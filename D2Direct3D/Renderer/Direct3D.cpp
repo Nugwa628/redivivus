@@ -78,22 +78,14 @@ typedef HRESULT (__stdcall *D3DVB_Lock)(void * This, DWORD dwFlags, void * * lpl
 
 namespace D2Direct3D::Renderer {
 
-static uint8_t gpD3DGroundTileVertexBuffer;
+static unsigned int gpD3DGroundTileVertexBuffer = {}; D2_STATIC_GUARD(gpD3DGroundTileVertexBuffer, "D2Direct3D::Renderer::gpD3DGroundTileVertexBuffer");
 
 // Not a CRT/unit function: its ONLY xref is the
 // PUSH at 006b4aff feeding IDirect3DDevice3::EnumTextureFormats in Direct3DCallBack, so it is the
 // D3DEnumPixelFormatsCallback. Parameter 1 is an LPDDPIXELFORMAT; parameter 2 is the device-caps flag word, and the 0x200 bit
 // it sets is the one Direct3DCallBack tests for "Supports 1555 textures".
 HRESULT __stdcall D3D_EnumTextureFormatsCallback(void * lpDDPixFmt, DWORD * pnDeviceFlags) {
-    // Static local variables (originally global data)
-    static uint32_t gdwUnitSfxStartLightDefault = 0x41;
-    static uint32_t gdwUnitSfxFlagDefault = 0x10;
-    static uint32_t gnUnitSfxModeDefault = 0x7c00;
-    static uint32_t gpUnitSfxDataDefault = 0x3e0;
-    static uint32_t gdwUnitSfxTicksDefault = 0x1f;
-    static uint32_t gdwUnitSfxAsyncTicksDefault = 0x8000;
-
-    if (!(pnDeviceFlags && *(int*)((int)lpDDPixFmt + 4) == gdwUnitSfxStartLightDefault && *(int*)((int)lpDDPixFmt + 0xc) == gdwUnitSfxFlagDefault && *(int*)((int)lpDDPixFmt + 0x10) == gnUnitSfxModeDefault && *(int*)((int)lpDDPixFmt + 0x14) == gpUnitSfxDataDefault && *(int*)((int)lpDDPixFmt + 0x18) == gdwUnitSfxTicksDefault && *(int*)((int)lpDDPixFmt + 0x1c) == gdwUnitSfxAsyncTicksDefault)) {
+    if (!(pnDeviceFlags && *(uint32_t*)((int)lpDDPixFmt + 4) == gsD3DTextureDescTemplate[1] && *(uint32_t*)((int)lpDDPixFmt + 0xc) == gsD3DTextureDescTemplate[3] && *(uint32_t*)((int)lpDDPixFmt + 0x10) == gsD3DTextureDescTemplate[4] && *(uint32_t*)((int)lpDDPixFmt + 0x14) == gsD3DTextureDescTemplate[5] && *(uint32_t*)((int)lpDDPixFmt + 0x18) == gsD3DTextureDescTemplate[6] && *(uint32_t*)((int)lpDDPixFmt + 0x1c) == gsD3DTextureDescTemplate[7])) {
       return 1;
     }
 
@@ -636,8 +628,8 @@ void __stdcall RENDERER_D3D_AllocateTextureCaches() {
       }
     }
     if (!g_bPerspectiveMode) {
-      gnTextureMemoryUsageBytes = 0;
-      gnGlideSubtileCacheMemBytes = 0;
+      gnTextureMemoryUsageBytes.nTextureMemoryUsageBytes = 0;
+      gnTextureMemoryUsageBytes.nGlideSubtileCacheMemBytes = 0;
       nSmackerBase = RENDERER_D3D_CreateSmackerSurfaces(0);
       nGenericNodeBytes = RENDERER_D3D_InitializeTextureCachePool(gD3DGenericTextureCache.aCaches, nSmackerBase, (uSmallCacheAlloc - nSmackerBase) * 0x46 / 100 + nSmackerBase, 0x100, 0x100);
       nGenericCacheEnd = gD3DGenericTextureCache.aCaches[0].nMaxNodes * g_nBytesPerPixel;
@@ -664,20 +656,20 @@ void __stdcall RENDERER_D3D_AllocateTextureCaches() {
       }
 
       nGenericNodeBytes = RENDERER_D3D_InitializeFontSystem(0);
-      gnTextureMemoryUsageBytes = uSubtileCacheAlloc;
+      gnTextureMemoryUsageBytes.nTextureMemoryUsageBytes = uSubtileCacheAlloc;
       nSmackerBase = d3dFloorCache::D3DFLOOR_Initialize(&gD3DFloorTextureCache, nGenericNodeBytes, uSubtileCacheAlloc + nGenericNodeBytes, nSmackerBase * 2);
-      gnGlideSubtileCacheMemBytes = uVideoMemBudget;
+      gnTextureMemoryUsageBytes.nGlideSubtileCacheMemBytes = uVideoMemBudget;
       nSmackerBase = d3dSubtileCache::D3DSUBTILE_Initialize(&gD3DSubtileTextureCache, nSmackerBase, uVideoMemBudget + nSmackerBase, 0x800);
       nGenericNodeBytes = RENDERER_D3D_InitializeTextureCachePool(gD3DGenericTextureCache.aCaches, nSmackerBase, (uSmallCacheAlloc - nSmackerBase) * 0x14 / 100 + nSmackerBase, 0x100, 0x100);
       nGenericCacheEnd = gD3DGenericTextureCache.aCaches[0].nMaxNodes * g_nBytesPerPixel;
       uSubtileCacheAlloc = (uint32_t)((uint64_t)((uSmallCacheAlloc - nSmackerBase) * 0x4b) * 0x51eb851f >> 0x20);
     }
 
-    gnGlideSmallTextureCacheMemBytes = nGenericCacheEnd * 0x10000;
+    gnTextureMemoryUsageBytes.nGlideSmallTextureCacheMemBytes = nGenericCacheEnd * 0x10000;
     nSmackerBase = RENDERER_D3D_InitializeTextureCachePool(gD3DGenericTextureCache.aCaches + 1, nGenericNodeBytes, (uSubtileCacheAlloc >> 5) + nSmackerBase, 0x80, 0x80);
-    gnGlideMediumTextureCacheMemBytes = gD3DGenericTextureCache.aCaches[1].nMaxNodes * g_nBytesPerPixel * 0x4000;
+    gnTextureMemoryUsageBytes.nGlideMediumTextureCacheMemBytes = gD3DGenericTextureCache.aCaches[1].nMaxNodes * g_nBytesPerPixel * 0x4000;
     RENDERER_D3D_InitializeTextureCachePool(gD3DGenericTextureCache.aCaches + 2, nSmackerBase, uSmallCacheAlloc, 0x20, 0x20);
-    gnGlideLargeTextureCacheMemBytes = gD3DGenericTextureCache.aCaches[2].nMaxNodes * g_nBytesPerPixel * 0x400;
+    gnTextureMemoryUsageBytes.nGlideLargeTextureCacheMemBytes = gD3DGenericTextureCache.aCaches[2].nMaxNodes * g_nBytesPerPixel * 0x400;
     RENDERER_D3D_InitializeTexturePools();
     D2CMP::SRC::CelCmp::GFX_SetSpriteCacheMaxSize((size_t)(uintptr_t)d3dFloorCache::D3D_InvalidateTileCachesForEntry);
 }
@@ -699,7 +691,7 @@ void __stdcall RENDERER_D3D_FreeTextureCaches() {
 
 void __stdcall RENDERER_D3D_ReleaseDevice() {
     // Static local variables (originally global data)
-    static IDirectDrawSurface7 * g_pD3DSurfacePrimary;
+    static IDirectDrawSurface7 * g_pD3DSurfacePrimary; D2_STATIC_GUARD_BSS(g_pD3DSurfacePrimary, "D2Direct3D::Renderer::RENDERER_D3D_ReleaseDevice::g_pD3DSurfacePrimary");
 
     if (!g_bDeviceInitialized) {
       return;
@@ -905,7 +897,7 @@ int32_t __fastcall RENDERER_D3D_CreateSystemMemoryTexture(IDirectDrawSurface7 * 
     memset(&ddSurfaceDesc.dwFlags, 0, 0x78);
     ddSurfaceDesc.dwFlags = 0x1007;
     ddSurfaceDesc.dwCaps = 0x840;
-    DWORD* pSrcTemplate = (DWORD*)&gsD3DTextureDescTemplate;
+    uint32_t* pSrcTemplate = gsD3DTextureDescTemplate;
     DWORD* pDstPixelFormat = ddSurfaceDesc.ddpfPixelFormat;
     for (nCopyCount = 8; nCopyCount; nCopyCount--) {
       *pDstPixelFormat = *pSrcTemplate;
@@ -1170,10 +1162,10 @@ void __fastcall RENDERER_DIRECT3D_ErrorLog(char * szText, DWORD dwParam) {
 
 HRESULT __stdcall RENDERER_D3D_EnumDisplayModeCallback(int * pDisplayModeDesc, int pModeList) {
     // Static local variables (originally global data)
-    static uint32_t gnD3DEnumDisplayModeCacheWidth = 0x280;
-    static uint32_t gnD3DEnumDisplayModeCacheHeight = 0x320;
-    static uint32_t gnD3DEnumDisplayModeCacheFormat = 0x1e0;
-    static uint32_t gnD3DEnumDisplayModeCacheRefreshRate = 0x258;
+    static uint32_t gnD3DEnumDisplayModeCacheWidth = 0x280; D2_STATIC_GUARD(gnD3DEnumDisplayModeCacheWidth, "D2Direct3D::Renderer::RENDERER_D3D_EnumDisplayModeCallback::gnD3DEnumDisplayModeCacheWidth");
+    static uint32_t gnD3DEnumDisplayModeCacheHeight = 0x320; D2_STATIC_GUARD(gnD3DEnumDisplayModeCacheHeight, "D2Direct3D::Renderer::RENDERER_D3D_EnumDisplayModeCallback::gnD3DEnumDisplayModeCacheHeight");
+    static uint32_t gnD3DEnumDisplayModeCacheFormat = 0x1e0; D2_STATIC_GUARD(gnD3DEnumDisplayModeCacheFormat, "D2Direct3D::Renderer::RENDERER_D3D_EnumDisplayModeCallback::gnD3DEnumDisplayModeCacheFormat");
+    static uint32_t gnD3DEnumDisplayModeCacheRefreshRate = 0x258; D2_STATIC_GUARD(gnD3DEnumDisplayModeCacheRefreshRate, "D2Direct3D::Renderer::RENDERER_D3D_EnumDisplayModeCallback::gnD3DEnumDisplayModeCacheRefreshRate");
 
     // Frame slots -16..-4 are ONE object: &pTestSurface is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
@@ -1311,8 +1303,8 @@ HRESULT __stdcall RENDERER_D3D_EnumDisplayModeCallback(int * pDisplayModeDesc, i
 
 BOOL __stdcall Direct3DCallBack(GUID * lpGUID, char * lpDriverDescription, char * lpDriverName, void * lpContext) {
     // Static local variables (originally global data)
-    static int gnD3DBytesPerPixelDevice1;
-    static int gnD3DBytesPerPixelDevice0;
+    static int gnD3DBytesPerPixelDevice1; D2_STATIC_GUARD_BSS(gnD3DBytesPerPixelDevice1, "D2Direct3D::Renderer::Direct3DCallBack::gnD3DBytesPerPixelDevice1");
+    static int gnD3DBytesPerPixelDevice0; D2_STATIC_GUARD_BSS(gnD3DBytesPerPixelDevice0, "D2Direct3D::Renderer::Direct3DCallBack::gnD3DBytesPerPixelDevice0");
 
     // Frame slots -36..-12 are ONE object: &pPrimarySurface is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
@@ -1459,7 +1451,7 @@ BOOL __stdcall Direct3DCallBack(GUID * lpGUID, char * lpDriverDescription, char 
                 goto ReleaseD3DInterfacesCleanup;
               }
 
-              nDisplayModeIndex = nDeviceNameOffset + 0x9707e8 + gD3DDeviceBlock0[uVar3].nModeCount * 0x14;
+              nDisplayModeIndex = nDeviceNameOffset + (intptr_t)&gD3DDeviceBlock0[0].dwTextureMemFree + gD3DDeviceBlock0[uVar3].nModeCount * 0x14;
               hResult = g_pDirectDraw7->lpVtbl->SetDisplayMode(g_pDirectDraw7, *(DWORD*)(nDisplayModeIndex + 8), *(DWORD*)(nDisplayModeIndex + 0xc), *(DWORD*)(nDisplayModeIndex + 4), *(DWORD*)(nDeviceNameOffset + (int)((char*)&gD3DDeviceBlock0 + 312) + gD3DDeviceBlock0[uVar3].nModeCount * 0x14), 0);
               if (!hResult) {
                 nSurfDescSize.dwSize = 0x7c;
@@ -1816,12 +1808,277 @@ void * __stdcall Catch_All_006b4d4b() {
 
 BOOL __fastcall Initialize(HINSTANCE hInstance) {
     // Static local variables (originally global data)
-    static uint8_t gD3DAdapterInfoBuffer;
-    static unsigned int gpD3DDevice8;
-    static unsigned int gnD3DAdapterIndex;
+    static uint8_t gD3DAdapterInfoBuffer[264] = {
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+}; D2_STATIC_GUARD(gD3DAdapterInfoBuffer, "D2Direct3D::Renderer::Initialize::gD3DAdapterInfoBuffer");
+    static unsigned int gpD3DDevice8; D2_STATIC_GUARD_BSS(gpD3DDevice8, "D2Direct3D::Renderer::Initialize::gpD3DDevice8");
+    static unsigned int gnD3DAdapterIndex; D2_STATIC_GUARD_BSS(gnD3DAdapterIndex, "D2Direct3D::Renderer::Initialize::gnD3DAdapterIndex");
 
-    int32_t nDeviceNameLoaded;
     int iVar1;
+    int32_t iVar2;
     char szRegPath[22];
     uint32_t* pnGuidSize;
     uint32_t pSFileGlobal = Fog::Source::SFile::SFILE_GetGlobalPointer();
@@ -1841,8 +2098,8 @@ BOOL __fastcall Initialize(HINSTANCE hInstance) {
 
     gnD3DAdapterIndex = 1;
     do {
-      nDeviceNameLoaded = Storm::Source::SReg::SRegLoadString(szRegPath, "DeviceName", 0, (LPSTR)&gD3DAdapterInfoBuffer, 0x100);
-      if (nDeviceNameLoaded) {
+      iVar2 = Storm::Source::SReg::SRegLoadString(szRegPath, "DeviceName", 0, (LPSTR)gD3DAdapterInfoBuffer, 0x100);
+      if (iVar2) {
         iVar1 = Storm::Source::SReg::SRegLoadValue(szRegPath, "dwFlags", 0, (int32_t*)&gnD3DTextureCapFlags);
         if (iVar1) {
           if (gnD3DTextureCapFlags & 1) {
@@ -1850,8 +2107,8 @@ BOOL __fastcall Initialize(HINSTANCE hInstance) {
           }
 
           pnGuidSize = (uint32_t*)0x10;
-          nDeviceNameLoaded = Storm::Source::SReg::SRegLoadData((uint32_t*)szRegPath, "GUID", 0, &gsD3DAdapterGuid, 0x10, &pnGuidSize);
-          if (!nDeviceNameLoaded) {
+          iVar2 = Storm::Source::SReg::SRegLoadData((uint32_t*)szRegPath, "GUID", 0, (LPBYTE)&gsD3DAdapterGuid, 0x10, &pnGuidSize);
+          if (!iVar2) {
             return 0;
           }
           if (pnGuidSize == (uint32_t*)0x10) {
@@ -1874,11 +2131,284 @@ BOOL __fastcall Initialize(HINSTANCE hInstance) {
 
 BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWnd) {
     // Static local variables (originally global data)
-    static uint8_t gszRendererD3DDeviceInitializationCode = 0x3e;
-    static unsigned int gdwD3DTextureAvailableMemory;
-    static int bD3DDeviceInitialized;
-    static unsigned int gdwD3DLocalTextureAvailableMemory;
-    static unsigned int gdwD3DAgpTextureAvailableMemory;
+    static uint8_t gszRendererD3DDeviceInitializationCode[272] = {
+    0x3e,
+    0x1c,
+    0xc1,
+    0x69,
+    0x6b,
+    0xb4,
+    0xd1,
+    0x11,
+    0xad,
+    0x7a,
+    0x0,
+    0xc0,
+    0x4f,
+    0xc2,
+    0x9b,
+    0x4e,
+    0xe0,
+    0xe,
+    0x9f,
+    0x4b,
+    0x7e,
+    0xd,
+    0xd0,
+    0x11,
+    0x9b,
+    0x6,
+    0x0,
+    0xa0,
+    0xc9,
+    0x3,
+    0xa3,
+    0xb8,
+    0x85,
+    0xdb,
+    0x14,
+    0x6c,
+    0x33,
+    0xa7,
+    0xce,
+    0x11,
+    0xa5,
+    0x21,
+    0x0,
+    0x20,
+    0xaf,
+    0xb,
+    0xe5,
+    0x60,
+    0x84,
+    0xdb,
+    0x14,
+    0x6c,
+    0x33,
+    0xa7,
+    0xce,
+    0x11,
+    0xa5,
+    0x21,
+    0x0,
+    0x20,
+    0xaf,
+    0xb,
+    0xe5,
+    0x60,
+    0x7e,
+    0x47,
+    0x3c,
+    0xc0,
+    0x19,
+    0x65,
+    0xd1,
+    0x11,
+    0x8c,
+    0x52,
+    0x0,
+    0xc0,
+    0x4f,
+    0xd9,
+    0x30,
+    0xc5,
+    0x1e,
+    0x1f,
+    0x19,
+    0x51,
+    0x2b,
+    0x4f,
+    0xd1,
+    0x11,
+    0x8c,
+    0xc3,
+    0x0,
+    0xa0,
+    0xc9,
+    0x6,
+    0x29,
+    0xa8,
+    0xfc,
+    0x7f,
+    0xc,
+    0x73,
+    0x47,
+    0x53,
+    0xd1,
+    0x11,
+    0x8c,
+    0x4d,
+    0x0,
+    0xc0,
+    0x4f,
+    0xd9,
+    0x30,
+    0xc5,
+    0x46,
+    0xbc,
+    0x43,
+    0xe0,
+    0x17,
+    0x53,
+    0xd1,
+    0x11,
+    0x8c,
+    0x4d,
+    0x0,
+    0xc0,
+    0x4f,
+    0xd9,
+    0x30,
+    0xc5,
+    0x88,
+    0xc4,
+    0xb2,
+    0x89,
+    0xf4,
+    0x4a,
+    0xd1,
+    0x11,
+    0x8c,
+    0x4c,
+    0x0,
+    0xc0,
+    0x4f,
+    0xd9,
+    0x30,
+    0xc5,
+    0x90,
+    0x47,
+    0xdc,
+    0xb9,
+    0xf1,
+    0x4a,
+    0xd1,
+    0x11,
+    0x8c,
+    0x4c,
+    0x0,
+    0xc0,
+    0x4f,
+    0xd9,
+    0x30,
+    0xc5,
+    0x96,
+    0x8e,
+    0xab,
+    0x1b,
+    0xfe,
+    0x9c,
+    0xe3,
+    0x4c,
+    0xbc,
+    0x72,
+    0xd7,
+    0xe9,
+    0xe9,
+    0x9a,
+    0x21,
+    0x75,
+    0x80,
+    0x5a,
+    0x67,
+    0x6,
+    0x9b,
+    0x3b,
+    0xd2,
+    0x11,
+    0xb9,
+    0x2f,
+    0x0,
+    0x60,
+    0x97,
+    0x97,
+    0xea,
+    0x5b,
+    0x30,
+    0x86,
+    0x2b,
+    0xb,
+    0x35,
+    0xad,
+    0xd0,
+    0x11,
+    0x8e,
+    0xa6,
+    0x0,
+    0x60,
+    0x97,
+    0x97,
+    0xea,
+    0x5b,
+    0x0,
+    0x4e,
+    0x4,
+    0xda,
+    0xb2,
+    0x69,
+    0xd0,
+    0x11,
+    0xa1,
+    0xd5,
+    0x0,
+    0xaa,
+    0x0,
+    0xb8,
+    0xdf,
+    0xbb,
+    0x85,
+    0x58,
+    0x80,
+    0x57,
+    0xec,
+    0x6e,
+    0xcf,
+    0x11,
+    0x94,
+    0x41,
+    0xa8,
+    0x23,
+    0x3,
+    0xc1,
+    0xe,
+    0x27,
+    0x81,
+    0xdb,
+    0x14,
+    0x6c,
+    0x33,
+    0xa7,
+    0xce,
+    0x11,
+    0xa5,
+    0x21,
+    0x0,
+    0x20,
+    0xaf,
+    0xb,
+    0xe5,
+    0x60,
+    0xc0,
+    0x5e,
+    0xe6,
+    0x15,
+    0x9c,
+    0x3b,
+    0xd2,
+    0x11,
+    0xb9,
+    0x2f,
+    0x0,
+    0x60,
+    0x97,
+    0x97,
+    0xea,
+    0x5b
+}; D2_STATIC_GUARD(gszRendererD3DDeviceInitializationCode, "D2Direct3D::Renderer::RENDERER_D3D_InitializeDevice::gszRendererD3DDeviceInitializationCode");
+    static unsigned int gdwD3DTextureAvailableMemory; D2_STATIC_GUARD_BSS(gdwD3DTextureAvailableMemory, "D2Direct3D::Renderer::RENDERER_D3D_InitializeDevice::gdwD3DTextureAvailableMemory");
+    static int bD3DDeviceInitialized; D2_STATIC_GUARD_BSS(bD3DDeviceInitialized, "D2Direct3D::Renderer::RENDERER_D3D_InitializeDevice::bD3DDeviceInitialized");
+    static unsigned int gdwD3DLocalTextureAvailableMemory; D2_STATIC_GUARD_BSS(gdwD3DLocalTextureAvailableMemory, "D2Direct3D::Renderer::RENDERER_D3D_InitializeDevice::gdwD3DLocalTextureAvailableMemory");
+    static unsigned int gdwD3DAgpTextureAvailableMemory; D2_STATIC_GUARD_BSS(gdwD3DAgpTextureAvailableMemory, "D2Direct3D::Renderer::RENDERER_D3D_InitializeDevice::gdwD3DAgpTextureAvailableMemory");
 
     char* szErrorMsg;
     DDSURFACEDESC2 ddsurfacedesc;
@@ -1940,7 +2470,7 @@ BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWnd) {
     nResult = g_pD3DSurfaceBackbuffer->lpVtbl->GetAttachedSurface(g_pD3DSurfaceBackbuffer, &iidData2, (void**)&D3DSurfaceSecondary);
     if (!nResult) {
       if (gnD3DTextureCapFlags & 0x10) {
-        nResult = g_pD3DSurfaceBackbuffer->lpVtbl->QueryInterface(g_pD3DSurfaceBackbuffer, (GUID*)&gszRendererD3DDeviceInitializationCode, (void**)&g_pDDGammaControl);
+        nResult = g_pD3DSurfaceBackbuffer->lpVtbl->QueryInterface(g_pD3DSurfaceBackbuffer, (GUID*)gszRendererD3DDeviceInitializationCode, (void**)&g_pDDGammaControl);
         if (nResult) {
           DIRECTD3D_LogError("Failed to get gamma control interface!", nResult);
           RENDERER_D3D_ReleaseDevice();
@@ -2218,7 +2748,7 @@ BOOL __fastcall RENDERER_D3D_CreateSurfaceWithTexture(IDirectDrawSurface7 * * pd
     memset(&ddsdSize.dwFlags, 0, 0x78);
     ddsdSize.dwFlags = 0x1007;
     ddsdSize.ddsCapsRest[0] = 0x80;
-    DWORD* pDstPixelFmt = (DWORD*)&gsD3DTextureDescTemplate;
+    uint32_t* pDstPixelFmt = gsD3DTextureDescTemplate;
     DWORD* pSrcTemplate = ddsdSize.ddpfPixelFormat;
     for (iLoop = 8; iLoop; iLoop--) {
       *pSrcTemplate = *pDstPixelFmt;
@@ -2255,7 +2785,7 @@ void thunk_Release() {
 }
 
 BOOL __fastcall InitPerspective(D2GfxSettingsStrc * pSettings, ::D2GfxHelperStrc * pHelpers) {
-    _GUID* lpGUID;
+    GUID* lpGUID;
     uint8_t ddDeviceIdentifier[2128];
     IDirectDraw1* lpDD = 0;
     if (g_bD3DCoreInitialized) {
@@ -2263,7 +2793,7 @@ BOOL __fastcall InitPerspective(D2GfxSettingsStrc * pSettings, ::D2GfxHelperStrc
       exit(-1);
     }
     if (!(gnD3DTextureCapFlags & 1)) {
-      lpGUID = (_GUID*)&gsD3DAdapterGuid;
+      lpGUID = &gsD3DAdapterGuid;
     } else {
       lpGUID = 0;
     }
@@ -2400,12 +2930,7 @@ void __stdcall RENDERER_D3D_CalculateTextureSize(D2D3DSpriteInfoStrc * pStruct) 
 
 // Direct3D texture cache: uploads a DC6 frame to video memory. Determines mipmap level based on size, allocates cache slot, renders frame to memory surface, copies to texture via LockRect/memcpy, and sets as active texture.
 int32_t RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfoStrc * pTexInfo, BYTE * pPalette, uint8_t nOutlineColor, int32_t nMode) {
-    // Static local variables (originally global data)
-    static uint8_t DAT_00970eac;
-    static int INT_00970ec4;
-
     uint8_t* pBVar3;
-    int32_t iVar4;
     DWORD dwHResult;
     int iCacheNodeIdx;
     uint8_t* pbOutlinePixel;
@@ -2417,6 +2942,7 @@ int32_t RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfoStrc * pTexInfo, B
     char cPixel;
     int iMipLevel;
     int32_t nErrorLine;
+    void* pMemPool;
     DC6Block* nParam = pTexInfo->pSprite->pDC6Block;
     if (!nParam) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), nErrorLine);
@@ -2445,10 +2971,10 @@ int32_t RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfoStrc * pTexInfo, B
 
     iMipLevel = *(int*)(pbSrcPixel + nMipIdx * 8);
     int* piVar2 = (int*)(pbSrcPixel + 4 + nMipIdx * 8);
-    D3DTextureCacheStrc* pCache = (D3DTextureCacheStrc*)(&DAT_00970eac + iMipLevel * 0x1c);
-    if (*piVar2 && (*(uint8_t**)(*piVar2 * 0x20 - 0x14 + (&INT_00970ec4)[iMipLevel * 7]) == pPalette || nMode == 4)) {
+    D3DTextureCacheStrc* pCache = (D3DTextureCacheStrc*)((uint8_t*)&gD3DGenericTextureCache - 0x1c + iMipLevel * 0x1c);
+    if (*piVar2 && (*(uint8_t**)(*piVar2 * 0x20 - 0x14 + ((int*)((uint8_t*)&gD3DGenericTextureCache - 0x4))[iMipLevel * 7]) == pPalette || nMode == 4)) {
       d3dTextureCache::D3DTEXCACHE_InvalidateByIndex(pCache, *piVar2);
-      dwHResult = g_pD3DDevice->lpVtbl->SetTexture(g_pD3DDevice, 0, *(void**)(*piVar2 * 0x20 + (&INT_00970ec4)[iMipLevel * 7] - 0xc));
+      dwHResult = g_pD3DDevice->lpVtbl->SetTexture(g_pD3DDevice, 0, *(void**)(*piVar2 * 0x20 + ((int*)((uint8_t*)&gD3DGenericTextureCache - 0x4))[iMipLevel * 7] - 0xc));
       if (!dwHResult) {
         return 1;
       }
@@ -2460,19 +2986,20 @@ int32_t RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfoStrc * pTexInfo, B
     IDirectDrawSurface7* pDestSurface_00 = (IDirectDrawSurface7*)gD3DGenericTextureCache.apSpriteTextures[iMipLevel + 2];
     IDirect3DTexture2* lpD3DTexture_00 = gD3DGenericTextureCache.apSpriteTextures[iMipLevel - 1];
     if (!*piVar2) {
+      int32_t iVar4;
       iVar4 = d3dTextureCache::D3DTEXCACHE_EnsureAvailableNode(pCache);
       *piVar2 = iVar4;
     }
 
-    void* pMemPool = gpD3DTextureSpritePoolMemory0;
+    pMemPool = gpD3DTextureSpritePoolMemory0;
     int iVar1 = *piVar2 - 1;
     if (iVar1 < 0) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x164);
       exit(-1);
     } else if (iVar1 < pCache->nMaxNodes) {
       iCacheNodeIdx = *piVar2 * 0x20;
-      iVar1 = *(int*)(iCacheNodeIdx - 0x10 + (&INT_00970ec4)[iMipLevel * 7]);
-      iMipLevel = iCacheNodeIdx - 0x20 + (&INT_00970ec4)[iMipLevel * 7];
+      iVar1 = *(int*)(iCacheNodeIdx - 0x10 + ((int*)((uint8_t*)&gD3DGenericTextureCache - 0x4))[iMipLevel * 7]);
+      iMipLevel = iCacheNodeIdx - 0x20 + ((int*)((uint8_t*)&gD3DGenericTextureCache - 0x4))[iMipLevel * 7];
       pbPixelData = (uint8_t*)gpD3DTextureSpritePoolMemory0;
       *(int*)(iMipLevel + 4) = pbSrcPixel;
       *(int*)(iMipLevel + 8) = nMipIdx;
@@ -3179,8 +3706,8 @@ void __stdcall RENDERER_D3D_ReleaseFontTextures() {
 
 void __stdcall RENDERER_D3D_CreateFontTextures() {
     // Static local variables (originally global data)
-    static uint32_t gnD3DFontTextColor = 0xffffff;
-    static COLORREF gnD3DFontBkColor = 0;
+    static uint32_t gnD3DFontTextColor = 0xffffff; D2_STATIC_GUARD(gnD3DFontTextColor, "D2Direct3D::Renderer::RENDERER_D3D_CreateFontTextures::gnD3DFontTextColor");
+    static COLORREF gnD3DFontBkColor = 0; D2_STATIC_GUARD(gnD3DFontBkColor, "D2Direct3D::Renderer::RENDERER_D3D_CreateFontTextures::gnD3DFontBkColor");
 
     // Frame slots -28..-4 are ONE object: &pMemoryTexture is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
@@ -3340,26 +3867,26 @@ void __fastcall DrawLight(DWORD * pLight, DWORD * pPlayerLight, int nPosX, int n
 
 int __fastcall RENDERER_D3D_InitializeFontSystem(int nBaseOffset) {
     // Static local variables (originally global data)
-    static float gfD3DFontVertex0W;
-    static float gfD3DFontVertex0RHW;
-    static unsigned int gnD3DFontVertex0Diffuse;
-    static float gfD3DFontVertex0U;
-    static float gfD3DFontVertex0V;
-    static float gfD3DFontVertex1Z;
-    static float gfD3DFontVertex1RHW;
-    static unsigned int gnD3DFontVertex1Diffuse;
-    static float gfD3DFontVertex1X;
-    static float gfD3DFontVertex1U;
-    static float gfD3DFontVertex2Z;
-    static float gfD3DFontVertex2RHW;
-    static unsigned int gnD3DFontVertex2Diffuse;
-    static float gfD3DFontVertex2U;
-    static float gfD3DFontVertex2V;
-    static float gfD3DFontVertex3Z;
-    static float gfD3DFontVertex3RHW;
-    static unsigned int gnD3DFontVertex3Diffuse;
-    static float gfD3DFontVertex3U;
-    static float gfD3DFontVertex3V;
+    static float gfD3DFontVertex0W; D2_STATIC_GUARD_BSS(gfD3DFontVertex0W, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex0W");
+    static float gfD3DFontVertex0RHW; D2_STATIC_GUARD_BSS(gfD3DFontVertex0RHW, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex0RHW");
+    static unsigned int gnD3DFontVertex0Diffuse; D2_STATIC_GUARD_BSS(gnD3DFontVertex0Diffuse, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gnD3DFontVertex0Diffuse");
+    static float gfD3DFontVertex0U; D2_STATIC_GUARD_BSS(gfD3DFontVertex0U, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex0U");
+    static float gfD3DFontVertex0V; D2_STATIC_GUARD_BSS(gfD3DFontVertex0V, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex0V");
+    static float gfD3DFontVertex1Z; D2_STATIC_GUARD_BSS(gfD3DFontVertex1Z, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex1Z");
+    static float gfD3DFontVertex1RHW; D2_STATIC_GUARD_BSS(gfD3DFontVertex1RHW, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex1RHW");
+    static unsigned int gnD3DFontVertex1Diffuse; D2_STATIC_GUARD_BSS(gnD3DFontVertex1Diffuse, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gnD3DFontVertex1Diffuse");
+    static float gfD3DFontVertex1X; D2_STATIC_GUARD_BSS(gfD3DFontVertex1X, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex1X");
+    static float gfD3DFontVertex1U; D2_STATIC_GUARD_BSS(gfD3DFontVertex1U, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex1U");
+    static float gfD3DFontVertex2Z; D2_STATIC_GUARD_BSS(gfD3DFontVertex2Z, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex2Z");
+    static float gfD3DFontVertex2RHW; D2_STATIC_GUARD_BSS(gfD3DFontVertex2RHW, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex2RHW");
+    static unsigned int gnD3DFontVertex2Diffuse; D2_STATIC_GUARD_BSS(gnD3DFontVertex2Diffuse, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gnD3DFontVertex2Diffuse");
+    static float gfD3DFontVertex2U; D2_STATIC_GUARD_BSS(gfD3DFontVertex2U, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex2U");
+    static float gfD3DFontVertex2V; D2_STATIC_GUARD_BSS(gfD3DFontVertex2V, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex2V");
+    static float gfD3DFontVertex3Z; D2_STATIC_GUARD_BSS(gfD3DFontVertex3Z, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex3Z");
+    static float gfD3DFontVertex3RHW; D2_STATIC_GUARD_BSS(gfD3DFontVertex3RHW, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex3RHW");
+    static unsigned int gnD3DFontVertex3Diffuse; D2_STATIC_GUARD_BSS(gnD3DFontVertex3Diffuse, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gnD3DFontVertex3Diffuse");
+    static float gfD3DFontVertex3U; D2_STATIC_GUARD_BSS(gfD3DFontVertex3U, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex3U");
+    static float gfD3DFontVertex3V; D2_STATIC_GUARD_BSS(gfD3DFontVertex3V, "D2Direct3D::Renderer::RENDERER_D3D_InitializeFontSystem::gfD3DFontVertex3V");
 
     RENDERER_D3D_CreateFontTextures();
     gD3DFontVertex0 = 0;
@@ -4239,7 +4766,7 @@ BOOL __fastcall DrawWallTile(D2TileLibraryEntryStrc * pTile, int nPosX, int nPos
 // Creates ground tile vertex buffer (6x6 grid = 36 vertices) and index buffer (60 indices for 5x5 tile strips) for perspective tile rendering. Calculates texture coordinates based on window dimensions (gnD3DTextureCacheBlockSize, gnD3DTextureCacheCount). Each vertex has position adjustment flags at corners (±1 in X/Y) for isometric diamond shape. Index buffer stored at gaD3DGroundTileIndexBuffer.
 void __stdcall RENDERER_D3D_InitGroundTileCache() {
     // Static local variables (originally global data)
-    static unsigned short gaD3DGroundTileIndexBuffer;
+    static unsigned short gaD3DGroundTileIndexBuffer; D2_STATIC_GUARD_BSS(gaD3DGroundTileIndexBuffer, "D2Direct3D::Renderer::RENDERER_D3D_InitGroundTileCache::gaD3DGroundTileIndexBuffer");
 
     // Frame slots -12..-4 are ONE object: &pLockedVB is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
@@ -4368,7 +4895,7 @@ void __stdcall RENDERER_D3D_ReleaseGroundTileCache() {
 
 void __fastcall DrawGroundTile(D2TileLibraryEntryStrc * pTile, D2GfxLightExStrc * pLight, int nPosX, int nPosY, int nWorldXpos, int nWorldYpos, uint32_t nAlpha, int nScreenPanels, void * pTileData) {
     // Static local variables (originally global data)
-    static uint32_t gdwRendererMode = 0x50000;
+    static uint32_t gdwRendererMode = 0x50000; D2_STATIC_GUARD(gdwRendererMode, "D2Direct3D::Renderer::DrawGroundTile::gdwRendererMode");
 
     DWORD DVar2;
     uint32_t* lpwIndices;
@@ -4455,8 +4982,8 @@ void __fastcall DrawGroundTile(D2TileLibraryEntryStrc * pTile, D2GfxLightExStrc 
       }
 
       dwIndexCount = 0x41;
-      lpwIndices = (uint32_t*)&gpD3DGroundTileVertexBuffer;
       DVar2 = 5;
+      lpwIndices = &gpD3DGroundTileVertexBuffer;
     } else {
       DVar2 = (*pVBLockFn)(g_pD3DGroundTileVB, 0x21, (void**)&nAlpha, nullptr);
       if (DVar2) {
@@ -4604,10 +5131,10 @@ void SetDefaultPerspectiveFactor() {
 // Initializes Smacker video subsystem. Allocates 64KB decode buffer at pSmackerDecodeBuffer, clears it to zero. Sets 4 corner vertex colors to 0xFFFFFFFF (white with full alpha) at offsets 0x00989760, 0x00989780, 0x009897a0, 0x009897c0.
 void __stdcall RENDERER_D3D_InitSmackerVertexBuffer() {
     // Static local variables (originally global data)
-    static unsigned int gdwD3DSmackerVertex1Color;
-    static unsigned int gdwD3DSmackerVertex2Color;
-    static unsigned int gdwD3DSmackerVertex3Color;
-    static unsigned int gdwD3DSmackerVertex4Color;
+    static unsigned int gdwD3DSmackerVertex1Color; D2_STATIC_GUARD_BSS(gdwD3DSmackerVertex1Color, "D2Direct3D::Renderer::RENDERER_D3D_InitSmackerVertexBuffer::gdwD3DSmackerVertex1Color");
+    static unsigned int gdwD3DSmackerVertex2Color; D2_STATIC_GUARD_BSS(gdwD3DSmackerVertex2Color, "D2Direct3D::Renderer::RENDERER_D3D_InitSmackerVertexBuffer::gdwD3DSmackerVertex2Color");
+    static unsigned int gdwD3DSmackerVertex3Color; D2_STATIC_GUARD_BSS(gdwD3DSmackerVertex3Color, "D2Direct3D::Renderer::RENDERER_D3D_InitSmackerVertexBuffer::gdwD3DSmackerVertex3Color");
+    static unsigned int gdwD3DSmackerVertex4Color; D2_STATIC_GUARD_BSS(gdwD3DSmackerVertex4Color, "D2Direct3D::Renderer::RENDERER_D3D_InitSmackerVertexBuffer::gdwD3DSmackerVertex4Color");
 
     gdwD3DSmackerVertex1Color = -1;
     gdwD3DSmackerVertex2Color = -1;
@@ -4722,30 +5249,30 @@ void __stdcall RENDERER_D3D_ResetSmackerSurfaces() {
 // Blits decoded Smacker video frame to screen. Renders two textured quads: top 256x256 section uses first texture pair (gpD3DSmackerVideoTexture0), bottom section (256 to nHeight) uses second pair (gpD3DSmackerVideoTexture1). Texture V coordinate for bottom quad calculated as (nHeight-256)/256 for proper scaling. Sets blend mode 1, enables lighting and texture stage 0 before rendering.
 void RENDERER_D3D_BlitSmackerFrame(int nHeight, D2SmackerContextStrc * pSurface, int nOffset) {
     // Static local variables (originally global data)
-    static int gaD3DSmackerVertices;
-    static float gfD3DSmackerVertex0Y;
-    static float gfD3DSmackerVertex0V;
-    static float gfD3DSmackerVertex1W_a;
-    static float gfD3DSmackerVertex1U;
-    static float gfD3DSmackerVertex1V;
-    static float gfD3DSmackerVertex1X_b;
-    static float gfD3DSmackerVertex1Y_b;
-    static float gfD3DSmackerVertex1Z;
-    static float gfD3DSmackerVertex1W;
-    static float gfD3DSmackerVertex2W_b;
-    static float gfD3DSmackerVertex2Z_b;
-    static float gfD3DSmackerVertex2X;
-    static float gfD3DSmackerVertex2Y;
-    static float gfD3DSmackerVertex2U;
-    static float gfD3DSmackerVertex2W_a;
-    static float gfD3DSmackerVertex2V;
-    static float gfD3DSmackerVertex2W;
-    static float gfD3DSmackerVertex1X_quad2;
-    static float gfD3DSmackerVertex1Y_quad2;
-    static float gfD3DSmackerVertex1Z_quad2;
-    static float gfD3DSmackerVertex1U_quad2;
-    static int gnD3DSmackerVertex2V_bottom;
-    static float gfD3DSmackerVertex2Rhw;
+    static int gaD3DSmackerVertices; D2_STATIC_GUARD_BSS(gaD3DSmackerVertices, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gaD3DSmackerVertices");
+    static float gfD3DSmackerVertex0Y; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex0Y, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex0Y");
+    static float gfD3DSmackerVertex0V; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex0V, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex0V");
+    static float gfD3DSmackerVertex1W_a; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1W_a, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1W_a");
+    static float gfD3DSmackerVertex1U; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1U, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1U");
+    static float gfD3DSmackerVertex1V; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1V, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1V");
+    static float gfD3DSmackerVertex1X_b; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1X_b, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1X_b");
+    static float gfD3DSmackerVertex1Y_b; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1Y_b, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1Y_b");
+    static float gfD3DSmackerVertex1Z; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1Z, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1Z");
+    static float gfD3DSmackerVertex1W; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1W, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1W");
+    static float gfD3DSmackerVertex2W_b; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex2W_b, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex2W_b");
+    static float gfD3DSmackerVertex2Z_b; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex2Z_b, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex2Z_b");
+    static float gfD3DSmackerVertex2X; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex2X, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex2X");
+    static float gfD3DSmackerVertex2Y; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex2Y, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex2Y");
+    static float gfD3DSmackerVertex2U; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex2U, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex2U");
+    static float gfD3DSmackerVertex2W_a; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex2W_a, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex2W_a");
+    static float gfD3DSmackerVertex2V; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex2V, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex2V");
+    static float gfD3DSmackerVertex2W; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex2W, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex2W");
+    static float gfD3DSmackerVertex1X_quad2; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1X_quad2, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1X_quad2");
+    static float gfD3DSmackerVertex1Y_quad2; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1Y_quad2, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1Y_quad2");
+    static float gfD3DSmackerVertex1Z_quad2; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1Z_quad2, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1Z_quad2");
+    static float gfD3DSmackerVertex1U_quad2; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex1U_quad2, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex1U_quad2");
+    static int gnD3DSmackerVertex2V_bottom; D2_STATIC_GUARD_BSS(gnD3DSmackerVertex2V_bottom, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gnD3DSmackerVertex2V_bottom");
+    static float gfD3DSmackerVertex2Rhw; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex2Rhw, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex2Rhw");
 
     int nSurfaceY = pSurface->nY;
     RENDERER_D3D_SetBlendMode(1);
@@ -4866,7 +5393,6 @@ void __stdcall RENDERER_D3D_PresentSmackerFrame() {
 
 void __fastcall DecodeSmacker(char * szSmacker, D2SmackerContextStrc * pBuffer, int nVersion) {
     void* nResult;
-    uint32_t bFileLoaded;
     int nPixelCol;
     uint16_t* pIndexedPixels;
     uint8_t* pOutputPixel;
@@ -4893,6 +5419,7 @@ void __fastcall DecodeSmacker(char * szSmacker, D2SmackerContextStrc * pBuffer, 
 
     pBuffer->eMode = (char)nVersion;
     if ((char)nVersion == 'p') {
+      uint32_t bFileLoaded;
       nVersion = 0;
       nFileSize = 0;
       bFileLoaded = Storm::Source::SFile::SFileLoadFileEx(nullptr, (uint32_t*)szSmacker, (void**)&nVersion, &nFileSize, 0, 3, 0);

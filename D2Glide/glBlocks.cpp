@@ -85,9 +85,9 @@ void GLBLOCKS_DecodeRLEBlock(uint8_t * pbSrc, uint8_t * pbDstRow) {
 
 void __stdcall GLBLOCKS_RenderTileSubBlocks(D2TileLibraryEntryStrc * pTileEntry, uint8_t * pbDstBuf) {
     uint8_t* pbSrc;
+    void* nErrAddr;
     uint8_t byRunLen;
     int nRleRowsLeft;
-    void* pIsomSrc;
     uint8_t* pbDstRow;
     uint8_t* pbRleRowStart;
     size_t nCopyWidth;
@@ -105,10 +105,10 @@ void __stdcall GLBLOCKS_RenderTileSubBlocks(D2TileLibraryEntryStrc * pTileEntry,
       pbDstRow = pbDstBuf + (int)*psVar1 + psVar1[1] * 0x100;
       if (psVar1[4] & 1U) {
         if (!(psVar1[4] & 4U)) {
-          pIsomSrc = *(void**)(psVar1 + 8);
+          nErrAddr = *(void**)(psVar1 + 8);
           pbDstRow += 0xe;
           nCopyWidth = 4;
-          if (!pIsomSrc) {
+          if (!nErrAddr) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa8);
             exit(-1);
           }
@@ -119,8 +119,8 @@ void __stdcall GLBLOCKS_RenderTileSubBlocks(D2TileLibraryEntryStrc * pTileEntry,
 
           nIsomRow = 0;
           do {
-            memcpy(pbDstRow, pIsomSrc, nCopyWidth);
-            pIsomSrc = (void*)((int)pIsomSrc + nCopyWidth);
+            memcpy(pbDstRow, nErrAddr, nCopyWidth);
+            nErrAddr = (void*)((int)nErrAddr + nCopyWidth);
             if (nIsomRow < 7) {
               pbDstRow += 0xfe;
               nCopyWidth += 4;
@@ -297,7 +297,7 @@ void __stdcall GLBLOCKS_RenderBinkVideoFrame() {
 
 void __fastcall GLBLOCKS_PlayBinkVideo(char * szFileName, int32_t nAudioChannel, fnBinkFrameCallback pfnCallback) {
     // Static local variables (originally global data)
-    static unsigned int gdwGlideBinkClickTimestamp;
+    static unsigned int gdwGlideBinkClickTimestamp; D2_STATIC_GUARD_BSS(gdwGlideBinkClickTimestamp, "D2Glide::glBlocks::GLBLOCKS_PlayBinkVideo::gdwGlideBinkClickTimestamp");
 
     DWORD dwCurrentTick;
     int bBinkNotReady;
