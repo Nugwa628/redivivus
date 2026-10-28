@@ -1833,7 +1833,8 @@ void __fastcall UIMENU_PleaseInsertExpansionCdWithNotWorkingCancelButton(int32_t
     D2ControlStrc* pForm = FORMS_CreateAnyFormFromList(0xde);
     D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pForm, 1);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08(pForm, 1);
-    D2Win::Src::D2WinMain::SetUnsetFlag0x08(FORMS_CreateAnyFormFromList(0x3c), 1);
+    D2ControlStrc* pCreatedForm = FORMS_CreateAnyFormFromList(0x3c);
+    D2Win::Src::D2WinMain::SetUnsetFlag0x08(pCreatedForm, 1);
     ::D2WinTextBox* pTextBox = (::D2WinTextBox*)FORMS_CreateAnyFormFromList(0xd9);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08((D2ControlStrc*)pTextBox, 1);
     int nTextPadC = 0;
@@ -2028,8 +2029,10 @@ void __stdcall UIMENU_PleaseInsertCinematicDiscWithCancelAndNotWorkingOkButtons(
     D2ControlStrc* pForm = FORMS_CreateAnyFormFromList(0xd6);
     D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pForm, 1);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08(pForm, 1);
-    D2Win::Src::D2WinMain::SetUnsetFlag0x08(FORMS_CreateAnyFormFromList(0x3a), 1);
-    D2Win::Src::D2WinMain::SetUnsetFlag0x08(FORMS_CreateAnyFormFromList(0x3b), 1);
+    D2ControlStrc* pCreatedForm = FORMS_CreateAnyFormFromList(0x3a);
+    D2Win::Src::D2WinMain::SetUnsetFlag0x08(pCreatedForm, 1);
+    pCreatedForm = FORMS_CreateAnyFormFromList(0x3b);
+    D2Win::Src::D2WinMain::SetUnsetFlag0x08(pCreatedForm, 1);
     ::D2WinTextBox* pTextBox = (::D2WinTextBox*)FORMS_CreateAnyFormFromList(0xd9);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08((D2ControlStrc*)pTextBox, 1);
     int nTextPadC = 0;
@@ -5394,7 +5397,8 @@ void __stdcall UIMENU_ConnectinToBattleNetWitProgressDots() {
     D2ControlStrc* pBackgroundControl = FORMS_CreateAnyFormFromList(0xe2);
     D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pBackgroundControl, 0);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08(pBackgroundControl, 1);
-    D2Win::Src::D2WinMain::SetUnsetFlag0x08(FORMS_CreateAnyFormFromList(0xe3), 1);
+    D2ControlStrc* pCreatedForm = FORMS_CreateAnyFormFromList(0xe3);
+    D2Win::Src::D2WinMain::SetUnsetFlag0x08(pCreatedForm, 1);
     ::D2WinTextBox* pTextBox = (::D2WinTextBox*)FORMS_CreateAnyFormFromList(0xe4);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08((D2ControlStrc*)pTextBox, 1);
     int nTextArg3 = 0;
