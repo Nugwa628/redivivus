@@ -934,11 +934,11 @@ uint32_t TEXT_ConvertCharToWideWithLanguage(uint32_t dwParam, char * szText, uin
 }
 
 void __stdcall TEXT_FreeStaticTextBox() {
-    D2TextBoxStrc* pPopup = gpStaticTextPopup;
     if (!gpStaticTextPopup) {
       return;
     }
 
+    D2TextBoxStrc* pPopup = gpStaticTextPopup;
     TEXT_FreeTextLineList(gpStaticTextPopup->pLineList);
     Fog::Memory::FreeClientMemory(pPopup, ".\\UI\\text.cpp", 0x68e, 0);
     gpStaticTextPopup = 0;
