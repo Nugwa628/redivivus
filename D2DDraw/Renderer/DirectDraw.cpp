@@ -1322,12 +1322,12 @@ BOOL __fastcall ResizeWindow(HWND hWnd, BOOL bForceResize) {
 }
 
 // @sourcefile .\Src\ddCore.cpp
-void Release() {
+BOOL Release() {
     // Static local variables (originally global data)
     static IUnknown * gpDDrawComObject; D2_STATIC_GUARD_BSS(gpDDrawComObject, "D2DDraw::Renderer::DirectDraw::Release::gpDDrawComObject");
 
     if (!gnDDrawSurfaceHeight) {
-      return;
+      return 1;
     }
 
     InternalReleaseWindow();
@@ -1353,6 +1353,7 @@ void Release() {
 
     D2ddDebugFont_Free();
     gnDDrawSurfaceHeight = 0;
+    return 1;
 }
 
 void __fastcall EndCutScene(HWND hWnd, int32_t nResolutionMode, int32_t nWindowState) {
