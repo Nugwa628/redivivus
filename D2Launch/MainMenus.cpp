@@ -823,18 +823,18 @@ void MAINMENU_GetLocalizedFilePath(char * szPathFormat, char * szOutPath, char *
     }
 
     uint32_t nLanguageCode = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
-    if (!nLanguageCode) {
-      sprintf(szOutPath, szPathFormat, "DATA\\LOCAL", "CHI", szResolution);
-      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, szOutPath, 0, (void**)&pFileHandle);
-      if (bOpened) {
-        Storm::Source::SFile::SFileCloseFile(pFileHandle);
-      }
-    } else {
+    if (nLanguageCode) {
       sprintf(szOutPath, szPathFormat, "DATA\\LOCAL", "ENG", szResolution);
       bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, szOutPath, 0, (void**)&pFileHandle);
       if (bOpened) {
         Storm::Source::SFile::SFileCloseFile(pFileHandle);
         return;
+      }
+    } else {
+      sprintf(szOutPath, szPathFormat, "DATA\\LOCAL", "CHI", szResolution);
+      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, szOutPath, 0, (void**)&pFileHandle);
+      if (bOpened) {
+        Storm::Source::SFile::SFileCloseFile(pFileHandle);
       }
     }
 }
