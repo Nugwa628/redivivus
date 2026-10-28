@@ -231,7 +231,6 @@ void __stdcall UIMENU_SelectCinematics(int32_t nCineLevel);
 void __fastcall UIMENU_PleaseInsertExpansionCdWithNotWorkingCancelButton(int32_t nMode);
 BOOL __stdcall MAINMENU_ShowCinematicsMenu(struct D2ControlMsg * pControlMsg);
 void __stdcall GetAndDispatchAllPossible();
-void __stdcall UIMENU_PlayCutScene(char * szSceneName, struct D2ControlMsg * pControlMsg);
 BOOL __stdcall MAINMENU_OnPressSetInsertPlayCd(struct D2ControlMsg * pControlMsg);
 BOOL __stdcall MAINMENUS_OnPressSetInsertPlayCd_ForCinematicDisc(struct D2ControlMsg * pControlMsg);
 void __stdcall MAINMENU_ShowCinematicsMenuAndSetFlag(struct D2ControlMsg * pControlMsg);

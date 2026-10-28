@@ -1971,7 +1971,7 @@ void __stdcall GetAndDispatchAllPossible() {
     } while (true);
 }
 
-void __stdcall UIMENU_PlayCutScene(char * szSceneName, D2ControlMsg * pControlMsg) {
+static void __stdcall UIMENU_PlayCutScene(char * szSceneName, D2ControlMsg * pControlMsg) {
     char szFilePath[260];
     char pFourccTail[8];
     int32_t nFlags;

@@ -190,11 +190,12 @@ int32_t __fastcall MISSILE_CltHitFn10_ProgOverlay(D2UnitStrc * pUnit, D2UnitStrc
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId)) {
+    D2MissilesTxt* pMissilesTxt = 0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[nClassId] : nullptr;
+    if (!pMissilesTxt) {
       return 1;
     }
 
-    short int nProgOverlay = sgptDataTable->pTxtMissiles[nClassId].ProgOverlay;
+    short int nProgOverlay = pMissilesTxt->ProgOverlay;
     if (0 >= nProgOverlay) {
       return 1;
     }

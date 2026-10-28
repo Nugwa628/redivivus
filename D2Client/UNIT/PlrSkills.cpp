@@ -634,11 +634,12 @@ void __fastcall PLRSKILLS_StateSetFn07_Hurricane(D2UnitStrc * pUnit, eD2States e
     }
 
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsTxt = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pSkillsTxt) {
       return;
     }
 
-    short int sPrgSound = sgptDataTable->pTxtSkills[eSkill].prgsound;
+    short int sPrgSound = pSkillsTxt->prgsound;
     if (0 >= sPrgSound) {
       return;
     }
@@ -653,11 +654,12 @@ void __fastcall PLRSKILLS_StateRemFn04_Hurricane(D2UnitStrc * pUnit, eD2States e
     }
 
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsTxt = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pSkillsTxt) {
       return;
     }
 
-    short int sPrgSound = sgptDataTable->pTxtSkills[eSkill].prgsound;
+    short int sPrgSound = pSkillsTxt->prgsound;
     if (0 >= sPrgSound) {
       return;
     }
