@@ -463,7 +463,7 @@ void __stdcall COMPOSIT_BuildCofPath(D2UnitStrc * pUnit, uint32_t nPlrClass, uin
       if ((int)nPlrClass < 0) {
         return;
       }
-      if (sgptDataTable->nTxtMonStatsSize <= (int)nPlrClass) {
+      if ((int)nPlrClass >= sgptDataTable->nTxtMonStatsSize) {
         return;
       }
       if (!(sgptDataTable->pTxtMonStats + nPlrClass)) {

@@ -2484,7 +2484,7 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
         Path::TypeOfUiOverlayOverWorld(1);
         if (bAdjustMouse) {
           iVar1 = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
-          if (iVar1 < iVar2) {
+          if (iVar2 > iVar1) {
             ui::SetMouseXY(iVar2 - iVar1, y);
             return 1;
           }
@@ -2504,7 +2504,7 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
             if (!bAdjustMouse) {
               return 1;
             }
-            if (iVar2 <= ScreenSizeX / 2) {
+            if (ScreenSizeX / 2 >= iVar2) {
               return 1;
             }
             ui::SetMouseXY(iVar2 - ((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2), y);
@@ -2515,7 +2515,7 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
             return 1;
           }
           iVar1 = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
-          if (ScreenSizeX - iVar1 <= iVar2) {
+          if (iVar2 >= ScreenSizeX - iVar1) {
             return 1;
           }
           ui::SetMouseXY(iVar1 + iVar2, y);
@@ -6278,16 +6278,16 @@ void __stdcall DRAW_UI_StatWindow_I() {
           }
 
           nDisplayVal = nMouseXCast + 0x4b;
-          if (0x5e < (int)nDisplayVal) {
+          if (0x5f <= (int)nDisplayVal) {
             nDisplayVal = 0x5f;
           }
 
           nResistClamped = nStatVal;
-          if ((int)nStatVal < -99) {
+          if ((int)nStatVal <= -100) {
             nResistClamped = -100;
           }
           if ((int)nResistClamped < (int)nDisplayVal) {
-            if ((int)nStatVal < -99) {
+            if ((int)nStatVal <= -100) {
               nStatVal = -100;
             }
 
@@ -6965,7 +6965,7 @@ BOOL __fastcall UI_DrawGroundItemTooltip(int * pnX, int * pnY, int * pnRight, in
           *pnBottom += nScreenBottom;
           return 0;
         }
-        if ((*pnRight - nTooltipIdx) / 2 && nMaxX <= nTooltipIdx) {
+        if ((*pnRight - nTooltipIdx) / 2 && nTooltipIdx >= nMaxX) {
           nScreenBottom = gaGroundItemLabels[iEntry].nLeft - *pnRight - 1;
           *pnX = nTooltipIdx + nScreenBottom;
           *pnRight += nScreenBottom;

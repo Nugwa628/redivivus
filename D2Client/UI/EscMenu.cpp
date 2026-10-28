@@ -539,7 +539,7 @@ void __stdcall INPUT_EscMenuOptionDecrease(D2UIMouseMsgStrc * pMsg) {
     if (pItemData->nMenuItemType == 1) {
       pItemData->nImageIndex--;
       uVar2 = pItemData->nSubImageCount - 1;
-      if (uVar2 < (uint32_t)pItemData->nImageIndex) {
+      if ((uint32_t)pItemData->nImageIndex > uVar2) {
         pItemData->nImageIndex = uVar2;
       }
     } else if (pItemData->nMenuItemType == 2 && (pItemData->nImageIndex-- , (uint32_t)pItemData->nImageIndex > pItemData->nSubImageCount - 1U)) {

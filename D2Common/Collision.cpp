@@ -139,7 +139,7 @@ int32_t __stdcall GetDistanceBetweenUnits(D2UnitStrc * pUnit, D2UnitStrc * pUnit
     int nSizeAdjY;
     D2UnitStrc* pUnit1Saved = pUnit;
     eD2UnitType eUnitType = pUnit2->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nTargetX = pUnit2->pPath.pStaticPath->nPosX;
     } else if (pUnit2->pPath.pDynamicPath) {
       nTargetX = PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
@@ -148,7 +148,7 @@ int32_t __stdcall GetDistanceBetweenUnits(D2UnitStrc * pUnit, D2UnitStrc * pUnit
     }
 
     eD2UnitType eUnitTypeTmp = pUnit->eUnitType;
-    if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp < 6) {
+    if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
       eUnitType2 = pUnit->pPath.pStaticPath->nPosX;
     } else if (!pUnit->pPath.pDynamicPath) {
       eUnitType2 = 0;
@@ -162,7 +162,7 @@ int32_t __stdcall GetDistanceBetweenUnits(D2UnitStrc * pUnit, D2UnitStrc * pUnit
     }
 
     eUnitTypeTmp = pUnit2->eUnitType;
-    if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp < 6) {
+    if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
       nTargetX = pUnit2->pPath.pStaticPath->nPosY;
     } else if (!pUnit2->pPath.pDynamicPath) {
       nTargetX = 0;
@@ -197,7 +197,7 @@ int32_t __stdcall GetDistanceBetweenUnits(D2UnitStrc * pUnit, D2UnitStrc * pUnit
       if (eUnitType2 < 0) {
         eUnitType2 = 0;
       }
-      if (nSizeUnit2 < 2 || nSizeUnit < 2) {
+      if (nSizeUnit2 <= 1 || nSizeUnit <= 1) {
         return eUnitType2 + 1;
       }
     } else {
@@ -243,7 +243,7 @@ int32_t __stdcall GetCollisionDistance(D2UnitStrc * pUnit, D2UnitStrc * pTarget)
     int32_t nSizeTarget;
     int nHalfSizeSum;
     eD2UnitType eUnitType = pTarget->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDx = pTarget->pPath.pStaticPath->nPosX;
     } else if (!pTarget->pPath.pDynamicPath) {
       nDx = 0;
@@ -2282,7 +2282,7 @@ BOOL __stdcall TestCollision(D2RoomStrc * pRoom, POINT * nIterY, POINT * pPoint2
                 nBresenhamErr = nDifferenceY - nY2;
                 nDifferenceY = nY2;
               }
-            } else if (nRoomXEnd <= nX2) {
+            } else if (nX2 >= nRoomXEnd) {
               nY2 = nRoomXEnd - nX1;
               nBresenhamErr = nDifferenceY - nY2;
               nDifferenceY = nY2;
@@ -2329,7 +2329,7 @@ BOOL __stdcall TestCollision(D2RoomStrc * pRoom, POINT * nIterY, POINT * pPoint2
             if (nDirY < 0) {
               nXBound = (uintptr_t)&pRoom[-1].pDrlgRoomNext + 3;
             }
-            if (nRoomYEnd <= (int)nIterY) {
+            if ((int)nIterY >= nRoomYEnd) {
               break;
             }
 
@@ -2342,7 +2342,7 @@ BOOL __stdcall TestCollision(D2RoomStrc * pRoom, POINT * nIterY, POINT * pPoint2
 
               nIterY = (POINT*)((uintptr_t)&nIterY->x + nDirY);
               nBresenhamErr2 += nDifferenceY;
-              if (nDifferenceX <= nBresenhamErr2) {
+              if (nBresenhamErr2 >= nDifferenceX) {
                 nBresenhamErr2 -= nDifferenceX;
                 nX1 += nDirX;
                 peCellCurrent += nDirX;
@@ -2399,7 +2399,7 @@ BOOL __stdcall TestCollision(D2RoomStrc * pRoom, POINT * nIterY, POINT * pPoint2
 
               nBresenhamErr += nDifferenceX;
               nX1 += nDirX;
-              if (nDifferenceY <= nBresenhamErr) {
+              if (nBresenhamErr >= nDifferenceY) {
                 nBresenhamErr -= nDifferenceY;
                 nIterY = (POINT*)((uintptr_t)&nIterY->x + nDirY);
                 peCellCurrent += pCurrentRoom->sCoords.dwXSize * nDirY;

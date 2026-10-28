@@ -408,7 +408,7 @@ void __fastcall Q22_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nGossipLineIdx == -1) {
         return;
       }
-      if (7 < nGossipLineIdx) {
+      if (8 <= nGossipLineIdx) {
         return;
       }
     } else {

@@ -1167,7 +1167,7 @@ D2TextLineStrc * __fastcall D2WINFONT_WordWrapString(uint16_t * wszText, int * p
 
         goto next_segment;
       }
-      if (nFitPixelWidth > nMaxWidth) {
+      if (nMaxWidth < nFitPixelWidth) {
         nSegEnd = nStrLen;
         if (nSegStart < nStrLen) {
           do {

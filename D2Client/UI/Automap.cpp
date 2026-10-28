@@ -626,7 +626,7 @@ static void __stdcall AUTOMAP_AddCellForUnit(int32_t nParam, D2AutomapCellStrc *
     D2AutomapCellStrc* pAutomapCell1 = AUTOMAP_AllocCell();
     int32_t nTargetX = D2Common::Units::GetTargetX(pUnit);
     int32_t nTargetY = D2Common::Units::GetTargetY(pUnit);
-    if (nTargetX / 10 + 0x8001U < 0x10000) {
+    if (nTargetX / 10 + 0x8001U <= 0xffff) {
       if (nTargetY / 10 + 0x7ffdU <= 0xffff) {
         if (nParam + 0x8000U <= 0xffff) {
           pAutomapCell1->nCellNo = (short int)nParam;

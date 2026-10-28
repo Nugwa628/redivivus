@@ -980,7 +980,7 @@ static void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2Unit
       if (pUnit2) {
         if (nTotalGold < 0) {
           nTotalGold = 0;
-        } else if (pUnit2->eUnitType == UNIT_PLAYER && (nGold = D2Common::Units::GetStashGoldLimit(pUnit2) , (int)nGold < nTotalGold)) {
+        } else if (pUnit2->eUnitType == UNIT_PLAYER && (nGold = D2Common::Units::GetStashGoldLimit(pUnit2) , nTotalGold > (int)nGold)) {
           nTotalGold = 0;
         }
 
@@ -991,7 +991,7 @@ static void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2Unit
           nGold = nValue;
           if (pUnit2->eUnitType == UNIT_PLAYER) {
             nStashLimit = D2Common::Units::GetInventoryGoldLimit(pUnit2);
-            if ((int)nStashLimit < (int)nValue) {
+            if ((int)nValue > (int)nStashLimit) {
               nGold = 0;
             }
           }

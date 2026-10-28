@@ -1447,7 +1447,7 @@ void __fastcall UNITS_UpdateRoomClientVisibility(::SGAMEDATA * pGame, D2UnitStrc
               }
 
               nOldClientIdx++;
-              if (nCurrentClientsCount <= nOldClientIdx) {
+              if (nOldClientIdx >= nCurrentClientsCount) {
                 break;
               }
             }
@@ -1487,7 +1487,7 @@ void __fastcall UNITS_UpdateRoomClientVisibility(::SGAMEDATA * pGame, D2UnitStrc
 
         pClient = ppCurrentClientList[nOldClientIdx];
         pClient_00 = (D2ClientStrc*)pRoom->nLastDeadGUIDs[nNewClientIdx - 0xe];
-        if (pClient_00 > pClient) {
+        if (pClient < pClient_00) {
           pOwnerUnit = GAME::Clients::CLIENTS_GetControlUnit(pClient, 0);
           if (pUnit != pOwnerUnit) {
             SUnitMsg::SERVER_SendInitUnitPacket(pGame, pUnit, ppCurrentClientList[nOldClientIdx]);
@@ -1999,7 +1999,7 @@ D2UnitStrc * __fastcall CreateUnit(eD2UnitType eUnitType, int32_t nClassId, int3
       if (6 < (uint32_t)nClassId) {
         return nullptr;
       }
-    } else if (eUnitType == UNIT_MONSTER && (nClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nClassId || !(sgptDataTable->pTxtMonStats + nClassId) || !sgptDataTable->pTxtMonStats[nClassId].enabled)) {
+    } else if (eUnitType == UNIT_MONSTER && (nClassId < 0 || nClassId >= sgptDataTable->nTxtMonStatsSize || !(sgptDataTable->pTxtMonStats + nClassId) || !sgptDataTable->pTxtMonStats[nClassId].enabled)) {
       return nullptr;
     }
 

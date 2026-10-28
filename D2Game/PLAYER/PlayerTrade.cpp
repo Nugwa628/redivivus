@@ -491,7 +491,7 @@ uint32_t __fastcall CUBE_MatchInputDescriptorToCubeItems(::SGAMEDATA * pGame, D2
                                   break;
                                   case 0x14:
                                     eStatId = pRecipe->nParam;
-                                  if (-1 < (int)eStatId && (int)eStatId <= sgptDataTable->nTxtItemStatCostSize) {
+                                  if (0 <= (int)eStatId && (int)eStatId <= sgptDataTable->nTxtItemStatCostSize) {
                                     pItemStatCostTxt = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine(eStatId);
                                     if (!pItemStatCostTxt) {
                                       continue;
@@ -558,7 +558,7 @@ uint32_t __fastcall CUBE_MatchInputDescriptorToCubeItems(::SGAMEDATA * pGame, D2
                                   break;
                                   case 0x18:
                                     eStatId = pRecipe->nParam;
-                                  if (-1 < (int)eStatId && (int)eStatId <= sgptDataTable->nTxtItemStatCostSize) {
+                                  if (0 <= (int)eStatId && (int)eStatId <= sgptDataTable->nTxtItemStatCostSize) {
                                     pItemStatCostTxt = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine(eStatId);
                                     if (!pItemStatCostTxt) {
                                       continue;
@@ -2110,7 +2110,7 @@ uint32_t __fastcall PLRTRADE_ValidateAndInitiateTrade(::SGAMEDATA * pGame, D2Uni
     D2UnitDataPlayerStrc* pSelfData = D2Common::Units::GetPlayerData(pUnit);
     _bInteractValid = UNIT::SUnit::GetInteractInfo(pUnit, &eInteractType, &dwInteractGUID);
     if (!_bInteractValid) {
-      return (uint32_t)((int)pSelfData->dwTradeState < 5);
+      return (uint32_t)((int)pSelfData->dwTradeState <= 4);
     }
     if (eInteractType != UNIT_PLAYER) {
       return 1;
@@ -2443,7 +2443,7 @@ static void __stdcall PLRTRADE_ExecuteTrade(::SGAMEDATA * pGame, D2UnitStrc * pU
           if (pTradeCopy->nTradeStatus) {
             nGold = pTradeCopy->nTradeStatus;
             nGold2 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
-            if (nGold <= nGold2) {
+            if (nGold2 >= nGold) {
               UNIT::Party::ChangeGoldForPlayer(pUnit, UNITSTAT_gold, -nGold);
             }
 

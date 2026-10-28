@@ -399,7 +399,7 @@ static void QUESTLOG_PopulateQuestEntry(D2QuestLogEntryStrc * pEntry) {
     nQuestStepIdx = (uint32_t)bQuestActive;
     pLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(pQuestDataTbl[nQuestStepIdx * 2 + 1]);
     if (nQuestStepIdx == 3 || nQuestStepIdx == 4) {
-      if (*pQuestDataTbl != 0xe82 || gQuestLog.MonstersleftInDenOfEvil < 2) {
+      if (*pQuestDataTbl != 0xe82 || gQuestLog.MonstersleftInDenOfEvil <= 1) {
         pLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0xe9b);
         D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(pEntry->wszDescription, pLocaleStr, 300);
         pEntry->wszDescription[299] = L'\0';
@@ -2077,7 +2077,7 @@ void __stdcall QUESTLOG_OnMouseUp(D2UIMouseMsgStrc * pMsg) {
           }
         }
       }
-    } else if (nPanelRelX - 0x116U < 0x24 && nPanelRelY - 0x188U < 0x22) {
+    } else if (nPanelRelX - 0x116U <= 0x23 && nPanelRelY - 0x188U <= 0x21) {
       QUESTLOG_ToggleQuestScreen(0);
     }
 

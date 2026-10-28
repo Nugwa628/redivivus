@@ -307,7 +307,7 @@ BOOL __fastcall Skills_SrvDoFunc_127_SuckBlood(::SGAMEDATA * pGame, D2UnitStrc *
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -374,7 +374,7 @@ BOOL __fastcall Skills_SrvDoFunc_128_MonsterCreateMinion(::SGAMEDATA * pGame, D2
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -498,7 +498,7 @@ BOOL __fastcall Skills_SrvDoFunc_129_AttachOrDetachFromHost(::SGAMEDATA * pGame,
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
     if (!(sgptDataTable->pTxtSkills + eSkill)) {
@@ -920,7 +920,7 @@ BOOL __fastcall Skills_SrvDoFunc_135_SpawnMinionFromParams(::SGAMEDATA * pGame, 
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -971,7 +971,7 @@ BOOL __fastcall Skills_SrvDoFunc_136_FireSpeedScaledMissile(::SGAMEDATA * pGame,
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -1272,7 +1272,7 @@ BOOL __fastcall Skills_SrvDoFunc_140_BaalTentacle(::SGAMEDATA * pGame, D2UnitStr
     nSpawnY = 0;
     if (!pSpawnedMinion) {
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nBaseX = pUnit->pPath.pStaticPath->nPosX;
         goto spawn_tentacles_around_center;
       }

@@ -1033,7 +1033,7 @@ void __fastcall MONSTER_EndOfFrameAiDispatch(::SGAMEDATA * pGame, D2UnitStrc * p
         if (-1 < nBaseMonClassId && nBaseMonClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nBaseMonClassId) {
           nBaseMonClassId = (int)sgptDataTable->pTxtMonStats[nBaseMonClassId].BaseId;
         }
-        if (-1 < nBaseMonClassId) {
+        if (0 <= nBaseMonClassId) {
           nResolvedBaseId = nBaseMonClassId;
           if (nBaseMonClassId < sgptDataTable->nTxtMonStatsSize) {
             goto dispatch_by_base_id;

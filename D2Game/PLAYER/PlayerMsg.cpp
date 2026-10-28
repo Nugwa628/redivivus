@@ -121,7 +121,7 @@ void __fastcall UpgradeLifeAndHitClass(D2UnitStrc * pUnit, D2ClientStrc * pClien
     uint32_t dwLastHitClass = pUnit->dwLastHitClass;
     int32_t nPlayerLife = D2Common::Units::GetCurrentLifePercentage(pUnit);
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       wPosY = (uint16_t)pUnit->pPath.pStaticPath->nPosY;
     } else if (!pUnit->pPath.pDynamicPath) {
       wPosY = 0;
@@ -324,7 +324,7 @@ void __fastcall SendPlayerStop(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Client
     int32_t dwMoveMode = gaPlayerModeNetMsgTable[param_1].nMoveModeByte;
     int32_t nLifePct = D2Common::Units::GetCurrentLifePercentage(pUnit);
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       wPosY = (uint16_t)pUnit->pPath.pStaticPath->nPosY;
     } else if (!pUnit->pPath.pDynamicPath) {
       wPosY = 0;

@@ -900,7 +900,7 @@ static int32_t __stdcall DRLGPATH_GetDirectionIndex(int32_t nY2, int32_t nY1, in
       nAbsDy = -nDy;
     }
     if ((int)nAbsDx < (int)(nAbsDy * 2)) {
-      if ((int)(nAbsDx * 2) <= (int)nAbsDy) {
+      if ((int)nAbsDy >= (int)(nAbsDx * 2)) {
         if ((int)nDx < 0) {
           nDx = -1;
           goto combine_dir_index;
@@ -952,7 +952,7 @@ int32_t __stdcall DRLGPATH_GetDirectionIndexPacked(uint32_t nParam1, uint32_t nP
       nAbsDeltaY = -nDeltaY;
     }
     if ((int)nAbsDeltaX < (int)(nAbsDeltaY * 2)) {
-      if ((int)(nAbsDeltaX * 2) <= (int)nAbsDeltaY) {
+      if ((int)nAbsDeltaY >= (int)(nAbsDeltaX * 2)) {
         if ((int)nDeltaX < 0) {
           nDeltaX = -1;
           goto combine_dir_index;
@@ -1194,7 +1194,7 @@ uint32_t __fastcall DRLGPATH_StepPathWithCollisionCheck(D2PathTypeArg * pPathTyp
     if ((int)nVelY < 0) {
       nAbsVelY = -nVelY;
     }
-    if ((int)nAbsVelY < (int)nAbsVelX) {
+    if ((int)nAbsVelX > (int)nAbsVelY) {
       nStepSize = nVelX;
       if (-1 < (int)nVelX) {
         goto walk_path;

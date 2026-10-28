@@ -1144,7 +1144,7 @@ BOOL __fastcall DRLGROOM_HasUniqueClient(D2RoomStrc * pRoom1, D2RoomStrc * pRoom
           pClient1Iter++;
         } while (j < nClients1);
       }
-      if (nClients1 <= j) {
+      if (j >= nClients1) {
         return 1;
       }
 

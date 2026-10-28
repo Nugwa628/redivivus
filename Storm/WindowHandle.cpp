@@ -347,7 +347,7 @@ static uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, StormWndRec
     }
 
     SMem::SMemFree(pRecord, s___AUWNDREC___00708850, -2, 0);
-    return (int)nResult < 1 ? 0 : nResult;
+    return (int)nResult <= 0 ? 0 : nResult;
 }
 
 // @blizzard FindWindow (SMSG.CPP)

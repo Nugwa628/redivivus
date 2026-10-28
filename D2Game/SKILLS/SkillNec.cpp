@@ -702,7 +702,7 @@ BOOL __fastcall Skills_SrvDoFunc_059_CastCorpseSkill(::SGAMEDATA * pGame, D2Unit
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 

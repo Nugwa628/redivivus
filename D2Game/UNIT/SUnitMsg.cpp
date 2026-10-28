@@ -1266,7 +1266,7 @@ void __fastcall SERVER_SendInitUnitPacket(::SGAMEDATA * pGame, D2UnitStrc * pUni
           do {
             if ((uint8_t)gadwBitMasks[(uint32_t)pClient & 7] & pMonStatsTxt->SendSkills[(int)pClient >> 3]) {
               wSkillId = *pMonSkillEntry;
-              if (-1 < (short int)wSkillId && (int)(short int)wSkillId < sgptDataTable->nTxtSkillsCount) {
+              if (0 <= (short int)wSkillId && (int)(short int)wSkillId < sgptDataTable->nTxtSkillsCount) {
                 pSkill = D2Common::Skills::SKILLS_GetSkillByEnum((int)(short int)wSkillId, pUnit);
                 if (pSkill) {
                   bRemove = 0;

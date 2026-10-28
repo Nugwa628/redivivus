@@ -758,11 +758,11 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
 
     uint32_t uClampedXEnd = RENDERER_nWindowHeight - 1;
     uClampedXStart = nYStart < 1 ? 0 : nYStart;
-    if ((int)uClampedXEnd <= (int)uClampedXStart) {
+    if ((int)uClampedXStart >= (int)uClampedXEnd) {
       uClampedXStart = uClampedXEnd;
     }
 
-    uint32_t uMaxY = nYEnd < 1 ? 0 : nYEnd;
+    uint32_t uMaxY = nYEnd <= 0 ? 0 : nYEnd;
     if ((int)uClampedXEnd <= (int)uMaxY) {
       uMaxY = uClampedXEnd;
     }

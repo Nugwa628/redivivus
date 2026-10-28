@@ -811,7 +811,7 @@ ULONGLONG __stdcall SSTR_HashString64(uint8_t * pszText, uint8_t bCaseSensitive,
       if (!(bCaseSensitive & 1)) {
         while (nChar) {
           pszText++;
-          if (nChar - 0x61 < 0x1a) {
+          if (nChar - 0x61 <= 0x19) {
             nChar -= 0x20;
           }
           if (nChar == 0x2f) {

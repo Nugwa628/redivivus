@@ -1161,7 +1161,7 @@ static void __stdcall DRLGPRESET_InitDrlgMapPopLocations(int32_t nPopCount, D2Dr
       nX0 = *pPos;
       nPopIndex++;
       *pPos = ((int)nX0 / 4) - 1;
-    } while (nPopCount > nPopIndex);
+    } while (nPopIndex < nPopCount);
 }
 
 void __fastcall DRLGPRESET_SetPickedFileInDrlgMap(D2DrlgMapStrc * pDrlgMap, int32_t nPickedFile) {

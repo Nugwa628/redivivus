@@ -232,7 +232,7 @@ BOOL __fastcall SKILLAMA_SrvStFn08_Strafe(::SGAMEDATA * pGame, D2UnitStrc * pUni
     int32_t nHitCount;
     int nParam3;
     int32_t nAreaHitCount;
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 

@@ -632,7 +632,7 @@ static int32_t ITEM_GetItemDropSound(uint32_t * pnParam, D2UnitStrc * pUnit) {
       eItemQuality = D2Common::ITEMS::Items::GetItemQuality(pUnit);
       if (eItemQuality == 5) {
         eItemQuality = D2Common::ITEMS::Items::ITEM_GetItemData_nFileIndex(pUnit);
-        if (-1 < eItemQuality && eItemQuality < sgptDataTable->nTxtSetItemsSize) {
+        if (0 <= eItemQuality && eItemQuality < sgptDataTable->nTxtSetItemsSize) {
           pSetItemsTxt = sgptDataTable->pTxtSetItems + eItemQuality;
           if (pSetItemsTxt && 0 < pSetItemsTxt->dropsound) {
             if (pnParam && pSetItemsTxt->dropsfxframe) {
@@ -961,7 +961,7 @@ int32_t __fastcall SOUND_GetIdFromUnit(D2UnitStrc * pUnit) {
       if (eQuality < 0) {
         return nSoundId;
       }
-      if (sgptDataTable->nTxtUniqueItemsSize <= eQuality) {
+      if (eQuality >= sgptDataTable->nTxtUniqueItemsSize) {
         return nSoundId;
       }
       if (!(sgptDataTable->pTxtUniqueItems + eQuality)) {

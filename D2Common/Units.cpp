@@ -997,7 +997,7 @@ void __stdcall SetFrameNonRate(D2UnitStrc * pUnit, int32_t nRate, int32_t nFailR
 
 static int32_t UNITS_GetBaseWalkVelocity(eD2UnitType eUnitType, int32_t nClassId) {
     if (eUnitType == UNIT_PLAYER) {
-      if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtCharStatsSize)) {
+      if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtCharStatsSize)) {
         return (uint32_t)*(volatile uint8_t*)0x40 << 8;
       }
 
@@ -3363,7 +3363,7 @@ void __stdcall AdvanceAnimFrame(D2UnitStrc * pUnit) {
       pUnit->eUnitFlags &= ~UNITFLAG_SQGFXCHANGE;
       uVar2 = pUnit->nSeqAnimSpeed + nSeqMode;
       pUnit->nSeqFrame = uVar2;
-      if ((int)pUnit->nSeqFrameCount <= (int)uVar2) {
+      if ((int)uVar2 >= (int)pUnit->nSeqFrameCount) {
         pUnit->nSeqFrame = uVar2 - pUnit->nSeqFrameCount;
       }
 

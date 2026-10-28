@@ -3527,7 +3527,7 @@ static uint32_t __fastcall SFILE_RemoveAsyncRequestFromQueue(void * pListContext
     }
 
     SMem::SMemFree(pNode, sRTTI_EVENTREC_AllocTag, -2, 0);
-    return (int)nRefCount < 1 ? 0 : nRefCount;
+    return (int)nRefCount <= 0 ? 0 : nRefCount;
 }
 
 D2MPQFileStrc * * __fastcall SFILE_AllocFileRecord4(int * * ppArchive, int32_t nInsertMode, int32_t nExtraSize, uint32_t nFlags) {
@@ -4710,7 +4710,7 @@ int __stdcall SFileReadFileEx2(D2MPQFileStrc * pFileHandle, void * pOutputBuffer
 
             nChunkOffset += nChunkCount;
             nChunkIndex++;
-          } while (nChunkBytes > nChunkIndex);
+          } while (nChunkIndex < nChunkBytes);
         }
 
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00779068);

@@ -2168,7 +2168,7 @@ void __stdcall INPUT_PanelLeftClickUp(D2UIMouseMsgStrc * pMsg) {
 
       iVar1 = ScreenSizeX / 2;
       if (nMouseX < iVar1 + 0x17 || iVar1 + 0x91 < nMouseX || nMouseY < ScreenSizeY - 0x27 || ScreenSizeY - 10 < nMouseY) {
-        if (nMouseX - 0x75U < 0x31 && nMouseY <= ScreenSizeY) {
+        if (nMouseX - 0x75U <= 0x30 && nMouseY <= ScreenSizeY) {
           iVar1 = ui::GetItemType();
           if (iVar1 == 6) {
             ui::UI_DropCursorItemOnGround();

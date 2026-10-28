@@ -327,7 +327,7 @@ int32_t __stdcall TestUnit(D2UnitStrc * pUnit, D2UnitFindArgStrc * pUnitFindArg)
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       pUnitFindArg = (D2UnitFindArgStrc*)pUnit->pPath.pStaticPath->nPosX;
     } else if (!pUnit->pPath.pDynamicPath) {
       pUnitFindArg = 0;

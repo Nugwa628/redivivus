@@ -592,7 +592,7 @@ uint8_t __fastcall QuitGameAfterDia(::SGAMEDATA * pGame, D2QuestDataStrc * pQues
       D2UnitStrc* pDVar2;
       pnSpawnRetryCount = pDVar1->sQuestGUID.aPlayerGUID + 6;
       (*pnSpawnRetryCount)++;
-      if (9 < (uint32_t)pDVar1->sQuestGUID.aPlayerGUID[6] && *(char*)((int)pDVar1->sQuestGUID.aPlayerGUID + 6) != '\0') {
+      if (10 <= (uint32_t)pDVar1->sQuestGUID.aPlayerGUID[6] && *(char*)((int)pDVar1->sQuestGUID.aPlayerGUID + 6) != '\0') {
         pDVar2 = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_OBJECT, pDVar1->sQuestGUID.aPlayerGUID[2]);
         if (pDVar2) {
           pQuestSpecificA4Q2 = pDVar1;

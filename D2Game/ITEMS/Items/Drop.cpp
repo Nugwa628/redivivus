@@ -3379,7 +3379,7 @@ void __fastcall ITEMS_ReduceDurability(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       _bIsThrowable = 0xc87;
     } else {
       _bIsThrowable = D2Common::Stats::StatsEx::GetTxtMaxDurability(pItemUnit);
-      if (_bIsThrowable <= (int)bIsArmor) {
+      if ((int)bIsArmor >= _bIsThrowable) {
         bIsArmor = D2Common::Stats::StatsEx::GetTxtMaxDurability(pItemUnit);
       }
 
@@ -3897,7 +3897,7 @@ void __fastcall SERVER_ITEM_RollItemToDrop(::SGAMEDATA * pGame, D2UnitStrc * pUn
                   do {
                     nEntryIdx = (nLoopUnroll - nPicksRemaining) / 2 + nPicksRemaining;
                     iVar1 = pNestedTC->pEntries[nEntryIdx].nCumulativeWeightExpansion;
-                    if (iVar1 < (int)uVar18) {
+                    if ((int)uVar18 > iVar1) {
                       nPicksRemaining = nEntryIdx + 1;
                       nEntryIdx = nLoopUnroll;
                     } else if (iVar1 <= (int)uVar18) {

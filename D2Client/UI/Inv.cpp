@@ -2640,7 +2640,7 @@ void __stdcall szPrintfBuffer(D2UnitStrc * pUnit, uint16_t * wszText) {
         *(uint8_t*)(char*)&pUnit = '\x02';
       nElemDuration = D2Common::Units::Missile::GetElementalLength(0, pPlayerUnit_lcl, nMinDamage, 1);
       iDurationFrames = nElemDuration / 0x19;
-      if (iDurationFrames < 1) {
+      if (iDurationFrames <= 0) {
         iDurationFrames = 1;
       }
 
@@ -3747,7 +3747,7 @@ static void __stdcall INV_UpdateItemUnderCursor(D2UnitStrc * pUnit, D2InventoryS
       if ((int)nCol < 0) {
         nCol = 0;
       }
-      if ((int)(uint32_t)byGridWidth < (int)(*(uint8_t*)((char*)&nPage + 3) + nCol)) {
+      if ((int)(*(uint8_t*)((char*)&nPage + 3) + nCol) > (int)(uint32_t)byGridWidth) {
         return;
       }
     }
@@ -3756,7 +3756,7 @@ static void __stdcall INV_UpdateItemUnderCursor(D2UnitStrc * pUnit, D2InventoryS
       if ((int)nRow < 0) {
         nRow = 0;
       }
-      if ((int)(uint32_t)byGridHeight < (int)(*(uint8_t*)((char*)&pUnit + 3) + nRow)) {
+      if ((int)(*(uint8_t*)((char*)&pUnit + 3) + nRow) > (int)(uint32_t)byGridHeight) {
         return;
       }
     }
@@ -7201,7 +7201,7 @@ void __stdcall INV_HandleMercInvLeftClick(D2UIMouseMsgStrc * pMsg) {
           }
 
           nBodySlotIdx++;
-        } while ((int)((uintptr_t)((char*)&gaHirelingBodySlotScreenCoords + sizeof(gaHirelingBodySlotScreenCoords) + 4)) > (int)((int)(uint32_t*)&gaHirelingBodySlotScreenCoords[nBodySlotIdx].nRight));
+        } while ((int)((int)(uint32_t*)&gaHirelingBodySlotScreenCoords[nBodySlotIdx].nRight) < (int)((uintptr_t)((char*)&gaHirelingBodySlotScreenCoords + sizeof(gaHirelingBodySlotScreenCoords) + 4)));
 
         GAME::Game::GAMEDATA_ClearQueuedClicks();
         consume_click:

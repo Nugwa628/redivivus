@@ -1892,7 +1892,7 @@ void __stdcall CheckAll(D2DrlgWallLayerGridsStrc * pUnknown, D2LvlSubTxt * pSubT
                   pDVar1->sSeed = DVar2;
                   if (pSubTxt->Prob[pUnknown->nSubTypeIndex] < (int)(DVar2.nSeedLow % 100)) {
                     nVariantIdx = pGroupEntry[5];
-                    if ((int)nVariantIdx < 1) {
+                    if ((int)nVariantIdx <= 0) {
                       nVariantIdx = 0;
                     } else {
                       uSeedLow = pDVar1->sSeed.nSeedLow;
@@ -3943,7 +3943,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
         }
       } else {
         bNotAtDst = nCurY != nDstY;
-        nDstY = (uint16_t)(-1 < nDeltaX) * 2 - 1;
+        nDstY = (uint16_t)(0 <= nDeltaX) * 2 - 1;
         *(uint16_t*)(char*)&nPackedSrc = (uint16_t)(-1 < nDeltaY) * 2 - 1;
         nDeltaX = nStepsX;
         if (bNotAtDst) {
@@ -4425,7 +4425,7 @@ D2DrlgRoomAStarNodeStrc * __stdcall DRLGPATH_AStarExpandNode(int32_t nMaxCost, D
       }
 
       nMinDelta = nHashIdx;
-      if (nHashIdx >= nDirIndex) {
+      if (nDirIndex <= nHashIdx) {
         nMinDelta = nDirIndex;
         if (nDirIndex < nHashIdx) {
           nDirIndex = nHashIdx;
@@ -6443,7 +6443,7 @@ int * __stdcall DRLGOUTROOM_PathSearchStep(int * * ppNodeList, int32_t nMaxFCost
         }
 
         nHMin = nFCost;
-        if (nFCost >= nHCost) {
+        if (nHCost <= nFCost) {
           nHMin = nHCost;
           if (nHCost < nFCost) {
             nHCost = nFCost;

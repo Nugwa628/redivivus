@@ -625,7 +625,7 @@ uint32_t __fastcall DAMAGE_CalculatePhysicalDamage(D2UnitStrc * pUnit, int32_t n
         }
 
         nParam2 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxdamage, 0);
-        if (nParam2 < 2) {
+        if (nParam2 <= 1) {
           nParam2 = 2;
         }
       } else {
@@ -3240,7 +3240,7 @@ static int32_t EXPERIENCE_ApplyLevelDiffPenaulty(int32_t nExperience, int32_t nD
       nPercent = gaExperiencePenaultyHigherAttacker[nLevelDifference];
     } else {
       nLevelDifference2 = nDefenderLevel - nAttackerLevel;
-      if (10 < nLevelDifference2) {
+      if (11 <= nLevelDifference2) {
         nLevelDifference2 = 10;
       }
 
@@ -3329,7 +3329,7 @@ static uint32_t __stdcall SERVER_CalculateExperienceForUnit(::SGAMEDATA * pGame,
     eD2PlayerClassID ePlayerClass;
     int32_t nXpAfterLevelPenalty;
     if (baseExperience < 0x800000) {
-      if (baseExperience < 1) {
+      if (baseExperience <= 0) {
         return 1;
       }
     } else {

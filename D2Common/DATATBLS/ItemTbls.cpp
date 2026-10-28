@@ -4052,7 +4052,7 @@ void __fastcall TXT_AllocTxt_itemstatcost(D2PoolManagerStrc * pMemory) {
           pDepSlot = pOpStat1;
           do {
             nOpBaseStatId = (uint32_t)(uint16_t)*pDepSlot;
-            if (nStatCount <= (int)nOpBaseStatId) {
+            if ((int)nOpBaseStatId >= nStatCount) {
               break;
             }
 

@@ -3268,7 +3268,7 @@ void __stdcall SKILLS_AddOrRemoveItemSkill(D2UnitStrc * pUnit, int32_t nOwnerGUI
     if ((int)eSkill < 0) {
       return;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return;
     }
 
@@ -3432,7 +3432,7 @@ static BOOL SKILLS_HasEnoughManaForSkill(D2SkillStrc * pSkillStrc, D2UnitStrc * 
         }
 
         nCurrentStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnitStrc, UNITSTAT_hitpoints, 0);
-        return (uint32_t)(nManaCost <= nCurrentStatValue);
+        return (uint32_t)(nCurrentStatValue >= nManaCost);
       }
 
       nErrorLine = 0x6ee;

@@ -83,7 +83,7 @@ template<> ::SGAMEDATA * TSExplicitList<SGAMEDATA, -572662307>::RawNext(::SGAMED
 
 template<> ::SGAMEDATA * TSExplicitList<SGAMEDATA, -572662307>::Next(::SGAMEDATA * pNode) {
     if (pNode) {
-      return (::SGAMEDATA*)((int)*(uint32_t*)(pNode->szGameName + this->m_linkoffset - 0x26) < 1 ? 0 : *(uint32_t*)(pNode->szGameName + this->m_linkoffset - 0x26));
+      return (::SGAMEDATA*)((int)*(uint32_t*)(pNode->szGameName + this->m_linkoffset - 0x26) <= 0 ? 0 : *(uint32_t*)(pNode->szGameName + this->m_linkoffset - 0x26));
     }
 
     uint32_t uVar1 = this->m_terminator.m_next;

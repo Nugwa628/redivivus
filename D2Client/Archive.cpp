@@ -249,7 +249,7 @@ uint32_t __fastcall ARCHIVE_RemoveNode(int32_t pThis, int * pNode) {
     }
 
     Storm::SMem::SMemFree(pNode, s___AUTALLOCREC___00711480, -2, 0);
-    return (int)nValue < 1 ? 0 : nValue;
+    return (int)nValue <= 0 ? 0 : nValue;
 }
 
 // NOTE: Callee-saved register params inferred (medium confidence): param_esi (ESI): LPOVERLAPPED, param_edi (EDI): LPOVERLAPPED, param_ebx (EBX): LPOVERLAPPED
