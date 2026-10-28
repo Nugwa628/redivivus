@@ -3425,7 +3425,7 @@ extern uint32_t gnUICtrlConfigButton3State;
 // Indices: [0] list area  [1] up arrow  [2] down arrow  [3] scroll bar  [4] scroll thumb  [5] below thumb  [6] tab/button row.
 extern int gaControlConfigRegionMouseState[7];
 extern uint32_t gnUICtrlConfigScrollOffset;
-extern uint8_t g_ControlConfigUIState;
+extern uint32_t g_ControlConfigUIState;
 extern int gnUICtrlConfigActiveButton;
 extern BOOL gbUICtrlConfigKeyBindMode;
 extern DC6 * gpUICtrlConfigScrollbarDC6;
