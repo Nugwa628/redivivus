@@ -1421,7 +1421,10 @@ void __fastcall SKILL_ExecuteClientProgressFunc(D2UnitStrc * pUnit, D2UnitStrc *
     bHadTarget = GetCooordinates(pUnit, (int32_t*)aSavedSP1Y, (int32_t*)aSavedSP1X);
     D2UnitStrc* pSavedTarget;
     pSavedTarget = UNIT::CUnit::GetConfirmedTargetUnit(pUnit);
-    if (!pUnit2) {
+    if (pUnit2) {
+      D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pUnit2);
+      pUnit->nInitSeed = (uint32_t)bDirection;
+    } else {
       if (!nTargetX) {
         goto run_progress_func;
       }
@@ -1429,9 +1432,6 @@ void __fastcall SKILL_ExecuteClientProgressFunc(D2UnitStrc * pUnit, D2UnitStrc *
         D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, (int16_t)nTargetX, (int16_t)nTargetY);
         pUnit->nInitSeed = (uint32_t)bDirection;
       }
-    } else {
-      D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pUnit2);
-      pUnit->nInitSeed = (uint32_t)bDirection;
     }
     if (nTargetX && !nTargetY) {
       pUnit->nInitSeed = nTargetX;
