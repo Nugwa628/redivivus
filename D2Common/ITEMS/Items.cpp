@@ -215,7 +215,7 @@ void __stdcall SetModSeed(D2UnitStrc * pUnit, int32_t nModSeed) {
 }
 
 // Returns nQuality from D2UnitDataItemStrc. Returns 2 (NORMAL) if unit is null, not an item, or has no item data. Thirty-seven bytes reading the unit from [EBP+8] and touching EAX only, so it preserves ECX; CalculateTransactionCost_Impl carries a magic-or-better flag there across this call.
-int GetItemQuality(D2UnitStrc * pUnit) {
+int __stdcall GetItemQuality(D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataMonster)) {
       return 2;
     }
