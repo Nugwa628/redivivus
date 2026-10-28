@@ -1,0 +1,20 @@
+tree 3be4601-dirty; compiler sp1; flags /O2 /Oy- /Ob1 /EHsc /GS /MT /W1 /D WIN32 /D NDEBUG /D _WINDOWS; D2Client/ /GS-; D2DDraw/ /GS-; D2Direct3D/ /GS-; D2Gdi/ /GS-; D2Glide/ /GS-; D2Launch/ /GS-; D2Launch/Engine/ ; D2MCPClient/ /GS-; D2Multi/ /GS-; D2Sound/ /GS-; D2Win/ /GS-; D2gfx/ /GS-
+original functions: 15521 (2678537 bytes of code)
+mapped and compared: 12351
+  MATCH               5087
+  REF_DIFF               6
+  INSN_MATCH           255
+  INSN_COUNT_MATCH    1272
+  OUR+-N              5726
+  QUARANTINE             5
+  MISSING                0
+matched code: 376782 bytes (14.07% of the original)
+pairings by funcmap tier: votes 3839, exact 3470, bracket 2911, calls 947, refs 459, align 282, string 237, name 124, import 60, export 22
+globals seen at aligned instructions: 2078, of which consistent 2010 (datamap.tsv)
+self-check, names carrying their own address: 199 agree, 6 elsewhere
+  look at: D2Direct3D::Renderer::Catch_All_006b4c42 at 006b4770
+  look at: D2Direct3D::Renderer::Catch_All_006b4c73 at 006b4900
+  look at: ?BYTE_ARRAY_006e5da0@?1??CELCMP_GetPaletteShiftValue@CelCmp@SRC@D2CMP@@YGIIIHH@Z@4PAEA at 006e5db8
+  look at: ?BYTE_ARRAY_006e5db8@?1??CELCMP_GetPaletteShiftValue@CelCmp@SRC@D2CMP@@YGIIIHH@Z@4PAEA at 006e5da0
+  look at: ?BYTE_ARRAY_006e5da8@?1??CELCMP_GetPaletteShiftValue@CelCmp@SRC@D2CMP@@YGIIIHH@Z@4PAEA at 006e5dc0
+  look at: ?BYTE_ARRAY_006e5dc0@?1??CELCMP_GetPaletteShiftValue@CelCmp@SRC@D2CMP@@YGIIIHH@Z@4PAEA at 006e5da8
