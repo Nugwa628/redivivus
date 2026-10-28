@@ -192,10 +192,10 @@ BOOL __fastcall SPAWN_FindRandomPositionForMonster(::SGAMEDATA * pGame, D2RoomSt
     }
 
     uint32_t bUseCoordList = (uint32_t)(pCoordList != 0);
-    if (pRoomWork) {
-      pRoomSeed = &pRoomWork->sSeed;
-    } else {
+    if (!pRoomWork) {
       pRoomSeed = 0;
+    } else {
+      pRoomSeed = &pRoomWork->sSeed;
     }
 
     for (nTryCount = 0; nTryCount < 0x14; nTryCount++) {
@@ -271,10 +271,10 @@ BOOL __stdcall SPAWN_SpawnMonsterGroupAtRandom(::SGAMEDATA * pGame, D2RoomStrc *
     }
 
     uint32_t bUseCoordList = (uint32_t)(pCoordList != 0);
-    if (pRoom) {
-      pRoomSeed = &pRoom->sSeed;
-    } else {
+    if (!pRoom) {
       pRoomSeed = 0;
+    } else {
+      pRoomSeed = &pRoom->sSeed;
     }
 
     int32_t nGroupSize = *pnParam;

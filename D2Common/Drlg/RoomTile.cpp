@@ -1060,7 +1060,8 @@ void __fastcall DRLGROOMTILE_GrowTileDataArray(D2PoolManagerStrc * pMemory, D2Dr
     }
 
     pTileGrid->sRoomTiles.pRoofTiles[nIndex].pNext = 0;
-    pTileGrid->sRoomTiles.nRoofTilesCount += nAdditionalTiles;
+    int* piVar1 = &pTileGrid->sRoomTiles.nRoofTilesCount;
+    *piVar1 += nAdditionalTiles;
 }
 
 // NOTE: Callee-saved register params inferred (medium confidence): pPoolManagerStrc (EDI): D2PoolManagerStrc*

@@ -120,7 +120,8 @@ POINT * __stdcall FIELDTBLS_AllocPoint() {
       exit(-1);
     }
 
-    memset(pPoint, 0, sizeof(*pPoint));
+    pPoint->x = 0;
+    pPoint->y = 0;
     return pPoint;
 }
 

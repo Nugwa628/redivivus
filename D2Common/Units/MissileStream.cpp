@@ -70,10 +70,10 @@ void __stdcall AllocMissileStream(D2UnitStrc * pUnit) {
     if (pStream) {
       return;
     }
-    if (pUnit) {
-      pMemory = pUnit->pMemory;
-    } else {
+    if (!pUnit) {
       pMemory = 0;
+    } else {
+      pMemory = pUnit->pMemory;
     }
 
     pStream = ((D2MissileStreamStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2MissileStreamStrc), ".\\UNITS\\MisStream.cpp", 0x2e, 0));
