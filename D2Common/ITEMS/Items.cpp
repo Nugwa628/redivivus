@@ -423,11 +423,10 @@ int32_t __stdcall ITEM_GetItemData_nItemLevel(D2UnitStrc * pUnit) {
     if (!temp_5f060235c5) {
       return 1;
     }
-    if (temp_5f060235c5->nItemLevel > 0) {
-      return temp_5f060235c5->nItemLevel;
+    if (temp_5f060235c5->nItemLevel < 1) {
+      temp_5f060235c5->nItemLevel = 1;
     }
 
-    temp_5f060235c5->nItemLevel = 1;
     return temp_5f060235c5->nItemLevel;
 }
 
