@@ -741,7 +741,7 @@ void __fastcall Q04_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q4.cpp
 static void __stdcall Q04_DeactivateCairnStones(D2QuestDataStrc * pQuestData) {
     D2QuestDataA1Q4Strc* pQuestSpecific = pQuestData->pQuestSpecificData.pA1Q4;
-    if (pQuestSpecific->sSub.bTreeObjectSaved) {
+    if (pQuestSpecific->sSub.bTreeObjectSaved == 1) {
       D2UnitStrc* pUnit;
       pUnit = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_OBJECT, pQuestSpecific->sSub.nTreeObjectGUID);
       if (pUnit && pUnit->nClassId == 0x1e) {
@@ -1222,7 +1222,7 @@ BOOL __fastcall OBJOP_A1Q4_ActivateInifussTree(D2ObjectOperateFnArg * pOperation
     D2RoomStrc* pRoom;
     D2QuestDataStrc* pQuestDataFound = GetQuestDataByQuestNoInternal(pOperation->sArg.pGame, QUESTINT_TheSearchForCain);
     D2QuestDataA1Q4Strc* pA1Q4Data = 0;
-    if (!(!pQuestDataFound || (pA1Q4Data = pQuestDataFound->pQuestSpecificData.pA1Q4 , pQuestDataFound->bIsNotIntroduction && !pA1Q4Data->sSub.bQuestObjectsActivated) && pQuestDataFound->nStateFlag < 6)) {
+    if (!(!pQuestDataFound || (pA1Q4Data = pQuestDataFound->pQuestSpecificData.pA1Q4 , pQuestDataFound->bIsNotIntroduction && pA1Q4Data->sSub.bQuestObjectsActivated != 1) && pQuestDataFound->nStateFlag < 6)) {
       return 0;
     }
 
@@ -2213,7 +2213,7 @@ void __fastcall Q04_InitializeTristramObjects(::SGAMEDATA * pGame, D2UnitStrc * 
     sInitArgGame.nX = D2Client::Units::GetXPosFromDynamicPathUnit(pFoundUnit);
     sInitArgGame.nY = D2Client::Units::GetYPosFromDynamicPathUnit(pFoundUnit);
     Objects_InitFn54(&sInitArgGame);
-    if (!pDVar1->sSub.bCairnMonsterSaved) {
+    if (pDVar1->sSub.bCairnMonsterSaved != 1) {
       return;
     }
 
@@ -2317,7 +2317,7 @@ void Q04_SetCainUnitGUID(void * pThis, int32_t nCainGUID) {
 static void __stdcall Q04_ActivateCairnStonesAndTree(char cParam1, char cParam2, D2QuestDataStrc * pQuestData) {
     D2UnitStrc* pTreeUnit;
     D2QuestDataA1Q4Strc* pA1Q4Sub = pQuestData->pQuestSpecificData.pA1Q4;
-    if (!(pA1Q4Sub->sSub.bCairnStonesObjectSaved && (pTreeUnit = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_OBJECT, pA1Q4Sub->sSub.nCairnStonesObjectGUID) , pTreeUnit != 0) && pTreeUnit->nClassId == 0x1a)) {
+    if (!(pA1Q4Sub->sSub.bCairnStonesObjectSaved == 1 && (pTreeUnit = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_OBJECT, pA1Q4Sub->sSub.nCairnStonesObjectGUID) , pTreeUnit != 0) && pTreeUnit->nClassId == 0x1a)) {
       pA1Q4Sub->sSub.nCairnAnimState = 3;
     } else {
       if (pTreeUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Run) {
@@ -2325,7 +2325,7 @@ static void __stdcall Q04_ActivateCairnStonesAndTree(char cParam1, char cParam2,
         pA1Q4Sub->sSub.nCairnAnimState = 3;
       }
     }
-    if (pA1Q4Sub->sSub.bTreeObjectSaved) {
+    if (pA1Q4Sub->sSub.bTreeObjectSaved == 1) {
       pTreeUnit = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_OBJECT, pA1Q4Sub->sSub.nTreeObjectGUID);
       if (pTreeUnit) {
         D2Common::Units::SetupUpdateFlag(pTreeUnit, 1);
@@ -2338,17 +2338,17 @@ static void __stdcall Q04_ActivateCairnStonesAndTree(char cParam1, char cParam2,
       }
 
       UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 1, nullptr, (::fpExecuteOnUnitFunction)Q04_DespawnRogueGuards);
-    } else if (!pA1Q4Sub->sSub.bRogueGuardTimerArmed) {
+    } else if (pA1Q4Sub->sSub.bRogueGuardTimerArmed != 1) {
       pA1Q4Sub->sSub.bRogueGuardTimerArmed = true;
       AddQuestTimer(pQuestData, Q04_TimerDespawnRogueGuards, 1);
     }
     if (cParam2 != '\0') {
-      if (!pA1Q4Sub->sSub.bPortalArmed) {
+      if (pA1Q4Sub->sSub.bPortalArmed != 1) {
         UNIT::SUnitInactive::SUNITINACTIVE_RemoveInactiveUnitByTypeAndId(pQuestData->pGame, 1, 0x92, 0);
       }
 
       pA1Q4Sub->sSub.bQuestObjectsActivated = true;
-      if (pA1Q4Sub->sSub.bCairnMonsterSaved) {
+      if (pA1Q4Sub->sSub.bCairnMonsterSaved == 1) {
         return;
       }
 

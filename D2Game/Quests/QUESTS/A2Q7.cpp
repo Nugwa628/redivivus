@@ -637,7 +637,7 @@ BOOL __fastcall Q14_GetTyraelSpawnCoords(::SGAMEDATA * pGame, POINT * pPoint, D2
 // Q14: set/clear the Izual(Tyrael) placement flag in A2Q6 data, only while the quest is introduced and field_0x0E unset. cParam==0 -> mark located (bIzualLocationSet=1) and set pIzualUnit sentinel (8 single-player / 9 multiplayer); cParam!=0 -> clear bIzualLocationSet. No quest-record state change.
 void __fastcall Q14_SetTyraelState(int nParam, char cParam) {
     D2QuestDataStrc* pA4Q1Data = GetQuestDataByQuestNoInternal(*(::SGAMEDATA**)(nParam + 4), QUESTINT_TheSevenTombs);
-    if (!(pA4Q1Data && pA4Q1Data->bIsNotIntroduction)) {
+    if (!(pA4Q1Data && pA4Q1Data->bIsNotIntroduction == 1)) {
       return;
     }
 
@@ -669,7 +669,7 @@ void __fastcall Q14_SetTyraelState(int nParam, char cParam) {
 
 // Q15 (Act2Guard4Gossip / Jerhyn gossip pseudo-quest) state-2 handler. When the kill/target unit is Jerhyn (classId 0x179) and the one-shot bBloodRavenKilled-style flag is set, clears it and unhooks itself (handler[2]=null). One-time post-trigger cleanup; no quest-record write.
 void __fastcall Q15_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    if (!(pQuestArgs->pTarget && (short int)pQuestArgs->pTarget->nClassId == 0x179 && pQuestData->pQuestSpecificData.pA2Q7->bGossipAwaits)) {
+    if (!(pQuestArgs->pTarget && (short int)pQuestArgs->pTarget->nClassId == 0x179 && pQuestData->pQuestSpecificData.pA2Q7->bGossipAwaits == 1)) {
       return;
     }
 

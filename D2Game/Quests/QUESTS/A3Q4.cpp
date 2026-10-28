@@ -163,7 +163,7 @@ void __fastcall Q21_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nMonStatsId, 6);
         return;
       }
-    } else if (nMonStatsId != 0xfe || !pQuestData->pQuestSpecificData.pA3Q4->bBirdDropped) {
+    } else if (nMonStatsId != 0xfe || pQuestData->pQuestSpecificData.pA3Q4->bBirdDropped != 1) {
       /* GetQuestState RewardAwaits(1) -> Alkor offers reward: gossip line 5 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGoldenBird, QUESTSTATE_RewardAwaits);
       if (bQuestState) {
         AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nMonStatsId, 5);
@@ -237,7 +237,7 @@ void __fastcall Q21_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     short int sVar1 = !pQuestArgs->pTarget ? -1 : (short int)pQuestArgs->pTarget->nClassId;
     D2QuestDataA3Q4Strc* pQuestDataA3Q4 = pQuestData->pQuestSpecificData.pA3Q4;
     if (sVar1 == 0xfe) {
-      if (pQuestDataA3Q4->bRewardGivenToAlchemist) {
+      if (pQuestDataA3Q4->bRewardGivenToAlchemist == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 5, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
         pQuestDataA3Q4->bRewardGivenToAlchemist = false;
@@ -245,18 +245,18 @@ void __fastcall Q21_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
         return;
       }
     } else if (sVar1 == 0xf5) {
-      if (pQuestDataA3Q4->bCainToldAboutTome) {
+      if (pQuestDataA3Q4->bCainToldAboutTome == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 2, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
         pQuestDataA3Q4->bCainToldAboutTome = false;
       }
-      if (pQuestDataA3Q4->bAlchemistTradedBird) {
+      if (pQuestDataA3Q4->bAlchemistTradedBird == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 4, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
         pQuestDataA3Q4->bAlchemistTradedBird = false;
         return;
       }
-    } else if (sVar1 == 0x108 && pQuestDataA3Q4->bJadeGivenToMeshif) {
+    } else if (sVar1 == 0x108 && pQuestDataA3Q4->bJadeGivenToMeshif == 1) {
       pQuestData->nQuestPacketFlags = '\0';
       QUEST_SetStateAndBroadcast(pQuestData, 3, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
       pQuestDataA3Q4->bJadeGivenToMeshif = false;

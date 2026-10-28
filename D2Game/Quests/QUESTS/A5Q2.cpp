@@ -613,7 +613,7 @@ void __fastcall Q32_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
 // stateFlag 1. Drives progression from "talked to Qual-Kehk" toward "barricades reached".
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q2.cpp
 void __fastcall Q32_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    if (pQuestArgs->sQuestArgs.sNpcActivate.nIndex - 0x6fU <= 1 && pQuestData->bIsNotIntroduction && pQuestData->pQuestSpecificData.pA5Q2->nPrisonersKilledByMonsters < 5) {
+    if (pQuestArgs->sQuestArgs.sNpcActivate.nIndex - 0x6fU <= 1 && pQuestData->bIsNotIntroduction == 1 && pQuestData->pQuestSpecificData.pA5Q2->nPrisonersKilledByMonsters < 5) {
       bool bStateFlagAdvanced;
       bStateFlagAdvanced = false;
       if (pQuestData->nStateFlag == 1 || pQuestData->nStateFlag == 2) {
@@ -655,7 +655,7 @@ void __fastcall Q32_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
 
     QUEST_SetStateFlag(pQuestData, 3, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q2.cpp", 0x294);
     UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Q32_UpdateQuestStep);
-    if (!(!pQuestData->nStateFlagPrev && pQuestData->bIsNotIntroduction && pQuestData->pQuestSpecificData.pA5Q2->nPrisonersKilledByMonsters < 5)) {
+    if (!(!pQuestData->nStateFlagPrev && pQuestData->bIsNotIntroduction == 1 && pQuestData->pQuestSpecificData.pA5Q2->nPrisonersKilledByMonsters < 5)) {
       return;
     }
 

@@ -145,7 +145,7 @@ void __fastcall Q02_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     }
 
     D2QuestDataA1Q2Strc* pvVar1 = pQuestData->pQuestSpecificData.pA1Q2;
-    if (!pvVar1->bAcceptedQuest) {
+    if (pvVar1->bAcceptedQuest != 1) {
       return;
     }
 
@@ -461,7 +461,7 @@ static void __fastcall Q02_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData
 void __fastcall Q02_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     D2GSPacketSrv0x27_TextStrc* pTextControl;
     pTextControl = pQuestArgs->sQuestArgs.sNpcActivate.pTextControl;
-    if (pQuestArgs->sQuestArgs.sNpcActivate.nIndex == 0x11 && pQuestData->bIsNotIntroduction) {
+    if (pQuestArgs->sQuestArgs.sNpcActivate.nIndex == 0x11 && pQuestData->bIsNotIntroduction == 1) {
       bool bStateFlagLow;
       bStateFlagLow = pQuestData->nStateFlag < 3;
       if (bStateFlagLow) {

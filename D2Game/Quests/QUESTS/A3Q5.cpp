@@ -149,7 +149,7 @@ void __fastcall Q22_OnCouncilMemberKilled(D2QuestDataStrc * pQuestData, D2UnitSt
     int iVar1;
     int nKillerGUID;
     D2QuestDataA3Q5Strc* pCouncilQuestData = pQuestData->pQuestSpecificData.pA3Q5;
-    if (!pCouncilQuestData->bCouncilMemberTracking) {
+    if (pCouncilQuestData->bCouncilMemberTracking != 1) {
       return;
     }
     if (!pKillerUnit) {
@@ -429,7 +429,7 @@ void __fastcall Q22_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     }
 
     D2QuestDataA3Q5Strc* pA2Q3Data = pQuestData->pQuestSpecificData.pA3Q5;
-    if (!pA2Q3Data->nTrackedCouncilByte0) {
+    if (pA2Q3Data->nTrackedCouncilByte0 != 1) {
       return;
     }
 

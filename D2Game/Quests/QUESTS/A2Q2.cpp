@@ -68,7 +68,7 @@ namespace D2Game::Quests::QUESTS::A2Q2 {
 // all players. Uses the internal D2QuestDataStrc state machine, NOT QuestRecord bits.
 void __fastcall Q09_AICallback_GreaterMummy(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_RadamentsLair);
-    if (!(pQuestData && pQuestData->bIsNotIntroduction && (pQuestData->nStateFlag < 3 || pQuestData->nStateFlagPrev < 2))) {
+    if (!(pQuestData && pQuestData->bIsNotIntroduction == 1 && (pQuestData->nStateFlag < 3 || pQuestData->nStateFlagPrev < 2))) {
       return;
     }
 

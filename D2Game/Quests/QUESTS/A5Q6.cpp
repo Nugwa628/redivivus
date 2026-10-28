@@ -278,17 +278,17 @@ void __fastcall Q36_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (!pA5Q5QuestData) {
         return;
       }
-      if (!pA5Q5QuestData->pQuestSpecificData.pA5Q5->bAncientsSpawned) {
+      if (pA5Q5QuestData->pQuestSpecificData.pA5Q5->bAncientsSpawned != 1) {
         return;
       }
       if (pA5Q5QuestData->pQuestSpecificData.pA5Q5->nAncientsAlive) {
         return;
       }
-      if (pQuestData->nStateFlag != 1 || pA5Q6Data->bAnyaTransformed) {
+      if (pQuestData->nStateFlag != 1 || pA5Q6Data->bAnyaTransformed == 1) {
         if (pQuestData->nStateFlag != 2) {
           return;
         }
-        if (!pA5Q6Data->bAnyaTransformed) {
+        if (pA5Q6Data->bAnyaTransformed != 1) {
           return;
         }
       }
