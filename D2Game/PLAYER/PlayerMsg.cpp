@@ -922,7 +922,7 @@ eD2ServerIncomingStatus __stdcall CloseEnoughToInteract(::SGAMEDATA * pGame, eD2
     return eVar1;
 }
 
-static eD2ServerIncomingStatus __stdcall SERVER_IsItemOnCursor(void * pThis, D2UnitStrc * pUnit, uint32_t dwParam) {
+static eD2ServerIncomingStatus SERVER_IsItemOnCursor(void * pThis, D2UnitStrc * pUnit, uint32_t dwParam) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x463);
       exit(-1);
@@ -941,7 +941,7 @@ static eD2ServerIncomingStatus __stdcall SERVER_IsItemOnCursor(void * pThis, D2U
     return SERVERSTATUS_OK;
 }
 
-static eD2ServerIncomingStatus __stdcall IsPlayerTheOwner(void * pThis, D2UnitStrc * pOwner, uint32_t nItemGid) {
+static eD2ServerIncomingStatus IsPlayerTheOwner(void * pThis, D2UnitStrc * pOwner, uint32_t nItemGid) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x47a);
       exit(-1);
@@ -960,7 +960,7 @@ static eD2ServerIncomingStatus __stdcall IsPlayerTheOwner(void * pThis, D2UnitSt
     return SERVERSTATUS_OK;
 }
 
-static eD2ServerIncomingStatus __stdcall ItemBelongsToUnit(void * pThis, D2UnitStrc * pOwner, uint32_t nItemGid) {
+static eD2ServerIncomingStatus ItemBelongsToUnit(void * pThis, D2UnitStrc * pOwner, uint32_t nItemGid) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x491);
       exit(-1);
@@ -1004,7 +1004,7 @@ uint8_t __stdcall MONSTER_SetAlignmentCallback(int32_t nParam1, int32_t nParam2)
     return !pBodyItem;
 }
 
-static eD2ServerIncomingStatus __stdcall ItemBelongsToInventoryOf(void * pThis, D2UnitStrc * pPlayer, uint32_t nItemGid) {
+static eD2ServerIncomingStatus ItemBelongsToInventoryOf(void * pThis, D2UnitStrc * pPlayer, uint32_t nItemGid) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4e8);
       exit(-1);
@@ -3717,8 +3717,8 @@ eD2ServerIncomingStatus __fastcall SCMD_0x50_DropGold(::SGAMEDATA * pGame, D2Uni
       return SERVERSTATUS_BAD_PARAMS;
     }
 
-    DWORD dwUnitGUID = pPacket->nUnitId;
     uint32_t nGoldAmount = pPacket->nGoldAmount;
+    DWORD dwUnitGUID = pPacket->nUnitId;
     int32_t nTradeTick = Player::GetPlayerTradeTickOrBusy(pUnit);
     if (nTradeTick) {
       nDropResult = PlayerTrade::IsInteractingWithPlayer(pGame, pUnit, 1);
@@ -3728,7 +3728,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x50_DropGold(::SGAMEDATA * pGame, D2Uni
     }
 
     nDropResult = Player::GOLD_DropGoldFromInventory(pGame, pUnit, dwUnitGUID, nGoldAmount);
-    return nDropResult ? (eD2ServerIncomingStatus)0 : SERVERSTATUS_BAD_PARAMS;
+    return (nDropResult ? 0xfdU : 0) + SERVERSTATUS_BAD_PARAMS;
 }
 
 eD2ServerIncomingStatus __fastcall SCMD_0x51_SetHotkey(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x51_SetHotkey * pPacket, size_t nSize) {
