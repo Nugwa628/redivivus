@@ -801,12 +801,8 @@ void StaticInit_6cab90() {
 }
 
 void StaticInit_6cabf0() {
-    int nDwordsRemaining;
-    uint8_t* pInvRecipeBuf = gpInvRecipeScrollImage;
-    for (nDwordsRemaining = 0x800; nDwordsRemaining; nDwordsRemaining--) {
-      for (int i = 0; i < 4; i++) pInvRecipeBuf[i] = 0;
-      pInvRecipeBuf += 4;
-    }
+    uint32_t* pInvRecipeBuf = (uint32_t*)gpInvRecipeScrollImage;
+    for (int nDwordsRemaining = 0x800; nDwordsRemaining; nDwordsRemaining--) *pInvRecipeBuf++ = 0;
 }
 
 void StaticInit_6cac10() {
