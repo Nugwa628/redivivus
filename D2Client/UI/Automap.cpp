@@ -792,9 +792,7 @@ static void AUTOMAP_SaveLayerToFile(D2AutomapFileEntryStrc * pEntry) {
 
     __frame0.nEntryOffset = dwHeader[pEntry->nLayer];
     __frame0.dwFileSize = GetFileSize(hFile, (LPDWORD)0x0);
-    if (!__frame0.nEntryOffset) {
-      dwHeader[pEntry->nLayer] = __frame0.dwFileSize;
-    } else {
+    if (__frame0.nEntryOffset) {
       int nPrevEntryOffset;
       do {
         Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, __frame0.nEntryOffset, (PLONG)0x0, 0);
@@ -804,6 +802,8 @@ static void AUTOMAP_SaveLayerToFile(D2AutomapFileEntryStrc * pEntry) {
 
       Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, nPrevEntryOffset, (PLONG)0x0, 0);
       Fog::Source::SFile::thunk_WriteFile(hFile, (LPCVOID)&__frame0.dwFileSize, 4, &__frame0.dwBytesTransferred, (LPOVERLAPPED)0x0);
+    } else {
+      dwHeader[pEntry->nLayer] = __frame0.dwFileSize;
     }
 
     Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, 0, (PLONG)0x0, 0);
