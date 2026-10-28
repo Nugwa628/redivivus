@@ -333,7 +333,11 @@ int32_t __fastcall MISSILE_CltHitFn13_Homing(D2UnitStrc * pUnit, D2UnitStrc * pT
     if (!(pTarget || !(nTargetFlags & 4))) {
       return 1;
     }
-    if (!(nTargetFlags & 1)) {
+    if (nTargetFlags & 1) {
+      if (pTarget && (pOwner = D2Common::PATH::DynamicPath::GetTargetUnit(pDynamicPath) , pTarget != pOwner)) {
+        return 0;
+      }
+    } else {
       int32_t nCurrentFrame;
       if (nTargetFlags & 2) {
         nCurrentFrame = D2Common::Units::Missile::GetCurrentFrame(pUnit);
@@ -344,8 +348,6 @@ int32_t __fastcall MISSILE_CltHitFn13_Homing(D2UnitStrc * pUnit, D2UnitStrc * pT
         bIsInTown = MISSILE_RetargetClosest(pUnit);
         return (uint32_t)(bIsInTown != 0);
       }
-    } else if (pTarget && (pOwner = D2Common::PATH::DynamicPath::GetTargetUnit(pDynamicPath) , pTarget != pOwner)) {
-      return 0;
     }
 
     return 1;

@@ -320,12 +320,14 @@ void __fastcall SKILL_DrawChargeTrail(D2UnitStrc * pUnit, uint32_t nParticleType
     int nScreenVelX = 0;
     int nScreenVelY = 0;
     D2Common::PATH::Path::PATH_GetScreenVelocity(pUnit, &nScreenVelX, &nScreenVelY);
-    if (!nDirectionFlag) {
+    if (nDirectionFlag) {
+      if (nScreenVelY < 0) {
+        return;
+      }
+    } else {
       if (-1 < nScreenVelY) {
         return;
       }
-    } else if (nScreenVelY < 0) {
-      return;
     }
 
     int nAbsVelX = nScreenVelX;

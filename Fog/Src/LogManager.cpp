@@ -92,7 +92,27 @@ void __stdcall DecodeCpuModelName(uint32_t nModel, int32_t nBrandId, char * pOut
         memcpy(pOutName, "Xeon", 5);
         return;
       }
-      if (!nType) {
+      if (nType) {
+        if (nType == 1) {
+          if (nFamily == 5) {
+            if (nModel < 3) {
+              memcpy(pOutName, "Pentium OD586", 0xe);
+              return;
+            }
+            if (nModel == 3) {
+              memcpy(pOutName, "Pentium OD486", 0xe);
+              return;
+            }
+            if (3 < nModel) {
+              memcpy(pOutName, "Pentium MMX OD586", 0x12);
+              return;
+            }
+          } else if (nFamily == 6) {
+            memcpy(pOutName, "Pentium II OD", 0xe);
+            return;
+          }
+        }
+      } else {
         if (nFamily == 5) {
           if (nModel < 4) {
             memcpy(pOutName, "Pentium", 8);
@@ -137,24 +157,6 @@ void __stdcall DecodeCpuModelName(uint32_t nModel, int32_t nBrandId, char * pOut
           }
         } else if (nFamily == 0xf) {
           memcpy(pOutName, "Pentium 4 (no brand)", 0x15);
-        }
-      } else if (nType == 1) {
-        if (nFamily == 5) {
-          if (nModel < 3) {
-            memcpy(pOutName, "Pentium OD586", 0xe);
-            return;
-          }
-          if (nModel == 3) {
-            memcpy(pOutName, "Pentium OD486", 0xe);
-            return;
-          }
-          if (3 < nModel) {
-            memcpy(pOutName, "Pentium MMX OD586", 0x12);
-            return;
-          }
-        } else if (nFamily == 6) {
-          memcpy(pOutName, "Pentium II OD", 0xe);
-          return;
         }
       }
     } else if (nVendor == 2) {

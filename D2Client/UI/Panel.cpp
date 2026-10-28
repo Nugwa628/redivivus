@@ -1753,12 +1753,14 @@ BOOL __fastcall PANEL_CalculateBeltSlotIndex(D2UIMouseMsgStrc * pMsg) {
     int32_t nMouseX = (int32_t)pMsg->uLParam.sMousePos.nMouseX;
     int32_t nMouseY = (int32_t)pMsg->uLParam.sMousePos.nMouseY;
     D2Common::DATATBLS::BeltsTbls::GetBeltsLine(gnBeltPanelState, nScreenMode, &sBeltsTxt);
-    if (!gnPanelBeltRowsExpanded) {
+    if (gnPanelBeltRowsExpanded) {
+      if (*(int*)(sBeltsTxt.pad0x01 + (uint32_t)(uint8_t)sBeltsTxt.nBoxes * 0x10 - 0x39) <= nMouseX && nMouseX <= sBeltsTxt.beltBoxes[3].nRight && *(int*)(sBeltsTxt.pad0x01 + (uint32_t)(uint8_t)sBeltsTxt.nBoxes * 0x10 - 0x31) <= nMouseY && nMouseY <= sBeltsTxt.beltBoxes[3].nBottom) {
+        return 1;
+      }
+    } else {
       if (ScreenSizeY - 0x30 < nMouseY && ScreenSizeX / 2 + 0x17 <= nMouseX && nMouseX <= ScreenSizeX / 2 + 0x91 && ScreenSizeY - 0x27 <= nMouseY && nMouseY <= ScreenSizeY - 10) {
         return 1;
       }
-    } else if (*(int*)(sBeltsTxt.pad0x01 + (uint32_t)(uint8_t)sBeltsTxt.nBoxes * 0x10 - 0x39) <= nMouseX && nMouseX <= sBeltsTxt.beltBoxes[3].nRight && *(int*)(sBeltsTxt.pad0x01 + (uint32_t)(uint8_t)sBeltsTxt.nBoxes * 0x10 - 0x31) <= nMouseY && nMouseY <= sBeltsTxt.beltBoxes[3].nBottom) {
-      return 1;
     }
 
     return 0;

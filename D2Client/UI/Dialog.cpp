@@ -918,13 +918,15 @@ void __fastcall DIALOG_DrawBackground(D2DialogStrc * pDialog) {
     nBottom = sBgRect.top + pDialog->nBackgroundHeight;
     sBgRect.bottom = nBottom - 1;
     sGfxData.nDirection = 0;
-    if (!pDialog->bHasBackground) {
+    if (pDialog->bHasBackground) {
+      if (pDialog->pBackgroundDC6) {
+        sGfxData.nFrameNumber = 0;
+        sGfxData.pDC6 = pDialog->pBackgroundDC6;
+        D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, sBgRect.left, nBottom, -1, DRAW_SOLID, nullptr);
+      }
+    } else {
       Engine::GfxInfo::D2GFX_DrawSolidRectExBySize(sBgRect.left, sBgRect.top, sBgRect.right - sBgRect.left + 1, sBgRect.bottom - sBgRect.top + 1, 0, DRAW_TRANSPARENT);
       ui::DRAW_Direct_RectFrame(&sBgRect);
-    } else if (pDialog->pBackgroundDC6) {
-      sGfxData.nFrameNumber = 0;
-      sGfxData.pDC6 = pDialog->pBackgroundDC6;
-      D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, sBgRect.left, nBottom, -1, DRAW_SOLID, nullptr);
     }
     for (pSub = pDialog->pDialogSub; pSub; pSub = pSub->pNext) {
       self = pSub->pWidget;

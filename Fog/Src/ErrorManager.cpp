@@ -4889,7 +4889,12 @@ void __fastcall ERRORMANAGER_InitErrorManager(char * dwUnused1, char * szText, B
     __frame0_t __frame0;
     uint32_t uCookie;
     void* nBadAddr;
-    if (!gbFogErrorManagerInitialized) {
+    if (gbFogErrorManagerInitialized) {
+      if (bLogGameStrartupInfo) {
+        Source::SFile::LOGFILE_StoreGameStartupInfo();
+        return;
+      }
+    } else {
       int iBitIdx;
       _3rdparty::crashy::thunk_InitializeDebugSubsystem();
       File::CRASH_SetExceptionHandler(DumpLog, nullptr, 0);
@@ -4952,9 +4957,6 @@ void __fastcall ERRORMANAGER_InitErrorManager(char * dwUnused1, char * szText, B
       atexit(EXIT_AtExit);
       Debug::DEBUG_LoadStackCrawlDbgHelp();
       Storm::Source::SErr::SErrSetBlizzardErrorFunction(CRASH_FillupCrashTxt);
-    } else if (bLogGameStrartupInfo) {
-      Source::SFile::LOGFILE_StoreGameStartupInfo();
-      return;
     }
 
 }

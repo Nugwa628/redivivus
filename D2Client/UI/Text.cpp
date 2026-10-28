@@ -5877,7 +5877,15 @@ void __stdcall INPUT_TextClickHandler(D2UIMouseMsgStrc * pMsg) {
     D2UnitStrc* pNpcUnit;
     gpTextDismissCallback = 1;
     D2UnitStrc* pSelectedUnit = GAME::Select::GetSelectedUnit();
-    if (!pSelectedUnit) {
+    if (pSelectedUnit) {
+      if (gnTextNpcInteractGuid) {
+        pSelectedUnit = UNIT::Player::UNITS_FindClientSideUnit(gnTextNpcGuid, UNIT_MONSTER);
+        pNpcUnit = GAME::Select::GetSelectedUnit();
+        if (pSelectedUnit == pNpcUnit) {
+          return;
+        }
+      }
+    } else {
       pSelectedUnit = GAME::Select::GetSelectedUnit();
       if (!pSelectedUnit && gbTextNpcMenuSelection != '\0') {
         pSelectedUnit = UNIT::Player::UNITS_FindClientSideUnit(gnTextNpcMenuIndex, UNIT_MONSTER);
@@ -5893,12 +5901,6 @@ void __stdcall INPUT_TextClickHandler(D2UIMouseMsgStrc * pMsg) {
         pMsg->bHandled = 1;
         pMsg->dwResult = 0;
         Storm::SMsgBreakHandlerChain(pMsg);
-        return;
-      }
-    } else if (gnTextNpcInteractGuid) {
-      pSelectedUnit = UNIT::Player::UNITS_FindClientSideUnit(gnTextNpcGuid, UNIT_MONSTER);
-      pNpcUnit = GAME::Select::GetSelectedUnit();
-      if (pSelectedUnit == pNpcUnit) {
         return;
       }
     }

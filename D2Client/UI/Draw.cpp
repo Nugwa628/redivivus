@@ -329,7 +329,13 @@ void __stdcall DRAW_Overlay_EnteringAreaX() {
       }
 
       uResult = GAME::Game::GAMEDATA_CheckTimerExpired(&gnAreaNameOverlay);
-      if (!uResult) {
+      if (uResult) {
+        if (DC6_EnteredAreaName) {
+          Core::Archive::DC6_FreeAndDelete(DC6_EnteredAreaName);
+          DC6_EnteredAreaName = 0;
+          return;
+        }
+      } else {
         pLevelTxt = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eRoomLevel);
         if ((int)eRoomLevel < 0x6d) {
           neAct = D2Common::Drlg::GetActNoFromLevelNumber(eRoomLevel);
@@ -361,10 +367,6 @@ void __stdcall DRAW_Overlay_EnteringAreaX() {
         }
 
         D2Win::Src::D2WinFont::IMAGE_DrawDC6ImageOnScreen(DC6_EnteredAreaName, ScreenSizeX / 2, ScreenSizeY / 2 - 0x8c, 1, DRAW_SOLID, PALETTE_RED);
-      } else if (DC6_EnteredAreaName) {
-        Core::Archive::DC6_FreeAndDelete(DC6_EnteredAreaName);
-        DC6_EnteredAreaName = 0;
-        return;
       }
     }
 }

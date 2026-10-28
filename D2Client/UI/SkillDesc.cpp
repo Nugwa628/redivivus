@@ -2959,13 +2959,15 @@ static void __stdcall SKILLDESC_FormatDecimalWithLabel(int32_t nDecimalPart, uin
     uint16_t* pWszLabel;
     uint16_t local_44[32];
     memset(local_44, 0, 32 * sizeof(local_44[0]));
-    if (!nIntPart) {
+    if (nIntPart) {
+      if (!nDecimalPart) {
+        SKILLDESC_FormatIntValue(local_44, bPrefixSign, nIntPart);
+        goto append_value_line;
+      }
+    } else {
       if (nDecimalPart < 1) {
         return;
       }
-    } else if (!nDecimalPart) {
-      SKILLDESC_FormatIntValue(local_44, bPrefixSign, nIntPart);
-      goto append_value_line;
     }
 
     SKILLDESC_FormatDecimalValue(local_44, bPrefixSign, nIntPart);
@@ -5600,19 +5602,21 @@ void __stdcall SKILLDESC_DescLine9_ElemDamage(D2UnitStrc * pUnit, uint16_t * wsz
     }
 
     iVar1 = nMaxScaled + iVar1 + nFlatBonus;
-    if (!nMinFinal) {
+    if (nMinFinal) {
+      if (nMinFinal == iVar1) {
+        if (nMinFinal < 0) {
+          /* LPCSTR param_2 for wsprintfA */ szFmtStr = "%d";
+        } else {
+          szFmtStr = "+%d";
+        }
+
+        wsprintfA(szFormattedA, szFmtStr, nMinFinal);
+        goto append_damage_line;
+      }
+    } else {
       if (!iVar1) {
         return;
       }
-    } else if (nMinFinal == iVar1) {
-      if (nMinFinal < 0) {
-        /* LPCSTR param_2 for wsprintfA */ szFmtStr = "%d";
-      } else {
-        szFmtStr = "+%d";
-      }
-
-      wsprintfA(szFormattedA, szFmtStr, nMinFinal);
-      goto append_damage_line;
     }
 
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFormattedA, "%d-%d", nMinFinal, iVar1);

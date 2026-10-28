@@ -1761,12 +1761,14 @@ void __fastcall MuteOrUnmuteUnitSounds(D2UnitStrc * pUnit, int32_t nMuteDelta) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcfd);
       exit(-1);
     }
-    if (!pUnit->uSideData.pClientSide.bHasActiveSound) {
+    if (pUnit->uSideData.pClientSide.bHasActiveSound) {
+      if (0 < nMuteDelta) {
+        return;
+      }
+    } else {
       if (nMuteDelta < 0) {
         return;
       }
-    } else if (0 < nMuteDelta) {
-      return;
     }
 
     *(uint32_t*)((uintptr_t)&pUnit->uSideData + 0x24) = (uint32_t)(0 < nMuteDelta);
