@@ -475,11 +475,11 @@ eD2UnitType __stdcall GetOwnerType(D2StatListExStrc * pStatList) {
 }
 
 int32_t __stdcall STATLIST_GetStatCountFromStatList(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return 0;
+    } else {
       return (int)pStatList->sStatList.sBaseStats.wStatCount;
     }
-
-    return 0;
 }
 
 int32_t __stdcall STATLIST_GetUnitTotalStats(D2UnitStrc * pUnit) {
@@ -528,11 +528,11 @@ void __stdcall SetTimeout_WithFlag(D2StatListExStrc * pStatList, int32_t nTimeou
 }
 
 int __stdcall STATLIST_GetFullListFromStatList(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return 0;
+    } else {
       return pStatList->sStatList.nTimeout;
     }
-
-    return 0;
 }
 
 int32_t __stdcall STATLIST_GetStatFromBaseArray(D2StatListExStrc * pStatList, eD2UnitStat eUnitStat, uint32_t nParam) {
@@ -1228,11 +1228,11 @@ int32_t __stdcall STATLIST_GetStatForDamageCalc(D2UnitStrc * pUnit2, D2UnitStrc 
 }
 
 int __stdcall STATLIST_GetFullListPtr(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return 0;
+    } else {
       return pStatList->sStatList.nTimeout;
     }
-
-    return 0;
 }
 
 void __stdcall STATSEX_SetStatListTimeout(D2StatListExStrc * pStatList, int32_t nParam) {

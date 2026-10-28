@@ -564,19 +564,19 @@ uint32_t __stdcall GetYSP3(D2DynamicPathStrc * pDynamicPath) {
 }
 
 int32_t __stdcall GetLastPathPointX(D2DynamicPathStrc * pDynamicPath) {
-    if (!pDynamicPath->dwPathPoints) {
+    if (pDynamicPath->dwPathPoints) {
+      return (uint32_t)pDynamicPath->PathPoints[pDynamicPath->dwPathPoints - 1].nX;
+    } else {
       return 0;
     }
-
-    return (uint32_t)pDynamicPath->PathPoints[pDynamicPath->dwPathPoints - 1].nX;
 }
 
 int32_t __stdcall GetLastPathPointY(D2DynamicPathStrc * pDynamicPath) {
-    if (!pDynamicPath->dwPathPoints) {
+    if (pDynamicPath->dwPathPoints) {
+      return (uint32_t)pDynamicPath->PathPoints[pDynamicPath->dwPathPoints - 1].nY;
+    } else {
       return 0;
     }
-
-    return (uint32_t)pDynamicPath->PathPoints[pDynamicPath->dwPathPoints - 1].nY;
 }
 
 D2RoomStrc * __stdcall GetRoom(D2DynamicPathStrc * pDynamicPath) {

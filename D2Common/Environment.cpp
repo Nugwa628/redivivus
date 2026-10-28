@@ -465,11 +465,11 @@ int32_t __stdcall DRLGENV_GetPeriodOfDayFromAct(D2DrlgActStrc * pDrlgAct, int32_
 
 int32_t __stdcall DRLGENV_GetUnusedMember(D2DrlgActStrc * pDrlgAct) {
     D2DrlgEnvironmentStrc* pEnv = DUNGEON::Dungeon::DRLGENV_GetEnvironmentFromAct(pDrlgAct);
-    if (pEnv) {
+    if (!pEnv) {
+      return 0;
+    } else {
       return pEnv->nUnused;
     }
-
-    return 0;
 }
 
 void __stdcall DRLGENV_NextEnvCycle(D2DrlgActStrc * pDrlgAct, D2RoomStrc * pRoom) {

@@ -506,11 +506,11 @@ void __stdcall PATH_SnapPositionToTile(D2DynamicPathStrc * pDynamicPath) {
 }
 
 uint32_t __stdcall Get8FlagsFromDynamicPath(D2DynamicPathStrc * pDynamicPath) {
-    if (pDynamicPath) {
+    if (!pDynamicPath) {
+      return 0;
+    } else {
       return pDynamicPath->nFlags & 8;
     }
-
-    return 0;
 }
 
 void __stdcall PATH_SetPathTarget(D2UnitStrc * pUnit, D2UnitStrc * pTargetUnit) {

@@ -1588,12 +1588,12 @@ BOOL __stdcall ITEMMOD_CanApplyAutomod(D2UnitStrc * pUnit, int32_t nParam) {
     if (wVersion < 100) {
       uint32_t bIsStackable;
       bIsStackable = Items::IsStackable(pUnit);
-      if (bIsStackable) {
-        return 0;
-      }
-
-      iVar1 = Items::ITEM_GetTxtItemTypes_throwable(pUnit);
-      if (iVar1) {
+      if (!bIsStackable) {
+        iVar1 = Items::ITEM_GetTxtItemTypes_throwable(pUnit);
+        if (iVar1) {
+          return 0;
+        }
+      } else {
         return 0;
       }
     }

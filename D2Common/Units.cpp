@@ -1334,11 +1334,11 @@ int32_t __stdcall GetEventFrameInfo(D2UnitStrc * pUnit, int32_t nFrame) {
 }
 
 BOOL __stdcall HasCollision(D2UnitStrc * pUnit) {
-    if (pUnit->eUnitType != UNIT_OBJECT) {
+    if (pUnit->eUnitType == UNIT_OBJECT) {
+      return (uint32_t)pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->HasCollision[pUnit->eAnimMode.ePlayerMode];
+    } else {
       return 1;
     }
-
-    return (uint32_t)pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->HasCollision[pUnit->eAnimMode.ePlayerMode];
 }
 
 D2SkillStrc * __stdcall GetSkillFromSkillId(D2UnitStrc * pUnit, eD2Skills eSkill) {
