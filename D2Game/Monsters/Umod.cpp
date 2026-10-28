@@ -640,10 +640,10 @@ void __fastcall ExtraStrong(D2UnitStrc * pUnit, int32_t nIndex, BOOL bUnknown) {
 
       pUmodEntry = sgptDataTable->pTxtMonUmod + 0xd;
     }
-    if (!pUmodEntry) {
-      nToHitConst = 0;
-    } else {
+    if (pUmodEntry) {
       nToHitConst = pUmodEntry->constants;
+    } else {
+      nToHitConst = 0;
     }
 
     scale_and_add_bonus:

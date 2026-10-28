@@ -246,13 +246,14 @@ void __stdcall _TableNullSub24(uint32_t dwArg1, uint32_t dwArg2, uint32_t dwArg3
 
 }
 
-void __stdcall FreeServer() {
+int __stdcall FreeServer() {
     Clients::DeleteCriticalSections();
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&gQServerGameListCs);
     UNIT::sunitproxy::SUNITPROXY_FreeAllNpcItemTables();
     gpQServerGameState = 0;
     StartingAct = 0;
     QServerNextToken = 1;
+    return 1;
 }
 
 int32_t __fastcall SERVER_IsTokenValid(uint16_t nToken) {
@@ -1815,7 +1816,7 @@ void __fastcall RemoveObjects(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
 
 void __fastcall SERVER_EnterCriticalSection(int32_t pThis, int * pCriticalSection, int32_t nParam) {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection((LPCRITICAL_SECTION)(pThis + 0x50));
-    *pCriticalSection = (uint32_t)(nParam != 0) * 2 - 1;
+    *pCriticalSection = (nParam != 0 ? 0x1 : -1);
 }
 
 uint32_t __stdcall ParamIsOne(int32_t nParam) {
