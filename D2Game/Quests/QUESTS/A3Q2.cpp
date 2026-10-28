@@ -363,7 +363,7 @@ BOOL __fastcall OBJOP_UseStairDirect(D2ObjectOperateFnArg * pOperation) {
 }
 
 // Q19_IsKhalimsWillNotComplete (Khalim's Will). Predicate: returns true when the in-memory A3Q2 quest data exists, is active, and its GUID-tracked completion marker (aPlayerGUID[2]) != 2 (i.e. relic-pedestal sequence not finished). Reads quest data struct only.
-bool __fastcall Q19_IsKhalimsWillNotComplete(::SGAMEDATA * pGame) {
+BOOL __fastcall Q19_IsKhalimsWillNotComplete(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_KhalimsWill);
     if (!(pQuestData && pQuestData->bIsNotIntroduction)) {
       return false;
