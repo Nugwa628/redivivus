@@ -2491,8 +2491,7 @@ void __fastcall DRAW_OOG_ChannelPlayers(D2QuestDataA3Q6Strc * pA3Q6Data) {
       BOOL bMouseInRect;
       pWideStr = wszLineText;
       for (nIconAnchorY = 0x80; nIconAnchorY; nIconAnchorY--) {
-        pWideStr[0] = L'\0';
-        pWideStr[1] = L'\0';
+        *(uint32_t*)pWideStr = 0;
         pWideStr += 2;
       }
 

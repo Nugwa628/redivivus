@@ -308,8 +308,7 @@ void __stdcall HELP_DrawHelpButtonTooltip() {
     uint16_t wszKeyLine[30];
     uint16_t* pKeyDescPrimary = wszTooltip;
     for (i = 100; i; i--) {
-      pKeyDescPrimary[0] = L'\0';
-      pKeyDescPrimary[1] = L'\0';
+      *(uint32_t*)pKeyDescPrimary = 0;
       pKeyDescPrimary += 2;
     }
 
@@ -447,8 +446,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     uint16_t wszBuf[100];
     uint16_t* pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -462,8 +460,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x17c - nPrevFont / 2, nLabelWidth, nPosY, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -478,8 +475,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(5);
     pStr = wszBuf4;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -489,8 +485,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(wszBuf4, 0x75, 0x4e, 0, 0);
     pStr = wszBuf1;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -500,8 +495,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(wszBuf1, 0x75, 0x62, 0, 0);
     pStr = wszBuf2;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -511,8 +505,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(wszBuf2, 0x75, 0x76, 0, 0);
     pStr = wszBuf3;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -537,8 +530,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x75, nLabelWidth, nPosY, bCentered);
     pStr = wszBuf5;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -548,8 +540,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(wszBuf5, 0x75, 0xda, 0, 0);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -563,8 +554,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x3b - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -578,8 +568,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x86 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -593,8 +582,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x86 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -608,8 +596,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x86 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -623,8 +610,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0xde - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -638,8 +624,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x108 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -653,8 +638,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x108 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -668,8 +652,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x13a - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -683,8 +666,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x171 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -698,8 +680,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x171 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -713,8 +694,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x1c1 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -728,8 +708,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x1c1 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -743,8 +722,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x1c1 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -758,8 +736,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x1c1 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -773,8 +750,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x216 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -788,8 +764,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x23c - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -803,8 +778,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x2a2 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -818,8 +792,7 @@ void __stdcall DRAW_UI_HelpXpac() {
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x2a2 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
     pStr = wszBuf;
     for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -854,8 +827,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     uint16_t wszBuf[100];
     uint16_t* pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -867,8 +839,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1066), 0x131 - nPrevFont / 2, nTextWidth, nPosY, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -881,8 +852,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(5);
     pDst = wszBuf4;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -892,8 +862,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(wszBuf4, 0x75, 0x4e, 0, 0);
     pDst = wszBuf1;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -902,8 +871,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(wszBuf1, 0x75, 0x62, 0, 0);
     pDst = wszBuf2;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -912,8 +880,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(wszBuf2, 0x75, 0x76, 0, 0);
     pDst = wszBuf3;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -934,8 +901,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x106d), 0x75, nTextWidth, nPosY, bCentered);
     pDst = wszBuf5;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -944,8 +910,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(wszBuf5, 0x75, 0xda, 0, 0);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -957,8 +922,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x106f), 0x37 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -970,8 +934,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1070), 0x83 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -983,8 +946,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1071), 0x83 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -996,8 +958,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1072), 0x83 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1009,8 +970,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1074), 0xb6 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1022,8 +982,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1075), 0xb6 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1035,8 +994,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1076), 0xe7 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1048,8 +1006,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1077), 0x120 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1061,8 +1018,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1078), 0x120 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1074,8 +1030,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1079), 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1087,8 +1042,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x107a), 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1100,8 +1054,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x107b), 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1113,8 +1066,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x107c), 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1126,8 +1078,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x107d), 0x1c1 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1139,8 +1090,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1073), 0x1fb - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 
@@ -1152,8 +1102,7 @@ void __stdcall DRAW_UI_HelpClassic() {
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1071), 0x1fb - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
+      *(uint32_t*)pDst = 0;
       pDst += 2;
     }
 

@@ -1350,8 +1350,7 @@ BOOL __fastcall SetText(::D2WinTextBox * pTextBox, uint16_t * szText, int32_t nL
       }
       pszTrimmed = wszWorkBuf;
       for (nVisibleLines = 0x200; nVisibleLines; nVisibleLines--) {
-        pszTrimmed[0] = L'\0';
-        pszTrimmed[1] = L'\0';
+        *(uint32_t*)pszTrimmed = 0;
         pszTrimmed += 2;
       }
       D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszWorkBuf, szText);

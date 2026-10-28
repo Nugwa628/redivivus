@@ -112,15 +112,13 @@ void __fastcall SKILLDESC_FormatItemStatLine(int32_t pUnit, uint16_t * wszText, 
     uint16_t wStatId;
     uint16_t* pInitDst = wString2;
     for (i = 0x40; i; i--) {
-      pInitDst[0] = L'\0';
-      pInitDst[1] = L'\0';
+      *(uint32_t*)pInitDst = 0;
       pInitDst += 2;
     }
 
     pInitDst = wString1;
     for (i = 0x40; i; i--) {
-      pInitDst[0] = L'\0';
-      pInitDst[1] = L'\0';
+      *(uint32_t*)pInitDst = 0;
       pInitDst += 2;
     }
 
@@ -1866,15 +1864,13 @@ void __fastcall SKILLDESC_BuildStatBuffDesc(D2UnitStrc * pUnit, uint16_t * wszOu
     uint16_t* pInitDst;
     pInitDst = wszDescLine;
     for (nStatBonusCount = 0x40; nStatBonusCount; nStatBonusCount--) {
-      pInitDst[0] = L'\0';
-      pInitDst[1] = L'\0';
+      *(uint32_t*)pInitDst = 0;
       pInitDst += 2;
     }
 
     pInitDst = wszTempBuffer;
     for (nStatBonusCount = 0x40; nStatBonusCount; nStatBonusCount--) {
-      pInitDst[0] = L'\0';
-      pInitDst[1] = L'\0';
+      *(uint32_t*)pInitDst = 0;
       pInitDst += 2;
     }
 
@@ -7346,8 +7342,7 @@ void __fastcall SKILLDESC_BuildSkillTooltip_NoMaxLevelCheck(D2UnitStrc * pUnit, 
     uint16_t* pWszLocale;
     pWszLocale = wszTooltipBuf;
     for (nIter = 0x200; nIter; nIter--) {
-      pWszLocale[0] = L'\0';
-      pWszLocale[1] = L'\0';
+      *(uint32_t*)pWszLocale = 0;
       pWszLocale += 2;
     }
 
@@ -7473,8 +7468,7 @@ void __fastcall SKILLDESC_BuildSkillTooltip_NoMaxLevelCheck(D2UnitStrc * pUnit, 
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltipBuf, pWszLocale);
     pWszLocale = wszSkillNameBuf;
     for (nIter = 0x80; nIter; nIter--) {
-      pWszLocale[0] = L'\0';
-      pWszLocale[1] = L'\0';
+      *(uint32_t*)pWszLocale = 0;
       pWszLocale += 2;
     }
 
@@ -7534,8 +7528,7 @@ void __fastcall SKILLDESC_BuildSkillShortTooltip(D2UnitStrc * pUnit, eD2Skills e
     D2UnitStrc* pUnitLocal = pUnit;
     eD2Skills eSkillLocal = eSkill;
     for (nLineResult = 0x200; nLineResult; nLineResult--) {
-      pWszLocale[0] = L'\0';
-      pWszLocale[1] = L'\0';
+      *(uint32_t*)pWszLocale = 0;
       pWszLocale += 2;
     }
 

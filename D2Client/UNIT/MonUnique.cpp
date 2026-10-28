@@ -186,8 +186,7 @@ void __fastcall DefineSuperMonster(D2UnitStrc * pUnit, int32_t eModifier, int32_
     uint32_t pModifier;
     pModifier = eModifier;
     for (nClassId = 0x96; nClassId; nClassId--) {
-      pLocaleName[0] = L'\0';
-      pLocaleName[1] = L'\0';
+      *(uint32_t*)pLocaleName = 0;
       pLocaleName += 2;
     }
 

@@ -411,8 +411,7 @@ void __stdcall DRAW_LocalCharsInSelectionScreen() {
           szNameBuf[0] = '\0';
           pwszLocaleStr = wszClassName;
           for (nTextArg0 = 0x32; nTextArg0; nTextArg0--) {
-            pwszLocaleStr[0] = L'\0';
-            pwszLocaleStr[1] = L'\0';
+            *(uint32_t*)pwszLocaleStr = 0;
             pwszLocaleStr += 2;
           }
 
@@ -436,8 +435,7 @@ void __stdcall DRAW_LocalCharsInSelectionScreen() {
           CHARSEL_GetClassNameString((uint32_t)pDVar1->ePlayerClassID, wszClassName);
           pwVar3 = wszLineBuf;
           for (nTextArg0 = 0x32; nTextArg0; nTextArg0--) {
-            pwVar3[0] = L'\0';
-            pwVar3[1] = L'\0';
+            *(uint32_t*)pwVar3 = 0;
             pwVar3 += 2;
           }
 
@@ -625,8 +623,7 @@ void __stdcall DRAW_LocalCharsInSelectionScreen0() {
             sLineBuf.szNameBuf[0] = '\0';
             pwszLocaleStr = wszClassName;
             for (nLoopIdx = 0x32; nLoopIdx; nLoopIdx--) {
-              pwszLocaleStr[0] = L'\0';
-              pwszLocaleStr[1] = L'\0';
+              *(uint32_t*)pwszLocaleStr = 0;
               pwszLocaleStr += 2;
             }
 

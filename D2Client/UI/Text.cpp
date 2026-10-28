@@ -633,8 +633,7 @@ void __stdcall TEXT_DrawChatMessages() {
           if (bWordWrap) {
             pwszClear = awszBuffer;
             for (nScreenY = 200; nScreenY; nScreenY--) {
-              pwszClear[0] = L'\0';
-              pwszClear[1] = L'\0';
+              *(uint32_t*)pwszClear = 0;
               pwszClear += 2;
             }
 

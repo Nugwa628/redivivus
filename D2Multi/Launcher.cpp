@@ -541,8 +541,7 @@ void __stdcall UIMENU_CantTestItBeacuseItCrash() {
     gpCtlConfirmDialog = (::D2WinTextBox*)D2Win::Src::D2WinMain::FORMS_CreateAnyForm(gaPredefinedForms_b + 0x13);
     uint16_t* pwszLocaleStr = wszClassName;
     for (nDifficultyDone = 0x32; nDifficultyDone; nDifficultyDone--) {
-      pwszLocaleStr[0] = L'\0';
-      pwszLocaleStr[1] = L'\0';
+      *(uint32_t*)pwszLocaleStr = 0;
       pwszLocaleStr += 2;
     }
 

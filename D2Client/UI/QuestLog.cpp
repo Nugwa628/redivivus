@@ -2042,8 +2042,7 @@ BOOL __fastcall QUESTLOG_IsQuestAvailableForInteraction(int32_t nQuestIconIndex)
 
     uint16_t* pQuestEntryInit = byQuestEntryHdr.wszDescription;
     for (iVar1 = 0x96; iVar1; iVar1--) {
-      pQuestEntryInit[0] = L'\0';
-      pQuestEntryInit[1] = L'\0';
+      *(uint32_t*)pQuestEntryInit = 0;
       pQuestEntryInit += 2;
     }
 

@@ -584,8 +584,7 @@ void __stdcall PANEL_ShowRunButtonTooltip() {
     uint16_t wszKeyLine[30];
     uint16_t* pwszCursor = wszTooltip;
     for (nClearCount = 100; nClearCount; nClearCount--) {
-      pwszCursor[0] = L'\0';
-      pwszCursor[1] = L'\0';
+      *(uint32_t*)pwszCursor = 0;
       pwszCursor += 2;
     }
 
@@ -709,8 +708,7 @@ void __stdcall PANEL_DrawStaminaBar() {
     show_stamina_tooltip:
     pwszCursor = wszTooltip;
     for (iVar1 = 0x32; iVar1; iVar1--) {
-      pwszCursor[0] = L'\0';
-      pwszCursor[1] = L'\0';
+      *(uint32_t*)pwszCursor = 0;
       pwszCursor += 2;
     }
 
@@ -848,8 +846,7 @@ void __stdcall PANEL_DrawExperienceBar() {
     wszStatText[0] = L'\0';
     uint16_t* pClearDst = wszStatText + 1;
     for (iTmp = 0x7f; iTmp; iTmp--) {
-      pClearDst[0] = L'\0';
-      pClearDst[1] = L'\0';
+      *(uint32_t*)pClearDst = 0;
       pClearDst += 2;
     }
 
@@ -857,8 +854,7 @@ void __stdcall PANEL_DrawExperienceBar() {
     wszItemName[0] = L'\0';
     pClearDst = wszItemName + 1;
     for (iTmp = 0x3f; iTmp; iTmp--) {
-      pClearDst[0] = L'\0';
-      pClearDst[1] = L'\0';
+      *(uint32_t*)pClearDst = 0;
       pClearDst += 2;
     }
 
@@ -866,8 +862,7 @@ void __stdcall PANEL_DrawExperienceBar() {
     wszTooltip[0] = L'\0';
     pClearDst = wszTooltip + 1;
     for (iTmp = 0xbf; iTmp; iTmp--) {
-      pClearDst[0] = L'\0';
-      pClearDst[1] = L'\0';
+      *(uint32_t*)pClearDst = 0;
       pClearDst += 2;
     }
 
@@ -1233,30 +1228,26 @@ void __stdcall PANEL_DrawPanelLayout() {
     int nMouseY = ui::GetMouseY();
     uint16_t* pwszBuf = wszHpText;
     for (nClearCount = 0x32; nClearCount; nClearCount--) {
-      pwszBuf[0] = L'\0';
-      pwszBuf[1] = L'\0';
+      *(uint32_t*)pwszBuf = 0;
       pwszBuf += 2;
     }
 
     pwszBuf = wszMpText;
     for (nClearCount = 0x32; nClearCount; nClearCount--) {
-      pwszBuf[0] = L'\0';
-      pwszBuf[1] = L'\0';
+      *(uint32_t*)pwszBuf = 0;
       pwszBuf += 2;
     }
 
     pwszBuf = wszHpFormatted;
     for (nClearCount = 0x32; nClearCount; nClearCount--) {
-      pwszBuf[0] = L'\0';
-      pwszBuf[1] = L'\0';
+      *(uint32_t*)pwszBuf = 0;
       pwszBuf += 2;
     }
 
     pwszBuf = wszMpFormatted;
     int nMouseYSaved = nMouseY;
     for (nClearCount = 0x32; nClearCount; nClearCount--) {
-      pwszBuf[0] = L'\0';
-      pwszBuf[1] = L'\0';
+      *(uint32_t*)pwszBuf = 0;
       pwszBuf += 2;
     }
 
@@ -1982,8 +1973,7 @@ void __stdcall PANEL_DrawBottomPanel() {
             if (nRectXorLen) {
               pwsKeyDesc = awsHotkeyText;
               for (nBeltState = 0x32; nBeltState; nBeltState--) {
-                pwsKeyDesc[0] = L'\0';
-                pwsKeyDesc[1] = L'\0';
+                *(uint32_t*)pwsKeyDesc = 0;
                 pwsKeyDesc += 2;
               }
 

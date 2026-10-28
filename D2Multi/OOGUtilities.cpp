@@ -2692,15 +2692,13 @@ void __stdcall UIMENU_WaitInLine() {
     D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(gpCtlGameNameLabelOrQueueStatus, " ", 0);
     pwszClearCursor = wszMessageBuffer;
     for (nClearIter = 100; nClearIter; nClearIter--) {
-      pwszClearCursor[0] = L'\0';
-      pwszClearCursor[1] = L'\0';
+      *(uint32_t*)pwszClearCursor = 0;
       pwszClearCursor += 2;
     }
 
     pwszClearCursor = wszPositionString;
     for (nClearIter = 0x32; nClearIter; nClearIter--) {
-      pwszClearCursor[0] = L'\0';
-      pwszClearCursor[1] = L'\0';
+      *(uint32_t*)pwszClearCursor = 0;
       pwszClearCursor += 2;
     }
 

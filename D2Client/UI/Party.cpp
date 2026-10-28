@@ -226,8 +226,7 @@ static void __fastcall UI_DrawPartyMemberName(char * pszName, D2UiPartyStrc * pU
     uint16_t* pTruncate;
     pTruncate = wszName;
     for (i = 0x32; i; i--) {
-      pTruncate[0] = L'\0';
-      pTruncate[1] = L'\0';
+      *(uint32_t*)pTruncate = 0;
       pTruncate += 2;
     }
 
@@ -492,8 +491,7 @@ static void __stdcall UI_DrawPartyMemberLevelName(D2UiPartyStrc * pUiParty, int3
     uint16_t wLastCharTmp;
     uint16_t* pwszLevelName = wszLevelName;
     for (iVar3 = 0x7f; iVar3; iVar3--) {
-      pwszLevelName[0] = L'\0';
-      pwszLevelName[1] = L'\0';
+      *(uint32_t*)pwszLevelName = 0;
       pwszLevelName += 2;
     }
 
@@ -673,8 +671,7 @@ void __stdcall DRAW_UI_PartyWindow_II() {
                 ShowToolTipOnPartyButtons(0x1004, 0x1005, 0xda, 1);
                 pText = wszLine1;
                 for (nTmp = 0x32; nTmp; nTmp--) {
-                  pText[0] = L'\0';
-                  pText[1] = L'\0';
+                  *(uint32_t*)pText = 0;
                   pText += 2;
                 }
 
@@ -689,8 +686,7 @@ void __stdcall DRAW_UI_PartyWindow_II() {
                 D2Win::Src::D2WinFont::DRAW_text(pText, nTmpX + 0xda, nTmp, nColorArg, bCenter);
                 pText = wszLine2;
                 for (nTmp = 0x32; nTmp; nTmp--) {
-                  pText[0] = L'\0';
-                  pText[1] = L'\0';
+                  *(uint32_t*)pText = 0;
                   pText += 2;
                 }
 
@@ -952,8 +948,7 @@ void __stdcall UI_HandlePartyButtonTooltips() {
                 ShowToolTipOnPartyButtons(0x101a, 0x101b, 0xa0, 1);
                 pText = wszText;
                 for (nTmp = 0x32; nTmp; nTmp--) {
-                  pText[0] = L'\0';
-                  pText[1] = L'\0';
+                  *(uint32_t*)pText = 0;
                   pText += 2;
                 }
 
@@ -968,8 +963,7 @@ void __stdcall UI_HandlePartyButtonTooltips() {
                 D2Win::Src::D2WinFont::DRAW_text(pText, nTmpX + 0xa0, nTmp, nTmp3, bResult);
                 pText = wszText;
                 for (nTmp = 0x32; nTmp; nTmp--) {
-                  pText[0] = L'\0';
-                  pText[1] = L'\0';
+                  *(uint32_t*)pText = 0;
                   pText += 2;
                 }
 

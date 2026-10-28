@@ -632,8 +632,7 @@ void __stdcall DRAW_UI_ChatInput() {
       D2TextLineStrc* pWrapLine;
       pwszClear = wszInputCopy;
       for (i = 0x80; i; i--) {
-        pwszClear[0] = L'\0';
-        pwszClear[1] = L'\0';
+        *(uint32_t*)pwszClear = 0;
         pwszClear += 2;
       }
 
