@@ -43,7 +43,7 @@ int TXT_Skills_GetPassiveState(int nSkillId);
 int __fastcall SKILLS_Min(int nParam1, int nParam2, uint32_t dwParam3, uint32_t dwParam4);
 int __fastcall SKILLS_Max(int nParam1, int nParam2, uint32_t dwParam3, uint32_t dwParam4);
 int * __fastcall SKILLS_RandomRange(int * pnMinVal, int32_t nRange, uint32_t nUnused, int * pnSeed);
-void __fastcall SKILLS_GetMissileSpecialParam(int32_t nParamIndex, uint8_t bParamType, uint32_t nUnused, struct D2UnitStrc * * ppContext);
+int __fastcall SKILLS_GetMissileSpecialParam(int32_t nParamIndex, uint8_t bParamType, uint32_t nUnused, struct D2UnitStrc * * ppContext);
 int32_t __fastcall SKILLS_GetUnitStatValue(eD2UnitStat eUnitStat, int32_t nShiftCount, uint32_t nUnused, struct D2UnitStrc * * ppContext);
 struct D2SkillStrc * GetSkill(struct D2UnitStrc * pUnit, eD2Skills eSkill);
 int __stdcall GetSkillMode(struct D2UnitStrc * pUnit, struct D2SkillStrc * pSkill);
@@ -186,7 +186,7 @@ void __stdcall SKILL_CalcKickDamage(struct D2UnitStrc * pUnit, int * pnParam1, i
 // Evaluates one skill-description calc code (bParam selects which, 0..0x48) for skill eSkill at level/param nParam, optionally for unit pUnit; returns the computed value. Dispatches a large switch over the calc selector to skill range, mana cost (and shifted variants), to-hit, min/max/synergy damage (>>8 for display scaling), per-element min/max damage and length from the skill's descmissile entries, missile range, unit level/skill-level, aura/passive radii, and the raw skills.txt calc-column fields (auralencalc, calc[0..3], aurarangecalc, aurastatcalc[0..5], passivecalc[0..4], petmax, skpoints). For the raw-field cases it then runs the value through SKILLS_CompileSkillFormula against the skills calc-code blob. Bounds-checks eSkill; returns 0 on invalid skill/missile or out-of-range selector.
 uint32_t __stdcall SKILLDESC_EvalDescCalcValue(struct D2UnitStrc * pUnit, uint8_t bParam, eD2Skills eSkill, uint32_t nParam);
 uint32_t __fastcall SKILLS_DescCalcCallback_Eval(uint8_t nCalcCode, struct D2SkillCalcContextStrc * pCalcCtx);
-void __fastcall SKILLS_EvalSkillDescCalc_CurrentLevel(eD2Skills eSkill, uint8_t bParam, uint32_t nUnused, struct D2UnitStrc * * ppUnit);
+int __fastcall SKILLS_EvalSkillDescCalc_CurrentLevel(eD2Skills eSkill, uint8_t bParam, uint32_t nUnused, struct D2UnitStrc * * ppUnit);
 uint32_t __fastcall SKILLS_EvalSkillDescCalc_Chained(eD2Skills eSkill, uint8_t bParam, uint8_t bCalcIndex, struct D2UnitStrc * * ppUnit);
 int32_t __stdcall D2GetSkillCalc(struct D2UnitStrc * pUnit, int32_t calc, eD2Skills eSkill, int32_t nSkillLvl);
 uint32_t __stdcall SKILLS_EvalDescCalcBytecode(struct D2UnitStrc * pUnit, uint32_t nCalcOffset, eD2Skills eSkillId, int32_t nSkillLevel);

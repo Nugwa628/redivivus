@@ -8,12 +8,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -28,7 +28,7 @@ int __fastcall GLSUBTILE_Initialize(GlSubtileCacheStrc * pCache, int nVramStart,
     pCache->dwEntrySize = dwSubtileSize;
     size_t nAllocSize = nEntryCount * 0x14;
     pCache->nMaxEntries = nEntryCount;
-    uint8_t* pNodeArray = (uint8_t*)D2_ALLOC(nAllocSize);
+    uint8_t* pNodeArray = (uint8_t*)D2_ALLOC_AT(nAllocSize, ".\\Src\\glSubtileCache.cpp", 0x29);
     pCache->pNodes = (GlSubtileCacheNodeStrc*)pNodeArray;
     if (!pNodeArray) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2a);
@@ -172,7 +172,12 @@ int GLSUBTILE_AllocateNode(GlSubtileCacheStrc * pCache) {
     }
 
     GlSubtileCacheNodeStrc* pGVar1 = pCache->pFreeHead;
-    if (pGVar1) {
+    if (!pGVar1) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9d);
+      exit(-1);
+    }
+
+    {
       uint8_t* pNewFreeHead;
       pNewFreeHead = (uint8_t*)pGVar1->pNext;
       pCache->pFreeHead = (GlSubtileCacheNodeStrc*)pNewFreeHead;
@@ -197,9 +202,6 @@ int GLSUBTILE_AllocateNode(GlSubtileCacheStrc * pCache) {
       pCache->pActiveTail = pGVar1;
       return pGVar1->nIndex + 1;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9d);
-    exit(-1);
 }
 
 // Promotes a subtile cache node to most-recently-used position (active list tail).
@@ -215,14 +217,14 @@ void __fastcall GLSUBTILE_PromoteNodeToMRU(GlSubtileCacheStrc * pCache, int nNod
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xbb);
       exit(-1);
     } else {
-      if (0 < nNodeIndex1Based) {
-        pNode = GLSUBTILE_RemoveNodeByIndex(pCache, nNodeIndex1Based - 1);
-        GLSUBTILE_AppendNodeToTail(pCache, pNode);
-        return;
+      if (!(0 < nNodeIndex1Based)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xbc);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xbc);
-      exit(-1);
+      pNode = GLSUBTILE_RemoveNodeByIndex(pCache, nNodeIndex1Based - 1);
+      GLSUBTILE_AppendNodeToTail(pCache, pNode);
+      return;
     }
 }
 
@@ -296,7 +298,7 @@ void __fastcall GLSUBTILE_Destroy(uint32_t * pCacheData, GlSubtileCacheStrc * pC
       }
     }
     if ((void*)pCacheData[7]) {
-      D2_FREE((void*)pCacheData[7]);
+      D2_FREE_AT((void*)pCacheData[7], ".\\Src\\glSubtileCache.cpp", 0x74);
       pCacheData[7] = 0;
     }
 

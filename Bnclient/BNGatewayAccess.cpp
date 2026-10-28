@@ -76,7 +76,7 @@ void __stdcall SaveAndUnload(D2BNetGatewayAccessStr * pGatewayAccess) {
     pGatewayAccess->pRealmsData = 0;
 }
 
-char * Nth(void * pThis, int nIndex) {
+char * __thiscall Nth(void * pThis, int nIndex) {
     char* szDataCursor = *(char**)((int)pThis + 0x10);
     if (!(szDataCursor && 0 < nIndex && nIndex <= *(int*)((int)pThis + 8))) {
       return (char*)pThis;
@@ -187,7 +187,7 @@ void __stdcall SetCurGateway(int32_t nParam1, int32_t nParam2) {
 // Load falls to UpdateGatewaysFromIni -> assert (see 0x518850).
 // An "Override.." value name sets bIsOverride=1 @0x51827f.
 // @sourcefile .\BNetGW.cpp
-void GetGatewayList(void * pThis, char * szText) {
+void __thiscall GetGatewayList(void * pThis, char * szText) {
     bool bRegReadResult;
     uint32_t* dwRegDataSize;
     int32_t nLine;
@@ -245,12 +245,12 @@ void __fastcall GetBattlenetRealmsList(int32_t nGatewayAccess) {
     bool bFileLoaded;
     DWORD dwFileSize = 0;
     _bFileLoaded = Storm::Source::SFile::SFileLoadFile("Data\\Global\\Realms.bin", (void**)(nGatewayAccess + 0x20), &dwFileSize, 0, 0);
-    if (_bFileLoaded) {
-      return;
+    if (!_bFileLoaded) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x188);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x188);
-    exit(-1);
+    return;
 }
 
 uint32_t * __stdcall WritingDefaultGatewayList(DWORD * pdwFileSize) {
@@ -310,7 +310,7 @@ char * __stdcall SkipEOL(char * szText1, char * szText2) {
     return szText1;
 }
 
-char * __stdcall FindSection(char * szText1, char * szText2) {
+char * __thiscall FindSection(D2BNetGatewayAccessStr * pThis, char * szText1, char * szText2) {
     char* pIniCursor = szText1;
     char* pBufEnd = pIniCursor + strlen(pIniCursor);
     pIniCursor = pBufEnd + 1;
@@ -381,7 +381,7 @@ char * __stdcall FindKey(char * szText1, char * szText2) {
     return nullptr;
 }
 
-void PickClosestZone(void * pThis, int32_t nGmtMinutes) {
+void __thiscall PickClosestZone(void * pThis, int32_t nGmtMinutes) {
     // Frame slots -24..-4 are ONE object: &szStrtolEnd is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -571,7 +571,7 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
     char* pCur = szText;
     __frame0.nTmp2 = pCur + strlen(pCur);
     pCur = __frame0.nTmp2 + 1;
-    pCur = FindSection(szText, "Server List Version");
+    pCur = FindSection(pClientSideData, szText, "Server List Version");
     if (!pCur) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x277);
       exit(-1);
@@ -613,7 +613,7 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
         pCur[1] = '0';
         pCur[2] = '\0';
         pCur += 3;
-        pIniKeyVal = FindSection(szText, "Server Gateways");
+        pIniKeyVal = FindSection(pClientSideData, szText, "Server Gateways");
         __frame0.nGatewayIniIdx = 1;
         sprintf(__frame0.szKeyBuf, "%d", 1);
         pZoneVal = FindKey(pIniKeyVal, __frame0.szKeyBuf);
@@ -622,7 +622,7 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
           __frame0.nTmp1 += -(int)pZoneVal;
           Storm::Source::SSTR::SStrCopy(pCur, pZoneVal, (int32_t)(__frame0.nTmp1 + 1));
           __frame0.nTmp3 = pCur;
-          pZoneVal = FindSection(szText, pCur);
+          pZoneVal = FindSection(pClientSideData, szText, pCur);
           if (pZoneVal) {
             __frame0.nTmp1 = pCur + 1 + (int)__frame0.nTmp1;
             pCur = FindKey(pZoneVal, "ZONE");
@@ -661,18 +661,18 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
         *pCur = '\0';
         pCur += 1 - (int)pRegMultiSzBuf;
         if ((int)pCur < (int)nSize) {
-          if (pRegMultiSzBuf[(int)(pCur - 1)] == '\0' && pRegMultiSzBuf[(int)(pCur - 2)] == '\0') {
-            pClientSideData->pGatewayData = pRegMultiSzBuf;
-            pClientSideData->nGatewayDataSize = (uint32_t)pCur;
-            PickClosestZone(pClientSideData, __frame0.nSystemGmtBias);
-            SaveAndUnload(pClientSideData);
-            Load(pClientSideData);
-            Fog::Debug::GuardStack();
-            return;
+          if (!(pRegMultiSzBuf[(int)(pCur - 1)] == '\0' && pRegMultiSzBuf[(int)(pCur - 2)] == '\0')) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e8);
+            exit(-1);
           }
 
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e8);
-          exit(-1);
+          pClientSideData->pGatewayData = pRegMultiSzBuf;
+          pClientSideData->nGatewayDataSize = (uint32_t)pCur;
+          PickClosestZone(pClientSideData, __frame0.nSystemGmtBias);
+          SaveAndUnload(pClientSideData);
+          Load(pClientSideData);
+          Fog::Debug::GuardStack();
+          return;
         } else {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e6);
           exit(-1);

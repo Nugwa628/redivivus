@@ -66,15 +66,15 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA5Q6Strc) == 0xa8, "D2_NEW(D2QuestDataA5Q6Strc): the 32-bit layout must be the 0xa8 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA5Q6Strc) == 0xa8, "D2_NEW_AT(D2QuestDataA5Q6Strc): the 32-bit layout must be the 0xa8 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpExecuteOnUnitFunction
@@ -84,10 +84,6 @@ typedef BOOL (__fastcall *fpExecuteOnUnitFunction)(::SGAMEDATA * pGame, D2UnitSt
 #ifndef RECON_FPTD_QUESTACTIVE
 #define RECON_FPTD_QUESTACTIVE
 typedef bool (__fastcall *QUESTACTIVE)(D2QuestDataStrc * pQuestData, int32_t nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx);
-#endif
-#ifndef RECON_FPTD_QUESTSEQ
-#define RECON_FPTD_QUESTSEQ
-typedef bool (__fastcall *QUESTSEQ)(D2QuestDataStrc * pQuestData);
 #endif
 
 namespace D2Game::Quests::QUESTS::A5Q6 {
@@ -790,10 +786,10 @@ bool __fastcall Q36_ActiveFilter(D2QuestDataStrc * pQuestData, eD2MonsterClassId
 }
 
 // A5Q6 Eve of Destruction. fpSequenceFilter (linked to prerequisite QUEST_PrisonOfIce / Anya rescue). When this quest is active and not yet started (nStateFlag==0), latch bAnyaTransformed, force live nStateFlag=2, broadcast "in progress" (state 1), and push sub-steps to all players. Kicks the final quest into motion once Anya/prereq conditions are met.
-void __fastcall Q36_SequenceFilter(D2QuestDataStrc * pQuestData) {
+bool __fastcall Q36_SequenceFilter(D2QuestDataStrc * pQuestData) {
     D2QuestDataStrc* pA5Q6EveQuestData = GetQuestDataByQuestNoInternal(pQuestData->pGame, QUESTINT_EveOfDestruction);
     if (!(pA5Q6EveQuestData->bIsNotIntroduction && !pA5Q6EveQuestData->nStateFlag)) {
-      return;
+      return true;
     }
 
     pA5Q6EveQuestData->pQuestSpecificData.pA5Q6->bAnyaTransformed = 1;
@@ -801,6 +797,7 @@ void __fastcall Q36_SequenceFilter(D2QuestDataStrc * pQuestData) {
     pA5Q6EveQuestData->nQuestPacketFlags = '\0';
     QUEST_SetStateAndBroadcast(pA5Q6EveQuestData, 1, nullptr, (::fpExecuteOnUnitFunction)SendQuestBitsIfNeeded, true);
     UNIT::SUnit::IteratePlayerOrMonsterUnits(pA5Q6EveQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)SetStep0x2And0x3);
+    return true;
 }
 
 // A5Q6 Eve of Destruction (state-fn slot 0xe). If the player's quest is Completed(0), set Step0x10 (the "departed act V / acknowledged completion" bit). Small post-completion bookkeeping callback.
@@ -881,13 +878,13 @@ void __fastcall Q36_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->pNpcMessages = &A5Q6::aNpcGossipData;
     pQuestData->bIsActive = true;
     pQuestData->nStateFlag = 0;
-    D2QuestDataA5Q6Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA5Q6Strc);
+    D2QuestDataA5Q6Strc* pQuestSpecificData = D2_NEW_POOL_AT(pGame->pMemoryPool, D2QuestDataA5Q6Strc, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q6.cpp", 0x329);
     pQuestData->pQuestSpecificData.pA5Q6 = pQuestSpecificData;
     pQuestData->nQuestIdReal = QUEST_EveOfDestruction;
     pQuestData->fpStatusFilter = 0;
     pQuestData->nInitNo = 4;
     pQuestData->fpActiveFilter = (QUESTACTIVE)Q36_ActiveFilter;
-    pQuestData->fpSequenceFilter = (QUESTSEQ)Q36_SequenceFilter;
+    pQuestData->fpSequenceFilter = Q36_SequenceFilter;
     pQuestData->nSequenceQuestId = QUEST_PrisonOfIce;
     memset(pQuestSpecificData, 0, 0xa8);
     QUESTGUID_SetPlayerCountToZero(&pQuestSpecificData->sQuestGUID);

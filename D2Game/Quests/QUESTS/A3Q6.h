@@ -120,7 +120,7 @@ void __fastcall Objects_InitFn45(struct D2ObjectInitFnArg * pInitArg);
 void __fastcall Objects_InitFn44(struct D2ObjectInitFnArg * pInitArg);
 // [The Guardian (Q23)] fpSequenceFilter: when the player has the intro done (bIsNotIntroduction) but no
 // state flag yet, sets nStateFlag=1 and arms slot[2] (Q23_Callback_02). Bootstraps the acceptance step.
-void __fastcall Q23_SequenceFilter(struct D2QuestDataStrc * pQuestData);
+bool __fastcall Q23_SequenceFilter(struct D2QuestDataStrc * pQuestData);
 // [The Guardian (Q23)] Quest-state handler slot[0xd]: RELOAD/REJOIN reconstruction. On game (re)entry,
 // reads the player's saved Guardian QuestRecord sub-steps (Step0x02..0x09) and rebuilds the in-memory
 // shared nStateFlag/nStateFlagPrev so the Mephisto quest resumes at the right dialog stage. If already

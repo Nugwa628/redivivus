@@ -496,18 +496,18 @@ void __fastcall HandleIncoming0x89(int32_t nEventId) {
     static uint32_t gdwDenOfEvilEventFlags; D2_STATIC_GUARD_BSS(gdwDenOfEvilEventFlags, "D2Client::Source::ClientEngine::HandleIncoming0x89::gdwDenOfEvilEventFlags");
 
     if (nEventId < 0x20) {
-      if (nEventId < 0x14) {
-        gdwDenOfEvilEventFlags |= 1 << ((uint8_t)nEventId & 0x1f);
-        if (!CLIENT_QuestEventHandlers[nEventId]) {
-          return;
-        }
+      if (!(nEventId < 0x14)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1da);
+        exit(-1);
+      }
 
-        (*CLIENT_QuestEventHandlers[nEventId])();
+      gdwDenOfEvilEventFlags |= 1 << ((uint8_t)nEventId & 0x1f);
+      if (!CLIENT_QuestEventHandlers[nEventId]) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1da);
-      exit(-1);
+      (*CLIENT_QuestEventHandlers[nEventId])();
+      return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1d9);
       exit(-1);

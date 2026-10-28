@@ -683,28 +683,7 @@ void __fastcall dRoofDraw(D2GameViewStrc * pGameView) {
 // D2DrawFloorStrc scratch state.
 void __fastcall dFloorDraw(D2GameViewStrc * pGameView) {
     // Static local variables (originally global data)
-    static D2DrawFloorStrc D2DrawFloorStrc_007c8a28 = {
-    /* .bLowQuality = */ 0,
-    /* .field1_0x1 = */ 0,
-    /* .field2_0x2 = */ 0,
-    /* .field3_0x3 = */ 0,
-    /* .bIsPerspective = */ 0,
-    /* .bWeatherSplashEnabled = */ 0,
-    /* .nRecordingRelated = */ 0,
-    /* .uWeatherRelated = */ 0,
-    /* .nLastSplashFrame = */ 0,
-    /* .nRecordingFrameRelated = */ 0,
-    /* .nRollSeed = */ nullptr,
-    /* .nWindowBorderType = */ 0,
-    /* .pGameView = */ nullptr,
-    /* .bPerspectiveHasEffectOnSprite = */ 0,
-    /* .nMinTileX = */ 0,
-    /* .nMaxTileX = */ 0,
-    /* .nMinTileY = */ 0,
-    /* .nMaxTileY = */ 0,
-    /* .nX = */ 0,
-    /* .nY = */ 0
-}; D2_STATIC_GUARD(D2DrawFloorStrc_007c8a28, "D2Client::GAME::Draw::dFloorDraw::D2DrawFloorStrc_007c8a28");
+    static D2DrawFloorStrc D2DrawFloorStrc_007c8a28 = {}; D2_STATIC_GUARD(D2DrawFloorStrc_007c8a28, "D2Client::GAME::Draw::dFloorDraw::D2DrawFloorStrc_007c8a28");
 
     DrawFloorByViewAndFloor(pGameView, &D2DrawFloorStrc_007c8a28);
 }

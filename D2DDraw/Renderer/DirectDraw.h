@@ -431,9 +431,9 @@ BOOL __stdcall BeginCutScene();
 BOOL __stdcall RENDERER_DDRAW_DestroyWindow();
 BOOL __fastcall ResizeWindow(HWND hWnd, BOOL bForceResize);
 // @sourcefile .\Src\ddCore.cpp
-void Release();
+BOOL Release();
 void __fastcall EndCutScene(HWND hWnd, int32_t nResolutionMode, int32_t nWindowState);
-void thunk_Release();
+BOOL thunk_Release();
 // @sourcefile .\Src\ddCore.cpp
 BOOL __fastcall InitPerspective(struct D2GfxSettingsStrc * pSettings, ::D2GfxHelperStrc * pHelpers);
 // DirectDraw renderer: returns palette pointer for the specified render mode. Reads from gpPaletteTable offsets 0x0-0x10C based on the nPaletteMode index (0-6).

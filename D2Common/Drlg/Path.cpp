@@ -1297,12 +1297,12 @@ uint32_t __fastcall DRLGPATH_StepPathWithCollisionCheck(D2PathTypeArg * pPathTyp
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1df);
             exit(-1);
           } else {
-            if (nFpCurY != -0x7fff8000) {
-              return 1;
+            if (nFpCurY == -0x7fff8000) {
+              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1e0);
+              exit(-1);
             }
 
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1e0);
-            exit(-1);
+            return 1;
           }
         }
       }
@@ -1337,23 +1337,23 @@ void __fastcall DRLGPATH_ApplyMissileOffset(D2UnitStrc * pMissileStrc) {
       exit(-1);
     } else {
       uint8_t byDirection;
-      if (pMissileStrc->pGfxDataCopy) {
-        byDirection = PATH::DynamicPath::GetDirection(*(D2DynamicPathStrc**)(pMissileStrc->pGfxDataCopy + 0x2c));
-        findex = (uint32_t)*(uint8_t*)((uintptr_t)&pMissileStrc->uSideData + 4);
-        fOffsetRadius = (float)findex;
-        findex = (uint32_t)byDirection * 8 + findex * -0x100 & 0x1ff;
-        fVar1 = Fog::MATH_sinTable_f32_LookupOffset(findex);
-        nOffsetRadius = (short int)(int)std::nearbyint(fVar1 * fOffsetRadius);
-        pMissileStrc->eAnimMode.eMissileCollision += nOffsetRadius;
-        fVar1 = Fog::MATH_sinTable_f32_Lookup(findex);
-        nOffsetRadius = (short int)(int)std::nearbyint(fVar1 * fOffsetRadius);
-        pwMissilePosY = (short int*)((uintptr_t)&pMissileStrc->eAnimMode + 2);
-        *pwMissilePosY += nOffsetRadius;
-        return;
+      if (!pMissileStrc->pGfxDataCopy) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1eb);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1eb);
-      exit(-1);
+      byDirection = PATH::DynamicPath::GetDirection(*(D2DynamicPathStrc**)(pMissileStrc->pGfxDataCopy + 0x2c));
+      findex = (uint32_t)*(uint8_t*)((uintptr_t)&pMissileStrc->uSideData + 4);
+      fOffsetRadius = (float)findex;
+      findex = (uint32_t)byDirection * 8 + findex * -0x100 & 0x1ff;
+      fVar1 = Fog::MATH_sinTable_f32_LookupOffset(findex);
+      nOffsetRadius = (short int)(int)std::nearbyint(fVar1 * fOffsetRadius);
+      pMissileStrc->eAnimMode.eMissileCollision += nOffsetRadius;
+      fVar1 = Fog::MATH_sinTable_f32_Lookup(findex);
+      nOffsetRadius = (short int)(int)std::nearbyint(fVar1 * fOffsetRadius);
+      pwMissilePosY = (short int*)((uintptr_t)&pMissileStrc->eAnimMode + 2);
+      *pwMissilePosY += nOffsetRadius;
+      return;
     }
 }
 
@@ -1373,49 +1373,49 @@ void __fastcall DRLGPATH_GetMissileTargetPosition(short * pOutPos, D2UnitStrc * 
     } else {
       uint8_t byDirection;
       pOwner = (int*)pMissileStrc->pGfxDataCopy;
-      if (pOwner) {
-        eUnitType = *pOwner;
-        if (eUnitType == 2 || 3 < eUnitType && eUnitType < 6) {
-          nCoord = (short int)*(uint32_t*)(pOwner[0xb] + 0xc);
-        } else if (!(D2DynamicPathStrc*)pOwner[0xb]) {
-          nCoord = 0;
-        } else {
-          nLine = PATH::DynamicPath::GetXPos((D2DynamicPathStrc*)pOwner[0xb]);
-          nCoord = (short int)nLine;
-        }
+      if (!pOwner) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x202);
+        exit(-1);
+      }
 
-        *pOutPos = nCoord;
-        pOwner = (int*)pMissileStrc->pGfxDataCopy;
-        eUnitType = *pOwner;
-        if (eUnitType == 2 || 3 < eUnitType && eUnitType < 6) {
-          nCoord = (short int)*(uint32_t*)(pOwner[0xb] + 0x10);
-        } else if (!(D2DynamicPathStrc*)pOwner[0xb]) {
-          nCoord = 0;
-        } else {
-          nLine = PATH::DynamicPath::GetYPos((D2DynamicPathStrc*)pOwner[0xb]);
-          nCoord = (short int)nLine;
-        }
+      eUnitType = *pOwner;
+      if (eUnitType == 2 || 3 < eUnitType && eUnitType < 6) {
+        nCoord = (short int)*(uint32_t*)(pOwner[0xb] + 0xc);
+      } else if (!(D2DynamicPathStrc*)pOwner[0xb]) {
+        nCoord = 0;
+      } else {
+        nLine = PATH::DynamicPath::GetXPos((D2DynamicPathStrc*)pOwner[0xb]);
+        nCoord = (short int)nLine;
+      }
 
-        pOutPos[1] = nCoord;
-        if (*(char*)((uintptr_t)&pMissileStrc->uSideData + 4) == '\0') {
-          return;
-        }
+      *pOutPos = nCoord;
+      pOwner = (int*)pMissileStrc->pGfxDataCopy;
+      eUnitType = *pOwner;
+      if (eUnitType == 2 || 3 < eUnitType && eUnitType < 6) {
+        nCoord = (short int)*(uint32_t*)(pOwner[0xb] + 0x10);
+      } else if (!(D2DynamicPathStrc*)pOwner[0xb]) {
+        nCoord = 0;
+      } else {
+        nLine = PATH::DynamicPath::GetYPos((D2DynamicPathStrc*)pOwner[0xb]);
+        nCoord = (short int)nLine;
+      }
 
-        byDirection = PATH::DynamicPath::GetDirection(*(D2DynamicPathStrc**)(pMissileStrc->pGfxDataCopy + 0x2c));
-        findex = (uint32_t)*(uint8_t*)((uintptr_t)&pMissileStrc->uSideData + 4);
-        fSpiralRadius = (float)findex;
-        findex = (uint32_t)byDirection * 8 + findex * -0x100 & 0x1ff;
-        fVar1 = Fog::MATH_sinTable_f32_LookupOffset(findex);
-        nOffsetRadius = (short int)(int)std::nearbyint(fVar1 * fSpiralRadius);
-        *pOutPos += nOffsetRadius;
-        fVar1 = Fog::MATH_sinTable_f32_Lookup(findex);
-        nOffsetRadius = (short int)(int)std::nearbyint(fVar1 * fSpiralRadius);
-        pOutPos[1] += nOffsetRadius;
+      pOutPos[1] = nCoord;
+      if (*(char*)((uintptr_t)&pMissileStrc->uSideData + 4) == '\0') {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x202);
-      exit(-1);
+      byDirection = PATH::DynamicPath::GetDirection(*(D2DynamicPathStrc**)(pMissileStrc->pGfxDataCopy + 0x2c));
+      findex = (uint32_t)*(uint8_t*)((uintptr_t)&pMissileStrc->uSideData + 4);
+      fSpiralRadius = (float)findex;
+      findex = (uint32_t)byDirection * 8 + findex * -0x100 & 0x1ff;
+      fVar1 = Fog::MATH_sinTable_f32_LookupOffset(findex);
+      nOffsetRadius = (short int)(int)std::nearbyint(fVar1 * fSpiralRadius);
+      *pOutPos += nOffsetRadius;
+      fVar1 = Fog::MATH_sinTable_f32_Lookup(findex);
+      nOffsetRadius = (short int)(int)std::nearbyint(fVar1 * fSpiralRadius);
+      pOutPos[1] += nOffsetRadius;
+      return;
     }
 }
 
@@ -1641,12 +1641,12 @@ BOOL __stdcall DRLGPATH_RaycastCollisionLine(int * pVelocity, uint32_t nParam, u
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0xab);
       exit(-1);
     } else {
-      if (*(uint16_t*)((char*)&nPackedDst + 2)) {
-        return 1;
+      if (!*(uint16_t*)((char*)&nPackedDst + 2)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0xac);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0xac);
-      exit(-1);
+      return 1;
     }
 }
 
@@ -1829,27 +1829,26 @@ BOOL DRLGPATH_CheckTargetReachable(uint32_t * pnParam, D2DynamicPathStrc * pDyna
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x146);
       exit(-1);
     } else {
-      if (*(short int*)((int)pnParam + 2)) {
-        if (!pDynamicPath->dwVelocity) {
-          *(short int*)pnParam = pDynamicPath->Coords.tSubtile.nPosX;
-          *(short int*)((int)pnParam + 2) = pDynamicPath->Coords.tSubtile.nPosY;
-          return 0;
-        }
-
-        DRLGPATH_AdvanceAlongPathPoints(pDynamicPath, 1, 1);
-        if (!pDynamicPath->dwVelocity) {
-          *(short int*)pnParam = pDynamicPath->Coords.tSubtile.nPosX;
-          *(short int*)((int)pnParam + 2) = pDynamicPath->Coords.tSubtile.nPosY;
-          return 0;
-        }
-
-        nPackedPos = (uint32_t)((uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosY << 16 | (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosX);
-        nReachResult = DRLGPATH_RaycastBresenhamLine(nPackedPos, pnParam, pDynamicPath);
-        return nReachResult;
+      if (!*(short int*)((int)pnParam + 2)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x147);
+        exit(-1);
+      }
+      if (!pDynamicPath->dwVelocity) {
+        *(short int*)pnParam = pDynamicPath->Coords.tSubtile.nPosX;
+        *(short int*)((int)pnParam + 2) = pDynamicPath->Coords.tSubtile.nPosY;
+        return 0;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x147);
-      exit(-1);
+      DRLGPATH_AdvanceAlongPathPoints(pDynamicPath, 1, 1);
+      if (!pDynamicPath->dwVelocity) {
+        *(short int*)pnParam = pDynamicPath->Coords.tSubtile.nPosX;
+        *(short int*)((int)pnParam + 2) = pDynamicPath->Coords.tSubtile.nPosY;
+        return 0;
+      }
+
+      nPackedPos = (uint32_t)((uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosY << 16 | (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosX);
+      nReachResult = DRLGPATH_RaycastBresenhamLine(nPackedPos, pnParam, pDynamicPath);
+      return nReachResult;
     }
 }
 
@@ -2059,12 +2058,12 @@ void __fastcall DRLGPATH_ScaleVelocityVector(int32_t nVelocityScale, POINT * pPo
     } else if (nVelY < 0) {
       nVelY = -nVelY;
     }
-    if (nVelY < 0x200000) {
-      return;
+    if (!(nVelY < 0x200000)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x331);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x331);
-    exit(-1);
+    return;
 }
 
 // Checks if a ray from source to target position is collision-free. Normalizes the direction vector and delegates to DRLGPATH_RaycastCollisionLine. Used when waypoints are more than 1 tile apart.
@@ -3072,7 +3071,12 @@ BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg, int * 
     int32_t nType = pPathTypeArg->nUnitWidth;
     D2RoomStrc* pRoom = pPathTypeArg->pRoom;
     int32_t nFallbackDirIdx = (int32_t)pPathTypeArg->pDynamicPath->pOwner;
-    if (nFallbackDirIdx && (!*(int*)nFallbackDirIdx || nFallbackDirIdx && *(int*)nFallbackDirIdx == 1)) {
+    if (!(nFallbackDirIdx && (!*(int*)nFallbackDirIdx || nFallbackDirIdx && *(int*)nFallbackDirIdx == 1))) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x122);
+      exit(-1);
+    }
+
+    {
       int iVar1;
       pScannerState[4] = 0;
       *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[*pScannerState * 2] + (short int)pScannerState[2];
@@ -3112,9 +3116,6 @@ BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg, int * 
       iVar3 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
       return (uint32_t)!iVar3;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x122);
-    exit(-1);
 }
 
 // Inserts a set of waypoints from a path node into the main waypoint buffer at a given index. Uses memmove to shift existing data and memcpy to copy the new points. Updates the insertion index and total count.

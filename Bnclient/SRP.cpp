@@ -59,7 +59,7 @@ void __fastcall SRP_InitializeRandomState(D2Srp * pThis, uint32_t dwSeed) {
     Fog::Debug::GuardStack();
 }
 
-void SRP_ExtractSessionKeyBytes(void * pThis, void * pDst, uint32_t nBytes) {
+void __thiscall SRP_ExtractSessionKeyBytes(void * pThis, void * pDst, uint32_t nBytes) {
     uint32_t nAvail;
     int iVar1;
     uint32_t aShaCtx[23];
@@ -281,7 +281,7 @@ void __fastcall SRP_CreateContext(D2Srp * * ppSrp) {
     *ppSrp = 0;
 }
 
-BOOL SRP_ExportPublicValues(D2Srp * * ppSrp, uint32_t * pnGeneratorLen, void * pGeneratorOut, uint32_t * pnModulusLen, void * pModulusOut) {
+BOOL __thiscall SRP_ExportPublicValues(D2Srp * * ppSrp, uint32_t * pnGeneratorLen, void * pGeneratorOut, uint32_t * pnModulusLen, void * pModulusOut) {
     if (!(*ppSrp)->bInitialized) {
       return 0;
     }
@@ -293,7 +293,7 @@ BOOL SRP_ExportPublicValues(D2Srp * * ppSrp, uint32_t * pnGeneratorLen, void * p
     return 1;
 }
 
-BOOL SRP_SetParameters(D2Srp * * ppSrp, uint32_t nGeneratorLen, uint8_t * pGeneratorBytes, uint32_t nModulusLen, uint8_t * pModulusBytes) {
+BOOL __thiscall SRP_SetParameters(D2Srp * * ppSrp, uint32_t nGeneratorLen, uint8_t * pGeneratorBytes, uint32_t nModulusLen, uint8_t * pModulusBytes) {
     if ((*ppSrp)->bInitialized) {
       SHA::SHA1_BigIntFree((*ppSrp)->pModulusN);
       SHA::SHA1_BigIntFree((*ppSrp)->pGenerator);
@@ -334,7 +334,7 @@ void __fastcall SRP_FreeParameters(D2Srp * * ppSrp) {
     pDVar1->bInitialized = 0;
 }
 
-void SRP_ClientGenerateVerifier(void * pThis, char * szUsername, uint32_t * pnParam1, uint32_t * pnParam2, void * pParam) {
+void __thiscall SRP_ClientGenerateVerifier(void * pThis, char * szUsername, uint32_t * pnParam1, uint32_t * pnParam2, void * pParam) {
     uint32_t* pParam_00 = pnParam2;
     SRP_ExtractSessionKeyBytes(pThis, pnParam2, 0x20);
     SRP_ComputePasswordHash(pParam_00, szUsername, (char*)pnParam1, (int*)&pnParam2);
@@ -346,7 +346,7 @@ void SRP_ClientGenerateVerifier(void * pThis, char * szUsername, uint32_t * pnPa
     SHA::SHA1_BigIntFree(pVerifier);
 }
 
-void SRP_GenerateAccountCredentials(void * pThis, char * pCredsBuf, char * szUsername, char * szPassword) {
+void __thiscall SRP_GenerateAccountCredentials(void * pThis, char * pCredsBuf, char * szUsername, char * szPassword) {
     Storm::Source::SSTR::SStrCopy(pCredsBuf, szUsername, 0x7fffffff);
     Storm::Source::SSTR::SStrCopy(pCredsBuf + 0x20, szPassword, 0x7fffffff);
     SRP_ExtractSessionKeyBytes(pThis, pCredsBuf + 0x40, 0x20);
@@ -358,7 +358,7 @@ void SRP_GenerateAccountCredentials(void * pThis, char * pCredsBuf, char * szUse
     SHA::SHA1_BigIntFree(pVerifier);
 }
 
-BOOL SRP_ClientKeyExchange(void * pThis, D2SrpCredentialsStrc * pContext, void * pParam1, void * pParam2) {
+BOOL __thiscall SRP_ClientKeyExchange(void * pThis, D2SrpCredentialsStrc * pContext, void * pParam1, void * pParam2) {
     int bSharedSecretOk;
     uint32_t uVar3;
     BigData* pServerPublicB;
@@ -394,7 +394,7 @@ BOOL SRP_ClientKeyExchange(void * pThis, D2SrpCredentialsStrc * pContext, void *
     return 0;
 }
 
-BOOL __stdcall SRP_ClientVerifyServerProof(void * pSrpContext, int * pServerProof) {
+BOOL __thiscall SRP_ClientVerifyServerProof(D2Srp * * pThis, void * pSrpContext, int * pServerProof) {
     int nCmpSign;
     int nCmpDiff;
     uint8_t computedProofBuf[20];
@@ -480,7 +480,7 @@ uint32_t __stdcall SRP_ParseChallenge(uint32_t * pContext, char * szText, uint32
     return (uint32_t)(nCompareResult == 1);
 }
 
-void SRP_ServerComputePublicB(void * pThis, int32_t nContextBase) {
+void __thiscall SRP_ServerComputePublicB(void * pThis, int32_t nContextBase) {
     BigData* pSmallKeyBigInt = SHA::SHA1_FromBigIntBytes((void*)(nContextBase + 0x20), 0x20);
     SRP_ExtractSessionKeyBytes(pThis, (void*)(nContextBase + 0x80), 0x20);
     BigData* pRandomKeyBigInt = SHA::SHA1_FromBigIntBytes((void*)(nContextBase + 0x80), 0x20);
@@ -499,7 +499,7 @@ void SRP_ServerComputePublicB(void * pThis, int32_t nContextBase) {
     SHA::SHA1_BigIntFree(pPublicB);
 }
 
-void SRP_ClientVerifyAndComputeKey(void * pThis, void * pContext, uint32_t * pServerProof) {
+void __thiscall SRP_ClientVerifyAndComputeKey(void * pThis, void * pContext, uint32_t * pServerProof) {
     // Frame slots -52..-4 are ONE object: &pServerPublicB is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {

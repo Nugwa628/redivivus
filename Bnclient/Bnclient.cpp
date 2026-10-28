@@ -25,8 +25,8 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -163,7 +163,7 @@ bool __fastcall D2FILE_GetSignerOrganization(LPCSTR szFilePath, LPSTR szOrgOut, 
     int nAnsiLen;
     uint32_t dwSehUnused;
     _CERT_INFO sCertInfo;
-    SIZE_T nMsgInfoSize;
+    DWORD nMsgInfoSize;
     uint8_t* local_8 = gszFileSignerOrganizationAttribute;
     uint32_t dwSehHandlerAddr = 0x517c3f;
     /* int cchWideChar for MultiByteToWideChar */ /* LPWSTR lpWideCharStr for MultiByteToWideChar */ /* int cbMultiByte for MultiByteToWideChar */ /* LPCSTR lpMultiByteStr for MultiByteToWideChar */ /* DWORD dwFlags for MultiByteToWideChar */ /* UINT CodePage for MultiByteToWideChar */ if (!(szFilePath && *szFilePath != '\0')) {
@@ -488,7 +488,7 @@ void __stdcall CACHE_DeleteFile() {
 // @sourcefile .\BnSend.cpp
 void BNSEND_FreeRealmQueryData() {
     if (gpRealmQueryData) {
-      D2_FREE(gpRealmQueryData);
+      D2_FREE_AT(gpRealmQueryData, ".\\BnSend.cpp", 0x19a);
     }
 
     gpRealmQueryData = 0;
@@ -497,7 +497,7 @@ void BNSEND_FreeRealmQueryData() {
 // @sourcefile .\BnSend.cpp
 void BNSEND_FreeUserProfileData() {
     if (gpBNetWriteUserData) {
-      D2_FREE(gpBNetWriteUserData);
+      D2_FREE_AT(gpBNetWriteUserData, ".\\BnSend.cpp", 0x3b2);
     }
 
     gpBNetWriteUserData = 0;

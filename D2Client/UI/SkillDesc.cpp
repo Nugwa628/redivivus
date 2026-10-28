@@ -2346,103 +2346,103 @@ void __fastcall SKILLDESC_BuildMagicAffixDesc(D2UnitStrc * pUnit, uint16_t * wsz
       }
 
       pItemsTxtLine = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(bIsSocketFiller);
-      if (pItemsTxtLine) {
-        *wszText = L'\0';
-        bIsSocketFiller = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Gem);
+      if (!pItemsTxtLine) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x21c);
+        exit(-1);
+      }
+
+      *wszText = L'\0';
+      bIsSocketFiller = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Gem);
+      if (!bIsSocketFiller) {
+        bIsSocketFiller = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Rune);
         if (!bIsSocketFiller) {
-          bIsSocketFiller = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Rune);
-          if (!bIsSocketFiller) {
-            return;
-          }
+          return;
+        }
 
-          pGemsTxtLine = D2Common::DATATBLS::ItemTbls::TXT_Gems_GetLine(pItemsTxtLine->dwGemOffset);
-          if (!pGemsTxtLine) {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
-            exit(-1);
-          }
-
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
-          wszAffixLine[0] = L'\0';
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b42);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          SKILLDESC_FormatMagicPrefixDesc(pUnit, pGemsTxtLine, 2, wszText, nMaxBufferSize, wszAffixLine);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
-          wszAffixLine[0] = L'\0';
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b41);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          SKILLDESC_FormatMagicPrefixDesc(pUnit, pGemsTxtLine, 1, wszText, nMaxBufferSize, wszAffixLine);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
-          wszAffixLine[0] = L'\0';
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b44);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          SKILLDESC_FormatMagicPrefixDesc(pUnit, pGemsTxtLine, 1, wszText, nMaxBufferSize, wszAffixLine);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
-          wszAffixLine[0] = L'\0';
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b43);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          SKILLDESC_FormatMagicPrefixDesc(pUnit, pGemsTxtLine, 0, wszText, nMaxBufferSize, wszAffixLine);
-        } else {
-          pGemsTxtLine = D2Common::DATATBLS::ItemTbls::TXT_Gems_GetLine(pItemsTxtLine->dwGemOffset);
-          if (!pGemsTxtLine) {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x223);
-            exit(-1);
-          }
-
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
-          wszAffixLine[0] = L'\0';
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b42);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          SKILLDESC_FormatMagicSuffixDesc(pUnit, pGemsTxtLine, 2, wszText, nMaxBufferSize, wszAffixLine);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
-          wszAffixLine[0] = L'\0';
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b41);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          SKILLDESC_FormatMagicSuffixDesc(pUnit, pGemsTxtLine, 1, wszText, nMaxBufferSize, wszAffixLine);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
-          wszAffixLine[0] = L'\0';
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b44);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          SKILLDESC_FormatMagicSuffixDesc(pUnit, pGemsTxtLine, 1, wszText, nMaxBufferSize, wszAffixLine);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
-          wszAffixLine[0] = L'\0';
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b43);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
-          SKILLDESC_FormatMagicSuffixDesc(pUnit, pGemsTxtLine, 0, wszText, nMaxBufferSize, wszAffixLine);
+        pGemsTxtLine = D2Common::DATATBLS::ItemTbls::TXT_Gems_GetLine(pItemsTxtLine->dwGemOffset);
+        if (!pGemsTxtLine) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
+          exit(-1);
         }
 
         wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
+        wszAffixLine[0] = L'\0';
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b42);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        SKILLDESC_FormatMagicPrefixDesc(pUnit, pGemsTxtLine, 2, wszText, nMaxBufferSize, wszAffixLine);
         wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
-        return;
+        wszAffixLine[0] = L'\0';
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b41);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        SKILLDESC_FormatMagicPrefixDesc(pUnit, pGemsTxtLine, 1, wszText, nMaxBufferSize, wszAffixLine);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
+        wszAffixLine[0] = L'\0';
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b44);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        SKILLDESC_FormatMagicPrefixDesc(pUnit, pGemsTxtLine, 1, wszText, nMaxBufferSize, wszAffixLine);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
+        wszAffixLine[0] = L'\0';
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b43);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        SKILLDESC_FormatMagicPrefixDesc(pUnit, pGemsTxtLine, 0, wszText, nMaxBufferSize, wszAffixLine);
+      } else {
+        pGemsTxtLine = D2Common::DATATBLS::ItemTbls::TXT_Gems_GetLine(pItemsTxtLine->dwGemOffset);
+        if (!pGemsTxtLine) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x223);
+          exit(-1);
+        }
+
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
+        wszAffixLine[0] = L'\0';
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b42);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        SKILLDESC_FormatMagicSuffixDesc(pUnit, pGemsTxtLine, 2, wszText, nMaxBufferSize, wszAffixLine);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
+        wszAffixLine[0] = L'\0';
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b41);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        SKILLDESC_FormatMagicSuffixDesc(pUnit, pGemsTxtLine, 1, wszText, nMaxBufferSize, wszAffixLine);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
+        wszAffixLine[0] = L'\0';
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b44);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        SKILLDESC_FormatMagicSuffixDesc(pUnit, pGemsTxtLine, 1, wszText, nMaxBufferSize, wszAffixLine);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
+        wszAffixLine[0] = L'\0';
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b43);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9b);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
+        SKILLDESC_FormatMagicSuffixDesc(pUnit, pGemsTxtLine, 0, wszText, nMaxBufferSize, wszAffixLine);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x21c);
-      exit(-1);
+      wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
+      D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
+      wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
+      D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszLocalStr);
+      return;
     }
 }
 

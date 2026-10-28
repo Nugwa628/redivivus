@@ -30,8 +30,8 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
 
@@ -1097,7 +1097,7 @@ void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t nOpcode
       } else {
         pDestPtr = szDestPath;
         pDestPtr = pDestPtr + strlen(pDestPtr) + 1;
-        __frame0.dwStackPad3 = (char*)D2_ALLOC((size_t)(pDestPtr + (1 - (int)(szDestPath + 1))));
+        __frame0.dwStackPad3 = (char*)D2_ALLOC_AT((size_t)(pDestPtr + (1 - (int)(szDestPath + 1))), ".\\BnDownload.cpp", 0x179);
         bOpened = (int)__frame0.dwStackPad3 - (int)szDestPath;
         do {
           cStrChar = *szDestPath;
@@ -1119,7 +1119,7 @@ void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t nOpcode
             puPoolCursor = (uint32_t*)((int)puPoolCursor + 1);
           } while ((char)uPoolChar != '\0');
 
-          __frame0.dwStackPad2 = (char*)D2_ALLOC((size_t)((int)puPoolCursor + (1 - ((int)pPoolMgr + 1))));
+          __frame0.dwStackPad2 = (char*)D2_ALLOC_AT((size_t)((int)puPoolCursor + (1 - ((int)pPoolMgr + 1))), ".\\BnDownload.cpp", 0x182);
           bOpened = (int)__frame0.dwStackPad2 - (int)pPoolMgr;
           do {
             uPoolChar = *pPoolMgr;
@@ -1136,7 +1136,7 @@ void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t nOpcode
       if (!bDeleteSource || !__frame1.archiveFileCtx) {
         _Dst = 0;
       } else {
-        _Dst = D2_ALLOC(bDeleteSource);
+        _Dst = D2_ALLOC_AT(bDeleteSource, ".\\BnDownload.cpp", 0x18b);
         memcpy(_Dst, __frame1.archiveFileCtx, bDeleteSource);
       }
       __frame0.dwStackPad0 = bDeleteSource;

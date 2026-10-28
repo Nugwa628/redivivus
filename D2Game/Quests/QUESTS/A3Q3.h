@@ -99,7 +99,7 @@ void __fastcall Q20_Callback04_ItemPickedUp(struct D2QuestDataStrc * pQuestData,
 // real play: bump nStateFlag 0->1 and return. Once at step 5 (Will used), it looks up the chained
 // prerequisite quest (nSequenceQuestId = QUEST_AbleGoToAct3) and invokes that quest's own sequence
 // filter, propagating the completion forward in the quest chain.
-void __fastcall Q20_SequenceFilter(struct D2QuestDataStrc * pQuestData);
+bool __fastcall Q20_SequenceFilter(struct D2QuestDataStrc * pQuestData);
 // A3Q3 "Khalim's Will" — callback #14: per-player counter maintenance. Increments the
 // "players holding the Will item" tally (aPlayerGUID[7]) when this player has the quest item; clears
 // the aPlayerGUID[8] one-shot flag once the count drops back to exactly 1. Bookkeeping for spawn/drop

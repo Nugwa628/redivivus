@@ -550,10 +550,10 @@ uint32_t __stdcall SFileLoadFileEx2(struct D2ArchiveStrc * pArchive, uint32_t * 
 // @blizzard SFileReadFile (SFILE.CPP)
 int __stdcall SFileReadFile(struct D2MPQFileStrc * pMPQFile, void * pOutputBuffer, uint32_t nBytesToRead, uint32_t * pnSize, int32_t pAsyncReadCtx);
 // Simplified wrapper for SFILE_ReadFile that passes 0 for the completion callback parameter and param6 as the async flags. Used when caller doesn't need completion notification.
-void __stdcall SFILE_ReadFileSimple(struct D2MPQFileStrc * pMPQFile, void * pOutputBuffer, uint32_t nBytesToRead, size_t * pnSize, int32_t pAsyncReadCtx, struct D2StormAsyncCompletionStrc * pCompletion);
+void __stdcall SFILE_ReadFileSimple(struct D2MPQFileStrc * pMPQFile, void * pOutputBuffer, uint32_t nBytesToRead, uint32_t * pnSize, int32_t pAsyncReadCtx, struct D2StormAsyncCompletionStrc * pCompletion);
 // Load MPQ attributes from (attributes) file in archive
 // @sourcefile .\SOURCE\SFILE.CPP
-int SFILE_LoadAttributes(struct D2ArchiveStrc * pArchive, int pAttributesBuffer, int nNumEntries);
+int __thiscall SFILE_LoadAttributes(struct D2ArchiveStrc * pArchive, int pAttributesBuffer, int nNumEntries);
 // @blizzard FindChunk (SFILE.CPP)
 uint32_t SFILE_FindChunk(int32_t nChunkId, struct D2MPQFileStrc * pMPQFile, int * pnChunkSize);
 // Open wave file as audio stream from MPQ archive. Parses RIFF/WAVE headers, allocates audio buffer, initializes DirectSound stream with frequency/channels settings. Starts async IO thread. Returns 1 on success, 0 on failure.

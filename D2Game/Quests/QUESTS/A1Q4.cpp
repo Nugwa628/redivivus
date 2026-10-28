@@ -65,24 +65,20 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA1Q4Strc) == 0x1bc, "D2_NEW(D2QuestDataA1Q4Strc): the 32-bit layout must be the 0x1bc bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA1Q4Strc) == 0x1bc, "D2_NEW_AT(D2QuestDataA1Q4Strc): the 32-bit layout must be the 0x1bc bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpExecuteOnUnitFunction
 #define RECON_FPTD_fpExecuteOnUnitFunction
 typedef BOOL (__fastcall *fpExecuteOnUnitFunction)(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg);
-#endif
-#ifndef RECON_FPTD_QUESTSEQ
-#define RECON_FPTD_QUESTSEQ
-typedef bool (__fastcall *QUESTSEQ)(D2QuestDataStrc * pQuestData);
 #endif
 
 namespace D2Game::Quests::QUESTS::A1Q4 {
@@ -1161,7 +1157,12 @@ void __fastcall MakeTownPortalFromScroolTree(::SGAMEDATA * pGame, D2UnitStrc * p
     D2QuestDataA1Q4Strc* pQuestSpecificData;
     D2UnitStrc* pTriggerUnit = pUnit;
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
-    if (pQuestData) {
+    if (!pQuestData) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x68e);
+      exit(-1);
+    }
+
+    {
       bool bPortalSpawned;
       pQuestSpecificData = pQuestData->pQuestSpecificData.pA1Q4;
       if (!(pQuestData->bIsNotIntroduction && !pQuestSpecificData->sSub.bQuestObjectsActivated)) {
@@ -1205,9 +1206,6 @@ void __fastcall MakeTownPortalFromScroolTree(::SGAMEDATA * pGame, D2UnitStrc * p
       QUEST_SetStateAndBroadcast(pQuestData, 6, nullptr, (::fpExecuteOnUnitFunction)Q04_NotifyQuestStateToPlayer, true);
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x68e);
-    exit(-1);
 }
 
 // A1Q4 — OBJOP_A1Q4_ActivateInifussTree (object OperateFn): player clicks the Tree
@@ -1723,27 +1721,30 @@ void __fastcall Q04_SendStonesOrderToClient(::SGAMEDATA * pGame, D2UnitStrc * pU
 // the next quest in the chain (nSequenceQuestId = QUEST_ToolsOfTheTrade) by invoking
 // its sequence filter. Asserts the next filter pointer is valid.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q4.cpp
-void __fastcall Q04_SequenceFilter(D2QuestDataStrc * pQuestData) {
+bool __fastcall Q04_SequenceFilter(D2QuestDataStrc * pQuestData) {
+    bool bVar1;
     D2QuestDataStrc* pQuestData_00;
-    BOOL BVar1;
+    BOOL BVar2;
     if (!pQuestData->nStateFlag && pQuestData->bIsNotIntroduction) {
       QUEST_DebugPrint(pQuestData->pGame, "Started quest", "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q4.cpp", 599);
       QUEST_SetStateFlag(pQuestData, 1, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q4.cpp", 0x891);
     } else if (pQuestData->nStateFlag == 6 || !pQuestData->bIsNotIntroduction) {
       pQuestData_00 = GetQuestDataByQuestNoInternal(pQuestData->pGame, pQuestData->nSequenceQuestId);
       if (!pQuestData_00) {
-        return;
+        return false;
       }
 
-      /* FARPROC lpfn for IsBadCodePtr */ BVar1 = IsBadCodePtr((FARPROC)pQuestData->fpSequenceFilter);
-      if (BVar1) {
+      /* FARPROC lpfn for IsBadCodePtr */ BVar2 = IsBadCodePtr((FARPROC)pQuestData->fpSequenceFilter);
+      if (BVar2) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x899);
         exit(-1);
       }
 
-      pQuestData_00->fpSequenceFilter(pQuestData_00);
-      return;
+      bVar1 = pQuestData_00->fpSequenceFilter(pQuestData_00);
+      return bVar1;
     }
+
+    return true;
 }
 
 // A1Q4 — Q04_SetCainRescuedFlag: sets the quest sub-struct "Cain rescued" byte
@@ -1845,12 +1846,12 @@ void __fastcall Q04_SetScrollActivatedFlag(::SGAMEDATA * pGame) {
 // (portal-created). Halts via ErrorManager if quest data is missing. Getter only.
 uint8_t __fastcall Q04_GetPortalCreatedFlag(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
-    if (pQuestData) {
-      return pQuestData->pQuestSpecificData.pA1Q4->sSub.bStonesRolled;
+    if (!pQuestData) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x99d);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x99d);
-    exit(-1);
+    return pQuestData->pQuestSpecificData.pA1Q4->sSub.bStonesRolled;
 }
 
 // A1Q4 — Objects_InitFn09: init callback for a quest object (the Cairn-stones /
@@ -2098,7 +2099,7 @@ void __fastcall Q33_UpdateFrozenAnyaNpcState(D2QuestDataStrc * pQuestData, D2Uni
 // A1Q4 — Q04_GetCainPortalCoordinates: outputs the saved Cain-area portal coords
 // (field 0xA8/0xAC) into pOutCoords if the quest is active, the portal-placed flag is
 // set, and not suppressed. Returns 1 on success, 0 otherwise. Getter.
-BOOL Q04_GetCainPortalCoordinates(void * pThis, uint32_t * pOutCoords) {
+BOOL __thiscall Q04_GetCainPortalCoordinates(void * pThis, uint32_t * pOutCoords) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal((::SGAMEDATA*)pThis, QUESTINT_TheSearchForCain);
     if (!(pQuestData && pQuestData->bIsNotIntroduction)) {
       return 0;
@@ -2305,7 +2306,7 @@ void __fastcall Q04_DropShieldRewards(D2QuestDataStrc * pQuestData, D2UnitStrc *
 
 // A1Q4 — Q04_SetCainUnitGUID: stores Cain's unit GUID into the quest sub-struct
 // (field_0xB0). Setter only.
-void Q04_SetCainUnitGUID(void * pThis, int32_t nCainGUID) {
+void __thiscall Q04_SetCainUnitGUID(void * pThis, int32_t nCainGUID) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal((::SGAMEDATA*)pThis, QUESTINT_TheSearchForCain);
     if (!pQuestData) {
       return;
@@ -2371,7 +2372,12 @@ void __stdcall Q04_ActivateCairnStonesAndTree(char cParam1, char cParam2, D2Ques
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q4.cpp
 void __fastcall Q04_ForceStartQuestProgression(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
-    if (pQuestData) {
+    if (!pQuestData) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x357);
+      exit(-1);
+    }
+
+    {
       D2QuestDataA1Q4Strc* pDVar1;
       pDVar1 = pQuestData->pQuestSpecificData.pA1Q4;
       if (pDVar1->sSub.field_0x4D) {
@@ -2383,9 +2389,6 @@ void __fastcall Q04_ForceStartQuestProgression(::SGAMEDATA * pGame) {
       pDVar1->sSub.field_0x4D = 1;
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x357);
-    exit(-1);
 }
 
 // A1Q4 — Q04_Callback_03 (quest event handler, slot 3): gossip/dialogue progression.
@@ -2610,9 +2613,9 @@ void __fastcall Q04_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->sStateFunctions.fpQuestStateHandler[10] = Q04_Callback10_PlayerLeavesGame;
     pQuestData->sStateFunctions.fpQuestStateHandler[2] = Q04_Callback02_NpcDeactivate;
     pQuestData->sStateFunctions.fpQuestStateHandler[0xd] = Q04_Callback13_PlayerStartedGame;
-    pQuestData->fpSequenceFilter = (QUESTSEQ)Q04_SequenceFilter;
+    pQuestData->fpSequenceFilter = Q04_SequenceFilter;
     pQuestData->nSequenceQuestId = QUEST_ToolsOfTheTrade;
-    D2QuestDataA1Q4Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA1Q4Strc);
+    D2QuestDataA1Q4Strc* pQuestSpecificData = D2_NEW_POOL_AT(pGame->pMemoryPool, D2QuestDataA1Q4Strc, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q4.cpp", 0x95f);
     pQuestData->pQuestSpecificData.pA1Q4 = pQuestSpecificData;
     memset(pQuestSpecificData, 0, 0x1bc);
     pQuestSpecificData->nScrollActivationStep = 0;

@@ -770,12 +770,12 @@ int32_t __fastcall PLRSAVE_SerializeCorpseData(::SGAMEDATA * pGame, D2UnitStrc *
       *(int*)(pCorpseBuffer + 4) = nCorpsePosX;
       *(int*)(pCorpseBuffer + 6) = nCorpsePosY;
       nInventoryBytes = SAVE_SerializeInventoryItems(pCorpseUnit->pInventory, pCorpseBuffer + 8, nBufferSize - 0x10, 0, nParam, 0);
-      if (0 < nInventoryBytes) {
-        return nInventoryBytes + 0x10;
+      if (!(0 < nInventoryBytes)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x984);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x984);
-      exit(-1);
+      return nInventoryBytes + 0x10;
     }
 }
 
@@ -2041,7 +2041,7 @@ int __fastcall PLRSAVE_DispatchItemLoadByFormat(::SGAMEDATA * pGame, D2UnitStrc 
 
 // Creates a player corpse unit during save-game loading. Allocates a UNIT_PLAYER ghost with UNITFLAG_CANBEATTACKED cleared and STATE_playerbody set, copies client/name/seed from the live unit, sets inventory owner GUID, then restores the corpse's items from the save stream (either PLRSAVE_RestoreItemsFromStream for format 0x47 or PLRSAVE_LoadItemListFromStream for 0x48-0x60). On success appends an inventory notification and sends 0x8E CorpseAssign.
 // @sourcefile .\PLAYER\PlrSave.cpp
-int32_t __stdcall _oldSaveGameLoadingPart7_part1(int32_t nParam1, uint32_t nParam, int32_t nParam2, uint8_t * * pbParam, D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+int32_t __stdcall _oldSaveGameLoadingPart7_part1(uint8_t * nParam1, uint32_t nParam, int32_t nParam2, uint32_t * pbParam, D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     char* szCharName;
     int32_t nItemLoadResult;
     uint8_t* pCorpseBytesRead;
@@ -2091,13 +2091,13 @@ int32_t __stdcall _oldSaveGameLoadingPart7_part1(int32_t nParam1, uint32_t nPara
     pCorpseBytesRead = &pClientLocal->nCharTemplate;
     D2Common::INVENTORY::Inventory::INVENTORY_AddCorpse(pUnit->pInventory, pCorpseUnit->nUnitGUID, 0, UNIT_MONSTER);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x8E_CorpseAssign_Sender(pGame, pUnit->nUnitGUID, pCorpseUnit->nUnitGUID, 1);
-    *pbParam = pCorpseBytesRead;
+    *pbParam = (uint32_t)pCorpseBytesRead;
     nItemLoadResult = 0;
     return nItemLoadResult;
 }
 
-int32_t __fastcall _oldSaveGameLoadingPart7(::SGAMEDATA * pGame, D2UnitStrc * pUnit, short * param_1, uint32_t param_2, uint32_t nParam, uint8_t * * pbParam) {
-    uint8_t* pBytesPerCorpse;
+int32_t __fastcall _oldSaveGameLoadingPart7(::SGAMEDATA * pGame, D2UnitStrc * pUnit, short * param_1, uint32_t param_2, uint32_t nParam, uint32_t * pbParam) {
+    uint32_t pBytesPerCorpse;
     *pbParam = 0;
     if (0x19 < param_2 - 0x47) {
       return 1;
@@ -2115,19 +2115,19 @@ int32_t __fastcall _oldSaveGameLoadingPart7(::SGAMEDATA * pGame, D2UnitStrc * pU
     if (nCorpseCount) {
       int32_t nCorpseResult;
       do {
-        nCorpseResult = _oldSaveGameLoadingPart7_part1((int32_t)pCorpseData, param_2, nRemainingBytes, &pBytesPerCorpse, pCurrentUnit, pGame);
+        nCorpseResult = _oldSaveGameLoadingPart7_part1(pCorpseData, param_2, nRemainingBytes, &pBytesPerCorpse, pCurrentUnit, pGame);
         if (nCorpseResult) {
           return nCorpseResult;
         }
 
-        param_1 = (short int*)((int)param_1 + (int)pBytesPerCorpse);
-        pCorpseData += (int)pBytesPerCorpse;
-        nRemainingBytes -= (int)pBytesPerCorpse;
+        param_1 = (short int*)((int)param_1 + pBytesPerCorpse);
+        pCorpseData += pBytesPerCorpse;
+        nRemainingBytes -= pBytesPerCorpse;
         nParam++;
       } while (nParam < nCorpseCount);
     }
 
-    *pbParam = (uint8_t*)param_1;
+    *pbParam = (uint32_t)param_1;
     return 0;
 }
 
@@ -2532,7 +2532,7 @@ int32_t __fastcall SEVER_loadFrom_Old_Savegame(::SGAMEDATA * pGame, D2ClientStrc
     if (!nLoadResult) {
       nGoldLimit = nBytesRemaining - (int)ppUnit;
       pSkillsData = (short int*)(pItemsData + (int)ppUnit);
-      iVar1 = _oldSaveGameLoadingPart7(__frame1.pGameLocal, pUnit, pSkillsData, nSavefileSize, nGoldLimit, (uint8_t**)&ppUnit);
+      iVar1 = _oldSaveGameLoadingPart7(__frame1.pGameLocal, pUnit, pSkillsData, nSavefileSize, nGoldLimit, (uint32_t*)&ppUnit);
       if (!iVar1) {
         pCorpseData = (uint32_t*)((int)pSkillsData + (int)ppUnit);
         ppUnitOut = (D2UnitStrc**)_oldSaveGameLoadingPart8(pUnit, pCorpseData, nSavefileSize, nGoldLimit - (int)ppUnit, (uint32_t**)&ppUnit, __frame1.pGameLocal);

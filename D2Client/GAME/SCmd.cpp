@@ -119,19 +119,19 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2ServerCmdStrc) == 0x10, "D2_NEW(D2ServerCmdStrc): the 32-bit layout must be the 0x10 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2ServerCmdStrc) == 0x10, "D2_NEW_AT(D2ServerCmdStrc): the 32-bit layout must be the 0x10 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_D2NET_CLIENT_D2GStoCLT_Unit
@@ -229,12 +229,12 @@ void DownloadSave(char * pBytes) {
         goto append_chunk;
       }
 
-      D2_FREE(D2Game::Save::pRawSaveBuffer);
+      D2_FREE_AT(D2Game::Save::pRawSaveBuffer, ".\\GAME\\SCmd.cpp", 0x5b);
       D2Game::Save::pRawSaveBuffer = 0;
       D2Game::Save::nRawSaveBufferSize = 0;
     }
 
-    D2Game::Save::pRawSaveBuffer = (uint8_t*)D2_ALLOC(*(size_t*)(pBytes + 3));
+    D2Game::Save::pRawSaveBuffer = (uint8_t*)D2_ALLOC_AT(*(size_t*)(pBytes + 3), ".\\GAME\\SCmd.cpp", 0x62);
     append_chunk:
     pDst = D2Game::Save::pRawSaveBuffer + D2Game::Save::nRawSaveBufferSize;
     int i = 0;
@@ -254,7 +254,7 @@ void DownloadSave(char * pBytes) {
     }
 
     SaveCharacter();
-    D2_FREE(D2Game::Save::pRawSaveBuffer);
+    D2_FREE_AT(D2Game::Save::pRawSaveBuffer, ".\\GAME\\SCmd.cpp", 0x71);
     D2Game::Save::pRawSaveBuffer = 0;
     D2Game::Save::nRawSaveBufferSize = 0;
 }
@@ -391,15 +391,17 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x02_LoadSuccess(char * pBytes) {
 int __stdcall CLIENT_GetCurrentRoomAct() {
     eD2LevelId eLevel;
     D2RoomStrc* pRoom = UNIT::CUnit::GetCurrentRoom();
-    if (pRoom) {
+    if (!pRoom) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x527);
+      exit(-1);
+    }
+
+    {
       eAct eVar1;
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       eVar1 = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
       return (uint32_t)eVar1;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x527);
-    exit(-1);
 }
 
 // Returns the act of the level containing pUnit's room; halts (line 1336) when the unit has no room.
@@ -407,15 +409,17 @@ int __stdcall CLIENT_GetCurrentRoomAct() {
 int __fastcall CLIENT_GetUnitAct(D2UnitStrc * pUnit) {
     eD2LevelId eLevel;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    if (pRoom) {
+    if (!pRoom) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x538);
+      exit(-1);
+    }
+
+    {
       eAct eVar1;
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       eVar1 = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
       return (uint32_t)eVar1;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x538);
-    exit(-1);
 }
 
 // 0x04 sets ServerLoadingComplete=1 / _gLevelLoadInProgress=0, calls
@@ -427,7 +431,12 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x04_STARTACT(char * pBytes) {
     ServerLoadingComplete = 1;
     gLevelLoadInProgress = 0;
     D2RoomStrc* pRoom = UNIT::CUnit::GetCurrentRoom();
-    if (pRoom) {
+    if (!pRoom) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x527);
+      exit(-1);
+    }
+
+    {
       eD2LevelId eLevel;
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
@@ -443,9 +452,6 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x04_STARTACT(char * pBytes) {
       pUnit->pUnitData.pUnitDataPlayer->nTargetUnitGUID = 0;
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x527);
-    exit(-1);
 }
 
 // The teardown that undoes 0x04 (0045c9a0).
@@ -837,7 +843,12 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x16_UPDATE(char * pBytes) {
     uint8_t* pUnitEntry;
     int i;
     uint16_t nY;
-    if (pBytes[3] != '\0') {
+    if (pBytes[3] == '\0') {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x855);
+      exit(-1);
+    }
+
+    {
       uint16_t nX;
       pUnitEntry = (uint8_t*)(pBytes + 4);
       i = 0;
@@ -859,9 +870,6 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x16_UPDATE(char * pBytes) {
 
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x855);
-    exit(-1);
 }
 
 void __fastcall NET_D2GS_CLIENT_Incoming0x28_INTERACTION_ENABLE(D2GSPacketSrv0x28 * pBytes) {
@@ -2586,7 +2594,7 @@ D2ServerCmdStrc * STRUCT_CreateAndPreprareServerCmd(D2UnitStrc * pUnit) {
 
     D2ServerCmdStrc* pServerCmd = UNIT::CUnit::GetServerCmd(pUnit);
     if (!pServerCmd) {
-      pServerCmd = D2_NEW(D2ServerCmdStrc);
+      pServerCmd = D2_NEW_AT(D2ServerCmdStrc, ".\\GAME\\SCmd.cpp", 0x1266);
       pServerCmd->nBufferArraySize = 0;
       pServerCmd->nUsedBuffersCount = 0;
       pServerCmd->field2_0x8 = 0;
@@ -2595,11 +2603,11 @@ D2ServerCmdStrc * STRUCT_CreateAndPreprareServerCmd(D2UnitStrc * pUnit) {
     }
 
     nMaxPacketSize = pServerCmd->nBufferArraySize + 5;
-    char* pNewBuffers = (char*)D2_ALLOC(nD2PacketsClientBufferSize * nMaxPacketSize);
+    char* pNewBuffers = (char*)D2_ALLOC_AT(nD2PacketsClientBufferSize * nMaxPacketSize, ".\\GAME\\SCmd.cpp", 0x126b);
     memset(pNewBuffers, 0, nD2PacketsClientBufferSize * nMaxPacketSize);
     if (pServerCmd->aBuffers) {
       memcpy(pNewBuffers, pServerCmd->aBuffers, pServerCmd->nBufferArraySize * nD2PacketsClientBufferSize);
-      D2_FREE(pServerCmd->aBuffers);
+      D2_FREE_AT(pServerCmd->aBuffers, ".\\GAME\\SCmd.cpp", 0x126f);
     }
 
     pServerCmd->nBufferArraySize = nMaxPacketSize;
@@ -2752,8 +2760,8 @@ void __fastcall FreeServerCmd(D2UnitStrc * pUnit) {
       return;
     }
 
-    D2_FREE(pMemoryToFree->aBuffers);
-    D2_FREE(pMemoryToFree);
+    D2_FREE_AT(pMemoryToFree->aBuffers, ".\\GAME\\SCmd.cpp", 0x1516);
+    D2_FREE_AT(pMemoryToFree, ".\\GAME\\SCmd.cpp", 0x1517);
     UNIT::CUnit::SetServerCmd(pUnit, nullptr);
 }
 

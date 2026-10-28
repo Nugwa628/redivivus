@@ -1117,44 +1117,43 @@ void PLAYER_ExecuteSkillWithAura(int32_t nTargetGUID, eD2UnitType eTargetUnitTyp
       exit(-1);
     } else {
       uint32_t bOutOfRange;
-      if (pUnderMouse->pPlayer) {
-        if (!(*(uint8_t*)&pUnderMouse->flags & 0x20)) {
-          bOutOfRange = SKILL_CheckAuraRange(pUnderMouse->pSkill, pUnderMouse->pTarget, &nCurDist, &nTotalDist);
-          if (!bOutOfRange) {
-            if (*(uint8_t*)&pUnderMouse->flags & 1) {
-              Engine::StoreLastSkillHit(unk1, pUnderMouse->pPlayer, eTargetUnitType, nTargetGUID);
-            }
-            if (*(uint8_t*)&pUnderMouse->flags & 2) {
-              Engine::StoreLastSkillHit(unk3 | Poison, pUnderMouse->pPlayer, eTargetUnitType, nTargetGUID);
-            }
+      if (!pUnderMouse->pPlayer) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x530);
+        exit(-1);
+      }
+      if (!(*(uint8_t*)&pUnderMouse->flags & 0x20)) {
+        bOutOfRange = SKILL_CheckAuraRange(pUnderMouse->pSkill, pUnderMouse->pTarget, &nCurDist, &nTotalDist);
+        if (!bOutOfRange) {
+          if (*(uint8_t*)&pUnderMouse->flags & 1) {
+            Engine::StoreLastSkillHit(unk1, pUnderMouse->pPlayer, eTargetUnitType, nTargetGUID);
+          }
+          if (*(uint8_t*)&pUnderMouse->flags & 2) {
+            Engine::StoreLastSkillHit(unk3 | Poison, pUnderMouse->pPlayer, eTargetUnitType, nTargetGUID);
+          }
 
-            nStepsRemaining = nTotalDist - nCurDist;
-            if (nStepsRemaining < 1) {
-              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x548);
-              exit(-1);
-            } else {
-              if (nTotalDist) {
-                nSrcXPos = Units::GetXPosFromDynamicPathUnit(pUnderMouse->pPlayer);
-                nCurDist = Units::GetYPosFromDynamicPathUnit(pUnderMouse->pPlayer);
-                nDstX = Units::GetXPosFromDynamicPathUnit(pUnderMouse->pTarget);
-                nDstY = Units::GetYPosFromDynamicPathUnit(pUnderMouse->pTarget);
-                nCurDist = (nDstY - nCurDist) * nStepsRemaining / nTotalDist + nCurDist;
-                CLIENT_MovePlayerToPosition(pUnderMouse->pPlayer, (short int)((nDstX - nSrcXPos) * nStepsRemaining / nTotalDist) + (short int)nSrcXPos, (int16_t)nCurDist, pUnderMouse->nMoveActionType);
-                return;
-              }
-
+          nStepsRemaining = nTotalDist - nCurDist;
+          if (nStepsRemaining < 1) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x548);
+            exit(-1);
+          } else {
+            if (!nTotalDist) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x549);
               exit(-1);
             }
+
+            nSrcXPos = Units::GetXPosFromDynamicPathUnit(pUnderMouse->pPlayer);
+            nCurDist = Units::GetYPosFromDynamicPathUnit(pUnderMouse->pPlayer);
+            nDstX = Units::GetXPosFromDynamicPathUnit(pUnderMouse->pTarget);
+            nDstY = Units::GetYPosFromDynamicPathUnit(pUnderMouse->pTarget);
+            nCurDist = (nDstY - nCurDist) * nStepsRemaining / nTotalDist + nCurDist;
+            CLIENT_MovePlayerToPosition(pUnderMouse->pPlayer, (short int)((nDstX - nSrcXPos) * nStepsRemaining / nTotalDist) + (short int)nSrcXPos, (int16_t)nCurDist, pUnderMouse->nMoveActionType);
+            return;
           }
         }
-
-        PLAYER_ExecuteModeBasedAction(1, pUnderMouse);
-        return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x530);
-      exit(-1);
+      PLAYER_ExecuteModeBasedAction(1, pUnderMouse);
+      return;
     }
 }
 
@@ -2406,11 +2405,7 @@ void __fastcall PLAYER_ProcessPlayerModeSimulation(D2UnitStrc * pUnit) {
         /* .nFrameAdvanceMode = */ 0x2,
         /* .nCompleteMode = */ 0x0
     },
-    {
-        /* .nStepMode = */ 0x0,
-        /* .nFrameAdvanceMode = */ 0x0,
-        /* .nCompleteMode = */ 0x0
-    },
+    {},
     {
         /* .nStepMode = */ 0x1,
         /* .nFrameAdvanceMode = */ 0x0,
@@ -2426,11 +2421,7 @@ void __fastcall PLAYER_ProcessPlayerModeSimulation(D2UnitStrc * pUnit) {
         /* .nFrameAdvanceMode = */ 0x1,
         /* .nCompleteMode = */ 0x2
     },
-    {
-        /* .nStepMode = */ 0x0,
-        /* .nFrameAdvanceMode = */ 0x0,
-        /* .nCompleteMode = */ 0x0
-    },
+    {},
     {
         /* .nStepMode = */ 0x1,
         /* .nFrameAdvanceMode = */ 0x0,
@@ -2792,12 +2783,12 @@ D2UnitStrc * __stdcall FindUnit(int32_t nUnitGUID, D2UnitStrc * * ppUnitHashTabl
       pCurUnit = pCurUnit->pListNext;
     }
 
-    if (pCurUnit->eUnitType == eUnitType) {
-      return pCurUnit;
+    if (pCurUnit->eUnitType != eUnitType) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5a);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5a);
-    exit(-1);
+    return pCurUnit;
 }
 
 D2UnitStrc * __fastcall UNITS_FindClientSideUnit(int32_t nUnitGUID, eD2UnitType eUnitType) {
@@ -2856,12 +2847,12 @@ uint32_t InsertIntoHashTable(D2UnitStrc * pUnit) {
       pPrevUnit = FindUnit(pUnit->nUnitGUID, ServerSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
       if (!pPrevUnit) {
         pPrevUnit = FindUnit(pUnit->nUnitGUID, ServerSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
-        if (!pPrevUnit) {
-          goto insert_sorted;
+        if (pPrevUnit) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa5);
+          exit(-1);
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa5);
-        exit(-1);
+        goto insert_sorted;
       }
     } else {
       D2UnitStrc* (*papDVar1)[128];

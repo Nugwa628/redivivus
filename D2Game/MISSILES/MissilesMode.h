@@ -32,7 +32,7 @@ struct __attribute__((packed)) D2SubMissileAreaArgStrc {
 namespace D2Game::MISSILES::MissilesMode {
 
 // Function declarations
-uint32_t MISSILE_RollAttackHit(void * pThis, struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit1);
+uint32_t __thiscall MISSILE_RollAttackHit(void * pThis, struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit1);
 // Rolls a random elemental damage value for a missile unit. Reads max damage (eStat) and min damage (eUnitStat) stats from the unit; if an optional bonus-percent stat (eUnitStatEx) is provided, scales both bounds by that percentage. Returns a random value in [scaledMin, scaledMax] using the unit's seed, or 0 if max is less than 1 or min is 0.
 int32_t __stdcall MISSILE_RollElementalDamage(struct D2UnitStrc * pUnit, eD2UnitStat eUnitStat, eD2UnitStat eUnitStatEx, eD2UnitStat eStat);
 // MISSILE DAMAGE PACKET ASSEMBLY: Fills the caller's D2DamageStrc (memset 0x70, then +8 physical, +0x10 fire, +0x14/+0x18 burn, +0x1c lightning,

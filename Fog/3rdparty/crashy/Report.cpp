@@ -13,7 +13,7 @@
 
 namespace Fog::_3rdparty::crashy {
 
-::Report * Constructor(::Report * pThis) {
+::Report * __thiscall Constructor(::Report * pThis) {
     pThis->_vfptr = (ReportVtable*)(void*)crashy::vftable;
     pThis->pFile = 0;
     pThis->nAttachmentCount = 0;
@@ -22,7 +22,7 @@ namespace Fog::_3rdparty::crashy {
     return pThis;
 }
 
-::Report * ScalarDeletingDestructor(::Report * pThis, uint32_t nFlags) {
+::Report * __thiscall ScalarDeletingDestructor(::Report * pThis, uint32_t nFlags) {
     pThis->_vfptr = (ReportVtable*)(void*)crashy::vftable;
     if (pThis->pFile) {
       fclose(pThis->pFile);
@@ -36,7 +36,7 @@ namespace Fog::_3rdparty::crashy {
     return pThis;
 }
 
-void Destructor(::Report * pThis) {
+void __thiscall Destructor(::Report * pThis) {
     pThis->_vfptr = (ReportVtable*)(void*)crashy::vftable;
     if (!pThis->pFile) {
       return;
@@ -46,7 +46,7 @@ void Destructor(::Report * pThis) {
     pThis->pFile = 0;
 }
 
-int8_t Open(::Report * pThis, char * szFileName) {
+int8_t __thiscall Open(::Report * pThis, char * szFileName) {
     bool bGotPath;
     tm localTime;
     __time64_t tTime = __time64(nullptr);
@@ -84,7 +84,7 @@ int8_t Open(::Report * pThis, char * szFileName) {
     return pFile != 0;
 }
 
-int8_t Close(::Report * pThis) {
+int8_t __thiscall Close(::Report * pThis) {
     if (!pThis->pFile) {
       return '\x01';
     }
@@ -94,11 +94,11 @@ int8_t Close(::Report * pThis) {
     return '\x01';
 }
 
-int8_t IsOpen(::Report * pThis) {
+int8_t __thiscall IsOpen(::Report * pThis) {
     return pThis->pFile != 0;
 }
 
-int8_t AddAttachment(::Report * pThis, char * szPath, int8_t bCopyToReportDir) {
+int8_t __thiscall AddAttachment(::Report * pThis, char * szPath, int8_t bCopyToReportDir) {
     char* pBaseDirPtr;
     uint32_t uVar1;
     char* pDst;

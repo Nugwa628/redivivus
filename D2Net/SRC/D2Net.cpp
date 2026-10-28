@@ -14,8 +14,8 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -58,7 +58,7 @@ size_t __fastcall NET_D2GS_CLIENT_ExtractPacketSize(LPCRITICAL_SECTION * lpCriti
       memcpy(pBytes, pPacket, nSize);
       nPacketSize = pPacket->nSize;
       *pD2OnePacketClient = pPacket->pD2PacketClientNext;
-      D2_FREE(pPacket);
+      D2_FREE_AT(pPacket, ".\\SRC\\D2Net.cpp", 0x46);
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection((LPCRITICAL_SECTION)lpCriticalSection);
@@ -72,7 +72,7 @@ void __fastcall NET_D2GS_CLIENT_FreeAllClientD2Packets(LPCRITICAL_SECTION lpCrit
     while (pPacket) {
       pPacket = *pD2PacketClient;
       *pD2PacketClient = pPacket->pD2PacketClientNext;
-      D2_FREE(pPacket);
+      D2_FREE_AT(pPacket, ".\\SRC\\D2Net.cpp", 0x5d);
       pPacket = *pD2PacketClient;
     }
 

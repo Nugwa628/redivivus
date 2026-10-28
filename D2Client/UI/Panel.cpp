@@ -1748,13 +1748,13 @@ void __stdcall PANEL_ClearBeltSlotHover() {
 // Stores nState in gnBeltPanelState; halts (panel.cpp line 2823) when nState is negative.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 void __fastcall PANEL_SetBeltPanelState(int nState) {
-    if (-1 < nState) {
-      gnBeltPanelState = nState;
-      return;
+    if (!(-1 < nState)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb07);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb07);
-    exit(-1);
+    gnBeltPanelState = nState;
+    return;
 }
 
 BOOL __fastcall PANEL_CalculateBeltSlotIndex(D2UIMouseMsgStrc * pMsg) {

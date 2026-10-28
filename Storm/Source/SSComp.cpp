@@ -473,17 +473,20 @@ void __fastcall SCOMP_PkwareDecompress(void * pOutBuf, uint32_t * pdwOutLength, 
 }
 
 // @sourcefile .\SOURCE\SCOMP.CPP
-void __fastcall SCOMP_ArenaAlloc(D2ScompArenaStrc * pArenaState, int32_t nItems, int32_t nItemSize) {
+void * __fastcall SCOMP_ArenaAlloc(D2ScompArenaStrc * pArenaState, int32_t nItems, int32_t nItemSize) {
     uint8_t* nSize = (uint8_t*)(nItems * nItemSize);
     if ((uint32_t)nSize & 3) {
       nSize += 4 - ((uint32_t)nSize & 3);
     }
-    if (nSize < pArenaState->pBase + (pArenaState->nSize - (int)pArenaState->pCur)) {
-      pArenaState->pCur = nSize + (int)pArenaState->pCur;
-      return;
+
+    uint8_t* puVar1 = pArenaState->pCur;
+    if (nSize < pArenaState->pBase + (pArenaState->nSize - (int)puVar1)) {
+      pArenaState->pCur = nSize + (int)puVar1;
+      return puVar1;
     }
 
-    SMem::SMemAlloc((uint32_t)nSize, ".\\SOURCE\\SCOMP.CPP", 0x4c4, 0);
+    void* pvVar2 = SMem::SMemAlloc((uint32_t)nSize, ".\\SOURCE\\SCOMP.CPP", 0x4c4, 0);
+    return pvVar2;
 }
 
 // @sourcefile .\SOURCE\SCOMP.CPP
@@ -3958,72 +3961,7 @@ void SLOG_OutputReturn(D2SLogStrc * pLog) {
 void __stdcall SLOG_OutputTime(int32_t bHasData, D2SLogStrc * pLog) {
     // Static local variables (originally global data)
     static uint32_t gnSLogTimeStrLen; D2_STATIC_GUARD_BSS(gnSLogTimeStrLen, "Storm::Source::SSComp::SLOG_OutputTime::gnSLogTimeStrLen");
-    static char gszSLogTimeStr[64] = {
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-}; D2_STATIC_GUARD(gszSLogTimeStr, "Storm::Source::SSComp::SLOG_OutputTime::gszSLogTimeStr");
+    static char gszSLogTimeStr[64] = {}; D2_STATIC_GUARD(gszSLogTimeStr, "Storm::Source::SSComp::SLOG_OutputTime::gszSLogTimeStr");
     static uint32_t gdwSLogLastTime; D2_STATIC_GUARD_BSS(gdwSLogLastTime, "Storm::Source::SSComp::SLOG_OutputTime::gdwSLogLastTime");
 
     if (!pLog->bTimestamps) {

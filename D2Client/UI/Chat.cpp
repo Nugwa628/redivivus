@@ -41,12 +41,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -61,16 +61,16 @@ void CHAT_HandleIMECandidateList(HIMC hImc) {
       return;
     }
     if (gpIMECandidateList) {
-      D2_FREE(gpIMECandidateList);
+      D2_FREE_AT(gpIMECandidateList, ".\\UI\\chat.cpp", 0xeb);
     }
 
-    gpIMECandidateList = (LPCANDIDATELIST)D2_ALLOC(nAllocSize);
+    gpIMECandidateList = (LPCANDIDATELIST)D2_ALLOC_AT(nAllocSize, ".\\UI\\chat.cpp", 0xed);
     /* DWORD dwBufLen for ImmGetCandidateListA */ /* LPCANDIDATELIST lpCandList for ImmGetCandidateListA */ /* DWORD deIndex for ImmGetCandidateListA */ /* HIMC param_1 for ImmGetCandidateListA */ ImmGetCandidateListA(hImc, 0, gpIMECandidateList, nAllocSize);
     if (!(gpIMECandidateList->dwStyle == 2 && gpIMECandidateList->dwCount == 1)) {
       return;
     }
 
-    D2_FREE(gpIMECandidateList);
+    D2_FREE_AT(gpIMECandidateList, ".\\UI\\chat.cpp", 0xf2);
     gpIMECandidateList = (LPCANDIDATELIST)0x0;
 }
 
@@ -112,7 +112,7 @@ void __stdcall INPUT_HandleIMENotify(D2UIMouseMsgStrc * pMsg) {
           pMemoryToFree = gpIMECandidateList;
         if (gaIMECompositionBuffer == 9) {
           if (gpIMECandidateList) {
-            D2_FREE(gpIMECandidateList);
+            D2_FREE_AT(gpIMECandidateList, ".\\UI\\chat.cpp", 0x160);
             gpIMECandidateList = (LPCANDIDATELIST)0x0;
           }
 
@@ -124,7 +124,7 @@ void __stdcall INPUT_HandleIMENotify(D2UIMouseMsgStrc * pMsg) {
           goto cleanup;
         }
         if (pMemoryToFree) {
-          D2_FREE(pMemoryToFree);
+          D2_FREE_AT(pMemoryToFree, ".\\UI\\chat.cpp", 0x16b);
           gpIMECandidateList = (LPCANDIDATELIST)0x0;
         }
 
@@ -395,7 +395,7 @@ void __stdcall CHAT_ShutdownIME() {
       return;
     }
 
-    D2_FREE(gpIMECandidateList);
+    D2_FREE_AT(gpIMECandidateList, ".\\UI\\chat.cpp", 0x29d);
     gpIMECandidateList = (LPCANDIDATELIST)0x0;
 }
 

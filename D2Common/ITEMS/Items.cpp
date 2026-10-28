@@ -70,18 +70,18 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2UnitDataItemStrc) == 0x74, "D2_NEW(D2UnitDataItemStrc): the 32-bit layout must be the 0x74 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2UnitDataItemStrc) == 0x74, "D2_NEW_AT(D2UnitDataItemStrc): the 32-bit layout must be the 0x74 bytes 1.14d allocates");
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
 
@@ -131,7 +131,7 @@ void __stdcall STRUCT_CreateDataItem(D2PoolManagerStrc * pMemory, D2UnitStrc * p
       return;
     }
 
-    D2UnitDataItemStrc* pUnitDataItem = D2_NEW_POOL(pMemory, D2UnitDataItemStrc);
+    D2UnitDataItemStrc* pUnitDataItem = D2_NEW_POOL_AT(pMemory, D2UnitDataItemStrc, ".\\ITEMS\\Items.cpp", 0xd2);
     if (!pUnitDataItem) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd5);
       exit(-1);
@@ -153,7 +153,7 @@ void __stdcall ITEMDATA_Free(D2PoolManagerStrc * pMemory, D2UnitStrc * pUnit) {
       return;
     }
 
-    D2_FREE_POOL(pMemory, pUnit->pUnitData.pUnitDataPlayer);
+    D2_FREE_POOL_AT(pMemory, pUnit->pUnitData.pUnitDataPlayer, ".\\ITEMS\\Items.cpp", 0x10a);
 }
 
 eD2BodyLoc __stdcall GetBodyLocation(D2UnitStrc * pUnit) {
@@ -201,13 +201,13 @@ void __stdcall SetModSeed(D2UnitStrc * pUnit, int32_t nModSeed) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x187);
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
-      if (pUnit->pUnitData.pUnitDataItem) {
-        pUnit->pUnitData.pUnitDataItem->nModSeed = nModSeed;
-        return;
+      if (!pUnit->pUnitData.pUnitDataItem) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x18b);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x18b);
-      exit(-1);
+      pUnit->pUnitData.pUnitDataItem->nModSeed = nModSeed;
+      return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x188);
       exit(-1);
@@ -590,12 +590,12 @@ int32_t __stdcall ITEM_GetItemsTxt_dw2HandedWClass(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return pItemsTxt->dw2HandedWClass;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x60c);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x60c);
-      exit(-1);
+      return pItemsTxt->dw2HandedWClass;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x609);
       exit(-1);
@@ -609,12 +609,12 @@ uint32_t __stdcall ITEM_GetItemsTxt_szCode(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return pItemsTxt->dwCode;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x61e);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x61e);
-      exit(-1);
+      return pItemsTxt->dwCode;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x61b);
       exit(-1);
@@ -628,16 +628,15 @@ int32_t __stdcall ITEM_GetItemsTxt_dwAlternateGfxIfExists(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        if (!pItemsTxt->dwAlternateGfx) {
-          return pItemsTxt->dwCode;
-        }
-
-        return pItemsTxt->dwAlternateGfx;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x62b);
+        exit(-1);
+      }
+      if (!pItemsTxt->dwAlternateGfx) {
+        return pItemsTxt->dwCode;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x62b);
-      exit(-1);
+      return pItemsTxt->dwAlternateGfx;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x628);
       exit(-1);
@@ -651,12 +650,12 @@ uint8_t __stdcall ITEM_GetItemsTxt_bComponent(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return pItemsTxt->bComponent;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x638);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x638);
-      exit(-1);
+      return pItemsTxt->bComponent;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x635);
       exit(-1);
@@ -679,12 +678,12 @@ void __stdcall ITEM_GetItemsTxt_nWidthAndHeight(D2UnitStrc * pUnit, char * pWidt
 
 eD2ItemTypes __stdcall TXT_Items_GetType(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return (int)pItemsTxt->wType;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x68d);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x68d);
-    exit(-1);
+    return (int)pItemsTxt->wType;
     return (int)pItemsTxt->wType;
 }
 
@@ -695,12 +694,12 @@ uint8_t __stdcall ITEM_GetItemsTxt_nLevel(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return pItemsTxt->nLevel;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x69a);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x69a);
-      exit(-1);
+      return pItemsTxt->nLevel;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x697);
       exit(-1);
@@ -726,17 +725,17 @@ int32_t __stdcall IITEM_GetItemsTxt_dwNormCode(D2UnitStrc * pUnit) {
       exit(-1);
     } else {
       D2ItemsTxt* pItemsTxt;
-      if (pUnit->eUnitType == UNIT_ITEM) {
-        pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-        if (!pItemsTxt->dwNormCode) {
-          return pItemsTxt->dwCode;
-        }
-
-        return pItemsTxt->dwNormCode;
+      if (pUnit->eUnitType != UNIT_ITEM) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x798);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x798);
-      exit(-1);
+      pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
+      if (!pItemsTxt->dwNormCode) {
+        return pItemsTxt->dwCode;
+      }
+
+      return pItemsTxt->dwNormCode;
     }
 }
 
@@ -786,12 +785,12 @@ uint8_t __stdcall ITEM_GetItemsTxt_nRangeAdder(D2UnitStrc * pUnit) {
 
 BOOL __stdcall TXT_Items_ConfirmWClass(uint32_t nClassId, int32_t dwWClass) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nClassId);
-    if (pItemsTxt) {
-      return (uint32_t)(pItemsTxt->dwWClass == dwWClass);
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8eb);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8eb);
-    exit(-1);
+    return (uint32_t)(pItemsTxt->dwWClass == dwWClass);
     return (uint32_t)(pItemsTxt->dwWClass == dwWClass);
 }
 
@@ -806,12 +805,12 @@ BOOL __stdcall HasWeaponClass(D2UnitStrc * pUnit, int32_t dwWClass) {
 
 BOOL __stdcall TXT_Items_Getb2Handed(uint32_t nClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nClassId);
-    if (pItemsTxt) {
-      return (uint32_t)pItemsTxt->b2Handed;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x906);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x906);
-    exit(-1);
+    return (uint32_t)pItemsTxt->b2Handed;
     return (uint32_t)pItemsTxt->b2Handed;
 }
 
@@ -832,12 +831,12 @@ BOOL __stdcall IsStackable(D2UnitStrc * pUnit) {
     }
 
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-    if (pItemsTxt) {
-      return (uint32_t)pItemsTxt->bStackable;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x922);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x922);
-    exit(-1);
+    return (uint32_t)pItemsTxt->bStackable;
     return (uint32_t)pItemsTxt->bStackable;
 }
 
@@ -932,21 +931,20 @@ BOOL __stdcall INVENTORY_CheckIfItemCanBeAutoBelted(D2InventoryStrc * pInventory
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        if (pItemsTxt->bAutoBelt != '\0') {
-          return 1;
-        }
-
-        BVar1 = INVENTORY::Inventory::INVENTORY_CanAutoBeltItem(pInventory, pUnit);
-        if (BVar1 != -1) {
-          return 1;
-        }
-
-        return 0;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9a9);
+        exit(-1);
+      }
+      if (pItemsTxt->bAutoBelt != '\0') {
+        return 1;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9a9);
-      exit(-1);
+      BVar1 = INVENTORY::Inventory::INVENTORY_CanAutoBeltItem(pInventory, pUnit);
+      if (BVar1 != -1) {
+        return 1;
+      }
+
+      return 0;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9a7);
       exit(-1);
@@ -960,12 +958,12 @@ int32_t __stdcall IsUseable(D2UnitStrc * pUnit) {
     }
 
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-    if (pItemsTxt) {
-      return (uint32_t)pItemsTxt->bUseable;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9c4);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9c4);
-    exit(-1);
+    return (uint32_t)pItemsTxt->bUseable;
     return (uint32_t)pItemsTxt->bUseable;
 }
 
@@ -976,12 +974,12 @@ int32_t __stdcall IsUnique(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return (uint32_t)pItemsTxt->bUnique;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9d1);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9d1);
-      exit(-1);
+      return (uint32_t)pItemsTxt->bUnique;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9ce);
       exit(-1);
@@ -995,12 +993,12 @@ int32_t __stdcall IsQuestItem(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return (uint32_t)pItemsTxt->bQuest;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9de);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9de);
-      exit(-1);
+      return (uint32_t)pItemsTxt->bQuest;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9db);
       exit(-1);
@@ -1296,12 +1294,12 @@ int32_t __stdcall ITEMS_CalculateGamblePrice(int32_t nLevel, D2UnitStrc * pItem)
 
 int32_t __stdcall TXT_Items_GetMaxStack(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return pItemsTxt->dwMaxStack;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd4f);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd4f);
-    exit(-1);
+    return pItemsTxt->dwMaxStack;
     return pItemsTxt->dwMaxStack;
 }
 
@@ -1313,31 +1311,31 @@ int __stdcall ITEM_GetMaxStack(D2UnitStrc * pUnit) {
       exit(-1);
     } else {
       int nMaxStack;
-      if (pUnit->eUnitType == UNIT_ITEM) {
-        nLine = TXT_Items_GetMaxStack(pUnit->nClassId);
-        nMaxStack = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_item_extra_stack, 0);
-        nMaxStack = nLine + nMaxStack;
-        if (0x1fe >= nMaxStack) {
-          return nMaxStack;
-        }
+      if (pUnit->eUnitType != UNIT_ITEM) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd5b);
+        exit(-1);
+      }
 
-        nMaxStack = 0x1ff;
+      nLine = TXT_Items_GetMaxStack(pUnit->nClassId);
+      nMaxStack = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_item_extra_stack, 0);
+      nMaxStack = nLine + nMaxStack;
+      if (0x1fe >= nMaxStack) {
         return nMaxStack;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd5b);
-      exit(-1);
+      nMaxStack = 0x1ff;
+      return nMaxStack;
     }
 }
 
 int32_t __stdcall TXT_Items_GetSpawnStack(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return pItemsTxt->dwSpawnStack;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd6c);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd6c);
-    exit(-1);
+    return pItemsTxt->dwSpawnStack;
     return pItemsTxt->dwSpawnStack;
 }
 
@@ -1347,24 +1345,24 @@ int32_t __stdcall ITEM_GetItemsTxt_dwSpawnStack(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd7b);
       exit(-1);
     } else {
-      if (pUnit->eUnitType == UNIT_ITEM) {
-        nLine = TXT_Items_GetSpawnStack(pUnit->nClassId);
-        return nLine;
+      if (pUnit->eUnitType != UNIT_ITEM) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd7c);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd7c);
-      exit(-1);
+      nLine = TXT_Items_GetSpawnStack(pUnit->nClassId);
+      return nLine;
     }
 }
 
 int32_t __stdcall TXT_Items_GetMinStack(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return pItemsTxt->dwMinStack;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd8a);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd8a);
-    exit(-1);
+    return pItemsTxt->dwMinStack;
     return pItemsTxt->dwMinStack;
 }
 
@@ -1374,13 +1372,13 @@ int32_t __stdcall ITEM_GetItemsTxt_dwMinStack(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd93);
       exit(-1);
     } else {
-      if (pUnit->eUnitType == UNIT_ITEM) {
-        nLine = TXT_Items_GetMinStack(pUnit->nClassId);
-        return nLine;
+      if (pUnit->eUnitType != UNIT_ITEM) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd94);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd94);
-      exit(-1);
+      nLine = TXT_Items_GetMinStack(pUnit->nClassId);
+      return nLine;
     }
 }
 
@@ -1391,12 +1389,12 @@ uint32_t __stdcall TXT_Items_GetBitFieldAnd0x08(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return pItemsTxt->dwBitfield1 & 8;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xda0);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xda0);
-      exit(-1);
+      return pItemsTxt->dwBitfield1 & 8;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd9e);
       exit(-1);
@@ -1410,12 +1408,12 @@ bool __stdcall ITEM_GetItemsTxt_bDurWarning(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return pItemsTxt->bDurWarning;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdc6);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdc6);
-      exit(-1);
+      return pItemsTxt->bDurWarning;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdc4);
       exit(-1);
@@ -1429,12 +1427,12 @@ bool __stdcall ITEM_GetItemsTxt_bQntWarning(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return pItemsTxt->bQntWarning;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdd2);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdd2);
-      exit(-1);
+      return pItemsTxt->bQntWarning;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdd0);
       exit(-1);
@@ -1524,24 +1522,24 @@ int32_t __stdcall ITEM_GetSocketsCount(D2UnitStrc * pUnit) {
       exit(-1);
     } else {
       int nSocketCount;
-      if (pUnit->eUnitType == UNIT_ITEM) {
-        nSocketCount = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_item_numsockets, 0);
-        return nSocketCount;
+      if (pUnit->eUnitType != UNIT_ITEM) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xea7);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xea7);
-      exit(-1);
+      nSocketCount = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_item_numsockets, 0);
+      return nSocketCount;
     }
 }
 
 uint32_t __stdcall TXT_Items_GetGemApplyType(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return (uint32_t)pItemsTxt->bGemApplyType;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf28);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf28);
-    exit(-1);
+    return (uint32_t)pItemsTxt->bGemApplyType;
     return (uint32_t)pItemsTxt->bGemApplyType;
 }
 
@@ -1552,13 +1550,13 @@ uint32_t __stdcall ITEM_GetItemsTxt_bGemApplyType(D2UnitStrc * pUnit) {
       exit(-1);
     } else {
       uint32_t uVar1;
-      if (pUnit->eUnitType == UNIT_ITEM) {
-        uVar1 = TXT_Items_GetGemApplyType(pUnit->nClassId);
-        return uVar1;
+      if (pUnit->eUnitType != UNIT_ITEM) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf3e);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf3e);
-      exit(-1);
+      uVar1 = TXT_Items_GetGemApplyType(pUnit->nClassId);
+      return uVar1;
     }
 }
 
@@ -1625,34 +1623,34 @@ uint32_t __stdcall ITEMS_IsA(D2UnitStrc * pUnit, eD2ItemTypes eItemType) {
 
 uint32_t __stdcall TXT_Items_GetBitFieldAnd0x01(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return pItemsTxt->dwBitfield1 & 1;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1040);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1040);
-    exit(-1);
+    return pItemsTxt->dwBitfield1 & 1;
     return pItemsTxt->dwBitfield1 & 1;
 }
 
 uint32_t __stdcall TXT_Items_GetBitFieldAnd0x02(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return pItemsTxt->dwBitfield1 & 2;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x104a);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x104a);
-    exit(-1);
+    return pItemsTxt->dwBitfield1 & 2;
     return pItemsTxt->dwBitfield1 & 2;
 }
 
 uint32_t __stdcall TXT_Items_GetBitFieldAnd0x04(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return pItemsTxt->dwBitfield1 & 4;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1054);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1054);
-    exit(-1);
+    return pItemsTxt->dwBitfield1 & 4;
     return pItemsTxt->dwBitfield1 & 4;
 }
 
@@ -1675,12 +1673,12 @@ int __stdcall ITEM_GetItemData_nFileIndex(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1070);
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
-      if (pUnit->pUnitData.pUnitDataItem) {
-        return pUnit->pUnitData.pUnitDataItem->nFileIndex;
+      if (!pUnit->pUnitData.pUnitDataItem) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1073);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1073);
-      exit(-1);
+      return pUnit->pUnitData.pUnitDataItem->nFileIndex;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1071);
       exit(-1);
@@ -1692,13 +1690,13 @@ void __stdcall ITEM_SetItemData_nFileIndex(D2UnitStrc * pUnit, DWORD dwFileIndex
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x107c);
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
-      if (pUnit->pUnitData.pUnitDataItem) {
-        pUnit->pUnitData.pUnitDataItem->nFileIndex = dwFileIndex;
-        return;
+      if (!pUnit->pUnitData.pUnitDataItem) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x107f);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x107f);
-      exit(-1);
+      pUnit->pUnitData.pUnitDataItem->nFileIndex = dwFileIndex;
+      return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x107d);
       exit(-1);
@@ -1743,13 +1741,13 @@ void __stdcall ITEM_SetItemData_nPlayerGUID(D2UnitStrc * pUnit, int32_t nPlayerG
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10bc);
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
-      if (pUnit->pUnitData.pUnitDataObject) {
-        pUnit->pUnitData.pUnitDataObject->nActivatingPlayerGUID = nPlayerGUID;
-        return;
+      if (!pUnit->pUnitData.pUnitDataObject) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10bf);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10bf);
-      exit(-1);
+      pUnit->pUnitData.pUnitDataObject->nActivatingPlayerGUID = nPlayerGUID;
+      return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10bd);
       exit(-1);
@@ -1761,12 +1759,12 @@ int32_t __stdcall ITEM_GetItemData_nPlayerGUID(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10c7);
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
-      if (pUnit->pUnitData.pUnitDataItem) {
-        return pUnit->pUnitData.pUnitDataItem->nPlayerGUID;
+      if (!pUnit->pUnitData.pUnitDataItem) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10ca);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10ca);
-      exit(-1);
+      return pUnit->pUnitData.pUnitDataItem->nPlayerGUID;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10c8);
       exit(-1);
@@ -1856,12 +1854,12 @@ int16_t __stdcall ITEM_GetWeaponAnimClass(D2UnitStrc * pUnit) {
 
 BOOL __stdcall TXT_Items_CheckTransmogrify(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return (uint32_t)pItemsTxt->bTransmogrify;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1155);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1155);
-    exit(-1);
+    return (uint32_t)pItemsTxt->bTransmogrify;
     return (uint32_t)pItemsTxt->bTransmogrify;
 }
 
@@ -1872,13 +1870,13 @@ int32_t __stdcall ITEM_CheckItemsTxt_bTransmogrify(D2UnitStrc * pUnit) {
       exit(-1);
     } else {
       BOOL BVar1;
-      if (pUnit->eUnitType == UNIT_ITEM) {
-        BVar1 = TXT_Items_CheckTransmogrify(pUnit->nClassId);
-        return BVar1;
+      if (pUnit->eUnitType != UNIT_ITEM) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1163);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1163);
-      exit(-1);
+      BVar1 = TXT_Items_CheckTransmogrify(pUnit->nClassId);
+      return BVar1;
     }
 }
 
@@ -1924,12 +1922,12 @@ uint8_t __stdcall ITEM_GetItemsTxt_bHitClass(D2UnitStrc * pUnit) {
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (pItemsTxt) {
-        return pItemsTxt->bHitClass;
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1192);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1192);
-      exit(-1);
+      return pItemsTxt->bHitClass;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1190);
       exit(-1);
@@ -1942,25 +1940,24 @@ int32_t __stdcall BARBARIAN_CheckItemData_b1or2Handed_isTrue(D2UnitStrc * pUnit,
       exit(-1);
     } else {
       D2ItemsTxt* pItemsTxt;
-      if (pUnit) {
-        if (!(pUnit->eUnitType == UNIT_PLAYER && pUnit->nClassId == 4)) {
-          return 0;
-        }
-
-        pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pItem->nClassId);
-        if (!pItemsTxt) {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11a5);
-          exit(-1);
-        }
-        if (!pItemsTxt->b1or2Handed) {
-          return 0;
-        }
-
-        return 1;
+      if (!pUnit) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x119d);
+        exit(-1);
+      }
+      if (!(pUnit->eUnitType == UNIT_PLAYER && pUnit->nClassId == 4)) {
+        return 0;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x119d);
-      exit(-1);
+      pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pItem->nClassId);
+      if (!pItemsTxt) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11a5);
+        exit(-1);
+      }
+      if (!pItemsTxt->b1or2Handed) {
+        return 0;
+      }
+
+      return 1;
     }
 }
 
@@ -1994,12 +1991,12 @@ BOOL ITEMS_HasSocketedItems(D2UnitStrc * pItem) {
 BOOL ITEMS_GetCompactSaveFlag(D2UnitStrc * pItem) {
     uint32_t nItemClassId = !pItem ? -1 : pItem->nClassId;
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
-      return (uint32_t)(uint8_t)pItemsTxt->bCompactSave;
+    if (!pItemsTxt) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12e0);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12e0);
-    exit(-1);
+    return (uint32_t)(uint8_t)pItemsTxt->bCompactSave;
     return (uint32_t)(uint8_t)pItemsTxt->bCompactSave;
 }
 
@@ -2208,12 +2205,12 @@ int16_t __stdcall ITEM_GetItemData_wItemVersion(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1504);
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
-      if (pUnit->pUnitData.pUnitDataItem) {
-        return pUnit->pUnitData.pUnitDataItem->wItemVersion;
+      if (!pUnit->pUnitData.pUnitDataItem) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1507);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1507);
-      exit(-1);
+      return pUnit->pUnitData.pUnitDataItem->wItemVersion;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1505);
       exit(-1);
@@ -2225,13 +2222,13 @@ void __stdcall ITEM_SetItemData_wItemVersion(D2UnitStrc * pUnit, int16_t wItemVe
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x150f);
       exit(-1);
     } else if (pUnit->eUnitType == UNIT_ITEM) {
-      if (pUnit->pUnitData.pUnitDataItem) {
-        pUnit->pUnitData.pUnitDataItem->wItemVersion = wItemVersion;
-        return;
+      if (!pUnit->pUnitData.pUnitDataItem) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1512);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1512);
-      exit(-1);
+      pUnit->pUnitData.pUnitDataItem->wItemVersion = wItemVersion;
+      return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1510);
       exit(-1);
@@ -2281,17 +2278,17 @@ int __stdcall ITEM_CalcWeaponAttackSpeed(D2UnitStrc * pUnit, D2UnitStrc * pItem)
           Fog::Debug::GuardStack();
           return 0x2d;
         }
-        if (__frame0.nFrames) {
-          iVar1 = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pItem, UNITSTAT_item_fasterattackrate, 0);
-          iVar2 = Stats::StatsEx::STATSEX_GetCurrentStat(pItem, UNITSTAT_attackrate, 0);
-          iVar3 = (iVar1 + 100 + iVar2) * __frame0.nAnimSpeed;
-          iVar2 = __frame0.nFrames << 8;
-          Fog::Debug::GuardStack();
-          return iVar2 / (iVar3 / 100);
+        if (!__frame0.nFrames) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1538);
+          exit(-1);
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1538);
-        exit(-1);
+        iVar1 = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pItem, UNITSTAT_item_fasterattackrate, 0);
+        iVar2 = Stats::StatsEx::STATSEX_GetCurrentStat(pItem, UNITSTAT_attackrate, 0);
+        iVar3 = (iVar1 + 100 + iVar2) * __frame0.nAnimSpeed;
+        iVar2 = __frame0.nFrames << 8;
+        Fog::Debug::GuardStack();
+        return iVar2 / (iVar3 / 100);
       }
     }
 }
@@ -3009,13 +3006,13 @@ uint32_t __stdcall ITEM_ValidateAndGetClass(D2UnitStrc * pUnit) {
       exit(-1);
     } else {
       uint32_t uVar1;
-      if (pUnit->eUnitType == UNIT_ITEM) {
-        uVar1 = ITEMS_CheckIfUpgradeable(pUnit->nClassId);
-        return uVar1;
+      if (pUnit->eUnitType != UNIT_ITEM) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78d);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78d);
-      exit(-1);
+      uVar1 = ITEMS_CheckIfUpgradeable(pUnit->nClassId);
+      return uVar1;
     }
 }
 
@@ -3341,36 +3338,36 @@ int __stdcall ITEM_GetSpellIcon(D2UnitStrc * pUnit) {
       exit(-1);
     } else {
       uint32_t bIsScrollOrBook;
-      if (pUnit->eUnitType == UNIT_ITEM) {
-        bIsScrollOrBook = ITEMS_IsA(pUnit, ITEMTYPE_Scroll);
-        if (!bIsScrollOrBook) {
-          bIsScrollOrBook = ITEMS_IsA(pUnit, ITEMTYPE_Book);
-          if (!bIsScrollOrBook) {
-            pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-            if (pItemsTxt) {
-              return (uint32_t)(uint8_t)pItemsTxt->bSpellIcon;
-            }
+      if (pUnit->eUnitType != UNIT_ITEM) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdad);
+        exit(-1);
+      }
 
+      bIsScrollOrBook = ITEMS_IsA(pUnit, ITEMTYPE_Scroll);
+      if (!bIsScrollOrBook) {
+        bIsScrollOrBook = ITEMS_IsA(pUnit, ITEMTYPE_Book);
+        if (!bIsScrollOrBook) {
+          pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
+          if (!pItemsTxt) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdb8);
             exit(-1);
           }
-        }
-        if (pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataItem) {
-          nBookTxtIdx = (uint32_t)(uint16_t)pUnit->pUnitData.pUnitDataItem->wMagicSuffix[0];
-        } else {
-          nBookTxtIdx = 0;
-        }
 
-        nBooksTxtLine = DATATBLS::ItemTbls::TXT_Books_GetLine(nBookTxtIdx);
-        if (nBooksTxtLine) {
-          return (uint32_t)*(uint8_t*)((int)nBooksTxtLine + 2);
+          return (uint32_t)(uint8_t)pItemsTxt->bSpellIcon;
         }
-
-        return -1;
+      }
+      if (pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataItem) {
+        nBookTxtIdx = (uint32_t)(uint16_t)pUnit->pUnitData.pUnitDataItem->wMagicSuffix[0];
+      } else {
+        nBookTxtIdx = 0;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdad);
-      exit(-1);
+      nBooksTxtLine = DATATBLS::ItemTbls::TXT_Books_GetLine(nBookTxtIdx);
+      if (nBooksTxtLine) {
+        return (uint32_t)*(uint8_t*)((int)nBooksTxtLine + 2);
+      }
+
+      return -1;
     }
 }
 
@@ -7685,7 +7682,12 @@ void __fastcall SerializeItemToBitBuffer(D2UnitStrc * pUnit, D2BitBufferStrc * p
     }
 
     D2ItemsTxt* txtLine = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (txtLine) {
+    if (!txtLine) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12e0);
+      exit(-1);
+    }
+
+    {
       D2UnitStrc* pUnit_00;
       if (txtLine->bCompactSave != '\0') {
         nValue = eItemFlags & -524289 | 0xa00000;
@@ -7718,9 +7720,6 @@ void __fastcall SerializeItemToBitBuffer(D2UnitStrc * pUnit, D2BitBufferStrc * p
       Fog::BitBuffer::GetNextPositon(pBitBuffer);
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12e0);
-    exit(-1);
 }
 
 int32_t __stdcall SerializeItem(D2UnitStrc * pUnit, uint8_t * pBitStream, size_t nBitStreamSize, D2StatListExStrc * pStatListEx, BOOL bAllItems, BOOL bIsCrude) {

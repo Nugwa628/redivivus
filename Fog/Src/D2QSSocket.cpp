@@ -17,18 +17,18 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2QSSocketStrc) == 0x194, "D2_NEW(D2QSSocketStrc): the 32-bit layout must be the 0x194 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2QSSocketStrc) == 0x194, "D2_NEW_AT(D2QSSocketStrc): the 32-bit layout must be the 0x194 bytes 1.14d allocates");
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -338,31 +338,31 @@ D2QSSocketStrc * __stdcall STRUCT_D2QSSocket_Init(char * szIpAddress, int nPort,
       char* pszScan;
       pszScan = szIpAddress;
       pszScan = pszScan + strlen(pszScan) + 1;
-      if ((uint32_t)((int)pszScan - (int)(szIpAddress + 1)) < 0x103) {
-        pD2QSSocket = D2_NEW(D2QSSocketStrc);
-        if (!pD2QSSocket) {
-          return pD2QSSocket;
-        }
+      if (!((uint32_t)((int)pszScan - (int)(szIpAddress + 1)) < 0x103)) {
+        ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x243);
+        exit(-1);
+      }
 
-        memset(pD2QSSocket, 0, 0x194);
-        Storm::Source::SSTR::SStrCopy(pD2QSSocket->szIpAddress, szIpAddress, 0x104);
-        if (!szName) {
-          dwErrorCode = 0x40;
-          szName = "UNKNOWN";
-        } else {
-          dwErrorCode = 4;
-        }
-
-        Storm::Source::SSTR::SStrCopy(pD2QSSocket->szName, szName, dwErrorCode);
-        pD2QSSocket->nPort = nPort;
-        D2QSQueue::D2QSQUEUE_Initialize(&pD2QSSocket->aQueue);
-        pD2QSSocket->nHeaderSize = 2;
-        pD2QSSocket->nSizeFieldOffset = 0;
+      pD2QSSocket = D2_NEW_AT(D2QSSocketStrc, ".\\Src\\D2QSSocket.cpp", 0x245);
+      if (!pD2QSSocket) {
         return pD2QSSocket;
       }
 
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x243);
-      exit(-1);
+      memset(pD2QSSocket, 0, 0x194);
+      Storm::Source::SSTR::SStrCopy(pD2QSSocket->szIpAddress, szIpAddress, 0x104);
+      if (!szName) {
+        dwErrorCode = 0x40;
+        szName = "UNKNOWN";
+      } else {
+        dwErrorCode = 4;
+      }
+
+      Storm::Source::SSTR::SStrCopy(pD2QSSocket->szName, szName, dwErrorCode);
+      pD2QSSocket->nPort = nPort;
+      D2QSQueue::D2QSQUEUE_Initialize(&pD2QSSocket->aQueue);
+      pD2QSSocket->nHeaderSize = 2;
+      pD2QSSocket->nSizeFieldOffset = 0;
+      return pD2QSSocket;
     }
 }
 
@@ -380,7 +380,7 @@ void __stdcall FreeD2QSSocket(D2QSSocketStrc * pSocket) {
       pSocket->pSafesock = 0;
     }
 
-    D2_FREE(pSocket);
+    D2_FREE_AT(pSocket, ".\\Src\\D2QSSocket.cpp", 0x27c);
 }
 
 void __stdcall QSSOCKET_WaitForEvent(D2QSSocketStrc * pQSSocket, DWORD dwTimeout) {

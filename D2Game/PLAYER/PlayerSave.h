@@ -154,8 +154,8 @@ int __fastcall PLRSAVE_LoadItemListFromStream(::SGAMEDATA * pGame, struct D2Unit
 int __fastcall PLRSAVE_DispatchItemLoadByFormat(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pItemData, uint32_t eFormat, int32_t nStreamEnd, int32_t bUsePageHandler, short * * ppnShort);
 // Creates a player corpse unit during save-game loading. Allocates a UNIT_PLAYER ghost with UNITFLAG_CANBEATTACKED cleared and STATE_playerbody set, copies client/name/seed from the live unit, sets inventory owner GUID, then restores the corpse's items from the save stream (either PLRSAVE_RestoreItemsFromStream for format 0x47 or PLRSAVE_LoadItemListFromStream for 0x48-0x60). On success appends an inventory notification and sends 0x8E CorpseAssign.
 // @sourcefile .\PLAYER\PlrSave.cpp
-int32_t __stdcall _oldSaveGameLoadingPart7_part1(int32_t nParam1, uint32_t nParam, int32_t nParam2, uint8_t * * pbParam, struct D2UnitStrc * pUnit, ::SGAMEDATA * pGame);
-int32_t __fastcall _oldSaveGameLoadingPart7(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, short * param_1, uint32_t param_2, uint32_t nParam, uint8_t * * pbParam);
+int32_t __stdcall _oldSaveGameLoadingPart7_part1(uint8_t * nParam1, uint32_t nParam, int32_t nParam2, uint32_t * pbParam, struct D2UnitStrc * pUnit, ::SGAMEDATA * pGame);
+int32_t __fastcall _oldSaveGameLoadingPart7(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, short * param_1, uint32_t param_2, uint32_t nParam, uint32_t * pbParam);
 // Lookup table function: given a character class index (wParam, 0x00–0x1b) and a character level (nParam), returns the base experience-point threshold (or similar save-load scalar) for that class/level bracket. All paths return a constant or one of two bracket constants selected by level comparison. Part of the old save-game loading path (PlayerSave), used when reconstructing character progression data from .d2s files.
 int32_t _oldSaveGameLoadingPart8_part1_part1(uint16_t wParam, int32_t nParam);
 uint32_t __fastcall _oldSaveGameLoadingPart8_part1(int32_t nParam, uint16_t nParam2, uint32_t param_1);

@@ -18,7 +18,7 @@ uint32_t __fastcall STRING_CompareWideStrings(uint16_t * wszText1, uint16_t * ws
 int32_t __fastcall UNICODE_CompareWideStringsN(uint16_t * nParam1, uint16_t * nParam2, int32_t nMaxChars);
 int32_t __fastcall UNICODE_CompareWideStringsNoCase(uint16_t * pwszText1, uint16_t * pwszText2);
 uint32_t __fastcall UNICODE_CompareWideStringsNNoCase(uint16_t * pwszText1, uint16_t * pwszText2, int32_t nMaxChars);
-short * UNICODE_FindWideChar(void * pThis, int16_t wCharToFind);
+short * __thiscall UNICODE_FindWideChar(void * pThis, int16_t wCharToFind);
 uint16_t * __fastcall AppendToBuffer(uint16_t * wszText1, uint16_t * wszText2);
 void __fastcall UNICODE_AppendWideStringN(uint16_t * pwszDst, uint16_t * pwszSrc, int32_t nMaxChars);
 void __fastcall WSTRING_PutWideCharIntoBuffer(uint16_t * pDestination, uint16_t * wszChar, size_t nSizeMaybe);
@@ -36,8 +36,8 @@ bool UNICODE_CheckLeadingPunctuation(char * pszTable, uint16_t * wszText);
 void __fastcall UNICODE_FormatPossessiveName(uint16_t * wszText1, uint16_t * wszText2, uint16_t * wszSuffix, int32_t nMaxChars, int32_t nLang);
 void UNICODE_FreeBuffer(void * pParam);
 void UNICODE_AllocBuffer(uint32_t nSize);
-void UNICODE_ReadByteRange(void * pThis, uint8_t * pByteRange);
-uint32_t UNICODE_CheckByteInRange(void * pThis, uint8_t byValue);
+void __thiscall UNICODE_ReadByteRange(void * pThis, uint8_t * pByteRange);
+uint32_t __thiscall UNICODE_CheckByteInRange(void * pThis, uint8_t byValue);
 int32_t UNICODE_IsControlChar(uint8_t byChar);
 void __stdcall UNICODE_FreeKamapTables();
 // @sourcefile .\Unicode\UNISYS.CPP
@@ -50,6 +50,6 @@ uint32_t UNICODE_BinarySearchKamap(uint16_t wChar);
 uint16_t * __fastcall UNICODE_ConvertMultiByteToWide(uint16_t * wszText, uint8_t * pbParam, int32_t nSize);
 uint8_t * __fastcall UNICODE_ConvertWideToMultiByte(uint8_t * pParam, uint16_t * nParam, int32_t nSize);
 int32_t __fastcall UNICODE_GetMultiByteLength(uint16_t * wszText, int32_t nParam);
-char * __fastcall UNICODE_GetWideCharCount(char * szText, char * szSourceFile);
+int32_t __fastcall UNICODE_GetWideCharCount(char * szText, int32_t szSourceFile);
 
 } // namespace D2Lang::Unicode::UNISYS

@@ -57,12 +57,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
 
@@ -151,7 +151,7 @@ void __stdcall LoadClassIcons() {
     }
 
     size_t nAllocSize = sgptDataTable->nTxtPetTypeSize * 0x14;
-    gpHireablesList = (D2HireablesListStrc*)D2_ALLOC_POOL(nullptr, nAllocSize);
+    gpHireablesList = (D2HireablesListStrc*)D2_ALLOC_POOL_AT(nullptr, nAllocSize, ".\\UI\\Hireables.cpp", 0x96);
     memset(gpHireablesList, 0, nAllocSize);
 }
 
@@ -184,7 +184,7 @@ void __stdcall FreeHireablesList() {
       } while (nIconIdx < nIconCount);
     }
 
-    D2_FREE_POOL(nullptr, pMemoryToFree);
+    D2_FREE_POOL_AT(nullptr, pMemoryToFree, ".\\UI\\Hireables.cpp", 0xb7);
     gpHireablesList = 0;
 }
 

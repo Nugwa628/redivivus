@@ -4862,13 +4862,13 @@ int __stdcall SFileReadFile(D2MPQFileStrc * pMPQFile, void * pOutputBuffer, uint
 }
 
 // Simplified wrapper for SFILE_ReadFile that passes 0 for the completion callback parameter and param6 as the async flags. Used when caller doesn't need completion notification.
-void __stdcall SFILE_ReadFileSimple(D2MPQFileStrc * pMPQFile, void * pOutputBuffer, uint32_t nBytesToRead, size_t * pnSize, int32_t pAsyncReadCtx, D2StormAsyncCompletionStrc * pCompletion) {
+void __stdcall SFILE_ReadFileSimple(D2MPQFileStrc * pMPQFile, void * pOutputBuffer, uint32_t nBytesToRead, uint32_t * pnSize, int32_t pAsyncReadCtx, D2StormAsyncCompletionStrc * pCompletion) {
     SFileReadFileEx2(pMPQFile, pOutputBuffer, nBytesToRead, pnSize, (LPOVERLAPPED)pAsyncReadCtx, 0, pCompletion);
 }
 
 // Load MPQ attributes from (attributes) file in archive
 // @sourcefile .\SOURCE\SFILE.CPP
-int SFILE_LoadAttributes(D2ArchiveStrc * pArchive, int pAttributesBuffer, int nNumEntries) {
+int __thiscall SFILE_LoadAttributes(D2ArchiveStrc * pArchive, int pAttributesBuffer, int nNumEntries) {
     uint32_t* pDstEntry;
     DWORD nExpectedSize;
     D2MPQFileStrc* pMpqFile;

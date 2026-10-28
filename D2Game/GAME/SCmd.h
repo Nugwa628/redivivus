@@ -249,7 +249,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(struct D2ClientStrc * pCl
 void __fastcall NET_D2GS_SERVER_Send_0x78_TRADENAME(struct D2ClientStrc * pClient, struct D2GSPacketSrv0x78 * pPacketData);
 // Server-to-client summon log update. Opcode 0x7A.
 void __fastcall NET_D2GS_SERVER_Send_0x7A_UPDATEPET(struct D2ClientStrc * pClient, uint8_t bParam, uint8_t nUnitType, uint32_t dwGUID, uint32_t dwMercGUID, uint16_t wExperience);
-void NET_D2GS_SERVER_Send_0x81_UPDATEPETPARAMS(void * pThis, uint8_t byAction, uint32_t dwPetGUID, uint32_t dwMercUnitGUID, uint16_t wMercType, uint32_t dwOwnerUnitGUID, uint32_t dwMercExperience);
+void __thiscall NET_D2GS_SERVER_Send_0x81_UPDATEPETPARAMS(void * pThis, uint8_t byAction, uint32_t dwPetGUID, uint32_t dwMercUnitGUID, uint16_t wMercType, uint32_t dwOwnerUnitGUID, uint32_t dwMercExperience);
 // Server-to-client gold amount in trade. Opcode 0x79.
 void __fastcall NET_D2GS_SERVER_Send_0x79_TRADEGOLD(struct D2ClientStrc * pClient, uint32_t dwGold, uint8_t nTradeId);
 BOOL SCMD_DetectPositionDesync(int32_t pState, int32_t nNewPos);
@@ -357,7 +357,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xA4_PRELOAD_MONSTER(struct D2ClientStrc * 
 void __fastcall NET_D2GS_SERVER_Send_0xA6_DATATABLEUPDATE(struct D2ClientStrc * pClient, bool bUnknown, int16_t nTxtRunesSize, size_t nStreamSize, void * nStream);
 void __fastcall NET_D2GS_SERVER_Send_0xA7_UNITSTATE_ON_EX(struct D2ClientStrc * pClient, uint8_t byUnitType, uint32_t nUnitGUID, uint32_t dwStateId);
 void __fastcall NET_D2GS_SERVER_Send_0xA9_UNITSTATE_OFF_EX(struct D2ClientStrc * pClient, uint8_t byUnitType, uint32_t nUnitGUID, uint32_t dwStateId);
-void SCMD_WriteBooleanToBitBuffer(void * pThis, int32_t nBoolValue);
+void __thiscall SCMD_WriteBooleanToBitBuffer(void * pThis, int32_t nBoolValue);
 // Server-to-client packet builder/sender for D2GS message 0xAC (spawn/add a monster on the client). For a UNIT_MONSTER, bit-packs into a temp BitBuffer: animation mode (clamped to Attack2/Block/Kick/Death/Neutral), component/equipment indices, boss/champion/unique/superunique/minion/ghostly type flags, superunique boss number, the UMod list, the monster name seed, pet ownership (owner GUID when the owner is a player whose pet type==7), an optional owner GUID for player-owned units, and the network-visible stat list (only stats flagged ITEMSTATCOSTFLAG_SEND_OTHER, written using each stat's sendBits/sendParamBits). Prepends the 0xAC header (id, GUID, classId, X/Y, hp%, total size) and dispatches via NET_D2GS_SERVER_SendPacket_Helper to the given client. No-op for null/non-monster units. Stack-guarded.
 void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit);
 // Server-to-client Warden anti-cheat module packet. Opcode 0xAE, variable size (max 510 bytes).
@@ -397,11 +397,11 @@ void __fastcall Send0x9CItemAddQuantity(struct D2ClientStrc * pClient, struct D2
 void __fastcall Send0x9CItemSwapInContainer(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, eD2ItemFlag eItemFlags);
 // @sourcefile .\GAME\SCmd.cpp
 void __fastcall Send0x9CItemPutInBelt(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, eD2ItemFlag eItemFlags);
-void Send0x9CItemRemoveFromBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
-void Send0x9CItemSwapInBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
-void Send0x9CItemToCursor(void * pThis, struct D2UnitStrc * pUnit);
+void __thiscall Send0x9CItemRemoveFromBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
+void __thiscall Send0x9CItemSwapInBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
+void __thiscall Send0x9CItemToCursor(void * pThis, struct D2UnitStrc * pUnit);
 // @sourcefile .\GAME\SCmd.cpp
-void Send0x9CItemHandleInShop(void * pThis, struct D2UnitStrc * pUnit, char cParam);
+void __thiscall Send0x9CItemHandleInShop(void * pThis, struct D2UnitStrc * pUnit, char cParam);
 BOOL __fastcall STRING_CheckIfStringLengthDoNotExceedSize(char * szText, int32_t nMaxLength);
 void __fastcall thunk_NET_D2GS_SERVER_Send_0x5A_EventMessages(struct D2ClientStrc * pClient, struct D2Packet0x5aEventStructure * pEventPacket);
 

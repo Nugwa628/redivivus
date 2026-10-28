@@ -145,7 +145,7 @@ void DAMAGE_ProcessFreezeAndPoisonImmunity(struct D2DamageContext * pCtx);
 // KEY: Absorb happens AFTER resist (less effective than it seems).
 // Table at 0x00732980 (12 entries, 44 bytes): resist/pierce/absorb stats per element.
 void __fastcall DAMAGE_ApplyDefensiveReduction(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit2, struct D2UnitStrc * pUnit, struct D2DamageStrc * pBypassFlags);
-uint32_t DAMAGE_GetMonsterDrainEffectiveness(void * pThis, struct D2UnitStrc * pUnit);
+uint32_t __thiscall DAMAGE_GetMonsterDrainEffectiveness(void * pThis, struct D2UnitStrc * pUnit);
 // LEECH CALCULATION: % of physical damage dealt, AFTER DR.
 // Life/Mana leech = (physical_damage_dealt * leech%) / 64
 // Applied AFTER defensive reduction (DR, resist).

@@ -150,7 +150,7 @@ void __fastcall SCOMP_PkwareCompress(void * pOutBuf, uint32_t * pdwOutLength, vo
 // @blizzard PkwareDecompress (SCOMP.CPP)
 void __fastcall SCOMP_PkwareDecompress(void * pOutBuf, uint32_t * pdwOutLength, void * pInBuf, uint32_t nInLen, uint32_t dwUnused);
 // @sourcefile .\SOURCE\SCOMP.CPP
-void __fastcall SCOMP_ArenaAlloc(struct D2ScompArenaStrc * pArenaState, int32_t nItems, int32_t nItemSize);
+void * __fastcall SCOMP_ArenaAlloc(struct D2ScompArenaStrc * pArenaState, int32_t nItems, int32_t nItemSize);
 // @sourcefile .\SOURCE\SCOMP.CPP
 void __fastcall SCOMP_ArenaFree(struct D2ScompArenaStrc * pArenaState, void * pBlock);
 int __stdcall SCOMP_ZlibCompress(uint8_t * pSrc, uint32_t nSrcLen, uint32_t nLevel, uint32_t * pnOutLen);

@@ -66,11 +66,11 @@ struct D2RareAffixTableStrc * __stdcall TXT_RareAffixes_GetTableInfo();
 struct D2RareAffixTxt * __stdcall TXT_RareAffixes_GetLine(int32_t nIndex);
 // Loads and compiles uniqueitems.txt into sgtDataTable.pTxtUniqueItems (record stride 0x14C). Builds the column-binding descriptor: index, version, enabled/ladder/nolimit/carry1 bit flags, code (item base), rarity, lvl, lvl req, chr/inv transform colors, flippyfile/invfile graphics, cost mult/add, drop/use sounds, and the 12 prop/par/min/max modifier groups (props linked to the Properties table, par parsed via ITEMTBLS_ParseSkillMonTypeOrStateId). Creates the unique-items txt-link, calls CompileTxt, and error-halts if more than 0x7FFE rows. Then for each record: writes its sequential index, parses the index string field, and resolves the display-name string-table id (defaulting to 0x1507 if not found). __stdcall(void). Side effect: populates the global unique-items data table.
 // @sourcefile .\DATATBLS\ItemTbls.cpp
-void __stdcall TXT_AllocTxt_uniqueitems();
+void __fastcall TXT_AllocTxt_uniqueitems(struct D2PoolManagerStrc * pMemory);
 void __stdcall ITEMTBLS_FreeUniqueItems();
 // Builds the field-descriptor tables for SetItems.txt (and the embedded Sets.txt schema) and compiles both into the global sgtDataTable bin tables via CompileTxt. Wires record links (pTxtSets/pTxtSetItems) and property/parameter linkers (ITEMTBLS_ParseSkillMonTypeOrStateId). Post-compile: assigns each set-item record its row id, resolves its display string id (default 0x1507 if missing), and back-links each set-item into its parent Sets record (max 6 per set), copying version. Halts via Fog ErrorManager if a table exceeds 0x7fff rows. Called once at data-table load.
 // @sourcefile .\DATATBLS\ItemTbls.cpp
-void __stdcall TXT_AllocTxt_setitems();
+void __fastcall TXT_AllocTxt_setitems(struct D2PoolManagerStrc * pMemory);
 void __stdcall ITEMTBLS_FreeSetsAndSetItems();
 // Compiles QualityItems.txt into the in-memory pTxtQualityItems table during data-table init. Declares the column schema (nummods, mod1/2 code+param+min+max, effect1/effect2 strings, and the per-equipment-type applicability flags armor/weapon/shield/scepter/wand/staff/bow/boots/gloves/belt) with field types and struct offsets, linking mod codes to the Properties table, then calls DataTbls::CompileTxt (record size 0x70). Post-process: for each row resolves the effect1/effect2 string-table keys via STRTABLE_LookupString and writes the looked-up string indices back into the record. Side effect: sets the global pTxtQualityItems / nTxtQualityItemsSize. Allocates from pMemory.
 void __fastcall TXT_AllocTxt_qualityitems(struct D2PoolManagerStrc * pMemory);

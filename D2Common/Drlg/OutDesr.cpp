@@ -294,12 +294,12 @@ void __fastcall AddExits(D2DrlgLevelStrc * pLevel) {
     }
 
     BOOL bSpawnResult = Outdoors::SpawnOutdoorLevelPreset(pLevel, nLine, -1, 0, '\x0f');
-    if (bSpawnResult) {
-      return;
+    if (!bSpawnResult) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xaa);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xaa);
-    exit(-1);
+    return;
 }
 
 void PlaceFillsInRockyWaste(D2DrlgLevelStrc * pLevel) {

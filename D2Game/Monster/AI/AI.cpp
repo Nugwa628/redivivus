@@ -276,7 +276,7 @@ void __fastcall SetDwArgsIfNotNeg0x29a(D2AiGeneralStrc * pMonsterAi, int32_t dwA
     pMonsterAi->dwArg2 = dwArg2;
 }
 
-uint32_t AI_CanApplyColdState(void * pThis, eD2States eState, int32_t nParam) {
+uint32_t __thiscall AI_CanApplyColdState(void * pThis, eD2States eState, int32_t nParam) {
     uint32_t bCanSwitch;
     if (eState == STATE_none || eState != STATE_frozenarmor && eState != STATE_cold && eState != STATE_inferno) {
       return 1;
@@ -1996,27 +1996,27 @@ int32_t __fastcall MONSTERAI_GetDistanceToCoords(D2UnitStrc * pUnit, int32_t nX,
     } else {
       int32_t nDiffY;
       pDynamicPath = pUnit->pPath.pDynamicPath;
-      if (pDynamicPath) {
-        nDiffY = D2Common::PATH::DynamicPath::GetXPos(pDynamicPath);
-        nDiffX = nDiffY - nX;
-        if (nDiffX < 0) {
-          nDiffX = -nDiffX;
-        }
-
-        nDiffY = D2Common::PATH::DynamicPath::GetYPos(pDynamicPath);
-        nAbsDiffY = nDiffY - nY;
-        if (nAbsDiffY < 0) {
-          nAbsDiffY = -nAbsDiffY;
-        }
-        if (nAbsDiffY >= nDiffX) {
-          return (nDiffX + nAbsDiffY * 2) / 2;
-        }
-
-        return (nAbsDiffY + nDiffX * 2) / 2;
+      if (!pDynamicPath) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10e);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10e);
-      exit(-1);
+      nDiffY = D2Common::PATH::DynamicPath::GetXPos(pDynamicPath);
+      nDiffX = nDiffY - nX;
+      if (nDiffX < 0) {
+        nDiffX = -nDiffX;
+      }
+
+      nDiffY = D2Common::PATH::DynamicPath::GetYPos(pDynamicPath);
+      nAbsDiffY = nDiffY - nY;
+      if (nAbsDiffY < 0) {
+        nAbsDiffY = -nAbsDiffY;
+      }
+      if (nAbsDiffY >= nDiffX) {
+        return (nDiffX + nAbsDiffY * 2) / 2;
+      }
+
+      return (nAbsDiffY + nDiffX * 2) / 2;
     }
 }
 
@@ -4770,44 +4770,44 @@ void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32_t nMin
       exit(-1);
     } else {
       BOOL BVar1;
-      if (nMinDelay < nMaxDelay) {
-        memset(&sUnitFindArg, 0, 0x38);
-        sUnitFindArg.nX = nPosX;
-        sUnitFindArg.nDistance = nUnitType;
-        sUnitFindArg.nFlags = 0x583;
-        sUnitFindArg.pAttacker = pUnit;
-        D2Common::Units::UnitFinds::InitializeUnitFindData(pGame->pMemoryPool, &sUnitFindData, pRoom, nPosX, sUnitFindArg.nY, nUnitType, nullptr, &sUnitFindArg);
-        D2Common::Units::UnitFinds::UNITFINDS_FindCullRange(&sUnitFindData);
-        nPosX = 0;
-        if (0 < sUnitFindData.nCountedUnits) {
-          do {
-            pUnit_00 = sUnitFindData.pUnitsArray->aFoundUnitsList[nPosX];
-            if (pUnit_00 && pUnit_00->eUnitType == UNIT_MONSTER) {
-              nErrorLine = D2Common::Stats::StatsEx::STATSEX_GetAlignment(pUnit_00);
-              bIsNeutral = !nErrorLine;
-              if (bUndeadOnly) {
-                BVar1 = D2Common::Monsters::MONSTERS::MONSTER_IsMonsterUndead(pUnit_00);
-                if (!BVar1) {
-                  bIsNeutral = false;
-                }
-              }
-              if (pUnit_00->nClassId != 0x14d && bIsNeutral) {
-                nRandDelay = D2Client::Archive::RANDOM_RandomNumberSelector(&pUnit->sSeed, nMaxDelay - nMinDelay);
-                GAME::Event::SetEvent(pGame, pUnit_00, 7, pGame->dwGameFrame + nRandDelay + nMinDelay, 0, 0);
-                Monsters::InitUmods(pGame, pUnit_00, 0x15, 0);
-              }
-            }
-
-            nPosX++;
-          } while (nPosX < sUnitFindData.nCountedUnits);
-        }
-
-        D2Common::Units::UnitFinds::FreeUnitFindData(&sUnitFindData);
-        return;
+      if (!(nMinDelay < nMaxDelay)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x21);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x21);
-      exit(-1);
+      memset(&sUnitFindArg, 0, 0x38);
+      sUnitFindArg.nX = nPosX;
+      sUnitFindArg.nDistance = nUnitType;
+      sUnitFindArg.nFlags = 0x583;
+      sUnitFindArg.pAttacker = pUnit;
+      D2Common::Units::UnitFinds::InitializeUnitFindData(pGame->pMemoryPool, &sUnitFindData, pRoom, nPosX, sUnitFindArg.nY, nUnitType, nullptr, &sUnitFindArg);
+      D2Common::Units::UnitFinds::UNITFINDS_FindCullRange(&sUnitFindData);
+      nPosX = 0;
+      if (0 < sUnitFindData.nCountedUnits) {
+        do {
+          pUnit_00 = sUnitFindData.pUnitsArray->aFoundUnitsList[nPosX];
+          if (pUnit_00 && pUnit_00->eUnitType == UNIT_MONSTER) {
+            nErrorLine = D2Common::Stats::StatsEx::STATSEX_GetAlignment(pUnit_00);
+            bIsNeutral = !nErrorLine;
+            if (bUndeadOnly) {
+              BVar1 = D2Common::Monsters::MONSTERS::MONSTER_IsMonsterUndead(pUnit_00);
+              if (!BVar1) {
+                bIsNeutral = false;
+              }
+            }
+            if (pUnit_00->nClassId != 0x14d && bIsNeutral) {
+              nRandDelay = D2Client::Archive::RANDOM_RandomNumberSelector(&pUnit->sSeed, nMaxDelay - nMinDelay);
+              GAME::Event::SetEvent(pGame, pUnit_00, 7, pGame->dwGameFrame + nRandDelay + nMinDelay, 0, 0);
+              Monsters::InitUmods(pGame, pUnit_00, 0x15, 0);
+            }
+          }
+
+          nPosX++;
+        } while (nPosX < sUnitFindData.nCountedUnits);
+      }
+
+      D2Common::Units::UnitFinds::FreeUnitFindData(&sUnitFindData);
+      return;
     }
 }
 
@@ -8322,7 +8322,12 @@ void __fastcall AI_Function0_AttachedCasterInit(::SGAMEDATA * pGame, D2UnitStrc 
     eD2UnitType eUnitType;
     D2AiGeneralStrc* pAiGeneral;
     D2UnitStrc* pOwnerUnit = Ai::AiGeneral::GetOwnerUnit(pUnit);
-    if (pOwnerUnit) {
+    if (!pOwnerUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe17);
+      exit(-1);
+    }
+
+    {
       D2SeedStrc DVar1;
       eUnitType = pOwnerUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
@@ -8372,9 +8377,6 @@ void __fastcall AI_Function0_AttachedCasterInit(::SGAMEDATA * pGame, D2UnitStrc 
       pAiGeneral->dwArg2 = DVar1.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) / 100) * -100;
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe17);
-    exit(-1);
 }
 
 // Monster AI tick for a summoner/master archetype. Reads its current AI command (GetAiCmd); if a command of type 8 is pending it skips the active logic. Otherwise flags whether any minion is dead/missing (CallForEachMinion + MONSTERAI_FlagIfDeadOrNull) and checks if it is currently attacking. If neither attacking nor needing minions: when the master is owned by another unit it walks toward the saved command offset (or PlanNextAiMove), else it performs a circular patrol around itself — phase counter dwArg2 (0..99) drives offset direction/sign via RNG, then MONSTERAI_CommandWalkToCoords; on success advances the phase, on failure creates a walk minion command and resets. If attacking/minions-needed it issues a CreateMinion cmd-8, frees minion AIs and reattaches the correct AI. Always ends scheduling the next move.
@@ -10886,19 +10888,18 @@ bool __fastcall AI_IsTargetWithinBossRange(D2UnitStrc * pSource, D2UnitStrc * pT
       exit(-1);
     } else {
       int32_t nX;
-      if (pTarget) {
-        if (pSource->nAct != pTarget->nAct) {
-          return false;
-        }
-
-        nY = D2Client::Units::GetYPosFromDynamicPathUnit(pSource);
-        nX = D2Client::Units::GetXPosFromDynamicPathUnit(pSource);
-        nRange = GetCollisionDistanceFromXY(pTarget, nX, nY);
-        return nRange < 0x3fc;
+      if (!pTarget) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x36d);
+        exit(-1);
+      }
+      if (pSource->nAct != pTarget->nAct) {
+        return false;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x36d);
-      exit(-1);
+      nY = D2Client::Units::GetYPosFromDynamicPathUnit(pSource);
+      nX = D2Client::Units::GetXPosFromDynamicPathUnit(pSource);
+      nRange = GetCollisionDistanceFromXY(pTarget, nX, nY);
+      return nRange < 0x3fc;
     }
 }
 
@@ -11674,7 +11675,7 @@ int32_t __fastcall AI_BAAL_ChooseCombatAction(int nAiContext, D2UnitStrc * pUnit
     return 0xb;
 }
 
-void MONSTERAI_SpawnSpecificMinions(void * pThis, D2UnitStrc * pUnit) {
+void __thiscall MONSTERAI_SpawnSpecificMinions(void * pThis, D2UnitStrc * pUnit) {
     if (!pUnit) {
       return;
     }

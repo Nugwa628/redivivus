@@ -130,60 +130,13 @@ static bool gbInvOverlayFlag = 0; D2_STATIC_GUARD(gbInvOverlayFlag, "D2Client::U
 
 void __stdcall InitializeiInventoryPages() {
     // Static local variables (originally global data)
-    static D2GridScreenCoordinates pTrophyCasePageGridCoordinates = {
-    /* .nGridCols = */ 0,
-    /* .nGridRows = */ 0,
-    /* .pad_02 = */ 0,
-    /* .nPixelLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0,
-    /* .nCellWidth = */ 0,
-    /* .nCellHeight = */ 0,
-    /* .pad_16 = */ 0
-}; D2_STATIC_GUARD(pTrophyCasePageGridCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pTrophyCasePageGridCoordinates");
-    static D2InventoryScreenCoordinates pTradePage2ScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_STATIC_GUARD(pTradePage2ScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pTradePage2ScreenCoordinates");
-    static D2GridScreenCoordinates pGuildVaultPageGridScreenCoordinates = {
-    /* .nGridCols = */ 0,
-    /* .nGridRows = */ 0,
-    /* .pad_02 = */ 0,
-    /* .nPixelLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0,
-    /* .nCellWidth = */ 0,
-    /* .nCellHeight = */ 0,
-    /* .pad_16 = */ 0
-}; D2_STATIC_GUARD(pGuildVaultPageGridScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pGuildVaultPageGridScreenCoordinates");
-    static D2InventoryScreenCoordinates pThrophyCasePageScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_STATIC_GUARD(pThrophyCasePageScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pThrophyCasePageScreenCoordinates");
-    static D2InventoryScreenCoordinates pTradePage1ScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_STATIC_GUARD(pTradePage1ScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pTradePage1ScreenCoordinates");
-    static D2InventoryScreenCoordinates pHirelingScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_STATIC_GUARD(pHirelingScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pHirelingScreenCoordinates");
-    static D2InventoryScreenCoordinates pGuildVaultPageScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_STATIC_GUARD(pGuildVaultPageScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pGuildVaultPageScreenCoordinates");
+    static D2GridScreenCoordinates pTrophyCasePageGridCoordinates = {}; D2_STATIC_GUARD(pTrophyCasePageGridCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pTrophyCasePageGridCoordinates");
+    static D2InventoryScreenCoordinates pTradePage2ScreenCoordinates = {}; D2_STATIC_GUARD(pTradePage2ScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pTradePage2ScreenCoordinates");
+    static D2GridScreenCoordinates pGuildVaultPageGridScreenCoordinates = {}; D2_STATIC_GUARD(pGuildVaultPageGridScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pGuildVaultPageGridScreenCoordinates");
+    static D2InventoryScreenCoordinates pThrophyCasePageScreenCoordinates = {}; D2_STATIC_GUARD(pThrophyCasePageScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pThrophyCasePageScreenCoordinates");
+    static D2InventoryScreenCoordinates pTradePage1ScreenCoordinates = {}; D2_STATIC_GUARD(pTradePage1ScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pTradePage1ScreenCoordinates");
+    static D2InventoryScreenCoordinates pHirelingScreenCoordinates = {}; D2_STATIC_GUARD(pHirelingScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pHirelingScreenCoordinates");
+    static D2InventoryScreenCoordinates pGuildVaultPageScreenCoordinates = {}; D2_STATIC_GUARD(pGuildVaultPageScreenCoordinates, "D2Client::UI::Inv::InitializeiInventoryPages::pGuildVaultPageScreenCoordinates");
     static BOOL bInventoryScreenCoordinatesInitialized; D2_STATIC_GUARD_BSS(bInventoryScreenCoordinatesInitialized, "D2Client::UI::Inv::InitializeiInventoryPages::bInventoryScreenCoordinatesInitialized");
     static int gnInventoryPage; D2_STATIC_GUARD_BSS(gnInventoryPage, "D2Client::UI::Inv::InitializeiInventoryPages::gnInventoryPage");
 
@@ -457,218 +410,80 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x1,
         /* .nY = */ 0x1
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x2
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x3
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x4
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x1
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x2
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x3
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x4
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x1
@@ -677,22 +492,10 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x1,
         /* .nY = */ 0x3
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x2
@@ -701,22 +504,10 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x1,
         /* .nY = */ 0x4
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x3
@@ -725,22 +516,10 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x1,
         /* .nY = */ 0x5
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x1
@@ -749,22 +528,10 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x3,
         /* .nY = */ 0x1
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x1
@@ -773,22 +540,10 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x2,
         /* .nY = */ 0x3
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x2
@@ -797,22 +552,10 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x2,
         /* .nY = */ 0x4
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x2
@@ -821,70 +564,22 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x2,
         /* .nY = */ 0x6
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x1
@@ -897,18 +592,9 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x1,
         /* .nY = */ 0x5
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x2
@@ -921,42 +607,15 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x1,
         /* .nY = */ 0x6
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x1
@@ -969,18 +628,9 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x2,
         /* .nY = */ 0x3
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x1
@@ -993,18 +643,9 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x2,
         /* .nY = */ 0x5
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x2
@@ -1017,90 +658,27 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x2,
         /* .nY = */ 0x6
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x1
@@ -1117,38 +695,14 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x1,
         /* .nY = */ 0x7
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x1
@@ -1165,14 +719,8 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x3,
         /* .nY = */ 0x1
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x2
@@ -1189,14 +737,8 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x3,
         /* .nY = */ 0x2
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x1
@@ -1213,158 +755,44 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x2,
         /* .nY = */ 0x7
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x3
@@ -1385,10 +813,7 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x3,
         /* .nY = */ 0x1
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
     {
         /* .nX = */ 0x2,
         /* .nY = */ 0x4
@@ -1409,154 +834,43 @@ void __stdcall INV_DrawSocketedItems(D2UnitStrc * pUnit, D2GridScreenCoordinates
         /* .nX = */ 0x3,
         /* .nY = */ 0x2
     },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
-    {
-        /* .nX = */ 0x0,
-        /* .nY = */ 0x0
-    },
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
     {
         /* .nX = */ 0x1,
         /* .nY = */ 0x1
@@ -7306,7 +6620,7 @@ void __stdcall INV_HandleMercInvMouseMove(D2UIMouseMsgStrc * pMsg) {
     Draw::SetUIFlag(UI_MERCINV, UI_TOGGLE, 0);
 }
 
-void CloseScrollOfWhatever(void * pThis, int32_t nColor) {
+void __thiscall CloseScrollOfWhatever(void * pThis, int32_t nColor) {
     D2Lang::Unicode::UNISYS::STRING_CopyWideString((uint16_t*)gpInvRecipeScrollImage, (uint16_t*)pThis);
     gbInvRecipeScrollOpen = nColor;
     Draw::SetUIFlag(UI_RECIPESCROLL, UI_SET, 0);
@@ -8119,41 +7433,41 @@ void __stdcall INV_ShowBookTooltip() {
         }
 
         pItemsTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(nClassId);
-        if (pItemsTxt) {
-          AppendQuanity(wszDescription, pItemToDescribe);
-          if (!g_nCurrentInventoryPage) {
-            pwLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0x89b);
-            D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, pwLocaleStr);
-            D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, pwSeparator);
-            pwLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0x89e);
-            D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, pwLocaleStr);
-            D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, pwSeparator);
-          }
+        if (!pItemsTxt) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcf5);
+          exit(-1);
+        }
 
-          Fog::File::CONTAINER_InitializeBuffer(wszItemName, 2, 0x80, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
-          GetItemName(pItemToDescribe, wszItemName, 0x80);
-          ui::MoveArgumentToEAX(wszItemName);
-          D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, wszItemName);
-          Fog::File::CONTAINER_InitializeBuffer(wszTooltip, 2, 0x400, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
-          if (g_nCurrentInventoryPage - 1U < 9) {
-            INV_FormatItemTooltipWithCost(wszDescription, wszTooltip);
-          } else {
-            D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszTooltip, wszDescription);
-          }
+        AppendQuanity(wszDescription, pItemToDescribe);
+        if (!g_nCurrentInventoryPage) {
+          pwLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0x89b);
+          D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, pwLocaleStr);
+          D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, pwSeparator);
+          pwLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0x89e);
+          D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, pwLocaleStr);
+          D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, pwSeparator);
+        }
 
-          ui::MoveArgumentToEAX(wszTooltip);
-          D2Win::Src::D2WinFont::TEXT_CalcTextDimensions(wszTooltip, &nTextWidth, &nTooltipHeight);
-          if (gaInventoryState != nTooltipHeight && -1 < gaInventoryState - nTooltipHeight) {
-            D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(wszTooltip, gaInventoryItemSlots, gaInventoryState, 0, 0);
-            return;
-          }
+        Fog::File::CONTAINER_InitializeBuffer(wszItemName, 2, 0x80, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+        GetItemName(pItemToDescribe, wszItemName, 0x80);
+        ui::MoveArgumentToEAX(wszItemName);
+        D2Lang::Unicode::UNISYS::AppendToBuffer(wszDescription, wszItemName);
+        Fog::File::CONTAINER_InitializeBuffer(wszTooltip, 2, 0x400, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+        if (g_nCurrentInventoryPage - 1U < 9) {
+          INV_FormatItemTooltipWithCost(wszDescription, wszTooltip);
+        } else {
+          D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszTooltip, wszDescription);
+        }
 
-          D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(wszTooltip, nInventoryContextMode, pInventoryContextUi + nTooltipHeight, 0, 0);
+        ui::MoveArgumentToEAX(wszTooltip);
+        D2Win::Src::D2WinFont::TEXT_CalcTextDimensions(wszTooltip, &nTextWidth, &nTooltipHeight);
+        if (gaInventoryState != nTooltipHeight && -1 < gaInventoryState - nTooltipHeight) {
+          D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(wszTooltip, gaInventoryItemSlots, gaInventoryState, 0, 0);
           return;
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcf5);
-        exit(-1);
+        D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(wszTooltip, nInventoryContextMode, pInventoryContextUi + nTooltipHeight, 0, 0);
+        return;
       }
     }
 
@@ -12205,39 +11519,14 @@ namespace D2Client::UI::Inv {
 
 // Initialized data
 
-D2InventoryScreenCoordinates pBankPageScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_GLOBAL_GUARD(pBankPageScreenCoordinates, "D2Client::UI::Inv::pBankPageScreenCoordinates");
+D2InventoryScreenCoordinates pBankPageScreenCoordinates = {}; D2_GLOBAL_GUARD(pBankPageScreenCoordinates, "D2Client::UI::Inv::pBankPageScreenCoordinates");
 
-D2InventoryScreenCoordinates pInventoryScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_GLOBAL_GUARD(pInventoryScreenCoordinates, "D2Client::UI::Inv::pInventoryScreenCoordinates");
+D2InventoryScreenCoordinates pInventoryScreenCoordinates = {}; D2_GLOBAL_GUARD(pInventoryScreenCoordinates, "D2Client::UI::Inv::pInventoryScreenCoordinates");
 
-D2InventoryScreenCoordinates BigBankPageScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_GLOBAL_GUARD(BigBankPageScreenCoordinates, "D2Client::UI::Inv::BigBankPageScreenCoordinates");
+D2InventoryScreenCoordinates BigBankPageScreenCoordinates = {}; D2_GLOBAL_GUARD(BigBankPageScreenCoordinates, "D2Client::UI::Inv::BigBankPageScreenCoordinates");
 
-D2InventoryScreenCoordinates pTranspogrifyBoxScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_GLOBAL_GUARD(pTranspogrifyBoxScreenCoordinates, "D2Client::UI::Inv::pTranspogrifyBoxScreenCoordinates");
+D2InventoryScreenCoordinates pTranspogrifyBoxScreenCoordinates = {}; D2_GLOBAL_GUARD(pTranspogrifyBoxScreenCoordinates, "D2Client::UI::Inv::pTranspogrifyBoxScreenCoordinates");
 
-D2InventoryScreenCoordinates pNpcInventoryScreenCoordinates = {
-    /* .nLeft = */ 0,
-    /* .nRight = */ 0,
-    /* .nTop = */ 0,
-    /* .nBottom = */ 0
-}; D2_GLOBAL_GUARD(pNpcInventoryScreenCoordinates, "D2Client::UI::Inv::pNpcInventoryScreenCoordinates");
+D2InventoryScreenCoordinates pNpcInventoryScreenCoordinates = {}; D2_GLOBAL_GUARD(pNpcInventoryScreenCoordinates, "D2Client::UI::Inv::pNpcInventoryScreenCoordinates");
 
 } // namespace D2Client::UI::Inv

@@ -218,7 +218,7 @@ void __stdcall OOGUTIL_RequestGameListFromServer();
 // If nScreenToShow == 2 (REALM/Battle.net): sends MCP 0x05 GAMELIST request (reqid=CreateJoinGameRequestId)
 // over d2cs; server replies with one 0x05 packet per game + a token=-2 terminator (see NET_MCP_CLIENT_Incoming0x05).
 void __stdcall OOGMENU_RequestGameList();
-void __stdcall OOGUTIL_SendGamePassword(DWORD dwParam1, DWORD dwParam2, char * szText);
+BOOL __stdcall OOGUTIL_SendGamePassword(DWORD dwParam1, DWORD dwParam2, char * szText);
 int __stdcall EDITBOX_Cb_OOGUTIL_SetJoinGameError(void * pUnknown);
 int __stdcall OOGUTIL_HandleGameCreation(struct D2ControlMsg * pControlMsg);
 // Applies the state of gUIGameListLevelRestrictionCheckbox to the create-game dialog: checked makes gUILevelRestrictionEditBox and gUIGameListLevelRestrictionUp/DownButton visible and active and gUIGameListLevelRestrictionInactiveImage/InactiveArrowButton inactive, unchecked the reverse; re-sets string 0x148b on gUIGameListLevelRestrictionLabel and 0x148c ("Levels") on gUIGameListLevelRestrictionLevelsLabel (alignment 4 checked, 5 unchecked), then calls OOGUTIL_RefreshGameList.

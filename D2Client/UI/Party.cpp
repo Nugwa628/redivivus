@@ -46,19 +46,19 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2UiPartyStrc) == 0xd1, "D2_NEW(D2UiPartyStrc): the 32-bit layout must be the 0xd1 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2UiPartyStrc) == 0xd1, "D2_NEW_AT(D2UiPartyStrc): the 32-bit layout must be the 0xd1 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fnSendChatCommand
@@ -118,7 +118,7 @@ void __stdcall FreeAllUiParty() {
     while (pMemoryToFree) {
       D2UiPartyStrc* pDVar1;
       pDVar1 = pMemoryToFree->pNext;
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\UI\\Party.cpp", 0x108);
       pMemoryToFree = pDVar1;
     }
 
@@ -185,7 +185,7 @@ void AllocUiPartyFromRoster(D2RosterStrc * pRoster, int32_t nPositionY) {
     D2UiPartyStrc* pUiParty;
     char cChar;
     D2UiPartyStrc* pUiPartyGlobal = Party::pUiParty;
-    pUiParty = D2_NEW(D2UiPartyStrc);
+    pUiParty = D2_NEW_AT(D2UiPartyStrc, ".\\UI\\Party.cpp", 0x14d);
     memset(pUiParty, 0, 0xd1);
     SetupPartyButtons(pRoster, pUiParty, nPositionY);
     char* pRosterName = GAME::Roster::GetRosterName(pRoster);
@@ -387,11 +387,11 @@ void __stdcall UI_DrawPlayerNameInParty() {
       D2Win::Src::D2WinFont::SetAndReturnLastFont(nLen);
     }
 
-    uint16_t* wszMessage = (uint16_t*)D2_ALLOC(nLenPlus1 * 2);
+    uint16_t* wszMessage = (uint16_t*)D2_ALLOC_AT(nLenPlus1 * 2, ".\\UI\\Party.cpp", 0x211);
     D2Lang::UTF8_ConvertToWideChar(wszMessage, pszName, nLenPlus1);
     ui::UI_DrawTextCentered(gnPanelOffsetX + 0x14, 0x1f - gnPanelOffsetY, gnPanelOffsetX + 0xbe, wszMessage, 0);
     D2Win::Src::D2WinFont::SetAndReturnLastFont(0);
-    D2_FREE(wszMessage);
+    D2_FREE_AT(wszMessage, ".\\UI\\Party.cpp", 0x21a);
 }
 
 int32_t __stdcall ResetPartyUi() {
@@ -541,7 +541,7 @@ void __stdcall UI_DrawPartyAcceptButton() {
 
 void __stdcall SetEachPlayerRosterGlobalPartyId() {
     // Static local variables (originally global data)
-    static int gaEachplayerRosterPartyId[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; D2_STATIC_GUARD(gaEachplayerRosterPartyId, "D2Client::UI::Party::SetEachPlayerRosterGlobalPartyId::gaEachplayerRosterPartyId");
+    static int gaEachplayerRosterPartyId[8] = {}; D2_STATIC_GUARD(gaEachplayerRosterPartyId, "D2Client::UI::Party::SetEachPlayerRosterGlobalPartyId::gaEachplayerRosterPartyId");
 
     int* pPartyId;
     D2RosterStrc* pRoster = GAME::Roster::GetNextRosterPlayer(nullptr);

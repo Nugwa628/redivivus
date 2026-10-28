@@ -51,18 +51,18 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2UnitDataMissileStrc) == 0x34, "D2_NEW(D2UnitDataMissileStrc): the 32-bit layout must be the 0x34 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2UnitDataMissileStrc) == 0x34, "D2_NEW_AT(D2UnitDataMissileStrc): the 32-bit layout must be the 0x34 bytes 1.14d allocates");
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
 
@@ -79,7 +79,7 @@ void __stdcall AllocMissileData(D2UnitStrc * pUnit) {
       return;
     }
 
-    D2UnitDataMissileStrc* pUnitDataMissile = D2_NEW_POOL(pUnit->pMemory, D2UnitDataMissileStrc);
+    D2UnitDataMissileStrc* pUnitDataMissile = D2_NEW_POOL_AT(pUnit->pMemory, D2UnitDataMissileStrc, ".\\UNITS\\Missile.cpp", 0x22);
     memset(pUnitDataMissile, 0, 0x34);
     pUnitDataMissile->nOwnerGUID = -1;
     pUnit->pUnitData.pUnitDataMissile = pUnitDataMissile;
@@ -91,7 +91,7 @@ void __stdcall FreeMissileData(D2UnitStrc * pUnit) {
       return;
     }
 
-    D2_FREE_POOL(pUnit->pMemory, pUnit->pUnitData.pUnitDataPlayer);
+    D2_FREE_POOL_AT(pUnit->pMemory, pUnit->pUnitData.pUnitDataPlayer, ".\\UNITS\\Missile.cpp", 0x3e);
     pUnit->pUnitData.pUnitDataPlayer = 0;
 }
 

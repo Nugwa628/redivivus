@@ -222,7 +222,7 @@ BOOL __stdcall SCMD_ProcessFile(char * filename, int * pnParam, uint32_t dwParam
     return nResult;
 }
 
-uint32_t SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset) {
+uint32_t __thiscall SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset) {
     uint32_t uOffset = *(uint32_t*)(pThis + 4);
     if ((int)uOffset < 0) {
       return ~uOffset;
@@ -235,7 +235,7 @@ uint32_t SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset) {
     return uOffset + nBaseOffset;
 }
 
-::SCMD * SCMD_GetListHead(::SCMD * pThis, ::SCMD * pNode) {
+::SCMD * __thiscall SCMD_GetListHead(::SCMD * pThis, ::SCMD * pNode) {
     if (pNode) {
       return pNode;
     }
@@ -244,7 +244,7 @@ uint32_t SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset) {
     return pNode;
 }
 
-void SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd) {
+void __thiscall SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd) {
     uint32_t nNextOffset;
     ::SCMD* pPrevLink = (::SCMD*)pNode;
     if (!pNode) {
@@ -295,7 +295,7 @@ void SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd)
     *(::SCMD**)(pScmd + 4) = (::SCMD*)pNode;
 }
 
-uint32_t SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode) {
+uint32_t __thiscall SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode) {
     if (pNode) {
       return (int)*(uint32_t*)(pNode + 4) < 1 ? 0 : *(uint32_t*)(pNode + 4);
     }
@@ -304,7 +304,7 @@ uint32_t SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode) {
     return (int)*(uint32_t*)(pNode + 4) < 1 ? 0 : *(uint32_t*)(pNode + 4);
 }
 
-void SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode) {
+void __thiscall SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode) {
     ::SCMD* pPrevLink;
     if (!pNode) {
       pNode = (::SCMD*)(pThis + 4);
@@ -359,7 +359,7 @@ StormCmdArgDefStrc * __stdcall SCMD_FindFlagDef(StormCmdArgDefStrc * cmdList, ch
     return pMinLen;
 }
 
-uint32_t SCMD_GetHandler(::SCMD * pThis, int nNodeOffset) {
+uint32_t __thiscall SCMD_GetHandler(::SCMD * pThis, int nNodeOffset) {
     if (!nNodeOffset) {
       return *(uint32_t*)(pThis + 8);
     }
@@ -417,7 +417,7 @@ void __fastcall SCMD_ClearAll(D2StormListHead * nListPtr) {
     nListPtr->pNext = 0;
 }
 
-::SCMD * SCMD_AllocNode(::SCMD * pThis, int nInsertMode, int nParam, uint32_t nParam2) {
+::SCMD * __thiscall SCMD_AllocNode(::SCMD * pThis, int nInsertMode, int nParam, uint32_t nParam2) {
     ::SCMD* pNewNode = (::SCMD*)SMem::SMemAlloc(nParam + 0x40, s___AUCMDDEF___0074c47c, -2, nParam2 | 8);
     if (!pNewNode) {
       pNewNode = 0;
@@ -433,7 +433,7 @@ void __fastcall SCMD_ClearAll(D2StormListHead * nListPtr) {
     return pNewNode;
 }
 
-::SCMD * SCMD_FreeNode(::SCMD * pThis, uint8_t bFreeMemory) {
+::SCMD * __thiscall SCMD_FreeNode(::SCMD * pThis, uint8_t bFreeMemory) {
     uint32_t nNextOffset;
     int pListHead = *(int*)pThis;
     if (pListHead) {
@@ -619,7 +619,7 @@ void __fastcall SCMD_FreeAllNodes(void * pListHead) {
     }
 }
 
-uint32_t SCMD_RemoveNode(::SCMD * pThis, ::SCMD * pNode) {
+uint32_t __thiscall SCMD_RemoveNode(::SCMD * pThis, ::SCMD * pNode) {
     uint32_t nPrevLinkField;
     ::SCMD* pSVar2 = (::SCMD*)pNode;
     if (!pNode) {
@@ -724,7 +724,7 @@ BOOL __fastcall SCMD_PerformConversion(char * str, StormCmdArgDefStrc * cmdDef, 
 }
 
 // @blizzard ProcessCurrentFlag (SCMD.CPP)
-BOOL SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed) {
+BOOL __thiscall SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed) {
     int iVar1;
     int nArgConsumed;
     *outConsumed = 0;

@@ -43,27 +43,27 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2InventoryStrc) == 0x40, "D2_NEW(D2InventoryStrc): the 32-bit layout must be the 0x40 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2InventoryStrc) == 0x40, "D2_NEW_AT(D2InventoryStrc): the 32-bit layout must be the 0x40 bytes 1.14d allocates");
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_REALLOC_POOL
-#define D2_REALLOC_POOL(pPool, p, size) Fog::Memory::ReAllocServerMemory((pPool), (p), (size), __FILE__, __LINE__, 0)
+#ifndef D2_REALLOC_POOL_AT
+#define D2_REALLOC_POOL_AT(pPool, p, size, szFile, nLine) Fog::Memory::ReAllocServerMemory((pPool), (p), (size), (szFile), (nLine), 0)
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2InventoryToBeUpdatedStrc) == 0x8, "D2_NEW(D2InventoryToBeUpdatedStrc): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2InventoryToBeUpdatedStrc) == 0x8, "D2_NEW_AT(D2InventoryToBeUpdatedStrc): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2CorpseStrc) == 0x10, "D2_NEW(D2CorpseStrc): the 32-bit layout must be the 0x10 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2CorpseStrc) == 0x10, "D2_NEW_AT(D2CorpseStrc): the 32-bit layout must be the 0x10 bytes 1.14d allocates");
 
 
 namespace D2Common::INVENTORY::Inventory {
@@ -293,7 +293,7 @@ D2InventoryStrc * __stdcall STRUCT_CreatePlayerInventory(D2PoolManagerStrc * pMe
       pMemory = pUnit->pMemory;
     }
 
-    D2InventoryStrc* pInventoryStrc = D2_NEW_POOL(pMemory, D2InventoryStrc);
+    D2InventoryStrc* pInventoryStrc = D2_NEW_POOL_AT(pMemory, D2InventoryStrc, ".\\INVENTORY\\Inventory.cpp", 0x22d);
     if (!pInventoryStrc) {
       return nullptr;
     }
@@ -337,7 +337,7 @@ void __stdcall STRUCT_FreeInventory(D2InventoryStrc * pInventory) {
       do {
         pInventoryGrid = *(D2InventoryGridStrc**)&pInventory->pGrids[nGridOffset].pGridCells;
         if (pInventoryGrid) {
-          D2_FREE_POOL(pInventory->pMemory, pInventoryGrid);
+          D2_FREE_POOL_AT(pInventory->pMemory, pInventoryGrid, ".\\INVENTORY\\Inventory.cpp", 0x261);
         }
 
         nGridIdx++;
@@ -345,7 +345,7 @@ void __stdcall STRUCT_FreeInventory(D2InventoryStrc * pInventory) {
       } while (nGridIdx < pInventory->nGridCount);
     }
     if (pInventory->pGrids) {
-      D2_FREE_POOL(pInventory->pMemory, pInventory->pGrids);
+      D2_FREE_POOL_AT(pInventory->pMemory, pInventory->pGrids, ".\\INVENTORY\\Inventory.cpp", 0x267);
     }
     if (pInventory->pOwner) {
       pInventory->pOwner->pInventory = 0;
@@ -354,18 +354,18 @@ void __stdcall STRUCT_FreeInventory(D2InventoryStrc * pInventory) {
     D2InventoryToBeUpdatedStrc* pUpdates = pInventory->pUpdates;
     while (pUpdates) {
       pNextUpdate = pUpdates->pNext;
-      D2_FREE_POOL(pInventory->pMemory, pUpdates);
+      D2_FREE_POOL_AT(pInventory->pMemory, pUpdates, ".\\INVENTORY\\Inventory.cpp", 0x273);
       pUpdates = pNextUpdate;
     }
 
     D2CorpseStrc* pCorpse = pInventory->pCorpse;
     while (pCorpse) {
       pNextCorpse = pCorpse->pNext;
-      D2_FREE_POOL(pInventory->pMemory, pCorpse);
+      D2_FREE_POOL_AT(pInventory->pMemory, pCorpse, ".\\INVENTORY\\Inventory.cpp", 0x27b);
       pCorpse = pNextCorpse;
     }
 
-    D2_FREE_POOL(pInventory->pMemory, pInventory);
+    D2_FREE_POOL_AT(pInventory->pMemory, pInventory, ".\\INVENTORY\\Inventory.cpp", 0x27f);
 }
 
 BOOL __stdcall INVENTORY_CheckDoItemBelongToInventory(D2InventoryStrc * pInventory, D2UnitStrc * pUnit) {
@@ -415,7 +415,7 @@ D2InventoryGridInfoStrc * __stdcall ReinitializeInventoryGrid(D2InventoryStrc * 
           pGridInfo->bWidth = pInventorySize->Width;
           byWidth = pInventorySize->Height;
           pGridInfo->bHeight = byWidth;
-          pNewGrid = (D2UnitStrc**)D2_ALLOC_POOL(pInventory->pMemory, (uint32_t)pGridInfo->bWidth * (uint32_t)byWidth * 4);
+          pNewGrid = (D2UnitStrc**)D2_ALLOC_POOL_AT(pInventory->pMemory, (uint32_t)pGridInfo->bWidth * (uint32_t)byWidth * 4, ".\\INVENTORY\\Inventory.cpp", 0x2d1);
           pGridInfo->pGridCells = pNewGrid;
           memset(pNewGrid, 0, (uint32_t)pGridInfo->bWidth * (uint32_t)pGridInfo->bHeight * 4);
         }
@@ -429,7 +429,7 @@ D2InventoryGridInfoStrc * __stdcall ReinitializeInventoryGrid(D2InventoryStrc * 
         return nullptr;
       }
 
-      pGridInfo = (D2InventoryGridInfoStrc*)D2_REALLOC_POOL(pInventory->pMemory, pInventory->pGrids, nNewGridSize * 0x10 + 0x10);
+      pGridInfo = (D2InventoryGridInfoStrc*)D2_REALLOC_POOL_AT(pInventory->pMemory, pInventory->pGrids, nNewGridSize * 0x10 + 0x10, ".\\INVENTORY\\Inventory.cpp", 0x2e4);
       pInventory->pGrids = pGridInfo;
       memset(pGridInfo + pInventory->nGridCount, 0, (nNewGridSize - pInventory->nGridCount + 1) * 0x10);
       pInventory->nGridCount = nNewGridSize + 1;
@@ -438,7 +438,7 @@ D2InventoryGridInfoStrc * __stdcall ReinitializeInventoryGrid(D2InventoryStrc * 
       pGridInfo->bWidth = byWidth;
       byHeight = pInventorySize->Height;
       pGridInfo->bHeight = byHeight;
-      pNewGrid = (D2UnitStrc**)D2_ALLOC_POOL(pInventory->pMemory, (uint32_t)byWidth * (uint32_t)byHeight * 4);
+      pNewGrid = (D2UnitStrc**)D2_ALLOC_POOL_AT(pInventory->pMemory, (uint32_t)byWidth * (uint32_t)byHeight * 4, ".\\INVENTORY\\Inventory.cpp", 0x2eb);
       pGridInfo->pGridCells = pNewGrid;
       memset(pNewGrid, 0, (uint32_t)pGridInfo->bWidth * (uint32_t)pGridInfo->bHeight * 4);
     }
@@ -2158,7 +2158,7 @@ void __stdcall FreeUpdatesFromInventory(D2InventoryStrc * pInventory) {
     while (pMemoryToFree) {
       D2InventoryToBeUpdatedStrc* pvVar1;
       pvVar1 = pMemoryToFree->pNext;
-      D2_FREE_POOL(pInventory->pMemory, pMemoryToFree);
+      D2_FREE_POOL_AT(pInventory->pMemory, pMemoryToFree, ".\\INVENTORY\\Inventory.cpp", 0xcbb);
       pMemoryToFree = pvVar1;
     }
 
@@ -2192,7 +2192,7 @@ void __stdcall UpsertToUpdateList(D2InventoryStrc * pInventory, D2UnitStrc * pIt
       return;
     }
 
-    D2InventoryToBeUpdatedStrc* pNewUpdate = D2_NEW_POOL(pInventory->pMemory, D2InventoryToBeUpdatedStrc);
+    D2InventoryToBeUpdatedStrc* pNewUpdate = D2_NEW_POOL_AT(pInventory->pMemory, D2InventoryToBeUpdatedStrc, ".\\INVENTORY\\Inventory.cpp", 0xd09);
     if (!pNewUpdate) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd0a);
       exit(-1);
@@ -2843,7 +2843,7 @@ void __stdcall INVENTORY_AddCorpse(D2InventoryStrc * pInventory, int32_t nUnitGU
       return;
     }
 
-    D2CorpseStrc* pCorpse = D2_NEW_POOL(pInventory->pMemory, D2CorpseStrc);
+    D2CorpseStrc* pCorpse = D2_NEW_POOL_AT(pInventory->pMemory, D2CorpseStrc, ".\\INVENTORY\\Inventory.cpp", 0xfea);
     pCorpse->eUnitType = eUnitType;
     pCorpse->nUnitGUID = nUnitGUID;
     pCorpse->dwFlags = dwFlags;
@@ -2901,7 +2901,7 @@ BOOL __stdcall INVENTORY_RemoveCorpse(D2InventoryStrc * pInventory, int32_t nGUI
       pInventory->nCorpseCount--;
     }
 
-    D2_FREE_POOL(pInventory->pMemory, pMemoryToFree);
+    D2_FREE_POOL_AT(pInventory->pMemory, pMemoryToFree, ".\\INVENTORY\\Inventory.cpp", 0x1034);
     return 1;
 }
 
@@ -2923,7 +2923,7 @@ void __stdcall INVENTORY_FreeNotifications(int * pnParam) {
     while (pMemoryToFree) {
       void* pNextNotification;
       pNextNotification = *(void**)((int)pMemoryToFree + 0xc);
-      D2_FREE_POOL((D2PoolManagerStrc*)pnParam[1], pMemoryToFree);
+      D2_FREE_POOL_AT((D2PoolManagerStrc*)pnParam[1], pMemoryToFree, ".\\INVENTORY\\Inventory.cpp", 0x1071);
       pMemoryToFree = pNextNotification;
     }
 
@@ -4245,20 +4245,20 @@ void __stdcall INVENTORY_UpdateCompositeWeaponGfx(int32_t nParam1, int32_t nPara
         pOffhandItem = INVENTORY_FindWornItemByType(pInventory, 5);
         if (pOffhandItem) {
           pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pOffhandItem->nClassId);
-          if (pItemsTxt) {
-            nAltGfxIdx = INVENTORY_GetAlternateGfxIndex(pItemsTxt->dwCode, pItemsTxt->dwAlternateGfx);
-            if (0 < (int)nAltGfxIdx) {
-              *(char*)(nParam1 + 6) = (char)nAltGfxIdx;
-              return;
-            }
+          if (!pItemsTxt) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x13cf);
+            exit(-1);
+          }
 
-            *(uint8_t*)(nParam1 + 6) = 0xff;
-            *(uint8_t*)(nParam2 + 6) = 0xff;
+          nAltGfxIdx = INVENTORY_GetAlternateGfxIndex(pItemsTxt->dwCode, pItemsTxt->dwAlternateGfx);
+          if (0 < (int)nAltGfxIdx) {
+            *(char*)(nParam1 + 6) = (char)nAltGfxIdx;
             return;
           }
 
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x13cf);
-          exit(-1);
+          *(uint8_t*)(nParam1 + 6) = 0xff;
+          *(uint8_t*)(nParam2 + 6) = 0xff;
+          return;
         }
       }
     } else if (nAltGfxIdx == 0x20776f62 && bHasComponent == '\x06' && (pItemsTxt = DATATBLS::ItemTbls::ConvertItemCodeToClassIdAndGetItemsTxtLine(0x2074696c, &nLitClassId) , pItemsTxt != 0)) {
@@ -4775,7 +4775,7 @@ BOOL __stdcall CreateCopyOfInventoryForTrading(D2PoolManagerStrc * pMemory, D2Un
     D2InventoryStrc* pInventory2;
     D2PoolManagerStrc* pMemory_00 = pMemory;
     _bSuccess = 0;
-    D2InventoryStrc* pInventoryCopy = D2_NEW_POOL(pMemory, D2InventoryStrc);
+    D2InventoryStrc* pInventoryCopy = D2_NEW_POOL_AT(pMemory, D2InventoryStrc, ".\\INVENTORY\\Inventory.cpp", 0x22d);
     if (!pInventoryCopy) {
       pInventory2 = 0;
     } else {
@@ -4786,7 +4786,7 @@ BOOL __stdcall CreateCopyOfInventoryForTrading(D2PoolManagerStrc * pMemory, D2Un
       pInventory2 = pInventoryCopy;
     }
 
-    D2InventoryStrc* pInventory = D2_NEW_POOL(pMemory_00, D2InventoryStrc);
+    D2InventoryStrc* pInventory = D2_NEW_POOL_AT(pMemory_00, D2InventoryStrc, ".\\INVENTORY\\Inventory.cpp", 0x22d);
     if (!pInventory) {
       pInventory = 0;
     } else {

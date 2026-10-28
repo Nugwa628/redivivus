@@ -42,19 +42,19 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2DrlgLevelLinkNodeStrc) == 0x10, "D2_NEW(D2DrlgLevelLinkNodeStrc): the 32-bit layout must be the 0x10 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2DrlgLevelLinkNodeStrc) == 0x10, "D2_NEW_AT(D2DrlgLevelLinkNodeStrc): the 32-bit layout must be the 0x10 bytes 1.14d allocates");
 
 
 namespace D2Common::Drlg::Maze {
@@ -63,40 +63,40 @@ namespace D2Common::Drlg::Maze {
 D2RoomExStrc * __stdcall DRLGMAZE_PickRoomPreset(D2RoomExStrc * pRoomEx, int dwParam2) {
     // Static local variables (originally global data)
     static int gaMazePresetLookupExt[16][2] = {
-    { 0x0, 0x0 },
+    {},
     { 0x0, 0x420 },
     { 0x0, 0x41f },
     { 0x0, 0x421 },
     { 0x0, 0x41e },
     { 0x415, 0x0 },
     { 0x414, 0x0 },
-    { 0x0, 0x0 },
+    {},
     { 0x0, 0x41d },
     { 0x413, 0x0 },
     { 0x412, 0x0 },
-    { 0x0, 0x0 },
+    {},
     { 0x0, 0x422 },
-    { 0x0, 0x0 },
-    { 0x0, 0x0 },
-    { 0x0, 0x0 }
+    {},
+    {},
+    {}
 }; D2_STATIC_GUARD(gaMazePresetLookupExt, "D2Common::Drlg::Maze::DRLGMAZE_PickRoomPreset::gaMazePresetLookupExt");
     static int gaMazePresetLookup[16][3] = {
-    { 0x0, 0x0, 0x0 },
-    { 0x0, 0x0, 0x0 },
-    { 0x0, 0x0, 0x0 },
-    { 0x0, 0x0, 0x0 },
-    { 0x0, 0x0, 0x0 },
+    {},
+    {},
+    {},
+    {},
+    {},
     { 0x164, 0x168, 0x293 },
     { 0x163, 0x167, 0x294 },
-    { 0x0, 0x0, 0x0 },
-    { 0x0, 0x0, 0x0 },
+    {},
+    {},
     { 0x165, 0x169, 0x295 },
     { 0x162, 0x166, 0x296 },
-    { 0x0, 0x0, 0x0 },
-    { 0x0, 0x0, 0x0 },
-    { 0x0, 0x0, 0x0 },
-    { 0x0, 0x0, 0x0 },
-    { 0x0, 0x0, 0x0 }
+    {},
+    {},
+    {},
+    {},
+    {}
 }; D2_STATIC_GUARD(gaMazePresetLookup, "D2Common::Drlg::Maze::DRLGMAZE_PickRoomPreset::gaMazePresetLookup");
 
     bool _bIsSingleFile;
@@ -598,7 +598,7 @@ void __stdcall DRLGMAZE_ExpandRoomsWithPresets(D2DrlgLevelStrc * pLevel, uint32_
     D2LvlMazeTxt* pLvlMazeTxt;
     D2DrlgPresetRoomStrc* pRoomExData;
     D2PoolManagerStrc* pMemPool = pLevel->pDrlg->pMemoryPool;
-    D2RoomExStrc** pRoomPtrArray = (D2RoomExStrc**)D2_ALLOC_POOL(pMemPool, pLevel->nRoomExCount * 4);
+    D2RoomExStrc** pRoomPtrArray = (D2RoomExStrc**)D2_ALLOC_POOL_AT(pMemPool, pLevel->nRoomExCount * 4, ".\\DRLG\\Maze.cpp", 0x271);
     D2RoomExStrc* pRoomIter = pLevel->pRoomExFirst;
     int nRoomCount = pLevel->nRoomExCount;
     int nRoomIdx = 0;
@@ -643,7 +643,7 @@ void __stdcall DRLGMAZE_ExpandRoomsWithPresets(D2DrlgLevelStrc * pLevel, uint32_
       }
     }
 
-    D2_FREE_POOL(pMemPool, pRoomPtrArray);
+    D2_FREE_POOL_AT(pMemPool, pRoomPtrArray, ".\\DRLG\\Maze.cpp", 0x288);
 }
 
 // Initialises the Throne of Destruction (Baal's chamber) level layout. Advances the first room's seed to pick a random direction (0-3), looks up two preset IDs from the gaBaalChamberPresets table for that direction, allocates and assigns them via DRLGMAZE_AllocRoomExAndPickPreset, then expands surrounding rooms with presets.
@@ -1094,7 +1094,7 @@ int __stdcall DRLGMAZE_SelectRandomPresetFile(int nPresetFile, D2DrlgLevelStrc *
       }
     }
 
-    pNode = D2_NEW_POOL(pLevel->pDrlg->pMemoryPool, D2DrlgLevelLinkNodeStrc);
+    pNode = D2_NEW_POOL_AT(pLevel->pDrlg->pMemoryPool, D2DrlgLevelLinkNodeStrc, ".\\DRLG\\Maze.cpp", 0x780);
     pNode->dwData2 = 0;
     pNode->pNext = 0;
     pNode->dwData0 = nFirstFile;

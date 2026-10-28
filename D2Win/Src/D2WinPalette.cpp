@@ -14,8 +14,8 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -217,8 +217,8 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
 
     D2WINPALETTE_LoadPalettes();
     D2gfx::D2GFX::D2GFX_SetPalette(MostLikelyCurrentPalletePtr);
-    D2_FREE(pDatFileHandle);
-    D2_FREE(pMemoryToFree);
+    D2_FREE_AT(pDatFileHandle, ".\\Src\\D2WinPalette.cpp", 0x96);
+    D2_FREE_AT(pMemoryToFree, ".\\Src\\D2WinPalette.cpp", 0x99);
     return 1;
 }
 

@@ -95,7 +95,7 @@
 
 namespace D2Game::MISSILES::MissilesMode {
 
-uint32_t MISSILE_RollAttackHit(void * pThis, D2UnitStrc * pUnit, D2UnitStrc * pUnit1) {
+uint32_t __thiscall MISSILE_RollAttackHit(void * pThis, D2UnitStrc * pUnit, D2UnitStrc * pUnit1) {
     int32_t nToHit = 0;
     if (pThis) {
       nToHit = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat((D2UnitStrc*)pThis, UNITSTAT_tohit, 0);

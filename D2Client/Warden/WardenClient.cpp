@@ -774,16 +774,16 @@ uint32_t __stdcall WARDEN_DownloadModule(char * dwParam1, void * dwParam2, uint3
     return bResult;
 }
 
-void SendPacket(::WardenClient * pThis, void * pData, uint32_t nLen) {
+void __thiscall SendPacket(::WardenClient * pThis, void * pData, uint32_t nLen) {
     GAME::Msg::NET_D2GS_CLIENT_Send_0x66(pData, nLen);
 }
 
-bool CheckModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pRc4Key) {
+bool __thiscall CheckModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pRc4Key) {
     BOOL bResult = WARDEN_ResolveAndLoadModule(pRc4Key, pModuleHash);
     return bResult != 0;
 }
 
-void LoadModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pData, uint32_t nSize) {
+void __thiscall LoadModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pData, uint32_t nSize) {
     char szModuleFile[40];
     _FILETIME fileTime;
     uint32_t i = 0;
@@ -804,18 +804,18 @@ void LoadModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pData, uin
 }
 
 // @sourcefile .\WARDEN\WardenClient.cpp
-void * AllocateMemory(::WardenClient * pThis, uint32_t nSize) {
+void * __thiscall AllocateMemory(::WardenClient * pThis, uint32_t nSize) {
     void* pvVar1 = Storm::SMem::SMemAlloc(nSize, ".\\WARDEN\\WardenClient.cpp", 0x274, 0);
     return pvVar1;
 }
 
 // @sourcefile .\WARDEN\WardenClient.cpp
-void FreeMemory(::WardenClient * pThis, void * pMem) {
+void __thiscall FreeMemory(::WardenClient * pThis, void * pMem) {
     Storm::SMem::SMemFree(pMem, ".\\WARDEN\\WardenClient.cpp", 0x27b, 0);
 }
 
 // @sourcefile .\WARDEN\WardenClient.cpp
-void SetRC4Data(::WardenClient * pThis, void * pData, uint32_t nSize) {
+void __thiscall SetRC4Data(::WardenClient * pThis, void * pData, uint32_t nSize) {
     if (gpWardenResponseData) {
       Storm::SMem::SMemFree(gpWardenResponseData, ".\\WARDEN\\WardenClient.cpp", 0x283, 0);
     }
@@ -826,7 +826,7 @@ void SetRC4Data(::WardenClient * pThis, void * pData, uint32_t nSize) {
 }
 
 // @sourcefile .\WARDEN\WardenClient.cpp
-bool GetRC4Data(::WardenClient * pThis, void * pDest, uint32_t * pnSize) {
+bool __thiscall GetRC4Data(::WardenClient * pThis, void * pDest, uint32_t * pnSize) {
     void* pSrc = gpWardenResponseData;
     if (!gpWardenResponseData) {
       return false;
@@ -845,7 +845,7 @@ bool GetRC4Data(::WardenClient * pThis, void * pDest, uint32_t * pnSize) {
     return true;
 }
 
-::WardenClient * Constructor(::WardenClient * pThis) {
+::WardenClient * __thiscall Constructor(::WardenClient * pThis) {
     pThis->_vfptr = (WardenClientVtable*)(void*)Warden::vftable;
     return pThis;
 }

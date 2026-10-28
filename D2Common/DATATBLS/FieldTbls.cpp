@@ -19,23 +19,23 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::POINT) == 0x8, "D2_NEW(POINT): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::POINT) == 0x8, "D2_NEW_AT(POINT): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
 
 
 namespace D2Common::DATATBLS::FieldTbls {
@@ -60,7 +60,7 @@ void __stdcall FIELDTBLS_InitFieldData(D2ExpFieldFileStrc * pArchive, uint32_t d
     uint32_t nHeight = pArchive->nHeight;
     uint32_t nWidth = pArchive->nWidth;
     size_t nAllocSize = nWidth * nHeight;
-    void* nErrAddress = D2_ALLOC_POOL(nullptr, nAllocSize);
+    void* nErrAddress = D2_ALLOC_POOL_AT(nullptr, nAllocSize, ".\\DATATBLS\\FieldTbls.cpp", 0x3e);
     if (!nErrAddress) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x40);
       exit(-1);
@@ -82,7 +82,7 @@ void __stdcall FIELDTBLS_InitFieldData(D2ExpFieldFileStrc * pArchive, uint32_t d
     gnFieldDataTableWidth = nWidth;
     gnFieldDataTableHeight = nHeight;
     gnFieldDataTableSize = nAllocSize;
-    D2_FREE(pArchive);
+    D2_FREE_AT(pArchive, ".\\DATATBLS\\FieldTbls.cpp", 0x50);
 }
 
 // Frees the global field table data and zeroes all field dimensions/offsets.
@@ -90,7 +90,7 @@ void __stdcall FIELDTBLS_InitFieldData(D2ExpFieldFileStrc * pArchive, uint32_t d
 // @sourcefile .\DATATBLS\FieldTbls.cpp
 void __stdcall FIELDTBLS_FreeFieldData() {
     if (gpFieldDataTable) {
-      D2_FREE_POOL(nullptr, gpFieldDataTable);
+      D2_FREE_POOL_AT(nullptr, gpFieldDataTable, ".\\DATATBLS\\FieldTbls.cpp", 0x5b);
     }
 
     gpFieldDataTable = 0;
@@ -113,7 +113,7 @@ void __stdcall FIELDTBLS_GetFieldCenterOffsets(uint32_t * pdwHalfWidth, uint32_t
 // allocates its own storage and returns it.
 // @sourcefile .\DATATBLS\FieldTbls.cpp
 POINT * __stdcall FIELDTBLS_AllocPoint() {
-    POINT* pPoint = D2_NEW_POOL(nullptr, POINT);
+    POINT* pPoint = D2_NEW_POOL_AT(nullptr, POINT, ".\\DATATBLS\\FieldTbls.cpp", 0x87);
     if (!pPoint) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x88);
       exit(-1);
@@ -134,7 +134,7 @@ void __stdcall FIELDTBLS_FreePoint(POINT * pPoint) {
       exit(-1);
     }
 
-    D2_FREE_POOL(nullptr, pPoint);
+    D2_FREE_POOL_AT(nullptr, pPoint, ".\\DATATBLS\\FieldTbls.cpp", 0x94);
 }
 
 void __stdcall SetXY(POINT * pPoint, LONG nX, LONG nY) {
@@ -150,12 +150,12 @@ void __stdcall SetXY(POINT * pPoint, LONG nX, LONG nY) {
 // Reads a byte value from the field data at the given world coordinates.
 // Used for automap or collision field lookups. Halts on null input.
 uint32_t __stdcall FIELDTBLS_GetFieldValueAtCoords(int * pnFieldOrigin, int32_t nX, int32_t nY) {
-    if (pnFieldOrigin) {
-      return (uint32_t)*(uint8_t*)((int)gpFieldDataTable + nX + ((nY - pnFieldOrigin[1]) * 0x100 - *pnFieldOrigin));
+    if (!pnFieldOrigin) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb0);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb0);
-    exit(-1);
+    return (uint32_t)*(uint8_t*)((int)gpFieldDataTable + nX + ((nY - pnFieldOrigin[1]) * 0x100 - *pnFieldOrigin));
     return (uint32_t)*(uint8_t*)((int)gpFieldDataTable + nX + ((nY - pnFieldOrigin[1]) * 0x100 - *pnFieldOrigin));
 }
 

@@ -270,24 +270,7 @@ void __fastcall SPELLSEL_DrawSkillTooltip(short * pSkillId, int32_t bShowExpande
 
 void __fastcall SPELLSEL_DrawKeyBindingText(int32_t nCmdIndex, int32_t nX, int32_t nY, int32_t dwColor) {
     // Static local variables (originally global data)
-    static uint16_t gSpellSelKeyNameBuffer[16] = {
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-}; D2_STATIC_GUARD(gSpellSelKeyNameBuffer, "D2Client::UI::SpellSel::SPELLSEL_DrawKeyBindingText::gSpellSelKeyNameBuffer");
+    static uint16_t gSpellSelKeyNameBuffer[16] = {}; D2_STATIC_GUARD(gSpellSelKeyNameBuffer, "D2Client::UI::SpellSel::SPELLSEL_DrawKeyBindingText::gSpellSelKeyNameBuffer");
     static unsigned int gnSpellSelKeyBindTextDrawMode; D2_STATIC_GUARD_BSS(gnSpellSelKeyBindTextDrawMode, "D2Client::UI::SpellSel::SPELLSEL_DrawKeyBindingText::gnSpellSelKeyBindTextDrawMode");
 
     uint16_t* pTruncEnd;
@@ -980,24 +963,7 @@ void __fastcall SPELLSEL_DrawSkillGrid(D2UnitStrc * pUnit, int32_t nGridStartX, 
     static int gnSpellSelGridDrawX1; D2_STATIC_GUARD_BSS(gnSpellSelGridDrawX1, "D2Client::UI::SpellSel::SPELLSEL_DrawSkillGrid::gnSpellSelGridDrawX1");
     static int gnSpellSelGridDrawX2; D2_STATIC_GUARD_BSS(gnSpellSelGridDrawX2, "D2Client::UI::SpellSel::SPELLSEL_DrawSkillGrid::gnSpellSelGridDrawX2");
     static int gnSpellSelGridDrawX3; D2_STATIC_GUARD_BSS(gnSpellSelGridDrawX3, "D2Client::UI::SpellSel::SPELLSEL_DrawSkillGrid::gnSpellSelGridDrawX3");
-    static uint8_t gnSpellSelGridDrawX4[16] = {
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-}; D2_STATIC_GUARD(gnSpellSelGridDrawX4, "D2Client::UI::SpellSel::SPELLSEL_DrawSkillGrid::gnSpellSelGridDrawX4");
+    static uint8_t gnSpellSelGridDrawX4[16] = {}; D2_STATIC_GUARD(gnSpellSelGridDrawX4, "D2Client::UI::SpellSel::SPELLSEL_DrawSkillGrid::gnSpellSelGridDrawX4");
 
     D2SkillStrc* pCurSkill;
     int nSkillId;
@@ -1305,7 +1271,7 @@ int32_t SPELLSEL_GetSkillTreeColumnOffset(char cParam) {
     return ScreenSizeX - gnPanelOffsetX - 0xa7;
 }
 
-void SPELLSEL_DrawTabHeader(void * pThis, int32_t nYOffset) {
+void __thiscall SPELLSEL_DrawTabHeader(void * pThis, int32_t nYOffset) {
     ui::UI_DrawTextCentered(WindowSizeX - gnPanelOffsetX - 0x5a, gnPanelOffsetY + ScreenSizeY - 0x1e0 + nYOffset, WindowSizeX - gnPanelOffsetX, (uint16_t*)pThis, 0);
 }
 

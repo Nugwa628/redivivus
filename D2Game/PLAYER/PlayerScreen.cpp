@@ -52,7 +52,7 @@ typedef BOOL (__fastcall *fpExecuteOnUnitFunction)(::SGAMEDATA * pGame, D2UnitSt
 namespace D2Game::PLAYER::PlayerScreen {
 
 // Builds and sends a 0x5A event-message packet to a client. Zeroes a D2Packet0x5aEventStructure, fills packet ID 0x5A, message type 0x07, the target unit GID, and maps bParam (event subtype 1-11) to a color code. Dispatches via NET_D2GS_SERVER_Send_0x5A_EventMessages. Used for party/relationship notifications.
-void SendPlayerEvent(void * pThis, uint32_t pUnitGid, uint8_t bParam) {
+void __thiscall SendPlayerEvent(void * pThis, uint32_t pUnitGid, uint8_t bParam) {
     D2Packet0x5aEventStructure sEventPacket;
     uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     memset(sEventPacket.szName1, 0, 16 * sizeof(sEventPacket.szName1[0]));
@@ -533,25 +533,25 @@ eD2ServerIncomingStatus __fastcall PlayerScreen_DispatchAction(::SGAMEDATA * pGa
 }
 
 void __fastcall PARTYSCREEN_ClearHostileRelation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
-    if (pUnit && pUnit->eUnitType == UNIT_PLAYER) {
-      UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
-      UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 0);
-      return;
+    if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15);
-    exit(-1);
+    UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
+    UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 0);
+    return;
 }
 
 void __fastcall PARTYSCREEN_SetHostileRelation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
-    if (pUnit && pUnit->eUnitType == UNIT_PLAYER) {
-      UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
-      UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 1);
-      return;
+    if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x24);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x24);
-    exit(-1);
+    UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
+    UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 1);
+    return;
 }
 
 uint32_t __fastcall PLAYERSCREEN_CheckUnitsCanSeeEachOther(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pOtherUnit) {

@@ -115,7 +115,7 @@ BOOL CUBE_HasAnyItemsInCube(struct D2UnitStrc * pPlayer);
 // @sourcefile .\PLAYER\PlrTrade.cpp
 void __fastcall CheckIfCanStartTradeWithPlayer(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pOtherUnit);
 // @sourcefile .\PLAYER\PlrTrade.cpp
-void TRADE_SendTradeCompleteToPlayers(void * pThis, struct D2UnitStrc * pUnit, struct D2UnitDataPlayerStrc * pData, struct D2UnitDataPlayerStrc * pDataOther);
+void __thiscall TRADE_SendTradeCompleteToPlayers(void * pThis, struct D2UnitStrc * pUnit, struct D2UnitDataPlayerStrc * pData, struct D2UnitDataPlayerStrc * pDataOther);
 // @sourcefile .\PLAYER\PlrTrade.cpp
 void __stdcall SetStatsOnEar(BOOL bHardcore, struct D2UnitStrc * pUnit, struct D2UnitStrc * pOther);
 // Trade/corpse-recovery helper: iterates all items in pUnit's inventory, clones each INVPAGE_MERC item via ITEM_CloneFromSerializedData, sets ear stats if applicable, marks it for update, moves it to INVPAGE_INVENTORY, and places it into pUnit2's inventory via SERVER_ItemToInventory. Also iterates INVPAGE_CORPSE items: strips them from pUnit's inventory (sends 0x9D remove packet) and deletes them. Sends trade-action packet 0x77 opcode 10 (fail) to both parties and returns 0 on any placement failure; returns 1 on full success.

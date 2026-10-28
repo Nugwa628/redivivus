@@ -932,7 +932,7 @@ eD2ServerIncomingStatus __stdcall CloseEnoughToInteract(::SGAMEDATA * pGame, eD2
     return eVar1;
 }
 
-eD2ServerIncomingStatus SERVER_IsItemOnCursor(void * pThis, D2UnitStrc * pUnit, uint32_t dwParam) {
+eD2ServerIncomingStatus __thiscall SERVER_IsItemOnCursor(void * pThis, D2UnitStrc * pUnit, uint32_t dwParam) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x463);
       exit(-1);
@@ -951,7 +951,7 @@ eD2ServerIncomingStatus SERVER_IsItemOnCursor(void * pThis, D2UnitStrc * pUnit, 
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus IsPlayerTheOwner(void * pThis, D2UnitStrc * pOwner, uint32_t nItemGid) {
+eD2ServerIncomingStatus __thiscall IsPlayerTheOwner(void * pThis, D2UnitStrc * pOwner, uint32_t nItemGid) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x47a);
       exit(-1);
@@ -970,7 +970,7 @@ eD2ServerIncomingStatus IsPlayerTheOwner(void * pThis, D2UnitStrc * pOwner, uint
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus ItemBelongsToUnit(void * pThis, D2UnitStrc * pOwner, uint32_t nItemGid) {
+eD2ServerIncomingStatus __thiscall ItemBelongsToUnit(void * pThis, D2UnitStrc * pOwner, uint32_t nItemGid) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x491);
       exit(-1);
@@ -1014,7 +1014,7 @@ uint8_t __stdcall MONSTER_SetAlignmentCallback(int32_t nParam1, int32_t nParam2)
     return !pBodyItem;
 }
 
-eD2ServerIncomingStatus ItemBelongsToInventoryOf(void * pThis, D2UnitStrc * pPlayer, uint32_t nItemGid) {
+eD2ServerIncomingStatus __thiscall ItemBelongsToInventoryOf(void * pThis, D2UnitStrc * pPlayer, uint32_t nItemGid) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4e8);
       exit(-1);
@@ -1283,7 +1283,7 @@ int32_t __stdcall CheckIfInrangeAndReassign(::SGAMEDATA * pGame, D2UnitStrc * pU
 // C->S Packet 0x01 - Walk to XY (5 bytes)
 // [op:1][x:u16][y:u16]
 // Calls MoveToLocation(mode=2).
-eD2ServerIncomingStatus __fastcall SCMD_0x01_WalkToLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x01_WalkToLocation * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x01_WalkToLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x01_WalkToLocation * pPacket, uint32_t nSize) {
     int32_t nStatus = CheckIfInrangeAndReassign(pGame, (D2UnitStrc*)nSize, (uint16_t*)&pPacket, (uint16_t*)&nSize, pUnit, &pPacket->nCmd);
     if (nStatus) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1319,7 +1319,7 @@ eD2ServerIncomingStatus __stdcall AnyPacketClickOnMap(::SGAMEDATA * pGame, size_
 }
 
 // Handles C→S packet 0x02 (Walk To Entity, 9 bytes: [op][unitType:u32][GUID:u32]). Validates packet size, unit type < 6, and proximity via CloseEnoughToInteract(range=0x32). If valid and in range, calls PLRMODES_StartModeID with walk mode 2 targeting the entity. Returns SERVERSTATUS_OK on success, error codes for bad size/type/range.
-eD2ServerIncomingStatus __fastcall SCMD_0x02_WalkToEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x02_WalkToEntity * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x02_WalkToEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x02_WalkToEntity * pPacket, uint32_t nSize) {
     eD2ServerIncomingStatus nStatus = AnyPacketClickOnMap(pGame, nSize, (eD2UnitType*)&pPacket, &nSize, pUnit, &pPacket->nCmd);
     if (nStatus != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1333,7 +1333,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x02_WalkToEntity(::SGAMEDATA * pGame, D
 // C->S Packet 0x03 - Run to XY (5 bytes)
 // [op:1][x:u16][y:u16]
 // Calls MoveToLocation(mode=3).
-eD2ServerIncomingStatus __fastcall SCMD_0x03_RunToLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x03_RunToLocation * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x03_RunToLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x03_RunToLocation * pPacket, uint32_t nSize) {
     int32_t nStatus = CheckIfInrangeAndReassign(pGame, (D2UnitStrc*)nSize, (uint16_t*)&pPacket, (uint16_t*)&nSize, pUnit, &pPacket->nCmd);
     if (nStatus) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1347,7 +1347,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x03_RunToLocation(::SGAMEDATA * pGame, 
 // C->S Packet 0x04 - Run to Unit (9 bytes)
 // [op:1][unitType:u32][GUID:u32]
 // Validates range 0x32, calls StartModeID(mode=3).
-eD2ServerIncomingStatus __fastcall SCMD_0x04_RunToEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x04_RunToEntity * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x04_RunToEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x04_RunToEntity * pPacket, uint32_t nSize) {
     eD2ServerIncomingStatus nStatus = AnyPacketClickOnMap(pGame, nSize, (eD2UnitType*)&pPacket, &nSize, pUnit, &pPacket->nCmd);
     if (nStatus != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1402,13 +1402,13 @@ D2SkillStrc * __stdcall GetDualSwingSkill(D2SkillStrc * pSkill, D2UnitStrc * pPl
     if (!nSkillParam4) {
       D2SkillStrc* pSkill2;
       pSkill2 = D2Common::Skills::GetSkillByIdAndOwner(pPlayer, SKILL_LeftHandSwing, -1);
-      if (pSkill2) {
-        D2Common::Skills::SKILL_SetParam4(pSkill, 5);
-        return pSkill2;
+      if (!pSkill2) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x725);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x725);
-      exit(-1);
+      D2Common::Skills::SKILL_SetParam4(pSkill, 5);
+      return pSkill2;
     }
 
     D2Common::Skills::SKILL_SetParam4(pSkill, 0);
@@ -1533,7 +1533,7 @@ void __stdcall PLAYER_ProcessSkillOnEntity(D2UnitStrc * pUnit, ::SGAMEDATA * pGa
 // C->S Packet 0x05 - Left Skill on Location (5 bytes)
 // [op:1][x:u16][y:u16]
 // Gets left skill, increments pierce_idx, CastSkillOnLocation.
-eD2ServerIncomingStatus __fastcall SCMD_0x05_LeftSkillOnLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x05_LeftSkillOnLocation * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x05_LeftSkillOnLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x05_LeftSkillOnLocation * pPacket, uint32_t nSize) {
     int32_t nPierceIdx = CheckIfInrangeAndReassign(pGame, (D2UnitStrc*)nSize, (uint16_t*)&pPacket, (uint16_t*)&nSize, pUnit, &pPacket->nCmd);
     if (nPierceIdx) {
       return (eD2ServerIncomingStatus)nPierceIdx;
@@ -1558,7 +1558,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x05_LeftSkillOnLocation(::SGAMEDATA * p
 // C->S Packet 0x06 - Left Skill on Unit (9 bytes)
 // [op:1][unitType:u32][GUID:u32]
 // Left skill on target, approach=1 (walk to target).
-eD2ServerIncomingStatus __fastcall SCMD_0x06_LeftSkillOnEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x06_LeftSkillOnEntity * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x06_LeftSkillOnEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x06_LeftSkillOnEntity * pPacket, uint32_t nSize) {
     eD2ServerIncomingStatus nStatus = AnyPacketClickOnMap(pGame, nSize, (eD2UnitType*)&pPacket, &nSize, pUnit, &pPacket->nCmd);
     if (nStatus != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1584,7 +1584,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x06_LeftSkillOnEntity(::SGAMEDATA * pGa
 // C->S Packet 0x07 - Left Skill on Unit, Shift (9 bytes)
 // [op:1][unitType:u32][GUID:u32]
 // Left skill on target, approach=0 (hold position).
-eD2ServerIncomingStatus __fastcall SCMD_0x07_LeftSkillOnEntityEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x07_LeftSkillOnEntityEx * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x07_LeftSkillOnEntityEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x07_LeftSkillOnEntityEx * pPacket, uint32_t nSize) {
     eD2ServerIncomingStatus nStatus = AnyPacketClickOnMap(pGame, nSize, (eD2UnitType*)&pPacket, &nSize, pUnit, &pPacket->nCmd);
     if (nStatus != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1610,8 +1610,8 @@ eD2ServerIncomingStatus __fastcall SCMD_0x07_LeftSkillOnEntityEx(::SGAMEDATA * p
 // C->S Packet 0x08 - Left Skill on Location, Repeat (5 bytes)
 // [op:1][x:u16][y:u16]
 // Held mouse: extra validation then delegates to handler 0x05.
-eD2ServerIncomingStatus __fastcall SCMD_0x08_LeftSkillOnLocationEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x08_LeftSkillOnLocationEx * pPacket, size_t nSize) {
-    size_t nSizeCopy = nSize;
+eD2ServerIncomingStatus __fastcall SCMD_0x08_LeftSkillOnLocationEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x08_LeftSkillOnLocationEx * pPacket, uint32_t nSize) {
+    uint32_t nSizeCopy = nSize;
     ::SGAMEDATA* pGameCopy = pGame;
     int32_t nStatus = CheckIfInrangeAndReassign(pGame, (D2UnitStrc*)nSize, (uint16_t*)&pGameCopy, (uint16_t*)&nSize, pUnit, &pPacket->nCmd);
     if (nStatus) {
@@ -1652,9 +1652,9 @@ eD2ServerIncomingStatus __fastcall PLRMSG_Cmd0x09_CheckRangeThenLeftSkillOnEntit
 // C->S Packet 0x0A - Left Skill on Unit, Repeat+Shift (9 bytes)
 // [op:1][unitType:u32][GUID:u32]
 // Held+shift: delegates to handler 0x07.
-eD2ServerIncomingStatus __fastcall SCMD_0x0A_LeftSkillOnEntityEx3(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0A_LeftSkillOnEntityEx3 * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x0A_LeftSkillOnEntityEx3(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0A_LeftSkillOnEntityEx3 * pPacket, uint32_t nSize) {
     eD2UnitType eOutUnitType;
-    size_t nSize_00 = nSize;
+    uint32_t nSize_00 = nSize;
     eD2ServerIncomingStatus nStatus = AnyPacketClickOnMap(pGame, nSize, &eOutUnitType, &nSize, pUnit, &pPacket->nCmd);
     if (nStatus != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1673,14 +1673,14 @@ eD2ServerIncomingStatus __fastcall SCMD_0x0A_LeftSkillOnEntityEx3(::SGAMEDATA * 
 // C->S Packet 0x0B - Keepalive/Noop (1 byte)
 // [op:1]
 // Validates size==1, does nothing.
-eD2ServerIncomingStatus __fastcall SCMD_0x0B_Keepalive(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0B_Keepalive * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x0B_Keepalive(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0B_Keepalive * pPacket, uint32_t nSize) {
     return nSize != 1 ? SERVERSTATUS_BAD_PARAMS : 0;
 }
 
 // C->S Packet 0x0C - Right Skill on Location (5 bytes)
 // [op:1][x:u16][y:u16]
 // Gets right skill, increments pierce_idx, CastSkillOnLocation.
-eD2ServerIncomingStatus __fastcall SCMD_0x0C_RightSkillOnLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0C_RightSkillOnLocation * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x0C_RightSkillOnLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0C_RightSkillOnLocation * pPacket, uint32_t nSize) {
     int32_t nPierceIdx = CheckIfInrangeAndReassign(pGame, (D2UnitStrc*)nSize, (uint16_t*)&pPacket, (uint16_t*)&nSize, pUnit, &pPacket->nCmd);
     if (nPierceIdx) {
       return (eD2ServerIncomingStatus)nPierceIdx;
@@ -1705,7 +1705,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x0C_RightSkillOnLocation(::SGAMEDATA * 
 // C->S Packet 0x0D - Right Skill on Unit (9 bytes)
 // [op:1][unitType:u32][GUID:u32]
 // Right skill on target, approach=1 (walk to target).
-eD2ServerIncomingStatus __fastcall SCMD_0x0D_RightSkillOnEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0D_RightSkillOnEntity * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x0D_RightSkillOnEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0D_RightSkillOnEntity * pPacket, uint32_t nSize) {
     eD2ServerIncomingStatus nStatus = AnyPacketClickOnMap(pGame, nSize, (eD2UnitType*)&pPacket, &nSize, pUnit, &pPacket->nCmd);
     if (nStatus != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1721,7 +1721,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x0D_RightSkillOnEntity(::SGAMEDATA * pG
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_pierce_idx, nPierceIdx + 1, nLayerZero);
     nPierceIdx = 1;
     D2GSPacketClt0x0D_RightSkillOnEntity* eUnitTypeParsed = pPacket;
-    size_t nTargetGUID = nSize;
+    uint32_t nTargetGUID = nSize;
     pRightSkill = D2Common::Units::GetRightSkill(pUnit);
     PLAYER_ProcessSkillOnEntity(pUnit, pGame, (eD2UnitType)eUnitTypeParsed, nTargetGUID, nPierceIdx, pRightSkill);
     nStatus = SERVERSTATUS_OK;
@@ -1731,7 +1731,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x0D_RightSkillOnEntity(::SGAMEDATA * pG
 // C->S Packet 0x0E - Right Skill on Unit, Shift (9 bytes)
 // [op:1][unitType:u32][GUID:u32]
 // Right skill on target, approach=0 (hold position).
-eD2ServerIncomingStatus __fastcall SCMD_0x0E_RightSkillOnEntityEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0E_RightSkillOnEntityEx * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x0E_RightSkillOnEntityEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0E_RightSkillOnEntityEx * pPacket, uint32_t nSize) {
     eD2ServerIncomingStatus nStatus = AnyPacketClickOnMap(pGame, nSize, (eD2UnitType*)&pPacket, &nSize, pUnit, &pPacket->nCmd);
     if (nStatus != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1747,7 +1747,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x0E_RightSkillOnEntityEx(::SGAMEDATA * 
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_pierce_idx, nPierceIdx + 1, nLayerZero);
     nPierceIdx = 0;
     D2GSPacketClt0x0E_RightSkillOnEntityEx* eUnitTypeParsed = pPacket;
-    size_t nTargetGUID = nSize;
+    uint32_t nTargetGUID = nSize;
     pRightSkill = D2Common::Units::GetRightSkill(pUnit);
     PLAYER_ProcessSkillOnEntity(pUnit, pGame, (eD2UnitType)eUnitTypeParsed, nTargetGUID, nPierceIdx, pRightSkill);
     nStatus = SERVERSTATUS_OK;
@@ -1757,8 +1757,8 @@ eD2ServerIncomingStatus __fastcall SCMD_0x0E_RightSkillOnEntityEx(::SGAMEDATA * 
 // C->S Packet 0x0F - Right Skill on Location, Repeat (5 bytes)
 // [op:1][x:u16][y:u16]
 // Held mouse: delegates to handler 0x0C.
-eD2ServerIncomingStatus __fastcall SCMD_0x0F_RightSkillOnLocationEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0F_RightSkillOnLocationEx * pPacket, size_t nSize) {
-    size_t nSizeCopy = nSize;
+eD2ServerIncomingStatus __fastcall SCMD_0x0F_RightSkillOnLocationEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x0F_RightSkillOnLocationEx * pPacket, uint32_t nSize) {
+    uint32_t nSizeCopy = nSize;
     ::SGAMEDATA* pGameCopy = pGame;
     int32_t nStatus = CheckIfInrangeAndReassign(pGame, (D2UnitStrc*)nSize, (uint16_t*)&pGameCopy, (uint16_t*)&nSize, pUnit, &pPacket->nCmd);
     if (nStatus) {
@@ -1799,9 +1799,9 @@ eD2ServerIncomingStatus __fastcall PLRMSG_Cmd0x10_CheckRangeThenRightSkillOnEnti
 // C->S Packet 0x11 - Right Skill on Unit, Repeat+Shift (9 bytes)
 // [op:1][unitType:u32][GUID:u32]
 // Held+shift: delegates to handler 0x0E.
-eD2ServerIncomingStatus __fastcall SCMD_0x11_RightSkillOnEntityEx3(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x11_RightSkillOnEntityEx3 * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x11_RightSkillOnEntityEx3(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x11_RightSkillOnEntityEx3 * pPacket, uint32_t nSize) {
     eD2UnitType eOutUnitType;
-    size_t nSize_00 = nSize;
+    uint32_t nSize_00 = nSize;
     eD2ServerIncomingStatus nStatus = AnyPacketClickOnMap(pGame, nSize, &eOutUnitType, &nSize, pUnit, &pPacket->nCmd);
     if (nStatus != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)nStatus;
@@ -1820,7 +1820,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x11_RightSkillOnEntityEx3(::SGAMEDATA *
 // C->S Packet 0x12 - Cancel Channeled Skill (1 byte)
 // [op:1]
 // Clears STATE_inferno to stop channeled skills.
-eD2ServerIncomingStatus __fastcall SCMD_0x12_CancelChanneledSkill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x12_CancelChanneledSkill * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x12_CancelChanneledSkill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x12_CancelChanneledSkill * pPacket, uint32_t nSize) {
     if (nSize != 1) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -1834,7 +1834,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x12_CancelChanneledSkill(::SGAMEDATA * 
 // Max msg=256, name=16. Allocates D2HoverTextStrc with language code and timed expiry.
 // Frees existing hover text, sets UNITFLAG_HASTXTMSG, schedules FREEHOVER event at expiry frame.
 // Input sanitized via STRING_CutStringBeginingTillFoundString — filtered messages silently dropped.
-eD2ServerIncomingStatus __fastcall SCMD_0x14_OverheadMessage(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x14_OverheadMessage * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x14_OverheadMessage(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x14_OverheadMessage * pPacket, uint32_t nSize) {
     char* pcVar1;
     D2HoverTextStrc* pHoverText;
     uint32_t nExpireFrame;
@@ -1991,7 +1991,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x26_Chat(D2ClientStrc * pClient, D2GSPacke
 // Whisper error responses via 0x5A event: type 4 = player not in game, type 0xD = player found but squelched.
 // Successful whisper echoed back to sender via 0x26 packet. Source: .\PLAYER\PlrMsg.cpp
 // @sourcefile .\PLAYER\PlrMsg.cpp
-eD2ServerIncomingStatus __fastcall SCMD_0x15_ChatMessage(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x15_ChatMessage * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x15_ChatMessage(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x15_ChatMessage * pPacket, uint32_t nSize) {
     fpForEachClientFn pfnChatCallback;
     uint32_t* pMsgBufDst;
     char* szFilteredMsg;
@@ -2206,7 +2206,7 @@ void __fastcall BroadcastEventMessage(::SGAMEDATA * pGame, D2Packet0x5aEventStru
 // C->S 0x13 Entity Interact (9 bytes)
 // [op:1][unitType:u32][GUID:u32]
 // Validates unitType<=UNIT_WARP, calls SERVER_InteractOrPick(bSetting=0).
-eD2ServerIncomingStatus __fastcall SCMD_0x13_InteractWithEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x13_InteractWithEntity * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x13_InteractWithEntity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x13_InteractWithEntity * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -2221,7 +2221,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x13_InteractWithEntity(::SGAMEDATA * pG
 // C->S 0x16 Entity Interact Extended (13 bytes)
 // [op:1][unitType:u32][GUID:u32][bSetting:BOOL]
 // Prevents self-interaction on player units.
-eD2ServerIncomingStatus __fastcall SCMD_0x16_InteractWithEntityEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x16_PickUpItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x16_InteractWithEntityEx(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x16_PickUpItem * pPacket, uint32_t nSize) {
     uint32_t dwSelfGUID;
     if (nSize != 0xd) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -2245,7 +2245,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x16_InteractWithEntityEx(::SGAMEDATA * 
 }
 
 // C2S packet 0x17 handler (5 bytes): [opcode:1][itemGUID:u32]. Drops item from cursor to ground. Validates item is on cursor via SERVER_IsItemOnCursor, checks player is not in active trade, then calls SERVER_DropItemFromPlayer which finds a collision-free tile near the player and spawns the item. Special handling for Horadric Cube (clears cube contents) and socketed items (sets ITEMFLAG_RELOAD).
-eD2ServerIncomingStatus __fastcall SCMD_0x17_DropItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x17_DropItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x17_DropItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x17_DropItem * pPacket, uint32_t nSize) {
     if (nSize != 5) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -2274,7 +2274,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x17_DropItem(::SGAMEDATA * pGame, D2Uni
 // [op:1][itemGUID:u32][x:u32][y:u32][bufferId:u32]
 // bufferId: 0=inventory, 2/3=trade(requires trade check), 4=stash(requires town).
 // @sourcefile .\PLAYER\PlrMsg.cpp
-eD2ServerIncomingStatus __fastcall SCMD_0x18_ItemToInventory(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x18_InsertItemToBuffer * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x18_ItemToInventory(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x18_InsertItemToBuffer * pPacket, uint32_t nSize) {
     D2RoomStrc* pRoom;
     BOOL bIsRoomInTown;
     D2UnitStrc* pItem;
@@ -2353,7 +2353,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x18_ItemToInventory(::SGAMEDATA * pGame
 // C->S 0x19 Pick Up Item to Inventory (5 bytes)
 // [op:1][itemGUID:u32]
 // Direct-to-inventory pickup, skips cursor. Rejects corpse items.
-eD2ServerIncomingStatus __fastcall SCMD_0x19_PickUpToCursor(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x19_RemoveItemFromBuffer * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x19_PickUpToCursor(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x19_RemoveItemFromBuffer * pPacket, uint32_t nSize) {
     uint32_t nMovePermission;
     BOOL nTakeToCursorResult;
     if (nSize != 5) {
@@ -2398,7 +2398,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x19_PickUpToCursor(::SGAMEDATA * pGame,
 // C->S 0x1A Equip Item (9 bytes)
 // [op:1][itemGUID:u32][bodyLoc:u8][pad:3]
 // Cursor item to body location (1-10). Handles weapon swap, sockets.
-eD2ServerIncomingStatus __fastcall SCMD_0x1A_EquipItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1A_EquipItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x1A_EquipItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1A_EquipItem * pPacket, uint32_t nSize) {
     uint32_t nBodyLoc;
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -2428,13 +2428,13 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1A_EquipItem(::SGAMEDATA * pGame, D2Un
 // C->S 0x1B Unequip Item (9 bytes)
 // [op:1][itemGUID:u32][bodyLoc:u8][pad:3]
 // Body location to cursor. Weapon swap logic, socket handling, sound events.
-eD2ServerIncomingStatus __fastcall SCMD_0x1B_EquipToSwapSlot(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1B_UnequipItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x1B_EquipToSwapSlot(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1B_UnequipItem * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
 
     DWORD dwParam = pPacket->dwItemGUID;
-    nSize = (size_t)(uint8_t)pPacket->dwBodyLoc;
+    nSize = (uint32_t)(uint8_t)pPacket->dwBodyLoc;
     eD2ServerIncomingStatus eVar1 = SERVER_IsItemOnCursor(pGame, pUnit, dwParam);
     if (eVar1 != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)eVar1;
@@ -2456,7 +2456,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1B_EquipToSwapSlot(::SGAMEDATA * pGame
 // C->S 0x1C Unequip to Inventory (3 bytes)
 // [op:1][bodyLoc:u16]
 // Removes equipped item at bodyLoc directly into inventory. Belt(8) checks trade state.
-eD2ServerIncomingStatus __fastcall SCMD_0x1C_UnequipToInventory(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1C_SwapEquippedItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x1C_UnequipToInventory(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1C_SwapEquippedItem * pPacket, uint32_t nSize) {
     int nTradeCheckResult;
     if (nSize != 3) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -2484,7 +2484,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1C_UnequipToInventory(::SGAMEDATA * pG
 }
 
 // Server handler for client packet 0x1D (9 bytes): swap the cursor item with an equipped body-location slot. Validates packet size, confirms the item identified by dwItemGUID is on the cursor (SERVER_IsItemOnCursor), validates bodyLoc is in [1..9], then retrieves the currently equipped item at that slot. For bodyLoc 8 (two-hand weapon slot), checks trade restrictions via PLAYERTRADE_CheckNoEquippedTradeItems. Calls SERVER_Swap2HandItem to perform the actual swap; returns SERVERSTATUS_BAD_PARAMS if the swap produces an unexpected secondary output item. Returns SERVERSTATUS_OK on success.
-eD2ServerIncomingStatus __fastcall SCMD_0x1D_SwapBodyItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1D_Swap2HandItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x1D_SwapBodyItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1D_Swap2HandItem * pPacket, uint32_t nSize) {
     int32_t nTradeCheck;
     BOOL nSwapResult;
     if (nSize != 9) {
@@ -2492,7 +2492,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1D_SwapBodyItem(::SGAMEDATA * pGame, D
     }
 
     DWORD dwParam = pPacket->dwItemGUID;
-    nSize = (size_t)(uint8_t)pPacket->dwBodyLoc;
+    nSize = (uint32_t)(uint8_t)pPacket->dwBodyLoc;
     eD2ServerIncomingStatus eVar1 = SERVER_IsItemOnCursor(pGame, pUnit, dwParam);
     if (eVar1 != SERVERSTATUS_OK) {
       return (eD2ServerIncomingStatus)eVar1;
@@ -2527,7 +2527,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1D_SwapBodyItem(::SGAMEDATA * pGame, D
 // C->S 0x1E Weapon Swap Slot (9 bytes)
 // [op:1][cursorGUID:u32][bodyLoc:u8][pad:3]
 // Only accepts bodyLoc 4(R_ARM) or 5(L_ARM). Alternate weapon set.
-eD2ServerIncomingStatus __fastcall SCMD_0x1E_EquipToWeaponSwap(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1E_RemoveItemFromBelt * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x1E_EquipToWeaponSwap(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1E_RemoveItemFromBelt * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -2571,7 +2571,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1E_EquipToWeaponSwap(::SGAMEDATA * pGa
 // C->S 0x1F Use Item (17 bytes)
 // [op:1][cursorItemGUID:u32][targetItemGUID:u32][targetUnitGUID:u32][arg:u32]
 // Uses cursor item on target item/unit. Rejects corpse/merc pages.
-eD2ServerIncomingStatus __fastcall SCMD_0x1F_UseItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1F_UseItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x1F_UseItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x1F_UseItem * pPacket, uint32_t nSize) {
     uint32_t nUseResult;
     if (nSize != 0x11) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -2624,7 +2624,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1F_UseItem(::SGAMEDATA * pGame, D2Unit
 // C->S 0x20 Use Item (13 bytes)
 // [op:1][itemGUID:u32][x:u32][y:u32]
 // Books, scrolls, quest items. Hardcoded: ass=+1skill, xyz=+20HP, tr2=resist, toa=respec.
-eD2ServerIncomingStatus __fastcall SCMD_0x20_UseItemAtLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x20_StackItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x20_UseItemAtLocation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x20_StackItem * pPacket, uint32_t nSize) {
     if (nSize != 0xd) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -2653,7 +2653,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x20_UseItemAtLocation(::SGAMEDATA * pGa
 }
 
 // C->S 0x27 Apply Scroll to Item (9B). Packet: [op:1][itemGUID:u32][scrollGUID:u32]. Identify scroll on item, or merge stackables.
-eD2ServerIncomingStatus __fastcall SCMD_0x27_UseItemOnItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x27_UseItemOnItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x27_UseItemOnItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x27_UseItemOnItem * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -2683,7 +2683,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x27_UseItemOnItem(::SGAMEDATA * pGame, 
 // C->S 0x21 Stack Items (9 bytes)
 // [op:1][srcGUID:u32][dstGUID:u32]
 // Merges stackable items (arrows, scrolls).
-eD2ServerIncomingStatus __fastcall SCMD_0x21_MergeStackables(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x21_RemoveStackItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x21_MergeStackables(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x21_RemoveStackItem * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -2736,7 +2736,7 @@ eD2ServerIncomingStatus __fastcall PLRMSG_Cmd0x22_RemoveStackItem(::SGAMEDATA * 
 }
 
 // C->S 0x23 Item to Belt (9B). Packet: [op:1][itemGUID:u32][beltSlot:u32]. Cursor item to belt slot.
-eD2ServerIncomingStatus __fastcall SCMD_0x23_ItemToBelt(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x23_ItemFromBelt * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x23_ItemToBelt(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x23_ItemFromBelt * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -2758,7 +2758,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x23_ItemToBelt(::SGAMEDATA * pGame, D2U
 }
 
 // C->S 0x24 Item from Belt (5B). Packet: [op:1][itemGUID:u32]. Belt item to cursor.
-eD2ServerIncomingStatus __fastcall SCMD_0x24_ItemFromBelt(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x24_SwapBeltItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x24_ItemFromBelt(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x24_SwapBeltItem * pPacket, uint32_t nSize) {
     BOOL nResult;
     if (nSize != 5) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -2790,7 +2790,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x24_ItemFromBelt(::SGAMEDATA * pGame, D
 }
 
 // C->S 0x25 Swap Belt Item (9B). Packet: [op:1][cursorGUID:u32][beltGUID:u32]. Swap cursor with belt item.
-eD2ServerIncomingStatus __fastcall SCMD_0x25_SwapBeltItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x25_UseScroll * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x25_SwapBeltItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x25_UseScroll * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -2820,7 +2820,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x25_SwapBeltItem(::SGAMEDATA * pGame, D
 // C->S 0x26 Use Item at Player Coords (13 bytes)
 // [op:1][itemGUID:u32][arg:u32][unk0x09:u32]
 // Uses item at player's current X/Y (range check 50). arg forwarded to SERVER_UseItemAtCoords.
-eD2ServerIncomingStatus __fastcall SCMD_0x26_UseItemAtPlayerCoords(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x26_ItemToCube * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x26_UseItemAtPlayerCoords(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x26_ItemToCube * pPacket, uint32_t nSize) {
     int nUnitPosY;
     if (nSize != 0xd) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -2867,7 +2867,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x26_UseItemAtPlayerCoords(::SGAMEDATA *
 }
 
 // C->S 0x28 Socket Item (9B). Packet: [op:1][gemGUID:u32][socketableGUID:u32]. Insert gem/rune/jewel into sockets. Handles runeword logic.
-eD2ServerIncomingStatus __fastcall SCMD_0x28_SocketItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x28_SocketItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x28_SocketItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x28_SocketItem * pPacket, uint32_t nSize) {
     D2UnitStrc* pInteractUnit;
     eD2UnitType eInteractUnitType;
     uint32_t dwGemGUID;
@@ -2902,7 +2902,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x28_SocketItem(::SGAMEDATA * pGame, D2U
 }
 
 // C->S 0x29 Split Stack (9B). Packet: [op:1][stackGUID:u32][targetGUID:u32]. Remove item from stack.
-eD2ServerIncomingStatus __fastcall SCMD_0x29_ScrollIntoBook(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x29_ScrollIntoBook * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x29_ScrollIntoBook(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x29_ScrollIntoBook * pPacket, uint32_t nSize) {
     uint32_t dwBookGUID;
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -2931,7 +2931,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x29_ScrollIntoBook(::SGAMEDATA * pGame,
 }
 
 // C->S 0x2A Item to Cube (9B). Packet: [op:1][cursorGUID:u32][cubeGUID:u32]. Place cursor item into Horadric Cube.
-eD2ServerIncomingStatus __fastcall SCMD_0x2A_ItemToCube(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x2A_ItemToCube * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x2A_ItemToCube(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x2A_ItemToCube * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3020,7 +3020,7 @@ eD2ServerIncomingStatus __fastcall PLRMSG_Cmd0x2E_ReturnOk(::SGAMEDATA * pGame, 
 // C->S 0x2F NPC Repair/Interact (9 bytes)
 // [op:1][unk0x01:u32][npcGUID:u32]
 // Validates NPC target, range <=10, triggers NPC AI state change.
-eD2ServerIncomingStatus __fastcall SCMD_0x2F_NpcInteract(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x2F_NpcRepair * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x2F_NpcInteract(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x2F_NpcRepair * pPacket, uint32_t nSize) {
     D2MonsterAiStrc* pNpcAi;
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -3057,7 +3057,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x2F_NpcInteract(::SGAMEDATA * pGame, D2
 }
 
 // C->S 0x30 NPC Cancel Dialog (9B). Packet: [op:1][pad:u32][npcGUID:u32]. Close NPC dialog, frees AI state, triggers quest callback.
-eD2ServerIncomingStatus __fastcall SCMD_0x30_NpcCancelDialog(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x30_NpcCancelDialog * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x30_NpcCancelDialog(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x30_NpcCancelDialog * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3085,7 +3085,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x30_NpcCancelDialog(::SGAMEDATA * pGame
 }
 
 // C->S 0x31 handler for NPC gossip interaction packet; validates length and forwards NPC GUID + gossip option id to QUEST_OnNpcGossip.
-eD2ServerIncomingStatus __fastcall SCMD_0x31_NpcGossip(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x31_NpcGossip * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x31_NpcGossip(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x31_NpcGossip * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3095,7 +3095,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x31_NpcGossip(::SGAMEDATA * pGame, D2Un
 }
 
 // C->S 0x32 NPC Buy (17B). Packet: [op:1][npcGUID:u32][itemGUID:u32][flags:u32][cost:u32]. Bit-packed flags: bit31=special, high16=param1, low16=param2. SUNITNPC.CPP.
-eD2ServerIncomingStatus __fastcall SCMD_0x32_NpcBuyConfirm(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x32_NpcBuyConfirm * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x32_NpcBuyConfirm(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x32_NpcBuyConfirm * pPacket, uint32_t nSize) {
     if (nSize != 0x11) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3106,7 +3106,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x32_NpcBuyConfirm(::SGAMEDATA * pGame, 
 }
 
 // C->S 0x33 handler for NPC sell transaction packet; validates packet length and forwards GUIDs/mode/param to SUNITNPC_SellItem.
-eD2ServerIncomingStatus __fastcall SCMD_0x33_NpcSell(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x33_NpcSell * pBytes, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x33_NpcSell(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x33_NpcSell * pBytes, uint32_t nSize) {
     if (nSize != 0x11) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3116,7 +3116,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x33_NpcSell(::SGAMEDATA * pGame, D2Unit
 }
 
 // C->S 0x35 NPC Repair (17B). Packet: [op:1][npcGUID:u32][itemGUID:u32][params:8B]. Repair item at smithy. Checks durability, ethereal.
-eD2ServerIncomingStatus __fastcall SCMD_0x35_NpcGamble(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x35_NpcGamble * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x35_NpcGamble(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x35_NpcGamble * pPacket, uint32_t nSize) {
     if (nSize != 0x11) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3126,7 +3126,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x35_NpcGamble(::SGAMEDATA * pGame, D2Un
 }
 
 // C->S 0x34 NPC Identify Items (5B). Packet: [op:1][npcGUID:u32]. Batch identify at Cain. Iterates inventory, charges gold.
-eD2ServerIncomingStatus __fastcall SCMD_0x34_CainIdentify(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x34_CainIdentify * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x34_CainIdentify(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x34_CainIdentify * pPacket, uint32_t nSize) {
     if (nSize != 5) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3136,7 +3136,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x34_CainIdentify(::SGAMEDATA * pGame, D
 }
 
 // C->S 0x36 Hire Mercenary (9B). Packet: [op:1][npcGUID:u32][mercId:u32]. Hire merc, rolls stats, checks gold.
-eD2ServerIncomingStatus __fastcall SCMD_0x36_HireMerc(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x36_HireMerc * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x36_HireMerc(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x36_HireMerc * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3145,7 +3145,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x36_HireMerc(::SGAMEDATA * pGame, D2Uni
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x62_NpcSellExpansion(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x62_NpcSellExpansion * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x62_NpcSellExpansion(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x62_NpcSellExpansion * pPacket, uint32_t nSize) {
     if (!(pGame->bExpansion && nSize == 5)) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3155,7 +3155,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x62_NpcSellExpansion(::SGAMEDATA * pGam
 }
 
 // C->S 0x37 Gamble Confirm (5B). Packet: [op:1][itemGUID:u32]. Reveal gambled item.
-eD2ServerIncomingStatus __fastcall SCMD_0x37_GambleConfirm(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x37_GambleConfirm * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x37_GambleConfirm(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x37_GambleConfirm * pPacket, uint32_t nSize) {
     if (nSize != 5) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3176,7 +3176,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x37_GambleConfirm(::SGAMEDATA * pGame, 
 }
 
 // C->S 0x38 NPC Menu Select (13B). Packet: [op:1][npcGUID:u32][menuId:u32][params:4B]. Select NPC menu option (trade/identify/repair/gamble/hire/quest).
-eD2ServerIncomingStatus __fastcall SCMD_0x38_NpcMenuSelect(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x38_NpcMenuSelect * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x38_NpcMenuSelect(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x38_NpcMenuSelect * pPacket, uint32_t nSize) {
     eD2UnitType eTargetUnitType;
     if (nSize != 0xd) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -3200,7 +3200,7 @@ eD2ServerIncomingStatus __fastcall PLRMSG_Cmd0x39_ReturnBadParams(::SGAMEDATA * 
 }
 
 // C->S 0x3A Add Stat Point (3B). Packet: [op:1][statId:u16]. Stat 0-15, supports repeat count up to 100.
-eD2ServerIncomingStatus __fastcall SCMD_0x3A_AllocStatPoint(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3A_AllocStatPoint * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x3A_AllocStatPoint(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3A_AllocStatPoint * pPacket, uint32_t nSize) {
     BOOL nAssignResult;
     uint16_t wStatPacked;
     if (nSize != 3) {
@@ -3228,7 +3228,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x3A_AllocStatPoint(::SGAMEDATA * pGame,
 
 // C->S 0x3B Add Skill Point (3B). Packet: [op:1][skillId:u16]. Validates skill exists and can be leveled.
 // @sourcefile .\PLAYER\PlrMsg.cpp
-eD2ServerIncomingStatus __fastcall SCMD_0x3B_AllocSkillPoint(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3B_AllocSkillPoint * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x3B_AllocSkillPoint(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3B_AllocSkillPoint * pPacket, uint32_t nSize) {
     D2ClientStrc* pClient;
     int nSkillMaxLevel;
     uint8_t bySkillArg;
@@ -3280,7 +3280,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x3B_AllocSkillPoint(::SGAMEDATA * pGame
 }
 
 // C->S 0x3C Select Skill (9B). Packet: [op:1][skillId:u32][??:u32]. Bit 31 of skillId = left(1)/right(0) slot.
-eD2ServerIncomingStatus __fastcall SCMD_0x3C_SelectSkill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3C_SelectSkill * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x3C_SelectSkill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3C_SelectSkill * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3313,7 +3313,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x3C_SelectSkill(::SGAMEDATA * pGame, D2
 }
 
 // C2S packet 0x3D handler (5 bytes): [opcode:1][objectGUID:u32]. Activates interactive objects (doors, shrines, chests, waypoints, quest objects). Validates player is within 10 tiles via CloseEnoughToInteract, then calls OBJECT_UpdateCollisionOnModeChange to transition the object's state (door opens, chest unlocks, shrine triggers). Client sends this when left-clicking an interactable object.
-eD2ServerIncomingStatus __fastcall SCMD_0x3D_ActivateObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3D_ActivateObject * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x3D_ActivateObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3D_ActivateObject * pPacket, uint32_t nSize) {
     if (nSize != 5) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3330,7 +3330,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x3D_ActivateObject(::SGAMEDATA * pGame,
 }
 
 // C->S 0x3E Quest Item Interact (5B). Packet: [op:1][unitGUID:u32]. Validates same act, range 10, calls QUEST_HandleClientQuestMessage.
-eD2ServerIncomingStatus __fastcall SCMD_0x3E_QuestItemPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3E_QuestItemPickup * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x3E_QuestItemPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3E_QuestItemPickup * pPacket, uint32_t nSize) {
     eAct eActItem;
     uint16_t nPosX;
     uint16_t nPosY;
@@ -3394,7 +3394,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x3E_QuestItemPickup(::SGAMEDATA * pGame
 }
 
 // C->S 0x3F Play Emote (3B). Packet: [op:1][emoteId:u16]. Values 0x19-0x20 only. Blocked if unit has flag bit 10.
-eD2ServerIncomingStatus __fastcall SCMD_0x3F_PlayEmote(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3F_PlayEmote * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x3F_PlayEmote(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x3F_PlayEmote * pPacket, uint32_t nSize) {
     eD2ServerIncomingStatus eResult = SERVERSTATUS_BAD_PARAMS;
     if (nSize != 3) {
       return eResult;
@@ -3411,7 +3411,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x3F_PlayEmote(::SGAMEDATA * pGame, D2Un
     return eResult;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x40_RefreshQuestData(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x40_RefreshQuestData * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x40_RefreshQuestData(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x40_RefreshQuestData * pPacket, uint32_t nSize) {
     if (nSize != 1) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3422,7 +3422,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x40_RefreshQuestData(::SGAMEDATA * pGam
 
 // Server-side handler for client packet 0x41 (Resurrect). Validates packet size=1 and that the player unit is in Dead mode. Restores HP/mana/stamina to txt-table max, sets UNITFLAG_TARGETABLE, briefly toggles STATE_uninterruptable, warps the player to the act town (InitLevel + PLRMODES_MoveToLocation), and reselects their left/right skills. Disconnects flagged clients (file-flag 4). Returns SERVERSTATUS_OK.
 // @sourcefile .\PLAYER\PlrMsg.cpp
-eD2ServerIncomingStatus __fastcall SCMD_0x41_Resurrect(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x41_Resurrect * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x41_Resurrect(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x41_Resurrect * pPacket, uint32_t nSize) {
     eAct nAct;
     D2RoomStrc* pRoom;
     eD2LevelId eLevelId;
@@ -3482,7 +3482,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x41_Resurrect(::SGAMEDATA * pGame, D2Un
 }
 
 // Client packet 0x5D handler: Cube recipe check/preview. Validates packet size (7 bytes), checks arena "no cube" flag, validates action parameter (<=10), and dispatches to PlayerScreen action table. Used to preview if a cube recipe is valid before applying it.
-eD2ServerIncomingStatus __fastcall SCMD_0x5D_CubeRecipeCheck(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, D2GSPacketClt0x5D_CubeRecipeCheck * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x5D_CubeRecipeCheck(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, D2GSPacketClt0x5D_CubeRecipeCheck * pPacket, uint32_t nSize) {
     if (nSize != 7) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3500,7 +3500,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x5D_CubeRecipeCheck(::SGAMEDATA * pGame
 }
 
 // Client packet 0x5E handler: Apply cube transmutation. Validates packet size (6 bytes), checks arena "no cube" flag, validates action parameter (<=10), and dispatches to PlayerScreen action table with arg=0. Triggers the actual cube transmutation process.
-eD2ServerIncomingStatus __fastcall SCMD_0x5E_CubeApply(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, D2GSPacketClt0x5E_CubeApply * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x5E_CubeApply(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, D2GSPacketClt0x5E_CubeApply * pPacket, uint32_t nSize) {
     if (nSize != 6) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3517,15 +3517,15 @@ eD2ServerIncomingStatus __fastcall SCMD_0x5E_CubeApply(::SGAMEDATA * pGame, D2Un
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x42_StaffInOrifice1(::SGAMEDATA * pGame, D2UnitStrc * pUnit, char * pBytes, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x42_StaffInOrifice1(::SGAMEDATA * pGame, D2UnitStrc * pUnit, char * pBytes, uint32_t nSize) {
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x43_StaffInOrifice2(::SGAMEDATA * pGame, D2UnitStrc * pUnit, char * pBytes, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x43_StaffInOrifice2(::SGAMEDATA * pGame, D2UnitStrc * pUnit, char * pBytes, uint32_t nSize) {
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x44_StaffInOrifice(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x44_StaffInOrifice * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x44_StaffInOrifice(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x44_StaffInOrifice * pPacket, uint32_t nSize) {
     DWORD dwPlayerGUID;
     if (nSize != 0x11) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -3557,7 +3557,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x44_StaffInOrifice(::SGAMEDATA * pGame,
     return (eD2ServerIncomingStatus)eVar1;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x45_Unused(::SGAMEDATA * pGame, D2UnitStrc * pUnit, char * pBytes, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x45_Unused(::SGAMEDATA * pGame, D2UnitStrc * pUnit, char * pBytes, uint32_t nSize) {
     return SERVERSTATUS_BAD_PARAMS;
 }
 
@@ -3582,7 +3582,7 @@ eD2ServerIncomingStatus __stdcall CanInteractWithMerc(int32_t nCmdArg1, int32_t 
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x46_NpcInteractMerc(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x46_NpcInteractMerc * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x46_NpcInteractMerc(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x46_NpcInteractMerc * pPacket, uint32_t nSize) {
     if (nSize != 0xd) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3604,7 +3604,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x46_NpcInteractMerc(::SGAMEDATA * pGame
 }
 
 // C2S packet 0x47 handler (13 bytes): [opcode:1][mercGUID:u32][targetX:u16][pad:2][targetY:u16][pad:2]. Issues an AI command to the player's mercenary. Validates the unit is the player's hired merc (PETTYPE_hireable), player is within 50 units of target coords, then resets AI state and injects a new command with the target coordinates. Sent when player directs their merc to a location.
-eD2ServerIncomingStatus __fastcall SCMD_0x47_CommandMercenary(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x47_CommandMercenary * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x47_CommandMercenary(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x47_CommandMercenary * pPacket, uint32_t nSize) {
     if (nSize != 0xd) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3623,7 +3623,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x47_CommandMercenary(::SGAMEDATA * pGam
 }
 
 // C2S packet 0x48 handler (1 byte): [opcode:1]. Clears the dwTradeTick lock on D2UnitDataPlayerStrc+0x4C. Acts as a client acknowledgment that trade state has been processed. Validates dwTradeTick is non-zero before clearing. Prevents trade state corruption by requiring explicit client confirmation before unlocking player actions.
-eD2ServerIncomingStatus __fastcall SCMD_0x48_ConfirmTradeTick(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x48_TransmogrifyItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x48_ConfirmTradeTick(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x48_TransmogrifyItem * pPacket, uint32_t nSize) {
     if (nSize != 1) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3637,7 +3637,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x48_ConfirmTradeTick(::SGAMEDATA * pGam
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x49_TakeWaypoint(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x49_TakeWaypoint * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x49_TakeWaypoint(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x49_TakeWaypoint * pPacket, uint32_t nSize) {
     D2UnitStrc* pWaypointUnit;
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -3670,7 +3670,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x49_TakeWaypoint(::SGAMEDATA * pGame, D
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x4D_ResetNpcIntroFlag(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x4D_ResetNpcIntroFlag * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x4D_ResetNpcIntroFlag(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x4D_ResetNpcIntroFlag * pPacket, uint32_t nSize) {
     eD2ServerIncomingStatus eResult = SERVERSTATUS_BAD_PARAMS;
     if (nSize != 3) {
       return eResult;
@@ -3684,7 +3684,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x4D_ResetNpcIntroFlag(::SGAMEDATA * pGa
     return eResult;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x4B_ForceUnitUpdate(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x4B_ForceUnitUpdate * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x4B_ForceUnitUpdate(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x4B_ForceUnitUpdate * pPacket, uint32_t nSize) {
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3715,7 +3715,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x4B_ForceUnitUpdate(::SGAMEDATA * pGame
 // C->S 0x4C Transmogrify Item 2 (5 bytes)
 // [op:1][itemGUID:u32]
 // Looks up item (0xFFFFFFFF allowed) and calls SkillsServer::Transmorgify.
-eD2ServerIncomingStatus __fastcall SCMD_0x4C_TransmogrifyItem2(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x4C_TransmogrifyItem2 * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x4C_TransmogrifyItem2(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x4C_TransmogrifyItem2 * pPacket, uint32_t nSize) {
     if (nSize != 5) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3733,7 +3733,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x4C_TransmogrifyItem2(::SGAMEDATA * pGa
 // C->S 0x4F Click Button (7 bytes)
 // [op:1][buttonId:u16][param:u32]
 // Dispatches to PlayerTrade::ClickButton. buttonId 0x18 triggers cube transmute (PreCubeSetup).
-eD2ServerIncomingStatus __fastcall SCMD_0x4F_GoToTownFolk(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x4F_ClickButton * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x4F_GoToTownFolk(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x4F_ClickButton * pPacket, uint32_t nSize) {
     if (nSize != 7) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3742,7 +3742,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x4F_GoToTownFolk(::SGAMEDATA * pGame, D
     return (eD2ServerIncomingStatus)eVar1;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x50_DropGold(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x50_DropGold * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x50_DropGold(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x50_DropGold * pPacket, uint32_t nSize) {
     BOOL nDropResult;
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -3762,7 +3762,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x50_DropGold(::SGAMEDATA * pGame, D2Uni
     return (nDropResult ? 0xfdU : 0) + SERVERSTATUS_BAD_PARAMS;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x51_SetHotkey(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x51_SetHotkey * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x51_SetHotkey(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x51_SetHotkey * pPacket, uint32_t nSize) {
     D2SkillStrc* pSkill;
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -3785,12 +3785,12 @@ eD2ServerIncomingStatus __fastcall SCMD_0x51_SetHotkey(::SGAMEDATA * pGame, D2Un
     return (nHotkeyResult ? 0xfdU : 0) + SERVERSTATUS_BAD_PARAMS;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x52_Unused(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x52_Unused * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x52_Unused(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x52_Unused * pPacket, uint32_t nSize) {
     return SERVERSTATUS_BAD_PARAMS;
 }
 
 // C->S 0x53 Gamepad Run Toggle (1B). Packet: [op:1]. No data payload. If player is walking and has stamina (stat 10 > 0), switches to run mode. Partially implemented gamepad support — no retail client sends this packet.
-eD2ServerIncomingStatus __fastcall SCMD_0x53_GamepadInput(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x53_GamepadInput * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x53_GamepadInput(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x53_GamepadInput * pPacket, uint32_t nSize) {
     if (nSize != 1) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3810,7 +3810,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x53_GamepadInput(::SGAMEDATA * pGame, D
 // C->S 0x54 Stack Merge (1 byte)
 // [op:1]
 // If player running, sets update flag 2.
-eD2ServerIncomingStatus __fastcall SCMD_0x54_StopRunning(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x54_StackMerge * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x54_StopRunning(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x54_StackMerge * pPacket, uint32_t nSize) {
     if (nSize != 1) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -3822,7 +3822,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x54_StopRunning(::SGAMEDATA * pGame, D2
     return SERVERSTATUS_OK;
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x58_MarkQuestDone(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x58_MarkQuestDone * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x58_MarkQuestDone(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x58_MarkQuestDone * pPacket, uint32_t nSize) {
     eD2ServerIncomingStatus eStatus = SERVERSTATUS_BAD_PARAMS;
     if (nSize != 3) {
       return eStatus;
@@ -3841,7 +3841,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x58_MarkQuestDone(::SGAMEDATA * pGame, 
 }
 
 // C->S 0x59 Command NPC (17 bytes): [op:1][unitType:u32][unitGUID:u32][x:u32][y:u32]. Finds target unit within distance 0x32, verifies it is an interactable NPC (MonStats interact+npc flags), clears its path, fires AITHINK event, schedules next AI tick at gameFrame+1, and sets AI args 1/2/3 to 0x28/Y/X to direct the NPC toward the requested coordinates.
-eD2ServerIncomingStatus __fastcall SCMD_0x59_CommandNPC(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x59_CommandNPC * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x59_CommandNPC(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x59_CommandNPC * pPacket, uint32_t nSize) {
     if (nSize != 0x11) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -4015,7 +4015,7 @@ BOOL __stdcall RelocateAndApplySyncWarp(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 
 // Client-to-server position sync correction. When client detects desync with server position, sends [x:u16, y:u16]. Distance 15-45: validates walkable path then relocates instantly via SUNIT_RelocateUnit. Distance 5-14 or 46+: falls through to normal walk/run. Distance 0-4: rejected. On BNet, rate-limited: 5+ sync warps in 90 seconds triggers randomized lockout (50% 60s, 25% 2min, 25% 3min) via STATE_sync_warped.
 // @sourcefile .\PLAYER\PlrMsg.cpp
-eD2ServerIncomingStatus __fastcall SCMD_0x5F_SyncPosition(::SGAMEDATA * pGame, D2UnitStrc * pUnit, char * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x5F_SyncPosition(::SGAMEDATA * pGame, D2UnitStrc * pUnit, char * pPacket, uint32_t nSize) {
     BOOL bDead;
     eD2States eSyncWarpState;
     uint32_t bPathReachable;
@@ -4029,7 +4029,12 @@ eD2ServerIncomingStatus __fastcall SCMD_0x5F_SyncPosition(::SGAMEDATA * pGame, D
     uint32_t nX = (uint32_t)*(uint16_t*)(pPacket + 1);
     uint32_t nY = (uint32_t)*(uint16_t*)(pPacket + 3);
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x1616);
-    if (pClient) {
+    if (!pClient) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1617);
+      exit(-1);
+    }
+
+    {
       D2SkillStrc* pCurrentSkill;
       pCurrentSkill = D2Common::Units::GetCurrentSkill(pUnit);
       if (pCurrentSkill) {
@@ -4073,12 +4078,9 @@ eD2ServerIncomingStatus __fastcall SCMD_0x5F_SyncPosition(::SGAMEDATA * pGame, D
       PlayerModes::PLRMODES_MoveToLocation(pGame, pUnit, nullptr, (eAnimMode == eD2PlayerAnimMode_ns::Run) + 2, nX, nY, 0);
       return SERVERSTATUS_OK;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1617);
-    exit(-1);
 }
 
-eD2ServerIncomingStatus __fastcall SCMD_0x60_WeaponSwap(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x60_WeaponSwap * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x60_WeaponSwap(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x60_WeaponSwap * pPacket, uint32_t nSize) {
     if (nSize != 1 || !pGame->bExpansion) {
       return SERVERSTATUS_BAD_PARAMS;
     }
@@ -4347,7 +4349,7 @@ void __stdcall MERC_CanEquipItem(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2Unit
 // C->S 0x61 Merc Equip Item (3 bytes, Expansion only)
 // [op:1][bodyLoc:u16]
 // If cursor empty and bodyLoc!=0, equip/unequip merc item. Otherwise validate cursor item vs merc.
-eD2ServerIncomingStatus __fastcall SCMD_0x61_MercEquipItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x61_MercEquipItem * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x61_MercEquipItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x61_MercEquipItem * pPacket, uint32_t nSize) {
     bool bIsQuestItemFlag;
     BOOL bInTrade;
     uint16_t nBodyLocRaw;
@@ -4413,7 +4415,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x61_MercEquipItem(::SGAMEDATA * pGame, 
 // [op:1][itemGUID:u32]
 // Moves belt-compatible item from inventory to belt if allowed; sends 0x9C/0x9D updates.
 // @sourcefile .\PLAYER\PlrMsg.cpp
-eD2ServerIncomingStatus __fastcall SCMD_0x63_ItemToBeltAuto(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x63_ItemToBeltAuto * pPacket, size_t nSize) {
+eD2ServerIncomingStatus __fastcall SCMD_0x63_ItemToBeltAuto(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x63_ItemToBeltAuto * pPacket, uint32_t nSize) {
     bool bIsBeltable;
     BOOL bFoundSlot;
     D2UnitStrc* pItemInInv;
@@ -4606,69 +4608,68 @@ void __fastcall PLAYERMSG_BroadcastPlayerSlain(::SGAMEDATA * pGame, D2UnitStrc *
     char szKillerNameTmp[16];
     int32_t nLine;
     uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
-    if (pVictim && pVictim->eUnitType == UNIT_PLAYER) {
-      if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
-        pOwnerUnit = Ai::AiGeneral::GetOwnerUnit(pUnit);
-        if (pOwnerUnit && pOwnerUnit->eUnitType == UNIT_PLAYER) {
-          pUnit = pOwnerUnit;
-        }
+    if (!(pVictim && pVictim->eUnitType == UNIT_PLAYER)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x19b4);
+      exit(-1);
+    }
+    if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
+      pOwnerUnit = Ai::AiGeneral::GetOwnerUnit(pUnit);
+      if (pOwnerUnit && pOwnerUnit->eUnitType == UNIT_PLAYER) {
+        pUnit = pOwnerUnit;
       }
-
-      memset(packet0x5a.szName1, 0, 16 * sizeof(packet0x5a.szName1[0]));
-      memset(packet0x5a.szName2 + 4, 0, 12 * sizeof(packet0x5a.szName2[0]));
-      packet0x5a.nPacketId = 'Z';
-      packet0x5a.nMessageType = '\x06';
-      packet0x5a.nColor = '\x04';
-      if (!pUnit) {
-        packet0x5a.nArg = -1;
-      } else {
-        packet0x5a.nArg = pUnit->nClassId;
-      }
-
-      packet0x5a.nArgTypes = '\x06';
-      if (pUnit) {
-        packet0x5a.nArgTypes = (uint8_t)pUnit->eUnitType;
-      }
-
-      memset(packet0x5a.szName2, 0, 4 * sizeof(packet0x5a.szName2[0]));
-      pClient = UNIT::SUnit::SUNIT_GetClient(pVictim, ".\\PLAYER\\PlrMsg.cpp", 0x19c9);
-      szCharName = GAME::Clients::GetCharName(pClient);
-      pVictimNameEnd = Storm::Source::SSTR::SStrLen(szCharName);
-      if (!pVictimNameEnd) {
-        *(uint32_t*)(char*)&packet0x5a.szName1 &= -256;
-      } else {
-        Storm::Source::SSTR::SStrCopy(packet0x5a.szName1, szCharName, 0x10);
-      }
-
-      eKillerType = UNIT_COUNT;
-      if (pUnit) {
-        eKillerType = pUnit->eUnitType;
-      }
-      if (eKillerType == UNIT_PLAYER) {
-        nLine = 0x10;
-        pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x19db);
-        szCharName = GAME::Clients::GetCharName(pClient);
-        Storm::Source::SSTR::SStrCopy(szKillerNameTmp, szCharName, nLine);
-        pVictimNameEnd = Storm::Source::SSTR::SStrLen(szKillerNameTmp);
-        if (pVictimNameEnd) {
-          Storm::Source::SSTR::SStrCopy(packet0x5a.szName2, szKillerNameTmp, 0x10);
-        }
-      } else if (eKillerType == UNIT_MONSTER) {
-        pVictimNameEnd = Monsters::CheckMonsterType(pUnit, 2);
-        if (pVictimNameEnd) {
-          nBossNo = Monsters::GetBossNo(pUnit);
-          packet0x5a.szName2[0] = (char)nBossNo;
-          packet0x5a.szName2[1] = (char)((uint16_t)nBossNo >> 8);
-        }
-      }
-
-      BroadcastEventMessage(pGame, &packet0x5a);
-      Fog::Debug::GuardStack();
-      return;
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x19b4);
-    exit(-1);
+    memset(packet0x5a.szName1, 0, 16 * sizeof(packet0x5a.szName1[0]));
+    memset(packet0x5a.szName2 + 4, 0, 12 * sizeof(packet0x5a.szName2[0]));
+    packet0x5a.nPacketId = 'Z';
+    packet0x5a.nMessageType = '\x06';
+    packet0x5a.nColor = '\x04';
+    if (!pUnit) {
+      packet0x5a.nArg = -1;
+    } else {
+      packet0x5a.nArg = pUnit->nClassId;
+    }
+
+    packet0x5a.nArgTypes = '\x06';
+    if (pUnit) {
+      packet0x5a.nArgTypes = (uint8_t)pUnit->eUnitType;
+    }
+
+    memset(packet0x5a.szName2, 0, 4 * sizeof(packet0x5a.szName2[0]));
+    pClient = UNIT::SUnit::SUNIT_GetClient(pVictim, ".\\PLAYER\\PlrMsg.cpp", 0x19c9);
+    szCharName = GAME::Clients::GetCharName(pClient);
+    pVictimNameEnd = Storm::Source::SSTR::SStrLen(szCharName);
+    if (!pVictimNameEnd) {
+      *(uint32_t*)(char*)&packet0x5a.szName1 &= -256;
+    } else {
+      Storm::Source::SSTR::SStrCopy(packet0x5a.szName1, szCharName, 0x10);
+    }
+
+    eKillerType = UNIT_COUNT;
+    if (pUnit) {
+      eKillerType = pUnit->eUnitType;
+    }
+    if (eKillerType == UNIT_PLAYER) {
+      nLine = 0x10;
+      pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x19db);
+      szCharName = GAME::Clients::GetCharName(pClient);
+      Storm::Source::SSTR::SStrCopy(szKillerNameTmp, szCharName, nLine);
+      pVictimNameEnd = Storm::Source::SSTR::SStrLen(szKillerNameTmp);
+      if (pVictimNameEnd) {
+        Storm::Source::SSTR::SStrCopy(packet0x5a.szName2, szKillerNameTmp, 0x10);
+      }
+    } else if (eKillerType == UNIT_MONSTER) {
+      pVictimNameEnd = Monsters::CheckMonsterType(pUnit, 2);
+      if (pVictimNameEnd) {
+        nBossNo = Monsters::GetBossNo(pUnit);
+        packet0x5a.szName2[0] = (char)nBossNo;
+        packet0x5a.szName2[1] = (char)((uint16_t)nBossNo >> 8);
+      }
+    }
+
+    BroadcastEventMessage(pGame, &packet0x5a);
+    Fog::Debug::GuardStack();
+    return;
 }
 
 void __fastcall SendPlayerStopAndAtributeUpdate(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2ClientStrc * pClient, int32_t nStopReason) {

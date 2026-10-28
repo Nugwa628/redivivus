@@ -391,7 +391,7 @@ int __stdcall GetConnectedClients(struct D2QServerStrc * pQServer);
 uint32_t __stdcall IsSingleplayer(struct D2QServerStrc * pQServer);
 void __stdcall SetPerIpConnectionLimit(struct D2QServerStrc * pQServer, int nPerIpConnectionLimit);
 DWORD __stdcall WaitForEmptyEvent(struct D2QServerStrc * pQServer, DWORD dwParam);
-struct FogCritSectLockStrc * _unused_broken(struct FogCritSectLockStrc * pQServer, LPCRITICAL_SECTION pCriticalSection);
+struct FogCritSectLockStrc * __thiscall _unused_broken(struct FogCritSectLockStrc * pQServer, LPCRITICAL_SECTION pCriticalSection);
 // Leaves the critical section a QServer frame local holds: LeaveCriticalSection(*ppCriticalSection). ECX = &local,
 // plain RET; reached from the EH unwind funclet Unwind_006ca540 (LEA ECX,[EBP-0x10]; JMP).
 // Provenance: 1.14d 006be530 MOV EAX,[ECX] / PUSH EAX / CALL [LeaveCriticalSection].
@@ -405,7 +405,7 @@ void __stdcall LogHackList(int nHacklistSize);
 void __fastcall SweepExpiredHackEntries(struct D2QServerStrc * pQServer);
 // @sourcefile .\Src\QServer\QServer.cpp
 void __fastcall HACKL_RemoveIpFromHacklist(struct D2QServerStrc * pQServer, uint32_t nIpAddress, uint32_t dwParam3);
-int HACKL_CheckAndResetHacklistEntry(struct D2QServerStrc * pQServer, uint32_t nIpAddress);
+int __thiscall HACKL_CheckAndResetHacklistEntry(struct D2QServerStrc * pQServer, uint32_t nIpAddress);
 // Checks whether the given IP currently has at least the configured per-IP connection limit.
 BOOL __fastcall IsPerIpLimitReached(struct D2QServerStrc * pQServer, in_addr * pClientIp);
 int __stdcall CountQueuedPacketsInMode(struct D2QServerStrc * pQServer, int nMode);
@@ -461,7 +461,7 @@ void __stdcall _NullSubRet8(struct D2QServerStrc * dwArg1, uint32_t dwArg2);
 // Adds a token-filter entry (expected masked token + mask-table index) to QServer's game-token filter table.
 void __fastcall AddGameTokenFilter(struct D2QServerStrc * pQServer, uint32_t nMaskTableIndex, uint32_t nExpectedMaskedToken);
 // Checks whether a value matches any configured game-token filter entry.
-int MatchesGameTokenFilter(struct D2QServerStrc * pQServer, uint32_t nValue);
+int __thiscall MatchesGameTokenFilter(struct D2QServerStrc * pQServer, uint32_t nValue);
 int __fastcall MatchesGameTokenFilter_Thunk(struct D2QServerStrc * pQServer, uint32_t nValue);
 void __fastcall CopyWorkerTelemetrySnapshot(struct D2QServerStrc * pQServer, struct D2QServerWorkerTelemetryStrc * pOutTelemetry, int nWorkers);
 void __stdcall _NullSub();

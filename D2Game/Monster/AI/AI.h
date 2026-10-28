@@ -112,7 +112,7 @@ void __fastcall AI_Fn1_Idle(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, stru
 uint32_t __fastcall AI_FindClosestAllyOfSameType(int nUnusedCtx, struct D2UnitStrc * pUnit, struct D2UnitStrc * pCandidate, struct D2MonsterAiParameterStruct * ppBestResult);
 uint32_t __fastcall ReturnFirstArgument(uint32_t * pdwParam);
 void __fastcall SetDwArgsIfNotNeg0x29a(struct D2AiGeneralStrc * pMonsterAi, int32_t dwArg0, int32_t dwArg1, int32_t dwArg2);
-uint32_t AI_CanApplyColdState(void * pThis, eD2States eState, int32_t nParam);
+uint32_t __thiscall AI_CanApplyColdState(void * pThis, eD2States eState, int32_t nParam);
 // Assigns or switches the active AI function for a monster unit. Validates pGame/pUnit/pMonsterAiGeneral and that nFunctionId < 0x12. If the monster is in STATE_uninterruptable, halts with an error. If the current fpFunction differs from the table entry or there is no secondary function, resets dwArg0/1/2, calls ResetAiGeneralStrc, looks up the new AI entry, runs its fpInit initializer (populating a scratch D2AiParamStrc), then sets fpFunction to fpMain (or AI_Function1_Idle if null). If a valid secondary function exists, installs it instead without reinitializing.
 void __fastcall AttachCorrectAiFunctionToMonster(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2AiGeneralStrc * pMonsterAiGeneral, int32_t nFunctionId);
 BOOL __fastcall MonsterNeedsToOpenDoor(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2AiParamStrc * pAiParam);
@@ -445,7 +445,7 @@ void __fastcall AITHINK_Fn1_Diablo(::SGAMEDATA * pGame, struct D2UnitStrc * pUni
 // Server-side Baal AI action selector. Builds a 17-entry skill-weight table chosen by branch on whether Baal is in melee range vs colliding-with-wall vs ranged, then adjusts weights by target fire/light resist, the target's life%, cold state, difficulty, distance, whether the target casts a feared skill (Blizzard/Meteor/FireWall/ImmolationArrow over a level threshold), and Chaos-Sanctuary arena positioning. Filters out actions Baal cannot cast at the target position, sums the weights and does a seed-RNG weighted pick. Returns the chosen action index (0..16), or fixed codes (0x10 collision-blocked, 0xb fallback) when no valid target. Honors a precomputed override at *(nAiContext+0x14).
 // Action weight slots (aActionWeights index): 5 melee skill mod, 6 lightning, 7 cold adjust, 8 fire adjust, 9 range bias, 10 fire, 12 skill, 13 cold, 15 arena target. aActionWeightTemplate is built first and copied over aActionWeights with REP MOVSD (17 dwords).
 int32_t __fastcall AI_BAAL_ChooseCombatAction(int nAiContext, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTargetUnit, uint32_t nDistanceMetric, int32_t nDifficultyContext, int32_t pAiCommand);
-void MONSTERAI_SpawnSpecificMinions(void * pThis, struct D2UnitStrc * pUnit);
+void __thiscall MONSTERAI_SpawnSpecificMinions(void * pThis, struct D2UnitStrc * pUnit);
 void __fastcall AITHINK_Fn1_UberDiablo(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2AiParamStrc * pAiParam);
 void __fastcall AITHINK_Fn1_Vendor(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2AiParamStrc * pAiParam);
 void __fastcall AITHINK_Fn1_Hydra(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2AiParamStrc * pAiParam);

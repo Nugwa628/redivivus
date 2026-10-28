@@ -36,23 +36,23 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2RosterPartyListStrc) == 0xc, "D2_NEW(D2RosterPartyListStrc): the 32-bit layout must be the 0xc bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2RosterPartyListStrc) == 0xc, "D2_NEW_AT(D2RosterPartyListStrc): the 32-bit layout must be the 0xc bytes 1.14d allocates");
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2RosterLinkListStrc) == 0x8, "D2_NEW(D2RosterLinkListStrc): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2RosterLinkListStrc) == 0x8, "D2_NEW_AT(D2RosterLinkListStrc): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2RosterStrc) == 0x84, "D2_NEW(D2RosterStrc): the 32-bit layout must be the 0x84 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2RosterStrc) == 0x84, "D2_NEW_AT(D2RosterStrc): the 32-bit layout must be the 0x84 bytes 1.14d allocates");
 
 
 namespace D2Client::GAME::Roster {
@@ -89,12 +89,12 @@ D2RosterStrc * __stdcall GetPlayerRoster() {
     }
 
     D2RosterStrc* pRoster = GetRosterPlayerByGUID(nGUID);
-    if (pRoster) {
-      return pRoster;
+    if (!pRoster) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x75);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x75);
-    exit(-1);
+    return pRoster;
     return pRoster;
 }
 
@@ -173,7 +173,7 @@ void FreeRosterLinkList(D2RosterStrc * pRoster) {
     while (pRosterLinkList) {
       D2RosterLinkListStrc* pNext;
       pNext = pRosterLinkList->pNext;
-      D2_FREE(pRosterLinkList);
+      D2_FREE_AT(pRosterLinkList, ".\\GAME\\Roster.cpp", 0x110);
       pRosterLinkList = pNext;
     }
 
@@ -194,12 +194,12 @@ void __stdcall ClearBothRosterLists() {
       pOtherLink = pOther->pRosterLinkList;
       while (pOtherLink) {
         pNextOtherLink = pOtherLink->pNext;
-        D2_FREE(pOtherLink);
+        D2_FREE_AT(pOtherLink, ".\\GAME\\Roster.cpp", 0x110);
         pOtherLink = pNextOtherLink;
       }
 
       pOther->pRosterLinkList = 0;
-      D2_FREE(pOther);
+      D2_FREE_AT(pOther, ".\\GAME\\Roster.cpp", 0x14d);
       pOther = pNextOther;
     }
 
@@ -212,12 +212,12 @@ void __stdcall ClearBothRosterLists() {
       pOtherLink = pOther->pRosterLinkList;
       while (pOtherLink) {
         pNextOtherLink = pOtherLink->pNext;
-        D2_FREE(pOtherLink);
+        D2_FREE_AT(pOtherLink, ".\\GAME\\Roster.cpp", 0x110);
         pOtherLink = pNextOtherLink;
       }
 
       pOther->pRosterLinkList = 0;
-      D2_FREE(pOther);
+      D2_FREE_AT(pOther, ".\\GAME\\Roster.cpp", 0x159);
       pOther = pNextOther;
     }
 
@@ -233,12 +233,12 @@ D2RosterStrc * __fastcall GetNextRosterPlayer(D2RosterStrc * pRoster) {
 }
 
 char * __fastcall GetRosterName(D2RosterStrc * pRoster) {
-    if (pRoster) {
-      return pRoster->pRosterName;
+    if (!pRoster) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x174);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x174);
-    exit(-1);
+    return pRoster->pRosterName;
     return pRoster->pRosterName;
 }
 
@@ -336,7 +336,7 @@ void AllocRosterPartyList(int16_t nPartyId) {
     D2RosterPartyListStrc* pPartyIter = pRosterPartyList;
     while (true) {
       if (!pPartyIter) {
-        pNewParty = D2_NEW(D2RosterPartyListStrc);
+        pNewParty = D2_NEW_AT(D2RosterPartyListStrc, ".\\GAME\\Roster.cpp", 0x1fc);
         *(uint32_t*)pNewParty = 0;
         pNewParty->pOwner = 0;
         pNewParty->nPartyId = nPartyId;
@@ -358,7 +358,7 @@ void __stdcall FreeRosterPartyList() {
     while (pMemoryToFree) {
       D2RosterPartyListStrc* pSavedNext;
       pSavedNext = pMemoryToFree->pNext;
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\GAME\\Roster.cpp", 0x22f);
       pMemoryToFree = pSavedNext;
     }
 
@@ -507,7 +507,7 @@ void __stdcall ROSTER_GroupPlayersIntoParties() {
         }
       }
 
-      pRosterPartyList = D2_NEW(D2RosterPartyListStrc);
+      pRosterPartyList = D2_NEW_AT(D2RosterPartyListStrc, ".\\GAME\\Roster.cpp", 0x1fc);
       *(uint32_t*)pRosterPartyList = 0;
       pRosterPartyList->pOwner = 0;
       pRosterPartyList->nPartyId = nPartyId;
@@ -1084,23 +1084,23 @@ char * __fastcall GetPlayerRosterName(D2UnitStrc * pUnit) {
       exit(-1);
     } else {
       D2RosterStrc* pRoster;
-      if (pUnit->eUnitType == UNIT_PLAYER) {
-        pRoster = GetRosterPlayerByGUID(pUnit->nUnitGUID);
-        if (!pRoster) {
-          pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-          if (!pPlayerData) {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5e5);
-            exit(-1);
-          }
-        } else {
-          pPlayerData = (D2UnitDataPlayerStrc*)pRoster->pRosterName;
-        }
-
-        return pPlayerData->szCharName;
+      if (pUnit->eUnitType != UNIT_PLAYER) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5dc);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5dc);
-      exit(-1);
+      pRoster = GetRosterPlayerByGUID(pUnit->nUnitGUID);
+      if (!pRoster) {
+        pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+        if (!pPlayerData) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5e5);
+          exit(-1);
+        }
+      } else {
+        pPlayerData = (D2UnitDataPlayerStrc*)pRoster->pRosterName;
+      }
+
+      return pPlayerData->szCharName;
     }
 }
 
@@ -1211,7 +1211,7 @@ void __fastcall AllocRosterOther(int32_t nOwnerGUID, int32_t nRosterGUID) {
     D2RosterLinkListStrc* pRosterLinkList;
     D2RosterStrc* pRoster = GetRosterPlayerByGUID(nOwnerGUID);
     if (!pRoster) {
-      pRoster = D2_NEW(D2RosterStrc);
+      pRoster = D2_NEW_AT(D2RosterStrc, ".\\GAME\\Roster.cpp", 0x686);
       if (!pRoster) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x687);
         exit(-1);
@@ -1229,17 +1229,17 @@ void __fastcall AllocRosterOther(int32_t nOwnerGUID, int32_t nRosterGUID) {
       }
     }
 
-    pRosterLinkList = D2_NEW(D2RosterLinkListStrc);
-    if (pRosterLinkList) {
-      pRosterLinkList->pNext = 0;
-      pRosterLinkList->nRosterGUID = nRosterGUID;
-      pRosterLinkList->pNext = pRoster->pRosterLinkList;
-      pRoster->pRosterLinkList = pRosterLinkList;
-      return;
+    pRosterLinkList = D2_NEW_AT(D2RosterLinkListStrc, ".\\GAME\\Roster.cpp", 0x697);
+    if (!pRosterLinkList) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x698);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x698);
-    exit(-1);
+    pRosterLinkList->pNext = 0;
+    pRosterLinkList->nRosterGUID = nRosterGUID;
+    pRosterLinkList->pNext = pRoster->pRosterLinkList;
+    pRoster->pRosterLinkList = pRosterLinkList;
+    return;
 }
 
 // @sourcefile .\GAME\Roster.cpp
@@ -1271,12 +1271,12 @@ void __fastcall FreeAllRosterPlayer(int32_t nOwnerGUID, int32_t nRosterGUID) {
 
     if (pPrevLink) {
       pPrevLink->pNext = pMemoryToFree->pNext;
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\GAME\\Roster.cpp", 0x6bd);
       return;
     }
 
     pRoster->pRosterLinkList = pMemoryToFree->pNext;
-    D2_FREE(pMemoryToFree);
+    D2_FREE_AT(pMemoryToFree, ".\\GAME\\Roster.cpp", 0x6bd);
 }
 
 BOOL __fastcall ROSTER_CheckPlayerCanLoot(int32_t nLooterGUID, int32_t nOwnerGUID) {
@@ -1446,7 +1446,7 @@ void __fastcall ROSTER_AllocOrUpdatePlayer(int nPlayerGUID, int nCharType, char 
       }
 
       if (!pNewRoster) {
-        pNewRoster = D2_NEW(D2RosterStrc);
+        pNewRoster = D2_NEW_AT(D2RosterStrc, ".\\GAME\\Roster.cpp", 0xd8);
         memset(pNewRoster, 0, 0x84);
       } else if (!pPrev) {
         gpRosterOther = pNewRoster->pNext;
@@ -1528,12 +1528,12 @@ void __fastcall PlayerLeft(int32_t nPlayerUid) {
       pCurrentRoster = pCurrent->pRosterLinkList;
       while (pCurrentRoster) {
         pNextRoster = pCurrentRoster->pNext;
-        D2_FREE(pCurrentRoster);
+        D2_FREE_AT(pCurrentRoster, ".\\GAME\\Roster.cpp", 0x110);
         pCurrentRoster = pNextRoster;
       }
 
       pCurrent->pRosterLinkList = 0;
-      D2_FREE(pCurrent);
+      D2_FREE_AT(pCurrent, ".\\GAME\\Roster.cpp", 0x131);
     }
 
     ROSTER_RebuildPlayerParty();

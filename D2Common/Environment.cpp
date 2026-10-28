@@ -18,18 +18,18 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2DrlgEnvironmentStrc) == 0x38, "D2_NEW(D2DrlgEnvironmentStrc): the 32-bit layout must be the 0x38 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2DrlgEnvironmentStrc) == 0x38, "D2_NEW_AT(D2DrlgEnvironmentStrc): the 32-bit layout must be the 0x38 bytes 1.14d allocates");
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
 
@@ -168,7 +168,7 @@ void DRLGENV_InitEnvironmentCycle(D2DrlgEnvironmentStrc * pDrlgEnvironment) {
 }
 
 D2DrlgEnvironmentStrc * __fastcall DRLGENV_AllocEnvironment(D2PoolManagerStrc * pMemory) {
-    D2DrlgEnvironmentStrc* pEnv = D2_NEW_POOL(pMemory, D2DrlgEnvironmentStrc);
+    D2DrlgEnvironmentStrc* pEnv = D2_NEW_POOL_AT(pMemory, D2DrlgEnvironmentStrc, ".\\ENVIRONMENT\\Env.cpp", 0x12a);
     memset(pEnv, 0, 0x38);
     pEnv->nTimeIndex = 2;
     uint32_t nTimeRate = gnTimeRates[pEnv->nTimeRateIndex];
@@ -190,7 +190,7 @@ D2DrlgEnvironmentStrc * __fastcall DRLGENV_AllocEnvironment(D2PoolManagerStrc * 
 }
 
 void __fastcall DRLGENV_FreeEnvironment(D2PoolManagerStrc * pMemory, D2DrlgEnvironmentStrc * pDrlgEnvironment) {
-    D2_FREE_POOL(pMemory, pDrlgEnvironment);
+    D2_FREE_POOL_AT(pMemory, pDrlgEnvironment, ".\\ENVIRONMENT\\Env.cpp", 0x13f);
 }
 
 // Advances the day/night environment cycle by one tick. Act 2 and 3 have accelerated cycle rates. Updates phase index and intensity when thresholds are crossed.
@@ -520,46 +520,45 @@ void __stdcall DRLGENV_InitializeEnvironment(D2DrlgActStrc * pDrlgAct, D2RoomStr
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x210);
       exit(-1);
     } else if (nIndex < 6) {
-      if (-1 < nAngle) {
-        if (pEnv->nTimeRate * 0x168 < nAngle) {
-          nAngle = 0;
-        }
+      if (!(-1 < nAngle)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x212);
+        exit(-1);
+      }
+      if (pEnv->nTimeRate * 0x168 < nAngle) {
+        nAngle = 0;
+      }
 
-        pEnv->nTimeIndex = nIndex;
-        pEnv->nTicks = nAngle;
-        if (!bEclipse) {
-          pDVar1 = (D2DrlgActEnvironmentData*)(aENVIRONMENTDATA1 + nIndex * 3);
-        } else {
-          pDVar1 = aENVIRONMENTDATA2 + nIndex;
-        }
+      pEnv->nTimeIndex = nIndex;
+      pEnv->nTicks = nAngle;
+      if (!bEclipse) {
+        pDVar1 = (D2DrlgActEnvironmentData*)(aENVIRONMENTDATA1 + nIndex * 3);
+      } else {
+        pDVar1 = aENVIRONMENTDATA2 + nIndex;
+      }
 
-        pEnv->nEnvironmentData = pDVar1->nEnvData;
-        nDrlgAct = (eD2LevelId)0x0;
-        if (pRoom) {
-          nDrlgAct = DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-        }
+      pEnv->nEnvironmentData = pDVar1->nEnvData;
+      nDrlgAct = (eD2LevelId)0x0;
+      if (pRoom) {
+        nDrlgAct = DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+      }
 
-        eActNo = Drlg::GetActNoFromLevelNumber(nDrlgAct);
-        nActNo = (uint32_t)eActNo;
+      eActNo = Drlg::GetActNoFromLevelNumber(nDrlgAct);
+      nActNo = (uint32_t)eActNo;
+      DRLGENV_UpdateLightIntensity(nDrlgAct, pEnv, nActNo);
+      pEnv->bEclipse = bEclipse;
+      if (bEclipse) {
+        DRLGENV_InitEnvironmentCycle(pEnv);
         DRLGENV_UpdateLightIntensity(nDrlgAct, pEnv, nActNo);
-        pEnv->bEclipse = bEclipse;
-        if (bEclipse) {
-          DRLGENV_InitEnvironmentCycle(pEnv);
-          DRLGENV_UpdateLightIntensity(nDrlgAct, pEnv, nActNo);
-          DRLGENV_UpdateLightColor(nActNo, pEnv);
-        }
-        if ((D2DrlgActStrc*)nDrlgAct != (D2DrlgActStrc*)LEVEL_ArreatSummit) {
-          return;
-        }
-
-        pEnv->nGlobalLightRed = 0xf5;
-        pEnv->nGlobalLightGreen = 0xf0;
-        pEnv->nGlobalLightBlue = 0xff;
+        DRLGENV_UpdateLightColor(nActNo, pEnv);
+      }
+      if ((D2DrlgActStrc*)nDrlgAct != (D2DrlgActStrc*)LEVEL_ArreatSummit) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x212);
-      exit(-1);
+      pEnv->nGlobalLightRed = 0xf5;
+      pEnv->nGlobalLightGreen = 0xf0;
+      pEnv->nGlobalLightBlue = 0xff;
+      return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x211);
       exit(-1);

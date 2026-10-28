@@ -19,8 +19,8 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
 
@@ -732,116 +732,116 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
     uint32_t nChunkLen;
     char cScanChar;
     __frame0.nStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
-    if (*(int*)(pLogRecord + 0xc) == 2) {
-      pbVar2 = (uint8_t*)(pLogRecord + 0x24);
-      pData = Storm::Source::SSTR::SStrLen((char*)pbVar2);
-      pDumpHeader = pbVar2 + pData + 1;
-      __frame0.pDumpHeaderSaved = pDumpHeader;
-      if (!*(int*)(pbVar2 + pData + 0xd)) {
-        pData = Storm::Source::SSTR::SStrLen((char*)(pDumpHeader + 0x14));
-        __frame0.pDumpData = pDumpHeader + pData + 0x15;
-      } else {
-        __frame0.pDumpData = *(uint8_t**)pDumpHeader;
-      }
+    if (*(int*)(pLogRecord + 0xc) != 2) {
+      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x389);
+      exit(-1);
+    }
 
-      __frame0.pLogFile = FindOrOpenLogFileSlot(pbVar2, &__frame0.local_160);
-      if (__frame0.pLogFile) {
-        Storm::Source::SSTR::SStrPrintf(__frame0.szTimePrefix, 0x20, "%02d:%02d:%02d.%03d  ", (uint32_t)*(uint16_t*)(pLogRecord + 0x1c), (uint32_t)*(uint16_t*)(pLogRecord + 0x1e), (uint32_t)*(uint16_t*)(pLogRecord + 0x20), (uint32_t)*(uint16_t*)(pLogRecord + 0x22));
-        Storm::Source::SSTR::SStrCopy(__frame0.szContPrefix, "              ", 0x20);
-        __frame0.nBytesRemaining = *(uint32_t*)(pDumpHeader + 4);
-        nChunkLen = 1;
-        pbVar2 = __frame0.pDumpData;
-        while (true) {
-          __frame0.pChunkStart = pbVar2;
-          if (!__frame0.nBytesRemaining) {
-            break;
+    pbVar2 = (uint8_t*)(pLogRecord + 0x24);
+    pData = Storm::Source::SSTR::SStrLen((char*)pbVar2);
+    pDumpHeader = pbVar2 + pData + 1;
+    __frame0.pDumpHeaderSaved = pDumpHeader;
+    if (!*(int*)(pbVar2 + pData + 0xd)) {
+      pData = Storm::Source::SSTR::SStrLen((char*)(pDumpHeader + 0x14));
+      __frame0.pDumpData = pDumpHeader + pData + 0x15;
+    } else {
+      __frame0.pDumpData = *(uint8_t**)pDumpHeader;
+    }
+
+    __frame0.pLogFile = FindOrOpenLogFileSlot(pbVar2, &__frame0.local_160);
+    if (__frame0.pLogFile) {
+      Storm::Source::SSTR::SStrPrintf(__frame0.szTimePrefix, 0x20, "%02d:%02d:%02d.%03d  ", (uint32_t)*(uint16_t*)(pLogRecord + 0x1c), (uint32_t)*(uint16_t*)(pLogRecord + 0x1e), (uint32_t)*(uint16_t*)(pLogRecord + 0x20), (uint32_t)*(uint16_t*)(pLogRecord + 0x22));
+      Storm::Source::SSTR::SStrCopy(__frame0.szContPrefix, "              ", 0x20);
+      __frame0.nBytesRemaining = *(uint32_t*)(pDumpHeader + 4);
+      nChunkLen = 1;
+      pbVar2 = __frame0.pDumpData;
+      while (true) {
+        __frame0.pChunkStart = pbVar2;
+        if (!__frame0.nBytesRemaining) {
+          break;
+        }
+
+        iVar1 = (int)pbVar2 - (int)__frame0.pDumpData;
+        if (!*(int*)(pDumpHeader + 8)) {
+          iVar1 = *(int*)pDumpHeader + iVar1;
+        }
+
+        pLineCursor = __frame0.szTimePrefix;
+        if (!nChunkLen) {
+          pLineCursor = __frame0.szContPrefix;
+        }
+
+        pRecordBody = "%s%s%04X:";
+        if (!*(int*)(pDumpHeader + 8)) {
+          pRecordBody = "%s%s%08X:";
+        }
+
+        fprintf(__frame0.pLogFile, pRecordBody, pLineCursor, pDumpHeader + 0x14, iVar1);
+        __frame0.local_160 = 0;
+        nChunkLen = __frame0.nBytesRemaining;
+        if (0xf < __frame0.nBytesRemaining) {
+          nChunkLen = 0x10;
+        }
+
+        /* UINT_PTR ucb for IsBadReadPtr */ /* void * lp for IsBadReadPtr */ __frame0.szLineBuf[0] = '\0';
+        bBadPtr = IsBadReadPtr(pbVar2, nChunkLen);
+        if (!bBadPtr) {
+          nColumn = 0;
+          if (nChunkLen) {
+            do {
+              pLineCursor = __frame0.szLineBuf;
+              pLineCursor = pLineCursor + strlen(pLineCursor) + 1;
+              pRecordBody = "%02X";
+              if (!(nColumn & 3)) {
+                pRecordBody = " %02X";
+              }
+
+              Storm::Source::SSTR::SStrPrintf(__frame0.szLineBuf + ((int)pLineCursor - (int)(__frame0.szLineBuf + 1)), 0x100 - ((int)pLineCursor - (int)(__frame0.szLineBuf + 1)), pRecordBody, (uint32_t)pbVar2[nColumn]);
+              nColumn++;
+            } while (nColumn < nChunkLen);
           }
 
-          iVar1 = (int)pbVar2 - (int)__frame0.pDumpData;
-          if (!*(int*)(pDumpHeader + 8)) {
-            iVar1 = *(int*)pDumpHeader + iVar1;
-          }
+          pDumpHeader = __frame0.pDumpHeaderSaved;
+          if (*(int*)(__frame0.pDumpHeaderSaved + 0x10)) {
+            pbVar2 = __frame0.pChunkStart;
+            for (iVar1 = ((0x10 - nChunkLen) * 9 >> 2) + 2; __frame0.pChunkStart = pbVar2 , iVar1 != 0; iVar1--) {
+              Storm::Source::SSTR::SStrPack(__frame0.szLineBuf, " ", 0x100);
+              pbVar2 = __frame0.pChunkStart;
+            }
 
-          pLineCursor = __frame0.szTimePrefix;
-          if (!nChunkLen) {
-            pLineCursor = __frame0.szContPrefix;
-          }
-
-          pRecordBody = "%s%s%04X:";
-          if (!*(int*)(pDumpHeader + 8)) {
-            pRecordBody = "%s%s%08X:";
-          }
-
-          fprintf(__frame0.pLogFile, pRecordBody, pLineCursor, pDumpHeader + 0x14, iVar1);
-          __frame0.local_160 = 0;
-          nChunkLen = __frame0.nBytesRemaining;
-          if (0xf < __frame0.nBytesRemaining) {
-            nChunkLen = 0x10;
-          }
-
-          /* UINT_PTR ucb for IsBadReadPtr */ /* void * lp for IsBadReadPtr */ __frame0.szLineBuf[0] = '\0';
-          bBadPtr = IsBadReadPtr(pbVar2, nChunkLen);
-          if (!bBadPtr) {
+            pLineCursor = __frame0.szLineBuf;
+            pLineCursor = pLineCursor + strlen(pLineCursor) + 1;
             nColumn = 0;
             if (nChunkLen) {
+              pDumpHeader = (uint8_t*)(pLineCursor + (int)(__frame0.szLineBuf - (int)(__frame0.szLineBuf + 1)));
               do {
-                pLineCursor = __frame0.szLineBuf;
-                pLineCursor = pLineCursor + strlen(pLineCursor) + 1;
-                pRecordBody = "%02X";
-                if (!(nColumn & 3)) {
-                  pRecordBody = " %02X";
+                byAsciiChar = pbVar2[nColumn];
+                if ((byAsciiChar & 0x7f) < 0x20) {
+                  byAsciiChar = 0x2e;
                 }
 
-                Storm::Source::SSTR::SStrPrintf(__frame0.szLineBuf + ((int)pLineCursor - (int)(__frame0.szLineBuf + 1)), 0x100 - ((int)pLineCursor - (int)(__frame0.szLineBuf + 1)), pRecordBody, (uint32_t)pbVar2[nColumn]);
+                *pDumpHeader = byAsciiChar;
                 nColumn++;
+                pDumpHeader++;
               } while (nColumn < nChunkLen);
             }
 
+            pLineCursor[(int)(__frame0.szLineBuf + (nColumn - (int)(__frame0.szLineBuf + 1)))] = '\0';
             pDumpHeader = __frame0.pDumpHeaderSaved;
-            if (*(int*)(__frame0.pDumpHeaderSaved + 0x10)) {
-              pbVar2 = __frame0.pChunkStart;
-              for (iVar1 = ((0x10 - nChunkLen) * 9 >> 2) + 2; __frame0.pChunkStart = pbVar2 , iVar1 != 0; iVar1--) {
-                Storm::Source::SSTR::SStrPack(__frame0.szLineBuf, " ", 0x100);
-                pbVar2 = __frame0.pChunkStart;
-              }
-
-              pLineCursor = __frame0.szLineBuf;
-              pLineCursor = pLineCursor + strlen(pLineCursor) + 1;
-              nColumn = 0;
-              if (nChunkLen) {
-                pDumpHeader = (uint8_t*)(pLineCursor + (int)(__frame0.szLineBuf - (int)(__frame0.szLineBuf + 1)));
-                do {
-                  byAsciiChar = pbVar2[nColumn];
-                  if ((byAsciiChar & 0x7f) < 0x20) {
-                    byAsciiChar = 0x2e;
-                  }
-
-                  *pDumpHeader = byAsciiChar;
-                  nColumn++;
-                  pDumpHeader++;
-                } while (nColumn < nChunkLen);
-              }
-
-              pLineCursor[(int)(__frame0.szLineBuf + (nColumn - (int)(__frame0.szLineBuf + 1)))] = '\0';
-              pDumpHeader = __frame0.pDumpHeaderSaved;
-            }
-          } else {
-            Storm::Source::SSTR::SStrCopy(__frame0.szLineBuf, "<unreadable>", 0x7fffffff);
           }
-
-          fprintf(__frame0.pLogFile, "%s\n", __frame0.szLineBuf);
-          pbVar2 += nChunkLen;
-          __frame0.nBytesRemaining -= nChunkLen;
-          nChunkLen = __frame0.local_160;
+        } else {
+          Storm::Source::SSTR::SStrCopy(__frame0.szLineBuf, "<unreadable>", 0x7fffffff);
         }
-      }
 
-      Debug::GuardStack();
-      return;
+        fprintf(__frame0.pLogFile, "%s\n", __frame0.szLineBuf);
+        pbVar2 += nChunkLen;
+        __frame0.nBytesRemaining -= nChunkLen;
+        nChunkLen = __frame0.local_160;
+      }
     }
 
-    ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x389);
-    exit(-1);
+    Debug::GuardStack();
+    return;
 }
 
 void __stdcall CloseStaleLogFileHandles() {
@@ -963,7 +963,7 @@ char * __fastcall ReadLogFileRange(uint8_t * szFileName, int32_t nStartOffset, i
     _SYSTEMTIME localTime;
     size_t nAllocSize = nEndOffset - nStartOffset + 1;
     int32_t nSavedStart = nStartOffset;
-    char* pBuffer = (char*)D2_ALLOC(nAllocSize);
+    char* pBuffer = (char*)D2_ALLOC_AT(nAllocSize, ".\\Src\\LogManager.cpp", 0x10a);
     memset(pBuffer, 0, nAllocSize);
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gLogFileCS);
     CloseLogFileByName(szFileName);
@@ -1310,7 +1310,7 @@ void __fastcall ZeroListNode(uint32_t * pNode) {
 }
 
 // Scalar deleting destructor: MOV ESI,ECX takes this; TEST byte [EBP+8],1 is the free flag; RET 4; returns this in EAX. Parameters were listed in STORAGE order (bFreeMemory first), which is the argument-swap shape that crashed IGNORELIST_DtorScalar; a vtable caller passes (this, bFreeMemory).
-void * DestroyListNodeAndFree(void * pThis, uint8_t bFreeMemory) {
+void * __thiscall DestroyListNodeAndFree(void * pThis, uint8_t bFreeMemory) {
     pfnEHHandlerRoutine pfnSEHHandler = __GSHandlerCheck_EH_6c9d98;
     void* pPrevExceptionList = ExceptionList;
     ExceptionList = &pPrevExceptionList;
@@ -1813,16 +1813,18 @@ void InitHighResTimer() {
     *(uint32_t*)((char*)&qwResult + 4) = -1;
     Atomic64Store(&qwTestTarget, &qwTestValue);
     Atomic64Load(&qwResult, &qwTestTarget);
-    if ((int)qwResult == 0x29a && !*(uint32_t*)((char*)&qwResult + 4)) {
+    if (!((int)qwResult == 0x29a && !*(uint32_t*)((char*)&qwResult + 4))) {
+      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3c);
+      exit(-1);
+    }
+
+    {
       D2HighResTimestampStrc tInitTimestamp;
       tInitTimestamp.nSeconds = _time32(nullptr);
       tInitTimestamp.dwTick = GetTickCount();
       Atomic64Store((int64_t*)&gHighResTimerInitTimestamp, (int64_t*)&tInitTimestamp);
       return;
     }
-
-    ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3c);
-    exit(-1);
 }
 
 // Returns the current wall-clock second count in EAX (base seconds + elapsed ticks/1000). Takes no arguments: the former EBX parameter was a phantom propagated from AtomicExchange64's don't-care comparand.

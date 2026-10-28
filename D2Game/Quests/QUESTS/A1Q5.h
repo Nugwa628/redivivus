@@ -65,7 +65,7 @@ int __fastcall Q05_OnTowerComplete(::SGAMEDATA * pGame, struct D2QuestDataStrc *
 void __fastcall Q05_Callback03_ChangedLevel(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q5.cpp
 void __fastcall Q05_CheckAndUpdateOnAreaEntry(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nAreaFlag);
-void __fastcall Q05_SequenceFilter(struct D2QuestDataStrc * pQuestData);
+bool __fastcall Q05_SequenceFilter(struct D2QuestDataStrc * pQuestData);
 bool __fastcall Q05_ActiveFilter(struct D2QuestDataStrc * pQuestData, int32_t nTargetClassId, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2UnitStrc * pUnitEx);
 BOOL __fastcall Q05_SetCannotCompleteInGame(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 BOOL __fastcall Q05_PropagateRewardToParty(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);

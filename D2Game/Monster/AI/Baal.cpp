@@ -330,19 +330,18 @@ uint32_t __fastcall AI_BAAL_IsUnitInRange(D2UnitStrc * pUnit, int * pnParam) {
       exit(-1);
     } else {
       int32_t nX;
-      if (pnParam) {
-        if (pUnit->nAct != *(eAct*)(pnParam + 6)) {
-          return 0;
-        }
-
-        nLine = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-        nX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-        nDist = GetCollisionDistanceFromXY((D2UnitStrc*)pnParam, nX, nLine);
-        return (uint32_t)(nDist < 0x3fc);
+      if (!pnParam) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11e);
+        exit(-1);
+      }
+      if (pUnit->nAct != *(eAct*)(pnParam + 6)) {
+        return 0;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11e);
-      exit(-1);
+      nLine = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
+      nX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
+      nDist = GetCollisionDistanceFromXY((D2UnitStrc*)pnParam, nX, nLine);
+      return (uint32_t)(nDist < 0x3fc);
     }
 }
 

@@ -135,12 +135,12 @@ void __stdcall LoadCustomSettingsPerAreaAct5() {
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 void __stdcall WEATHER_ResetEnvironmentParticles() {
     Fog::Src::DataArrays::FOG_InitDataArray(pEnvironmentParticles);
-    if (!pEnvironmentParticles->nUsedCount) {
-      return;
+    if (pEnvironmentParticles->nUsedCount) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15b);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15b);
-    exit(-1);
+    return;
 }
 
 void __stdcall WEATHER_SetEnabledState(int bForceReset, int bNewState) {
@@ -655,13 +655,13 @@ void WEATHER_SpawnParticle(D2SeedStrc * pSeed) {
       }
 
       nLineIndex = pParticleArray[nParticleSlotIndex].nLineIndex;
-      if (nLineIndex < 8 && -1 < nLineIndex) {
-        WEATHER_GetLightingTint(&pParticleArray[nParticleSlotIndex].nColor, nLineIndex, &pParticleArray[nParticleSlotIndex].nAlpha);
-        return;
+      if (!(nLineIndex < 8 && -1 < nLineIndex)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x390);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x390);
-      exit(-1);
+      WEATHER_GetLightingTint(&pParticleArray[nParticleSlotIndex].nColor, nLineIndex, &pParticleArray[nParticleSlotIndex].nAlpha);
+      return;
     }
 
     sNextSeed = D2_SEED_NEXT(*pSeed);
@@ -1165,7 +1165,12 @@ void __stdcall ENV_FreeClientSide_NoOp() {
 
 void __fastcall WEATHER_TransitionState(uint32_t nState) {
     int32_t nErrorLineReg;
-    if (nState < 4) {
+    if (!(nState < 4)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12a);
+      exit(-1);
+    }
+
+    {
       D2UnitStrc* pPlayer;
       if (!((!gnWeatherTransitionLock || !nState) && (!gnWeatherStateAct5 || nState == 2))) {
         return;
@@ -1196,9 +1201,6 @@ void __fastcall WEATHER_TransitionState(uint32_t nState) {
 
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12a);
-    exit(-1);
 }
 
 // Flips gnWeatherTransitionLock. Unlocking calls WEATHER_UpdateStateAct5(1). Locking zeroes the Act 5 and transition weather states, requires the player unit (halt, Env.cpp line 311), clears gnWeatherParticleState and resets the particle array (halt, line 347, if entries remain).
@@ -1219,12 +1221,12 @@ void __stdcall WEATHER_ToggleTransitionLock() {
     } else {
       gnWeatherParticleState = 0;
       Fog::Src::DataArrays::FOG_InitDataArray(pEnvironmentParticles);
-      if (!pEnvironmentParticles->nUsedCount) {
-        return;
+      if (pEnvironmentParticles->nUsedCount) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15b);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15b);
-      exit(-1);
+      return;
     }
 }
 
@@ -1259,13 +1261,13 @@ void __stdcall WEATHER_UpdateTransition(D2SeedStrc * pSeed) {
     } else if (!gnWeatherTransitionLock) {
       gnWeatherCurrentTransitionState = 2;
       pPlayer = UNIT::Player::GetPlayerUnit_UI();
-      if (pPlayer) {
-        LoadCustomSettingsPerAreaAct5();
-        return;
+      if (!pPlayer) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x137);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x137);
-      exit(-1);
+      LoadCustomSettingsPerAreaAct5();
+      return;
     }
 }
 

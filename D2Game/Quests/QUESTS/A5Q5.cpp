@@ -65,24 +65,20 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA5Q5Strc) == 0x64, "D2_NEW(D2QuestDataA5Q5Strc): the 32-bit layout must be the 0x64 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA5Q5Strc) == 0x64, "D2_NEW_AT(D2QuestDataA5Q5Strc): the 32-bit layout must be the 0x64 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpExecuteOnUnitFunction
 #define RECON_FPTD_fpExecuteOnUnitFunction
 typedef BOOL (__fastcall *fpExecuteOnUnitFunction)(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg);
-#endif
-#ifndef RECON_FPTD_QUESTSEQ
-#define RECON_FPTD_QUESTSEQ
-typedef bool (__fastcall *QUESTSEQ)(D2QuestDataStrc * pQuestData);
 #endif
 
 namespace D2Game::Quests::QUESTS::A5Q5 {
@@ -930,19 +926,19 @@ bool __fastcall Q35_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 }
 
 // [A5Q5 = Rite of Passage] Q35_SequenceFilter: quest-chain gate. While nStateFlag != 5 (Ancients not dead), parks the quest at nStateFlag 1; once finished, chains into the next quest (nSequenceQuestId = RescueOnMountArreat) sequence filter. No quest-record writes.
-void __fastcall Q35_SequenceFilter(D2QuestDataStrc * pQuestData) {
+bool __fastcall Q35_SequenceFilter(D2QuestDataStrc * pQuestData) {
     if (pQuestData->nStateFlag != 5 && pQuestData->bIsNotIntroduction) {
       if (pQuestData->nStateFlag) {
-        return;
+        return true;
       }
 
       pQuestData->nStateFlag = 1;
-      return;
+      return true;
     }
 
     D2QuestDataStrc* pNextQuestData = GetQuestDataByQuestNoInternal(pQuestData->pGame, pQuestData->nSequenceQuestId);
     if (!pNextQuestData) {
-      return;
+      return false;
     }
 
     BOOL bBadCodePtr = IsBadCodePtr((FARPROC)pQuestData->fpSequenceFilter);
@@ -951,7 +947,8 @@ void __fastcall Q35_SequenceFilter(D2QuestDataStrc * pQuestData) {
       exit(-1);
     }
 
-    pNextQuestData->fpSequenceFilter(pNextQuestData);
+    bool uVar1 = pNextQuestData->fpSequenceFilter(pNextQuestData);
+    return uVar1;
 }
 
 // [A5Q5 = Rite of Passage] Q35_Callback_13 (sub-handler idx 0xd): on game load, reconstructs live nStateFlag/nStateFlagPrev from the saved quest record. Completed/FinishedInPreviousGame -> set field_0x4A (done). Step0x03 -> nStateFlag 3. Step0x02 -> nStateFlag 2. Read-only on records.
@@ -999,13 +996,13 @@ void __fastcall Q35_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->pNpcMessages = A5Q5::aNpcGossipData;
     pQuestData->bIsActive = true;
     pQuestData->nStateFlag = 0;
-    D2QuestDataA5Q5Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA5Q5Strc);
+    D2QuestDataA5Q5Strc* pQuestSpecificData = D2_NEW_POOL_AT(pGame->pMemoryPool, D2QuestDataA5Q5Strc, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q5.cpp", 0x41d);
     pQuestData->pQuestSpecificData.pA5Q5 = pQuestSpecificData;
     pQuestData->nQuestIdReal = QUEST_RiteOfPassage;
     pQuestData->fpStatusFilter = 0;
     pQuestData->nInitNo = 4;
     pQuestData->fpActiveFilter = Q35_ActiveFilter;
-    pQuestData->fpSequenceFilter = (QUESTSEQ)Q35_SequenceFilter;
+    pQuestData->fpSequenceFilter = Q35_SequenceFilter;
     pQuestData->nSequenceQuestId = QUEST_RescueOnMountArreat;
     memset(pQuestSpecificData, 0, 0x64);
 }

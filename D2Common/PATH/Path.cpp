@@ -34,8 +34,8 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
 
@@ -304,7 +304,7 @@ uint32_t PATH_CanMonsterPathInArea(D2UnitStrc * pUnit, uint16_t * pPathData) {
 }
 
 void __stdcall STRUCT_FreePath(D2PoolManagerStrc * pMemory, void * pPath) {
-    D2_FREE_POOL(pMemory, pPath);
+    D2_FREE_POOL_AT(pMemory, pPath, ".\\PATH\\Path.cpp", 0x3d9);
 }
 
 uint32_t __stdcall PATH_CalculateDistance(uint32_t nFromXfp, uint32_t nFromYfp, uint32_t nToXfp, uint32_t nToYfp) {
@@ -319,13 +319,13 @@ BOOL __stdcall PATH_CheckCollisionOnStep(uint32_t nParam1, uint32_t nParam2, D2D
     if (pDynamicPath->nFlags & 4U) {
       D2UnitStrc* pDVar1;
       pDVar1 = pDynamicPath->pOwner;
-      if (pDVar1 && (pDVar1->eUnitType == UNIT_PLAYER || pDVar1 && pDVar1->eUnitType == UNIT_MONSTER)) {
-        Collision::UpdateCollision_Type(pDynamicPath->pRoom, nParam2 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam2 + 2), pDynamicPath->pRoom, nParam1 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam1 + 2), pDynamicPath->nUnitWidth, pDynamicPath->nCollisionFlag);
-        return 1;
+      if (!(pDVar1 && (pDVar1->eUnitType == UNIT_PLAYER || pDVar1 && pDVar1->eUnitType == UNIT_MONSTER))) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x209);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x209);
-      exit(-1);
+      Collision::UpdateCollision_Type(pDynamicPath->pRoom, nParam2 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam2 + 2), pDynamicPath->pRoom, nParam1 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam1 + 2), pDynamicPath->nUnitWidth, pDynamicPath->nCollisionFlag);
+      return 1;
     }
 
     uint32_t nBBoxFlag = pDynamicPath->nFlags & 0x40000;
@@ -652,24 +652,24 @@ void __stdcall PATH_SetPathTarget(D2UnitStrc * pUnit, D2UnitStrc * pTargetUnit) 
       exit(-1);
     } else {
       D2DynamicPathStrc* pSrcPath;
-      if (pTargetUnit) {
-        pSrcPath = pUnit->pPath.pDynamicPath;
-        pTargetPath = pTargetUnit->pPath.pDynamicPath;
-        if (pSrcPath->Coords.tSubtile.nPosX == pTargetPath->Coords.tSubtile.nPosX && pSrcPath->Coords.tSubtile.nPosY == pTargetPath->Coords.tSubtile.nPosY) {
-          pSrcPath->nFlags &= -9;
-        } else {
-          pSrcPath->nFlags |= 8;
-        }
-        if (pSrcPath->pRoom != pTargetPath->pRoom) {
-          pSrcPath->nFlags |= 1;
-        }
-
-        Drlg::Path::DRLGPATH_SetPathPosition(pTargetPath->Coords.tFixed.x, pTargetPath->Coords.tFixed.y, pTargetPath->pRoom, pSrcPath);
-        return;
+      if (!pTargetUnit) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x54f);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x54f);
-      exit(-1);
+      pSrcPath = pUnit->pPath.pDynamicPath;
+      pTargetPath = pTargetUnit->pPath.pDynamicPath;
+      if (pSrcPath->Coords.tSubtile.nPosX == pTargetPath->Coords.tSubtile.nPosX && pSrcPath->Coords.tSubtile.nPosY == pTargetPath->Coords.tSubtile.nPosY) {
+        pSrcPath->nFlags &= -9;
+      } else {
+        pSrcPath->nFlags |= 8;
+      }
+      if (pSrcPath->pRoom != pTargetPath->pRoom) {
+        pSrcPath->nFlags |= 1;
+      }
+
+      Drlg::Path::DRLGPATH_SetPathPosition(pTargetPath->Coords.tFixed.x, pTargetPath->Coords.tFixed.y, pTargetPath->pRoom, pSrcPath);
+      return;
     }
 }
 

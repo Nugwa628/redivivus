@@ -73,7 +73,7 @@ int __stdcall D2COMP_GetNumFrames(int32_t pCompUnit);
 void __stdcall D2COMP_SetCurrentFrame(struct D2CharSelCompStrc * pCompUnit, uint32_t nTargetFrame);
 void __stdcall D2COMP_SetScreenX(struct D2CharSelCompStrc * pCompUnit, int32_t nScreenX);
 void __stdcall D2COMP_SetScreenY(struct D2CharSelCompStrc * pCompUnit, int32_t nScreenY);
-uint32_t __stdcall D2COMP_GetFlags(uint32_t * pCompUnit);
+uint32_t __stdcall D2COMP_GetFlags(struct D2CharSelCompStrc * pCompUnit);
 void __stdcall D2COMP_SetFlags(struct D2CharSelStrc * pCharSel, uint32_t dwFlags);
 void __stdcall D2COMP_LoadGuildEmblemIcon(int32_t pCompUnit, uint8_t byEmblemIcon, uint8_t byPrimaryColor, uint8_t bySecondaryColor);
 void D2COMP_LoadItemPaletteFile(int32_t nPaletteSlot, char * szPaletteFilename);

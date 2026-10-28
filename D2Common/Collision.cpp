@@ -39,12 +39,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
 
@@ -963,7 +963,7 @@ void __fastcall AllocRoomCollisionGrid(D2PoolManagerStrc * pMemPool, D2RoomStrc 
     D2RoomStrc* pRoomSaved = pRoom;
     DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &sRoomCoords);
     int nRoomCoordsCount = sRoomCoords.dwYSize * sRoomCoords.dwXSize;
-    D2RoomCollisionGridStrc* pCollisionMapNew = (D2RoomCollisionGridStrc*)D2_ALLOC_POOL(pMemPool, (nRoomCoordsCount + 0x12 + sRoomCoords.dwYSize * 2) * 2);
+    D2RoomCollisionGridStrc* pCollisionMapNew = (D2RoomCollisionGridStrc*)D2_ALLOC_POOL_AT(pMemPool, (nRoomCoordsCount + 0x12 + sRoomCoords.dwYSize * 2) * 2, ".\\COLLISN\\Collisn.cpp", 0x185);
     D2RoomStrc* pRoomAdj = pRoomSaved;
     D2DrlgRoomCoordsStrc* pCoordsIter = &sRoomCoords;
     int* pCollisionMapWriter = (int*)pCollisionMapNew;
@@ -1006,7 +1006,7 @@ void __fastcall FreeRoomCollisionGrid(D2PoolManagerStrc * pMemory, D2RoomStrc * 
       return;
     }
 
-    D2_FREE_POOL(pMemory, pDrlgRoomCollsionMap);
+    D2_FREE_POOL_AT(pMemory, pDrlgRoomCollsionMap, ".\\COLLISN\\Collisn.cpp", 0x1c1);
     DUNGEON::Dungeon::DRLGROOM_SetCollisionGridInRoom(pRoom, nullptr);
 }
 

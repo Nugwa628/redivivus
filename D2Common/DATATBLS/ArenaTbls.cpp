@@ -70,12 +70,12 @@ void __fastcall TXT_LoadArenaTxt(D2PoolManagerStrc * pMemory) {
 }
 
 D2ArenaTxt * __fastcall GetArenaTxtRecord(int32_t nArenaType) {
-    if (0 >= nArenaType) {
-      return sgpTxtArena + nArenaType;
+    if (!(0 >= nArenaType)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x41);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x41);
-    exit(-1);
+    return sgpTxtArena + nArenaType;
     return sgpTxtArena + nArenaType;
 }
 
@@ -525,12 +525,12 @@ D2CharTemplateTxt * __fastcall TXT_CharTemplate_GetLine(int nTemplate, int nLeve
     } else {
       int iVar1;
       iVar1 = sgCharTemplateLevelIndex[nLevelIndex] - 1 + nTemplate;
-      if (iVar1 < nTxtCharTemplateSize) {
-        return sgpTxtCharTemplate + iVar1;
+      if (!(iVar1 < nTxtCharTemplateSize)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf8);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf8);
-      exit(-1);
+      return sgpTxtCharTemplate + iVar1;
     }
 }
 
@@ -541,12 +541,12 @@ uint32_t __fastcall GetClassFromCharTemplateTxt(int32_t nTemplate, int32_t nLeve
     } else {
       int nRowIdx;
       nRowIdx = sgCharTemplateLevelIndex[nLevel] - 1 + nTemplate;
-      if (nRowIdx < nTxtCharTemplateSize) {
-        return (uint32_t)sgpTxtCharTemplate[nRowIdx]._class;
+      if (!(nRowIdx < nTxtCharTemplateSize)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf8);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf8);
-      exit(-1);
+      return (uint32_t)sgpTxtCharTemplate[nRowIdx]._class;
     }
 }
 

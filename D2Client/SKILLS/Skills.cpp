@@ -2198,41 +2198,44 @@ void __fastcall SKILLS_CltAdjustSkillTabBonuses(D2UnitStrc * pUnit, int32_t nBon
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x96b);
       exit(-1);
     } else {
-      if (pUnit->pSkillsList) {
-        pSkill = D2Common::Skills::GetFirstSkill(pUnit->pSkillsList);
-        pSkillNext = pSkill;
-        while (true) {
-          pSkillCur = pSkillNext;
-          if (!pSkill) {
-            break;
-          }
+      if (!pUnit->pSkillsList) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x96d);
+        exit(-1);
+      }
 
-          pSkillAfter = D2Common::Skills::GetNext(pSkill);
-          eSkill = D2Common::Skills::GetSkillId(pSkill, ".\\SKILLS\\Skills.cpp", 0x974);
-          pSkillNext = pSkillCur;
-          if (-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) {
-            pSkillsTxt = sgptDataTable->pTxtSkills + eSkill;
-            if (pSkillsTxt) {
-              nSkillDescIdx = (int)pSkillsTxt->skilldesc;
-              if (-1 < nSkillDescIdx && nSkillDescIdx < sgptDataTable->nTxtSkillDescSize) {
-                pSkillDescTxt = sgptDataTable->pTxtSkillDesc;
-                pSkill = pSkillCur;
-                if (pSkillDescTxt + nSkillDescIdx) {
-                  nTotalLevel = D2Common::Skills::GetSkillLevel(pUnit, pSkillCur, 1);
-                  pSkill = pSkillAfter;
-                  pSkillNext = pSkillAfter;
-                  if (0 < nTotalLevel) {
-                    _bSkillHasTab = D2Common::Skills::SKILLS_CheckSkillFlagBit1(eSkill);
-                    if (_bSkillHasTab && (!neSkillEType || pSkillsTxt->EType == neSkillEType) && (nSkillPage == 4 || (int)(char)pSkillDescTxt[nSkillDescIdx].skillpage == nSkillPage + 1)) {
-                      nErrorLine = D2Common::Skills::GetOwnerGUID(pSkillCur);
-                      if (nErrorLine == -1) {
-                        D2Common::Skills::SKILL_AdjustSkillLevelBonus(pUnit, eSkill, nBonusDelta);
-                        pSkillCur = D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1);
-                        if (pSkillCur) {
-                          nSkillDescIdx = D2Common::Skills::GetSkillLevel(pUnit, pSkillCur, 1);
-                          if (!nSkillDescIdx) {
-                            D2Common::Skills::SKILL_RemoveSkillCallback(pUnit, eSkill, ".\\SKILLS\\Skills.cpp", 0x9a1);
-                          }
+      pSkill = D2Common::Skills::GetFirstSkill(pUnit->pSkillsList);
+      pSkillNext = pSkill;
+      while (true) {
+        pSkillCur = pSkillNext;
+        if (!pSkill) {
+          break;
+        }
+
+        pSkillAfter = D2Common::Skills::GetNext(pSkill);
+        eSkill = D2Common::Skills::GetSkillId(pSkill, ".\\SKILLS\\Skills.cpp", 0x974);
+        pSkillNext = pSkillCur;
+        if (-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) {
+          pSkillsTxt = sgptDataTable->pTxtSkills + eSkill;
+          if (pSkillsTxt) {
+            nSkillDescIdx = (int)pSkillsTxt->skilldesc;
+            if (-1 < nSkillDescIdx && nSkillDescIdx < sgptDataTable->nTxtSkillDescSize) {
+              pSkillDescTxt = sgptDataTable->pTxtSkillDesc;
+              pSkill = pSkillCur;
+              if (pSkillDescTxt + nSkillDescIdx) {
+                nTotalLevel = D2Common::Skills::GetSkillLevel(pUnit, pSkillCur, 1);
+                pSkill = pSkillAfter;
+                pSkillNext = pSkillAfter;
+                if (0 < nTotalLevel) {
+                  _bSkillHasTab = D2Common::Skills::SKILLS_CheckSkillFlagBit1(eSkill);
+                  if (_bSkillHasTab && (!neSkillEType || pSkillsTxt->EType == neSkillEType) && (nSkillPage == 4 || (int)(char)pSkillDescTxt[nSkillDescIdx].skillpage == nSkillPage + 1)) {
+                    nErrorLine = D2Common::Skills::GetOwnerGUID(pSkillCur);
+                    if (nErrorLine == -1) {
+                      D2Common::Skills::SKILL_AdjustSkillLevelBonus(pUnit, eSkill, nBonusDelta);
+                      pSkillCur = D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1);
+                      if (pSkillCur) {
+                        nSkillDescIdx = D2Common::Skills::GetSkillLevel(pUnit, pSkillCur, 1);
+                        if (!nSkillDescIdx) {
+                          D2Common::Skills::SKILL_RemoveSkillCallback(pUnit, eSkill, ".\\SKILLS\\Skills.cpp", 0x9a1);
                         }
                       }
                     }
@@ -2242,13 +2245,10 @@ void __fastcall SKILLS_CltAdjustSkillTabBonuses(D2UnitStrc * pUnit, int32_t nBon
             }
           }
         }
-
-        D2Common::Skills::SKILLS_UpdateAllPassiveSkills(pUnit);
-        return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x96d);
-      exit(-1);
+      D2Common::Skills::SKILLS_UpdateAllPassiveSkills(pUnit);
+      return;
     }
 }
 

@@ -77,7 +77,7 @@ void __stdcall ARCHIVE_LoadSpellsClassSkilltree();
 void __stdcall SPELLSEL_FreeSkilltreeGraphic();
 int32_t SPELLSEL_GetSkillTreeRowOffset(char cParam);
 int32_t SPELLSEL_GetSkillTreeColumnOffset(char cParam);
-void SPELLSEL_DrawTabHeader(void * pThis, int32_t nYOffset);
+void __thiscall SPELLSEL_DrawTabHeader(void * pThis, int32_t nYOffset);
 void __stdcall SPELLSEL_DrawSkilltreeBackground(struct DC6 * pDC6, int32_t nParam);
 void __stdcall DRAW_UI_SkillsWindow_II();
 void __stdcall thunk_D2GFX_GetColorFromPalette_C();

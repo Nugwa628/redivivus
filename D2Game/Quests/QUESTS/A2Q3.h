@@ -79,7 +79,7 @@ void __fastcall Q11_OnViperAmuletInit(struct D2QuestDataStrc * pQuestData, struc
 // A2Q3 - fpSequenceFilter (Q11_SequenceFilter): chains to the next quest in the sequence. When this quest's
 // stateFlag==5 (finished) or intro not done, looks up the sequence-linked quest data and invokes its own
 // fpSequenceFilter (asserting the fn ptr is valid first). No quest-record access.
-void __fastcall Q11_SequenceFilter(struct D2QuestDataStrc * pQuestData);
+bool __fastcall Q11_SequenceFilter(struct D2QuestDataStrc * pQuestData);
 // A2Q3 - per-unit iterator cb (Q11_UpdateQuestRecord): mirrors the server quest stateFlag into each player's
 // saved quest record. If not yet Completed/RewardAwaits, reads the live stateFlag and writes the matching
 // progress sub-state: any flag -> Step0x02, ==2 -> Step0x03, ==3 -> Step0x04. Keeps client save in sync.

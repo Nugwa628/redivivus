@@ -1237,14 +1237,14 @@ void __fastcall CUBE_LoadCubeMainTable(D2PoolManagerStrc * pMemory) {
     if (!_bFileExists) {
       /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\%s", "DATA\\GLOBAL\\EXCEL", "cubeserver.txt");
       _bFileExists = DATATBLS::DataTbls::CheckIfFileExists(pMemory, szFilePath, (D2MPQFileStrc**)&pFileData, 1);
-      if (!_bFileExists) {
-        pTxtCubeMain = (D2CubeMainTxt*)DATATBLS::DataTbls::CompileTxt(pMemory, "cubemain", cubemain, &nTxtCubeMainSize, 0x148);
-        Fog::Debug::GuardStack();
-        return;
+      if (_bFileExists) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2f4);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2f4);
-      exit(-1);
+      pTxtCubeMain = (D2CubeMainTxt*)DATATBLS::DataTbls::CompileTxt(pMemory, "cubemain", cubemain, &nTxtCubeMainSize, 0x148);
+      Fog::Debug::GuardStack();
+      return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2f0);
       exit(-1);
@@ -1262,12 +1262,12 @@ D2CubeMainTxt * __stdcall CUBE_GetRecipeByIndex(int32_t nIndex) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x34e);
       exit(-1);
     } else {
-      if (nIndex < nTxtCubeMainSize) {
-        return pTxtCubeMain + nIndex;
+      if (!(nIndex < nTxtCubeMainSize)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x34f);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x34f);
-      exit(-1);
+      return pTxtCubeMain + nIndex;
     }
 }
 

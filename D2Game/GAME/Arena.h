@@ -30,7 +30,7 @@ namespace D2Game::GAME::Arena {
 // Function declarations
 bool __stdcall ARENA_TestFlag(::SGAMEDATA * pGame, uint32_t nParam);
 // @sourcefile .\GAME\Arena.cpp
-void AllocArenaControl(void * pThis, eD2ArenaFlags eArenaFlags, uint8_t nTemplate);
+void __thiscall AllocArenaControl(void * pThis, eD2ArenaFlags eArenaFlags, uint8_t nTemplate);
 // @sourcefile .\GAME\Arena.cpp
 void __fastcall FreeArenaControl(::SGAMEDATA * pGame);
 // @sourcefile .\GAME\Arena.cpp

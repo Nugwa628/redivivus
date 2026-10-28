@@ -480,32 +480,32 @@ void __stdcall PLRMODES_UnequipAndPrepareItemForDrop(::SGAMEDATA * pGame, D2Unit
       exit(-1);
     } else {
       eD2ItemTypes eItemType;
-      if (pUnit2 == pOwnerUnit) {
-        D2Common::INVENTORY::Inventory::NullSub_2Arg(pInventory, nBodyLoc);
-        eItemType = D2Common::ITEMS::Items::ITEM_GetItemData_wType(pUnit2);
-        if (eItemType == ITEMTYPE_Belt) {
-          ITEMS::ItemMode::ITEMMODE_RemoveItemFromBelt(pGame, pUnit, nullptr);
-        }
-        if (pUnit2) {
-          pUnit2->eUnitFlags &= ~UNITFLAG_TARGETABLE;
-        }
-
-        ITEMS::ItemMode::ITEMMODE_UnequipItemStats(pGame, pUnit2, pUnit, 0, 1);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit2, ITEMFLAG_REMOVED, 1);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pUnit2, ITEMCMD_DELETE, 1);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pUnit2, ITEMCMD_BODYLOC_TAKE_ITEM, 1);
-        D2Common::INVENTORY::Inventory::UpsertToUpdateList(pInventory, pUnit2);
-        if (bShouldReturnItem) {
-          ITEMS::ItemMode::ITEMMODE_ReturnOne(0);
-        }
-
-        D2Common::ITEM_ProcessSetItemEquip(pUnit, pUnit2, 1, 1);
-        D2Common::Units::RefreshInventory(pUnit, 1);
-        return;
+      if (pUnit2 != pOwnerUnit) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x25e);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x25e);
-      exit(-1);
+      D2Common::INVENTORY::Inventory::NullSub_2Arg(pInventory, nBodyLoc);
+      eItemType = D2Common::ITEMS::Items::ITEM_GetItemData_wType(pUnit2);
+      if (eItemType == ITEMTYPE_Belt) {
+        ITEMS::ItemMode::ITEMMODE_RemoveItemFromBelt(pGame, pUnit, nullptr);
+      }
+      if (pUnit2) {
+        pUnit2->eUnitFlags &= ~UNITFLAG_TARGETABLE;
+      }
+
+      ITEMS::ItemMode::ITEMMODE_UnequipItemStats(pGame, pUnit2, pUnit, 0, 1);
+      D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit2, ITEMFLAG_REMOVED, 1);
+      D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pUnit2, ITEMCMD_DELETE, 1);
+      D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pUnit2, ITEMCMD_BODYLOC_TAKE_ITEM, 1);
+      D2Common::INVENTORY::Inventory::UpsertToUpdateList(pInventory, pUnit2);
+      if (bShouldReturnItem) {
+        ITEMS::ItemMode::ITEMMODE_ReturnOne(0);
+      }
+
+      D2Common::ITEM_ProcessSetItemEquip(pUnit, pUnit2, 1, 1);
+      D2Common::Units::RefreshInventory(pUnit, 1);
+      return;
     }
 }
 
@@ -619,23 +619,23 @@ uint32_t __stdcall PLRMODES_IsCorpseOwnedByPlayer(::SGAMEDATA * pGame, D2UnitStr
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x38e);
       exit(-1);
     } else {
-      if (pUnit->eUnitType == UNIT_PLAYER) {
-        nPartyFlags = D2Common::INVENTORY::Inventory::INVENTORY_GetCursorItemGUID(pCorpseUnitRaw->pInventory);
-        if (pUnit->nUnitGUID == nPartyFlags) {
-          return 1;
-        }
-
-        pCorpseOwner = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_PLAYER, nPartyFlags);
-        if (!pCorpseOwner) {
-          return 0;
-        }
-
-        nPartyFlags = UNIT::PlayerList::PLAYERLIST_GetFlagsMasked(pCorpseOwner, pUnit, 1);
-        return nPartyFlags;
+      if (pUnit->eUnitType != UNIT_PLAYER) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x38f);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x38f);
-      exit(-1);
+      nPartyFlags = D2Common::INVENTORY::Inventory::INVENTORY_GetCursorItemGUID(pCorpseUnitRaw->pInventory);
+      if (pUnit->nUnitGUID == nPartyFlags) {
+        return 1;
+      }
+
+      pCorpseOwner = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_PLAYER, nPartyFlags);
+      if (!pCorpseOwner) {
+        return 0;
+      }
+
+      nPartyFlags = UNIT::PlayerList::PLAYERLIST_GetFlagsMasked(pCorpseOwner, pUnit, 1);
+      return nPartyFlags;
     }
 }
 
@@ -1627,13 +1627,13 @@ void __fastcall PLRMODES_Death(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD nM
         }
 
         /* FARPROC lpfn for IsBadCodePtr */ bBadPtr = IsBadCodePtr((FARPROC)PLRMODES_SetIdleMode);
-        if (!bBadPtr) {
-          PLRMODES_SetIdleMode(pGame, pUnit, 1, 0, 0);
-          return;
+        if (bBadPtr) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x812);
+          exit(-1);
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x812);
-        exit(-1);
+        PLRMODES_SetIdleMode(pGame, pUnit, 1, 0, 0);
+        return;
       }
     }
 
@@ -1777,13 +1777,13 @@ void __fastcall PLRMODES_OnModeComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
       }
 
       /* FARPROC lpfn for IsBadCodePtr */ bBadPtr = IsBadCodePtr((FARPROC)PLRMODES_ChangeAnimModeAndResetSkill);
-      if (!bBadPtr) {
-        PLRMODES_ChangeAnimModeAndResetSkill(pGame, pUnit, 4, -1, 0);
-        return;
+      if (bBadPtr) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x812);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x812);
-      exit(-1);
+      PLRMODES_ChangeAnimModeAndResetSkill(pGame, pUnit, 4, -1, 0);
+      return;
     }
 }
 

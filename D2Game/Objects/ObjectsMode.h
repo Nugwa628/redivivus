@@ -136,7 +136,7 @@ BOOL __fastcall OBJOP_ActivateNoOp(struct D2ObjectOperateFnArg * pOperation);
 // Server entry-point for a player interacting with a world object. Looks up the object unit by nUnitId/pUId, reads its ObjectsTxt record, and guards against interaction while the player is trading, has interact state set, or is holding a cursor item (except for class 0x10b). Dispatches to OBJECTSOPERATEFN[pTxt->OperateFn] with a fully populated D2ObjectOperateFnArg. Skips classes 0x79, 0x7a, and 0x16. Halts with an unrecoverable error if OperateFn >= 0x65.
 BOOL __fastcall InteractWithObject(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint32_t nUnitId, DWORD pUId, int * pTxt);
 ::SGAMEDATA * __fastcall Interact(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint32_t nObjectType, DWORD nGid);
-void OBJECT_UpdateCollisionOnModeChange(void * pThis, DWORD nGid);
+void __thiscall OBJECT_UpdateCollisionOnModeChange(void * pThis, DWORD nGid);
 BOOL __fastcall OBJOP_A2Q2_ArcaneGateLevelTransition(struct D2ObjectOperateFnArg * pOperation);
 // Object operate-fn (index 46): activates the portal to Act 4 (Pandemonium Fortress). Guards: victim object must be alive (not Death mode) and the attacker must have QUEST_TheGuardian in JustCompleted or Completed state. Calls QUEST_HandleKhalimsWillCompletion, and if the victim is in DuranceOfHateLevel3 also unlocks the ThePandemoniumFortress waypoint and calls InitLevel to load Act 4. Returns 0.
 BOOL __fastcall Objects_OperateFn46_PortalToAct4(struct D2ObjectOperateFnArg * pOperation);
@@ -167,7 +167,7 @@ void __fastcall OBJMODE_HandleObjectDeactivation(::SGAMEDATA * pGame, struct D2U
 // NOTE: Register param types inferred (medium confidence): pGameStrc (ECX): SGAMEDATA *, pUnit (EDX): D2UnitStrc *
 void __fastcall OBJMODE_OnWaypointFinish(::SGAMEDATA * pGameStrc, struct D2UnitStrc * pUnit);
 // Completes the two-phase town-portal link: given the GUID of a blue portal stub and the destination level, locates the stub object (classId 0x3b), verifies it is unlinked and has an owner unit, then stores the destination level in the portal's component data, sets the linked flag, frees the owner stub unit, and calls LinkPortal to establish the bidirectional connection. Halts with an internal error if preconditions fail.
-void OBJMODE_FinalizePortalLink(void * pThis, DWORD dwBluePortalGUID, eD2LevelId eLevel);
+void __thiscall OBJMODE_FinalizePortalLink(void * pThis, DWORD dwBluePortalGUID, eD2LevelId eLevel);
 void __stdcall OBJMODE_FinalizePortalLink_HaltTail(int nLine);
 void __stdcall OBJECT_HandleUnitRevival(struct D2UnitStrc * pUnit, bool * pbRevived);
 // Object-mode handler that applies well/shrine healing to a player unit. Reads D2ObjectsTxt Parm flags (bit 1=HP, bit 0=mana) and a percentage scalar, then restores HP, mana, and stamina up to their maximums and sends attribute-update packets for each. Also removes poison and freeze state lists. Revives any dead hireable mercenary via SUNITNPC_HandleHireableAction, then iterates pets via PetsForEach/OBJECT_HandleUnitRevival. Returns UNIT_MONSTER (1) if anything was healed/cured, UNIT_PLAYER (0) if nothing changed.

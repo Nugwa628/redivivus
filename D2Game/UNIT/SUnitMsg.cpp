@@ -66,15 +66,15 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2SUnitMsgStrc) == 0x28, "D2_NEW(D2SUnitMsgStrc): the 32-bit layout must be the 0x28 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2SUnitMsgStrc) == 0x28, "D2_NEW_AT(D2SUnitMsgStrc): the 32-bit layout must be the 0x28 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpSUnitIterateCallback
@@ -782,7 +782,7 @@ void __fastcall UnitQueuePacket0x99(D2UnitStrc * pUnit, uint16_t wParam, uint8_t
       pSyncPool = pUnit->pMemory;
     }
 
-    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pSyncPool, 0x14);
+    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL_AT(pSyncPool, 0x14, ".\\UNIT\\SUnitMsg.cpp", 0x284);
     pMsg->uArgs.s99.field_0x2 = byArg1;
     pMsg->uArgs.s99.field_0x3 = byArg2;
     pMsg->nOpcode = 0x99;
@@ -810,7 +810,7 @@ void __fastcall UnitQueuePacket0x9A(D2UnitStrc * pUnit, uint16_t wParam1, uint8_
       pAllocPool = pUnit->pMemory;
     }
 
-    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pAllocPool, 0x14);
+    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL_AT(pAllocPool, 0x14, ".\\UNIT\\SUnitMsg.cpp", 0x29b);
     pMsg->uArgs.s9A.field_0x2 = byArg1;
     pMsg->uArgs.s9A.field_0x4 = wArg2;
     pMsg->nOpcode = 0x9a;
@@ -846,7 +846,7 @@ void __fastcall UnitQueuePacket0x9E(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, u
       pMemory = pUnit->pMemory;
     }
 
-    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pMemory, 0x14);
+    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL_AT(pMemory, 0x14, ".\\UNIT\\SUnitMsg.cpp", 0x2af);
     pMsg->nOpcode = 0x9e;
     pMsg->pNext = 0;
     if (!pUnit) {
@@ -887,7 +887,7 @@ void __fastcall UnitQueuePacket0xA1(D2UnitStrc * pUnit, uint16_t nParam, int32_t
       pMemory = pUnit->pMemory;
     }
 
-    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pMemory, 0x18);
+    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL_AT(pMemory, 0x18, ".\\UNIT\\SUnitMsg.cpp", 0x2c5);
     pMsg->nOpcode = 0xa1;
     pMsg->pNext = 0;
     if (!pUnit) {
@@ -919,7 +919,7 @@ void __fastcall UnitQueuePacket0xAB(D2UnitStrc * pUnit, uint8_t bParam) {
       pAllocPool = pUnit->pMemory;
     }
 
-    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pAllocPool, 0x14);
+    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL_AT(pAllocPool, 0x14, ".\\UNIT\\SUnitMsg.cpp", 0x2d9);
     pMsg->pNext = 0;
     pMsg->nOpcode = '\0';
     pMsg->pad_0x5[0] = '\0';
@@ -963,7 +963,7 @@ void __fastcall SERVER_SendUnitMessagePacket(D2UnitStrc * pUnit, D2UnitStrc * pT
       pMemPool = pUnit->pMemory;
     }
 
-    D2SUnitMsgStrc* pMsg = D2_NEW_POOL(pMemPool, D2SUnitMsgStrc);
+    D2SUnitMsgStrc* pMsg = D2_NEW_POOL_AT(pMemPool, D2SUnitMsgStrc, ".\\UNIT\\SUnitMsg.cpp", 0x2ea);
     pMsg->nOpcode = '\0';
     pMsg->pad_0x5[0] = '\0';
     pMsg->pad_0x5[1] = '\0';
@@ -1027,7 +1027,7 @@ void __fastcall UnitQueuePacket0xA5(D2UnitStrc * pUnit, uint16_t wParam) {
       pMemory = pUnit->pMemory;
     }
 
-    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pMemory, 0x14);
+    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL_AT(pMemory, 0x14, ".\\UNIT\\SUnitMsg.cpp", 0x30f);
     pMsg->nOpcode = '\0';
     pMsg->pad_0x5[0] = '\0';
     pMsg->pad_0x5[1] = '\0';
@@ -1069,7 +1069,7 @@ void __fastcall SERVER_UnitQueuePacket0xA4(D2UnitStrc * pUnit, int16_t nClassId)
       pMemory = pUnit->pMemory;
     }
 
-    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pMemory, 0xc);
+    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL_AT(pMemory, 0xc, ".\\UNIT\\SUnitMsg.cpp", 0x322);
     pMsg->nOpcode = 0xa4;
     pMsg->pNext = 0;
     pMsg->uArgs.sA4.nClassId = nClassId;
@@ -1091,7 +1091,7 @@ void __fastcall SERVER_SendPacket0x23(D2UnitStrc * pMemory, uint8_t byTypeId, ui
       pAllocPool = pMemory->pMemory;
     }
 
-    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pAllocPool, 0x10);
+    D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL_AT(pAllocPool, 0x10, ".\\UNIT\\SUnitMsg.cpp", 0x332);
     pMsg->nOpcode = '#';
     pMsg->pNext = 0;
     pMsg->uArgs.s23.field_0x6 = byTypeId;

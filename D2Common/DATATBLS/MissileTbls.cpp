@@ -23,8 +23,8 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
 
@@ -1036,7 +1036,7 @@ void __fastcall TXT_AllocTxt_missiles(D2PoolManagerStrc * pMemory) {
 // @sourcefile .\DATATBLS\MissileTbls.cpp
 void __stdcall MISSILETBLS_FreeTxt() {
     if (sgtDataTable.pMissCode) {
-      D2_FREE_POOL(nullptr, sgtDataTable.pMissCode);
+      D2_FREE_POOL_AT(nullptr, sgtDataTable.pMissCode, ".\\DATATBLS\\MissileTbls.cpp", 0x19e);
       sgtDataTable.pMissCode = 0;
     }
 

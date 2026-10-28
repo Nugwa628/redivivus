@@ -70,23 +70,23 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2InactiveUnitListStrc) == 0x18, "D2_NEW(D2InactiveUnitListStrc): the 32-bit layout must be the 0x18 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2InactiveUnitListStrc) == 0x18, "D2_NEW_AT(D2InactiveUnitListStrc): the 32-bit layout must be the 0x18 bytes 1.14d allocates");
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2InactiveMonsterRecordStrc) == 0x5c, "D2_NEW(D2InactiveMonsterRecordStrc): the 32-bit layout must be the 0x5c bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2InactiveMonsterRecordStrc) == 0x5c, "D2_NEW_AT(D2InactiveMonsterRecordStrc): the 32-bit layout must be the 0x5c bytes 1.14d allocates");
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2InactiveUnitRecordStrc) == 0x34, "D2_NEW(D2InactiveUnitRecordStrc): the 32-bit layout must be the 0x34 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2InactiveUnitRecordStrc) == 0x34, "D2_NEW_AT(D2InactiveUnitRecordStrc): the 32-bit layout must be the 0x34 bytes 1.14d allocates");
 
 
 namespace D2Game::UNIT::SUnitInactive {
@@ -97,7 +97,7 @@ void SUNITINACTIVE_FreeInactiveMonster(::SGAMEDATA * pGame, D2InventoryToBeUpdat
       D2Common::Drlg::Preset::DRLGPRESET_FreeSpawnPointList(pGame->pMemoryPool, (D2AiGeneralStrc*)pUnit[4].pNext);
     }
 
-    D2_FREE_POOL(pGame->pMemoryPool, pUnit);
+    D2_FREE_POOL_AT(pGame->pMemoryPool, pUnit, ".\\UNIT\\SUnitInactive.cpp", 0x8c);
 }
 
 // @sourcefile .\UNIT\SUnitInactive.cpp
@@ -125,7 +125,7 @@ void __stdcall SUNITINACTIVE_FindAndRemoveInactiveUnitsByRoom(int * pnParam1, in
 
         *pnParam1 = pMemoryToFree[4];
         *pnParam2 = pMemoryToFree[2];
-        D2_FREE_POOL(*(D2PoolManagerStrc**)(nParam + 0x1c), pMemoryToFree);
+        D2_FREE_POOL_AT(*(D2PoolManagerStrc**)(nParam + 0x1c), pMemoryToFree, ".\\UNIT\\SUnitInactive.cpp", 0xb6);
         return;
       }
 
@@ -206,7 +206,7 @@ void __stdcall SUNITINACTIVE_RestoreInactiveItemList(::SGAMEDATA * pGame, D2Room
         SUNITINACTIVE_RestoreInactiveItem(pGame, pRoom, pnParam);
       }
 
-      D2_FREE_POOL(pGame->pMemoryPool, pnParam);
+      D2_FREE_POOL_AT(pGame->pMemoryPool, pnParam, ".\\UNIT\\SUnitInactive.cpp", 0x126);
       pnParam = piVar1;
     }
 }
@@ -223,7 +223,7 @@ void __stdcall SUNITINACTIVE_SerializeAndDeactivateItem(::SGAMEDATA * pGame, D2U
     sRecord.nItemDataSize = (int16_t)nSerializedLen;
     sRecord.nDespawnTimer = ITEMS::Items::Drop::ITEM_CalculateDespawnTimer(pGame, pUnit);
     uint32_t nSerializedBytes = (uint32_t)(uint16_t)sRecord.nItemDataSize;
-    int* pNewInactiveRecord = (int*)D2_ALLOC_POOL(pGame->pMemoryPool, nSerializedBytes + 0xf);
+    int* pNewInactiveRecord = (int*)D2_ALLOC_POOL_AT(pGame->pMemoryPool, nSerializedBytes + 0xf, ".\\UNIT\\SUnitInactive.cpp", 0x1e2);
     memcpy(pNewInactiveRecord, &sRecord, nSerializedBytes + 0xf);
     int32_t iVar1 = D2Common::ITEMS::Items::ITEM_GetItemsTxt_bHasInv(pUnit);
     if (iVar1) {
@@ -281,7 +281,7 @@ void SUNITINACTIVE_RemoveInactiveMonsterByClassId(uint8_t byActNo, ::SGAMEDATA *
               D2Common::Drlg::Preset::DRLGPRESET_FreeSpawnPointList(pGame->pMemoryPool, pCurMonster->pAiGeneral);
             }
 
-            D2_FREE_POOL(pGame->pMemoryPool, pCurMonster);
+            D2_FREE_POOL_AT(pGame->pMemoryPool, pCurMonster, ".\\UNIT\\SUnitInactive.cpp", 0x8c);
             return;
           }
 
@@ -306,7 +306,7 @@ void SUNITINACTIVE_FreeInactiveMonsterList(::SGAMEDATA * pGame, D2InactiveUnitLi
         D2Common::Drlg::Preset::DRLGPRESET_FreeSpawnPointList(pGame->pMemoryPool, pCurMonster->pAiGeneral);
       }
 
-      D2_FREE_POOL(pGame->pMemoryPool, pCurMonster);
+      D2_FREE_POOL_AT(pGame->pMemoryPool, pCurMonster, ".\\UNIT\\SUnitInactive.cpp", 0x8c);
       pCurMonster = pNextMonster;
     }
 }
@@ -345,7 +345,7 @@ D2InactiveUnitListStrc * __stdcall SUNITINACTIVE_AllocOrFindInactiveList(::SGAME
       return pResultList;
     }
 
-    pResultList = D2_NEW_POOL(pGame->pMemoryPool, D2InactiveUnitListStrc);
+    pResultList = D2_NEW_POOL_AT(pGame->pMemoryPool, D2InactiveUnitListStrc, ".\\UNIT\\SUnitInactive.cpp", 0x424);
     pResultList->pInactiveItems = 0;
     pResultList->pInactiveMonsters = 0;
     pResultList->pInactiveUnits = 0;
@@ -582,7 +582,7 @@ void __stdcall SUNITINACTIVE_DeactivateMonster(::SGAMEDATA * pGame, D2UnitStrc *
     }
 
     GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_AITHINK, 0);
-    D2InactiveMonsterRecordStrc* pInactiveRec = D2_NEW_POOL(pGame->pMemoryPool, D2InactiveMonsterRecordStrc);
+    D2InactiveMonsterRecordStrc* pInactiveRec = D2_NEW_POOL_AT(pGame->pMemoryPool, D2InactiveMonsterRecordStrc, ".\\UNIT\\SUnitInactive.cpp", 0x528);
     memset(pInactiveRec, 0, 0x5c);
     pInactiveRec->nOwnerId = -1;
     eD2UnitType eUnitType = pUnit->eUnitType;
@@ -928,7 +928,7 @@ void __stdcall SUNITINACTIVE_RoomInitMonsters(::SGAMEDATA * pGame, D2RoomStrc * 
         D2Common::Drlg::Preset::DRLGPRESET_FreeSpawnPointList(pGame->pMemoryPool, pInactiveMonRec->pAiGeneral);
       }
 
-      D2_FREE_POOL(pGame->pMemoryPool, pInactiveMonRec);
+      D2_FREE_POOL_AT(pGame->pMemoryPool, pInactiveMonRec, ".\\UNIT\\SUnitInactive.cpp", 0x8c);
       pInactiveMonRec = pNextInactiveRec;
       if (!pNextInactiveRec) {
         return;
@@ -953,37 +953,37 @@ BOOL __fastcall SUNITINACTIVE_CheckDeadMonsterAtCoords(::SGAMEDATA * pGame, D2Ro
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6db);
       exit(-1);
     } else {
-      if (nPosX && nPosY) {
-        pFoundRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nPosX, nPosY);
-        eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-        eActNo = D2Common::Drlg::GetActNoFromLevelNumber(eLevelId);
-        if (pFoundRoom || (pFoundRoom = D2Common::DUNGEON::Dungeon::FindRoomBySubtileCoordinates(pGame->pAct[eActNo], nPosX, nPosY) , pFoundRoom != 0)) {
-          for (pUnit = pFoundRoom->pUnitList; pUnit; pUnit = pUnit->pRoomNext) {
-            if (pUnit->eUnitType == UNIT_MONSTER && pUnit->nClassId == nParam) {
-              BVar1 = SUnit::CheckForModeZeroDeath(pUnit);
-              if (BVar1) {
-                return 1;
-              }
+      if (!(nPosX && nPosY)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6dc);
+        exit(-1);
+      }
+
+      pFoundRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nPosX, nPosY);
+      eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+      eActNo = D2Common::Drlg::GetActNoFromLevelNumber(eLevelId);
+      if (pFoundRoom || (pFoundRoom = D2Common::DUNGEON::Dungeon::FindRoomBySubtileCoordinates(pGame->pAct[eActNo], nPosX, nPosY) , pFoundRoom != 0)) {
+        for (pUnit = pFoundRoom->pUnitList; pUnit; pUnit = pUnit->pRoomNext) {
+          if (pUnit->eUnitType == UNIT_MONSTER && pUnit->nClassId == nParam) {
+            BVar1 = SUnit::CheckForModeZeroDeath(pUnit);
+            if (BVar1) {
+              return 1;
             }
           }
         }
+      }
 
-        pInactiveList = SUNITINACTIVE_AllocOrFindInactiveList(pGame, (uint32_t)eActNo, nPosY, 0, nPosX);
-        if (!pInactiveList) {
-          return 0;
-        }
-
-        for (pInactiveMonster = pInactiveList->pInactiveMonsters; pInactiveMonster; pInactiveMonster = pInactiveMonster->pNext) {
-          if (pInactiveMonster->nClassId == nParam && pInactiveMonster->nTypeFlags & 4) {
-            return 1;
-          }
-        }
-
+      pInactiveList = SUNITINACTIVE_AllocOrFindInactiveList(pGame, (uint32_t)eActNo, nPosY, 0, nPosX);
+      if (!pInactiveList) {
         return 0;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6dc);
-      exit(-1);
+      for (pInactiveMonster = pInactiveList->pInactiveMonsters; pInactiveMonster; pInactiveMonster = pInactiveMonster->pNext) {
+        if (pInactiveMonster->nClassId == nParam && pInactiveMonster->nTypeFlags & 4) {
+          return 1;
+        }
+      }
+
+      return 0;
     }
 }
 
@@ -1011,7 +1011,7 @@ void __fastcall SUNITINACTIVE_FreeUnusedItems(::SGAMEDATA * pGame, int32_t nAct)
             pDVar1->pNext = pNextItemRec;
           }
 
-          D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+          D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\SUnitInactive.cpp", 0x723);
           pMemoryToFree = pDVar1;
         }
       }
@@ -1198,7 +1198,7 @@ void __stdcall SUNITINACTIVE_SaveInactiveUnit(::SGAMEDATA * pGame, D2UnitStrc * 
       pDVar2 = pDVar5;
       if (!pDVar2) {
         insert_new_list_node:
-        pDVar5 = D2_NEW_POOL(pGame->pMemoryPool, D2InactiveUnitListStrc);
+        pDVar5 = D2_NEW_POOL_AT(pGame->pMemoryPool, D2InactiveUnitListStrc, ".\\UNIT\\SUnitInactive.cpp", 0x22e);
         pDVar5->nX = 0;
         pDVar5->nY = 0;
         pDVar5->pInactiveItems = 0;
@@ -1237,7 +1237,7 @@ void __stdcall SUNITINACTIVE_SaveInactiveUnit(::SGAMEDATA * pGame, D2UnitStrc * 
       return;
     }
 
-    D2InactiveUnitRecordStrc* _Dst = D2_NEW_POOL(pGame->pMemoryPool, D2InactiveUnitRecordStrc);
+    D2InactiveUnitRecordStrc* _Dst = D2_NEW_POOL_AT(pGame->pMemoryPool, D2InactiveUnitRecordStrc, ".\\UNIT\\SUnitInactive.cpp", 0x244);
     memset(_Dst, 0, 0x34);
     eD2UnitType eVar1 = pUnit->eUnitType;
     if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 < 6) {
@@ -1317,19 +1317,19 @@ void __fastcall SUNITINACTIVE_FreeAllInactiveLists(::SGAMEDATA * pGame) {
         pCurUnitRecord = pCurList->pInactiveUnits;
         while (pCurUnitRecord) {
           pNextUnitRecord = pCurUnitRecord->pNext;
-          D2_FREE_POOL(pGame->pMemoryPool, pCurUnitRecord);
+          D2_FREE_POOL_AT(pGame->pMemoryPool, pCurUnitRecord, ".\\UNIT\\SUnitInactive.cpp", 0x29a);
           pCurUnitRecord = pNextUnitRecord;
         }
 
         pMemoryToFree = pCurList->pInactiveItems;
         while (pMemoryToFree) {
           pNextItemRecord = pMemoryToFree->pNext;
-          D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+          D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\SUnitInactive.cpp", 0x2a4);
           pMemoryToFree = pNextItemRecord;
         }
 
         SUNITINACTIVE_FreeInactiveMonsterList(pGame, pCurList);
-        D2_FREE_POOL(pGame->pMemoryPool, pCurList);
+        D2_FREE_POOL_AT(pGame->pMemoryPool, pCurList, ".\\UNIT\\SUnitInactive.cpp", 0x2ab);
         pCurList = pNextList;
       }
 
@@ -1367,7 +1367,7 @@ void __stdcall SUNITINACTIVE_RemoveInactiveUnitByTypeAndId(::SGAMEDATA * pGame, 
               pPrevRecord->pNext = pCurRecord->pNext;
             }
 
-            D2_FREE_POOL(pGame->pMemoryPool, pCurRecord);
+            D2_FREE_POOL_AT(pGame->pMemoryPool, pCurRecord, ".\\UNIT\\SUnitInactive.cpp", 0x324);
             return;
           }
 

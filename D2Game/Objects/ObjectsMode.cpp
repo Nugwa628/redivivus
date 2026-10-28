@@ -358,44 +358,44 @@ void __fastcall OBJMODE_DispatchChestType(::SGAMEDATA * pGame, D2UnitStrc * pUni
     if (byChestType == 8) {
       if (0x4a < (int)eLevelId) {
         /* FARPROC lpfn for IsBadCodePtr */ bBadCallback = IsBadCodePtr((FARPROC)gapObjectOperateCallbacks[2]);
-        if (!bBadCallback) {
-          (*gapObjectOperateCallbacks[2])(pGame, pUnit);
-          return;
+        if (bBadCallback) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x161);
+          exit(-1);
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x161);
-        exit(-1);
+        (*gapObjectOperateCallbacks[2])(pGame, pUnit);
+        return;
       }
     } else if (byChestType == 3) {
       if ((int)eLevelId < 0x28 && eLevelId != LEVEL_TowerCellarLevel5) {
         /* FARPROC lpfn for IsBadCodePtr */ bBadCallback = IsBadCodePtr((FARPROC)gapObjectOperateCallbacks[2]);
-        if (!bBadCallback) {
-          (*gapObjectOperateCallbacks[2])(pGame, pUnit);
-          return;
+        if (bBadCallback) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x16c);
+          exit(-1);
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x16c);
-        exit(-1);
-      }
-    } else if ((byChestType == 1 || byChestType == 4) && (int)eLevelId < 0x28) {
-      /* FARPROC lpfn for IsBadCodePtr */ bBadCallback = IsBadCodePtr((FARPROC)gapObjectOperateCallbacks[2]);
-      if (!bBadCallback) {
         (*gapObjectOperateCallbacks[2])(pGame, pUnit);
         return;
       }
+    } else if ((byChestType == 1 || byChestType == 4) && (int)eLevelId < 0x28) {
+      /* FARPROC lpfn for IsBadCodePtr */ bBadCallback = IsBadCodePtr((FARPROC)gapObjectOperateCallbacks[2]);
+      if (bBadCallback) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x176);
+        exit(-1);
+      }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x176);
-      exit(-1);
-    }
-
-    /* FARPROC lpfn for IsBadCodePtr */ bBadCallback = IsBadCodePtr((FARPROC)gapObjectOperateCallbacks[uChestType]);
-    if (!bBadCallback) {
-      (*gapObjectOperateCallbacks[uChestType])(pGame, pUnit);
+      (*gapObjectOperateCallbacks[2])(pGame, pUnit);
       return;
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x17b);
-    exit(-1);
+    /* FARPROC lpfn for IsBadCodePtr */ bBadCallback = IsBadCodePtr((FARPROC)gapObjectOperateCallbacks[uChestType]);
+    if (bBadCallback) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x17b);
+      exit(-1);
+    }
+
+    (*gapObjectOperateCallbacks[uChestType])(pGame, pUnit);
+    return;
 }
 
 // Per-frame server update for a proximity-triggered object (e.g. trap/shrine reacting to nearby players), driven by a 3-state machine stored in the object's data byte at szCharName[4] (0=idle,1=armed,2=fired). Scans the object's room for live players within collision range: in idle/armed it either plays the activation event (REFRESHVENDOR sound, -> mark armed) or, when already activated, runs MONSTERAI_CalculateCounterAttackDamage against the player (the trap's hit) and transitions to fired+update-flag; state 2 clears the update flag and returns to idle. Reschedules its own update event (event 3) using the object's txt FrameCnt timing (~0x19 frames when active, ~0xf otherwise).
@@ -1409,13 +1409,13 @@ void __fastcall Shrines_GemShrineFunction(D2ObjectOperateFnArg * pArguments, D2S
     }
 
     nItemClassId = D2Common::DATATBLS::ItemTbls::TXT_Items_ConvertItemCodeToItemClassId(acItemCode);
-    if (nItemClassId != -1) {
-      Shrines_GemShrine_SpawnGem(nItemClassId, nullptr, pArguments->sArg.pGame, pArguments->pAttacker);
-      return;
+    if (nItemClassId == -1) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x84c);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x84c);
-    exit(-1);
+    Shrines_GemShrine_SpawnGem(nItemClassId, nullptr, pArguments->sArg.pGame, pArguments->pAttacker);
+    return;
 }
 
 // Server-side activation effect for a Storm/Tempest shrine (operate handler, D2ObjectOperateFnArg + ShrinesTxt). Two-phase: (1) finds all alive units within ShrinesTxt.dwArg1 tiles of the operating unit via InitializeUnitFindData/FindAllMatchingUnitsInNeighboredRooms and drains a percentage (dwArg0-based, ~ /100) of each monster/player target's hitpoints via STATLIST_AddUnitStat; (2) spawns a 5x5 ring/grid of MISSILE_Fireball missiles around the unit (offsets -5..+25 step 5, alternating sides), owned by pAttacker, with missile level capped 1..8 from the owner's level/5. No return.
@@ -2430,7 +2430,7 @@ BOOL __fastcall InteractWithObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint
     return pResultFlags;
 }
 
-void OBJECT_UpdateCollisionOnModeChange(void * pThis, DWORD nGid) {
+void __thiscall OBJECT_UpdateCollisionOnModeChange(void * pThis, DWORD nGid) {
     eCollisionFlags wCollisionResult;
     POINT ptPos;
     D2UnitStrc* pUnit = UNIT::SUnit::FindUnitFromTable((::SGAMEDATA*)pThis, UNIT_OBJECT, nGid);
@@ -2850,29 +2850,29 @@ BOOL __fastcall OBJOP_ActivatePortalObject(D2ObjectOperateFnArg * pOperation) {
       if (eDestAct < (ACT_V | ACT_II)) {
         nUnitSizeX = D2Common::Units::GetUnitSizeX(pOperation->pAttacker);
         pRoom = D2Common::DUNGEON::Dungeon::SpawnUnit(pOperation->sArg.pGame->pAct[eDestAct], eLevel, 0, (int*)&nSpawnX, (int*)&nSpawnY, nUnitSizeX);
-        if (pRoom) {
-          bAllowNeighboorRooms = 0;
-          eCollisionFlag_00 = 0x1c09;
-          ptDest.x = nSpawnX;
-          ptDest.y = nSpawnY;
-          nLine = D2Common::Units::GetUnitSizeX(pOperation->pAttacker);
-          pRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pRoom, &ptDest, nLine, eCollisionFlag_00, bAllowNeighboorRooms);
-          if (!pRoom) {
-            return 0;
-          }
-
-          bAllowNeighboorRooms = UNIT::SUnit::SUNIT_RelocateUnit(pOperation->sArg.pGame, pOperation->pAttacker, pRoom, ptDest.x, ptDest.y, 0, 0);
-          if (bAllowNeighboorRooms) {
-            return 0;
-          }
-
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfd9);
+        if (!pRoom) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfcd);
           exit(-1);
+        }
+
+        bAllowNeighboorRooms = 0;
+        eCollisionFlag_00 = 0x1c09;
+        ptDest.x = nSpawnX;
+        ptDest.y = nSpawnY;
+        nLine = D2Common::Units::GetUnitSizeX(pOperation->pAttacker);
+        pRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pRoom, &ptDest, nLine, eCollisionFlag_00, bAllowNeighboorRooms);
+        if (!pRoom) {
           return 0;
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfcd);
-        exit(-1);
+        bAllowNeighboorRooms = UNIT::SUnit::SUNIT_RelocateUnit(pOperation->sArg.pGame, pOperation->pAttacker, pRoom, ptDest.x, ptDest.y, 0, 0);
+        if (!bAllowNeighboorRooms) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfd9);
+          exit(-1);
+        }
+
+        return 0;
+        return 0;
       } else {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfcb);
         exit(-1);
@@ -3312,7 +3312,7 @@ void __fastcall OBJMODE_OnWaypointFinish(::SGAMEDATA * pGameStrc, D2UnitStrc * p
 }
 
 // Completes the two-phase town-portal link: given the GUID of a blue portal stub and the destination level, locates the stub object (classId 0x3b), verifies it is unlinked and has an owner unit, then stores the destination level in the portal's component data, sets the linked flag, frees the owner stub unit, and calls LinkPortal to establish the bidirectional connection. Halts with an internal error if preconditions fail.
-void OBJMODE_FinalizePortalLink(void * pThis, DWORD dwBluePortalGUID, eD2LevelId eLevel) {
+void __thiscall OBJMODE_FinalizePortalLink(void * pThis, DWORD dwBluePortalGUID, eD2LevelId eLevel) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11dd);
       exit(-1);
@@ -3598,43 +3598,43 @@ D2UnitStrc * * __fastcall RollChestDrops(D2ObjectOperateFnArg * pUnitKill, eD2It
         exit(-1);
       } else {
         pTxtObjects = D2Common::Units::GetObjectTxtRecordFromObject(pUnitKill->sArg.pVictim);
-        if (pTxtObjects) {
-          pRoom = D2Common::Units::UNITS_GetRoom(pUnitKill->sArg.pVictim);
-          if (!pRoom) {
-            return nullptr;
-          }
-
-          eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-          neAct = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
-          __frame0.nMonLvl = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetMonLvlForDifficulty(eLevel, pGame->nDifficulty, pGame->bExpansion);
-          nAct = (uint32_t)neAct;
-          nActMonLvlMin = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetMonLvlForDifficulty(eLevelId_ActLevels[nAct][0], pGame->nDifficulty, pGame->bExpansion);
-          nActMonLvlMax = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetMonLvlForDifficulty(eLevelId_ActLevels[nAct][1], pGame->nDifficulty, pGame->bExpansion);
-          nVictimLevel = nActMonLvlMax - nActMonLvlMin;
-          if (nVictimLevel < 0) {
-            nVictimLevel = -nVictimLevel;
-          }
-
-          nVictimLevel = (nVictimLevel + 1) / 3;
-          if (__frame0.nMonLvl < nVictimLevel + nActMonLvlMin) {
-            nVictimLevel = 0;
-          } else {
-            nVictimLevel = (nActMonLvlMin + nVictimLevel * 2 <= __frame0.nMonLvl) + 1;
-          }
-
-          pTreasure = D2Common::DATATBLS::MonsterTbls::RollTreasureClass((uint32_t)pGame->nDifficulty, nAct, nVictimLevel);
-          if (!pTreasure) {
-            return nullptr;
-          }
-
-          __frame0.nResultsItemSize = 0;
-          memset(aResultsItemList, 0, 6 * sizeof(aResultsItemList[0]));
-          ITEMS::Items::Drop::SERVER_ITEM_RollItemToDrop(pGame, pUnitKill->sArg.pVictim, pUnitKill->pAttacker, pTreasure, eItemType, nVictimLevel, 0, aResultsItemList, &__frame0.nResultsItemSize, 6, (uint16_t*)nVictimLevel, (uint32_t)pGame, pSeedExtra);
-          return (D2UnitStrc**)aResultsItemList[0];
+        if (!pTxtObjects) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1317);
+          exit(-1);
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1317);
-        exit(-1);
+        pRoom = D2Common::Units::UNITS_GetRoom(pUnitKill->sArg.pVictim);
+        if (!pRoom) {
+          return nullptr;
+        }
+
+        eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+        neAct = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
+        __frame0.nMonLvl = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetMonLvlForDifficulty(eLevel, pGame->nDifficulty, pGame->bExpansion);
+        nAct = (uint32_t)neAct;
+        nActMonLvlMin = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetMonLvlForDifficulty(eLevelId_ActLevels[nAct][0], pGame->nDifficulty, pGame->bExpansion);
+        nActMonLvlMax = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetMonLvlForDifficulty(eLevelId_ActLevels[nAct][1], pGame->nDifficulty, pGame->bExpansion);
+        nVictimLevel = nActMonLvlMax - nActMonLvlMin;
+        if (nVictimLevel < 0) {
+          nVictimLevel = -nVictimLevel;
+        }
+
+        nVictimLevel = (nVictimLevel + 1) / 3;
+        if (__frame0.nMonLvl < nVictimLevel + nActMonLvlMin) {
+          nVictimLevel = 0;
+        } else {
+          nVictimLevel = (nActMonLvlMin + nVictimLevel * 2 <= __frame0.nMonLvl) + 1;
+        }
+
+        pTreasure = D2Common::DATATBLS::MonsterTbls::RollTreasureClass((uint32_t)pGame->nDifficulty, nAct, nVictimLevel);
+        if (!pTreasure) {
+          return nullptr;
+        }
+
+        __frame0.nResultsItemSize = 0;
+        memset(aResultsItemList, 0, 6 * sizeof(aResultsItemList[0]));
+        ITEMS::Items::Drop::SERVER_ITEM_RollItemToDrop(pGame, pUnitKill->sArg.pVictim, pUnitKill->pAttacker, pTreasure, eItemType, nVictimLevel, 0, aResultsItemList, &__frame0.nResultsItemSize, 6, (uint16_t*)nVictimLevel, (uint32_t)pGame, pSeedExtra);
+        return (D2UnitStrc**)aResultsItemList[0];
       }
     }
 }
@@ -3721,30 +3721,30 @@ void __fastcall SERVER_MissleKilled(D2ObjectOperateFnArg * pKill) {
       ITEMS::Items::Drop::ITEM_RewardItemToDrop(pKill->sArg.pGame, pKill->sArg.pVictim, ITEMTYPE_Shield, &nDropArg, nullptr, -1, 1);
       ITEMS::Items::Drop::ITEM_RewardItemToDrop(pKill->sArg.pGame, pKill->sArg.pVictim, ITEMTYPE_Shield, &nDropArg, nullptr, -1, 1);
       nCharCode = ITEMS::Items::Drop::UNIT_GetMaxAvailableMPCharCode(pKill->sArg.pVictim);
-      if (nCharCode) {
-        pKill->sArg.pVictim->dwDropItemCode = nCharCode;
-        ITEMS::Items::Drop::ITEM_RewardItemToDrop(pKill->sArg.pGame, pKill->sArg.pVictim, ITEMTYPE_Shield, &nDropArg, nullptr, -1, 1);
-        ITEMS::Items::Drop::ITEM_RewardItemToDrop(pKill->sArg.pGame, pKill->sArg.pVictim, ITEMTYPE_Shield, &nDropArg, nullptr, -1, 1);
-        if (!pTxtObjects->Mode[1]) {
-          D2Common::Units::SetupUpdateFlag(pKill->sArg.pVictim, 2);
-        } else {
-          D2Common::Units::SetupUpdateFlag(pKill->sArg.pVictim, 1);
-          pGame = pKill->sArg.pGame;
-          GAME::Event::SetEvent(pGame, pKill->sArg.pVictim, 1, (pTxtObjects->FrameCnt[1] >> 8) + 1 + pGame->dwGameFrame, 0, 0);
-        }
+      if (!nCharCode) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x599);
+        exit(-1);
+      }
 
-        pVictim = pKill->sArg.pVictim;
-        if (!pVictim) {
-          return;
-        }
+      pKill->sArg.pVictim->dwDropItemCode = nCharCode;
+      ITEMS::Items::Drop::ITEM_RewardItemToDrop(pKill->sArg.pGame, pKill->sArg.pVictim, ITEMTYPE_Shield, &nDropArg, nullptr, -1, 1);
+      ITEMS::Items::Drop::ITEM_RewardItemToDrop(pKill->sArg.pGame, pKill->sArg.pVictim, ITEMTYPE_Shield, &nDropArg, nullptr, -1, 1);
+      if (!pTxtObjects->Mode[1]) {
+        D2Common::Units::SetupUpdateFlag(pKill->sArg.pVictim, 2);
+      } else {
+        D2Common::Units::SetupUpdateFlag(pKill->sArg.pVictim, 1);
+        pGame = pKill->sArg.pGame;
+        GAME::Event::SetEvent(pGame, pKill->sArg.pVictim, 1, (pTxtObjects->FrameCnt[1] >> 8) + 1 + pGame->dwGameFrame, 0, 0);
+      }
 
-        peVar1 = &pVictim->eUnitFlags;
-        *peVar1 &= ~UNITFLAG_TARGETABLE;
+      pVictim = pKill->sArg.pVictim;
+      if (!pVictim) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x599);
-      exit(-1);
+      peVar1 = &pVictim->eUnitFlags;
+      *peVar1 &= ~UNITFLAG_TARGETABLE;
+      return;
     }
 }
 

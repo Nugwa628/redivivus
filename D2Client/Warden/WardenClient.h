@@ -13,47 +13,47 @@ struct D2WardenModuleObjectStrc;
 struct WardenClient;
 #ifndef RECON_FPTD_WardenClient_AllocateMemory
 #define RECON_FPTD_WardenClient_AllocateMemory
-typedef void * (*WardenClient_AllocateMemory)(::WardenClient * pThis, uint32_t nSize);
+typedef void * (__thiscall *WardenClient_AllocateMemory)(::WardenClient * pThis, uint32_t nSize);
 #endif
 #ifndef RECON_FPTD_WardenClient_CheckModule
 #define RECON_FPTD_WardenClient_CheckModule
-typedef bool (*WardenClient_CheckModule)(::WardenClient * pThis, uint8_t * pModuleHash, void * pRc4Key);
+typedef bool (__thiscall *WardenClient_CheckModule)(::WardenClient * pThis, uint8_t * pModuleHash, void * pRc4Key);
 #endif
 #ifndef RECON_FPTD_WardenClient_FreeMemory
 #define RECON_FPTD_WardenClient_FreeMemory
-typedef void (*WardenClient_FreeMemory)(::WardenClient * pThis, void * pMem);
+typedef void (__thiscall *WardenClient_FreeMemory)(::WardenClient * pThis, void * pMem);
 #endif
 #ifndef RECON_FPTD_WardenClient_GetRC4Data
 #define RECON_FPTD_WardenClient_GetRC4Data
-typedef bool (*WardenClient_GetRC4Data)(::WardenClient * pThis, void * pDest, uint32_t * pnSize);
+typedef bool (__thiscall *WardenClient_GetRC4Data)(::WardenClient * pThis, void * pDest, uint32_t * pnSize);
 #endif
 #ifndef RECON_FPTD_WardenClient_LoadModule
 #define RECON_FPTD_WardenClient_LoadModule
-typedef void (*WardenClient_LoadModule)(::WardenClient * pThis, uint8_t * pModuleHash, void * pData, uint32_t nSize);
+typedef void (__thiscall *WardenClient_LoadModule)(::WardenClient * pThis, uint8_t * pModuleHash, void * pData, uint32_t nSize);
 #endif
 #ifndef RECON_FPTD_WardenClient_SendPacket
 #define RECON_FPTD_WardenClient_SendPacket
-typedef void (*WardenClient_SendPacket)(::WardenClient * pThis, void * pData, uint32_t nLen);
+typedef void (__thiscall *WardenClient_SendPacket)(::WardenClient * pThis, void * pData, uint32_t nLen);
 #endif
 #ifndef RECON_FPTD_WardenClient_SetRC4Data
 #define RECON_FPTD_WardenClient_SetRC4Data
-typedef void (*WardenClient_SetRC4Data)(::WardenClient * pThis, void * pData, uint32_t nSize);
+typedef void (__thiscall *WardenClient_SetRC4Data)(::WardenClient * pThis, void * pData, uint32_t nSize);
 #endif
 #ifndef RECON_FPTD_fpWardenGenerateRC4Keys
 #define RECON_FPTD_fpWardenGenerateRC4Keys
-typedef void (*fpWardenGenerateRC4Keys)(struct D2WardenModuleObjectStrc * pThis, void * pSeed, uint32_t nSeedLen);
+typedef void (__thiscall *fpWardenGenerateRC4Keys)(struct D2WardenModuleObjectStrc * pThis, void * pSeed, uint32_t nSeedLen);
 #endif
 #ifndef RECON_FPTD_fpWardenHandlePacket
 #define RECON_FPTD_fpWardenHandlePacket
-typedef void (*fpWardenHandlePacket)(struct D2WardenModuleObjectStrc * pThis, void * pData, uint32_t nLen, uint32_t * pnConsumed);
+typedef void (__thiscall *fpWardenHandlePacket)(struct D2WardenModuleObjectStrc * pThis, void * pData, uint32_t nLen, uint32_t * pnConsumed);
 #endif
 #ifndef RECON_FPTD_fpWardenTick
 #define RECON_FPTD_fpWardenTick
-typedef void (*fpWardenTick)(struct D2WardenModuleObjectStrc * pThis, uint32_t nTicks);
+typedef void (__thiscall *fpWardenTick)(struct D2WardenModuleObjectStrc * pThis, uint32_t nTicks);
 #endif
 #ifndef RECON_FPTD_fpWardenUnload
 #define RECON_FPTD_fpWardenUnload
-typedef void (*fpWardenUnload)(struct D2WardenModuleObjectStrc * pThis);
+typedef void (__thiscall *fpWardenUnload)(struct D2WardenModuleObjectStrc * pThis);
 #endif
 #ifndef RECON_FPTD_pfnWardenCreateInterface
 #define RECON_FPTD_pfnWardenCreateInterface
@@ -68,10 +68,10 @@ struct D2RC4StateStrc {
 };
 
 struct D2WardenModuleFuncsStrc {
-    /* 0x00 */ void (*pfnGenerateRC4Keys)(struct D2WardenModuleObjectStrc *, void *, uint32_t);
-    /* 0x04 */ void (*pfnUnload)(struct D2WardenModuleObjectStrc *);
-    /* 0x08 */ void (*pfnHandlePacket)(struct D2WardenModuleObjectStrc *, void *, uint32_t, uint32_t *);
-    /* 0x0C */ void (*pfnTick)(struct D2WardenModuleObjectStrc *, uint32_t);
+    /* 0x00 */ void (__thiscall *pfnGenerateRC4Keys)(struct D2WardenModuleObjectStrc *, void *, uint32_t);
+    /* 0x04 */ void (__thiscall *pfnUnload)(struct D2WardenModuleObjectStrc *);
+    /* 0x08 */ void (__thiscall *pfnHandlePacket)(struct D2WardenModuleObjectStrc *, void *, uint32_t, uint32_t *);
+    /* 0x0C */ void (__thiscall *pfnTick)(struct D2WardenModuleObjectStrc *, uint32_t);
 };
 
 struct D2WardenModuleObjectStrc {
@@ -87,13 +87,13 @@ struct D2WardenModuleStrc {
 };
 
 struct WardenClientVtable {
-    /* 0x00 */ void (*SendPacket)(::WardenClient *, void *, uint32_t);
-    /* 0x04 */ bool (*CheckModule)(::WardenClient *, uint8_t *, void *);
-    /* 0x08 */ void (*LoadModule)(::WardenClient *, uint8_t *, void *, uint32_t);
-    /* 0x0C */ void * (*AllocateMemory)(::WardenClient *, uint32_t);
-    /* 0x10 */ void (*FreeMemory)(::WardenClient *, void *);
-    /* 0x14 */ void (*SetRC4Data)(::WardenClient *, void *, uint32_t);
-    /* 0x18 */ bool (*GetRC4Data)(::WardenClient *, void *, uint32_t *);
+    /* 0x00 */ void (__thiscall *SendPacket)(::WardenClient *, void *, uint32_t);
+    /* 0x04 */ bool (__thiscall *CheckModule)(::WardenClient *, uint8_t *, void *);
+    /* 0x08 */ void (__thiscall *LoadModule)(::WardenClient *, uint8_t *, void *, uint32_t);
+    /* 0x0C */ void * (__thiscall *AllocateMemory)(::WardenClient *, uint32_t);
+    /* 0x10 */ void (__thiscall *FreeMemory)(::WardenClient *, void *);
+    /* 0x14 */ void (__thiscall *SetRC4Data)(::WardenClient *, void *, uint32_t);
+    /* 0x18 */ bool (__thiscall *GetRC4Data)(::WardenClient *, void *, uint32_t *);
     /* 0x1C */ uint8_t field_0x1c;
     /* 0x1D */ uint8_t field_0x1d;
     /* 0x1E */ uint8_t field_0x1e;
@@ -130,18 +130,18 @@ BOOL __stdcall WARDEN_DecryptAndLoadModule(void * pSrcData, void * pRc4Key, uint
 // Provenance: 1.14d asm 0047fee0 (callers 004803e4 MOV EBX,0x6d8768 and 00480027 MOV EBX,[EBP+8]).
 BOOL __stdcall WARDEN_ResolveAndLoadModule(void * pRc4Key, uint8_t * pModuleHash);
 uint32_t __stdcall WARDEN_DownloadModule(char * dwParam1, void * dwParam2, uint32_t pModuleRequest);
-void SendPacket(::WardenClient * pThis, void * pData, uint32_t nLen);
-bool CheckModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pRc4Key);
-void LoadModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pData, uint32_t nSize);
+void __thiscall SendPacket(::WardenClient * pThis, void * pData, uint32_t nLen);
+bool __thiscall CheckModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pRc4Key);
+void __thiscall LoadModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pData, uint32_t nSize);
 // @sourcefile .\WARDEN\WardenClient.cpp
-void * AllocateMemory(::WardenClient * pThis, uint32_t nSize);
+void * __thiscall AllocateMemory(::WardenClient * pThis, uint32_t nSize);
 // @sourcefile .\WARDEN\WardenClient.cpp
-void FreeMemory(::WardenClient * pThis, void * pMem);
+void __thiscall FreeMemory(::WardenClient * pThis, void * pMem);
 // @sourcefile .\WARDEN\WardenClient.cpp
-void SetRC4Data(::WardenClient * pThis, void * pData, uint32_t nSize);
+void __thiscall SetRC4Data(::WardenClient * pThis, void * pData, uint32_t nSize);
 // @sourcefile .\WARDEN\WardenClient.cpp
-bool GetRC4Data(::WardenClient * pThis, void * pDest, uint32_t * pnSize);
-::WardenClient * Constructor(::WardenClient * pThis);
+bool __thiscall GetRC4Data(::WardenClient * pThis, void * pDest, uint32_t * pnSize);
+::WardenClient * __thiscall Constructor(::WardenClient * pThis);
 // @sourcefile .\WARDEN\WardenClient.cpp
 void __stdcall WARDEN_UnloadActiveModule();
 // @sourcefile .\WARDEN\WardenClient.cpp

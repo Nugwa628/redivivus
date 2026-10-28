@@ -36,12 +36,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
 
@@ -301,7 +301,7 @@ void * __stdcall NET_SID_CLIENT_Send_0x40_QueryRealms2() {
 // @sourcefile .\BnSend.cpp
 void __stdcall BNSEND_FreeChannelListData() {
     if (g_pBNetChannelListData) {
-      D2_FREE(g_pBNetChannelListData);
+      D2_FREE_AT(g_pBNetChannelListData, ".\\BnSend.cpp", 0x1ef);
     }
 
     g_pBNetChannelListData = 0;
@@ -544,7 +544,7 @@ BOOL __fastcall BNCLIENT_GetEnterChatResponseFlags(uint32_t * pOutFlags) {
 // @sourcefile .\BnSend.cpp
 void __stdcall BNSEND_FreeGameListData() {
     if (g_pBNetGameListData) {
-      D2_FREE(g_pBNetGameListData);
+      D2_FREE_AT(g_pBNetGameListData, ".\\BnSend.cpp", 0x36a);
     }
 
     g_pBNetGameListData = 0;
@@ -601,11 +601,11 @@ void __fastcall NET_SID_CLIENT_Send_0x22_NotifyJoin(char * szText1, char * szTex
 // @sourcefile .\BnSend.cpp
 void __fastcall BNSEND_StoreUserProfileData(uint8_t * pbProfileData, size_t nDataSize) {
     if (gpBNetWriteUserData) {
-      D2_FREE(gpBNetWriteUserData);
+      D2_FREE_AT(gpBNetWriteUserData, ".\\BnSend.cpp", 0x3b2);
     }
 
     gpBNetWriteUserData = 0;
-    gpBNetWriteUserData = D2_ALLOC(nDataSize + 4);
+    gpBNetWriteUserData = D2_ALLOC_AT(nDataSize + 4, ".\\BnSend.cpp", 0x3bb);
     *(size_t*)gpBNetWriteUserData = nDataSize;
     memcpy((void*)((int)gpBNetWriteUserData + 4), pbProfileData, nDataSize);
     if (!(nDataSize != 8 && 0x47 < nDataSize)) {
@@ -714,7 +714,7 @@ uint32_t __fastcall NET_SID_CLIENT_Send_0x27_WriteUserData(char * szAccount, uin
       } while (nIdx);
     }
 
-    char* pPacketBuf = (char*)D2_ALLOC(iVar1 + 8);
+    char* pPacketBuf = (char*)D2_ALLOC_AT(iVar1 + 8, ".\\BnSend.cpp", 0x4c4);
     pPacketBuf[0] = '\x01';
     pPacketBuf[1] = '\0';
     pPacketBuf[2] = '\0';
@@ -742,17 +742,17 @@ uint32_t __fastcall NET_SID_CLIENT_Send_0x27_WriteUserData(char * szAccount, uin
 
     _net_sid::NET_SID_CLIENT_ResetRequireResponse(0x27);
     int32_t nSendResult = NET_SID_CLIENT_Send(0x27, pPacketBuf, (int)szBufferOutput - (int)pPacketBuf);
-    D2_FREE(pPacketBuf);
+    D2_FREE_AT(pPacketBuf, ".\\BnSend.cpp", 0x4e0);
     return (uint32_t)(-1 < nSendResult);
 }
 
 // @sourcefile .\BnSend.cpp
 void __fastcall BNSEND_StoreReadUserData(uint8_t * pbReadData, size_t nSize) {
     if (g_pBNetReadUserData) {
-      D2_FREE(g_pBNetReadUserData);
+      D2_FREE_AT(g_pBNetReadUserData, ".\\BnSend.cpp", 0x4ec);
     }
 
-    g_pBNetReadUserData = D2_ALLOC(nSize);
+    g_pBNetReadUserData = D2_ALLOC_AT(nSize, ".\\BnSend.cpp", 0x4ed);
     memcpy(g_pBNetReadUserData, pbReadData, nSize);
 }
 
@@ -769,7 +769,7 @@ uint32_t __fastcall NET_SID_CLIENT_Send_0x26_ReadUserData(char * szAccount, uint
       } while (nIdx < nCount);
     }
 
-    char* pPacketBuf = (char*)D2_ALLOC(iVar1 + 0xc);
+    char* pPacketBuf = (char*)D2_ALLOC_AT(iVar1 + 0xc, ".\\BnSend.cpp", 0x506);
     pPacketBuf[0] = '\x01';
     pPacketBuf[1] = '\0';
     pPacketBuf[2] = '\0';
@@ -789,7 +789,7 @@ uint32_t __fastcall NET_SID_CLIENT_Send_0x26_ReadUserData(char * szAccount, uint
 
     _net_sid::NET_SID_CLIENT_ResetRequireResponse(0x26);
     int32_t nSendResult = NET_SID_CLIENT_Send(0x26, pPacketBuf, (int)szBufferOutput - (int)pPacketBuf);
-    D2_FREE(pPacketBuf);
+    D2_FREE_AT(pPacketBuf, ".\\BnSend.cpp", 0x521);
     return (uint32_t)(-1 < nSendResult);
 }
 
@@ -838,16 +838,16 @@ void __fastcall NET_SID_CLIENT_Send_0x59_SetEmail(char * szText) {
       exit(-1);
     } else {
       nStrLen = Storm::Source::SSTR::SStrLen(szText);
-      if (nStrLen < 0x100) {
-        memcpy(szEmailBuf, szText, nStrLen);
-        szEmailBuf[nStrLen] = '\0';
-        NET_SID_CLIENT_Send(0x59, szEmailBuf, nStrLen + 1);
-        Fog::Debug::GuardStack();
-        return;
+      if (!(nStrLen < 0x100)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x565);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x565);
-      exit(-1);
+      memcpy(szEmailBuf, szText, nStrLen);
+      szEmailBuf[nStrLen] = '\0';
+      NET_SID_CLIENT_Send(0x59, szEmailBuf, nStrLen + 1);
+      Fog::Debug::GuardStack();
+      return;
     }
 }
 
@@ -950,33 +950,33 @@ void __stdcall NET_SID_CLIENT_Send_0x5D_ReportCrash() {
 // @sourcefile .\BnSend.cpp
 void __fastcall BNSEND_StoreRealmQueryData(uint8_t * pbRealmData, size_t nSize) {
     if (gpRealmQueryData) {
-      D2_FREE(gpRealmQueryData);
+      D2_FREE_AT(gpRealmQueryData, ".\\BnSend.cpp", 0x19a);
     }
 
     gpRealmQueryData = 0;
-    gpRealmQueryData = D2_ALLOC(nSize);
+    gpRealmQueryData = D2_ALLOC_AT(nSize, ".\\BnSend.cpp", 0x16b);
     memcpy(gpRealmQueryData, pbRealmData, nSize);
 }
 
 // @sourcefile .\BnSend.cpp
 void __fastcall BNSEND_StoreChannelListData(uint8_t * pbChannelData, size_t nSize) {
     if (g_pBNetChannelListData) {
-      D2_FREE(g_pBNetChannelListData);
+      D2_FREE_AT(g_pBNetChannelListData, ".\\BnSend.cpp", 0x1ef);
     }
 
     g_pBNetChannelListData = 0;
-    g_pBNetChannelListData = D2_ALLOC(nSize);
+    g_pBNetChannelListData = D2_ALLOC_AT(nSize, ".\\BnSend.cpp", 0x1e6);
     memcpy(g_pBNetChannelListData, pbChannelData, nSize);
 }
 
 // @sourcefile .\BnSend.cpp
 void __fastcall BNSEND_StoreGameListData(uint8_t * pbGameData, size_t nSize) {
     if (g_pBNetGameListData) {
-      D2_FREE(g_pBNetGameListData);
+      D2_FREE_AT(g_pBNetGameListData, ".\\BnSend.cpp", 0x36a);
     }
 
     g_pBNetGameListData = 0;
-    g_pBNetGameListData = D2_ALLOC(nSize);
+    g_pBNetGameListData = D2_ALLOC_AT(nSize, ".\\BnSend.cpp", 0x326);
     memcpy(g_pBNetGameListData, pbGameData, nSize);
 }
 
@@ -995,13 +995,7 @@ DWORD __stdcall GetDnsResults(void * lpThreadParam) {
     static uint32_t gInAddrBnetLookupAddr; D2_STATIC_GUARD_BSS(gInAddrBnetLookupAddr, "Bnclient::BnSend::GetDnsResults::gInAddrBnetLookupAddr");
     static char * gInAddrBnetLookupAddrList; D2_STATIC_GUARD_BSS(gInAddrBnetLookupAddrList, "Bnclient::BnSend::GetDnsResults::gInAddrBnetLookupAddrList");
     static uint32_t g_nBNetLookupAddrPad; D2_STATIC_GUARD_BSS(g_nBNetLookupAddrPad, "Bnclient::BnSend::GetDnsResults::g_nBNetLookupAddrPad");
-    static hostent gsHostentBnetLookup = {
-    /* .h_name = */ nullptr,
-    /* .h_aliases = */ nullptr,
-    /* .h_addrtype = */ 0,
-    /* .h_length = */ 0,
-    /* .h_addr_list = */ nullptr
-}; D2_STATIC_GUARD(gsHostentBnetLookup, "Bnclient::BnSend::GetDnsResults::gsHostentBnetLookup");
+    static hostent gsHostentBnetLookup = {}; D2_STATIC_GUARD(gsHostentBnetLookup, "Bnclient::BnSend::GetDnsResults::gsHostentBnetLookup");
 
     int nRandIdx;
     char* szAddrStr;
@@ -1860,264 +1854,7 @@ void __stdcall NET_SID_CLIENT_LogonSequence(char * szServerList) {
 // lpStartAddress parameter of CreateThread
 int __stdcall BattleConnectFastest() {
     // Static local variables (originally global data)
-    static char RealmDNS[256] = {
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-}; D2_STATIC_GUARD(RealmDNS, "Bnclient::BnSend::BattleConnectFastest::RealmDNS");
+    static char RealmDNS[256] = {}; D2_STATIC_GUARD(RealmDNS, "Bnclient::BnSend::BattleConnectFastest::RealmDNS");
     static char * EntireDnsRecordOfServers; D2_STATIC_GUARD_BSS(EntireDnsRecordOfServers, "Bnclient::BnSend::BattleConnectFastest::EntireDnsRecordOfServers");
 
     Debug::DEBUG_UnusedDebugFunction("BattleConnectFastest()");
@@ -2280,7 +2017,7 @@ void __stdcall BNNEWS_SaveToCache() {
     }
 
     nTotalSize = nAccumSize;
-    uint32_t* pMemoryToFree = (uint32_t*)D2_ALLOC(nAccumSize);
+    uint32_t* pMemoryToFree = (uint32_t*)D2_ALLOC_AT(nAccumSize, ".\\BNNews.cpp", 0x154);
     if (!pMemoryToFree) {
       return;
     }
@@ -2318,7 +2055,7 @@ void __stdcall BNNEWS_SaveToCache() {
     /* LPSYSTEMTIME lpSystemTime for GetSystemTime */ GetSystemTime(&stSystemTime);
     /* LPFILETIME lpFileTime for SystemTimeToFileTime */ /* SYSTEMTIME * lpSystemTime for SystemTimeToFileTime */ SystemTimeToFileTime(&stSystemTime, &ftWriteTime);
     Cache::CACHE_WriteData(szBnNewsChannelName, (LPCVOID)pMemoryToFree, nTotalSize, (uint32_t*)&ftWriteTime.dwLowDateTime, -1, -1);
-    D2_FREE(pMemoryToFree);
+    D2_FREE_AT(pMemoryToFree, ".\\BNNews.cpp", 0x17b);
 }
 
 void __stdcall BNNEWS_InvokeCallbacks() {

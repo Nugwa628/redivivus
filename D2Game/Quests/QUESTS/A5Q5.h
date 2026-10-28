@@ -64,7 +64,7 @@ void __fastcall Q35_Callback03_ChangedLevel(struct D2QuestDataStrc * pQuestData,
 // [A5Q5 = Rite of Passage] Q35_ActiveFilter: predicate for the Ancients altar (classId 0x203). Returns true (quest interactable) iff the altar is in-play (nStateFlag set) and RiteOfPassage is not yet Completed.
 bool __fastcall Q35_ActiveFilter(struct D2QuestDataStrc * pQuestData, int32_t nTargetClassId, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2UnitStrc * pUnitEx);
 // [A5Q5 = Rite of Passage] Q35_SequenceFilter: quest-chain gate. While nStateFlag != 5 (Ancients not dead), parks the quest at nStateFlag 1; once finished, chains into the next quest (nSequenceQuestId = RescueOnMountArreat) sequence filter. No quest-record writes.
-void __fastcall Q35_SequenceFilter(struct D2QuestDataStrc * pQuestData);
+bool __fastcall Q35_SequenceFilter(struct D2QuestDataStrc * pQuestData);
 // [A5Q5 = Rite of Passage] Q35_Callback_13 (sub-handler idx 0xd): on game load, reconstructs live nStateFlag/nStateFlagPrev from the saved quest record. Completed/FinishedInPreviousGame -> set field_0x4A (done). Step0x03 -> nStateFlag 3. Step0x02 -> nStateFlag 2. Read-only on records.
 void __fastcall Q35_Callback13_PlayerStartedGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // [A5Q5 = Rite of Passage] Q35_InitData: quest table init. Allocates A5Q5 quest-specific data, wires sub-handlers (00/02/03/08/0b/0d), sets nQuestIdReal=QUEST_RiteOfPassage, fpActiveFilter=Q35_ActiveFilter, fpSequenceFilter=Q35_SequenceFilter, nSequenceQuestId=RescueOnMountArreat, and the altar gossip table (npc 0x203 -> string 0x4eb9).

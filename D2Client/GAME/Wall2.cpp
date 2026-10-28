@@ -75,12 +75,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -602,11 +602,11 @@ void WALL2_AllocDrawList(D2GameViewStrc * pGameView) {
         goto store_grid_dims;
       }
       if (pPrevWall2) {
-        D2_FREE(pPrevWall2);
+        D2_FREE_AT(pPrevWall2, ".\\GAME\\Wall2.cpp", 0x3a);
       }
     }
 
-    pPrevWall2 = (D2Wall2CellStrc*)D2_ALLOC(nGridCellCount * 0x24);
+    pPrevWall2 = (D2Wall2CellStrc*)D2_ALLOC_AT(nGridCellCount * 0x24, ".\\GAME\\Wall2.cpp", 0x3d);
     pGameView->sWall2.pWall2 = pPrevWall2;
     pGameView->sWall2.nWall2CellCount = nGridCellCount;
     store_grid_dims:
@@ -626,7 +626,7 @@ void __fastcall ResetWall2Data(D2GameViewStrc * pGameView) {
 void __fastcall FreeWall2(D2GameViewStrc * pGameView) {
     D2Wall2CellStrc* pMemoryToFree = pGameView->sWall2.pWall2;
     if (pMemoryToFree) {
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\GAME\\Wall2.cpp", 0x55);
     }
 
     pGameView->sWall2.pWall2 = 0;
@@ -1316,54 +1316,54 @@ void __fastcall WALL2_BuildSceneDrawList(D2GameViewStrc * pGameView, uint32_t nT
       }
 
       pUnit = UNIT::Player::GetPlayerUnit_UI();
-      if (pUnit) {
-        pGameViewLocal.pRoom = UNIT::CUnit::GetCurrentRoom();
-        eUnitType = pUnit->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-          nGridRowIdx = pUnit->pPath.pStaticPath->nPosX;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          nGridRowIdx = 0;
-        } else {
-          nGridRowIdx = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-        }
-
-        eUnitType = pUnit->eUnitType;
-        UNIT_CenterXCoordsDiv5 = nGridRowIdx / 5;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-          nGridRowIdx = pUnit->pPath.pStaticPath->nPosY;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          nGridRowIdx = 0;
-        } else {
-          nGridRowIdx = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-        }
-
-        eUnitType = pUnit->eUnitType;
-        UNIT_CenterYCoordsDiv5 = nGridRowIdx / 5;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-          nPlayerX = pUnit->pPath.pStaticPath->nPosY;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          nPlayerX = 0;
-        } else {
-          nPlayerX = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-        }
-
-        eUnitType = pUnit->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-          nPlayerY = pUnit->pPath.pStaticPath->nPosX;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          nPlayerY = 0;
-        } else {
-          nPlayerY = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-        }
-
-        pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-        gnPlayerTileGridIndex = D2Common::DUNGEON::Dungeon::GetGridIndex(pRoom, nPlayerY, nPlayerX);
-        D2Common::DUNGEON::Dungeon::CallRoomCallback(pGameViewLocal.pRoom, (ROOMCALLBACKFN)WALL2_CollectRoomTilesAndUnits, &pGameViewLocal);
-        return;
+      if (!pUnit) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x351);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x351);
-      exit(-1);
+      pGameViewLocal.pRoom = UNIT::CUnit::GetCurrentRoom();
+      eUnitType = pUnit->eUnitType;
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+        nGridRowIdx = pUnit->pPath.pStaticPath->nPosX;
+      } else if (!pUnit->pPath.pDynamicPath) {
+        nGridRowIdx = 0;
+      } else {
+        nGridRowIdx = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      }
+
+      eUnitType = pUnit->eUnitType;
+      UNIT_CenterXCoordsDiv5 = nGridRowIdx / 5;
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+        nGridRowIdx = pUnit->pPath.pStaticPath->nPosY;
+      } else if (!pUnit->pPath.pDynamicPath) {
+        nGridRowIdx = 0;
+      } else {
+        nGridRowIdx = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      }
+
+      eUnitType = pUnit->eUnitType;
+      UNIT_CenterYCoordsDiv5 = nGridRowIdx / 5;
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+        nPlayerX = pUnit->pPath.pStaticPath->nPosY;
+      } else if (!pUnit->pPath.pDynamicPath) {
+        nPlayerX = 0;
+      } else {
+        nPlayerX = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      }
+
+      eUnitType = pUnit->eUnitType;
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+        nPlayerY = pUnit->pPath.pStaticPath->nPosX;
+      } else if (!pUnit->pPath.pDynamicPath) {
+        nPlayerY = 0;
+      } else {
+        nPlayerY = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      }
+
+      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
+      gnPlayerTileGridIndex = D2Common::DUNGEON::Dungeon::GetGridIndex(pRoom, nPlayerY, nPlayerX);
+      D2Common::DUNGEON::Dungeon::CallRoomCallback(pGameViewLocal.pRoom, (ROOMCALLBACKFN)WALL2_CollectRoomTilesAndUnits, &pGameViewLocal);
+      return;
     }
 }
 

@@ -2111,7 +2111,7 @@ void __stdcall UTF8_StepForwardOneChar(int str_base, int position, uint32_t ecx_
     UTF8_AdvanceToCharBoundary(ecx_passthru, str_base, position + 1, 1);
 }
 
-int TRANSTBL_UnicodeToSingleByte(void * pThis, uint16_t * pXlatTbl, uint8_t * pbOut, int nCount) {
+int __thiscall TRANSTBL_UnicodeToSingleByte(void * pThis, uint16_t * pXlatTbl, uint8_t * pbOut, int nCount) {
     uint8_t byMapped;
     uint16_t* pSearchEntry;
     int iSearchIdx;

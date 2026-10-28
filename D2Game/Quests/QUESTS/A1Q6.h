@@ -65,7 +65,7 @@ bool __fastcall Q06_ActiveFilter(struct D2QuestDataStrc * pQuestData, int32_t nT
 // A1Q6 small accessor: returns a quest-specific flag byte ([pQuestSpecific+0x194]) when the quest's active byte (+9) is set, else returns 1 (default). No quest-record state access.
 uint32_t __fastcall Q06_GetQuestSpecificFlag(struct D2QuestDataStrc * pQuestData);
 // A1Q6 fpSequenceFilter: if stateFlag==0 and quest is live (bIsNotIntroduction), schedules Q06_QuestUpdate on a 0x14-tick timer to introduce the quest. No quest-record access.
-void __fastcall Q06_SequenceFilter(struct D2QuestDataStrc * pQuestData);
+bool __fastcall Q06_SequenceFilter(struct D2QuestDataStrc * pQuestData);
 // A1Q6 load/restore callback (state slot 0xd) — reconstructs server stateFlag/stateFlagPrev from the persisted player quest record on game (re)load. If not Completed/FinishedInPreviousGame: Step0x04 -> flag 3/prev 2; Step0x03 -> flag 3/prev 1; Step0x02 -> flag 2/prev 1. Pure read of record bits to rebuild in-memory progress.
 void __fastcall Q06_Callback13_PlayerStartedGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // A1Q6 quest constructor (nInitNo 4). Zeroes the state-handler table then installs callbacks: slot0=Callback_00(gossip), 2=Callback_02(accept), 3=Callback_03(area), 8=Callback_08(Andariel death), 0xb=Callback_11(NPC gossip dispatch), 0xd=Callback_13(load). Sets fpSequenceFilter=Q06_SequenceFilter, fpActiveFilter=Q06_ActiveFilter, nQuestIdReal=SistersToTheSlaughter, nSequenceQuestId=PrisonOfIce, allocates 0x198-byte A1Q6 specific data and zeroes its GUID lists/flags. No quest-record state transitions.

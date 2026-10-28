@@ -130,7 +130,7 @@ BOOL __fastcall DrawGroundTile(struct D2TileLibraryEntryStrc * pTile, struct D2G
 // @sourcefile .\Src\gdiSmack.cpp
 void __fastcall CloseSmacker(struct D2SmackerContextStrc * pContext);
 // Blits Smacker video frame to framebuffer with palette translation. Reads Smacker structure (offset +8=x, +0xC=y), copies nWidth×nHeight pixels from gnSmackerGlideYOffset.pFrameBuffer (Smacker frame buffer) to ppvBits_007c9154, applying palette lookup via gnSmackerGlideYOffset[pixel] translation table. Row-major blit with RENDERER_nWindowWidth stride.
-void RENDERER_WINDOWED_BlitSmackerFrame(struct D2SmackerContextStrc * pSmacker, int nHeight, int nWidth);
+void __thiscall RENDERER_WINDOWED_BlitSmackerFrame(struct D2SmackerContextStrc * pSmacker, int nHeight, int nWidth);
 void __fastcall DecodeSmacker(char * szSmacker, struct D2SmackerContextStrc * pBuffer, int nVersion);
 
 } // namespace D2Gdi::Renderer::Windowed

@@ -145,12 +145,12 @@ int16_t __fastcall GetItemIndexInList(::SGAMEDATA * pGame, D2UnitStrc * pUnit, i
       nItemIdx++;
     }
 
-    if (0x7ffe >= nItemIdx) {
-      return (int16_t)nItemIdx;
+    if (!(0x7ffe >= nItemIdx)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x185);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x185);
-    exit(-1);
+    return (int16_t)nItemIdx;
     return (int16_t)nItemIdx;
 }
 
@@ -1541,7 +1541,7 @@ D2UnitStrc * __fastcall LoadMerc(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Merc
 }
 
 // Loads a mercenary's equipped items from the save buffer into the given merc unit (expansion-only, magic 0x666a). Calls PLRSAVE_LoadItemsFromBuffer, then recalculates the merc's inventory stats and sets HP to max if the merc is alive. Skipped entirely in classic (non-expansion) games.
-int LoadMerc2(void * pThis, D2UnitStrc * pUnit, D2UnitStrc * * ppUnit, D2UnitStrc * pUnit2, uint32_t nParam, int * pnParam) {
+int __thiscall LoadMerc2(void * pThis, D2UnitStrc * pUnit, D2UnitStrc * * ppUnit, D2UnitStrc * pUnit2, uint32_t nParam, int * pnParam) {
     BOOL bIsDead;
     int32_t nValue;
     D2UnitStrc* pMercUnit = pUnit2;

@@ -32,7 +32,7 @@ BOOL __stdcall ANIMDATA_CompareNames(uint32_t * pdwName1, uint32_t * pdwName2);
 // byte-sum hash, then walks the hash bucket comparing 8-byte names.
 // Returns pointer to the matching record or NULL.
 // Source: .\\DATATBLS\\AnimTbls.cpp
-int * ANIMDATA_GetRecordByNameHash(int * pnParam);
+int * ANIMDATA_GetRecordByNameHash(LPSTR pnParam);
 // Gets the AnimData record for a unit. Builds the composit animation
 // name via COMPOSIT_BuildCofPath, then looks it up via ANIMDATA_GetRecordByNameHash.
 // Called by SetAnimData and composit rendering code.

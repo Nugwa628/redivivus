@@ -32,20 +32,20 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -947,7 +947,7 @@ void LVLTBLS_BuildPortalLevelArray(D2LevelDefsTxt * pTxtLevelDefs) {
 
       nPortalLevelCount = nPortalLevels;
       if (nPortalLevels) {
-        pPortalLevelIds = D2_ALLOC_POOL(nullptr, nPortalLevels * 4);
+        pPortalLevelIds = D2_ALLOC_POOL_AT(nullptr, nPortalLevels * 4, ".\\DATATBLS\\LvlTbls.cpp", 0x16c);
         nPortalLevels = nPortalLevelCount;
         gpPortalLevelArray = pPortalLevelIds;
         memset(pPortalLevelIds, 0, nPortalLevelCount * 4);
@@ -1213,7 +1213,7 @@ void __stdcall LVLTBLS_FreeLevelDefsTxt() {
       return;
     }
 
-    D2_FREE_POOL(nullptr, gpPortalLevelArray);
+    D2_FREE_POOL_AT(nullptr, gpPortalLevelArray, ".\\DATATBLS\\LvlTbls.cpp", 0x1d9);
 }
 
 D2LevelDefsTxt * __fastcall TXT_LevelDefs_GetLine(eD2LevelId eLevel) {
@@ -1465,12 +1465,12 @@ void __stdcall thunk_UnloadBin_DataTbls() {
 }
 
 D2LvlTypesTxt * __stdcall TXT_LvlTypes_GetLine(int32_t nLvlTypeId) {
-    if (pTxtLvlTypes) {
-      return pTxtLvlTypes + nLvlTypeId;
+    if (!pTxtLvlTypes) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x251);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x251);
-    exit(-1);
+    return pTxtLvlTypes + nLvlTypeId;
     return pTxtLvlTypes + nLvlTypeId;
 }
 
@@ -1640,7 +1640,7 @@ void __fastcall TXT_AllocTxt_lvlprest(D2PoolManagerStrc * pMemory, int32_t nPara
     if (nParam) {
       size_t nAllocSize;
       nAllocSize = sgptDataTable->nTxtLvlPrestSize * 0x18;
-      pTxtLvlTbls = (D2LvlTblsTxt*)D2_ALLOC(nAllocSize);
+      pTxtLvlTbls = (D2LvlTblsTxt*)D2_ALLOC_AT(nAllocSize, ".\\DATATBLS\\LvlTbls.cpp", 0x2a7);
       memset(pTxtLvlTbls, 0, nAllocSize);
     }
 
@@ -1700,7 +1700,7 @@ void __stdcall TXT_LvlTbls_Free() {
         } while (i < sgptDataTable->nTxtLvlPrestSize * 6);
       }
 
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\DATATBLS\\LvlTbls.cpp", 0x2d2);
       pTxtLvlTbls = 0;
     }
     if (!sgtDataTable.pTxtLvlPrest) {
@@ -2053,7 +2053,7 @@ void __fastcall TXT_AllocTxt_lvlsub(D2PoolManagerStrc * pMemory, int32_t nParam,
 
       if (nMaxTypeId) {
         nAllocSize = nMaxTypeId * 4 + 4;
-        gpnLvlSubTypeToIndex = (int*)D2_ALLOC_POOL(nullptr, nAllocSize);
+        gpnLvlSubTypeToIndex = (int*)D2_ALLOC_POOL_AT(nullptr, nAllocSize, ".\\DATATBLS\\LvlTbls.cpp", 0x3a6);
         memset(gpnLvlSubTypeToIndex, 0, nAllocSize);
         i = 0;
         nRowCount = nTxtLvlSubSize;
@@ -2075,7 +2075,7 @@ void __fastcall TXT_AllocTxt_lvlsub(D2PoolManagerStrc * pMemory, int32_t nParam,
       }
     }
     if (nParam || bGametypeIsOBNetHost) {
-      gpaDrlgLvlSubPresetFiles = D2_ALLOC(nRowCount * 4);
+      gpaDrlgLvlSubPresetFiles = D2_ALLOC_AT(nRowCount * 4, ".\\DATATBLS\\LvlTbls.cpp", 0x3b6);
       memset(gpaDrlgLvlSubPresetFiles, 0, nTxtLvlSubSize * 4);
     }
 
@@ -2122,7 +2122,7 @@ void __stdcall TXT_FreeTxt_LvlSub() {
         } while (i < nTxtLvlSubSize);
       }
 
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\DATATBLS\\LvlTbls.cpp", 0x3d8);
       gpaDrlgLvlSubPresetFiles = 0;
     }
     if (sgpTxtLvlSub) {
@@ -2143,7 +2143,7 @@ void __stdcall TXT_FreeTxt_LvlSub() {
       return;
     }
 
-    D2_FREE_POOL(nullptr, gpnLvlSubTypeToIndex);
+    D2_FREE_POOL_AT(nullptr, gpnLvlSubTypeToIndex, ".\\DATATBLS\\LvlTbls.cpp", 1000);
     gpnLvlSubTypeToIndex = 0;
 }
 
@@ -2155,12 +2155,12 @@ D2LvlSubTxt * __fastcall TXT_LvlSub_GetLineFromSubType(int32_t nSubType) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3f2);
       exit(-1);
     } else {
-      if (gpnLvlSubTypeToIndex) {
-        return sgpTxtLvlSub + gpnLvlSubTypeToIndex[nSubType];
+      if (!gpnLvlSubTypeToIndex) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3f3);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3f3);
-      exit(-1);
+      return sgpTxtLvlSub + gpnLvlSubTypeToIndex[nSubType];
     }
 }
 
@@ -2177,7 +2177,7 @@ void __stdcall TXT_LoadExpansionLvlTbls() {
     }
 
     size_t nAllocSize = nTxtLvlTypesSize << 0xc;
-    D2ExpansionLvlTblsTxt* pExpLvlTblsRow = (D2ExpansionLvlTblsTxt*)D2_ALLOC_POOL(nullptr, nAllocSize);
+    D2ExpansionLvlTblsTxt* pExpLvlTblsRow = (D2ExpansionLvlTblsTxt*)D2_ALLOC_POOL_AT(nullptr, nAllocSize, ".\\DATATBLS\\LvlTbls.cpp", 0x413);
     pExpansionLvlTbls = pExpLvlTblsRow;
     memset(pExpLvlTblsRow, 0, nAllocSize);
     BOOL bIsExpansion = Fog::D2CheckExpansionGame();
@@ -2216,7 +2216,7 @@ void __stdcall TXT_FreeExpansionLvlTbls() {
       return;
     }
 
-    D2_FREE_POOL(nullptr, pExpansionLvlTbls);
+    D2_FREE_POOL_AT(nullptr, pExpansionLvlTbls, ".\\DATATBLS\\LvlTbls.cpp", 0x43a);
 }
 
 // Looks up the automap level ID for a given level name string by linearly scanning a hardcoded name table (stride 0x10, ending before 0x6E7F8F). Returns the zero-based index of the matching entry, or 0 if the input starts with '0'. Halts with an internal error if the table end is exceeded.
@@ -2997,7 +2997,7 @@ void __fastcall TXT_AllocTxt_automap(D2PoolManagerStrc * pMemory) {
     automap[9].nOffset = 0;
     automap[9].fpLinker = 0;
     D2AutomapTxt* pTxtAutomap = (D2AutomapTxt*)DataTbls::CompileTxt(pMemory, "automap", automap, &nTxtAutomapSize, 0x2c);
-    D2AutoMapLvlTbls* pAutoMapLvlTbls_lcl = (D2AutoMapLvlTbls*)D2_ALLOC_POOL(nullptr, nTxtAutomapSize << 5);
+    D2AutoMapLvlTbls* pAutoMapLvlTbls_lcl = (D2AutoMapLvlTbls*)D2_ALLOC_POOL_AT(nullptr, nTxtAutomapSize << 5, ".\\DATATBLS\\LvlTbls.cpp", 0x4f7);
     memset(pAutoMapLvlTbls_lcl, 0, nTxtAutomapSize << 5);
     int nTxtRow = 0;
     if (0 < nTxtAutomapSize) {
@@ -3070,12 +3070,12 @@ void __fastcall TXT_AllocTxt_automap(D2PoolManagerStrc * pMemory) {
         gpaAutoMapRelated[nIndex].nCount = nAutoMapRow;
       } while (nAutoMapRow < nTxtAutomapSize);
     }
-    if (nAutoMapRow <= nTxtAutomapSize) {
-      return;
+    if (!(nAutoMapRow <= nTxtAutomapSize)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), (int32_t)pTxtAutomap);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), (int32_t)pTxtAutomap);
-    exit(-1);
+    return;
 }
 
 int32_t __fastcall GetRandomCellNo(int32_t nLevelType, int32_t nOrientation, int32_t nIndex, int32_t nSubIndex) {
@@ -3115,7 +3115,7 @@ int32_t __fastcall GetRandomCellNo(int32_t nLevelType, int32_t nOrientation, int
 // @sourcefile .\DATATBLS\LvlTbls.cpp
 void __stdcall FreeAutoMapLvlTbls() {
     if (pAutoMapLvlTbls) {
-      D2_FREE_POOL(nullptr, pAutoMapLvlTbls);
+      D2_FREE_POOL_AT(nullptr, pAutoMapLvlTbls, ".\\DATATBLS\\LvlTbls.cpp", 0x551);
     }
 
     pAutoMapLvlTbls = 0;

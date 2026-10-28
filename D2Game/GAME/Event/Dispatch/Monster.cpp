@@ -223,13 +223,13 @@ void __fastcall DropItemForVictim_Unused(::SGAMEDATA * pGame, D2ObjectOperateFnA
           exit(-1);
         } else {
           pVictimMonStats = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetLine(pVictim->nClassId);
-          if (pVictimMonStats) {
-            SERVER_ITEM_DecideDrops(pGame, pVictim, 0, pUnitKill);
-            return;
+          if (!pVictimMonStats) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x204);
+            exit(-1);
           }
 
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x204);
-          exit(-1);
+          SERVER_ITEM_DecideDrops(pGame, pVictim, 0, pUnitKill);
+          return;
         }
       }
     }
@@ -1097,14 +1097,15 @@ BOOL __fastcall MONMODE_TryFleeFromTarget(::SGAMEDATA * pGame, D2MonsterKillStrc
     return 1;
 }
 
-void __fastcall MONMODE_CompleteSkillSequence(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
+BOOL __fastcall MONMODE_CompleteSkillSequence(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
     D2UnitStrc* pUnit = pMonsterKill->pVictim;
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, 0xe);
     if (pUnit) {
       pUnit->eUnitFlags &= ~UNITFLAG_SKSRVDOFUNC;
     }
 
-    SKILLS::SkillsServer::SKILLS_OnModeComplete(pGame, pUnit);
+    int32_t iVar1 = SKILLS::SkillsServer::SKILLS_OnModeComplete(pGame, pUnit);
+    return iVar1;
 }
 
 // Looks up the death/drop event-dispatch callback record for a monster. Given a UNIT_MONSTER and an event index nParam (0..0xF), returns a pointer into the global DropHandlerArray. Returns NULL for non-monsters, out-of-range class ids, or nParam>0xF. Most monsters map directly (DropHandlerArray + nParam), but special bosses override specific events by class id: Diablo / DiabloClone / UberDiablo and Baal variants (Throne/Uber) redirect their death/drop events to dedicated handler slots (e.g. +7, +0x10, +0x11), TrappedSoul to +0x12/+0x13, and Warrior/Master act-boss minions event 0xB to +0x14. Used by the monster event dispatcher to pick the correct on-death behavior.
@@ -1196,7 +1197,7 @@ D2AiDispatchCallbacksStrc * __fastcall GetDropHandler(D2UnitStrc * pUnit, uint32
         /* .bBool = */ 0x1
     },
     {
-        /* .pFn1 = */ (fnD2DropHandler)&D2Game::GAME::Event::Dispatch::Monster::MONMODE_CompleteSkillSequence,
+        /* .pFn1 = */ &D2Game::GAME::Event::Dispatch::Monster::MONMODE_CompleteSkillSequence,
         /* .pFn2 = */ (fnD2DropHandler)&D2Game::GAME::Event::Dispatch::Monster::MONSTER_UpdateSkillCastAnimation,
         /* .pFn3 = */ &D2Game::GAME::Event::Dispatch::Monster::MONSTER_EndOfFrameAiDispatch,
         /* .bBool = */ 0x1

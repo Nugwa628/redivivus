@@ -79,27 +79,27 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2GfxUnknown_0xa8) == 0xa8, "D2_NEW(D2GfxUnknown_0xa8): the 32-bit layout must be the 0xa8 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2GfxUnknown_0xa8) == 0xa8, "D2_NEW_AT(D2GfxUnknown_0xa8): the 32-bit layout must be the 0xa8 bytes 1.14d allocates");
 
 
 namespace D2Client::Engine::Gfx {
@@ -207,7 +207,7 @@ void * __stdcall GFX_LoadCofFile(void * pTextureCache, char * szPath) {
       return nullptr;
     }
 
-    uint32_t* pEntry = (uint32_t*)D2_ALLOC(0x1c);
+    uint32_t* pEntry = (uint32_t*)D2_ALLOC_AT(0x1c, ".\\ENGINE\\Gfx.cpp", 0xdc);
     *pEntry = 0;
     memset(pEntry + 1, 0, 6 * sizeof(pEntry[0]));
     pEntry[1] |= 1;
@@ -411,8 +411,8 @@ int32_t GFX_FreeUnusedCofEntries(void * pCacheTable) {
         pNextEntry = (uint32_t*)*pMemoryToFree;
         if (*(uint8_t*)(pMemoryToFree + 1) & 1) {
           gbCofCacheLRUEnabled += -0x1c - pMemoryToFree[2];
-          D2_FREE((void*)pMemoryToFree[5]);
-          pCacheTable = (void*)D2_FREE(pMemoryToFree);
+          D2_FREE_AT((void*)pMemoryToFree[5], ".\\ENGINE\\Gfx.cpp", 0xe3c);
+          pCacheTable = (void*)D2_FREE_AT(pMemoryToFree, ".\\ENGINE\\Gfx.cpp", 0xe3d);
         }
       }
 
@@ -428,7 +428,7 @@ void __fastcall GFX_FreePlayerCofCache(int32_t nParam) {
     GFX_FreeUnusedCofEntries(&gPlayerCofCache);
     gbCofCacheLRUEnabled -= gPlayerCofCache.nCacheEntryCount;
     if (gPlayerCofCache.pCacheMemory) {
-      D2_FREE(gPlayerCofCache.pCacheMemory);
+      D2_FREE_AT(gPlayerCofCache.pCacheMemory, ".\\ENGINE\\Gfx.cpp", 0xe50);
     }
 
     memset(&gPlayerCofCache, 0, 0x80c);
@@ -440,7 +440,7 @@ int32_t GFX_FreeMonsterCofCache() {
     GFX_FreeUnusedCofEntries(&gMonsterCofCache);
     gbCofCacheLRUEnabled -= gMonsterCofCache.nCacheEntryCount;
     if (gMonsterCofCache.pCacheMemory) {
-      D2_FREE(gMonsterCofCache.pCacheMemory);
+      D2_FREE_AT(gMonsterCofCache.pCacheMemory, ".\\ENGINE\\Gfx.cpp", 0xe61);
     }
 
     pCleared = memset(&gMonsterCofCache, 0, 0x80c);
@@ -1097,7 +1097,7 @@ void __fastcall GFX_InitCofSystem(int nSystemFlags) {
     memset(&gMonsterCofCache, 0, 0x80c);
     memset(gaSpriteLoadStatusTable, 0, 0x460);
     size_t nMonSpriteTableSize = sgptDataTable->nTxtMonStatsSize * 0xa0;
-    g_pMonsterSpriteCofStatusTable = (D2MonsterCofStatusEntryStrc*)D2_ALLOC_POOL(nullptr, nMonSpriteTableSize);
+    g_pMonsterSpriteCofStatusTable = (D2MonsterCofStatusEntryStrc*)D2_ALLOC_POOL_AT(nullptr, nMonSpriteTableSize, ".\\ENGINE\\Gfx.cpp", 0x7e1);
     memset(g_pMonsterSpriteCofStatusTable, 0, nMonSpriteTableSize);
     gnGfxDirectionCountCache = D2Win::Src::D2WinArchive::D2WINARCHIVE_GetArchiveHandle();
     GfxUtil::InitializeModeTokens();
@@ -1108,14 +1108,14 @@ void GFX_ShutdownCofSystem() {
     GFX_FreeUnusedCofEntries(&gPlayerCofCache);
     gbCofCacheLRUEnabled -= gPlayerCofCache.nCacheEntryCount;
     if (gPlayerCofCache.pCacheMemory) {
-      D2_FREE(gPlayerCofCache.pCacheMemory);
+      D2_FREE_AT(gPlayerCofCache.pCacheMemory, ".\\ENGINE\\Gfx.cpp", 0xe50);
     }
 
     memset(&gPlayerCofCache, 0, 0x80c);
     GFX_FreeUnusedCofEntries(&gMonsterCofCache);
     gbCofCacheLRUEnabled -= gMonsterCofCache.nCacheEntryCount;
     if (gMonsterCofCache.pCacheMemory) {
-      D2_FREE(gMonsterCofCache.pCacheMemory);
+      D2_FREE_AT(gMonsterCofCache.pCacheMemory, ".\\ENGINE\\Gfx.cpp", 0xe61);
     }
 
     memset(&gMonsterCofCache, 0, 0x80c);
@@ -1123,7 +1123,7 @@ void GFX_ShutdownCofSystem() {
       return;
     }
 
-    D2_FREE_POOL(nullptr, g_pMonsterSpriteCofStatusTable);
+    D2_FREE_POOL_AT(nullptr, g_pMonsterSpriteCofStatusTable, ".\\ENGINE\\Gfx.cpp", 0x7f9);
     g_pMonsterSpriteCofStatusTable = 0;
 }
 
@@ -1194,7 +1194,7 @@ void __fastcall GFX_AddOverlayToUnit(D2UnitStrc * pUnit, eOverlayId eOverlay, in
       GfxInfo::GFX_RemoveOverlayById(eOverlay, pUnit);
     }
 
-    D2GfxUnknown_0xa8* pOverlay = D2_NEW(D2GfxUnknown_0xa8);
+    D2GfxUnknown_0xa8* pOverlay = D2_NEW_AT(D2GfxUnknown_0xa8, ".\\ENGINE\\Gfx.cpp", 0xc48);
     if (!pOverlay) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc49);
       exit(-1);
@@ -1247,31 +1247,31 @@ void __fastcall GFX_AddOverlayToUnit(D2UnitStrc * pUnit, eOverlayId eOverlay, in
       }
 
       pGfxInfo = UNIT::CUnit::GetGfxInfo(pUnit);
-      if (pGfxInfo) {
-        pOverlay->nPreDraw = (uint32_t)(uint8_t)pOverlayTxt->PreDraw;
-        pOverlay->pNext = (D2GfxUnknown_0xa8*)pGfxInfo->pOverlayList;
-        pGfxInfo->pOverlayList = pOverlay;
-        if (pOverlay->nOverlayType == 8) {
-          pOverlay->nStatePriorityValue = nValue0;
-          GFX_SyncStateOverlayPriority(&pOverlay->nOverlayType, (int32_t)pGfxInfo);
-        }
-        if (nColorScale) {
-          nRandomValue = Archive::RANDOM_RandomNumberSelector(&pPlayer->sSeed, nColorScale << 8);
-          pOverlay->nRandomOffset = nRandomValue;
-        }
-
-        pOverlay->nAnimRate = pOverlayTxt->AnimRate << 4;
-        if (nRandomMod) {
-          nRandomValue = Archive::RANDOM_RandomNumberSelector(&pPlayer->sSeed, nRandomMod << 4);
-          pOverlay->nAnimRate += nRandomValue;
-        }
-
-        pOverlay->nLoopWaitTime = pOverlayTxt->LoopWaitTime;
-        return;
+      if (!pGfxInfo) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc7a);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc7a);
-      exit(-1);
+      pOverlay->nPreDraw = (uint32_t)(uint8_t)pOverlayTxt->PreDraw;
+      pOverlay->pNext = (D2GfxUnknown_0xa8*)pGfxInfo->pOverlayList;
+      pGfxInfo->pOverlayList = pOverlay;
+      if (pOverlay->nOverlayType == 8) {
+        pOverlay->nStatePriorityValue = nValue0;
+        GFX_SyncStateOverlayPriority(&pOverlay->nOverlayType, (int32_t)pGfxInfo);
+      }
+      if (nColorScale) {
+        nRandomValue = Archive::RANDOM_RandomNumberSelector(&pPlayer->sSeed, nColorScale << 8);
+        pOverlay->nRandomOffset = nRandomValue;
+      }
+
+      pOverlay->nAnimRate = pOverlayTxt->AnimRate << 4;
+      if (nRandomMod) {
+        nRandomValue = Archive::RANDOM_RandomNumberSelector(&pPlayer->sSeed, nRandomMod << 4);
+        pOverlay->nAnimRate += nRandomValue;
+      }
+
+      pOverlay->nLoopWaitTime = pOverlayTxt->LoopWaitTime;
+      return;
     }
 }
 
@@ -1310,13 +1310,13 @@ void __fastcall GFX_LoadUnitModeCof(D2UnitStrc * pUnit) {
       GFX_LoadMonsterModeCofByState(pUnit, nSeqMode);
       return;
     }
-    if (eUnitType == UNIT_OBJECT) {
-      GfxInfo::GFX_LoadObjectModeCof(pUnit, nSeqMode);
-      return;
+    if (eUnitType != UNIT_OBJECT) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd26);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd26);
-    exit(-1);
+    GfxInfo::GFX_LoadObjectModeCof(pUnit, nSeqMode);
+    return;
 }
 
 // @sourcefile .\ENGINE\Gfx.cpp

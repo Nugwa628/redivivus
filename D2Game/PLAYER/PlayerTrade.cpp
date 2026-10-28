@@ -81,21 +81,21 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2UnknownStructure0x18) == 0x18, "D2_NEW(D2UnknownStructure0x18): the 32-bit layout must be the 0x18 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2UnknownStructure0x18) == 0x18, "D2_NEW_AT(D2UnknownStructure0x18): the 32-bit layout must be the 0x18 bytes 1.14d allocates");
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2UnknownStructure0xc) == 0xc, "D2_NEW(D2UnknownStructure0xc): the 32-bit layout must be the 0xc bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2UnknownStructure0xc) == 0xc, "D2_NEW_AT(D2UnknownStructure0xc): the 32-bit layout must be the 0xc bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpSUnitIterateCallback
@@ -1625,8 +1625,8 @@ bool InitCopyInventoryForTrade(::SGAMEDATA * pGame, D2UnitStrc * pUnitStrc) {
       return false;
     }
 
-    D2UnknownStructure0x18* pCopy = D2_NEW_POOL(pGame->pMemoryPool, D2UnknownStructure0x18);
-    void* pSaveBuffer = D2_ALLOC_POOL(pGame->pMemoryPool, 0x2000);
+    D2UnknownStructure0x18* pCopy = D2_NEW_POOL_AT(pGame->pMemoryPool, D2UnknownStructure0x18, ".\\PLAYER\\PlrTrade.cpp", 0x806);
+    void* pSaveBuffer = D2_ALLOC_POOL_AT(pGame->pMemoryPool, 0x2000, ".\\PLAYER\\PlrTrade.cpp", 0x807);
     pCopy->pSaveBuffer = pSaveBuffer;
     D2InventoryStrc* pCopyInventory = PlayerSave::GetCopyInventory(pGame, pUnitStrc, (uint16_t*)pSaveBuffer, 0x2000, 0, 0, 0);
     pCopy->pCopyInventory = (int32_t)pCopyInventory;
@@ -1653,17 +1653,17 @@ void __fastcall PLRTRADE_FreeTradeCopyInventory(::SGAMEDATA * pGame, D2UnitStrc 
       return;
     }
 
-    D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree_00->pSaveBuffer);
+    D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree_00->pSaveBuffer, ".\\PLAYER\\PlrTrade.cpp", 0x822);
     D2UnknownStructure0xc* pTradeNode = pMemoryToFree_00->pUnknownStruct;
     while (pTradeNode) {
       D2UnknownStructure0xc* pNextNode;
       pNextNode = pTradeNode->pUnknownStruct;
-      D2_FREE_POOL(pGame->pMemoryPool, pTradeNode);
+      D2_FREE_POOL_AT(pGame->pMemoryPool, pTradeNode, ".\\PLAYER\\PlrTrade.cpp", 0x827);
       pTradeNode = pNextNode;
     }
 
     pMemoryToFree_00->pUnknownStruct = 0;
-    D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree_00);
+    D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree_00, ".\\PLAYER\\PlrTrade.cpp", 0x82b);
     pPlayerData->pTradeCopyInventory = 0;
 }
 
@@ -1701,21 +1701,21 @@ void __fastcall TRADE_RestoreInventoryFromBackup(::SGAMEDATA * pGame, D2UnitStrc
       } while (dwParam2 < 0xd);
 
       pTradeCopy = pPlayerData->pTradeCopyInventory;
-      if (pTradeCopy) {
-        GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSTATS, 0);
-        PlayerSave::PLRSAVE_DispatchItemLoadByFormat(pGame, pUnit, pTradeCopy->pSaveBuffer, 0x60, 0x2000, 0, &pSavePtr);
-        iInvPage = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
-        if (!(0 < iInvPage && pUnit->eAnimMode.ePlayerMode != Death && pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead)) {
-          return;
-        }
+      if (!pTradeCopy) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x888);
+        exit(-1);
+      }
 
-        UNIT::Party::ChangeGoldForPlayer(pUnit, UNITSTAT_gold, -iInvPage);
-        UNIT::Party::ChangeGoldForPlayer(pUnit, UNITSTAT_gold, pTradeCopy->nGold);
+      GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSTATS, 0);
+      PlayerSave::PLRSAVE_DispatchItemLoadByFormat(pGame, pUnit, pTradeCopy->pSaveBuffer, 0x60, 0x2000, 0, &pSavePtr);
+      iInvPage = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
+      if (!(0 < iInvPage && pUnit->eAnimMode.ePlayerMode != Death && pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead)) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x888);
-      exit(-1);
+      UNIT::Party::ChangeGoldForPlayer(pUnit, UNITSTAT_gold, -iInvPage);
+      UNIT::Party::ChangeGoldForPlayer(pUnit, UNITSTAT_gold, pTradeCopy->nGold);
+      return;
     }
 }
 
@@ -1846,7 +1846,7 @@ void __fastcall CheckIfCanStartTradeWithPlayer(::SGAMEDATA * pGame, D2UnitStrc *
 }
 
 // @sourcefile .\PLAYER\PlrTrade.cpp
-void TRADE_SendTradeCompleteToPlayers(void * pThis, D2UnitStrc * pUnit, D2UnitDataPlayerStrc * pData, D2UnitDataPlayerStrc * pDataOther) {
+void __thiscall TRADE_SendTradeCompleteToPlayers(void * pThis, D2UnitStrc * pUnit, D2UnitDataPlayerStrc * pData, D2UnitDataPlayerStrc * pDataOther) {
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient((D2UnitStrc*)pThis, ".\\PLAYER\\PlrTrade.cpp", 0x976);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(pClient, 6);
     pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x977);
@@ -2007,7 +2007,7 @@ void __stdcall CreateStructure0xc(::SGAMEDATA * pGame, int nUID, uint32_t nUIDOt
       return;
     }
 
-    D2UnknownStructure0xc* pUnknown = D2_NEW_POOL(pGame->pMemoryPool, D2UnknownStructure0xc);
+    D2UnknownStructure0xc* pUnknown = D2_NEW_POOL_AT(pGame->pMemoryPool, D2UnknownStructure0xc, ".\\PLAYER\\PlrTrade.cpp", 0xc5b);
     pUnknown->nUID = nUID;
     pUnknown->nUIDOther = nUIDOther;
     pUnknown->pUnknownStruct = pTradeCopyInv->pUnknownStruct;

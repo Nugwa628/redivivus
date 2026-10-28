@@ -87,19 +87,19 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2CombatEntryStrc) == 0x88, "D2_NEW(D2CombatEntryStrc): the 32-bit layout must be the 0x88 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2CombatEntryStrc) == 0x88, "D2_NEW_AT(D2CombatEntryStrc): the 32-bit layout must be the 0x88 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_PFN_StatExpireCallback
@@ -1546,7 +1546,7 @@ void __fastcall DAMAGE_ApplyDefensiveReduction(::SGAMEDATA * pGame, D2UnitStrc *
     pDmg->dwDmgTotal = pDmg->dwLifeLeech + nDrStatValue;
 }
 
-uint32_t DAMAGE_GetMonsterDrainEffectiveness(void * pThis, D2UnitStrc * pUnit) {
+uint32_t __thiscall DAMAGE_GetMonsterDrainEffectiveness(void * pThis, D2UnitStrc * pUnit) {
     if (!pThis || *(int*)pThis != 1) {
       return 100;
     }
@@ -1864,7 +1864,7 @@ void __fastcall FreeCombat(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
           pPrevCombatEntry->pNext = pNextCombatEntry;
         }
 
-        D2_FREE_POOL(pGame->pMemoryPool, pCombatEntry);
+        D2_FREE_POOL_AT(pGame->pMemoryPool, pCombatEntry, ".\\UNIT\\SUnitDmg.cpp", 0x769);
         pCurCombatEntry = pPrevCombatEntry;
       }
 
@@ -1893,7 +1893,7 @@ void __fastcall DAMAGE_RemoveDamageListEntry(::SGAMEDATA * pGame, int * pnParam,
           pPrevCombatEntry->pNext = pNextCombatEntry;
         }
 
-        D2_FREE_POOL(pGame->pMemoryPool, pCombatEntry);
+        D2_FREE_POOL_AT(pGame->pMemoryPool, pCombatEntry, ".\\UNIT\\SUnitDmg.cpp", 0x79f);
         pCurCombatEntry = pPrevCombatEntry;
       }
 
@@ -1909,7 +1909,7 @@ void __stdcall DAMAGE_AddDamageListEntry(int32_t nGamePtr, int * pnParam1, int *
       return;
     }
 
-    D2CombatEntryStrc* pNewCombatEntry = D2_NEW_POOL(*(D2PoolManagerStrc**)(nGamePtr + 0x1c), D2CombatEntryStrc);
+    D2CombatEntryStrc* pNewCombatEntry = D2_NEW_POOL_AT(*(D2PoolManagerStrc**)(nGamePtr + 0x1c), D2CombatEntryStrc, ".\\UNIT\\SUnitDmg.cpp", 0x7cb);
     pNewCombatEntry->field_0 = nGamePtr;
     pNewCombatEntry->eAttackerType = *pnParam2;
     pNewCombatEntry->nAttackerGUID = pnParam2[3];
@@ -3309,18 +3309,18 @@ BOOL __fastcall ExperienceLoopOverPlayers(uint32_t dwParam, D2UnitStrc * pUnit, 
         return nPlayerCount;
       }
     }
-    if (pPartyExp->nPlayers < 8) {
-      pPartyExp->pPlayers[pPartyExp->nPlayers] = pUnit;
-      nPlayerCount = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
-      pPartyExp->nPlayerLevels[pPartyExp->nPlayers] = nPlayerCount;
-      pPartyExp->nPlayerLevelSum += pPartyExp->nPlayerLevels[pPartyExp->nPlayers];
-      nUpdatedCount = pPartyExp->nPlayers + 1;
-      pPartyExp->nPlayers = nUpdatedCount;
-      return nUpdatedCount;
+    if (!(pPartyExp->nPlayers < 8)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf25);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf25);
-    exit(-1);
+    pPartyExp->pPlayers[pPartyExp->nPlayers] = pUnit;
+    nPlayerCount = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
+    pPartyExp->nPlayerLevels[pPartyExp->nPlayers] = nPlayerCount;
+    pPartyExp->nPlayerLevelSum += pPartyExp->nPlayerLevels[pPartyExp->nPlayers];
+    nUpdatedCount = pPartyExp->nPlayers + 1;
+    pPartyExp->nPlayers = nUpdatedCount;
+    return nUpdatedCount;
 }
 
 // Distributes kill XP among all party members near the victim. Calls ExperienceLoopOverPlayers to collect eligible players into D2PartyExperienceStrc. For a solo kill, computes and grants XP directly. For parties, computes each member's share proportionally by level and calls SERVER_PlayerUpdateExperience per member.

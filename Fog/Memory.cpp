@@ -893,35 +893,35 @@ void * __fastcall ReAlloc(D2PoolManagerStrc * pMemory, void * pMemoryToRealloc, 
 
               LeaveCriticalSection(&lpCriticalSection->pSync);
               nErrAddress = Memory::Alloc(pOrigManager, nAllocSize, szFile, nLine);
-              if (nErrAddress) {
-                memcpy(nErrAddress, pMemoryToRealloc, (size_t)pFoundBlock);
-                Memory::Free(pOrigManager, &pOldPtr, szFile, nLine);
-                return nErrAddress;
+              if (!nErrAddress) {
+                Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), (int32_t)(char*)0x68b);
+                exit(-1);
               }
 
-              Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), (int32_t)(char*)0x68b);
-              exit(-1);
+              memcpy(nErrAddress, pMemoryToRealloc, (size_t)pFoundBlock);
+              Memory::Free(pOrigManager, &pOldPtr, szFile, nLine);
+              return nErrAddress;
             }
           } else {
             nErrAddress = ReallocTrackedAllocation(pManager, pMemoryToRealloc, nAllocSize, szFile, nLine);
-            if (nErrAddress) {
-              return nErrAddress;
+            if (!nErrAddress) {
+              Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), (int32_t)(char*)0x648);
+              exit(-1);
             }
 
-            Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), (int32_t)(char*)0x648);
-            exit(-1);
+            return nErrAddress;
           }
         }
 
         nErrAddress = ReallocTrackedAllocation(pManager2, pMemoryToRealloc, nAllocSize, szFile, nLine);
       }
     }
-    if (nErrAddress) {
-      return nErrAddress;
+    if (!nErrAddress) {
+      Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), (int32_t)szFile);
+      exit(-1);
     }
 
-    Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), (int32_t)szFile);
-    exit(-1);
+    return nErrAddress;
 }
 
 void * __fastcall AllocClientMemory(size_t nAllocSize, char * szFile, int32_t nLine, int32_t nNull) {

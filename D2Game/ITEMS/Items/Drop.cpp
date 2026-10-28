@@ -417,13 +417,13 @@ int32_t __stdcall ITEMDROP_RollItemClassByLevel(::SGAMEDATA * pGame, D2SeedStrc 
         nRoll = ITEMDROP_RollNormalItemClass(pGame, pSeed, nLevel, nTCFilter, nMonsterLevel);
         return nRoll;
       }
-      if (nRoll < 100) {
-        nRoll = ITEMDROP_RollEliteItemClass(pGame, pSeed, nLevel, nTCFilter, nMonsterLevel, bIsMonsterDrop);
-        return nRoll;
+      if (!(nRoll < 100)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1ba);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1ba);
-      exit(-1);
+      nRoll = ITEMDROP_RollEliteItemClass(pGame, pSeed, nLevel, nTCFilter, nMonsterLevel, bIsMonsterDrop);
+      return nRoll;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x180);
       exit(-1);
@@ -447,13 +447,13 @@ void ITEM_RollBaseArmorClass(D2UnitStrc * pUnit) {
       uint32_t nValue;
       nMaxAc = pItemsTxt->dwMaxAc;
       nValue = D2Client::Seed::RollBetweenMinAndMax(&pUnit->sSeed, pItemsTxt->dwMinAc, nMaxAc - pItemsTxt->dwMinAc + 1);
-      if (nValue <= nMaxAc) {
-        D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_armorclass, nValue, 0);
-        return;
+      if (!(nValue <= nMaxAc)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1ce);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1ce);
-      exit(-1);
+      D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_armorclass, nValue, 0);
+      return;
     }
 }
 
@@ -1107,128 +1107,127 @@ uint32_t __stdcall ITEM_RollItemQuality(D2UnitStrc * pUnit, D2ItemGenContextStrc
         }
 
         pItemTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(nQualityThreshold);
-        if (pItemTxt) {
-          if (pItemTxt->bQuest) {
-            return 2;
-          }
-
-          nItemLevelAdj = pItemGenContext->nItemLevel;
-          nItemClassId = 0;
-          wVersionCheck = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-          if (wVersionCheck) {
-            bIsMisc = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Miscellaneous);
-            if (bIsMisc || (nItemLevelAdj -= (uint32_t)(uint8_t)pItemTxt->nLevel , nItemLevelAdj < 1)) {
-              nItemLevelAdj = 1;
-            }
-          }
-
-          eResultQuality = 1;
-          wVersionCheck = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-          if (!wVersionCheck) {
-            nTierTableOffset = 0;
-            do {
-              switch ((uint32_t)gaItemQualityTierTable[nTierTableOffset]) {
-                case 2:
-                  nItemClassId = pQualityRatioRow->Normal;
-                nMFDivisor = nItemLevelAdj / pQualityRatioRow->NormalDivisor;
-                eResultQuality = 2;
-                nItemClassId -= nMFDivisor;
-                break;
-                case 3:
-                  nItemClassId = pQualityRatioRow->HiQuality;
-                nMFDivisor = nItemLevelAdj / pQualityRatioRow->HiQualityDivisor;
-                eResultQuality = 3;
-                nItemClassId -= nMFDivisor;
-                break;
-                case 4:
-                  nItemClassId = pQualityRatioRow->Magic;
-                nMFDivisor = nItemLevelAdj / pQualityRatioRow->MagicDivisor;
-                eResultQuality = 4;
-                nItemClassId -= nMFDivisor;
-                break;
-                case 5:
-                  nItemClassId = pQualityRatioRow->Set - nItemLevelAdj;
-                eResultQuality = 5;
-                break;
-                case 6:
-                  nItemClassId = pQualityRatioRow->Rare - nItemLevelAdj;
-                eResultQuality = 6;
-                break;
-                case 7:
-                  nItemClassId = pQualityRatioRow->Unique - nItemLevelAdj;
-                eResultQuality = 7;
-              }
-
-              if ((int)nItemClassId < 1) {
-                nItemClassId = 1;
-              }
-
-              pSeed = D2Common::ITEMS::Items::GetItemSeed(pUnit);
-              nQualityThreshold = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nItemClassId);
-              if (!nQualityThreshold) {
-                return eResultQuality;
-              }
-
-              nTierTableOffset++;
-            } while (nTierTableOffset < 6);
-          } else {
-            nTierTableOffset = 0;
-            do {
-              switch ((uint32_t)gaItemQualityTierTable[nTierTableOffset]) {
-                case 2:
-                  iVar1 = pQualityRatioRow->Normal;
-                nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->NormalDivisor;
-                eResultQuality = 2;
-                break;
-                case 3:
-                  iVar1 = pQualityRatioRow->HiQuality;
-                nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->HiQualityDivisor;
-                eResultQuality = 3;
-                break;
-                case 4:
-                  iVar1 = pQualityRatioRow->Magic;
-                nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->MagicDivisor;
-                eResultQuality = 4;
-                break;
-                case 5:
-                  iVar1 = pQualityRatioRow->Set;
-                nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->SetDivisor;
-                eResultQuality = 5;
-                break;
-                case 6:
-                  iVar1 = pQualityRatioRow->Rare;
-                nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->RareDivisor;
-                eResultQuality = 6;
-                break;
-                case 7:
-                  iVar1 = pQualityRatioRow->Unique;
-                nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->UniqueDivisor;
-                eResultQuality = 7;
-                break;
-                default:
-                  goto roll_quality_tier;
-              }
-
-              nItemClassId = iVar1 - nMFDivisorExp;
-              roll_quality_tier:
-              if ((int)nItemClassId < 1) {
-                return eResultQuality;
-              }
-              pSeed = D2Common::ITEMS::Items::GetItemSeed(pUnit);
-              nQualityThreshold = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nItemClassId);
-              if (!nQualityThreshold) {
-                return eResultQuality;
-              }
-
-              nTierTableOffset++;
-            } while (nTierTableOffset < 6);
-          }
-
-          return ((uint8_t)(char)pItemGenContext->nFlags & 0x40 | 0x20) >> 5;
+        if (!pItemTxt) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x489);
+          exit(-1);
+        }
+        if (pItemTxt->bQuest) {
+          return 2;
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x489);
-        exit(-1);
+        nItemLevelAdj = pItemGenContext->nItemLevel;
+        nItemClassId = 0;
+        wVersionCheck = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
+        if (wVersionCheck) {
+          bIsMisc = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Miscellaneous);
+          if (bIsMisc || (nItemLevelAdj -= (uint32_t)(uint8_t)pItemTxt->nLevel , nItemLevelAdj < 1)) {
+            nItemLevelAdj = 1;
+          }
+        }
+
+        eResultQuality = 1;
+        wVersionCheck = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
+        if (!wVersionCheck) {
+          nTierTableOffset = 0;
+          do {
+            switch ((uint32_t)gaItemQualityTierTable[nTierTableOffset]) {
+              case 2:
+                nItemClassId = pQualityRatioRow->Normal;
+              nMFDivisor = nItemLevelAdj / pQualityRatioRow->NormalDivisor;
+              eResultQuality = 2;
+              nItemClassId -= nMFDivisor;
+              break;
+              case 3:
+                nItemClassId = pQualityRatioRow->HiQuality;
+              nMFDivisor = nItemLevelAdj / pQualityRatioRow->HiQualityDivisor;
+              eResultQuality = 3;
+              nItemClassId -= nMFDivisor;
+              break;
+              case 4:
+                nItemClassId = pQualityRatioRow->Magic;
+              nMFDivisor = nItemLevelAdj / pQualityRatioRow->MagicDivisor;
+              eResultQuality = 4;
+              nItemClassId -= nMFDivisor;
+              break;
+              case 5:
+                nItemClassId = pQualityRatioRow->Set - nItemLevelAdj;
+              eResultQuality = 5;
+              break;
+              case 6:
+                nItemClassId = pQualityRatioRow->Rare - nItemLevelAdj;
+              eResultQuality = 6;
+              break;
+              case 7:
+                nItemClassId = pQualityRatioRow->Unique - nItemLevelAdj;
+              eResultQuality = 7;
+            }
+
+            if ((int)nItemClassId < 1) {
+              nItemClassId = 1;
+            }
+
+            pSeed = D2Common::ITEMS::Items::GetItemSeed(pUnit);
+            nQualityThreshold = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nItemClassId);
+            if (!nQualityThreshold) {
+              return eResultQuality;
+            }
+
+            nTierTableOffset++;
+          } while (nTierTableOffset < 6);
+        } else {
+          nTierTableOffset = 0;
+          do {
+            switch ((uint32_t)gaItemQualityTierTable[nTierTableOffset]) {
+              case 2:
+                iVar1 = pQualityRatioRow->Normal;
+              nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->NormalDivisor;
+              eResultQuality = 2;
+              break;
+              case 3:
+                iVar1 = pQualityRatioRow->HiQuality;
+              nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->HiQualityDivisor;
+              eResultQuality = 3;
+              break;
+              case 4:
+                iVar1 = pQualityRatioRow->Magic;
+              nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->MagicDivisor;
+              eResultQuality = 4;
+              break;
+              case 5:
+                iVar1 = pQualityRatioRow->Set;
+              nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->SetDivisor;
+              eResultQuality = 5;
+              break;
+              case 6:
+                iVar1 = pQualityRatioRow->Rare;
+              nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->RareDivisor;
+              eResultQuality = 6;
+              break;
+              case 7:
+                iVar1 = pQualityRatioRow->Unique;
+              nMFDivisorExp = nItemLevelAdj / pQualityRatioRow->UniqueDivisor;
+              eResultQuality = 7;
+              break;
+              default:
+                goto roll_quality_tier;
+            }
+
+            nItemClassId = iVar1 - nMFDivisorExp;
+            roll_quality_tier:
+            if ((int)nItemClassId < 1) {
+              return eResultQuality;
+            }
+            pSeed = D2Common::ITEMS::Items::GetItemSeed(pUnit);
+            nQualityThreshold = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nItemClassId);
+            if (!nQualityThreshold) {
+              return eResultQuality;
+            }
+
+            nTierTableOffset++;
+          } while (nTierTableOffset < 6);
+        }
+
+        return ((uint8_t)(char)pItemGenContext->nFlags & 0x40 | 0x20) >> 5;
       }
     }
 }

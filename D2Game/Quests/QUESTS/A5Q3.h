@@ -59,7 +59,7 @@ BOOL __fastcall Q33_OnFrozenAnyaKilled(::SGAMEDATA * pGame, struct D2UnitStrc * 
 // Q33_SequenceFilter (PrisonOfIce): the quest's fpSequenceFilter. While quest active and stateFlag<5, bootstraps
 // stateFlag 0->1. Once past that, chains to the next quest's sequence filter (nSequenceQuestId) so dependent quests
 // (Betrayal of Harrogath) get re-evaluated. Halts on IsBadCodePtr of the chained fn ptr.
-void __fastcall Q33_SequenceFilter(struct D2QuestDataStrc * pQuestData);
+bool __fastcall Q33_SequenceFilter(struct D2QuestDataStrc * pQuestData);
 // Q33_SpawnAnyaAndPortal (PrisonOfIce): when the frozen-Anya OBJECT exists, spawns the rescued-Anya MONSTER (0x200)
 // at its coords, hands over the preset/DRLG map AI, then creates a town portal OBJECT (classId 0xbd) in a nearby room.
 // Records GUIDs in pA5Q3. Re-runs Q33_SequenceFilter afterward. Drives the post-rescue Anya escort/portal sequence.
@@ -157,7 +157,7 @@ void __fastcall Objects_InitFn69(struct D2ObjectInitFnArg * pInitArg);
 void __fastcall Q33_AnyaTimerCallback(struct D2QuestDataStrc * pQuestData, struct D2UnitStrc * pUnit);
 // Q33_GetAnyaCoordinates (PrisonOfIce): returns the stored portal coords if active, portal spawned and Anya not yet
 // running. Used to locate the rescue portal.
-uint32_t Q33_GetAnyaCoordinates(void * pThis, int32_t * pOutCoords);
+uint32_t __thiscall Q33_GetAnyaCoordinates(void * pThis, int32_t * pOutCoords);
 // Q33_SpawnPortalNearAnya (PrisonOfIce): creates the town-portal OBJECT (classId 0xbd) at stored coords in a nearby
 // valid room (nudging coords +3 if none found), once. Records portal GUID. The portal Anya uses to return to Harrogath.
 BOOL __fastcall Q33_SpawnPortalNearAnya(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
@@ -198,9 +198,9 @@ BOOL __fastcall OBJOP_A5Q3_RescueAnyaFromPortal(struct D2ObjectOperateFnArg * pO
 // Q33_OnPresetObjectLoad1 (PrisonOfIce): on preset-unit load, copies the preset object list into pA5Q3->pDrlgMap; if the
 // frozen Anya is already spawned and present, hands the DRLG map file over to its monster map AI (once). Restores ice-Anya
 // visuals/AI when the level region (re)loads.
-void Q33_OnPresetObjectLoad1(void * pThis, struct D2MapAIStrc * pMapAI);
+void __thiscall Q33_OnPresetObjectLoad1(void * pThis, struct D2MapAIStrc * pMapAI);
 // Q33_OnPresetObjectLoad2 (PrisonOfIce): same as Load1 but for the rescued-Anya monster (field_0x108 map) — copies the
 // preset list and transfers the DRLG map file to the Anya monster's AI once it is alive. Restores rescued-Anya on reload.
-void Q33_OnPresetObjectLoad2(void * pThis, struct D2MapAIStrc * pMapAI);
+void __thiscall Q33_OnPresetObjectLoad2(void * pThis, struct D2MapAIStrc * pMapAI);
 
 } // namespace D2Game::Quests::QUESTS::A5Q3

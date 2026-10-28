@@ -225,7 +225,7 @@ void __fastcall Q04_SendStonesOrderToClient(::SGAMEDATA * pGame, struct D2UnitSt
 // the next quest in the chain (nSequenceQuestId = QUEST_ToolsOfTheTrade) by invoking
 // its sequence filter. Asserts the next filter pointer is valid.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q4.cpp
-void __fastcall Q04_SequenceFilter(struct D2QuestDataStrc * pQuestData);
+bool __fastcall Q04_SequenceFilter(struct D2QuestDataStrc * pQuestData);
 // A1Q4 — Q04_SetCainRescuedFlag: sets the quest sub-struct "Cain rescued" byte
 // (offset 0x63) to 1. Setter only.
 void __fastcall Q04_SetCainRescuedFlag(::SGAMEDATA * pGame);
@@ -289,7 +289,7 @@ void __fastcall Q33_UpdateFrozenAnyaNpcState(struct D2QuestDataStrc * pQuestData
 // A1Q4 — Q04_GetCainPortalCoordinates: outputs the saved Cain-area portal coords
 // (field 0xA8/0xAC) into pOutCoords if the quest is active, the portal-placed flag is
 // set, and not suppressed. Returns 1 on success, 0 otherwise. Getter.
-BOOL Q04_GetCainPortalCoordinates(void * pThis, uint32_t * pOutCoords);
+BOOL __thiscall Q04_GetCainPortalCoordinates(void * pThis, uint32_t * pOutCoords);
 // A1Q4 — Q04_SpawnCainCage: spawns the Cain cage/gibbet object (object classId 0xbd)
 // at the saved coords the first time (guarded by a one-shot flag), retrying nearby rooms
 // and nudging the spawn position if no room is found. Records the cage GUID. No quest
@@ -319,7 +319,7 @@ uint32_t __fastcall Q04_IsTristramActive(::SGAMEDATA * pGame);
 void __fastcall Q04_DropShieldRewards(struct D2QuestDataStrc * pQuestData, struct D2UnitStrc * pUnit);
 // A1Q4 — Q04_SetCainUnitGUID: stores Cain's unit GUID into the quest sub-struct
 // (field_0xB0). Setter only.
-void Q04_SetCainUnitGUID(void * pThis, int32_t nCainGUID);
+void __thiscall Q04_SetCainUnitGUID(void * pThis, int32_t nCainGUID);
 // A1Q4 — Q04_ActivateCairnStonesAndTree: master "make the quest objects active" routine.
 // Animates/activates the Cairn Stones (classId 0x1a) and the Tree-of-Inifuss objects to
 // their open/usable state and sets sub-flags. Depending on cParam1/cParam2 it either

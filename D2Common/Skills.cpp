@@ -68,21 +68,21 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2SkillListStrc) == 0x18, "D2_NEW(D2SkillListStrc): the 32-bit layout must be the 0x18 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2SkillListStrc) == 0x18, "D2_NEW_AT(D2SkillListStrc): the 32-bit layout must be the 0x18 bytes 1.14d allocates");
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2SkillStrc) == 0x40, "D2_NEW(D2SkillStrc): the 32-bit layout must be the 0x40 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2SkillStrc) == 0x40, "D2_NEW_AT(D2SkillStrc): the 32-bit layout must be the 0x40 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fnSkillCalcMethod
@@ -184,12 +184,13 @@ int * __fastcall SKILLS_RandomRange(int * pnMinVal, int32_t nRange, uint32_t nUn
     return (int*)(nRandOffset + (int)pnMinVal);
 }
 
-void __fastcall SKILLS_GetMissileSpecialParam(int32_t nParamIndex, uint8_t bParamType, uint32_t nUnused, D2UnitStrc * * ppContext) {
+int __fastcall SKILLS_GetMissileSpecialParam(int32_t nParamIndex, uint8_t bParamType, uint32_t nUnused, D2UnitStrc * * ppContext) {
     if (!ppContext) {
-      return;
+      return 0;
     }
 
-    Units::Missile::GetSpecialParamValue(nullptr, *ppContext, bParamType, nParamIndex, (int32_t)ppContext[2]);
+    int32_t iVar1 = Units::Missile::GetSpecialParamValue(nullptr, *ppContext, bParamType, nParamIndex, (int32_t)ppContext[2]);
+    return iVar1;
 }
 
 int32_t __fastcall SKILLS_GetUnitStatValue(eD2UnitStat eUnitStat, int32_t nShiftCount, uint32_t nUnused, D2UnitStrc * * ppContext) {
@@ -261,7 +262,7 @@ int32_t __stdcall SKILLS_GetSkillsTxtField0x14(int * pnParam) {
 
 // @sourcefile .\SKILLS\Skills.cpp
 D2SkillListStrc * __stdcall STRUCT_CreateSkillsList(D2PoolManagerStrc * pMemory) {
-    D2SkillListStrc* pPlayerSkills = D2_NEW_POOL(pMemory, D2SkillListStrc);
+    D2SkillListStrc* pPlayerSkills = D2_NEW_POOL_AT(pMemory, D2SkillListStrc, ".\\SKILLS\\Skills.cpp", 0x37f);
     pPlayerSkills->pFirstSkill = 0;
     pPlayerSkills->pLeftSkill = 0;
     pPlayerSkills->pRightSkill = 0;
@@ -288,22 +289,22 @@ D2SkillStrc * __stdcall GetFirstSkill(D2SkillListStrc * pSkillsList) {
 }
 
 D2SkillStrc * __fastcall GetLeftSkill(D2SkillListStrc * pSkillsList) {
-    if (pSkillsList) {
-      return pSkillsList->pLeftSkill;
+    if (!pSkillsList) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3e9);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3e9);
-    exit(-1);
+    return pSkillsList->pLeftSkill;
     return pSkillsList->pLeftSkill;
 }
 
 D2SkillStrc * __fastcall GetRightSkill(D2SkillListStrc * pSkillsList) {
-    if (pSkillsList) {
-      return pSkillsList->pRightSkill;
+    if (!pSkillsList) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x40e);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x40e);
-    exit(-1);
+    return pSkillsList->pRightSkill;
     return pSkillsList->pRightSkill;
 }
 
@@ -400,17 +401,17 @@ void __stdcall SKILLS_FreeSkillList(D2UnitStrc * pUnit) {
       pMemoryToFree_00 = pNextSkill;
     }
 
-    D2_FREE_POOL(pUnit->pMemory, pMemoryToFree);
+    D2_FREE_POOL_AT(pUnit->pMemory, pMemoryToFree, ".\\SKILLS\\Skills.cpp", 0x508);
     pUnit->pSkillsList = 0;
 }
 
 int32_t __stdcall GetOwnerGUID(D2SkillStrc * pSkill) {
-    if (pSkill) {
-      return pSkill->nOwnerGUID;
+    if (!pSkill) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x637);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x637);
-    exit(-1);
+    return pSkill->nOwnerGUID;
     return pSkill->nOwnerGUID;
 }
 
@@ -953,12 +954,12 @@ int32_t __stdcall SKILL_GetMode(D2SkillStrc * pSkill) {
 }
 
 int __stdcall SKILLS_GetField0x10(D2SkillStrc * pSkill) {
-    if (pSkill) {
-      return pSkill->dwTargetInfo;
+    if (!pSkill) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa23);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa23);
-    exit(-1);
+    return pSkill->dwTargetInfo;
     return pSkill->dwTargetInfo;
 }
 
@@ -972,12 +973,12 @@ void __stdcall SKILLS_SetField0x10(D2SkillStrc * pSkill, int32_t dwParam) {
 }
 
 int __stdcall SKILLS_GetField0x14(D2SkillStrc * pSkill) {
-    if (pSkill) {
-      return pSkill->dwTargetType;
+    if (!pSkill) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa35);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa35);
-    exit(-1);
+    return pSkill->dwTargetType;
     return pSkill->dwTargetType;
 }
 
@@ -1001,42 +1002,42 @@ void __stdcall SKILLS_ClearFields0x10_0x14(D2SkillStrc * pSkill) {
 }
 
 int32_t __stdcall SKILL_GetParam1(D2SkillStrc * pSkill) {
-    if (pSkill) {
-      return pSkill->nPar1;
+    if (!pSkill) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa52);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa52);
-    exit(-1);
+    return pSkill->nPar1;
     return pSkill->nPar1;
 }
 
 int32_t __stdcall SKILL_GetParam2(D2SkillStrc * pSkill) {
-    if (pSkill) {
-      return pSkill->nPar2;
+    if (!pSkill) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa5b);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa5b);
-    exit(-1);
+    return pSkill->nPar2;
     return pSkill->nPar2;
 }
 
 int32_t __stdcall SKILL_GetParam3(D2SkillStrc * pSkill) {
-    if (pSkill) {
-      return pSkill->nPar3;
+    if (!pSkill) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa64);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa64);
-    exit(-1);
+    return pSkill->nPar3;
     return pSkill->nPar3;
 }
 
 int32_t __stdcall SKILL_GetParam4(D2SkillStrc * pSkill) {
-    if (pSkill) {
-      return pSkill->nPar4;
+    if (!pSkill) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa6d);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa6d);
-    exit(-1);
+    return pSkill->nPar4;
     return pSkill->nPar4;
 }
 
@@ -1577,12 +1578,12 @@ uint32_t __stdcall SKILLS_GetCharClassFromSkillId_Validated(int32_t eSkillId, in
 }
 
 int32_t __stdcall SKILL_GetQuantity(D2SkillStrc * pSkill) {
-    if (pSkill) {
-      return pSkill->nQuantity;
+    if (!pSkill) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xda4);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xda4);
-    exit(-1);
+    return pSkill->nQuantity;
     return pSkill->nQuantity;
 }
 
@@ -2922,9 +2923,9 @@ uint32_t __fastcall SKILLS_DescCalcCallback_Eval(uint8_t nCalcCode, D2SkillCalcC
     return uResult;
 }
 
-void __fastcall SKILLS_EvalSkillDescCalc_CurrentLevel(eD2Skills eSkill, uint8_t bParam, uint32_t nUnused, D2UnitStrc * * ppUnit) {
+int __fastcall SKILLS_EvalSkillDescCalc_CurrentLevel(eD2Skills eSkill, uint8_t bParam, uint32_t nUnused, D2UnitStrc * * ppUnit) {
     if (!ppUnit) {
-      return;
+      return 0;
     }
 
     D2UnitStrc* pUnit = *ppUnit;
@@ -2937,7 +2938,8 @@ void __fastcall SKILLS_EvalSkillDescCalc_CurrentLevel(eD2Skills eSkill, uint8_t 
       }
     }
 
-    SKILLDESC_EvalDescCalcValue(*ppUnit, bParam, eSkill, nSkillLevel);
+    nSkillLevel = SKILLDESC_EvalDescCalcValue(*ppUnit, bParam, eSkill, nSkillLevel);
+    return nSkillLevel;
 }
 
 uint32_t __fastcall SKILLS_EvalSkillDescCalc_Chained(eD2Skills eSkill, uint8_t bParam, uint8_t bCalcIndex, D2UnitStrc * * ppUnit) {
@@ -3146,7 +3148,7 @@ void __stdcall SKILLS_RemoveSkill(D2UnitStrc * pUnitStrc, eD2Skills dwParam2, in
         pSlotSkill->pNext = pSkillToRemove->pNext;
       }
 
-      D2_FREE_POOL(pUnitStrc->pMemory, pSkillToRemove);
+      D2_FREE_POOL_AT(pUnitStrc->pMemory, pSkillToRemove, ".\\SKILLS\\Skills.cpp", 0x4ac);
     }
 
     SKILLS_UpdatePassiveSkillStats(pUnitStrc, dwParam2);
@@ -3197,7 +3199,7 @@ D2SkillStrc * __stdcall AllocSkill(D2UnitStrc * pUnit, eD2Skills eSkill) {
       return nullptr;
     }
 
-    D2SkillStrc* pNewSkill = D2_NEW_POOL(pSkillsList->pMemory, D2SkillStrc);
+    D2SkillStrc* pNewSkill = D2_NEW_POOL_AT(pSkillsList->pMemory, D2SkillStrc, ".\\SKILLS\\Skills.cpp", 0x539);
     memset(pNewSkill, 0, 0x40);
     pNewSkill->pRecord = pSkillListStrc;
     if (pUnit->eUnitType == UNIT_MONSTER) {
@@ -3329,7 +3331,7 @@ void __stdcall SKILLS_AddOrRemoveItemSkill(D2UnitStrc * pUnit, int32_t nOwnerGUI
         pCurSkill->pNext = pNewSkill->pNext;
       }
 
-      D2_FREE_POOL(pUnit->pMemory, pNewSkill);
+      D2_FREE_POOL_AT(pUnit->pMemory, pNewSkill, ".\\SKILLS\\Skills.cpp", 0x5e7);
       return;
     }
 
@@ -3352,7 +3354,7 @@ void __stdcall SKILLS_AddOrRemoveItemSkill(D2UnitStrc * pUnit, int32_t nOwnerGUI
       pIterSkill = (D2UnitStrc*)pPrevSkill->nClassId;
     }
 
-    pNewSkill = D2_NEW_POOL(pSkillsList->pMemory, D2SkillStrc);
+    pNewSkill = D2_NEW_POOL_AT(pSkillsList->pMemory, D2SkillStrc, ".\\SKILLS\\Skills.cpp", 0x5fe);
     memset(pNewSkill, 0, 0x40);
     pNewSkill->pRecord = pSkillTxt;
     switch ((int)pSkillTxt->anim) {

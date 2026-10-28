@@ -42,18 +42,18 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2ChatDlgUnknown_0x10) == 0x10, "D2_NEW(D2ChatDlgUnknown_0x10): the 32-bit layout must be the 0x10 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2ChatDlgUnknown_0x10) == 0x10, "D2_NEW_AT(D2ChatDlgUnknown_0x10): the 32-bit layout must be the 0x10 bytes 1.14d allocates");
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -108,7 +108,7 @@ BOOL __stdcall CHATDLG_OnPressUserListNextLine(D2ControlMsg * pControlMsg) {
 
 // @sourcefile .\Src\ChatDlg.cpp
 D2ChatDlgUnknown_0x10 * __stdcall StoreChatMsg(LPRECT pRect, int32_t nParam, char * pString) {
-    D2ChatDlgUnknown_0x10* pNode = D2_NEW(D2ChatDlgUnknown_0x10);
+    D2ChatDlgUnknown_0x10* pNode = D2_NEW_AT(D2ChatDlgUnknown_0x10, ".\\Src\\ChatDlg.cpp", 0xc1d);
     pNode->pszText = 0;
     pNode->lpRect = (LPRECT)0x0;
     pNode->nLength = 0;
@@ -124,7 +124,7 @@ D2ChatDlgUnknown_0x10 * __stdcall StoreChatMsg(LPRECT pRect, int32_t nParam, cha
     }
 
     uint32_t pszCopy = Storm::Source::SSTR::SStrLen(pString);
-    char* szBufferOutput = (char*)D2_ALLOC(pszCopy + 1);
+    char* szBufferOutput = (char*)D2_ALLOC_AT(pszCopy + 1, ".\\Src\\ChatDlg.cpp", 0xc28);
     pNode->pszText = szBufferOutput;
     if (szBufferOutput) {
       Storm::Source::SSTR::SStrCopy(szBufferOutput, pString, 0x7fffffff);
@@ -141,10 +141,10 @@ void CHATDLG_FreeChatMsgNode(void * * pParam) {
       return;
     }
     if (*pParam) {
-      D2_FREE(*pParam);
+      D2_FREE_AT(*pParam, ".\\Src\\ChatDlg.cpp", 0xc38);
     }
 
-    D2_FREE(pParam);
+    D2_FREE_AT(pParam, ".\\Src\\ChatDlg.cpp", 0xc39);
 }
 
 void StoreData(LPRECT pRect, int32_t nParam, char * szText) {
@@ -187,11 +187,11 @@ void __stdcall CHATDLG_ProcessPendingMessages() {
       if ((char*)*pMemoryToFree) {
         Launcher::CHATDLG_AddMultiLineText(gpChatMessagesTextBox, 0, (char*)*pMemoryToFree, pMemoryToFree[1]);
         if ((void*)*pMemoryToFree) {
-          D2_FREE((void*)*pMemoryToFree);
+          D2_FREE_AT((void*)*pMemoryToFree, ".\\Src\\ChatDlg.cpp", 0xc38);
         }
       }
 
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\Src\\ChatDlg.cpp", 0xc39);
       D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ScrollToLine(gpChatMessagesTextBox, 0);
     }
 }
@@ -241,7 +241,7 @@ void __fastcall CHATDLG_DisplayTimestampedMessage(uint32_t nUnixTime, int32_t ps
 
 // @sourcefile .\Src\ChatDlg.cpp
 void __stdcall CHATDLG_EnqueueClearMessage() {
-    uint32_t* pNode = (uint32_t*)D2_ALLOC(0x10);
+    uint32_t* pNode = (uint32_t*)D2_ALLOC_AT(0x10, ".\\Src\\ChatDlg.cpp", 0xc1d);
     *pNode = 0;
     pNode[1] = 0;
     pNode[2] = 0;
@@ -720,12 +720,12 @@ int32_t __stdcall CHATDLG_GetLadderFilterForTab(int32_t nLadderTab, uint32_t nCu
     if (nCurrentFilterMode - 0x13 < 8) {
       return nLadderTab + 0x13;
     }
-    if (nCurrentFilterMode - 0x1b < 8) {
-      return nLadderTab + 0x1b;
+    if (!(nCurrentFilterMode - 0x1b < 8)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1a23);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1a23);
-    exit(-1);
+    return nLadderTab + 0x1b;
 }
 
 // OnPress handler of the ladder board's overall (all classes) tab: disables the ladder buttons, highlights gpCtlLadderBtnOverall, and unless the filter byte 0070cd62 already shows tab 0 (value 0 or 9), sets gnLadderListRowCount to 1000 (0x3e8), clears the board, recomputes the filter via CHATDLG_GetLadderFilterForTab(0, g_nLadderFilterMode), resets the selected rank (0070cd7c) and flags a reload; returns 1.
@@ -1037,7 +1037,7 @@ void __stdcall CHATDLG_FreePlayerNameList() {
     while (pMemoryToFree) {
       void* pvVar1;
       pvVar1 = *(void**)((int)pMemoryToFree + 0x204);
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\Src\\ChatDlg.cpp", 0x1c01);
       pMemoryToFree = pvVar1;
     }
 
@@ -1860,7 +1860,7 @@ void __fastcall CHATDLG_StorePlayerName(uint32_t nPlayerId, uint32_t nDataLength
       }
     }
 
-    pNode = (char*)D2_ALLOC(0x208);
+    pNode = (char*)D2_ALLOC_AT(0x208, ".\\Src\\ChatDlg.cpp", 0x1bae);
     void* pInsertAfter;
     pInsertAfter = gpChatPlayerNameListHead;
     bool bEmpty;

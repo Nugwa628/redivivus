@@ -73,7 +73,7 @@ void __fastcall SOUNDSMP_SetVolume(struct D2SoundSmpStrc * ppSoundSmp, int nVolu
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 int __fastcall SOUNDSMP_GetVolume(struct D2SoundSmpStrc * pSoundSmp);
 void __fastcall SOUNDSMP_SetPan(struct D2SoundSmpStrc * ppSoundSmp, int32_t nPan);
-void SOUNDSMP_Set3DPosition(struct D2SoundSmpStrc * pThis, float nSoundHandle, float dwParam, float pD2SoundsTxt);
+void __thiscall SOUNDSMP_Set3DPosition(struct D2SoundSmpStrc * pThis, float nSoundHandle, float dwParam, float pD2SoundsTxt);
 uint32_t __fastcall SOUNDSMP_GetStreamProgress(struct D2SoundSmpStrc * nParam);
 void __fastcall SOUNDSMP_SetFrequency(int32_t nParam, uint32_t dwParam);
 void __fastcall SOUNDSMP_SetMinDistance(struct D2SoundSmpStrc * nParam, int32_t dwParam);

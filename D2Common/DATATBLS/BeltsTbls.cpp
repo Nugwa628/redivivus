@@ -348,12 +348,12 @@ void __fastcall LoadBeltsTxt(D2PoolManagerStrc * pMemory) {
     belts[0x40].nOffset = 0x104;
     belts[0x41].szName = "end";
     pTxtBelts = (D2BeltsTxt*)DataTbls::CompileTxt(pMemory, "belts", belts, &nTxtBeltsSize, 0x108);
-    /* "nSize / NUM_GAME_RESOLUTIONS == NUM_BELT_STATS" */ if (nTxtBeltsSize / 2 == 7) {
-      return;
+    /* "nSize / NUM_GAME_RESOLUTIONS == NUM_BELT_STATS" */ if (nTxtBeltsSize / 2 != 7) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6a);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6a);
-    exit(-1);
+    return;
 }
 
 void __stdcall FreeBeltsTxt() {
@@ -367,12 +367,12 @@ D2BeltsTxt * __stdcall TXT_Belts_GetLine(int nIndex) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x79);
       exit(-1);
     } else {
-      if (pTxtBelts + nIndex) {
-        return pTxtBelts + nIndex;
+      if (!(pTxtBelts + nIndex)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x7a);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x7a);
-      exit(-1);
+      return pTxtBelts + nIndex;
     }
 }
 
@@ -410,16 +410,16 @@ void __stdcall GetInvRectFromBeltsTxt(int32_t nIndex, int32_t bHigherRes, int32_
       exit(-1);
     } else {
       pBeltEntry = pTxtBelts[bHigherRes * 7 + nIndex].beltBoxes + nBoxId;
-      if (pBeltEntry) {
-        *pInvRect = pBeltEntry->nLeft;
-        pInvRect[1] = pBeltEntry->nRight;
-        pInvRect[2] = pBeltEntry->nTop;
-        pInvRect[3] = pBeltEntry->nBottom;
-        return;
+      if (!pBeltEntry) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x8f);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x8f);
-      exit(-1);
+      *pInvRect = pBeltEntry->nLeft;
+      pInvRect[1] = pBeltEntry->nRight;
+      pInvRect[2] = pBeltEntry->nTop;
+      pInvRect[3] = pBeltEntry->nBottom;
+      return;
     }
 }
 

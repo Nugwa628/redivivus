@@ -121,12 +121,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
 
@@ -280,7 +280,12 @@ uint16_t * __fastcall UI_RemoveColorCodesFromString(uint16_t * wszText) {
     uint16_t* wszMatch;
     int32_t iVar1;
     int32_t nLength = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszText);
-    if (nLength < 500) {
+    if (!(nLength < 500)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x37f);
+      exit(-1);
+    }
+
+    {
       uint16_t* wszColorCode;
       wszColorCode = D2Lang::StrTable::strtable::GetLocaleString(0xf9a);
       nLength = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszColorCode);
@@ -293,9 +298,6 @@ uint16_t * __fastcall UI_RemoveColorCodesFromString(uint16_t * wszText) {
 
       return wszText;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x37f);
-    exit(-1);
 }
 
 uint16_t * __fastcall UI_WrapStringWithColorCodes(uint16_t * wszText, char cStartColor, char cEndColor) {
@@ -633,13 +635,13 @@ void __fastcall UI_FormatItemNameWithQuality(D2UnitStrc * pUnit, uint16_t * wszT
 
       AppendAsWideChar(&__frame0.wszGoldName, (char)nColorCode);
       nStrLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(&__frame0.wszGoldName);
-      if (nStrLen < nMaxLength) {
-        D2Lang::Unicode::UNISYS::STRING_CopyWideString(pTmpStr, &__frame0.wszGoldName);
-        return;
+      if (!(nStrLen < nMaxLength)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5e0);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5e0);
-      exit(-1);
+      D2Lang::Unicode::UNISYS::STRING_CopyWideString(pTmpStr, &__frame0.wszGoldName);
+      return;
     } else {
       __frame0.wszItemName = L'\0';
       Fog::File::CONTAINER_InitializeBuffer(__frame0.wszItemNameTail, 2, 0x7f, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
@@ -652,13 +654,13 @@ void __fastcall UI_FormatItemNameWithQuality(D2UnitStrc * pUnit, uint16_t * wszT
 
       AppendAsWideChar(&__frame0.wszItemName, (char)nColorCode);
       nStrLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(&__frame0.wszItemName);
-      if (nStrLen < nMaxLength) {
-        D2Lang::Unicode::UNISYS::STRING_CopyWideString(pTmpStr, &__frame0.wszItemName);
-        return;
+      if (!(nStrLen < nMaxLength)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5eb);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5eb);
-      exit(-1);
+      D2Lang::Unicode::UNISYS::STRING_CopyWideString(pTmpStr, &__frame0.wszItemName);
+      return;
     }
 }
 
@@ -1306,12 +1308,12 @@ void UI_SetMultipleButtonKeyBindings(D2UIKeyBindingSetStrc * pnButtonIndices) {
 }
 
 BOOL __fastcall GetUIFlag(eD2UIvars eUI) {
-    if (UI_RECIPESCROLL >= eUI) {
-      return (&GFX_bShowUIFlag.Game)[eUI];
+    if (!(UI_RECIPESCROLL >= eUI)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc34);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc34);
-    exit(-1);
+    return (&GFX_bShowUIFlag.Game)[eUI];
     return (&GFX_bShowUIFlag.Game)[eUI];
 }
 
@@ -1851,8 +1853,8 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
           while (pWordWrapLine) {
             Dialog::AddStringData(Dialog::gpDialog, pWordWrapLine->wszLine, 0x18, 0, 4, 1, nullptr, 0);
             pNextWordWrapLine = pWordWrapLine->pNext;
-            D2_FREE(pWordWrapLine->wszLine);
-            D2_FREE(pWordWrapLine);
+            D2_FREE_AT(pWordWrapLine->wszLine, ".\\UI\\ui.cpp", 0x1827);
+            D2_FREE_AT(pWordWrapLine, ".\\UI\\ui.cpp", 0x1828);
             pWordWrapLine = pNextWordWrapLine;
             nTransactionType = (int32_t)pAllocCtx;
           }
@@ -2011,7 +2013,7 @@ void * __fastcall UI_LoadFileToMemory(LPCSTR szFilename, size_t * pSize) {
     DWORD dwFileSize = GetFileSize(hFile, (LPDWORD)0x0);
     size_t* pSizeTmp = __frame0.pSizeOut;
     *__frame0.pSizeOut = dwFileSize;
-    void* pBuffer = D2_ALLOC(dwFileSize);
+    void* pBuffer = D2_ALLOC_AT(dwFileSize, ".\\UI\\ui.cpp", 0x18ad);
     memset(pBuffer, 0, *pSizeTmp);
     /* LPOVERLAPPED lpOverlapped for ReadFile */ /* LPDWORD lpNumberOfBytesRead for ReadFile */ /* DWORD nNumberOfBytesToRead for ReadFile */ /* LPVOID lpBuffer for ReadFile */ /* HANDLE hFile for ReadFile */ ReadFile(hFile, pBuffer, *pSizeTmp, &__frame0.dwBytesRead, (LPOVERLAPPED)0x0);
     /* HANDLE hObject for CloseHandle */ CloseHandle(hFile);
@@ -2042,12 +2044,12 @@ bool __stdcall UI_ShowPopupDialog() {
 
 int UI_GetCursorFrameOffset(int32_t nCursorIndex) {
     if (gnCursorDataCount == 7) {
-      if (nCursorIndex < 7) {
-        return CursorData[nCursorIndex].nFrameOffset;
+      if (!(nCursorIndex < 7)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x90);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x90);
-      exit(-1);
+      return CursorData[nCursorIndex].nFrameOffset;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8f);
       exit(-1);
@@ -2056,12 +2058,12 @@ int UI_GetCursorFrameOffset(int32_t nCursorIndex) {
 
 int32_t UI_GetCursorMaxFrames(int32_t nCursorIndex) {
     if (gnCursorDataCount == 7) {
-      if (nCursorIndex < 7) {
-        return CursorData[nCursorIndex].nMaxFrames << 8;
+      if (!(nCursorIndex < 7)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9b);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9b);
-      exit(-1);
+      return CursorData[nCursorIndex].nMaxFrames << 8;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9a);
       exit(-1);
@@ -2218,15 +2220,15 @@ void __stdcall UI_AnimateCursorForward() {
       return;
     }
     if (ItemTypeOnHand != 2) {
-      if (ItemTypeOnHand == 5) {
-        ItemTypeOnHand = 1;
-        Cursor::nCursorDataIndex = nSavedCursorIndex;
-        gCursorAnimationFrame = 0;
-        return;
+      if (ItemTypeOnHand != 5) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1e9);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1e9);
-      exit(-1);
+      ItemTypeOnHand = 1;
+      Cursor::nCursorDataIndex = nSavedCursorIndex;
+      gCursorAnimationFrame = 0;
+      return;
     }
 
     ItemTypeOnHand = 4;
@@ -2260,27 +2262,26 @@ void __stdcall UI_UpdateCursorAnimation() {
 
     DWORD dwTickCount = GetTickCount();
     if (gnCursorDataCount == 7) {
-      if (Cursor::nCursorDataIndex < 7) {
-        if (CursorData[Cursor::nCursorDataIndex].bAnimated && gdwCursorAnimLastTick + 0x10 < dwTickCount) {
-          gdwCursorAnimLastTick = dwTickCount;
-          if (ItemTypeOnHand == 3) {
-            UI_AnimateCursorBackward();
-          } else {
-            UI_AnimateCursorForward();
-          }
+      if (!(Cursor::nCursorDataIndex < 7)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x85);
+        exit(-1);
+      }
+      if (CursorData[Cursor::nCursorDataIndex].bAnimated && gdwCursorAnimLastTick + 0x10 < dwTickCount) {
+        gdwCursorAnimLastTick = dwTickCount;
+        if (ItemTypeOnHand == 3) {
+          UI_AnimateCursorBackward();
+        } else {
+          UI_AnimateCursorForward();
         }
-        if (!(ItemTypeOnHand == 1 && gnCursorAnimStartTick + 5000U < dwTickCount)) {
-          return;
-        }
-
-        ItemTypeOnHand = 2;
-        Cursor::nCursorDataIndex = 2;
-        gCursorAnimationFrame = 0;
+      }
+      if (!(ItemTypeOnHand == 1 && gnCursorAnimStartTick + 5000U < dwTickCount)) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x85);
-      exit(-1);
+      ItemTypeOnHand = 2;
+      Cursor::nCursorDataIndex = 2;
+      gCursorAnimationFrame = 0;
+      return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x84);
       exit(-1);
@@ -2345,16 +2346,16 @@ void __stdcall DrawCursor() {
       if (nResult) {
         nSpriteLoaded = D2CMP::SRC::SpriteCache::SPRITECACHE_GetOrLoadSprite(&sGfxData, 0, 1);
         if (nSpriteLoaded) {
-          if (sGfxData.pDC6Block) {
-            nDimension = D2CMP::SRC::CelCmp::GetDC6Height(sGfxData.pDC6Block);
-            nSpriteLoaded = MouseY - (nDimension >> 1);
-            nDimension = D2CMP::SRC::CelCmp::GetDC6Width(sGfxData.pDC6Block);
-            Engine::GfxInfo::DrawItemGfx(pCursorItem, gnCursorType - (nDimension >> 1) + MouseX, nSpriteLoaded);
-            return;
+          if (!sGfxData.pDC6Block) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x27d);
+            exit(-1);
           }
 
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x27d);
-          exit(-1);
+          nDimension = D2CMP::SRC::CelCmp::GetDC6Height(sGfxData.pDC6Block);
+          nSpriteLoaded = MouseY - (nDimension >> 1);
+          nDimension = D2CMP::SRC::CelCmp::GetDC6Width(sGfxData.pDC6Block);
+          Engine::GfxInfo::DrawItemGfx(pCursorItem, gnCursorType - (nDimension >> 1) + MouseX, nSpriteLoaded);
+          return;
         }
       }
     }
@@ -2411,16 +2412,16 @@ void __stdcall UI_DrawCursorWithItem() {
       if (nClampedY) {
         nCursorIndex = D2CMP::SRC::SpriteCache::SPRITECACHE_GetOrLoadSprite(&sGfxData, 0, 1);
         if (nCursorIndex) {
-          if (sGfxData.pDC6Block) {
-            nDimension = D2CMP::SRC::CelCmp::GetDC6Height(sGfxData.pDC6Block);
-            nCursorIndex = MouseY - (nDimension >> 1);
-            nDimension = D2CMP::SRC::CelCmp::GetDC6Width(sGfxData.pDC6Block);
-            Engine::GfxInfo::DrawItemGfx(pCursorItem, gnCursorType - (nDimension >> 1) + MouseX, nCursorIndex);
-            return;
+          if (!sGfxData.pDC6Block) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 699);
+            exit(-1);
           }
 
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 699);
-          exit(-1);
+          nDimension = D2CMP::SRC::CelCmp::GetDC6Height(sGfxData.pDC6Block);
+          nCursorIndex = MouseY - (nDimension >> 1);
+          nDimension = D2CMP::SRC::CelCmp::GetDC6Width(sGfxData.pDC6Block);
+          Engine::GfxInfo::DrawItemGfx(pCursorItem, gnCursorType - (nDimension >> 1) + MouseX, nCursorIndex);
+          return;
         }
       }
     }
@@ -2453,28 +2454,28 @@ void __fastcall SetMouseXY(int32_t x, int32_t y) {
       exit(-1);
     } else {
       uint32_t bIsFullscreen;
-      if (-1 < y) {
-        bIsFullscreen = D2gfx::D2GFX::IsFullscreen();
-        if (!bIsFullscreen) {
-          lpRect = &WindowRect_lcl;
-          /* LPRECT lpRect for GetWindowRect */ hWnd = D2gfx::D2GFX::GetHwnd();
-          /* HWND hWnd for GetWindowRect */ GetWindowRect(hWnd, lpRect);
-          /* int nIndex for GetSystemMetrics */ iCaptionAreaHeight = GetSystemMetrics(4);
-          /* int nIndex for GetSystemMetrics */ iFixedFrameWidth = GetSystemMetrics(7);
-          /* int Y for SetCursorPos */ /* int X for SetCursorPos */ SetCursorPos(iFixedFrameWidth + WindowRect_lcl.left + x, iCaptionAreaHeight + WindowRect_lcl.top + y);
-          MouseY = y;
-          MouseX = x;
-          return;
-        }
+      if (!(-1 < y)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x310);
+        exit(-1);
+      }
 
-        /* int Y for SetCursorPos */ /* int X for SetCursorPos */ SetCursorPos(x, y);
+      bIsFullscreen = D2gfx::D2GFX::IsFullscreen();
+      if (!bIsFullscreen) {
+        lpRect = &WindowRect_lcl;
+        /* LPRECT lpRect for GetWindowRect */ hWnd = D2gfx::D2GFX::GetHwnd();
+        /* HWND hWnd for GetWindowRect */ GetWindowRect(hWnd, lpRect);
+        /* int nIndex for GetSystemMetrics */ iCaptionAreaHeight = GetSystemMetrics(4);
+        /* int nIndex for GetSystemMetrics */ iFixedFrameWidth = GetSystemMetrics(7);
+        /* int Y for SetCursorPos */ /* int X for SetCursorPos */ SetCursorPos(iFixedFrameWidth + WindowRect_lcl.left + x, iCaptionAreaHeight + WindowRect_lcl.top + y);
         MouseY = y;
         MouseX = x;
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x310);
-      exit(-1);
+      /* int Y for SetCursorPos */ /* int X for SetCursorPos */ SetCursorPos(x, y);
+      MouseY = y;
+      MouseX = x;
+      return;
     }
 }
 
@@ -4867,7 +4868,12 @@ void __stdcall DRAW_UI_StatWindow_II(int32_t bUpperEnabled, int32_t bLowerEnable
     pClearPtr = D2Lang::StrTable::strtable::GetLocaleString(0x103f);
     D2Win::Src::D2WinFont::DRAW_text(pClearPtr, nX, nMonsterIdx, dwColor, bMultiLineCenter);
     nMonsterIdx = GAME::Select::SELECT_GetConstant13_X();
-    if (-1 < nMonsterIdx && nMonsterIdx < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonsterIdx) {
+    if (!(-1 < nMonsterIdx && nMonsterIdx < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonsterIdx)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xec);
+      exit(-1);
+    }
+
+    {
       uint16_t* wszFmt;
       pClearPtr = D2Lang::StrTable::strtable::GetLocaleString(sgptDataTable->pTxtMonStats[nMonsterIdx].NameStr);
       wszFmt = D2Lang::StrTable::strtable::GetLocaleString(0x2777);
@@ -4875,9 +4881,6 @@ void __stdcall DRAW_UI_StatWindow_II(int32_t bUpperEnabled, int32_t bLowerEnable
       D2Win::Src::D2WinFont::DRAW_text(wszMonNameTooltip, gaStatWindowRowLayout[nBtnIndex * 6 + 4] + gnPanelOffsetX, gaStatWindowRowLayout[nBtnIndex * 6 + 5] + gnPanelOffsetY - 0x1e0 + ScreenSizeY, 0, 0);
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xec);
-    exit(-1);
 }
 
 void __stdcall DRAW_UI_StatWindow_I() {

@@ -168,7 +168,7 @@ void __stdcall UIMENU_BackgroundAndExpansionText();
 int16_t __stdcall MAINMENU_FilterNewlineKey(int16_t nParam);
 int __stdcall MAINMENU_PollRevisionCheckPump(int nFrameIndex);
 BOOL __stdcall MAINMENU_OnPressCreateBattleNetAccount(struct D2ControlMsg * pControlMsg);
-void __stdcall MAINMENU_ScrollListExUp(struct D2ControlMsg * pControlMsg);
+BOOL __stdcall MAINMENU_ScrollListExUp(struct D2ControlMsg * pControlMsg);
 BOOL __stdcall MAINMENU_ScrollListExDown(struct D2ControlMsg * pControlMsg);
 void __stdcall UIMENU_AreYouSureToCreateHardcoreCharacter();
 // Validates character name input as user types. First character must be a-z or A-Z (rejects '-' and '_' at start). If nTextLen is 0 (first char position), rejects non-alpha. Also rejects consecutive '-' or '_' characters by checking if previous character was the same special char. Returns 1 if valid, 0 if invalid.
@@ -235,7 +235,7 @@ void __stdcall GetAndDispatchAllPossible();
 void __stdcall UIMENU_PlayCutScene(char * szSceneName, struct D2ControlMsg * pControlMsg);
 BOOL __stdcall MAINMENU_OnPressSetInsertPlayCd(struct D2ControlMsg * pControlMsg);
 BOOL __stdcall MAINMENUS_OnPressSetInsertPlayCd_ForCinematicDisc(struct D2ControlMsg * pControlMsg);
-void __stdcall MAINMENU_ShowCinematicsMenuAndSetFlag(struct D2ControlMsg * pControlMsg);
+BOOL __stdcall MAINMENU_ShowCinematicsMenuAndSetFlag(struct D2ControlMsg * pControlMsg);
 int __stdcall MAINMENU_PollDisconnectFlagPump(int nFrameIndex);
 void __stdcall UIMENU_PleaseInsertCinematicDiscWithCancelAndNotWorkingOkButtons();
 bool fpRequiredUserAction();

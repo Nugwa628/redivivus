@@ -1505,7 +1505,12 @@ BOOL __fastcall SpawnRandomMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int3
     if (sCreateParams.nClassId == -1) {
       return 0;
     }
-    if (nMonSearchAttempts < (int)nLevelMonCount) {
+    if (!(nMonSearchAttempts < (int)nLevelMonCount)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x507);
+      exit(-1);
+    }
+
+    {
       D2UnitStrc* pSpawnedUnit;
       sCreateParams.pRoom = pRoomSaved;
       sCreateParams.nGUID = 0;
@@ -1519,9 +1524,6 @@ BOOL __fastcall SpawnRandomMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int3
       pSpawnedUnit = CreateMonster(&sCreateParams);
       return (uint32_t)(pSpawnedUnit != 0);
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x507);
-    exit(-1);
     return 0;
 }
 

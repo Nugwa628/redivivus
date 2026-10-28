@@ -88,21 +88,21 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2AutomapStrc) == 0x2804, "D2_NEW(D2AutomapStrc): the 32-bit layout must be the 0x2804 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2AutomapStrc) == 0x2804, "D2_NEW_AT(D2AutomapStrc): the 32-bit layout must be the 0x2804 bytes 1.14d allocates");
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2AutomapLayerStrc) == 0x1c, "D2_NEW(D2AutomapLayerStrc): the 32-bit layout must be the 0x1c bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2AutomapLayerStrc) == 0x1c, "D2_NEW_AT(D2AutomapLayerStrc): the 32-bit layout must be the 0x1c bytes 1.14d allocates");
 
 
 namespace D2Client::UI::Automap {
@@ -252,15 +252,15 @@ void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, D2AutomapCellStrc * *
     } else {
       D2AutomapCellStrc* pRightChild;
       pRightChild = pNode->pMore;
-      if (pRightChild) {
-        pNode->pMore = pRightChild->pLess;
-        pRightChild->pLess = pNode;
-        *ppRootNode = pRightChild;
-        return;
+      if (!pRightChild) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x234);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x234);
-      exit(-1);
+      pNode->pMore = pRightChild->pLess;
+      pRightChild->pLess = pNode;
+      *ppRootNode = pRightChild;
+      return;
     }
 }
 
@@ -272,15 +272,15 @@ void __fastcall AUTOMAP_RotateCellLeft(uint32_t dwUnused, D2AutomapCellStrc * * 
     } else {
       D2AutomapCellStrc* pLeftChild;
       pLeftChild = pNode->pLess;
-      if (pLeftChild) {
-        pNode->pLess = pLeftChild->pMore;
-        pLeftChild->pMore = pNode;
-        *ppRootNode = pLeftChild;
-        return;
+      if (!pLeftChild) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
-      exit(-1);
+      pNode->pLess = pLeftChild->pMore;
+      pLeftChild->pMore = pNode;
+      *ppRootNode = pLeftChild;
+      return;
     }
 }
 
@@ -294,15 +294,15 @@ void __stdcall AUTOMAP_RebalanceTreeRight(D2AutomapCellStrc * * ppRootNode) {
       pNode->wWeight = 0;
       pChild->wWeight = 0;
       pChild = *ppChildSlot;
-      if (pChild) {
-        *ppChildSlot = pChild->pMore;
-        pChild->pMore = pNode;
-        *ppRootNode = pChild;
-        return;
+      if (!pChild) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
-      exit(-1);
+      *ppChildSlot = pChild->pMore;
+      pChild->pMore = pNode;
+      *ppRootNode = pChild;
+      return;
     } else if (pChild->wWeight != 1) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x259);
       exit(-1);
@@ -327,15 +327,15 @@ void __stdcall AUTOMAP_RebalanceTreeRight(D2AutomapCellStrc * * ppRootNode) {
       pGrandChild->wWeight = 0;
       AUTOMAP_RotateCellRight(nBalanceFactor, ppChildSlot);
       pChild = *ppChildSlot;
-      if (pChild) {
-        *ppChildSlot = pChild->pMore;
-        pChild->pMore = pNode;
-        *ppRootNode = pChild;
-        return;
+      if (!pChild) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
-      exit(-1);
+      *ppChildSlot = pChild->pMore;
+      pChild->pMore = pNode;
+      *ppRootNode = pChild;
+      return;
     }
 }
 
@@ -373,15 +373,15 @@ void __stdcall AUTOMAP_RebalanceTreeLeft(D2AutomapCellStrc * * ppCell) {
       pRightLeft->wWeight = 0;
       AUTOMAP_RotateCellLeft(nGrandChildWeight, ppMore);
       pRight = *ppMore;
-      if (pRight) {
-        *ppMore = pRight->pLess;
-        pRight->pLess = pCell;
-        *ppCell = pRight;
-        return;
+      if (!pRight) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x234);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x234);
-      exit(-1);
+      *ppMore = pRight->pLess;
+      pRight->pLess = pCell;
+      *ppCell = pRight;
+      return;
     } else if (pRight->wWeight != 1) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x294);
       exit(-1);
@@ -390,15 +390,15 @@ void __stdcall AUTOMAP_RebalanceTreeLeft(D2AutomapCellStrc * * ppCell) {
     pCell->wWeight = 0;
     pRight->wWeight = 0;
     pRight = *ppMore;
-    if (pRight) {
-      *ppMore = pRight->pLess;
-      pRight->pLess = pCell;
-      *ppCell = pRight;
-      return;
+    if (!pRight) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x234);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x234);
-    exit(-1);
+    *ppMore = pRight->pLess;
+    pRight->pLess = pCell;
+    *ppCell = pRight;
+    return;
 }
 
 // AUTOMAP_InsertCellIntoTree - Inserts an automap cell into an AVL tree.
@@ -516,7 +516,7 @@ D2AutomapCellStrc * __stdcall AUTOMAP_AllocCell() {
     do {
       if (!pAutomap) {
         alloc_new_block:
-        pAutomap = D2_NEW(D2AutomapStrc);
+        pAutomap = D2_NEW_AT(D2AutomapStrc, ".\\UI\\automap.cpp", 0x35d);
         memset(pAutomap, 0, 0x2804);
         pNewListHead = pAutomap;
         if (pDVar2) {
@@ -589,20 +589,19 @@ void __stdcall AUTOMAP_RevealTile(D2RoomExStrc * pRoomEx, D2AutomapCellStrc * pA
     nX /= 10;
     if (nY + 0x8000U < 0x10000) {
       if (nX + 0x8000U < 0x10000) {
-        if (nCellNo + 0x8000U < 0x10000) {
-          if (0xf < pTileData->nTileType) {
-            nX += 0x18;
-          }
-
-          pAutomapCell1->nCellNo = (short int)nCellNo;
-          pAutomapCell1->xPixel = (short int)nY;
-          pAutomapCell1->yPixel = (short int)nX;
-          AUTOMAP_InsertCellIntoTree(pAutomapCell1, pAutomapCell);
-          return;
+        if (!(nCellNo + 0x8000U < 0x10000)) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x393);
+          exit(-1);
+        }
+        if (0xf < pTileData->nTileType) {
+          nX += 0x18;
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x393);
-        exit(-1);
+        pAutomapCell1->nCellNo = (short int)nCellNo;
+        pAutomapCell1->xPixel = (short int)nY;
+        pAutomapCell1->yPixel = (short int)nX;
+        AUTOMAP_InsertCellIntoTree(pAutomapCell1, pAutomapCell);
+        return;
       } else {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x392);
         exit(-1);
@@ -628,16 +627,16 @@ void __stdcall AUTOMAP_AddCellForUnit(int32_t nParam, D2AutomapCellStrc * pAutom
     int32_t nTargetY = D2Common::Units::GetTargetY(pUnit);
     if (nTargetX / 10 + 0x8001U < 0x10000) {
       if (nTargetY / 10 + 0x7ffdU < 0x10000) {
-        if (nParam + 0x8000U < 0x10000) {
-          pAutomapCell1->nCellNo = (short int)nParam;
-          pAutomapCell1->xPixel = (short int)(nTargetX / 10) + 1;
-          pAutomapCell1->yPixel = (short int)(nTargetY / 10) - 3;
-          AUTOMAP_InsertCellIntoTree(pAutomapCell1, pAutomapCell);
-          return;
+        if (!(nParam + 0x8000U < 0x10000)) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3c7);
+          exit(-1);
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3c7);
-        exit(-1);
+        pAutomapCell1->nCellNo = (short int)nParam;
+        pAutomapCell1->xPixel = (short int)(nTargetX / 10) + 1;
+        pAutomapCell1->yPixel = (short int)(nTargetY / 10) - 3;
+        AUTOMAP_InsertCellIntoTree(pAutomapCell1, pAutomapCell);
+        return;
       } else {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3c6);
         exit(-1);
@@ -878,7 +877,7 @@ void __stdcall AUTOMAP_SaveCurrentLayer() {
     if (!sEntry.dwFloorDataSize) {
       if (sEntry.dwWallDataSize) {
         serialize_walls:
-        pClientAutomapCellActual = D2_ALLOC(sEntry.dwWallDataSize);
+        pClientAutomapCellActual = D2_ALLOC_AT(sEntry.dwWallDataSize, ".\\UI\\automap.cpp", 0x4f1);
         sEntry.pWallData = pClientAutomapCellActual;
         AUTOMAP_SerializeCellTree(sgpAutomapLayerEx->pWalls);
         goto serialize_objects_if_any;
@@ -890,7 +889,7 @@ void __stdcall AUTOMAP_SaveCurrentLayer() {
         return;
       }
     } else {
-      pClientAutomapCellActual = D2_ALLOC(sEntry.dwFloorDataSize);
+      pClientAutomapCellActual = D2_ALLOC_AT(sEntry.dwFloorDataSize, ".\\UI\\automap.cpp", 0x4ea);
       sEntry.pFloorData = pClientAutomapCellActual;
       AUTOMAP_SerializeCellTree(sgpAutomapLayerEx->pFloors);
       if (sEntry.dwWallDataSize) {
@@ -900,7 +899,7 @@ void __stdcall AUTOMAP_SaveCurrentLayer() {
       serialize_objects_if_any:
       if (sEntry.dwObjectDataSize) {
         serialize_objects:
-        pClientAutomapCellActual = D2_ALLOC(sEntry.dwObjectDataSize);
+        pClientAutomapCellActual = D2_ALLOC_AT(sEntry.dwObjectDataSize, ".\\UI\\automap.cpp", 0x4f8);
         sEntry.pObjectData = pClientAutomapCellActual;
         AUTOMAP_SerializeCellTree(sgpAutomapLayerEx->pObjects);
       }
@@ -909,25 +908,25 @@ void __stdcall AUTOMAP_SaveCurrentLayer() {
       }
     }
 
-    pClientAutomapCellActual = D2_ALLOC(sEntry.dwExtraDataSize);
+    pClientAutomapCellActual = D2_ALLOC_AT(sEntry.dwExtraDataSize, ".\\UI\\automap.cpp", 0x4ff);
     sEntry.pExtraData = pClientAutomapCellActual;
     AUTOMAP_SerializeCellTree(sgpAutomapLayerEx->pExtras);
     write_and_free:
     AUTOMAP_SaveLayerToFile(&sEntry);
     if (sEntry.pFloorData) {
-      D2_FREE(sEntry.pFloorData);
+      D2_FREE_AT(sEntry.pFloorData, ".\\UI\\automap.cpp", 0x509);
     }
     if (sEntry.pWallData) {
-      D2_FREE(sEntry.pWallData);
+      D2_FREE_AT(sEntry.pWallData, ".\\UI\\automap.cpp", 0x50a);
     }
     if (sEntry.pObjectData) {
-      D2_FREE(sEntry.pObjectData);
+      D2_FREE_AT(sEntry.pObjectData, ".\\UI\\automap.cpp", 0x50b);
     }
     if (!sEntry.pExtraData) {
       return;
     }
 
-    D2_FREE(sEntry.pExtraData);
+    D2_FREE_AT(sEntry.pExtraData, ".\\UI\\automap.cpp", 0x50c);
 }
 
 // @sourcefile .\UI\automap.cpp
@@ -946,7 +945,7 @@ void __stdcall AUTOMAP_FreeCurrentLayerCells() {
       }
 
       pNextCell = pMemoryToFree->pNext;
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\UI\\automap.cpp", 0x51e);
       pSavedLayer = sgpAutomapLayerEx;
       pMemoryToFree = pNextCell;
     }
@@ -1054,7 +1053,7 @@ void __stdcall AUTOMAP_LoadLayerFromFile() {
           return;
         }
         if (sFileEntry.dwFloorDataSize) {
-          nErrorAddress = D2_ALLOC(sFileEntry.dwFloorDataSize);
+          nErrorAddress = D2_ALLOC_AT(sFileEntry.dwFloorDataSize, ".\\UI\\automap.cpp", 0x575);
           nWordCount = sFileEntry.dwFloorDataSize >> 1;
           __frame1.nWordLimit = nWordCount;
           Fog::Source::SFile::thunk_ReadFile(hFileHandle, nErrorAddress, sFileEntry.dwFloorDataSize, &dwBytesRead, (LPOVERLAPPED)0x0);
@@ -1086,11 +1085,11 @@ void __stdcall AUTOMAP_LoadLayerFromFile() {
             } while (nWordIndex < __frame1.nWordLimit);
           }
 
-          D2_FREE(nErrorAddress);
+          D2_FREE_AT(nErrorAddress, ".\\UI\\automap.cpp", 0x586);
           hMapFile = hFileHandle;
         }
         if (sFileEntry.dwWallDataSize) {
-          nErrorAddress = D2_ALLOC(sFileEntry.dwWallDataSize);
+          nErrorAddress = D2_ALLOC_AT(sFileEntry.dwWallDataSize, ".\\UI\\automap.cpp", 0x58a);
           nWordCount = sFileEntry.dwWallDataSize >> 1;
           __frame1.nWordLimit = nWordCount;
           Fog::Source::SFile::thunk_ReadFile(hFileHandle, nErrorAddress, sFileEntry.dwWallDataSize, &dwBytesRead, (LPOVERLAPPED)0x0);
@@ -1122,12 +1121,12 @@ void __stdcall AUTOMAP_LoadLayerFromFile() {
             } while (nWordIndex < __frame1.nWordLimit);
           }
 
-          D2_FREE(nErrorAddress);
+          D2_FREE_AT(nErrorAddress, ".\\UI\\automap.cpp", 0x59b);
           hMapFile = hFileHandle;
         }
         if (sFileEntry.dwObjectDataSize) {
           if (sFileEntry.nMapType == D2GameGame0x546->nAutomap) {
-            nErrorAddress = D2_ALLOC(sFileEntry.dwObjectDataSize);
+            nErrorAddress = D2_ALLOC_AT(sFileEntry.dwObjectDataSize, ".\\UI\\automap.cpp", 0x5a2);
             nWordCount = sFileEntry.dwObjectDataSize >> 1;
             __frame1.nWordLimit = nWordCount;
             Fog::Source::SFile::thunk_ReadFile(hFileHandle, nErrorAddress, sFileEntry.dwObjectDataSize, &dwBytesRead, (LPOVERLAPPED)0x0);
@@ -1159,7 +1158,7 @@ void __stdcall AUTOMAP_LoadLayerFromFile() {
               } while (nWordIndex < __frame1.nWordLimit);
             }
 
-            D2_FREE(nErrorAddress);
+            D2_FREE_AT(nErrorAddress, ".\\UI\\automap.cpp", 0x5b3);
             hMapFile = hFileHandle;
           } else {
             Fog::Source::SFile::SFILE_Win32SetFilePointer(hMapFile, sFileEntry.dwObjectDataSize, (PLONG)0x0, 1);
@@ -1168,7 +1167,7 @@ void __stdcall AUTOMAP_LoadLayerFromFile() {
 
         nCurrentEntryPos = __frame1.nNextPos;
         if (sFileEntry.dwExtraDataSize) {
-          nErrorAddress = D2_ALLOC(sFileEntry.dwExtraDataSize);
+          nErrorAddress = D2_ALLOC_AT(sFileEntry.dwExtraDataSize, ".\\UI\\automap.cpp", 0x5bd);
           nWordCount = sFileEntry.dwExtraDataSize >> 1;
           __frame1.nWordLimit = nWordCount;
           Fog::Source::SFile::thunk_ReadFile(hFileHandle, nErrorAddress, sFileEntry.dwExtraDataSize, &dwBytesRead, (LPOVERLAPPED)0x0);
@@ -1200,7 +1199,7 @@ void __stdcall AUTOMAP_LoadLayerFromFile() {
             } while (nWordIndex < __frame1.nWordLimit);
           }
 
-          D2_FREE(nErrorAddress);
+          D2_FREE_AT(nErrorAddress, ".\\UI\\automap.cpp", 0x5ce);
           hMapFile = hFileHandle;
           nCurrentEntryPos = __frame1.nNextPos;
         }
@@ -1219,7 +1218,7 @@ void __stdcall AUTOMAP_SwitchLayer(D2AutomapLayerStrc * pAutomapLayer) {
 
 // @sourcefile .\UI\automap.cpp
 void __stdcall AUTOMAP_AllocLayer(int32_t nLayer) {
-    D2AutomapLayerStrc* pLayer = D2_NEW(D2AutomapLayerStrc);
+    D2AutomapLayerStrc* pLayer = D2_NEW_AT(D2AutomapLayerStrc, ".\\UI\\automap.cpp", 0x5ed);
     pLayer->fSaved = 0;
     pLayer->pFloors = 0;
     pLayer->pWalls = 0;
@@ -1240,7 +1239,7 @@ D2AutomapLayerStrc * AUTOMAP_AddLayer(int32_t nLayer) {
       }
     }
 
-    pLayer = D2_NEW(D2AutomapLayerStrc);
+    pLayer = D2_NEW_AT(D2AutomapLayerStrc, ".\\UI\\automap.cpp", 0x5ed);
     pLayer->fSaved = 0;
     pLayer->pFloors = 0;
     pLayer->pWalls = 0;
@@ -1414,7 +1413,12 @@ void __stdcall AUTOMAP_Update() {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    if (pUnit) {
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x696);
+      exit(-1);
+    }
+
+    {
       int nDeltaX;
       nAutoMapPlayerTargetX = D2Common::Units::GetTargetX(pUnit);
       nAutoMapPlayerTargetY = D2Common::Units::GetTargetY(pUnit);
@@ -1467,9 +1471,6 @@ void __stdcall AUTOMAP_Update() {
 
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x696);
-    exit(-1);
 }
 
 void __stdcall AUTOMAP_SetRefreshDelay() {
@@ -2243,7 +2244,12 @@ void __stdcall AUTOMAP_DrawDifficulty() {
     int32_t nTextWidth = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pZeroFill);
     pZeroFill = D2Lang::StrTable::strtable::GetLocaleString(0x1057);
     int32_t nFormatLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pZeroFill);
-    if (nTextWidth + 3 + nFormatLen < 300) {
+    if (!(nTextWidth + 3 + nFormatLen < 300)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb2a);
+      exit(-1);
+    }
+
+    {
       uint16_t* wFormat;
       pZeroFill = D2Lang::StrTable::strtable::GetLocaleString(nDiffStringId);
       wFormat = D2Lang::StrTable::strtable::GetLocaleString(0x1057);
@@ -2256,9 +2262,6 @@ void __stdcall AUTOMAP_DrawDifficulty() {
       AUTOMAP_TextHeightOffset += 0x10;
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb2a);
-    exit(-1);
 }
 
 void __stdcall AUTOMAP_LoadDC6Sprites() {
@@ -2492,7 +2495,7 @@ void __stdcall AUTOMAP_Free() {
     while (pMemoryToFree) {
       D2AutomapLayerStrc* pNextLayer;
       pNextLayer = pMemoryToFree->pNext;
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\UI\\automap.cpp", 0xc06);
       pMemoryToFree = pNextLayer;
     }
 

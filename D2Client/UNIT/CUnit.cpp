@@ -630,12 +630,12 @@ void __stdcall UpdateObjectAutoLightOnPeriodChange() {
 }
 
 D2ServerCmdStrc * __fastcall GetServerCmd(D2UnitStrc * pUnit) {
-    if (pUnit) {
-      return pUnit->pServerCmd;
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8a5);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8a5);
-    exit(-1);
+    return pUnit->pServerCmd;
     return pUnit->pServerCmd;
 }
 
@@ -931,12 +931,12 @@ void __fastcall CUNIT_SetUnitFlag3(int32_t pUnit) {
 // Returns the client-side dwStartLight (+0x68) of pUnit; halts (CUnit.cpp line 2623) on NULL.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 uint32_t __fastcall CUNIT_GetStartLight(D2UnitStrc * pUnit) {
-    if (pUnit) {
-      return pUnit->uSideData.pClientSide.dwStartLight;
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa3f);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa3f);
-    exit(-1);
+    return pUnit->uSideData.pClientSide.dwStartLight;
     return pUnit->uSideData.pClientSide.dwStartLight;
 }
 
@@ -1364,87 +1364,86 @@ void __fastcall CLIENT_TeleportUnitToPosition(D2UnitStrc * pUnit, int32_t nX, in
       exit(-1);
     } else {
       D2RoomStrc* pCurrentRoom;
-      if (!nXSaved || !nY || pRoom) {
-        if (pUnit->eUnitFlags & UNITFLAG_ISDEAD) {
-          return;
-        }
-
-        eUnitAnimMode = pUnit->eAnimMode.ePlayerMode;
-        if (pUnit->eUnitType == UNIT_PLAYER) {
-          if (eUnitAnimMode == Death) {
-            return;
-          }
-          if (eUnitAnimMode == eD2PlayerAnimMode_ns::Dead) {
-            return;
-          }
-        } else if (pUnit->eUnitType == UNIT_MONSTER) {
-          if (eUnitAnimMode == Death) {
-            return;
-          }
-          if (eUnitAnimMode == Kick) {
-            return;
-          }
-        }
-        if (pUnit == pPlayer) {
-          pCurrentRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-          if (pCurrentRoom) {
-            pSkill = D2Common::Units::GetCurrentSkill(pUnit);
-            if (!pSkill || (pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt) || !pSkillsTxt->warp) {
-              if (bWarpFade) {
-                if (pUnit->eUnitType != UNIT_PLAYER) {
-                  Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x17d);
-                  exit(-1);
-                }
-
-                DRAW_WORLD_SetWarpFadeTimer();
-              }
-            } else {
-              bWarpFade = 0;
-            }
-          }
-          if (pRoom) {
-            D2Common::DUNGEON::Dungeon::UpdatePops(pRoom, nXSaved, nY, (uint32_t)(pCurrentRoom != pRoom));
-            eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-            bNoPerspective = D2Common::DATATBLS::LvlTbls::LVLTBLS_GetNoPer(eLevelId);
-            D2gfx::D2GFX::D2GFX_SetPerspectiveCapable((uint32_t)((char)bNoPerspective == '\0'));
-            if (pCurrentRoom) {
-              eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pCurrentRoom);
-              ptFreePos.y = (LONG)D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevelId);
-              eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-              pLevelsTxt = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevelId);
-              if (*(char*)(ptFreePos.y + 2) != pLevelsTxt->Pal) {
-                D2Win::Src::D2WinPalette::D2WINPAL_LoadActPalette(pLevelsTxt->Pal);
-                D2CMP::Pallete::PALETTE_SetAct((uint32_t)(uint8_t)pLevelsTxt->Pal);
-              }
-            }
-          }
-        }
-
-        pDynamicPathCast = pDynamicPath;
-        nCollisionType = D2Common::PATH::Path::PATH_GetCollisionMaskAt(pDynamicPath, pUnit, pRoom, (uint16_t)nXSaved, (uint16_t)nY);
-        if (!nCollisionType) {
-          ptFreePos.x = nXSaved;
-          ptFreePos.y = nY;
-          nLine = D2Common::Units::GetUnitSizeX(pUnit);
-          D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pRoom, &ptFreePos, nLine, 0x1c09, 1);
-          nLine = D2Common::PATH::Path::PATH_GetCollisionTypeAt((uint32_t*)pDynamicPathCast, pUnit, pRoom, (uint16_t)ptFreePos.x, (uint16_t)ptFreePos.y);
-          if (!nLine) {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1a9);
-            exit(-1);
-          }
-        }
-
-        UI::Automap::AUTOMAP_SetRefreshDelay();
-        if (pUnit == pPlayer) {
-          Draw::Weather::WEATHER_ClearParticleArrays(bWarpFade);
-        }
-
-        Player::CLIENT_SendIdlePlayerMessage(pUnit);
+      if (!(!nXSaved || !nY || pRoom)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x168);
+        exit(-1);
+      }
+      if (pUnit->eUnitFlags & UNITFLAG_ISDEAD) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x168);
-      exit(-1);
+      eUnitAnimMode = pUnit->eAnimMode.ePlayerMode;
+      if (pUnit->eUnitType == UNIT_PLAYER) {
+        if (eUnitAnimMode == Death) {
+          return;
+        }
+        if (eUnitAnimMode == eD2PlayerAnimMode_ns::Dead) {
+          return;
+        }
+      } else if (pUnit->eUnitType == UNIT_MONSTER) {
+        if (eUnitAnimMode == Death) {
+          return;
+        }
+        if (eUnitAnimMode == Kick) {
+          return;
+        }
+      }
+      if (pUnit == pPlayer) {
+        pCurrentRoom = D2Common::Units::UNITS_GetRoom(pUnit);
+        if (pCurrentRoom) {
+          pSkill = D2Common::Units::GetCurrentSkill(pUnit);
+          if (!pSkill || (pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt) || !pSkillsTxt->warp) {
+            if (bWarpFade) {
+              if (pUnit->eUnitType != UNIT_PLAYER) {
+                Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x17d);
+                exit(-1);
+              }
+
+              DRAW_WORLD_SetWarpFadeTimer();
+            }
+          } else {
+            bWarpFade = 0;
+          }
+        }
+        if (pRoom) {
+          D2Common::DUNGEON::Dungeon::UpdatePops(pRoom, nXSaved, nY, (uint32_t)(pCurrentRoom != pRoom));
+          eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+          bNoPerspective = D2Common::DATATBLS::LvlTbls::LVLTBLS_GetNoPer(eLevelId);
+          D2gfx::D2GFX::D2GFX_SetPerspectiveCapable((uint32_t)((char)bNoPerspective == '\0'));
+          if (pCurrentRoom) {
+            eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pCurrentRoom);
+            ptFreePos.y = (LONG)D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevelId);
+            eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+            pLevelsTxt = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevelId);
+            if (*(char*)(ptFreePos.y + 2) != pLevelsTxt->Pal) {
+              D2Win::Src::D2WinPalette::D2WINPAL_LoadActPalette(pLevelsTxt->Pal);
+              D2CMP::Pallete::PALETTE_SetAct((uint32_t)(uint8_t)pLevelsTxt->Pal);
+            }
+          }
+        }
+      }
+
+      pDynamicPathCast = pDynamicPath;
+      nCollisionType = D2Common::PATH::Path::PATH_GetCollisionMaskAt(pDynamicPath, pUnit, pRoom, (uint16_t)nXSaved, (uint16_t)nY);
+      if (!nCollisionType) {
+        ptFreePos.x = nXSaved;
+        ptFreePos.y = nY;
+        nLine = D2Common::Units::GetUnitSizeX(pUnit);
+        D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pRoom, &ptFreePos, nLine, 0x1c09, 1);
+        nLine = D2Common::PATH::Path::PATH_GetCollisionTypeAt((uint32_t*)pDynamicPathCast, pUnit, pRoom, (uint16_t)ptFreePos.x, (uint16_t)ptFreePos.y);
+        if (!nLine) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1a9);
+          exit(-1);
+        }
+      }
+
+      UI::Automap::AUTOMAP_SetRefreshDelay();
+      if (pUnit == pPlayer) {
+        Draw::Weather::WEATHER_ClearParticleArrays(bWarpFade);
+      }
+
+      Player::CLIENT_SendIdlePlayerMessage(pUnit);
+      return;
     }
 }
 

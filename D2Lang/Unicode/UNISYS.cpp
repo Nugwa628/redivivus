@@ -17,8 +17,8 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -157,7 +157,7 @@ uint32_t __fastcall UNICODE_CompareWideStringsNNoCase(uint16_t * pwszText1, uint
     return -1;
 }
 
-short * UNICODE_FindWideChar(void * pThis, int16_t wCharToFind) {
+short * __thiscall UNICODE_FindWideChar(void * pThis, int16_t wCharToFind) {
     short int wCurChar = *(short int*)pThis;
     if (!wCurChar) {
       return nullptr;
@@ -992,12 +992,12 @@ void UNICODE_AllocBuffer(uint32_t nSize) {
     Storm::SMem::SMemAlloc(nSize, "new[]", -1, 0);
 }
 
-void UNICODE_ReadByteRange(void * pThis, uint8_t * pByteRange) {
+void __thiscall UNICODE_ReadByteRange(void * pThis, uint8_t * pByteRange) {
     *(uint16_t*)pThis = (uint16_t)*pByteRange;
     *(uint16_t*)((int)pThis + 2) = (uint16_t)pByteRange[2];
 }
 
-uint32_t UNICODE_CheckByteInRange(void * pThis, uint8_t byValue) {
+uint32_t __thiscall UNICODE_CheckByteInRange(void * pThis, uint8_t byValue) {
     if (!(*(uint8_t*)pThis <= byValue && byValue <= *(uint8_t*)((int)pThis + 1))) {
       return 0;
     }
@@ -1044,48 +1044,7 @@ void __stdcall UNICODE_FreeKamapTables() {
 // @sourcefile .\Unicode\UNISYS.CPP
 void __fastcall UNICODE_LoadKamapFile(D2PoolManagerStrc * pMemory, char * szFilename) {
     // Static local variables (originally global data)
-    static uint8_t szUnicodeKamapVersion[40] = {
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-}; D2_STATIC_GUARD(szUnicodeKamapVersion, "D2Lang::Unicode::UNISYS::UNICODE_LoadKamapFile::szUnicodeKamapVersion");
+    static uint8_t szUnicodeKamapVersion[40] = {}; D2_STATIC_GUARD(szUnicodeKamapVersion, "D2Lang::Unicode::UNISYS::UNICODE_LoadKamapFile::szUnicodeKamapVersion");
 
     uint8_t szVersionBuf[40];
     uint8_t cTmp;
@@ -1093,7 +1052,7 @@ void __fastcall UNICODE_LoadKamapFile(D2PoolManagerStrc * pMemory, char * szFile
     char* pFileData = (char*)Fog::Archive::D2FILE_AllocAndLoadD2File(pMemory, szFilename, nullptr, ".\\Unicode\\UNISYS.CPP", 0x61);
     int nOffset = strncmp(pFileData, "KAMAP\n", 5);
     if (nOffset) {
-      D2_FREE(pFileData);
+      D2_FREE_AT(pFileData, ".\\Unicode\\UNISYS.CPP", 0x65);
       Fog::Debug::GuardStack();
       return;
     }
@@ -1107,7 +1066,7 @@ void __fastcall UNICODE_LoadKamapFile(D2PoolManagerStrc * pMemory, char * szFile
         nOffset++;
       }
       if (0x27 < nOffset) {
-        D2_FREE(pFileData);
+        D2_FREE_AT(pFileData, ".\\Unicode\\UNISYS.CPP", 0x79);
         Fog::Debug::GuardStack();
         return;
       }
@@ -1124,7 +1083,7 @@ void __fastcall UNICODE_LoadKamapFile(D2PoolManagerStrc * pMemory, char * szFile
 
     g_pUnicodeKamapTable = Storm::SMem::SMemAlloc((uint32_t)(uint8_t)*pGroupCount * 2, "new[]", -1, 0);
     if (!g_pUnicodeKamapTable) {
-      D2_FREE(pFileData);
+      D2_FREE_AT(pFileData, ".\\Unicode\\UNISYS.CPP", 0x91);
       Fog::Debug::GuardStack();
       return;
     }
@@ -1138,7 +1097,7 @@ void __fastcall UNICODE_LoadKamapFile(D2PoolManagerStrc * pMemory, char * szFile
     void* pAllocBuf = Storm::SMem::SMemAlloc((uint32_t)*pFilePtr * 4, "new[]", -1, 0);
     gpUnicodeKamapToCodeTable = pAllocBuf;
     if (!pAllocBuf) {
-      D2_FREE(pFileData);
+      D2_FREE_AT(pFileData, ".\\Unicode\\UNISYS.CPP", 0x9e);
       Fog::Debug::GuardStack();
       return;
     }
@@ -1159,7 +1118,7 @@ void __fastcall UNICODE_LoadKamapFile(D2PoolManagerStrc * pMemory, char * szFile
     uint16_t* pwCodeToMapTable = (uint16_t*)Storm::SMem::SMemAlloc((uint32_t)*pFilePtr * 2, "new[]", -1, 0);
     gpUnicodeCodeToMapTable = pwCodeToMapTable;
     if (!pwCodeToMapTable) {
-      D2_FREE(pFileData);
+      D2_FREE_AT(pFileData, ".\\Unicode\\UNISYS.CPP", 0xb0);
       Fog::Debug::GuardStack();
       return;
     }
@@ -1182,7 +1141,7 @@ void __fastcall UNICODE_LoadKamapFile(D2PoolManagerStrc * pMemory, char * szFile
       nOffset++;
     } while (cTmp);
 
-    D2_FREE(pFileData);
+    D2_FREE_AT(pFileData, ".\\Unicode\\UNISYS.CPP", 0xbe);
     Fog::Debug::GuardStack();
 }
 
@@ -1408,23 +1367,23 @@ int32_t __fastcall UNICODE_GetMultiByteLength(uint16_t * wszText, int32_t nParam
     return nByteLen;
 }
 
-char * __fastcall UNICODE_GetWideCharCount(char * szText, char * szSourceFile) {
-    char* pszCount;
+int32_t __fastcall UNICODE_GetWideCharCount(char * szText, int32_t szSourceFile) {
+    int32_t nIsControl;
     char cTmp;
     if (!gpUnicodeCodeToMapTable) {
-      pszCount = szText + 1;
+      char* pcVar1;
+      pcVar1 = szText + 1;
       szText = szText + strlen(szText) + 1;
-      return szText - (int)pszCount;
+      return (int)szText - (int)pcVar1;
     }
 
-    pszCount = 0;
+    int pszCount = 0;
     int i = 0;
-    if (0 >= (int)szSourceFile) {
+    if (0 >= szSourceFile) {
       return pszCount;
     }
 
     do {
-      int32_t nIsControl;
       if (!szText[i]) {
         return pszCount;
       }
@@ -1437,7 +1396,7 @@ char * __fastcall UNICODE_GetWideCharCount(char * szText, char * szSourceFile) {
       }
 
       pszCount++;
-    } while (i < (int)szSourceFile);
+    } while (i < szSourceFile);
 
     return pszCount;
 }

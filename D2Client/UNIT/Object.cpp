@@ -61,18 +61,18 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2UnitDataObjectStrc) == 0x38, "D2_NEW(D2UnitDataObjectStrc): the 32-bit layout must be the 0x38 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2UnitDataObjectStrc) == 0x38, "D2_NEW_AT(D2UnitDataObjectStrc): the 32-bit layout must be the 0x38 bytes 1.14d allocates");
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -106,7 +106,7 @@ void __fastcall AllocObjectData(D2UnitStrc * pUnit, D2RoomStrc * pRoom, int32_t 
     BOOL nAutoLightResult;
     pUnit->uSideData.pClientSide.pLight = 0;
     pUnit->eAnimMode.ePlayerMode = nInitMode & 0xff;
-    D2UnitDataObjectStrc* pObjectData = D2_NEW(D2UnitDataObjectStrc);
+    D2UnitDataObjectStrc* pObjectData = D2_NEW_AT(D2UnitDataObjectStrc, ".\\UNIT\\Object.cpp", 0x76);
     pUnit->pUnitData.pUnitDataObject = pObjectData;
     memset(pObjectData, 0, 0x38);
     pUnit->pUnitData.pUnitDataPlayer->pQuestRecord[0] = 0;
@@ -220,7 +220,7 @@ void __fastcall FreeObjectData(D2UnitStrc * pUnit) {
       CUnit::FreeLightMap(pUnit);
     }
 
-    D2_FREE(pUnit->pUnitData.pUnitDataPlayer);
+    D2_FREE_AT(pUnit->pUnitData.pUnitDataPlayer, ".\\UNIT\\Object.cpp", 0xfe);
 }
 
 void OBJECT_ToggleDoorState(D2UnitStrc * pUnit) {
@@ -715,17 +715,16 @@ void __stdcall OBJECT_PlayShrineSound(D2UnitStrc * pUnit, D2UnitStrc * pSourceUn
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x34d);
       exit(-1);
     } else {
-      if ((int)(uint32_t)pShrinesTxt->nCode < nShrineDispatchTableSize) {
-        if (aShrineDispatchTable[pShrinesTxt->nCode].nSoundId == SOUND_NONE) {
-          return;
-        }
-
-        Sound::SOUND_PlaySound(aShrineDispatchTable[pShrinesTxt->nCode].nSoundId, pUnit, 0, 0, 0);
+      if (!((int)(uint32_t)pShrinesTxt->nCode < nShrineDispatchTableSize)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x34e);
+        exit(-1);
+      }
+      if (aShrineDispatchTable[pShrinesTxt->nCode].nSoundId == SOUND_NONE) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x34e);
-      exit(-1);
+      Sound::SOUND_PlaySound(aShrineDispatchTable[pShrinesTxt->nCode].nSoundId, pUnit, 0, 0, 0);
+      return;
     }
 }
 
@@ -762,17 +761,16 @@ void OBJECT_DispatchShrineClientFunc(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x37a);
       exit(-1);
     } else {
-      if ((int)(uint32_t)pShrinesTxt->nCode < nShrineDispatchTableSize) {
-        if (!aShrineDispatchTable[pShrinesTxt->nCode].fpClientOverlayUpdate) {
-          return;
-        }
-
-        aShrineDispatchTable[pShrinesTxt->nCode].fpClientOverlayUpdate(pUnit, pShrinesTxt);
+      if (!((int)(uint32_t)pShrinesTxt->nCode < nShrineDispatchTableSize)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x37b);
+        exit(-1);
+      }
+      if (!aShrineDispatchTable[pShrinesTxt->nCode].fpClientOverlayUpdate) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x37b);
-      exit(-1);
+      aShrineDispatchTable[pShrinesTxt->nCode].fpClientOverlayUpdate(pUnit, pShrinesTxt);
+      return;
     }
 }
 

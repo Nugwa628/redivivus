@@ -64,15 +64,15 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA2Q7Strc) == 0x1, "D2_NEW(D2QuestDataA2Q7Strc): the 32-bit layout must be the 0x1 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA2Q7Strc) == 0x1, "D2_NEW_AT(D2QuestDataA2Q7Strc): the 32-bit layout must be the 0x1 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpExecuteOnUnitFunction
@@ -811,7 +811,7 @@ void __fastcall Q15_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->bIsActive = true;
     pQuestData->nStateFlag = 0;
     pQuestData->nStateFlagPrev = 0;
-    D2QuestDataA2Q7Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA2Q7Strc);
+    D2QuestDataA2Q7Strc* pQuestSpecificData = D2_NEW_POOL_AT(pGame->pMemoryPool, D2QuestDataA2Q7Strc, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q7.cpp", 0xc2);
     pQuestData->pQuestSpecificData.pA2Q7 = pQuestSpecificData;
     pQuestSpecificData->bGossipAwaits = false;
     pQuestData->nQuestIdReal = QUEST_Act2Guard4Gossip;

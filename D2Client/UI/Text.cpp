@@ -85,23 +85,23 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::ScreenMessage_t) == 0x26, "D2_NEW(ScreenMessage_t): the 32-bit layout must be the 0x26 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::ScreenMessage_t) == 0x26, "D2_NEW_AT(ScreenMessage_t): the 32-bit layout must be the 0x26 bytes 1.14d allocates");
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2TextLineStrc) == 0x8, "D2_NEW(D2TextLineStrc): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2TextLineStrc) == 0x8, "D2_NEW_AT(D2TextLineStrc): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2TextBoxStrc) == 0x2c, "D2_NEW(D2TextBoxStrc): the 32-bit layout must be the 0x2c bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2TextBoxStrc) == 0x2c, "D2_NEW_AT(D2TextBoxStrc): the 32-bit layout must be the 0x2c bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_pfnTextScrollComplete
@@ -136,8 +136,8 @@ void TEXT_FreeTextLineList(D2TextLineStrc * pLine) {
     while (pLine) {
       D2TextLineStrc* pDVar1;
       pDVar1 = pLine->pNext;
-      D2_FREE(pLine->wszLine);
-      D2_FREE(pLine);
+      D2_FREE_AT(pLine->wszLine, ".\\UI\\text.cpp", 0x60f);
+      D2_FREE_AT(pLine, ".\\UI\\text.cpp", 0x610);
       pLine = pDVar1;
     }
 }
@@ -165,7 +165,7 @@ void __stdcall TEXT_FreeTextBox(D2TextBoxStrc * pTextBox) {
     }
 
     TEXT_FreeTextLineList(pTextBox->pLineList);
-    D2_FREE(pTextBox);
+    D2_FREE_AT(pTextBox, ".\\UI\\text.cpp", 0x68e);
 }
 
 void __stdcall TEXT_InitTextDisplaySettings() {
@@ -223,13 +223,13 @@ void TEXT_FreeScreenMessage(ScreenMessage_t * pMessage) {
     int i = 0;
     do {
       if (pMessage->apwszLines[i]) {
-        D2_FREE(pMessage->apwszLines[i]);
+        D2_FREE_AT(pMessage->apwszLines[i], ".\\UI\\text.cpp", 0x6b3);
       }
 
       i++;
     } while (i < 6);
 
-    D2_FREE(pMessage);
+    D2_FREE_AT(pMessage, ".\\UI\\text.cpp", 0x6b6);
 }
 
 void __stdcall TEXT_FreeAllScreenMessages(D2ScreenMessageListStrc * pList) {
@@ -244,13 +244,13 @@ void __stdcall TEXT_FreeAllScreenMessages(D2ScreenMessageListStrc * pList) {
         i = 0;
         do {
           if (pMessage->apwszLines[i]) {
-            D2_FREE(pMessage->apwszLines[i]);
+            D2_FREE_AT(pMessage->apwszLines[i], ".\\UI\\text.cpp", 0x6b3);
           }
 
           i++;
         } while (i < 6);
 
-        D2_FREE(pMessage);
+        D2_FREE_AT(pMessage, ".\\UI\\text.cpp", 0x6b6);
         nCount = nCountPrev + 1;
         pMessage = pNextMessage;
         nCountPrev = nCount;
@@ -258,13 +258,13 @@ void __stdcall TEXT_FreeAllScreenMessages(D2ScreenMessageListStrc * pList) {
 
       pList->pHead = 0;
     }
-    if (nCount == pList->nCount) {
-      pList->nCount = 0;
-      return;
+    if (nCount != pList->nCount) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6cd);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6cd);
-    exit(-1);
+    pList->nCount = 0;
+    return;
 }
 
 void __fastcall TEXT_SetTextDisplayMode(int32_t nParam) {
@@ -523,7 +523,7 @@ ScreenMessage_t * __fastcall TEXT_AllocScreenMessage(uint16_t * * ppwszText) {
     uint16_t** ppwszSrcLine;
     int32_t nLine;
     int32_t nZero;
-    ScreenMessage_t* pMessage = D2_NEW(ScreenMessage_t);
+    ScreenMessage_t* pMessage = D2_NEW_AT(ScreenMessage_t, ".\\UI\\text.cpp", 0x9d0);
     memset(pMessage->apwszLines, 0, 6 * sizeof(pMessage->apwszLines[0]));
     *(uint32_t*)&pMessage->nLineCount = 0;
     *(uint32_t*)((uintptr_t)&pMessage->color + 2) = 0;
@@ -666,8 +666,8 @@ void __stdcall TEXT_DrawChatMessages() {
                   nScreenY += 0xf;
                 }
 
-                D2_FREE(pWrapNode->wszLine);
-                D2_FREE(pWrapNode);
+                D2_FREE_AT(pWrapNode->wszLine, ".\\UI\\text.cpp", 0xa47);
+                D2_FREE_AT(pWrapNode, ".\\UI\\text.cpp", 0xa48);
                 pWrapNode = (D2TextLineStrc*)pWrapNext;
                 pMessage = pMessageHead;
               } while (pWrapNext);
@@ -700,13 +700,13 @@ void __stdcall TEXT_DrawChatMessages() {
         nScreenX = 0;
         do {
           if (pMessage->apwszLines[nScreenX]) {
-            D2_FREE(pMessage->apwszLines[nScreenX]);
+            D2_FREE_AT(pMessage->apwszLines[nScreenX], ".\\UI\\text.cpp", 0x6b3);
           }
 
           nScreenX++;
         } while (nScreenX < 6);
 
-        D2_FREE(pMessage);
+        D2_FREE_AT(pMessage, ".\\UI\\text.cpp", 0x6b6);
         if (pPrevMessage) {
           pPrevMessage->pNext = pListHead;
         }
@@ -781,13 +781,13 @@ void __stdcall TEXT_DrawPartyMessages() {
         nLineY = 0;
         do {
           if (pMessage->apwszLines[nLineY]) {
-            D2_FREE(pMessage->apwszLines[nLineY]);
+            D2_FREE_AT(pMessage->apwszLines[nLineY], ".\\UI\\text.cpp", 0x6b3);
           }
 
           nLineY++;
         } while (nLineY < 6);
 
-        D2_FREE(pMessage);
+        D2_FREE_AT(pMessage, ".\\UI\\text.cpp", 0x6b6);
         pMessage = pNext;
         if (pPrevMessage) {
           pPrevMessage->pNext = pNext;
@@ -943,7 +943,7 @@ void __stdcall TEXT_FreeStaticTextBox() {
     }
 
     TEXT_FreeTextLineList(gpStaticTextPopup->pLineList);
-    D2_FREE(pPopup);
+    D2_FREE_AT(pPopup, ".\\UI\\text.cpp", 0x68e);
     gpStaticTextPopup = 0;
 }
 
@@ -972,7 +972,7 @@ void __fastcall TEXT_PrintGameString(uint16_t * wMessage, uint8_t nColor) {
     ScreenMessage_t* pTailMsg;
     int nLineIdx = 0;
     __frame0.byColor = nColor;
-    ScreenMessage_t* pNewMsg = D2_NEW(ScreenMessage_t);
+    ScreenMessage_t* pNewMsg = D2_NEW_AT(ScreenMessage_t, ".\\UI\\text.cpp", 0xd46);
     memset(pNewMsg->apwszLines, 0, 6 * sizeof(pNewMsg->apwszLines[0]));
     *(uint32_t*)&pNewMsg->nLineCount = 0;
     *(uint32_t*)((uintptr_t)&pNewMsg->color + 2) = 0;
@@ -993,11 +993,11 @@ void __fastcall TEXT_PrintGameString(uint16_t * wMessage, uint8_t nColor) {
         if (nLineIdx < (int)(uint32_t)pNewMsg->nLineCount) {
           pNewMsg->apwszLines[nLineIdx] = pNewMessage->wszLine;
         } else {
-          D2_FREE(pNewMessage->wszLine);
+          D2_FREE_AT(pNewMessage->wszLine, ".\\UI\\text.cpp", 0xd5a);
         }
 
         __frame0.pNextWrapNode = pNewMessage->pNext;
-        D2_FREE(pNewMessage);
+        D2_FREE_AT(pNewMessage, ".\\UI\\text.cpp", 0xd5d);
         nLineIdx++;
         pNewMessage = __frame0.pNextWrapNode;
       } while (nLineIdx < (int)__frame0.nWrapCount);
@@ -1078,7 +1078,7 @@ void __fastcall TEXT_PrintPartyMessage(uint16_t * wszText, uint8_t byColor) {
     uint16_t* pwszText = wszText;
     uint8_t byColorSaved = byColor;
     int32_t nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(0xd);
-    ScreenMessage_t* pNewMsg = D2_NEW(ScreenMessage_t);
+    ScreenMessage_t* pNewMsg = D2_NEW_AT(ScreenMessage_t, ".\\UI\\text.cpp", 0xdad);
     memset(pNewMsg->apwszLines, 0, 6 * sizeof(pNewMsg->apwszLines[0]));
     *(uint32_t*)&pNewMsg->nLineCount = 0;
     *(uint32_t*)((uintptr_t)&pNewMsg->color + 2) = 0;
@@ -1126,7 +1126,7 @@ void __fastcall TEXT_PrintPartyMessage(uint16_t * wszText, uint8_t byColor) {
       }
 
       nSegLen = nLineLen * 2 + 2;
-      pwszLine = (uint16_t*)D2_ALLOC(nSegLen);
+      pwszLine = (uint16_t*)D2_ALLOC_AT(nSegLen, ".\\UI\\text.cpp", 0xdd7);
       pNewMsg->apwszLines[pNewMsg->nLineCount] = pwszLine;
       memset(pNewMsg->apwszLines[pNewMsg->nLineCount], 0, nSegLen);
       D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(pNewMsg->apwszLines[pNewMsg->nLineCount], pwszLineSeg, nLineLen);
@@ -1640,7 +1640,7 @@ void __fastcall TEXT_FreeHoverText(D2HoverTextStrc * pHover) {
     uint32_t* pMemoryToFree = (uint32_t*)D2Common::Chat::HOVERTEXT_GetTextLineList(pHover);
     if (pMemoryToFree) {
       TEXT_FreeTextLineList((D2TextLineStrc*)*pMemoryToFree);
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\UI\\text.cpp", 0x68e);
       D2Common::Chat::HOVERTEXT_SetTextLineList(pHover, 0);
     }
 
@@ -4002,7 +4002,7 @@ void __stdcall TEXT_CloseScrollingText() {
     D2TextBoxStrc* pMemoryToFree = gpTextScrollingBox;
     if (gpTextScrollingBox) {
       TEXT_FreeTextLineList(gpTextScrollingBox->pLineList);
-      D2_FREE(pMemoryToFree);
+      D2_FREE_AT(pMemoryToFree, ".\\UI\\text.cpp", 0x68e);
       gpTextScrollingBox = 0;
     }
     if (gpTextScrollBoxDC6) {
@@ -5036,7 +5036,7 @@ D2TextLineStrc * __stdcall TEXT_ParseMultilineString(uint16_t * pwszInput, int *
         pwszInput += 5;
       } while (iLineLen < 100);
 
-      pNewNode = D2_NEW(D2TextLineStrc);
+      pNewNode = D2_NEW_AT(D2TextLineStrc, ".\\UI\\text.cpp", 0x5b8);
       if (bIsFirstLine) {
         nLineWStrLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszLineBuf);
         nLine2Len = 0;
@@ -5120,7 +5120,7 @@ D2TextLineStrc * __stdcall TEXT_ParseMultilineString(uint16_t * pwszInput, int *
         /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szLogBuf, "line %d of string is too long", *pnLineCount);
       }
 
-      pwszLineCopy = (uint16_t*)D2_ALLOC(nLineWStrLen * 2 + 2);
+      pwszLineCopy = (uint16_t*)D2_ALLOC_AT(nLineWStrLen * 2 + 2, ".\\UI\\text.cpp", 0x5eb);
       pNewNode->wszLine = pwszLineCopy;
       D2Lang::Unicode::UNISYS::STRING_CopyWideString(pwszLineCopy, wszLineBuf);
       pNewNode->pNext = 0;
@@ -5139,7 +5139,7 @@ D2TextLineStrc * __stdcall TEXT_ParseMultilineString(uint16_t * pwszInput, int *
 
 D2TextBoxStrc * __fastcall TEXT_AllocTextBox(uint16_t * wszText, int32_t nWrapMode) {
     D2TextLineStrc* pParsedLines;
-    D2TextBoxStrc* pTextBox = D2_NEW(D2TextBoxStrc);
+    D2TextBoxStrc* pTextBox = D2_NEW_AT(D2TextBoxStrc, ".\\UI\\text.cpp", 0x65d);
     if (nWrapMode == 3) {
       pParsedLines = D2Win::Src::D2WinFont::D2WINFONT_WordWrapString(wszText, &pTextBox->nLineCount, 0xb4);
       pTextBox->pLineList = pParsedLines;
@@ -5171,15 +5171,15 @@ void __stdcall TEXT_FreeEverything() {
     D2TextBoxStrc* pTextBox = gpTextScrollingBox;
     if (gpTextScrollingBox) {
       TEXT_FreeTextLineList(gpTextScrollingBox->pLineList);
-      D2_FREE(pTextBox);
+      D2_FREE_AT(pTextBox, ".\\UI\\text.cpp", 0x68e);
       gpTextScrollingBox = 0;
     }
 
     pTextBox = gpStaticTextPopup;
     if (gpStaticTextPopup) {
       TEXT_FreeTextLineList(gpStaticTextPopup->pLineList);
-      D2_FREE(pTextBox);
-      D2_FREE(gpStaticTextPopup);
+      D2_FREE_AT(pTextBox, ".\\UI\\text.cpp", 0x68e);
+      D2_FREE_AT(gpStaticTextPopup, ".\\UI\\text.cpp", 0x6e4);
       gpStaticTextPopup = 0;
     }
     if (Dialog::DialogHandle) {
@@ -5321,7 +5321,7 @@ int __stdcall TEXT_HandleEscapeKey() {
     }
 
     TEXT_FreeTextBox(gpStaticTextPopup);
-    D2_FREE(gpStaticTextPopup);
+    D2_FREE_AT(gpStaticTextPopup, ".\\UI\\text.cpp", 0x949);
     gpStaticTextPopup = 0;
     gbTextStaticPopupActive = 0;
     gpTextStaticPopupBox = 0;
@@ -5340,7 +5340,7 @@ void __stdcall TEXT_DrawUnitOverheadText(D2HoverTextStrc * pHoverText, int32_t p
     }
 
     int32_t nSavedFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(0xd);
-    D2TextBoxStrc* pMemoryToFree = D2_NEW(D2TextBoxStrc);
+    D2TextBoxStrc* pMemoryToFree = D2_NEW_AT(D2TextBoxStrc, ".\\UI\\text.cpp", 0x65d);
     D2TextLineStrc* pWrappedText = D2Win::Src::D2WinFont::D2WINFONT_WordWrapString(wszText, &pMemoryToFree->nLineCount, 0xb4);
     pMemoryToFree->pLineList = pWrappedText;
     TEXT_RecalcTextBoxDimensions(pMemoryToFree);
@@ -5357,7 +5357,7 @@ void __stdcall TEXT_DrawUnitOverheadText(D2HoverTextStrc * pHoverText, int32_t p
       bRectPlaced = TEXT_FindNonOverlappingRect(gbTextOverheadActive, &rcBox, gbTextOverheadActive);
       if ((char)bRectPlaced == '\0') {
         TEXT_FreeTextLineList(pMemoryToFree->pLineList);
-        D2_FREE(pMemoryToFree);
+        D2_FREE_AT(pMemoryToFree, ".\\UI\\text.cpp", 0x68e);
         return;
       }
     }
@@ -5365,7 +5365,7 @@ void __stdcall TEXT_DrawUnitOverheadText(D2HoverTextStrc * pHoverText, int32_t p
     gbTextOverheadActive++;
     TEXT_DrawTextBoxWithBorderCheck(pMemoryToFree, (int*)&rcBox.left);
     TEXT_FreeTextLineList(pMemoryToFree->pLineList);
-    D2_FREE(pMemoryToFree);
+    D2_FREE_AT(pMemoryToFree, ".\\UI\\text.cpp", 0x68e);
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nSavedFont);
 }
 
@@ -5619,7 +5619,7 @@ void __fastcall TEXT_ShowNpcDialog(D2UnitStrc * pUnit, uint16_t nParam, uint32_t
       if (gbTextStaticPopupActive) {
         if (gpStaticTextPopup) {
           TEXT_FreeTextLineList(gpStaticTextPopup->pLineList);
-          D2_FREE(pPopupToFree);
+          D2_FREE_AT(pPopupToFree, ".\\UI\\text.cpp", 0x68e);
           gpStaticTextPopup = 0;
         }
 
@@ -5781,13 +5781,13 @@ void __fastcall TEXT_ShowStaticTextPopup(uint16_t nParam) {
     D2TextBoxStrc* ppTextBox = gpStaticTextPopup;
     if (gpStaticTextPopup) {
       TEXT_FreeTextLineList(gpStaticTextPopup->pLineList);
-      D2_FREE(ppTextBox);
+      D2_FREE_AT(ppTextBox, ".\\UI\\text.cpp", 0x68e);
       gpStaticTextPopup = 0;
     }
 
     uint16_t* wszString = D2Lang::StrTable::strtable::GetLocaleString(nParam);
     int32_t nSavedFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(0xd);
-    ppTextBox = D2_NEW(D2TextBoxStrc);
+    ppTextBox = D2_NEW_AT(D2TextBoxStrc, ".\\UI\\text.cpp", 0x65d);
     D2TextLineStrc* pWrappedText = D2Win::Src::D2WinFont::D2WINFONT_WordWrapString(wszString, &ppTextBox->nLineCount, 0xb4);
     ppTextBox->pLineList = pWrappedText;
     TEXT_RecalcTextBoxDimensions(ppTextBox);

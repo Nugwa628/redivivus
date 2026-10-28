@@ -190,7 +190,7 @@ void __stdcall UTF8_EncodeChar(uint32_t uCodepoint, uint8_t * pbOut);
 void __fastcall UTF8_AdvanceToCharBoundary(uint32_t pThis, int pszBase, int nPosition, int nDirection);
 void __stdcall UTF8_StepBackOneChar(int str_base, int position, uint32_t ecx_passthru);
 void __stdcall UTF8_StepForwardOneChar(int str_base, int position, uint32_t ecx_passthru);
-int TRANSTBL_UnicodeToSingleByte(void * pThis, uint16_t * pXlatTbl, uint8_t * pbOut, int nCount);
+int __thiscall TRANSTBL_UnicodeToSingleByte(void * pThis, uint16_t * pXlatTbl, uint8_t * pbOut, int nCount);
 int __fastcall TRANSTBL_SingleByteToUnicode(uint32_t pThis, uint8_t * pbSrc, int nCount, uint16_t * pDest, uint16_t * pXlatTbl);
 void __stdcall TRANSTBL_UnicodeToLatin1(uint8_t * pbOut, void * pSrcUTF16, int nCount);
 void __stdcall TRANSTBL_UnicodeToLatin2(uint8_t * pbOut, void * pSrcUTF16, int nCount);

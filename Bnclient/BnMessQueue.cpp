@@ -9,18 +9,18 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::BnMessQueue) == 0x12c, "D2_NEW(BnMessQueue): the 32-bit layout must be the 0x12c bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::BnMessQueue) == 0x12c, "D2_NEW_AT(BnMessQueue): the 32-bit layout must be the 0x12c bytes 1.14d allocates");
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -45,7 +45,7 @@ void __stdcall BNMESSQUEUE_Shutdown() {
 }
 
 void __fastcall BNMESSQUEUE_EnqueueBytes(int32_t nEventType, char * pBytes, size_t nSize) {
-    ::BnMessQueue* pNewMessage = D2_NEW(::BnMessQueue);
+    ::BnMessQueue* pNewMessage = D2_NEW_AT(::BnMessQueue, ".\\BnMessQueue.cpp", 0x37);
     if (nSize < 0x121) {
       if (!nSize) {
         pNewMessage->bBuffer[0] = '\0';
@@ -60,7 +60,12 @@ void __fastcall BNMESSQUEUE_EnqueueBytes(int32_t nEventType, char * pBytes, size
     pNewMessage->nDataSize = nSize;
     pNewMessage->nZero = nEventType;
     pNewMessage->pNext = 0;
-    if (nSize < 0x121) {
+    if (!(nSize < 0x121)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x44);
+      exit(-1);
+    }
+
+    {
       ::BnMessQueue* pFirstMessage;
       /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
       pFirstMessage = pNewMessage;
@@ -74,21 +79,23 @@ void __fastcall BNMESSQUEUE_EnqueueBytes(int32_t nEventType, char * pBytes, size
       LeaveCriticalSection(&lpCriticalSection_00882004);
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x44);
-    exit(-1);
 }
 
 uint32_t __fastcall BNMESSQUEUE_EnqueueString(int32_t nEventType, char * szMessage) {
     char cCurrentChar;
-    ::BnMessQueue* pNewMessage = D2_NEW(::BnMessQueue);
+    ::BnMessQueue* pNewMessage = D2_NEW_AT(::BnMessQueue, ".\\BnMessQueue.cpp", 0x5c);
     char* pDestBuffer = pNewMessage->bBuffer;
     Storm::Source::SSTR::SStrCopy(pDestBuffer, szMessage, 0x120);
     pDestBuffer = pDestBuffer + strlen(pDestBuffer) + 1;
     pNewMessage->nDataSize = (size_t)(pDestBuffer + (1 - (int)(pNewMessage->bBuffer + 1)));
     pNewMessage->nZero = nEventType;
     pNewMessage->pNext = 0;
-    if (pDestBuffer + (1 - (int)(pNewMessage->bBuffer + 1)) < (char*)0x121) {
+    if (!(pDestBuffer + (1 - (int)(pNewMessage->bBuffer + 1)) < (char*)0x121)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x62);
+      exit(-1);
+    }
+
+    {
       ::BnMessQueue* pFirstMessage;
       /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
       pFirstMessage = pNewMessage;
@@ -102,9 +109,6 @@ uint32_t __fastcall BNMESSQUEUE_EnqueueString(int32_t nEventType, char * szMessa
       LeaveCriticalSection(&lpCriticalSection_00882004);
       return 1;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x62);
-    exit(-1);
 }
 
 // Dequeues next Battle.net lobby chat message. Thread-safe dequeue from global linked list (nLobbyChatCurrentMessage). Copies message buffer to output, returns data size. Returns 0 if queue empty.
@@ -117,7 +121,7 @@ size_t __fastcall BNMESSQUEUE_DequeueMessage(int * pMessageTypeOut, void * pBuff
       *pMessageTypeOut = pBVar2->nZero;
       sVar1 = pBVar2->nDataSize;
       pBVar2 = pBVar2->pNext;
-      D2_FREE(nLobbyChatCurrentMessage);
+      D2_FREE_AT(nLobbyChatCurrentMessage, ".\\BnMessQueue.cpp", 0x86);
       nLobbyChatCurrentMessage = pBVar2;
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00882004);
       return sVar1;
@@ -132,7 +136,7 @@ void __stdcall BNMESSQUEUE_ClearAll() {
     while (nLobbyChatCurrentMessage) {
       ::BnMessQueue* pBVar1;
       pBVar1 = nLobbyChatCurrentMessage->pNext;
-      D2_FREE(nLobbyChatCurrentMessage);
+      D2_FREE_AT(nLobbyChatCurrentMessage, ".\\BnMessQueue.cpp", 0x9f);
       nLobbyChatCurrentMessage = pBVar1;
     }
 

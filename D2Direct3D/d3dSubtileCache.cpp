@@ -22,12 +22,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -42,7 +42,7 @@ int __fastcall D3DSUBTILE_Initialize(D3DSubtileCacheStrc * pCache, int nBaseMemo
     }
 
     pCache->nMaxNodes = uNodeCountCandidate;
-    D3DSubtileCacheNodeStrc* pNodeBuffer = (D3DSubtileCacheNodeStrc*)D2_ALLOC(uNodeCountCandidate * 0x18);
+    D3DSubtileCacheNodeStrc* pNodeBuffer = (D3DSubtileCacheNodeStrc*)D2_ALLOC_AT(uNodeCountCandidate * 0x18, ".\\Src\\d3dSubtileCache.cpp", 0x2d);
     pCache->pNodeBuffer = pNodeBuffer;
     if (!pNodeBuffer) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e);
@@ -216,14 +216,14 @@ void __fastcall D3DSUBTILE_PromoteNodeToMRU(D3DSubtileCacheStrc * pCache, int nI
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 200);
       exit(-1);
     } else {
-      if (0 < nIndex) {
-        pNode = D3DSUBTILE_RemoveNodeByIndex(pCache, nIndex - 1);
-        D3DSUBTILE_InsertNodeAtTail(pNode, pCache);
-        return;
+      if (!(0 < nIndex)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc9);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc9);
-      exit(-1);
+      pNode = D3DSUBTILE_RemoveNodeByIndex(pCache, nIndex - 1);
+      D3DSUBTILE_InsertNodeAtTail(pNode, pCache);
+      return;
     }
 }
 
@@ -330,7 +330,7 @@ void __fastcall D3DSUBTILE_Free(D3DSubtileCacheStrc * pCache, BOOL bInvalidateAl
         }
       }
       if (pCache->pNodeBuffer) {
-        D2_FREE(pCache->pNodeBuffer);
+        D2_FREE_AT(pCache->pNodeBuffer, ".\\Src\\d3dSubtileCache.cpp", 0x82);
         pCache->pNodeBuffer = 0;
       }
 

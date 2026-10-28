@@ -61,21 +61,21 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2UnitDataPlayerPetsStrc) == 0x4, "D2_NEW(D2UnitDataPlayerPetsStrc): the 32-bit layout must be the 0x4 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2UnitDataPlayerPetsStrc) == 0x4, "D2_NEW_AT(D2UnitDataPlayerPetsStrc): the 32-bit layout must be the 0x4 bytes 1.14d allocates");
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2PetStrc) == 0x18, "D2_NEW(D2PetStrc): the 32-bit layout must be the 0x18 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2PetStrc) == 0x18, "D2_NEW_AT(D2PetStrc): the 32-bit layout must be the 0x18 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpSUnitIterateCallback
@@ -169,7 +169,7 @@ void __stdcall PETS_FreeOrKillPetList(D2UnitStrc * pUnit, D2PetListStrc * pPetLi
         KillHandlerPet(pPetStrc->nPetGUID, pGame);
         pPetList->nPets2--;
         pPetList->nMax--;
-        D2_FREE_POOL(pGame->pMemoryPool, pPetStrc);
+        D2_FREE_POOL_AT(pGame->pMemoryPool, pPetStrc, ".\\PLAYER\\PlayerPets.cpp", 0xe8);
       } else {
         pPetUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, pPetStrc->nPetGUID);
         if (pPetUnit) {
@@ -190,7 +190,7 @@ void __stdcall PETS_FreeOrKillPetList(D2UnitStrc * pUnit, D2PetListStrc * pPetLi
             UNIT::SUnit::FreeServerUnit(pGame, pPetUnit);
             pPetList->nPets2--;
             pPetList->nMax--;
-            D2_FREE_POOL(pGame->pMemoryPool, pPetStrc);
+            D2_FREE_POOL_AT(pGame->pMemoryPool, pPetStrc, ".\\PLAYER\\PlayerPets.cpp", 0xe8);
             continue;
           }
           if (!(*(uint32_t*)pPetStrc & 1)) {
@@ -211,7 +211,7 @@ void __stdcall PETS_FreeOrKillPetList(D2UnitStrc * pUnit, D2PetListStrc * pPetLi
         if (!nParam2) {
           pPetList->nPets2--;
           pPetList->nMax--;
-          D2_FREE_POOL(pGame->pMemoryPool, pPetStrc);
+          D2_FREE_POOL_AT(pGame->pMemoryPool, pPetStrc, ".\\PLAYER\\PlayerPets.cpp", 0xe8);
         }
       }
     }
@@ -224,7 +224,12 @@ void __fastcall FreePets(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     int nTxtPetTypeSize;
     D2UnitDataPlayerPetsStrc* pMemoryToFree;
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    if (pPlayerData) {
+    if (!pPlayerData) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x14f);
+      exit(-1);
+    }
+
+    {
       D2PetListStrc* pPetList;
       pMemoryToFree = pPlayerData->pPets;
       if (!pMemoryToFree) {
@@ -247,14 +252,11 @@ void __fastcall FreePets(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
         } while (nPetTypeIndex < nTxtPetTypeSize);
       }
 
-      D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree->pPetList);
-      D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+      D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree->pPetList, ".\\PLAYER\\PlayerPets.cpp", 0x161);
+      D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree, ".\\PLAYER\\PlayerPets.cpp", 0x162);
       pPlayerData->pPets = 0;
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x14f);
-    exit(-1);
 }
 
 int32_t GetPetUidByIndex(int32_t nIndex, D2UnitStrc * pUnit) {
@@ -318,15 +320,15 @@ void __stdcall KillingPets(uint32_t nTargetGUID, D2PetListStrc * pPetList, int32
       }
     }
 
-    D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+    D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree, ".\\PLAYER\\PlayerPets.cpp", 0x25c);
     int* pnPetCount = &pPetList->nPets2;
     (*pnPetCount)--;
-    if (-1 < *pnPetCount) {
-      return;
+    if (!(-1 < *pnPetCount)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x260);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x260);
-    exit(-1);
+    return;
 }
 
 // @sourcefile .\PLAYER\PlayerPets.cpp
@@ -517,7 +519,7 @@ void __stdcall PLAYERPETS_FreeAllPetsInList(D2PetListStrc * pParam, ::SGAMEDATA 
       D2PetStrc* pNextPet;
       pNextPet = pMemoryToFree->pNext;
       KillHandlerPet(pMemoryToFree->nPetGUID, pGame);
-      D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+      D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree, ".\\PLAYER\\PlayerPets.cpp", 0x4a5);
       pMemoryToFree = pNextPet;
     }
 
@@ -1289,10 +1291,10 @@ void __fastcall AllocPets(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       FreePets(pGame, pUnit);
     }
 
-    D2UnitDataPlayerPetsStrc* pNewPets = D2_NEW_POOL(pGame->pMemoryPool, D2UnitDataPlayerPetsStrc);
+    D2UnitDataPlayerPetsStrc* pNewPets = D2_NEW_POOL_AT(pGame->pMemoryPool, D2UnitDataPlayerPetsStrc, ".\\PLAYER\\PlayerPets.cpp", 0xa2);
     pNewPets->pPetList = 0;
     pPlayerData->pPets = pNewPets;
-    D2PetListStrc* pPet = (D2PetListStrc*)D2_ALLOC_POOL(pGame->pMemoryPool, sgptDataTable->nTxtPetTypeSize * 0xc);
+    D2PetListStrc* pPet = (D2PetListStrc*)D2_ALLOC_POOL_AT(pGame->pMemoryPool, sgptDataTable->nTxtPetTypeSize * 0xc, ".\\PLAYER\\PlayerPets.cpp", 0xa6);
     pNewPets->pPetList = pPet;
     memset(pPet, 0, sgptDataTable->nTxtPetTypeSize * 0xc);
     PETS_ResetAllPetLimitsToBase(pGame, pUnit);
@@ -1304,7 +1306,12 @@ void __fastcall PETS_FreeAllPetsByType(::SGAMEDATA * pGame, D2UnitStrc * pUnit) 
     int nPetTypeIdx;
     D2UnitDataPlayerPetsStrc* pPets;
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    if (pPlayerData) {
+    if (!pPlayerData) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12f);
+      exit(-1);
+    }
+
+    {
       int nPetTypeSize;
       pPets = pPlayerData->pPets;
       if (!pPets) {
@@ -1330,9 +1337,6 @@ void __fastcall PETS_FreeAllPetsByType(::SGAMEDATA * pGame, D2UnitStrc * pUnit) 
       PETS_RecalculateAllPetLimits(pGame, pUnit);
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12f);
-    exit(-1);
 }
 
 // Enforces the per-type pet cap when the player recasts a summoning skill. If pPetList->nMax is 0, recalculates limits first; if still 0, kills the given minion (or all pets if null). If at cap, kills the oldest pet in the list (FIFO). Otherwise allocates a new D2PetStrc node from the game memory pool, fills it from pPetArgs and pMinion's GUID, and appends it to pPetList. Halts with an internal error if the count exceeds nMax after insertion.
@@ -1375,7 +1379,7 @@ BOOL __stdcall KillPetOnRecast(D2UnitStrc * pUnit, D2UnitStrc * pMinion, D2PetAr
       }
     }
 
-    pNewPetNode = D2_NEW_POOL(pGame->pMemoryPool, D2PetStrc);
+    pNewPetNode = D2_NEW_POOL_AT(pGame->pMemoryPool, D2PetStrc, ".\\PLAYER\\PlayerPets.cpp", 0x322);
     *(uint32_t*)pNewPetNode = 0;
     pNewPetNode->nPetGUID = 0;
     pNewPetNode->pPetData.nSeed = 0;
@@ -1399,12 +1403,12 @@ BOOL __stdcall KillPetOnRecast(D2UnitStrc * pUnit, D2UnitStrc * pMinion, D2PetAr
     }
 
     pPetList->nPets2++;
-    if (pPetList->nPets2 <= pPetList->nMax) {
-      return 1;
+    if (!(pPetList->nPets2 <= pPetList->nMax)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x330);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x330);
-    exit(-1);
+    return 1;
 }
 
 // Handles re-cast of a summoning skill onto an existing pet unit (pPet may be null for a fresh summon). Removes conflicting pets by group, trims excess via PETS_SetMaxAndTrimExcess, checks for valid recast via KillPetOnRecast, then iterates all units calling SummonAndAssign to bind the new/existing minion to the owner. pPet==null summons a fresh minion; non-null re-assigns the specified monster.
@@ -1458,7 +1462,12 @@ void __fastcall RecastPetAndAssign(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, D2
     D2PetArgStrc sPetArgs;
     D2PetDataStrc sPetData;
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pPlayer);
-    if (pPlayerData) {
+    if (!pPlayerData) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3b5);
+      exit(-1);
+    }
+
+    {
       D2PetListStrc* pPetList;
       if (!(pPlayerData->pPets && -1 < nPetType && nPetType < sgptDataTable->nTxtPetTypeSize)) {
         return;
@@ -1501,9 +1510,6 @@ void __fastcall RecastPetAndAssign(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, D2
       UNIT::SUnit::IterateAllUnits(pGame, (fpSUnitIterateCallback)SummonAndAssign, &sPetArgs);
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3b5);
-    exit(-1);
 }
 
 uint32_t __fastcall GetCarry1FlagOfitem(D2UnitStrc * pUnit) {

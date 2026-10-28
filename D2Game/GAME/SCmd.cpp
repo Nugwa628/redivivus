@@ -92,21 +92,21 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2PacketListStrc) == 0x208, "D2_NEW(D2PacketListStrc): the 32-bit layout must be the 0x208 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2PacketListStrc) == 0x208, "D2_NEW_AT(D2PacketListStrc): the 32-bit layout must be the 0x208 bytes 1.14d allocates");
 
-#ifndef D2_FREE_POOL
-#define D2_FREE_POOL(pPool, p) Fog::Memory::FreeServerMemory((pPool), (p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_POOL_AT
+#define D2_FREE_POOL_AT(pPool, p, szFile, nLine) Fog::Memory::FreeServerMemory((pPool), (p), (szFile), (nLine), 0)
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2PartyDataStrc) == 0x14, "D2_NEW(D2PartyDataStrc): the 32-bit layout must be the 0x14 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2PartyDataStrc) == 0x14, "D2_NEW_AT(D2PartyDataStrc): the 32-bit layout must be the 0x14 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpSUnitIterateCallback
@@ -131,7 +131,7 @@ void __stdcall SCMD_QueuePacketForClient(uint8_t * pBytes, size_t nSize, D2Clien
       pPacket = pClient->pEmpty;
       nOffset = 0;
       if (!pPacket) {
-        pPacket = D2_NEW_POOL(nullptr, D2PacketListStrc);
+        pPacket = D2_NEW_POOL_AT(nullptr, D2PacketListStrc, ".\\GAME\\SCmd.cpp", 0xa0);
       } else {
         pClient->pEmpty = pPacket->pNext;
       }
@@ -1019,7 +1019,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x94_SETALLSKILLS(D2ClientStrc * pClient, D
 
         pGame = Clients::CLIENT_GetGame(pClient);
         nAllocSize = nSkillCountIter * 3 + 6;
-        pPktBuf = (uint8_t*)D2_ALLOC_POOL(pGame->pMemoryPool, nAllocSize);
+        pPktBuf = (uint8_t*)D2_ALLOC_POOL_AT(pGame->pMemoryPool, nAllocSize, ".\\GAME\\SCmd.cpp", 0x568);
         pSkillEntryBuf = pPktBuf + 6;
         *pPktBuf = 0x94;
         if (nSkillCountIter < 0x100) {
@@ -1036,7 +1036,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x94_SETALLSKILLS(D2ClientStrc * pClient, D
           }
 
           SCMD_QueuePacketForClient(pPktBuf, nAllocSize, pClient);
-          D2_FREE_POOL(pGame->pMemoryPool, pPktBuf);
+          D2_FREE_POOL_AT(pGame->pMemoryPool, pPktBuf, ".\\GAME\\SCmd.cpp", 0x57e);
           return;
         }
 
@@ -1231,7 +1231,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x7A_UPDATEPET(D2ClientStrc * pClient, uint
     SCMD_QueuePacketForClient(aPacket, 0xd, pClient);
 }
 
-void NET_D2GS_SERVER_Send_0x81_UPDATEPETPARAMS(void * pThis, uint8_t byAction, uint32_t dwPetGUID, uint32_t dwMercUnitGUID, uint16_t wMercType, uint32_t dwOwnerUnitGUID, uint32_t dwMercExperience) {
+void __thiscall NET_D2GS_SERVER_Send_0x81_UPDATEPETPARAMS(void * pThis, uint8_t byAction, uint32_t dwPetGUID, uint32_t dwMercUnitGUID, uint16_t wMercType, uint32_t dwOwnerUnitGUID, uint32_t dwMercExperience) {
     uint8_t cStack_18[20];
     *(uint32_t*)((char*)&cStack_18 + 4) = dwMercUnitGUID;
     *(uint32_t*)((char*)&cStack_18 + 8) = dwPetGUID;
@@ -1348,7 +1348,7 @@ BOOL __stdcall PLAYERDATA_AllocPartyData(D2UnitStrc * pUnit, int32_t nUnitLife, 
       }
     }
 
-    pPartyData = D2_NEW_POOL(pGame->pMemoryPool, D2PartyDataStrc);
+    pPartyData = D2_NEW_POOL_AT(pGame->pMemoryPool, D2PartyDataStrc, ".\\GAME\\SCmd.cpp", 0x6fa);
     if (!pPartyData) {
       return 0;
     }
@@ -1390,21 +1390,20 @@ BOOL __stdcall SCMD_DispatchUnitPartyData(D2UnitStrc * pUnit, int32_t nUnitLife,
       exit(-1);
     } else {
       int32_t nResult;
-      if (pUnit2) {
-        if (pUnit2->eUnitType == UNIT_PLAYER) {
-          nPartyDataChanged = PLAYERDATA_AllocPartyData(pUnit2, nUnitLife, eLevel, pUnit);
-          return nPartyDataChanged;
-        }
-        if (pUnit2->eUnitType != UNIT_MONSTER) {
-          return 0;
-        }
-
-        nResult = SCMD_CheckMonsterPositionDesync(pUnit, pUnit2, nUnitLife);
-        return nResult;
+      if (!pUnit2) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x713);
+        exit(-1);
+      }
+      if (pUnit2->eUnitType == UNIT_PLAYER) {
+        nPartyDataChanged = PLAYERDATA_AllocPartyData(pUnit2, nUnitLife, eLevel, pUnit);
+        return nPartyDataChanged;
+      }
+      if (pUnit2->eUnitType != UNIT_MONSTER) {
+        return 0;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x713);
-      exit(-1);
+      nResult = SCMD_CheckMonsterPositionDesync(pUnit, pUnit2, nUnitLife);
+      return nResult;
     }
 }
 
@@ -1492,18 +1491,18 @@ void __fastcall NET_D2GS_SERVER_Send_0x9D_ITEMUNITEX(D2ClientStrc * pClient, D2U
     D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, eItemFlag, 1);
     int32_t nSerializedLen = D2Common::ITEMS::Items::SerializeItem(pItem, sPacket.aBitStream, 0xf4, nullptr, 0, bSerializeFull);
     uint32_t nTotalPacketLen = nSerializedLen + 0xd;
-    if (nTotalPacketLen < 0xfd) {
-      D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
-      D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, eSavedItemFlag, 1);
-      sPacket.nPacketSize = (uint8_t)nTotalPacketLen;
-      SCMD_QueuePacketForClient(&sPacket.nPacketId, nTotalPacketLen & 0xff, pClient);
-      Send0x9DAllSocketedItems(pClient, pItem, eItemFlag);
-      Fog::Debug::GuardStack();
-      return;
+    if (!(nTotalPacketLen < 0xfd)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x7b4);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x7b4);
-    exit(-1);
+    D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
+    D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, eSavedItemFlag, 1);
+    sPacket.nPacketSize = (uint8_t)nTotalPacketLen;
+    SCMD_QueuePacketForClient(&sPacket.nPacketId, nTotalPacketLen & 0xff, pClient);
+    Send0x9DAllSocketedItems(pClient, pItem, eItemFlag);
+    Fog::Debug::GuardStack();
+    return;
 }
 
 // @sourcefile .\GAME\SCmd.cpp
@@ -2351,7 +2350,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xA9_UNITSTATE_OFF_EX(D2ClientStrc * pClien
     SCMD_QueuePacketForClient(aPacket, 7, pClient);
 }
 
-void SCMD_WriteBooleanToBitBuffer(void * pThis, int32_t nBoolValue) {
+void __thiscall SCMD_WriteBooleanToBitBuffer(void * pThis, int32_t nBoolValue) {
     Fog::BitBuffer::WriteValueToBitBuffer((D2BitBufferStrc*)pThis, (uint32_t)(nBoolValue != 0), 1);
 }
 
@@ -2581,7 +2580,12 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
 // (SCMD_0x66_WardenStub @ 0x0054d740 returns PROCEED_NEXT without processing).
 // Likely disabled/removed in later patches after Warden was integrated into Battle.net realm.
 void __fastcall NET_D2GS_SERVER_Send_0xAE_WARDENDATA(D2ClientStrc * pClient, void * pParam, uint32_t nDataSize) {
-    if (nDataSize < 0x1fe) {
+    if (!(nDataSize < 0x1fe)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe38);
+      exit(-1);
+    }
+
+    {
       D2GSPacketSrv0xAE sPacket;
       sPacket.nPacketId = 0xae;
       sPacket.nDataSize = (uint16_t)nDataSize;
@@ -2590,9 +2594,6 @@ void __fastcall NET_D2GS_SERVER_Send_0xAE_WARDENDATA(D2ClientStrc * pClient, voi
       Fog::Debug::GuardStack();
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe38);
-    exit(-1);
 }
 
 // Generic wrapper for sending state-related packets (0xA8 SetState or 0xAA AddUnit).
@@ -2701,18 +2702,18 @@ void __fastcall NET_D2GS_SERVER_Send_0x9C_ITEMEX(D2ClientStrc * pClient, D2UnitS
       D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, eItemFlag, 1);
       memset(sPacket.aBitStream, 0, 0xf4);
       nLine = D2Common::ITEMS::Items::SerializeItem(pUnit, (uint8_t*)sPacket.aBitStream, 0xf4, nullptr, 0, nParam);
-      if (nLine + 8U < 0xfd) {
-        sPacket.nFullPacketSize = (uint8_t)(nLine + 8U);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, eSavedItemFlags, 1);
-        SCMD_QueuePacketForClient(&sPacket.nPacketId, (uint32_t)sPacket.nFullPacketSize, pClient);
-        Send0x9DAllSocketedItems(pClient, pUnit, eItemFlag);
-        Fog::Debug::GuardStack();
-        return;
+      if (!(nLine + 8U < 0xfd)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78c);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78c);
-      exit(-1);
+      sPacket.nFullPacketSize = (uint8_t)(nLine + 8U);
+      D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
+      D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, eSavedItemFlags, 1);
+      SCMD_QueuePacketForClient(&sPacket.nPacketId, (uint32_t)sPacket.nFullPacketSize, pClient);
+      Send0x9DAllSocketedItems(pClient, pUnit, eItemFlag);
+      Fog::Debug::GuardStack();
+      return;
     }
 }
 
@@ -2799,20 +2800,20 @@ void __fastcall Send0x9CItemPutInBelt(D2ClientStrc * pClient, D2UnitStrc * pUnit
     NET_D2GS_SERVER_Send_0x9C_ITEMEX(pClient, pItem, 0xe, eItemFlags, 0);
 }
 
-void Send0x9CItemRemoveFromBelt(void * pThis, D2UnitStrc * pUnit, eD2ItemFlag eItemFlag) {
+void __thiscall Send0x9CItemRemoveFromBelt(void * pThis, D2UnitStrc * pUnit, eD2ItemFlag eItemFlag) {
     NET_D2GS_SERVER_Send_0x9C_ITEMEX((D2ClientStrc*)pThis, pUnit, 0xf, eItemFlag, 0);
 }
 
-void Send0x9CItemSwapInBelt(void * pThis, D2UnitStrc * pUnit, eD2ItemFlag eItemFlag) {
+void __thiscall Send0x9CItemSwapInBelt(void * pThis, D2UnitStrc * pUnit, eD2ItemFlag eItemFlag) {
     NET_D2GS_SERVER_Send_0x9C_ITEMEX((D2ClientStrc*)pThis, pUnit, 0x10, eItemFlag, 0);
 }
 
-void Send0x9CItemToCursor(void * pThis, D2UnitStrc * pUnit) {
+void __thiscall Send0x9CItemToCursor(void * pThis, D2UnitStrc * pUnit) {
     NET_D2GS_SERVER_Send_0x9C_ITEMEX((D2ClientStrc*)pThis, pUnit, 0x12, ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD), 0);
 }
 
 // @sourcefile .\GAME\SCmd.cpp
-void Send0x9CItemHandleInShop(void * pThis, D2UnitStrc * pUnit, char cParam) {
+void __thiscall Send0x9CItemHandleInShop(void * pThis, D2UnitStrc * pUnit, char cParam) {
     eInventoryPage eCurrentPage;
     eInventoryPage ePreviousPage;
     BOOL bIsIdentified;

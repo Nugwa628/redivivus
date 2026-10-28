@@ -19,12 +19,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -124,34 +124,33 @@ BOOL __stdcall BeginAsyncReadForClient(D2QServerStrc * pQServer, D2QServerClient
       HANDLE pvVar1;
       pvVar1 = pClient->ovRead.hEvent;
       pClient->dwReadFlags |= QSRV_READFLAG_PENDING_IO;
-      if (!pvVar1) {
-        if (pClient->socket == -1) {
-          nBytesRead = pClient->nClientToken;
-          /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);
-          CloseRemoteConnection(pQServer, nBytesRead, ".\\Src\\QServer\\QServerNT.cpp", 0x408);
+      if (pvVar1) {
+        ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3f8);
+        exit(-1);
+      }
+      if (pClient->socket == -1) {
+        nBytesRead = pClient->nClientToken;
+        /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);
+        CloseRemoteConnection(pQServer, nBytesRead, ".\\Src\\QServer\\QServerNT.cpp", 0x408);
+        RemoveClientAndClearLog(pQServer, pClient);
+        return 0;
+      }
+
+      IncrementClientRefCount(pQServer, pClient);
+      /* LPOVERLAPPED lpOverlapped for ReadFile */ /* LPDWORD lpNumberOfBytesRead for ReadFile */ /* DWORD nNumberOfBytesToRead for ReadFile */ /* LPVOID lpBuffer for ReadFile */ /* HANDLE hFile for ReadFile */ fReadResult = ReadFile((HANDLE)pClient->socket, pClient->aRecvBuffer + nBytesRead, DVar2, (LPDWORD)&pClient->dwReadTransferSize, &pClient->ovRead);
+      if (!fReadResult) {
+        DVar2 = GetLastError();
+        if (DVar2 != 0x3e5) {
           RemoveClientAndClearLog(pQServer, pClient);
+          CloseRemoteConnection(pQServer, pClient->nClientToken, ".\\Src\\QServer\\QServerNT.cpp", 0x430);
           return 0;
         }
 
-        IncrementClientRefCount(pQServer, pClient);
-        /* LPOVERLAPPED lpOverlapped for ReadFile */ /* LPDWORD lpNumberOfBytesRead for ReadFile */ /* DWORD nNumberOfBytesToRead for ReadFile */ /* LPVOID lpBuffer for ReadFile */ /* HANDLE hFile for ReadFile */ fReadResult = ReadFile((HANDLE)pClient->socket, pClient->aRecvBuffer + nBytesRead, DVar2, (LPDWORD)&pClient->dwReadTransferSize, &pClient->ovRead);
-        if (!fReadResult) {
-          DVar2 = GetLastError();
-          if (DVar2 != 0x3e5) {
-            RemoveClientAndClearLog(pQServer, pClient);
-            CloseRemoteConnection(pQServer, pClient->nClientToken, ".\\Src\\QServer\\QServerNT.cpp", 0x430);
-            return 0;
-          }
-
-          fReadResult = 1;
-        }
-
-        /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);
-        return fReadResult;
+        fReadResult = 1;
       }
 
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3f8);
-      exit(-1);
+      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);
+      return fReadResult;
     } else {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3f5);
       exit(-1);
@@ -159,7 +158,7 @@ BOOL __stdcall BeginAsyncReadForClient(D2QServerStrc * pQServer, D2QServerClient
 }
 
 D2QServerClientPacketStrc * __stdcall NET_QServerClientPacket_CreateStructAndCopyBytesThere(D2QServerClientConnectionStrc * pQServerClient, size_t nSize, char * pBytes) {
-    D2QServerClientPacketStrc* pNewPacket = (D2QServerClientPacketStrc*)D2_ALLOC(nSize + 8);
+    D2QServerClientPacketStrc* pNewPacket = (D2QServerClientPacketStrc*)D2_ALLOC_AT(nSize + 8, ".\\Src\\QServer\\QServerNT.cpp", 0x440);
     memcpy(pNewPacket + 1, pBytes, nSize);
     pNewPacket->nPacketSize = nSize;
     pNewPacket->pQServerClientPacketNext = 0;
@@ -338,7 +337,7 @@ int __stdcall PopAndFreeCompletedSendPacket(D2QServerClientConnectionStrc * pCli
       return 1;
     }
 
-    D2_FREE(pMemoryToFree);
+    D2_FREE_AT(pMemoryToFree, ".\\Src\\QServer\\QServerNT.cpp", 0x578);
     return 1;
 }
 
@@ -359,7 +358,7 @@ DWORD __stdcall AcceptThreadMain(void * lpThreadParam) {
     pQServer = *(D2QServerStrc**)lpThreadParam;
     int nWorkerIndex;
     nWorkerIndex = *(int*)((int)lpThreadParam + 4);
-    D2_FREE(lpThreadParam);
+    D2_FREE_AT(lpThreadParam, ".\\Src\\QServer\\QServerNT.cpp", 0x10d);
     DWORD dwSleepMs;
     dwSleepMs = GetTickCount();
     int nStopFlag;
@@ -541,12 +540,12 @@ int __fastcall PumpIoCompletionQueueForWorker(D2QServerStrc * pQServer, int nWor
         dwTickStart = GetLastError();
         if (!bGqcsResult) {
           if (!pOverlapped || !pClient) {
-            if (dwTickStart == 0x102) {
-              return bReceivedData;
+            if (dwTickStart != 0x102) {
+              ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3c8);
+              exit(-1);
             }
 
-            ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3c8);
-            exit(-1);
+            return bReceivedData;
           }
 
           QSERVER_LOG("QSRV", "[NTRdQ]          I/O err %d on client %d refcount=%d", dwTickStart, pClient->nClientToken, pClient->nRefCount);
@@ -579,7 +578,7 @@ int __fastcall PumpIoCompletionQueueForWorker(D2QServerStrc * pQServer, int nWor
           pClient->dwWriteFlags &= ~QSRV_WRITEFLAG_PENDING_IO;
           /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(pClientLock);
           if (pMemoryToFree) {
-            D2_FREE(pMemoryToFree);
+            D2_FREE_AT(pMemoryToFree, ".\\Src\\QServer\\QServerNT.cpp", 0x578);
           }
 
           /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(pClientLock);
@@ -639,8 +638,13 @@ int __fastcall PumpIoCompletionQueueForWorker(D2QServerStrc * pQServer, int nWor
 DWORD __stdcall IoWorkerThreadMain(void * lpThreadParam) {
     D2QServerStrc* pQServer = *(D2QServerStrc**)lpThreadParam;
     int nWorkerIndex = *(int*)((int)lpThreadParam + 4);
-    D2_FREE(lpThreadParam);
-    if (pQServer->bUseDedicatedIoWorkers) {
+    D2_FREE_AT(lpThreadParam, ".\\Src\\QServer\\QServerNT.cpp", 0x2ae);
+    if (!pQServer->bUseDedicatedIoWorkers) {
+      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x2af);
+      exit(-1);
+    }
+
+    {
       int iVar1;
       iVar1 = pQServer->aIoWorkerStopFlags[nWorkerIndex];
       while (!iVar1) {
@@ -654,9 +658,6 @@ DWORD __stdcall IoWorkerThreadMain(void * lpThreadParam) {
       ErrorManager::StubHook2();
       return 1;
     }
-
-    ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x2af);
-    exit(-1);
 }
 
 int __fastcall PumpIoCompletionQueues(D2QServerStrc * pQServer, uint32_t dwTimeoutMs) {
@@ -739,14 +740,14 @@ SOCKET __fastcall StartListening(D2QServerStrc * pQServer, uint32_t nPort) {
         pQServer->aListenPorts[nResult] = (u_short)nPortLocal;
         pQServer->aListenSockets[nResult] = hListenSocket;
         pQServer->aWorkerSlotValues[nResult] = 1;
-        pThreadArgs = (uint32_t*)D2_ALLOC(8);
+        pThreadArgs = (uint32_t*)D2_ALLOC_AT(8, ".\\Src\\QServer\\QServerNT.cpp", 0xa2);
         /* LPDWORD lpThreadId for CreateThread */ /* DWORD dwCreationFlags for CreateThread */ /* LPVOID lpParameter for CreateThread */ /* LPTHREAD_START_ROUTINE lpStartAddress for CreateThread */ /* SIZE_T dwStackSize for CreateThread */ /* LPSECURITY_ATTRIBUTES lpThreadAttributes for CreateThread */ *pThreadArgs = (uint32_t)(uintptr_t)pQServer;
         pThreadArgs[1] = nResult;
         hThread = CreateThread((LPSECURITY_ATTRIBUTES)0x0, 0, (LPTHREAD_START_ROUTINE)AcceptThreadMain, pThreadArgs, 0, (LPDWORD)(pQServer->aAcceptThreadIds + nResult));
         pQServer->aAcceptThreadHandles[nResult] = hThread;
         ErrorManager::StubHook1();
         if (pQServer->bUseDedicatedIoWorkers) {
-          pThreadArgs = (uint32_t*)D2_ALLOC(8);
+          pThreadArgs = (uint32_t*)D2_ALLOC_AT(8, ".\\Src\\QServer\\QServerNT.cpp", 0xb5);
           pIocp = (int32_t)(pQServer->aIoWorkerThreadIds + nResult);
           /* LPDWORD lpThreadId for CreateThread */ /* DWORD dwCreationFlags for CreateThread */ /* LPVOID lpParameter for CreateThread */ /* LPTHREAD_START_ROUTINE lpStartAddress for CreateThread */ /* SIZE_T dwStackSize for CreateThread */ /* LPSECURITY_ATTRIBUTES lpThreadAttributes for CreateThread */ *pThreadArgs = (uint32_t)(uintptr_t)pQServer;
           pThreadArgs[1] = nResult;

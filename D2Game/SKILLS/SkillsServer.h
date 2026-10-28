@@ -143,7 +143,7 @@ int32_t __fastcall SKILLS_CalcPerDelayInterval(::SGAMEDATA * pGame, struct D2Uni
 void __fastcall SKILLS_SetPeriodicSkillTimer(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLevel, int32_t bReset);
 void __fastcall SKILLS_SetPeriodicStatOrSkillTimer(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nStatId, eD2Skills eSkill, int32_t nParam1, int32_t nParam2);
 // Server-side: spawns and links a Town Portal object for pUnit. Finds a free spawn coordinate in eSrcLevel, checks for the special Duriel portal, creates an OBJECT unit of pUnit's class, stores the source level ID in the portal's char name buffer, sets portal flags, and bidirectionally links owner/portal via StoreOwner and LinkPortalCoords. Frees the placeholder pUnit on spawn failure. Returns the new portal unit or NULL on error.
-struct D2UnitStrc * LinkPortal(void * pThis, struct D2UnitStrc * pUnit, struct D2RoomStrc * eLevel, eD2LevelId nLevelId2);
+struct D2UnitStrc * __thiscall LinkPortal(void * pThis, struct D2UnitStrc * pUnit, struct D2RoomStrc * eLevel, eD2LevelId nLevelId2);
 // Spawns a town-portal or special portal object at the best free coordinate near (nX, nY) in pRoom, linking it to eLevel. Validates that caster is in town (blocks non-uber portals from town); requires source and destination to share the same act. Finds a free spawn location via collision, creates the UNIT_OBJECT (class nClassId), sets portal flags, writes *ppPortal, and toggles the room's has-portal flag. Returns 1 on success, 0 if no spawn point found, halts if pRoom is null or acts differ.
 BOOL __fastcall SERVER_SpawnPortal(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, eD2LevelId eLevel, struct D2UnitStrc * * ppPortal, int32_t nClassId, BOOL bIgnoreFindSpawnLocationMaybe);
 // Resolves the skill aim position into tile coordinates written to *pnOutX/*pnOutY. If the unit has a locked target, reads its static or dynamic path position. If no target, falls back to the unit's own SP1 (cursor/destination) position. Returns 1 if both coordinates are nonzero, 0 otherwise.
@@ -180,7 +180,7 @@ uint32_t __fastcall SKILLS_IsSkillEquipped(struct D2UnitStrc * pUnit, eD2Skills 
 // @sourcefile .\SKILLS\Skills.cpp
 void __fastcall SKILLS_ApplyAllPassiveStates(struct D2UnitStrc * pUnit);
 void __stdcall SKILLS_CalcSkillMinMaxToHit(int * pnParam, eD2Skills eSkill, struct D2UnitStrc * pUnit);
-void SKILLS_CalcPetSkillDamage(void * pThis, int * pnDamageOut);
+void __thiscall SKILLS_CalcPetSkillDamage(void * pThis, int * pnDamageOut);
 int32_t __fastcall SetDamageOnEvent(struct D2UnitStrc * pUnit, struct D2DamageStrc * pEvent, eD2Skills eSkill, int32_t nSkillLvl);
 void __fastcall SKILLS_AddRandomSkillDamage(struct D2UnitStrc * pUnit, int32_t * pDamageAccum, eD2Skills eSkill, int32_t nSkillLevel);
 uint32_t __fastcall SKILLS_GetWeaponClassBitfield(struct D2UnitStrc * pUnit);
@@ -251,7 +251,7 @@ void __fastcall Server_SelectSkill(struct D2UnitStrc * pUnit, int32_t leftOrRigh
 // @sourcefile .\SKILLS\Skills.cpp
 void __fastcall ClearSkills(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 // Applies STATE_stunned to a non-boss, non-special monster unit. Skips if already STATE_uninterruptable. Allocates a stat list expiring in 100 game frames, attaches STATE_stunned state, schedules a game event, then interrupts the monster's current AI by calling SetCurrentSkill(Neutral) and MONSTERAI_ExecuteLifecycleTransition. Extends existing stun timeout if a stun statlist is already present.
-void SKILL_ApplyStunState(void * pThis, struct D2UnitStrc * pUnit, eD2States eState);
+void __thiscall SKILL_ApplyStunState(void * pThis, struct D2UnitStrc * pUnit, eD2States eState);
 void __fastcall SKILL_StunExpireAndRestoreAi(struct D2UnitStrc * pUnit, eD2States eState, uint32_t dwParam);
 struct D2UnitStrc * __fastcall SKILL_CreateTimedAuraStatList(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTargetUnit, eD2States eState, eD2Skills eSkill, int32_t nParam);
 

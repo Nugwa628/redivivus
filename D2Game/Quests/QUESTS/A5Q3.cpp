@@ -75,24 +75,20 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA5Q3Strc) == 0x114, "D2_NEW(D2QuestDataA5Q3Strc): the 32-bit layout must be the 0x114 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA5Q3Strc) == 0x114, "D2_NEW_AT(D2QuestDataA5Q3Strc): the 32-bit layout must be the 0x114 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpExecuteOnUnitFunction
 #define RECON_FPTD_fpExecuteOnUnitFunction
 typedef BOOL (__fastcall *fpExecuteOnUnitFunction)(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg);
-#endif
-#ifndef RECON_FPTD_QUESTSEQ
-#define RECON_FPTD_QUESTSEQ
-typedef bool (__fastcall *QUESTSEQ)(D2QuestDataStrc * pQuestData);
 #endif
 
 namespace D2Game::Quests::QUESTS::A5Q3 {
@@ -223,19 +219,19 @@ BOOL __fastcall Q33_OnFrozenAnyaKilled(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
 // Q33_SequenceFilter (PrisonOfIce): the quest's fpSequenceFilter. While quest active and stateFlag<5, bootstraps
 // stateFlag 0->1. Once past that, chains to the next quest's sequence filter (nSequenceQuestId) so dependent quests
 // (Betrayal of Harrogath) get re-evaluated. Halts on IsBadCodePtr of the chained fn ptr.
-void __fastcall Q33_SequenceFilter(D2QuestDataStrc * pQuestData) {
+bool __fastcall Q33_SequenceFilter(D2QuestDataStrc * pQuestData) {
     if (pQuestData->nStateFlag < 5 && pQuestData->bIsNotIntroduction) {
       if (pQuestData->nStateFlag) {
-        return;
+        return true;
       }
 
       pQuestData->nStateFlag = 1;
-      return;
+      return true;
     }
 
     D2QuestDataStrc* pSequenceQuest = GetQuestDataByQuestNoInternal(pQuestData->pGame, pQuestData->nSequenceQuestId);
     if (!pSequenceQuest) {
-      return;
+      return false;
     }
 
     BOOL bBadCodePtr = IsBadCodePtr((FARPROC)pQuestData->fpSequenceFilter);
@@ -244,7 +240,8 @@ void __fastcall Q33_SequenceFilter(D2QuestDataStrc * pQuestData) {
       exit(-1);
     }
 
-    pSequenceQuest->fpSequenceFilter(pSequenceQuest);
+    bool byTmp = pSequenceQuest->fpSequenceFilter(pSequenceQuest);
+    return byTmp;
 }
 
 // Q33_SpawnAnyaAndPortal (PrisonOfIce): when the frozen-Anya OBJECT exists, spawns the rescued-Anya MONSTER (0x200)
@@ -1346,13 +1343,13 @@ void __fastcall Q33_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->pNpcMessages = A5Q3::aNpcGossipData;
     pQuestData->bIsActive = true;
     pQuestData->nStateFlag = 0;
-    D2QuestDataA5Q3Strc* pQuestSpecificData = D2_NEW_POOL(pGameTmp->pMemoryPool, D2QuestDataA5Q3Strc);
+    D2QuestDataA5Q3Strc* pQuestSpecificData = D2_NEW_POOL_AT(pGameTmp->pMemoryPool, D2QuestDataA5Q3Strc, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q3.cpp", 0x5ca);
     pQuestData->pQuestSpecificData.pA5Q3 = pQuestSpecificData;
     pQuestData->nQuestIdReal = QUEST_PrisonOfIce;
     pQuestData->fpStatusFilter = Q33_StatusFilter;
     pQuestData->nInitNo = 5;
     pQuestData->fpActiveFilter = Q33_ActiveFilter;
-    pQuestData->fpSequenceFilter = (QUESTSEQ)Q33_SequenceFilter;
+    pQuestData->fpSequenceFilter = Q33_SequenceFilter;
     pQuestData->nSequenceQuestId = QUEST_Act4Traversed;
     memset(pQuestSpecificData, 0, 0x114);
     QUESTGUID_SetPlayerCountToZero(&pQuestSpecificData->sQuestGUID);
@@ -1528,7 +1525,7 @@ void __fastcall Q33_AnyaTimerCallback(D2QuestDataStrc * pQuestData, D2UnitStrc *
 
 // Q33_GetAnyaCoordinates (PrisonOfIce): returns the stored portal coords if active, portal spawned and Anya not yet
 // running. Used to locate the rescue portal.
-uint32_t Q33_GetAnyaCoordinates(void * pThis, int32_t * pOutCoords) {
+uint32_t __thiscall Q33_GetAnyaCoordinates(void * pThis, int32_t * pOutCoords) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal((::SGAMEDATA*)pThis, QUESTINT_PrisonOfIce);
     if (!(pQuestData && pQuestData->bIsNotIntroduction)) {
       return 0;
@@ -1824,7 +1821,7 @@ BOOL __fastcall OBJOP_A5Q3_RescueAnyaFromPortal(D2ObjectOperateFnArg * pOperatio
 // Q33_OnPresetObjectLoad1 (PrisonOfIce): on preset-unit load, copies the preset object list into pA5Q3->pDrlgMap; if the
 // frozen Anya is already spawned and present, hands the DRLG map file over to its monster map AI (once). Restores ice-Anya
 // visuals/AI when the level region (re)loads.
-void Q33_OnPresetObjectLoad1(void * pThis, D2MapAIStrc * pMapAI) {
+void __thiscall Q33_OnPresetObjectLoad1(void * pThis, D2MapAIStrc * pMapAI) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal((::SGAMEDATA*)pThis, QUESTINT_PrisonOfIce);
     if (!pQuestData) {
       return;
@@ -1854,7 +1851,7 @@ void Q33_OnPresetObjectLoad1(void * pThis, D2MapAIStrc * pMapAI) {
 
 // Q33_OnPresetObjectLoad2 (PrisonOfIce): same as Load1 but for the rescued-Anya monster (field_0x108 map) — copies the
 // preset list and transfers the DRLG map file to the Anya monster's AI once it is alive. Restores rescued-Anya on reload.
-void Q33_OnPresetObjectLoad2(void * pThis, D2MapAIStrc * pMapAI) {
+void __thiscall Q33_OnPresetObjectLoad2(void * pThis, D2MapAIStrc * pMapAI) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal((::SGAMEDATA*)pThis, QUESTINT_PrisonOfIce);
     if (!(pQuestData && pMapAI)) {
       return;

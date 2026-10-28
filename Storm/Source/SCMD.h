@@ -67,18 +67,18 @@ void __stdcall SCMD_ConvertString(char * str, struct D2UnitDataMonsterStrc * cmd
 void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCallback, char * szItem);
 // @blizzard ProcessFile (SCMD.CPP)
 BOOL __stdcall SCMD_ProcessFile(char * filename, int * pnParam, uint32_t dwParam, pfnSCmdUnknownArgCallback pfnCallback, pfnSCmdErrorCallback pfnErrorCallback);
-uint32_t SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset);
-::SCMD * SCMD_GetListHead(::SCMD * pThis, ::SCMD * pNode);
-void SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd);
-uint32_t SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode);
-void SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode);
+uint32_t __thiscall SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset);
+::SCMD * __thiscall SCMD_GetListHead(::SCMD * pThis, ::SCMD * pNode);
+void __thiscall SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd);
+uint32_t __thiscall SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode);
+void __thiscall SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode);
 // @blizzard FindFlagDef (SCMD.CPP)
 struct StormCmdArgDefStrc * __stdcall SCMD_FindFlagDef(struct StormCmdArgDefStrc * cmdList, char * str, int minLen);
-uint32_t SCMD_GetHandler(::SCMD * pThis, int nNodeOffset);
+uint32_t __thiscall SCMD_GetHandler(::SCMD * pThis, int nNodeOffset);
 void __fastcall SCMD_ClearList(struct D2StormListHead * nListPtr);
 void __fastcall SCMD_ClearAll(struct D2StormListHead * nListPtr);
-::SCMD * SCMD_AllocNode(::SCMD * pThis, int nInsertMode, int nParam, uint32_t nParam2);
-::SCMD * SCMD_FreeNode(::SCMD * pThis, uint8_t bFreeMemory);
+::SCMD * __thiscall SCMD_AllocNode(::SCMD * pThis, int nInsertMode, int nParam, uint32_t nParam2);
+::SCMD * __thiscall SCMD_FreeNode(::SCMD * pThis, uint8_t bFreeMemory);
 // Registers one command-line argument definition into Storm's command list.
 // @oracle SCmdRegisterArgument
 // @oracle-source Storm export vector SCmdRegisterArgument @100cbcac -> code 10008240 = the traceback-named function .SCmdRegisterArgument, in Mac PPC 1.10b Storm
@@ -86,11 +86,11 @@ void __fastcall SCMD_ClearAll(struct D2StormListHead * nListPtr);
 // @former-name SCMD_RegisterCommand
 BOOL __stdcall SCmdRegisterArgument(uint32_t dwFlags, uint32_t dwId, char * szText, void * pVariable, uint32_t dwVariableBytes, uint32_t dwSetValue, uint32_t dwSetMask, SCMDCALLBACK pfnCallback);
 void __fastcall SCMD_FreeAllNodes(void * pListHead);
-uint32_t SCMD_RemoveNode(::SCMD * pThis, ::SCMD * pNode);
+uint32_t __thiscall SCMD_RemoveNode(::SCMD * pThis, ::SCMD * pNode);
 // @blizzard PerformConversion (SCMD.CPP)
 BOOL __fastcall SCMD_PerformConversion(char * str, struct StormCmdArgDefStrc * cmdDef, int * outConsumed);
 // @blizzard ProcessCurrentFlag (SCMD.CPP)
-BOOL SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed);
+BOOL __thiscall SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed);
 // @blizzard ProcessFlags (SCMD.CPP)
 BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * szText, int * pnOutConsumed);
 // @blizzard ProcessToken (SCMD.CPP)

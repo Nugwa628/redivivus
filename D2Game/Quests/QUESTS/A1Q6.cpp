@@ -42,24 +42,20 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC_POOL
-#define D2_ALLOC_POOL(pPool, size) Fog::Memory::AllocServerMemory((pPool), (size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_POOL_AT
+#define D2_ALLOC_POOL_AT(pPool, size, szFile, nLine) Fog::Memory::AllocServerMemory((pPool), (size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW_POOL
-#define D2_NEW_POOL(pPool, T) ((T*)D2_ALLOC_POOL((pPool), sizeof(T)))
+#ifndef D2_NEW_POOL_AT
+#define D2_NEW_POOL_AT(pPool, T, szFile, nLine) ((T*)D2_ALLOC_POOL_AT((pPool), sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA1Q6Strc) == 0x198, "D2_NEW(D2QuestDataA1Q6Strc): the 32-bit layout must be the 0x198 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA1Q6Strc) == 0x198, "D2_NEW_AT(D2QuestDataA1Q6Strc): the 32-bit layout must be the 0x198 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fpExecuteOnUnitFunction
 #define RECON_FPTD_fpExecuteOnUnitFunction
 typedef BOOL (__fastcall *fpExecuteOnUnitFunction)(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg);
-#endif
-#ifndef RECON_FPTD_QUESTSEQ
-#define RECON_FPTD_QUESTSEQ
-typedef bool (__fastcall *QUESTSEQ)(D2QuestDataStrc * pQuestData);
 #endif
 
 namespace D2Game::Quests::QUESTS::A1Q6 {
@@ -67,17 +63,16 @@ namespace D2Game::Quests::QUESTS::A1Q6 {
 // A1Q6 (Sisters to the Slaughter) object init-fn 04. Marks the quest object (Andariel-related) as updatable while the Forgotten Tower quest is still in its intro phase (!bIsNotIntroduction). Halts if quest data missing. No quest-state transitions.
 void __fastcall Objects_InitFn04(D2ObjectInitFnArg * pInitArg) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pInitArg->pGame, QUESTINT_ForgottenTower);
-    if (pQuestData) {
-      if (pQuestData->bIsNotIntroduction) {
-        return;
-      }
-
-      D2Common::Units::SetupUpdateFlag(pInitArg->pObject, 3);
+    if (!pQuestData) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x423);
+      exit(-1);
+    }
+    if (pQuestData->bIsNotIntroduction) {
       return;
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x423);
-    exit(-1);
+    D2Common::Units::SetupUpdateFlag(pInitArg->pObject, 3);
+    return;
 }
 
 // A1Q6 object init-fn 47. Registers this object's GUID into the A1Q6 quest-specific GUID list (dedup, max 8 entries), bumps the count, runs A1Q5 Countess death-effect, then fires game event 7 (delayed +10 frames) if the recorded flags warrant it. List/event bookkeeping; no GetQuestState/SetQuestState.
@@ -740,12 +735,13 @@ uint32_t __fastcall Q06_GetQuestSpecificFlag(D2QuestDataStrc * pQuestData) {
 }
 
 // A1Q6 fpSequenceFilter: if stateFlag==0 and quest is live (bIsNotIntroduction), schedules Q06_QuestUpdate on a 0x14-tick timer to introduce the quest. No quest-record access.
-void __fastcall Q06_SequenceFilter(D2QuestDataStrc * pQuestData) {
+bool __fastcall Q06_SequenceFilter(D2QuestDataStrc * pQuestData) {
     if (!(!pQuestData->nStateFlag && pQuestData->bIsNotIntroduction)) {
-      return;
+      return true;
     }
 
     AddQuestTimer(pQuestData, Q06_QuestUpdate, 0x14);
+    return true;
 }
 
 // A1Q6 load/restore callback (state slot 0xd) — reconstructs server stateFlag/stateFlagPrev from the persisted player quest record on game (re)load. If not Completed/FinishedInPreviousGame: Step0x04 -> flag 3/prev 2; Step0x03 -> flag 3/prev 1; Step0x02 -> flag 2/prev 1. Pure read of record bits to rebuild in-memory progress.
@@ -797,13 +793,13 @@ void __fastcall Q06_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->sStateFunctions.fpQuestStateHandler[0xb] = Q06_Callback11_ScrollMessage;
     pQuestData->sStateFunctions.fpQuestStateHandler[2] = Q06_Callback02_NpcDeactivate;
     pQuestData->sStateFunctions.fpQuestStateHandler[0xd] = Q06_Callback13_PlayerStartedGame;
-    pQuestData->fpSequenceFilter = (QUESTSEQ)Q06_SequenceFilter;
+    pQuestData->fpSequenceFilter = Q06_SequenceFilter;
     pQuestData->nQuestIdReal = QUEST_SistersToTheSlaughter;
     pQuestData->pNpcMessages = &A1Q6::aNpcGossipData;
     pQuestData->bIsActive = true;
     pQuestData->nStateFlagPrev = 0;
     pQuestData->nStateFlag = 0;
-    D2QuestDataA1Q6Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA1Q6Strc);
+    D2QuestDataA1Q6Strc* pQuestSpecificData = D2_NEW_POOL_AT(pGame->pMemoryPool, D2QuestDataA1Q6Strc, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q6.cpp", 0x345);
     pQuestData->pQuestSpecificData.pA1Q6 = pQuestSpecificData;
     pQuestData->nInitNo = 4;
     pQuestData->fpStatusFilter = 0;

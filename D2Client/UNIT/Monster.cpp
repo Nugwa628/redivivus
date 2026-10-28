@@ -88,8 +88,8 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -1086,7 +1086,7 @@ void __fastcall FreeMonster(D2UnitStrc * pUnit) {
       return;
     }
 
-    D2_FREE(pMonData->pPathParamOrName.wszMonsterName);
+    D2_FREE_AT(pMonData->pPathParamOrName.wszMonsterName, ".\\UNIT\\Monster.cpp", 0x66);
     pMonData->pPathParamOrName.wszMonsterName = 0;
 }
 
@@ -1140,7 +1140,7 @@ void __fastcall MONSTER_TransformToClassId(D2UnitStrc * pUnit, int32_t nClassId)
     if (pUnit->eUnitType == UNIT_MONSTER) {
       pMonData = pUnit->pUnitData.pUnitDataMonster;
       if (pMonData && pMonData->pPathParamOrName.wszMonsterName) {
-        D2_FREE(pMonData->pPathParamOrName.wszMonsterName);
+        D2_FREE_AT(pMonData->pPathParamOrName.wszMonsterName, ".\\UNIT\\Monster.cpp", 0x66);
         pMonData->pPathParamOrName.wszMonsterName = 0;
       }
     }
@@ -1382,11 +1382,7 @@ int * MONSTER_GetAnimModeDataEntry(D2UnitStrc * pUnit) {
         /* .nField4 = */ 0x2,
         /* .nField8 = */ 0x0
     },
-    {
-        /* .nField0 = */ 0x0,
-        /* .nField4 = */ 0x0,
-        /* .nField8 = */ 0x0
-    },
+    {},
     {
         /* .nField0 = */ 0x1,
         /* .nField4 = */ 0x0,
@@ -1432,11 +1428,7 @@ int * MONSTER_GetAnimModeDataEntry(D2UnitStrc * pUnit) {
         /* .nField4 = */ 0x2,
         /* .nField8 = */ 0x0
     },
-    {
-        /* .nField0 = */ 0x0,
-        /* .nField4 = */ 0x0,
-        /* .nField8 = */ 0x0
-    },
+    {},
     {
         /* .nField0 = */ 0x0,
         /* .nField4 = */ 0x2,

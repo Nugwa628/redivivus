@@ -104,19 +104,19 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_NEW
-#define D2_NEW(T) ((T*)D2_ALLOC(sizeof(T)))
+#ifndef D2_NEW_AT
+#define D2_NEW_AT(T, szFile, nLine) ((T*)D2_ALLOC_AT(sizeof(T), (szFile), (nLine)))
 #endif
 
-static_assert(sizeof(void*) != 4 || sizeof(::D2Game_Line0x546) == 0x8, "D2_NEW(D2Game_Line0x546): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
+static_assert(sizeof(void*) != 4 || sizeof(::D2Game_Line0x546) == 0x8, "D2_NEW_AT(D2Game_Line0x546): the 32-bit layout must be the 0x8 bytes 1.14d allocates");
 
 
 #ifndef RECON_FPTD_fTownAutoMap
@@ -641,7 +641,7 @@ void __stdcall GAME_FreeClientSideStructures() {
     D2Client::Draw::Weather::Free();
     Fog::Memory::FreeMemoryPool(gClientGameData.gpClientPoolManager);
     memset(&gClientGameData, 0, 0x80);
-    D2_FREE(D2GameGame0x546);
+    D2_FREE_AT(D2GameGame0x546, ".\\GAME\\Game.cpp", 0x599);
 }
 
 void __fastcall GAMEDATA_SetDrawFunction(int32_t nDrawMode) {
@@ -662,12 +662,12 @@ int __stdcall GAMEDATA_GetCurrentLevelBlankScreen() {
 
     eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     D2LevelsTxt* pDVar1 = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevel);
-    if (pDVar1) {
-      return pDVar1->BlankScreen;
+    if (!pDVar1) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5de);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5de);
-    exit(-1);
+    return pDVar1->BlankScreen;
     return pDVar1->BlankScreen;
 }
 
@@ -1290,13 +1290,13 @@ void __fastcall ClientInit_StartingAct(D2IniConfigStrc * pIniConfig) {
       return;
     }
     if (iVar1 < 6) {
-      if (0 < iVar1) {
-        D2Game::GAME::Server::SetupStartingAct(iVar1 - 1);
-        return;
+      if (!(0 < iVar1)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd27);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd27);
-      exit(-1);
+      D2Game::GAME::Server::SetupStartingAct(iVar1 - 1);
+      return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd26);
       exit(-1);
@@ -1996,7 +1996,7 @@ void __stdcall GAME_InitClientSide() {
     Source::ClientEngine::CLIENT_ClearActiveUnitSlotArray();
     D2Client::Draw::Weather::ENV_InitClientSide_NoOp();
     Source::ClientEngine::CLIENT_InitializeQuestStateGlobals();
-    D2GameGame0x546 = D2_NEW(D2Game_Line0x546);
+    D2GameGame0x546 = D2_NEW_AT(D2Game_Line0x546, ".\\GAME\\Game.cpp", 0x546);
     UNIT::Player::CLIENT_ClearServerAndClientUnitLists();
     D2Client::Draw::LightMap::LIGHTMAP_ClearToBlack();
     D2Client::Draw::Weather::WEATHER_Init();
@@ -2711,143 +2711,7 @@ eD2ClientAppMode __stdcall pfModes_EnterGame() {
         /* .pfHandler = */ &D2Client::GAME::Game::INPUT_HandlePassthrough
     }
 }; D2_STATIC_GUARD(g_UIFlagInitGameDataPanel4, "D2Client::GAME::Game::pfModes_EnterGame::g_UIFlagInitGameDataPanel4");
-    static _OSVERSIONINFOA lpVersionInformation_007a0528 = {
-    /* .dwOSVersionInfoSize = */ 0,
-    /* .dwMajorVersion = */ 0,
-    /* .dwMinorVersion = */ 0,
-    /* .dwBuildNumber = */ 0,
-    /* .dwPlatformId = */ 0,
-    /* .szCSDVersion = */ {
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-    }
-}; D2_STATIC_GUARD(lpVersionInformation_007a0528, "D2Client::GAME::Game::pfModes_EnterGame::lpVersionInformation_007a0528");
+    static _OSVERSIONINFOA lpVersionInformation_007a0528 = {}; D2_STATIC_GUARD(lpVersionInformation_007a0528, "D2Client::GAME::Game::pfModes_EnterGame::lpVersionInformation_007a0528");
     // also labelled: lpThreadId_QserverLoopThread, lpThreadId_007a05f0
 static uint32_t gdwHostGameThreadId; D2_STATIC_GUARD_BSS(gdwHostGameThreadId, "D2Client::GAME::Game::pfModes_EnterGame::gdwHostGameThreadId");
     static bool gbExitingGamePadding; D2_STATIC_GUARD_BSS(gbExitingGamePadding, "D2Client::GAME::Game::pfModes_EnterGame::gbExitingGamePadding");

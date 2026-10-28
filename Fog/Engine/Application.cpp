@@ -31,12 +31,12 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-#ifndef D2_ALLOC
-#define D2_ALLOC(size) Fog::Memory::AllocClientMemory((size), __FILE__, __LINE__, 0)
+#ifndef D2_ALLOC_AT
+#define D2_ALLOC_AT(size, szFile, nLine) Fog::Memory::AllocClientMemory((size), (szFile), (nLine), 0)
 #endif
 
-#ifndef D2_FREE
-#define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
+#ifndef D2_FREE_AT
+#define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
 
@@ -1109,15 +1109,15 @@ int32_t __stdcall ApplicationRunCurrentMode(D2IniConfigStrc * pD2IniData) {
       Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x133);
       exit(-1);
     } else {
-      if (ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown) {
-        CurrentApplication = ApplicationBootstrapArray[geD2ApplicationMode].pfnInit(WinMain_hInstance);
-        modeResult = (**CurrentApplication)(pD2IniData);
-        ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown();
-        return modeResult;
+      if (!ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown) {
+        Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x134);
+        exit(-1);
       }
 
-      Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x134);
-      exit(-1);
+      CurrentApplication = ApplicationBootstrapArray[geD2ApplicationMode].pfnInit(WinMain_hInstance);
+      modeResult = (**CurrentApplication)(pD2IniData);
+      ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown();
+      return modeResult;
     }
 }
 
@@ -1261,7 +1261,7 @@ void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD
     char* pszModeStr;
     char* pszCmdToken = szText;
     pszCmdToken = pszCmdToken + strlen(pszCmdToken) + 1;
-    char* szCmdLineCopy = (char*)D2_ALLOC((size_t)(pszCmdToken + (1 - (int)(szText + 1))));
+    char* szCmdLineCopy = (char*)D2_ALLOC_AT((size_t)(pszCmdToken + (1 - (int)(szText + 1))), ".\\DUNGEON\\Dungeon.cpp", 0x1ba);
     Storm::Source::SSTR::SStrCopy(szCmdLineCopy, szText, (int32_t)(pszCmdToken + (1 - (int)(szText + 1))));
     pszCmdToken = strtok(szCmdLineCopy, "-");
     while (pszCmdToken) {
@@ -1282,7 +1282,7 @@ void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD
       pszCmdToken = strtok(nullptr, "-");
     }
 
-    D2_FREE(szCmdLineCopy);
+    D2_FREE_AT(szCmdLineCopy, ".\\DUNGEON\\Dungeon.cpp", 0x1e0);
 }
 
 // lpHandlerProc parameter of RegisterServiceCtrlHandlerA

@@ -29,7 +29,7 @@ void __stdcall IGNORELIST_Shutdown() {
     gpIgnoreList = 0;
 }
 
-void __stdcall IGNORELIST_ExtractPrefix(char * szText, char * pszDstBuf, int32_t nBufLen) {
+void __thiscall IGNORELIST_ExtractPrefix(::IgnoreList * pThis, char * szText, char * pszDstBuf, int32_t nBufLen) {
     char cCurrent = *szText;
     uint32_t nCharIdx = 0;
     if (cCurrent == '*') {
@@ -59,7 +59,7 @@ void __stdcall IGNORELIST_ExtractPrefix(char * szText, char * pszDstBuf, int32_t
     pszDstBuf[nCharIdx] = '\0';
 }
 
-void __stdcall IGNORELIST_ExtractSuffix(char * szText, int32_t nDstBuf, int32_t nBufLen) {
+void __thiscall IGNORELIST_ExtractSuffix(::IgnoreList * pThis, char * szText, int32_t nDstBuf, int32_t nBufLen) {
     char cCurrent = *szText;
     uint32_t nLen = 0;
     if (cCurrent == '\0') {
@@ -93,7 +93,7 @@ void __stdcall IGNORELIST_ExtractSuffix(char * szText, int32_t nDstBuf, int32_t 
     *(uint8_t*)(nLen + nDstBuf) = 0;
 }
 
-void __stdcall IGNORELIST_ParsePattern(char * szText1, char * szText2, int32_t nParam) {
+void __thiscall IGNORELIST_ParsePattern(::IgnoreList * pThis, char * szText1, char * szText2, int32_t nParam) {
     // Frame slots -264..-4 are ONE object: &cPatternBuf is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -112,9 +112,9 @@ void __stdcall IGNORELIST_ParsePattern(char * szText1, char * szText2, int32_t n
     *szText2 = '\0';
     __frame0.cPatternBuf = '\0';
     memset(__frame0.aPatternRest, 0, 0xff);
-    IGNORELIST_ExtractSuffix(szText1, (uintptr_t)&__frame0.cPatternBuf, 0x100);
+    IGNORELIST_ExtractSuffix(pThis, szText1, (uintptr_t)&__frame0.cPatternBuf, 0x100);
     if (__frame0.cPatternBuf == '\0') {
-      IGNORELIST_ExtractPrefix(szText1, &__frame0.cPatternBuf, 0x100);
+      IGNORELIST_ExtractPrefix(pThis, szText1, &__frame0.cPatternBuf, 0x100);
     }
 
     Storm::Source::SSTR::SStrCopy(szText2, &__frame0.cPatternBuf, nParam);

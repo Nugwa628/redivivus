@@ -1269,7 +1269,12 @@ int __stdcall OOGUTIL_SendChatMessageWide(uint16_t * wszText) {
 }
 
 char * __fastcall OOGUTIL_GetStringEnd(char * szText) {
-    if (szText) {
+    if (!szText) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xad);
+      exit(-1);
+    }
+
+    {
       char cVar1;
       cVar1 = *szText;
       while (cVar1 != '\0') {
@@ -1279,9 +1284,6 @@ char * __fastcall OOGUTIL_GetStringEnd(char * szText) {
 
       return szText + 1;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xad);
-    exit(-1);
 }
 
 uint32_t __fastcall OOGUTIL_CheckCharacterLevel(uint8_t * pszLevelChars) {
@@ -2745,9 +2747,10 @@ void __stdcall OOGMENU_RequestGameList() {
     LastGameRequestId = CreateJoinGameRequestId;
 }
 
-void __stdcall OOGUTIL_SendGamePassword(DWORD dwParam1, DWORD dwParam2, char * szText) {
+BOOL __stdcall OOGUTIL_SendGamePassword(DWORD dwParam1, DWORD dwParam2, char * szText) {
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_SetSelectedLine(gpOOGGameListTextBox, -1);
-    OOGUTIL_SendPasswordPacket(dwParam1, dwParam2, szText);
+    BOOL BVar1 = OOGUTIL_SendPasswordPacket(dwParam1, dwParam2, szText);
+    return BVar1;
 }
 
 int __stdcall EDITBOX_Cb_OOGUTIL_SetJoinGameError(void * pUnknown) {
@@ -3802,7 +3805,12 @@ void __stdcall OOGUTIL_AppendChatText(uint16_t * wszText) {
     uint16_t* pwszMatch;
     int32_t iVar1;
     int32_t nLength = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszText);
-    if (nLength < 500) {
+    if (!(nLength < 500)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x300);
+      exit(-1);
+    }
+
+    {
       uint16_t* pwszNewlineToken;
       pwszNewlineToken = D2Lang::StrTable::strtable::GetLocaleString(0xf9a);
       nLength = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pwszNewlineToken);
@@ -3815,9 +3823,6 @@ void __stdcall OOGUTIL_AppendChatText(uint16_t * wszText) {
 
       return;
     }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x300);
-    exit(-1);
 }
 
 int __fastcall OOGUTIL_ValidateStringFilter(DWORD dwUnused, char * szText) {
