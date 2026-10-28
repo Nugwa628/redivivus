@@ -32,7 +32,7 @@ namespace Fog::Skills {
 
 // Function declarations
 // Stack-based bytecode evaluator for compiled skill and missile calc formulas. The 64-entry value stack keeps its count in the 65th slot, at byte offset 0x100 from the base, which is why it is one int[65] local and not a head plus a separate counter. Consecutive SKILLS_PopValue calls reuse the stack pointer in ECX without reloading it, so that callee is typed __fastcall_ecxsafe.
-int SKILLS_PopValue(int * pValueStack);
+int __fastcall SKILLS_PopValue(int * pValueStack);
 uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, fnSkillCalcMethod pFunction, struct D2ItemsEventMethodStrc * pFunctionArray, int32_t nFunctionArraySize, void * dwParam);
 // *pTokenType out is eD2SkillCalcToken:
 // 0=TOKEN_PAREN_OPEN '(' 1=TOKEN_PAREN_CLOSE ')' 2=TOKEN_COMMA ',' 3=TOKEN_PLUS '+'

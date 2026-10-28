@@ -861,7 +861,7 @@ void __stdcall QUEST_SendQuestUpdateToPlayer_HaltTail(int nLine) {
     exit(-1);
 }
 
-void __fastcall QUEST_SetStateAndBroadcast(D2QuestDataStrc * pQuestData, int32_t nPrevStateFlag, D2UnitStrc * pUnit, ::fpExecuteOnUnitFunction fpFunction, bool bExecute) {
+void __fastcall QUEST_SetStateAndBroadcast(D2QuestDataStrc * pQuestData, uint8_t nPrevStateFlag, D2UnitStrc * pUnit, ::fpExecuteOnUnitFunction fpFunction, bool bExecute) {
     pQuestData->nStateFlagPrev = nPrevStateFlag;
     if (!bExecute) {
       return;
@@ -1991,7 +1991,7 @@ void __fastcall SendQuestState(D2UnitStrc * pUnit, int32_t nQuestId) {
 }
 
 // @sourcefile .\QUESTS\QUESTS.CPP
-void __fastcall QUEST_SendQuestStatePacket(D2UnitStrc * pUnit, int32_t bQuestId, uint8_t bReasoned) {
+void __fastcall QUEST_SendQuestStatePacket(D2UnitStrc * pUnit, uint8_t bQuestId, uint8_t bReasoned) {
     eD2LevelId eLevel;
     struct { uint8_t e0, e1, e2, e3, e4, e5; } aPacketBuf;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
