@@ -1469,11 +1469,11 @@ uint32_t __stdcall SBmpAllocLoadImage(char * szText, void * pPalette, uint32_t *
 
           iProbeResult = nWidth * nHeight * nBppOverride;
           nSize_00 = (int)(iProbeResult + (iProbeResult >> 0x1f & 7U)) >> 3;
-          if (!pfnAlloc) {
-            pvAllocResult = SMem::SMemAlloc(nSize_00, szText, -4, 0);
+          if (pfnAlloc) {
+            pvAllocResult = (*pfnAlloc)(nSize_00);
             *ppOutputBuf = (uint32_t)(uintptr_t)pvAllocResult;
           } else {
-            pvAllocResult = (*pfnAlloc)(nSize_00);
+            pvAllocResult = SMem::SMemAlloc(nSize_00, szText, -4, 0);
             *ppOutputBuf = (uint32_t)(uintptr_t)pvAllocResult;
           }
           if ((uint8_t*)*ppOutputBuf) {
