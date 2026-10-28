@@ -839,13 +839,13 @@ void __stdcall UI_DrawMercenaryHealthBar() {
     D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(nCoord, nWorldOffset, 0, &__frame0.nScreenX, &__frame0.nScreenY);
     eBorderType = Path::DRAW_GetTypeOfBorder();
     if (eBorderType == 1) {
-      nBorderShift = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+      nBorderShift = -((int)ScreenSizeX / 4);
     } else {
       if (eBorderType != 2) {
         goto place_health_bar;
       }
 
-      nBorderShift = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+      nBorderShift = (int)ScreenSizeX / 4;
     }
 
     __frame0.nScreenX += nBorderShift;
@@ -1068,11 +1068,11 @@ void __fastcall UI_DrawPlayerNameOverhead(D2UnitStrc * pUnit) {
     ptScreen.x -= rcView.left;
     ptScreen.y += -0x46 - rcView.top;
     if (eBorderType == 1) {
-      ptScreen.x -= (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+      ptScreen.x -= (int)ScreenSizeX / 4;
       if (ScreenSizeX / 2 < ptScreen.x) {
         return;
       }
-    } else if (eBorderType == 2 && (ptScreen.x += (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2 , ptScreen.x < ScreenSizeX / 2)) {
+    } else if (eBorderType == 2 && (ptScreen.x += (int)ScreenSizeX / 4 , ptScreen.x < ScreenSizeX / 2)) {
       return;
     }
     if (!(0 < ptScreen.y && ptScreen.y < ScreenSizeX && -0x32 < ptScreen.x && ptScreen.x < ScreenSizeY + 0x32)) {
@@ -2250,12 +2250,12 @@ void __fastcall DRAW_UnitUnderMouse(D2UnitStrc * pUnit) {
       nResult = Path::DRAW_GetTypeOfBorder();
       switch (nResult) {
       case 1: {
-        nClassId = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+        nClassId = -((int)ScreenSizeX / 4);
         __frame0.nScreenX += nClassId;
         break;
       }
       case 2: {
-        nClassId = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+        nClassId = (int)ScreenSizeX / 4;
         __frame0.nScreenX += nClassId;
         break;
       }
@@ -2632,7 +2632,7 @@ BOOL __fastcall UI_CloseActivePanels(int32_t bForceAutomap, int32_t bAdjustMouse
                   if (!GFX_bShowUIFlag.CharStat && !GFX_bShowUIFlag.WaypointMenu && !GFX_bShowUIFlag.Quest && !GFX_bShowUIFlag.PartyPane && !GFX_bShowUIFlag.MercMenu && !GFX_bShowUIFlag.UnusedScroll && !GFX_bShowUIFlag.PartyMenu) {
                     Path::TypeOfUiOverlayOverWorld(0);
                     if (bAdjustMouse && iVar1 < ScreenSizeX / 2) {
-                      ui::SetMouseXY(((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) + iVar1, nMouseY);
+                      ui::SetMouseXY(((int)ScreenSizeX / 4) + iVar1, nMouseY);
                     }
                   } else {
                     eOverlayMode = 2;
@@ -2653,7 +2653,7 @@ BOOL __fastcall UI_CloseActivePanels(int32_t bForceAutomap, int32_t bAdjustMouse
                   }
                 Path::TypeOfUiOverlayOverWorld(0);
                 if (bAdjustMouse && iVar1 > ScreenSizeX / 2) {
-                  ui::SetMouseXY(iVar1 - ((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2), nMouseY);
+                  ui::SetMouseXY(iVar1 - ((int)ScreenSizeX / 4), nMouseY);
                 }
                 break;
                 case UI_CONFIG:

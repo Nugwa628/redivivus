@@ -397,8 +397,8 @@ BOOL __fastcall TestOutdoorLevelPreset(D2DrlgLevelStrc * pLevel, int32_t nX, int
     } else {
       D2LvlPrestTxt* pLvlPrestTxt;
       pLvlPrestTxt = DATATBLS::LvlTbls::TXT_LvlPrest_GetLine(nLevelPrestId);
-      nSizeY = (int)(pLvlPrestTxt->SizeX + (pLvlPrestTxt->SizeX >> 0x1f & 7U)) >> 3;
-      nSizeX = (int)(pLvlPrestTxt->SizeY + (pLvlPrestTxt->SizeY >> 0x1f & 7U)) >> 3;
+      nSizeY = (int)pLvlPrestTxt->SizeX / 8;
+      nSizeX = (int)pLvlPrestTxt->SizeY / 8;
     }
 
     int nX0 = nX;
@@ -1131,8 +1131,8 @@ void __fastcall SpawnAct12Shrines(D2DrlgLevelStrc * pLevel, int32_t nShrines) {
 static void DRLGOUTDOOR_SimplifyOutdoorPoints(D2PoolManagerStrc * pMemory, int * * ppnParam) {
     int* pPoint = *ppnParam;
     do {
-      *pPoint = (int)(*pPoint + (*pPoint >> 0x1f & 7U)) >> 3;
-      pPoint[1] = (int)(pPoint[1] + (pPoint[1] >> 0x1f & 7U)) >> 3;
+      *pPoint = (int)(*pPoint) / 8;
+      pPoint[1] = (int)pPoint[1] / 8;
       pPoint = (int*)pPoint[4];
     } while (pPoint != *ppnParam);
 
@@ -1269,10 +1269,10 @@ void __fastcall DRLGOUTDOOR_GenerateLevel(D2DrlgLevelStrc * pLevel) {
     pDrlgLevelData->pGridCoordsCellFlags = 0;
     pDrlgLevelData->pGridCoordsRowOffsets = 0;
     int nTileSize = pLevel->sCoordinatesAndSize.WorldSize.x;
-    pDrlgLevelData->nGridCoordsWidth = (int)(nTileSize + (nTileSize >> 0x1f & 7U)) >> 3;
+    pDrlgLevelData->nGridCoordsWidth = (int)nTileSize / 8;
     nTileSize = pLevel->sCoordinatesAndSize.WorldSize.y;
     int32_t nWidth = pDrlgLevelData->nGridCoordsWidth;
-    nTileSize = (int)(nTileSize + (nTileSize >> 0x1f & 7U)) >> 3;
+    nTileSize = (int)nTileSize / 8;
     pDrlgLevelData->nGridCoordsHeight = nTileSize;
     DrlgGrid::DRLGGRID_InitGridCells(pMemory, &pDrlgLevelData->sGridPreset, nWidth, nTileSize);
     DrlgGrid::DRLGGRID_InitGridCells(pMemory, &pDrlgLevelData->sGridLink, nWidth, nTileSize);

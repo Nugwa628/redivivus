@@ -1518,7 +1518,7 @@ BOOL __stdcall CHATDLG_UpdateChatRoomList() {
       D2Lang::Unicode::UNISYS::UNICODE_WideToMultiByte(szCell, (uint16_t*)pwszCell, 0x100);
       bMatch = !strcmp(szCell, "-");
       if (bMatch) {
-        gnChatRoomListSelectedBase = (int)(nScrollPos + (nScrollPos >> 0x1f & 0xfU)) >> 4 << 4;
+        gnChatRoomListSelectedBase = (int)nScrollPos / 16 << 4;
         gnLadderBoardSelectedRank = gnChatRoomListSelectedBase;
         return 1;
       }

@@ -204,7 +204,7 @@ void __stdcall WriteValueToBitBuffer(D2BitBufferStrc * pBitBuffer, int32_t nValu
     size_t nCapacityBits = pBitBuffer->nBitsInBuffer;
     /* check if there is room */ if ((int)(pBitBuffer->nBitsAtPos + pBitBuffer->nCurrentPos * 8 + nSizeInBits) > (int)nCapacityBits) {
       pBitBuffer->bEnd = 1;
-      pBitBuffer->nCurrentPos = (int)(nCapacityBits + ((int)nCapacityBits >> 0x1f & 7U)) >> 3;
+      pBitBuffer->nCurrentPos = (int)nCapacityBits / 8;
       pBitBuffer->nBitsAtPos = 0;
       return;
     }

@@ -2228,7 +2228,7 @@ void __fastcall SKILLASS_ClearAllChargeUpStates(D2UnitStrc * pUnit) {
 
     int* pStateFlags = D2Common::DATATBLS::ItemStats::thunk_UNIT_GetStateList_StateFlags(pUnit);
     int nStateWordCount = sgptDataTable->nTxtStatesSize + 0x1f;
-    nStateWordCount = (int)(nStateWordCount + (nStateWordCount >> 0x1f & 0x1fU)) >> 5;
+    nStateWordCount = (int)nStateWordCount / 32;
     memcpy(aStateBitWords, pStateFlags, nStateWordCount * 4);
     int nStateIdBitBase = 0;
     if (0 >= nStateWordCount) {

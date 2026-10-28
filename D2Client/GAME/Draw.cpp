@@ -122,13 +122,13 @@ void __stdcall GetIntensityFlagsForTile(int32_t nTileX, int32_t nTileY, int32_t 
 void __stdcall DRAW_CalcRoofLightGridOrtho(D2GfxLightExStrc * pLightEntry, int32_t nScreenX, int32_t nScreenY, int32_t bBorderOnly, int32_t nSplitSide) {
     int nHalfWidthAdj;
     if (nSplitSide == 1) {
-      nHalfWidthAdj = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+      nHalfWidthAdj = -((int)ScreenSizeX / 4);
     } else {
       if (nSplitSide != 2) {
         goto fill_light_grid;
       }
 
-      nHalfWidthAdj = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+      nHalfWidthAdj = (int)ScreenSizeX / 4;
     }
 
     nScreenX += nHalfWidthAdj;
@@ -210,11 +210,11 @@ static void __stdcall DRAW_CalcRoofLightGridPerspective(D2GfxLightExStrc * pLigh
     int nScreenHalfAdj = 0;
     switch (nSplitSide) {
     case 1: {
-      nScreenHalfAdj = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+      nScreenHalfAdj = -((int)ScreenSizeX / 4);
       break;
     }
     case 2: {
-      nScreenHalfAdj = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+      nScreenHalfAdj = (int)ScreenSizeX / 4;
       break;
     }
     }

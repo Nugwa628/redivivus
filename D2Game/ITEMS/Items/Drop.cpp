@@ -2312,7 +2312,7 @@ static int32_t __stdcall GAME_GetItemQuality(uint32_t nItemClassId, int32_t nVic
     }
 
     uint32_t nRoll;
-    nRoll = nScaledRollChance - ((int)((uint32_t)pMagicFindUnit[3] * nScaledRollChance + ((int)((uint32_t)pMagicFindUnit[3] * nScaledRollChance) >> 0x1f & 0x3ffU)) >> 10);
+    nRoll = nScaledRollChance - ((int)((uint32_t)pMagicFindUnit[3] * nScaledRollChance) / 1024);
     if ((int)nRoll <= 0) {
       return 7;
     }
@@ -2334,7 +2334,7 @@ static int32_t __stdcall GAME_GetItemQuality(uint32_t nItemClassId, int32_t nVic
       nScaledRollChance = pQualityRatio->SetMin;
     }
 
-    nRoll = nScaledRollChance - ((int)((uint32_t)pMagicFindUnit[2] * nScaledRollChance + ((int)((uint32_t)pMagicFindUnit[2] * nScaledRollChance) >> 0x1f & 0x3ffU)) >> 10);
+    nRoll = nScaledRollChance - ((int)((uint32_t)pMagicFindUnit[2] * nScaledRollChance) / 1024);
     if ((int)nRoll <= 0) {
       return 5;
     }
@@ -2356,7 +2356,7 @@ static int32_t __stdcall GAME_GetItemQuality(uint32_t nItemClassId, int32_t nVic
         nScaledRollChance = pQualityRatio->RareMin;
       }
 
-      nRoll = nScaledRollChance - ((int)((uint32_t)pMagicFindUnit[1] * nScaledRollChance + ((int)((uint32_t)pMagicFindUnit[1] * nScaledRollChance) >> 0x1f & 0x3ffU)) >> 10);
+      nRoll = nScaledRollChance - ((int)((uint32_t)pMagicFindUnit[1] * nScaledRollChance) / 1024);
       if ((int)nRoll <= 0) {
         return 6;
       }
@@ -2379,7 +2379,7 @@ static int32_t __stdcall GAME_GetItemQuality(uint32_t nItemClassId, int32_t nVic
       nScaledRollChance = pQualityRatio->MagicMin;
     }
 
-    nRoll = nScaledRollChance - ((int)((uint32_t)*pMagicFindUnit * nScaledRollChance + ((int)((uint32_t)*pMagicFindUnit * nScaledRollChance) >> 0x1f & 0x3ffU)) >> 10);
+    nRoll = nScaledRollChance - ((int)((uint32_t)*pMagicFindUnit * nScaledRollChance) / 1024);
     if ((int)nRoll <= 0) {
       return 4;
     }

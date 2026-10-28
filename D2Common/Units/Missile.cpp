@@ -536,39 +536,39 @@ static void CalculateFinalDamage(D2MissileDamageDataStrc * pMissileDamageData, i
     }
 
     int nScaledTmp = pMissileDamageData->nFireMinDamage * nSrcDamage;
-    pMissileDamageData->nFireMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nFireMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nFireMaxDamage * nSrcDamage;
-    pMissileDamageData->nFireMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nFireMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nLightMinDamage * nSrcDamage;
-    pMissileDamageData->nLightMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nLightMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nLightMaxDamage * nSrcDamage;
-    pMissileDamageData->nLightMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nLightMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nMagicMinDamage * nSrcDamage;
-    pMissileDamageData->nMagicMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nMagicMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nMagicMaxDamage * nSrcDamage;
-    pMissileDamageData->nMagicMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nMagicMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nColdMinDamage * nSrcDamage;
-    pMissileDamageData->nColdMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nColdMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nColdMaxDamage * nSrcDamage;
-    pMissileDamageData->nColdMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nColdMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nColdLength * nSrcDamage;
-    pMissileDamageData->nColdLength = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nColdLength = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nPoisonMinDamage * nSrcDamage;
-    pMissileDamageData->nPoisonMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nPoisonMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nPoisonMaxDamage * nSrcDamage;
-    pMissileDamageData->nPoisonMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nPoisonMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nPoisonCount * nSrcDamage;
-    pMissileDamageData->nPoisonCount = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nPoisonCount = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nLifeDrainMinDamage * nSrcDamage;
-    pMissileDamageData->nLifeDrainMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nLifeDrainMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nManaDrainMinDamage * nSrcDamage;
-    pMissileDamageData->nManaDrainMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nManaDrainMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nBurningMin * nSrcDamage;
-    pMissileDamageData->nBurningMin = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nBurningMin = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nBurningMax * nSrcDamage;
-    pMissileDamageData->nBurningMax = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nBurningMax = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nBurnLength * nSrcDamage;
-    pMissileDamageData->nBurnLength = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nBurnLength = (int)nScaledTmp / 128;
 }
 
 // Returns nSrcDamage scaled by the owner unit's elemental mastery passive stat for nElemType (fire/lightning/cold+freeze/poison). Reads UNITSTAT_passive_*_mastery via GetStatUnsignedValue and applies the percentage via D2ApplyPercent. Returns 0 if no mastery or unknown element.

@@ -844,13 +844,13 @@ void __fastcall DAMAGE_CalculateOffensiveDamage(::SGAMEDATA * pGame, D2UnitStrc 
     if (bParam != 0x80) {
       nWeaponScalePct = (uint32_t)bParam;
       nElemDmgResult = DAMAGE_RollElementalDamageWithBonus(UNITSTAT_firemindam, UNITSTAT_passive_fire_mastery, 0, 0, pDmgStrc->dwFireDmg, pUnit, UNITSTAT_firemaxdam);
-      pDmgStrc->dwFireDmg = (int)(nElemDmgResult * nWeaponScalePct + ((int)(nElemDmgResult * nWeaponScalePct) >> 0x1f & 0x7fU)) >> 7;
+      pDmgStrc->dwFireDmg = (int)(nElemDmgResult * nWeaponScalePct) / 128;
       nElemDmgResult = DAMAGE_RollElementalDamageWithBonus(UNITSTAT_lightmindam, UNITSTAT_passive_ltng_mastery, 0, 0, pDmgStrc->dwLtngDamage, pUnit, UNITSTAT_lightmaxdam);
-      pDmgStrc->dwLtngDamage = (int)(nElemDmgResult * nWeaponScalePct + ((int)(nElemDmgResult * nWeaponScalePct) >> 0x1f & 0x7fU)) >> 7;
+      pDmgStrc->dwLtngDamage = (int)(nElemDmgResult * nWeaponScalePct) / 128;
       nElemDmgResult = DAMAGE_RollElementalDamageWithBonus(UNITSTAT_coldmindam, UNITSTAT_passive_cold_mastery, 0, 0, pDmgStrc->dwColdDmg, pUnit, UNITSTAT_coldmaxdam);
-      pDmgStrc->dwColdDmg = (int)(nElemDmgResult * nWeaponScalePct + ((int)(nElemDmgResult * nWeaponScalePct) >> 0x1f & 0x7fU)) >> 7;
+      pDmgStrc->dwColdDmg = (int)(nElemDmgResult * nWeaponScalePct) / 128;
       nElemDmgResult = DAMAGE_RollElementalDamageWithBonus(UNITSTAT_magicmindam, UNITSTAT_passive_mag_mastery, 0, 0, pDmgStrc->dwMagDamage, pUnit, UNITSTAT_magicmaxdam);
-      nElemDmgResult = (int)(nElemDmgResult * nWeaponScalePct + ((int)(nElemDmgResult * nWeaponScalePct) >> 0x1f & 0x7fU)) >> 7;
+      nElemDmgResult = (int)(nElemDmgResult * nWeaponScalePct) / 128;
     } else {
       nElemDmgResult = DAMAGE_RollElementalDamageWithBonus(UNITSTAT_firemindam, UNITSTAT_passive_fire_mastery, 0, 0, pDmgStrc->dwFireDmg, pUnit, UNITSTAT_firemaxdam);
       pDmgStrc->dwFireDmg = nElemDmgResult;
@@ -867,15 +867,15 @@ void __fastcall DAMAGE_CalculateOffensiveDamage(::SGAMEDATA * pGame, D2UnitStrc 
       if (!nElemDmgResult) {
         if (!(pDmgStrc->dwHitFlags & 4)) {
           nElemRoll = DAMAGE_RollElementalDamageWithBonus(UNITSTAT_lifedrainmindam, ~UNITSTAT_strength, 0, 0, pDmgStrc->dwLifeLeech, pUnit, UNITSTAT_lifedrainmaxdam);
-          pDmgStrc->dwLifeLeech += (int)(nElemRoll * bParam + ((int)(nElemRoll * bParam) >> 0x1f & 0x7fU)) >> 7;
+          pDmgStrc->dwLifeLeech += (int)(nElemRoll * bParam) / 128;
         }
         if (!(pDmgStrc->dwHitFlags & 8)) {
           nElemRoll = DAMAGE_RollElementalDamageWithBonus(UNITSTAT_manadrainmindam, ~UNITSTAT_strength, 0, 0, pDmgStrc->dwManaLeech, pUnit, UNITSTAT_manadrainmaxdam);
-          pDmgStrc->dwManaLeech += (int)(nElemRoll * bParam + ((int)(nElemRoll * bParam) >> 0x1f & 0x7fU)) >> 7;
+          pDmgStrc->dwManaLeech += (int)(nElemRoll * bParam) / 128;
         }
         if (!(pDmgStrc->dwHitFlags & 0x10)) {
           nElemRoll = DAMAGE_RollElementalDamageWithBonus(UNITSTAT_stamdrainmindam, ~UNITSTAT_strength, 0, 0, pDmgStrc->dwStamLeech, pUnit, UNITSTAT_stamdrainmaxdam);
-          pDmgStrc->dwStamLeech += (int)(nElemRoll * bParam + ((int)(nElemRoll * bParam) >> 0x1f & 0x7fU)) >> 7;
+          pDmgStrc->dwStamLeech += (int)(nElemRoll * bParam) / 128;
         }
 
         goto roll_common_damage;
@@ -917,7 +917,7 @@ void __fastcall DAMAGE_CalculateOffensiveDamage(::SGAMEDATA * pGame, D2UnitStrc 
 
     nWeaponScalePct = (uint32_t)bParam;
     nElemRoll = DAMAGE_RollPhysicalDamageRange(nPoisMinStat, nPoisMastery, pUnit, nStatValue, nPoisMastery, pDmgStrc->dwPoisDamage);
-    nStatValue = (int)(nElemRoll * nWeaponScalePct + ((int)(nElemRoll * nWeaponScalePct) >> 0x1f & 0x7fU)) >> 7;
+    nStatValue = (int)(nElemRoll * nWeaponScalePct) / 128;
     pDmgStrc->dwPoisDamage = nStatValue;
     if (nStatValue) {
       nStatValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_skill_poison_override_length, 0);
@@ -934,21 +934,21 @@ void __fastcall DAMAGE_CalculateOffensiveDamage(::SGAMEDATA * pGame, D2UnitStrc 
     }
     if (0 < pDmgStrc->dwColdDmg) {
       nStatValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_coldlength, 0);
-      pDmgStrc->dwColdLength += (int)(nStatValue * nWeaponScalePct + ((int)(nStatValue * nWeaponScalePct) >> 0x1f & 0x7fU)) >> 7;
+      pDmgStrc->dwColdLength += (int)(nStatValue * nWeaponScalePct) / 128;
     }
     if (!pDmgStrc->dwStunLen) {
       nStatValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_stunlength, 0);
-      pDmgStrc->dwStunLen += (int)(nStatValue * nWeaponScalePct + ((int)(nStatValue * nWeaponScalePct) >> 0x1f & 0x7fU)) >> 7;
+      pDmgStrc->dwStunLen += (int)(nStatValue * nWeaponScalePct) / 128;
     }
 
     nStatValue = pDmgStrc->dwBurnDmg;
     nElemRoll = D2Client::Archive::RANDOM_RandomNumberSelector(&pUnit->sSeed, 1);
     nLeechPct = nStatValue * (uint32_t)bParam + 0x13c + nElemRoll;
     nWeaponScalePct = (int)nLeechPct < 0 ? 0 : nLeechPct;
-    pDmgStrc->dwBurnDmg += (int)(nWeaponScalePct + ((int)nWeaponScalePct >> 0x1f & 0x7fU)) >> 7;
+    pDmgStrc->dwBurnDmg += (int)nWeaponScalePct / 128;
     if (pDmgStrc->dwBurnLen) {
       nStatValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_firelength, 0);
-      pDmgStrc->dwBurnLen += (int)(nStatValue * (uint32_t)bParam + ((int)(nStatValue * (uint32_t)bParam) >> 0x1f & 0x7fU)) >> 7;
+      pDmgStrc->dwBurnLen += (int)(nStatValue * (uint32_t)bParam) / 128;
     }
     if ((eAttackerType == UNIT_PLAYER || nElemDmgResult) && !(pDmgStrc->wResultFlags & 0x20)) {
       SUnitEvent::UNITEVENT_DispatchEventsByType(pGame, 3, pTarget, pUnit, pDmgStrc);
@@ -985,7 +985,7 @@ void __fastcall DAMAGE_CalculateOffensiveDamage(::SGAMEDATA * pGame, D2UnitStrc 
         pDmgStrc->dwColdLength = nStatValue;
         break;
         case ELEMENTAL_POISON:
-          pDmgStrc->dwPoisDamage += (int)(nConvDmg + (nConvDmg >> 0x1f & 7U)) >> 3;
+          pDmgStrc->dwPoisDamage += (int)nConvDmg / 8;
         nStatValue = pDmgStrc->dwPoisLength;
         if (nStatValue < 0x32) {
           nStatValue = 0x32;
@@ -1633,8 +1633,8 @@ static void __stdcall DAMAGE_ApplyLifeAndManaLeech(::SGAMEDATA * pGame, D2UnitSt
       if (eUnitType != UNIT_PLAYER) {
         nManaStat = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pDefenderSaved, UNITSTAT_mana, 0);
         eAnimMode.ePlayerMode = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pDefenderSaved, UNITSTAT_stamina, 0);
-        nLifeLeechAmt = (int)(pDmgStrc->dwLifeLeech + (pDmgStrc->dwLifeLeech >> 0x1f & 0x3fU)) >> 6;
-        nMaxHp = (int)(pDmgStrc->dwManaLeech + (pDmgStrc->dwManaLeech >> 0x1f & 0x3fU)) >> 6;
+        nLifeLeechAmt = (int)pDmgStrc->dwLifeLeech / 64;
+        nMaxHp = (int)pDmgStrc->dwManaLeech / 64;
         pDmgStrc->dwLifeLeech = nLifeLeechAmt;
         pDmgStrc->dwManaLeech = nMaxHp;
         if (pDmgStrc->dwPhysDamage <= nLifeLeechAmt) {
@@ -1695,7 +1695,7 @@ static void __stdcall DAMAGE_ApplyLifeAndManaLeech(::SGAMEDATA * pGame, D2UnitSt
         nLeechAmount = D2Client::Stats::D2ApplyPercent(nLeechAmount, (int32_t)pDefender, 100);
       }
 
-      DAMAGE_ApplyManaToUnit((int)(nLeechAmount + (nLeechAmount >> 0x1f & 0x3fU)) >> 6, pAttacker);
+      DAMAGE_ApplyManaToUnit((int)nLeechAmount / 64, pAttacker);
       eUnitType = UNIT_MONSTER;
     }
     if (!pDmgStrc->dwLifeLeech) {
@@ -1708,7 +1708,7 @@ static void __stdcall DAMAGE_ApplyLifeAndManaLeech(::SGAMEDATA * pGame, D2UnitSt
         nMaxHp = D2Client::Stats::D2ApplyPercent(nMaxHp, (int32_t)pDefender, 100);
       }
 
-      DAMAGE_ApplyHealingToUnit((int)(nMaxHp + (nMaxHp >> 0x1f & 0x3fU)) >> 6, pAttacker);
+      DAMAGE_ApplyHealingToUnit((int)nMaxHp / 64, pAttacker);
       if (eUnitType == UNIT_PLAYER) {
         set_leech_overlay:
         D2Common::Units::SetOverlay(pAttacker, 0x97, 0);
@@ -2230,7 +2230,7 @@ void __fastcall SERVER_GetHitCalculation(::SGAMEDATA * pGameIn, D2UnitStrc * pUn
                 nStatOrFrame = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pVictim, UNITSTAT_lastblockframe, 0);
                 nFasterBlockRate = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pVictim, UNITSTAT_item_fasterblockrate, 0);
                 pGameLocal = pGame;
-                if (pGame->dwGameFrame - nStatOrFrame <= ((int)(nFasterBlockRate + (nFasterBlockRate >> 0x1f & 7U)) >> 3) + 0xf) {
+                if (pGame->dwGameFrame - nStatOrFrame <= ((int)nFasterBlockRate / 8) + 0xf) {
                   return;
                 }
 
@@ -3476,7 +3476,7 @@ static void __stdcall SERVER_PartyShareExperience(int32_t nBaseExperience, D2Uni
       nPlayerLevel = sParty.nPlayerLevels[nAttackerLevel];
       pPartyPlayer = sParty.pPlayers[nAttackerLevel];
       /* This returns a variable in 2 registers, as its 8 bytes long. This is bugging
-                         ghidra */ nXpForPlayer = SERVER_CalculateExperienceForUnit(pGame, nVictimLevel, (int)((float)nPlayerLevel * ((float)(((int)(nXpAdj + (nXpAdj >> 0x1f & 0xffU)) >> 8) + nBaseExperience) / (float)sParty.nPlayerLevelSum)), pPartyPlayer, nPlayerLevel);
+                         ghidra */ nXpForPlayer = SERVER_CalculateExperienceForUnit(pGame, nVictimLevel, (int)((float)nPlayerLevel * ((float)(((int)nXpAdj / 256) + nBaseExperience) / (float)sParty.nPlayerLevelSum)), pPartyPlayer, nPlayerLevel);
       SERVER_PlayerUpdateExperience(pGame, nPlayerLevel, nXpForPlayer, pPartyPlayer);
       nAttackerLevel++;
     } while (nAttackerLevel < sParty.nPlayers);

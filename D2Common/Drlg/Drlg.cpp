@@ -5908,25 +5908,25 @@ static int DRLGOUTROOM_SnapVertexToGrid(D2DrlgLevelStrc * pLevel, int * pOutCoor
     if (*(uint8_t*)(pVertex + 2) < 4) {
       switch (*(uint8_t*)(pVertex + 2)) {
         case 0:
-          *pOutCoords = ((int)(*pOutCoords + (*pOutCoords >> 0x1f & 7U)) >> 3) * 8 + 0xb;
+          *pOutCoords = ((int)(*pOutCoords) / 8) * 8 + 0xb;
         *pOutCoords += pLevel->sCoordinatesAndSize.WorldPosition.x;
         nRelativeY = pLevel->sCoordinatesAndSize.WorldPosition.y;
         pOutCoords[1] += nRelativeY;
         return nRelativeY;
         case 1:
-          pOutCoords[1] = ((int)(nRelativeY + (nRelativeY >> 0x1f & 7U)) >> 3) * 8 + 0xb;
+          pOutCoords[1] = ((int)nRelativeY / 8) * 8 + 0xb;
         *pOutCoords += pLevel->sCoordinatesAndSize.WorldPosition.x;
         nRelativeY = pLevel->sCoordinatesAndSize.WorldPosition.y;
         pOutCoords[1] += nRelativeY;
         return nRelativeY;
         case 2:
-          *pOutCoords = ((int)(*pOutCoords + (*pOutCoords >> 0x1f & 7U)) >> 3) * 8 - 5;
+          *pOutCoords = ((int)(*pOutCoords) / 8) * 8 - 5;
         *pOutCoords += pLevel->sCoordinatesAndSize.WorldPosition.x;
         nRelativeY = pLevel->sCoordinatesAndSize.WorldPosition.y;
         pOutCoords[1] += nRelativeY;
         return nRelativeY;
         case 3:
-          pOutCoords[1] = ((int)(nRelativeY + (nRelativeY >> 0x1f & 7U)) >> 3) * 8 - 5;
+          pOutCoords[1] = ((int)nRelativeY / 8) * 8 - 5;
       }
     }
 
@@ -6520,12 +6520,12 @@ BOOL __fastcall DRLGOUTROOM_FindPathBetweenExits(D2DrlgLevelStrc * pLevel, int32
     int nStartGridX = pDVar1->aExitPoints2[nExitIndex].nWorldX - nExitWorldX;
     int nTargetGridYRaw = pLevel->sCoordinatesAndSize.WorldPosition.y;
     int nStartGridY = pDVar1->aExitPoints2[nExitIndex].nWorldY - nTargetGridYRaw;
-    nStartGridY = (int)(nStartGridY + (nStartGridY >> 0x1f & 7U)) >> 3;
+    nStartGridY = (int)nStartGridY / 8;
     nExitWorldX = pDVar1->aExitPoints3[nExitIndex].nWorldX - nExitWorldX;
     nTargetGridYRaw = pDVar1->aExitPoints3[nExitIndex].nWorldY - nTargetGridYRaw;
-    nStartGridX = (int)(nStartGridX + (nStartGridX >> 0x1f & 7U)) >> 3;
-    aTargetPos[0] = (int)(nExitWorldX + (nExitWorldX >> 0x1f & 7U)) >> 3;
-    int iVar4 = (int)(nTargetGridYRaw + (nTargetGridYRaw >> 0x1f & 7U)) >> 3;
+    nStartGridX = (int)nStartGridX / 8;
+    aTargetPos[0] = (int)nExitWorldX / 8;
+    int iVar4 = (int)nTargetGridYRaw / 8;
     nTargetGridYRaw = nStartGridX - aTargetPos[0];
     nExitWorldX = nTargetGridYRaw;
     if (nTargetGridYRaw < 0) {

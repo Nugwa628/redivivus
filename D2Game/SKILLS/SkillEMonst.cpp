@@ -84,7 +84,7 @@ void __fastcall SKILLEMONST_ApplyReflectedDamage(::SGAMEDATA * pGame, D2UnitStrc
       return;
     }
     if (pUnit && pUnit->eUnitType == UNIT_PLAYER || (nMercType = D2Common::Monsters::MONSTERS::MONSTER_GetMercType(pUnit) , nMercType != 0)) {
-      nPercent = (int)(nPercent + 4 + (nPercent + 4 >> 0x1f & 7U)) >> 3;
+      nPercent = (int)(nPercent + 4) / 8;
     }
     if (0 >= nPercent) {
       return;

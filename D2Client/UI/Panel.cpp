@@ -692,10 +692,10 @@ void __stdcall PANEL_DrawStaminaBar() {
     nMouseY = ui::GetMouseY();
     nMaxStamina = PANEL_GetSmoothedStatValue(UNITSTAT_stamina);
     int32_t nCurStaminaUnits;
-    nCurStaminaUnits = (int)(nMaxStamina + (nMaxStamina >> 0x1f & 0xffU)) >> 8;
+    nCurStaminaUnits = (int)nMaxStamina / 256;
     nMaxStamina = D2Common::Stats::StatsEx::GetTxtMaxStamina(pUnit);
     int32_t nMaxStaminaUnits;
-    nMaxStaminaUnits = (int)(nMaxStamina + (nMaxStamina >> 0x1f & 0xffU)) >> 8;
+    nMaxStaminaUnits = (int)nMaxStamina / 256;
     nCurStamina = 0;
     if (nCurStaminaUnits <= nMaxStaminaUnits) {
       eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_shrine_stamina);

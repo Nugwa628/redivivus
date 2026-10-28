@@ -16288,7 +16288,7 @@ void __fastcall AITHINK_Fn1_Baboon(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ai
             iVar2 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hpregen, 0);
             if (iVar2) {
               iVar3 = pMonStats->aip[4][pGame->nDifficulty] * iVar2;
-              iVar3 = (int)(iVar3 + (iVar3 >> 0x1f & 7U)) >> 3;
+              iVar3 = (int)iVar3 / 8;
               pMonsterAiGeneral->dwArg2 = iVar3;
               D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hpregen, iVar3 + iVar2, 0);
             } else {
@@ -18617,7 +18617,7 @@ void __fastcall AITHINK_Fn1_BatDemon(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2
       iVar1 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hpregen, 0);
       if (iVar1) {
         nDistToTarget = pMonStats->aip[4][pGame->nDifficulty] * iVar1;
-        nDistToTarget = (int)(nDistToTarget + (nDistToTarget >> 0x1f & 7U)) >> 3;
+        nDistToTarget = (int)nDistToTarget / 8;
         pMonsterAiGeneral->dwArg2 = nDistToTarget;
         D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hpregen, nDistToTarget + iVar1, 0);
         return;

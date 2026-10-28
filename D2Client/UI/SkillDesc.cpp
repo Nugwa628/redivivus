@@ -1121,7 +1121,7 @@ static BOOL __stdcall ItemStatCost_DescFunc_DGrpFunc(D2UnitStrc * pUnit, D2StatL
       case 5:
 
       case 10:
-        Storm::Source::SSTR::SStrPrintf(szValueBuffer, 10, "%i", (int)(nGroupValue * 100 + (nGroupValue * 100 >> 0x1f & 0x7fU)) >> 7);
+        Storm::Source::SSTR::SStrPrintf(szValueBuffer, 10, "%i", (int)(nGroupValue * 100) / 128);
       D2Lang::UTF8_ConvertToWideChar(wszValueFormatted, szValueBuffer, 9);
       percent_by_descval:
       if (nDescriptionValue == 1) {
@@ -3338,7 +3338,7 @@ static void __stdcall SKILLDESC_DescLine1_SkillParams(D2SkillsTxt * pSkillsTxt, 
           nManaCostFrac = (nManaCostFrac - 1 | -256) + 1;
         }
 
-        SKILLDESC_FormatDecimalWithLabel((int)(nManaCostFrac * 10 + ((int)(nManaCostFrac * 10) >> 0x1f & 0xffU)) >> 8, wStrIdMana, (int)(nManaCost + ((int)nManaCost >> 0x1f & 0xffU)) >> 8, 0, wszText);
+        SKILLDESC_FormatDecimalWithLabel((int)(nManaCostFrac * 10) / 256, wStrIdMana, (int)nManaCost / 256, 0, wszText);
         return;
       }
 
@@ -3391,8 +3391,8 @@ static void __stdcall SKILLDESC_CalcWeaponDamageRange(D2UnitStrc * pUnit, int * 
       nParam = (uint32_t)(uint8_t)pSkillsTxt->SrcDam;
     }
     if (nParam != 0x80) {
-      nMinDmg = (int)(nMinDmg * nParam + ((int)(nMinDmg * nParam) >> 0x1f & 0x7fU)) >> 7;
-      nMaxDmg = (int)(nMaxDmg * nParam + ((int)(nMaxDmg * nParam) >> 0x1f & 0x7fU)) >> 7;
+      nMinDmg = (int)(nMinDmg * nParam) / 128;
+      nMaxDmg = (int)(nMaxDmg * nParam) / 128;
     }
     if (nParam) {
       if (nMinDmg < 1) {
@@ -4062,7 +4062,7 @@ static void __stdcall SKILLDESC_DrawElemDamageWithRange(D2UnitStrc * pUnit, int 
     int nCalcMaxDmg = 0;
     SKILLDESC_CalcWeaponDamageRange(pUnit, &nCalcMinDmg, &nCalcMaxDmg, pdwParam, 0, pSkill, 0x80, pUnit2, 0, 0);
     SKILLDESC_CalcElemDamageRange(pUnit, &nCalcMinDmg, &nCalcMaxDmg, (uint32_t*)pdwParam, pSkill);
-    *pnParam1 += (int)(nCalcMinDmg * nParam + (nCalcMinDmg * nParam >> 0x1f & 0x7fU)) >> 7;
+    *pnParam1 += (int)(nCalcMinDmg * nParam) / 128;
     *pnParam2 += (int)((nCalcMaxDmg * nParam >> 0x1f & 0x7fU) + nCalcMaxDmg * nParam) >> 7;
 }
 
@@ -4191,12 +4191,12 @@ static void __stdcall SKILLDESC_DrawSkillDmgPhysical(int32_t pSkillRecord, D2Uni
     __frame0.nOffhandMaxDmg = 0;
     SKILLDESC_CalcDualWieldDamage(&__frame0.nMainMinDmg, &nElemDmg, &__frame0.nDmgTypeFlag, &nItemClassId, &__frame0.nOffhandMaxDmg, &__frame0.nElemDmgTypeFlag, (D2SkillStrc*)pSkillRecord, pfnCalcWeaponDmg, nExtraFlags, (D2UnitStrc*)pCompareUnit, pUnit);
     if (__frame0.nMainMinDmg && nElemDmg) {
-      __frame0.nMainMinDmg = ((int)(__frame0.nMainMinDmg * nSrcDamPct + ((int)(__frame0.nMainMinDmg * nSrcDamPct) >> 0x1f & 0x7fU)) >> 7) + nElemMinDmg;
-      nElemDmg = ((int)(nElemDmg * nSrcDamPct + ((int)(nElemDmg * nSrcDamPct) >> 0x1f & 0x7fU)) >> 7) + nElemMaxDmg;
+      __frame0.nMainMinDmg = ((int)(__frame0.nMainMinDmg * nSrcDamPct) / 128) + nElemMinDmg;
+      nElemDmg = ((int)(nElemDmg * nSrcDamPct) / 128) + nElemMaxDmg;
     }
     if (nItemClassId && __frame0.nOffhandMaxDmg) {
-      nItemClassId = ((int)(nItemClassId * nSrcDamPct + ((int)(nItemClassId * nSrcDamPct) >> 0x1f & 0x7fU)) >> 7) + nElemMinDmg;
-      __frame0.nOffhandMaxDmg = ((int)(__frame0.nOffhandMaxDmg * nSrcDamPct + ((int)(__frame0.nOffhandMaxDmg * nSrcDamPct) >> 0x1f & 0x7fU)) >> 7) + nElemMaxDmg;
+      nItemClassId = ((int)(nItemClassId * nSrcDamPct) / 128) + nElemMinDmg;
+      __frame0.nOffhandMaxDmg = ((int)(__frame0.nOffhandMaxDmg * nSrcDamPct) / 128) + nElemMaxDmg;
     }
     if (!__frame0.nMainMinDmg && !nElemDmg) {
       SKILLDESC_DrawDamageNumbers(nItemClassId, __frame0.nOffhandMaxDmg, __frame0.nElemDmgTypeFlag, nScreenY, nScreenZ, nScreenX);
@@ -4708,9 +4708,9 @@ void __fastcall SKILLDESC_DrawSkillDmgAuraElem(D2UnitStrc * pUnit, D2SkillStrc *
     pSkillsTxt = 0;
     SKILLDESC_CalcAuraDamageRange(pUnit, &nMinDamage, &nMaxDamage, (uint32_t*)&pSkillsTxt, 0, 0, pSkill, 0, nullptr);
     nMinDamage *= (uint32_t)byDmgShiftFactor;
-    nMinDamage = (int)(nMinDamage + (nMinDamage >> 0x1f & 0x7fU)) >> 7;
+    nMinDamage = (int)nMinDamage / 128;
     nMaxDamage *= (uint32_t)byDmgShiftFactor;
-    nMaxDamage = (int)(nMaxDamage + (nMaxDamage >> 0x1f & 0x7fU)) >> 7;
+    nMaxDamage = (int)nMaxDamage / 128;
     SKILLDESC_CalcSkillElemDamage(pUnit, &nMinDamage, &nMaxDamage, (int32_t*)&pSkillsTxt, &nSkillDescAddrSaved->skill, nSkillLevel);
     SKILLDESC_DrawDamageNumbers(nMinDamage, nMaxDamage, (int32_t)pSkillsTxt, nY, nXRight, nXLeft);
 }

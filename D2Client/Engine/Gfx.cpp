@@ -2121,12 +2121,12 @@ BOOL __fastcall GFX_DrawUnitShadow(D2UnitStrc * pUnit) {
       nBorderType = UI::Path::DRAW_GetTypeOfBorder();
       switch (nBorderType) {
       case 1: {
-        nOffsetX = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+        nOffsetX = -((int)ScreenSizeX / 4);
         nDrawX += nOffsetX;
         break;
       }
       case 2: {
-        nOffsetX = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+        nOffsetX = (int)ScreenSizeX / 4;
         nDrawX += nOffsetX;
         break;
       }
@@ -2281,13 +2281,13 @@ int32_t __fastcall DrawUnitShadows(D2UnitStrc * pUnit) {
     if (pCofLayerDataBase) {
       nCallResult2 = UI::Path::DRAW_GetTypeOfBorder();
       if (nCallResult2 == 1) {
-        nPrecisionX = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+        nPrecisionX = -((int)ScreenSizeX / 4);
       } else {
         if (nCallResult2 != 2) {
           goto draw_shadow;
         }
 
-        nPrecisionX = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+        nPrecisionX = (int)ScreenSizeX / 4;
       }
 
       nCoordTmp += nPrecisionX;
@@ -2536,10 +2536,10 @@ BOOL __fastcall GFX_DrawUnitSelectionShape(D2UnitStrc * pUnit) {
       D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(nParticleXY, nWorldOffsetVal, nCoord, pScreenXOut, pScreenYOut);
       nCallResult = UI::Path::DRAW_GetTypeOfBorder();
       if (nCallResult == 1) {
-        nParticleOffset = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+        nParticleOffset = -((int)ScreenSizeX / 4);
         __frame0.nScreenX += nParticleOffset;
       } else if (nCallResult == 2) {
-        nParticleOffset = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+        nParticleOffset = (int)ScreenSizeX / 4;
         __frame0.nScreenX += nParticleOffset;
       }
 
@@ -2745,13 +2745,13 @@ D2GfxInfoUnkStrc * __fastcall DRAW_WORLD_Unit_1(D2UnitStrc * pUnit, uint32_t nGa
     if (bPerspective) {
       nGfxTimerOrBorder = UI::Path::DRAW_GetTypeOfBorder();
       if (nGfxTimerOrBorder == 1) {
-        nPaletteOrFlag = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+        nPaletteOrFlag = -((int)ScreenSizeX / 4);
       } else {
         if (nGfxTimerOrBorder != 2) {
           goto draw_sprite;
         }
 
-        nPaletteOrFlag = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+        nPaletteOrFlag = (int)ScreenSizeX / 4;
       }
 
       nCallResult += nPaletteOrFlag;

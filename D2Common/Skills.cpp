@@ -1392,7 +1392,7 @@ static int32_t __stdcall SKILLS_CalculateBaseDamageFromStats(int32_t nType, D2Un
       return nDamage / 3 * 0x100;
     }
 
-    return (int)(nDamage + (nDamage >> 0x1f & 3U)) >> 2 << 8;
+    return (int)nDamage / 4 << 8;
 }
 
 // Applies an Sorceress elemental mastery passive bonus to a base damage value. Given an element type (fire/lightning/cold/freeze/poison), reads the corresponding passive mastery stat from pUnit and scales nBaseDamage by that percentage via D2ApplyPercent. Returns the adjusted damage, or 0 if no mastery bonus or unrecognized element type.
@@ -2455,7 +2455,7 @@ int32_t __stdcall SKILL_GetConcentrationDamageBonus(D2UnitStrc * pUnit, int32_t 
     }
 
     int nScaledBonus = sgptDataTable->pTxtSkills[nSkillId].Param[0] * nDamagePct;
-    return (int)(nScaledBonus + (nScaledBonus >> 0x1f & 7U)) >> 3;
+    return (int)nScaledBonus / 8;
 }
 
 // Computes the kick (Assassin Dragon Talon etc.) damage range and bonus and accumulates it into the three out-params (min/max/bonus). Reads item_kickdamage stat, temporarily marks the equipped weapon and off-hand weapon item-stats active, then derives base min/max from the equipped boots' ItemsTxt nMinDam/nMaxDam plus strength/dexterity %-bonuses (D2ApplyPercent) and the damagepercent/maxdamage_percent stats. Clamps damage% to >= -90. Server-side; no return value, results written through pnParam1/2/3.
@@ -3776,11 +3776,11 @@ int32_t __stdcall SKILL_CalcMinDamage(D2UnitStrc * pUnit, int32_t nSkillId, int3
         nMinDmg = nMinDmg + nDexterity - 0x14;
       }
       if (nMinDmg >= 1) {
-        return (int)(nMinDmg + (nMinDmg >> 0x1f & 3U)) >> 2 << 8;
+        return (int)nMinDmg / 4 << 8;
       }
 
       nMinDmg = 1;
-      return (int)(nMinDmg + (nMinDmg >> 0x1f & 3U)) >> 2 << 8;
+      return (int)nMinDmg / 4 << 8;
     }
 
     nMinDmg = 0;
@@ -3793,7 +3793,7 @@ int32_t __stdcall SKILL_CalcMinDamage(D2UnitStrc * pUnit, int32_t nSkillId, int3
       }
 
       nMinDmg = (uint32_t)(uint8_t)pSkillTxt->SrcDam * nMinDmg;
-      nMinDmg = (int)(nMinDmg + (nMinDmg >> 0x1f & 0x7fU)) >> 7;
+      nMinDmg = (int)nMinDmg / 128;
     }
 
     int32_t nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MinLevDam);
@@ -3842,7 +3842,7 @@ int32_t __stdcall SKILL_CalcMaxDamage(D2UnitStrc * pUnit, int32_t nSkillId, int3
       }
 
       nMaxDmg = (uint32_t)(uint8_t)pSkillTxt->SrcDam * nMaxDmg;
-      nMaxDmg = (int)(nMaxDmg + (nMaxDmg >> 0x1f & 0x7fU)) >> 7;
+      nMaxDmg = (int)nMaxDmg / 128;
     }
 
     nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MaxLevDam);

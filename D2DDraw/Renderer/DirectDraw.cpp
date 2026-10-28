@@ -2052,7 +2052,7 @@ void __fastcall RENDERER_DDRAW_DrawLine(POINT * pStartPoint, POINT * pEndPoint, 
     while (nStepX < 0 || nStepX >= RENDERER_nWindowHeight || nCurrentX < 0 || nCurrentX >= RENDERER_nWindowWidth) {
       nAccumulatorX += nDeltaX;
       if (0x10000 <= nAccumulatorX || nAccumulatorX <= -0x10000) {
-        nStepX = (int)(nAccumulatorX + (nAccumulatorX >> 0x1f & 0xffffU)) >> 0x10;
+        nStepX = (int)nAccumulatorX / 65536;
         nCurrentX += nStepX;
         nAccumulatorX += nStepX * -0x10000;
         nStepX = nCurrentY;
@@ -2060,7 +2060,7 @@ void __fastcall RENDERER_DDRAW_DrawLine(POINT * pStartPoint, POINT * pEndPoint, 
 
       nAccumulatorY += nDeltaY;
       if (0xffff < nAccumulatorY || nAccumulatorY < -0xffff) {
-        nStepY = (int)(nAccumulatorY + (nAccumulatorY >> 0x1f & 0xffffU)) >> 0x10;
+        nStepY = (int)nAccumulatorY / 65536;
         nStepX = nCurrentY + nStepY;
         nAccumulatorY += nStepY * -0x10000;
         nCurrentY = nStepX;
@@ -2082,7 +2082,7 @@ void __fastcall RENDERER_DDRAW_DrawLine(POINT * pStartPoint, POINT * pEndPoint, 
     while (true) {
       nAccumulatorX += nDeltaX;
       if (0x10000 <= nAccumulatorX || nAccumulatorX <= -0x10000) {
-        nStepX = (int)(nAccumulatorX + (nAccumulatorX >> 0x1f & 0xffffU)) >> 0x10;
+        nStepX = (int)nAccumulatorX / 65536;
         nCurrentX += nStepX;
         pPixelDst += nStepX;
         nAccumulatorX += nStepX * -0x10000;
@@ -2096,7 +2096,7 @@ void __fastcall RENDERER_DDRAW_DrawLine(POINT * pStartPoint, POINT * pEndPoint, 
 
       nAccumulatorY += nDeltaY;
       if (0x10000 <= nAccumulatorY || nAccumulatorY <= -0x10000) {
-        nStepX = (int)(nAccumulatorY + (nAccumulatorY >> 0x1f & 0xffffU)) >> 0x10;
+        nStepX = (int)nAccumulatorY / 65536;
         nCurrentY += nStepX;
         pPixelDst += RENDERER_nWindowWidth * nStepX;
         nAccumulatorY += nStepX * -0x10000;

@@ -1178,10 +1178,10 @@ void __stdcall RENDERER_GLIDE_DrawShadowQuad(int32_t nParam1, int32_t nParam2, G
     nScreenXCenter = nParam3->nLeft + nParam3->nTop;
     nScreenXBase = nParam3->nTop - nTexHeight;
     if (bPerspectiveEnabled && gnGlidePerspectiveScale != 0x100) {
-      nScreenXCenter = (int)(gnGlidePerspectiveScale * nScreenXCenter + (gnGlidePerspectiveScale * nScreenXCenter >> 0x1f & 0xffU)) >> 8;
-      nScreenXBase = (int)(gnGlidePerspectiveScale * nScreenXBase + (gnGlidePerspectiveScale * nScreenXBase >> 0x1f & 0xffU)) >> 8;
-      nTexWidth = (int)(gnGlidePerspectiveScale * nTexWidth + (gnGlidePerspectiveScale * nTexWidth >> 0x1f & 0xffU)) >> 8;
-      nTexHeight = (int)(gnGlidePerspectiveScale * nTexHeight + (gnGlidePerspectiveScale * nTexHeight >> 0x1f & 0xffU)) >> 8;
+      nScreenXCenter = (int)(gnGlidePerspectiveScale * nScreenXCenter) / 256;
+      nScreenXBase = (int)(gnGlidePerspectiveScale * nScreenXBase) / 256;
+      nTexWidth = (int)(gnGlidePerspectiveScale * nTexWidth) / 256;
+      nTexHeight = (int)(gnGlidePerspectiveScale * nTexHeight) / 256;
     }
 
     gGlideVertex0.aVertex[0].fY = (float)(nScreenXBase + nParam2);
@@ -1244,10 +1244,10 @@ static void __stdcall RENDERER_GLIDE_DrawPalettedQuad(GlideTexInfoStrc * pGlideQ
     int nQuadLeft = pGlideQuad->nLeft;
     int nQuadTop = pGlideQuad->nTop - nTexHeight;
     if (bPerspectiveEnabled && gnGlidePerspectiveScale != 0x100) {
-      nQuadLeft = (int)(gnGlidePerspectiveScale * nQuadLeft + (gnGlidePerspectiveScale * nQuadLeft >> 0x1f & 0xffU)) >> 8;
-      nQuadTop = (int)(gnGlidePerspectiveScale * nQuadTop + (gnGlidePerspectiveScale * nQuadTop >> 0x1f & 0xffU)) >> 8;
-      nParam3 = (int)(gnGlidePerspectiveScale * nParam3 + (gnGlidePerspectiveScale * nParam3 >> 0x1f & 0xffU)) >> 8;
-      nTexHeight = (int)(gnGlidePerspectiveScale * nTexHeight + (gnGlidePerspectiveScale * nTexHeight >> 0x1f & 0xffU)) >> 8;
+      nQuadLeft = (int)(gnGlidePerspectiveScale * nQuadLeft) / 256;
+      nQuadTop = (int)(gnGlidePerspectiveScale * nQuadTop) / 256;
+      nParam3 = (int)(gnGlidePerspectiveScale * nParam3) / 256;
+      nTexHeight = (int)(gnGlidePerspectiveScale * nTexHeight) / 256;
     }
 
     gGlideVertex0.aVertex[0].fX = (float)(nQuadLeft + nParam1);
@@ -1365,7 +1365,7 @@ void __fastcall DrawPerspectiveImage(D2GfxDataStrc * pData, int32_t nPosX, int32
     gGlideVertex0.aVertex[3].fX = (float)nScreenX;
     gGlideVertex0.aVertex[3].fY = (float)nScreenY;
     gGlideVertex0.aVertex[3].fOOW = 1.0;
-    bSpriteResult = (int)(RENDERER_nWindowWidth + (RENDERER_nWindowWidth >> 0x1f & 3U)) >> 2;
+    bSpriteResult = (int)RENDERER_nWindowWidth / 4;
     gGlideVertex0.aVertex[3].fS = fTexT1Scaled;
     gGlideVertex0.aVertex[3].fT = fTexT0Scaled;
     if (nScreenMode == 1) {

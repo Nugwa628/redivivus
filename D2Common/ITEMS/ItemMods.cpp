@@ -1100,7 +1100,7 @@ static int32_t __fastcall PropertyFunc_Charges(int32_t nType, D2UnitStrc * pUnit
     if (!nChargeSkillLevel) {
       nReqLevel = Skills::TXT_Skills_GetReqLevel(eSkill);
       nItemLevel = Items::ITEM_GetItemData_nItemLevel(pItemUnit);
-      nSkillLevel = (int)(nItemLevel - nReqLevel + (nItemLevel - nReqLevel >> 0x1f & 3U)) >> 2;
+      nSkillLevel = (int)(nItemLevel - nReqLevel) / 4;
       nChargeSkillLevel = nSkillLevel + 1;
       nClampedSkillLevel = nChargeSkillLevel;
       if (nChargeSkillLevel <= 1) {
@@ -1144,7 +1144,7 @@ static int32_t __fastcall PropertyFunc_Charges(int32_t nType, D2UnitStrc * pUnit
     }
     if (nSkillLevel < 0) {
       nClampedSkillLevel = -nSkillLevel * nChargeSkillLevel;
-      nSkillLevel = -nSkillLevel + ((int)(nClampedSkillLevel + (nClampedSkillLevel >> 0x1f & 7U)) >> 3);
+      nSkillLevel = -nSkillLevel + ((int)nClampedSkillLevel / 8);
     }
     if (1 < nSkillLevel) {
       if (0xfe < nSkillLevel) {
@@ -1158,7 +1158,7 @@ static int32_t __fastcall PropertyFunc_Charges(int32_t nType, D2UnitStrc * pUnit
 
     nSkillLevel = 1;
     add_charged_skill_stat:
-    nChargesDiv8 = (int)(nSkillLevel + (nSkillLevel >> 0x1f & 7U)) >> 3;
+    nChargesDiv8 = (int)nSkillLevel / 8;
     D2SeedStrc* pSeed = Items::GetItemSeed(pItemUnit);
     uint32_t nRandChargeOffset = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nSkillLevel - nChargesDiv8);
     D2StatListExStrc* pStatsEx = ITEMMOD_GetOrCreateStatList(pItemUnit, nParam3, nParam, pUnit);

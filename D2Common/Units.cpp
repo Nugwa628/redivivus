@@ -1853,7 +1853,7 @@ int32_t __stdcall GetDefense(D2UnitStrc * pUnit) {
     D2UnitStrc* pUnitOrig = pUnit;
     int nBaseArmor = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_armorclass, 0);
     int nDexBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnitOrig, UNITSTAT_dexterity, 0);
-    nBaseArmor += (int)(nDexBonus + (nDexBonus >> 0x1f & 3U)) >> 2;
+    nBaseArmor += (int)nDexBonus / 4;
     nSkillArmorPct = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pUnitOrig, UNITSTAT_skill_armor_percent, 0);
     nItemArmorPct = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pUnitOrig, UNITSTAT_item_armor_percent, 0);
     nDexBonus = nSkillArmorPct + nItemArmorPct;

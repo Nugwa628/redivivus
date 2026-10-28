@@ -4790,7 +4790,7 @@ void __fastcall TXT_AllocTxt_itemtypes(D2PoolManagerStrc * pMemory) {
       }
     }
 
-    sgtDataTable.nItemTypesEquivRowDwords = (int)(sgtDataTable.nTxtItemTypesSize + 0x1f + (sgtDataTable.nTxtItemTypesSize + 0x1f >> 0x1f & 0x1fU)) >> 5;
+    sgtDataTable.nItemTypesEquivRowDwords = (int)(sgtDataTable.nTxtItemTypesSize + 0x1f) / 32;
     size_t nAllocSize = sgtDataTable.nItemTypesEquivRowDwords * sgtDataTable.nTxtItemTypesSize * 4;
     sgtDataTable.pTxtItemTypesUnknown = Fog::Memory::AllocServerMemory(nullptr, nAllocSize, ".\\DATATBLS\\ItemTbls.cpp", 0x893, 0);
     memset(sgtDataTable.pTxtItemTypesUnknown, 0, nAllocSize);

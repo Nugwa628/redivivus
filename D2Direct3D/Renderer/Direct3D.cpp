@@ -3139,10 +3139,10 @@ static void __stdcall RENDERER_D3D_DrawShadowQuad(int * pTextureInfo, int nPosX,
     nCenterX = pTextureInfo[3] + pTextureInfo[4];
     nTopYOffset = pTextureInfo[4] - nHalfHeight;
     if (bPerspectiveEnabled && g_aSmackerSurfaceArray != 0x100) {
-      nCenterX = (int)(g_aSmackerSurfaceArray * nCenterX + (g_aSmackerSurfaceArray * nCenterX >> 0x1f & 0xffU)) >> 8;
-      nTopYOffset = (int)(g_aSmackerSurfaceArray * nTopYOffset + (g_aSmackerSurfaceArray * nTopYOffset >> 0x1f & 0xffU)) >> 8;
-      nQuadWidth = (int)(g_aSmackerSurfaceArray * nQuadWidth + (g_aSmackerSurfaceArray * nQuadWidth >> 0x1f & 0xffU)) >> 8;
-      nHalfHeight = (int)(g_aSmackerSurfaceArray * nHalfHeight + (g_aSmackerSurfaceArray * nHalfHeight >> 0x1f & 0xffU)) >> 8;
+      nCenterX = (int)(g_aSmackerSurfaceArray * nCenterX) / 256;
+      nTopYOffset = (int)(g_aSmackerSurfaceArray * nTopYOffset) / 256;
+      nQuadWidth = (int)(g_aSmackerSurfaceArray * nQuadWidth) / 256;
+      nHalfHeight = (int)(g_aSmackerSurfaceArray * nHalfHeight) / 256;
     }
 
     fQuadTopY = (float)(nTopYOffset + nPosY);
@@ -3207,10 +3207,10 @@ static void __stdcall RENDERER_DIRECT3D_DrawPalettedQuad(D2D3DSpriteInfoStrc * p
     int nScaledHeight = pTextureInfo->nTexHeight;
     int nScaledWidth = pTextureInfo->nOffsetY - nScaledHeight;
     if (bPerspective && g_aSmackerSurfaceArray != 0x100) {
-      nLockResult = (int)(g_aSmackerSurfaceArray * nLockResult + (g_aSmackerSurfaceArray * nLockResult >> 0x1f & 0xffU)) >> 8;
-      nScaledWidth = (int)(g_aSmackerSurfaceArray * nScaledWidth + (g_aSmackerSurfaceArray * nScaledWidth >> 0x1f & 0xffU)) >> 8;
-      nScaledOffsetX = (int)(g_aSmackerSurfaceArray * nScaledOffsetX + (g_aSmackerSurfaceArray * nScaledOffsetX >> 0x1f & 0xffU)) >> 8;
-      nScaledHeight = (int)(g_aSmackerSurfaceArray * nScaledHeight + (g_aSmackerSurfaceArray * nScaledHeight >> 0x1f & 0xffU)) >> 8;
+      nLockResult = (int)(g_aSmackerSurfaceArray * nLockResult) / 256;
+      nScaledWidth = (int)(g_aSmackerSurfaceArray * nScaledWidth) / 256;
+      nScaledOffsetX = (int)(g_aSmackerSurfaceArray * nScaledOffsetX) / 256;
+      nScaledHeight = (int)(g_aSmackerSurfaceArray * nScaledHeight) / 256;
     }
 
     float fQuadLeftX = (float)(nLockResult + nPosX);
@@ -3348,7 +3348,7 @@ void __fastcall DrawPerspectiveImage(D2GfxDataStrc * pData, int nPosX, int nPosY
     aQuadVertexData[3].fV = spriteInfo.fV0;
     switch (nScreenMode) {
     case 1: {
-      fHalfWidth = (float)((int)(RENDERER_nWindowWidth + (RENDERER_nWindowWidth >> 0x1f & 3U)) >> 2);
+      fHalfWidth = (float)((int)RENDERER_nWindowWidth / 4);
       aQuadVertexData[0].fX -= fHalfWidth;
       aQuadVertexData[1].fX -= fHalfWidth;
       aQuadVertexData[2].fX -= fHalfWidth;
@@ -3356,7 +3356,7 @@ void __fastcall DrawPerspectiveImage(D2GfxDataStrc * pData, int nPosX, int nPosY
       break;
     }
     case 2: {
-      fHalfWidth = (float)((int)(RENDERER_nWindowWidth + (RENDERER_nWindowWidth >> 0x1f & 3U)) >> 2);
+      fHalfWidth = (float)((int)RENDERER_nWindowWidth / 4);
       aQuadVertexData[0].fX = fHalfWidth + aQuadVertexData[0].fX;
       aQuadVertexData[1].fX = fHalfWidth + aQuadVertexData[1].fX;
       aQuadVertexData[2].fX = fHalfWidth + aQuadVertexData[2].fX;
@@ -4300,7 +4300,7 @@ static void RENDERER_D3D_CalculateViewportRect(RECT * pRect, int nScreenPanels, 
         exit(-1);
       }
 
-      nQuarterWidth = (int)(RENDERER_nWindowWidth + (RENDERER_nWindowWidth >> 0x1f & 3U)) >> 2;
+      nQuarterWidth = (int)RENDERER_nWindowWidth / 4;
       switch (nScreenPanels) {
       case 1: {
         *pOffset = -nQuarterWidth;

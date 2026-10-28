@@ -1649,11 +1649,11 @@ void __fastcall AUTOMAP_DrawCellTree(D2AutomapCellStrc * pCell, D2AutomapDrawCtx
       eBorderType = Path::DRAW_GetTypeOfBorder();
       switch (eBorderType) {
       case 1: {
-        nBorderOffsetX = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+        nBorderOffsetX = -((int)ScreenSizeX / 4);
         break;
       }
       case 2: {
-        nBorderOffsetX = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+        nBorderOffsetX = (int)ScreenSizeX / 4;
         break;
       }
       }
@@ -1788,7 +1788,7 @@ void __stdcall AUTOMAP_DrawMap() {
     switch (eBorderType) {
     case 1: {
       if (MiniMapType != 1) {
-        nBorderOffsetX = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+        nBorderOffsetX = -((int)ScreenSizeX / 4);
       }
       if (!AutoMapLeft) {
         AutoMapLeft2 = 0;
@@ -1798,7 +1798,7 @@ void __stdcall AUTOMAP_DrawMap() {
     }
     case 2: {
       if (MiniMapType != 1) {
-        nBorderOffsetX = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+        nBorderOffsetX = (int)ScreenSizeX / 4;
       }
       if (AutoMapLeft) {
         AutoMapLeft2 = AutoMapLeft;

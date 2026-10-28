@@ -7827,8 +7827,8 @@ int __fastcall MISSILESMODE_SrvDoFn35_RoyalStrikeChaosIce(::SGAMEDATA * pGame, D
 
     nNewDirY += nMissileId * 4;
     nDirXSaved += nFrameInterval * 4;
-    nDirY = (int)(nNewDirY + (nNewDirY >> 0x1f & 3U)) >> 2;
-    nInterval = (int)(nDirXSaved + (nDirXSaved >> 0x1f & 3U)) >> 2;
+    nDirY = (int)nNewDirY / 4;
+    nInterval = (int)nDirXSaved / 4;
     if (!nDirY) {
       nDirY = 1;
     }

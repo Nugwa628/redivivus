@@ -1799,7 +1799,7 @@ BOOL __fastcall ITEMEVENT_OpenWounds(::SGAMEDATA * pGame, uint32_t nUnitEvent, D
     nWoundsChance = SKILLITEM_CalculateStaminaPotionValue(nWoundsChance, nDmgTable);
     sStateArg.nSkillCalc = nWoundsChance + 0x28;
     if (pTarget->eUnitType == UNIT_PLAYER) {
-      sStateArg.nSkillCalc = (int)(sStateArg.nSkillCalc + (sStateArg.nSkillCalc >> 0x1f & 3U)) >> 2;
+      sStateArg.nSkillCalc = (int)sStateArg.nSkillCalc / 4;
       if (nDmgTable[5] != 6) {
         goto apply_open_wounds_state;
       }

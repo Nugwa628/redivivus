@@ -105,7 +105,7 @@ void __fastcall SKILLNEC_ApplyBloodCost(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     memset(&sDamage, 0, 0x70);
     sDamage.dwHitFlags |= 0x1000;
     sDamage.wResultFlags |= 4;
-    sDamage.dwPhysDamage = (int)(nMaxHp + (nMaxHp >> 0x1f & 7U)) >> 3;
+    sDamage.dwPhysDamage = (int)nMaxHp / 8;
     sDamage.dwDmgTotal = sDamage.dwPhysDamage;
     UNIT::SUnitDmg::DAMAGE_ApplyDamageToUnit(pGame, pUnit, pUnit, 0, &sDamage);
     UNIT::SUnitDmg::SERVER_GetHitCalculation(pGame, pUnit, pUnit, &sDamage);
