@@ -2986,8 +2986,9 @@ int32_t __fastcall SKILLS_GetUnitWalkVelocity(D2UnitStrc * pnParam) {
     }
     if (pnParam->eUnitType == UNIT_PLAYER) {
       nWalkVelocity = pnParam->nClassId;
-      if (0 <= nWalkVelocity && nWalkVelocity < sgptDataTable->nTxtCharStatsSize && sgptDataTable->pTxtCharStats + nWalkVelocity) {
-        return (uint32_t)(uint8_t)sgptDataTable->pTxtCharStats[nWalkVelocity].WalkVelocity << 8;
+      D2CharStatsTxt* pCharStatsRecord = (0 <= nWalkVelocity && nWalkVelocity < sgptDataTable->nTxtCharStatsSize) ? &sgptDataTable->pTxtCharStats[nWalkVelocity] : 0;
+      if (pCharStatsRecord) {
+        return (uint32_t)(uint8_t)pCharStatsRecord->WalkVelocity << 8;
       }
     } else if (pnParam->eUnitType == UNIT_MONSTER && (nWalkVelocity = pnParam->nClassId , 0 <= nWalkVelocity) && nWalkVelocity < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nWalkVelocity) {
       return (int)sgptDataTable->pTxtMonStats[nWalkVelocity].Velocity << 8;
@@ -4261,9 +4262,10 @@ void __fastcall SKILLS_PeriodicSkillsCallback(::SGAMEDATA * pGame, D2UnitStrc * 
 void __fastcall SKILLS_PeriodicStatsCallback(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
     int nAuraLevel;
     short int nAuraState;
-    if (0 <= nArg2 && nArg2 < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nArg2) {
+    D2SkillsTxt* pSkillsRecord2 = (0 <= nArg2 && nArg2 < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nArg2] : 0;
+    if (pSkillsRecord2) {
       BOOL bModeZeroDeath;
-      nAuraState = sgptDataTable->pTxtSkills[nArg2].aurastate;
+      nAuraState = pSkillsRecord2->aurastate;
       if (0 <= nAuraState && (int)nAuraState < sgptDataTable->nTxtStatesSize) {
         bModeZeroDeath = UNIT::SUnit::CheckForModeZeroDeath(pUnit);
         if (!bModeZeroDeath) {

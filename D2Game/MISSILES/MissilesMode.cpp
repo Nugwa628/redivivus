@@ -223,8 +223,9 @@ void __stdcall MISSILE_SetDamage(D2UnitStrc * pUnit, D2UnitStrc * pTarget, D2Dam
       }
       if (pTarget->eUnitType == UNIT_MONSTER) {
         nStatValue = pTarget->nClassId;
-        if (-1 < nStatValue && nStatValue < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nStatValue) {
-          nMonType = sgptDataTable->pTxtMonStats[nStatValue].MonType;
+        D2MonStatsTxt* pMonStatsRecord = (-1 < nStatValue && nStatValue < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nStatValue] : 0;
+        if (pMonStatsRecord) {
+          nMonType = pMonStatsRecord->MonType;
           if (0 < nMonType) {
             nElemDamage = D2Common::Stats::StatsEx::STATLIST_GetItemStatBonusValues(pUnit, 0xb4, aStatBonusValues, 0x80);
             nStatValue = 0;

@@ -99,8 +99,9 @@ void SKILLSOR_OnInfernoExpire(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
       nMonStatIdx = pUnit->nClassId;
       if (-1 < nMonStatIdx && nMonStatIdx < sgptDataTable->nTxtMonStatsSize) {
         nMonStatIdx = (int)sgptDataTable->pTxtMonStats[nMonStatIdx].MonStatsEx;
-        if (-1 < nMonStatIdx && nMonStatIdx < sgptDataTable->nTxtMonStatsExSize && sgptDataTable->pTxtMonStatsEx + nMonStatIdx) {
-          nFrames = (uint32_t)(uint8_t)sgptDataTable->pTxtMonStatsEx[nMonStatIdx].byInfernoLen;
+        D2MonStats2Txt* pMonStatsExRecord = (-1 < nMonStatIdx && nMonStatIdx < sgptDataTable->nTxtMonStatsExSize) ? &sgptDataTable->pTxtMonStatsEx[nMonStatIdx] : 0;
+        if (pMonStatsExRecord) {
+          nFrames = (uint32_t)(uint8_t)pMonStatsExRecord->byInfernoLen;
         }
       }
     }
