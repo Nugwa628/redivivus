@@ -619,12 +619,7 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
 
     RENDERER_GLIDE_GenerateDebugFont();
     __frame0.nResult = 0;
-    if (!nParam) {
-      screen_resolution = 7;
-      RENDERER_nWindowWidth = 0x280;
-      RENDERER_nWindowHeight = 0x1e0;
-      refresh_rate = gnGlideRefreshRate640;
-    } else {
+    if (nParam) {
       screen_resolution = 8;
       RENDERER_nWindowWidth = 800;
       RENDERER_nWindowHeight = 600;
@@ -633,15 +628,18 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
       if (nParam != 2) {
         goto open_sst_window;
       }
+    } else {
+      screen_resolution = 7;
+      RENDERER_nWindowWidth = 0x280;
+      RENDERER_nWindowHeight = 0x1e0;
+      refresh_rate = gnGlideRefreshRate640;
     }
 
     gbGlidePerspectiveMode = 1;
     open_sst_window:
     gnGlideWindowHandle = nParam2;
     ghGlideSstWindow = (*GLIDEDLL_grSstWinOpen_28)(nParam2, screen_resolution, refresh_rate, 2, 0, 2, 0);
-    if (!ghGlideSstWindow) {
-      Fog::Src::LogManager::LOGFILE_WriteStringToFile("Opening Glide window failed!");
-    } else {
+    if (ghGlideSstWindow) {
       ghGlideWindow = 1;
       if (gnGlideRendererInitialized) {
         nTMUCount = 0;
@@ -692,6 +690,8 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
       if (bInitTexMemOk) {
         return 1;
       }
+    } else {
+      Fog::Src::LogManager::LOGFILE_WriteStringToFile("Opening Glide window failed!");
     }
 
     return __frame0.nResult;
