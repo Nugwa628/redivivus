@@ -2626,11 +2626,7 @@ uint32_t __stdcall GetStashGoldLimit(D2UnitStrc * pUnit) {
 }
 
 BOOL __fastcall CanSwitchAI(int32_t nMonsterId) {
-    if (!(0 <= nMonsterId && nMonsterId < sgptDataTable->nTxtMonStatsSize)) {
-      return 0;
-    }
-
-    D2MonStatsTxt* pMonStats = sgptDataTable->pTxtMonStats + nMonsterId;
+    D2MonStatsTxt* pMonStats = (0 <= nMonsterId && nMonsterId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nMonsterId] : NULL;
     if (!pMonStats) {
       return 0;
     }

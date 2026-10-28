@@ -1342,11 +1342,7 @@ int32_t __stdcall SKILLS_GetTotalSkillLevel(D2UnitStrc * pUnit, eD2Skills eSkill
 // Output feeds into missile spawn and damage calculation.
 // Heart of skill scaling system.
 int32_t __stdcall SKILLS_CalculateManaCost(eD2Skills eSkillId, int32_t nSkillLevel) {
-    if (!(0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxt = sgptDataTable->pTxtSkills + eSkillId;
+    D2SkillsTxt* pSkillsTxt = (0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkillId] : NULL;
     if (!pSkillsTxt) {
       return 0;
     }
@@ -3153,11 +3149,7 @@ D2SkillStrc * __stdcall AllocSkill(D2UnitStrc * pUnit, eD2Skills eSkill) {
     if (!pUnit) {
       return nullptr;
     }
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return nullptr;
-    }
-
-    D2SkillsTxt* pSkillListStrc = sgptDataTable->pTxtSkills + eSkill;
+    D2SkillsTxt* pSkillListStrc = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : NULL;
     if (!pSkillListStrc) {
       return nullptr;
     }

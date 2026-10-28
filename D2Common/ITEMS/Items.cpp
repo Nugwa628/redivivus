@@ -5756,11 +5756,7 @@ D2Row_char_32 * __stdcall ITEM_GetTxtItemTypes_invgfx(D2UnitStrc * pUnit, uint32
     }
 
     eD2ItemTypes eItemType = ITEM_GetItemData_wType(pUnit);
-    if (!(0 <= (int)eItemType && (int)eItemType < sgptDataTable->nTxtItemTypesSize)) {
-      return (D2Row_char_32*)(char (*)[32])gpszItemNoInvGfx;
-    }
-
-    D2ItemTypesTxt* pItemTypesTxt = sgptDataTable->pTxtItemTypes + eItemType;
+    D2ItemTypesTxt* pItemTypesTxt = (0 <= (int)eItemType && (int)eItemType < sgptDataTable->nTxtItemTypesSize) ? &sgptDataTable->pTxtItemTypes[eItemType] : NULL;
     if (!pItemTypesTxt) {
       return (D2Row_char_32*)(char (*)[32])gpszItemNoInvGfx;
     }

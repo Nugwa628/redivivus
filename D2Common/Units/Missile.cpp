@@ -713,11 +713,7 @@ int32_t __stdcall GetMinDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int32_t 
         nLevel = 0;
       }
     }
-    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
-      return 0;
-    }
-
-    D2MissilesTxt* pMissileTxt = sgptDataTable->pTxtMissiles + nMissileId;
+    D2MissilesTxt* pMissileTxt = (0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nMissileId] : NULL;
     if (!pMissileTxt) {
       return 0;
     }
@@ -753,11 +749,7 @@ int32_t __stdcall GetMaxDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int32_t 
         nLevel = 0;
       }
     }
-    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
-      return 0;
-    }
-
-    D2MissilesTxt* pMissileTxt = sgptDataTable->pTxtMissiles + nMissileId;
+    D2MissilesTxt* pMissileTxt = (0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nMissileId] : NULL;
     if (!pMissileTxt) {
       return 0;
     }
@@ -802,11 +794,7 @@ int32_t __stdcall GetMinElemDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int3
         nLevel = 0;
       }
     }
-    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
-      return 0;
-    }
-
-    D2MissilesTxt* pMissileTxt = sgptDataTable->pTxtMissiles + nMissileId;
+    D2MissilesTxt* pMissileTxt = (0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nMissileId] : NULL;
     if (!pMissileTxt) {
       return 0;
     }
@@ -842,11 +830,7 @@ int32_t __stdcall GetMaxElemDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int3
         nLevel = 0;
       }
     }
-    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
-      return 0;
-    }
-
-    D2MissilesTxt* pMissileTxt = sgptDataTable->pTxtMissiles + nMissileId;
+    D2MissilesTxt* pMissileTxt = (0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nMissileId] : NULL;
     if (!pMissileTxt) {
       return 0;
     }
@@ -869,11 +853,7 @@ int32_t __stdcall GetMaxElemDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int3
 
 int32_t __stdcall GetElementalLength(int32_t nUnused, D2UnitStrc * pUnit, int32_t nMissileId, int32_t nLevel) {
     int nLevLenBonus;
-    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
-      return 0;
-    }
-
-    D2MissilesTxt* pMissileTxt = sgptDataTable->pTxtMissiles + nMissileId;
+    D2MissilesTxt* pMissileTxt = (0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nMissileId] : NULL;
     if (!pMissileTxt) {
       return 0;
     }
