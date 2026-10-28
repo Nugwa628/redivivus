@@ -390,7 +390,7 @@ void __fastcall Send0x9CItemAddQuantity(struct D2ClientStrc * pClient, struct D2
 void __fastcall Send0x9CItemSwapInContainer(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, eD2ItemFlag eItemFlags);
 // @sourcefile .\GAME\SCmd.cpp
 void __fastcall Send0x9CItemPutInBelt(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, eD2ItemFlag eItemFlags);
-void Send0x9CItemRemoveFromBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
+void __fastcall Send0x9CItemRemoveFromBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
 void Send0x9CItemSwapInBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
 void Send0x9CItemToCursor(void * pThis, struct D2UnitStrc * pUnit);
 // @sourcefile .\GAME\SCmd.cpp
