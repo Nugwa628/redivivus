@@ -19,7 +19,6 @@
 #include "Fog/Src/ErrorManager.h"
 #include "Storm/Source/SSTR.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -47,7 +46,6 @@ namespace D2Common::DATATBLS::AnimTbls {
 // @sourcefile .\DATATBLS\AnimTbls.cpp
 D2AnimDataStrc * __fastcall TXT_AllocTxt_AnimTbls(D2PoolManagerStrc * pMemory) {
     char szFilePath[260];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2AnimDataStrc* pAnimTbls = D2_NEW_POOL_AT(nullptr, D2AnimDataStrc, ".\\DATATBLS\\AnimTbls.cpp", 0x83);
     memset(pAnimTbls, 0, 0x4a4);
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\AnimData.d2", "DATA\\GLOBAL");
@@ -64,7 +62,6 @@ D2AnimDataStrc * __fastcall TXT_AllocTxt_AnimTbls(D2PoolManagerStrc * pMemory) {
 
     pAnimTbls->pDefaultRecord.nFrames = 0x800;
     pAnimTbls->pDefaultRecord.nAnimSpeed = 0x100;
-    Fog::Debug::GuardStack();
     return pAnimTbls;
 }
 
@@ -164,7 +161,6 @@ static int * ANIMDATA_GetRecordByNameHash(LPSTR pnParam) {
 D2AnimDataRecordStrc * __fastcall ANIMDATA_GetAnimDataForUnit(D2UnitStrc * pUnit, uint32_t nParam, uint32_t nCofMode, uint32_t nWeaponClass, D2InventoryStrc * pInventory) {
     D2AnimDataStrc* pDVar1;
     char szCofName[8];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     memset(szCofName, 0, 8 * sizeof(szCofName[0]));
     int32_t nCofNameLen = 0;
     COMPOSIT::Composit::COMPOSIT_BuildCofPath(pUnit, nParam, nCofMode, nWeaponClass, pInventory, szCofName, &nCofNameLen, 0, 1);
@@ -174,7 +170,6 @@ D2AnimDataRecordStrc * __fastcall ANIMDATA_GetAnimDataForUnit(D2UnitStrc * pUnit
       pRecord = &pDVar1->pDefaultRecord;
     }
 
-    Fog::Debug::GuardStack();
     return pRecord;
 }
 
@@ -182,7 +177,6 @@ D2AnimDataRecordStrc * __fastcall ANIMDATA_GetAnimDataForUnit(D2UnitStrc * pUnit
 // Builds composit name, looks up record, writes nParam to the speed field.
 void __stdcall ANIMDATA_SetAnimSpeedForUnit(D2UnitStrc * pUnit, int32_t nParam) {
     char szCofName[8];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     memset(szCofName, 0, 8 * sizeof(szCofName[0]));
     int nCofNameLen = 0;
     COMPOSIT::Composit::COMPOSIT_GetCofPathWithTransform(pUnit, szCofName, &nCofNameLen, 0, 1, pUnit->pInventory, -1);
@@ -190,8 +184,6 @@ void __stdcall ANIMDATA_SetAnimSpeedForUnit(D2UnitStrc * pUnit, int32_t nParam) 
     if (pRecord) {
       pRecord[3] = nParam;
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Retrieves frame count, animation speed, and trigger frame from an AnimData

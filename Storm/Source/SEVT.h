@@ -51,7 +51,7 @@ uint32_t SEvtDestroy();
 void __stdcall SEvtPushState(uint32_t nEventId, uint32_t nSubId);
 // Registers an event handler: allocates a handler node keyed by dwKey and links it into the handler table for (dwEventId, dwSubId); pfnHandler must be non-NULL and dwReserved zero. SEvtDispatch matches its key argument against the stored key.
 // Storm export SEvtRegisterHandler (export name list and Mac PPC 1.10b traceback).
-void __stdcall SEvtRegisterHandler(uint32_t dwEventId, uint32_t dwSubId, uint32_t dwKey, int dwReserved, pfnSEvtHandler pfnHandler);
+int __stdcall SEvtRegisterHandler(uint32_t dwEventId, uint32_t dwSubId, uint32_t dwKey, int dwReserved, pfnSEvtHandler pfnHandler);
 // Removes one registered handler from an event type.
 // @oracle SEvtUnregisterHandler
 // @oracle-source Storm export name list, and the PEF traceback-named body .SEvtUnregisterHandler @10017460 in Mac PPC 1.10b Storm

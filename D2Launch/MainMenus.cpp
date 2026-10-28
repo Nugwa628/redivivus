@@ -390,7 +390,7 @@ void __stdcall IMAGE_FreePredefinedImages() {
 }
 
 // Loads a palette pair (.dat and .pl2 files) for rendering. Constructs full paths by prepending "DATA\\GLOBAL\\" to the input filenames, checks if the palette is "palette\\fechar\\pal.dat" via string comparison, sets global flag gnIsFecharPalette accordingly, then calls D2Win palette loader with the constructed paths.
-void __fastcall D2GFX_SetPaletteForDraw(char * szPaletteDat, char * szPalettePl2) {
+int __fastcall D2GFX_SetPaletteForDraw(char * szPaletteDat, char * szPalettePl2) {
     char szDatPath[260];
     char szPl2Path[260];
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ gnPaletteLoadedFlag = 1;
@@ -399,6 +399,7 @@ void __fastcall D2GFX_SetPaletteForDraw(char * szPaletteDat, char * szPalettePl2
     bool bIsFecharPalette = !strcmp(szPaletteDat, "palette\\fechar\\pal.dat");
     gnIsFecharPalette = (uint32_t)bIsFecharPalette;
     D2Win::Src::D2WinPalette::LoadPalette(szDatPath, szPl2Path);
+    return 1;
 }
 
 D2ControlStrc * __fastcall FORMS_CreateAnyFormFromList(int32_t nFormIndex) {
@@ -1289,7 +1290,7 @@ BOOL __stdcall MAINMENU_OnPressToggleExpansionFlag(D2ControlMsg * pControlMsg) {
     return 1;
 }
 
-void __fastcall MAINMENU_SetClassDescriptionTooltip(int32_t bSetTooltip, int32_t nClassId, uint16_t wPrimaryStrId, uint16_t wSecondaryStrId) {
+int __fastcall MAINMENU_SetClassDescriptionTooltip(int32_t bSetTooltip, int32_t nClassId, uint16_t wPrimaryStrId, uint16_t wSecondaryStrId) {
     int32_t nLineStyle;
     int nAlignment;
     int32_t nSetTextArg3;
@@ -1297,7 +1298,7 @@ void __fastcall MAINMENU_SetClassDescriptionTooltip(int32_t bSetTooltip, int32_t
     int32_t nSetTextArg1;
     bool nSetTextArg2;
     if (gnClassDescriptionTooltipState != -1) {
-      return;
+      return 1;
     }
     if (bSetTooltip) {
       uint16_t* pwszText;
@@ -1314,14 +1315,15 @@ void __fastcall MAINMENU_SetClassDescriptionTooltip(int32_t bSetTooltip, int32_t
       pwszText = D2Lang::StrTable::strtable::GetLocaleString(wSecondaryStrId);
       D2Win::Src::D2WinTextBox::SetText(gpCtlClassDescriptionTooltipSecondary, pwszText, nLineStyle, nSetTextArg2, nAlignment);
       gnClassDescriptionTooltipClassId = nClassId;
-      return;
+      return 1;
     }
     if (gnClassDescriptionTooltipClassId != nClassId) {
-      return;
+      return 1;
     }
 
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ClearAllLines(gpCtlClassDescriptionTooltipPrimary);
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ClearAllLines(gpCtlClassDescriptionTooltipSecondary);
+    return 1;
 }
 
 // Mouse-over notify of the Sorceress create-hero image: MAINMENU_SetClassDescriptionTooltip(pNotify->bStateIsOne, class 1, 0xfaa "Sorceress", 0x140b class blurb). Returns 1.
@@ -1656,7 +1658,7 @@ void __stdcall MAINMENU_SyncCreditsColumns() {
 }
 
 // @sourcefile .\Src\MainMenus.cpp
-void __stdcall MAINMENU_DisplayCredits() {
+int __stdcall MAINMENU_DisplayCredits() {
     int i;
     ::D2WinTextBox* pTargetBox;
     uint32_t nRemaining;
@@ -1692,7 +1694,7 @@ void __stdcall MAINMENU_DisplayCredits() {
       if (!nRemaining) {
         MAINMENU_AppendCreditsEnd();
         D2_FREE_AT(pwTextBuf, ".\\Src\\MainMenus.cpp", 0x146f);
-        return;
+        return 1;
       }
       if (*pwCursor == L'*') {
         D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsiSimple(gpMainMenuCreditsPairLeftTextBox, "");
@@ -2142,7 +2144,7 @@ void __stdcall UIMENU_ShowRealmNameOnButton() {
     }
 
     memset(awButtonText, 0, 0x100);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, awButtonText, awFormat, (uint16_t*)awGatewayW);
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, awButtonText, awFormat, awGatewayW);
     i = 0;
     nLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(awButtonText);
     if (0 < nLen) {
@@ -2764,7 +2766,7 @@ int __stdcall MAINMENU_PollMCPCreateGamePump(int nFrameIndex) {
     return 1;
 }
 
-static void __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextBox * pTextBox, int32_t nColor, uint8_t bCentered) {
+static int __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextBox * pTextBox, int32_t nColor, uint8_t bCentered) {
     int nClearCount;
     uint16_t wszBuffer[1024];
     uint16_t* pwszLineStart = wszBuffer;
@@ -2778,7 +2780,7 @@ static void __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextB
     pwszLineStart = wszBuffer;
     uint16_t* pwszCursor = pwszLineStart;
     if (wszBuffer[0] == L'\0') {
-      return;
+      return 1;
     }
 
     do {
@@ -2792,10 +2794,11 @@ static void __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextB
     } while (*pwszCursor != L'\0');
 
     if (pwszLineStart >= pwszCursor) {
-      return;
+      return 1;
     }
 
     D2Win::Src::D2WinTextBox::SetText(pTextBox, pwszLineStart, nColor, (bool)bCentered, 0);
+    return 1;
 }
 
 void __fastcall UIMENU_CreatePopupWithContent(uint16_t * wszTitle, uint16_t * wszContent, pfnUIMenuInstance pMenuInstance) {
@@ -3884,7 +3887,7 @@ int __fastcall SelectedCharBnetSingleTcpIp(D2CharSelStrc * charName, eD2PlayerSt
                 D2MCPClient::McpConnect::FreeMCP();
                 pszLocaleMsg = wszCharName;
                 pszFmt = D2Lang::StrTable::strtable::GetLocaleString(0x2b89);
-                D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszPopupMsg, pszFmt, (uint16_t*)pszLocaleMsg);
+                D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszPopupMsg, pszFmt, pszLocaleMsg);
                 FORMS_DestroyList();
                 pSavedFontParams = gaPredefinedForms[0xe0].pTypeArg2;
                 gaPredefinedForms[0xe0].pTypeArg2 = gaMenuFormFontParamsFont1;
@@ -4663,7 +4666,7 @@ void __stdcall NET_MCP_CLIENT_HandleCharCreation() {
               D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszCharNameForMsg, D2IniData_launcher->szNAME, 0x100);
               wszMessage = wszCharNameForMsg;
               wszFormat = D2Lang::StrTable::strtable::GetLocaleString(0x2b33);
-              D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszPopupText, wszFormat, (uint16_t*)wszMessage);
+              D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszPopupText, wszFormat, wszMessage);
               MAINMENU_ShowPopupDialog(wszPopupText, UIMENU_CreateHeroSinglePlayer, 1);
               return;
             }

@@ -66,7 +66,6 @@
 #include "D2Common/Unit/D2UnitDataItemStrc.h"
 #include "D2Game/GAME/SCmd.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -215,7 +214,7 @@ void __stdcall SetModSeed(D2UnitStrc * pUnit, int32_t nModSeed) {
 }
 
 // Returns nQuality from D2UnitDataItemStrc. Returns 2 (NORMAL) if unit is null, not an item, or has no item data. Thirty-seven bytes reading the unit from [EBP+8] and touching EAX only, so it preserves ECX; CalculateTransactionCost_Impl carries a magic-or-better flag there across this call.
-int GetItemQuality(D2UnitStrc * pUnit) {
+int __stdcall GetItemQuality(D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataMonster)) {
       return 2;
     }
@@ -271,7 +270,7 @@ void __stdcall SetAutoMagic(D2UnitStrc * pUnit, int16_t wAutoMagic) {
 }
 
 // Returns magic suffix ID at nIndex (offset 0x3E + nIndex*2) from D2UnitDataItemStrc. Returns 0 if unit is null, not an item, or has no item data.
-int GetMagicSuffix(D2UnitStrc * pUnit, int nIndex) {
+int __stdcall GetMagicSuffix(D2UnitStrc * pUnit, int nIndex) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM)) {
       return (uint32_t)pUnit & -65536;
     }
@@ -325,7 +324,7 @@ void __stdcall SetRareSuffix(D2UnitStrc * pUnit, int16_t wRareSuffix) {
     pUnit->pUnitData.pUnitDataItem->wRareSuffix = wRareSuffix;
 }
 
-BOOL CheckItemFlag(D2UnitStrc * pUnit, eD2ItemFlag neD2ItemFlag, int32_t nParam, char * szText) {
+BOOL __stdcall CheckItemFlag(D2UnitStrc * pUnit, eD2ItemFlag neD2ItemFlag, int32_t nParam, char * szText) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataItem)) {
       return 0;
     }
@@ -410,7 +409,7 @@ eD2ItemCmd __stdcall ITEM_GetItemData_eD2ItemCmd(D2UnitStrc * pUnit) {
     return pUnit->pUnitData.pUnitDataItem->eItemCmd;
 }
 
-int32_t ITEM_GetItemData_nItemLevel(D2UnitStrc * pUnit) {
+int32_t __stdcall ITEM_GetItemData_nItemLevel(D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM)) {
       return 1;
     }
@@ -2237,16 +2236,15 @@ void __stdcall ITEM_SetItemData_wItemVersion(D2UnitStrc * pUnit, int16_t wItemVe
 
 // Calculates frames-per-attack for a weapon held by pUnit. Builds the COF path from unit/inventory state, looks up frame count and animation speed via ANIMDATA, then computes (frames&lt;&lt;8) / (((IAS+baseAttackRate+100)*animSpeed)/100). Halts with internal error if item is not a weapon or COF data is missing.
 int __stdcall ITEM_CalcWeaponAttackSpeed(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
-    // Frame slots -28..-4 are ONE object: &nWClass is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -28..-8 are ONE object: &nWClass is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       int32_t nWClass;
       int nAnimSpeed;
       uint32_t nFrames;
       int szCofPath[2];
-      uint32_t nSecurityCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 24, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 20, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     bool _bIsWeapon;
     bool bIsWeapon;
@@ -2255,7 +2253,6 @@ int __stdcall ITEM_CalcWeaponAttackSpeed(D2UnitStrc * pUnit, D2UnitStrc * pItem)
     int iVar2;
     int iVar3;
     uint32_t nTrigger;
-    __frame0.nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!pItem || pItem->eUnitType != UNIT_ITEM) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x151d);
       exit(-1);
@@ -2275,7 +2272,6 @@ int __stdcall ITEM_CalcWeaponAttackSpeed(D2UnitStrc * pUnit, D2UnitStrc * pItem)
         COMPOSIT::Composit::COMPOSIT_BuildCofPath(pUnit, pUnit->nClassId, 7, pUnit->eUnitType, pUnit->pInventory, (LPSTR)__frame0.szCofPath, &__frame0.nWClass, 0, 0);
         nAttackSpeedResult = DATATBLS::AnimTbls::ANIMDATA_GetFramesSpeedAndTrigger(__frame0.szCofPath, &__frame0.nFrames, &__frame0.nAnimSpeed, &nTrigger);
         if (!nAttackSpeedResult) {
-          Fog::Debug::GuardStack();
           return 0x2d;
         }
         if (!__frame0.nFrames) {
@@ -2287,7 +2283,6 @@ int __stdcall ITEM_CalcWeaponAttackSpeed(D2UnitStrc * pUnit, D2UnitStrc * pItem)
         iVar2 = Stats::StatsEx::STATSEX_GetCurrentStat(pItem, UNITSTAT_attackrate, 0);
         iVar3 = (iVar1 + 100 + iVar2) * __frame0.nAnimSpeed;
         iVar2 = __frame0.nFrames << 8;
-        Fog::Debug::GuardStack();
         return iVar2 / (iVar3 / 100);
       }
     }
@@ -2338,7 +2333,7 @@ BOOL __stdcall ITEMS_CheckChargedSkillFullyCharged(D2UnitStrc * pItem, bool * pO
     return _bResult;
 }
 
-uint32_t ITEM_GetItemData_eD2ItemFlag_IsEthereal(D2UnitStrc * pUnit) {
+uint32_t __stdcall ITEM_GetItemData_eD2ItemFlag_IsEthereal(D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataItem)) {
       return 0;
     }

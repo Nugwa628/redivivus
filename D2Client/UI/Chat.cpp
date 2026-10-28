@@ -1029,7 +1029,7 @@ void __stdcall CHAT_ProcessBattleNetMessage() {
           }
 
           pwszFormat = D2Lang::StrTable::strtable::GetLocaleString(wStringId);
-          D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x153, wszFormatted, pwszFormat, (uint16_t*)pwszSenderLine, pWVar1);
+          D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x153, wszFormatted, pwszFormat, pwszSenderLine, pWVar1);
           wszFormatted[0x153] = L'\0';
           Text::TEXT_PrintGameString(wszFormatted, 2);
           return;
@@ -1349,7 +1349,7 @@ static void __stdcall ChatCommandProcessor(uint16_t * pwInputMessage, char * psz
 
           pwLocaleString = wszAccountName;
           pwFormatArg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba3);
-          D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x208, wszMsgBuffer3, pwFormatArg, (uint16_t*)pwLocaleString);
+          D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x208, wszMsgBuffer3, pwFormatArg, pwLocaleString);
           D2Lang::Unicode::UNISYS::AppendToBuffer(wszMsgBuffer1, wszMsgBuffer3);
         }
       } else {
@@ -1455,7 +1455,7 @@ static void __stdcall ChatCommandProcessor(uint16_t * pwInputMessage, char * psz
           pwFormatArg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba5);
         }
 
-        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x208, wszMsgBuffer3, pwFormatArg, (uint16_t*)pwLocaleString);
+        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x208, wszMsgBuffer3, pwFormatArg, pwLocaleString);
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszMsgBuffer1, wszMsgBuffer3);
       }
 
@@ -1564,7 +1564,7 @@ void __stdcall INPUT_HandleChatCharInput(D2UIMouseMsgStrc * pMsg) {
     Storm::SMsgBreakHandlerChain(pMsg);
 }
 
-int UI_SLIDER_GetValueFromPosition(int32_t nCurrentPos, int32_t nMinPos, D2EscMenuItemStrc * pSliderItem, int32_t nMaxPos) {
+int __stdcall UI_SLIDER_GetValueFromPosition(int32_t nCurrentPos, int32_t nMinPos, D2EscMenuItemStrc * pSliderItem, int32_t nMaxPos) {
     int nStepCount = pSliderItem->nSubImageCount - 1;
     float fStepCount = (float)nStepCount;
     if (nStepCount < 0) {
@@ -1586,7 +1586,7 @@ int UI_SLIDER_GetValueFromPosition(int32_t nCurrentPos, int32_t nMinPos, D2EscMe
     return nResultValue;
 }
 
-int UI_SLIDER_GetPositionFromValue(int32_t nMinPos, D2EscMenuItemStrc * pSliderItem, int32_t nMaxPos) {
+int __fastcall UI_SLIDER_GetPositionFromValue(int32_t nMinPos, D2EscMenuItemStrc * pSliderItem, int32_t nMaxPos) {
     float fRange = (float)(nMaxPos - nMinPos);
     if (nMaxPos - nMinPos < 0) {
       fRange += 4.2949673e+09;

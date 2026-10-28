@@ -5,7 +5,6 @@
 #include "Fog/Debug.h"
 #include "Fog/Src/ErrorManager.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -13,20 +12,18 @@
 namespace D2Lang {
 
 void __stdcall UI_FormatNumberWithCommas(uint16_t * wszText, int32_t nParam1, int32_t nParam2) {
-    // Frame slots -76..-4 are ONE object: &nCommaCounter is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -76..-8 are ONE object: &nCommaCounter is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       int nCommaCounter;
       char aDigitBuffer[64];
-      uint32_t dwStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 72, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 68, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     int nFormattedLen;
     int nWritePos;
     char cCurChar;
     int nDigitIdx;
-    __frame0.dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     __frame0.nCommaCounter = 0;
     if (nParam2 < 3) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4b9);
@@ -67,7 +64,6 @@ void __stdcall UI_FormatNumberWithCommas(uint16_t * wszText, int32_t nParam1, in
 
           nFormattedLen = nWritePos;
           if (!nDigitCount) {
-            Fog::Debug::GuardStack();
             return;
           }
         }
@@ -80,7 +76,6 @@ void __stdcall UI_FormatNumberWithCommas(uint16_t * wszText, int32_t nParam1, in
     __frame0.nCommaCounter = 0;
     UTF8_ConvertToWideChar((uint16_t*)&__frame0.nCommaCounter, "*", 2);
     Unicode::UNISYS::STRING_CopyWideString(wszText, (uint16_t*)&__frame0.nCommaCounter);
-    Fog::Debug::GuardStack();
 }
 
 // Decodes next UTF-8 character from byte stream. Multi-byte decoding using table at gaUtf8DecodeTable. Returns character width in bytes or -1 on error. Validates continuation bytes (0x80 mask).
@@ -244,9 +239,7 @@ int32_t __fastcall UTF8_GetStringLength(char * szUtf8, int32_t nMaxBytes) {
 
 void __fastcall UTF8_EncodeCodePoint(uint16_t * nParam) {
     uint8_t abUtf8Buf[8];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     EncodeUTF8CodePoint(*nParam, abUtf8Buf);
-    Fog::Debug::GuardStack();
 }
 
 uint16_t * __fastcall UTF8_ConvertToWideChar(uint16_t * wszText, char * szText, int32_t nMaxWideChars) {
@@ -311,7 +304,6 @@ char * __fastcall WideCharToUTF8(char * pDest, uint16_t * pSrc, int nMaxBytes) {
 void __fastcall UTF8_GetEncodedLength(uint16_t * pwszStr, int32_t nMaxChars) {
     int32_t nEncBytes;
     uint8_t abUtf8Buf[12];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int nCharsProcessed = 0;
     uint16_t wCurChar = *pwszStr;
     while (true) {
@@ -331,8 +323,6 @@ void __fastcall UTF8_GetEncodedLength(uint16_t * pwszStr, int32_t nMaxChars) {
       nCharsProcessed++;
       wCurChar = *pwszStr;
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Compares two characters using UI character lookup table for case-insensitive comparison. If char < 0x100, maps via CharacterLookupTable, else uses raw value. Returns 1 if equal, 0 otherwise.

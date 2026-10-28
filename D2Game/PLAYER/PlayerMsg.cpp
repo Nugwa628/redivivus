@@ -92,7 +92,6 @@
 #include "D2Common/ITEMS/ItemMods.h"
 #include "D2Common/Unit/D2UnitDataItemStrc.h"
 #include "D2Game/D2Game.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -1418,7 +1417,6 @@ static D2SkillStrc * __stdcall GetDualSwingSkill(D2SkillStrc * pSkill, D2UnitStr
 // @sourcefile .\PLAYER\PlrMsg.cpp
 void __fastcall PLAYER_SendInventoryFullMessage(D2UnitStrc * pUnit) {
     D2Packet0x5aEventStructure local_30;
-    uint32_t nStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     local_30.nArgTypes = '\0';
     memset(local_30.szName1, 0, 16 * sizeof(local_30.szName1[0]));
     memset(local_30.szName2, 0, 16 * sizeof(local_30.szName2[0]));
@@ -1428,7 +1426,6 @@ void __fastcall PLAYER_SendInventoryFullMessage(D2UnitStrc * pUnit) {
     local_30.nMessageType = '\x0e';
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x73c);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5A_SYSTEMMSG(pClient, &local_30);
-    Fog::Debug::GuardStack();
 }
 
 // Validates player is alive, resolves dual-swing skill alternation via GetDualSwingSkill, checks skill usability (falling back to SKILL_Attack if skill has flag4 bit4 set and CanUseSkill returns 1-2 or 4). On success calls PLRMODES_MoveToLocation with the resolved skill mode; on mana-full sends inventory-full message. Returns SERVERSTATUS_OK or SERVERSTATUS_BAD_DATA.
@@ -1841,9 +1838,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x14_OverheadMessage(::SGAMEDATA * pGame
     uint32_t nHoverExpiryFrame;
     char szMessage[256];
     char szSenderName[16];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (0x10f < nSize - 4) {
-      Fog::Debug::GuardStack();
       return SERVERSTATUS_BAD_PARAMS;
     }
 
@@ -1851,7 +1846,6 @@ eD2ServerIncomingStatus __fastcall SCMD_0x14_OverheadMessage(::SGAMEDATA * pGame
     if (0 < (int)szMsgFiltered) {
       Storm::Source::SSTR::SStrCopy(szMessage, pPacket->szMsg, 0x100);
       if (0xff < (int)szMsgFiltered) {
-        Fog::Debug::GuardStack();
         return SERVERSTATUS_BAD_DATA;
       }
 
@@ -1886,7 +1880,6 @@ eD2ServerIncomingStatus __fastcall SCMD_0x14_OverheadMessage(::SGAMEDATA * pGame
       }
     }
 
-    Fog::Debug::GuardStack();
     return SERVERSTATUS_OK;
 }
 
@@ -2001,7 +1994,6 @@ eD2ServerIncomingStatus __fastcall SCMD_0x15_ChatMessage(::SGAMEDATA * pGame, D2
     D2ChatMessage pBuffer;
     D2Packet0x5aEventStructure sEventPacket;
     int32_t nErrorLine;
-    uint32_t nStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     memset(&pBuffer, 0, 0x113);
     pBuffer.nMessageId = pPacket->nCmd;
     pBuffer.nMessageType = pPacket->nMsgId;
@@ -2009,7 +2001,6 @@ eD2ServerIncomingStatus __fastcall SCMD_0x15_ChatMessage(::SGAMEDATA * pGame, D2
     Storm::Source::SSTR::SStrCopy(pBuffer.szMessage, (char*)&pPacket->nLocale, 0x100);
     uint32_t szFiltered = Storm::Source::SSTR::SStrLen((char*)&pPacket->nLocale);
     if (0xff < (int)szFiltered || (int)nSize <= (int)(szFiltered + 4)) {
-      Fog::Debug::GuardStack();
       return SERVERSTATUS_BAD_DATA;
     }
 
@@ -2084,7 +2075,6 @@ eD2ServerIncomingStatus __fastcall SCMD_0x15_ChatMessage(::SGAMEDATA * pGame, D2
 
               pSenderClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0xa46);
               GAME::SCmd::NET_D2GS_SERVER_Send_0x26_CHATSTART(pSenderClient, &local_37c);
-              Fog::Debug::GuardStack();
               return SERVERSTATUS_OK;
             }
 
@@ -2114,16 +2104,13 @@ eD2ServerIncomingStatus __fastcall SCMD_0x15_ChatMessage(::SGAMEDATA * pGame, D2
           *(uint32_t*)((char*)&sEventPacket.szName1 + 12) &= 0xffffff;
           pSenderClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", nErrorLine);
           GAME::SCmd::NET_D2GS_SERVER_Send_0x5A_SYSTEMMSG(pSenderClient, &sEventPacket);
-          Fog::Debug::GuardStack();
           return SERVERSTATUS_OK;
         }
 
-        Fog::Debug::GuardStack();
         return SERVERSTATUS_OK;
       }
     }
 
-    Fog::Debug::GuardStack();
     return SERVERSTATUS_OK;
 }
 
@@ -2146,7 +2133,6 @@ void __fastcall PrepareClientMessage(::SGAMEDATA * pGame, char * szMessage, uint
     }
 
     GAME::Server::ForEachClient(pGame, (fpForEachClientFn)NET_D2GS_SERVER_Send_0x26_Chat, &aPacketBuf);
-    Fog::Debug::GuardStack();
 }
 
 // Broadcasts a pre-built 0x26 chat packet (pointed to by pdwParam as uint32_t array) to all clients in the game. dwParam is packed into the packet color/locale byte. Wraps ForEachClient with NET_D2GS_SERVER_Send_0x26_Chat callback.
@@ -2167,7 +2153,6 @@ void __fastcall CHAT_BroadcastMessageToAllClients(::SGAMEDATA * pGame, uint32_t 
 
     aPacketBuf.nLanguage = '\0';
     GAME::Server::ForEachClient(pGame, (fpForEachClientFn)NET_D2GS_SERVER_Send_0x26_Chat, &aPacketBuf);
-    Fog::Debug::GuardStack();
 }
 
 // Iterates all clients in pGame via ForEachClient, broadcasting a 0x5A EventMessages packet built from nParam (pointer to message data). First measures the embedded character name string (capped at 16 chars); skips broadcast if name exceeds that limit. Side-effect: sends to every player in the game session.
@@ -4605,7 +4590,6 @@ void __fastcall PLAYERMSG_BroadcastPlayerSlain(::SGAMEDATA * pGame, D2UnitStrc *
     D2Packet0x5aEventStructure packet0x5a;
     char szKillerNameTmp[16];
     int32_t nLine;
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (pVictim && pVictim->eUnitType == UNIT_PLAYER) {
       if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
         pOwnerUnit = Ai::AiGeneral::GetOwnerUnit(pUnit);
@@ -4663,7 +4647,6 @@ void __fastcall PLAYERMSG_BroadcastPlayerSlain(::SGAMEDATA * pGame, D2UnitStrc *
       }
 
       BroadcastEventMessage(pGame, &packet0x5a);
-      Fog::Debug::GuardStack();
       return;
     }
 

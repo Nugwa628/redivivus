@@ -51,7 +51,7 @@ namespace D2Game::PLAYER::PlayerSave2 {
 // Provenance: asm 00568d60..00568d69; unreferenced in 1.14d.
 __time32_t __stdcall PLRSAVE_GetTime32(__time32_t * pTime);
 int32_t __fastcall FindEndOfString(char * szString, int32_t nMaxSize);
-void __stdcall PLAYERSAVE2_LoadOldSavegame_ReturnZero();
+int __stdcall PLAYERSAVE2_LoadOldSavegame_ReturnZero();
 // Returns the 1-based index of the carried item matching nItemGUID in the player's inventory list, by iterating INVENTORY_GetFirstItem/GetNextItem/GetCarriedItem. Returns 0 if GUID is -1, inventory is null, or item not found. Halts with an internal error if the index would exceed 0x7FFE.
 int16_t __fastcall GetItemIndexInList(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nItemGUID);
 void __fastcall SaveMercData(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2SaveFileHeaderStrc * pSaveHeader);

@@ -151,7 +151,7 @@ void __fastcall D2WINTEXTBOX_ClearAllLines(::D2WinTextBox * pTextBox) {
     pTextBox->sStyleControl.dwSizeY = 0;
 }
 
-void __fastcall D2WINTEXTBOX_SetLinePadding(::D2WinTextBox * pnTextBox, int32_t nPadLeft, int32_t nPadding) {
+int __fastcall D2WINTEXTBOX_SetLinePadding(::D2WinTextBox * pnTextBox, int32_t nPadLeft, int32_t nPadding) {
     if (!pnTextBox) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfa);
       exit(-1);
@@ -163,12 +163,12 @@ void __fastcall D2WINTEXTBOX_SetLinePadding(::D2WinTextBox * pnTextBox, int32_t 
 
       pnTextBox->nExtraLineSpacingC = nPadding;
       pnTextBox->nExtraLineSpacingB = nPadLeft;
-      return;
+      return 1;
     }
 }
 
 // @sourcefile .\Src\D2WinTextBox.cpp
-void __fastcall D2WINTEXTBOX_SetLineCellTextW(::D2WinTextBox * pnTextBox, uint16_t * wszText, int32_t nRow, int32_t nCol) {
+int __fastcall D2WINTEXTBOX_SetLineCellTextW(::D2WinTextBox * pnTextBox, uint16_t * wszText, int32_t nRow, int32_t nCol) {
     int nLineNode;
     uint16_t* wszAllocDst;
     int nCurLineNode;
@@ -192,7 +192,7 @@ void __fastcall D2WINTEXTBOX_SetLineCellTextW(::D2WinTextBox * pnTextBox, uint16
       if (0 < nRow) {
         do {
           if (!nCurLineNode) {
-            return;
+            return 1;
           }
 
           nCurLineNode = *(int*)(nCurLineNode + 0x1c);
@@ -200,7 +200,7 @@ void __fastcall D2WINTEXTBOX_SetLineCellTextW(::D2WinTextBox * pnTextBox, uint16
         } while (nLineNode < nRow);
       }
       if (!nCurLineNode) {
-        return;
+        return 1;
       }
       if (*(int*)(nCurLineNode + nCol * 4)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x20f);
@@ -213,7 +213,7 @@ void __fastcall D2WINTEXTBOX_SetLineCellTextW(::D2WinTextBox * pnTextBox, uint16
       wszAllocDst = (uint16_t*)Fog::Memory::AllocClientMemory(nLine_00 * 2 + 2, ".\\Src\\D2WinTextBox.cpp", nLine, nZero);
       *(uint16_t**)(nCurLineNode + nCol * 4) = (uint16_t*)wszAllocDst;
       D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszAllocDst, wszLocalBuf);
-      return;
+      return 1;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1fa);
       exit(-1);
@@ -1472,7 +1472,7 @@ BOOL __fastcall SetText(::D2WinTextBox * pTextBox, uint16_t * szText, int32_t nL
 }
 
 // @sourcefile .\Src\D2WinTextBox.cpp
-void __fastcall D2WINTEXTBOX_AddLines(::D2WinTextBox * pnParam, uint16_t * wszText, int nRepeatCount, int32_t nLineStyle, bool bIndent) {
+int __fastcall D2WINTEXTBOX_AddLines(::D2WinTextBox * pnParam, uint16_t * wszText, int nRepeatCount, int32_t nLineStyle, bool bIndent) {
     uint32_t* pNewEntry;
     uint16_t* pAllocedText;
     int32_t nLine;
@@ -1510,12 +1510,12 @@ void __fastcall D2WINTEXTBOX_AddLines(::D2WinTextBox * pnParam, uint16_t * wszTe
         } while (nRepeatCount);
       }
       if (!pnParam->pScrollbar) {
-        return;
+        return 1;
       }
 
       nLine = D2WINTEXTBOX_GetVisibleLineCount(pnParam);
       D2WinScrollbar::D2WINSCROLLBAR_SetMaxValue(pnParam->pScrollbar, pnParam->sStyleControl.dwSizeX - nLine);
-      return;
+      return 1;
     }
 }
 

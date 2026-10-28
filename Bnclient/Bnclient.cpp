@@ -21,7 +21,6 @@
 #include "Storm/_unnamespaced.h"
 #include "globals/globals.h"
 #include "Bnclient/Bnet.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -41,7 +40,6 @@ char __fastcall D2FILE_VerifyFileSignature(LPCSTR szText) {
     char cVar2;
     int iVar3;
     char szSignerOrg[512];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int32_t dwWinTrustResult = D2FILE_VerifySignatureWinTrust(szText);
     if (!dwWinTrustResult) {
       bVar1 = D2FILE_GetSignerOrganization(szText, szSignerOrg, 0x200);
@@ -54,7 +52,6 @@ char __fastcall D2FILE_VerifyFileSignature(LPCSTR szText) {
       cVar2 = '\0';
     }
 
-    Fog::Debug::GuardStack();
     return cVar2;
 }
 
@@ -66,7 +63,6 @@ int32_t __fastcall D2FILE_VerifySignatureWinTrust(LPCSTR szText) {
     D2WinTrustData sWvtData;
     D2WinTrustFileInfo sWvtFileInfo;
     GUID sActionGuid;
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (szText && *szText != '\0') {
       /* int cchWideChar for MultiByteToWideChar */ /* LPWSTR lpWideCharStr for MultiByteToWideChar */ /* int cbMultiByte for MultiByteToWideChar */ /* LPCSTR lpMultiByteStr for MultiByteToWideChar */ /* DWORD dwFlags for MultiByteToWideChar */ /* UINT CodePage for MultiByteToWideChar */ nVerifyResult = MultiByteToWideChar(0, 0, szText, -1, (LPWSTR)0x0, 0);
       if (0 < (int)nVerifyResult) {
@@ -115,13 +111,11 @@ int32_t __fastcall D2FILE_VerifySignatureWinTrust(LPCSTR szText) {
         }
 
         Fog::Engine::Application::MISC_OperatorDeleteShim(pWideStr);
-        Fog::Debug::GuardStack();
         return nVerifyResult;
       }
     }
 
     nVerifyResult = 4;
-    Fog::Debug::GuardStack();
     return nVerifyResult;
 }
 
@@ -473,7 +467,6 @@ void CACHE_BuildFilePath(LPSTR szText) {
 // Closes and deletes the Fog cache file. Closes ghCacheFileHandle if open, builds cache file path to %APPDATA%\Blizzard Entertainment\Diablo II\bncache.dat, and deletes it via DeleteFileA.
 void __stdcall CACHE_DeleteFile() {
     char szFilePath[260];
-    uint32_t uStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (ghCacheFileHandle != (HANDLE)-1) {
       /* HANDLE hObject for CloseHandle */ CloseHandle(ghCacheFileHandle);
       ghCacheFileHandle = (HANDLE)-1;
@@ -482,7 +475,6 @@ void __stdcall CACHE_DeleteFile() {
     szFilePath[0] = '\0';
     CACHE_BuildFilePath(szFilePath);
     /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(szFilePath);
-    Fog::Debug::GuardStack();
 }
 
 // @sourcefile .\BnSend.cpp
@@ -518,13 +510,11 @@ void __fastcall NET_SID_CLIENT_SetupIDEAKey(int32_t nKeyScheduleIdx, int32_t bEn
     *(uint32_t*)((char*)&aUserKey + 12) = pdwKeyMaterial[3];
     if (bEncryptMode) {
       _net_sid::NET_SID_CLIENT_IDEAExpandKey(aUserKey, (uint16_t*)(g_IDEAKeySchedules + nKeyScheduleIdx * 0x68));
-      Fog::Debug::GuardStack();
       return;
     }
 
     _net_sid::NET_SID_CLIENT_IDEAExpandKey(aUserKey, aKeyScheduleBuf);
     _net_sid::NET_SID_CLIENT_IDEAInvertKey(aKeyScheduleBuf, (uint16_t*)(g_IDEAKeySchedules + nKeyScheduleIdx * 0x68));
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall SRP_DestroyContext(D2Srp * * ppContext) {

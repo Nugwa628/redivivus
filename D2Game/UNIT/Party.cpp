@@ -326,7 +326,7 @@ static BOOL CheckUnitGUIDInAllPartyControlSubs(int32_t nUnitGUID, D2UnitPartyCon
 
 // Adds a player unit to an existing party slot identified by nPartyId. Searches pGame->pPartyControl->pSub for the matching party, allocates a new D2UnitPartyControlSubSub node with the unit's GUID, prepends it to the party's member list, broadcasts 0x8D (AssignPlayerToParty), and clears hostile relations between the newcomer and all existing members. Returns 1 on success. Halts with an internal error if the party control, party slot, or unit is invalid.
 // @sourcefile .\UNIT\Party.cpp
-void __stdcall PARTY_AddUnitToParty(::SGAMEDATA * pGame, int16_t nPartyId, D2UnitStrc * pUnit, int32_t nLine) {
+int __stdcall PARTY_AddUnitToParty(::SGAMEDATA * pGame, int16_t nPartyId, D2UnitStrc * pUnit, int32_t nLine) {
     D2UnitPartyControlSubSub* pNewSubSub;
     D2UnitStrc* pExistingMember;
     D2UnitPartyControlSub* pFoundSub;
@@ -355,7 +355,7 @@ void __stdcall PARTY_AddUnitToParty(::SGAMEDATA * pGame, int16_t nPartyId, D2Uni
       } else {
         bAlreadyInParty = CheckUnitGUIDInAllPartyControlSubs(nUnitGUID, pFoundSub);
         if (bAlreadyInParty) {
-          return;
+          return 1;
         }
 
         pNewSubSub = D2_NEW_POOL_AT(pGame->pMemoryPool, D2UnitPartyControlSubSub, ".\\UNIT\\Party.cpp", 0x108);
@@ -373,7 +373,7 @@ void __stdcall PARTY_AddUnitToParty(::SGAMEDATA * pGame, int16_t nPartyId, D2Uni
             }
           }
 
-          return;
+          return 1;
         }
       }
     }

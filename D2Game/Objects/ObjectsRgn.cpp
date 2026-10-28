@@ -264,12 +264,10 @@ void __thiscall SendDebugMessageToEveryone(void * pThis, char * pMessage) {
     *(uint8_t*)((char*)&nMsgBuf.nUnitGUID + 3) = 2;
     *(uint8_t*)((char*)&nMsgBuf.nUnitGUID + 1) = 1;
     GAME::Server::ForEachClient((::SGAMEDATA*)pThis, (fpForEachClientFn)Send_0x26_Chat, &nMsgBuf);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall Debug(::SGAMEDATA * pGame) {
     char szMsgBuf[128];
-    uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2ObjectControlStrc* nSecurityCookie2 = pGame->pObjectControl;
     int nGroupIdx = 1;
     short int* pObjectTypeCount = nSecurityCookie2->aObjectTypeCount;
@@ -287,7 +285,6 @@ void __fastcall Debug(::SGAMEDATA * pGame) {
     SendDebugMessageToEveryone(pGame, szMsgBuf);
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szMsgBuf, "%d rooms tried to place 1+ group(s); %d rooms w/no objs\n", (uint32_t)(uint16_t)nSecurityCookie2->aObjectTypeCount[0x61], (uint32_t)(uint16_t)nSecurityCookie2->aObjectTypeCount[0]);
     SendDebugMessageToEveryone(pGame, szMsgBuf);
-    Fog::Debug::GuardStack();
 }
 
 // @sourcefile .\OBJECTS\objrgn.cpp

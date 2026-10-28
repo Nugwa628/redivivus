@@ -37,11 +37,19 @@ What is rewritten, and why each is exact:
   __attribute__((noinline)) ->  __declspec(noinline)
   extern "C" __stdcall T f( ->  extern "C" T __stdcall f(
       GCC takes a calling convention before the return type; MSVC only after.
-  __thiscall                ->  (removed)
+  T __thiscall f(A a, B b)  ->  T __fastcall f(A a, int, B b)
+  T (__thiscall *p)(A, B)   ->  T (__fastcall *p)(A, int, B)
+  f(a, b)  /  x->p(a, b)    ->  f(a, 0, b)  /  x->p(a, 0, b)
       The tree spells __thiscall on free functions that take the receiver as
       their first parameter, and on the pointer types that hold them; gcc
       passes it in ECX, VC8 accepts the keyword only on member functions
-      (C3865). A member is __thiscall without it.
+      (C3865). __fastcall with an unused int second parameter is the same
+      callee: receiver in ECX, the rest on the stack, popped by the callee.
+      A caller pays one `xor edx, edx` it did not have, but pushed the
+      receiver and cleaned up the stack before, so it matched neither way.
+      Calls are rewritten by name (thiscall_names); a name also declared
+      without __thiscall with the same parameter count is left stripped, as
+      __thiscall was before: compiled as __cdecl.
   constructors of a struct that is a union member  ->  (blanked)
       C++03 forbids them (C2620). The generator adds converting constructors
       to small by-value structs as decompilation conveniences; the original's
@@ -90,6 +98,14 @@ TEMPLATE_STATIC_DECL = re.compile(r'^template\s*<>\s*[^;=(){}]*::\w+\s*(?:\[[^\]
 BINARY = re.compile(r'\b0[bB]([01]+)([uUlL]*)\b')
 CXX_ATTR = re.compile(r'\[\[\s*[A-Za-z_][\w:]*(?:\([^)]*\))?\s*\]\]\s*')
 THISCALL = re.compile(r'\b__thiscall\b[ \t]*')
+QUAL = r'(?:[A-Za-z_]\w*(?:<[^;{}()<>]*>)?::)*'
+THISCALL_FN = re.compile(r'\b__thiscall(\s+' + QUAL + r'([A-Za-z_]\w*)\s*)\(')
+THISCALL_PTR = re.compile(r'\(\s*__thiscall(\s*\*\s*([A-Za-z_]\w*)?\s*\)\s*)\(')
+OTHER_FN = re.compile(r'^[ \t]*(?:template\s*<>\s*)?(?!(?:return|else|new|delete|case|throw|goto|sizeof)\b)'
+                      r'(?:::)?[A-Za-z_][\w:<>, ]*?[\s*&]+(?:__(?:cdecl|stdcall|fastcall)\s+)?' + QUAL +
+                      r'([A-Za-z_]\w*)\s*\(', re.M)
+OTHER_PTR = re.compile(r'[\w*&>][ \t]*\(\s*(?:__(?:cdecl|stdcall|fastcall)\s*)?\*\s*([A-Za-z_]\w*)\s*\)\s*\(')
+THISCALL_TYPEDEF = re.compile(r'\btypedef\b[^;]*?\(\s*__thiscall\s*\*\s*([A-Za-z_]\w*)\s*\)\s*\(')
 NOINLINE = re.compile(r'__attribute__\s*\(\(\s*noinline\s*\)\)')
 CONV_FIRST = re.compile(r'\b(__stdcall|__cdecl|__fastcall|__thiscall)\s+'
                         r'((?:const\s+|struct\s+|unsigned\s+|signed\s+)*[A-Za-z_][\w:]*(?:\s*\*+)?)\s+'
@@ -304,6 +320,120 @@ def rewrite_list_inits(s, types):
     return ''.join(out)
 
 
+def _arg_commas(s, open_idx, angle=False):
+    """(top-level comma indices, index of the closing paren) of the
+    parenthesised list at s[open_idx]; with `angle`, <> nest too (a
+    parameter list, where they are template arguments)."""
+    commas, depth, i = [], 0, open_idx
+    opens, closes = ('([{<', ')]}>') if angle else ('([{', ')]}')
+    while i < len(s):
+        k = _skip_literal(s, i)
+        if k is not None:
+            i = k
+            continue
+        c = s[i]
+        if c in opens:
+            depth += 1
+        elif c in closes and not (c == '>' and s[i - 1] == '-'):
+            depth -= 1
+            if depth == 0:
+                return commas, i
+        elif c == ',' and depth == 1:
+            commas.append(i)
+        i += 1
+    return commas, -1
+
+
+def _arg_count(s, open_idx, angle=False):
+    commas, close = _arg_commas(s, open_idx, angle)
+    if close < 0:
+        return -1
+    inner = s[open_idx + 1:close].strip()
+    return 0 if inner in ('', 'void') else len(commas) + 1
+
+
+def thiscall_names(texts):
+    """(functions, pointers): name -> parameter counts of the functions and
+    the pointer fields declared __thiscall, less any count the same name
+    also has declared otherwise - a call to that one cannot be told apart."""
+    funcs, ptrs, other_f, other_p, typedefs = {}, {}, {}, {}, {}
+    for s in texts:
+        for m in THISCALL_FN.finditer(s):
+            funcs.setdefault(m.group(2), set()).add(_arg_count(s, m.end() - 1, True))
+        for m in THISCALL_PTR.finditer(s):
+            n = _arg_count(s, m.end() - 1, True)
+            if m.group(2):
+                ptrs.setdefault(m.group(2), set()).add(n)
+        for m in THISCALL_TYPEDEF.finditer(s):
+            typedefs[m.group(1)] = _arg_count(s, s.index('(', m.end() - 1), True)
+        for m in OTHER_FN.finditer(s):
+            if '__thiscall' not in m.group(0):
+                other_f.setdefault(m.group(1), set()).add(_arg_count(s, m.end() - 1, True))
+        for m in OTHER_PTR.finditer(s):
+            other_p.setdefault(m.group(1), set()).add(_arg_count(s, m.end() - 1, True))
+    if typedefs:
+        field = re.compile(r'\b(' + '|'.join(map(re.escape, typedefs)) + r')\s+([A-Za-z_]\w*)\s*;')
+        for s in texts:
+            for m in field.finditer(s):
+                ptrs.setdefault(m.group(2), set()).add(typedefs[m.group(1)])
+    funcs = {k: v - other_f.get(k, set()) - {0, -1} for k, v in funcs.items()}
+    ptrs = {k: v - other_p.get(k, set()) - other_f.get(k, set()) - {0, -1} for k, v in ptrs.items()}
+    return {k: v for k, v in funcs.items() if v}, {k: v for k, v in ptrs.items() if v}
+
+
+def _insert_second(s, open_idx, text, counts, angle):
+    """s with `text` added as the second item of the list at s[open_idx] when
+    its item count is in `counts`, else None."""
+    commas, close = _arg_commas(s, open_idx, angle)
+    if close < 0 or _arg_count(s, open_idx, angle) not in counts:
+        return None
+    at = commas[0] if commas else close
+    return s[:at] + ', ' + text + s[at:]
+
+
+def rewrite_thiscall(s):
+    """__thiscall declarations, pointer types and the calls through them as
+    __fastcall with an unused int second parameter (see the docstring)."""
+    for rx, names in ((THISCALL_FN, THISCALL_FUNCS), (THISCALL_PTR, THISCALL_PTRS)):
+        pos = 0
+        while True:
+            m = rx.search(s, pos)
+            if not m:
+                break
+            name = m.group(2)
+            new = _insert_second(s, m.end() - 1, 'int', names.get(name, ()), True) if name else None
+            if new is None and rx is THISCALL_PTR and not name:   # a cast or an unnamed parameter
+                new = _insert_second(s, m.end() - 1, 'int', range(1, 64), True)
+            if new is None:
+                s = s[:m.start()] + s[m.start():m.end()].replace('__thiscall', '', 1).lstrip() + s[m.end():] \
+                    if rx is THISCALL_FN else s[:m.start()] + '(' + m.group(1) + '(' + s[m.end():]
+                pos = m.start() + 1
+                continue
+            s = new[:m.start()] + new[m.start():].replace('__thiscall', '__fastcall', 1)
+            pos = m.end()
+    calls = [(r'(?<![\w.>])(' + '|'.join(map(re.escape, THISCALL_FUNCS)) + r')\s*\(', THISCALL_FUNCS)] if THISCALL_FUNCS else []
+    if THISCALL_PTRS:
+        ptrs = '|'.join(map(re.escape, THISCALL_PTRS))
+        calls.append((r'(?:->|\.)\s*(' + ptrs + r')\s*\(', THISCALL_PTRS))
+        calls.append((r'\(\s*\*\s*(' + ptrs + r')\s*\)\s*\(', THISCALL_PTRS))    # (*pfn)(...), pfn a local
+    for pat, names in calls:
+        rx, pos = re.compile(pat), 0
+        while True:
+            m = rx.search(s, pos)
+            if not m:
+                break
+            pos = m.end()
+            head = s[max(0, m.start() - 200):m.start()]
+            head = re.sub(r'(?:::)?' + QUAL + r'$', '', head) if names is THISCALL_FUNCS else ''
+            if re.search(r'(?:[\w>]\s*[*&]*|(?<!&)[*&])\s*$', head) and \
+                    not re.search(r'\b(?:return|else|case|throw)\s*$', head):
+                continue                  # a declaration or definition, not a call
+            new = _insert_second(s, m.end() - 1, '0', names[m.group(1)], False)
+            if new is not None:
+                s = new
+    return s
+
+
 def strip_ctors(s, names):
     """Blank every constructor of the named structs, keeping the line count."""
     out, pos = [], 0
@@ -330,6 +460,8 @@ def strip_ctors(s, names):
 
 
 STRIP_CTORS = set()   # filled by mirror()'s pre-pass
+THISCALL_FUNCS = {}   # likewise: __thiscall function name -> its parameter counts
+THISCALL_PTRS = {}    # likewise: __thiscall pointer field name -> its parameter counts
 CONSTRUCT = set()     # likewise: list-initialised structs whose braces become constructor calls
 
 
@@ -431,6 +563,8 @@ def translate(text, rel=''):
         s = TEMPLATE_STATIC_DECL.sub('', s)
     s = BINARY.sub(lambda m: hex(int(m.group(1), 2)) + m.group(2), s)
     s = CXX_ATTR.sub('', s)
+    if '__thiscall' in s or (THISCALL_FUNCS and any(n in s for n in THISCALL_FUNCS)) or THISCALL_PTRS:
+        s = rewrite_thiscall(s)
     s = THISCALL.sub('', s)
     s = CONV_FIRST.sub(lambda m: '%s %s %s(' % (m.group(2), m.group(1), m.group(3)), s)
     if STRIP_CTORS and any(n in s for n in STRIP_CTORS):
@@ -479,6 +613,11 @@ def mirror(root, out, quarantine=None):
             texts[(rel, name)] = f.read()
     strip, construct = ctor_struct_classes([t for (r, n), t in texts.items() if n.endswith('.h')],
                                            [t for (r, n), t in texts.items() if not n.endswith('.h')])
+    funcs, ptrs = thiscall_names([without_non_win32(t) for t in texts.values()])
+    THISCALL_FUNCS.clear()
+    THISCALL_FUNCS.update(funcs)
+    THISCALL_PTRS.clear()
+    THISCALL_PTRS.update(ptrs)
     STRIP_CTORS.clear()
     STRIP_CTORS.update(strip)
     CONSTRUCT.clear()

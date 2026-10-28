@@ -82,7 +82,6 @@
 #include "globals/globals.h"
 #include "D2Client/UNIT/Missile.h"
 #include "D2Common/ITEMS/ItemMods.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 #include "Fog/Src/Safesock.h"
 
@@ -119,8 +118,6 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
     uint8_t aCompIndices[17];
     bool bIsSlotDuplicate;
     D2SeedStrc sSeedNext;
-    uint32_t nSecurityCookie;
-    nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!pSeed) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa0);
       exit(-1);
@@ -185,7 +182,6 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
                 byCompCount = aCompIndices[1];
               } else {
                 if ((int)nEligibleComps < 2) {
-                  Fog::Debug::GuardStack();
                   return;
                 }
 
@@ -312,7 +308,6 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
         }
       }
 
-      Fog::Debug::GuardStack();
       return;
     }
 }

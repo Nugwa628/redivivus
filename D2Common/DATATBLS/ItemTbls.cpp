@@ -31,7 +31,6 @@
 #include "globals/globals.h"
 #include "Bnclient/BNGatewayAccess.h"
 #include "D2Common/D2Common.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -94,9 +93,7 @@ void __fastcall ITEMTBLS_CompileItemCodeExpression(char * szExpression, char * p
     size_t nParsedLen;
     int32_t nFieldLen;
     uint8_t szWorkBuf[1024];
-    uint32_t nGuardCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!pRecord) {
-      Fog::Debug::GuardStack();
       return;
     }
     if (szExpression) {
@@ -104,7 +101,6 @@ void __fastcall ITEMTBLS_CompileItemCodeExpression(char * szExpression, char * p
       if (0 < (int)nParsedLen) {
         nFieldLen = DataTbls::DATATBLS_AppendDataToBuffer(&sgtDataTable.pItemsCode, &sgtDataTable.nItemsCodeSize, &sgtDataTable.nItemsCodeCapacity, szWorkBuf, nParsedLen);
         *(int32_t*)(pRecord + nOffset) = nFieldLen;
-        Fog::Debug::GuardStack();
         return;
       }
     }
@@ -114,7 +110,6 @@ void __fastcall ITEMTBLS_CompileItemCodeExpression(char * szExpression, char * p
     pcVar1[1] = -1;
     pcVar1[2] = -1;
     pcVar1[3] = -1;
-    Fog::Debug::GuardStack();
 }
 
 // Loads and compiles items.txt into the engine's runtime ItemsTxt table. Builds the ~194-field D2BinFieldInputStrc schema (code/version/type/damage/req/inv/vendor min-max/quality columns, with code/string/sound/stat/state link resolvers and calc-string compilers), then compiles the weapons, armor and misc .txt files separately and memcpy-merges them into one contiguous sgpTxtItems array (sgpTxtWeapons/sgpTxtArmor/sgpTxtMisc point into it). Registers each item code in the items code link (FillUpTxtLinkSub0x08) unless bUseTxt, saves the itemscode bin, and builds sgpTxtItemsVersion: a short index table of all rows whose version==0 (classic items). __fastcall(pMemory).
@@ -4453,7 +4448,7 @@ D2GambleTableStrc * __stdcall GetGambleTableSize() {
 }
 
 // Breadth-first traversal of the itemtypes.txt equiv1/equiv2 parent-type tree to test whether nItemTypeId is a subtype of nTargetTypeId. Returns 1 if nTargetTypeId &lt; 1 (wildcard), 1 if target found in the type hierarchy, 0 if out-of-range or stack depth exceeds 124. Used by item-type membership checks.
-BOOL ITEMTBLS_CheckItemTypeRecursive(int32_t nItemTypeId, int32_t nTargetTypeId) {
+BOOL __fastcall ITEMTBLS_CheckItemTypeRecursive(int32_t nItemTypeId, int32_t nTargetTypeId) {
     int nNewStackSize;
     int anTypeStack[128];
     short int wEquiv2;
@@ -4740,16 +4735,13 @@ void __stdcall ITEMTBLS_FreeItemTypes() {
 static BOOL __stdcall ITEMTBLS_CheckIfDataFileExists(char * szFileExt, D2PoolManagerStrc * pPoolManagerStrc, char * szFileName) {
     D2MPQFileStrc* pFile;
     char szFilePath[260];
-    uint32_t nStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\%s%s", "DATA\\GLOBAL\\EXCEL", szFileName, szFileExt);
     BOOL fFileExistsCheck = DataTbls::CheckIfFileExists(pPoolManagerStrc, szFilePath, &pFile, 1);
     if (!fFileExistsCheck) {
-      Fog::Debug::GuardStack();
       return 0;
     }
 
     D2FILE_CloseFile(pPoolManagerStrc, pFile);
-    Fog::Debug::GuardStack();
     return 1;
 }
 

@@ -409,7 +409,7 @@ static void __stdcall ITEMMOD_MaximizeStatForEnhanced(eD2UnitStat eEnhancedProp,
 }
 
 // Scales stat values by shifting left 8 bits for specific stat types (life, mana, stamina, resistances). Twenty-eight bytes: an ADD, a jump table and a shift through ECX, touching EDX not at all. PropertyFunc_MinMaxDamagePair loads the max-stat code into EDX before calling this and reads it back afterwards, so declaring EDX killed lost the code and every elemental and poison MAX damage value was scaled with garbage.
-static void ITEMMOD_ScaleValueForStatType(int * pnParam, eD2UnitStat eStatType) {
+static void __stdcall ITEMMOD_ScaleValueForStatType(int * pnParam, eD2UnitStat eStatType) {
     switch (eStatType) {
       case UNITSTAT_hitpoints:
 

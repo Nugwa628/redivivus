@@ -58,7 +58,7 @@ int __stdcall EDITBOX_Cb_COMCALLBACK_ClearChannelUserList(void * pUnknown) {
     return 1;
 }
 
-static void COMCALLBACK_HandleBannerAdFile(uint32_t * pBannerAdData) {
+static int COMCALLBACK_HandleBannerAdFile(uint32_t * pBannerAdData) {
     // Static local variables (originally global data)
     static char lpFileName_00798e30[260] = {}; D2_STATIC_GUARD(lpFileName_00798e30, "D2Multi::ComCallback::COMCALLBACK_HandleBannerAdFile::lpFileName_00798e30");
 
@@ -99,6 +99,7 @@ static void COMCALLBACK_HandleBannerAdFile(uint32_t * pBannerAdData) {
     ghBannerAdProcess = *pBannerAdData;
     D2_FREE_AT((void*)pBannerAdData[2], ".\\Src\\ComCallback.cpp", 0x386);
     D2_FREE_AT((void*)pBannerAdData[3], ".\\Src\\ComCallback.cpp", 0x387);
+    return 1;
 }
 
 // Returns gszCurrentChannelName, the name of the chat channel last joined (copied there by the "You have joined channel: %s" handler COMCALLBACK_HandleChannelError).
@@ -775,7 +776,7 @@ BOOL __stdcall COMCALLBACK_ValidateGameJoinability() {
     return 1;
 }
 
-void __fastcall PrintChannelText(uint32_t dwParam, char * szText, int32_t nColor) {
+int __fastcall PrintChannelText(uint32_t dwParam, char * szText, int32_t nColor) {
     int i;
     uint16_t wszText[576];
     uint16_t* pStr = wszText;
@@ -788,6 +789,7 @@ void __fastcall PrintChannelText(uint32_t dwParam, char * szText, int32_t nColor
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszText, szText, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(wszText);
     ChatDlg::CHATDLG_AppendTextToTextBox_ForComCallback(wszText, nColor);
+    return 1;
 }
 
 static void __stdcall COMCALLBACK_AppendChatWithUser(uint32_t dwParam, char * szUsername, char * szMessage, char * dwToTarget, int32_t nColor) {

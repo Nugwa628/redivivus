@@ -8,7 +8,6 @@
 #include "Storm/Source/SSTR.h"
 #include "Storm/_unnamespaced.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -110,7 +109,7 @@ void __fastcall DRAW_ConvertPaletteRGBtoHSL(D2HSLColorStrc * pHSLOut, uint8_t * 
 }
 
 // No register arguments: EAX is first written by FNSTSW AX at 00604fee and only carries the x87 status word (1.14d asm).
-double DRAW_GetHueSector(double m1, double m2, double dHue) {
+double __stdcall DRAW_GetHueSector(double m1, double m2, double dHue) {
     if (360.0 < dHue) {
       dHue -= 360.0;
     }
@@ -251,7 +250,6 @@ BOOL __fastcall DRAW_LoadPaletteFromPCX(LPCSTR szFilePath) {
       /* LPCSTR lpOutputString for OutputDebugStringA */ OutputDebugStringA("Unable to open ");
       /* LPCSTR lpOutputString for OutputDebugStringA */ OutputDebugStringA(szFilePath);
       /* LPCSTR lpOutputString for OutputDebugStringA */ OutputDebugStringA("\n");
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -275,7 +273,6 @@ BOOL __fastcall DRAW_LoadPaletteFromPCX(LPCSTR szFilePath) {
         } while (iPaletteEntry < 256);
 
         /* HANDLE hObject for CloseHandle */ CloseHandle(hFile);
-        Fog::Debug::GuardStack();
         return 1;
       }
 
@@ -286,7 +283,6 @@ BOOL __fastcall DRAW_LoadPaletteFromPCX(LPCSTR szFilePath) {
 
     OutputDebugStringA(lpOutputString);
     /* HANDLE hObject for CloseHandle */ CloseHandle(hFile);
-    Fog::Debug::GuardStack();
     return 0;
 }
 

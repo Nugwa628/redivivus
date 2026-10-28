@@ -6,7 +6,6 @@
 #include "Fog/Engine/Application.h"
 #include "Fog/File.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -107,11 +106,9 @@ int8_t __thiscall AddAttachment(::Report * pThis, char * szPath, int8_t bCopyToR
     char szPathCopy[1024];
     char cCh;
     uint32_t local_8;
-    local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     ::Report* pFileReg;
     pFileReg = pThis;
     if (0xf < pThis->nAttachmentCount) {
-      Debug::GuardStack();
       return '\0';
     }
     if (bCopyToReportDir == '\0') {
@@ -141,7 +138,6 @@ int8_t __thiscall AddAttachment(::Report * pThis, char * szPath, int8_t bCopyToR
         szPath = szPath + strlen(szPath) + 1;
         count_attachment:
         pFileReg->nAttachmentCount++;
-        Debug::GuardStack();
         return '\x01';
       }
     } else if (pThis->szReportDir[0] != '\0') {
@@ -179,12 +175,13 @@ int8_t __thiscall AddAttachment(::Report * pThis, char * szPath, int8_t bCopyToR
       }
     }
 
-    Debug::GuardStack();
     return '\0';
 }
 
 int32_t Printf(::Report * pThis, char * szFormat, ...) {
-    int nWritten = CRT_Vsprintf_L(pThis->pFile, (int)szFormat, (va_list)((uint8_t*)&szFormat + 4));
+    va_list __va;
+    va_start(__va, szFormat);
+    int nWritten = CRT_Vsprintf_L(pThis->pFile, (int)szFormat, __va);
     return nWritten;
 }
 

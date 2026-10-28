@@ -246,13 +246,14 @@ void __stdcall _TableNullSub24(uint32_t dwArg1, uint32_t dwArg2, uint32_t dwArg3
 
 }
 
-void __stdcall FreeServer() {
+int __stdcall FreeServer() {
     Clients::DeleteCriticalSections();
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&gQServerGameListCs);
     UNIT::sunitproxy::SUNITPROXY_FreeAllNpcItemTables();
     gpQServerGameState = 0;
     StartingAct = 0;
     QServerNextToken = 1;
+    return 1;
 }
 
 int32_t __fastcall SERVER_IsTokenValid(uint16_t nToken) {
@@ -399,7 +400,6 @@ void __stdcall GAME_SetForcedGameSeed(uint32_t dwForcedSeed) {
 BOOL __fastcall SetupGameChecks(int32_t nClientID2, D2GSMsg67GameLogonSPStrc * pMsg) {
     BOOL bGotPlayerName;
     char szPlayerName[16];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     eD2PlayerClassID byCharClassRaw = pMsg->ePlayerClass;
     eD2ArenaFlags dwGameFlags = pMsg->eArenaFlags;
     if (!BattleNetServerService || pMsg->eHostGameType == SGAMETYPE_BNET_HOST) {
@@ -411,7 +411,6 @@ BOOL __fastcall SetupGameChecks(int32_t nClientID2, D2GSMsg67GameLogonSPStrc * p
           if (bGotPlayerName) {
             bGotPlayerName = Clients::SERVER_IsPlayerCharacterInGame(pMsg->szCharName, szPlayerName);
             if (bGotPlayerName) {
-              Fog::Debug::GuardStack();
               return (uint32_t)(byCharClassRaw < CLASS_COUNT);
             }
           }
@@ -419,7 +418,6 @@ BOOL __fastcall SetupGameChecks(int32_t nClientID2, D2GSMsg67GameLogonSPStrc * p
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -666,7 +664,6 @@ BOOL __fastcall NET_D2GS_SERVER_IsValidChecks(int32_t nClientID, uint16_t nGameT
     uint32_t bNameValid;
     int iVar1;
     char szExistingPlayerName[16];
-    uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     BOOL bGotPlayerName = SCmd::STRING_CheckIfStringLengthDoNotExceedSize(pPlayerName, 0x10);
     if (bGotPlayerName && language < 0xe) {
       bGotPlayerName = Clients::NET_D2GS_SERVER_GetPlayerNameByClientId(nClientID, szExistingPlayerName);
@@ -686,12 +683,10 @@ BOOL __fastcall NET_D2GS_SERVER_IsValidChecks(int32_t nClientID, uint16_t nGameT
 
                 /* Here is the bnetserver server asked how to see/find the players token */ iVar1 = BattleNetServerService->fpFindPlayerToken((int)nGameToken, (void*)byRef1, (void*)byRef2, (void*)byRef3, (void*)byRef4, (void*)byRef5, (void*)byRef6);
                 if (!iVar1) {
-                  Fog::Debug::GuardStack();
                   return 0;
                 }
               }
 
-              Fog::Debug::GuardStack();
               return 1;
             }
           }
@@ -699,7 +694,6 @@ BOOL __fastcall NET_D2GS_SERVER_IsValidChecks(int32_t nClientID, uint16_t nGameT
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -890,15 +884,11 @@ void __fastcall SERVER_DisconnectClient(::SGAMEDATA * pGame, D2ClientStrc * pCli
       ServerCmd::NET_D2GS_SERVER_Send_0xB0_ConnectionTerminated(nClientId);
       D2Net::Game::Server::QSERVER_KillConnection(nClientId);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 BOOL __fastcall FindMe_6E_Handler(int32_t nParam) {
     char szPlayerName[16];
-    uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     BOOL bGotName = Clients::NET_D2GS_SERVER_GetPlayerNameByClientId(nParam, szPlayerName);
-    Fog::Debug::GuardStack();
     return (uint32_t)(bGotName != 0);
 }
 
@@ -1001,7 +991,6 @@ void __fastcall NET_D2GS_SERVER_ProcessClientMessage_System(char * pBytes, int32
           D2Net::Game::Server::NET_D2GS_SERVER_SendPacketToClient(2, nClientId, szSendBuffer, 0x10);
           D2Net::Game::Server::QSERVER_KillConnection(nClientId);
           /* LONG * lpAddend for InterlockedDecrement */ InterlockedDecrement((LONG*)&lpAddend_00883d64);
-          Fog::Debug::GuardStack();
           return;
           case -4:
             D2Net::Game::Server::NET_QServer_FindIpAddressByClientIdForQServer(nClientId, szSendBuffer + 0x10, 0x10);
@@ -1012,8 +1001,6 @@ void __fastcall NET_D2GS_SERVER_ProcessClientMessage_System(char * pBytes, int32
         }
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // PACKET RECEIVE ENTRY: Server processes incoming client packets.
@@ -1056,8 +1043,6 @@ void NET_D2GS_SERVER_HandleAnyIncomingPacket() {
 
       NET_D2GS_SERVER_ProcessClientMessage_System(pBytes, nSizeMode2);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // NOTE: Register params: pUnitHead (EAX): D2UnitStrc * *, pGame (EDI): SGAMEDATA *
@@ -1260,7 +1245,6 @@ static void UpdateClients(::SGAMEDATA * pGame) {
     char cAccountChar;
     D2ClientStrc* pClient;
     D2ClientStrc* pClientNext;
-    uint32_t dwStackGuard = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     uint32_t dwFrameMod8192 = pGame->dwGameFrame & 0x80001fff;
     bool bIs8192thFrame = !dwFrameMod8192;
     char* szCharNameLoop = 0;
@@ -1369,7 +1353,6 @@ static void UpdateClients(::SGAMEDATA * pGame) {
       }
     }
 
-    Fog::Debug::GuardStack();
     return;
 }
 
@@ -2113,7 +2096,6 @@ void __stdcall RequestHostedGames(int32_t nParam) {
     } while ((int)pTokenCursor < (uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken)));
 
     ServerCmd::SERVERCMD_SendBufferToClient(nParam, 0xffff, 0, "");
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_RequestHostedGames(int32_t nParam) {
@@ -2690,7 +2672,6 @@ void __stdcall QSERVER_BroadcastPlayerMessage(int32_t nMsgType, uint32_t dwEvent
 
       pTokenCursor++;
       if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
-        Fog::Debug::GuardStack();
         return;
       }
     } while (true);
@@ -2868,11 +2849,9 @@ BOOL __fastcall GAME_CheckIfGameNameExistsSafely(char * szGameName) {
 void __fastcall SetGameName(::SGAMEDATA * pGame, char * szGameName, uint32_t dwFlags) {
     char szDedupeName[16];
     char cScanChar;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     BOOL bNameAvailable = GAME_CheckIfGameNameExistsSafely(szGameName);
     if (bNameAvailable) {
       Storm::Source::SSTR::SStrCopy(pGame->szGameName, szGameName, 0x7fffffff);
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -2906,7 +2885,6 @@ void __fastcall SetGameName(::SGAMEDATA * pGame, char * szGameName, uint32_t dwF
     }
 
     Storm::Source::SSTR::SStrCopy(pGame->szGameName, szDedupeName, 0x7fffffff);
-    Fog::Debug::GuardStack();
 }
 
 // Server entry point called by the QServer when a client requests to join a game. Looks up the game token in DATA_LastGameServer under a critical section, locks the target game, creates the client record (CreateClient), and sends the game flags/state-1 packet. If BattleNet callbacks are registered, asynchronously requests the character data from the database (fpGetDatabaseCharacter) and returns; otherwise sends state-command 2 directly. On failure (game not found, client allocation failed) sends 0xB0 connection-terminated and kills the connection.
@@ -3267,7 +3245,6 @@ void __stdcall QSERVER_DisconnectClientFromGame(uint32_t nClientId) {
     char* szBufferInput;
     D2Packet0x5aEventStructure byPacketType;
     int32_t nCopyLen;
-    uint32_t dwStackGuard = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (nClientId) {
       nToken = D2Net::Game::Server::QSERVER_GetClientGameToken(nClientId);
       pGame = QSERVER_FindAndLockGame(nToken);
@@ -3295,8 +3272,6 @@ void __stdcall QSERVER_DisconnectClientFromGame(uint32_t nClientId) {
         Server::Unlock(pGame);
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Graceful player disconnect: saves all players (unless BNet with incomplete save), sends state 5 (leaving), sends pending save data (0xB3 for LAN/Open), sends state 6 (terminated), sends 0xB0 ConnectionTerminated, broadcasts 0x5A PlayerLeave event. If all clients gone, loops until empty. Sleeps 100ms for LAN/Open before closing socket.
@@ -3313,7 +3288,6 @@ void __fastcall NET_D2GS_SERVER_LeaveServer(uint32_t nClientId, int32_t bBroadca
       bIsInGame = Clients::IsClientInGame(pGame, nClientId);
       if (!bIsInGame) {
         Server::Unlock(pGame);
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -3376,8 +3350,6 @@ void __fastcall NET_D2GS_SERVER_LeaveServer(uint32_t nClientId, int32_t bBroadca
 
       D2Net::Game::Server::QSERVER_KillConnection(nClientId);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Removes a client from the server by token, cleaning up their connection state.
@@ -3408,7 +3380,7 @@ void __fastcall LeaveServer(::SGAMEDATA * pQServer, uint32_t nClientToken) {
     }
 }
 
-void __stdcall QSERVER_InitializeServerState() {
+int __stdcall QSERVER_InitializeServerState() {
     int nCount;
     Storm::Source::SReg::SRegLoadValue("Diablo II", "PlayerPos", 0, &gbQServerSendPlayerPos);
     ::SGAMEDATA** ppSVar1 = gaQServerGameByToken;
@@ -3420,6 +3392,7 @@ void __stdcall QSERVER_InitializeServerState() {
     Clients::QServerClearAll();
     D2Net::Game::Server::NET_SetQServerCallbackFunction((void*)QSERVER_ClientDisconnectCallback);
     UNIT::sunitproxy::SUNITPROXY_InitAllNpcItemTables();
+    return 1;
 }
 
 // Callback invoked when the character-server (CS) delivers save data for a joining client (JOIN step 3). Accumulates chunked save data; on completion with nCsResult==0 stores file-time fields into pClient and sends state-command 2 to advance the join sequence. On CS error or stale pClientContainer, triggers disconnect.

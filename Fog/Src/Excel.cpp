@@ -15,7 +15,6 @@
 #include "Storm/Source/SSTR.h"
 #include "Storm/Source/SSystem.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -417,13 +416,11 @@ int32_t __stdcall GetLinkNodeIndex(D2TxtLinkStrc * pLink, char * szItemCode, uin
     int nCmpResult;
     int32_t iVar1;
     uint8_t szUpperItemCode[32];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Storm::Source::SSTR::SStrCopy((char*)szUpperItemCode, szItemCode, 0x20);
     SMem::SMemStringToUppercase((char*)szUpperItemCode, 0x20);
     D2TxtLinkNodeStrc* pCurNode = pLink->pTxtLinkNode;
     if (!pLink->nRecords) {
       if (!pCurNode) {
-        Debug::GuardStack();
         return -1;
       }
     } else if (!pCurNode) {
@@ -435,7 +432,6 @@ int32_t __stdcall GetLinkNodeIndex(D2TxtLinkStrc * pLink, char * szItemCode, uin
       nCmpResult = strcmp((char*)szUpperItemCode, pCurNode->szText);
       if (!nCmpResult) {
         iVar1 = pCurNode->nLinkIndex;
-        Debug::GuardStack();
         return iVar1;
       }
       if (nCmpResult < 0) {
@@ -445,7 +441,6 @@ int32_t __stdcall GetLinkNodeIndex(D2TxtLinkStrc * pLink, char * szItemCode, uin
       }
     } while (pCurNode);
 
-    Debug::GuardStack();
     return -1;
 }
 
@@ -664,8 +659,6 @@ void __stdcall TXT_ParseDataAndPutIntoStructure(D2BinFieldExcelStrc * pBinFieldE
     bool bHasLinkFields;
     uint32_t dwCode;
     uint16_t nFieldMapIdx;
-    uint32_t dwSecurityCookie;
-    dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char* pCurrentRecord;
     pCurrentRecord = pRecord;
     if (!nLinesCount) {
@@ -880,7 +873,6 @@ void __stdcall TXT_ParseDataAndPutIntoStructure(D2BinFieldExcelStrc * pBinFieldE
         pCurDataPos = pBinFieldExcel->pDataStart;
         nLineIndex = 0;
         if ((int)pBinFieldExcel->nLinesCount < 1) {
-          Debug::GuardStack();
           return;
         }
 
@@ -1279,7 +1271,6 @@ void __stdcall TXT_ParseDataAndPutIntoStructure(D2BinFieldExcelStrc * pBinFieldE
           nLineIndex++;
           pCurDataPos = pDstChar + 1;
           if ((int)pBinFieldExcel->nLinesCount <= nLineIndex) {
-            Debug::GuardStack();
             return;
           }
         } while (true);

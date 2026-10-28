@@ -28,7 +28,6 @@
 #include "Fog/Src/ErrorManager.h"
 #include "Fog/Src/Excel.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -875,12 +874,12 @@ D2LevelsTxt * __stdcall TXT_Levels_GetLine(eD2LevelId eLevel) {
     return sgptDataTable->pTxtLevels + eLevel;
 }
 
-bool __stdcall LEVEL_CanHaveRain(eD2LevelId eLevel) {
+uint8_t __stdcall LEVEL_CanHaveRain(eD2LevelId eLevel) {
     if (!(0 < (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize)) {
-      return false;
+      return '\0';
     }
 
-    return (bool)sgptDataTable->pTxtLevels[eLevel].Rain;
+    return sgptDataTable->pTxtLevels[eLevel].Rain;
 }
 
 uint32_t __stdcall LVLTBLS_GetNoPer(uint32_t nParam) {
@@ -891,12 +890,12 @@ uint32_t __stdcall LVLTBLS_GetNoPer(uint32_t nParam) {
     return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)(nParam * 0x220 >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)sgptDataTable->pTxtLevels[nParam].NoPer);
 }
 
-bool __stdcall LEVEL_CanHaveMud(eD2LevelId eLevel) {
+uint8_t __stdcall LEVEL_CanHaveMud(eD2LevelId eLevel) {
     if (!(0 < (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize)) {
-      return false;
+      return '\0';
     }
 
-    return (bool)sgptDataTable->pTxtLevels[eLevel].Mud;
+    return sgptDataTable->pTxtLevels[eLevel].Mud;
 }
 
 void __stdcall LVLTBLS_FreeLevelsTxt() {
@@ -1229,7 +1228,6 @@ static void __fastcall LVLTBLS_FixPathSlashes(char * szText, char * szPathPrefix
     int i;
     char szFormatBuf[60];
     char cCurrent;
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char* pcScan = szText;
     pcScan = pcScan + strlen(pcScan) + 1;
     int pcSrc = (int)pcScan - (int)(szText + 1);
@@ -1255,8 +1253,6 @@ static void __fastcall LVLTBLS_FixPathSlashes(char * szText, char * szPathPrefix
         pcScan++;
       } while (cCurrent != '\0');
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Loads and compiles lvltypes.txt into the global pTxtLvlTypes / nTxtLvlTypesSize table. Builds a D2BinFieldInputStrc schema describing the row layout: 32 "File N" ASCII path fields (0x3b bytes each), plus Act (char) and Expansion (int), terminated by an END field; row stride 0x788. Calls CompileTxt to parse the txt via pMemory pool, then post-processes every row converting forward to back slashes in all 32 file-path strings via LVLTBLS_FixPathSlashes. Part of D2Common data-table init.

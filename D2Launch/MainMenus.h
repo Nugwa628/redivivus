@@ -115,7 +115,7 @@ void __stdcall MAINMENU_SetGlobalFlag();
 void __stdcall IMAGE_LoadPredefinedImages();
 void __stdcall IMAGE_FreePredefinedImages();
 // Loads a palette pair (.dat and .pl2 files) for rendering. Constructs full paths by prepending "DATA\\GLOBAL\\" to the input filenames, checks if the palette is "palette\\fechar\\pal.dat" via string comparison, sets global flag gnIsFecharPalette accordingly, then calls D2Win palette loader with the constructed paths.
-void __fastcall D2GFX_SetPaletteForDraw(char * szPaletteDat, char * szPalettePl2);
+int __fastcall D2GFX_SetPaletteForDraw(char * szPaletteDat, char * szPalettePl2);
 struct D2ControlStrc * __fastcall FORMS_CreateAnyFormFromList(int32_t nFormIndex);
 void __stdcall FORMS_DestroyList();
 struct D2ControlStrc * __fastcall FORMS_CreateAnyFormFromListExEx(int32_t nParam);
@@ -182,7 +182,7 @@ BOOL __stdcall MAINMENU_OnPressToggleLadderFlag(struct D2ControlMsg * pControlMs
 // OnPress of the create-hero expansion checkbox (form 0xd4): returns 0 if D2CheckExpansionGame reports no expansion; otherwise XORs PLAYERSTATUS_Expansion (0x20) into the launcher ini data +0x1ef and returns 1.
 // Provenance: asm 00430770..0043078e (RET 4); fpOnPressCallback of create-hero form record 0xd4.
 BOOL __stdcall MAINMENU_OnPressToggleExpansionFlag(struct D2ControlMsg * pControlMsg);
-void __fastcall MAINMENU_SetClassDescriptionTooltip(int32_t bSetTooltip, int32_t nClassId, uint16_t wPrimaryStrId, uint16_t wSecondaryStrId);
+int __fastcall MAINMENU_SetClassDescriptionTooltip(int32_t bSetTooltip, int32_t nClassId, uint16_t wPrimaryStrId, uint16_t wSecondaryStrId);
 // Mouse-over notify of the Sorceress create-hero image: MAINMENU_SetClassDescriptionTooltip(pNotify->bStateIsOne, class 1, 0xfaa "Sorceress", 0x140b class blurb). Returns 1.
 // Provenance: asm 00430840 (PUSH 0x140b; PUSH 0xfaa; EDX=1; RET 4); string.tbl and the class id fix the class.
 BOOL __stdcall MAINMENU_SetSorceressDescription(struct D2WinAnimImageNotifyStrc * pNotify);
@@ -225,7 +225,7 @@ void __stdcall MAINMENU_AppendCreditsEnd();
 uint16_t * __stdcall MAINMENU_LoadCreditsFile(uint32_t * pnCharCount);
 void __stdcall MAINMENU_SyncCreditsColumns();
 // @sourcefile .\Src\MainMenus.cpp
-void __stdcall MAINMENU_DisplayCredits();
+int __stdcall MAINMENU_DisplayCredits();
 BOOL __stdcall MAINMENU_InitCreditsScreen(struct D2ControlMsg * pControlMsg);
 void __stdcall UIMENU_SelectCinematics(int32_t nCineLevel);
 void __fastcall UIMENU_PleaseInsertExpansionCdWithNotWorkingCancelButton(int32_t nMode);

@@ -1007,15 +1007,14 @@ void __stdcall DRAW_UI_DeathMessage() {
     uint32_t nIngameUIFlags;
     nIngameUIFlags = ClientModeInGame::CLIENTMODE_GetIngameUIFlags();
     if (!nIngameUIFlags) {
-      uint16_t* pnGoldLostArg;
       nGoldLost = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_goldlost, 0);
       if (!nGoldLost) {
         goto draw_exp_loss_line;
       }
 
-      pnGoldLostArg = (uint16_t*)D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_goldlost, 0);
+      nDrawY = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_goldlost, 0);
       pDwFill = D2Lang::StrTable::strtable::GetLocaleString(0x13e6);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszDeathMessage, pDwFill, pnGoldLostArg);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszDeathMessage, pDwFill, nDrawY);
     } else {
       pDwFill = D2Lang::StrTable::strtable::GetLocaleString(0x13e8);
       D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszDeathMessage, pDwFill);
@@ -1771,7 +1770,6 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
     eD2UnitStat eGoldStatType;
     uint16_t nStatLayer;
     D2TextLineStrc* pNextWordWrapLine;
-    uint16_t* pnTotalGoldArg;
     uint32_t nCleanupStage = -1;
     pfnEHHandlerRoutine pfnEHHandler = __GSHandlerCheck_EH_6ca05c;
     void* pPrevExceptionList = ExceptionList;
@@ -1840,9 +1838,9 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
             eGoldStatType = UNITSTAT_gold;
             pPlayer = UNIT::Player::GetPlayerUnit_UI();
             nGoldInventory = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pPlayer, eGoldStatType, nStatLayer);
-            pnTotalGoldArg = (uint16_t*)(nGoldBank + nGoldInventory);
+            nGoldBank += nGoldInventory;
             pwszPrompt = D2Lang::StrTable::strtable::GetLocaleString(wPromptLocaleId);
-            D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszPromptText, pwszPrompt, pnTotalGoldArg);
+            D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszPromptText, pwszPrompt, nGoldBank);
             nTransactionType = (int32_t)pAllocCtx;
           } else {
             pwszPrompt = D2Lang::StrTable::strtable::GetLocaleString(wPromptLocaleId);
@@ -4390,12 +4388,12 @@ static void __fastcall DRAW_UI_StatWindow_III(int32_t nX, int32_t nY, int32_t nV
 
     nErrorLine = nValue;
     pwszClear = D2Lang::StrTable::strtable::GetLocaleString(pMonStatsTxt->NameStr);
-    if (!(uint16_t*)nBlockRateOrDescStrId) {
+    if (!nBlockRateOrDescStrId) {
       wszFmt = D2Lang::StrTable::strtable::GetLocaleString(0x2778);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMessage, wszFmt, (uint16_t*)pwszClear, nErrorLine);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMessage, wszFmt, pwszClear, nErrorLine);
     } else {
       pwszClear = D2Lang::StrTable::strtable::GetLocaleString(0x2779);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMessage, pwszClear, (uint16_t*)nBlockRateOrDescStrId, nValue);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMessage, pwszClear, nBlockRateOrDescStrId, nValue);
     }
 
     D2Win::Src::D2WinFont::D2WINFONT_DrawTextWithBackgroundRect(wszMessage, gnPanelOffsetX + 0x8b, gnPanelOffsetY - 0x13b + ScreenSizeY, (uint32_t)(uint8_t)gbUIStatWindowDrawFlag, DRAW_LESSTRANSPARENT, 0);
@@ -4872,7 +4870,7 @@ static void __stdcall DRAW_UI_StatWindow_II(int32_t bUpperEnabled, int32_t bLowe
       uint16_t* wszFmt;
       pClearPtr = D2Lang::StrTable::strtable::GetLocaleString(sgptDataTable->pTxtMonStats[nMonsterIdx].NameStr);
       wszFmt = D2Lang::StrTable::strtable::GetLocaleString(0x2777);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMonNameTooltip, wszFmt, (uint16_t*)pClearPtr, bUpperEnabled);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMonNameTooltip, wszFmt, pClearPtr, bUpperEnabled);
       D2Win::Src::D2WinFont::DRAW_text(wszMonNameTooltip, gaStatWindowRowLayout[nBtnIndex * 6 + 4] + gnPanelOffsetX, gaStatWindowRowLayout[nBtnIndex * 6 + 5] + gnPanelOffsetY - 0x1e0 + ScreenSizeY, 0, 0);
       return;
     }

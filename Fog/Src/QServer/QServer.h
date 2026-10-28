@@ -462,7 +462,7 @@ void __fastcall BanIpAddress(struct D2QServerStrc * pQServer, char * szFile, uin
 int __fastcall CheckIpConnectionRate(struct D2QServerStrc * pQServer, in_addr * pIpAddress);
 // Shuts down and frees QServer structure. Optionally broadcasts final packet to all clients before cleanup. Closes all worker threads, frees hash-map buckets, deletes critical sections, closes sockets, and invokes WSACleanup. Iterates through mode packet free list and hacklist free list to release all pooled allocations.
 // @sourcefile .\Src\QServer\QServer.cpp
-void __stdcall Shutdown(struct D2QServerStrc * pQServer, char * pBytes, int nSize);
+int __stdcall Shutdown(struct D2QServerStrc * pQServer, char * pBytes, int nSize);
 // Decrements pClient refcount via InterlockedDecrement. If zero: invokes optional cleanup callback at pQServer+0xBC8, removes client from server, and frees all queued packets.
 // @sourcefile .\Src\QServer\QServer.cpp
 void __fastcall RemoveClientAndClearLog(struct D2QServerStrc * pQServer, struct D2QServerClientConnectionStrc * pClient);

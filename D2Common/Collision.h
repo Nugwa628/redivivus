@@ -92,7 +92,7 @@ eCollisionFlags __fastcall RemoveGetCollision_Width(struct D2RoomStrc * pRoom, i
 eCollisionFlags __fastcall RemoveGetCollision_Type(struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nCheckX, int32_t nCheckY, int32_t nType, int32_t eCollisionFlag, int32_t eCheckCollisionFlag);
 int32_t __fastcall UpdateGetCollision_Unused(struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nCheckX, int32_t nCheckY, int32_t nType, int32_t eCollisionFlag, int32_t eCheckCollisionFlags);
 eCollisionFlags __fastcall UpdateGetCollision_Width(struct D2RoomStrc * pOldRoom, int32_t nOldX, int32_t nOldY, struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, eD2CollisionUnitSize nWidth, int32_t eCollisionFlag, int32_t eCollisionFlagCheck);
-void __fastcall UpdateCollision_Width(struct D2RoomStrc * pOldRoom, int32_t nOldX, int32_t nOldY, struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, eD2CollisionUnitSize nWidth, int32_t eCollisionFlag);
+uint16_t __fastcall UpdateCollision_Width(struct D2RoomStrc * pOldRoom, int32_t nOldX, int32_t nOldY, struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, eD2CollisionUnitSize nWidth, int32_t eCollisionFlag);
 int32_t __fastcall UpdateGetCollision_Type(struct D2RoomStrc * pOldRoom, int32_t nOldX, int32_t nOldY, struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nType, int32_t eCollisionFlag, int32_t eCollFlags);
 void __fastcall UpdateCollision_Type(struct D2RoomStrc * pOldRoom, int32_t nOldX, int32_t nOldY, struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nType, int32_t eCollisionFlag);
 // 24 internal functions (defined in .cpp)

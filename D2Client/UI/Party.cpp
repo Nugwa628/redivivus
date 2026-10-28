@@ -878,7 +878,7 @@ static void ROSTER_DrawPlayerTooltip(D2RosterStrc * pRoster) {
       }
 
       pFormat = D2Lang::StrTable::strtable::GetLocaleString(nLocaleId);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszLine1, pFormat, (uint16_t*)pSrc);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszLine1, pFormat, pSrc);
     }
 
     uint32_t nUiFlags = ClientModeInGame::CLIENTMODE_GetIngameUIFlags();
@@ -903,7 +903,7 @@ static void ROSTER_DrawPlayerTooltip(D2RosterStrc * pRoster) {
           pFormat = D2Lang::StrTable::strtable::GetLocaleString(gwRosterCountMax[bInLoot + bOutLoot * 2]);
         }
 
-        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszLine2, pFormat, (uint16_t*)pSrc);
+        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszLine2, pFormat, pSrc);
       }
     }
     if (BVar1) {

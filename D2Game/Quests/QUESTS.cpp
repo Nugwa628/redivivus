@@ -104,7 +104,6 @@
 #include "D2Client/UI/Automap.h"
 #include "D2Client/UI/QuestLog.h"
 #include "D2Common/Unit/D2UnitDataItemStrc.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/Quests/QUESTS/A1Q0.h"
 #include "D2Game/Quests/QUESTS/A1Q3.h"
 #include "D2Game/Quests/QUESTS/A1Q7.h"
@@ -453,7 +452,7 @@ void __fastcall QUEST_OnMonsterKilled(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     QUEST_DispatchToUnit(pKiller, &questArg2);
 }
 
-void __stdcall QUEST_OnPlayerEnteredArea(::SGAMEDATA * pGame, int32_t ePreviousLevelId, int32_t eEnteredLevelId, D2UnitStrc * pUnit) {
+void __fastcall QUEST_OnPlayerEnteredArea(::SGAMEDATA * pGame, int32_t ePreviousLevelId, int32_t eEnteredLevelId, D2UnitStrc * pUnit) {
     D2QuestArgStrc questArg;
     // Zeroed deliberately. Every one of these builders leaves part of the struct unwritten
     // and QUEST_DispatchBroadcast dereferences pGame and pPlayer - it crashed in UNITS_GetRoom on a
@@ -568,7 +567,7 @@ void __fastcall QUEST_OnNpcInteraction(D2ClientStrc * pClient, D2UnitStrc * pUni
 //   MOV [EBP-0x14],EAX  -> questArg.pTarget (the one stack argument, [EBP+8])
 //   MOV [EBP-0x10],EDX  -> questArg.pPlayer (EDX)
 // Declaring only the stack argument left pGame and pPlayer as uninitialised locals and split the struct into loose dwTmp slots, so the broadcast received a garbage game pointer and a garbage player.
-void __stdcall QUEST_OnNpcDeactivate(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, D2UnitStrc * pTarget) {
+void __fastcall QUEST_OnNpcDeactivate(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, D2UnitStrc * pTarget) {
     D2QuestArgStrc DStack_20;
     DStack_20.pTarget = pTarget;
     DStack_20.nEvent = 2;
@@ -875,14 +874,11 @@ void __fastcall QUEST_SetStateAndBroadcast(D2QuestDataStrc * pQuestData, uint8_t
 
 void __fastcall QUEST_SetStateFlag(D2QuestDataStrc * pQuestData, int32_t nState, char * szSourceFile, uint32_t nSourceLine) {
     char szDebugMsg[128];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ pQuestData->nStateFlag = (uint8_t)nState;
     wsprintfA(szDebugMsg, "changing state to %d\n", nState);
     if (DEBUGPRINT) {
       PLAYER::PlayerMsg::PrepareClientMessage(pQuestData->pGame, szDebugMsg, 4);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall QUEST_OnNpcGossip(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, uint32_t nNpcGUID, uint32_t nGossipIndex) {
@@ -976,7 +972,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x29_GAMEQUESTRECORD_Prepare(::SGAMEDATA * 
     sPacket0x29.nPacketId = 0x29;
     D2Common::QuestRecord::CopyQuestBitBuffer(pGame->pQuestControl->pQuestFlags, sPacket0x29.szQuestBits, 0x60, 0);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x29_GAMEQUESTRECORD(pClient, &sPacket0x29.nPacketId);
-    Fog::Debug::GuardStack();
 }
 
 // Server-side handler that determines whether an NPC wants to initiate a quest interaction with a player unit. Validates that pUnit is a player and that the target NPC's MonStats.interact flag is set. Iterates the game's quest list for the player's current act; for each quest calls fpActiveFilter to check eligibility against the player's quest record. On first match, sends packet 0x8A (NpcWantsInteract) to the client and returns 1. Triggers fatal error if called with bad state (null quest-set, bad function pointer, null player data, null quest record).
@@ -1610,7 +1605,6 @@ BOOL __fastcall INTRONPC_FillInPacketWithIntroNpcIdsInAct(::SGAMEDATA * pGame, D
       break;
       default:
         {
-          Fog::Debug::GuardStack();
           return (BOOL)(uintptr_t)pInteractedNPCs;
         }
       case ACT_V:
@@ -1629,7 +1623,6 @@ BOOL __fastcall INTRONPC_FillInPacketWithIntroNpcIdsInAct(::SGAMEDATA * pGame, D
       pInteractedNPCs = pInteractedNPCsAfterSend;
     }
 
-    Fog::Debug::GuardStack();
     return (BOOL)(uintptr_t)pInteractedNPCs;
 }
 
@@ -2496,8 +2489,6 @@ void __fastcall RefreshQuestDataForUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
 
       GAME::SCmd::NET_D2GS_SERVER_Send_0x52_PlayerQuestLog(pClientData, &__frame0.byMsgId52);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Server-side quest initialization run when a player joins/enters the game. On first call (bPickedSet==0) it picks the quest set: for fresh games (nExperienceFrame==0) handles reconnect carry-over of completed quests (gbQuestReconnectMode), fires each quest's join-init handler (state-fn index 0xD), then runs the act-quest sequence filters (Den of Evil, Radament, Golden Bird, Fallen Angel, Siege/Haggorath) via fpSequenceFilter. On subsequent calls fires handler index 0xE. Always sends the client its quest UI state: 0x5E (quest availability per extended quest's bIsNotIntroduction), 0x28 (PlayerQuestInfo from the difficulty's quest record), 0x29 (quest-log prep), and 0x89 (unique events) if Den-of-Evil QuestDataBool is set. Halts via ERROR_UnrecoverableInternalError on bad handler pointers.
@@ -2589,7 +2580,6 @@ void __fastcall QUEST_OnPlayerJoinGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
           while (pQuestDataIter->nQuestNoInternal != QUESTINT_DenOfEvil) {
             pQuestDataIter = pQuestDataIter->pPrev;
             if (!pQuestDataIter) {
-              Fog::Debug::GuardStack();
               return;
             }
           }
@@ -2603,7 +2593,6 @@ void __fastcall QUEST_OnPlayerJoinGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
         }
       }
 
-      Fog::Debug::GuardStack();
       return;
     }
 

@@ -14,7 +14,6 @@
 #include "Fog/Src/Safesock.h"
 #include "Storm/_unnamespaced.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "Fog/D2QServerStrc.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -175,7 +174,6 @@ int __stdcall NET_D2GS_CLIENT_ParseRecvBufferIntoPacketQueues() {
     uint8_t aHuffmanTable[256];
     uint8_t byFirstByte;
     D2OnePacketClientStrc* pWalkPacket;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     size_t pBytesSize = pD2PacketsClientBuffer->nCount;
     int bHasCompressionPacket = 0;
     D2PacketsClientStrc* pBytes = pD2PacketsClientBuffer;
@@ -245,7 +243,6 @@ int __stdcall NET_D2GS_CLIENT_ParseRecvBufferIntoPacketQueues() {
       memmove(pWalkBuffer, pBytes, pBytesSize);
     }
 
-    Fog::Debug::GuardStack();
     return bHasCompressionPacket;
 }
 
@@ -262,8 +259,6 @@ DWORD __stdcall ThreadClientToServer(void * lpThreadParam) {
     uint8_t aCompressedBuf[2496];
     uint8_t bLenHeaderByte;
     char* lpOutputString;
-    uint32_t dwStackCookie;
-    dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     uint8_t* pCompressedRead;
     pCompressedRead = 0;
     int bCompressedMode;
@@ -375,7 +370,6 @@ DWORD __stdcall ThreadClientToServer(void * lpThreadParam) {
         /* LPCSTR lpOutputString for OutputDebugStringA */ lpOutputString = "Client thread close #6\n";
         exit_thread:
         OutputDebugStringA(lpOutputString);
-        Fog::Debug::GuardStack();
         return 0;
       }
     } while (true);

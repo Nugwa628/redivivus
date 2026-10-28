@@ -116,7 +116,7 @@ bool __stdcall SCmdGetBool(int nCmdId);
 // @oracle-source Storm export vector SCmdProcess @100cbc94 -> code 100086c0 = the traceback-named function .SCmdProcess, in Mac PPC 1.10b Storm
 // @rename-basis Behaviour plus a cross-architecture body match. .SCmdProcess reads r3..r6, i.e. exactly four arguments, and is the target of the two-argument command-line wrapper at 10008640 which supplies its own second argument as the literal 1. This function has the same four arguments and is likewise the target of SCmdProcessCommandLine 006c50b0, which calls it as (GetCommandLineA(), 1, arg1, arg2) - the same literal 1 in the same slot, which is the skip-argv[0] flag.
 // @former-name SCMD_ParseCommandLine (also resolves a duplicate-name collision: 006c4a00 carried the same name)
-void __stdcall SCmdProcess(char * szCommandLine, int bSkipFirstToken, pfnSCmdUnknownArgCallback pfnUnknownCallback, pfnSCmdErrorCallback pfnErrorCallback);
+int __stdcall SCmdProcess(char * szCommandLine, int bSkipFirstToken, pfnSCmdUnknownArgCallback pfnUnknownCallback, pfnSCmdErrorCallback pfnErrorCallback);
 // Processes the process's own command line: GetCommandLineA() then SCmdProcess(cmdline, 1, arg1, arg2).
 // @oracle SCmdProcessCommandLine
 // @oracle-source Storm export vector SCmdProcessCommandLine @100cbc9c -> code 10008640 in Mac PPC 1.10b Storm

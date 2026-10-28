@@ -76,7 +76,7 @@ void __stdcall NPCMENU_SelectRandomDialogOption(struct D2NPCSpeechStrc * pSpeech
 void __stdcall NPCMENU_RandomizeAllNpcDialogs();
 uint32_t __fastcall NPCMENU_FindNextUnhandledMessage(int16_t nMsgTypeToFind);
 int __fastcall NPCMENU_ScrollCompleteShowNextMessage(void * pUserParam, uint32_t nReason, void * pDismissCallback);
-void NPCMENU_AddHandledMessageId(short wMsgId);
+void __fastcall NPCMENU_AddHandledMessageId(short wMsgId);
 void inline_NPC_IsInteractableSideNpc(int32_t nNpcClassId);
 int __stdcall NPCMENU_ShowSelectedDialogOption();
 int __stdcall NPCMENU_ShowGossipDialog();

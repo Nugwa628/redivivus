@@ -902,8 +902,8 @@ uint32_t __stdcall WEATHER_GetCurrentLevelWeatherFlags() {
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveRain(eLevel);
-    bool bCanHaveMud = D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveMud(eLevel);
-    return (uint32_t)bCanHaveMud;
+    uint8_t bCanHaveMud = D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveMud(eLevel);
+    return (uint32_t)(bCanHaveMud != '\0');
 }
 
 static int WEATHER_UpdateParticleCount(D2SeedStrc * pSeed) {
@@ -958,6 +958,7 @@ static int WEATHER_UpdateParticleCount(D2SeedStrc * pSeed) {
 }
 
 void __stdcall DRAW_Overlay_Weather() {
+    uint32_t eBorderType;
     D2RoomStrc* pRoom;
     eD2LevelId eLevel;
     int nClipLeft;
@@ -967,11 +968,13 @@ void __stdcall DRAW_Overlay_Weather() {
     int32_t nLineOrCoord;
     int32_t nSoundPosZ;
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_Net();
-    bool bVar1 = false;
+    bool bVar2 = false;
     if (pPlayer) {
+      uint8_t bVar1;
       pRoom = D2Common::Units::UNITS_GetRoom(pPlayer);
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       bVar1 = D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveRain(eLevel);
+      bVar2 = bVar1 != '\0';
       D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveMud(eLevel);
     }
 
@@ -983,7 +986,6 @@ void __stdcall DRAW_Overlay_Weather() {
 
     D2SeedStrc* pSeed = &pPlayer->sSeed;
     if (gnWeatherTransitionProgress && gbWeatherTransitionTriggered) {
-      uint32_t eBorderType;
       gbWeatherTransitionTriggered--;
       if (!gbWeatherTransitionTriggered) {
         if (!gnWeatherTransitionState) {
@@ -1022,7 +1024,7 @@ void __stdcall DRAW_Overlay_Weather() {
         return;
       }
     }
-    if (!(bVar1 && pEnvironmentParticles->nUsedCount)) {
+    if (!(bVar2 && pEnvironmentParticles->nUsedCount)) {
       return;
     }
 
@@ -1134,8 +1136,8 @@ uint32_t __stdcall WEATHER_CanHaveRain() {
 
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    bool bCanRainResult = D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveRain(eLevel);
-    bCanRain = (uint32_t)bCanRainResult;
+    uint8_t bCanRainResult = D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveRain(eLevel);
+    bCanRain = (uint32_t)(bCanRainResult != '\0');
     D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveMud(eLevel);
     return bCanRain;
 }
@@ -1276,7 +1278,7 @@ void __stdcall WeatherEffects() {
     static BOOL WEATHER_bCanMud; D2_STATIC_GUARD_BSS(WEATHER_bCanMud, "D2Client::Draw::Weather::WeatherEffects::WEATHER_bCanMud");
     static BOOL WEATHER_bCanRain; D2_STATIC_GUARD_BSS(WEATHER_bCanRain, "D2Client::Draw::Weather::WeatherEffects::WEATHER_bCanRain");
 
-    bool bMudResult;
+    uint8_t bMudResult;
     D2RoomStrc* pRoom;
     eD2LevelId eLevel;
     D2UnitStrc* pPlayer;
@@ -1289,10 +1291,10 @@ void __stdcall WeatherEffects() {
       bool bRainResult;
       pRoom = D2Common::Units::UNITS_GetRoom(pPlayer);
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-      bRainResult = D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveRain(eLevel);
+      bRainResult = (bool)D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveRain(eLevel);
       bCanRain = (BOOL)bRainResult;
       bMudResult = D2Common::DATATBLS::LvlTbls::LEVEL_CanHaveMud(eLevel);
-      bCanMud = (BOOL)bMudResult;
+      bCanMud = (BOOL)(bMudResult != '\0');
       if (bCanRain) {
         goto clear_mud_and_update;
       }

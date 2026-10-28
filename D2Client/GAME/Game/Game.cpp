@@ -158,7 +158,7 @@ void __fastcall GAMEDATA_SetClickModifier(int32_t bModifierDown) {
 }
 
 // Compute mouse click modifier flags (run/always-run, modifier key).
-uint32_t GetMouseClickFlags() {
+uint32_t __stdcall GetMouseClickFlags() {
     uint32_t flags = 0;
     if (gRunKeyDown) {
       flags = 8;
@@ -1807,7 +1807,7 @@ uint32_t __stdcall GAMEDATA_GetLadderOrGameType() {
     return bResult;
 }
 
-BOOL CLIENT_CheckExpansion() {
+BOOL __stdcall CLIENT_CheckExpansion() {
     return gClientGameData.CLIENT_bExpansion;
 }
 

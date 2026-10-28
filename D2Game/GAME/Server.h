@@ -251,7 +251,7 @@ void __fastcall _TableNullSub21(void * pParam);
 uint8_t * __stdcall _TableNullSub22();
 uint8_t * __stdcall _TableNullSub23();
 void __stdcall _TableNullSub24(uint32_t dwArg1, uint32_t dwArg2, uint32_t dwArg3, uint32_t dwArg4);
-void __stdcall FreeServer();
+int __stdcall FreeServer();
 int32_t __fastcall SERVER_IsTokenValid(uint16_t nToken);
 void __stdcall QSERVER_SetGlobalInstance(TSExportTableSync<::SGAMEDATA, struct HSGAMEDATA__*, struct HSGAMEDATALOCK__*, CCritSect, 0>* pQServerState, void * pInitState);
 void __stdcall SetupAsBnetServer(struct D2BattleNetEventCallbackTable * pBnetCallbacks);
@@ -423,7 +423,7 @@ void __stdcall QSERVER_DisconnectClientFromGame(uint32_t nClientId);
 void __fastcall NET_D2GS_SERVER_LeaveServer(uint32_t nClientId, int32_t bBroadcastLeave);
 // Removes a client from the server by token, cleaning up their connection state.
 void __fastcall LeaveServer(::SGAMEDATA * pQServer, uint32_t nClientToken);
-void __stdcall QSERVER_InitializeServerState();
+int __stdcall QSERVER_InitializeServerState();
 // Callback invoked when the character-server (CS) delivers save data for a joining client (JOIN step 3). Accumulates chunked save data; on completion with nCsResult==0 stores file-time fields into pClient and sends state-command 2 to advance the join sequence. On CS error or stale pClientContainer, triggers disconnect.
 // @sourcefile .\GAME\Game.cpp
 uint32_t __stdcall CLIENT_OnDatabaseCharacterReceived(uint32_t nClientId, void * pParam, uint16_t nChunkSize, uint32_t nTotalSize, int32_t nCsResult, uint32_t dwCharFlags, int * pFileTimeData, void * pClientContainer);

@@ -1090,7 +1090,9 @@ void __stdcall D2GFX_SetDefaultPerspectiveFactor() {
 }
 
 void D2GFX_DrawString(int32_t nProbablyX, int32_t nProbablyY, char * szFormatString, ...) {
-    RENDERER_CurrentRenderedFunctions->nfpDrawString(nProbablyX, nProbablyY, szFormatString, (va_list)((uint8_t*)&szFormatString + 4));
+    va_list __va;
+    va_start(__va, szFormatString);
+    RENDERER_CurrentRenderedFunctions->nfpDrawString(nProbablyX, nProbablyY, szFormatString, __va);
 }
 
 void __stdcall D2GFX_DrawLight(DWORD * pLight, DWORD * pPlayerLight, int32_t nXpos, int32_t nYpos) {

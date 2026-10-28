@@ -53,7 +53,6 @@
 #include "D2Client/UI/QuestLog.h"
 #include "D2Common/Text.h"
 #include "D2Game/D2Game.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/Quests/QUESTS/A4Q1.h"
 #include "Fog/Src/Safesock.h"
 
@@ -512,7 +511,6 @@ BOOL __fastcall Q27_PlayerEnterGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
       sPacket5D.nAlertFlags = '\x01';
       sPacket5D.nFilterStatus = '\0';
       GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &sPacket5D);
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -520,7 +518,6 @@ BOOL __fastcall Q27_PlayerEnterGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
     sPacket50.nMessageType = 0x17;
     pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x1da);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x50_QuestSpecial(pClient, &sPacket50);
-    Fog::Debug::GuardStack();
     return 0;
 }
 

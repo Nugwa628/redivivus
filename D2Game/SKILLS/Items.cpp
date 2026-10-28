@@ -37,7 +37,6 @@
 #include "Fog/Src/ErrorManager.h"
 #include "globals/globals.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -1712,7 +1711,6 @@ static BOOL __stdcall ITEMMOD_GenerateQualityItem(D2UnitStrc * pUnit, D2ItemGenC
     DWORD nRandIdx;
     uint32_t nTableSize;
     char aVisitedSlots[12];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2QualityItemsTableStrc* pQualityItemsTableInfo = D2Common::DATATBLS::ItemTbls::TXT_QualityItems_GetTableInfo();
     if (!pUnit) {
       nClassId = -1;
@@ -1755,7 +1753,6 @@ static BOOL __stdcall ITEMMOD_GenerateQualityItem(D2UnitStrc * pUnit, D2ItemGenC
           D2Common::ITEMS::Items::ITEM_SetItemData_nFileIndex(pUnit, nRandIdx);
           D2Common::ITEMS::ItemMods::ApplyRuneAndGemStats(1, nullptr, pUnit, pMagicAffixLine, 0, 0);
           StaffMod(pUnit, pItemGenContext);
-          Fog::Debug::GuardStack();
           return 1;
         }
 
@@ -1768,14 +1765,12 @@ static BOOL __stdcall ITEMMOD_GenerateQualityItem(D2UnitStrc * pUnit, D2ItemGenC
         while (aVisitedSlots[iVisitedIdx] != '\0') {
           iVisitedIdx++;
           if ((int)nTableSize <= iVisitedIdx) {
-            Fog::Debug::GuardStack();
             return 0;
           }
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 

@@ -76,7 +76,6 @@
 #include "D2Common/DATATBLS/ItemStats.h"
 #include "D2Common/ITEMS/ItemMods.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -112,8 +111,8 @@ int32_t __fastcall FindEndOfString(char * szString, int32_t nMaxSize) {
     return (int)pPosition - (int)szString;
 }
 
-void __stdcall PLAYERSAVE2_LoadOldSavegame_ReturnZero() {
-
+int __stdcall PLAYERSAVE2_LoadOldSavegame_ReturnZero() {
+    return 0;
 }
 
 // Returns the 1-based index of the carried item matching nItemGUID in the player's inventory list, by iterating INVENTORY_GetFirstItem/GetNextItem/GetCarriedItem. Returns 0 if GUID is -1, inventory is null, or item not found. Halts with an internal error if the index would exceed 0x7FFE.
@@ -248,7 +247,6 @@ int32_t __fastcall SaveHeader(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * p
         if (0 < iVar3) {
           nRequiredEndAddr = nStartAddress + 0x14f;
           if (pEndAddress < nRequiredEndAddr) {
-            Fog::Debug::GuardStack();
             return 1;
           }
 
@@ -363,13 +361,11 @@ int32_t __fastcall SaveHeader(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * p
           *(short int*)pDstDword = (short int)*pSrcDword;
           *(uint8_t*)((int)pDstDword + 2) = *(uint8_t*)((int)pSrcDword + 2);
           *(uint32_t*)pStartPtr = nRequiredEndAddr;
-          Fog::Debug::GuardStack();
           return 0;
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 2;
 }
 
@@ -808,7 +804,6 @@ int __fastcall MakeSaveFile(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint8_t * p
     size_t nSaveFileSize;
     DWORD dwCrc;
     char* pItemsDryRunEnd;
-    __frame0.nItemsTempEnd = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     DWORD pEndAddress = nBufferSize + (int)pSaveBuffer;
     __frame0.pStartAddress = (DWORD)pSaveBuffer;
     char* pTempCursor = __frame0.itemsTempBuf;
@@ -848,7 +843,6 @@ int __fastcall MakeSaveFile(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint8_t * p
                           *(size_t*)(pSaveBuffer + 8) = nSaveFileSize;
                           dwCrc = Fog::Save::CalculateChecksum(pSaveBuffer, nSaveFileSize);
                           *(DWORD*)(pSaveBuffer + 0xc) = dwCrc;
-                          Fog::Debug::GuardStack();
                           return 0;
                         }
                       }
@@ -863,7 +857,6 @@ int __fastcall MakeSaveFile(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint8_t * p
     }
 
     *nStartOffset = 0;
-    Fog::Debug::GuardStack();
     return nItemsSpaceAvail;
 }
 

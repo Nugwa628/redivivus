@@ -86,7 +86,6 @@
 #include "D2Common/ITEMS/ItemMods.h"
 #include "D2Common/Unit/Unit.h"
 #include "D2Game/D2Game.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillEMonst.h"
 #include "Fog/Src/Safesock.h"
 
@@ -6986,13 +6985,11 @@ int __fastcall MISSMODE_SrvDoFn18_TowerChestSpawner(::SGAMEDATA * pGame, D2UnitS
           }
 
           nSpawnInterval = MISSMODE_SrvDoFn01_BasicMissile(pGame, pUnit);
-          Fog::Debug::GuardStack();
           return nSpawnInterval;
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 2;
 }
 

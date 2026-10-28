@@ -19,7 +19,6 @@
 #include "Storm/Source/SFile.h"
 #include "Storm/_unnamespaced.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -270,7 +269,6 @@ void __stdcall CODEC_BuildInversePalette(uint32_t nPaletteBase, int32_t nPalette
 
 void __fastcall CODEC_BuildInversePaletteFromBitmask(uint8_t * pInversePalette, uint32_t * pUsedColourBits, uint8_t * pPaletteData) {
     uint8_t aUsedFlags[256];
-    uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     uint32_t nIdx1 = 1;
     uint32_t nBitIdx = 0;
     uint32_t nIdx3 = 3;
@@ -303,7 +301,6 @@ void __fastcall CODEC_BuildInversePaletteFromBitmask(uint8_t * pInversePalette, 
     pPaletteData[0x102] = 0;
     pPaletteData[0x103] = 0;
     *(int*)(pInversePalette + 0x100) = nMappedCount;
-    Fog::Debug::GuardStack();
 }
 
 static void __stdcall CODEC_DecodeFramePixels(uint8_t * * pbParam, int32_t nParam, int32_t nBitStream2, int * pPrevIterState, int * pnParam) {
@@ -318,7 +315,6 @@ static void __stdcall CODEC_DecodeFramePixels(uint8_t * * pbParam, int32_t nPara
     uint8_t* pOutRow;
     uint8_t aTmpRow[28];
     uint8_t byFillValue;
-    uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!nParam || !*pPrevIterState || (nSkipBit = CODEC_ReadBits((D2CodecBitStateStrc*)nParam, 1) , !nSkipBit)) {
       pOutRow = (uint8_t*)pnParam[1];
       nCodeWidth = 0;
@@ -389,7 +385,6 @@ static void __stdcall CODEC_DecodeFramePixels(uint8_t * * pbParam, int32_t nPara
             iRow++;
           } while (iRow < pnParam[4]);
 
-          Fog::Debug::GuardStack();
           return;
         }
       }
@@ -403,12 +398,9 @@ static void __stdcall CODEC_DecodeFramePixels(uint8_t * * pbParam, int32_t nPara
           iRow++;
         } while (iRow < pnParam[4]);
 
-        Fog::Debug::GuardStack();
         return;
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Decompress frame pixel data from bit streams. Processes frame iterator list, decodes pixels via two bit buffers (one for pixel delta, one for colors). Fills output buffer row-by-row. Returns bits read into pBitsRead and buffer advance into pBitOffsets.
@@ -811,7 +803,6 @@ void * __fastcall CODEC_DecompressAllFrames(uint32_t * pnParam, D2PoolManagerStr
     char szErrorMsg[252];
     uint8_t local_10c[260];
     uint32_t uVar1;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     __frame0.local_334 = (uint32_t)pDecodeState;
     __frame0.local_330 = pMemory;
     EnterCriticalSection(&lpCriticalSection_008f03cc);
@@ -1245,7 +1236,6 @@ void * __fastcall CODEC_DecompressAllFrames(uint32_t * pnParam, D2PoolManagerStr
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_008f03cc);
-    Fog::Debug::GuardStack();
     return pvVar2;
 }
 

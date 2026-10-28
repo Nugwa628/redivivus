@@ -40,7 +40,6 @@
 #include "Fog/Src/ErrorManager.h"
 #include "globals/globals.h"
 #include "D2Common/Drlg/Drlg.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -256,8 +255,6 @@ static void __stdcall MONREGION_PopulateMonsterTypes(BOOL bIsNotNormalDifficulty
         nRandPick = nValidMonCount;
       } while (nMonsPicked < (int)nMaxMons);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Allocates and populates a D2MonsterRegionStrc for every level (index 1..nTxtLevelsSize-1) in the game. Per level: pool-allocates a zeroed region, fills monster density/boss counts/wander/quest flags from LevelsTxt, rolls monster types via MONREGION_PopulateMonsterTypes, then seeds champion-pack data for each monster slot. Halts with fatal error 0x83 if DifficultyLevels txt lookup fails.

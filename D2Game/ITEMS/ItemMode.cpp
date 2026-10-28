@@ -76,7 +76,6 @@
 #include "D2Common/Unit/D2UnitDataItemStrc.h"
 #include "D2Game/Ai/AiGeneral.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/Items.h"
 #include "D2Game/SKILLS/SkillAss.h"
 
@@ -1031,7 +1030,7 @@ static void __stdcall ITEMMODE_GetItemPageForUnit(int32_t nParam, D2UnitStrc * p
     UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pUnit, nParam, pUnit);
 }
 
-uint32_t ITEMMODE_CheckQuestItemCodePair(D2ItemsTxt * pItemsTxt1, D2ItemsTxt * pItemsTxt2, int32_t nCode1, int32_t nCode2) {
+uint32_t __fastcall ITEMMODE_CheckQuestItemCodePair(D2ItemsTxt * pItemsTxt1, D2ItemsTxt * pItemsTxt2, int32_t nCode1, int32_t nCode2) {
     if (!((pItemsTxt1->dwCode != nCode1 || pItemsTxt2->dwCode != nCode2) && (pItemsTxt1->dwCode != nCode2 || pItemsTxt2->dwCode != nCode1))) {
       return 1;
     }
@@ -3168,7 +3167,7 @@ BOOL __fastcall ITEMMODE_CheckEquipRestrictions(::SGAMEDATA * pGame, D2UnitStrc 
 }
 
 // Maps a body location to its alternate (weapon-swap) slot. Fifty-four bytes: a pure ECX jump table writing only EAX, so EDX survives. ITEMMODE_EquipCorpseItems holds the main body item in EDX across this call and reads it back afterwards; with EDX declared killed the pointer was lost and corpse reclaim resolved the wrong item. The parameter arrives in a whole register - typing it from the single byte the body reads made the decompiler splice the indeterminate upper bytes back in as an uninitialised local.
-static int ITEMMODE_GetAlternateBodyLoc(eD2BodyLocDWORD dwParam) {
+static int __fastcall ITEMMODE_GetAlternateBodyLoc(eD2BodyLocDWORD dwParam) {
     switch (dwParam) {
       case BODYLOC_R_ARM:
         return 5;
@@ -4392,8 +4391,6 @@ void __fastcall ITEMMODE_RemoveItemFromBelt(::SGAMEDATA * pGame, D2UnitStrc * pU
     D2BeltsTxt* pBeltTxtRecord;
     POINT* pDropSpotOut;
     ::SGAMEDATA* pGameDrop;
-    uint32_t nSecurityCookie;
-    nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2InventoryStrc* pInventory;
     pInventory = pUnit->pInventory;
     D2InventoryStrc* pInventorySaved;
@@ -4533,7 +4530,6 @@ void __fastcall ITEMMODE_RemoveItemFromBelt(::SGAMEDATA * pGame, D2UnitStrc * pU
       nBeltSlotIdx++;
       pInventory = pInventorySaved;
       if (0xf < (int)nBeltSlotIdx) {
-        Fog::Debug::GuardStack();
         return;
       }
     } while (true);
@@ -6969,7 +6965,6 @@ BOOL __fastcall Transmorgify(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc
       pItemTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(pItem->nClassId);
       if (pItemTxt) {
         if (!pItemTxt->bTransmogrify) {
-          Fog::Debug::GuardStack();
           return 0;
         }
 
@@ -6977,7 +6972,6 @@ BOOL __fastcall Transmorgify(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc
         pTmogItemTxt = D2Common::DATATBLS::ItemTbls::ConvertItemCodeToClassIdAndGetItemsTxtLine(szTMogCode, &nTmogClassId);
         if (pTmogItemTxt) {
           if (pItem->eAnimMode.ePlayerMode != Death) {
-            Fog::Debug::GuardStack();
             return 0;
           }
 
@@ -7003,7 +6997,6 @@ BOOL __fastcall Transmorgify(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc
               }
             }
 
-            Fog::Debug::GuardStack();
             return 1;
           }
 

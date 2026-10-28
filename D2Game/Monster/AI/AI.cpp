@@ -123,7 +123,6 @@
 #include "D2Common/Units/Missile.h"
 #include "D2Game/D2Game.h"
 #include "D2Game/Monster/AI/Baal.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 #include "Fog/Src/Safesock.h"
 
@@ -2030,7 +2029,6 @@ BOOL __fastcall TestIfMonsterCanHitTarget(D2UnitStrc * pUnit, D2UnitStrc * pTarg
     int nTargetY;
     nTargetY = 0;
     if (!pUnit || !pTarget) {
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -2124,12 +2122,10 @@ BOOL __fastcall TestIfMonsterCanHitTarget(D2UnitStrc * pUnit, D2UnitStrc * pTarg
       bHasLOS = D2Common::Units::TestCollisionByCoordinates(pUnit, nTargetX - nXOffset, nTargetY + nYOffset, 0x805);
       if (bHasLOS) {
         bHasLOS = D2Common::Units::TestCollisionByCoordinates(pUnit, nTargetX + nXOffset, nTargetY - nYOffset, 0x805);
-        Fog::Debug::GuardStack();
         return (uint32_t)!bHasLOS;
       }
     }
 
-    Fog::Debug::GuardStack();
     return 1;
 }
 
@@ -3643,7 +3639,6 @@ void __fastcall SendNpcMessageOrHoverText(::SGAMEDATA * pGame, D2UnitStrc * pNpc
     char szMessageIdStr[12];
     int32_t nMsgIdx;
     int32_t pNullEventArg;
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if ((short int)nMessageId) {
       if (bSendPacket) {
         pClient = UNIT::SUnit::SUNIT_GetClient(pPlayer, ".\\Ai\\AiTatics.cpp", 0x2cb);
@@ -3659,7 +3654,6 @@ void __fastcall SendNpcMessageOrHoverText(::SGAMEDATA * pGame, D2UnitStrc * pNpc
         sNpcInfoPacket.aMessages[0].bShow = true;
         sNpcInfoPacket.aMessages[0].nMessage = (short int)nMessageId;
         GAME::SCmd::NET_D2GS_SERVER_Send_0x27_NpcInfo(pClient, &sNpcInfoPacket);
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -3685,8 +3679,6 @@ void __fastcall SendNpcMessageOrHoverText(::SGAMEDATA * pGame, D2UnitStrc * pNpc
         GAME::Event::SetEvent(pGame, pNpc, 6, pExpireFrame, nMsgIdx, pNullEventArg);
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall MONSTERAI_CommandMoveToPosition(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nTargetX, int32_t nTargetY, int32_t nParam) {
@@ -21330,7 +21322,6 @@ BOOL __fastcall AI_Monster_CastDirectionalSkillAtTarget(::SGAMEDATA * pGame, D2U
     eD2UnitType eUnitType2;
     int nSelfXPos;
     int nSpawnY;
-    uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2MonStatsTxt* pMonStatsTmp = pMonStats;
     eD2UnitType eUnitTypeTmp2 = pTargetUnit->eUnitType;
     ::SGAMEDATA* pGameCopy = pGame;
@@ -21396,7 +21387,6 @@ BOOL __fastcall AI_Monster_CastDirectionalSkillAtTarget(::SGAMEDATA * pGame, D2U
         nCanSpawn = MONSTERAI_CanSpawnMonsterAt(nSpawnMonsterId, pRoom, nSelfXPos, nSpawnY, nTargetYPos);
         if (nCanSpawn) {
           SERVER_UNIT_CastSkill(pGameCopy, pUnit, pMonStatsTmp->aSkMode[0], (int)pMonStatsTmp->aSkill[0], nullptr, nTargetUnitType, nUnitXOffset);
-          Fog::Debug::GuardStack();
           return 1;
         }
       }
@@ -21411,7 +21401,6 @@ BOOL __fastcall AI_Monster_CastDirectionalSkillAtTarget(::SGAMEDATA * pGame, D2U
       nDirOctant = (uint32_t)bVar1;
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 

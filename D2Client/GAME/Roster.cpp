@@ -57,7 +57,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2RosterStrc) == 0x84, "D2_NEW_AT(D
 
 namespace D2Client::GAME::Roster {
 
-static D2RosterStrc * GetRosterPlayerByGUID(int32_t nRosterGUID) {
+static D2RosterStrc * __stdcall GetRosterPlayerByGUID(int32_t nRosterGUID) {
     D2RosterLinkListStrc* pRosterLink;
     D2RosterStrc* pRosterIter = gpRosterPlayers;
     if (nRosterGUID == -1) {

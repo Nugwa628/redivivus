@@ -1577,7 +1577,7 @@ BOOL __fastcall D2WINEDITBOX_HandleKeyRelease(::D2WinEditBox * pEditBox, char cP
     return 1;
 }
 
-void __fastcall D2WINEDITBOX_SetTextWide(::D2WinEditBox * pnParam, uint16_t * wszText) {
+int __fastcall D2WINEDITBOX_SetTextWide(::D2WinEditBox * pnParam, uint16_t * wszText) {
     int32_t nLine;
     if (!pnParam) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x45e);
@@ -1598,11 +1598,11 @@ void __fastcall D2WINEDITBOX_SetTextWide(::D2WinEditBox * pnParam, uint16_t * ws
       pnParam->nCursorIndex = nLine;
       D2WINEDITBOX_UpdateCursorPosition(pnParam);
       if (!pnParam->fpChangeCallback) {
-        return;
+        return 1;
       }
 
       pnParam->fpChangeCallback(nullptr);
-      return;
+      return 1;
     }
 }
 

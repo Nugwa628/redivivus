@@ -13,7 +13,6 @@
 #include "Fog/Src/Safesock.h"
 #include "Storm/Source/SSystem.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Net/in_addr.h"
 #include "Fog/QServer.h"
 
@@ -452,7 +451,6 @@ DWORD __stdcall AcceptThreadMain(void * lpThreadParam) {
     LeaveCriticalSection(&pQServer->csClientLifecycle);
     exit_thread:
     ErrorManager::StubHook2();
-    Debug::GuardStack();
     return 1;
 }
 
@@ -687,7 +685,6 @@ SOCKET __fastcall StartListening(D2QServerStrc * pQServer, uint32_t nPort) {
     char optKeepAlive[8];
     sockaddr bindAddr;
     char* pszErrFmt;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     uint32_t nPortLocal = nPort;
     int32_t pIocp = (int32_t)CreateIoCompletionPort((HANDLE)-1, (HANDLE)0x0, 0, 0);
     if (!(HANDLE)pIocp) {
@@ -699,7 +696,6 @@ SOCKET __fastcall StartListening(D2QServerStrc * pQServer, uint32_t nPort) {
     if (hListenSocket == -1) {
       nResult = WSAGetLastError();
       LogManager::LOGFILE_WriteStringToFile("[SERVER]  QSNTInit failed on socket() - err=%d", nResult);
-      Debug::GuardStack();
       return 0;
     }
 
@@ -756,7 +752,6 @@ SOCKET __fastcall StartListening(D2QServerStrc * pQServer, uint32_t nPort) {
           ErrorManager::StubHook1();
         }
 
-        Debug::GuardStack();
         return hListenSocket;
       }
 
@@ -766,22 +761,18 @@ SOCKET __fastcall StartListening(D2QServerStrc * pQServer, uint32_t nPort) {
 
     LogManager::LOGFILE_WriteStringToFile(pszErrFmt, nResult);
     Safesock::closeSocket(hListenSocket);
-    Debug::GuardStack();
     return 0;
 }
 
 SOCKET __fastcall CreateSocketLocal(D2QServerStrc * pQServer, int nPort) {
     WSADATA wsaData;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     /* LPWSADATA lpWSAData for WSAStartup */ /* WORD wVersionRequired for WSAStartup */ pQServer->nPerIpConnectionLimit = 1;
     int nWsaResult = WSAStartup(0x101, &wsaData);
     if (nWsaResult) {
-      Debug::GuardStack();
       return 0;
     }
 
     SOCKET SVar1 = QServerNT::StartListening(pQServer, nPort);
-    Debug::GuardStack();
     return SVar1;
 }
 

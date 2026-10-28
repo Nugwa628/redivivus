@@ -68,7 +68,6 @@
 #include "globals/globals.h"
 #include "D2Game/Ai/AiGeneral.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -762,7 +761,7 @@ BOOL __stdcall ITEM_RollUniqueItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2It
 }
 
 // Rolls and assigns magic prefix and/or suffix for an item during generation. Respects forced prefix/suffix overrides from pItemGenCtx (nForcePrefix/nForceSuffix). If both overrides are absent, rolls randomly via ITEMMOD_RollMagicAffixVersioned. Halts if neither prefix nor suffix could be assigned. Clears ITEMFLAG_IDENTIFIED on success.
-static void __stdcall ITEM_RollForcedMagicAffix(D2ItemGenContextStrc * pItemGenCtx, D2UnitStrc * pUnit) {
+static int __stdcall ITEM_RollForcedMagicAffix(D2ItemGenContextStrc * pItemGenCtx, D2UnitStrc * pUnit) {
     int16_t wMagicSuffix;
     int16_t wForcedPrefix;
     wForcedPrefix = 0;
@@ -802,6 +801,7 @@ static void __stdcall ITEM_RollForcedMagicAffix(D2ItemGenContextStrc * pItemGenC
       exit(-1);
     }
     D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, ITEMFLAG_IDENTIFIED, 0);
+    return 1;
 }
 
 // Drop-time socket roller: decides whether an item gets sockets and how many. Bails
@@ -2867,12 +2867,9 @@ void __fastcall DROP_SpawnRandomItemInRoom(::SGAMEDATA * pGame, D2RoomStrc * pRo
           ppUnitTable++;
         }
 
-        Fog::Debug::GuardStack();
         return;
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Spawns a gold item at or near pCoords in pRoom. Derives monster level from the room's level ID and game difficulty, resolves a nearby open tile via GetFreeCoordinates_WithFieldCoords (SPAWN_ITEM_COLLISION), then calls ITEM_CreateItemInstance with a fully populated D2ItemGenContextStrc (gold class ID, mode=3, quality=INVALID). Clears ITEMFLAG_NEW on the created unit.
@@ -2933,11 +2930,8 @@ void __fastcall DROP_SpawnGoldInRoom(::SGAMEDATA * pGame, D2RoomStrc * pRoom, PO
         D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, ITEMFLAG_NEW, 0);
       }
 
-      Fog::Debug::GuardStack();
       return;
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Spawns an exceptional-tier item drop at the given map coordinates. Derives effective item level from the room's difficulty-adjusted monster level, rolls a class ID via ITEMDROP_RollExceptionalItemClass, finds the best free spawn tile near the coordinates, and calls ITEM_CreateItemInstance with the constructed D2ItemGenContextStrc.
@@ -2981,12 +2975,9 @@ void __fastcall DROP_SpawnExceptionalItem(::SGAMEDATA * pGame, D2RoomStrc * pRoo
         sItemGenCtx.nItemLevel = nEffectiveItemLevel;
         sItemGenCtx.pDrlgRoom = pSpawnRoom;
         ITEM_CreateItemInstance(pGame, &sItemGenCtx, 0);
-        Fog::Debug::GuardStack();
         return;
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Spawns a normal-quality item drop in the world. Rolls an item class from the treasure-class system (up to 6 retries) using the room seed and effective monster level, finds a free collision-clear tile near the requested coordinates, populates a D2ItemGenContextStrc, and calls ITEM_CreateItemInstance. Silently returns (no item) if no valid class rolls or no free tile is found.
@@ -3056,12 +3047,9 @@ void __fastcall DROP_SpawnNormalItem(::SGAMEDATA * pGame, D2RoomStrc * pRoom, PO
         sItemGenCtx.nItemLevel = nEffectiveMonLevel;
         sItemGenCtx.nItemClassid = nItemClassId;
         ITEM_CreateItemInstance(pGame, &sItemGenCtx, 0);
-        Fog::Debug::GuardStack();
         return;
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Spawns a single elite/special drop item into the world near pCoords in pRoom. Derives an effective item level from the room's level id (clamped, monster-level-for-difficulty, or 1 in town/no level), then rolls an item class via ITEMDROP_RollEliteItemClass (using the room seed, treasure-class filter nTCFilter, monster level, and whether pUnit is a monster). Finds a nearby better room and a free collision-clear coordinate (GetFreeCoordinates_WithFieldCoords); if a valid spawn spot is found, fills a D2ItemGenContextStrc (mode 3, quality invalid/auto, the rolled class id and item level) and creates the item instance via ITEM_CreateItemInstance. Uses Fog GuardStack as the tail epilogue. No return; side effect is the new world item.
@@ -3134,11 +3122,8 @@ void __fastcall DROP_SpawnEliteItem(::SGAMEDATA * pGame, D2RoomStrc * pRoom, POI
       sItemGenCtx.nItemClassid = nRolledClassId;
       sItemGenCtx.pDrlgRoom = pSpawnRoom;
       ITEM_CreateItemInstance(pGame, &sItemGenCtx, 0);
-      Fog::Debug::GuardStack();
       return;
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Server-side: rolls and creates a reward/drop item instance to be dropped near a unit. Determines item level from the source unit (monster level, player level, or level-table mon level by difficulty/expansion; min 2) and writes it to *pnParam. If the unit carries a forced drop code, converts it to a class id; otherwise rolls an item class by level (for gold drops, retries up to 11 times until an Items.txt entry with the gold bitfield is found, then falls back to a normal class roll). Finds the best passable spawn spot in the unit's room, fills a D2ItemGenContextStrc (quality, position, level, class id) and calls ITEM_CreateItemInstance. If ppUnit is non-null, copies the 0x84-byte context out to it. Returns the created item unit (NULL on spawn-spot failure); halts with unrecoverable error on bad game ptr or bad item code.
@@ -3238,12 +3223,10 @@ D2UnitStrc * __fastcall ITEM_RewardItemToDrop(::SGAMEDATA * pGame, D2UnitStrc * 
           ppUnit++;
         }
 
-        Fog::Debug::GuardStack();
         return pDVar1;
       }
     }
 
-    Fog::Debug::GuardStack();
     return pDVar1;
 }
 
@@ -3303,7 +3286,6 @@ D2UnitStrc * __fastcall ITEM_CreateFromTemplate(D2UnitStrc * pUnit, int32_t nIte
       D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pCreatedItem, ITEMFLAG_IDENTIFIED, 1);
     }
 
-    Fog::Debug::GuardStack();
     return pCreatedItem;
 }
 
@@ -3541,7 +3523,7 @@ void __fastcall ITEM_DropEarOnPvpDeath(::SGAMEDATA * pGame, D2UnitStrc * pUnit) 
 
 // Two explicit GuardStack tails: GuardStack((int)pClonedItem) on success, GuardStack(0) on failure. Returns the cloned item unit or NULL.
 D2UnitStrc * __fastcall ITEM_CloneFromSerializedData(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pSourceItem, BOOL bCloneSockets) {
-    // Frame slots -1060..-4 are ONE object: &stInventoryBuf is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -1060..-8 are ONE object: &stInventoryBuf is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       int32_t stInventoryBuf;
@@ -3552,9 +3534,8 @@ D2UnitStrc * __fastcall ITEM_CloneFromSerializedData(::SGAMEDATA * pGame, D2Unit
       ::SGAMEDATA* pGameSaved;
       uint8_t* pSocketDataCursor;
       uint8_t aSerializedItemData[1024];
-      uint32_t nSecurityCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 1056, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 1052, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     bool _bPutItemSuccess;
     bool bPutItemSuccess;
@@ -3567,7 +3548,6 @@ D2UnitStrc * __fastcall ITEM_CloneFromSerializedData(::SGAMEDATA * pGame, D2Unit
     int32_t nSocketIdx;
     int32_t nSocketSlot;
     int32_t* pInventoryBuf;
-    __frame0.nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     __frame0.pUnitSaved = pUnit;
     __frame0.pGameSaved = pGame;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
@@ -3587,7 +3567,6 @@ D2UnitStrc * __fastcall ITEM_CloneFromSerializedData(::SGAMEDATA * pGame, D2Unit
             D2Common::ITEMS::Items::ExtractItemDetails(__frame0.pSocketDataCursor, nSerializedSize, 1, &stItemDetails);
             pSocketedGem = ITEM_CreateFromSaveData(pGame, nullptr, __frame0.pSocketDataCursor, nSerializedSize, 1, &stItemDetails, &__frame0.nBytesConsumed, 0x60);
             if (!pSocketedGem) {
-              Fog::Debug::GuardStack();
               return nullptr;
             }
 
@@ -3634,11 +3613,9 @@ D2UnitStrc * __fastcall ITEM_CloneFromSerializedData(::SGAMEDATA * pGame, D2Unit
 
       UNIT::ITEM_ClearFlagsAndCommands(pGame, pClonedItem);
       D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pClonedItem, ITEMCMD_DELETE, 0);
-      Fog::Debug::GuardStack();
       return pClonedItem;
     }
 
-    Fog::Debug::GuardStack();
     return nullptr;
 }
 
@@ -3652,7 +3629,6 @@ static D2UnitStrc * __stdcall ITEMGEN_CreateItemFromClassIdAndQuality(int32_t nI
     D2ItemGenContextStrc sItemGenCtx;
     int local_8;
     if (nItemClassId < 0) {
-      Fog::Debug::GuardStack();
       return nullptr;
     }
 
@@ -3671,7 +3647,6 @@ static D2UnitStrc * __stdcall ITEMGEN_CreateItemFromClassIdAndQuality(int32_t nI
     // Retire-When: the decompile of 0055a550 assigns sItemGenCtx.pDrlgRoom after the memset.
     D2RoomStrc* pSpawnRoomFound = FindBestSpotToSpawnItem(pSpawnRoom, &ptUnitPos, pSpawnPos, bUseBestSpot, bCheckPassable);
     if (!pSpawnRoomFound) {
-      Fog::Debug::GuardStack();
       return nullptr;
     }
 
@@ -3713,7 +3688,6 @@ static D2UnitStrc * __stdcall ITEMGEN_CreateItemFromClassIdAndQuality(int32_t nI
 
     sItemGenCtx.nFlags |= nFlags;
     pNewItem = ITEM_CreateItemInstance(pGame, &sItemGenCtx, 0);
-    Fog::Debug::GuardStack();
     return pNewItem;
 }
 
@@ -3973,7 +3947,6 @@ void __fastcall SERVER_ITEM_RollItemToDrop(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
                       (*pUnitIndex)++;
                       if (nItemsCountToGenerate <= *pUnitIndex) {
-                        Fog::Debug::GuardStack();
                         return;
                       }
 
@@ -4150,7 +4123,6 @@ void __fastcall SERVER_ITEM_RollItemToDrop(::SGAMEDATA * pGame, D2UnitStrc * pUn
         }
       }
       if (!nTCStackDepth) {
-        Fog::Debug::GuardStack();
         return;
       }
     } while (true);

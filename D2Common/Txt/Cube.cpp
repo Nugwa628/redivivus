@@ -25,7 +25,6 @@
 #include "Fog/Src/ErrorManager.h"
 #include "Fog/Src/Excel.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "Storm/D2MPQFileStrc.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -711,7 +710,6 @@ void __fastcall CUBE_LoadCubeMainTable(D2PoolManagerStrc * pMemory) {
     D2BinFieldInputStrc cubemain[104];
     void* pFileData;
     char szFilePath[260];
-    uint32_t nStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     cubemain[0].szName = "enabled";
     cubemain[0].eType = FIELDTYPE_CHAR;
     cubemain[0].nSize = 0;
@@ -1243,7 +1241,6 @@ void __fastcall CUBE_LoadCubeMainTable(D2PoolManagerStrc * pMemory) {
       }
 
       pTxtCubeMain = (D2CubeMainTxt*)DATATBLS::DataTbls::CompileTxt(pMemory, "cubemain", cubemain, &nTxtCubeMainSize, 0x148);
-      Fog::Debug::GuardStack();
       return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2f0);

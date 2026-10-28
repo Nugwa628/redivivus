@@ -55,7 +55,6 @@
 #include "Bnclient/BNGatewayAccess.h"
 #include "D2Common/D2Common.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -315,9 +314,7 @@ void __fastcall DATATBLS_CompileSkillCode(char * szText, char * pRecord, int32_t
     size_t sVar1;
     uint32_t nCompiledLen;
     uint8_t aByteCodeBuf[1024];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!pRecord) {
-      Fog::Debug::GuardStack();
       return;
     }
     if (szText) {
@@ -325,7 +322,6 @@ void __fastcall DATATBLS_CompileSkillCode(char * szText, char * pRecord, int32_t
       if (0 < (int)sVar1) {
         nCompiledLen = DATATBLS_AppendDataToBuffer(&sgtDataTable.pSkillsCode, &sgtDataTable.nSkillsCodeSize, &sgtDataTable.nSkillsCodeCapacity, aByteCodeBuf, sVar1);
         *(uint32_t*)(pRecord + nOffset) = nCompiledLen;
-        Fog::Debug::GuardStack();
         return;
       }
     }
@@ -335,16 +331,13 @@ void __fastcall DATATBLS_CompileSkillCode(char * szText, char * pRecord, int32_t
     pcVar1[1] = -1;
     pcVar1[2] = -1;
     pcVar1[3] = -1;
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall DATATBLS_CompileSkillDescCode(char * szText, char * pRecord, int32_t nOffset, int32_t nSize, int32_t nTxtRow, int32_t nTxtColumn) {
     size_t sVar1;
     uint32_t nCompiledLen;
     uint8_t aByteCodeBuf[1024];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!pRecord) {
-      Fog::Debug::GuardStack();
       return;
     }
     if (szText) {
@@ -352,7 +345,6 @@ void __fastcall DATATBLS_CompileSkillDescCode(char * szText, char * pRecord, int
       if (0 < (int)sVar1) {
         nCompiledLen = DATATBLS_AppendDataToBuffer(&sgtDataTable.pSkillDescCode, &sgtDataTable.nSkillDescCodeSize, &sgtDataTable.nSkillDescCodeCapacity, aByteCodeBuf, sVar1);
         *(uint32_t*)(pRecord + nOffset) = nCompiledLen;
-        Fog::Debug::GuardStack();
         return;
       }
     }
@@ -362,7 +354,6 @@ void __fastcall DATATBLS_CompileSkillDescCode(char * szText, char * pRecord, int
     pcVar1[1] = -1;
     pcVar1[2] = -1;
     pcVar1[3] = -1;
-    Fog::Debug::GuardStack();
 }
 
 D2AnimDataStrc * __stdcall TXT_AnimTbls_Get() {
@@ -582,7 +573,6 @@ char * __stdcall GetNameByClassIdAndType(eD2UnitType eUnitType, int16_t nClassId
 
 void __stdcall StoreDataTables(uint32_t szFileName, D2InventoryToBeUpdatedStrc * pInventoryToBeUpdated, size_t nSize, uint32_t dwVersion) {
     char szFilePath[260];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\%s", "DATA\\GLOBAL\\EXCEL", szFileName);
     FILE* _File = fopen(szFilePath, "wb");
     if (_File) {
@@ -590,17 +580,13 @@ void __stdcall StoreDataTables(uint32_t szFileName, D2InventoryToBeUpdatedStrc *
       fwrite(pInventoryToBeUpdated, nSize, 1, _File);
       fclose(_File);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // @sourcefile .\DATATBLS\DataTbls.cpp
 D2ArchiveStrc * __fastcall ARCHIVE_LoadDataTables(D2PoolManagerStrc * pMemory, char * szTableName, char * szExtension, uint32_t * pSize, char * szFile, int32_t nLine) {
     char szFilePath[260];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\%s%s", "DATA\\GLOBAL\\EXCEL", szTableName, szExtension);
     D2ArchiveStrc* pDVar1 = (D2ArchiveStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(pMemory, szFilePath, pSize, ".\\DATATBLS\\DataTbls.cpp", 0x82f);
-    Fog::Debug::GuardStack();
     return pDVar1;
 }
 
@@ -696,7 +682,6 @@ void * __stdcall CompileTxt(D2PoolManagerStrc * pMemory, char * szTableName, D2B
       *nTxtTableSize = (int)pArchiveTxt;
     }
 
-    Fog::Debug::GuardStack();
     return pParsedData;
 }
 
@@ -727,7 +712,6 @@ void __fastcall TXT_CharStats_DefineWideStringClass(D2CharStatsTxt * pTxtCharSta
     uint16_t wszTmpBuf[512];
     uint16_t wszSrcBuf[512];
     uint16_t wszShortBuf[32];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     uint16_t* pDestination = wszSrcBuf;
     for (i = 0x100; i; i--) {
       pDestination[0] = L'\0';
@@ -766,8 +750,6 @@ void __fastcall TXT_CharStats_DefineWideStringClass(D2CharStatsTxt * pTxtCharSta
         nRowsRemaining--;
       } while (nRowsRemaining);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // One-time startup loader for the many small single-column code/name lookup tables in DataTbls. Always compiles compcode. If sgtDataTable.bUseTxt is set, also creates a TxtLink struct and compiles each of: playerclass, bodylocs, storepage, elemtypes, hitclass, colors, hiredesc, monmode, plrmode, monai, monplace, skillcalc, misscalc, skills, events. Each is a CODE4 or NAME_I_WORD keyed table whose compiled pointer + link are stored into the corresponding sgtDataTable.pTxt*/pTxt*Link/nTxt*Size globals. Allocates from pMemory. Pure init side-effects, no return.
@@ -1658,7 +1640,6 @@ void __fastcall TXT_SaveTableToBinFile(D2PoolManagerStrc * pMemory, char * szTab
     FILE* pFile;
     uint32_t nLoadedSize;
     char szFilePath[260];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (sgtDataTable.bUseTxt && *ppInput) {
       /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\%s.bin", "DATA\\GLOBAL\\EXCEL", szTableName);
       pFile = fopen(szFilePath, "wb");
@@ -1674,7 +1655,6 @@ void __fastcall TXT_SaveTableToBinFile(D2PoolManagerStrc * pMemory, char * szTab
     *ppInput = pLoadedArchive;
     *pSize1 = nLoadedSize;
     *pSize2 = nLoadedSize;
-    Fog::Debug::GuardStack();
 }
 
 // Loads and compiles Skills.txt and SkillDesc.txt into the engine's runtime tables. Builds two large D2BinFieldInputStrc schemas (skills: flags, mana/level reqs, damage, elemental, calc/srvprgfunc string-linker columns, state and reqskill cross-links; skilldesc) and compiles both into sgtDataTable (pTxtSkills/nTxtSkillsCount, pTxtSkillDesc/nTxtSkillDescSize, their txt-links, nPassiveSkillsCount). Also derives per-class skill index tables (pSkillsPerClassStrc, pPassiveSkillsPerClassStrc, pSkillsPerClassCounter, nSkillCountMaxPerClass) and cross-references pets (pTxtPetType.nSkillId). Caches skillscode/skilldesccode bins. Must run after pTxtPetType is loaded; halts via ErrorManager on count overflow. Skill record stride 0x23c. __stdcall(pMemory).

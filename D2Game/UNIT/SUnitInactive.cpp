@@ -65,7 +65,6 @@
 #include "globals/globals.h"
 #include "Bnclient/BNGatewayAccess.h"
 #include "D2Game/GAME/Event/Dispatch/Monster.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "Fog/Src/Safesock.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -245,12 +244,10 @@ static void __stdcall SUNITINACTIVE_SerializeAndDeactivateItem(::SGAMEDATA * pGa
     if (!pOutInactiveRecord) {
       *pNewInactiveRecord = *(int*)(pInactiveList + 8);
       *(int**)(pInactiveList + 8) = (int*)pNewInactiveRecord;
-      Fog::Debug::GuardStack();
       return;
     }
 
     *pOutInactiveRecord = (int)pNewInactiveRecord;
-    Fog::Debug::GuardStack();
 }
 
 // Locates and removes an inactive monster record matching nClassId (record +8, stored from pUnit->nClassId by SUNITINACTIVE_DeactivateMonster at 005422b1) from the bucket list indexed by byActNo in the game's inactive monster table. On match: unlinks the node, clears its minion list via ClearMinionList, frees its AI/spawn-point list, and frees the record. Searches all D2InactiveUnitListStrc chained entries in the bucket.
@@ -1340,7 +1337,7 @@ void __fastcall SUNITINACTIVE_FreeAllInactiveLists(::SGAMEDATA * pGame) {
 
 // Removes a single inactive unit record from the per-act inactive list by unit type and class ID. For monsters (nUnitType==1) delegates to SUNITINACTIVE_RemoveInactiveMonsterByClassId; for other types walks the linked list and frees the matching D2InactiveUnitRecordStrc from the game memory pool.
 // @sourcefile .\UNIT\SUnitInactive.cpp
-void __stdcall SUNITINACTIVE_RemoveInactiveUnitByTypeAndId(::SGAMEDATA * pGame, uint16_t nUnitType, uint32_t nClassId, uint8_t byActNo) {
+void __fastcall SUNITINACTIVE_RemoveInactiveUnitByTypeAndId(::SGAMEDATA * pGame, uint16_t nUnitType, uint32_t nClassId, uint8_t byActNo) {
     D2InactiveUnitRecordStrc* pCurRecord;
     D2InactiveUnitRecordStrc* pNextRecord;
     if (nUnitType == 1) {

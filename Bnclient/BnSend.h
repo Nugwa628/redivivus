@@ -141,9 +141,9 @@ uint32_t __stdcall BNSEND_GetServerToken();
 void __fastcall BNSEND_SetClientToken(uint32_t nClientToken);
 DWORD __stdcall BNCLIENT_GetBNetClientToken();
 void __fastcall NET_SID_CLIENT_Send_0x29_LogonResponse(char * szText1, char * szText2);
-void __fastcall NET_SID_CLIENT_Send_0x3A_LogonResponse2(char * szText1, char * szText2);
-void __fastcall NET_SID_CLIENT_Send_0x3D_CreateAccount2(char * szText1, char * szText2);
-void __fastcall NET_SID_CLIENT_Send_0x31_ChangePassword(char * szText1, char * szText2, char * szNewPassword);
+int __fastcall NET_SID_CLIENT_Send_0x3A_LogonResponse2(char * szText1, char * szText2);
+int __fastcall NET_SID_CLIENT_Send_0x3D_CreateAccount2(char * szText1, char * szText2);
+int __fastcall NET_SID_CLIENT_Send_0x31_ChangePassword(char * szText1, char * szText2, char * szNewPassword);
 void __fastcall NET_SID_CLIENT_Send_0x07_ReportVersion(uint32_t dwExeHash, uint32_t dwParam2, char * szExeInfoStr);
 void NET_SID_CLIENT_Send_0x06_StartVersioning();
 // @sourcefile .\BnSend.cpp
@@ -160,7 +160,7 @@ void __fastcall NET_SID_CLIENT_Send_0x0B_GetChannelList_0x0A_EnterChat(char * sz
 uint32_t NET_SID_CLIENT_Send_0x10_LeaveChat();
 void __fastcall NET_SID_CLIENT_Send_0x0E_ChatCommand(uint8_t * pbParam);
 int __stdcall NET_SID_CLIENT_Send_0x15_CheckAd();
-void __stdcall NET_SID_CLIENT_Send_0x21_DisplayAd();
+int __stdcall NET_SID_CLIENT_Send_0x21_DisplayAd();
 void __fastcall NET_SID_CLIENT_Send_0x1C_StartAdVex3(char * szGameName, char * szGamePassword, char * szGameDescription, int32_t nFlags);
 DWORD __stdcall BNCLIENT_SendKeepAlive();
 uint32_t __fastcall thunk_NET_SID_CLIENT_Send(uint8_t bParam, char * szText);
@@ -265,8 +265,8 @@ void __stdcall NET_SID_CLIENT_Send_0x42_CDKey3();
 void __stdcall BNNEWS_DecodeCDKeys();
 // High-level CD key hash helper. Gets server token, retrieves CD key by type (0=classic, 1=expansion), and prepares hash structure for SID_AUTH_CHECK.
 void __fastcall BNSEND_HashCDKeyByType(struct D2CDKeyHashStrc * pOutHash, uint32_t nToken, int32_t nCDKeyType);
-void __fastcall BNSEND_SendRawBytes(void * pBytes, size_t nSize);
-void __fastcall BNSEND_SendString(char * szString);
+int __fastcall BNSEND_SendRawBytes(void * pBytes, size_t nSize);
+int __fastcall BNSEND_SendString(char * szString);
 void __fastcall NET_SID_CLIENT_Send_0x33_GetFileTime(char * szText, uint32_t dwRequestId);
 void StaticFini_gpBNetNewsCache();
 // 2 internal functions (defined in .cpp)

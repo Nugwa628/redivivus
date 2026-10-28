@@ -6,7 +6,6 @@
 #include "Storm/Source/SErr.h"
 #include "Storm/Source/SSystem.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -455,12 +454,14 @@ static uint32_t D2vsprintf(char * szFormat, size_t nSize, char * pBuffer, va_lis
 // @sourcefile-storm .\SOURCE\SSTR.CPP  (first-party: SStrDup's own SMemAlloc call site names it)
 // @wasnamed STRING_printfToPointer
 size_t SStrPrintf(char * szOutput, size_t nSize, char * Format, ...) {
+    va_list __va;
+    va_start(__va, Format);
     if (!szOutput || !Format) {
       SErr::SErrSetLastError(0x57);
       return 0;
     }
 
-    uint32_t nWritten = D2vsprintf(Format, nSize, szOutput, (va_list)((uint8_t*)&Format + 4));
+    uint32_t nWritten = D2vsprintf(Format, nSize, szOutput, __va);
     return nWritten;
 }
 
@@ -925,7 +926,6 @@ int __stdcall SStrHashHT(uint8_t * pszText) {
     uint32_t nLen;
     uint8_t szUpper[1024];
     uint32_t nChar;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     uint8_t bChar = *pszText;
     uint8_t* pWrite = szUpper;
     for (nLen = 0; nChar = (uint32_t)bChar , nChar && (pszText++ , nLen < 0x3ff); nLen++) {
@@ -942,7 +942,6 @@ int __stdcall SStrHashHT(uint8_t * pszText) {
 
     *pWrite = 0;
     uint32_t uVar1 = SSTR_JenkinsHash((int*)szUpper, nLen, 0);
-    Fog::Debug::GuardStack();
     return uVar1;
 }
 

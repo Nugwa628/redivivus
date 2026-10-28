@@ -14,7 +14,7 @@ struct BigData;
 namespace Bnclient::SHA {
 
 // Function declarations
-void SHA1_Init(uint32_t * pState);
+void __fastcall SHA1_Init(uint32_t * pState);
 void __fastcall SHA1_Update(uint32_t * pnParam, void * pParam, uint32_t nByteLen);
 void __fastcall SHA1_Final(uint8_t * pHashOut, uint32_t * pShaCtx);
 // Register params: pHashOut (ECX): uint8_t *, pWideStr (EDX): char *

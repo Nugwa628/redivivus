@@ -711,7 +711,7 @@ D2ClientSoundChannelStrc * __fastcall SOUND_PlaySoundWithPanning(D2SoundChannelS
 
 // Returns the unit's greeting sound set &gaNpcGreetingSounds[n] by class id (pUnit+4, nClassId), or NULL if pUnit is NULL or the class has none. The callers pass the interacted NPC or the mercenary; every Cain class (0x92, 0xf4-0xf6, 0x109, 0x208) maps to entry 4.
 // Provenance: 004e0378 MOV EAX,[EAX+4]; record values are Sounds.txt <npc>_greeting_* ids.
-static D2NpcGreetingSoundsStrc * SOUND_GetNpcGreetingSounds(D2UnitStrc * pUnit) {
+static D2NpcGreetingSoundsStrc * __stdcall SOUND_GetNpcGreetingSounds(D2UnitStrc * pUnit) {
     // Static local variables (originally global data)
     // also labelled: gaAmbienceSoundGroups, bAmbienceSoundGroupAct1D
 static D2NpcGreetingSoundsStrc gaNpcGreetingSounds[29] = {

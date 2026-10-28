@@ -8,7 +8,6 @@
 #include "Fog/Src/Safesock.h"
 #include "Storm/Source/SSTR.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Net/in_addr.h"
 #include "D2Net/sockaddr.h"
 
@@ -39,7 +38,6 @@ void __stdcall NET_GetLocalIPAddressString(char * szIpAddressOut) {
     getsockname(CLIENT_SocketToServer, (sockaddr*)&__frame0.sSockAddr, &__frame0.nAddrLen);
     char* szInetNtoaResult = inet_ntoa((in_addr)__frame0.sSockAddr.sin_addr);
     Storm::Source::SSTR::SStrCopy(szIpAddressOut, szInetNtoaResult, 0x7fffffff);
-    Fog::Debug::GuardStack();
 }
 
 // @sourcefile .\SRC\D2Net.cpp

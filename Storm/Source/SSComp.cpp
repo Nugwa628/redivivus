@@ -13,7 +13,6 @@
 #include "Storm/Storm.h"
 #include "Storm/_unnamespaced.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -522,13 +521,11 @@ static int __stdcall SCOMP_ZlibCompress(uint8_t * pSrc, uint32_t nSrcLen, uint32
         _3rdparty::zlib::deflate::deflateEnd(&zStream);
         nRetInit = -5;
         if (nRet) {
-          Fog::Debug::GuardStack();
           return nRet;
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return nRetInit;
 }
 
@@ -564,7 +561,6 @@ static int __stdcall SCOMP_InflateZlibStackArena(uint8_t * pSrc, uint8_t * pDst,
     z_stream zStream;
     D2ScompArenaStrc sArena;
     uint8_t aArenaBuf[47000];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     zStream.avail_out = *pnOutLen;
     zStream.next_out = pDst;
     sArena.pCur = aArenaBuf;
@@ -585,13 +581,11 @@ static int __stdcall SCOMP_InflateZlibStackArena(uint8_t * pSrc, uint8_t * pDst,
         _3rdparty::zlib::inflate::inflateEnd(&zStream);
         nRetInit = -5;
         if (nRet) {
-          Fog::Debug::GuardStack();
           return nRet;
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return nRetInit;
 }
 
@@ -4151,6 +4145,8 @@ void __stdcall SLogInitialize() {
 
 // @blizzard SLogPend (SLOG.CPP)
 void SLogPend(uint32_t nHandle, char * szFormat, ...) {
+    va_list __va;
+    va_start(__va, szFormat);
     uint32_t nSlot;
     D2SLogStrc* pContext = SLOG_LockLog(&nSlot, 0, nHandle);
     if (!pContext) {
@@ -4159,7 +4155,7 @@ void SLogPend(uint32_t nHandle, char * szFormat, ...) {
 
     pContext->nUsed = pContext->nLineStart;
     SLOG_OutputTime(1, pContext);
-    vsprintf(pContext->acBuffer + pContext->nUsed, szFormat, (va_list)((uint8_t*)&szFormat + 4));
+    vsprintf(pContext->acBuffer + pContext->nUsed, szFormat, __va);
     uint32_t nWritten = SSTR::SStrLen(pContext->acBuffer + pContext->nUsed);
     pContext->nUsed += nWritten;
     SLOG_OutputReturn(pContext);
@@ -4168,6 +4164,8 @@ void SLogPend(uint32_t nHandle, char * szFormat, ...) {
 
 // @blizzard SLogWrite (SLOG.CPP)
 void SLogWrite(uint32_t nHandle, char * szFormat, ...) {
+    va_list __va;
+    va_start(__va, szFormat);
     uint32_t nSlot;
     D2SLogStrc* pContext = SLOG_LockLog(&nSlot, 0, nHandle);
     if (!pContext) {
@@ -4175,7 +4173,7 @@ void SLogWrite(uint32_t nHandle, char * szFormat, ...) {
     }
 
     SLOG_OutputTime(1, pContext);
-    vsprintf(pContext->acBuffer + pContext->nUsed, szFormat, (va_list)((uint8_t*)&szFormat + 4));
+    vsprintf(pContext->acBuffer + pContext->nUsed, szFormat, __va);
     uint32_t nWritten = SSTR::SStrLen(pContext->acBuffer + pContext->nUsed);
     pContext->nUsed += nWritten;
     SLOG_OutputReturn(pContext);

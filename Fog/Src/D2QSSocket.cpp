@@ -13,7 +13,6 @@
 #include "Storm/Source/SSTR.h"
 #include "Storm/Source/SSystem.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -197,8 +196,6 @@ void __stdcall ReceiveLoopCallback(D2QSSocketStrc * pQSSocket) {
     int nWsaError;
     int nSocketStatus;
     char aRecvBuffer[8296];
-    uint32_t dwStackCookie;
-    dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int nPendingOffset;
     nPendingOffset = 0;
     D2NetDataStrc* pSafesock;
@@ -259,7 +256,6 @@ void __stdcall ReceiveLoopCallback(D2QSSocketStrc * pQSSocket) {
               /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&pQSSocket->pSafesock->pSync);
             }
 
-            Debug::GuardStack();
             return;
           }
 
@@ -278,7 +274,6 @@ void __stdcall ReceiveLoopCallback(D2QSSocketStrc * pQSSocket) {
 
     cleanup:
     CloseSocket(pQSSocket);
-    Debug::GuardStack();
 }
 
 // lpStartAddress parameter of CreateThread
@@ -429,7 +424,6 @@ int32_t __stdcall NET_MCP_CLIENT_Send(D2QSSocketStrc * pQSocket, char * pBytes, 
     uint16_t nDataSize = nDataSizeNoHeader;
     _nDataSizeNoHeader = (uint32_t)nDataSizeNoHeader;
     if (!pQSocket || !pQSocket->pSafesock || !pQSocket->pSafesock->bConnected) {
-      Debug::GuardStack();
       return -1;
     }
     if (pQSocket->nHeaderSize == 4 && pQSocket->nSizeFieldOffset == 2) {
@@ -464,7 +458,6 @@ int32_t __stdcall NET_MCP_CLIENT_Send(D2QSSocketStrc * pQSocket, char * pBytes, 
     }
 
     int nSendResult = NET_MCP_CLIENT_SendPacketToQSocket(pQSocket, (char*)aSendBuf, (short int)nTotalSendSize);
-    Debug::GuardStack();
     return nSendResult + (_nDataSizeNoHeader - nTotalSendSize);
 }
 

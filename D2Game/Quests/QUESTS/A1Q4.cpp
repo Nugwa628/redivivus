@@ -60,7 +60,6 @@
 #include "D2Game/D2QuestGUIDStrc.h"
 #include "D2Game/Monster/AI/AI.h"
 #include "D2Game/Monster/Monsters.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "Fog/Src/Safesock.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -893,7 +892,6 @@ void __fastcall RollStonesOrder(D2QuestDataA1Q4Strc * pQuestSpecificData) {
     int aStoneClassIds[5];
     char szDebugBuf[80];
     D2SeedStrc sNextSeed;
-    uint32_t nStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2QuestDataA1Q4SubStrc* pSubData = *(D2QuestDataA1Q4SubStrc**)pQuestSpecificData->sSub.aStones;
     memset(pSubData->aStones, 0, 5 * sizeof(pSubData->aStones[0]));
     pSubData->nStoneIndex = 0;
@@ -916,8 +914,6 @@ void __fastcall RollStonesOrder(D2QuestDataA1Q4Strc * pQuestSpecificData) {
         nStonesPlaced++;
       }
     } while (nStonesPlaced < 5);
-
-    Fog::Debug::GuardStack();
 }
 
 // A1Q4 — Q04_SetRescueTrigger: stores the rescued-Cain trigger unit GUID into the
@@ -1709,8 +1705,6 @@ void __fastcall Q04_SendStonesOrderToClient(::SGAMEDATA * pGame, D2UnitStrc * pU
 
       GAME::SCmd::NET_D2GS_SERVER_Send_0x50_QuestSpecial(pClient, &sPacket);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // A1Q4 — Q04_SequenceFilter (fpSequenceFilter): drives quest-chain ordering.

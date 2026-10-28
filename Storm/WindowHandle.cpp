@@ -59,11 +59,12 @@ HWND __stdcall WND_GetActiveWindow() {
 }
 
 // @blizzard SMsgPopRegisterState (SMSG.CPP)
-void __stdcall SMsgPopRegisterState(char * szText) {
+int __stdcall SMsgPopRegisterState(char * szText) {
     Source::SEVT::SEvtPopState((char*)0x534d5348, szText);
     Source::SEVT::SEvtPopState((char*)0x534d5349, szText);
     Source::SEVT::SEvtPopState((char*)0x534d534a, szText);
     Source::SEVT::SEvtPopState((char*)0x534d5347, szText);
+    return 1;
 }
 
 // @blizzard SMsgPushRegisterState (SMSG.CPP)

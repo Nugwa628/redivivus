@@ -604,7 +604,7 @@ void __stdcall PANEL_ShowRunButtonTooltip() {
       memset(wszKeyLine, 0, 0x3c);
       pwszCursor = CmdTbl::CMD_GetKeyDescForCommand(0x23, 1);
       pWVar2 = D2Lang::StrTable::strtable::GetLocaleString(0x1052);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyLine, pWVar2, (uint16_t*)pwszCursor);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyLine, pWVar2, pwszCursor);
       D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, wszKeyLine);
     }
 
@@ -613,7 +613,7 @@ void __stdcall PANEL_ShowRunButtonTooltip() {
       memset(wszKeyLine, 0, 0x3c);
       pwszCursor = CmdTbl::CMD_GetKeyDescForCommand(0x23, 0);
       pWVar2 = D2Lang::StrTable::strtable::GetLocaleString(0x1052);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyLine, pWVar2, (uint16_t*)pwszCursor);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyLine, pWVar2, pwszCursor);
       D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, wszKeyLine);
     }
 
@@ -726,7 +726,7 @@ void __stdcall PANEL_DrawStaminaBar() {
     }
 
     pwszCursor = D2Lang::StrTable::strtable::GetLocaleString(0x1044);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszTooltip, pwszCursor, (uint16_t*)nCurStaminaUnits, nMaxStaminaUnits);
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszTooltip, pwszCursor, nCurStaminaUnits, nMaxStaminaUnits);
     D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(wszTooltip, ScreenSizeX / 2 - 0x4c, ScreenSizeY - 0x34, nCurStamina, 1);
 }
 
@@ -1281,7 +1281,7 @@ void __stdcall PANEL_DrawPanelLayout() {
       }
 
       pwszBuf = D2Lang::StrTable::strtable::GetLocaleString(0x1045);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszHpFormatted, pwszBuf, (uint16_t*)nStatValue, nMouseY);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszHpFormatted, pwszBuf, nStatValue, nMouseY);
       D2Lang::Unicode::UNISYS::AppendToBuffer(wszHpText, wszHpFormatted);
       nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszHpText);
       D2Win::Src::D2WinFont::DRAW_text(wszHpText, 0x41 - nTextWidth / 2, ScreenSizeY - 0x5f, 0, 0);
@@ -1293,11 +1293,11 @@ void __stdcall PANEL_DrawPanelLayout() {
     }
 
     nTextWidth = PANEL_GetSmoothedStatValue(UNITSTAT_mana);
-    uint16_t* pArgs = (uint16_t*)(nTextWidth >> 8);
+    nMouseX = nTextWidth >> 8;
     nTextWidth = D2Common::Stats::StatsEx::GetTxtMaxMana(pUnit);
     nMouseY = nTextWidth >> 8;
     pwszBuf = D2Lang::StrTable::strtable::GetLocaleString(0x1046);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszMpFormatted, pwszBuf, pArgs, nMouseY);
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszMpFormatted, pwszBuf, nMouseX, nMouseY);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszMpText, wszMpFormatted);
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszMpText);
     D2Win::Src::D2WinFont::DRAW_text(wszMpText, ScreenSizeX - nTextWidth / 2 - 0x50, ScreenSizeY - 0x5f, 0, 0);
@@ -1822,7 +1822,7 @@ void __stdcall PANEL_DrawGoldAmount() {
       DWORD nNextLevelExp2 = nNextLevelExp;
       nNextLevelExp = nNextLevelExp2;
       pwsText = D2Lang::StrTable::strtable::GetLocaleString(0x1043);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, awsTooltip, pwsText, (uint16_t*)nCurrentExp, nNextLevelExp);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, awsTooltip, pwsText, nCurrentExp, nNextLevelExp);
       D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(awsTooltip, ScreenSizeX / 2 - 0x92, ScreenSizeY - 0x33, 0, 1);
     }
     if (!nBarWidth) {

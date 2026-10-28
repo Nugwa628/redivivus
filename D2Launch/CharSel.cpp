@@ -252,7 +252,7 @@ static void CHARSEL_GetClassNameString(int nClassId, uint16_t * wszText) {
     }
 }
 
-static BOOL CHARSEL_ClassHasAlternateDeath(int nPlayerClass) {
+static BOOL __stdcall CHARSEL_ClassHasAlternateDeath(int nPlayerClass) {
     switch (nPlayerClass) {
       case 0:
 
@@ -436,21 +436,21 @@ void __stdcall DRAW_LocalCharsInSelectionScreen() {
           } else {
             nDaysUntilExpire = 0;
           }
-          if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET && nDaysUntilExpire < (uintptr_t)(void*)0x3d) {
+          if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET && nDaysUntilExpire < 0x3d) {
             nTextLine = 1;
-            if (!(uint16_t*)nDaysUntilExpire) {
+            if (!nDaysUntilExpire) {
               wExpireStrIndex = 0x2b7e;
-            } else if (nDaysUntilExpire < (uintptr_t)(uint16_t*)0x2) {
+            } else if (nDaysUntilExpire < 2) {
               wExpireStrIndex = 0x2b7c;
             } else {
               wExpireStrIndex = 0x2b7d;
-              if ((uintptr_t)(uint16_t*)0xe < nDaysUntilExpire) {
+              if (0xe < nDaysUntilExpire) {
                 nTextLine = 0;
               }
             }
 
             pwszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(wExpireStrIndex);
-            D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszLineBuf, pwszLocaleStr, (uint16_t*)nDaysUntilExpire);
+            D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszLineBuf, pwszLocaleStr, nDaysUntilExpire);
             D2Win::Src::D2WinTextBox::SetText(gaCharSelScreenSlotControls[nCharacterIndex], wszLineBuf, nTextLine, false, 0);
           }
         }
@@ -470,7 +470,6 @@ void __stdcall DRAW_LocalCharsInSelectionScreen0() {
     uint32_t nLanguageCode;
     uint32_t dwCompFlags;
     char* pcSrc;
-    uint16_t* pArgs;
     uint16_t wExpireStrIndex;
     uint32_t nCopyDwords;
     char* pcCopySrc;
@@ -686,22 +685,22 @@ void __stdcall DRAW_LocalCharsInSelectionScreen0() {
               D2Win::Src::D2WinTextBox::SetText(gaCharSelScreenSlotControls[nCharIndex], pwszLocaleStr, nHaltLine, bVar2, nLoopIdx);
             }
 
-            pArgs = (uint16_t*)CHARSEL_GetDaysUntilExpiry(pCharEntry->dwRealmParam);
-            if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET && pArgs < (unsigned short*)(void*)0x3d) {
+            nLanguageCode = CHARSEL_GetDaysUntilExpiry(pCharEntry->dwRealmParam);
+            if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET && nLanguageCode < 0x3d) {
               nHaltLine = 1;
-              if (!pArgs) {
+              if (!nLanguageCode) {
                 wExpireStrIndex = 0x2b7e;
-              } else if (pArgs < (uint16_t*)0x2) {
+              } else if (nLanguageCode < 2) {
                 wExpireStrIndex = 0x2b7c;
               } else {
                 wExpireStrIndex = 0x2b7d;
-                if ((uint16_t*)0xe < pArgs) {
+                if (0xe < nLanguageCode) {
                   nHaltLine = 0;
                 }
               }
 
               pwszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(wExpireStrIndex);
-              D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, sLineBuf.wszLineBuf, pwszLocaleStr, pArgs);
+              D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, sLineBuf.wszLineBuf, pwszLocaleStr, nLanguageCode);
               D2Win::Src::D2WinTextBox::SetText(gaCharSelScreenSlotControls[nCharIndex], sLineBuf.wszLineBuf, nHaltLine, false, 0);
             }
 
@@ -997,7 +996,7 @@ void __stdcall CHARSEL_EnumerateLocalSaves() {
     /* HANDLE hFindFile for FindClose */ FindClose(hFindFile);
 }
 
-void __stdcall CHARSEL_UpdateSelectionExpansion() {
+int __stdcall CHARSEL_UpdateSelectionExpansion() {
     BOOL bDisabled;
     D2CharSelStrc* pCharSel = D2Client::CharScreen::D2CharSelStrcFirst;
     int nWalkIndex = 0;
@@ -1031,7 +1030,7 @@ void __stdcall CHARSEL_UpdateSelectionExpansion() {
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpCtlCharSelDownArrow->sControl, 0);
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCtlCharSelDeleteButton, 0);
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&gpaCharSelCharacterList->sControl, 0);
-      return;
+      return 1;
     }
 
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpCharSelScreenControl->sControl, 1);
@@ -1046,6 +1045,7 @@ void __stdcall CHARSEL_UpdateSelectionExpansion() {
 
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ClearAllLines(gpaCharSelectDisplay);
     D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(gpaCharSelectDisplay, pCharSel->szCharname, 0);
+    return 1;
 }
 
 // @sourcefile .\Src\CharSel.cpp
@@ -1791,7 +1791,7 @@ BOOL __stdcall CHARSEL_InitRealmSelection() {
 }
 
 // @sourcefile .\Src\CharSel.cpp
-void __stdcall CHARSEL_CreateCharEntry(uint16_t * wszCharName, uint16_t * wszCommandString, int32_t nEntryType, bool ePlayerClass) {
+int __stdcall CHARSEL_CreateCharEntry(uint16_t * wszCharName, uint16_t * wszCommandString, int32_t nEntryType, bool ePlayerClass) {
     int nAnimMode;
     D2CharSelStrc* pCharSel = D2_NEW_AT(D2CharSelStrc, ".\\Src\\CharSel.cpp", 0xbaf);
     D2Lang::WideCharToUTF8(pCharSel->szCharname, wszCharName, 0x100);
@@ -1843,6 +1843,7 @@ void __stdcall CHARSEL_CreateCharEntry(uint16_t * wszCharName, uint16_t * wszCom
     D2Client::CharScreen::D2CharSelStrcFirst = pListHead;
     D2Client::CharScreen::TotalCurrentChars++;
     DRAW_LocalCharsInSelectionScreen0();
+    return 1;
 }
 
 void __stdcall CHARSEL_AddCreateNewEntry() {

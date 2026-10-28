@@ -82,7 +82,6 @@
 #include "D2Common/Drlg/Drlg.h"
 #include "D2Common/ITEMS/ItemMods.h"
 #include "D2Common/Units/Missile.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/Quests/QUESTS/Quest40.h"
 #include "D2Game/SKILLS/SkillAss.h"
 #include "D2Game/SKILLS/SkillSor.h"
@@ -154,7 +153,7 @@ uint16_t __fastcall GetNameSeed(D2UnitStrc * pUnit) {
 }
 
 // 2022.01.09 - dzik
-uint32_t CheckMonsterType(D2UnitStrc * pUnit, uint16_t eMonsterType) {
+uint32_t __fastcall CheckMonsterType(D2UnitStrc * pUnit, uint16_t eMonsterType) {
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
       return 0;
     }
@@ -552,7 +551,6 @@ void __thiscall MONSTER_RollAndAssignUMods(void * pThis, ::SGAMEDATA * pGame, BO
 
                 nActiveUMods = MONSTER_SelectChampionMod((D2UnitStrc*)pThis, pGame);
                 MONSTER_AddEnchantmentToList((uint8_t)nActiveUMods, (D2UnitStrc*)pThis);
-                Fog::Debug::GuardStack();
                 return;
               }
             }
@@ -593,8 +591,6 @@ void __thiscall MONSTER_RollAndAssignUMods(void * pThis, ::SGAMEDATA * pGame, BO
         }
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Copies transferable MonUMod enchantments from pSrcUnit to pDstUnit's MonUModList. If bAppend is false, finds the first empty slot in the destination list; if true, starts at slot 0. Only copies entries where the MonUModTxt xfer flag is set. Silently exits if either unit is not a valid monster with unit data. Used when spawning minions to inherit boss enchantments.
@@ -2647,13 +2643,11 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
     eD2QuestsInternal eQuestId;
     uint16_t* puVar1;
     if (2 < pGame->nDifficulty) {
-      Fog::Debug::GuardStack();
       return nullptr;
     }
 
     D2SuperUniquesTxt* pSuperUniquesTxt = D2Common::DATATBLS::MonsterTbls::TXT_SuperUniques_GetLine(nClassId);
     if (!pSuperUniquesTxt || pSuperUniquesTxt->Class < 0 || pSuperUniquesTxt->Stacks == '\0' && (uint8_t)gadwBitMasks[nClassId & 7] & pGame->nBossFlagList[(int)nClassId >> 3]) {
-      Fog::Debug::GuardStack();
       return nullptr;
     }
     if (pSuperUniquesTxt->AutoPos != '\0') {
@@ -2663,13 +2657,11 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
 
     D2UnitStrc* pUnit = SERVER_SpawnMonsterInternal(pSuperUniquesTxt->Class, pGame, pRoom, nullptr, nPosX, nPosY, -1, 0);
     if (!pUnit) {
-      Fog::Debug::GuardStack();
       return nullptr;
     }
 
     uint8_t* pUModList = D2Game::Monsters::GetMonUModList(pUnit);
     if (!pUModList) {
-      Fog::Debug::GuardStack();
       return pUnit;
     }
 
@@ -2684,7 +2676,6 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
     bHasAuraEnchant = false;
     nUModCount = CountActiveUMods(pUModList);
     if (4 < nUModCount) {
-      Fog::Debug::GuardStack();
       return pUnit;
     }
 
@@ -2756,7 +2747,6 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
       Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, QUESTINT_ForgottenTower);
       Monster::AI::AttachCorrectAiFunctionToMonster(pGame, pUnit, pMonsterAiGeneral, 0xd);
       InitUmods(pGame, pUnit, 0x16, 1);
-      Fog::Debug::GuardStack();
       return pUnit;
       case 10:
         nBoneCount = D2Client::Archive::UNIT_GetModuloFromSeed(&pUnit->sSeed, 5);
@@ -2769,7 +2759,6 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
       Monster::Create::SpawnMonsterAtUnit(pGame, pUnit, 0x181, eD2MonsterAnimMode_ns::Neutral, 4, 0x40);
       Monster::Create::SpawnMonsterAtUnit(pGame, pUnit, 0x185, eD2MonsterAnimMode_ns::Neutral, 4, 0x40);
       InitUmods(pGame, pUnit, 0x16, 1);
-      Fog::Debug::GuardStack();
       return pUnit;
       case 0x1a:
 
@@ -2785,12 +2774,10 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
       case 0x26:
         Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, QUESTINT_TerrorsEnd);
       InitUmods(pGame, pUnit, 0x16, 1);
-      Fog::Debug::GuardStack();
       return pUnit;
       case 0x27:
         Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, QUESTINT_TheSearchForCain);
       InitUmods(pGame, pUnit, 0x16, 1);
-      Fog::Debug::GuardStack();
       return pUnit;
       case 0x2a:
         Monster::Create::SpawnMinions_BySlot(pGame, pUnit, 0x1c5, eD2MonsterAnimMode_ns::Neutral, 0x14, 0x14, 0);
@@ -2798,7 +2785,6 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
       Quests::QUESTS::QUEST_OnUniqueMonsterSpawned(pGame, pUnit);
       D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_corpse_noselect, 1);
       InitUmods(pGame, pUnit, 0x16, 1);
-      Fog::Debug::GuardStack();
       return pUnit;
       case 0x2b:
 
@@ -2815,20 +2801,17 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
       Monster::Create::SpawnMinions_BySlot(pGame, pUnit, nUModCount, eD2MonsterAnimMode_ns::Neutral, 10, 0x14, 0x40);
       Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, QUESTINT_BetrayalOfHaggorath);
       InitUmods(pGame, pUnit, 0x16, 1);
-      Fog::Debug::GuardStack();
       return pUnit;
       case 0x3e:
         Monster::Create::SpawnMinions_BySlot(pGame, pUnit, 0x17d, eD2MonsterAnimMode_ns::Neutral, 0x14, 10, 0x40);
       default:
         InitUmods(pGame, pUnit, 0x16, 1);
-      Fog::Debug::GuardStack();
       return pUnit;
     }
 
     Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, eQuestId);
     Quests::QUESTS::QUEST_OnUniqueMonsterSpawned(pGame, pUnit);
     InitUmods(pGame, pUnit, 0x16, 1);
-    Fog::Debug::GuardStack();
     return pUnit;
 }
 

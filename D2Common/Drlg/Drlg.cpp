@@ -70,7 +70,6 @@
 #include "globals/globals.h"
 #include "D2Common/Unit/Unit.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -137,7 +136,6 @@ void __fastcall DRLGACTMISC_LoadTileProjects(D2DrlgStrc * pDrlg) {
       pszFmtStr = "%s\\Tiles\\Act2\\Town\\Ground.dt1";
     } else {
       if (byActNo != 2) {
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -146,7 +144,6 @@ void __fastcall DRLGACTMISC_LoadTileProjects(D2DrlgStrc * pDrlg) {
 
     wsprintfA(szPath, pszFmtStr, "DATA\\GLOBAL");
     D2CMP::DUNGEON::Dungeon::TILEPROJECT_AllocSlot((uint8_t*)pDrlg->apTileProjects, szPath);
-    Fog::Debug::GuardStack();
 }
 
 // Tears down or resets the per-level sub-structures of a D2DrlgLevelStrc. When bFreeSubStructs==0 frees the RoomEx state-flags buffer, automap buffer, and level-link-node list; when non-zero allocates/zeroes the state-flags buffer to save room flags before the rooms are freed. Always frees all RoomEx entries, the DrlgMap list, and dispatches to the appropriate DRLGMAZE/PRESET/OUTDOOR free function based on eDrlgType. Clears spawn points and warp coordinates.
@@ -1733,7 +1730,6 @@ void __fastcall DRLGROOMEX_InitTileData(D2RoomExStrc * pRoomEx) {
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pathBuf, "%s\\Tiles\\Act1\\Barracks\\Warp.dt1", "DATA\\GLOBAL");
     D2CMP::DUNGEON::Dungeon::TILEPROJECT_AllocSlot((uint8_t*)pTileProject, pathBuf);
     pRoomEx->eRoomExFlags |= 0x1000000;
-    Fog::Debug::GuardStack();
 }
 
 // Gets secondary floor grid flags at the given Y coordinate. Checks if the misc grid's sub-grid flag is set before reading from the embedded coords grid at 0xF4.

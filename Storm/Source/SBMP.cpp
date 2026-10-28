@@ -10,7 +10,6 @@
 #include "Storm/Source/SSTR.h"
 #include "Storm/Source/SSystem.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Gdi/Renderer/Windowed.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -308,7 +307,6 @@ static int __fastcall SBMP_ReadTGA(D2MPQFileStrc * hFile, uint32_t * pWidth, voi
             SFile::SFileReadFile(hFile, abPalette, nPaletteDataSize, nullptr, 0);
             BVar1 = SBMP_DecodeTGAPalette(&sTgaHeader, nPaletteDataSize, (uint32_t*)pixels, abPalette);
             if (!BVar1) {
-              Fog::Debug::GuardStack();
               return 0;
             }
           }
@@ -320,23 +318,19 @@ static int __fastcall SBMP_ReadTGA(D2MPQFileStrc * hFile, uint32_t * pWidth, voi
             BVar1 = SBMP_DecodeTGAPixels(pSrcData, &sTgaHeader.byIdLength, nPaletteDataSize, pPixelsOut, nMaxPixelBytes);
             if (!BVar1) {
               SMem::SMemFree(pSrcData, ".\\SOURCE\\SBMP.CPP", 0x11d, 0);
-              Fog::Debug::GuardStack();
               return 0;
             }
 
             SMem::SMemFree(pSrcData, ".\\SOURCE\\SBMP.CPP", 0x120, 0);
           }
 
-          Fog::Debug::GuardStack();
           return 1;
         }
 
-        Fog::Debug::GuardStack();
         return 0;
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -467,7 +461,6 @@ static int __thiscall SBMP_WriteTGA(void * pPixels, void * hFile, int nPalettePt
       }
     }
 
-    Fog::Debug::GuardStack();
     return 1;
 }
 
@@ -657,7 +650,6 @@ int __fastcall SBMP_EncodePcx256File(int nWidth, int nHeight, HANDLE hFile, int 
     } while (nRowIdx);
 
     /* LPOVERLAPPED lpOverlapped for WriteFile */ /* LPDWORD lpNumberOfBytesWritten for WriteFile */ /* DWORD nNumberOfBytesToWrite for WriteFile */ /* LPCVOID lpBuffer for WriteFile */ /* HANDLE hFile for WriteFile */ WriteFile(hFile_00, (LPCVOID)aPaletteBlock, 0x301, &dwBytesWritten, (LPOVERLAPPED)0x0);
-    Fog::Debug::GuardStack();
     return iVar1;
 }
 
@@ -812,7 +804,7 @@ static char * __stdcall SBMP_FindExtension(char * path) {
 }
 
 // @blizzard DetermineImageType (SBMP.CPP)
-static int SBMP_DetermineImageType(short magic) {
+static int __stdcall SBMP_DetermineImageType(short magic) {
     if (magic == 0x50a) {
       return 2;
     }
@@ -1091,7 +1083,6 @@ int __fastcall SBMP_CompressGifImage(int nSrcLen, uint8_t * pSrcPixels, int pDst
     SMem::SMemFree(sEncoder.pHashTable, ".\\SOURCE\\SBMP.CPP", 0x3a4, 0);
     SMem::SMemFree(sEncoder.pCodeTable, ".\\SOURCE\\SBMP.CPP", 0x3a5, 0);
     int iVar1 = nDstOffset - pDstBuf;
-    Fog::Debug::GuardStack();
     return iVar1;
 }
 
@@ -1156,7 +1147,6 @@ static int __thiscall SBMP_EncodeGif256File(int width, void * hFile, int palette
     WriteFile(hFile, (LPCVOID)&__frame0.bySentinel, 1, (LPDWORD)&__frame0.pPixelsCopy, (LPOVERLAPPED)0x0);
     /* LPOVERLAPPED lpOverlapped for WriteFile */ /* LPDWORD lpNumberOfBytesWritten for WriteFile */ /* DWORD nNumberOfBytesToWrite for WriteFile */ /* LPCVOID lpBuffer for WriteFile */ /* HANDLE hFile for WriteFile */ __frame0.bySentinel = 0x3b;
     WriteFile(hFile, (LPCVOID)&__frame0.bySentinel, 1, (LPDWORD)&__frame0.pPixelsCopy, (LPOVERLAPPED)0x0);
-    Fog::Debug::GuardStack();
     return 1;
 }
 
@@ -1172,7 +1162,6 @@ static int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels
     D2PcxHeaderStrc sPcxHeader;
     int iResult = SFile::SFileReadFile(hFile, &sPcxHeader, 0x80, nullptr, 0);
     if (!iResult) {
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -1192,7 +1181,6 @@ static int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels
     }
     if (!pixels) {
       if (!bVar1) {
-        Fog::Debug::GuardStack();
         return 1;
       }
 
@@ -1223,7 +1211,6 @@ static int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels
       } while (iResult);
     }
 
-    Fog::Debug::GuardStack();
     return 1;
 }
 

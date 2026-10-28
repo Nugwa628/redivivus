@@ -70,7 +70,6 @@
 #include "D2Client/UI/Automap.h"
 #include "D2Client/UNIT/Missile.h"
 #include "D2Game/Ai/AiGeneral.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 #include "Fog/Src/Safesock.h"
 
@@ -1064,7 +1063,7 @@ static void __stdcall SKILLASSN_GetTrapHealthBonus(uint32_t dwUnused, eD2Skills 
     D2Common::Units::Missile::SetCurrentFrame(pMissileUnit, nLifetime);
 }
 
-static void SKILLMONST_TriggerModeChange(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static int SKILLMONST_TriggerModeChange(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     uint32_t nEventDelay = 0xb;
     if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
       int nMonStatsExIdx;
@@ -1079,6 +1078,7 @@ static void SKILLMONST_TriggerModeChange(D2UnitStrc * pUnit, ::SGAMEDATA * pGame
 
     GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_MODECHANGE, 0);
     GAME::Event::SetEvent(pGame, pUnit, 1, pGame->dwGameFrame + nEventDelay, 0, 0);
+    return 1;
 }
 
 void __fastcall SKILLASSN_GetShadowHealthBonus(D2SkillsTxt * pSkillsTxt, D2UnitStrc * pUnit) {
@@ -2703,12 +2703,9 @@ void __fastcall SKILLMONST_SpiderLayTrail(::SGAMEDATA * pGame, D2UnitStrc * pUni
         sSkillArg.nX = nPosX;
         sSkillArg.nY = nPosY;
         MISSILES::Missiles::CreatingMissile(pGame, &sSkillArg);
-        Fog::Debug::GuardStack();
         return;
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Monster skill server do-func: applies the Fetish Aura (STATE_fetishaura) to nearby enemy units. Resolves target/cursor position, finds units within range (Param[3] + nSkillLvl*2), filters by CanAttack and SKILLNEC_ValidateAttackableTarget, then calls SKILLS_SetStateWithCurse with UNITSTAT_attackrate on each valid target.

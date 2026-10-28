@@ -264,7 +264,7 @@ static void INV_DrawBodySlotHighlight(int * pnParam, int32_t nColorIndex) {
     Engine::GfxInfo::D2GFX_DrawSolidRectExBySize(nStartX, nStartY, (uint32_t)*(uint8_t*)(pnParam + 4), (uint32_t)*(uint8_t*)((int)pnParam + 0x11), (uint32_t)gaInvHighlightColors[nColorIndex], DRAW_VERYTRANSPARENT);
 }
 
-BOOL IsInInventoryScreenRange(int32_t nX, int32_t nY) {
+BOOL __fastcall IsInInventoryScreenRange(int32_t nX, int32_t nY) {
     if (!(pInventoryScreenCoordinates.nLeft <= nX && nX < pInventoryScreenCoordinates.nRight && pInventoryScreenCoordinates.nTop <= nY && nY <= pInventoryScreenCoordinates.nBottom)) {
       return 0;
     }
@@ -272,7 +272,7 @@ BOOL IsInInventoryScreenRange(int32_t nX, int32_t nY) {
     return 1;
 }
 
-static BOOL IsInTradepage1ScreenRange(int32_t nX, int32_t nY) {
+static BOOL __stdcall IsInTradepage1ScreenRange(int32_t nX, int32_t nY) {
     if (!(pTradePage1GridScreenCoordinates.nPixelLeft < nX && nX < pTradePage1GridScreenCoordinates.nRight && pTradePage1GridScreenCoordinates.nTop <= nY && nY <= pTradePage1GridScreenCoordinates.nBottom)) {
       return 0;
     }
@@ -280,7 +280,7 @@ static BOOL IsInTradepage1ScreenRange(int32_t nX, int32_t nY) {
     return 1;
 }
 
-static BOOL IsInTradePage2ScreenRange(int32_t nX, int32_t nY) {
+static BOOL __stdcall IsInTradePage2ScreenRange(int32_t nX, int32_t nY) {
     if (!(pTradePage2GridScreenCoordinates.nPixelLeft < nX && nX < pTradePage2GridScreenCoordinates.nRight && pTradePage2GridScreenCoordinates.nTop <= nY && nY <= pTradePage2GridScreenCoordinates.nBottom)) {
       return 0;
     }
@@ -2508,7 +2508,7 @@ static void __stdcall INV_FormatItemSpellDescText(uint32_t nValue, D2ItemsTxt * 
     uint16_t aWStack_42c[512];
     uint16_t wszValueBuf[10];
     char szValueAscii[12];
-    uint16_t* pnQuantity;
+    uint32_t pnQuantity;
     if (!nValue) {
       return;
     }
@@ -2560,7 +2560,7 @@ static void __stdcall INV_FormatItemSpellDescText(uint32_t nValue, D2ItemsTxt * 
       D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszText, pwszLabel);
       break;
       case 4:
-        pnQuantity = (uint16_t*)D2Common::ITEMS::Items::ITEMS_SearchItemCodeTable(pPlayer, nValue, pItemsTxt->dwCalc1);
+        pnQuantity = D2Common::ITEMS::Items::ITEMS_SearchItemCodeTable(pPlayer, nValue, pItemsTxt->dwCalc1);
       Fog::File::CONTAINER_InitializeBuffer(aWStack_42c, 2, 0x200, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
       pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(pItemsTxt->wSpellDescStr);
       D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x200, aWStack_42c, pwszLabel, pnQuantity);
@@ -2939,7 +2939,7 @@ static BOOL INV_IsMouseOverGoldButton(int32_t nX, int32_t nY) {
     return 1;
 }
 
-BOOL INV_IsMouseOverCloseButton(int32_t nParam1, int32_t nParam2) {
+BOOL __fastcall INV_IsMouseOverCloseButton(int32_t nParam1, int32_t nParam2) {
     if (!(ScreenSizeX - gnPanelOffsetX - 0x12e <= nParam1 && nParam1 <= ScreenSizeX - gnPanelOffsetX - 0x10e && gnPanelOffsetY - 0x60 + ScreenSizeY <= nParam2 && nParam2 <= gnPanelOffsetY - 0x40 + ScreenSizeY)) {
       return 0;
     }
@@ -3591,7 +3591,7 @@ void __stdcall INV_HandleShopAction(DWORD nAction, int32_t pTarget, D2UnitStrc *
     ui::ITEM_SetItemOnHand(nullptr);
 }
 
-void __stdcall INV_EnterShopMode() {
+int __stdcall INV_EnterShopMode() {
     gaNpcShopButtons[0].nDrawCallback = 0;
     gaNpcShopButtons[1].nDrawCallback = 0;
     gaNpcShopButtons[2].nDrawCallback = 0;
@@ -3600,6 +3600,7 @@ void __stdcall INV_EnterShopMode() {
     D2UnitStrc* pCursorItem_lcl = UNIT::Player::GetPlayerUnit_UI();
     pCursorItem_lcl = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pCursorItem_lcl->pInventory);
     ui::ITEM_SetItemOnHand(pCursorItem_lcl);
+    return 1;
 }
 
 void __stdcall INV_ReturnToShopFromRepair() {
@@ -4084,7 +4085,7 @@ void __stdcall INV_DrawNpcButtonTooltip() {
         bVar1 = GAME::Game::GetDificulity();
         nRepairAllCost = D2Common::ITEMS::Items::ITEMS_CalculateRepairAllCost(nullptr, pUnit, nNpcTypeId, (uint32_t)bVar1, pQuestInfo, pNullQuestFlags);
         pwFormatStr = D2Lang::StrTable::strtable::GetLocaleString(0x276f);
-        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszTooltipText, pwFormatStr, (uint16_t*)nRepairAllCost);
+        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszTooltipText, pwFormatStr, nRepairAllCost);
         D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(wszTooltipText, NPCButtonArray[nButtonIdx + CurrentNpcButtonSelection * 4] + gnPanelOffsetX, gnPanelOffsetY - 100 + ScreenSizeY, 0, 0);
         return;
       }
@@ -4556,7 +4557,7 @@ void __fastcall INV_InitTradeMode(int32_t nParam) {
     gbInvTradeCancelClicked = 0;
 }
 
-static BOOL INV_IsMouseOverAcceptTradeBtn(int32_t nMouseY, int32_t nMouseX) {
+static BOOL __stdcall INV_IsMouseOverAcceptTradeBtn(int32_t nMouseY, int32_t nMouseX) {
     if (!(gnPanelOffsetX + 0xdf < nMouseX && nMouseX < gnPanelOffsetX + 0xff && gnPanelOffsetY - 0x60 + ScreenSizeY < nMouseY && nMouseY < gnPanelOffsetY - 0x40 + ScreenSizeY)) {
       return 0;
     }
@@ -5129,7 +5130,7 @@ void __stdcall CloseStash() {
     gpInvStashImage2 = 0;
 }
 
-static BOOL INV_IsMouseOverTransmuteBtn(int32_t nX, int32_t nY) {
+static BOOL __stdcall INV_IsMouseOverTransmuteBtn(int32_t nX, int32_t nY) {
     if (!(gnPanelOffsetX + 0x113 < nX && nX < gnPanelOffsetX + 0x13b && gnPanelOffsetY - 100 + ScreenSizeY < nY && nY < gnPanelOffsetY - 0x3c + ScreenSizeY)) {
       return 0;
     }
@@ -5442,7 +5443,7 @@ void INV_HandleGambleMessage(short * pPacket) {
     byMsgType.nColor = '\x01';
     byMsgType.nArg = 0;
     byMsgType.nMessageType = '\x0e';
-    Text::TEXT_HandleEventMessagePacket(&byMsgType, pPacket);
+    Text::TEXT_HandleEventMessagePacket(&byMsgType);
 }
 
 void __stdcall INV_ResetOverlayFlag() {
@@ -6697,7 +6698,7 @@ void __fastcall INV_ExtractTextBetweenBrackets(uint16_t * wszText, short * wszDe
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszText, wszExtracted);
 }
 
-void wsprintf(uint16_t * wszDest, uint16_t * wszFormat, uint16_t * wszFirstArg, ...) {
+void wsprintf(uint16_t * wszDest, uint16_t * wszFormat, ...) {
     // Frame -12..-8 is ONE Ghidra variable the decompiler printed as 2 locals.
     // Separate locals let the compiler reorder them, so the pieces are one struct.
     struct __frame0_t {
@@ -6707,6 +6708,9 @@ void wsprintf(uint16_t * wszDest, uint16_t * wszFormat, uint16_t * wszFirstArg, 
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 4, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     uint16_t _wszTokenBuf;
+    va_list __va;
+    va_start(__va, wszFormat);
+    short int* pwTokenPtr;
     int nArgIdxA;
     uint16_t* pwArgSrc;
     uint16_t** ppwVarArgCursor;
@@ -6731,10 +6735,10 @@ void wsprintf(uint16_t * wszDest, uint16_t * wszFormat, uint16_t * wszFirstArg, 
     int nTotalArgs;
     nTotalArgs = 0;
     nArgIdxA = nTotalArgs;
-    if (wszFirstArg) {
-      ppwVarArgCursor = &wszFirstArg;
+    if (*(uint16_t**)__va) {
+      ppwVarArgCursor = (uint16_t**)__va;
       pwArgDest = awszArgs;
-      pwArgSrc = wszFirstArg;
+      pwArgSrc = *(uint16_t**)__va;
       do {
         D2Lang::Unicode::UNISYS::STRING_CopyWideString(pwArgDest, pwArgSrc);
         pwArgSrc = ppwVarArgCursor[1];
@@ -6751,7 +6755,6 @@ void wsprintf(uint16_t * wszDest, uint16_t * wszFormat, uint16_t * wszFirstArg, 
     pwColonPtr = D2Lang::Unicode::UNISYS::UNICODE_FindWideChar(wszFormat, 0x3a);
     pwColonSaved = pwColonPtr;
     if (pwColonPtr) {
-      short int* pwTokenPtr;
       __frame0.wszTokenBuf = 0x61;
       memcpy(wszMsToken, L"[ms]", 10);
       nArgIdxA = -1;
@@ -8748,7 +8751,6 @@ void __stdcall DRAW_UI_Inventory() {
     int32_t nDrawFlags;
     GLOBALPALLETE nGlobalPaletteShift;
     D2GamePalShiftGreenBloodStrc* pPalette;
-    uint16_t* pnStashGoldLimit;
     int nMouseX;
     nMouseX = ui::GetMouseX();
     D2UnitStrc* pLArmItem;
@@ -8799,10 +8801,10 @@ void __stdcall DRAW_UI_Inventory() {
         }
 
         pSlotItem = UNIT::Player::GetPlayerUnit_UI();
-        pnStashGoldLimit = (uint16_t*)D2Common::Units::GetStashGoldLimit(pSlotItem);
+        bIsPlayerDead = D2Common::Units::GetStashGoldLimit(pSlotItem);
         Fog::File::CONTAINER_InitializeBuffer(wszStashGoldText, 2, 100, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
         pwszText = D2Lang::StrTable::strtable::GetLocaleString(0xfd3);
-        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszStashGoldText, pwszText, pnStashGoldLimit);
+        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszStashGoldText, pwszText, bIsPlayerDead);
         bIsExpansion = GAME::Game::CLIENT_CheckExpansion();
         bIsTwoHandedEquipped = gnPanelOffsetY - 0x19f;
         if (!bIsExpansion) {

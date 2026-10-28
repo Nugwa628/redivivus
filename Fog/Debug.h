@@ -282,7 +282,7 @@ void __fastcall SKILLSTXT_ZeroOutFields(struct D2SkillsTxt * pSkillsTxt);
 int CompareUintDescending(LPCVOID pParam1, LPCVOID pParam2);
 void __fastcall FormatAddressDebugString(uint32_t * pAddrInfo, char * pSymInfo, char * szOutput);
 void __fastcall EnumerateAndDumpAllFunctions(fnCrashOutputLine pOutputCallback, ::Report * pReport);
-void __stdcall DEBUG_UnloadStackCrawlDbgHelp();
+int __stdcall DEBUG_UnloadStackCrawlDbgHelp();
 void __fastcall DumpThreadContext(HANDLE hHandle);
 // @sourcefile .\Src\Exceptions.cpp
 // Frees a D2FogModuleNodeStrc list (next at +0x20c); both callers pass the module list from LoadSymbolsForAllModules/EnumerateModulesPsapi.
@@ -308,7 +308,7 @@ void HandleExceptionWithStackDump(uint32_t dwUnused, struct _EXCEPTION_POINTERS 
 BOOL __stdcall DEBUG_LoadStackCrawlDbgHelp();
 void __fastcall TriggerManualStackDump(char * szCategory);
 // Security cookie check (MSVC /GS __security_check_cookie). Compares ECX against the stored security cookie and halts on mismatch. Touches no register, so the caller's return value in EAX (and EDX) survives the call; modelled with the __stdcall_noclobber convention.
-void GuardStack();
+void __stdcall GuardStack();
 _EXCEPTION_DISPOSITION __GSHandlerCheck_EH_6ca575(struct EHExceptionRecord * pExceptionRecord, struct EHRegistrationNode * pRegistrationNode, struct _CONTEXT * pContext, void * pDispatcherContext);
 _EXCEPTION_DISPOSITION __GSHandlerCheck_EH_6ca595(struct EHExceptionRecord * pExceptionRecord, struct EHRegistrationNode * pRegistrationNode, struct _CONTEXT * pContext, void * pDispatcherContext);
 _EXCEPTION_DISPOSITION __GSHandlerCheck_EH_6ca5b5(struct EHExceptionRecord * pExceptionRecord, struct EHRegistrationNode * pRegistrationNode, struct _CONTEXT * pContext, void * pDispatcherContext);

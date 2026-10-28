@@ -11,7 +11,6 @@
 #include "Fog/Src/LogManager.h"
 #include "Storm/Source/SSTR.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -39,9 +38,7 @@ int __fastcall closeSocket(SOCKET hSocket) {
 
 BOOL __stdcall StartUp() {
     WSADATA wsaData;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int nResult = WSAStartup(0x101, &wsaData);
-    Debug::GuardStack();
     return (uint32_t)!nResult;
 }
 
@@ -80,7 +77,6 @@ D2NetDataStrc * __fastcall Create(char * szHostName, u_short nPort, LPTHREAD_STA
       pSafesockStrc->nError = 1;
       DeleteCriticalSection(&pSafesockStrc->pSync);
       D2_FREE_AT(pSafesockStrc, ".\\Src\\Safesock.cpp", 0xdf);
-      Debug::GuardStack();
       return nullptr;
     }
 
@@ -92,7 +88,6 @@ D2NetDataStrc * __fastcall Create(char * szHostName, u_short nPort, LPTHREAD_STA
       /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ pSafesockStrc->nError = 2;
       DeleteCriticalSection(&pSafesockStrc->pSync);
       D2_FREE_AT(pSafesockStrc, ".\\Src\\Safesock.cpp", 0xf3);
-      Debug::GuardStack();
       return nullptr;
     }
 
@@ -133,7 +128,6 @@ D2NetDataStrc * __fastcall Create(char * szHostName, u_short nPort, LPTHREAD_STA
         /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ pSafesockStrc->nError = 3;
         DeleteCriticalSection(&pSafesockStrc->pSync);
         D2_FREE_AT(pSafesockStrc, ".\\Src\\Safesock.cpp", 0x123);
-        Debug::GuardStack();
         return nullptr;
       }
     }
@@ -161,7 +155,6 @@ D2NetDataStrc * __fastcall Create(char * szHostName, u_short nPort, LPTHREAD_STA
       pSafesockStrc->hSocketThread = hThread;
     }
 
-    Debug::GuardStack();
     return pSafesockStrc;
 }
 
@@ -327,7 +320,6 @@ char * __stdcall NET_GetLocalIp() {
     sockaddr_in connectAddr;
     sockaddr_in sLocalSockAddr;
     char szHostName[256];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     /* LPWSADATA lpWSAData for WSAStartup */ /* WORD wVersionRequired for WSAStartup */ sLocalSockAddr.sin_addr = 0;
     WSAStartup(0x101, &wsaData);
     int nResult = gethostname(szHostName, 0x100);
@@ -356,7 +348,6 @@ char * __stdcall NET_GetLocalIp() {
     char* pcVar3 = inet_ntoa((in_addr)sLocalSockAddr.sin_addr);
     sprintf(cp_0075d040, "%s", pcVar3);
     WSACleanup();
-    Debug::GuardStack();
     return cp_0075d040;
 }
 

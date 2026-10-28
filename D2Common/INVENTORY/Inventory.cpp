@@ -39,7 +39,6 @@
 #include "D2Common/ITEMS/ItemMods.h"
 #include "D2Game/ITEMS/ItemMode.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -1842,7 +1841,6 @@ BOOL __stdcall INVENTORY_FindBeltSlotForPotion(D2InventoryStrc * pInventory, D2U
     char byItemW;
     char byItemH;
     D2BeltsTxt sBeltsLine;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (pInventory && pInventory->nSignatureMagic == 0x1020304 && pUnit && pUnit->eUnitType == UNIT_ITEM) {
       iVar1 = ITEMS::Items::ITEM_GetTxtItemTypes_beltable(pUnit);
       if (iVar1) {
@@ -1867,7 +1865,6 @@ BOOL __stdcall INVENTORY_FindBeltSlotForPotion(D2InventoryStrc * pInventory, D2U
                   do {
                     if (!*ppBeltCell) {
                       *pnOutSlotIndex = iVar2;
-                      Fog::Debug::GuardStack();
                       return 1;
                     }
 
@@ -1887,7 +1884,6 @@ BOOL __stdcall INVENTORY_FindBeltSlotForPotion(D2InventoryStrc * pInventory, D2U
               do {
                 if (!*ppBeltCell) {
                   *pnOutSlotIndex = iVar2;
-                  Fog::Debug::GuardStack();
                   return 1;
                 }
 
@@ -1897,13 +1893,11 @@ BOOL __stdcall INVENTORY_FindBeltSlotForPotion(D2InventoryStrc * pInventory, D2U
             }
           }
 
-          Fog::Debug::GuardStack();
           return 0;
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 

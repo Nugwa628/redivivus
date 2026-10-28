@@ -265,12 +265,13 @@ void __stdcall CHATDLG_EnqueueClearMessage() {
     LeaveCriticalSection(&lpCriticalSection_0077ae28);
 }
 
-void __fastcall CHATDLG_AppendTextToTextBox(uint16_t * wszText, int32_t nParam) {
+int __fastcall CHATDLG_AppendTextToTextBox(uint16_t * wszText, int32_t nParam) {
     if (!gpChatMessagesTextBox) {
-      return;
+      return 1;
     }
 
     D2Win::Src::D2WinTextBox::SetText(gpChatMessagesTextBox, wszText, nParam, false, 1);
+    return 1;
 }
 
 uint32_t __fastcall CHATDLG_AppendTextToTextBox_ForComCallback(uint16_t * wszText, int32_t nParam) {
@@ -282,13 +283,14 @@ uint32_t __fastcall CHATDLG_AppendTextToTextBox_ForComCallback(uint16_t * wszTex
     return 1;
 }
 
-void __fastcall FORMS_DisplayBattleNetNews(uint16_t * wszText) {
+int __fastcall FORMS_DisplayBattleNetNews(uint16_t * wszText) {
     if (!BattleNetNews) {
-      return;
+      return 1;
     }
 
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ClearAllLines(BattleNetNews);
     D2Win::Src::D2WinTextBox::SetText(BattleNetNews, wszText, 3, false, 0);
+    return 1;
 }
 
 // Shows gpCtlChannelOkButton only while gpCtlChannelNameEditBox holds a non-empty name: D2WINMAIN_SetControlVisible(gpCtlChannelOkButton, name non-empty). Run by that edit box's change callback and once at the end of OOGUTIL_OpenChannelDialog.
@@ -1044,9 +1046,10 @@ void __stdcall CHATDLG_FreePlayerNameList() {
     gpChatPlayerNameListHead = 0;
 }
 
-void __stdcall CHATDLG_CancelGameCreate() {
+int __stdcall CHATDLG_CancelGameCreate() {
     D2MCPClient::McpConnect::NET_MCP_CLIENT_Send_0x13_CancelGameCreate();
     D2MCPClient::McpConnect::SetIsMPCJoinSuccesfull(0);
+    return 1;
 }
 
 void __stdcall CHATDLG_ParseCommandArgument(int32_t nMaxLen, char * szSource, char * szDest) {
@@ -1158,7 +1161,7 @@ int __stdcall CHATDLG_HandleTabCompletion(uint32_t nKeyCode, size_t nSize, char 
     return 0;
 }
 
-void __fastcall UIMENU_DrawSpecificJoinGameError(uint16_t * wszText, ChatDlgCallback pfnCallback) {
+int __fastcall UIMENU_DrawSpecificJoinGameError(uint16_t * wszText, ChatDlgCallback pfnCallback) {
     ChatDlg::CHATDLG_DestroyAllForms();
     if (pGameListCache) {
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&pGameListCache->sControl, 0);
@@ -1171,6 +1174,7 @@ void __fastcall UIMENU_DrawSpecificJoinGameError(uint16_t * wszText, ChatDlgCall
     gpControlJoinGameError = (::D2WinTextBox*)D2Win::Src::D2WinMain::FORMS_CreateAnyForm(gaPredefinedForms_b + 0x1d);
     D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextW(gpControlJoinGameError, wszText);
     gpfnChatDlgCallback = pfnCallback;
+    return 1;
 }
 
 void __stdcall CHATDLG_ResetButtonsAndForms() {
@@ -1548,7 +1552,7 @@ void __fastcall CHATDLG_HandleChatListClick(int32_t nStartRank, int32_t nRankCou
       OOGUtilities::OOGUTIL_GetProfileCharacterName(sScratch);
       D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszNamePart, "Player \'%s\' is not on the ladder.", 0x100);
       D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszEmptyMsg, sScratch, 0x100);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, sRowBuf.wszCell, wszNamePart, (uint16_t*)wszEmptyMsg);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, sRowBuf.wszCell, wszNamePart, wszEmptyMsg);
       UIMENU_DrawSpecificJoinGameError(sRowBuf.wszCell, nullptr);
       return;
     }

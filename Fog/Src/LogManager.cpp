@@ -14,7 +14,6 @@
 #include "Storm/_unnamespaced.h"
 #include "compiler/compiler.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Launch/CharSel.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -51,18 +50,15 @@ int __stdcall DetectCpuVendor() {
     *(uint32_t*)((char*)&szCpuVendor + 8) = *(uint32_t*)(nCpuidResult + 0xc);
     bool bMatch = !strcmp(szCpuVendor, "GenuineIntel");
     if (bMatch) {
-      Debug::GuardStack();
       return 1;
     }
 
     bMatch = !strcmp(szCpuVendor, "AuthenticAMD");
     if (bMatch) {
-      Debug::GuardStack();
       return 2;
     }
 
     bMatch = !strcmp(szCpuVendor, "CyrixInstead");
-    Debug::GuardStack();
     return !bMatch ? 0 : 0x3;
 }
 
@@ -435,7 +431,6 @@ void __stdcall LogCpuInfo() {
         LOGFILE_WriteStringToFile("Version: %s (Type %X, Family %X, Model %X, Stepping %X, Brand %X)", szModelName, nType, nFamily, nModel, nVersionLow & 0xf, nBrandId & 0xff);
         nBrandId = BenchmarkCpuSpeed();
         LOGFILE_WriteStringToFile("Speed: Approx. %d MHz", nBrandId);
-        Debug::GuardStack();
         return;
       }
 
@@ -443,7 +438,6 @@ void __stdcall LogCpuInfo() {
     }
 
     LOGFILE_WriteStringToFile(Format);
-    Debug::GuardStack();
 }
 
 BOOL __stdcall GetLoggerState_Stub() {
@@ -488,7 +482,6 @@ void __fastcall InitLogFilePathPointers(uint8_t * * pPathPtrArray, uint32_t nCou
 FILE * __fastcall OpenLogFileWithTimestamp(char * szFilePrefix, LPSYSTEMTIME pSystemTime, char * szOpenMode, uint32_t * pbIsNewFile, char * szOutPath, int32_t nOutPathLen) {
     FILE* pFile;
     char szLogFilePath[260];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     /* LPSYSTEMTIME lpSystemTime for GetLocalTime */ GetLocalTime(pSystemTime);
     Storm::Source::SSTR::SStrPrintf(szLogFilePath, 0x104, "%s%s%02d%02d%02d.txt", gszLogFilePath, szFilePrefix, (uint32_t)pSystemTime->wYear % 100, (uint32_t)pSystemTime->wMonth, (uint32_t)pSystemTime->wDay);
     if (szOutPath) {
@@ -506,22 +499,19 @@ FILE * __fastcall OpenLogFileWithTimestamp(char * szFilePrefix, LPSYSTEMTIME pSy
     }
 
     pFile = fopen(szLogFilePath, szOpenMode);
-    Debug::GuardStack();
     return pFile;
 }
 
 // Writes the header of a newly opened log file: a rule, the computer name and the date from pTime, and a closing rule.
 void __fastcall WriteLogFileHeader(FILE * pFile, SYSTEMTIME * pTime) {
-    // Frame slots -76..-4 are ONE object: &nNameSize is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -76..-8 are ONE object: &nNameSize is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       DWORD nNameSize;
       char szComputerName[64];
-      uint32_t local_8;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 72, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 68, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
-    __frame0.local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     __frame0.nNameSize = 0x40;
     BOOL bGotName = GetComputerNameA(__frame0.szComputerName, &__frame0.nNameSize);
     if (!bGotName) {
@@ -531,21 +521,18 @@ void __fastcall WriteLogFileHeader(FILE * pFile, SYSTEMTIME * pTime) {
     fprintf(pFile, "---------------------------------------------------------------\n");
     fprintf(pFile, "%s %04d-%02d-%02d\n", __frame0.szComputerName, (uint32_t)pTime->wYear, (uint32_t)pTime->wMonth, (uint32_t)pTime->wDay);
     fprintf(pFile, "---------------------------------------------------------------\n");
-    Debug::GuardStack();
 }
 
 // Writes the realm-startup banner to a log file: a rule, the computer name and the local time, and a closing rule.
 void __fastcall WriteRealmStartupHeader(FILE * pFile) {
-    // Frame slots -76..-4 are ONE object: &nNameSize is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -76..-8 are ONE object: &nNameSize is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       DWORD nNameSize;
       char szComputerName[64];
-      uint32_t local_8;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 72, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 68, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
-    __frame0.local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     __frame0.nNameSize = 0x40;
     BOOL bGotName = GetComputerNameA(__frame0.szComputerName, &__frame0.nNameSize);
     if (!bGotName) {
@@ -555,7 +542,6 @@ void __fastcall WriteRealmStartupHeader(FILE * pFile) {
     fprintf(pFile, "---------------------------------------------------------------\n");
     fprintf(pFile, "%s Realm startup at %04d-%02d-%02d %02d:%02d:%02d.%03u\n", __frame0.szComputerName, (uint32_t)gLogRealmStartupLocalTime.wYear, (uint32_t)gLogRealmStartupLocalTime.wMonth, (uint32_t)gLogRealmStartupLocalTime.wDay, (uint32_t)gLogRealmStartupLocalTime.wHour, (uint32_t)gLogRealmStartupLocalTime.wMinute, (uint32_t)gLogRealmStartupLocalTime.wSecond, (uint32_t)gLogRealmStartupLocalTime.wMilliseconds);
     fprintf(pFile, "---------------------------------------------------------------\n");
-    Debug::GuardStack();
 }
 
 // Returns the open log file for a name, opening it in a free slot and writing its header when it is new.
@@ -689,7 +675,6 @@ FILE * __fastcall FindOrOpenLogFileSlot(uint8_t * szFileName, uint32_t * pnSlotI
 
 void __fastcall FILETOOLS_GetUserMyDocumentsDiabloIIGameLogsFolder(char * szGameLogsPath, int32_t nGameLogsPathLength) {
     char szMyDocuments[260];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     *szGameLogsPath = '\0';
     int nResult = SHGetFolderPathA(0, 5, 0, 0, szMyDocuments);
     if (-1 < nResult) {
@@ -698,13 +683,11 @@ void __fastcall FILETOOLS_GetUserMyDocumentsDiabloIIGameLogsFolder(char * szGame
       Storm::Source::SSTR::SStrPack(szGameLogsPath, "Diablo II\\GameLogs\\", nGameLogsPathLength);
       Source::SFile::SafeCreateDirectoryTree(szGameLogsPath);
     }
-
-    Debug::GuardStack();
 }
 
 // Writes a log record whose body is a hex dump to its log file, one formatted line at a time.
 void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
-    // Frame slots -352..-4 are ONE object: &local_160 is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -352..-8 are ONE object: &local_160 is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       uint32_t local_160;
@@ -716,9 +699,8 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
       char szLineBuf[256];
       char szContPrefix[32];
       char szTimePrefix[32];
-      uint32_t nStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 348, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 344, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     uint32_t pData;
     int iVar1;
@@ -731,7 +713,6 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
     uint8_t* pbVar2;
     uint32_t nChunkLen;
     char cScanChar;
-    __frame0.nStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (*(int*)(pLogRecord + 0xc) != 2) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x389);
       exit(-1);
@@ -840,7 +821,6 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
       }
     }
 
-    Debug::GuardStack();
     return;
 }
 
@@ -855,8 +835,6 @@ void __stdcall CloseStaleLogFileHandles() {
 
       nSlotOffset++;
     } while (nSlotOffset < 20);
-
-    Debug::GuardStack();
 }
 
 void __fastcall DeleteOldLogFile(int32_t pRefFileTime, char * szFileName) {
@@ -936,10 +914,8 @@ uint32_t __fastcall ComputeAbsoluteFromRelative(int * pBase, int * pNode) {
 
 void __fastcall FILETOOLS_SetLogFilePathWithoutDateAndExtension2(FILE * szSuffix) {
     char szLogsFolder[260];
-    uint32_t uStack8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     FILETOOLS_GetUserMyDocumentsDiabloIIGameLogsFolder(szLogsFolder, 0x104);
     Storm::Source::SSTR::SStrPrintf(gszLogFilePath, 0x104, "%s%s", szLogsFolder, (char*)szSuffix);
-    Debug::GuardStack();
 }
 
 long __fastcall GetLogFileSize(uint8_t * szFileName) {
@@ -1091,7 +1067,6 @@ void __stdcall DeleteOldLogFiles() {
     char szFilePath[260];
     char szSearchPattern[260];
     char szLogsFolder[260];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!gLogCleanupLastTickCount || (dwTickCount = GetTickCount() , 86399999 < dwTickCount - gLogCleanupLastTickCount)) {
       gLogCleanupLastTickCount = GetTickCount();
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gLogFileCS);
@@ -1112,8 +1087,6 @@ void __stdcall DeleteOldLogFiles() {
         /* HANDLE hFindFile for FindClose */ FindClose(hFindFile);
       }
     }
-
-    Debug::GuardStack();
 }
 
 void __fastcall UnlinkListNodeDouble(int * pNode) {
@@ -1591,7 +1564,6 @@ void __fastcall EnqueueFormattedLogMessage(char * szText, int32_t nPriority, int
     }
 
     ExceptionList = tSehFrame.Next;
-    Debug::GuardStack();
 }
 
 void __stdcall StartLogWriterThread() {
@@ -1627,15 +1599,19 @@ void __stdcall StartLogWriterThread() {
 }
 
 void LOGFILE_WriteStringToFile(char * Format, ...) {
+    va_list __va;
+    va_start(__va, Format);
     if (!Format) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 299);
       exit(-1);
     }
 
-    EnqueueFormattedLogMessage("", 1, 1, Format, (va_list)((uint8_t*)&Format + 4));
+    EnqueueFormattedLogMessage("", 1, 1, Format, __va);
 }
 
 void LOGMANAGER_TraceToModuleLog(char * szModule, char * szFormatString, ...) {
+    va_list __va;
+    va_start(__va, szFormatString);
     if (!szFormatString) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x13c);
       exit(-1);
@@ -1644,10 +1620,12 @@ void LOGMANAGER_TraceToModuleLog(char * szModule, char * szFormatString, ...) {
       szModule = "";
     }
 
-    EnqueueFormattedLogMessage(szModule, 1, 1, szFormatString, (va_list)((uint8_t*)&szFormatString + 4));
+    EnqueueFormattedLogMessage(szModule, 1, 1, szFormatString, __va);
 }
 
 void LogWithCategory(char * szText1, char * szText2, ...) {
+    va_list __va;
+    va_start(__va, szText2);
     if (!szText2) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x14f);
       exit(-1);
@@ -1656,19 +1634,23 @@ void LogWithCategory(char * szText1, char * szText2, ...) {
       szText1 = "";
     }
 
-    EnqueueFormattedLogMessage(szText1, 1, 0, szText2, (va_list)((uint8_t*)&szText2 + 4));
+    EnqueueFormattedLogMessage(szText1, 1, 0, szText2, __va);
 }
 
 void LogSimple(char * szText, ...) {
+    va_list __va;
+    va_start(__va, szText);
     if (!szText) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x162);
       exit(-1);
     }
 
-    EnqueueFormattedLogMessage("", 0, 0, szText, (va_list)((uint8_t*)&szText + 4));
+    EnqueueFormattedLogMessage("", 0, 0, szText, __va);
 }
 
 void LogWithCategoryVarArgs(char * szText1, char * szText2, ...) {
+    va_list __va;
+    va_start(__va, szText2);
     if (!szText2) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x173);
       exit(-1);
@@ -1677,7 +1659,7 @@ void LogWithCategoryVarArgs(char * szText1, char * szText2, ...) {
       szText1 = "";
     }
 
-    EnqueueFormattedLogMessage(szText1, 0, 0, szText2, (va_list)((uint8_t*)&szText2 + 4));
+    EnqueueFormattedLogMessage(szText1, 0, 0, szText2, __va);
 }
 
 // Returns _time32(pTime) with pTime passed in EAX (CRT inline time() copy).
@@ -1737,7 +1719,6 @@ void __stdcall GetFreeDiskSpaceForSavePath() {
     ULONGLONG uFreeBytesAvailable;
     DWORD local_414[3];
     char szSavePath[1024];
-    uint32_t dwStackGuard = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Source::SFile::GetAndCreateSavePath(szSavePath, 0x400);
     HMODULE hModule = LoadLibraryA("kernel32.dll");
     /* LPCSTR lpProcName for GetProcAddress */ /* HMODULE hModule for GetProcAddress */ if (hModule) {
@@ -1751,7 +1732,6 @@ void __stdcall GetFreeDiskSpaceForSavePath() {
         *(uint32_t*)((char*)&uFreeBytesAvailable + 4) = 0;
         (*npfnGetDiskFreeSpaceEx)(szSavePath, &uFreeBytesAvailable, &uTotalBytes, &uTotalFreeBytes);
         /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(hModule);
-        Debug::GuardStack();
         return;
       }
     }
@@ -1771,7 +1751,6 @@ void __stdcall GetFreeDiskSpaceForSavePath() {
     local_414[1] = 0;
     DWORD dwBytesPerSector = 0;
     GetDiskFreeSpaceA(szSavePath, local_414 + 2, local_414, local_414 + 1, &dwBytesPerSector);
-    Debug::GuardStack();
 }
 
 void GetGlobalMemoryStatus(LPMEMORYSTATUS pMemoryStatus) {
@@ -1792,11 +1771,9 @@ int __stdcall IsWindowsNT() {
     /* LPOSVERSIONINFOA lpVersionInformation for GetVersionExA */ sVersionInfo.dwOSVersionInfoSize = 0x94;
     BOOL bGotVersion = GetVersionExA(&sVersionInfo);
     if (!bGotVersion) {
-      Debug::GuardStack();
       return 0;
     }
 
-    Debug::GuardStack();
     return (uint32_t)(sVersionInfo.dwPlatformId == 2);
 }
 

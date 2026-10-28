@@ -1177,7 +1177,7 @@ int32_t __fastcall GetSkillParam4(eD2Skills eSkill);
 uint16_t __fastcall SKILLDESC_GetStatNameString(int32_t nSkillId, int32_t nStatOffset);
 int16_t GetSkillLongDescription(eD2Skills eSkill);
 int32_t __stdcall SKILLDESC_GetAuraBonusDamage();
-void __stdcall SKILLDESC_AccumulateAuraBonusDmg(struct D2UnitStrc * pUnit, int * pnMinDmgAcc, int * pnMaxDmgAcc, uint32_t * pdwElemColorOut);
+int __stdcall SKILLDESC_AccumulateAuraBonusDmg(struct D2UnitStrc * pUnit, int * pnMinDmgAcc, int * pnMaxDmgAcc, uint32_t * pdwElemColorOut);
 uint32_t SKILLDESC_FormatDamageRangeWithCalc(int32_t bPrefixSign, int32_t nMinVal, int32_t nMaxVal, uint16_t * wszText);
 void __stdcall SKILLDESC_FormatDecimalRange(uint16_t * wszText, int32_t bPrefixSign);
 void __stdcall SKILLDESC_CalcElemDamageRange(struct D2UnitStrc * pUnit, int * pnParam1, int * pnParam2, uint32_t * pdwParam, struct D2SkillStrc * pSkill);

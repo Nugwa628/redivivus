@@ -140,7 +140,7 @@ void __stdcall SetSkill(D2UnitStrc * pUnit, eD2Skills eSkill) {
     pUnit->pUnitData.pUnitDataMissile->nSkillNo = (int16_t)eClampedSkill;
 }
 
-eD2Skills GetSkillId(D2UnitStrc * pUnit) {
+eD2Skills __stdcall GetSkillId(D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType == UNIT_MISSILE && pUnit->pUnitData.pUnitDataMissile)) {
       return SKILL_Attack;
     }

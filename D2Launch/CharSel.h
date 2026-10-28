@@ -105,7 +105,7 @@ BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharacterName
 // @sourcefile .\Src\CharSel.cpp
 void __stdcall CHARSEL_DestroyAllCharEntries();
 void __stdcall CHARSEL_EnumerateLocalSaves();
-void __stdcall CHARSEL_UpdateSelectionExpansion();
+int __stdcall CHARSEL_UpdateSelectionExpansion();
 // @sourcefile .\Src\CharSel.cpp
 BOOL __stdcall CHARSEL_UpdateSelectedCharDisplay();
 void __fastcall UIMENU_SelectDifficultySinglePlayerOrTcpip(int32_t nCharLevel, int32_t bExpansion);
@@ -126,7 +126,7 @@ void CHARSEL_SetStatusMessage(int32_t nStatusCode);
 void __stdcall CHARSEL_ShowWaitTimeout();
 BOOL __stdcall CHARSEL_InitRealmSelection();
 // @sourcefile .\Src\CharSel.cpp
-void __stdcall CHARSEL_CreateCharEntry(uint16_t * wszCharName, uint16_t * wszCommandString, int32_t nEntryType, bool ePlayerClass);
+int __stdcall CHARSEL_CreateCharEntry(uint16_t * wszCharName, uint16_t * wszCommandString, int32_t nEntryType, bool ePlayerClass);
 void __stdcall CHARSEL_AddCreateNewEntry();
 void __stdcall CHARSEL_AddRetrievingEntry();
 // @sourcefile .\Src\CharSel.cpp

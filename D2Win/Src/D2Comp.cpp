@@ -2382,12 +2382,11 @@ char * __stdcall D2COMP_GetTitlePrefix(uint32_t nCharClass, uint32_t nTitleRank,
     return "";
 }
 
-void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
+int __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
     // Static local variables (originally global data)
     static int gnItemQuality_Set = 0x7d; D2_STATIC_GUARD(gnItemQuality_Set, "D2Win::Src::D2Comp::D2COMP_DrawUnitNameAndTitle::gnItemQuality_Set");
 
     char* szTitlePrefix;
-    int i;
     int j;
     uint16_t wszTitlePrefix[256];
     uint16_t wszTempAppend[256];
@@ -2401,20 +2400,21 @@ void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
     }
 
     uint32_t dwFlags = *pnParam;
+    int bDrawn = 0;
     if (!(dwFlags & 2)) {
-      return;
+      return bDrawn;
     }
 
     uint32_t nCharClass = pnParam[6];
     uint16_t* pWCharClear = wszTitleText;
-    for (i = 0x80; i; i--) {
+    for (bDrawn = 0x80; bDrawn; bDrawn--) {
       pWCharClear[0] = L'\0';
       pWCharClear[1] = L'\0';
       pWCharClear += 2;
     }
 
     uint32_t dwGameType = pnParam[7];
-    i = nCharClass + 6;
+    bDrawn = nCharClass + 6;
     int32_t nDrawColor = 0;
     int bDrawShadow = 0;
     if (dwGameType == 0x14) {
@@ -2427,7 +2427,7 @@ void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
       nDrawColor = 1;
     }
     if (dwFlags & 0x100) {
-      i = nCharClass + 0x15;
+      bDrawn = nCharClass + 0x15;
     }
     if (!(dwFlags & 0x40) && !(dwFlags & 0x80)) {
       dwFlags = pnParam[0x8c];
@@ -2471,10 +2471,12 @@ void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
     D2COMP_TruncateStringToFitWidth(wszTitleText, 0x78);
     D2WinFont::TEXT_CalcTextDimensions(wszTitleText, &nTextWidth, &nTextHeight);
     if (bDrawShadow) {
-      D2WinFont::DRAW_text(wszTitleText, pnParam[5] - (nTextWidth >> 1) - 1, i - 1, 6, 0);
+      D2WinFont::DRAW_text(wszTitleText, pnParam[5] - (nTextWidth >> 1) - 1, bDrawn - 1, 6, 0);
     }
 
-    D2WinFont::DRAW_text(wszTitleText, pnParam[5] - (nTextWidth >> 1), i, nDrawColor, 0);
+    D2WinFont::DRAW_text(wszTitleText, pnParam[5] - (nTextWidth >> 1), bDrawn, nDrawColor, 0);
+    bDrawn = 1;
+    return bDrawn;
 }
 
 void __fastcall DRAW_OOG_ChannelPlayers(D2QuestDataA3Q6Strc * pA3Q6Data) {
@@ -2553,7 +2555,7 @@ void __fastcall DRAW_OOG_ChannelPlayers(D2QuestDataA3Q6Strc * pA3Q6Data) {
         if (0 < (int)nPingMs) {
           memset(wszLineText, 0, 0x200);
           pWideStr = D2Lang::StrTable::strtable::GetLocaleString(0x1399);
-          D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszLineText, pWideStr, (uint16_t*)nPingMs);
+          D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszLineText, pWideStr, nPingMs);
           D2COMP_AddTextLineToLayout(wszLineText, aLineLayouts[0], &__frame0.nLineCount, &__frame0.nMaxLineWidth, &__frame0.nTotalWidth);
           *(uint8_t*)(char*)&dwPlayerInfoCopy = pA3Q6Data->bQuestTimerActive;
           *(uint8_t*)((char*)&dwPlayerInfoCopy + 1) = pA3Q6Data->bBridgeObjectValid;

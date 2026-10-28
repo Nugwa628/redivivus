@@ -24,7 +24,6 @@
 #include "Storm/Source/SSystem.h"
 #include "globals/globals.h"
 #include "D2Client/UI/MiniPanel.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "Fog/Fog.h"
 #include "Fog/QServer.h"
 
@@ -665,7 +664,6 @@ in_addr __stdcall GetClientIpByToken(D2QServerStrc * pQServer, uint32_t nToken) 
 
 void __stdcall ProbePeerNameByToken(D2QServerStrc * pQServer, uint32_t nToken) {
     sockaddr byStackGuard;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     uint32_t nBucketId = pQServer->nClientHashMask & nToken;
     uint32_t nAddrLen = nToken;
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(pQServer->pClientBucketLocks + nBucketId);
@@ -673,7 +671,6 @@ void __stdcall ProbePeerNameByToken(D2QServerStrc * pQServer, uint32_t nToken) {
     while (true) {
       if (!pDVar1) {
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(pQServer->pClientBucketLocks + nBucketId);
-        Debug::GuardStack();
         return;
       }
       if (pDVar1->nClientToken == nAddrLen) {
@@ -687,7 +684,6 @@ void __stdcall ProbePeerNameByToken(D2QServerStrc * pQServer, uint32_t nToken) {
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(pQServer->pClientBucketLocks + nBucketId);
     /* int * namelen for getpeername */ /* sockaddr * name for getpeername */ /* SOCKET s for getpeername */ nAddrLen = 0x10;
     getpeername(s, &byStackGuard, (int*)&nAddrLen);
-    Debug::GuardStack();
 }
 
 uint32_t __stdcall GetClientSocketByToken(D2QServerStrc * pQServer, uint32_t nClientToken) {
@@ -853,7 +849,7 @@ static int NET_QServer_DecrementPerIpConnectionCount(in_addr * pClientIp, D2QSer
 }
 
 // @sourcefile .\Src\QServer\QServer.cpp
-static void PruneIpRateList(D2QServerStrc * pQServer) {
+static int PruneIpRateList(D2QServerStrc * pQServer) {
     DWORD dwNow = GetTickCount();
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pQServer->csClientLifecycle);
     D2QServerIpRateEntryStrc* pEntry = pQServer->pIpRateListHead;
@@ -889,6 +885,7 @@ static void PruneIpRateList(D2QServerStrc * pQServer) {
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&pQServer->csClientLifecycle);
+    return 1;
 }
 
 // @sourcefile .\Src\QServer\QServer.cpp
@@ -960,19 +957,15 @@ void __stdcall SetHackMode(D2QServerStrc * pQServer, BOOL bUseQServerHack) {
 
 void Listen98Nt(D2QServerStrc * pQServer, int pPort) {
     WSADATA wsaData;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int nResult = WSAStartup(0x101, &wsaData);
     if (!nResult) {
       if (pQServer->bUseNtLocalMode) {
         QServer::QServerNT::CreateSocketLocal(pQServer, pPort);
-        Debug::GuardStack();
         return;
       }
 
       QServer::QServer98::CreateSocketOnline(pQServer, (u_short)pPort);
     }
-
-    Debug::GuardStack();
 }
 
 int __stdcall CountAllQueuedPackets(D2QServerStrc * pQServer) {
@@ -1131,7 +1124,6 @@ void __stdcall _NullSub() {
 // @sourcefile .\Src\QServer\QServer.cpp
 D2QServerStrc * __stdcall NET_QServer_Init(eD2GSConnectionType neD2GSConnectionType, int nType, int nPort, eD2GSGameType eD2GameType, fpD2QServerPacketClassifier pfnPacketClassifier, fpD2QServerSourceLineHook pfnOnClientAcceptedHook, fpD2QServerSourceLineHook pfnOnClientFreedHook, fpD2QServerSinglePlayerSendHook pfnSinglePlayerSendHook) {
     WSADATA wsaData;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2QServerStrc* pQServer_lcl = D2_NEW_AT(D2QServerStrc, ".\\Src\\QServer\\QServer.cpp", 0x94);
     memset(pQServer_lcl, 0, 0xc4c);
     uint32_t nIpConnCountMod = gnQServerIpConnCountModulo;
@@ -1241,7 +1233,6 @@ D2QServerStrc * __stdcall NET_QServer_Init(eD2GSConnectionType neD2GSConnectionT
       }
     }
 
-    Debug::GuardStack();
     return pQServer_lcl;
 }
 
@@ -1516,9 +1507,9 @@ static BOOL __stdcall QSSpamCheck(D2QServerClientConnectionStrc * pQServerClient
 
 // Shuts down and frees QServer structure. Optionally broadcasts final packet to all clients before cleanup. Closes all worker threads, frees hash-map buckets, deletes critical sections, closes sockets, and invokes WSACleanup. Iterates through mode packet free list and hacklist free list to release all pooled allocations.
 // @sourcefile .\Src\QServer\QServer.cpp
-void __stdcall Shutdown(D2QServerStrc * pQServer, char * pBytes, int nSize) {
+int __stdcall Shutdown(D2QServerStrc * pQServer, char * pBytes, int nSize) {
     if (!pQServer) {
-      return;
+      return 1;
     }
     if (pBytes) {
       BroadcastToAllClients(pQServer, pBytes, nSize);
@@ -1584,6 +1575,7 @@ void __stdcall Shutdown(D2QServerStrc * pQServer, char * pBytes, int nSize) {
 
     D2_FREE_AT(pQServer->pClientBucketLocks, ".\\Src\\QServer\\QServer.cpp", 0x19c);
     D2_FREE_AT(pQServer, ".\\Src\\QServer\\QServer.cpp", 0x19f);
+    return 1;
 }
 
 // Decrements pClient refcount via InterlockedDecrement. If zero: invokes optional cleanup callback at pQServer+0xBC8, removes client from server, and frees all queued packets.

@@ -158,7 +158,7 @@ static DWORD BNDOWNLOAD_GetCachedFileSize(LPCSTR szText, FILETIME * pftCompare) 
 }
 
 int32_t __fastcall BNDOWNLOAD_PerformCheckRevision(uint32_t * pdwVersionOut, uint32_t * pdwChecksumOut, uint8_t * pbResultOut) {
-    // Frame slots -1068..-4 are ONE object: &dwAuthResult is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -1068..-8 are ONE object: &dwAuthResult is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       uint32_t dwAuthResult;
@@ -174,9 +174,8 @@ int32_t __fastcall BNDOWNLOAD_PerformCheckRevision(uint32_t * pdwVersionOut, uin
       uint8_t aGameExePathTail[259];
       char szDllPath;
       uint8_t aDllPathTail[259];
-      uint32_t dwStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 1064, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 1060, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     char bSigValid;
     DWORD dwCurrentTick;
@@ -187,7 +186,6 @@ int32_t __fastcall BNDOWNLOAD_PerformCheckRevision(uint32_t * pdwVersionOut, uin
     HMODULE hGameModule;
     int32_t iVar2;
     char* szGameExePathPtr;
-    __frame0.dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (pdwVersionOut) {
       *pdwVersionOut = 0;
     }
@@ -209,7 +207,6 @@ int32_t __fastcall BNDOWNLOAD_PerformCheckRevision(uint32_t * pdwVersionOut, uin
       if (lpFileName_00881c58[0] != '\0') {
         bArchiveOk = Storm::Source::SFile::SFileOpenArchive(lpFileName_00881c58, nullptr, 0, &__frame0.pArchive);
         if (!bArchiveOk) {
-          Fog::Debug::GuardStack();
           return 0;
         }
 
@@ -252,7 +249,6 @@ int32_t __fastcall BNDOWNLOAD_PerformCheckRevision(uint32_t * pdwVersionOut, uin
         }
 
         iVar2 = __frame0.nCheckResult;
-        Fog::Debug::GuardStack();
         return iVar2;
       }
 
@@ -260,7 +256,6 @@ int32_t __fastcall BNDOWNLOAD_PerformCheckRevision(uint32_t * pdwVersionOut, uin
       dwCurrentTick = GetTickCount();
     } while (dwCurrentTick - dwStartTick < 0x4e21);
 
-    Fog::Debug::GuardStack();
     return 1;
 }
 
@@ -330,8 +325,9 @@ int __stdcall BNDOWNLOAD_GetProgress() {
     return gnNetworkSendState;
 }
 
-void __fastcall BNDOWNLOAD_SetPatchFilename(char * szText) {
+int __fastcall BNDOWNLOAD_SetPatchFilename(char * szText) {
     Storm::Source::SSTR::SStrCopy(lpFileName_00881c58, szText, 0x7fffffff);
+    return 1;
 }
 
 uint32_t __stdcall BNDOWNLOAD_HasPatchFilename() {
@@ -377,21 +373,18 @@ static BOOL __stdcall BnetDownloadFile(SOCKET hSocket, char * szText, FILETIME *
 }
 
 static int32_t __stdcall BNDOWNLOAD_RecvFileFromSocket(LPCSTR pThis, SOCKET hSocket, uint32_t nOffset, uint32_t nTotalSize, int32_t nProgressMode, FILETIME * pFileTime) {
-    // Frame slots -1472..-4 are ONE object: &nBytesWritten is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -1472..-8 are ONE object: &nBytesWritten is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       DWORD nBytesWritten;
       char szRecvChunk[1460];
-      uint32_t dwStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 1468, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 1464, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     uint32_t len;
     DWORD nNumberOfBytesToWrite;
-    __frame0.dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     HANDLE hFile = Fog::Source::SFile::thunk_CreateFileA(pThis, 0x40000000, 0, (LPSECURITY_ATTRIBUTES)0x0, 4, 0x80, (HANDLE)0x0);
     if (hFile == (HANDLE)-1) {
-      Fog::Debug::GuardStack();
       return 0;
     }
     if (nOffset) {
@@ -405,7 +398,6 @@ static int32_t __stdcall BNDOWNLOAD_RecvFileFromSocket(LPCSTR pThis, SOCKET hSoc
     while (true) {
       if (nTotalSize <= nOffset) {
         Fog::Source::SFile::SFILE_Win32CloseHandle(hFile);
-        Fog::Debug::GuardStack();
         return 1;
       }
 
@@ -428,7 +420,6 @@ static int32_t __stdcall BNDOWNLOAD_RecvFileFromSocket(LPCSTR pThis, SOCKET hSoc
     }
 
     Fog::Source::SFile::SFILE_Win32CloseHandle(hFile);
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -512,7 +503,6 @@ void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut) {
     nErrorLine = Storm::Source::SReg::SRegLoadData((uint32_t*)"Patch", "Patches", 2, &__frame1.cRegistryValue, 0x3fe, nullptr);
     if (!nErrorLine || __frame1.cRegistryValue == '\0') {
       *pResultOut = 0;
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -527,7 +517,6 @@ void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut) {
       if (!bArchiveOpened) {
         /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA((LPCSTR)lpFileName);
         *__frame0.pOpenFileOut = -1;
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -536,7 +525,6 @@ void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut) {
         Storm::Source::SFile::SFileCloseArchive(__frame0.pArchiveHandle);
         /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA((LPCSTR)lpFileName);
         *__frame0.pOpenFileOut = -1;
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -665,12 +653,10 @@ void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut) {
     bIsExpansion = BNDOWNLOAD_LaunchVerifiedExecutables(__frame3.szModulePath, &__frame1.cArchiveListBuf);
     if (bIsExpansion) {
       *__frame0.pOpenFileOut = 2;
-      Fog::Debug::GuardStack();
       return;
     }
 
     *__frame0.pOpenFileOut = -1;
-    Fog::Debug::GuardStack();
 }
 
 int __fastcall BNDOWNLOAD_ApplyPrepatch(uint32_t * pdwParam) {
@@ -927,7 +913,6 @@ uint32_t __stdcall BnetDownloadFile_II(void * lpThreadParam) {
     }
 
     /* LONG * lpAddend for InterlockedDecrement */ InterlockedDecrement((LONG*)&lpAddend_00881d5c);
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -1064,7 +1049,6 @@ void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t nOpcode
         szDestPath++;
       } while (cStrChar != '\0');
 
-      Fog::Debug::GuardStack();
       return;
       case -0x7ffffffe:
         /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00881f64);
@@ -1145,7 +1129,6 @@ void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t nOpcode
       sprintf(__frame1.szAdMessage, "<Received Ad: %s, %s>\n", __frame0.dwStackPad3, __frame0.dwStackPad2);
       BNMESSQUEUE_EnqueueString(1, __frame1.szAdMessage);
       BNMESSQUEUE_EnqueueBytes(3, (char*)&__frame0.dwStackPad5, 0x18);
-      Fog::Debug::GuardStack();
       return;
       case -0x7ffffffc:
         Debug::DEBUG_UnusedDebugFunction("Processing Bnserver.ini file");
@@ -1155,13 +1138,11 @@ void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t nOpcode
       BNGatewayAccess::UpdateGatewaysFromIni(&ActualRealmInfo, pDestPtr);
       Storm::SMem::SMemFree(pDestPtr, ".\\BnDownload.cpp", 0x245, 0);
       BNGatewayAccess::SaveAndUnload(&ActualRealmInfo);
-      Fog::Debug::GuardStack();
       return;
       case -0x7ffffffb:
         {
           if (bIsExtraWork) {
             /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(szDestPath);
-            Fog::Debug::GuardStack();
             return;
           }
 
@@ -1173,7 +1154,6 @@ void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t nOpcode
           Debug::DEBUG_UnusedDebugFunction("Processing ExtraWork file");
           bOpened = Storm::Source::SFile::SFileOpenArchive(szDestPath, nullptr, 0, &pArchiveHandle);
           if (!bOpened) {
-            Fog::Debug::GuardStack();
             return;
           }
 
@@ -1242,18 +1222,15 @@ void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t nOpcode
           /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(szDestPath);
           if (__frame1.cTempDllPath != '\0') {
             /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(&__frame1.cTempDllPath);
-            Fog::Debug::GuardStack();
             return;
           }
 
-          Fog::Debug::GuardStack();
           return;
         }
       case -0x7ffffffa:
         goto case_0x80000006;
       default:
         {
-          Fog::Debug::GuardStack();
           return;
         }
     }
@@ -1274,7 +1251,6 @@ void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t nOpcode
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00881f64);
-    Fog::Debug::GuardStack();
 }
 
 uintptr_t __fastcall BNDOWNLOAD_InitiatePatchDownload(BYTE * pbParam, size_t nSize) {

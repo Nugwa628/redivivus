@@ -44,7 +44,7 @@ BOOL __stdcall CHARSEL_OnPressLoadCharListForPreferredRealm(struct D2ControlMsg 
 BOOL __stdcall CHARSEL_HandleRealmChange(struct D2ControlMsg * pMsg);
 BOOL __stdcall HandleUpdateToExpansion(struct D2ControlMsg * pControlMsg);
 BOOL __stdcall LAUNCHER_StartGameWithSelectedCharacter(struct D2ControlMsg * pControlMsg);
-void __fastcall LAUNCHER_InitNetworkLobbyQueue(struct D2IniConfigStrc * pIniConfig);
+int __fastcall LAUNCHER_InitNetworkLobbyQueue(struct D2IniConfigStrc * pIniConfig);
 void __stdcall LAUNCHER_SetBusyFlag();
 void __stdcall LAUNCHER_ClearBusyFlag();
 BOOL __stdcall LAUNCHER_GetBusyFlag();

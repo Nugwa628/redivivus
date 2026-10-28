@@ -89,7 +89,6 @@
 #include "D2Common/Unit/D2UnitDataItemStrc.h"
 #include "D2Game/Monster/AI/AI.h"
 #include "D2Game/Objects/ObjectsMode.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 #include "Fog/Src/Safesock.h"
 
@@ -2651,7 +2650,6 @@ void __fastcall HireMercFromNpc(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, int32
     D2GameNpcStrc* pNpcDataSaved;
     pNpcDataSaved = pNpcData;
     if (!pNpcData || (pHireList = pNpcData->unk0x10 , !pHireList)) {
-      Fog::Debug::GuardStack();
       return;
     }
     if (!pGame->bExpansion) {
@@ -2659,7 +2657,6 @@ void __fastcall HireMercFromNpc(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, int32
       require_no_merc:
       pExistingMerc = PLAYER::PlayerPets::SERVER_GetUnitPetByTypeId(pGame, pPlayer, PETTYPE_hireable, 0);
       if (pExistingMerc) {
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -2697,7 +2694,6 @@ void __fastcall HireMercFromNpc(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, int32
               if (!pExistingMerc) {
                 pExistingMerc = D2Game::Monster::Create::SpawnMonsterAtUnit(pGame, pPlayer, nMercClassId, eD2MonsterAnimMode_ns::Neutral, 0xc, 0);
                 if (!pExistingMerc) {
-                  Fog::Debug::GuardStack();
                   return;
                 }
               }
@@ -2726,7 +2722,6 @@ void __fastcall HireMercFromNpc(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, int32
     }
 
     ResetNpcHireListIfEmpty(pGame, nNpcClassId, (uint32_t)pNpcData);
-    Fog::Debug::GuardStack();
 }
 
 // Validates that a player-NPC trade interaction is permitted before opening a trade/gamble screen. Registers the player interaction on the NPC. For gamble mode (nNpcDataIdx==0): verifies the item exists in the player's personal NPC inventory node. Otherwise requires the item to be identified. Returns TRUE on success, FALSE on failure.
@@ -3252,7 +3247,7 @@ void __fastcall SUNITNPC_HandleSellAction(::SGAMEDATA * pGame, D2UnitStrc * pUni
 // Server-side NPC "use/talk" dispatcher: given the interacted NPC monster GUID and quest-state selector, performs the right NPC menu action and replies with a 0x58 OpenUI packet. Validates the monster (monstats interact flag, UNIT_MONSTER, has AI) then branches: trade-reward states route to NpcState_MoveState1To2 + SUNITNPC_HandleTradeAction for the appropriate vendor set; mercenary state sends the for-hire list. Handles act-specific quest actions by NPC class: Charsi imbue (A1Q3 ToolsOfTheTrade), Akara respec/skill-clear (A1Q1 Respec), Larzuk socketing (A5Q1), Anya personalize (A5Q4), and travel NPCs (Warriv/Meshif/Tyrael/Cain) loading the destination act level and enabling its waypoint. The imbue/socket/personalize branches create the reward item, place it in inventory or drop it at FindBestSpotToSpawnItem, and send OpenUI menu code 6 (success) or 7 (fail/drop). __fastcall: pGame(ECX), pUnit(EDX); pQState, item GUID, target-item GUID on stack.
 // @sourcefile .\UNIT\SUNITNPC.CPP
 int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQState, DWORD guid, DWORD nGuid) {
-    // Frame slots -248..-4 are ONE object: &pClient is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -248..-8 are ONE object: &pClient is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       D2ClientStrc* pClient;
@@ -3261,9 +3256,8 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       uint8_t __pad6[2];
       D2ItemGenContextStrc sItemGenCtx;
       char szPlayerName[100];
-      uint32_t dwStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 244, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 240, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     bool bVar1;
     D2MonsterAiStrc* pMonsterAI;
@@ -3292,11 +3286,9 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
     eD2LevelId eLevel;
     eD2Quests eQuestId;
     eD2QuestState eQuestState;
-    __frame0.dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2UnitStrc* pClonedItem;
     pClonedItem = SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, guid);
     if (!pClonedItem || !pUnit || (sUseMenuPkt.y = pClonedItem->nClassId , sUseMenuPkt.y < 0) || sgptDataTable->nTxtMonStatsSize <= sUseMenuPkt.y || !(sgptDataTable->pTxtMonStats + sUseMenuPkt.y) || !sgptDataTable->pTxtMonStats[sUseMenuPkt.y].interact || pClonedItem->eUnitType != UNIT_MONSTER || !pClonedItem->pUnitData.pUnitDataMonster || (pMonsterAI = pClonedItem->pUnitData.pUnitDataMonster->pMonsterAi , !pMonsterAI)) {
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -3334,7 +3326,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
               break;
           }
 
-          Fog::Debug::GuardStack();
           return 0;
         }
       } else if (nNpcClassId < 0x196) {
@@ -3342,7 +3333,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
           __frame0.pClient = bSingleAiMonster;
           __frame0.byGuidHigh = bySavedGuidHigh;
           if (nNpcClassId < 0xfc || 0xff < nNpcClassId && nNpcClassId != 0x101) {
-            Fog::Debug::GuardStack();
             return 0;
           }
         }
@@ -3350,7 +3340,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
         __frame0.pClient = bSingleAiMonster;
         __frame0.byGuidHigh = bySavedGuidHigh;
         if (2 < nNpcClassId - 0x1ff) {
-          Fog::Debug::GuardStack();
           return 0;
         }
       }
@@ -3358,7 +3347,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       start_trade:
       D2Game::Monster::MonsterAI::NpcState_MoveState1To2(pClonedItem, pUnit);
       SUNITNPC_HandleTradeAction(pGame, pUnit, pClonedItem, (int32_t)__frame0.pClient, 0);
-      Fog::Debug::GuardStack();
       return 0;
     }
     if (pQState == QUESTSTATE_Step0x02) {
@@ -3368,18 +3356,15 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
           __frame0.pClient = bSingleAiMonster;
           __frame0.byGuidHigh = bySavedGuidHigh;
           if (nNpcClassId != 0xfe) {
-            Fog::Debug::GuardStack();
             return 0;
           }
         }
       } else if (nNpcClassId != 0x200 && (__frame0.pClient = bSingleAiMonster , __frame0.byGuidHigh = bySavedGuidHigh , nNpcClassId != 0x202)) {
-        Fog::Debug::GuardStack();
         return 0;
       }
 
       D2Game::Monster::MonsterAI::NpcState_MoveState1To2(pClonedItem, pUnit);
       SUNITNPC_HandleTradeAction(pGame, pUnit, pClonedItem, (int32_t)__frame0.pClient, 1);
-      Fog::Debug::GuardStack();
       return 0;
     }
     if (pQState == QUESTSTATE_Step0x03) {
@@ -3388,7 +3373,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       nNpcClassId = (uint32_t)(nMercCount < 2);
       bSingleAiMonster = SUnit::SUNIT_GetClient(pUnit, ".\\UNIT\\SUNITNPC.CPP", 0xb50);
       SendMercForHireList(pGame, bSingleAiMonster, pClonedItem, nNpcClassId);
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -3399,7 +3383,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       sUseMenuPkt.y = (LONG)SUnit::SUNIT_GetClient(pUnit, ".\\UNIT\\SUNITNPC.CPP", 0xb59);
       bQuestState = UnitHasItemInInventory(nGuid, pUnit);
       if (!bQuestState) {
-        Fog::Debug::GuardStack();
         return 3;
       }
 
@@ -3410,7 +3393,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       bQuestState = D2Common::QuestRecord::GetQuestState(pQuestBuf, eQuestId, eQuestState);
       if (bQuestState) {
         if (!pItem) {
-          Fog::Debug::GuardStack();
           return 0;
         }
 
@@ -3419,7 +3401,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
           __frame0.byMenuType = '\a';
           GAME::SCmd::NET_D2GS_SERVER_Send_0x58_ITEMACCEPT((D2ClientStrc*)sUseMenuPkt.y, (D2GSPacketSrv0x58*)&__frame0.pClient);
           ITEMS::ItemMode::SERVER_DropItemFromPlayer(pGame, pUnit, nGuid);
-          Fog::Debug::GuardStack();
           return 0;
         }
 
@@ -3478,7 +3459,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
             GAME::SCmd::NET_D2GS_SERVER_Send_0x58_ITEMACCEPT((D2ClientStrc*)sUseMenuPkt.y, (D2GSPacketSrv0x58*)&__frame0.pClient);
           }
 
-          Fog::Debug::GuardStack();
           return 0;
         }
       }
@@ -3486,7 +3466,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       __frame0.byMenuType = '\a';
       GAME::SCmd::NET_D2GS_SERVER_Send_0x58_ITEMACCEPT((D2ClientStrc*)sUseMenuPkt.y, (D2GSPacketSrv0x58*)&__frame0.pClient);
       ITEMS::ItemMode::SERVER_DropItemFromPlayer(pGame, pUnit, nGuid);
-      Fog::Debug::GuardStack();
       return 0;
     }
     /* Akara */ if (sUseMenuPkt.y == 0x94) {
@@ -3523,7 +3502,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
         Quests::QUESTS::A1Q1::DeactivateRespecQuest(pGame, pUnit);
       }
 
-      Fog::Debug::GuardStack();
       return 0;
     }
     /* Larzuk */ if (sUseMenuPkt.y != 0x1ff) {
@@ -3545,7 +3523,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
             }
           }
 
-          Fog::Debug::GuardStack();
           return 0;
         }
         /* Warriv act 2 */ if (sUseMenuPkt.y == 0xaf) {
@@ -3569,14 +3546,12 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
               }
             }
 
-            Fog::Debug::GuardStack();
             return 0;
           }
           /* Meshif in act 3 */ if (sUseMenuPkt.y == 0x108) {
             __frame0.pClient = bSingleAiMonster;
             __frame0.byGuidHigh = bySavedGuidHigh;
             if (pQState != QUESTSTATE_Completed) {
-              Fog::Debug::GuardStack();
               return 0;
             }
 
@@ -3600,14 +3575,12 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
                 }
               }
 
-              Fog::Debug::GuardStack();
               return 0;
             }
 
             /* Decard cain act 5 */ __frame0.pClient = bSingleAiMonster;
             __frame0.byGuidHigh = bySavedGuidHigh;
             if (sUseMenuPkt.y != 0x208 || pQState != QUESTSTATE_Completed) {
-              Fog::Debug::GuardStack();
               return 0;
             }
 
@@ -3618,7 +3591,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
         __frame0.pClient = bSingleAiMonster;
         __frame0.byGuidHigh = bySavedGuidHigh;
         PLAYER::PlayerMsg::LoadAreaOrSpawnPortal(pGame, pUnit, eLevel, 5);
-        Fog::Debug::GuardStack();
         return 0;
       }
 
@@ -3629,7 +3601,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       __frame0.pClient = SUnit::SUNIT_GetClient(pUnit, ".\\UNIT\\SUNITNPC.CPP", 0xc57);
       bHasItemInInventory = UnitHasItemInInventory(nGuid, pUnit);
       if (!bHasItemInInventory) {
-        Fog::Debug::GuardStack();
         return 3;
       }
 
@@ -3641,7 +3612,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       bQuestState = D2Common::QuestRecord::GetQuestState(pQuestBuf, eQuestId, eQuestState);
       if (bQuestState) {
         if (!sUseMenuPkt.y) {
-          Fog::Debug::GuardStack();
           return 0;
         }
 
@@ -3680,7 +3650,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
             Quests::QUESTS::A5Q4::Q34_ClaimReward(pGame, pUnit);
             *(uint8_t*)((char*)&PStack_108.y + 1) = 6;
             GAME::SCmd::NET_D2GS_SERVER_Send_0x58_ITEMACCEPT(__frame0.pClient, (D2GSPacketSrv0x58*)&PStack_108);
-            Fog::Debug::GuardStack();
             return 0;
           }
 
@@ -3692,7 +3661,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       *(uint8_t*)((char*)&PStack_108.y + 1) = 7;
       GAME::SCmd::NET_D2GS_SERVER_Send_0x58_ITEMACCEPT(__frame0.pClient, (D2GSPacketSrv0x58*)&PStack_108);
       ITEMS::ItemMode::SERVER_DropItemFromPlayer(pGame, pUnit, nGuid);
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -3703,7 +3671,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
     __frame0.pClient = SUnit::SUNIT_GetClient(pUnit, ".\\UNIT\\SUNITNPC.CPP", 0xbe2);
     bQuestState = UnitHasItemInInventory(nGuid, pUnit);
     if (!bQuestState) {
-      Fog::Debug::GuardStack();
       return 3;
     }
 
@@ -3716,7 +3683,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       goto reject_ineligible_item;
     }
     if (!sUseMenuPkt.y) {
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -3731,7 +3697,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
       *(uint8_t*)((char*)&PStack_108.y + 1) = 7;
       GAME::SCmd::NET_D2GS_SERVER_Send_0x58_ITEMACCEPT(__frame0.pClient, (D2GSPacketSrv0x58*)&PStack_108);
       ITEMS::ItemMode::SERVER_DropItemFromPlayer(pGame, pUnit, nGuid);
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -3768,7 +3733,6 @@ int __fastcall UseMenu(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2QuestState pQ
     Quests::QUESTS::A5Q1::Q31_ClaimReward(pGame, pUnit);
     *(uint8_t*)((char*)&PStack_108.y + 1) = 6;
     GAME::SCmd::NET_D2GS_SERVER_Send_0x58_ITEMACCEPT(__frame0.pClient, (D2GSPacketSrv0x58*)&PStack_108);
-    Fog::Debug::GuardStack();
     return 0;
 }
 

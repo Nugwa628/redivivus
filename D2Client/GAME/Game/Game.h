@@ -99,7 +99,7 @@ void __fastcall SetGlobalAlwaysRun(int32_t nValue);
 BOOL __stdcall GetGlobalAlwaysRun();
 void __fastcall GAMEDATA_SetClickModifier(int32_t bModifierDown);
 // Compute mouse click modifier flags (run/always-run, modifier key).
-uint32_t GetMouseClickFlags();
+uint32_t __stdcall GetMouseClickFlags();
 void __stdcall GAME_SetMouseButtonEventPending();
 uint8_t __stdcall GAME_GetPrimaryClickState();
 uint8_t __stdcall GAME_GetMouseButtonEventState();
@@ -272,7 +272,7 @@ void __fastcall CLIENT_SetDifficulty(char nDifficulty);
 void __fastcall CLIENT_SetExpansion(bool bExpansion);
 void __fastcall CLIENT_SetLadder(BOOL bLadder);
 uint32_t __stdcall GAMEDATA_GetLadderOrGameType();
-BOOL CLIENT_CheckExpansion();
+BOOL __stdcall CLIENT_CheckExpansion();
 uint8_t __stdcall GetDificulity();
 // Clear in-game UI flags for several UI elements (data_0070f2c4/348/360).
 void __stdcall ClearInGameUIFlags();

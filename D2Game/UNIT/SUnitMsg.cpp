@@ -61,7 +61,6 @@
 #include "D2Common/ITEMS/ItemMods.h"
 #include "D2Game/Monster/AI/AI.h"
 #include "D2Game/Objects/Objects.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -511,8 +510,6 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
       sPacket.nPacketSize = (uint8_t)(nBitPosCheck + 7U);
       GAME::SCmd::NET_D2GS_SERVER_Send_0xAA_AddUnit_0xA8_SetState(pClient, &sPacket.nPacketId, nBitPosCheck + 7U);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Send stat changes (buffs/debuffs) to client. Iterates state flags, checks which are new/ending, encodes changed stats into bit buffer with ItemStatCost config, sends via 0xA7/0xA8/0xA9 opcodes.
@@ -669,8 +666,6 @@ void __fastcall PLAYER_SendStateDeltaToClient(D2UnitStrc * pUnit, D2ClientStrc *
         } while (nDwordIdx < nFlagDwordCount);
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall PLAYER_SendStateUpdate(D2UnitStrc * pUnit, D2ClientStrc * pClient, int32_t nStateUpdateType) {
@@ -733,7 +728,6 @@ void __fastcall PLAYER_SendHoverTextToClient(D2UnitStrc * pUnit, D2ClientStrc * 
           memset(sPacket.szMessage, 0, 0x100);
           D2Common::Chat::TEXT_CopyHoverMessageString(pHoverText, (int32_t)sPacket.szMessage);
           GAME::SCmd::NET_D2GS_SERVER_Send_0x26_CHATSTART(pClient, &sPacket);
-          Fog::Debug::GuardStack();
           return;
         }
 
@@ -745,7 +739,6 @@ void __fastcall PLAYER_SendHoverTextToClient(D2UnitStrc * pUnit, D2ClientStrc * 
           }
         }
 
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -754,7 +747,6 @@ void __fastcall PLAYER_SendHoverTextToClient(D2UnitStrc * pUnit, D2ClientStrc * 
     }
 
     GAME::SCmd::NET_D2GS_SERVER_Send_CMD_BYTE_INT(pClient, 0x76, byUnitTypeFallback, nGUIDFallback);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall UNITMSG_SendSoundPacketToClient(D2UnitStrc * pUnit, D2ClientStrc * pClient) {

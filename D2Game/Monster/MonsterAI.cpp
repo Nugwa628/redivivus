@@ -552,7 +552,7 @@ void __fastcall NPC_BeginInteractionFromUnit(::SGAMEDATA * pGame, D2UnitStrc * p
     NPC_BeginInteraction(pGame, pMonsterAi, bUnknown, pUnit, pMonster);
 }
 
-static BOOL UnitHasSwitchAiSet(D2UnitStrc * pMonster) {
+static BOOL __stdcall UnitHasSwitchAiSet(D2UnitStrc * pMonster) {
     if (!(pMonster && pMonster->eUnitType == UNIT_MONSTER)) {
       return 0;
     }

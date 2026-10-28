@@ -9,7 +9,6 @@
 #include "Storm/Source/SSTR.h"
 #include "globals/globals.h"
 #include "D2Common/Chat.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -94,16 +93,14 @@ void __thiscall IGNORELIST_ExtractSuffix(::IgnoreList * pThis, char * szText, in
 }
 
 void __thiscall IGNORELIST_ParsePattern(::IgnoreList * pThis, char * szText1, char * szText2, int32_t nParam) {
-    // Frame slots -264..-4 are ONE object: &cPatternBuf is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -264..-8 are ONE object: &cPatternBuf is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       char cPatternBuf;
       uint8_t aPatternRest[255];
-      uint32_t nSecurityCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 260, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 256, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
-    __frame0.nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!szText2) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1a0);
       exit(-1);
@@ -118,7 +115,6 @@ void __thiscall IGNORELIST_ParsePattern(::IgnoreList * pThis, char * szText1, ch
     }
 
     Storm::Source::SSTR::SStrCopy(szText2, &__frame0.cPatternBuf, nParam);
-    Fog::Debug::GuardStack();
 }
 
 // @sourcefile .\Chat\Ignorelist.cpp

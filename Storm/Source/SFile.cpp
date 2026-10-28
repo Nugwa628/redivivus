@@ -20,7 +20,6 @@
 #include "Storm/Storm.h"
 #include "Storm/_unnamespaced.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "support/d2_trace.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -432,7 +431,7 @@ void __stdcall SFILE_BuildDefaultBasePath() {
 }
 
 // @blizzard CheckArchiveHandle (SFILE.CPP)
-static int SFILE_CheckArchiveHandle(D2ArchiveStrc * pArchive, D2ArchiveStrc * * ppArchive) {
+static int __stdcall SFILE_CheckArchiveHandle(D2ArchiveStrc * pArchive, D2ArchiveStrc * * ppArchive) {
     *ppArchive = pArchive;
     return 1;
 }
@@ -443,14 +442,14 @@ static uint32_t SFILE_FileExistsOnDisk(LPCSTR szText) {
 }
 
 // @blizzard CheckFileHandle (SFILE.CPP)
-static int SFILE_CheckFileHandle(D2MPQFileStrc * pMPQFile, D2MPQFileStrc * * ppMPQFile) {
+static int __stdcall SFILE_CheckFileHandle(D2MPQFileStrc * pMPQFile, D2MPQFileStrc * * ppMPQFile) {
     *ppMPQFile = pMPQFile;
     return 1;
 }
 
 // @blizzard CheckForCdRom (SFILE.CPP)
 BOOL __stdcall SFILE_CheckForCdRom(char * szText) {
-    // Frame slots -288..-4 are ONE object: &dwTotalClusters is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -288..-8 are ONE object: &dwTotalClusters is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       DWORD dwTotalClusters;
@@ -459,14 +458,12 @@ BOOL __stdcall SFILE_CheckForCdRom(char * szText) {
       DWORD dwBytesPerSector;
       char szRootPath[4];
       uint32_t szFsName[65];
-      uint32_t dwStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 284, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 280, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     uint32_t nChecksum;
     LPDWORD dwSectorsPerCluster;
     uint16_t nFoldedChecksum;
-    __frame0.dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     SSTR::SStrCopy(__frame0.szRootPath, szText, 4);
     UINT nDriveType = GetDriveTypeA(__frame0.szRootPath);
     __frame0.dwFsFlags = 0;
@@ -482,13 +479,11 @@ BOOL __stdcall SFILE_CheckForCdRom(char * szText) {
         nChecksum = __frame0.dwFsFlags & 4 ^ __frame0.szFsName[0] ^ __frame0.dwFreeClusters ^ __frame0.dwBytesPerSector ^ nDriveType;
         nFoldedChecksum = (uint16_t)(nChecksum >> 0x10) ^ (uint16_t)nChecksum;
         if (nFoldedChecksum == 0x1f00 || nFoldedChecksum == 0x805) {
-          Fog::Debug::GuardStack();
           return 1;
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -496,7 +491,6 @@ BOOL __stdcall SFILE_CheckForCdRom(char * szText) {
 static void __stdcall SFILE_ConvertRelativePathName(int32_t bStripDir, char * szFileName, char * szOutPath) {
     char* pLastSlash;
     char szTmpPath[260];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (szSFileBasePath[0] == '\0') {
       SFILE_BuildDefaultBasePath();
     }
@@ -509,7 +503,6 @@ static void __stdcall SFILE_ConvertRelativePathName(int32_t bStripDir, char * sz
 
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szTmpPath, "%s%s", szSFileBasePath, szFileName);
     __fullpath(szOutPath, szTmpPath, 0x104);
-    Fog::Debug::GuardStack();
 }
 
 static uint32_t __stdcall SFILE_FindFileOnDisk(uint8_t bSearchFlags, LPCSTR szOutPath, char * szFileName) {
@@ -2362,7 +2355,6 @@ int __fastcall SFILE_SearchFileInArchives(D2ArchiveStrc * pArchive, D2MPQBlockEn
     char* szFileName_00;
     char szDiskPath[260];
     char szPrefixedName[260];
-    uint32_t nStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (ppArchiveOut) {
       *ppArchiveOut = 0;
     }
@@ -2374,7 +2366,6 @@ int __fastcall SFILE_SearchFileInArchives(D2ArchiveStrc * pArchive, D2MPQBlockEn
     if (pArchive) {
       nRet = SFILE_CheckArchiveHandle(pArchive, &pValidatedArchive);
       if (!nRet) {
-        Fog::Debug::GuardStack();
         return 0;
       }
     }
@@ -2402,7 +2393,6 @@ int __fastcall SFILE_SearchFileInArchives(D2ArchiveStrc * pArchive, D2MPQBlockEn
               SSTR::SStrCopy(szDiskPathOut, szDiskPath, 0x104);
             }
 
-            Fog::Debug::GuardStack();
             return 2;
           }
         }
@@ -2427,7 +2417,6 @@ int __fastcall SFILE_SearchFileInArchives(D2ArchiveStrc * pArchive, D2MPQBlockEn
             SErr::SErrSetLastError(0x3ee);
           }
 
-          Fog::Debug::GuardStack();
           return nRet;
         }
       }
@@ -2442,7 +2431,6 @@ int __fastcall SFILE_SearchFileInArchives(D2ArchiveStrc * pArchive, D2MPQBlockEn
     } while (true);
 
     SErr::SErrSetLastError(2);
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -3392,7 +3380,6 @@ int __stdcall SFileOpenFileEx(D2ArchiveStrc * pArchive, char * szFileName, uint3
     D2MPQBlockEntryStrc* pSavedBlockEntry;
     D2ArchiveStrc* pFileArchive;
     int* pRefCount;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     uint32_t nResult = -1;
     char* pFileName = szFileName;
     if (!phFile) {
@@ -3487,12 +3474,10 @@ int __stdcall SFileOpenFileEx(D2ArchiveStrc * pArchive, char * szFileName, uint3
         (*fpSFileOpenCallback)(szFileName, gpSFileOpenCallbackParam);
       }
 
-      Fog::Debug::GuardStack();
       return nResult;
     }
 
     SErr::SErrSetLastError(0x57);
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -5327,7 +5312,6 @@ int __stdcall SFileOpenArchive(char * szArchiveName, int * pUserData, uint32_t n
     }
     if (!(bValidArgs & -(uint32_t)(szArchiveName != 0) & -(uint32_t)(*szArchiveName != '\0'))) {
       SErr::SErrSetLastError(0x57);
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -5386,7 +5370,6 @@ int __stdcall SFileOpenArchive(char * szArchiveName, int * pUserData, uint32_t n
         pArchive->nPriority = 0;
         iVar2 = SFILE_s_OpenArchive(pArchive, nFlags, bIsCdrom, ppArchive);
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00779068);
-        Fog::Debug::GuardStack();
         return iVar2;
       }
     } else {
@@ -5394,31 +5377,27 @@ int __stdcall SFileOpenArchive(char * szArchiveName, int * pUserData, uint32_t n
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00779068);
-    Fog::Debug::GuardStack();
     return 0;
 }
 
 // @sourcefile .\SOURCE\SFILE.CPP
 void __stdcall SFILE_OpenNestedArchive(int32_t nParentArchive, char * szFileName, int * pUserData, uint32_t nFlags, D2ArchiveStrc * * ppArchive) {
-    // Frame slots -272..-4 are ONE object: &pBlockInfo is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -272..-8 are ONE object: &pBlockInfo is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       D2MPQFileStrc* pBlockInfo;
       char szResolvedPath[260];
-      uint32_t dwStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 268, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 264, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     D2ArchiveStrc* pNewArchive;
     D2MPQHeaderStrc* pHeaderBuf;
     D2ArchiveStrc* pArchive;
     D2MPQFileStrc* pOpenedFile;
-    __frame0.dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2MPQFileStrc** pMpqFile = &__frame0.pBlockInfo;
     uint32_t nSearchFlags = SFILE_GetOpenFlags();
     int nOpenResult = SFileOpenFileEx((D2ArchiveStrc*)nParentArchive, szFileName, nSearchFlags, (void**)pMpqFile);
     if (!nOpenResult) {
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -5431,7 +5410,6 @@ void __stdcall SFILE_OpenNestedArchive(int32_t nParentArchive, char * szFileName
       nSearchFlags = SFILE_GetOpenFlags();
       SFILE_FindFileOnDisk((uint8_t)nSearchFlags, __frame0.szResolvedPath, szFileName);
       SFileOpenArchive(szFileName, pUserData, nFlags, ppArchive);
-      Fog::Debug::GuardStack();
       return;
     }
     if (!(pOpenedFile->pBlockEntry->dwFlags & 0x1ff00)) {
@@ -5457,14 +5435,12 @@ void __stdcall SFILE_OpenNestedArchive(int32_t nParentArchive, char * szFileName
       pArchive->nArchiveFileSize = pOpenedFile->pBlockEntry->dwFileSize + pOpenedFile->pBlockEntry->dwFilePos;
       SFILE_s_OpenArchive(pArchive, nFlags, pArchive->nArchiveType, ppArchive);
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00779068);
-      Fog::Debug::GuardStack();
       return;
     }
 
     SFileCloseFile(pMPQFile);
     SErr::SErrSetLastError(0x3ee);
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00779068);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall CRC32_UpdateCRC(uint8_t * pbData, int32_t nLength, uint32_t * pdwCrc, uint8_t byFlags) {

@@ -12,7 +12,6 @@
 #include "Storm/WindowHandle.h"
 #include "Storm/_unnamespaced.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -201,7 +200,7 @@ void __stdcall SErrPrepareAppFatal(void * pfnCallback, uint32_t nCallbackParam) 
 // @oracle-basis Callee set {EnterCriticalSection, GetProcessHeap, HeapAlloc, LeaveCriticalSection} is the oracle's exactly. The oracle prologue at 10015890 saves r3 and r4 and nothing else, so the true arity is 2; Ghidra's third parameter dwParam2 is unused in the body and is spurious.
 // @corroboration Its one caller is D2Client CLIENT_LoadLNG - D2 registering the loaded .LNG string table as an error message source. That is the API's documented purpose and it is a caller from outside Storm, as an export should have.
 // @oracle-note The rival SSYSTEM_RegisterErrorModule 0041c0f0 writes the same gpErrorModuleList but calls GetModuleHandleA and takes no critical section, so it is the internal self-registration helper, not the export. Left under its descriptive name.
-void __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBase, uint32_t dwParam2) {
+int __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBase, uint32_t dwParam2) {
     SERR_InternalEnterCriticalSection();
     SIZE_T dwBytes = 0xc;
     DWORD dwFlags = 4;
@@ -212,6 +211,7 @@ void __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBas
     *(void**)(pNewModule + 4) = (void*)gpErrorModuleList;
     gpErrorModuleList = pNewModule;
     SERR_InternalLeaveCriticalSection();
+    return 1;
 }
 
 // Stores dwErrCode into Storm's own dwLastErrorCode global and then forwards it to the Win32 SetLastError.
@@ -325,7 +325,7 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
     // Static local variables (originally global data)
     static uint32_t gbSSystemErrorDialogActive; D2_STATIC_GUARD_BSS(gbSSystemErrorDialogActive, "Storm::Source::SErr::SErrDisplayError::gbSSystemErrorDialogActive");
 
-    // Frame slots -2396..-4 are ONE object: &nMsgBoxFlags is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -2396..-8 are ONE object: &nMsgBoxFlags is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       uint32_t nMsgBoxFlags;
@@ -337,9 +337,8 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
       char szModuleFile[260];
       char szModuleName[260];
       char szErrorText[256];
-      uint32_t dwSecurityCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 2392, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 2388, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     LPSTR* ppFormat;
     uint32_t nLen;
@@ -354,11 +353,9 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
     uint32_t nErrorCodeArg;
     int32_t nMaxCopyLen;
     uint32_t* pStackTraceArg;
-    __frame0.dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     __frame0.pStackTracePtr = pStackTrace;
     __frame0.pCustomMsgPtr = (char*)pCustomMsg;
     if (gbSSystemShutdownInProgress || gbSSystemErrorDialogActive) {
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -552,7 +549,6 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
     }
 
     gbSSystemErrorDialogActive = 0;
-    Fog::Debug::GuardStack();
     return iVar1;
 }
 
@@ -560,11 +556,11 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
 // @oracle Storm 1.10b PPC export SErrDisplayErrorFmt, code vector 10015ed0 (TVector 100cbe74).
 // @oracle-basis Callee set is exactly {vsprintf-family, SErrDisplayError} in both builds and nothing else - the PPC body is 176 B calling ._vsnprintf then .SErrDisplayError, this one is 90 B calling _vsprintf then SErrDisplayError. __cdecl with varargs in both. It is the vararg wrapper of 0041caf0.
 void SErrDisplayErrorFmt(uint32_t nErrorCode, uint32_t * pStackTrace, int32_t nTraceFlags, int32_t nMessageFlags, UINT nExitCode, char * szFormat, ...) {
+    va_list __va;
+    va_start(__va, szFormat);
     char szFormatted[1024];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
-    vsprintf(szFormatted, szFormat, (va_list)((uint8_t*)&szFormat + 4));
+    vsprintf(szFormatted, szFormat, __va);
     SErrDisplayError(nErrorCode, pStackTrace, nTraceFlags, (uint8_t*)szFormatted, nMessageFlags, nExitCode);
-    Fog::Debug::GuardStack();
 }
 
 // Reports a leaked resource. Formats "%s (%s)" from the description and the optional name, then either raises it through SErrDisplayError or, when the registry option is set, writes "Storm Error : handle never released -- %s" to the debugger.
@@ -578,7 +574,6 @@ void __stdcall SErrReportNamedResourceLeak(char * szMessage, char * szText) {
 
     char szDebugOutput[200];
     uint32_t szFormatted[64];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!gbDebugMemoryInitialized) {
       gbDebugMemoryInitialized = 1;
       SReg::SRegLoadValue("Internal", "Debug Memory", 0, &gnDebugMemoryInitFlag);
@@ -591,15 +586,12 @@ void __stdcall SErrReportNamedResourceLeak(char * szMessage, char * szText) {
       }
       if (!gnSSystemOption1) {
         SErrDisplayError(0x8510007f, szFormatted, -3, nullptr, 1, 1);
-        Fog::Debug::GuardStack();
         return;
       }
 
       /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szDebugOutput, "Storm Error : handle never released -- %s\n", szFormatted);
       /* LPCSTR lpOutputString for OutputDebugStringA */ OutputDebugStringA(szDebugOutput);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Under the error critical section, walks gpStormErrorCallbackListHead and removes every node whose handler slot (+8) equals the argument.
@@ -624,8 +616,9 @@ void __stdcall SErrUnregisterHandler(int32_t nCallbackId) {
 // @oracle Storm 1.10b PPC export SErrDisplayAppFatal, code vector 100168d0 (TVector 100cbe64).
 // @oracle-basis Callee set matches seven for seven, in order, and is unique in both builds: EnterErrorCriticalSection, GetCurrentThreadId, memset, LeaveErrorCriticalSection, vsnprintf/vsprintf, SErrDisplayError, ExitProcess. No other function in either module combines GetCurrentThreadId with memset and a vararg format. The old name FatalAssert was descriptively close but this is the SErr export, not an assert macro.
 void __stdcall SErrDisplayAppFatal(char * szText, ...) {
+    va_list __va;
+    va_start(__va, szText);
     char szFormatted[1024];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     SERR_InternalEnterCriticalSection();
     DWORD dwCurrentThreadId_lcl = GetCurrentThreadId();
     uint32_t nSavedContextParam = gpSSystemThreadContextCallback.nParam;
@@ -639,7 +632,7 @@ void __stdcall SErrDisplayAppFatal(char * szText, ...) {
     }
 
     SERR_InternalLeaveCriticalSection();
-    vsprintf(szFormatted, szText, (va_list)((uint8_t*)&szText + 4));
+    vsprintf(szFormatted, szText, __va);
     SErrDisplayError(0x85100084, pContextCallback, nContextParam, (uint8_t*)szFormatted, 0, 1);
     /* UINT uExitCode for ExitProcess */ ExitProcess(1);
 }

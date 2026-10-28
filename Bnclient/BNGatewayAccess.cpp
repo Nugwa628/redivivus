@@ -12,7 +12,6 @@
 #include "Storm/Source/SSystem.h"
 #include "globals/globals.h"
 #include "D2Client/UI/Chat.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -22,7 +21,6 @@ namespace Bnclient::BNGatewayAccess {
 int32_t __stdcall GetSystemTimeZone() {
     int32_t iVar1;
     _TIME_ZONE_INFORMATION tziInfo;
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Storm::Source::SSystem::SMemZero(&tziInfo, 0xac);
     /* LPTIME_ZONE_INFORMATION lpTimeZoneInformation for GetTimeZoneInformation */ GetTimeZoneInformation(&tziInfo);
     LANGID langId = GetUserDefaultLangID();
@@ -30,7 +28,6 @@ int32_t __stdcall GetSystemTimeZone() {
       iVar1 = tziInfo.Bias;
     }
 
-    Fog::Debug::GuardStack();
     return iVar1;
 }
 
@@ -542,7 +539,7 @@ void __stdcall Load(D2BNetGatewayAccessStr * pGatewayAccess) {
 // on a bad/empty buffer — the crash the 2nd shared-wineprefix client hits via the BNFTP path.
 // @sourcefile .\BNetGW.cpp
 void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, char * szText) {
-    // Frame slots -48..-4 are ONE object: &nTmp4 is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -48..-8 are ONE object: &nTmp4 is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       char* nTmp4;
@@ -552,9 +549,8 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
       uint32_t nGatewayIniIdx;
       char* nTmp1;
       char szKeyBuf[16];
-      uint32_t dwSecurityCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 44, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 40, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     uint32_t nSize;
     uint32_t nIniVersion;
@@ -567,7 +563,6 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
     char cCur;
     int nFieldLen;
     int32_t nLine;
-    __frame0.dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char* pCur = szText;
     __frame0.nTmp2 = pCur + strlen(pCur);
     pCur = __frame0.nTmp2 + 1;
@@ -585,7 +580,6 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
         nIniVersion = strtoul(pCur, &__frame0.nTmp4, 10);
         __frame0.nGatewayIniIdx = nIniVersion;
         if (nIniVersion <= pClientSideData->nFormatVersion) {
-          Fog::Debug::GuardStack();
           return;
         }
 
@@ -671,7 +665,6 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
           PickClosestZone(pClientSideData, __frame0.nSystemGmtBias);
           SaveAndUnload(pClientSideData);
           Load(pClientSideData);
-          Fog::Debug::GuardStack();
           return;
         } else {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e6);

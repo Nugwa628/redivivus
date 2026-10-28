@@ -118,7 +118,7 @@ void __stdcall SOUND_FadeOutMusic() {
     D2SoundSmp::SOUNDSMP_StartFade(gpMusicStreamBuffer, 0, 200);
 }
 
-void __stdcall SOUND_PlayNextAmbientSound() {
+int __stdcall SOUND_PlayNextAmbientSound() {
     uint32_t dwVolume;
     int* pAmbientEntry;
     BOOL BVar1;
@@ -130,7 +130,7 @@ void __stdcall SOUND_PlayNextAmbientSound() {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gSoundSmpCs);
     if (!gpMusicStreamBuffer || (dwVolume = D2SoundSmp::SOUNDSMP_GetEffectiveVolume() , !dwVolume) || gpMusicStreamBuffer && (dwVolume = D2SoundSmp::SOUNDSMP_IsStreaming(gpMusicStreamBuffer) , dwVolume != 0)) {
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gSoundSmpCs);
-      return;
+      return 0;
     }
 
     bool bResetDone;
@@ -152,7 +152,7 @@ void __stdcall SOUND_PlayNextAmbientSound() {
       if (bResetDone) {
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ gnMusicEnabled = 0;
         LeaveCriticalSection(&gSoundSmpCs);
-        return;
+        return 0;
       }
 
       SOUND_ResetAmbientSoundFlags();
@@ -215,7 +215,7 @@ void __stdcall SOUND_PlayNextAmbientSound() {
             nAmbientCount = gaAmbientSoundFlags;
             if (BVar1) {
               /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gSoundSmpCs);
-              return;
+              return 1;
             }
           }
         }

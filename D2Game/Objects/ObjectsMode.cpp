@@ -1333,12 +1333,10 @@ static BOOL __stdcall Shrines_GemShrine_SpawnGem(int32_t nItemClassId, D2UnitStr
         pClient = UNIT::SUnit::SUNIT_GetClient(pUnit2, ".\\OBJECTS\\ObjMode.cpp", 0x80f);
         GAME::SCmd::Send0x9DRemoveItemFromContainer(pClient, pUnit2, pOldGemItem, (eD2ItemFlag)pNewGemItem);
         ITEMS::ItemMode::ITEMMODE_DeleteItemFromInventory(pGame, pUnit2, pUnit, 0);
-        Fog::Debug::GuardStack();
         return 1;
       }
     }
 
-    Fog::Debug::GuardStack();
     return BVar1;
 }
 
@@ -1700,8 +1698,6 @@ void __fastcall Shrines_ExplodingShrineFunction(D2ObjectOperateFnArg * pArgument
       MISSILES::Missiles::CreatingMissile(pArguments->sArg.pGame, (D2SkillArgStrc*)&sItemGenCtx.usually_one);
       iMissileIdx++;
     } while (iMissileIdx < 6);
-
-    Fog::Debug::GuardStack();
 }
 
 // Object operate handler for a Poison shrine. Using the shrine unit's seed, spawns dwArg0..dwArg1 random potion items ("gpm" item code) at the best free spot near the attacker via FindBestSpotToSpawnItem + ITEM_CreateItemInstance (quantity 1, DOUPDATE). Then fires 6 poison missiles in a fixed offset spread (the aMissileOffsets ring) centered on the shrine, with skill level scaled by attacker level/5 (clamped 1..8). Side effect: advances the shrine seed.
@@ -1835,8 +1831,6 @@ void __fastcall Shrines_PoisonShrineFunction(D2ObjectOperateFnArg * pArguments, 
       MISSILES::Missiles::CreatingMissile(pArguments->sArg.pGame, (D2SkillArgStrc*)&sItemGenCtx.usually_one);
       iMissileIdx++;
     } while (iMissileIdx < 6);
-
-    Fog::Debug::GuardStack();
 }
 
 // Computes the effective to-hit (attack rate) for a skill+weapon pair and writes it into *pnParam. Starts from the unit's base attack rate; if no explicit weapon is provided (pUnit2==null), falls back to the equipped weapon. Missile-potion weapons force *pnParam=0. Final value combines skill's LevToHit/ToHit columns, item bonus damage, UNITSTAT_item_tohit_percent, and the character class's ToHitFactor from CharStats.txt. Halts if pSkill is null.
@@ -2011,12 +2005,9 @@ BOOL __fastcall OBJOP_ActivateShrine(D2ObjectOperateFnArg * pOperation) {
     ::SGAMEDATA* pGame;
     D2UnitStrc* pUnit;
     eD2UnitFlags* peUnitFlags2;
-    uint32_t uSecurityCookie;
-    uSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2UnitStrc* pShrineObject;
     pShrineObject = pOperation->sArg.pVictim;
     if (pShrineObject->pUnitData.pUnitDataObject->nActivatingPlayerGUID || pShrineObject->eAnimMode.ePlayerMode != Death) {
-      Fog::Debug::GuardStack();
       return 0;
     }
     if (!pOperation->pAttacker) {
@@ -2087,7 +2078,6 @@ BOOL __fastcall OBJOP_ActivateShrine(D2ObjectOperateFnArg * pOperation) {
       }
     }
 
-    Fog::Debug::GuardStack();
     return 1;
 }
 
@@ -2262,7 +2252,7 @@ BOOL __fastcall OBJOP_SpawnNormalItemDrop(D2ObjectOperateFnArg * pOperation) {
 }
 
 // Iterator callback (EDI = SGAMEDATA**) that applies counter-attack damage from a source object to all nearby units in its room. For each unit in the room: players not in Dead mode within range 3 take MONSTERAI_CalculateCounterAttackDamage; monsters not in Kick mode within range 3 take the same; explosive-barrel objects (pHashLink1==0xb, Death mode) within collision distance 3 are detonated via OBJOP_DetonateExplosiveBarrel. Passes the constructed sOperation for barrel detonation.
-static void OBJMODE_ApplyCounterAttackToNearbyUnits(::SGAMEDATA * * ppGame) {
+static int OBJMODE_ApplyCounterAttackToNearbyUnits(::SGAMEDATA * * ppGame) {
     bool _bInRange;
     bool bInRange;
     int32_t nCollisionDist;
@@ -2302,6 +2292,8 @@ static void OBJMODE_ApplyCounterAttackToNearbyUnits(::SGAMEDATA * * ppGame) {
         }
       }
     }
+
+    return 0;
 }
 
 BOOL __fastcall OBJOP_DetonateExplosiveBarrel(D2ObjectOperateFnArg * pOperation) {
@@ -2931,7 +2923,6 @@ BOOL __fastcall OBJOP_ActivateWaypoint(D2ObjectOperateFnArg * pOperation) {
       }
     }
 
-    Fog::Debug::GuardStack();
     return 1;
 }
 
@@ -3187,7 +3178,7 @@ static uint32_t __stdcall OBJMODE_DispatchOperateFunction(::SGAMEDATA * pGame, u
 
 // Server-side handler for the 0x44 object-interaction packet (well/Horadric-orifice/quest container). Resolves the player, object and item units by GUID. For nParam==2 sends the 0x58 OpenUI response (result 1) and clears interaction. For nParam==3 it tries to consume an item: special-cases the Horadric Orifice object (classId 0x98) requiring the "tsh " (Horadric Staff) item code, otherwise moves the item to the player's cursor; on success dispatches the object's operate function (or the orifice's Q14_OnStaffUsedInOrifice for A2Q7), sends OpenUI result 5 and schedules the object anim event; on failure sends result 4. Returns 1.
 // @sourcefile .\OBJECTS\ObjMode.cpp
-void __fastcall _x44PacketHandler(::SGAMEDATA * pGame, DWORD dwParam, DWORD param_1, DWORD dwItemGUID, int16_t nParam) {
+int __fastcall _x44PacketHandler(::SGAMEDATA * pGame, DWORD dwParam, DWORD param_1, DWORD dwItemGUID, int16_t nParam) {
     D2ClientStrc* pClient;
     uint32_t nItemClassId;
     D2ItemsTxt* pTxtItem;
@@ -3215,7 +3206,7 @@ void __fastcall _x44PacketHandler(::SGAMEDATA * pGame, DWORD dwParam, DWORD para
         GAME::SCmd::NET_D2GS_SERVER_Send_0x58_ITEMACCEPT(pClient, &sPacket);
         D2Common::Units::SetupUpdateFlag(pObject, 0);
         UNIT::SUnit::ClearInteractInfo(pPlayer);
-        return;
+        return 1;
       }
       if (nParam == 3) {
         if (!pItem) {
@@ -3244,15 +3235,15 @@ void __fastcall _x44PacketHandler(::SGAMEDATA * pGame, DWORD dwParam, DWORD para
               if (pObject->nClassId == 0x98) {
                 D2Common::Units::SetupUpdateFlag(pObject, 2);
                 Quests::QUESTS::A2Q7::Q14_OnStaffUsedInOrifice(pGame, pPlayer, pObject);
-                return;
+                return 1;
               }
 
               GAME::Event::SetEvent(pGame, pObject, 1, (pTxtObjects->FrameCnt[1] >> 8) + 1 + pGame->dwGameFrame, 0, 0);
-              return;
+              return 1;
             }
 
             D2Common::Units::SetupUpdateFlag(pObject, 0);
-            return;
+            return 1;
           }
         } else {
           bToCursor = ITEMS::ItemMode::ToCursorItem(pGame, pPlayer, pItem);
@@ -3265,6 +3256,8 @@ void __fastcall _x44PacketHandler(::SGAMEDATA * pGame, DWORD dwParam, DWORD para
         GAME::SCmd::NET_D2GS_SERVER_Send_0x58_ITEMACCEPT(pClient, &sPacket);
       }
     }
+
+    return 1;
 }
 
 void __fastcall OBJMODE_HandleObjectDeactivation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pObject) {
@@ -3511,12 +3504,9 @@ void __fastcall SpawnDrop(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t sCod
         sItemGenCtx.pDrlgRoom = pRoom;
         sItemGenCtx.nItemLevel = ITEMS::Items::Drop::GetLevel(pUnit, LEVEL_None);
         ITEMS::Items::Drop::ITEM_CreateItemInstance(pGame, &sItemGenCtx, 0);
-        Fog::Debug::GuardStack();
         return;
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall OBJMODE_DropItemAtPosition(int32_t nParam, D2UnitStrc * pUnit, int32_t nItemClassId, eD2ItemTypes eItemType) {
@@ -3524,7 +3514,6 @@ void __fastcall OBJMODE_DropItemAtPosition(int32_t nParam, D2UnitStrc * pUnit, i
     POINT ptSpawnPos;
     D2ItemGenContextStrc sItemGenCtx;
     if (nItemClassId < 0) {
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -3535,7 +3524,6 @@ void __fastcall OBJMODE_DropItemAtPosition(int32_t nParam, D2UnitStrc * pUnit, i
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     sItemGenCtx.pDrlgRoom = ITEMS::Items::Drop::FindBestSpotToSpawnItem(pRoom, &ptUnitPos, pNewPosition, nSearchRadius, bCheckNeighbors);
     if (!sItemGenCtx.pDrlgRoom) {
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -3552,7 +3540,6 @@ void __fastcall OBJMODE_DropItemAtPosition(int32_t nParam, D2UnitStrc * pUnit, i
     sItemGenCtx.pGame = (::SGAMEDATA*)nParam;
     sItemGenCtx.nItemLevel = ITEMS::Items::Drop::GetLevel(pUnit, LEVEL_None);
     ITEMS::Items::Drop::ITEM_CreateItemInstance((::SGAMEDATA*)nParam, &sItemGenCtx, 0);
-    Fog::Debug::GuardStack();
 }
 
 // Server-side loot roll for an opened chest object. Resolves the chest's room level, determines act and difficulty-scaled monster level tier, selects the appropriate treasure class via RollTreasureClass, and calls SERVER_ITEM_RollItemToDrop to generate up to 6 drop items. Returns the first dropped item unit, or NULL on any lookup failure.

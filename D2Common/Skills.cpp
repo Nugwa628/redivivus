@@ -141,7 +141,7 @@ static D2StatListExStrc * __stdcall SKILLS_GetOrAllocStateStatList(int32_t bAllo
 }
 
 // Returns the passivestate field from D2SkillsTxt for the given skill ID. Returns 0 if invalid or no passive state.
-int TXT_Skills_GetPassiveState(int nSkillId) {
+int __stdcall TXT_Skills_GetPassiveState(int nSkillId) {
     if (!(-1 < nSkillId && nSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nSkillId)) {
       return 0;
     }

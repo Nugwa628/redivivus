@@ -7,7 +7,6 @@
 #include "Storm/Source/SBig.h"
 #include "Storm/Source/SSystem.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -407,7 +406,7 @@ static void SHA1_Transform(uint32_t * blockWords, uint32_t * stateWords) {
     stateWords[4] += stateA;
 }
 
-void SHA1_Init(uint32_t * pState) {
+void __fastcall SHA1_Init(uint32_t * pState) {
     *pState = 0x67452301;
     pState[1] = 0xefcdab89;
     pState[2] = 0x98badcfe;
@@ -473,8 +472,6 @@ void __fastcall SHA1_Final(uint8_t * pHashOut, uint32_t * pShaCtx) {
       pHashOut[uVar1] = (uint8_t)(*(uint32_t*)((int)pShaCtx + (uVar1 & -4)) >> (('\x03' - ((uint8_t)uVar1 & 3)) * '\b' & 0x1f));
       uVar1 = dwBitLen2;
     } while (dwBitLen2 < 0x14);
-
-    Fog::Debug::GuardStack();
 }
 
 // Register params: pHashOut (ECX): uint8_t *, pWideStr (EDX): char *
@@ -485,7 +482,6 @@ int32_t __fastcall SHA1_HashWideString(uint8_t * pHashOut, char * pWideStr, int3
     uint8_t* pDstByte;
     uint32_t shaCtx[23];
     uint8_t aHashBuf[20];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     do {
       if (*pWideStr != '\0') {
         break;
@@ -545,7 +541,6 @@ int32_t __fastcall SHA1_HashWideString(uint8_t * pHashOut, char * pWideStr, int3
       nByteIdx = (uint32_t)pHashOut;
     }
 
-    Fog::Debug::GuardStack();
     return nByteIdx;
 }
 

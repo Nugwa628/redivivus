@@ -87,7 +87,6 @@
 #include "D2Common/Drlg/Drlg.h"
 #include "D2Game/Ai/AiGeneral.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -871,7 +870,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x20_STATCHANGE_PLAYER(D2ClientStrc * pClie
 void __fastcall NET_D2GS_SERVER_Send_0x18_PLAYERCOMMONSTATCHANGE_BIG(D2ClientStrc * pClient, uint16_t nLife, uint16_t nMana, uint16_t nStamina, uint8_t bLifePercent, uint8_t bManaPercent, uint16_t nMaxLife, uint16_t nMaxMana, uint8_t bMaxLifePercent, uint8_t bMaxManaPercent) {
     D2BitBufferStrc bitBuf;
     uint8_t pktBuf[16];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Fog::BitBuffer::InitBitBuffer(&bitBuf, pktBuf, 0xf);
     Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, 0x18, 8);
     Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint32_t)nLife, 0xf);
@@ -885,14 +883,12 @@ void __fastcall NET_D2GS_SERVER_Send_0x18_PLAYERCOMMONSTATCHANGE_BIG(D2ClientStr
     Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint32_t)bMaxManaPercent, 8);
     size_t nSize = Fog::BitBuffer::GetNextPositon(&bitBuf);
     SCMD_QueuePacketForClient(pktBuf, nSize, pClient);
-    Fog::Debug::GuardStack();
 }
 
 // Server-to-client life/mana update. Opcode 0x95.
 void __fastcall NET_D2GS_SERVER_Send_0x95_PLAYERCOMMONSTATCHANGE_MEDIUM(D2ClientStrc * pClient, uint16_t nLife, uint16_t nMana, uint16_t nMaxLife, uint16_t nMaxMana, uint16_t wParam5, uint8_t bManaPercent, uint8_t bParam7) {
     D2BitBufferStrc bitBuf;
     uint8_t pktBuf[16];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Fog::BitBuffer::InitBitBuffer(&bitBuf, pktBuf, 0xd);
     Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, 0x95, 8);
     Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint32_t)nLife, 0xf);
@@ -904,14 +900,12 @@ void __fastcall NET_D2GS_SERVER_Send_0x95_PLAYERCOMMONSTATCHANGE_MEDIUM(D2Client
     Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint32_t)bParam7, 8);
     size_t nSize = Fog::BitBuffer::GetNextPositon(&bitBuf);
     SCMD_QueuePacketForClient(pktBuf, nSize, pClient);
-    Fog::Debug::GuardStack();
 }
 
 // Server-to-client walk verification. Opcode 0x96.
 void __fastcall NET_D2GS_SERVER_Send_0x96_PLAYERCOMMONSTATCHANGE_SMALL(D2ClientStrc * pClient, uint16_t nX, uint16_t nY, uint16_t nZone, uint8_t bParam1, uint8_t bParam2) {
     D2BitBufferStrc bitBuf;
     uint8_t pktBuf[12];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Fog::BitBuffer::InitBitBuffer(&bitBuf, pktBuf, 9);
     Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, 0x96, 8);
     Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint32_t)nX, 0xf);
@@ -921,7 +915,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x96_PLAYERCOMMONSTATCHANGE_SMALL(D2ClientS
     Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint32_t)bParam2, 8);
     size_t nSize = Fog::BitBuffer::GetNextPositon(&bitBuf);
     SCMD_QueuePacketForClient(pktBuf, nSize, pClient);
-    Fog::Debug::GuardStack();
 }
 
 // @sourcefile .\GAME\SCmd.cpp
@@ -1087,14 +1080,12 @@ void __fastcall NET_D2GS_SERVER_Send_0x26_CHATSTART(D2ClientStrc * pClient, D2GS
     uint32_t uVar1 = Storm::Source::SSTR::SStrCopy(sPacket.szName, pPacket->szName, 0x10);
     uint32_t nMsgLen = Storm::Source::SSTR::SStrCopy(sPacket.szName + uVar1 + 1, pPacket->szMessage, 0x100);
     SCMD_QueuePacketForClient(&sPacket.nPacketId, (size_t)(sPacket.szName + uVar1 + 1 + (nMsgLen + 1 - (uintptr_t)&sPacket)), pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x5A_SYSTEMMSG(D2ClientStrc * pClient, D2Packet0x5aEventStructure * pEventPacket) {
     int nCopyCount;
     uint8_t pktBuf[40];
     char cCur;
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char* pszNameEnd = pEventPacket->szName1;
     pszNameEnd = pszNameEnd + strlen(pszNameEnd) + 1;
     if (0xf < (uint32_t)((int)pszNameEnd - (int)(pEventPacket->szName1 + 1))) {
@@ -1110,7 +1101,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x5A_SYSTEMMSG(D2ClientStrc * pClient, D2Pa
     }
 
     SCMD_QueuePacketForClient(pktBuf, 0x28, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x27_NpcInfo(D2ClientStrc * pClient, D2GSPacketSrv0x27 * pPacket) {
@@ -1173,8 +1163,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x5B_PlayerJoin(D2ClientStrc * pClient, D2U
     if (pUnit && pUnit->eUnitType == UNIT_PLAYER) {
       PLAYER::PlayerPets::PLAYERPETS_SendPetListToClient(pClient, pUnit);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x5C_REMOVECLIENT(D2ClientStrc * pClient, uint32_t dwLeavingPlayerGUID) {
@@ -1210,7 +1198,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x78_TRADENAME(D2ClientStrc * pClient, D2GS
     *(uint32_t*)((char*)&aPacket + 16) = *(uint32_t*)(pPacketData->szName + 0xf);
     aPacket[0x14] = *(uint8_t*)((uintptr_t)&pPacketData->nUnitGUID + 3);
     SCMD_QueuePacketForClient(aPacket, 0x15, pClient);
-    Fog::Debug::GuardStack();
 }
 
 // Server-to-client summon log update. Opcode 0x7A.
@@ -1497,7 +1484,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x9D_ITEMUNITEX(D2ClientStrc * pClient, D2U
       sPacket.nPacketSize = (uint8_t)nTotalPacketLen;
       SCMD_QueuePacketForClient(&sPacket.nPacketId, nTotalPacketLen & 0xff, pClient);
       Send0x9DAllSocketedItems(pClient, pItem, eItemFlag);
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -1574,7 +1560,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(D2ClientStrc * pClient
     nBitPos = Fog::BitBuffer::GetNextPositon(&bitBuf);
     aPacket[1] = (char)nBitPos + 2;
     SCMD_QueuePacketForClient(aPacket, 0x22, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(D2ClientStrc * pClient, D2UnitStrc * pUnit, int32_t nItemSlot, BOOL bUseUnitGUID, int32_t nParam, int16_t nSkillId) {
@@ -1817,7 +1802,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x28_PlayerQuestInfo(D2ClientStrc * pClient
     sPacket0x28.nPacketId = nPacketId;
     D2Common::QuestRecord::CopyQuestBitBuffer(pBitBuffer, sPacket0x28.szQuestBits, 0x60, 0);
     SCMD_QueuePacketForClient(&sPacket0x28.nPacketId, 0x67, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x62_INTERACTION_STOP(D2ClientStrc * pClient, uint8_t nPacketId, char eUnitType, int32_t nMonsterGUID, uint32_t dwParam5) {
@@ -1876,7 +1860,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x50_QuestSpecial(D2ClientStrc * pClient, D
     *(uint16_t*)((char*)&aPacket + 12) = *(uint16_t*)((int)pPacket->aPayload + 9);
     aPacket[0xe] = *(uint8_t*)((int)pPacket->aPayload + 0xb);
     SCMD_QueuePacketForClient(aPacket, 0xf, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x5E_QUESTPICKS(D2ClientStrc * pClient, D2GSPacketSrv0x5E * pPacket0x5E) {
@@ -1948,7 +1931,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x63_WAYPOINTLIST(D2ClientStrc * pClient, D
     *(uint32_t*)((char*)&aPacket + 16) = *(uint32_t*)((int)pWaypointData->sWaypoints.aWaypointBits + 9);
     aPacket[0x14] = *(uint8_t*)((int)pWaypointData->sWaypoints.aWaypointBits + 0xd);
     SCMD_QueuePacketForClient(aPacket, 0x15, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x65_SCORE_UPDATE(D2ClientStrc * pClient, uint32_t nUnitGUID, uint16_t wKillCountArg) {
@@ -2064,8 +2046,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x82_PortalOwnership(::SGAMEDATA * pGame, D
         SCMD_QueuePacketForClient(aPacket, 0x1d, pClient);
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x83_Unused(D2ClientStrc * pClient, char * szText, uint16_t wDataLen, uint16_t wExtraFlag, uint16_t wParam, void * pData) {
@@ -2084,7 +2064,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x83_Unused(D2ClientStrc * pClient, char * 
     sPacket.nParam = wParam;
     memcpy(sPacket.aData, pData, (uint32_t)wDataLen);
     SCMD_QueuePacketForClient(&sPacket.nPacketId, wDataLen + 0xb, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x84_Unused(D2ClientStrc * pClient, uint8_t byFlag, uint16_t wDataLen, void * pData) {
@@ -2093,7 +2072,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x84_Unused(D2ClientStrc * pClient, uint8_t
     sPacket.nFlag = byFlag;
     memcpy(sPacket.aData, pData, (uint32_t)wDataLen);
     SCMD_QueuePacketForClient(&sPacket.nPacketId, wDataLen + 2, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x88_Unused(D2ClientStrc * pClient, char * szText, uint16_t wDataLen, uint16_t wExtraFlag, uint16_t wParam, void * pData) {
@@ -2112,7 +2090,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x88_Unused(D2ClientStrc * pClient, char * 
     sPacket.nParam = wParam;
     memcpy(sPacket.aData, pData, (uint32_t)wDataLen);
     SCMD_QueuePacketForClient(&sPacket.nPacketId, wDataLen + 0xb, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x8B_PlayerRelationship(D2ClientStrc * pClient, uint32_t dwTargetArg, uint8_t byTypeArg) {
@@ -2252,7 +2229,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x91_WELCOME_BACK(D2ClientStrc * pClient, D
     pDstPacket->nPacketId = pD2GSPacketSrv0x91->nPacketId;
     pDstPacket->nAct = byField;
     SCMD_QueuePacketForClient(&nD2GSPacketSrv0x91.nPacketId, 0x1a, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0x98_SETSPAWNERMONSTER(D2ClientStrc * pClient, uint32_t nUnitGUID, uint16_t wWaypointData) {
@@ -2329,7 +2305,6 @@ void __fastcall NET_D2GS_SERVER_Send_0xA6_DATATABLEUPDATE(D2ClientStrc * pClient
     *(uint16_t*)((char*)&aBytes + 2) = (uint16_t)nSize;
     memcpy(aBytes + 6, nStream, nStreamSize);
     SCMD_QueuePacketForClient(aBytes, nSize, pClient);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_D2GS_SERVER_Send_0xA7_UNITSTATE_ON_EX(D2ClientStrc * pClient, uint8_t byUnitType, uint32_t nUnitGUID, uint32_t dwStateId) {
@@ -2569,8 +2544,6 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
       aPacket[0xc] = (uint8_t)(nScratch + 0xdU);
       SCMD_QueuePacketForClient(aPacket, nScratch + 0xdU, pClientSaved);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Server-to-client Warden anti-cheat module packet. Opcode 0xAE, variable size (max 510 bytes).
@@ -2586,7 +2559,6 @@ void __fastcall NET_D2GS_SERVER_Send_0xAE_WARDENDATA(D2ClientStrc * pClient, voi
       sPacket.nDataSize = (uint16_t)nDataSize;
       memcpy(sPacket.aData, pParam, nDataSize);
       SCMD_QueuePacketForClient(&sPacket.nPacketId, nDataSize + 3, pClient);
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -2619,8 +2591,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x59_AssignPlayer(D2ClientStrc * pClient, u
     if (pTargetUnit) {
       NET_D2GS_SERVER_Send_0x75_UPDATEROSTER(pUnit, pTargetUnit);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Server-to-client gold pickup notification. Opcode 0x19 encodes delta < 255 (2 bytes).
@@ -2710,7 +2680,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x9C_ITEMEX(D2ClientStrc * pClient, D2UnitS
       D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, eSavedItemFlags, 1);
       SCMD_QueuePacketForClient(&sPacket.nPacketId, (uint32_t)sPacket.nFullPacketSize, pClient);
       Send0x9DAllSocketedItems(pClient, pUnit, eItemFlag);
-      Fog::Debug::GuardStack();
       return;
     }
 }

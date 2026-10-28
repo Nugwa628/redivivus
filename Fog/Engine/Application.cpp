@@ -330,11 +330,9 @@ static bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModuleP
 
     uint32_t nParseResult = DEBUG_ParseModuleHeaders((short int**)&aModuleInfo, pModuleBase);
     if ((char)nParseResult == '\0') {
-      Debug::GuardStack();
       return true;
     }
     if (!pModuleList) {
-      Debug::GuardStack();
       return false;
     }
 
@@ -348,21 +346,19 @@ static bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModuleP
 
     (*pModuleList)++;
     nMbLen = *pModuleList;
-    Debug::GuardStack();
     return nMbLen < 0x100;
 }
 
 bool __stdcall DEBUG_EnumerateModulesViaPsapi(int * pnParam) {
-    // Frame slots -556..-8 are ONE object: &nBytesNeeded is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -556..-12 are ONE object: &nBytesNeeded is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       uint32_t nBytesNeeded;
       int* pList;
       short int* aModuleInfo[3];
       uint16_t szModuleName[262];
-      uint32_t dwSecurityCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 548, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 544, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     pfnEnumProcessModules pEnumProcessModules;
     BOOL bResult;
@@ -373,7 +369,6 @@ bool __stdcall DEBUG_EnumerateModulesViaPsapi(int * pnParam) {
     pfnGetModuleBaseNameW pGetModuleBaseNameW;
     uint32_t nModuleCount;
     HANDLE hProcess2;
-    __frame0.dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)&hProcess;
     __frame0.pList = pnParam;
     hProcess = GetCurrentProcess();
     HMODULE hModule = LoadLibraryW(L"psapi.dll");
@@ -408,7 +403,6 @@ bool __stdcall DEBUG_EnumerateModulesViaPsapi(int * pnParam) {
           }
 
           /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(hModule);
-          Debug::GuardStack();
           return true;
         }
       }
@@ -416,7 +410,6 @@ bool __stdcall DEBUG_EnumerateModulesViaPsapi(int * pnParam) {
       /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(hModule);
     }
 
-    Debug::GuardStack();
     return false;
 }
 
@@ -443,11 +436,9 @@ bool DEBUG_EnumerateModulesViaToolhelp32(int * pModuleList) {
       }
 
       /* HANDLE hObject for CloseHandle */ CloseHandle(hSnapshot);
-      Debug::GuardStack();
       return true;
     }
 
-    Debug::GuardStack();
     return false;
 }
 
@@ -688,7 +679,6 @@ int __stdcall DEBUG_UnwindStackFrames(DWORD dwThreadId, D2CrashFrameStrc * pFram
         }
 
         ExceptionList = tSehFrame.Next;
-        Debug::GuardStack();
         return nFrameCount;
       }
       if (hOpenedThread) {
@@ -699,15 +689,13 @@ int __stdcall DEBUG_UnwindStackFrames(DWORD dwThreadId, D2CrashFrameStrc * pFram
 
     nFrameCount = 0;
     ExceptionList = tSehFrame.Next;
-    Debug::GuardStack();
     return nFrameCount;
 }
 
-void __stdcall DEBUG_FormatAddressInfo(uint32_t nAddress, char * pOutput) {
+bool __stdcall DEBUG_FormatAddressInfo(uint32_t nAddress, char * pOutput) {
     char* pSep;
     char* pBasename;
     char szModulePath[260];
-    uint32_t local_c = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     *(uint32_t*)(pOutput + 0x200) = 0;
     char* pSrcFileField = pOutput + 0x244;
     *pSrcFileField = '\0';
@@ -768,7 +756,7 @@ void __stdcall DEBUG_FormatAddressInfo(uint32_t nAddress, char * pOutput) {
     }
 
     _strncpy_s(pSrcFileField, 0x100, pSep, -1);
-    Debug::GuardStack();
+    return true;
 }
 
 // Global operator delete: frees p through Storm SMemFree with the delete source tag, and ignores null. Counterpart of MISC_OperatorNewShim.
@@ -791,7 +779,6 @@ void __stdcall MISC_GetValueFromD2Ini(D2IniConfigStrc * pD2IniData) {
     char* pDestField;
     char szIniPath[260];
     char cVar1;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Source::SFile::SFILE_GetExecutableDirectory(szIniPath, 0x104);
     Storm::Source::SSTR::SStrPack(szIniPath, "D2.ini", 0x104);
     uint32_t nEntryOffset = 0;
@@ -820,8 +807,6 @@ void __stdcall MISC_GetValueFromD2Ini(D2IniConfigStrc * pD2IniData) {
 
       nEntryOffset += 0x5c;
     } while (nEntryOffset < 0x14d8);
-
-    Debug::GuardStack();
 }
 
 int32_t __stdcall INI_FindConfigValueIndex(uint8_t * pbArgName) {
@@ -868,8 +853,6 @@ static void INI_StripDelimiters(char * szText) {
     int nDelimIdx;
     char aWorkBuf[260];
     char cChar;
-    uint32_t dwSecurityCookie;
-    dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char* pCursor;
     pCursor = szText;
     do {
@@ -908,7 +891,6 @@ static void INI_StripDelimiters(char * szText) {
         do {
           if (aWorkBuf[nDelimIdx] == aWorkBuf[nReadIdx + 4]) {
             szText[nWriteIdx] = '\0';
-            Debug::GuardStack();
             return;
           }
 
@@ -922,14 +904,12 @@ static void INI_StripDelimiters(char * szText) {
     }
 
     szText[nWriteIdx] = '\0';
-    Debug::GuardStack();
 }
 
 int __fastcall INI_ParseCommandLineArg(uint8_t * pbArgName, char * szCmdLine, int32_t pOutValue) {
     char szArgNameBuf[256];
     char cChar;
     int nDstOffset;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char* pCursor = szCmdLine;
     pCursor = pCursor + strlen(pCursor) + 1;
     int nCmdLen = (int)pCursor - (int)(szCmdLine + 1);
@@ -1000,7 +980,6 @@ int __fastcall INI_ParseCommandLineArg(uint8_t * pbArgName, char * szCmdLine, in
 
     *(uint8_t*)(pOutValue + nCmdLen) = 0;
     INI_StripDelimiters((char*)pOutValue);
-    Debug::GuardStack();
     return nConfigIdx;
 }
 
@@ -1016,7 +995,6 @@ void __fastcall MISC_ParseCommandLineAndPutIntoD2IniData(D2IniConfigStrc * pD2In
     char szArgValue[256];
     uint8_t bVar2;
     char cChar;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char* pCmdEnd = szText;
     pCmdEnd = pCmdEnd + strlen(pCmdEnd) + 1;
     int iVar1 = (int)pCmdEnd - (int)(szText + 1);
@@ -1062,8 +1040,6 @@ void __fastcall MISC_ParseCommandLineAndPutIntoD2IniData(D2IniConfigStrc * pD2In
         nPos++;
       } while (nPos < iVar1);
     }
-
-    Debug::GuardStack();
 }
 
 void __fastcall MISC_InitD2IniAndIgnorelist(D2IniConfigStrc * D2IniData, char * szCommandLine) {
@@ -1139,7 +1115,6 @@ void __stdcall SystemSurvey_WriteProductLanugageToLocaleFile() {
     uint32_t pszLocaleSuffix;
     FILE* pLocaleFile;
     BOOL bIsExpansion;
-    __frame0.dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2Lang::StrTable::strtable::TABLES_GetLangAbbreviation((char*)&__frame0.langInfo, 3);
     int bAppDataPathOk = Source::SFile::SFILE_GetBlizzardAppDataPath(__frame0.szLocaleFilePath, 0x104);
     if (bAppDataPathOk) {
@@ -1180,7 +1155,6 @@ void __stdcall SystemSurvey_WriteProductLanugageToLocaleFile() {
     }
 
     D2TRACE("ApplicationMain returned");
-    Debug::GuardStack();
 }
 
 BOOL __stdcall ReturnTrue() {
@@ -1196,14 +1170,13 @@ void __stdcall CreateRegedit() {
     };
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 8, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
-    // Frame slots -268..-4 are ONE object: &szInstallPath is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -268..-8 are ONE object: &szInstallPath is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame1_t {
       char szInstallPath;
       uint8_t szInstallPathBuf[259];
-      uint32_t dwSecurityCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame1_t) == 264, "frame group __frame1_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame1_t) == 260, "frame group __frame1_t must reproduce the Ghidra frame layout");
     __frame1_t __frame1;
     DWORD dwIndex;
     LPDWORD dwValueInfo;
@@ -1211,7 +1184,6 @@ void __stdcall CreateRegedit() {
     HKEY hKeySrc;
     uint8_t dataBuf[1024];
     char szValueName[260];
-    __frame1.dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     LSTATUS nRegStatus = RegOpenKeyA((HKEY)0x80000002, "SOFTWARE\\Blizzard Entertainment\\Diablo II Beta", &hKeySrc);
     if (!nRegStatus) {
       /* PHKEY phkResult for RegCreateKeyA */ /* LPCSTR lpSubKey for RegCreateKeyA */ /* HKEY hKey for RegCreateKeyA */ RegCreateKeyA((HKEY)0x80000002, "SOFTWARE\\Blizzard Entertainment\\Diablo II", &hKeyDest);
@@ -1239,8 +1211,6 @@ void __stdcall CreateRegedit() {
     if (gnServiceRunning) {
       /* LPCSTR lpPathName for SetCurrentDirectoryA */ SetCurrentDirectoryA(&__frame1.szInstallPath);
     }
-
-    Debug::GuardStack();
 }
 
 uint32_t __stdcall ERRORMANAGER_TryGetProcAddress(HMODULE hModule, FARPROC * ppfnProc, LPCSTR szText) {
@@ -1254,7 +1224,7 @@ uint32_t __stdcall ERRORMANAGER_TryGetProcAddress(HMODULE hModule, FARPROC * ppf
 }
 
 // @sourcefile .\Main.cpp
-static void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD2ApplicationMode * eAppMode, char * szText) {
+static int __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD2ApplicationMode * eAppMode, char * szText) {
     // Static local variables (originally global data)
     static char * gApplicationModeCommandLineArgumentArray[6] = { s_modstate0_006cc928, s_client_006cc920, s_server_006cc918, s_multiplayer_006cc90c, s_launcher_006cc900, s_expand_006cc8f8 }; D2_STATIC_GUARD(gApplicationModeCommandLineArgumentArray, "Fog::Engine::Application::CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument::gApplicationModeCommandLineArgumentArray");
 
@@ -1286,6 +1256,7 @@ static void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgu
     }
 
     D2_FREE_AT(szCmdLineCopy, ".\\DUNGEON\\Dungeon.cpp", 0x1e0);
+    return 1;
 }
 
 // lpHandlerProc parameter of RegisterServiceCtrlHandlerA
@@ -1312,7 +1283,6 @@ void __stdcall ERRORMANAGER_ServiceControlHandler(int32_t nServiceControl) {
 void __fastcall PreInitApplication(int32_t argc, char * * argv) {
     D2IniConfigStrc pD2IniData;
     char szVersionString[260];
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char* local_4e0 = "";
     if (1 < argc) {
       local_4e0 = argv[argc - 1];
@@ -1348,7 +1318,6 @@ void __fastcall PreInitApplication(int32_t argc, char * * argv) {
 
     D2TRACE("ApplicationMain");
     D2Client::Engine::Application::ApplicationMain(WinMain_hInstance, &pD2IniData, eAppMode);
-    Debug::GuardStack();
 }
 
 // WinMain: decide server/service vs client, load advapi, then PreInitApplication.

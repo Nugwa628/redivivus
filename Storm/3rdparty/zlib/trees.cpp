@@ -4,7 +4,6 @@
 #include "Fog/Debug.h"
 #include "Storm/3rdparty/zlib/deflate.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -1101,7 +1100,6 @@ static void __stdcall gen_codes(ct_data * pTree, int32_t nMaxCode, uint16_t * pB
     uint32_t uVar7;
     uint16_t awNextCode[16];
     uint32_t nReversed;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int nBits = 1;
     uint16_t wCode = 0;
     do {
@@ -1132,8 +1130,6 @@ static void __stdcall gen_codes(ct_data * pTree, int32_t nMaxCode, uint16_t * pB
         nBits++;
       } while (nBits <= nMaxCode);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 static void __stdcall build_tree(tree_desc * pTreeDesc, deflate_state * pDeflateState) {

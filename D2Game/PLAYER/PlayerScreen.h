@@ -46,7 +46,7 @@ void __fastcall PARTYSCREEN_SetHostileForPlayer(::SGAMEDATA * pGame, struct D2Un
 void __fastcall PARTYSCREEN_ToggleHostile(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget, uint32_t bWantHostile, uint32_t * pdwParam);
 void __fastcall SendAllPlayersPartyInfo(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 eD2ServerIncomingStatus __fastcall PlayerScreen_DispatchAction(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int nActionIndex, uint32_t dwTargetUnitId, uint32_t dwArg);
-void __fastcall PARTYSCREEN_ClearHostileRelation(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
+int __fastcall PARTYSCREEN_ClearHostileRelation(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
 void __fastcall PARTYSCREEN_SetHostileRelation(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
 uint32_t __fastcall PLAYERSCREEN_CheckUnitsCanSeeEachOther(uint32_t dwUnused, struct D2UnitStrc * pUnit, struct D2UnitStrc * pOtherUnit);
 // 3 internal functions (defined in .cpp)

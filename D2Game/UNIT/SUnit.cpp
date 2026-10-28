@@ -90,7 +90,6 @@
 #include "globals/globals.h"
 #include "D2Client/UI/Automap.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -1115,7 +1114,6 @@ BOOL __stdcall GetInteractInfo(D2UnitStrc * pUnit, eD2UnitType * peUnitType, uin
 void __stdcall SetInteractInfo(D2UnitStrc * pUnit, eD2UnitType eInteractUnitType, uint32_t dwInteractGUID) {
     D2UnitDataPlayerStrc* pPlayerData;
     char acStack_58[80];
-    uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!pUnit->uSideData.pServerSide.bInteracting) {
       pUnit->uSideData.pServerSide.dwInteractGUID = dwInteractGUID;
       pUnit->uSideData.pServerSide.dwInteractType = eInteractUnitType;
@@ -1124,12 +1122,9 @@ void __stdcall SetInteractInfo(D2UnitStrc * pUnit, eD2UnitType eInteractUnitType
       pPlayerData = D2Common::Units::GetPlayerData(pUnit);
       if (pPlayerData) {
         sprintf(acStack_58, "Player %s attempted to operate while busy\n", pPlayerData->szCharName);
-        Fog::Debug::GuardStack();
         return;
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Clears pUnit's server-side interaction state: dwInteractGUID (+0x64) = -1, dwInteractType (+0x68) = UNIT_COUNT (6), bInteracting (+0x6c) = 0.
@@ -2297,8 +2292,6 @@ D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
     D2UnitStrc* pDVar1;
     int iVar2;
     D2ItemGenContextStrc sItemGenCtx;
-    uint32_t dwStackCookie;
-    dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2UnitStrc* pCreatedUnit;
     pCreatedUnit = 0;
     if (eUnitType == UNIT_MONSTER) {
@@ -2310,7 +2303,6 @@ D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
           goto flag_created_unit;
         }
         if (nClassId == 0x23d) {
-          Fog::Debug::GuardStack();
           return nullptr;
         }
       }
@@ -2320,7 +2312,6 @@ D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
       if (eUnitType == UNIT_ITEM) {
         if (!pDVar1) {
           pCreatedUnit = pDVar1;
-          Fog::Debug::GuardStack();
           return pDVar1;
         }
 
@@ -2330,7 +2321,6 @@ D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
         iVar2 = ITEMS::Items::Drop::ITEM_InitItemBaseStats(pGame, &pCreatedUnit, &sItemGenCtx, 1);
         if (!iVar2) {
           FreeServerUnit(pGame, pCreatedUnit);
-          Fog::Debug::GuardStack();
           return nullptr;
         }
       }
@@ -2343,7 +2333,6 @@ D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
     }
 
     pCreatedUnit = pDVar1;
-    Fog::Debug::GuardStack();
     return pDVar1;
 }
 

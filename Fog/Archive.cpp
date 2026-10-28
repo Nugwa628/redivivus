@@ -13,7 +13,6 @@
 #include "Storm/Source/SSTR.h"
 #include "Storm/_unnamespaced.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -75,8 +74,6 @@ static int __stdcall FindMPQOnCd(char * pszMpqName, int * pnPriority, int * * pp
     BOOL bVolumeInfoOk;
     char szDriveStrings[260];
     LPCSTR szCurrentDrive;
-    uint32_t local_8;
-    local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     /* DWORD nSize for GetModuleFileNameA */ /* LPSTR lpFilename for GetModuleFileNameA */ /* HMODULE hModule for GetModuleFileNameA */ GetModuleFileNameA((HMODULE)0x0, szText, 0x104);
     szText[0x103] = '\0';
     char cCurrentChar;
@@ -139,7 +136,6 @@ static int __stdcall FindMPQOnCd(char * pszMpqName, int * pnPriority, int * * pp
       bOpenArchiveCdOk = 1;
     }
 
-    Debug::GuardStack();
     return bOpenArchiveCdOk;
 }
 

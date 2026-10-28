@@ -15,7 +15,6 @@
 #include "globals/globals.h"
 #include "D2Common/Chat.h"
 #include "D2Common/Chat/Ignorelist/ChatIgnoreList.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -49,7 +48,6 @@ int32_t __thiscall AppendLineToFile(::IgnoreList * pThis, char * szLine) {
     uint32_t uVar2;
     char szPath[256];
     size_t _Count;
-    uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (szLine && *szLine != '\0') {
       bIsEnabled = pThis->_vfptr->GetPersistentSetting(pThis);
       if (bIsEnabled) {
@@ -66,12 +64,10 @@ int32_t __thiscall AppendLineToFile(::IgnoreList * pThis, char * szLine) {
           uVar2 = (uint32_t)!iVar1;
         }
 
-        Fog::Debug::GuardStack();
         return uVar2;
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -126,14 +122,12 @@ int32_t __thiscall RemoveByPattern(::IgnoreList * pThis, char * szPattern) {
           if (pEntry) {
             pThis->tIgnoredPatterns.Unlink(pEntry);
             IgnoreList::SaveToFile(pThis);
-            Fog::Debug::GuardStack();
             return 1;
           }
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -179,7 +173,6 @@ int32_t __thiscall CheckAccountNameIgnored(::IgnoreList * pThis, char * szAccoun
           pCurEntry = (::StringEntryNode*)((int)uVar1 < 1 ? 0 : uVar1);
           while (true) {
             if ((int)pCurEntry < 1) {
-              Fog::Debug::GuardStack();
               return 0;
             }
 
@@ -194,12 +187,10 @@ int32_t __thiscall CheckAccountNameIgnored(::IgnoreList * pThis, char * szAccoun
           }
         }
 
-        Fog::Debug::GuardStack();
         return 1;
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -244,21 +235,18 @@ int32_t __thiscall CheckIgnored(::IgnoreList * pThis, char * szPlayerName) {
           check_alternate_name:
           _bIsEnabled = CheckCharNameIgnored(pThis, szSuffix);
           if (_bIsEnabled) {
-            Fog::Debug::GuardStack();
             return 1;
           }
         }
         if (szPrefix[0] != '\0') {
           _bIsEnabled = CheckCharNameIgnored(pThis, szPrefix);
           if (_bIsEnabled) {
-            Fog::Debug::GuardStack();
             return 1;
           }
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -308,30 +296,26 @@ int32_t __thiscall AddByPattern(::IgnoreList * pThis, char * szPattern) {
             AppendLineToFile(pThis, szParsedPattern);
           }
 
-          Fog::Debug::GuardStack();
           return 1;
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
 // Adds an account name to the ignore list and returns the result. Tail-calls Fog::Debug::GuardStack, which returns its argument, so the value is already in EAX; typed void the reconstruction dropped it.
 int32_t __thiscall AddByAccountName(::IgnoreList * pThis, char * szAccountName) {
-    // Frame slots -264..-4 are ONE object: &cIgnorePrefix is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -264..-8 are ONE object: &cIgnorePrefix is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       char cIgnorePrefix;
       uint8_t szAccountNameBuf[255];
-      uint32_t dwStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 260, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 256, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     int32_t bCanAdd;
     ::StringEntryNode* pExistingEntry;
-    __frame0.dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (szAccountName && *szAccountName != '\0') {
       bCanAdd = pThis->_vfptr->GetPersistentSetting(pThis);
       if (bCanAdd && *szAccountName != '\0') {
@@ -344,12 +328,10 @@ int32_t __thiscall AddByAccountName(::IgnoreList * pThis, char * szAccountName) 
           AppendLineToFile(pThis, &__frame0.cIgnorePrefix);
         }
 
-        Fog::Debug::GuardStack();
         return 1;
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -391,8 +373,6 @@ void __thiscall LoadFromFile(::IgnoreList * pThis) {
 
       fclose(pFile);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 ::IgnoreList * __thiscall Constructor(::IgnoreList * pThis) {
@@ -408,7 +388,6 @@ void __thiscall LoadFromFile(::IgnoreList * pThis) {
     __frame0_t __frame0;
     pfnEHHandlerRoutine pExceptionLabel = __GSHandlerCheck_EH_6ca475;
     __frame0.pPrevExceptionList = ExceptionList;
-    __frame0.local_14 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     ExceptionList = &__frame0.pPrevExceptionList;
     uint32_t nSehState = 0;
     pThis->_vfptr = (IgnoreListVtable*)(void*)IgnoreList::vftable;
@@ -432,29 +411,26 @@ void __thiscall LoadFromFile(::IgnoreList * pThis) {
     pThis->nPersistentIgnore = __frame0.nPersistentIgnore;
     LoadFromFile(pThis);
     ExceptionList = __frame0.pPrevExceptionList;
-    Fog::Debug::GuardStack();
     return pThis;
 }
 
 // @sourcefile .\Chat\Ignorelist.cpp
 void __thiscall AddAccountMapping(::IgnoreList * pThis, char * szRaw, int32_t nRawLen) {
-    // Frame slots -776..-4 are ONE object: &cPatternPrefix is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -776..-8 are ONE object: &cPatternPrefix is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
       char cPatternPrefix;
       uint8_t szPatternBuf[255];
       char szCharName[256];
       char szAccountName[256];
-      uint32_t dwStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 772, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 768, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     int32_t bIsOnline;
     ::MappingEntryNode* pNameEntry;
     uint32_t* pszPatternDup;
     size_t nOpenParenIdx;
     uint32_t nCharIdx;
-    __frame0.dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (szRaw && *szRaw != '\0') {
       bIsOnline = pThis->_vfptr->GetPersistentSetting(pThis);
       if (bIsOnline) {
@@ -495,16 +471,12 @@ void __thiscall AddAccountMapping(::IgnoreList * pThis, char * szRaw, int32_t nR
           Storm::Source::SSTR::SStrPack(&__frame0.cPatternPrefix, __frame0.szCharName, 0x100);
           pszPatternDup = Storm::Source::SSTR::SStrDup(&__frame0.cPatternPrefix);
           pNameEntry->szMappedValue = (char*)pszPatternDup;
-          Fog::Debug::GuardStack();
           return;
         }
 
-        Fog::Debug::GuardStack();
         return;
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 } // namespace D2Common::Chat::Ignorelist::IgnoreList

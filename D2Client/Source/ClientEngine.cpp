@@ -1002,7 +1002,7 @@ static void DRAW_Overlay_SecondsLeftToGame(D2QServerClientConnectionStrc * pQSer
     }
 
     pFormatStr = D2Lang::StrTable::strtable::GetLocaleString(0x13e9);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszText, pFormatStr, (uint16_t*)nSecondsLeft);
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszText, pFormatStr, nSecondsLeft);
     int32_t nSavedFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(0xd);
     int32_t nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszText);
     D2Win::Src::D2WinFont::DRAW_text(wszText, ScreenSizeX / 2 - nTextWidth / 2, 0x177, 9, 1);

@@ -4,7 +4,6 @@
 #include "Fog/Debug.h"
 #include "Storm/Source/SSTR.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "Fog/3rdparty/crashy.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -159,7 +158,6 @@ void __fastcall COMPRESS_BuildHuffmanDecodeTable(uint8_t * pCodeLengths) {
     int nIndexC;
     uint8_t* pCurSortedLen;
     uint32_t* pTableEntry;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int nIndex = 0;
     memset(anOffsets, 0, 16 * sizeof(anOffsets[0]));
     while (true) {
@@ -265,12 +263,9 @@ void __fastcall COMPRESS_BuildHuffmanDecodeTable(uint8_t * pCodeLengths) {
           nLenIndex--;
         } while (nRemaining);
 
-        Debug::GuardStack();
         return;
       }
     }
-
-    Debug::GuardStack();
 }
 
 void __stdcall COMPRESS_Implode(void * pAddress, char * szModulePath, int * pnSectionIndex, void * * ppSectionOffset, int nBufferSize) {

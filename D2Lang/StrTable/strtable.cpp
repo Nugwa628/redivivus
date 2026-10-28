@@ -11,7 +11,6 @@
 #include "Fog/Src/ErrorManager.h"
 #include "Storm/D2ArchiveStrc.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "support/d2_trace.h"
 #define POOLPROBE(tag) D2TraceFmt("poolprobe %-22s nPoolId=%d", tag, \
     (int)Fog::Memory::pGlobalPoolSystem.pManagers[0].nPoolId)
@@ -585,7 +584,6 @@ void __stdcall STRTABLE_FormatNumber(uint16_t * wszText, uint32_t nValue, int32_
     char szDigits[64];
     char cChar;
     int nDigitIdx;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     uint16_t* pwszOut = wszText;
     if (nMaxLen < 3) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4ed);
@@ -621,7 +619,6 @@ void __stdcall STRTABLE_FormatNumber(uint16_t * wszText, uint32_t nValue, int32_
 
           nOutPos = nOutPos2;
           if (!nRawDigitCount) {
-            Fog::Debug::GuardStack();
             return;
           }
         }
@@ -635,7 +632,6 @@ void __stdcall STRTABLE_FormatNumber(uint16_t * wszText, uint32_t nValue, int32_
     wszFallback[1] = 0;
     UTF8_ConvertToWideChar(wszFallback, "*", 2);
     Unicode::UNISYS::STRING_CopyWideString(pwszOut, wszFallback);
-    Fog::Debug::GuardStack();
 }
 
 void __stdcall STRTABLE_FormatInt64(uint16_t * wszText, int32_t nParam1, int32_t nParam2, int32_t nParam3) {
@@ -684,7 +680,6 @@ void __stdcall STRTABLE_FormatInt64(uint16_t * wszText, int32_t nParam1, int32_t
 
           nOutPos = nOutPos2;
           if (!nDigitCount) {
-            Fog::Debug::GuardStack();
             return;
           }
         }
@@ -698,7 +693,6 @@ void __stdcall STRTABLE_FormatInt64(uint16_t * wszText, int32_t nParam1, int32_t
     wszFallback[1] = L'\0';
     UTF8_ConvertToWideChar(wszFallback, "*", 2);
     Unicode::UNISYS::STRING_CopyWideString(wszText, wszFallback);
-    Fog::Debug::GuardStack();
 }
 
 void __stdcall STRTABLE_FormatUInt64WithAbbrev(uint16_t * wszText, uint32_t dwParam1, uint32_t dwParam2, int32_t nParam) {
@@ -784,7 +778,6 @@ void __stdcall STRTABLE_FormatUInt64WithAbbrev(uint16_t * wszText, uint32_t dwPa
 
           nOutPos = pcVar4;
           if (!nDigitCount) {
-            Fog::Debug::GuardStack();
             return;
           }
         }
@@ -793,8 +786,6 @@ void __stdcall STRTABLE_FormatUInt64WithAbbrev(uint16_t * wszText, uint32_t dwPa
         exit(-1);
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 static void STRTABLE_LoadAbbreviationSymbols(DWORD dwParam) {
@@ -802,7 +793,6 @@ static void STRTABLE_LoadAbbreviationSymbols(DWORD dwParam) {
     char* pszScanPtr;
     char szAbbrevBuf[8];
     char cCurChar;
-    uint32_t uStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (gpStringTableBase) {
       pwsAbbrevStr = STRTABLE_GetStringByIndex(gpStringTableBase, gpStringIndexBase, 0x14d0, dwParam);
       Unicode::UNISYS::UNICODE_WideToMultiByte(szAbbrevBuf, (uint16_t*)pwsAbbrevStr, 5);
@@ -840,12 +830,10 @@ static void STRTABLE_LoadAbbreviationSymbols(DWORD dwParam) {
             pszScanPtr = pszScanPtr + strlen(pszScanPtr) + 1;
             if (1 < (uint32_t)((int)pszScanPtr - (int)(szAbbrevBuf + 1))) {
               gcAbbrevTrilSymbol = 0x54;
-              Fog::Debug::GuardStack();
               return;
             }
 
             gcAbbrevTrilSymbol = (short int)szAbbrevBuf[0];
-            Fog::Debug::GuardStack();
             return;
           }
         }
@@ -910,7 +898,6 @@ int __fastcall TABLES_LoadStrings(D2PoolManagerStrc * pPoolManager, char * szTex
     char cCurChar;
     if (gpStringTableBase) {
       gnStringTableRefCount++;
-      Fog::Debug::GuardStack();
       return 1;
     }
     if (!szText) {
@@ -953,7 +940,6 @@ int __fastcall TABLES_LoadStrings(D2PoolManagerStrc * pPoolManager, char * szTex
     D2StringTableTblFileStrc* pTblFile = (D2StringTableTblFileStrc*)STRTABLE_LoadStringTableFile(szPathBuf);
     gpStringTableBase = pTblFile;
     if (!pTblFile) {
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -1089,7 +1075,6 @@ int __fastcall TABLES_LoadStrings(D2PoolManagerStrc * pPoolManager, char * szTex
       POOLPROBE("expansion-convert-loop-done");
       STRTABLE_LoadAbbreviationSymbols((DWORD)pEntryData);
       POOLPROBE("abbrev-symbols-done");
-      Fog::Debug::GuardStack();
       return 1;
     }
 }

@@ -70,7 +70,7 @@ int __fastcall SRP_ClientComputeSharedSecret(int32_t pSrp, struct BigData * * pP
 int __fastcall SRP_ServerComputeSharedSecret(struct D2Srp * pThis, struct BigData * * ppClientPublic, int * pnParam, struct BigData * * pnParam1, struct BigData * * pnParam2, struct BigData * * pnParam3);
 void __fastcall SRP_ComputeClientProof(int32_t pThis, char * szUsername, void * pParam1, void * pParam2, void * pParam3, void * pParam4, int32_t nParam);
 void __stdcall SRP_ComputeServerProof(void * pParam1, void * pParam2, void * pParam3, int32_t nParam);
-BOOL SRP_IsContextInitialized(struct D2Srp * pSrp);
+BOOL __fastcall SRP_IsContextInitialized(struct D2Srp * pSrp);
 // @sourcefile .\SRP.cpp
 void __fastcall SRP_CreateContext(struct D2Srp * * ppSrp);
 BOOL __thiscall SRP_ExportPublicValues(struct D2Srp * * ppSrp, uint32_t * pnGeneratorLen, void * pGeneratorOut, uint32_t * pnModulusLen, void * pModulusOut);

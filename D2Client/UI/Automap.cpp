@@ -186,7 +186,7 @@ void __fastcall AUTOMAP_CenterOnPlayer(int32_t bForceCenter) {
     AutoMapMoveY = ScreenSizeY / 3 - nAutomapCenterY - 0x10;
 }
 
-int32_t AUTOMAP_GetFade() {
+int32_t __stdcall AUTOMAP_GetFade() {
     if (!(MiniMapType == 1 && nAutoMapFade == 1)) {
       return nAutoMapFade;
     }
@@ -195,7 +195,7 @@ int32_t AUTOMAP_GetFade() {
     return nAutoMapFade;
 }
 
-void __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
+int32_t __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
     if (MiniMapType == 1 && nAutomapFade == 1) {
       nAutomapFade = (bAutoMapFade ? -2 : 0) + 2;
       nAutoMapFade = 1;
@@ -204,6 +204,7 @@ void __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMapFade", 0, nAutomapFade);
     bAutoMapFade = nAutomapFade;
     nAutoMapFade = nAutomapFade;
+    return nAutomapFade;
 }
 
 int32_t __stdcall AUTOMAP_GetCenters() {
@@ -219,29 +220,32 @@ int32_t __stdcall AUTOMAP_GetLeft() {
     return AutoMapLeft;
 }
 
-void __fastcall AUTOMAP_SetLeft(int32_t nAutoMapLeft) {
+int32_t __fastcall AUTOMAP_SetLeft(int32_t nAutoMapLeft) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Left", 0, nAutoMapLeft);
     AutoMapLeft2 = nAutoMapLeft;
     AutoMapLeft3 = nAutoMapLeft;
     AutoMapLeft = nAutoMapLeft;
+    return nAutoMapLeft;
 }
 
 BOOL __stdcall AUTOMAP_GetParty() {
     return nAutoMapParty;
 }
 
-void __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty) {
+int32_t __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Party", 0, nAutoMapParty);
     Automap::nAutoMapParty = nAutoMapParty;
+    return nAutoMapParty;
 }
 
 int32_t __stdcall AUTOMAP_GetPartyNames() {
     return AutoMapPartyNames;
 }
 
-void __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames) {
+int32_t __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Party Names", 0, nAutoMapPartyNames);
     AutoMapPartyNames = nAutoMapPartyNames;
+    return nAutoMapPartyNames;
 }
 
 void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, D2AutomapCellStrc * * ppRootNode) {
@@ -2248,7 +2252,7 @@ void __stdcall AUTOMAP_DrawDifficulty() {
       uint16_t* wFormat;
       pZeroFill = D2Lang::StrTable::strtable::GetLocaleString(nDiffStringId);
       wFormat = D2Lang::StrTable::strtable::GetLocaleString(0x1057);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(300, wText, wFormat, (uint16_t*)pZeroFill);
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(300, wText, wFormat, pZeroFill);
       bMultiLineCenter = 0;
       nFormatLen = 4;
       nY = AUTOMAP_TextHeightOffset;

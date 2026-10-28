@@ -679,7 +679,7 @@ BOOL __stdcall HandleUpdateToExpansion(D2ControlMsg * pControlMsg) {
               D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(awszCharName, pSelectedCharacter->szCharname, 0x100);
               pwszMessage = awszCharName;
               pwszFormat = D2Lang::StrTable::strtable::GetLocaleString(0x2b89);
-              D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, awszFormattedMsg, pwszFormat, (uint16_t*)pwszMessage);
+              D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, awszFormattedMsg, pwszFormat, pwszMessage);
               pwszMessage = awszFormattedMsg;
             } else {
               pwszMessage = D2Lang::StrTable::strtable::GetLocaleString(0x145b);
@@ -751,9 +751,9 @@ BOOL __stdcall LAUNCHER_StartGameWithSelectedCharacter(D2ControlMsg * pControlMs
     return 1;
 }
 
-void __fastcall LAUNCHER_InitNetworkLobbyQueue(D2IniConfigStrc * pIniConfig) {
+int __fastcall LAUNCHER_InitNetworkLobbyQueue(D2IniConfigStrc * pIniConfig) {
     if (pIniConfig->pBNetClientCallbacks) {
-      return;
+      return 1;
     }
 
     gpBNetCallbacks = Bnclient::NET_InitAndGetLobbyChatQueue();
@@ -764,6 +764,7 @@ void __fastcall LAUNCHER_InitNetworkLobbyQueue(D2IniConfigStrc * pIniConfig) {
 
     pIniConfig->pBNetClientCallbacks = gpBNetCallbacks;
     gpBNetCallbacks->pfnSetLoggingFlag((uint32_t)pIniConfig);
+    return 1;
 }
 
 void __stdcall LAUNCHER_SetBusyFlag() {

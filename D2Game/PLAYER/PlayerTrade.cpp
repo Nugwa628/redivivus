@@ -76,7 +76,6 @@
 #include "D2Client/UI/Automap.h"
 #include "D2Common/Drlg/Drlg.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/PLAYER/PlayerMsg.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -758,7 +757,6 @@ uint16_t __fastcall ITEM_SelectRandomItemClassByType(::SGAMEDATA * pGame, int32_
     D2ItemsTxt* pDVar2;
     BOOL bTypeMatch;
     uint16_t aCandidateIds[256];
-    uint32_t nStackGuardCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2ItemsTableStrc* pItemTbl = D2Common::DATATBLS::ItemTbls::TXT_Items_GetSize();
     uint32_t nCandidateCount = 0;
     if (!pItemTbl) {
@@ -796,12 +794,10 @@ uint16_t __fastcall ITEM_SelectRandomItemClassByType(::SGAMEDATA * pGame, int32_
       if (nCandidateCount) {
         nEndId = D2Client::Archive::RANDOM_RandomNumberSelector(&pGame->pGameSeed, nCandidateCount);
         uVar1 = aCandidateIds[nEndId];
-        Fog::Debug::GuardStack();
         return uVar1;
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -1260,7 +1256,6 @@ void __fastcall CUBE_GenerateOutput(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2C
     }
 
     if (!bHasOutput) {
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -1309,8 +1304,6 @@ void __fastcall CUBE_GenerateOutput(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2C
         bApplyMods++;
       } while (bApplyMods < nExtractedItemCount);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 void __stdcall GetDateUnused(int * pnParam) {
@@ -1739,7 +1732,6 @@ void __fastcall SendEventMsg(D2UnitStrc * pUnit, uint8_t nMessageType, char * sz
 
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x8ce);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5A_SYSTEMMSG(pClient, &sEventPacket);
-    Fog::Debug::GuardStack();
 }
 
 // Checks if player has any items in the cube. Returns 1 if at least one item is in INVPAGE_CUBE, 0 otherwise. Used by trade validation to prevent trading while items are in the cube.
@@ -2517,7 +2509,6 @@ eD2ServerIncomingStatus __fastcall ClickButton(::SGAMEDATA * pGame, D2UnitStrc *
     ::SGAMEDATA* pGame01;
     pGame01 = pGame;
     if (!pUnit) {
-      Fog::Debug::GuardStack();
       return SERVERSTATUS_BAD_TARGET;
     }
 
@@ -2526,33 +2517,27 @@ eD2ServerIncomingStatus __fastcall ClickButton(::SGAMEDATA * pGame, D2UnitStrc *
     if (!bHasInteractInfo) {
       pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0xc0c);
       GAME::SCmd::NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(pClient, 0xc);
-      Fog::Debug::GuardStack();
       return SERVERSTATUS_OK;
     }
     if ((uint16_t)(nButtonId - 0x12U) < 3) {
       if (eInteractType == UNIT_OBJECT) {
         GOLD_HandleStashGoldTransaction(dwParam, pGame, nButtonId, pUnit, dwInteractGUID);
-        Fog::Debug::GuardStack();
         return SERVERSTATUS_OK;
       }
 
-      Fog::Debug::GuardStack();
       return SERVERSTATUS_BAD_TARGET;
     }
     if ((uint16_t)(nButtonId - 0x17U) < 2) {
       if (eInteractType == UNIT_ITEM) {
         CUBE_HandleTransmuteButtonClick(pUnit, nButtonId, pGame);
-        Fog::Debug::GuardStack();
         return SERVERSTATUS_OK;
       }
 
-      Fog::Debug::GuardStack();
       return SERVERSTATUS_BAD_PARAMS;
     }
     if (eInteractType != UNIT_PLAYER) {
       pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0xb31);
       GAME::SCmd::NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(pClient, 0xd);
-      Fog::Debug::GuardStack();
       return SERVERSTATUS_BAD_PARAMS;
     }
 
@@ -2564,7 +2549,6 @@ eD2ServerIncomingStatus __fastcall ClickButton(::SGAMEDATA * pGame, D2UnitStrc *
       int bPendingUpdates;
       bPendingUpdates = UNIT::ITEM_HasPendingInventoryUpdates(pGame, pUnit);
       if (bPendingUpdates) {
-        Fog::Debug::GuardStack();
         return SERVERSTATUS_OK;
       }
 
@@ -2748,7 +2732,6 @@ eD2ServerIncomingStatus __fastcall ClickButton(::SGAMEDATA * pGame, D2UnitStrc *
       }
     }
 
-    Fog::Debug::GuardStack();
     return SERVERSTATUS_OK;
 }
 

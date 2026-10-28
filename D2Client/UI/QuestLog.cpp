@@ -93,7 +93,7 @@ static void QUESTLOG_PopulateQuestEntry(D2QuestLogEntryStrc * pEntry) {
     D2BitBufferStrc* pQuestRecord;
     size_t nDescLen;
     eD2Quests nQuestIdLookup;
-    uint16_t* pExtraDescStr;
+    int pExtraDescStr;
     pEntry->wTitleStringId = 0xe8c;
     pEntry->wDescStringId = 0xe8c;
     pEntry->wszDescription[0] = L'\0';
@@ -371,7 +371,7 @@ static void QUESTLOG_PopulateQuestEntry(D2QuestLogEntryStrc * pEntry) {
           pLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0xe91);
           D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(pEntry->wszDescription, pLocaleStr, nDescLen);
         } else {
-          pExtraDescStr = (uint16_t*)gQuestLog.pQuestLogData;
+          pExtraDescStr = gQuestLog.pQuestLogData;
           pLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0x5860);
           D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(300, pEntry->wszDescription, pLocaleStr, pExtraDescStr);
         }

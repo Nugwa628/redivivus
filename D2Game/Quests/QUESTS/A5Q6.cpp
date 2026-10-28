@@ -60,7 +60,6 @@
 #include "D2Client/UI/QuestLog.h"
 #include "D2Game/D2Game.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/Quests/QUESTS/Quest40.h"
 #include "Fog/Src/Safesock.h"
 
@@ -670,7 +669,6 @@ static void Q36_SendQuestSpecialPacket(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) 
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_EveOfDestruction);
     sPacket.aPayload[0] = (uint16_t)pQuestData->pQuestSpecificData.pA5Q6->nQuestFlags;
     GAME::SCmd::NET_D2GS_SERVER_Send_0x50_QuestSpecial(pClient, &sPacket);
-    Fog::Debug::GuardStack();
 }
 
 // A5Q6 Eve of Destruction. Thin per-player iterate wrapper around Q36_SendQuestSpecialPacket (sends the 0x50 quest-special packet to each player).

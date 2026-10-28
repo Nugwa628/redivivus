@@ -83,7 +83,7 @@ void __stdcall SErrPrepareAppFatal(void * pfnCallback, uint32_t nCallbackParam);
 // @oracle-basis Callee set {EnterCriticalSection, GetProcessHeap, HeapAlloc, LeaveCriticalSection} is the oracle's exactly. The oracle prologue at 10015890 saves r3 and r4 and nothing else, so the true arity is 2; Ghidra's third parameter dwParam2 is unused in the body and is spurious.
 // @corroboration Its one caller is D2Client CLIENT_LoadLNG - D2 registering the loaded .LNG string table as an error message source. That is the API's documented purpose and it is a caller from outside Storm, as an export should have.
 // @oracle-note The rival SSYSTEM_RegisterErrorModule 0041c0f0 writes the same gpErrorModuleList but calls GetModuleHandleA and takes no critical section, so it is the internal self-registration helper, not the export. Left under its descriptive name.
-void __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBase, uint32_t dwParam2);
+int __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBase, uint32_t dwParam2);
 // Stores dwErrCode into Storm's own dwLastErrorCode global and then forwards it to the Win32 SetLastError.
 // @was SetLastError (pass 6, 2026.08.28) - the old name shadowed the Win32 import of the same name that this function calls, which made the decompilation read as infinite recursion.
 // @oracle Storm 1.10b PPC export SErrSetLastError, code vector 10015680 (TVector 100cbec4).

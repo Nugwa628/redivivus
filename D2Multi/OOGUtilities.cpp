@@ -1150,7 +1150,7 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
     pwszMsg = wszNameWide;
     pwszFmtTemplate = D2Lang::StrTable::strtable::GetLocaleString(nErrorStrId);
     print_ignore_result:
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x208, wszFormatBuffer, pwszFmtTemplate, (uint16_t*)pwszMsg);
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x208, wszFormatBuffer, pwszFmtTemplate, pwszMsg);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszOutputBuffer, wszFormatBuffer);
     ChatDlg::CHATDLG_AppendTextToTextBox(wszOutputBuffer, 3);
 }

@@ -9,7 +9,6 @@
 #include "Storm/Source/SSTR.h"
 #include "Storm/Source/SSystem.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -473,7 +472,6 @@ LPVOID * __fastcall SMEM_DestroyHeap(LPVOID * ppHeap) {
     char szErrorMsg[200];
     D2FogHeapDescStrc* pHeap;
     uint8_t byFlags;
-    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2FogHeapDescStrc* nHeap = (D2FogHeapDescStrc*)*ppHeap;
     D2FogHeapBlockHdrStrc* pBlock = (D2FogHeapBlockHdrStrc*)nHeap->pDataStart;
     uint8_t byLeakFlags = 0;
@@ -500,13 +498,11 @@ LPVOID * __fastcall SMEM_DestroyHeap(LPVOID * ppHeap) {
       } while ((void*)pNextBlock < nHeap->pWriteCursor);
 
       if (byLeakFlags) {
-        Fog::Debug::GuardStack();
         return (LPVOID*)&nHeap->pNext;
       }
     }
 
     SMEM_FreeHeap(ppHeap);
-    Fog::Debug::GuardStack();
     return ppHeap;
 }
 
@@ -1423,18 +1419,15 @@ void * __stdcall SMemAlloc(uint32_t nSize, char * szFile, uint32_t nLine, uint32
 void __stdcall SMemDumpState(pfnSMemDumpCallback pfnCallback, uint32_t dwCallbackArg) {
     SMemHeapDetailsStrc heapStats;
     char szLineBuffer[256];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!g_SMemInitialized) {
       SMemInitialize();
       if (!g_SMemInitialized) {
         SMEM_Warning((uint32_t*)"SMemDumpState()", -1, 0x8510007d);
-        Fog::Debug::GuardStack();
         return;
       }
     }
     if (!pfnCallback) {
       Source::SErr::SErrSetLastError(0x57);
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -1446,8 +1439,6 @@ void __stdcall SMemDumpState(pfnSMemDumpCallback pfnCallback, uint32_t dwCallbac
       (*pfnCallback)(dwCallbackArg, szLineBuffer);
       bHasNextHeap = SMemFindNextHeap(nHeapIndex, (int*)&nHeapIndex, &heapStats);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // @blizzard SMemHeapAlloc (SMEM.CPP)

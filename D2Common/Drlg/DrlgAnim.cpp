@@ -24,7 +24,6 @@
 #include "D2Common/DUNGEON/Dungeon.h"
 #include "D2Common/Drlg/D2DrlgCoordsStrc.h"
 #include "D2Common/Drlg/D2DrlgStrc.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -171,7 +170,6 @@ void __fastcall DRLGANIM_AllocAnimatedTiles(D2DrlgGridStrc * pGrids, D2RoomExStr
     int nWorldPosX;
     int* pTileEntryPtr;
     D2RoomExStrc* pRoomExIter;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2PoolManagerStrc* pMemory = pRoomEx->pLevel->pDrlg->pMemoryPool;
     D2DrlgGridStrc* pGridsCtx = pGrids;
     D2RoomExStrc* pRoomExCtx = pRoomEx;
@@ -286,8 +284,6 @@ void __fastcall DRLGANIM_AllocAnimatedTiles(D2DrlgGridStrc * pGrids, D2RoomExStr
         } while (i < nTileCount);
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Wrapper calling DRLGANIM_AllocAnimatedTiles for wall/floor/shadow.

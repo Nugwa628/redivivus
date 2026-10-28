@@ -260,7 +260,6 @@ int __stdcall InitializeDebugSymbols() {
     char szSymbolPath[32768];
     uint32_t uVar1 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (bDebugSymbolsInitialized != '\0') {
-      GuardStack();
       return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)(uVar1 >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)1);
     }
     if (hDbgHelpDll && pSymSetOptionsApi && pSymInitializeApi) {
@@ -285,12 +284,10 @@ int __stdcall InitializeDebugSymbols() {
       uVar1 = 0;
       if (bSymInitOk) {
         bDebugSymbolsInitialized = '\x01';
-        GuardStack();
         return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)((uint32_t)bSymInitOk >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)1);
       }
     }
 
-    GuardStack();
     return uVar1 & -256;
 }
 
@@ -336,7 +333,6 @@ bool __stdcall GetModuleInfoForAddress(uint32_t dwQueryAddr, uint32_t * pdwModul
           /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_0098a6f0);
           bVar1 = true;
           ExceptionList = pPrevExceptionList;
-          GuardStack();
           return bVar1;
         }
       }
@@ -346,7 +342,6 @@ bool __stdcall GetModuleInfoForAddress(uint32_t dwQueryAddr, uint32_t * pdwModul
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_0098a6f0);
     bVar1 = false;
     ExceptionList = pPrevExceptionList;
-    GuardStack();
     return bVar1;
 }
 
@@ -394,7 +389,6 @@ bool __stdcall GetSymbolNameForAddress(DWORD dwQueryAddr, char * szSymbolName, u
             LeaveCriticalSection(&lpCriticalSection_0098a6f0);
             bVar1 = true;
             ExceptionList = pPrevSehFrame;
-            GuardStack();
             return bVar1;
           }
         }
@@ -405,7 +399,6 @@ bool __stdcall GetSymbolNameForAddress(DWORD dwQueryAddr, char * szSymbolName, u
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_0098a6f0);
     bVar1 = false;
     ExceptionList = pPrevSehFrame;
-    GuardStack();
     return bVar1;
 }
 
@@ -778,9 +771,7 @@ bool __fastcall CrashDumpWriterThread(LPCSTR szDumpPath, char * pExceptionPtrs, 
     HANDLE hResult;
     D2CrashDumpRequestStrc sDumpRequest;
     uint16_t wszDumpPath[260];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (bEnableCrashDumps == '\0') {
-      GuardStack();
       return false;
     }
 
@@ -789,7 +780,6 @@ bool __fastcall CrashDumpWriterThread(LPCSTR szDumpPath, char * pExceptionPtrs, 
       *(uint8_t*)(char*)&bLoadOk = DEBUG_LoadDbgHelp64Apis();
       if (!*(uint8_t*)(char*)&bLoadOk) {
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_0098a6f0);
-        GuardStack();
         return false;
       }
     }
@@ -816,12 +806,10 @@ bool __fastcall CrashDumpWriterThread(LPCSTR szDumpPath, char * pExceptionPtrs, 
         LeaveCriticalSection(&lpCriticalSection_0098a6c4);
         /* HANDLE hObject for CloseHandle */ CloseHandle(hResult);
         bVar1 = sDumpRequest.bSuccess;
-        GuardStack();
         return (bool)bVar1;
       }
     }
 
-    GuardStack();
     return false;
 }
 
@@ -959,7 +947,6 @@ int CompareUintDescending(LPCVOID pParam1, LPCVOID pParam2) {
 static void FormatModuleDebugString(char * szText, D2FogDebugModuleEntryStrc * pModule) {
     char szGuidStr[40];
     char szTimeStampSuffix[16];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     *szText = '\0';
     szTimeStampSuffix[0] = '\0';
     if (pModule->dwTimestamp) {
@@ -968,14 +955,12 @@ static void FormatModuleDebugString(char * szText, D2FogDebugModuleEntryStrc * p
 
     __snprintf_s(szGuidStr, 0x28, -1, "{%08x-%04x-%04x-%02x%02x%02x%02x%02x%02x%02x%02x}", pModule->guidPdb.Data1, (uint32_t)pModule->guidPdb.Data2, (uint32_t)pModule->guidPdb.Data3, (uint32_t)pModule->guidPdb.Data4[0], (uint32_t)pModule->guidPdb.Data4[1], (uint32_t)pModule->guidPdb.Data4[2], (uint32_t)pModule->guidPdb.Data4[3], (uint32_t)pModule->guidPdb.Data4[4], (uint32_t)pModule->guidPdb.Data4[5], (uint32_t)pModule->guidPdb.Data4[6], (uint32_t)pModule->guidPdb.Data4[7]);
     __snprintf_s(szText, 0x400, -1, "DBG-MODULE<%p %08x \"%s\" \"%s\" %u %s %u %u%s>", pModule->pImageBase, pModule->nImageSize, pModule->szModuleName, pModule->szImagePath, pModule->dwUnknown208, szGuidStr, pModule->dwUnknown21c, pModule->dwUnknown220, szTimeStampSuffix);
-    GuardStack();
 }
 
 void __fastcall FormatAddressDebugString(uint32_t * pAddrInfo, char * pSymInfo, char * szOutput) {
     int nWritten;
     char szParamDetail[84];
     uint32_t nSymDisplacement;
-    uint32_t local_c = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     *szOutput = '\0';
     szParamDetail[0] = '\0';
     if (*(char*)(pAddrInfo + 4) != '\0') {
@@ -983,7 +968,6 @@ void __fastcall FormatAddressDebugString(uint32_t * pAddrInfo, char * pSymInfo, 
     }
     if (*pSymInfo == '\0') {
       __snprintf_s(szOutput, 0x400, -1, "DBG-ADDR<%p>(\"%s\")%s", (void*)*pAddrInfo, pSymInfo + 0x204, szParamDetail);
-      GuardStack();
       return;
     }
 
@@ -1001,8 +985,6 @@ void __fastcall FormatAddressDebugString(uint32_t * pAddrInfo, char * pSymInfo, 
     if (pSymInfo[0x244] != '\0' || *(int*)(pSymInfo + 0x344)) {
       __snprintf_s(szOutput + nOffset + nWritten, 0x400 - (nOffset + nWritten), -1, " (%s,%u)", pSymInfo + 0x244, *(uint32_t*)(pSymInfo + 0x344));
     }
-
-    GuardStack();
 }
 
 void __fastcall EnumerateAndDumpAllFunctions(fnCrashOutputLine pOutputCallback, ::Report * pReport) {
@@ -1023,7 +1005,6 @@ void __fastcall EnumerateAndDumpAllFunctions(fnCrashOutputLine pOutputCallback, 
     }
 
     qsort(sModuleTable.aEntries, 0, 0x228, CompareUintDescending);
-    GuardStack();
 }
 
 static void InitializeDebugInfoTable(D2FogDebugModuleTableStrc * pTable) {
@@ -1053,7 +1034,7 @@ static void InitializeDebugInfoTable(D2FogDebugModuleTableStrc * pTable) {
     } while (-1 < nRemaining);
 }
 
-void __stdcall DEBUG_UnloadStackCrawlDbgHelp() {
+int __stdcall DEBUG_UnloadStackCrawlDbgHelp() {
     bBetterStackCrawls = 0;
     if (pDbgHelpOrImageHlp) {
       /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(pDbgHelpOrImageHlp);
@@ -1061,6 +1042,7 @@ void __stdcall DEBUG_UnloadStackCrawlDbgHelp() {
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&lpCriticalSection_0075cfbc);
+    return 1;
 }
 
 void __fastcall DumpThreadContext(HANDLE hHandle) {
@@ -1072,7 +1054,6 @@ void __fastcall DumpThreadContext(HANDLE hHandle) {
     Src::LogManager::EnqueueLogMessage("ERR", "", (void*)sContext.Esp, (void*)0x1000, nullptr, 1, 0);
     Src::LogManager::LogWithCategoryVarArgs("", "Code bytes:\n");
     Src::LogManager::EnqueueLogMessage("ERR", "", (void*)sContext.Eip, (void*)0x20, nullptr, 1, 0);
-    GuardStack();
 }
 
 static BOOL __stdcall GetSourceLineWithRetry(HANDLE hProcess, DWORD nAddress, void * pdwDisplacement, void * pLine) {
@@ -1151,14 +1132,12 @@ D2FogModuleNodeStrc * __stdcall EnumerateModulesToolhelp32(uint32_t dwProcessId)
 
     if (!hLibModule) {
       Src::LogManager::LOGMANAGER_TraceToModuleLog("", "Unable to load toolhelp library");
-      GuardStack();
       return nullptr;
     }
 
     HANDLE hSnapshot = (*pfnCreateSnapshot)(8, dwProcessId);
     if (hSnapshot == (HANDLE)-1) {
       Src::LogManager::LOGMANAGER_TraceToModuleLog("", "Unable to get toolhelp snapshot");
-      GuardStack();
       return nullptr;
     }
 
@@ -1170,7 +1149,6 @@ D2FogModuleNodeStrc * __stdcall EnumerateModulesToolhelp32(uint32_t dwProcessId)
         /* HANDLE hObject for CloseHandle */ CloseHandle(hSnapshot);
         /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(hLibModule);
         pDVar1 = pModuleListHead;
-        GuardStack();
         return pDVar1;
       }
 
@@ -1239,8 +1217,6 @@ D2FogModuleNodeStrc * __stdcall EnumerateModulesPsapi(HANDLE hProcess) {
     D2FogModuleNodeStrc* pCurModule;
     char chCopy;
     char* pszCopySrc;
-    uint32_t dwStackCookie;
-    dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     HANDLE hProcessLocal;
     hProcessLocal = hProcess;
     D2FogModuleNodeStrc* pModuleListHead;
@@ -1248,7 +1224,6 @@ D2FogModuleNodeStrc * __stdcall EnumerateModulesPsapi(HANDLE hProcess) {
     HMODULE hPsapi;
     hPsapi = LoadLibraryA("psapi.dll");
     if (!hPsapi) {
-      GuardStack();
       return nullptr;
     }
 
@@ -1347,7 +1322,6 @@ D2FogModuleNodeStrc * __stdcall EnumerateModulesPsapi(HANDLE hProcess) {
         }
 
         /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(hPsapi);
-        GuardStack();
         return pModuleListHead;
       }
 
@@ -1358,7 +1332,6 @@ D2FogModuleNodeStrc * __stdcall EnumerateModulesPsapi(HANDLE hProcess) {
     error:
     /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(hPsapi);
     FOG_FreeModuleList(pModuleListHead);
-    GuardStack();
     return nullptr;
 }
 
@@ -1402,7 +1375,7 @@ void __fastcall DumpAnnotatedStackMemory(HANDLE hSymHandle, CONTEXT * pContext, 
     };
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 8, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
-    // Frame slots -632..-4 are ONE object: &nBytesRemaining is passed out and the callee reaches the rest by byte offset.
+    // Frame slots -632..-8 are ONE object: &nBytesRemaining is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame1_t {
       DWORD nBytesRemaining;
@@ -1412,9 +1385,8 @@ void __fastcall DumpAnnotatedStackMemory(HANDLE hSymHandle, CONTEXT * pContext, 
       char szSymbol[260];
       uint8_t aEscapedString[80];
       char szHexLine[256];
-      uint32_t dwStackCookie;
     };
-    static_assert(sizeof(void*) != 4 || sizeof(__frame1_t) == 628, "frame group __frame1_t must reproduce the Ghidra frame layout");
+    static_assert(sizeof(void*) != 4 || sizeof(__frame1_t) == 624, "frame group __frame1_t must reproduce the Ghidra frame layout");
     __frame1_t __frame1;
     D2FogModuleNodeStrc* pDVar1;
     char* pcVar4;
@@ -1425,7 +1397,6 @@ void __fastcall DumpAnnotatedStackMemory(HANDLE hSymHandle, CONTEXT * pContext, 
     uint8_t* pAsciiOut;
     char chCur;
     DWORD nBytesThisRow;
-    __frame1.dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     void* pStackPtr;
     pStackPtr = (void*)pContext->Esp;
     D2FogModuleNodeStrc* pModuleListIter;
@@ -1567,8 +1538,6 @@ void __fastcall DumpAnnotatedStackMemory(HANDLE hSymHandle, CONTEXT * pContext, 
       __frame1.nBytesRemaining -= iVar2;
       pStackPtr = (void*)((int)pStackPtr + iVar2);
     } while (__frame1.nBytesRemaining);
-
-    GuardStack();
 }
 
 static D2FogModuleNodeStrc * __stdcall LoadSymbolsForAllModules(HANDLE hProcess, uint32_t dwProcessId) {
@@ -1583,13 +1552,11 @@ static D2FogModuleNodeStrc * __stdcall LoadSymbolsForAllModules(HANDLE hProcess,
     char szModuleName[256];
     D2FogModuleNodeStrc* pNextModule;
     char chCopy;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2FogModuleNodeStrc* pModuleListHead = EnumerateAndLogModules(hProcess, dwProcessId);
     Src::LogManager::LOGMANAGER_TraceToModuleLog("", "");
     Src::LogManager::LOGMANAGER_TraceToModuleLog("", "Load symbols...");
     D2FogModuleNodeStrc* pCurModule = pModuleListHead;
     if (!pModuleListHead) {
-      GuardStack();
       return nullptr;
     }
 
@@ -1624,7 +1591,6 @@ static D2FogModuleNodeStrc * __stdcall LoadSymbolsForAllModules(HANDLE hProcess,
       pCurModule = pNextModule;
     } while (pNextModule);
 
-    GuardStack();
     return pModuleListHead;
 }
 
@@ -1673,8 +1639,6 @@ static int BuildSymbolSearchPath(char * szSearchPath) {
     int nResult;
     char szCurrentDir[512];
     char szComponent[512];
-    uint32_t dwSecurityCookie;
-    dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     *szSearchPath = '\0';
     BOOL bGotExeFolderPath;
     bGotExeFolderPath = FILETOOLS_GetExecutableFolderPath(szComponent, 0x200);
@@ -1728,7 +1692,6 @@ static int BuildSymbolSearchPath(char * szSearchPath) {
     }
 
     char cCurChar = *szSearchPath;
-    GuardStack();
     return cCurChar != '\0' ? (uint32_t)szSearchPath : 0;
 }
 
@@ -1877,7 +1840,6 @@ BOOL __fastcall QuickStackWalkWithSymbols(char * szSearchPath, HANDLE hProcess, 
     HANDLE hThread = hProcess;
     __frame1.szLogCategory = szSearchPath;
     if (gnStackWalkInProgress) {
-      GuardStack();
       return 0;
     }
 
@@ -1896,7 +1858,6 @@ BOOL __fastcall QuickStackWalkWithSymbols(char * szSearchPath, HANDLE hProcess, 
     int bOk = InitializeSymbolsWithRefcount();
     if (!bOk) {
       gnStackWalkInProgress--;
-      GuardStack();
       return 0;
     }
 
@@ -1989,7 +1950,6 @@ BOOL __fastcall QuickStackWalkWithSymbols(char * szSearchPath, HANDLE hProcess, 
     int64_t nAvgCycles = __alldiv(nCyclesLo + (uint32_t)qwFmtCycles, *(uint32_t*)((char*)&qwModInfoCycles + 4) + *(uint32_t*)((char*)&qwSymCycles + 4) + (uint32_t)((uint32_t)((uint32_t)qwModInfoCycles + (uint32_t)qwSymCycles) < (uint32_t)qwModInfoCycles) + nWalkCyclesHi + (uint32_t)((uint32_t)((uint32_t)((uint32_t)qwModInfoCycles + (uint32_t)qwSymCycles) + (uint32_t)nCyclesAcc) < (uint32_t)((uint32_t)qwModInfoCycles + (uint32_t)qwSymCycles)) + *(uint32_t*)((char*)&qwFmtCycles + 4) + (uint32_t)((uint32_t)((uint32_t)nCyclesLo + (uint32_t)qwFmtCycles) < (uint32_t)nCyclesLo), __frame2.nFrameIdx, (int)__frame2.nFrameIdx >> 0x1f);
     Src::LogManager::LOGMANAGER_TraceToModuleLog(__frame1.szLogCategory, "QuickStackWalk: %d entries, %I64d+%I64d+%I64d+%I64d cycles, %I64d avg", nCycleSample, nCyclesAcc, nWalkCyclesHi, (uint32_t)qwSymCycles, *(uint32_t*)((char*)&qwSymCycles + 4), (uint32_t)qwModInfoCycles, *(uint32_t*)((char*)&qwModInfoCycles + 4), (uint32_t)qwFmtCycles, *(uint32_t*)((char*)&qwFmtCycles + 4), nAvgCycles);
     gnStackWalkInProgress--;
-    GuardStack();
     return 1;
 }
 
@@ -2028,19 +1988,16 @@ void __fastcall FullStackWalkWithAnnotations(HANDLE hThread, CONTEXT * pContext)
     uint32_t dwFpoLocals;
     WORD* pwFpoFlags;
     uint16_t wFpoFlags;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     __frame0.bNoStackDump = 0;
     HANDLE dwHThreadLocal = hThread;
     __frame0.pContextLocal = pContext;
     Storm::Source::SReg::SRegLoadValue("Diablo II", "NoStackDump", 0, &__frame0.bNoStackDump);
     if (__frame0.bNoStackDump) {
       Src::LogManager::LOGMANAGER_TraceToModuleLog("", "sShowStack: Stack dump turned off in registry");
-      GuardStack();
       return;
     }
     if (!bBetterStackCrawls) {
       Src::LogManager::LOGMANAGER_TraceToModuleLog("", "sShowStack: imagehlp.dll not loaded");
-      GuardStack();
       return;
     }
 
@@ -2060,7 +2017,6 @@ void __fastcall FullStackWalkWithAnnotations(HANDLE hThread, CONTEXT * pContext)
       Src::LogManager::LOGMANAGER_TraceToModuleLog("", "SymInitialize(): gle = %lu", dwSymOptions);
       (*pSymCleanup)(hDupProcess);
       /* HANDLE hObject for CloseHandle */ CloseHandle(hDupProcess);
-      GuardStack();
       return;
     }
 
@@ -2194,13 +2150,11 @@ void __fastcall FullStackWalkWithAnnotations(HANDLE hThread, CONTEXT * pContext)
     Src::LogManager::ExitOrCrashCleanUpJmp();
     (*pSymCleanup)(hDupProcess);
     /* HANDLE hObject for CloseHandle */ CloseHandle(hDupProcess);
-    GuardStack();
 }
 
 void __fastcall WriteCrashDump(uint32_t dwHeader0, uint32_t dwHeader1, uint32_t dwRecordType, int32_t nDwordCount, void * pData) {
     D2CrashDumpRecordStrc sRecord;
     char szDumpPath[260];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Src::LogManager::FILETOOLS_GetUserMyDocumentsDiabloIIGameLogsFolder(szDumpPath, 0x104);
     Storm::Source::SSTR::SStrPack(szDumpPath, "Crashdump", 0x104);
     FILE* _File = fopen(szDumpPath, "ab");
@@ -2213,8 +2167,6 @@ void __fastcall WriteCrashDump(uint32_t dwHeader0, uint32_t dwHeader1, uint32_t 
       fwrite(&sRecord, nDwordCount * 4 + 0x10, 1, _File);
       fclose(_File);
     }
-
-    GuardStack();
 }
 
 // @sourcefile .\Src\Exceptions.cpp
@@ -2233,14 +2185,12 @@ BOOL __fastcall LoadPreviousCrashDump(uint8_t * pOutBuffer, int * pnBufferSize) 
     int nUniqueCount;
     char szDumpPath[260];
     uint32_t nDwordCount;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int* pnBufferSizeLocal = pnBufferSize;
     uint8_t* pOutBufferLocal = pOutBuffer;
     Src::LogManager::FILETOOLS_GetUserMyDocumentsDiabloIIGameLogsFolder(szDumpPath, 0x104);
     Storm::Source::SSTR::SStrPack(szDumpPath, "Crashdump", 0x104);
     DWORD dwFileAttrs = GetFileAttributesA(szDumpPath);
     if (dwFileAttrs == -1) {
-      GuardStack();
       return 0;
     }
 
@@ -2305,14 +2255,12 @@ BOOL __fastcall LoadPreviousCrashDump(uint8_t * pOutBuffer, int * pnBufferSize) 
         }
 
         *pOutBufferLocal = (uint8_t)nUniqueCount;
-        GuardStack();
         return 1;
       }
 
       fclose(pFile);
     }
 
-    GuardStack();
     return 0;
 }
 
@@ -2412,12 +2360,11 @@ void __fastcall TriggerManualStackDump(char * szCategory) {
     *(uint32_t*)((char*)&__frame0.context + 180) = (uint32_t)(uintptr_t)(uint8_t*)__builtin_frame_address(0);
     HANDLE hThread = GetCurrentThread();
     QuickStackWalkWithSymbols(__frame0.szCategorySpill, hThread, (CONTEXT*)__frame0.context);
-    GuardStack();
 }
 
 // Security cookie check (MSVC /GS __security_check_cookie). Compares ECX against the stored security cookie and halts on mismatch. Touches no register, so the caller's return value in EAX (and EDX) survives the call; modelled with the __stdcall_noclobber convention.
 // [override: replace]
-void GuardStack() {
+void __stdcall GuardStack() {
     // Hand-supplied body. Ghidra address 00681a48 (MSVC /GS __security_check_cookie).
     //
     //   00681a48  CMP ECX,[0x749de0]   ; the caller's [EBP-4] ^ EBP against the cookie

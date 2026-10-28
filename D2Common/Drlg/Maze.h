@@ -35,7 +35,7 @@ struct D2RoomExStrc * __stdcall DRLGMAZE_AllocRoomExAndPickPreset(eDrlgDirection
 // No call, jump or stored address reaches 00670e70 in 1.14d (byte scan for
 // the absolute and rel32 forms); only its sibling 00670de0 is called.
 struct D2RoomExStrc * __stdcall DRLGMAZE_AllocRoomAndPickPreset(eDrlgDirection eDirection, struct D2RoomExStrc * pSourceRoom, int bPickPresets);
-struct D2RoomExStrc * GetRandomRoomExFromLevel(struct D2DrlgLevelStrc * pLevel);
+struct D2RoomExStrc * __fastcall GetRandomRoomExFromLevel(struct D2DrlgLevelStrc * pLevel);
 // Core maze expansion loop: repeatedly picks a random non-preset room, advances its seed to choose a random direction, allocates and attempts to place a new adjacent room, links and registers it on success. Scales the target room count by difficulty and doubles or triples it for the Act 2 tombs. Runs until pLevel->nRoomExCount reaches the scaled target. The loop keeps pLevel in ECX across the GetRandomRoomExFromLevel call and its tail re-reads [ECX+8] without reloading, which is why that callee is typed __fastcall_ecxsafe.
 void __stdcall ActualLevelGeneration(struct D2DrlgLevelStrc * pLevel);
 // Iterates all rooms in pLevel and attempts to expand each non-skipped room in all 8 directions. For each successful expansion, allocates a new room with pDrlgLevelData dimensions, links it via DRLGROOMEX_AllocNodesForBothRoomEx, and marks its preset data with the 'has preset' flag. Frees the temp room pointer array after processing. Source: .\DRLG\Maze.cpp line 0x288.

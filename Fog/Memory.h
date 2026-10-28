@@ -37,7 +37,7 @@ namespace Fog::Memory {
 
 // Function declarations
 void OutOfMemoryHandler(char * format, ...);
-int32_t FindFirstFreeBit(uint32_t nParam);
+int32_t __fastcall FindFirstFreeBit(uint32_t nParam);
 void * __fastcall POOL_AllocOverflowBlock(struct D2PoolManagerStrc * pMemory, int32_t nSize, char * szFile, int32_t nFileLine);
 void __fastcall FreeTrackedAllocation(int32_t nManager, int32_t nUserPtr, char * szFile, int32_t nLine);
 void * __fastcall ReallocTrackedAllocation(struct D2PoolManagerStrc * pManager, void * pUserPtr, int32_t nNewSize, char * szFile, int32_t nLine);

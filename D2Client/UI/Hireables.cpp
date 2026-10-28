@@ -1051,7 +1051,7 @@ void __stdcall UI_DrawHireableIcons() {
     uint16_t* pwszStr2 = D2Lang::StrTable::strtable::GetLocaleString(0x58a3);
     uint16_t* pwszStr3 = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
     uint16_t* pwszKeyDesc = CmdTbl::CMD_GetKeyDescForCommand(0x36, 1);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszTooltip, pwszStr2, (uint16_t*)pwszKeyDesc);
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszTooltip, pwszStr2, pwszKeyDesc);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, pwszStr3);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, pwszStr1);
     D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(wszTooltip, gpHireHoverUnit, gnHireIconDrawX + 0x24, 0, 0);

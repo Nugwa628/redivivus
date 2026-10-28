@@ -141,13 +141,14 @@ static BOOL __stdcall Q10_CheckHoradricStaffState(D2UnitStrc * pUnit, ::SGAMEDAT
 // Q10_NotifyHoradricStaffActive. If Q10_CheckHoradricStaffState says the quest is
 // live, send quest-log update (msg 9 = The Horadric Staff) to the player. Pure
 // notification wrapper; no state changes.
-static void __stdcall Q10_NotifyHoradricStaffActive(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static int __stdcall Q10_NotifyHoradricStaffActive(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     BOOL bIsQuestLive = Q10_CheckHoradricStaffState(pUnit, pGame);
     if (!bIsQuestLive) {
-      return;
+      return 0;
     }
 
     QUEST_SendQuestUpdateToPlayer(pGame, pUnit, 9);
+    return 0;
 }
 
 // Q10_CheckQuestItemsForDialog. Inspects which quest items the player holds and

@@ -15,7 +15,6 @@
 #include "Fog/Memory.h"
 #include "Fog/Src/ErrorManager.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -45,7 +44,7 @@ namespace D2Common::DATATBLS::FieldTbls {
 // offset lookup tables used for automap/collision field stepping.
 // Source: .\\DATATBLS\\FieldTbls.cpp
 // @sourcefile .\DATATBLS\FieldTbls.cpp
-void __stdcall FIELDTBLS_InitFieldData(D2ExpFieldFileStrc * pArchive, uint32_t dwUnused) {
+int __stdcall FIELDTBLS_InitFieldData(D2ExpFieldFileStrc * pArchive, uint32_t dwUnused) {
     // Static local variables (originally global data)
     static int gnFieldDataTableDirectionOffset0; D2_STATIC_GUARD_BSS(gnFieldDataTableDirectionOffset0, "D2Common::DATATBLS::FieldTbls::FIELDTBLS_InitFieldData::gnFieldDataTableDirectionOffset0");
     static int gnFieldStepOffset_N; D2_STATIC_GUARD_BSS(gnFieldStepOffset_N, "D2Common::DATATBLS::FieldTbls::FIELDTBLS_InitFieldData::gnFieldStepOffset_N");
@@ -83,12 +82,13 @@ void __stdcall FIELDTBLS_InitFieldData(D2ExpFieldFileStrc * pArchive, uint32_t d
     gnFieldDataTableHeight = nHeight;
     gnFieldDataTableSize = nAllocSize;
     D2_FREE_AT(pArchive, ".\\DATATBLS\\FieldTbls.cpp", 0x50);
+    return 1;
 }
 
 // Frees the global field table data and zeroes all field dimensions/offsets.
 // Source: .\\DATATBLS\\FieldTbls.cpp
 // @sourcefile .\DATATBLS\FieldTbls.cpp
-void __stdcall FIELDTBLS_FreeFieldData() {
+int __stdcall FIELDTBLS_FreeFieldData() {
     if (gpFieldDataTable) {
       D2_FREE_POOL_AT(nullptr, gpFieldDataTable, ".\\DATATBLS\\FieldTbls.cpp", 0x5b);
     }
@@ -99,6 +99,7 @@ void __stdcall FIELDTBLS_FreeFieldData() {
     gnFieldDataTableSize = 0;
     gnFieldTableHalfWidth = 0;
     gnFieldTableHalfHeight = 0;
+    return 1;
 }
 
 // Returns the center offsets (half width, half height) of the loaded field data.
@@ -213,11 +214,9 @@ BOOL __stdcall FIELDTBLS_TracePathCheckCollision(POINT * pPoint, D2RoomStrc * pR
 void __fastcall FIELDTBLS_LoadExpFieldFile(D2PoolManagerStrc * pMemory) {
     uint32_t nFileSize;
     char szFilePath[260];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\expfield.d2", "DATA\\GLOBAL");
     D2ExpFieldFileStrc* pArchive = (D2ExpFieldFileStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(pMemory, szFilePath, &nFileSize, ".\\DATATBLS\\FieldTbls.cpp", 0x28);
     FIELDTBLS_InitFieldData(pArchive, nFileSize);
-    Fog::Debug::GuardStack();
 }
 
 } // namespace D2Common::DATATBLS::FieldTbls

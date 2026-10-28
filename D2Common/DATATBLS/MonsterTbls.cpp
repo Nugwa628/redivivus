@@ -37,7 +37,6 @@
 #include "Storm/Source/SSTR.h"
 #include "globals/globals.h"
 #include "D2Common/ITEMS/ItemMods.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/SKILLS/SkillAss.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -1878,7 +1877,6 @@ void __stdcall TC_GenerateAutoItemTypeTreasureClasses() {
     int nItemTypeStride;
     char szTCName[32];
     char szTCLinkCode[8];
-    uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     TC_ExtendTreasureClassSize("");
     D2ItemsTableStrc* pnTotalItems = ItemTbls::TXT_Items_GetSize();
     int iVar1 = sgptDataTable->nTxtItemTypesSize;
@@ -1954,8 +1952,6 @@ void __stdcall TC_GenerateAutoItemTypeTreasureClasses() {
         nItemTypeStride += 0xe4;
       } while ((int)nRecordId < iVar1);
     }
-
-    Fog::Debug::GuardStack();
 }
 
 static int32_t TC_ExtractNextIntModifier(char cParam, uint32_t * * pnParam) {
@@ -4474,7 +4470,7 @@ void __fastcall TXT_AllocTxt_monstats2(D2PoolManagerStrc * pMemory) {
 }
 
 // Breadth-first traversal of the monstypes.txt equiv1/equiv2/equiv3 parent-type hierarchy to test whether monster type nMonTypeId belongs to type nCheckTypeId. Returns 1 if found, 0 if not found, out-of-range, or stack depth exceeds 124. Despite its name, behaves as a monster-type membership test (analogous to ITEMTBLS_CheckItemTypeRecursive but for MonType with three equiv slots).
-BOOL MONSTERTBLS_GetMonSeqFrameCount(int32_t nMonTypeId, int32_t nCheckTypeId) {
+BOOL __fastcall MONSTERTBLS_GetMonSeqFrameCount(int32_t nMonTypeId, int32_t nCheckTypeId) {
     int nNewStackSize;
     int32_t typeStack[128];
     short int wEquiv3;
@@ -5684,7 +5680,6 @@ void __stdcall TXT_AllocParsedTreasureClassDiffActChestABC() {
     char** pszChestId;
     char szTCName[256];
     D2TxtLinkStrc* pDiffIter;
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2ParsedTreasureClassStrc* pTCDest = (D2ParsedTreasureClassStrc*)&sgtDataTable.pParsedTreasureClassDiffActChestABC;
     D2TxtLinkStrc* szDifficulty = (D2TxtLinkStrc*)gapTreasureClassChestParsedData;
     do {
@@ -5709,8 +5704,6 @@ void __stdcall TXT_AllocParsedTreasureClassDiffActChestABC() {
 
       szDifficulty = (D2TxtLinkStrc*)&szDifficulty->nCapacity;
     } while ((int)szDifficulty < (uintptr_t)&gapTreasureClassChestParsedData[3]);
-
-    Fog::Debug::GuardStack();
 }
 
 void __stdcall TXT_AllocItemDropData(D2PoolManagerStrc * pMemory) {

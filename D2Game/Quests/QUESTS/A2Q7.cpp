@@ -60,7 +60,6 @@
 #include "D2Client/UI/Automap.h"
 #include "D2Game/D2Game.h"
 #include "D2Game/Monster/AI/AI.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -102,7 +101,6 @@ void __fastcall Q14_SendTombLevelInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     }
 
     GAME::SCmd::NET_D2GS_SERVER_Send_0x50_QuestSpecial(pClient, &sPacket);
-    Fog::Debug::GuardStack();
 }
 
 // Q14 helper: returns the next "arcane" object classId to spawn (Tal Rasha sarcophagus/orifice decoy set: 0x133..0x139). On first call lazily fills a 6-entry ring (skipping the index matching the real tomb level), then cycles through it round-robin. Returns 0x133 if no tomb level is set yet. No quest-state transition.

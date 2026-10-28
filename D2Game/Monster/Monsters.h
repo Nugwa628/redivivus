@@ -62,7 +62,7 @@ uint8_t * __fastcall GetMonUModList(struct D2UnitStrc * pUnit);
 // 2022.01.09 - dzik
 uint16_t __fastcall GetNameSeed(struct D2UnitStrc * pUnit);
 // 2022.01.09 - dzik
-uint32_t CheckMonsterType(struct D2UnitStrc * pUnit, uint16_t eMonsterType);
+uint32_t __fastcall CheckMonsterType(struct D2UnitStrc * pUnit, uint16_t eMonsterType);
 void __fastcall MONSTER_SetMonsterDataFlags(int * pUnit, uint16_t nFlagMask, int32_t nFlagValue);
 // 2022.01.09 - dzik
 int16_t __fastcall GetBossNo(struct D2UnitStrc * pUnit);

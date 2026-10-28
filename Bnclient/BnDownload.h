@@ -39,7 +39,7 @@ void __fastcall BNDOWNLOAD_ExtractFileFromArchive(char * szFileName, struct D2Ar
 void __fastcall BNDOWNLOAD_UpdateProgressPercent(uint32_t dwUnused, int32_t nBytesDone, uint32_t nTotalSize);
 void __fastcall BNDOWNLOAD_ResetState(int nResetValue);
 int __stdcall BNDOWNLOAD_GetProgress();
-void __fastcall BNDOWNLOAD_SetPatchFilename(char * szText);
+int __fastcall BNDOWNLOAD_SetPatchFilename(char * szText);
 uint32_t __stdcall BNDOWNLOAD_HasPatchFilename();
 // Processes BNet prepatch.lst from downloaded MPQ archive - executes patches, extracts files, launches updates
 void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut);

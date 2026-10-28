@@ -30,9 +30,9 @@ namespace D2Win::Src::D2WinTextBox {
 int __stdcall EDITBOX_Cb_D2WINTEXTBOX_SetSelectedLine(::D2WinEditBox * pEditBox, int nTextLen, char * pKeyChar);
 // @sourcefile .\Src\D2WinTextBox.cpp
 void __fastcall D2WINTEXTBOX_ClearAllLines(::D2WinTextBox * pTextBox);
-void __fastcall D2WINTEXTBOX_SetLinePadding(::D2WinTextBox * pnTextBox, int32_t nPadLeft, int32_t nPadding);
+int __fastcall D2WINTEXTBOX_SetLinePadding(::D2WinTextBox * pnTextBox, int32_t nPadLeft, int32_t nPadding);
 // @sourcefile .\Src\D2WinTextBox.cpp
-void __fastcall D2WINTEXTBOX_SetLineCellTextW(::D2WinTextBox * pnTextBox, uint16_t * wszText, int32_t nRow, int32_t nCol);
+int __fastcall D2WINTEXTBOX_SetLineCellTextW(::D2WinTextBox * pnTextBox, uint16_t * wszText, int32_t nRow, int32_t nCol);
 // @sourcefile .\Src\D2WinTextBox.cpp
 void __fastcall D2WINTEXTBOX_ClearLineRow(::D2WinTextBox * pnParam, int32_t nRow);
 int32_t __fastcall D2WINTEXTBOX_GetLineCount(::D2WinTextBox * pnParam);
@@ -77,7 +77,7 @@ void __fastcall FORMS_DestroyD2WinTextBox(::D2WinTextBox * pWinTextBox);
 // @sourcefile .\Src\D2WinTextBox.cpp
 BOOL __fastcall SetText(::D2WinTextBox * pTextBox, uint16_t * szText, int32_t nLineStyle, bool bIndent, int nAlignment);
 // @sourcefile .\Src\D2WinTextBox.cpp
-void __fastcall D2WINTEXTBOX_AddLines(::D2WinTextBox * pnParam, uint16_t * wszText, int nRepeatCount, int32_t nLineStyle, bool bIndent);
+int __fastcall D2WINTEXTBOX_AddLines(::D2WinTextBox * pnParam, uint16_t * wszText, int nRepeatCount, int32_t nLineStyle, bool bIndent);
 void __fastcall D2WINTEXTBOX_SetLineCellTextA(::D2WinTextBox * pnParam, char * szText, int32_t nRowIndex, int32_t nColIndex);
 void __fastcall D2WINTEXTBOX_SetLineCellTextWDirect(::D2WinTextBox * pnParam, uint16_t * wszText, int32_t nParam1, int32_t nParam2);
 // @sourcefile .\Src\D2WinTextBox.cpp

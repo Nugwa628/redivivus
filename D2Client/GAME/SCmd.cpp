@@ -1460,7 +1460,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x5A(char * pBytes) {
       pDst = (D2Packet0x5aEventStructure*)((uintptr_t)&pDst->nArg + 1);
     }
 
-    UI::Text::TEXT_HandleEventMessagePacket(&packet, (short int*)pDst);
+    UI::Text::TEXT_HandleEventMessagePacket(&packet);
 }
 
 void __fastcall NET_D2GS_CLIENT_Incoming0x27_PRESETTALK(char * pBytes) {

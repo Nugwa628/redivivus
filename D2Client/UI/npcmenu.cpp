@@ -302,7 +302,7 @@ int __fastcall NPCMENU_ScrollCompleteShowNextMessage(void * pUserParam, uint32_t
     return 1;
 }
 
-void NPCMENU_AddHandledMessageId(short wMsgId) {
+void __fastcall NPCMENU_AddHandledMessageId(short wMsgId) {
     if (gnNpcMenuScrollMessageHead >= 9) {
       return;
     }
@@ -2595,7 +2595,7 @@ void __stdcall NPCMENU_OpenInteractionDialog() {
 
             iVar1 = D2Client::Merc::nMercReviveCost;
             pszFormatStr = D2Lang::StrTable::strtable::GetLocaleString(0x58a8);
-            D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x200, wszOptionText, pszFormatStr, (uint16_t*)pnOptionCallback, iVar1);
+            D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x200, wszOptionText, pszFormatStr, pnOptionCallback, iVar1);
             add_cost_option:
             Dialog::AddStringData(Dialog::gpNpcInteractionDialog, wszOptionText, 0xf, 0, 0, 1, (fpDialogFunc)*ppCurCallback, bOptionEnabled);
           } else {
@@ -3547,7 +3547,7 @@ int __stdcall NPCMENU_BuildMercHireMenu() {
     int nGoldOnBody = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pPlayerUnit_lcl, eStatId, nNameStringId);
     int32_t nTotalGold = nLoopCounter + nGoldOnBody;
     pszDialogPtr = D2Lang::StrTable::strtable::GetLocaleString(0xd24);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(300, wszGoldFmtBuf, pszDialogPtr, (uint16_t*)nTotalGold);
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(300, wszGoldFmtBuf, pszDialogPtr, nTotalGold);
     Dialog::AddStringData(Dialog::gpNpcMercListDialog, wszGoldFmtBuf, 0x15, 0, 4, 1, nullptr, 0);
     int32_t nMercSeed = 1;
     fpDialogFunc pfnCloseCallback = NPCMENU_MercListDrawCallback;

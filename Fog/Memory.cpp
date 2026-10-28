@@ -9,7 +9,6 @@
 #include "Fog/Src/LogManager.h"
 #include "Storm/Source/SSTR.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "Storm/_unnamespaced.h"
 #include "support/d2_trace.h"
 
@@ -19,11 +18,12 @@
 namespace Fog::Memory {
 
 void OutOfMemoryHandler(char * format, ...) {
+    va_list __va;
+    va_start(__va, format);
     _MEMORYSTATUS memStatus;
     char szMessage[4096];
     char szFormattedSize[32];
-    uint32_t uSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
-    vsprintf(szMessage, format, (va_list)((uint8_t*)&format + 4));
+    vsprintf(szMessage, format, __va);
     Src::LogManager::LOGMANAGER_TraceToModuleLog("", "--------------------------------------------------------");
     Src::LogManager::LOGMANAGER_TraceToModuleLog("", "ERROR: Out of memory!");
     Src::LogManager::LOGMANAGER_TraceToModuleLog("", "%s", szMessage);
@@ -41,7 +41,6 @@ void OutOfMemoryHandler(char * format, ...) {
     char* szAvailVirtual = SMem::SMemFormat64BitWithSeparators(szFormattedSize, 0x20, memStatus.dwAvailVirtual, 0);
     Src::LogManager::LOGMANAGER_TraceToModuleLog("", "available virtual:  %s", szAvailVirtual);
     Src::LogManager::LOGMANAGER_TraceToModuleLog("", "");
-    Debug::GuardStack();
 }
 
 static int32_t ComputeSizeClassIndex(int32_t nParam) {
@@ -67,7 +66,7 @@ static int32_t ComputeSizeClassIndex(int32_t nParam) {
     return nBitIndex - 3;
 }
 
-int32_t FindFirstFreeBit(uint32_t nParam) {
+int32_t __fastcall FindFirstFreeBit(uint32_t nParam) {
     int nBitIndex = 0;
     if (!~nParam) {
       return nBitIndex;

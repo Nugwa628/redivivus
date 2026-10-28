@@ -816,7 +816,7 @@ static BOOL __stdcall PATH_MoveUnitToPosition(D2RoomStrc * pRoom, uint32_t nTarg
     return 1;
 }
 
-static void __stdcall PATH_MoveObjectToPosition(D2RoomStrc * pRoom, uint32_t nTargetPos, uint32_t * pPath) {
+static int __stdcall PATH_MoveObjectToPosition(D2RoomStrc * pRoom, uint32_t nTargetPos, uint32_t * pPath) {
     uint16_t wPosX = *(uint16_t*)((int)pPath + 2);
     uint16_t wPosY = *(uint16_t*)((int)pPath + 6);
     if (!(int*)pPath[0xc] || *(int*)pPath[0xc] != 3) {
@@ -845,6 +845,7 @@ static void __stdcall PATH_MoveObjectToPosition(D2RoomStrc * pRoom, uint32_t nTa
     }
 
     PATH_ResetPathState((D2DynamicPathStrc*)pPath);
+    return 1;
 }
 
 BOOL __stdcall PATH_GetCollisionMaskAt(D2DynamicPathStrc * pDynamicPath, D2UnitStrc * pUnit, D2RoomStrc * pRoom, uint16_t wPosX, uint16_t wPosY) {

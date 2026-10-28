@@ -77,7 +77,6 @@
 #include "D2Common/Drlg/Drlg.h"
 #include "D2Game/Monster/AI/AI.h"
 #include "D2Game/Objects/ObjectsMode.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 #include "D2Game/PLAYER/PlayerModes.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
@@ -239,14 +238,12 @@ void __fastcall SetGameDataHook(::SGAMEDATA * pGame) {
 
 void __fastcall AppearenceItems(D2ClientStrc * pClient, D2UnitStrc * pUnit, uint32_t * pAppearanceBuf, uint32_t nBufSize) {
     char szAppearanceTmp[16];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (0xf < nBufSize && pUnit) {
       *pAppearanceBuf = -1;
       pAppearanceBuf[1] = -1;
       pAppearanceBuf[2] = -1;
       pAppearanceBuf[3] = -1;
       D2Common::INVENTORY::Inventory::SaveCharAppearance(pUnit, (char*)pAppearanceBuf, szAppearanceTmp);
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -256,14 +253,12 @@ void __fastcall AppearenceItems(D2ClientStrc * pClient, D2UnitStrc * pUnit, uint
 
 void __fastcall AppearenceItems2(uint32_t pClient, D2UnitStrc * pUnit, uint32_t * pAppearanceBuf, uint32_t nBufSize) {
     char szAppearanceTmp[16];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (0xf < nBufSize && pUnit) {
       *pAppearanceBuf = -1;
       pAppearanceBuf[1] = -1;
       pAppearanceBuf[2] = -1;
       pAppearanceBuf[3] = -1;
       D2Common::INVENTORY::Inventory::SaveCharAppearance(pUnit, szAppearanceTmp, (char*)pAppearanceBuf);
-      Fog::Debug::GuardStack();
       return;
     }
 
@@ -2052,8 +2047,6 @@ void __fastcall CleanUp(D2ClientStrc * pClient, uint8_t * pbParam) {
         *pbParam = 0;
       }
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // Removes client from game and cleans up all resources. Optionally saves player (bSavePlayer), removes from hash tables (by ID and name), broadcasts 0x5A PlayerLeave event, frees player unit and pets, notifies quests, frees memory pools. Called on disconnect, timeout, or kick.
@@ -2077,7 +2070,6 @@ void __fastcall CleanUpClient(::SGAMEDATA * pGame, uint32_t nClientId, int32_t b
     D2ClientStrc* pClientNode;
     D2PacketListStrc* pDVar5;
     D2ClientStrc* pNextClientNode;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!pGame) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x49f);
       exit(-1);
@@ -2275,8 +2267,6 @@ void __fastcall CleanUpClient(::SGAMEDATA * pGame, uint32_t nClientId, int32_t b
       D2_FREE_POOL_AT(pRemovedClient->pGame->pMemoryPool, pRemovedClient, ".\\GAME\\Clients.cpp", 0x608);
       pGame->nClientsCount--;
     }
-
-    Fog::Debug::GuardStack();
 }
 
 // When fClientFlags bit 1 is set, looks up the unit (nAttachedUnitType, dwAttachedUnitGUID). Returns it if IsUnitNearClient, otherwise clears the bit and returns NULL. Halts (line 1977) on a NULL client.

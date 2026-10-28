@@ -65,7 +65,7 @@ void __stdcall D2COMP_LoadGuildEmblemIcon(int32_t pCompUnit, uint8_t byEmblemIco
 void __stdcall D2COMP_LoadAllItemPalettes();
 void __stdcall D2COMP_InitEmblemColorTables();
 char * __stdcall D2COMP_GetTitlePrefix(uint32_t nCharClass, uint32_t nTitleRank, int32_t nParam);
-void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam);
+int __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam);
 void __fastcall DRAW_OOG_ChannelPlayers(struct D2QuestDataA3Q6Strc * pA3Q6Data);
 void __stdcall D2COMP_AllocTxt_EverythingItems();
 struct D2CharSelCompStrc * __stdcall AllocCharSelectComponent(uint32_t nPlayerClassId, int32_t nClassicExpansion, uint8_t * pbyEquipSlots, char * szText);

@@ -17,7 +17,6 @@
 #include "Storm/Source/SSystem.h"
 #include "Storm/Storm.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -154,7 +153,6 @@ static void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallbac
     uint32_t sCallbackArgs[3];
     char szFmtBuf[256];
     char szMsgBuf[256];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (errorCode == 0x6e) {
       nMsgIdx = 2;
       uID = 0x5203;
@@ -163,7 +161,6 @@ static void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallbac
       uID = 0x5201;
     } else {
       if (errorCode != 0x8510006d) {
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -195,7 +192,6 @@ static void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallbac
     sCallbackArgs[0] = errorCode;
     sCallbackArgs[1] = (uint32_t)szItem;
     (*pfnCallback)(sCallbackArgs);
-    Fog::Debug::GuardStack();
 }
 
 // @blizzard ProcessFile (SCMD.CPP)
@@ -766,8 +762,6 @@ BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * 
     int nConsumed;
     int nMatchLen;
     char szMatchBuf[256];
-    uint32_t dwStackCookie;
-    dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     szMatchBuf[0] = '\0';
     char cCurChar;
     cCurChar = *szText;
@@ -810,7 +804,6 @@ BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * 
           SCMD_GenerateError(0x85100065, pfnErrorCallback, szText);
         }
 
-        Fog::Debug::GuardStack();
         return 0;
       }
       szArgLine = szText + (int)piVar4;
@@ -828,7 +821,6 @@ BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * 
 
       BVar2 = SCMD_ProcessCurrentFlag(pCmdCtx, szArgLine, &nConsumed);
       if (!BVar2) {
-        Fog::Debug::GuardStack();
         return 0;
       }
 
@@ -836,7 +828,6 @@ BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * 
       cCurChar = *szText;
     }
 
-    Fog::Debug::GuardStack();
     return 1;
 }
 
@@ -1038,7 +1029,6 @@ BOOL __fastcall SCMD_ProcessString(uint32_t * ppszCursor, int * pCmdCtx, uint32_
     int nTokenLen;
     char* pszPos;
     char szTokenBuf[256];
-    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char cCursorChar = *(char*)*ppszCursor;
     while (cCursorChar != '\0') {
       pszPos = (char*)*ppszCursor;
@@ -1056,7 +1046,6 @@ BOOL __fastcall SCMD_ProcessString(uint32_t * ppszCursor, int * pCmdCtx, uint32_
     }
 
     cCursorChar = *(char*)*ppszCursor;
-    Fog::Debug::GuardStack();
     return (uint32_t)(cCursorChar == '\0');
 }
 
@@ -1075,14 +1064,12 @@ bool __stdcall SCmdGetBool(int nCmdId) {
 // @oracle-source Storm export vector SCmdProcess @100cbc94 -> code 100086c0 = the traceback-named function .SCmdProcess, in Mac PPC 1.10b Storm
 // @rename-basis Behaviour plus a cross-architecture body match. .SCmdProcess reads r3..r6, i.e. exactly four arguments, and is the target of the two-argument command-line wrapper at 10008640 which supplies its own second argument as the literal 1. This function has the same four arguments and is likewise the target of SCmdProcessCommandLine 006c50b0, which calls it as (GetCommandLineA(), 1, arg1, arg2) - the same literal 1 in the same slot, which is the skip-argv[0] flag.
 // @former-name SCMD_ParseCommandLine (also resolves a duplicate-name collision: 006c4a00 carried the same name)
-void __stdcall SCmdProcess(char * szCommandLine, int bSkipFirstToken, pfnSCmdUnknownArgCallback pfnUnknownCallback, pfnSCmdErrorCallback pfnErrorCallback) {
-    bool bVar1;
-    BOOL BVar2;
+int __stdcall SCmdProcess(char * szCommandLine, int bSkipFirstToken, pfnSCmdUnknownArgCallback pfnUnknownCallback, pfnSCmdErrorCallback pfnErrorCallback) {
+    BOOL BVar1;
+    int iVar2;
     uint32_t pCmdList;
     int cmdCtx[6];
     uint32_t nCmdNode;
-    uint32_t local_8;
-    local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     char* pszCursor;
     pszCursor = szCommandLine;
     if (!szCommandLine) {
@@ -1094,20 +1081,20 @@ void __stdcall SCmdProcess(char * szCommandLine, int bSkipFirstToken, pfnSCmdUnk
 
       SSystem::SMemZero(cmdCtx, 0x18);
       pCmdList = gStormCmdListHeadBackslash.pNext < 1 ? 0 : gStormCmdListHeadBackslash.pNext;
-      BVar2 = SCMD_ProcessString((uint32_t*)&pszCursor, cmdCtx, &pCmdList, pfnUnknownCallback, pfnErrorCallback);
-      if (BVar2) {
-        bVar1 = true;
+      BVar1 = SCMD_ProcessString((uint32_t*)&pszCursor, cmdCtx, &pCmdList, pfnUnknownCallback, pfnErrorCallback);
+      if (BVar1) {
+        iVar2 = 1;
         nCmdNode = pCmdList;
         while (true) {
           while (true) {
-            if (!nCmdNode || !bVar1) {
+            if (!nCmdNode || !iVar2) {
               goto report_missing_required_arg;
             }
             if ((*(uint32_t*)(nCmdNode + 8) & 0x3000000) != 0x2000000) {
               break;
             }
 
-            bVar1 = false;
+            iVar2 = 0;
           }
 
           if (*(int*)(nCmdNode + 4) < 1) {
@@ -1120,15 +1107,14 @@ void __stdcall SCmdProcess(char * szCommandLine, int bSkipFirstToken, pfnSCmdUnk
 
         pCmdList = 0;
         report_missing_required_arg:
-        if (pfnErrorCallback && !bVar1) {
+        if (pfnErrorCallback && !iVar2) {
           SCMD_GenerateError(0x8510006d, pfnErrorCallback, "");
         }
-        Fog::Debug::GuardStack();
-        return;
+        return iVar2;
       }
     }
 
-    Fog::Debug::GuardStack();
+    return 0;
 }
 
 // Processes the process's own command line: GetCommandLineA() then SCmdProcess(cmdline, 1, arg1, arg2).

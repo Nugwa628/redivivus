@@ -5,7 +5,6 @@
 #include "D2Game/D2QuestDataStrc.h"
 #include "Fog/Debug.h"
 #include "globals/globals.h"
-#include "D2Game/Objects/ObjectsRgn.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -38,7 +37,7 @@ static void __fastcall SKILLS_PushValue(int * pStack, int value) {
     pStack[0x40]++;
 }
 
-static int SKILLS_PopValue(int * pValueStack) {
+static int __fastcall SKILLS_PopValue(int * pValueStack) {
     if (pValueStack[0x40] < 1) {
       return 0;
     }
@@ -513,7 +512,6 @@ char * __fastcall SKILLS_ParseSkillDescription(CalcGetKeyWordToNumber_t pFuncLoo
     int local_11c;
     char szTokenBuf[256];
     char* pcScan;
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     *pnTokenValue = 0;
     char cCur = *szToken;
     CalcGetKeyWordToNumber_t local_118 = pFuncLookup;
@@ -540,7 +538,6 @@ char * __fastcall SKILLS_ParseSkillDescription(CalcGetKeyWordToNumber_t pFuncLoo
         nCtype = isdigit((int)szToken[1]);
       }
 
-      Debug::GuardStack();
       return szToken;
     }
     if (*szToken != '\'') {
@@ -550,33 +547,26 @@ char * __fastcall SKILLS_ParseSkillDescription(CalcGetKeyWordToNumber_t pFuncLoo
           case '!':
             if (szToken[1] == '=') {
               *pTokenType = '\x0f';
-              Debug::GuardStack();
               return szToken + 2;
             }
           break;
           case '(':
             *pTokenType = '\0';
-          Debug::GuardStack();
           return szToken + 1;
           case ')':
             *pTokenType = '\x01';
-          Debug::GuardStack();
           return szToken + 1;
           case '*':
             *pTokenType = '\x05';
-          Debug::GuardStack();
           return szToken + 1;
           case '+':
             *pTokenType = '\x03';
-          Debug::GuardStack();
           return szToken + 1;
           case ',':
             *pTokenType = '\x02';
-          Debug::GuardStack();
           return szToken + 1;
           case '-':
             *pTokenType = '\x04';
-          Debug::GuardStack();
           return szToken + 1;
           case '.':
             szTokenBuf[0] = szToken[1];
@@ -601,55 +591,44 @@ char * __fastcall SKILLS_ParseSkillDescription(CalcGetKeyWordToNumber_t pFuncLoo
           if (-1 < nCtype) {
             *local_10c = '\x10';
             *local_110 = nCtype;
-            Debug::GuardStack();
             return pcTokenEnd;
           }
 
           break;
           case '/':
             *pTokenType = '\x06';
-          Debug::GuardStack();
           return szToken + 1;
           case ':':
             *pTokenType = '\b';
-          Debug::GuardStack();
           return szToken + 1;
           case '<':
             if (szToken[1] != '=') {
               *pTokenType = '\v';
-              Debug::GuardStack();
               return szToken + 1;
             }
           *pTokenType = '\n';
-          Debug::GuardStack();
           return szToken + 2;
           case '=':
             if (szToken[1] == '=') {
               *pTokenType = '\x0e';
-              Debug::GuardStack();
               return szToken + 2;
             }
           break;
           case '>':
             if (szToken[1] != '=') {
               *pTokenType = '\f';
-              Debug::GuardStack();
               return szToken + 1;
             }
           *pTokenType = '\r';
-          Debug::GuardStack();
           return szToken + 2;
           case '?':
             *pTokenType = '\a';
-          Debug::GuardStack();
           return szToken + 1;
           case '^':
             *pTokenType = '\t';
-          Debug::GuardStack();
           return szToken + 1;
         }
 
-        Debug::GuardStack();
         return nullptr;
       }
 
@@ -684,7 +663,6 @@ char * __fastcall SKILLS_ParseSkillDescription(CalcGetKeyWordToNumber_t pFuncLoo
             if (-1 < nCtype) {
               *local_10c = '\x12';
               *local_110 = nCtype;
-              Debug::GuardStack();
               return pcTokenEnd + 1;
             }
           }
@@ -701,13 +679,11 @@ char * __fastcall SKILLS_ParseSkillDescription(CalcGetKeyWordToNumber_t pFuncLoo
       if (nCtype < 0) {
         *local_10c = '\x10';
         *local_110 = 0;
-        Debug::GuardStack();
         return pcTokenEnd;
       }
 
       *local_10c = !local_11c + '\x10';
       *local_110 = nCtype;
-      Debug::GuardStack();
       return pcTokenEnd;
     }
 
@@ -742,13 +718,11 @@ char * __fastcall SKILLS_ParseSkillDescription(CalcGetKeyWordToNumber_t pFuncLoo
     if (nCtype < 0) {
       *pTokenType = '\x10';
       *local_110 = 0;
-      Debug::GuardStack();
       return pcTokenEnd;
     }
 
     *pTokenType = !local_10c + '\x10';
     *local_110 = nCtype;
-    Debug::GuardStack();
     return pcTokenEnd;
 }
 
@@ -987,7 +961,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
             goto finish_token;
           }
         *pbByteCodeOutput = 0;
-        Debug::GuardStack();
         return 0;
         case 1:
           if (0 < __frame0.nOpStackTop) {
@@ -1002,7 +975,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
               nPrecedence = SKILLS_GetOpcodePrecedence(__frame0.aTokenBuf, pOpcodeInfo, nFunctionArg);
               if (__frame0.nPrecedenceDepth < nPrecedence || nMaxOutputSize <= nBytesWritten) {
                 *pbByteCodeOutput = 0;
-                Debug::GuardStack();
                 return 0;
               }
 
@@ -1013,7 +985,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
               if (__frame0.aTokenBuf == 1) {
                 if (nMaxOutputSize <= (int)pbFinalWrite - (int)pbByteCodeOutput) {
                   *pbByteCodeOutput = 0;
-                  Debug::GuardStack();
                   return 0;
                 }
 
@@ -1027,7 +998,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
               pbWritePtr = pbFinalWrite;
               if (__frame0.nOpStackTop < 1) {
                 *pbByteCodeOutput = 0;
-                Debug::GuardStack();
                 return 0;
               }
             }
@@ -1038,7 +1008,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
             }
           }
         *pbByteCodeOutput = 0;
-        Debug::GuardStack();
         return 0;
         case 2:
           bToken = 3;
@@ -1121,7 +1090,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
       finish_token:
       if (!pbWritePtr) {
         *pbByteCodeOutput = 0;
-        Debug::GuardStack();
         return 0;
       }
       __frame0.aTokenBuf = 0;
@@ -1136,12 +1104,10 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
         pbWritePtr = SKILLS_EmitFormulaBytecode(pbWritePtr, (uint8_t*)__frame0.aOpStackTokenTypes, pbByteCodeOutput, nMaxOutputSize, 0, nullptr, 0);
       }
 
-      Debug::GuardStack();
       return (int)pbWritePtr - (int)pbByteCodeOutput;
     }
 
     *pbByteCodeOutput = 0;
-    Debug::GuardStack();
     return 0;
 }
 

@@ -29,7 +29,7 @@ namespace Storm::WindowHandle {
 WPARAM __stdcall SMsgDoMessageLoop(pfnStormMsgIdleCallback pfnIdleCallback, uint32_t dwUnused);
 HWND __stdcall WND_GetActiveWindow();
 // @blizzard SMsgPopRegisterState (SMSG.CPP)
-void __stdcall SMsgPopRegisterState(char * szText);
+int __stdcall SMsgPopRegisterState(char * szText);
 // @blizzard SMsgPushRegisterState (SMSG.CPP)
 uint32_t __stdcall SMsgPushRegisterState(uint32_t nParam);
 uint32_t __stdcall WND_SetActiveWindow(uint32_t dwParam);
