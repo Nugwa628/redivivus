@@ -262,10 +262,10 @@ int32_t __fastcall D3DTEXCACHE_EnsureAvailableNode(D3DTextureCacheStrc * pCache)
         if (pEvictNode) {
           pNextUsedHead = pEvictNode->pNext;
           pCache->pUsedHead = pNextUsedHead;
-          if (!pNextUsedHead) {
-            pCache->pUsedTail = 0;
-          } else {
+          if (pNextUsedHead) {
             pNextUsedHead->pPrev = 0;
+          } else {
+            pCache->pUsedTail = 0;
           }
 
           pEvictNode->pNext = 0;
