@@ -548,9 +548,6 @@ char * __stdcall GetUnitClassIdToName(D2UnitStrc * pUnit, char * szResult, size_
         return szResult;
       }
     }
-
-    printf(szResult, "NULL Unit");
-    return szResult;
 }
 
 char * __stdcall GetNameByClassIdAndType(eD2UnitType eUnitType, int16_t nClassId, char * szResult, size_t nSize) {
