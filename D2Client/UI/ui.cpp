@@ -1617,7 +1617,7 @@ void __stdcall UI_CloseCurrentDialog() {
       gnGoldDialogTransactionMode = gpDialogDefaultActionCallback->pVtable->GetValue(gpDialogDefaultActionCallback);
     }
     if (Dialog::gpDialog) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpDialog);
+      Dialog::FreeDialogStrc();
       Dialog::gpDialog = 0;
     }
     if (gpCurrentDialog) {
@@ -6570,11 +6570,11 @@ void __stdcall UI_InitTradeState() {
 void __fastcall UI_CloseTradeWindow(int32_t nParam) {
     gbTradeWindowOpen = 0;
     if (Dialog::gpTradeCancelDialog) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeCancelDialog);
+      Dialog::FreeDialogStrc();
       Dialog::gpTradeCancelDialog = 0;
     }
     if (Dialog::gpTradeAgreeDialog) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeAgreeDialog);
+      Dialog::FreeDialogStrc();
       Dialog::gpTradeAgreeDialog = 0;
     }
     if (g_nTradeWindowState == 7) {
@@ -6867,7 +6867,7 @@ void __fastcall UI_HandleHoradricCubePacket(int32_t pPacket) {
       case 4:
         gnPlayerCashDisplay = 2;
       if (Dialog::gpHoradricCubeDialog) {
-        Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpHoradricCubeDialog);
+        Dialog::FreeDialogStrc();
         Dialog::gpHoradricCubeDialog = 0;
       }
 

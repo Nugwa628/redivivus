@@ -37,7 +37,7 @@ namespace D2Common::Skills {
 // Calculates a skill parameter value using Param[6] and Param[7] from SkillsTxt. Formula: (level - 1) * Param[7] + Param[6]. Returns 0 if skill ID or level is invalid.
 int32_t __fastcall SKILLS_CalcSkillParam(eD2Skills eSkill, int32_t nParam);
 // Returns the passivestate field from D2SkillsTxt for the given skill ID. Returns 0 if invalid or no passive state.
-int TXT_Skills_GetPassiveState(int nSkillId);
+int __stdcall TXT_Skills_GetPassiveState(int nSkillId);
 int __fastcall SKILLS_Min(int nParam1, int nParam2, uint32_t dwParam3, uint32_t dwParam4);
 int __fastcall SKILLS_Max(int nParam1, int nParam2, uint32_t dwParam3, uint32_t dwParam4);
 int * __fastcall SKILLS_RandomRange(int * pnMinVal, int32_t nRange, uint32_t nUnused, int * pnSeed);

@@ -65,6 +65,7 @@ int32_t __stdcall INI_FindConfigValueIndex(uint8_t * pbArgName);
 uint32_t __fastcall INI_IsDelimiterChar(char cChar);
 int __fastcall INI_ParseCommandLineArg(uint8_t * pbArgName, char * szCmdLine, int32_t pOutValue);
 void __stdcall CloseDiablo();
+void __fastcall MISC_ParseCommandLineAndPutIntoD2IniData(struct D2IniConfigStrc * pD2IniData, char * szText);
 void __fastcall MISC_InitD2IniAndIgnorelist(struct D2IniConfigStrc * D2IniData, char * szCommandLine);
 // Dispatch current app mode via ApplicationBootstrapArray: init -> run -> shutdown for selected mode.
 int32_t __stdcall ApplicationRunCurrentMode(struct D2IniConfigStrc * pD2IniData);

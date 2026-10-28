@@ -3205,9 +3205,8 @@ void __stdcall UIMENU_JoinGame() {
 
     gpOogGameListDetailsPanelControl = (::D2WinTextBox*)D2Win::Src::D2WinMain::FORMS_CreateAnyForm(gaPredefinedForms_b + 0x37);
     DWORD dwTickNow = GetTickCount();
-    dwTickNow -= gdwLastGameListRefreshTick;
-    if (dwTickNow >= 5000) {
-      gdwLastGameListRefreshTick += dwTickNow;
+    if (5000 <= dwTickNow - gdwLastGameListRefreshTick) {
+      gdwLastGameListRefreshTick += dwTickNow - gdwLastGameListRefreshTick;
       OOGMENU_RequestGameList();
     }
 
