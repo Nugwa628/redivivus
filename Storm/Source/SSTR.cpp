@@ -584,7 +584,7 @@ void __stdcall SStrTokenize(char * * ppszCursor, char * szTokenOut, char * nMaxL
     bInQuote = false;
     uint32_t bWasQuoted;
     bWasQuoted = 0;
-    char cCur;
+    int32_t cCur;
     cCur = *pRead;
     while (true) {
       if (cCur == '\0' || (pWritePos = SStrChr(szDelimiters, cCur) , !pWritePos)) {

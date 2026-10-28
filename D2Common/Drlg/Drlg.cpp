@@ -132,7 +132,7 @@ void __fastcall DRLGACTMISC_LoadTileProjects(D2DrlgStrc * pDrlg) {
     LPCSTR pszFmtStr;
     szPath[0] = '\0';
     for (int i = 0x1; i < 0x104; i++) szPath[i] = 0;
-    uint8_t byActNo = pDrlg->nActNo;
+    uint32_t byActNo = pDrlg->nActNo;
     if (!byActNo) {
       /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ pszFmtStr = "%s\\Tiles\\Act1\\Town\\Floor.dt1";
     } else if (byActNo == 1) {

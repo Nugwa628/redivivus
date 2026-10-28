@@ -932,7 +932,7 @@ void __fastcall D2COMP_DrawUnitShadow(uint32_t * pCompUnit) {
     D2GfxDataStrc sGfxData;
     int nMaxHeight;
     uint8_t* pShadowLayerFlags;
-    uint8_t bVar1;
+    uint32_t bVar1;
     int32_t nErrorLine;
     uint32_t nPositionX;
     uint8_t* pCOFLayerData;
@@ -1640,7 +1640,7 @@ int32_t __stdcall D2COMP_IsItemTypeDescendant(int32_t nItemType, int32_t nAncest
 static int32_t __stdcall D2COMP_ResolveWeaponClass(int32_t nPlayerClassId, uint8_t * pEquipData) {
     int32_t bIsDescendant;
     bool bBothHandsEquipped;
-    uint8_t bVar1;
+    uint32_t bVar1;
     bVar1 = pEquipData[5];
     if (bVar1 == 0xff || (bBothHandsEquipped = true , pEquipData[6] == 0xff)) {
       bBothHandsEquipped = false;

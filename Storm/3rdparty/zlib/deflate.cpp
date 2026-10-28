@@ -751,12 +751,12 @@ int32_t __fastcall deflate_stored(deflate_state * pDeflateState, int32_t nFlush)
 
 // zlib deflate_fast() - hash-chain matching, single pass compression strategy
 int32_t __fastcall deflate_fast(deflate_state * pDeflateState, int32_t nFlush) {
-    uint16_t nDist;
-    uint16_t nDistIdx;
+    uint32_t nDist;
+    uint32_t nDistIdx;
     uint32_t nInsertCount;
     uint8_t* pBlockStart;
     bool bBlockFull;
-    uint8_t byCode;
+    uint32_t byCode;
     int nBlockStartOff;
     uint32_t nMatchLenSaved;
     uint32_t* pMatchLenField;
@@ -1481,7 +1481,7 @@ int32_t __fastcall deflateReset(z_stream * pStream) {
 
 uint32_t __fastcall deflate(z_stream * pStream, int32_t nFlush) {
     uint16_t uVar1;
-    uint8_t byOsFlags;
+    uint32_t byOsFlags;
     uint32_t nChecksum;
     int nLevelFlag;
     block_state nBlockState;

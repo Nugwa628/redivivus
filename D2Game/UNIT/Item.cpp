@@ -619,10 +619,10 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
     uint32_t nTargetY;
     uint32_t nMonsterGUID;
     int32_t nTmp2;
-    uint16_t wTargetX;
+    uint32_t wTargetX;
     int32_t nLayer;
-    uint8_t byMoveParam2;
-    uint8_t nPacketId;
+    uint32_t byMoveParam2;
+    uint32_t nPacketId;
     uint8_t byDistance;
     byDistance = 0;
     uint8_t byMoveParam1;

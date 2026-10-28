@@ -5487,7 +5487,7 @@ void __fastcall AI_Fn1_DesertTurret(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
 void __fastcall AI_Fn1_Megademon(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2SkillStrc* pSkill;
     int nSkillLevel;
-    uint8_t byDifficulty;
+    uint32_t byDifficulty;
     D2SeedStrc sNewSeed;
     int nDistanceToTarget;
     nDistanceToTarget = pAiParam->nDistanceToTarget;
@@ -8734,7 +8734,7 @@ void __fastcall AITHINK_Fn1_SpecialCountess(::SGAMEDATA * pGame, D2UnitStrc * pU
       return;
     }
 
-    uint8_t byDifficulty = pGameLocal->nDifficulty;
+    uint32_t byDifficulty = pGameLocal->nDifficulty;
     uint32_t nPercentRoll = D2Client::Archive::UNIT_GetModuloFromSeed(&pUnit->sSeed, 100);
     if (bInCombat) {
       if ((int)nPercentRoll < pMonStats->aip[2][byDifficulty] + 10) {

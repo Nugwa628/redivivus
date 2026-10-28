@@ -554,7 +554,7 @@ BOOL __fastcall MONMODE_ProcessBlockAnimation(::SGAMEDATA * pGame, D2UnitStrc * 
 BOOL __fastcall PlanExecutionOfMonster(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
     bool _bTimerExists;
     bool bTimerExists;
-    uint8_t byAiDel;
+    uint32_t byAiDel;
     D2UnitStrc* pUnit = pMonsterKill->pVictim;
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, 1);
     _bTimerExists = EVENT_TimerTypeExistsOnUnit(pGame, pUnit, UNITEVENTCALLBACK_AITHINK);

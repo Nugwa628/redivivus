@@ -265,9 +265,9 @@ int32_t __fastcall inflate(z_stream * pInflateStream, int32_t nFlush) {
     BOOL nTmp;
     uint32_t nInConsumed;
     uint32_t nFinalCheck;
-    uint8_t bVar5;
+    uint32_t bVar5;
     uint8_t byShift3;
-    uint8_t byShift;
+    uint32_t byShift;
     char byOp;
     uint16_t nLenVal;
     uint32_t nScratch;

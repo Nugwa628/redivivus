@@ -673,7 +673,7 @@ static void __fastcall SBMP_UncompressPcxImage(int dstSize, uint8_t * dst, int s
     uint8_t* pDstRow = src;
     uint8_t* pSrcEnd = dst;
     do {
-      uint8_t byVal;
+      uint32_t byVal;
       if (pDstEnd <= pSrcEnd || pSrcPos <= pDstRow) {
         return;
       }

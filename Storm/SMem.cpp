@@ -472,11 +472,11 @@ LPVOID * __fastcall SMEM_DestroyHeap(LPVOID * ppHeap) {
     D2FogHeapBlockHdrStrc* pNextBlock;
     char szErrorMsg[200];
     D2FogHeapDescStrc* pHeap;
-    uint8_t byFlags;
+    uint32_t byFlags;
     uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     D2FogHeapDescStrc* nHeap = (D2FogHeapDescStrc*)*ppHeap;
     D2FogHeapBlockHdrStrc* pBlock = (D2FogHeapBlockHdrStrc*)nHeap->pDataStart;
-    uint8_t byLeakFlags = 0;
+    uint32_t byLeakFlags = 0;
     if ((void*)pBlock < nHeap->pWriteCursor) {
       do {
         byFlags = pBlock->byFlags;

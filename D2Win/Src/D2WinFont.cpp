@@ -879,7 +879,7 @@ void __fastcall D2WINFONT_DrawTextWithOffsetBackground(uint16_t * wszText, int32
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 16, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     __frame0.nTextHeightLines = TEXT_CalculateTextHeight(wszText);
-    uint8_t byFontHeight = gaFontCache[gnLastUsedFontId].pFontTableHeader->nLineHeight;
+    uint32_t byFontHeight = gaFontCache[gnLastUsedFontId].pFontTableHeader->nLineHeight;
     __frame0.nSavedX = nX;
     D2gfx::D2GFX::D2GFX_GetScreenSize(&__frame0.nScreenWidth, &__frame0.nScreenHeight);
     int nTextHeight = __frame0.nSavedX;
