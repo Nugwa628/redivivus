@@ -2973,7 +2973,7 @@ extern uint32_t gQueuedPrimaryClick;
 extern int gQueuedSecondaryClick;
 extern uint32_t gbMouseButtonEventPending;
 // Run modifier key state; adds run flag to ClickMap (cleared on key-up).
-extern bool gRunKeyDown;
+extern BOOL gRunKeyDown;
 // Click modifier key state used to add flag 0x4 in GetMouseClickFlags.
 extern int gClickModifierDown;
 extern uint32_t gnQueuedPrimaryClickX;
