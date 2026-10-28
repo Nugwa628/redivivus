@@ -630,12 +630,11 @@ D2RoomStrc * __stdcall UNITS_GetRoom(D2UnitStrc * pUnit) {
     if (!(eUnitType != UNIT_OBJECT && ((int)eUnitType <= 3 || 5 < (int)eUnitType))) {
       return pUnit->pPath.pStaticPath->pRoom;
     }
-    if (!pUnit->pPath.pDynamicPath) {
-      return nullptr;
+    if (pUnit->pPath.pDynamicPath) {
+      D2RoomStrc* pRoom = PATH::DynamicPath::GetRoom(pUnit->pPath.pDynamicPath);
+      return pRoom;
     }
-
-    D2RoomStrc* pRoom = PATH::DynamicPath::GetRoom(pUnit->pPath.pDynamicPath);
-    return pRoom;
+    return nullptr;
 }
 
 void __stdcall SetTargetUnitForDynamicUnit(D2UnitStrc * pUnit, D2UnitStrc * pTargetUnit) {
