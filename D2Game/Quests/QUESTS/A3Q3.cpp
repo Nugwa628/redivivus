@@ -154,7 +154,7 @@ BOOL __fastcall Q20_PlayerNotifyCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUni
 void __fastcall Q20_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     int32_t nTargetClassId = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA2Q3Strc* pA3Q3Data = pQuestData->pQuestSpecificData.pA2Q3;
-    if (nTargetClassId == 0xfd) {
+    if ((uint16_t)nTargetClassId == 0xfd) {
       if (pA3Q3Data->field_0x01 == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 2, nullptr, (::fpExecuteOnUnitFunction)Q20_PlayerNotifyCompleted, true);
@@ -162,7 +162,7 @@ void __fastcall Q20_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
         UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Q20_PlayerUpdateBladeState);
         return;
       }
-    } else if (nTargetClassId == 0xff && pA3Q3Data->field_0x07) {
+    } else if ((uint16_t)nTargetClassId == 0xff && pA3Q3Data->field_0x07) {
       pA3Q3Data->field_0x07 = 0;
       pA3Q3Data->field_0x06 = 1;
     }

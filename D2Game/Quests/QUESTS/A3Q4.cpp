@@ -236,7 +236,7 @@ static void __fastcall Q21_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData,
 void __fastcall Q21_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     int32_t sVar1 = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA3Q4Strc* pQuestDataA3Q4 = pQuestData->pQuestSpecificData.pA3Q4;
-    if (sVar1 == 0xfe) {
+    if ((uint16_t)sVar1 == 0xfe) {
       if (pQuestDataA3Q4->bRewardGivenToAlchemist == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 5, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
@@ -244,7 +244,7 @@ void __fastcall Q21_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
         pQuestDataA3Q4->bBirdDropped = true;
         return;
       }
-    } else if (sVar1 == 0xf5) {
+    } else if ((uint16_t)sVar1 == 0xf5) {
       if (pQuestDataA3Q4->bCainToldAboutTome == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 2, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
@@ -256,7 +256,7 @@ void __fastcall Q21_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
         pQuestDataA3Q4->bAlchemistTradedBird = false;
         return;
       }
-    } else if (sVar1 == 0x108 && pQuestDataA3Q4->bJadeGivenToMeshif == 1) {
+    } else if ((uint16_t)sVar1 == 0x108 && pQuestDataA3Q4->bJadeGivenToMeshif == 1) {
       pQuestData->nQuestPacketFlags = '\0';
       QUEST_SetStateAndBroadcast(pQuestData, 3, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
       pQuestDataA3Q4->bJadeGivenToMeshif = false;

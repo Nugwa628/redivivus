@@ -297,7 +297,7 @@ void __fastcall Q14_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     ::SGAMEDATA* pGame;
     int32_t sVar1 = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA2Q6Strc* pDVar1 = pQuestData->pQuestSpecificData.pA2Q6;
-    if (sVar1 == 0xfb) {
+    if ((uint16_t)sVar1 == 0xfb) {
       if (pDVar1->bTyraelPortalFlag == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 4, nullptr, (::fpExecuteOnUnitFunction)Q14_NotifySevenTombsComplete, true);
@@ -305,7 +305,7 @@ void __fastcall Q14_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
         pQuestData->sStateFunctions.fpQuestStateHandler[2] = (QUESTCALLBACKFN)0x0;
         return;
       }
-    } else if (sVar1 == 0xc9) {
+    } else if ((uint16_t)sVar1 == 0xc9) {
       if (pDVar1->bJerhynSpokeFlag == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 1, nullptr, (::fpExecuteOnUnitFunction)Q14_NotifySevenTombsComplete, true);

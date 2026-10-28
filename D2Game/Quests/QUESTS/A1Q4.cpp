@@ -182,7 +182,7 @@ BOOL __fastcall Q04_SyncQuestStepToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUni
 void __fastcall Q04_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     int32_t nTargetClassId = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA1Q4Strc* pA5Q3Data = pQuestData->pQuestSpecificData.pA1Q4;
-    if (nTargetClassId == 0x94) {
+    if ((uint16_t)nTargetClassId == 0x94) {
       if (pA5Q3Data->sSub.bNpcDialogState2 == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 1, pQuestArgs->pPlayer, (::fpExecuteOnUnitFunction)Q04_NotifyQuestStateToPlayer, true);
@@ -196,7 +196,7 @@ void __fastcall Q04_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
         pA5Q3Data->sSub.field_0x4C = 0;
         return;
       }
-    } else if (nTargetClassId == 0x92) {
+    } else if ((uint16_t)nTargetClassId == 0x92) {
       pA5Q3Data->sSub.field_0x7B = 1;
     }
 }
