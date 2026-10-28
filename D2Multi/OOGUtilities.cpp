@@ -71,7 +71,6 @@ typedef int (__stdcall *ChatDlgCallback)(uint32_t dwParam);
 #endif
 
 namespace D2Multi::Launcher {
-static void __stdcall OOGMENU_RefreshGameListDisplay();
 static uint32_t __stdcall LAUNCHER_ReadRegistryValue(LPCSTR szSubKey, LPCSTR szValueName, LPBYTE pbData, DWORD dwDataSize, LPDWORD pdwDataSize) {
     DWORD dwValueType;
     HKEY hKey;
@@ -145,6 +144,7 @@ static void LAUNCHER_AllocCharSelectComponent(int32_t pCharInfo) {
 }
 } // namespace D2Multi::Launcher
 namespace D2Multi::OOGUtilities {
+static void __stdcall OOGMENU_RefreshGameListDisplay();
 
 // Opens a URL in the default system browser by querying registry for .html file association. Reads "SOFTWARE\\Classes\\.html" to get file type, then reads "SOFTWARE\\Classes\\{type}\\shell\\open\\command" to get the command line. Appends the URL to the command string, creates a process via CreateProcessA with NORMAL_PRIORITY_CLASS flag, and closes process handles. Shows error dialog (locale 5340) if registry lookup fails. Uses 1024-byte buffers for registry paths and 1025-byte buffer for final command line construction.
 int __stdcall OOGUTIL_OpenBrowserWithURL(D2ControlMsg * pControlMsg) {
