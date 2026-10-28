@@ -1319,7 +1319,10 @@ static void PANEL_DrawCharacterInfo(int32_t nPanelOffsetY) {
     D2GfxDataStrc sGfxData;
     memset(&sGfxData, 0, 0x48);
     DWORD eResolutionMode = D2gfx::D2GFX::D2GFX_GetResolutionMode();
-    if (eResolutionMode != 2) {
+    switch (eResolutionMode) {
+    case 2:
+      break;
+    default:
       if (!CtrlPnl7) {
         CtrlPnl7 = ui::ARCHIVE_LoadOverlayImageUsedInGame("Panel\\CtrlPnl7");
       }
