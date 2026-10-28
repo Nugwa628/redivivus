@@ -527,10 +527,10 @@ void __fastcall MAINMENU_CreateMessageBox(uint16_t * wszText1, uint16_t * wszTex
       D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pForm, 1);
       D2Win::Src::D2WinMain::SetUnsetFlag0x08(pForm, 1);
       gaPredefinedForms[0x11a].nLabelAsLocaleStringId = nButton1LabelId;
-      if (!nParam2) {
-        gaPredefinedForms[0x11a].nExtraParam = nParam1 ? 0xd : 0;
-      } else {
+      if (nParam2) {
         gaPredefinedForms[0x11a].nExtraParam = 0x1b;
+      } else {
+        gaPredefinedForms[0x11a].nExtraParam = nParam1 ? 0xd : 0;
       }
       gaPredefinedForms[0x11a].fpOnPressCallback = pfnOnPress1;
       nLine = 0x11a;
