@@ -962,19 +962,19 @@ void __fastcall MONSTER_InitMonsterUnit(D2UnitStrc * pUnit, uint32_t nParam1, in
     uint32_t nRandStartFrame;
     nRandStartFrame = Archive::RANDOM_RandomNumberSelector(&pUnit->sSeed, pUnit->nFrameCount);
     pUnit->nGfxCurrentFrame = nRandStartFrame;
-    if (pMonStats2->isSel) {
+    if ((*((uint8_t*)pMonStats2 + 0x4) & gadwBitMasks[3])) {
       pUnit->eUnitFlags |= UNITFLAG_TARGETABLE;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
     }
-    if (!pMonStats2->shadow) {
+    if (!(*((uint8_t*)pMonStats2 + 0x5) & gadwBitMasks[6])) {
       pUnit->eUnitFlags |= UNITFLAG_DRAWSHADOW;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_DRAWSHADOW;
     }
 
     pUnit->eUnitFlags |= UNITFLAG_ISVALIDTARGET;
-    if (!pMonStats2->isAtt) {
+    if (!(*((uint8_t*)pMonStats2 + 0x5) & gadwBitMasks[1])) {
       eUpdatedFlags = pUnit->eUnitFlags & ~UNITFLAG_CANBEATTACKED;
     } else {
       eUpdatedFlags = pUnit->eUnitFlags | UNITFLAG_CANBEATTACKED;
