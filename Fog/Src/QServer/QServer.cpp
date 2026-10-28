@@ -1518,10 +1518,10 @@ int __stdcall Shutdown(D2QServerStrc * pQServer, char * pBytes, int nSize) {
       BroadcastToAllClients(pQServer, pBytes, nSize);
     }
     if (pQServer->neD2GSConnectionType != CONNECTIONTYPE_SINGLEPLAYER && pQServer->neD2GSConnectionType != CONNECTIONTYPE_SINGLEPLAYERUNCAPPED) {
-      if (!pQServer->bUseNtLocalMode) {
-        QServer::QServer98::QSERVER_CloseAllConnections(pQServer);
-      } else {
+      if (pQServer->bUseNtLocalMode) {
         QServer::QServerNT::AwaitAndClose(pQServer);
+      } else {
+        QServer::QServer98::QSERVER_CloseAllConnections(pQServer);
       }
     }
 
