@@ -534,8 +534,7 @@ void __fastcall AllocDrlgFile(D2DrlgFileStrc * * ppDrlgFile, D2PoolManagerStrc *
 // Deep-copies a preset unit's D2MapAIStrc path (8-byte header + nSize*12-byte D2PathPosStrc).
 D2MapAIStrc * __fastcall DRLGPRESET_CopyMapAI(D2PoolManagerStrc * pMemory, D2MapAIStrc * pSrcMapAI) {
     D2MapAIStrc* pNewMapAI = ((D2MapAIStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2MapAIStrc), ".\\DRLG\\Preset.cpp", 0x574, 0));
-    pNewMapAI->nSize = 0;
-    pNewMapAI->pPosition = 0;
+    memset(pNewMapAI, 0, sizeof(D2MapAIStrc));
     int nMode = pSrcMapAI->nSize;
     pNewMapAI->nSize = nMode;
     D2PathPosStrc* pData = (D2PathPosStrc*)Fog::Memory::AllocServerMemory(pMemory, nMode * 0xc, ".\\DRLG\\Preset.cpp", 0x579, 0);
