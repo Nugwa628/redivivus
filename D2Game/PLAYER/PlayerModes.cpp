@@ -94,7 +94,7 @@ static BOOL PLRMODES_HasEndAnimEventAndSeqInput(::SGAMEDATA * pGame, D2UnitStrc 
     if (pSkill) {
       D2SkillsTxt* pSkillTxt;
       pSkillTxt = D2Common::Skills::GetSkillsTxt(pSkill);
-      if (pSkillTxt && pSkillTxt->seqinput != '\0') {
+      if (pSkillTxt && (uint8_t)pSkillTxt->seqinput > 0) {
         return 1;
       }
     }
@@ -907,12 +907,7 @@ void __fastcall PLRMODES_HandlePlayerDeath(::SGAMEDATA * pGame, D2UnitStrc * pUn
       }
     }
 
-    BOOL bOverwriteSave;
-    bOverwriteSave = 0;
-    pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrModes.cpp", 0x43a);
-    char* szCharName;
-    szCharName = GAME::Clients::GetCharName(pClient);
-    PlayerSave::SaveGameAllGameTypes(pGame, pUnit, szCharName, bOverwriteSave);
+    PlayerSave::SaveGameAllGameTypes(pGame, pUnit, GAME::Clients::GetCharName(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrModes.cpp", 0x43a)), 0);
     skip_death_save:
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, 0x11);
     UNIT::SUnit::InitAnimFrame(pUnit);
