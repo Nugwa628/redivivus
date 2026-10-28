@@ -224,7 +224,7 @@ void __fastcall MERC_ClearHireInventory(D2UnitStrc * pUnit) {
       pCarried = D2Common::INVENTORY::Inventory::GetCarriedItem(pCurrentItem);
       pCurrentItem = pNextItem;
       if (pCarried) {
-        UNIT::CUnit::RemoveObjectFromServerObjectTable(pCarried->eUnitType, pCarried->nUnitGUID);
+        UNIT::CUnit::RemoveObjectFromServerObjectTable(pCarried->nUnitGUID, pCarried->eUnitType);
       }
     }
 
