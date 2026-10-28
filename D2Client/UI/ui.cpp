@@ -2474,13 +2474,7 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
           Path::TypeOfUiOverlayOverWorld(3);
           return 1;
         }
-      if (!iVar1) {
-        Path::TypeOfUiOverlayOverWorld(0);
-        if (bAdjustMouse && iVar2 < ScreenSizeX / 2) {
-          ui::SetMouseXY(((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) + iVar2, y);
-          return 1;
-        }
-      } else {
+      if (iVar1) {
         Path::TypeOfUiOverlayOverWorld(1);
         if (bAdjustMouse) {
           iVar1 = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
@@ -2488,6 +2482,12 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
             ui::SetMouseXY(iVar2 - iVar1, y);
             return 1;
           }
+        }
+      } else {
+        Path::TypeOfUiOverlayOverWorld(0);
+        if (bAdjustMouse && iVar2 < ScreenSizeX / 2) {
+          ui::SetMouseXY(((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) + iVar2, y);
+          return 1;
         }
       }
       break;
