@@ -355,10 +355,10 @@ int32_t __fastcall D3DSUBTILE_EnsureAvailableNode(D3DSubtileCacheStrc * pCache) 
           if (pFreeNode) {
             pNextUsedNode = pFreeNode->pNext;
             pCache->pUsedHead = pNextUsedNode;
-            if (!pNextUsedNode) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextUsedNode) {
               pNextUsedNode->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pFreeNode->pNext = 0;
@@ -387,10 +387,10 @@ int32_t __fastcall D3DSUBTILE_EnsureAvailableNode(D3DSubtileCacheStrc * pCache) 
       } else {
         pNextUsedNode = pFreeNode->pNext;
         pCache->pFreeHead = pNextUsedNode;
-        if (!pNextUsedNode) {
-          pCache->pFreeTail = 0;
-        } else {
+        if (pNextUsedNode) {
           pNextUsedNode->pPrev = 0;
+        } else {
+          pCache->pFreeTail = 0;
         }
 
         pFreeNode->pNext = 0;
