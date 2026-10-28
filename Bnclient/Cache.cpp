@@ -8,6 +8,8 @@
 #include "Storm/_unnamespaced.h"
 #include "globals/globals.h"
 #include "D2Game/Objects/ObjectsRgn.h"
+#include "Fog/Src/ErrorManager.h"
+#include "Storm/Source/SSTR.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -88,6 +90,34 @@ static void CACHE_RemoveEntry(char * szText) {
       pCacheBlockTable = gpCacheBlockTable;
     }
     gpCacheBlockTable = pCacheBlockTable;
+}
+
+static void CACHE_BuildFilePath(LPSTR szText) {
+    int nHResult = SHGetFolderPathA(0, 0x23, 0, 0, szText);
+    if (nHResult) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x112);
+      exit(-1);
+    }
+
+    Storm::Source::SSTR::SStrPack(szText, "\\Blizzard Entertainment", 0x104);
+    /* LPSECURITY_ATTRIBUTES lpSecurityAttributes for CreateDirectoryA */ /* LPCSTR lpPathName for CreateDirectoryA */ CreateDirectoryA(szText, (LPSECURITY_ATTRIBUTES)0x0);
+    Storm::Source::SSTR::SStrPack(szText, "\\Diablo II", 0x104);
+    /* LPSECURITY_ATTRIBUTES lpSecurityAttributes for CreateDirectoryA */ /* LPCSTR lpPathName for CreateDirectoryA */ CreateDirectoryA(szText, (LPSECURITY_ATTRIBUTES)0x0);
+    Storm::Source::SSTR::SStrPack(szText, "\\bncache.dat", 0x104);
+}
+
+// Closes and deletes the Fog cache file. Closes ghCacheFileHandle if open, builds cache file path to %APPDATA%\Blizzard Entertainment\Diablo II\bncache.dat, and deletes it via DeleteFileA.
+void __stdcall CACHE_DeleteFile() {
+    char szFilePath[260];
+    uint32_t uStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
+    if (ghCacheFileHandle != (HANDLE)-1) {
+      /* HANDLE hObject for CloseHandle */ CloseHandle(ghCacheFileHandle);
+      ghCacheFileHandle = (HANDLE)-1;
+    }
+
+    szFilePath[0] = '\0';
+    CACHE_BuildFilePath(szFilePath);
+    /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(szFilePath);
 }
 } // namespace Bnclient
 
