@@ -913,14 +913,7 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
     __frame0.nScreenY = 0;
     uint32_t nDirection = nParam;
     uint32_t bIsPerspective = D2gfx::D2GFX::D2GFX_IsPerspectiveActive();
-    if (!bIsPerspective) {
-      nBais = D2Common::Units::GetTargetX(pUnit);
-      nWorldOffset = UI::Path::DRAW_GetWorldOffsetX();
-      __frame0.nScreenX = nBais - nWorldOffset;
-      nBais = D2Common::Units::GetTargetY(pUnit);
-      nWorldOffset = UI::Path::DRAW_GetWorldOffsetY();
-      __frame0.nScreenY = nBais - nWorldOffset;
-    } else {
+    if (bIsPerspective) {
       int32_t nCoord;
       pYAdjust = &__frame0.nScreenY;
       pXAdjust = &__frame0.nScreenX;
@@ -933,6 +926,13 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
       } else if (uVar1 == 2) {
         __frame0.nScreenX += (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
       }
+    } else {
+      nBais = D2Common::Units::GetTargetX(pUnit);
+      nWorldOffset = UI::Path::DRAW_GetWorldOffsetX();
+      __frame0.nScreenX = nBais - nWorldOffset;
+      nBais = D2Common::Units::GetTargetY(pUnit);
+      nWorldOffset = UI::Path::DRAW_GetWorldOffsetY();
+      __frame0.nScreenY = nBais - nWorldOffset;
     }
 
     D2GfxInfoUnkStrc* pGfxInfo = Gfx::GFX_IsUnitOnScreen(pUnit, __frame0.nScreenX, __frame0.nScreenY, 0, 0);
