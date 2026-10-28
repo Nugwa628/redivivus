@@ -250,10 +250,10 @@ void __stdcall CLIENT_QuestEvent_RestoreTaintedSun() {
     eUnitType = pObject->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pObject->pPath.pStaticPath->nPosX;
-    } else if (!pObject->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pObject->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pObject->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     pPlayer = UNIT::Missile::CastAttack(pPlayer, MISSILE_Taintedsuncontrol, nX, nY, SKILL_Attack, 1);
