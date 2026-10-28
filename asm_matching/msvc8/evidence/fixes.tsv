@@ -351,3 +351,4 @@ fix_nestcall	2f14218	1103	0	0
 fix_order --by offset	2f14218	81	0	0	
 fix_order --by store	2f14218	30	0	0	
 fix_permute	2f14218	44	0	0	max-run 4
+fix_bitmask	e4d933d	265	194	7	
