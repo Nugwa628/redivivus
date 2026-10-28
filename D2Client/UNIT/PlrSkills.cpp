@@ -1297,7 +1297,7 @@ void __fastcall PLRSKILLS_RemoveStateFromUnit(D2UnitStrc * pUnit, eD2States eSta
     if (0 <= pDVar1->overlay[1]) {
       STATES_RemoveOverlayById(pUnit, (int)pDVar1->overlay[1]);
     }
-    if (pDVar1->transform) {
+    if ((*((uint8_t*)pDVar1 + 0x10) & gadwBitMasks[3])) {
       STATES_ResetUnitGfxAndMode(pUnit);
     }
 
