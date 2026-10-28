@@ -154,7 +154,7 @@ int32_t __fastcall SKILLSASS_GetCltMissileByAuraLevel(D2UnitStrc * pUnit, int32_
     if (!pSkillTxt) {
       return -1;
     }
-    if (!pSkillTxt->progressive) {
+    if (!(*((uint8_t*)pSkillTxt + 0x4) & gadwBitMasks[2])) {
       return (int)pSkillTxt->cltmissile[1];
     }
 
