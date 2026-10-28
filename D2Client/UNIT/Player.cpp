@@ -1705,7 +1705,7 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
         if (iVar1) {
           if (*ppSkill) {
             pSkillsTxt2 = D2Common::Skills::GetSkillsTxt(*ppSkill);
-            if (pSkillsTxt2 && pSkillsTxt2->TargetItem) {
+            if (pSkillsTxt2 && (*((uint8_t*)pSkillsTxt2 + 0x7) & gadwBitMasks[3])) {
               bValid = PLAYER_CheckSkillUsability(nullptr, pUnderMouse->pPlayer, ppSkill);
               if (!bValid) {
                 return;
@@ -1718,7 +1718,7 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
 
           bIsInteractable = pUnit->eUnitFlags >> 2 & 1;
           if (bIsInteractable) {
-            if (!pSkillsTxt->TargetPet && !pSkillsTxt->TargetAlly) {
+            if (!(*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[1]) && !pSkillsTxt->TargetAlly) {
               bIsInteractable = CUnit::CanInteractWith(pPlayerUnit_lcl, pUnit);
             }
             if (bIsInteractable) {
@@ -1782,7 +1782,7 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
         }
         if ((uint8_t)dwFlags & 4) {
           pMonStatsTxt = DataTbls::MonsterTbls::TXT_MonStats_GetLine(pUnit->nClassId);
-          if (pMonStatsTxt && pMonStatsTxt->interact) {
+          if (pMonStatsTxt && (*((uint8_t*)pMonStatsTxt + 0xd) & gadwBitMasks[1])) {
             PLAYER_InteractWithUnitByType(UNIT_MONSTER, nTargetUnitGUID, pUnderMouse);
             return;
           }
@@ -1794,13 +1794,13 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
       eD2Skills eSkillId;
       if (!(*(uint8_t*)&pUnderMouse->flags & 2) || nWeaponClass == 1) {
         choose_unit_or_ground:
-        if (pUnit->eUnitType != UNIT_MONSTER || (iVar1 = CUnit::IsActive(pUnit) , !iVar1) || pSkillsTxt->TargetCorpse) {
+        if (pUnit->eUnitType != UNIT_MONSTER || (iVar1 = CUnit::IsActive(pUnit) , !iVar1) || (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[0])) {
           goto use_on_target_unit;
         }
       } else {
         eTargetType = pUnit->eUnitType;
         if (eTargetType == UNIT_OBJECT || eTargetType == UNIT_ITEM) {
-          if (pSkillsTxt->TargetItem) {
+          if ((*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[3])) {
             bForceInteract = true;
             goto choose_unit_or_ground;
           }
