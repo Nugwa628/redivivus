@@ -1692,18 +1692,18 @@ void __stdcall UIMENU_LadderBoard_PrintClassesAndTableHeaders() {
 
 void __stdcall CHATDLG_OpenLadderClassicSoftcore() {
     uint16_t* pwszLabel;
-    gbLadderExpansionEnabled = 0;
-    gpCtlLadderBtnOverall = 0;
-    gpCtlLadderBtnAmazon = 0;
-    gpCtlLadderBtnSorceress = 0;
-    gpCtlLadderBtnNecromancer = 0;
-    gpCtlLadderBtnPaladin = 0;
-    gpCtlLadderBtnBarbarian = 0;
-    gpCtlLadderBtnDruid = 0;
-    gpCtlLadderBtnAssassin = 0;
-    g_pLadderBoardTextBox = 0;
-    gnLadderListRowCount = 1000;
     if (D2IniData_multiplayer->szCharacterRealm[0] != '\0') {
+      gbLadderExpansionEnabled = 0;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
       int32_t nHasPeer;
       nHasPeer = D2MCPClient::McpConnect::HasPeerName();
       if (!nHasPeer) {
@@ -1711,6 +1711,18 @@ void __stdcall CHATDLG_OpenLadderClassicSoftcore() {
         UIMENU_DrawSpecificJoinGameError(pwszLabel, nullptr);
         return;
       }
+    } else {
+      gbLadderExpansionEnabled = 0;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
     }
 
     FORMS_CreateAnyFormFromListEx(0x65);
@@ -1727,18 +1739,18 @@ void __stdcall CHATDLG_OpenLadderClassicSoftcore() {
 
 void __stdcall CHATDLG_OpenLadderClassicHardcore() {
     uint16_t* pwszLabel;
-    gbLadderExpansionEnabled = 0;
-    gpCtlLadderBtnOverall = 0;
-    gpCtlLadderBtnAmazon = 0;
-    gpCtlLadderBtnSorceress = 0;
-    gpCtlLadderBtnNecromancer = 0;
-    gpCtlLadderBtnPaladin = 0;
-    gpCtlLadderBtnBarbarian = 0;
-    gpCtlLadderBtnDruid = 0;
-    gpCtlLadderBtnAssassin = 0;
-    g_pLadderBoardTextBox = 0;
-    gnLadderListRowCount = 1000;
     if (D2IniData_multiplayer->szCharacterRealm[0] != '\0') {
+      gbLadderExpansionEnabled = 0;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
       int32_t nHasPeer;
       nHasPeer = D2MCPClient::McpConnect::HasPeerName();
       if (!nHasPeer) {
@@ -1746,6 +1758,18 @@ void __stdcall CHATDLG_OpenLadderClassicHardcore() {
         UIMENU_DrawSpecificJoinGameError(pwszLabel, nullptr);
         return;
       }
+    } else {
+      gbLadderExpansionEnabled = 0;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
     }
 
     FORMS_CreateAnyFormFromListEx(0x65);
@@ -1762,18 +1786,18 @@ void __stdcall CHATDLG_OpenLadderClassicHardcore() {
 
 void __stdcall CHATDLG_OpenLadderExpansionSoftcore() {
     uint16_t* pwszLabel;
-    gbLadderExpansionEnabled = 1;
-    gpCtlLadderBtnOverall = 0;
-    gpCtlLadderBtnAmazon = 0;
-    gpCtlLadderBtnSorceress = 0;
-    gpCtlLadderBtnNecromancer = 0;
-    gpCtlLadderBtnPaladin = 0;
-    gpCtlLadderBtnBarbarian = 0;
-    gpCtlLadderBtnDruid = 0;
-    gpCtlLadderBtnAssassin = 0;
-    g_pLadderBoardTextBox = 0;
-    gnLadderListRowCount = 1000;
     if (D2IniData_multiplayer->szCharacterRealm[0] != '\0') {
+      gbLadderExpansionEnabled = 1;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
       int32_t nHasPeer;
       nHasPeer = D2MCPClient::McpConnect::HasPeerName();
       if (!nHasPeer) {
@@ -1781,6 +1805,18 @@ void __stdcall CHATDLG_OpenLadderExpansionSoftcore() {
         UIMENU_DrawSpecificJoinGameError(pwszLabel, nullptr);
         return;
       }
+    } else {
+      gbLadderExpansionEnabled = 1;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
     }
 
     FORMS_CreateAnyFormFromListEx(0x65);
@@ -1797,18 +1833,18 @@ void __stdcall CHATDLG_OpenLadderExpansionSoftcore() {
 
 void __stdcall CHATDLG_OpenLadderExpansionHardcore() {
     uint16_t* pwszLabel;
-    gbLadderExpansionEnabled = 1;
-    gpCtlLadderBtnOverall = 0;
-    gpCtlLadderBtnAmazon = 0;
-    gpCtlLadderBtnSorceress = 0;
-    gpCtlLadderBtnNecromancer = 0;
-    gpCtlLadderBtnPaladin = 0;
-    gpCtlLadderBtnBarbarian = 0;
-    gpCtlLadderBtnDruid = 0;
-    gpCtlLadderBtnAssassin = 0;
-    g_pLadderBoardTextBox = 0;
-    gnLadderListRowCount = 1000;
     if (D2IniData_multiplayer->szCharacterRealm[0] != '\0') {
+      gbLadderExpansionEnabled = 1;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
       int32_t nHasPeer;
       nHasPeer = D2MCPClient::McpConnect::HasPeerName();
       if (!nHasPeer) {
@@ -1816,6 +1852,18 @@ void __stdcall CHATDLG_OpenLadderExpansionHardcore() {
         UIMENU_DrawSpecificJoinGameError(pwszLabel, nullptr);
         return;
       }
+    } else {
+      gbLadderExpansionEnabled = 1;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
     }
 
     FORMS_CreateAnyFormFromListEx(0x65);
