@@ -2698,8 +2698,8 @@ void __stdcall QSERVER_BroadcastChatByServerId(uint16_t nServerId, char * pMessa
 }
 
 ::SGAMEDATA * __stdcall QSERVER_GetFirstActiveGame() {
-    /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gQServerGameListCs);
     ::SGAMEDATA* nToken = 0;
+    /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gQServerGameListCs);
     if (gaQServerGameByToken[1] && gaQServerGameByToken[1] != (::SGAMEDATA*)-1) {
       nToken = gaQServerGameByToken[1];
     }

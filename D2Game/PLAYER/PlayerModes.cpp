@@ -1128,8 +1128,12 @@ static void PLRMODES_RestoreSwappedSkill(eD2Skills * peSkillId, D2UnitStrc * pUn
         pCurrentSkill = D2Common::Units::GetLeftSkill(pUnit);
         if (pSkill != pCurrentSkill) {
           nCanUse = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pSkill);
-          if (nCanUse != 2 && nCanUse != 7) {
-            SKILLS::SkillsServer::Server_SelectSkill(pUnit, 1, peSkillId[1], peSkillId[3]);
+          switch (nCanUse) {
+            case 2:
+            case 7:
+              break;
+            default:
+                SKILLS::SkillsServer::Server_SelectSkill(pUnit, 1, peSkillId[1], peSkillId[3]);
           }
         }
       }
@@ -1149,8 +1153,10 @@ static void PLRMODES_RestoreSwappedSkill(eD2Skills * peSkillId, D2UnitStrc * pUn
     }
 
     nCanUse = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pSkill);
-    if (!(nCanUse != 2 && nCanUse != 7)) {
-      return;
+    switch (nCanUse) {
+      case 2:
+      case 7:
+        return;
     }
 
     SKILLS::SkillsServer::Server_SelectSkill(pUnit, 0, *peSkillId, peSkillId[2]);

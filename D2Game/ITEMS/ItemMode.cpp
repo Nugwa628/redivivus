@@ -1968,8 +1968,12 @@ static void ITEMMODE_ValidateItemQuality(D2UnitStrc * pUnit, int * nParam) {
         pActiveSkill = D2Common::Units::GetLeftSkill(pUnit);
         if (pSwapSkill != pActiveSkill) {
           nCanUse = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pSwapSkill);
-          if (nCanUse != 2 && nCanUse != 7) {
-            SKILLS::SkillsServer::Server_SelectSkill(pUnit, 1, nParam[4], nParam[6]);
+          switch (nCanUse) {
+            case 2:
+            case 7:
+              break;
+            default:
+                SKILLS::SkillsServer::Server_SelectSkill(pUnit, 1, nParam[4], nParam[6]);
           }
         }
       }
