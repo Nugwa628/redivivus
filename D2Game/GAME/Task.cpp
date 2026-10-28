@@ -453,7 +453,7 @@ uint32_t __stdcall TASK_AllocateTaskQueue() {
       pNewSlot->nTaskCount = 0;
       pDVar1 = &pNewSlot->sTaskList;
       pDVar1->pNext = pDVar1;
-      pNewSlot->sTaskList.pPrev = pDVar1;
+      pDVar1->pPrev = pDVar1;
       gaTaskQueueHeadArray[nSlotIndex] = pNewSlot;
       TASK_MoveTasksToSlotAndLinkSlot(pNewSlot);
     }
