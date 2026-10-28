@@ -217,7 +217,7 @@ bool __fastcall Q20_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
     } else {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_BladeOfTheOldReligion, QUESTSTATE_Step0x04);
       if (bQuestState) {
-        *nUnknown = pQuestSpecific->bSerpentItemDropped + '\x02';
+        *nUnknown = (pQuestSpecific->bSerpentItemDropped == 1) + 2;
         return true;
       }
 
