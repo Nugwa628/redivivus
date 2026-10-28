@@ -1346,7 +1346,7 @@ int32_t __stdcall SKILLS_CalculateManaCost(eD2Skills eSkillId, int32_t nSkillLev
       return 0;
     }
 
-    return (int)pSkillsTxt->lvlmana * (nSkillLevel - 1) + (int)pSkillsTxt->mana << ((uint8_t)pSkillsTxt->manashift & 0x1f);
+    return (int)pSkillsTxt->lvlmana * (nSkillLevel - 1) + (int)pSkillsTxt->mana << (uint8_t)pSkillsTxt->manashift;
 }
 
 int32_t __fastcall SKILLS_GetValueByLevelBreakpoints(int32_t nLevel, int * pLevelArray) {
@@ -2072,7 +2072,7 @@ int32_t __stdcall SKILLS_CalculateManaCostShifted(int32_t eSkillId, int32_t nSki
       D2SkillsTxt* pSkillsTxt;
       pSkillsTxt = sgptDataTable->pTxtSkills + eSkillId;
       if (pSkillsTxt) {
-        nLine = (int)pSkillsTxt->lvlmana * (nSkillLevel - 1) + (int)pSkillsTxt->mana << ((uint8_t)pSkillsTxt->manashift & 0x1f) >> 8;
+        nLine = (int)pSkillsTxt->lvlmana * (nSkillLevel - 1) + (int)pSkillsTxt->mana << (uint8_t)pSkillsTxt->manashift >> 8;
         if (nLine >= 0) {
           return nLine;
         }
@@ -2644,12 +2644,12 @@ uint32_t __stdcall SKILLDESC_EvalDescCalcValue(D2UnitStrc * pUnit, uint8_t bPara
         if ((int)nParam <= 0) {
           return 0;
         }
-      return (int)((int)pSkillTxt->lvlmana * (nParam - 1) + (int)pSkillTxt->mana << ((uint8_t)pSkillTxt->manashift & 0x1f)) >> 8;
+      return (int)((int)pSkillTxt->lvlmana * (nParam - 1) + (int)pSkillTxt->mana << (uint8_t)pSkillTxt->manashift) >> 8;
       case 0x16:
         if ((int)nParam <= 0) {
           return 0;
         }
-      return (int)(((int)pSkillTxt->lvlmana * (nParam - 1) + (int)pSkillTxt->mana) * 0x19) / 2 << ((uint8_t)pSkillTxt->manashift & 0x1f) >> 8;
+      return (int)(((int)pSkillTxt->lvlmana * (nParam - 1) + (int)pSkillTxt->mana) * 0x19) / 2 << (uint8_t)pSkillTxt->manashift >> 8;
       case 0x17:
         uResult = SKILL_GetPassiveElementCalc(pUnit, eSkill, nParam, 0);
       return uResult;
@@ -2765,7 +2765,7 @@ uint32_t __stdcall SKILLDESC_EvalDescCalcValue(D2UnitStrc * pUnit, uint8_t bPara
         if ((int)nParam <= 0) {
           return 0;
         }
-      return (int)pSkillTxt->lvlmana * (nParam - 1) + (int)pSkillTxt->mana << ((uint8_t)pSkillTxt->manashift & 0x1f);
+      return (int)pSkillTxt->lvlmana * (nParam - 1) + (int)pSkillTxt->mana << (uint8_t)pSkillTxt->manashift;
       case 0x2b:
 
       case 0x2d:
@@ -3407,7 +3407,7 @@ static BOOL SKILLS_HasEnoughManaForSkill(D2SkillStrc * pSkillStrc, D2UnitStrc * 
           nClampedLevel = 0;
         }
 
-        nManaCost = pSkillTxt2->lvlmana * nClampedLevel + (int)pSkillTxt2->mana << ((uint8_t)pSkillTxt2->manashift & 0x1f);
+        nManaCost = pSkillTxt2->lvlmana * nClampedLevel + (int)pSkillTxt2->mana << (uint8_t)pSkillTxt2->manashift;
         eVenomState = DATATBLS::ItemStats::UNIT_GetUnitState(pUnitStrc, STATE_blood_mana);
         if (eVenomState == STATE_none) {
           if (pSkillTxt2->srvdofunc == 0x74) {
