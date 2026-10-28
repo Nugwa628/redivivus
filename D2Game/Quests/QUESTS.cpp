@@ -330,7 +330,7 @@ static void __stdcall QUEST_DispatchBroadcast(bool bFlag1, bool bFlag2, D2QuestA
     }
 
     for (; pQuestData; pQuestData = pQuestData->pPrev) {
-      if (pQuestData->sStateFunctions.fpQuestStateHandler[pQuestArg->nEvent] && (bFlag1 || pQuestData->bIsActive) && (ePlayerAct == ACT_NONE || ePlayerAct == pQuestData->nAct)) {
+      if (pQuestData->sStateFunctions.fpQuestStateHandler[pQuestArg->nEvent] && (bFlag1 || pQuestData->bIsActive == 1) && (ePlayerAct == ACT_NONE || ePlayerAct == pQuestData->nAct)) {
         /* FARPROC lpfn for IsBadCodePtr */ bIsBadPtr = IsBadCodePtr((FARPROC)pQuestData->sStateFunctions.fpQuestStateHandler[pQuestArg->nEvent]);
         if (bIsBadPtr) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x226);
@@ -352,7 +352,7 @@ static void __stdcall QUEST_DispatchToUnit(D2UnitStrc * pUnit, D2QuestArgStrc * 
       }
 
       pQuestData = pList->pQuestData;
-      if (pQuestData->sStateFunctions.fpQuestStateHandler[pCall->nEvent] && (pQuestData->bIsActive || (char)(uintptr_t)pUnit != '\0')) {
+      if (pQuestData->sStateFunctions.fpQuestStateHandler[pCall->nEvent] && (pQuestData->bIsActive == 1 || (char)(uintptr_t)pUnit != '\0')) {
         /* FARPROC lpfn for IsBadCodePtr */ bIsBadPtr = IsBadCodePtr((FARPROC)pQuestData->sStateFunctions.fpQuestStateHandler[pCall->nEvent]);
         if (bIsBadPtr) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x23e);
@@ -1474,7 +1474,7 @@ void __fastcall QUEST_OnGoldenBirdCouncilKilled(::SGAMEDATA * pGameStrc, D2UnitS
     }
 
     D2QuestDataStrc* pQuestData = pQuestEventList->pQuestData;
-    if (!(pQuestData->nQuestIdReal == QUEST_TheGoldenBird && pQuestData->bIsActive)) {
+    if (!(pQuestData->nQuestIdReal == QUEST_TheGoldenBird && pQuestData->bIsActive == 1)) {
       return;
     }
 
@@ -3251,17 +3251,17 @@ void __fastcall PlaceGuardInFrontOfJerhyn(D2QuestDataStrc * pQuestData, D2Object
 
 bool __fastcall QUEST_CheckJerhynShouldBlock(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pArcaneSanctuaryQuest = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheArcaneSanctuary);
-    if (!(pArcaneSanctuaryQuest && pArcaneSanctuaryQuest->pQuestSpecificData.pA2Q4->bShouldSpawnJerhyn)) {
+    if (!(pArcaneSanctuaryQuest && pArcaneSanctuaryQuest->pQuestSpecificData.pA2Q4->bShouldSpawnJerhyn == 1)) {
       return true;
     }
 
     D2QuestDataStrc* pRadamentsLairQuest = GetQuestDataByQuestNoInternal(pArcaneSanctuaryQuest->pGame, QUESTINT_RadamentsLair);
-    if (!(pRadamentsLairQuest && pRadamentsLairQuest->bIsNotIntroduction && pRadamentsLairQuest->nStateFlag != 5)) {
+    if (!(pRadamentsLairQuest && pRadamentsLairQuest->bIsNotIntroduction == 1 && pRadamentsLairQuest->nStateFlag != 5)) {
       return true;
     }
 
     bool bVar1 = A2Q7::Q14_IsSevenTombsLessThanState4(pArcaneSanctuaryQuest->pGame);
-    if (!(!bVar1 && pArcaneSanctuaryQuest->bIsNotIntroduction && pArcaneSanctuaryQuest->nStateFlag < 2)) {
+    if (!(!bVar1 && pArcaneSanctuaryQuest->bIsNotIntroduction == 1 && pArcaneSanctuaryQuest->nStateFlag < 2)) {
       return true;
     }
 

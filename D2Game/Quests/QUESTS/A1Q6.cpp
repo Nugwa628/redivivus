@@ -148,7 +148,7 @@ void __fastcall Q06_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     }
 
     D2QuestDataA1Q6Strc* pA1Q6Data = pQuestData->pQuestSpecificData.pA1Q6;
-    if (!pA1Q6Data->bQuestAccepted) {
+    if (pA1Q6Data->bQuestAccepted != 1) {
       return;
     }
 

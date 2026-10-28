@@ -142,7 +142,7 @@ bool __fastcall Q27_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
           return true;
         }
       }
-      if (!pQuestData->pGame->bExpansion) {
+      if (pQuestData->pGame->bExpansion != 1) {
         BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TerrorsEnd, QUESTSTATE_Completed);
         if (BVar1) {
           BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TerrorsEnd, QUESTSTATE_Step0x07);
@@ -151,7 +151,7 @@ bool __fastcall Q27_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
           }
         }
       }
-      if (!pQuestData->pGame->bExpansion) {
+      if (pQuestData->pGame->bExpansion != 1) {
         return false;
       }
 
@@ -165,7 +165,7 @@ bool __fastcall Q27_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
       if (nTargetClassId != 0xf6) {
         return false;
       }
-      if (!pQuestData->pGame->bExpansion) {
+      if (pQuestData->pGame->bExpansion != 1) {
         BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TerrorsEnd, QUESTSTATE_Completed);
         if (BVar1) {
           BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TerrorsEnd, QUESTSTATE_Step0x06);
@@ -174,7 +174,7 @@ bool __fastcall Q27_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
           }
         }
       }
-      if (!pQuestData->pGame->bExpansion) {
+      if (pQuestData->pGame->bExpansion != 1) {
         return false;
       }
 

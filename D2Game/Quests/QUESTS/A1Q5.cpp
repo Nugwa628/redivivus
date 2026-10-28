@@ -652,7 +652,7 @@ void __fastcall Q05_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     D2QuestDataA1Q5Strc* pvVar2;
     int nIndex;
     nIndex = pQuestArgs->sQuestArgs.sNpcActivate.nIndex;
-    if (!pQuestData->bIsNotIntroduction) {
+    if (pQuestData->bIsNotIntroduction != 1) {
       D2UnitDataPlayerStrc* pPlayerData;
       handle_left_town:
       if (pQuestArgs->sQuestArgs.sNpcActivate.pTextControl == (D2GSPacketSrv0x27_TextStrc*)0x1) {
@@ -664,7 +664,7 @@ void __fastcall Q05_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
             QUEST_SetStateFlag(pQuestData, 3, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q5.cpp", 0x28d);
             return;
           }
-        } else if (pQuestData->nStateFlag == 5 && pQuestData->bIsNotIntroduction) {
+        } else if (pQuestData->nStateFlag == 5 && pQuestData->bIsNotIntroduction == 1) {
           pvVar2 = pQuestData->pQuestSpecificData.pA1Q5;
           if (!pQuestArgs->pPlayer) {
             nIndex = -1;

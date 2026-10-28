@@ -879,10 +879,10 @@ void __fastcall Q11_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     int nLevelIndex = pQuestArgs->sQuestArgs.sNpcActivate.nIndex;
     D2GSPacketSrv0x27_TextStrc* pSpecificData = pQuestArgs->sQuestArgs.sNpcActivate.pTextControl;
     D2QuestDataA2Q3Strc* pGossipControl = pQuestData->pQuestSpecificData.pA2Q3;
-    if ((nLevelIndex == 0x2c || nLevelIndex == 0x2d) && !pQuestData->nStateFlag && pQuestData->bIsNotIntroduction) {
+    if ((nLevelIndex == 0x2c || nLevelIndex == 0x2d) && !pQuestData->nStateFlag && pQuestData->bIsNotIntroduction == 1) {
       Q11_StartDarknessTimer((uint8_t*)pQuestData);
     }
-    if (nLevelIndex == 0x28 && pGossipControl->bViperAmuletInitPending) {
+    if (nLevelIndex == 0x28 && pGossipControl->bViperAmuletInitPending == 1) {
       uint8_t uVar1;
       uVar1 = Q11_BeginTaintedSun(pQuestData);
       if (uVar1 != '\0') {

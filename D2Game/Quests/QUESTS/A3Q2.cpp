@@ -101,7 +101,7 @@ void __fastcall Q19_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
 
 // Q19_Callback_02 (Khalim's Will). State-2 handler installed after the player commits to the quest (NPC 0xf5 dialog). When that NPC's relic-pedestal interaction fires and bQuestCompleted is set, flips quest to RewardAwaits via QUEST_SetStateAndBroadcast(state=1, Q19_PlayerNotifyKhalimsWill) and clears its own slot (one-shot). Drives the transition into the reward/turn-in phase.
 void __fastcall Q19_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    if (!(pQuestArgs->pTarget && (short int)pQuestArgs->pTarget->nClassId == 0xf5 && pQuestData->pQuestSpecificData.pA3Q2->bQuestCompleted)) {
+    if (!(pQuestArgs->pTarget && (short int)pQuestArgs->pTarget->nClassId == 0xf5 && pQuestData->pQuestSpecificData.pA3Q2->bQuestCompleted == 1)) {
       return;
     }
 
@@ -385,7 +385,7 @@ BOOL __fastcall OBJOP_A3Q2_KhalimRelicPedestal(D2ObjectOperateFnArg * pOperation
     }
 
     D2QuestDataA3Q2Strc* pQuestSpecific = pGame->pQuestSpecificData.pA3Q2;
-    if (!pQuestSpecific->bOrbPlaced) {
+    if (pQuestSpecific->bOrbPlaced != 1) {
       return 0;
     }
 
@@ -408,7 +408,7 @@ BOOL __fastcall OBJOP_A3Q2_KhalimRelicPedestal(D2ObjectOperateFnArg * pOperation
 // Q19_UpdateCompellingOrbObject (Khalim's Will). Per-frame/refresh updater for the Compelling Orb object: if the orb-event flag is set, locates the orb unit, syncs its update flag, and (if changed) schedules its operate event. Maintains orb object state; no QuestRecord transitions.
 void __fastcall Q19_UpdateCompellingOrbObject(D2QuestDataStrc * pQuestData) {
     D2QuestDataA3Q2Strc* pA1Q2Data = pQuestData->pQuestSpecificData.pA3Q2;
-    if (!pA1Q2Data->bOrbPlaced) {
+    if (pA1Q2Data->bOrbPlaced != 1) {
       return;
     }
 

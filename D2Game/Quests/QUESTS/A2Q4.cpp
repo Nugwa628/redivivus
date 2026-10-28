@@ -207,7 +207,7 @@ void __fastcall Q12_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     }
 
     D2QuestDataA2Q4Strc* pA2Q3Data = pQuestData->pQuestSpecificData.pA2Q4;
-    if (!pA2Q3Data->bAtmaSpokeToJerhyn) {
+    if (pA2Q3Data->bAtmaSpokeToJerhyn != 1) {
       return;
     }
 
@@ -249,7 +249,7 @@ static void __stdcall Q12_OnJournalActivate(D2QuestDataA2Q4Strc * pQuestData, D2
     pQuestData->nPortalPlacedStateLo = 2;
     pQuestData->nPortalPlacedStateHi = 0;
     UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestContext->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Q12_UpdateQuestRecord);
-    if (!pQuestData->bPortalJerhynSpawned) {
+    if (pQuestData->bPortalJerhynSpawned != 1) {
       return;
     }
 
@@ -637,7 +637,7 @@ BOOL __fastcall Q12_CheckJerhynGateOpen(::SGAMEDATA * pGame) {
     }
 
     D2QuestDataA2Q4Strc* pDVar1 = pDVar2->pQuestSpecificData.pA2Q4;
-    if (!(pDVar1->bJerhynInitial && !pDVar1->bJerhynGateOpened)) {
+    if (!(pDVar1->bJerhynInitial == 1 && pDVar1->bJerhynGateOpened != 1)) {
       return 0;
     }
 

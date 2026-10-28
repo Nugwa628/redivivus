@@ -1492,14 +1492,14 @@ BOOL __fastcall OBJOP_A5Q5_WorldstoneStairPortal(D2ObjectOperateFnArg * pOperati
         if (eAnimMode != Opened) {
           return 0;
         }
-        if (!pQuestSpecificData->bAncientsDefeated) {
+        if (pQuestSpecificData->bAncientsDefeated != 1) {
           UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pOperation->pAttacker, 0x13, pOperation->pAttacker);
-        } else if (pQuestSpecificData->bAncientsSpawned) {
+        } else if (pQuestSpecificData->bAncientsSpawned == 1) {
           D2Common::Units::SetupUpdateFlag(pUnit, 0);
           pQuestSpecificData->nSummitDoorObjectMode = 0;
         }
       }
-      if (!pQuestSpecificData->bAncientsDefeated) {
+      if (pQuestSpecificData->bAncientsDefeated != 1) {
         UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pOperation->pAttacker, 0x13, pOperation->pAttacker);
         D2Common::Units::SetupUpdateFlag(pOperation->sArg.pVictim, 2);
         return 0;
@@ -1509,7 +1509,7 @@ BOOL __fastcall OBJOP_A5Q5_WorldstoneStairPortal(D2ObjectOperateFnArg * pOperati
       D2Common::Units::SetupUpdateFlag(pOperation->sArg.pVictim, 0);
       return 0;
     }
-    if (!pQuestSpecificData->bAncientsDefeated) {
+    if (pQuestSpecificData->bAncientsDefeated != 1) {
       D2Common::Units::SetupUpdateFlag(pUnit, 1);
       pQuestSpecificData->nSummitDoorObjectMode = 2;
       return 0;
