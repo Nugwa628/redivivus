@@ -229,17 +229,18 @@ static int __stdcall SFILE_ReadFileChecked(int32_t * pMPQFile, void * pOutputBuf
         }
 
         dwLastError = GetLastError();
-        if (!gnSFileReadErrorMode) {
+        switch (gnSFileReadErrorMode) {
+        case 0:
           return 0;
-        }
-        if (gnSFileReadErrorMode == 1) {
-          break;
-        }
-        if (gnSFileReadErrorMode == 2) {
+        case 1:
+          goto ask_handler;
+        case 2:
           SErr::SErrDisplayError(dwLastError, pnBytesRead, -4, nullptr, 0, 1);
+          break;
         }
       }
 
+    ask_handler:
       if (!pfnSFileReadErrorHandler) {
         return 0;
       }
