@@ -419,7 +419,7 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
             eState = nSetBitIdx + nStateBaseIdx;
             D2StatesTxt* pStatesRecord; pStatesRecord = (0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize) ? &sgptDataTable->pTxtStates[eState] : 0; if (!pStatesRecord) {
               nFlagDwordVal = *pFlagDword;
-            } else if (sgptDataTable->pTxtStates[eState].nosend) {
+            } else if (pStatesRecord->nosend) {
               nFlagDwordVal = *pFlagDword;
             } else {
               nBitPos = Fog::BitBuffer::GetNextPositon(&bitBuf);

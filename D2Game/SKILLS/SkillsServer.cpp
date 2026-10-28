@@ -2770,7 +2770,7 @@ void SKILLS_CalcPetSkillDamage(void * pThis, int * pnDamageOut) {
       return;
     }
 
-    short int nSkillDamage = sgptDataTable->pTxtMonStats[nClassId].SkillDamage;
+    short int nSkillDamage = pMonStatsRecord->SkillDamage;
     if (!(0 < nSkillDamage && (int)nSkillDamage <= sgptDataTable->nTxtSkillsCount)) {
       return;
     }
@@ -3578,7 +3578,7 @@ void __fastcall SKILLS_ApplySkillDelay(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       return;
     }
 
-    int32_t nSkillDelay = D2Common::Skills::D2GetSkillCalc(pUnit, sgptDataTable->pTxtSkills[eSkill].delay, eSkill, nSkillLvl);
+    int32_t nSkillDelay = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsRecord->delay, eSkill, nSkillLvl);
     if (0 >= nSkillDelay) {
       return;
     }

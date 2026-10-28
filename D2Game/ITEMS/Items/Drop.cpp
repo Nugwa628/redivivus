@@ -2201,7 +2201,7 @@ void __fastcall RefreshDurability(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       return;
     }
 
-    GAME::Event::SetEvent(pGame, pUnit, 3, (int)(0x9c4 / (int64_t)nReplenishDurability) + 1 + pGame->dwGameFrame, 0, 0);
+    GAME::Event::SetEvent(pGame, pUnit, 3, (0x9c4 / nReplenishDurability) + 1 + pGame->dwGameFrame, 0, 0);
 }
 
 void __fastcall RefreshQuantity(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -2215,7 +2215,7 @@ void __fastcall RefreshQuantity(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       return;
     }
 
-    GAME::Event::SetEvent(pGame, pUnit, 3, (int)(0x9c4 / (int64_t)nReplenishQuantity) + 1 + pGame->dwGameFrame, 0, 0);
+    GAME::Event::SetEvent(pGame, pUnit, 3, (0x9c4 / nReplenishQuantity) + 1 + pGame->dwGameFrame, 0, 0);
 }
 
 static int32_t ITEM_GetTotalMagicFind(D2UnitStrc * pUnit) {
@@ -3580,7 +3580,7 @@ D2UnitStrc * __fastcall ITEM_CloneFromSerializedData(::SGAMEDATA * pGame, D2Unit
       if (iVar1) {
         _bPutItemSuccess = GAME::Event::EVENT_TimerTypeExistsOnUnit(pGame, pClonedItem, UNITEVENTCALLBACK_STATREGEN);
         if (!_bPutItemSuccess) {
-          GAME::Event::SetEvent(pGame, pClonedItem, 3, (int)(0x9c4 / (int64_t)iVar1) + 1 + pGame->dwGameFrame, 0, 0);
+          GAME::Event::SetEvent(pGame, pClonedItem, 3, (0x9c4 / iVar1) + 1 + pGame->dwGameFrame, 0, 0);
         }
       }
 
@@ -3588,7 +3588,7 @@ D2UnitStrc * __fastcall ITEM_CloneFromSerializedData(::SGAMEDATA * pGame, D2Unit
       if (iVar1) {
         _bPutItemSuccess = GAME::Event::EVENT_TimerTypeExistsOnUnit(pGame, pClonedItem, UNITEVENTCALLBACK_STATREGEN);
         if (!_bPutItemSuccess) {
-          GAME::Event::SetEvent(pGame, pClonedItem, 3, (int)(0x9c4 / (int64_t)iVar1) + 1 + pGame->dwGameFrame, 0, 0);
+          GAME::Event::SetEvent(pGame, pClonedItem, 3, (0x9c4 / iVar1) + 1 + pGame->dwGameFrame, 0, 0);
         }
       }
 

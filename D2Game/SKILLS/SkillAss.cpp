@@ -94,7 +94,7 @@ D2MonEquipTxt * __fastcall SKILLBAR_GetVelocityAndSpreadForMissile(int32_t nPara
       return nullptr;
     }
 
-    short int nMonEquipId = sgptDataTable->pTxtMonStats[nParam].nMonEquipId;
+    short int nMonEquipId = pMonStatsRecord->nMonEquipId;
     if (0 > nMonEquipId) {
       return nullptr;
     }
@@ -2651,7 +2651,7 @@ static void __stdcall SKILLASS_ApplyLevelScaledBuffs(::SGAMEDATA * pGame, int32_
     if (!pSkillsRecord) {
       nHpBonusPerLevelPct = 0;
     } else {
-      nHpBonusPerLevelPct = sgptDataTable->pTxtSkills[eSkill].Param[0];
+      nHpBonusPerLevelPct = pSkillsRecord->Param[0];
     }
 
     int32_t nValue = D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit);
@@ -3382,7 +3382,7 @@ BOOL __fastcall Skills_SrvDoFunc_054_BladeShield_Activate(::SGAMEDATA * pGame, D
       return 0;
     }
 
-    short int eAuraState = sgptDataTable->pTxtSkills[eSkill].aurastate;
+    short int eAuraState = pSkillsRecord->aurastate;
     if (!(0 <= eAuraState && (int)eAuraState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }

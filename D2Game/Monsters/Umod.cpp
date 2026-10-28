@@ -673,7 +673,7 @@ void __fastcall ExtraFast(D2UnitStrc * pUnit, int32_t nIndex, BOOL bUnknown) {
       return;
     }
 
-    short int nBaseVelocity = sgptDataTable->pTxtMonStats[nClassId].Velocity;
+    short int nBaseVelocity = pMonStatsRecord->Velocity;
     if (0 >= nBaseVelocity) {
       return;
     }
