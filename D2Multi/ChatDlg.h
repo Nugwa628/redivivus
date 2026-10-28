@@ -59,7 +59,6 @@ int __fastcall FORMS_DisplayBattleNetNews(uint16_t * wszText);
 // Provenance: asm 0043e660..0043e6b6; change callback installed at 00441097, tail jump at 004411d7.
 void __stdcall CHATDLG_UpdateChannelOkButtonState();
 BOOL __stdcall CHATDLG_DetectCDKeyInString(char * szText);
-struct D2ControlStrc * FORMS_CreateAnyFormFromListEx(int32_t nFormIndex);
 void __stdcall FORMS_DestroyListEx();
 void __fastcall UIMENU_DrawTitleAndSubtitleOnCenterScreen(uint16_t * wszTitle, uint16_t * wszSubTitle);
 int __stdcall CHATDLG_DestroyListCallback(uint32_t dwParam);

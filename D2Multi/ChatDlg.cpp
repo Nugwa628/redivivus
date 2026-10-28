@@ -532,7 +532,7 @@ BOOL __stdcall CHATDLG_DetectCDKeyInString(char * szText) {
     return 0;
 }
 
-D2ControlStrc * FORMS_CreateAnyFormFromListEx(int32_t nFormIndex) {
+static D2ControlStrc * FORMS_CreateAnyFormFromListEx(int32_t nFormIndex) {
     if (0x1f < FORMS_nListExCount) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1475);
       exit(-1);
