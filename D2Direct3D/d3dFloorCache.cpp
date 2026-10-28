@@ -400,10 +400,10 @@ int32_t __fastcall D3DFLOOR_EnsureAvailableNode(D3DFloorCacheStrc * pCache) {
           if (pNode) {
             pNextNode = pNode->pNext;
             pCache->pUsedHead = pNextNode;
-            if (!pNextNode) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextNode) {
               pNextNode->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pNode->pNext = 0;
@@ -432,10 +432,10 @@ int32_t __fastcall D3DFLOOR_EnsureAvailableNode(D3DFloorCacheStrc * pCache) {
       } else {
         pNextNode = pNode->pNext;
         pCache->pFreeHead = pNextNode;
-        if (!pNextNode) {
-          pCache->pFreeTail = 0;
-        } else {
+        if (pNextNode) {
           pNextNode->pPrev = 0;
+        } else {
+          pCache->pFreeTail = 0;
         }
 
         pNode->pNext = 0;
