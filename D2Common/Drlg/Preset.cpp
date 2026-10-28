@@ -1629,17 +1629,22 @@ void __fastcall DRLGPRESET_CreateMonsterPresets(D2RoomExStrc * pRoomEx) {
       nLvlPrestId = pDrlgMap->nNumber;
       pDrlgMap->bInited = 0;
       if (nLvlPrestId <= 7) {
-        if (3 < nLvlPrestId) {
+        if (nLvlPrestId < 4) {
+          switch (nLvlPrestId) {
+            case 1:
+            case 3:
+              break;
+            default:
+              pRoomEx->eRoomExFlags |= 0x2000000;
+              return;
+          }
+        } else {
           if (pRoomEx->pLevel->eD2LevelId == 2 && pDrlgMap->nRandomMapFileSelector == 3) {
             CreateMonsterPreset(pMemory, pDrlgMap);
             pRoomEx->eRoomExFlags |= 0x2000000;
             return;
           }
 
-          pRoomEx->eRoomExFlags |= 0x2000000;
-          return;
-        }
-        if (nLvlPrestId != 1 && nLvlPrestId != 3) {
           pRoomEx->eRoomExFlags |= 0x2000000;
           return;
         }

@@ -831,12 +831,9 @@ uint8_t __stdcall GetMaxDistance(D2DynamicPathStrc * pDynamicPath) {
 }
 
 eCollisionFlags __stdcall CheckAndGetCollisionFlag(D2DynamicPathStrc * pDynamicPath) {
-    if (pDynamicPath->dwVelocity) {
-      return pDynamicPath->eCollisionFlag;
+    if (!pDynamicPath->dwVelocity) {
+      pDynamicPath->eCollisionFlag = Collision::CheckCollision_BlockAll_Width(pDynamicPath->pRoom, (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosX, (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosY, pDynamicPath->nUnitSize, 0x7fff);
     }
-
-    eCollisionFlags eCollisionResult = Collision::CheckCollision_BlockAll_Width(pDynamicPath->pRoom, (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosX, (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosY, pDynamicPath->nUnitSize, 0x7fff);
-    pDynamicPath->eCollisionFlag = eCollisionResult;
     return pDynamicPath->eCollisionFlag;
 }
 
