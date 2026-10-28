@@ -734,10 +734,10 @@ int32_t __stdcall IITEM_GetItemsTxt_dwNormCode(D2UnitStrc * pUnit) {
       }
 
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-      if (!pItemsTxt->dwNormCode) {
-        return pItemsTxt->dwCode;
+      if (pItemsTxt->dwNormCode) {
+        return pItemsTxt->dwNormCode;
       }
-      return pItemsTxt->dwNormCode;
+      return pItemsTxt->dwCode;
     }
 }
 
