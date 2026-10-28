@@ -1143,7 +1143,7 @@ uint32_t __fastcall UNITS_CheckAnimateAtFrameEnd(int32_t nAnimMode, eD2UnitType 
 
     eD2Skills eSkill = Skills::GetSkillId(pSkill, ".\\UNITS\\Units.cpp", 0xbfa);
     D2SkillsTxt* pSkillsTxt = D2Client::GAME::SCmd::TXT_Skills_GetLine(eSkill);
-    return (uint8_t)*((uint8_t*)pSkillsTxt + 0x6) & 8;
+    return (uint8_t)*((uint8_t*)pSkillsTxt + 0x6) & gadwBitMasks[3];
 }
 
 static int __stdcall UNITS_GetAnimFrameSkip(int32_t nAnimMode, int32_t nParam, eD2UnitType eUnitType) {
@@ -2028,7 +2028,7 @@ int32_t __stdcall GetBlockRate(D2UnitStrc * pUnit, BOOL bExpansion) {
         if (eUnitType != UNIT_MONSTER) {
           return 0;
         }
-        if (!pUnit || (iVar1 = pUnit->nClassId , iVar1 < 0) || sgptDataTable->nTxtMonStatsSize <= iVar1 || !(sgptDataTable->pTxtMonStats + iVar1) || !sgptDataTable->pTxtMonStats[iVar1].NoShldBlock) {
+        if (!pUnit || (iVar1 = pUnit->nClassId , iVar1 < 0) || iVar1 >= sgptDataTable->nTxtMonStatsSize || !(sgptDataTable->pTxtMonStats + iVar1) || !sgptDataTable->pTxtMonStats[iVar1].NoShldBlock) {
           nClassId = HasShield(pUnit);
           if (!nClassId) {
             return 0;
@@ -2763,10 +2763,10 @@ BOOL __stdcall IsCorpseUseable(D2UnitStrc * pUnit) {
     if (!pMonStats2) {
       return 0;
     }
-    if (pMonStats2->deadCol) {
+    if ((*((uint8_t *)pMonStats2 + 0x6) & gadwBitMasks[3])) {
       return 0;
     }
-    if (!pMonStats2->corpseSel) {
+    if (!(*((uint8_t *)pMonStats2 + 0x4) & gadwBitMasks[7])) {
       return 0;
     }
 

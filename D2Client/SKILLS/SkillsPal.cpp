@@ -150,14 +150,14 @@ BOOL __fastcall Skills_CltDoFunc_Pal_ChargePathMissile(D2UnitStrc * pUnit, eD2Sk
     }
 
     memset(&sSkillArg, 0, 0x5c);
-    sSkillArg.nUnitY = nDestY;
     sSkillArg.nFlags = 0x20;
     sSkillArg.nUnitX = nDestX;
+    sSkillArg.nUnitY = nDestY;
     sSkillArg.nSkillLevel = nSkillLvl;
     sSkillArg.pOwner = pUnit;
     sSkillArg.pMissile = pUnit;
-    sSkillArg.nMissileTxtNo = eCltMissileId;
     sSkillArg.eSkillNo = eSkill;
+    sSkillArg.nMissileTxtNo = eCltMissileId;
     D2UnitStrc* pMissileUnit = UNIT::Missile::MakeMissile(&sSkillArg);
     if (!pMissileUnit) {
       return 0;
@@ -198,9 +198,9 @@ BOOL __fastcall Skills_CltDoFunc_Pal_FistOfHeavens(D2UnitStrc * pUnit, eD2Skills
     sSkillArg.pOwner = pUnit;
     sSkillArg.nX = Units::GetXPosFromDynamicPathUnit(pTarget);
     sSkillArg.nY = Units::GetYPosFromDynamicPathUnit(pTarget);
+    sSkillArg.eSkillNo = eSkill;
     sSkillArg.nSkillLevel = nSkillLvl;
     sSkillArg.nMissileTxtNo = eCltMissileId;
-    sSkillArg.eSkillNo = eSkill;
     D2UnitStrc* pMissileUnit = UNIT::Missile::MakeMissile(&sSkillArg);
     if (!pMissileUnit) {
       return 0;

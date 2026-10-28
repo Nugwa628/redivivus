@@ -303,10 +303,10 @@ uint32_t __fastcall MONSTER_IsBossOrChampion(D2UnitStrc * pUnit) {
     if (!pTxt) {
       return 0;
     }
-    if (pTxt->npc) {
+    if ((*((uint8_t *)pTxt + 0xd) & gadwBitMasks[0])) {
       return 1;
     }
-    if (pTxt->inTown) {
+    if ((*((uint8_t *)pTxt + 0xd) & gadwBitMasks[2])) {
       return 1;
     }
 
@@ -361,7 +361,7 @@ BOOL __stdcall MONSTER_IsMonsterUndead(D2UnitStrc * pUnit) {
     if (!pTxt) {
       return 0;
     }
-    if (!((pTxt->lUndead || pTxt->hUndead))) {
+    if (!(((*((uint8_t *)pTxt + 0xd) & gadwBitMasks[3]) || (*((uint8_t *)pTxt + 0xd) & gadwBitMasks[4])))) {
       return 0;
     }
 
@@ -596,7 +596,7 @@ uint32_t __stdcall MONSTERS_CheckMonStatFlag0xc_Bit7(D2UnitStrc * pnParam) {
       return 0;
     }
 
-    return (uint8_t)*((uint8_t*)&sgptDataTable->pTxtMonStats[pMonStatsTxt] + 0xc) & 0x80;
+    return (uint8_t)*((uint8_t*)&sgptDataTable->pTxtMonStats[pMonStatsTxt] + 0xc) & gadwBitMasks[7];
 }
 
 // Retrieves the animation flags and valid-flags for a monster's upgrade tier by looking up its class id in the MonStats upgrade table. Writes the flags from gdwMonStatAnimFlagsTable into pdwAnimFlags and pdwValidFlags. Halts with a fatal error if the unit is not a monster or the upgrade index is out of range.

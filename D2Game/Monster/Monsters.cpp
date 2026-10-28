@@ -252,8 +252,7 @@ static void __stdcall SetUniqueMonsterType(::SGAMEDATA * pGame, D2UnitStrc * pUn
       return;
     }
 
-    uint16_t* eMonsterType = &pUnit->pUnitData.pUnitDataMonster->eMonsterType;
-    *eMonsterType |= MONTYPE_UNIQUE;
+    pUnit->pUnitData.pUnitDataMonster->eMonsterType |= MONTYPE_UNIQUE;
 }
 
 // 2022.01.09 - dzik
@@ -1768,7 +1767,7 @@ void __fastcall MONSTER_MissileSplitOnHit(::SGAMEDATA * pGame, D2UnitStrc * pUni
     eMissilesId eMissileId = nMissileId;
     D2UnitStrc* pMissileUnit = pUnit;
     D2UnitStrc* pOwnerUnit = UNIT::SUnit::GetOwnerUnit(pGame, pUnit);
-    if (!(pOwnerUnit && 0 <= (int)nMissileId && (int)nMissileId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nMissileId && !sgptDataTable->pTxtMissiles[nMissileId].NoMultiShot)) {
+    if (!(pOwnerUnit && 0 <= (int)nMissileId && (int)nMissileId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nMissileId && !(*((uint8_t *)&sgptDataTable->pTxtMissiles[nMissileId] + 0x5) & gadwBitMasks[4]))) {
       return;
     }
 
@@ -2143,10 +2142,10 @@ void __fastcall MONSTER_SuicideExplosion(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     }
 
     memset(&sMonStats, 0, 0x38);
-    if (!pUnit) {
-      nMonClassId = -1;
-    } else {
+    if (pUnit) {
       nMonClassId = pUnit->nClassId;
+    } else {
+      nMonClassId = -1;
     }
 
     D2MonStatsInitStrc* pScaledStats = &sMonStats;
@@ -2197,7 +2196,25 @@ void __fastcall MONSTER_SuicideExplosion(::SGAMEDATA * pGame, D2UnitStrc * pUnit
         nMissileSpawnX = 0;
         eMissileId = MISSILE_Suicidefireexplode;
       }
-    } else if (!(nClassId < 2)) {
+    } else if (nClassId < 2) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
+        nMissileSpawnY = pUnit->pPath.pStaticPath->nPosY;
+      } else if (pUnit->pPath.pDynamicPath) {
+        nMissileSpawnY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nMissileSpawnY = 0;
+      }
+      eUnitType = pUnit->eUnitType;
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
+        nMissileSpawnX = pUnit->pPath.pStaticPath->nPosX;
+      } else if (pUnit->pPath.pDynamicPath) {
+        nMissileSpawnX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nMissileSpawnX = 0;
+      }
+
+      eMissileId = MISSILE_Suicidecorpseexplode;
+    } else {
       sDamage.dwColdDmg = nPosX;
       sDamage.dwColdLength = nClassId;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
@@ -2219,24 +2236,6 @@ void __fastcall MONSTER_SuicideExplosion(::SGAMEDATA * pGame, D2UnitStrc * pUnit
         nMissileSpawnX = 0;
         eMissileId = MISSILE_Suicideiceexplode;
       }
-    } else {
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
-        nMissileSpawnY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (pUnit->pPath.pDynamicPath) {
-        nMissileSpawnY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-      } else {
-        nMissileSpawnY = 0;
-      }
-      eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
-        nMissileSpawnX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (pUnit->pPath.pDynamicPath) {
-        nMissileSpawnX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-      } else {
-        nMissileSpawnX = 0;
-      }
-
-      eMissileId = MISSILE_Suicidecorpseexplode;
     }
 
     pUnit_00 = SKILLS::SkillsServer::CreatingAMissile(pGame, eMissileId, pUnit, SKILL_Attack, 1, 0, 0, nMissileSpawnX, nMissileSpawnY, 1);
@@ -2657,8 +2656,7 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
 
     pGame->nBossFlagList[(int)nClassId >> 3] |= (uint8_t)gadwBitMasks[nClassId & 7];
     if (pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster) {
-      puVar1 = &pUnit->pUnitData.pUnitDataMonster->eMonsterType;
-      *puVar1 |= 2;
+      pUnit->pUnitData.pUnitDataMonster->eMonsterType |= 2;
     }
 
     MONSTER_SetMonsterDataField0x26(pUnit, (int16_t)nClassId);
@@ -2813,7 +2811,7 @@ int32_t __fastcall MONSTER_IsMonsterUnit(int * pnParam) {
 }
 
 void __fastcall SERVER_AwardKillExperience(D2UnitStrc * pUnit, D2UnitStrc * pVictim, ::SGAMEDATA * pGame) {
-    if (!(pUnit && pVictim && !(pVictim->eUnitFlags >> 0x1a & 1))) {
+    if (!(pUnit && pVictim && !(((bool)(pVictim->eUnitFlags >> 0x1a & 1))))) {
       return;
     }
 
@@ -2834,7 +2832,7 @@ int32_t __fastcall MONSTER_CalculateCorpseBombDamage(int32_t nParam1, int32_t nP
     0x38
 }; D2_STATIC_GUARD(gnCorpseBombDamageScaleByDifficulty, "D2Game::Monsters::MONSTER_CalculateCorpseBombDamage::gnCorpseBombDamageScaleByDifficulty");
 
-    if (!(*(char*)(nParam1 + 0x6d) != '\0' && 1 < nParam2)) {
+    if (!(*(char*)(nParam1 + 0x6d) != '\0' && 2 <= nParam2)) {
       return 0;
     }
     if (nParam2 < 9) {

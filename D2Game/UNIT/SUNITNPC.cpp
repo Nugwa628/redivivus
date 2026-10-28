@@ -3134,11 +3134,11 @@ void __fastcall SUNITNPC_ProcessSellConfirmation(::SGAMEDATA * pGame, D2UnitStrc
     eMonsterType = pUnit->eUnitType;
     if (eMonsterType == UNIT_OBJECT || 3 < (int)eMonsterType && (int)eMonsterType <= 5) {
       nPosX = (uint16_t)pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosTemp = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
       nPosX = (uint16_t)nPosTemp;
+    } else {
+      nPosX = 0;
     }
 
     PLAYER::PlayerPets::PETS_ManagePetsByType(pGame, pUnit, nPosX, wPosY);

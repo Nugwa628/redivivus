@@ -1980,14 +1980,14 @@ int __stdcall SFileAuthenticateArchive(D2ArchiveStrc * pArchive, uint32_t * pdwA
                                               uVar1 = pBlockEntry->dwFilePos + pBlockEntry->dwFileSize;
                                               if (uVar1 >= nResult + __frame0.pArchiveHandle->nArchiveOffset || (bApiResult = pCryptFuncs->pfnHashData(hHash, (void*)(uVar1 + (int)pMappedView), nResult - pBlockEntry->dwFilePos - pBlockEntry->dwFileSize + __frame0.pArchiveHandle->nArchiveOffset, 0) , bApiResult != 0)) {
                                                 bApiResult = pCryptFuncs->pfnVerifySignature(hHash, (void*)(pBlockEntry->dwFilePos + 8 + (int)pMappedView), pBlockEntry->dwFileSize - 8, __frame0.hKey, (LPCSTR)0x0, 0);
-                                                if (!bApiResult) {
-                                                  if (pdwAuthResult) {
-                                                    *pdwAuthResult = 2;
-                                                  }
-                                                } else {
+                                                if (bApiResult) {
                                                   bVerified = 1;
                                                   if (pdwAuthResult) {
                                                     *pdwAuthResult = 5;
+                                                  }
+                                                } else {
+                                                  if (pdwAuthResult) {
+                                                    *pdwAuthResult = 2;
                                                   }
                                                 }
                                               }

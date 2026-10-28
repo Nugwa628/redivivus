@@ -295,12 +295,12 @@ static void __stdcall DAMAGE_ApplyStun(D2UnitStrc * pUnit, int32_t nParam, D2Uni
       GAME::Event::SetEvent(pGame, pUnit2, 0xc, nTimeout, 0, 0);
       return;
     }
-    if (!pUnit) {
-      nAttackerGUID = -1;
-      eAttackerType = UNIT_COUNT;
-    } else {
+    if (pUnit) {
       nAttackerGUID = pUnit->nUnitGUID;
       eAttackerType = pUnit->eUnitType;
+    } else {
+      nAttackerGUID = -1;
+      eAttackerType = UNIT_COUNT;
     }
 
     pStunStatList = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(pGame->pMemoryPool, 2, nTimeout, eAttackerType, nAttackerGUID);
@@ -329,12 +329,12 @@ static void __stdcall DAMAGE_ApplyPoison(D2UnitStrc * pUnit, int32_t nParam1, in
     if (!pPoisonStatList) {
       eD2UnitType eAttackerType;
       D2Common::DATATBLS::ItemStats::SetState(pUnit2, STATE_poison, 1);
-      if (!pUnit) {
-        nAttackerGUID = -1;
-        eAttackerType = UNIT_COUNT;
-      } else {
+      if (pUnit) {
         nAttackerGUID = pUnit->nUnitGUID;
         eAttackerType = pUnit->eUnitType;
+      } else {
+        nAttackerGUID = -1;
+        eAttackerType = UNIT_COUNT;
       }
 
       pPoisonStatList = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(pGame->pMemoryPool, 2, nEndFrame, eAttackerType, nAttackerGUID);
@@ -394,12 +394,12 @@ static void __stdcall DAMAGE_ApplyBurning(D2UnitStrc * pUnit, int32_t nParam1, i
     if (!pBurnStatList) {
       eD2UnitType eAttackerType;
       D2Common::DATATBLS::ItemStats::SetState(pUnit2, STATE_burning, 1);
-      if (!pUnit) {
-        nAttackerGUID = -1;
-        eAttackerType = UNIT_COUNT;
-      } else {
+      if (pUnit) {
         nAttackerGUID = pUnit->nUnitGUID;
         eAttackerType = pUnit->eUnitType;
+      } else {
+        nAttackerGUID = -1;
+        eAttackerType = UNIT_COUNT;
       }
 
       pBurnStatList = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(pGame->pMemoryPool, 2, nEndFrame, eAttackerType, nAttackerGUID);
@@ -1552,7 +1552,7 @@ void __fastcall DAMAGE_ApplyDefensiveReduction(::SGAMEDATA * pGame, D2UnitStrc *
     pDmg->dwDmgTotal = pDmg->dwLifeLeech + nDrStatValue;
 }
 
-uint32_t DAMAGE_GetMonsterDrainEffectiveness(void * pThis, D2UnitStrc * pUnit) {
+uint32_t __fastcall DAMAGE_GetMonsterDrainEffectiveness(void * pThis, int32_t nEdxUnused, D2UnitStrc * pUnit) {
     if (!pThis || *(int*)pThis != 1) {
       return 100;
     }
@@ -1746,7 +1746,7 @@ void __fastcall DAMAGE_ApplyDamageToUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     pRoom = D2Common::Units::UNITS_GetRoom(pVictim);
     BOOL bIsInTownOrKillable;
     bIsInTownOrKillable = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom);
-    if (bIsInTownOrKillable && (!pUnit || pUnit->eUnitType != UNIT_MONSTER || (pMonStats = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetLine(pUnit->nClassId) , !pMonStats || !pMonStats->inTown))) {
+    if (bIsInTownOrKillable && (!pUnit || pUnit->eUnitType != UNIT_MONSTER || (pMonStats = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetLine(pUnit->nClassId) , !pMonStats || !(*((uint8_t *)pMonStats + 0xd) & gadwBitMasks[2])))) {
       pDamage->wResultFlags &= 0xfffd;
       return;
     }

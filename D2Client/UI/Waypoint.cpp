@@ -571,9 +571,9 @@ void __stdcall DRAW_UI_Waypoint() {
         ActsInGame++;
         nWaypointIndex++;
         pDrawOffsets += 6;
-      } while (nWaypointIndex < MaximumAmountOfWaypointInSelectedAct);
+      } while ((int)nWaypointIndex < (int)MaximumAmountOfWaypointInSelectedAct);
     }
-    if (nMouseX - 0x111U < 0x24 && nMouseY - 0x183U < 0x22) {
+    if (nMouseX - 0x111U <= 0x23 && nMouseY - 0x183U <= 0x21) {
       /* Draw cancel hoover */ pwszText = D2Lang::StrTable::strtable::GetLocaleString(0x1022);
       nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(pwszText);
       nMouseX = nTextWidth / 2;
@@ -702,7 +702,7 @@ void __stdcall INPUT_WaypointMouseUp(D2UIMouseMsgStrc * pMsg) {
             return;
           }
         }
-      } else if (nMouseX - 0x111U < 0x24 && nRelMouseY - 0x183U < 0x22) {
+      } else if (nMouseX - 0x111U <= 0x23 && nRelMouseY - 0x183U <= 0x21) {
         Draw::SetUIFlag(UI_WAYPOINT, UI_RESET, 0);
         WAYPOINT_SendClosePacket();
       }

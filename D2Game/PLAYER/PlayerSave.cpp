@@ -209,7 +209,7 @@ int __fastcall PLRSAVE_RestoreItemFromSaveData(::SGAMEDATA * pGame, D2UnitStrc *
     }
 
     item_restored:
-    if (pSavedItemData->nStorageType != '\0') {
+    if ((uint32_t)pSavedItemData->nStorageType > 0) {
       *ppItemOut = pUnit_00;
     }
     if (!pnParam) {
@@ -416,7 +416,7 @@ int __stdcall PLRSAVE_RestoreEquippedItem(::SGAMEDATA * pGame, D2UnknownItemRela
     }
 
     item_restored:
-    if (pItemUnknownStructure->nStorageType != '\0') {
+    if ((uint32_t)pItemUnknownStructure->nStorageType > 0) {
       *pGame2 = pItem;
     }
     *pnParam = (uint32_t)(uint8_t)pItemUnknownStructure->nStorageType;
@@ -531,14 +531,14 @@ static int __fastcall PLRSAVE_RestoreItemToBodyLoc(D2UnitStrc * pUnit, ::SGAMEDA
 int32_t __stdcall SAVE_SerializeItemIfValid(D2UnitStrc * pUnit, char * szText, size_t nSize, int32_t nParam1, int32_t nParam2, int32_t nParam3) {
     BOOL bTaskResult;
     int32_t nSerializeResult;
-    if (!(!pUnit || pUnit->eUnitFlagsEx >> 0xf & 1 || !nParam1 && nParam2 && !nParam3 && (bTaskResult = GAME::Task::TASK_ReturnTrue() , !bTaskResult))) {
+    if (!pUnit || ((bool)(pUnit->eUnitFlagsEx >> 0xf & 1)) || !nParam1 && nParam2 && !nParam3 && (bTaskResult = GAME::Task::TASK_ReturnTrue() , !bTaskResult)) {
+      nSerializeResult = 0;
+    } else {
       nSerializeResult = D2Common::ITEMS::Items::SerializeItem(pUnit, (uint8_t*)szText, nSize, (D2StatListExStrc*)0x1, 1, 0);
       if (!nSerializeResult) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x75c);
         exit(-1);
       }
-    } else {
-      nSerializeResult = 0;
     }
 
     return nSerializeResult;
@@ -1126,11 +1126,11 @@ BOOL __fastcall SaveGameAllGameTypes(::SGAMEDATA * pGame, D2UnitStrc * pUnit, ch
     if (pGame->nGameType == SGAMETYPE_OBNET_HOST || pGame->nGameType == SGAMETYPE_LAN_HOST) {
       ::SGAMEDATA* pGameCopy = pGame;
       SaveToBuffer(pGameCopy, bIsInteracting, pUnit, pClient);
-    } else if (!BattleNetServerService) {
-      PlayerSave::SaveToFile(pGame, pUnit, bIsInteracting, bUnknown, szCharName);
-    } else {
+    } else if (BattleNetServerService) {
       nSaveResult = SaveToFileBnet(pGame, (uint32_t)szAccountName, pUnit, (uint32_t)szCharName, bIsInteracting, clientContainer, bUnknown, nRealm);
       bSaveSucceeded = nSaveResult;
+    } else {
+      PlayerSave::SaveToFile(pGame, pUnit, bIsInteracting, bUnknown, szCharName);
     }
 
     _bHasInteractInfo = bSaveSucceeded;
@@ -1818,15 +1818,15 @@ int __fastcall PLRSAVE_RestoreItemsFromStream(::SGAMEDATA * pGame, D2UnitStrc * 
 
       nBytesAfterItem = 0;
       pLastItem = 0;
-      if (!nItemMode) {
-        nSubSocketIdx = PLRSAVE_RestoreItemFromSaveData(pGameLocal, pUnit, (D2UnknownItemRelatedStruct*)&sGfxData, &pLastItem, &nBytesAfterItem);
-        if (nSubSocketIdx) {
-          goto next_item;
-        }
-      } else {
+      if (nItemMode) {
         nSubSocketIdx = PLRSAVE_RestoreEquippedItem(pGameLocal, (D2UnknownItemRelatedStruct*)&sGfxData, &pLastItem, &nBytesAfterItem, pUnit);
         if (nSubSocketIdx) {
           return nSubSocketIdx;
+        }
+      } else {
+        nSubSocketIdx = PLRSAVE_RestoreItemFromSaveData(pGameLocal, pUnit, (D2UnknownItemRelatedStruct*)&sGfxData, &pLastItem, &nBytesAfterItem);
+        if (nSubSocketIdx) {
+          goto next_item;
         }
       }
 
@@ -1841,10 +1841,10 @@ int __fastcall PLRSAVE_RestoreItemsFromStream(::SGAMEDATA * pGame, D2UnitStrc * 
           nItemBytesRead = PLAYERSAVE_ParseItemFromBuffer((D2UnknownItemRelatedStruct*)&sGfxData, (char*)(pStreamPos + 1));
           pStreamPos = (short int*)((int)(pStreamPos + 1) + nItemBytesRead);
           nTotalBytesRead = nTotalBytesRead + 2 + nItemBytesRead;
-          if (!nItemMode) {
-            nSubSocketIdx = PLRSAVE_RestoreItemFromSaveData(pGameLocal, pUnit, (D2UnknownItemRelatedStruct*)&sGfxData, &pLastItem, &nSubSocketCount);
-          } else {
+          if (nItemMode) {
             nSubSocketIdx = PLRSAVE_RestoreEquippedItem(pGameLocal, (D2UnknownItemRelatedStruct*)&sGfxData, &pLastItem, &nSubSocketCount, pUnit);
+          } else {
+            nSubSocketIdx = PLRSAVE_RestoreItemFromSaveData(pGameLocal, pUnit, (D2UnknownItemRelatedStruct*)&sGfxData, &pLastItem, &nSubSocketCount);
           }
           if (nSubSocketIdx) {
             return nSubSocketIdx;

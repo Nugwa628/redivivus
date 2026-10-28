@@ -623,7 +623,7 @@ void __fastcall UpdateSingleClient(::SGAMEDATA * pGame, D2ClientStrc * pClient) 
     GAME_SendRemoveObjectsForAdjacentRooms(pOldRoom, pClient);
     SendAdjacentRoomUpdates(pGame, pOldRoom, pClient);
     D2Common::Stats::StatsEx::STATLIST_IterateChangedStats(pUnit, pUnit, PLAYER::PlayerMsg::SendAttributeUpdate);
-    if (pUnit->eUnitFlagsEx >> 0x15 & 1) {
+    if (((bool)(pUnit->eUnitFlagsEx >> 0x15 & 1))) {
       ITEMS::ItemMode::ITEMS_RecalcAndRefreshInventory(pGame, pUnit, 1, 1);
       ITEMS::ItemMode::ITEMMODE_ReturnZero3(1);
     }
@@ -2081,7 +2081,7 @@ void __fastcall CleanUpClient(::SGAMEDATA * pGame, uint32_t nClientId, int32_t b
     szCharName[0] = '\0';
     if (gQServerClientTablesInitialized) {
       /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gQServerClientByIdCs);
-      pFoundClient = QServerClientBucketById[nClientId & 0xff];
+      pFoundClient = QServerClientBucketById[(uint8_t)nClientId];
       if (pFoundClient) {
         if (pFoundClient->nClientNo == nClientId) {
           szSrcName = pFoundClient->szCharName;
@@ -2092,7 +2092,7 @@ void __fastcall CleanUpClient(::SGAMEDATA * pGame, uint32_t nClientId, int32_t b
             szSrcName++;
           } while (cNameChar != '\0');
 
-          QServerClientBucketById[nClientId & 0xff] = pFoundClient->pServerNext;
+          QServerClientBucketById[(uint8_t)nClientId] = pFoundClient->pServerNext;
         } else {
           nNameHash = pFoundClient->pServerNext->nClientNo;
           while (nNameHash != nClientId) {
@@ -2152,13 +2152,11 @@ void __fastcall CleanUpClient(::SGAMEDATA * pGame, uint32_t nClientId, int32_t b
     }
     if (gQServerClientTablesInitialized) {
       nNameHash = Fog::SMem::HashForName(szCharName);
-      /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ nNameHashBucket = nNameHash & 0xff;
+      /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ nNameHashBucket = (uint8_t)nNameHash;
       EnterCriticalSection(&gQServerClientByNameCs);
       if (QServerClientBucketByName[nNameHashBucket]) {
         nExpHi = Storm::Source::SSTR::SStrCmpI(QServerClientBucketByName[nNameHashBucket]->szCharName, szCharName, 0x10);
-        if (!nExpHi) {
-          QServerClientBucketByName[nNameHashBucket] = QServerClientBucketByName[nNameHashBucket]->pNextInListByName;
-        } else {
+        if (nExpHi) {
           pFoundClient = QServerClientBucketByName[nNameHashBucket];
           if (!pFoundClient->pNextInListByName) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x526);
@@ -2182,6 +2180,8 @@ void __fastcall CleanUpClient(::SGAMEDATA * pGame, uint32_t nClientId, int32_t b
           if (pFoundClient->pNextInListByName) {
             pFoundClient->pNextInListByName = pFoundClient->pNextInListByName->pNextInListByName;
           }
+        } else {
+          QServerClientBucketByName[nNameHashBucket] = QServerClientBucketByName[nNameHashBucket]->pNextInListByName;
         }
       }
 
@@ -2190,26 +2190,7 @@ void __fastcall CleanUpClient(::SGAMEDATA * pGame, uint32_t nClientId, int32_t b
     if (pRemovedClient) {
       Server::BroadcastPlayerLeave(pGame, pRemovedClient);
       pUnit = CLIENTS_GetControlUnit(pRemovedClient, 0);
-      if (!pUnit) {
-        if (BattleNetServerService) {
-          *(uint8_t*)&pRemovedClient->nStartSkill = 0;
-          /* FARPROC lpfn for IsBadCodePtr */ bBadCodePtr = IsBadCodePtr((FARPROC)BattleNetServerService->fpLeaveGame);
-          if (bBadCodePtr) {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5ce);
-            exit(-1);
-          }
-          if (BattleNetServerService->fpLeaveGame) {
-            dwRealmToken = (uint32_t)pRemovedClient->pClientContainer;
-            pClientNode_00 = (uint8_t*)pRemovedClient->dwSave;
-            wCharLevel = 0;
-            nExpHiShift = 0;
-            nExpHi = 0;
-            nNameHashBucket = 0;
-            nStrCmp = 0;
-            BattleNetServerService->fpLeaveGame(nStrCmp, nNameHashBucket, nExpHi, nExpHiShift, (int)wCharLevel, pRemovedClient->szCharName, (uint8_t*)&pRemovedClient->nStartSkill, pClientNode_00, 0, 0, pRemovedClient->szAccName, dwRealmToken, 0, 0, 0, 0, 0, (uint8_t*)&pRemovedClient->ftFileTime);
-          }
-        }
-      } else {
+      if (pUnit) {
         nExpHi = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_experience, 0);
         nExpHiShift = nExpHi >> 0x1f;
         nStrCmp = pUnit->nClassId;
@@ -2238,6 +2219,25 @@ void __fastcall CleanUpClient(::SGAMEDATA * pGame, uint32_t nClientId, int32_t b
             dwRealmToken = (uint32_t)pRemovedClient->pClientContainer;
             pClientNode_00 = (uint8_t*)pRemovedClient->dwSave;
             wCharLevel = pRemovedClient->nCharacterStatus;
+            BattleNetServerService->fpLeaveGame(nStrCmp, nNameHashBucket, nExpHi, nExpHiShift, (int)wCharLevel, pRemovedClient->szCharName, (uint8_t*)&pRemovedClient->nStartSkill, pClientNode_00, 0, 0, pRemovedClient->szAccName, dwRealmToken, 0, 0, 0, 0, 0, (uint8_t*)&pRemovedClient->ftFileTime);
+          }
+        }
+      } else {
+        if (BattleNetServerService) {
+          *(uint8_t*)&pRemovedClient->nStartSkill = 0;
+          /* FARPROC lpfn for IsBadCodePtr */ bBadCodePtr = IsBadCodePtr((FARPROC)BattleNetServerService->fpLeaveGame);
+          if (bBadCodePtr) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5ce);
+            exit(-1);
+          }
+          if (BattleNetServerService->fpLeaveGame) {
+            dwRealmToken = (uint32_t)pRemovedClient->pClientContainer;
+            pClientNode_00 = (uint8_t*)pRemovedClient->dwSave;
+            wCharLevel = 0;
+            nExpHiShift = 0;
+            nExpHi = 0;
+            nNameHashBucket = 0;
+            nStrCmp = 0;
             BattleNetServerService->fpLeaveGame(nStrCmp, nNameHashBucket, nExpHi, nExpHiShift, (int)wCharLevel, pRemovedClient->szCharName, (uint8_t*)&pRemovedClient->nStartSkill, pClientNode_00, 0, 0, pRemovedClient->szAccName, dwRealmToken, 0, 0, 0, 0, 0, (uint8_t*)&pRemovedClient->ftFileTime);
           }
         }
@@ -2566,8 +2566,11 @@ void __fastcall CLIENT_RevealRoomAndSendUnits(::SGAMEDATA * pGame, D2RoomStrc * 
       for (pRoomUnit = pRoom->pUnitList; pRoomUnit; pRoomUnit = pRoomUnit->pRoomNext) {
         eUnitType = UNIT_COUNT;
         eUnitType = pRoomUnit->eUnitType;
-        if (eUnitType == UNIT_MONSTER) {
+        switch (eUnitType) {
+        case UNIT_MONSTER: {
           Monster::MONSTERAI_TriggerMageThink(pGameSave, pRoomUnit);
+          break;
+        }
         }
       }
     }
@@ -2606,8 +2609,11 @@ void __fastcall RoomClearForClientAndHideMap(::SGAMEDATA * pGame, D2RoomStrc * p
         }
         eUnitType = UNIT_COUNT;
         eUnitType = pRoomUnit->eUnitType;
-        if (eUnitType == UNIT_MONSTER) {
+        switch (eUnitType) {
+        case UNIT_MONSTER: {
           Monster::MONSTER_StartAiAndRegenTimers(pGameSave, pRoomUnit);
+          break;
+        }
         }
         pRoomUnit = pRoomUnit->pRoomNext;
       }

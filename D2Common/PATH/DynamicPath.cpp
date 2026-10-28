@@ -989,7 +989,7 @@ void __stdcall PATH_SetOrClearFlag0x2000(D2DynamicPathStrc * pDynamicPath, int32
 void __stdcall PATH_PeriodicPathRecalc(D2UnitStrc * pUnit) {
     bool _bHasReachedTarget;
     bool bHasReachedTarget;
-    if (!(pUnit && !(pUnit->eUnitFlags >> 0x15 & 1) && pUnit->eUnitFlagsEx >> 0xd & 1)) {
+    if (!(pUnit && !(((bool)(pUnit->eUnitFlags >> 0x15 & 1))) && ((bool)(pUnit->eUnitFlagsEx >> 0xd & 1)))) {
       return;
     }
 

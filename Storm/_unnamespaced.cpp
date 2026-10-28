@@ -693,14 +693,14 @@ void StaticInit_6ca940() {
 
 void StaticInit_6ca960() {
     // Static local variables (originally global data)
-    static char gbChatMultiplayerUIActive; D2_STATIC_GUARD_BSS(gbChatMultiplayerUIActive, "StaticInit_6ca960::gbChatMultiplayerUIActive");
+    static int32_t gbChatMultiplayerUIActive; D2_STATIC_GUARD_BSS(gbChatMultiplayerUIActive, "StaticInit_6ca960::gbChatMultiplayerUIActive");
 
     gbChatMultiplayerUIActive = Storm::Source::SSTR::SStrHash("Header", 0, 0);
 }
 
 void StaticInit_6ca980() {
     // Static local variables (originally global data)
-    static char gbChatLobbyInitialize; D2_STATIC_GUARD_BSS(gbChatLobbyInitialize, "StaticInit_6ca980::gbChatLobbyInitialize");
+    static int32_t gbChatLobbyInitialize; D2_STATIC_GUARD_BSS(gbChatLobbyInitialize, "StaticInit_6ca980::gbChatLobbyInitialize");
 
     gbChatLobbyInitialize = Storm::Source::SSTR::SStrHash("Game Time", 0, 0);
 }

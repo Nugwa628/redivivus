@@ -573,15 +573,15 @@ template<> ::SGAMEDATA * TSHashTable<SGAMEDATA, HASHKEY_NONE>::InternalNew(TSHas
     TSLink<::SGAMEDATA>* ppSlot;
     uint32_t piVar2;
     ::SGAMEDATA* pNode = (::SGAMEDATA*)Storm::SMem::SMemAlloc(nExtraBytes + 0x1df4, s___AUSGAMEDATA___0070f56c, -2, dwFlags | 8);
-    if (!pNode) {
-      pNode = 0;
-      ppSlot = &pList->m_terminator;
-    } else {
+    if (pNode) {
       pNode->m_linktoslot.m_prevlink = 0;
       pNode->m_linktoslot.m_next = 0;
       pNode->m_linktofull.m_prevlink = 0;
       pNode->m_linktofull.m_next = 0;
       ppSlot = (TSLink<::SGAMEDATA>*)(pNode->szGameName + pList->m_linkoffset - 0x2a);
+    } else {
+      pNode = 0;
+      ppSlot = &pList->m_terminator;
     }
 
     TSLink<::SGAMEDATA>* pExisting = ppSlot->m_prevlink;
@@ -692,7 +692,7 @@ template<> void TSExplicitList<TSHashObjectChunk<SGAMEDATA, HASHKEY_NONE>, 16>::
       }
 
       nIndex = 0;
-      if (*(int*)((int)pChunk + 4)) {
+      if ((uint32_t)(*(int*)((int)pChunk + 4)) > 0) {
         pEntryBase = 0;
         do {
           pEntries = *(int*)((int)pChunk + 8);

@@ -673,8 +673,8 @@ static void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
       D2Common::Monsters::MONSTERS::MONSTER_ApplyDifficultyScaling(pUnit, pGame->bExpansion, pGame->nDifficulty);
       pStatsEx = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(pGame->pMemoryPool, 1, 0, UNIT_MONSTER, pUnit->nUnitGUID);
       D2Common::Stats::StatsEx::STATLIST_AttachStatListToUnit(pUnit, pStatsEx, 1);
-      if (pMonStatsTxt->inventory) {
-        if (pMonStatsTxt->interact) {
+      if ((*((uint8_t *)pMonStatsTxt + 0xf) & gadwBitMasks[0])) {
+        if ((*((uint8_t *)pMonStatsTxt + 0xd) & gadwBitMasks[1])) {
           nScaledStat = D2Client::UNIT::Player::ValidateClassId(nMonClassId);
           pNpcInventory = UNIT::sunitproxy::SUNITPROXY_GetNpcInventory(pGame, nScaledStat);
           pUnit->pInventory = pNpcInventory;
@@ -700,10 +700,10 @@ static void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
         nTmpInt++;
       } while (nTmpInt < 8);
       D2Common::Monsters::MONSTERS::MONSTERS_OnInitMonster_NoOp(pUnit, monLevelData.nMonsterSkillBonus);
-      if (uMonTxt.pMonStats2Txt->isAtt) {
+      if ((*((uint8_t *)uMonTxt.pMonStats2Txt + 0x5) & gadwBitMasks[1])) {
         pUnit->eUnitFlags |= UNITFLAG_CANBEATTACKED;
       }
-      if (pMonStatsTxt->petIgnore) {
+      if ((*((uint8_t *)pMonStatsTxt + 0xe) & gadwBitMasks[3])) {
         pUnit->eUnitFlags |= UNITFLAG_PETIGNORE;
       }
       uMonTxt.pMonPropTxt = MONSTER_GetMonPropTxtRecord(pUnit->nClassId);
@@ -800,7 +800,7 @@ void __fastcall MONSTER_TransformMonsterClass(::SGAMEDATA * pGame, D2UnitStrc * 
     if (!pUnit || pUnit->eUnitType != UNIT_MONSTER) {
       return;
     }
-    if (!(0 <= (int)nMonStatId && (int)nMonStatId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonStatId && sgptDataTable->pTxtMonStats[nMonStatId].enabled)) {
+    if (!(0 <= (int)nMonStatId && (int)nMonStatId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonStatId && (*((uint8_t *)&sgptDataTable->pTxtMonStats[nMonStatId] + 0xf) & gadwBitMasks[1]))) {
       return;
     }
 

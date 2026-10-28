@@ -265,10 +265,10 @@ BOOL __fastcall Skills_CltDoFunc_Nec_TargetedMissileAtParam(D2UnitStrc * pUnit, 
 
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.nFlags = 0x2001;
-    sSkillArg.nSkillLevel = nSkillLvl;
     sSkillArg.pOwner = pUnit;
-    sSkillArg.nMissileTxtNo = eVar1;
     sSkillArg.eSkillNo = eSkill;
+    sSkillArg.nSkillLevel = nSkillLvl;
+    sSkillArg.nMissileTxtNo = eVar1;
     sSkillArg.nX = D2Common::Skills::SKILL_GetParam1(pSkill);
     sSkillArg.nY = D2Common::Skills::SKILL_GetParam2(pSkill);
     UNIT::Missile::MakeMissile(&sSkillArg);
@@ -379,23 +379,12 @@ int __fastcall SKILLSNEC_CltCreateTeethMissiles(D2UnitStrc * pUnit, eD2Skills eS
     sSkillArg.nSkillLevel = nSkillLvl;
     sSkillArg.nMissileTxtNo = eCltMissileId;
     sSkillArg.eSkillNo = eSkill;
-    if (pMonStats2->isSmall) {
+    if ((*((uint8_t *)pMonStats2 + 0x5) & gadwBitMasks[2])) {
       nScatterMax = 1;
       nScatterMin = 0;
     } else {
       D2MissilesTxt* pMissileTxt;
-      if (!pMonStats2->large) {
-        Skills::SKILLS_CreateMissileScatter(pUnit, &sSkillArg, 2, 2);
-        pMissileTxt = GetMissleById(eCltMissileId);
-        nSubMissileId = pMissileTxt->SubMissile2;
-        if (nSubMissileId <= 0 || (int)nSubMissileId >= sgptDataTable->nTxtMissilesSize) {
-          goto spawn_target_missiles;
-        }
-
-        nScatterMax = 3;
-        nScatterMin = 1;
-        sSkillArg.nMissileTxtNo = (int)nSubMissileId;
-      } else {
+      if ((*((uint8_t *)pMonStats2 + 0x5) & gadwBitMasks[3])) {
         Skills::SKILLS_CreateMissileScatter(pUnit, &sSkillArg, 3, 3);
         pMissileTxt = GetMissleById(eCltMissileId);
         nSubMissileId = pMissileTxt->SubMissile1;
@@ -405,6 +394,17 @@ int __fastcall SKILLSNEC_CltCreateTeethMissiles(D2UnitStrc * pUnit, eD2Skills eS
 
         nScatterMax = 4;
         nScatterMin = 2;
+        sSkillArg.nMissileTxtNo = (int)nSubMissileId;
+      } else {
+        Skills::SKILLS_CreateMissileScatter(pUnit, &sSkillArg, 2, 2);
+        pMissileTxt = GetMissleById(eCltMissileId);
+        nSubMissileId = pMissileTxt->SubMissile2;
+        if (nSubMissileId <= 0 || (int)nSubMissileId >= sgptDataTable->nTxtMissilesSize) {
+          goto spawn_target_missiles;
+        }
+
+        nScatterMax = 3;
+        nScatterMin = 1;
         sSkillArg.nMissileTxtNo = (int)nSubMissileId;
       }
     }

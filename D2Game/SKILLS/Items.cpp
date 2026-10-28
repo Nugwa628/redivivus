@@ -59,7 +59,7 @@ static int32_t __stdcall SKILLITEMS_SetDispatchTableEntry(int32_t pCandidatePair
 }
 
 int32_t __stdcall SKILLITEMS_GetDispatchTableRange(int32_t pDispatchTable, int32_t nParam1, int32_t nParam2) {
-    if (nParam1 <= nParam2) {
+    if (nParam2 >= nParam1) {
       return 0;
     }
 
@@ -765,22 +765,22 @@ static uint32_t __fastcall ITEMMOD_GetMaxAffixGroupClassic(int32_t pThis, D2Unit
     uint32_t apiStack4108[1024];
     D2RareAffixTxt* pCurAffixEntry = (D2RareAffixTxt*)0x5c19ad;
     D2RareAffixTableStrc* pRareAffixTableInfo = D2Common::DATATBLS::ItemTbls::TXT_RareAffixes_GetTableInfo();
-    if (!pThis) {
-      pAffixRangeStart = pRareAffixTableInfo->pSuffixStart;
-      pCurAffixEntry = pAffixRangeStart;
-    } else {
+    if (pThis) {
       pAffixRangeStart = (D2RareAffixTxt*)pRareAffixTableInfo;
       pCurAffixEntry = pRareAffixTableInfo->pPrefixStart;
+    } else {
+      pAffixRangeStart = pRareAffixTableInfo->pSuffixStart;
+      pCurAffixEntry = pAffixRangeStart;
     }
     if (!pCurAffixEntry) {
       return (uint32_t)pAffixRangeStart & -65536;
     }
 
     int nAffixTableBaseIdx = ((int)pCurAffixEntry - (int)pRareAffixTableInfo->pTable) / 0x48;
-    if (!pThis) {
-      nAffixRangeBytes = (int)pRareAffixTableInfo->pPrefixStart - (int)pRareAffixTableInfo->pSuffixStart;
-    } else {
+    if (pThis) {
       nAffixRangeBytes = pRareAffixTableInfo->nSize * 0x48 - (int)pRareAffixTableInfo->pPrefixStart + (int)pRareAffixTableInfo->pTable;
+    } else {
+      nAffixRangeBytes = (int)pRareAffixTableInfo->pPrefixStart - (int)pRareAffixTableInfo->pSuffixStart;
     }
 
     uint32_t nCanApply = nAffixRangeBytes * 0x38e38e39;
@@ -830,22 +830,22 @@ static uint32_t __fastcall GetMaxToRoll(int32_t pThis, D2UnitStrc * pUnit) {
     uint32_t apiStack4108[1024];
     D2RareAffixTxt* pCurAffixEntry = (D2RareAffixTxt*)0x5c1abd;
     D2RareAffixTableStrc* pRareAffixTableInfo = D2Common::DATATBLS::ItemTbls::TXT_RareAffixes_GetTableInfo();
-    if (!pThis) {
-      pAffixRangeStart = pRareAffixTableInfo->pSuffixStart;
-      pCurAffixEntry = pAffixRangeStart;
-    } else {
+    if (pThis) {
       pAffixRangeStart = (D2RareAffixTxt*)pRareAffixTableInfo;
       pCurAffixEntry = pRareAffixTableInfo->pPrefixStart;
+    } else {
+      pAffixRangeStart = pRareAffixTableInfo->pSuffixStart;
+      pCurAffixEntry = pAffixRangeStart;
     }
     if (!pCurAffixEntry) {
       return (uint32_t)pAffixRangeStart & -65536;
     }
 
     int nAffixTableBaseIdx = ((int)pCurAffixEntry - (int)pRareAffixTableInfo->pTable) / 0x48;
-    if (!pThis) {
-      nAffixRangeBytes = (int)pRareAffixTableInfo->pPrefixStart - (int)pRareAffixTableInfo->pSuffixStart;
-    } else {
+    if (pThis) {
       nAffixRangeBytes = pRareAffixTableInfo->nSize * 0x48 - (int)pRareAffixTableInfo->pPrefixStart + (int)pRareAffixTableInfo->pTable;
+    } else {
+      nAffixRangeBytes = (int)pRareAffixTableInfo->pPrefixStart - (int)pRareAffixTableInfo->pSuffixStart;
     }
 
     uint32_t nCanApply = nAffixRangeBytes * 0x38e38e39;
@@ -1069,20 +1069,20 @@ static BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2Uni
     D2SeedStrc seedState;
     int16_t sVar4;
     sVar4 = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-    if (!sVar4) {
-      nMax = ITEMMOD_GetMaxAffixGroupClassic(1, pUnit);
+    if (sVar4) {
+      nMax = GetMaxToRoll(1, pUnit);
       wRarePrefix = (short int)nMax;
     } else {
-      nMax = GetMaxToRoll(1, pUnit);
+      nMax = ITEMMOD_GetMaxAffixGroupClassic(1, pUnit);
       wRarePrefix = (short int)nMax;
     }
 
     sVar4 = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-    if (!sVar4) {
-      nMax = ITEMMOD_GetMaxAffixGroupClassic(0, pUnit);
+    if (sVar4) {
+      nMax = GetMaxToRoll(0, pUnit);
       wRareSuffix = (short int)nMax;
     } else {
-      nMax = GetMaxToRoll(0, pUnit);
+      nMax = ITEMMOD_GetMaxAffixGroupClassic(0, pUnit);
       wRareSuffix = (short int)nMax;
     }
     if (!(wRarePrefix && wRareSuffix)) {
@@ -1120,10 +1120,10 @@ static BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2Uni
         nDupRetries = 0;
         do {
           sVar4 = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-          if (!sVar4) {
-            nRolledAffixRaw = ITEMMOD_RollMagicAffix(pUnit, 1, 1, 0, 0, 0);
-          } else {
+          if (sVar4) {
             nRolledAffixRaw = ITEMMOD_RollMagicAffixClassic(pUnit, 1, 1, 0, 0, 0, 0);
+          } else {
+            nRolledAffixRaw = ITEMMOD_RollMagicAffix(pUnit, 1, 1, 0, 0, 0);
           }
 
           nRolledAffixMasked = (uint16_t)nRolledAffixRaw;
@@ -1161,16 +1161,16 @@ static BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2Uni
         nDupRetries = 0;
         do {
           sVar4 = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-          if (!sVar4) {
-            nRolledAffixRaw = ITEMMOD_RollMagicAffix(pUnit, 1, 1, 0, 1, 0);
-          } else {
+          if (sVar4) {
             nRolledAffixRaw = ITEMMOD_RollMagicAffixClassic(pUnit, 1, 1, 0, 1, 0, 0);
+          } else {
+            nRolledAffixRaw = ITEMMOD_RollMagicAffix(pUnit, 1, 1, 0, 1, 0);
           }
 
           nRolledAffixMasked = (uint16_t)nRolledAffixRaw;
           uVar1 = nRolledAffixMasked;
           *(uint16_t*)(char*)&nRolledAffixMasked = (uint16_t)nRolledAffixRaw;
-          if (!(uint16_t)nRolledAffixMasked) {
+          if ((uint32_t)((uint16_t)nRolledAffixMasked) <= 0) {
             goto next_affix_roll;
           }
 

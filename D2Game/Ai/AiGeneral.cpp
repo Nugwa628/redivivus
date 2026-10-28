@@ -74,17 +74,24 @@ void __fastcall SetAiArgument(D2UnitStrc * pMonster, int32_t nArgNumber, int32_t
     if (!pAiGeneral) {
       return;
     }
-    if (nArgNumber == 1) {
+    switch (nArgNumber) {
+    case 1: {
       pAiGeneral->dwArg0 = nValue;
-    } else {
-      if (nArgNumber == 2) {
+      break;
+    }
+    default: {
+      switch (nArgNumber) {
+      case 2: {
         pAiGeneral->dwArg1 = nValue;
         return;
       }
-      if (nArgNumber == 3) {
+      case 3: {
         pAiGeneral->dwArg2 = nValue;
         return;
       }
+      }
+      break;
+    }
     }
 }
 

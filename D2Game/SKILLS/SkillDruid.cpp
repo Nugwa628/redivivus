@@ -1171,7 +1171,7 @@ BOOL __fastcall Skills_SrvDoFunc_145_Hurricane(::SGAMEDATA * pGame, D2UnitStrc *
         if (0 <= nAuraStateId && (int)nAuraStateId < sgptDataTable->nTxtStatesSize) {
           eActiveAuraState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, (int)nAuraStateId);
           if (eActiveAuraState != STATE_none) {
-            if (!pSkillTxt->InTown && (pRoom = D2Common::Units::UNITS_GetRoom(pUnit) , pRoom != 0) && (bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom) , bIsInTown != 0)) {
+            if (!(*((uint8_t *)pSkillTxt + 0x5) & gadwBitMasks[0]) && (pRoom = D2Common::Units::UNITS_GetRoom(pUnit) , pRoom != 0) && (bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom) , bIsInTown != 0)) {
               pStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit, (int)pSkillTxt->aurastate);
               if (pStatList) {
                 D2Common::Stats::StatsEx::STATLIST_RemoveAndRecalc(pUnit, pStatList);
@@ -1241,7 +1241,7 @@ BOOL __fastcall Skills_SrvDoFunc_146_CycloneArmor(::SGAMEDATA * pGame, D2UnitStr
         if (0 <= nAuraStateId && (int)nAuraStateId < sgptDataTable->nTxtStatesSize) {
           eActiveAuraState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, (int)nAuraStateId);
           if (eActiveAuraState != STATE_none) {
-            if (!pSkillTxt->InTown && (pRoom = D2Common::Units::UNITS_GetRoom(pUnit) , pRoom != 0) && (bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom) , bIsInTown != 0)) {
+            if (!(*((uint8_t *)pSkillTxt + 0x5) & gadwBitMasks[0]) && (pRoom = D2Common::Units::UNITS_GetRoom(pUnit) , pRoom != 0) && (bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom) , bIsInTown != 0)) {
               pStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit, (int)pSkillTxt->aurastate);
               if (pStatList) {
                 D2Common::Stats::StatsEx::STATLIST_RemoveAndRecalc(pUnit, pStatList);

@@ -415,14 +415,7 @@ static BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
       pwszZeroFill += 2;
     }
 
-    if (!gnNotifyEnabled) {
-      pcCmdEnd = "Player entering/leaving notifications are disabled.";
-      pszMsgDst = szMessage;
-      memcpy(pszMsgDst, pcCmdEnd, 0xd * 4);
-      pcCmdEnd += 0xd * 4;
-      pszMsgDst += 0xd * 4;
-      i = 0;
-    } else {
+    if (gnNotifyEnabled) {
       pcCmdEnd = "Player entering/leaving notifications are enabled.";
       pszMsgDst = szMessage;
       memcpy(pszMsgDst, pcCmdEnd, 0xc * 4);
@@ -431,6 +424,13 @@ static BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
 
       *(uint16_t*)pszMsgDst = *(uint16_t*)pcCmdEnd;
       pszMsgDst[2] = pcCmdEnd[2];
+    } else {
+      pcCmdEnd = "Player entering/leaving notifications are disabled.";
+      pszMsgDst = szMessage;
+      memcpy(pszMsgDst, pcCmdEnd, 0xd * 4);
+      pcCmdEnd += 0xd * 4;
+      pszMsgDst += 0xd * 4;
+      i = 0;
     }
 
     D2Lang::UTF8_ConvertToWideChar(wszMessage, szMessage, 0x200);

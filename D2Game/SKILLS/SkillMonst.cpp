@@ -2507,7 +2507,7 @@ BOOL __fastcall Skills_SrvDoFunc_110_FireArrowModMissile(::SGAMEDATA * pGame, D2
       if (0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize) {
         pMissileTxt = D2Client::GetMissleById(eMissileId);
         if (pMissileTxt) {
-          if (pSkillsTxt->lob) {
+          if ((*((uint8_t *)pSkillsTxt + 0x4) & gadwBitMasks[1])) {
             SkillsServer::SKILLS_CreateMissileFromUnit(pGame, eMissileId, pUnit, eSkill, nSkillLvl, 0, 0, 0, 0, 0);
             return 1;
           }

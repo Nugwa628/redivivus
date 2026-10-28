@@ -385,7 +385,7 @@ BOOL __fastcall Skills_CltStFunc_MonSummonSpawnSetCollision(D2UnitStrc * pUnit, 
     int nSpawnMode;
     int32_t nSpawnY;
     int32_t nSpawnX;
-    D2SkillsTxt* pTxtRecord = -1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
     if (!pTxtRecord) {
       return 0;
     }
@@ -396,7 +396,7 @@ BOOL __fastcall Skills_CltStFunc_MonSummonSpawnSetCollision(D2UnitStrc * pUnit, 
     }
 
     int32_t nSummonResult = D2Common::Monsters::MONSTERS::SummonOrSpawnMode(pUnit, 1, eSkill, nSkillLvl, &nSpawnMode, &nSpawnY, &nSpawnX);
-    if (-1 >= nSummonResult) {
+    if (0 > nSummonResult) {
       return 0;
     }
 

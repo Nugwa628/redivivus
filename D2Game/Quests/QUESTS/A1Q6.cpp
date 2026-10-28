@@ -631,16 +631,16 @@ void __fastcall Q06_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
       D2UnitDataPlayerStrc* pKillerPlayerData;
       if (pQuestArgs->pPlayer) {
         pGame = pQuestData->pGame;
-        pKillerPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-        bQuestState = D2Common::QuestRecord::GetQuestState(pKillerPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
+
+        bQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
         if (!bQuestState) {
           pGame2 = pQuestData->pGame;
-          pPlayerData2nd = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-          bQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData2nd->pQuestRecord[pGame2->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_RewardAwaits);
+
+          bQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame2->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_RewardAwaits);
           if (!bQuestState) {
             pGame2 = pQuestData->pGame;
-            pPlayerData2nd = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-            Q06_SetQuestCompletedAndReward(pQuestData->pGame, pQuestArgs->pPlayer, pPlayerData2nd->pQuestRecord[pGame2->nDifficulty]);
+
+            Q06_SetQuestCompletedAndReward(pQuestData->pGame, pQuestArgs->pPlayer, D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame2->nDifficulty]);
             iQ37DropCount = 2;
             do {
               pQuestSeed = GetQuestControlSeed(pQuestData->pGame);
@@ -737,12 +737,13 @@ uint32_t __fastcall Q06_GetQuestSpecificFlag(D2QuestDataStrc * pQuestData) {
 }
 
 // A1Q6 fpSequenceFilter: if stateFlag==0 and quest is live (bIsNotIntroduction), schedules Q06_QuestUpdate on a 0x14-tick timer to introduce the quest. No quest-record access.
-void __fastcall Q06_SequenceFilter(D2QuestDataStrc * pQuestData) {
+bool __fastcall Q06_SequenceFilter(D2QuestDataStrc * pQuestData) {
     if (!(!pQuestData->nStateFlag && pQuestData->bIsNotIntroduction == 1)) {
-      return;
+      return true;
     }
 
     AddQuestTimer(pQuestData, Q06_QuestUpdate, 0x14);
+    return true;
 }
 
 // A1Q6 load/restore callback (state slot 0xd) — reconstructs server stateFlag/stateFlagPrev from the persisted player quest record on game (re)load. If not Completed/FinishedInPreviousGame: Step0x04 -> flag 3/prev 2; Step0x03 -> flag 3/prev 1; Step0x02 -> flag 2/prev 1. Pure read of record bits to rebuild in-memory progress.

@@ -163,7 +163,7 @@ D2UnitStrc * __fastcall MISSILE_GetOwnerUnit(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x83);
       exit(-1);
     }
-    if (!(pUnit->eUnitFlagsEx >> 10 & 1)) {
+    if (!(((bool)(pUnit->eUnitFlagsEx >> 10 & 1)))) {
       return nullptr;
     }
     eD2UnitType eUnitType = pUnit->eOwnerType;
@@ -468,7 +468,7 @@ static uint32_t __stdcall SKILL_ExecuteSelectProc(D2UnitStrc * pUnit, eD2Skills 
     }
 
     uint8_t bySelectProc = pTxtRecord->SelectProc;
-    if (!(bySelectProc && (int)(uint32_t)bySelectProc < g_nSkillSelectProcCount)) {
+    if (!((uint32_t)bySelectProc > 0 && (int)((int)(uint32_t)bySelectProc) < (int)g_nSkillSelectProcCount)) {
       return 0;
     }
 
@@ -1201,13 +1201,13 @@ uint32_t __fastcall SKILL_IsTargetAlliedUnit(D2UnitStrc * pUnit, int * pnSkillPa
     D2SkillStrc* pSkill = D2Common::Units::GetLeftSkill(pUnit);
     if (pSkill) {
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UNIT\\CUnit.cpp", 0xb7f);
-      if (0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId && sgptDataTable->pTxtSkills[eSkillId].TargetAlly) {
+      if (0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId && (*((uint8_t *)&sgptDataTable->pTxtSkills[eSkillId] + 0x7) & gadwBitMasks[2])) {
         bHasAlliedSkill = true;
       }
     }
 
     pSkill = D2Common::Units::GetRightSkill(pUnit);
-    if ((!pSkill || (eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UNIT\\CUnit.cpp", 0xb88) , (int)eSkillId < 0) || (int)eSkillId >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkillId) || !sgptDataTable->pTxtSkills[eSkillId].TargetAlly) && !bHasAlliedSkill) {
+    if ((!pSkill || (eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UNIT\\CUnit.cpp", 0xb88) , (int)eSkillId < 0) || (int)eSkillId >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkillId) || !(*((uint8_t *)&sgptDataTable->pTxtSkills[eSkillId] + 0x7) & gadwBitMasks[2])) && !bHasAlliedSkill) {
       return 0;
     }
 

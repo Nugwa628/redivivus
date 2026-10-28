@@ -132,20 +132,22 @@ uint32_t * __fastcall SBIG_BigBuffer_GetDataPtr(BigBuffer * pBitSet) {
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method PLAUSIBLE. Zeroes m_alloc, m_count and m_data. The old infix Small was meaningless - the two functions it distinguished are two instantiations, not two sizes. SMem tag 0x708880.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void __fastcall TSBaseArray_Uc_Constructor(BigBuffer * pBitSet) {
+BigBuffer * __fastcall TSBaseArray_Uc_Constructor(BigBuffer * pBitSet) {
     pBitSet->nCapacity = 0;
     pBitSet->nCount = 0;
     pBitSet->pData = 0;
+    return pBitSet;
 }
 
 // @was SBIG_BitSet_InitMedium (pass 6, 2026.08.28)
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method PLAUSIBLE. Body identical to 00421020; second byte instantiation, SMem tag 0x70888c. The old infix Medium was likewise meaningless.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void __fastcall TSBaseArray_UcAlt_Constructor(BigBuffer * pBitSet) {
+BigBuffer * __fastcall TSBaseArray_UcAlt_Constructor(BigBuffer * pBitSet) {
     pBitSet->nCapacity = 0;
     pBitSet->nCount = 0;
     pBitSet->pData = 0;
+    return pBitSet;
 }
 
 // @was SBIG_BitSet_RoundUpPow2_Max64 (pass 6, 2026.08.28)
@@ -563,7 +565,7 @@ void TSBaseArray_Ui_Copy(uint32_t * pArray, uint32_t nCount, uint32_t * pSrc) {
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method CONFIRMED. Compute n = arg + m_count; when m_alloc is below n, and only when the flag is set, call CalcChunkSize then round n up to that chunk, then call ReallocData with n - the oracle's .Reserve__34TSGrowableArray<3RGN,10TSCD<3RGN>>FUi,i at 10040af0, including the bool second parameter that selects chunk rounding. Byte instantiation, SMem tag 0x708880.
 // @struct The container header is +0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk. BigBuffer extends it with +0x10 m_offset, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void TSGrowableArray_Uc_Reserve(uint32_t * pArray, int32_t nAdditional, int32_t bAlignToGranularity) {
+void __fastcall TSGrowableArray_Uc_Reserve(uint32_t * pArray, int32_t nEdxUnused, int32_t nAdditional, int32_t bAlignToGranularity) {
     uint32_t nNewSize = nAdditional + pArray[1];
     if (nNewSize <= *pArray) {
       return;
@@ -768,7 +770,7 @@ int32_t __fastcall TSGrowableArray_Uc_New(uint32_t * pArray) {
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method CONFIRMED. Matches the oracle's .SetCount__38TSGrowableArray<5RECTF,12TSCD<5RECTF>>FUi @1003cdb0 with the element construct/destruct loops collapsed away, as they are for a POD element type. Byte instantiation.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void TSGrowableArray_Uc_SetCount(uint32_t * pArray, uint32_t nNewCount) {
+void __fastcall TSGrowableArray_Uc_SetCount(uint32_t * pArray, int32_t nEdxUnused, uint32_t nNewCount) {
     uint32_t nNewSize;
     if (nNewCount > pArray[1] && nNewCount > *pArray) {
       uint32_t nGranularity;
@@ -853,7 +855,7 @@ void TSBaseArray_UcAlt_Copy(uint32_t * pArray, uint32_t nCount, uint8_t * pSrc) 
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method CONFIRMED. Same structure as TSGrowableArray_Uc_Reserve 00421630, dword elements.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void TSGrowableArray_Ui_Reserve(uint32_t * pArray, int32_t nAdditional, int32_t bAlignToGranularity) {
+void __fastcall TSGrowableArray_Ui_Reserve(uint32_t * pArray, int32_t nEdxUnused, int32_t nAdditional, int32_t bAlignToGranularity) {
     uint32_t nNewSize = nAdditional + pArray[1];
     if (nNewSize <= *pArray) {
       return;
@@ -876,7 +878,7 @@ void TSGrowableArray_Ui_Reserve(uint32_t * pArray, int32_t nAdditional, int32_t 
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method CONFIRMED. Same structure as 00421630; second byte instantiation, SMem tag 0x70888c.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void TSGrowableArray_UcAlt_Reserve(uint32_t * pArray, int32_t nAdditional, int32_t bAlignToGranularity) {
+void __fastcall TSGrowableArray_UcAlt_Reserve(uint32_t * pArray, int32_t nEdxUnused, int32_t nAdditional, int32_t bAlignToGranularity) {
     uint32_t nNewSize = nAdditional + pArray[1];
     if (nNewSize <= *pArray) {
       return;
@@ -899,7 +901,7 @@ void TSGrowableArray_UcAlt_Reserve(uint32_t * pArray, int32_t nAdditional, int32
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method CONFIRMED, and verified by hand this pass. Body is 'if (this != &src) Copy(src.m_count, src.m_data); this->m_chunk = src.m_chunk; return this'. The trailing chunk-field copy after the element copy is present ONLY in the oracle's .__as__ @100395e0 and is what identifies operator= rather than a plain copy helper. Its call to 004215c0 is also what establishes that function as TSBaseArray::Copy.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void * TSGrowableArray_Ui_Assign(uint32_t * pDest, void * pSource) {
+void * __fastcall TSGrowableArray_Ui_Assign(uint32_t * pDest, int32_t nEdxUnused, void * pSource) {
     if (pDest != (unsigned int*)pSource) {
       TSBaseArray_Ui_Copy(pDest, *(uint32_t*)((int)pSource + 4), *(uint32_t**)((int)pSource + 8));
     }
@@ -1087,7 +1089,7 @@ void __fastcall SBIG_EnsureCapacity(uint32_t nIndex, int32_t bZeroFill, BigBuffe
 // @oracle-method CONFIRMED. Line for line the same body as TSGrowableArray_Uc_SetCount 00421980 - which is itself confirmed against the oracle's .SetCount__38TSGrowableArray<5RECTF,12TSCD<5RECTF>>FUi @1003cdb0 - differing only in calling the dword instantiation's helpers (TSGrowableArray_Ui_CalcChunkSize 004210a0, TSFixedArray_Ui_ReallocData 004216e0) where 00421980 calls the byte ones. Same guard 'if (m_count < n && m_alloc < n)', same zero-chunk lazy CalcChunkSize, same round-up-to-chunk, same trailing 'm_count = n'.
 // @note This function lies OUTSIDE the 00420eb0-00421d80 COMDAT run that passes 5 and 6 worked, which is why earlier passes did not reach it. It completes the pair: SetCount now exists for both the Ui and the Uc instantiation.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}. Chunk cap = 256/sizeof(element).
-void TSGrowableArray_Ui_SetCount(BigBuffer * pDwordArray, uint32_t nNewLen) {
+void __fastcall TSGrowableArray_Ui_SetCount(BigBuffer * pDwordArray, int32_t nEdxUnused, uint32_t nNewLen) {
     uint32_t nNewCapacity;
     if (nNewLen > pDwordArray->nCount && nNewLen > pDwordArray->nCapacity) {
       uint32_t nGranularity;

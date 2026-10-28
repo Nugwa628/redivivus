@@ -388,7 +388,7 @@ void __fastcall PLAYER_CreateStarterItems(::SGAMEDATA * pGame, D2UnitStrc * pUni
     }
 
     __frame0.i = 0;
-    if (*(char*)((int)pnParam + 5) == '\0') {
+    if ((uint32_t)(*(char*)((int)pnParam + 5)) <= 0) {
       return;
     }
 

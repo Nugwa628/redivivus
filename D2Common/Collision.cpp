@@ -632,7 +632,7 @@ D2UnitStrc * __stdcall CallCollisionFunction(D2RoomStrc * pRoom, int32_t nX, int
               case UNIT_MISSILE:
                 case_UNIT_MISSILE:
                 nUnitSizeX = Units::GetUnitSizeX(pUnit);
-              if (!(nUnitSizeX <= 2)) {
+              if (!(nUnitSizeX < 3)) {
                 nUnitSizeX = 3;
               } else {
                 if (nUnitSizeX <= 0) {

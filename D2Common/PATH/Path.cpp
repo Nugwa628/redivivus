@@ -201,10 +201,10 @@ BOOL __stdcall PATH_CheckCollisionOnStep(uint32_t nParam1, uint32_t nParam2, D2D
     if (nCollisionPattern == 0x3401) {
       nCollisionPattern = 0x3c01;
     }
-    if (!nBBoxFlag) {
-      eCollResult = Collision::RemoveGetCollision_Type(pDynamicPath->pRoom, nParam2 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam2 + 2), nParam1 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam1 + 2), pDynamicPath->nUnitWidth, pDynamicPath->nCollisionFlag, nCollisionPattern);
-    } else {
+    if (nBBoxFlag) {
       eCollResult = Collision::RemoveGetCollision_Width(pDynamicPath->pRoom, nParam2 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam2 + 2), nParam1 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam1 + 2), pDynamicPath->nUnitSize, pDynamicPath->nCollisionFlag, nCollisionPattern);
+    } else {
+      eCollResult = Collision::RemoveGetCollision_Type(pDynamicPath->pRoom, nParam2 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam2 + 2), nParam1 & 0xffff, (uint32_t)*(uint16_t*)((char*)&nParam1 + 2), pDynamicPath->nUnitWidth, pDynamicPath->nCollisionFlag, nCollisionPattern);
     }
 
     pDynamicPath->eCollisionFlag |= eCollResult;

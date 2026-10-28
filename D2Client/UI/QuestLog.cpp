@@ -288,20 +288,7 @@ static void QUESTLOG_PopulateQuestEntry(D2QuestLogEntryStrc * pEntry) {
       }
       if (!bQuestActive) {
         bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer_00, gaQuestInfoTable[nActIndex].nQuestId, QUESTSTATE_JustCompleted);
-        if (!bRewardAwaits) {
-          bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer_00, gaQuestInfoTable[nActIndex].nQuestId, QUESTSTATE_FinishedInPreviousGame);
-          if (bRewardAwaits && !bStateResult) {
-            bStateResult = D2Common::QuestRecord::GetQuestState(pBitBuffer, gaQuestInfoTable[nActIndex].nQuestId, QUESTSTATE_RewardAwaits);
-            if (!bStateResult) {
-              wQuestStep = 0xe92;
-              if (eD2GSGameType_007a0610 == GAMETYPE_SINGLEPLAYER) {
-                wQuestStep = 0xe91;
-              }
-
-              goto show_fixed_desc;
-            }
-          }
-        } else {
+        if (bRewardAwaits) {
           if (pEntry->eQuestId == 0x15) {
             bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Completed);
             if (!bRewardAwaits) {
@@ -336,6 +323,19 @@ static void QUESTLOG_PopulateQuestEntry(D2QuestLogEntryStrc * pEntry) {
               pEntry->bHasDescription = '\x01';
               pEntry->nDisplayState = 3;
               return;
+            }
+          }
+        } else {
+          bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer_00, gaQuestInfoTable[nActIndex].nQuestId, QUESTSTATE_FinishedInPreviousGame);
+          if (bRewardAwaits && !bStateResult) {
+            bStateResult = D2Common::QuestRecord::GetQuestState(pBitBuffer, gaQuestInfoTable[nActIndex].nQuestId, QUESTSTATE_RewardAwaits);
+            if (!bStateResult) {
+              wQuestStep = 0xe92;
+              if (eD2GSGameType_007a0610 == GAMETYPE_SINGLEPLAYER) {
+                wQuestStep = 0xe91;
+              }
+
+              goto show_fixed_desc;
             }
           }
         }
@@ -848,7 +848,7 @@ static uint32_t QUESTLOG_GetDrawPosition(int32_t nBorderType) {
           return nResolutionMode_lcl != 2 ? 2 : 0;
         }
 
-        return (uint32_t)(nResolutionMode_lcl != 2) * 2 + 1;
+        return (uint32_t)((nResolutionMode_lcl != 2) ? 3 : 1);
       }
     }
 
@@ -1849,15 +1849,15 @@ void __stdcall QUESTLOG_OnMouseDown(D2UIMouseMsgStrc * pMsg) {
         uVar1 = QUESTLOG_HitTestQuestIcon(nPanelRelY, nPanelRelX);
         if (uVar1 == -1 || gQuestLog.nQuestLogQuestCount <= (int)uVar1) {
           bHitButton = QUESTLOG_HitTestOpenButton(nPanelRelY, nPanelRelX);
-          if ((char)bHitButton == '\0') {
+          if ((char)bHitButton != '\0') {
+            gQuestLog.bQuestLogOpenBtnPressed = 1;
+          } else {
             bHitButton = QUESTLOG_HitTestCloseButton(nPanelRelY, nPanelRelX);
             if ((char)bHitButton == '\0') {
               goto consume_click;
             }
 
             gQuestLog.bQuestLogCloseBtnPressed = 1;
-          } else {
-            gQuestLog.bQuestLogOpenBtnPressed = 1;
           }
 
           Sound::SOUND_PlaySound(SOUND_CURSOR_BUTTON_CLICK, nullptr, 0, 0, 0);

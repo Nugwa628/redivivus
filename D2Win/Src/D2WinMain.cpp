@@ -170,11 +170,11 @@ BOOL __fastcall FORMS_AppendFormToDestroyQueue(D2ControlStrc * pControl) {
 // @sourcefile .\Src\D2WinMain.cpp
 void __stdcall D2WINMAIN_FreeLeadingFormControls() {
     D2ControlStrc* pDVar1;
-    if (!(gnFormControlCount < 1 && D2Client::Forms::pFormUnknown)) {
+    if (!(gnFormControlCount <= 0 && D2Client::Forms::pFormUnknown)) {
       return;
     }
 
-    while (!(D2Client::Forms::pFormUnknown->dwState & 1U)) {
+    while (!(D2Client::Forms::pFormUnknown->dwState & gadwBitMasks[0])) {
       pDVar1 = D2Client::Forms::pFormUnknown->pNext;
       Fog::Memory::FreeClientMemory(D2Client::Forms::pFormUnknown, ".\\Src\\D2WinMain.cpp", 0x25a, 0);
       D2Client::Forms::pFormUnknown = pDVar1;
@@ -184,7 +184,7 @@ void __stdcall D2WINMAIN_FreeLeadingFormControls() {
     }
 
     do {
-      if (D2Client::Forms::pFormUnknown->dwState & 2U) {
+      if (D2Client::Forms::pFormUnknown->dwState & gadwBitMasks[1]) {
         return;
       }
 
@@ -368,11 +368,11 @@ void __fastcall D2WINMAIN_SetControlVisible(D2ControlStrc * pControl, BOOL bVisi
       return;
     }
     if (bVisible) {
-      pControl->dwState |= 1;
+      pControl->dwState |= gadwBitMasks[0];
       return;
     }
 
-    pControl->dwState &= -2;
+    pControl->dwState &= gadwInvBitMasks[0];
 }
 
 // Returns bit 0 of control flags (offset +8), checking visibility/enabled state. Halts on null pointer.
@@ -395,11 +395,11 @@ void __fastcall D2WINMAIN_SetControlActive(D2ControlStrc * pControl, BOOL bActiv
       exit(-1);
     }
     if (bActive) {
-      pControl->dwState |= 4;
+      pControl->dwState |= gadwBitMasks[2];
       return;
     }
 
-    pControl->dwState &= -5;
+    pControl->dwState &= gadwInvBitMasks[2];
 }
 
 // Returns pControl->dwState & gadwBitMasks[2], the active bit D2WINMAIN_SetControlActive sets; halts (line 858) on NULL.
@@ -524,7 +524,7 @@ void __stdcall RENDERER_DrawOutOfGameScene() {
       }
 
       for (; pForm; pForm = pForm->pNext) {
-        if (pForm->fpDraw && !(pForm->dwState & 8U)) {
+        if (pForm->fpDraw && !(pForm->dwState & gadwBitMasks[3])) {
           pForm->fpDraw(pForm);
         }
       }
@@ -537,7 +537,7 @@ void __stdcall RENDERER_DrawOutOfGameScene() {
       }
 
       for (; pForm; pForm = pForm->pNext) {
-        if (pForm->fpDraw && pForm->dwState & 8U) {
+        if (pForm->fpDraw && pForm->dwState & gadwBitMasks[3]) {
           pForm->fpDraw(pForm);
         }
       }
@@ -1044,7 +1044,7 @@ void __stdcall INPUT_FormMouseWheel(D2UIMouseMsgStrc * pMsg) {
       do {
         if (pControl->sControl.neD2FormType == FORM_Scrollbar) {
           dwState = pControl->sControl.dwState;
-          if (dwState & 4 && dwState & 1) {
+          if (dwState & gadwBitMasks[2] && dwState & gadwBitMasks[0]) {
             nMaxValue = D2WinScrollbar::D2WINSCROLLBAR_GetMaxValue(pControl);
             if (0 < nMaxValue) {
               pClosestScrollbar = (::D2WinScrollbar*)D2WIN_FindClosestControlToMouse(&pClosestScrollbar->sControl, &pControl->sControl);
@@ -1078,11 +1078,11 @@ void __stdcall D2WINMAIN_SetCursorVisible(BOOL bVisible) {
 
 void __stdcall SetUnsetFlag0x08(D2ControlStrc * pControl, int32_t nParam) {
     if (nParam) {
-      pControl->dwState |= 8;
+      pControl->dwState |= gadwBitMasks[3];
       return;
     }
 
-    pControl->dwState &= -9;
+    pControl->dwState &= gadwInvBitMasks[3];
 }
 
 // Sets pFormFourth global to the specified control

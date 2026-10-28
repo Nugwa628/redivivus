@@ -406,9 +406,7 @@ static void __stdcall CUBE_ParseOutputItem(D2CubeOutputStrc * pOutput, char * ps
     szPaddedCode = pszCursor;
     int nTokenCmpLen;
     nTokenCmpLen = __stricmp(pszField, "Cow Portal");
-    if (!nTokenCmpLen) {
-      pOutputCopy->nType = 1;
-    } else {
+    if (nTokenCmpLen) {
       D2ItemsTxt* pItemsTxt;
       nTokenCmpLen = __stricmp(pszField, "Pandemonium Portal");
       if (!nTokenCmpLen) {
@@ -484,6 +482,8 @@ static void __stdcall CUBE_ParseOutputItem(D2CubeOutputStrc * pOutput, char * ps
           }
         }
       }
+    } else {
+      pOutputCopy->nType = 1;
     }
 
     parse_modifiers:
@@ -495,11 +495,11 @@ static void __stdcall CUBE_ParseOutputItem(D2CubeOutputStrc * pOutput, char * ps
         nSpanLen = strcspn(szPaddedCode, "=,");
         pDVar1 = pOutput;
         pcVar2 = pszCursor + nSpanLen;
-        if (*pcVar2 == '\0') {
-          szPaddedCode = 0;
-        } else {
+        if (*pcVar2 != '\0') {
           *pcVar2 = '\0';
           szPaddedCode = pcVar2 + 1;
+        } else {
+          szPaddedCode = 0;
         }
 
         pcVar2 = szPaddedCode;
@@ -511,13 +511,13 @@ static void __stdcall CUBE_ParseOutputItem(D2CubeOutputStrc * pOutput, char * ps
         if (bTokenMatch) {
           nSpanLen = strcspn(szPaddedCode, ",");
           pszCursor = pcVar2 + nSpanLen;
-          if (*pszCursor == '\0') {
-            szPaddedCode = 0;
+          if (*pszCursor != '\0') {
+            *pszCursor = '\0';
+            szPaddedCode = pszCursor + 1;
             nAtol = atol(pcVar2);
             pOutput->nQuantity = (uint8_t)nAtol;
           } else {
-            *pszCursor = '\0';
-            szPaddedCode = pszCursor + 1;
+            szPaddedCode = 0;
             nAtol = atol(pcVar2);
             pOutput->nQuantity = (uint8_t)nAtol;
           }

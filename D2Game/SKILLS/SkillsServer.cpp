@@ -1302,7 +1302,7 @@ BOOL __fastcall SKILLS_SrvStFn03_Unsummon(::SGAMEDATA * pGame, D2UnitStrc * pUni
 
     int32_t nPetId = PLAYER::PlayerPets::GetOwnersPetType(pUnit, pTarget->nUnitGUID);
     D2PetTypeTxt* pPetTypeTxt = D2Client::GAME::RosterPets::GetPetTypeTxtById(nPetId);
-    if (!(pPetTypeTxt && pPetTypeTxt->unsummon)) {
+    if (!(pPetTypeTxt && (*((uint8_t *)pPetTypeTxt + 0x4) & gadwBitMasks[3]))) {
       return 0;
     }
 
@@ -1341,7 +1341,7 @@ BOOL __stdcall SKILLS_ValidateSkillTarget(::SGAMEDATA * pGame, D2UnitStrc * pUni
     if (!(pSkillTxt && (!pSkillTxt->TargetableOnly || (bCanAttack = UNIT::SUnit::UNITS_CheckIfCanAttackTarget(pGame, pUnit, pTarget) , bCanAttack != 0) || (nAlignmentCheck = UNIT::SUnit::UNITS_CheckSkillTargetAlignment(pGame, (int*)pUnit, pTarget, eSkill) , nAlignmentCheck || (bCanAttack = UNIT::SUnit::UNITS_CanUseSkillOnTarget(pGame, pUnit, pTarget, eSkill) , bCanAttack != 0))))) {
       return 0;
     }
-    if (pTarget->eUnitFlags >> 1 & 1) {
+    if (((bool)(pTarget->eUnitFlags >> 1 & 1))) {
       if (pTarget->eUnitType == UNIT_MONSTER && pTarget->eAnimMode.ePlayerMode == Kick) {
         if (pSkillTxt->TargetCorpse) {
           return 1;
@@ -1413,14 +1413,14 @@ void __fastcall SKILLS_SetPeriodicStatOrSkillTimer(::SGAMEDATA * pGame, D2UnitSt
     }
 
     int nGameFrame = pGame->dwGameFrame;
-    if (!nParam2) {
-      GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSTATS, nStatId);
-      nEventType = 9;
-    } else {
+    if (nParam2) {
       GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSKILLS, -1);
       eSkill = SKILL_Attack;
       nStatId = -1;
       nEventType = 8;
+    } else {
+      GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSTATS, nStatId);
+      nEventType = 9;
     }
 
     GAME::Event::SetEvent(pGame, pUnit, nEventType, (nGameFrame - 1 + nPerDelay) / nPerDelay * nPerDelay + 1, nStatId, eSkill);
@@ -2377,7 +2377,7 @@ static void ClearNecroPet(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     uint32_t dwFindGUID = UNIT::SUnit::GetNecroPet(pUnit);
     D2UnitStrc* pUnit_00 = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, dwFindGUID);
     if (pUnit_00) {
-      if (pUnit_00->eUnitFlagsEx >> 8 & 1) {
+      if (((bool)(pUnit_00->eUnitFlagsEx >> 8 & 1))) {
         UNIT::SUnit::FreeServerUnit(pGame, pUnit_00);
         UNIT::SUnit::SetNecroPet(pUnit, -1);
         return;
@@ -3287,11 +3287,11 @@ D2StatListExStrc * __fastcall SetStateWithExpiryTime(D2StateExArgStrc * pStateEx
     }
 
     uint32_t nStatListFlags = 0;
-    if (!bIsCurse) {
-      pExistingStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit_00, eAuraState);
-    } else {
+    if (bIsCurse) {
       nStatListFlags = 32;
       pExistingStatList = D2Common::Stats::StatsEx::GetStatsByFlags(pUnit_00, 0x20);
+    } else {
+      pExistingStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit_00, eAuraState);
     }
     if (pExistingStatList) {
       eExistingSkill = D2Common::Stats::StatsEx::GetState(pExistingStatList);
@@ -3719,12 +3719,12 @@ BOOL __fastcall Skills_SrvDoFunc_002_GenericMeleeHit(::SGAMEDATA * pGame, D2Unit
     if (0 < nAuraState && (int)nAuraState < sgptDataTable->nTxtStatesSize) {
       pAttackerStatList = D2Common::Stats::StatsEx::GetStatsByState(pAttacker, (int)nAuraState);
       if (!pAttackerStatList) {
-        if (!pAttacker) {
-          nAuraDuration = -1;
-          eAttackerType = UNIT_COUNT;
-        } else {
+        if (pAttacker) {
           nAuraDuration = pAttacker->nUnitGUID;
           eAttackerType = pAttacker->eUnitType;
+        } else {
+          nAuraDuration = -1;
+          eAttackerType = UNIT_COUNT;
         }
 
         pAttackerStatList = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(pGame->pMemoryPool, 4, 0, eAttackerType, nAuraDuration);
@@ -3886,7 +3886,7 @@ BOOL __fastcall SKILLS_SrvStartSkill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD
     if (!pSkillsTxt || !nParam && (bHasMana = SKILL_CheckManaForCast(pUnit) , !bHasMana)) {
       return 0;
     }
-    if (!pSkillsTxt->InTown) {
+    if (!(*((uint8_t *)pSkillsTxt + 0x5) & gadwBitMasks[0])) {
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       if (!pRoom || (bHasLOS = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom) , bHasLOS != 0)) {
         D2Common::Units::SetCurrentSkill(pUnit, nullptr);
@@ -4450,11 +4450,11 @@ void __fastcall Server_SelectSkill(D2UnitStrc * pUnit, int32_t leftOrRight, eD2S
     }
 
     D2SkillStrc* pPrevRightSkill = 0;
-    if (!leftOrRight) {
+    if (leftOrRight) {
+      D2Common::Skills::SelectSkillLeft(pUnit, eSkill, ownerId);
+    } else {
       pPrevRightSkill = D2Common::Units::GetRightSkill(pUnit);
       D2Common::Skills::SelectSkillRight(pUnit, eSkill, ownerId);
-    } else {
-      D2Common::Skills::SelectSkillLeft(pUnit, eSkill, ownerId);
     }
 
     ownerId = -1;
@@ -4560,7 +4560,11 @@ void SKILL_ApplyStunState(void * pThis, D2UnitStrc * pUnit, eD2States eState) {
     }
 
     D2StatListExStrc* pStatListEx = D2Common::Stats::StatsEx::GetStatsByState(pUnit, eState);
-    if (!pStatListEx) {
+    if (pStatListEx) {
+      pExtendedExpiryFrame = *(int*)((int)pThis + 0xa8) + eState;
+      D2Common::Stats::StatsEx::STATSEX_SetStatListTimeout(pStatListEx, pExtendedExpiryFrame);
+      GAME::Event::SetEvent((::SGAMEDATA*)pThis, pUnit, 0xc, pExtendedExpiryFrame, 0, 0);
+    } else {
       uint32_t dwStunExpireFrame;
       dwStunExpireFrame = *(int*)((int)pThis + 0xa8) + 100;
       pStatListEx = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(*(D2PoolManagerStrc**)((int)pThis + 0x1c), 2, dwStunExpireFrame, pUnit->eUnitType, pUnit->nUnitGUID);
@@ -4573,10 +4577,6 @@ void SKILL_ApplyStunState(void * pThis, D2UnitStrc * pUnit, eD2States eState) {
         D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_stunned, 1);
         pThis = (void*)pGameSaved;
       }
-    } else {
-      pExtendedExpiryFrame = *(int*)((int)pThis + 0xa8) + eState;
-      D2Common::Stats::StatsEx::STATSEX_SetStatListTimeout(pStatListEx, pExtendedExpiryFrame);
-      GAME::Event::SetEvent((::SGAMEDATA*)pThis, pUnit, 0xc, pExtendedExpiryFrame, 0, 0);
     }
 
     GAME::Event::Dispatch::Monster::SetCurrentSkill(pUnit, eD2MonsterAnimMode_ns::Neutral, &local_28);

@@ -1187,7 +1187,7 @@ void __stdcall DRAW_ConvertRGBAToIndexed(uint8_t * pRGBAIn, uint8_t * pIndexedOu
       pfnColorFinder = pfnCustomColorFinder;
     }
 
-    for (; nPixelCount; nPixelCount--) {
+    for (; (uint32_t)nPixelCount > 0; nPixelCount--) {
       uint8_t byColorIndex;
       *(uint8_t*)(char*)&pfnCustomColorFinder = *pSrcPixel;
       *(uint8_t*)(char*)&pIndexedOut = pSrcPixel[1];

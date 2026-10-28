@@ -531,8 +531,8 @@ void __stdcall DRAW_LocalCharsInSelectionScreen0() {
     int nLoopIdx = 0x100;
     D2CharSelStrc* pCharSelIter = D2Client::CharScreen::D2CharSelStrcFirst;
     int nNavigationIndex = 0;
-    uint16_t* pwszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0x1419);
-    D2Lang::WideCharToUTF8(szRetrievingMsg, pwszLocaleStr, nLoopIdx);
+    uint16_t* pwszLocaleStr;
+    D2Lang::WideCharToUTF8(szRetrievingMsg, D2Lang::StrTable::strtable::GetLocaleString(0x1419), nLoopIdx);
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gpControlCharSelArrows, 0);
     if (0 < gnCharSelScreenSlotCount) {
       nLoopIdx = 0;
@@ -767,11 +767,11 @@ static BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharac
     Storm::Source::SSTR::SStrCopy(pNewCharSel->szCharname, szCharacterName, 0x7fffffff);
     char* pDestination;
     pDestination = pNewCharSel->szCommandStringTable;
-    if (!szRealmName) {
+    if (szRealmName) {
+      D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize((uint16_t*)pDestination, szRealmName, 0xff);
+    } else {
       pDestination[0] = '\0';
       pDestination[1] = '\0';
-    } else {
-      D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize((uint16_t*)pDestination, szRealmName, 0xff);
     }
 
     int nEquipIndex;
@@ -849,12 +849,7 @@ static BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharac
     int32_t nClassicOrExpansionMode;
     nClassicOrExpansionMode = 5;
     if (pNewCharSel->nCharacterFlags & 4) {
-      if (!(pNewCharSel->nCharacterFlags & 8)) {
-        BVar6 = Fog::D2CheckExpansionGame();
-        if (BVar6 || pNewCharSel->ePlayerClassID < CLASS_DRUID) {
-          nClassicOrExpansionMode = 1;
-        }
-      } else {
+      if (pNewCharSel->nCharacterFlags & 8) {
         switch (ePlayerClassID) {
           case 0:
 
@@ -868,6 +863,11 @@ static BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharac
         }
 
         ePlayerClassID = 9;
+      } else {
+        BVar6 = Fog::D2CheckExpansionGame();
+        if (BVar6 || pNewCharSel->ePlayerClassID < CLASS_DRUID) {
+          nClassicOrExpansionMode = 1;
+        }
       }
     }
 
@@ -903,16 +903,7 @@ static BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharac
     pListIter = D2Client::CharScreen::D2CharSelStrcFirst;
     if (D2Client::CharScreen::D2CharSelStrcFirst) {
       BVar6 = Fog::D2CheckExpansionGame();
-      if (!BVar6) {
-        pListPrev = pListIter->pNext;
-        while (pListPrev) {
-          pListIter = pListIter->pNext;
-          pListPrev = pListIter->pNext;
-        }
-
-        pListIter->pNext = pNewCharSel;
-        pNewCharSel = D2Client::CharScreen::D2CharSelStrcFirst;
-      } else {
+      if (BVar6) {
         if (pListIter) {
           while (true) {
             pListCur = pListIter;
@@ -939,6 +930,15 @@ static BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharac
         }
 
         pNewCharSel->pNext = D2Client::CharScreen::D2CharSelStrcFirst;
+      } else {
+        pListPrev = pListIter->pNext;
+        while (pListPrev) {
+          pListIter = pListIter->pNext;
+          pListPrev = pListIter->pNext;
+        }
+
+        pListIter->pNext = pNewCharSel;
+        pNewCharSel = D2Client::CharScreen::D2CharSelStrcFirst;
       }
     }
 
@@ -1485,7 +1485,7 @@ BOOL __stdcall CHARSEL_UpdateSelectedCharDisplay() {
           dwCompFlags |= 0x20;
         }
         if (wCharFlags & 0x20) {
-          dwCompFlags |= 0x1000;
+          dwCompFlags |= gadwBitMasks[12];
         }
 
         D2Win::Src::D2Comp::D2COMP_SetFlags((D2CharSelStrc*)gpCharSelPendingEntry->pCharSelCompStrc, dwCompFlags);
@@ -2212,7 +2212,7 @@ void __stdcall CHARSEL_ParseRealmCharList(char * szRealmName, char * szText, int
     if (nCharCount < *(uint16_t*)(pRecordHeader + 3)) {
       nRemaining = nCharCount;
     }
-    for (; nRemaining; nRemaining--) {
+    for (; (uint32_t)nRemaining > 0; nRemaining--) {
       dwCharFlags = 0;
       szCharacterName = aSaveData;
       if (byRecordType == '\x19') {

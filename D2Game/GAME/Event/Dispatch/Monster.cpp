@@ -201,7 +201,7 @@ void __fastcall DropItemForVictim_Unused(::SGAMEDATA * pGame, D2ObjectOperateFnA
       exit(-1);
     } else {
       eCollisionFlags eCollision;
-      if (pVictim->eUnitFlags >> 0x11 & 1) {
+      if (((bool)(pVictim->eUnitFlags >> 0x11 & 1))) {
         return;
       }
       /* bonewall */ if (pVictim->nClassId == 0x158) {

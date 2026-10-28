@@ -190,7 +190,7 @@ int32_t __stdcall TXT_Experience_GetMaxLevel(int32_t ePlayerClass) {
 int __stdcall DATATBLS_GetLevelFromExperience(int32_t ePlayerClass, uint32_t nParam) {
     int nClassIdClamped;
     int nLevel;
-    if (ePlayerClass < 0 || 6 < ePlayerClass) {
+    if (ePlayerClass < 0 || 7 <= ePlayerClass) {
       ePlayerClass = 0;
     }
     if (ePlayerClass < 0 || (nClassIdClamped = ePlayerClass , 6 < ePlayerClass)) {
@@ -344,7 +344,6 @@ void __fastcall DATATBLS_CompileSkillDescCode(char * szText, char * pRecord, int
     uint8_t aByteCodeBuf[1024];
     uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!pRecord) {
-      Fog::Debug::GuardStack();
       return;
     }
     if (szText) {
@@ -352,7 +351,6 @@ void __fastcall DATATBLS_CompileSkillDescCode(char * szText, char * pRecord, int
       if (0 < (int)sVar1) {
         nCompiledLen = DATATBLS_AppendDataToBuffer(&sgtDataTable.pSkillDescCode, &sgtDataTable.nSkillDescCodeSize, &sgtDataTable.nSkillDescCodeCapacity, aByteCodeBuf, sVar1);
         *(uint32_t*)(pRecord + nOffset) = nCompiledLen;
-        Fog::Debug::GuardStack();
         return;
       }
     }
@@ -362,7 +360,6 @@ void __fastcall DATATBLS_CompileSkillDescCode(char * szText, char * pRecord, int
     pcVar1[1] = -1;
     pcVar1[2] = -1;
     pcVar1[3] = -1;
-    Fog::Debug::GuardStack();
 }
 
 D2AnimDataStrc * __stdcall TXT_AnimTbls_Get() {
@@ -4347,13 +4344,13 @@ void __fastcall TXT_AllocTxt_pettype(D2PoolManagerStrc * pMemory) {
     aFieldDefs[0x14].fpLinker = 0;
     sgtDataTable.pTxtPetTypeLink = Fog::Src::Excel::STRUCT_CreateTxtLinkStrc(".\\DATATBLS\\DataTbls.cpp", 0x729);
     sgtDataTable.pTxtPetType = (D2PetTypeTxt*)CompileTxt(pMemory, "pettype", aFieldDefs, &sgtDataTable.nTxtPetTypeSize, 0xe0);
-    if (0xff < sgtDataTable.nTxtPetTypeSize) {
+    if (0x100 <= sgtDataTable.nTxtPetTypeSize) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x72b);
       exit(-1);
     }
 
     /* Why it adjust size ? */ sgtDataTable.nTxtPetTypeSize = sgtDataTable.nTxtPetTypeSize <= 0 ? 0 : sgtDataTable.nTxtPetTypeSize;
-    if (0xff >= sgtDataTable.nTxtPetTypeSize) {
+    if (0x100 > sgtDataTable.nTxtPetTypeSize) {
       return;
     }
 

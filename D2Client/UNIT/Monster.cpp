@@ -862,8 +862,8 @@ uint32_t __fastcall MONSTER_CheckCatapultFiringPosition(D2UnitStrc * pUnit, D2Un
     byDirTable[7] = 5;
     uint8_t byDirIndex = byDirection;
     uint32_t nDirTableOffset = D2Common::Monsters::MONSTERS::MONSTERS_GetGfxOffsetTable2(byDirection);
-    _byDirIndex = (uint32_t)((uint32_t)((uint32_t)uStack_b & 0xffffffu) << 8 | (uint32_t)(uint8_t)byDirTable[nDirTableOffset & 0xff]);
-    D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(byDirTable[nDirTableOffset & 0xff], &nDimX, &nDimY);
+    _byDirIndex = (uint32_t)((uint32_t)((uint32_t)uStack_b & 0xffffffu) << 8 | (uint32_t)(uint8_t)byDirTable[(uint8_t)nDirTableOffset]);
+    D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(byDirTable[(uint8_t)nDirTableOffset], &nDimX, &nDimY);
     nCollisionDist = Units::GetXPosFromDynamicPathUnit(pUnit2);
     int32_t nCatapultPosY = Units::GetYPosFromDynamicPathUnit(pUnit2);
     int32_t nAttackerPosX = Units::GetXPosFromDynamicPathUnit(pAttacker);

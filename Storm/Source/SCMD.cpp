@@ -180,10 +180,10 @@ static void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallbac
     }
 
     char* pcFmtMarker = strstr(szMsgBuf, "%s");
-    if (!pcFmtMarker) {
-      SSTR::SStrCopy(szFmtBuf, szMsgBuf, 0x100);
-    } else {
+    if (pcFmtMarker) {
       /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFmtBuf, szMsgBuf, szItem);
+    } else {
+      SSTR::SStrCopy(szFmtBuf, szMsgBuf, 0x100);
     }
     if (szFmtBuf[0] != '\0') {
       SSTR::SStrPack(szFmtBuf, "\n", 0x100);
@@ -293,7 +293,7 @@ static void SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD *
     *(::SCMD**)(pScmd + 4) = (::SCMD*)pNode;
 }
 
-uint32_t SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode) {
+uint32_t __fastcall SCMD_GetNextOffset(::SCMD * pThis, int32_t nEdxUnused, ::SCMD * pNode) {
     if (pNode) {
       return (int)*(uint32_t*)(pNode + 4) <= 0 ? 0 : *(uint32_t*)(pNode + 4);
     }
@@ -302,7 +302,7 @@ uint32_t SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode) {
     return (int)*(uint32_t*)(pNode + 4) <= 0 ? 0 : *(uint32_t*)(pNode + 4);
 }
 
-void SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode) {
+void __fastcall SCMD_UnlinkNode(::SCMD * pThis, int32_t nEdxUnused, ::SCMD * pNode) {
     ::SCMD* pPrevLink;
     if (!pNode) {
       pNode = (::SCMD*)(pThis + 4);
@@ -417,11 +417,11 @@ void __fastcall SCMD_ClearAll(D2StormListHead * nListPtr) {
 
 ::SCMD * SCMD_AllocNode(::SCMD * pThis, int nInsertMode, int nParam, uint32_t nParam2) {
     ::SCMD* pNewNode = (::SCMD*)SMem::SMemAlloc(nParam + 0x40, s___AUCMDDEF___0074c47c, -2, nParam2 | 8);
-    if (!pNewNode) {
-      pNewNode = 0;
-    } else {
+    if (pNewNode) {
       *(uint32_t*)pNewNode = 0;
       *(uint32_t*)(pNewNode + 4) = 0;
+    } else {
+      pNewNode = 0;
     }
     if (!nInsertMode) {
       return pNewNode;

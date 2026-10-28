@@ -229,7 +229,7 @@ template<> void TSHashObject<SGAMEDATA, HASHKEY_NONE>::Destructor() {
 // Unreferenced copy of UnlinkNode: unlinks pNode and clears its link.
 // Byte-identical to TSExplicitList<CELLIST,..>::UnlinkNode 006022a0; T not proven (no xrefs), filed with the SGAMEDATA block.
 // stpl-orphan: a COMDAT copy in TSExplicitList<SGAMEDATA, -572662307> that no member owns
-void UnlinkNode_Unreferenced(TSExplicitList<::SGAMEDATA, -572662307>* pThis, ::SGAMEDATA * pNode) {
+void __fastcall UnlinkNode_Unreferenced(TSExplicitList<::SGAMEDATA, -572662307>* pThis, int32_t nEdxUnused, ::SGAMEDATA * pNode) {
     TSLink<::SGAMEDATA>* pNodeLink;
     int* pPrevLink;
     if (!pNode) {
@@ -580,15 +580,15 @@ template<> ::SGAMEDATA * TSHashTableReuse<SGAMEDATA, HASHKEY_NONE, 0>::InternalN
     TSLink<::SGAMEDATA>* ppSlot;
     uint32_t pTailLink;
     ::SGAMEDATA* pGame = (::SGAMEDATA*)Storm::SMem::SMemAlloc(nExtraBytes + 0x1df4, s___AUSGAMEDATA___0070f56c, -2, dwFlags | 8);
-    if (!pGame) {
-      pGame = 0;
-      ppSlot = &pList->m_terminator;
-    } else {
+    if (pGame) {
       pGame->m_linktoslot.m_prevlink = 0;
       pGame->m_linktoslot.m_next = 0;
       pGame->m_linktofull.m_prevlink = 0;
       pGame->m_linktofull.m_next = 0;
       ppSlot = (TSLink<::SGAMEDATA>*)(pGame->szGameName + pList->m_linkoffset - 0x2a);
+    } else {
+      pGame = 0;
+      ppSlot = &pList->m_terminator;
     }
 
     TSLink<::SGAMEDATA>* pExisting = ppSlot->m_prevlink;

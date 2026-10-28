@@ -1447,11 +1447,11 @@ void __fastcall ROSTER_AllocOrUpdatePlayer(int nPlayerGUID, int nCharType, char 
       if (!pNewRoster) {
         pNewRoster = D2_NEW(D2RosterStrc);
         memset(pNewRoster, 0, 0x84);
-      } else if (!pPrev) {
-        gpRosterOther = pNewRoster->pNext;
+      } else if (pPrev) {
+        pPrev->pNext = pNewRoster->pNext;
         pNewRoster->pNext = 0;
       } else {
-        pPrev->pNext = pNewRoster->pNext;
+        gpRosterOther = pNewRoster->pNext;
         pNewRoster->pNext = 0;
       }
 

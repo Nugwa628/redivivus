@@ -36,7 +36,7 @@ int32_t GetPersistentSetting(::IgnoreList * pThis) {
     return pThis->nPersistentIgnore;
 }
 
-void SavePersistentSetting(::IgnoreList * pThis, int32_t nPersistent) {
+void __fastcall SavePersistentSetting(::IgnoreList * pThis, int32_t nEdxUnused, int32_t nPersistent) {
     pThis->nPersistentIgnore = nPersistent;
     Storm::Source::SReg::SRegSaveValue("Diablo II", "Persistent Ignore", 0, nPersistent);
 }
@@ -157,7 +157,7 @@ int32_t RemoveByAccountName(::IgnoreList * pThis, char * szAccountName) {
 }
 
 // Returns whether the account name is on the ignore list. It tail-calls Fog::Debug::GuardStack, which returns its argument, so the result is already in EAX; typed void the reconstruction dropped every return value and callers tested an unassigned local.
-int32_t CheckAccountNameIgnored(::IgnoreList * pThis, char * szAccountName) {
+int32_t __fastcall CheckAccountNameIgnored(::IgnoreList * pThis, int32_t nEdxUnused, char * szAccountName) {
     bool _bIsEnabled;
     bool bIsEnabled;
     char* pcMatch;
@@ -214,7 +214,7 @@ int32_t CheckCharNameIgnored(::IgnoreList * pThis, char * szCharName) {
 }
 
 // Returns whether the player name is on the ignore list. Tail-calls Fog::Debug::GuardStack, which returns its argument, so the result is already in EAX; typed void the reconstruction dropped it.
-int32_t CheckIgnored(::IgnoreList * pThis, char * szPlayerName) {
+int32_t __fastcall CheckIgnored(::IgnoreList * pThis, int32_t nEdxUnused, char * szPlayerName) {
     bool _bIsEnabled;
     bool bIsEnabled;
     bool bFound;
@@ -426,7 +426,7 @@ void __fastcall LoadFromFile(::IgnoreList * pThis) {
 }
 
 // @sourcefile .\Chat\Ignorelist.cpp
-void AddAccountMapping(::IgnoreList * pThis, char * szRaw, int32_t nRawLen) {
+void __fastcall AddAccountMapping(::IgnoreList * pThis, int32_t nEdxUnused, char * szRaw, int32_t nRawLen) {
     // Frame slots -776..-4 are ONE object: &cPatternPrefix is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {

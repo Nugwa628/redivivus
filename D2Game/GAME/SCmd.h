@@ -344,7 +344,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xA4_PRELOAD_MONSTER(struct D2ClientStrc * 
 void __fastcall NET_D2GS_SERVER_Send_0xA6_DATATABLEUPDATE(struct D2ClientStrc * pClient, bool bUnknown, int16_t nTxtRunesSize, size_t nStreamSize, void * nStream);
 void __fastcall NET_D2GS_SERVER_Send_0xA7_UNITSTATE_ON_EX(struct D2ClientStrc * pClient, uint8_t byUnitType, uint32_t nUnitGUID, uint32_t dwStateId);
 void __fastcall NET_D2GS_SERVER_Send_0xA9_UNITSTATE_OFF_EX(struct D2ClientStrc * pClient, uint8_t byUnitType, uint32_t nUnitGUID, uint32_t dwStateId);
-void SCMD_WriteBooleanToBitBuffer(void * pThis, int32_t nBoolValue);
+void __fastcall SCMD_WriteBooleanToBitBuffer(void * pThis, int32_t nEdxUnused, int32_t nBoolValue);
 // Server-to-client packet builder/sender for D2GS message 0xAC (spawn/add a monster on the client). For a UNIT_MONSTER, bit-packs into a temp BitBuffer: animation mode (clamped to Attack2/Block/Kick/Death/Neutral), component/equipment indices, boss/champion/unique/superunique/minion/ghostly type flags, superunique boss number, the UMod list, the monster name seed, pet ownership (owner GUID when the owner is a player whose pet type==7), an optional owner GUID for player-owned units, and the network-visible stat list (only stats flagged ITEMSTATCOSTFLAG_SEND_OTHER, written using each stat's sendBits/sendParamBits). Prepends the 0xAC header (id, GUID, classId, X/Y, hp%, total size) and dispatches via NET_D2GS_SERVER_SendPacket_Helper to the given client. No-op for null/non-monster units. Stack-guarded.
 void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit);
 // Server-to-client Warden anti-cheat module packet. Opcode 0xAE, variable size (max 510 bytes).

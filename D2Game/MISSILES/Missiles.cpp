@@ -112,7 +112,7 @@ static void __stdcall CalculatePierce(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     }
 
     D2MissilesTxt* pMissileTxt = D2Client::GetMissleById(pUnit->nClassId);
-    if (!pMissileTxt->Pierce) {
+    if (!(*((uint8_t *)pMissileTxt + 0x4) & gadwBitMasks[2])) {
       return;
     }
 

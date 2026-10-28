@@ -1237,8 +1237,7 @@ int __fastcall D2WINTEXTBOX_GetScrollbarStyle(::D2WinTextBox * pTextBox) {
     }
 
     pNew->sControl.neD2FormType = FORM_TextBox;
-    int* pnStateFlags = &pNew->sControl.dwState;
-    *pnStateFlags |= 1;
+    pNew->sControl.dwState |= 1;
     pNew->sControl.dwPosX = nParam1;
     pNew->sControl.dwSizeY = nHeight;
     pNew->sControl.dwState |= 4;
@@ -1262,12 +1261,12 @@ int __fastcall D2WINTEXTBOX_GetScrollbarStyle(::D2WinTextBox * pTextBox) {
     pNew->sStyleControl.dwSizeX = 0;
     pNew->sStyleControl.dwSizeY = 0;
     pNew->sStyleControl.fpPush = (::Push)0x1;
-    if (!pnParam1) {
-      pNew->nScrollWidth = 1;
-      pNew->nScrollHeight = 0;
-    } else {
+    if (pnParam1) {
       pNew->nScrollWidth = *pnParam1;
       pNew->nScrollHeight = pnParam1[1];
+    } else {
+      pNew->nScrollWidth = 1;
+      pNew->nScrollHeight = 0;
     }
 
     D2WINTEXTBOX_ComputeLineSpacingForLanguage(pNew->nScrollWidth);
@@ -1275,14 +1274,14 @@ int __fastcall D2WINTEXTBOX_GetScrollbarStyle(::D2WinTextBox * pTextBox) {
     if (nParam & 4) {
       int nVisLineCount;
       pNew->sControl.pDC6 = 0;
-      if (!pnParam2) {
-        nScrollbarPosY = nParam2 - 2;
-        nVisLineCount = nHeight - 0x10;
-        nScrollbarPosX = nParam1 + 8 + nWidth;
-      } else {
+      if (pnParam2) {
         nScrollbarPosX = *pnParam2;
         nScrollbarPosY = pnParam2[1];
         nVisLineCount = pnParam2[2];
+      } else {
+        nScrollbarPosY = nParam2 - 2;
+        nVisLineCount = nHeight - 0x10;
+        nScrollbarPosX = nParam1 + 8 + nWidth;
       }
 
       pScrollbar = D2WinScrollbar::D2WinScrollbar(nScrollbarPosX, nScrollbarPosY, 10, nVisLineCount, pDC6, nullptr);

@@ -232,7 +232,7 @@ void __stdcall SetOwner(D2UnitStrc * pUnit, D2UnitStrc * pOwner) {
 
     int nClassId = pUnit->nClassId;
     D2MissilesTxt * pTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : NULL;
-    if (!(pTxt && pTxt->LastCollide)) {
+    if (!(pTxt && (*((uint8_t *)pTxt + 0x4) & gadwBitMasks[0]))) {
       return;
     }
 
@@ -256,7 +256,7 @@ BOOL __stdcall CheckUnitIfOwner(D2UnitStrc * pMissile, D2UnitStrc * pUnit) {
 
     int nClassId = pMissile->nClassId;
     D2MissilesTxt * pTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : NULL;
-    if (!(pTxt && pTxt->LastCollide)) {
+    if (!(pTxt && (*((uint8_t *)pTxt + 0x4) & gadwBitMasks[0]))) {
       return 0;
     }
 
@@ -1197,28 +1197,7 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
     int nItemMinDmgBonus = 0;
     int nItemMaxDmgPercent = 0;
     nSkillId = 0;
-    if (!nSourceDamage) {
-      if (nSrcMissDmgPct && pUnit2) {
-        _bHasBonusStats = HasBonusStats(nullptr, pUnit2);
-        if (_bHasBonusStats) {
-          pMissileDamageData->nFlags |= 2;
-        }
-
-        nMissileId = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_mindamage, 0);
-        nMissileId = (int)(nMissileId * nSrcMissDmgPct) / 128;
-        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_maxdamage, 0);
-        nParam = (int)(nStatVal * nSrcMissDmgPct) / 128;
-        nDmgPercentBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_damagepercent, 0);
-        nItemMinDmgBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_mindamage_percent, 0);
-        nItemMaxDmgPercent = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_maxdamage_percent, 0);
-        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_demondamage_percent, 0);
-        pMissileDamageData->nDemonDamagePercent += nStatVal;
-        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_undeaddamage_percent, 0);
-        pMissileDamageData->nUndeadDamagePercent += nStatVal;
-        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_damagetargetac, 0);
-        pMissileDamageData->nDamageTargetAC += nStatVal;
-      }
-    } else {
+    if (nSourceDamage) {
       int16_t nStrBonus;
       pMissileDamageData->nFlags |= 1;
       if (pOwner->eUnitType == UNIT_PLAYER) {
@@ -1314,6 +1293,27 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
       nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pOwner, UNITSTAT_skill_bypass_beasts, 0);
       if (nStatVal) {
         pMissileDamageData->nFlags |= 0x400;
+      }
+    } else {
+      if (nSrcMissDmgPct && pUnit2) {
+        _bHasBonusStats = HasBonusStats(nullptr, pUnit2);
+        if (_bHasBonusStats) {
+          pMissileDamageData->nFlags |= 2;
+        }
+
+        nMissileId = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_mindamage, 0);
+        nMissileId = (int)(nMissileId * nSrcMissDmgPct) / 128;
+        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_maxdamage, 0);
+        nParam = (int)(nStatVal * nSrcMissDmgPct) / 128;
+        nDmgPercentBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_damagepercent, 0);
+        nItemMinDmgBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_mindamage_percent, 0);
+        nItemMaxDmgPercent = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_maxdamage_percent, 0);
+        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_demondamage_percent, 0);
+        pMissileDamageData->nDemonDamagePercent += nStatVal;
+        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_undeaddamage_percent, 0);
+        pMissileDamageData->nUndeadDamagePercent += nStatVal;
+        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_damagetargetac, 0);
+        pMissileDamageData->nDamageTargetAC += nStatVal;
       }
     }
 

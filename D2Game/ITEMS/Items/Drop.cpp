@@ -100,7 +100,7 @@ void __fastcall ITEMDROP_AddToDropList(int * pnDropCount, int32_t pDropListArr, 
 }
 
 int32_t __stdcall ITEMDROP_GetDropListEntry(int32_t pDropListBase, int32_t nEntryIdx, int32_t nMaxEntries) {
-    if (nMaxEntries < nEntryIdx) {
+    if (nEntryIdx > nMaxEntries) {
       return 0;
     }
 
@@ -135,12 +135,12 @@ D2RoomStrc * __fastcall FindBestSpotToSpawnItem(D2RoomStrc * pRoom, POINT * pPoi
     int nX = pPoint->x + 2;
     int nY = pPoint->y + 3;
     D2RoomStrc* pFoundRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nX, nY);
-    if (!pFoundRoom) {
-      pNewPosition->x = pPoint->x;
-      pNewPosition->y = pPoint->y;
-    } else {
+    if (pFoundRoom) {
       pNewPosition->x = nX;
       pNewPosition->y = nY;
+    } else {
+      pNewPosition->x = pPoint->x;
+      pNewPosition->y = pPoint->y;
     }
 
     pFoundRoom = D2Common::Collision::GetFreeCoordinates_WithFieldCoords(pRoom, pNewPosition, pPoint, nCollisionMask, 0x3e01, 0x801, (uint32_t)nMaxSearchRadius);
@@ -154,7 +154,7 @@ static BOOL __stdcall ITEMDROP_IsItemClassEligible(D2SeedStrc * pSeed, int32_t b
     if ((int)eLevel <= 0) {
       eLevel = LEVEL_RogueEncampment;
     }
-    if (!(pItemsTxt->bSpawnable != '\0' && !pItemsTxt->bQuest && (int)(uint32_t)(uint8_t)pItemsTxt->nLevel <= (int)eLevel)) {
+    if (!((uint32_t)pItemsTxt->bSpawnable > 0 && !pItemsTxt->bQuest && (int)(uint32_t)(uint8_t)pItemsTxt->nLevel <= (int)eLevel)) {
       return 0;
     }
     if (!bSkipRarityRoll) {
@@ -529,7 +529,7 @@ static BOOL __stdcall ITEM_MarkUniqueAsDropped(::SGAMEDATA * pGame, D2UnitStrc *
     if (!(0 <= (int)nFileIndex && (int)nFileIndex < sgptDataTable->nTxtUniqueItemsSize && sgptDataTable->pTxtUniqueItems + nFileIndex)) {
       return 0;
     }
-    if (sgptDataTable->pTxtUniqueItems[nFileIndex].nolimit) {
+    if ((*((uint8_t *)&sgptDataTable->pTxtUniqueItems[nFileIndex] + 0x2c) & gadwBitMasks[1])) {
       return 1;
     }
     if (!pItemsTxt->bQuest) {
@@ -630,7 +630,25 @@ BOOL __stdcall ITEM_RollUniqueItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2It
 
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_maxdurability, nRarityWeight, 0);
     }
-    if (!pItemGenContext->bFromCustomData) {
+    if (pItemGenContext->bFromCustomData) {
+      dwFileIndex = pItemGenContext->dwFileIndex;
+      if ((int)dwFileIndex < 0) {
+        return 0;
+      }
+      if ((int)dwFileIndex >= sgptDataTable->nTxtUniqueItemsSize) {
+        return 0;
+      }
+
+      pUniqueItemsTxt = sgptDataTable->pTxtUniqueItems;
+      if (!(pUniqueItemsTxt + dwFileIndex)) {
+        return 0;
+      }
+
+      D2Common::ITEMS::Items::ITEM_SetItemData_nFileIndex(pUnit, dwFileIndex);
+      if (pUniqueItemsTxt[dwFileIndex].dwItemCode != pItemsTxt->dwCode) {
+        return 1;
+      }
+    } else {
       if (wItemVersion) {
         nUniqueIdx = 0;
         nRarityWeight = 0;
@@ -644,7 +662,7 @@ BOOL __stdcall ITEM_RollUniqueItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2It
               nRollResult = D2Common::ITEMS::Items::ITEM_GetItemData_nItemLevel(pUnit);
               pDataTable = sgptDataTable;
               if (*(short int*)(pUniqueEntryPtr + 8) <= nRollResult) {
-                if (pItemGenContext->dwFileIndex && pItemGenContext->dwFileIndex - 1 == nUniqueIdx) {
+                if ((uint32_t)pItemGenContext->dwFileIndex > 0 && pItemGenContext->dwFileIndex - 1 == nUniqueIdx) {
                   nChosenUniqueIdx = nUniqueIdx;
                 }
 
@@ -683,11 +701,11 @@ BOOL __stdcall ITEM_RollUniqueItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2It
               nChosenUniqueIdx = gUniqueCandidatePool.aCandidates[nWeightAccum - 1].nUniqueIdx;
               pDataTable = sgptDataTable;
             }
-            if (pItemsTxt->bQuest || !pGame || nChosenUniqueIdx < 0x1001 && !(pGame->fUniqueSpawn[(int)nChosenUniqueIdx >> 5] & gadwBitMasks[nChosenUniqueIdx & 0x1f])) {
+            if (pItemsTxt->bQuest || !pGame || nChosenUniqueIdx <= 0x1000 && !(pGame->fUniqueSpawn[(int)nChosenUniqueIdx >> 5] & gadwBitMasks[nChosenUniqueIdx & 0x1f])) {
               if ((int)nChosenUniqueIdx < 0) {
                 return 0;
               }
-              if (pDataTable->nTxtUniqueItemsSize <= (int)nChosenUniqueIdx) {
+              if ((int)nChosenUniqueIdx >= pDataTable->nTxtUniqueItemsSize) {
                 return 0;
               }
               if (!(pDataTable->pTxtUniqueItems + nChosenUniqueIdx)) {
@@ -736,24 +754,6 @@ BOOL __stdcall ITEM_RollUniqueItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2It
       }
 
       D2Common::ITEMS::Items::ITEM_SetItemData_nFileIndex(pUnit, bDurabilityCheck);
-    } else {
-      dwFileIndex = pItemGenContext->dwFileIndex;
-      if ((int)dwFileIndex < 0) {
-        return 0;
-      }
-      if (sgptDataTable->nTxtUniqueItemsSize <= (int)dwFileIndex) {
-        return 0;
-      }
-
-      pUniqueItemsTxt = sgptDataTable->pTxtUniqueItems;
-      if (!(pUniqueItemsTxt + dwFileIndex)) {
-        return 0;
-      }
-
-      D2Common::ITEMS::Items::ITEM_SetItemData_nFileIndex(pUnit, dwFileIndex);
-      if (pUniqueItemsTxt[dwFileIndex].dwItemCode != pItemsTxt->dwCode) {
-        return 1;
-      }
     }
 
     D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, ITEMFLAG_IDENTIFIED, 0);
@@ -1968,11 +1968,7 @@ D2UnitStrc * __fastcall HasQuestItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, ui
 // Returns the effective item-drop level for a unit or level. For monsters returns UNITSTAT_level; for players returns server stat level; for other units/items derives level from the room's LevelId via TXT_Levels monster-level table adjusted for difficulty and expansion. Returns at least 1.
 int32_t __fastcall GetLevel(D2UnitStrc * pUnit, eD2LevelId eLevel) {
     int nLevel;
-    if (!pUnit) {
-      if (eLevel == LEVEL_None) {
-        return 1;
-      }
-    } else {
+    if (pUnit) {
       D2RoomStrc* pRoom;
       if (pUnit->eUnitType == UNIT_MONSTER) {
         nLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
@@ -1985,6 +1981,10 @@ int32_t __fastcall GetLevel(D2UnitStrc * pUnit, eD2LevelId eLevel) {
 
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+    } else {
+      if (eLevel == LEVEL_None) {
+        return 1;
+      }
     }
 
     ::SGAMEDATA* pGame;

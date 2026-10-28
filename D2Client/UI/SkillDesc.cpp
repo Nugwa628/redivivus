@@ -1019,19 +1019,13 @@ static BOOL __stdcall ItemStatCost_DescFunc_DGrpFunc(D2UnitStrc * pUnit, D2StatL
       return 0;
     }
 
-    uint8_t byDescFunc;
+    uint32_t byDescFunc;
     byDescFunc = pStatCostLine->descfunc;
     uint32_t nDescriptionValue;
     nDescriptionValue = (uint32_t)(uint8_t)pStatCostLine->descval;
     uint32_t nSecondaryStringId;
     nSecondaryStringId = (uint32_t)pStatCostLine->descstr2;
-    if (!nGroupMatchResult) {
-      if (nGroupValue < 0) {
-        wStrId = pStatCostLine->descstrneg;
-      } else {
-        wStrId = pStatCostLine->descstrpos;
-      }
-    } else {
+    if (nGroupMatchResult) {
       byDescFunc = pStatCostLine->dgrpfunc;
       nDescriptionValue = (uint32_t)(uint8_t)pStatCostLine->dgrpval;
       nSecondaryStringId = (uint32_t)(uint16_t)pStatCostLine->dgrpstr2;
@@ -1039,6 +1033,12 @@ static BOOL __stdcall ItemStatCost_DescFunc_DGrpFunc(D2UnitStrc * pUnit, D2StatL
         wStrId = pStatCostLine->dgrpstrneg;
       } else {
         wStrId = pStatCostLine->dgrpstrpos;
+      }
+    } else {
+      if (!(nGroupValue < 0)) {
+        wStrId = pStatCostLine->descstrpos;
+      } else {
+        wStrId = pStatCostLine->descstrneg;
       }
     }
 
@@ -1457,10 +1457,10 @@ static BOOL __stdcall ItemStatCost_DescFunc_DGrpFunc(D2UnitStrc * pUnit, D2StatL
       if (!pUnit || (pPlayerUnit_lcl = pUnit , pUnit->eUnitType != UNIT_PLAYER)) {
         pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_UI();
       }
-      if (!pPlayerUnit_lcl) {
-        iVar1 = -1;
-      } else {
+      if (pPlayerUnit_lcl) {
         iVar1 = pPlayerUnit_lcl->nClassId;
+      } else {
+        iVar1 = -1;
       }
       if (*(char*)(nStatId + 0xc) == iVar1 && 3 < nGroupValue) {
         nGroupValue = 3;
@@ -5196,7 +5196,13 @@ void __fastcall SKILLDESC_DrawSkillDmgFist(D2UnitStrc * pUnit, D2SkillStrc * pSk
     pSkillsTxt = 0;
     int nElemMinDmg = 0;
     int32_t nElemMaxDmg = 0;
-    if (!bIsExpansion) {
+    if (bIsExpansion) {
+      SKILLDESC_CalcSkillElemDamage(pUnit, (int*)&pSkillsTxt, &nElemMinDmg, &nElemMaxDmg, &pSkillDescTxt->skill, nSkillLevel);
+      nMaxDmgBonused = D2Common::Skills::SKILL_GetConcentrationDamageBonus(pUnit, (int)pSkillDescTxt->skill);
+      nMinDmgBonused = (int)pSkillsTxt->srvprgfunc + nMaxDmgBonused * (int)pSkillsTxt / 100 - 0x30;
+      nMaxDmgBonused = nElemMinDmg + nMaxDmgBonused * nElemMinDmg / 100;
+      nElemTypeOut = nElemMaxDmg;
+    } else {
       SKILLDESC_CalcSkillElemDamage(pUnit, (int*)&pSkillsTxt, &nElemMaxDmg, &nElemMinDmg, &pSkillDescTxt->skill, nSkillLevel);
       nElemTypeOut = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_damagepercent, 0);
       if (nElemTypeOut <= -0x5a) {
@@ -5206,12 +5212,6 @@ void __fastcall SKILLDESC_DrawSkillDmgFist(D2UnitStrc * pUnit, D2SkillStrc * pSk
       nMinDmgBonused = (int)pSkillsTxt->srvprgfunc + nElemTypeOut * (int)pSkillsTxt / 100 - 0x30;
       nMaxDmgBonused = nElemMaxDmg + nElemTypeOut * nElemMaxDmg / 100;
       nElemTypeOut = nElemMinDmg;
-    } else {
-      SKILLDESC_CalcSkillElemDamage(pUnit, (int*)&pSkillsTxt, &nElemMinDmg, &nElemMaxDmg, &pSkillDescTxt->skill, nSkillLevel);
-      nMaxDmgBonused = D2Common::Skills::SKILL_GetConcentrationDamageBonus(pUnit, (int)pSkillDescTxt->skill);
-      nMinDmgBonused = (int)pSkillsTxt->srvprgfunc + nMaxDmgBonused * (int)pSkillsTxt / 100 - 0x30;
-      nMaxDmgBonused = nElemMinDmg + nMaxDmgBonused * nElemMinDmg / 100;
-      nElemTypeOut = nElemMaxDmg;
     }
 
     SKILLDESC_DrawDamageNumbers(nMinDmgBonused, nMaxDmgBonused, nElemTypeOut, nY, nXRight, nXLeft);

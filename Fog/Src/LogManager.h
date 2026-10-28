@@ -83,7 +83,7 @@ void __fastcall DestroyListWithHandler(int * pListHead);
 void __fastcall TeardownListFull(struct D2StormListHead * pListHead);
 void __fastcall ZeroListNode(uint32_t * pNode);
 // Scalar deleting destructor: MOV ESI,ECX takes this; TEST byte [EBP+8],1 is the free flag; RET 4; returns this in EAX. Parameters were listed in STORAGE order (bFreeMemory first), which is the argument-swap shape that crashed IGNORELIST_DtorScalar; a vtable caller passes (this, bFreeMemory).
-void * DestroyListNodeAndFree(void * pThis, uint8_t bFreeMemory);
+void * __fastcall DestroyListNodeAndFree(void * pThis, int32_t nEdxUnused, uint8_t bFreeMemory);
 void __fastcall DestroyAllListNodes(void * pListHead);
 int * * __fastcall AllocateAndInsertMessageNode(int32_t nInsertMode, int32_t nPayloadSize, uint32_t dwAllocFlags, int * * ppListHead);
 void __stdcall StopLogWriterThread();

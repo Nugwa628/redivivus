@@ -373,7 +373,7 @@ uint32_t __fastcall CUBE_MatchInputDescriptorToCubeItems(::SGAMEDATA * pGame, D2
                   wInputFlags = pRecipe->pInputItem[nInputSlotIndex].wFlagsAndUpgrade;
                   if (wInputFlags & 4) {
                     nSocketCount = D2Common::ITEMS::Items::ITEM_GetSocketsCount(pCubeItem);
-                    if ((char)nSocketCount == '\0') {
+                    if ((uint32_t)((char)nSocketCount) <= 0) {
                       sockets_ok:
                       wInputFlags = pRecipe->pInputItem[nInputSlotIndex].wFlagsAndUpgrade;
                       if (wInputFlags & 0x20) {
@@ -692,7 +692,7 @@ uint32_t __fastcall CUBE_MatchInputDescriptorToCubeItems(::SGAMEDATA * pGame, D2
                       }
                     }
                   } else {
-                    if (!(wInputFlags & 8) || (nSocketCount = D2Common::ITEMS::Items::ITEM_GetSocketsCount(pCubeItem) , (char)nSocketCount != '\0')) {
+                    if (!(wInputFlags & 8) || (nSocketCount = D2Common::ITEMS::Items::ITEM_GetSocketsCount(pCubeItem) , (uint32_t)((char)nSocketCount) > 0)) {
                       goto sockets_ok;
                     }
                   }
@@ -1320,7 +1320,7 @@ void __stdcall GetDateUnused(int * pnParam) {
 // Server-side Horadric Cube recipe engine. Counts items currently in the player's cube, then scans every CubMain.txt recipe checking gating conditions: enabled (or debug-allow-disabled), expansion/version, ladder-only vs SP, min difficulty, required class, exact input count. Recipes with nOp 1-2 add calendar gates (day-of-month range, day-of-week); nOp 3-14 add a player-stat threshold compared (</>/==) against nValue right-shifted by the stat's valshift, where the stat is read three different ways (3-6 GetStatUnsignedValue, 7-10 SERVER_GetUnitStat, 11-14 STATLIST_GetStatBonusFromLists). On the first recipe whose gates pass AND whose item inputs validate (CUBE_ValidateRecipeInputs), calls CUBE_GenerateOutput to consume inputs and produce the result, then returns. No-op if player null or cube empty.
 static void __stdcall CUBE_MatchAndExecuteRecipe(::SGAMEDATA * pGame, D2UnitStrc * pPlayer) {
     // Static local variables (originally global data)
-    static bool gbCubeAllowDisabledRecipes; D2_STATIC_GUARD_BSS(gbCubeAllowDisabledRecipes, "D2Game::PLAYER::PlayerTrade::CUBE_MatchAndExecuteRecipe::gbCubeAllowDisabledRecipes");
+    static BOOL gbCubeAllowDisabledRecipes; D2_STATIC_GUARD_BSS(gbCubeAllowDisabledRecipes, "D2Game::PLAYER::PlayerTrade::CUBE_MatchAndExecuteRecipe::gbCubeAllowDisabledRecipes");
 
     bool _bValidInputs;
     bool bValidInputs;

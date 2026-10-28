@@ -1271,17 +1271,7 @@ BOOL __fastcall Skills_SrvDoFunc_140_BaalTentacle(::SGAMEDATA * pGame, D2UnitStr
     pSpawnedMinion = UNIT::SUnit::GetTargetEx(pGame, pUnit);
     int nSpawnY;
     nSpawnY = 0;
-    if (!pSpawnedMinion) {
-      eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
-        nBaseX = pUnit->pPath.pStaticPath->nPosX;
-        goto spawn_tentacles_around_center;
-      }
-      if (pUnit->pPath.pDynamicPath) {
-        nBaseX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-        goto spawn_tentacles_around_center;
-      }
-    } else {
+    if (pSpawnedMinion) {
       eUnitType = pSpawnedMinion->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nBaseX = pSpawnedMinion->pPath.pStaticPath->nPosX;
@@ -1289,6 +1279,16 @@ BOOL __fastcall Skills_SrvDoFunc_140_BaalTentacle(::SGAMEDATA * pGame, D2UnitStr
       }
       if (pSpawnedMinion->pPath.pDynamicPath) {
         nBaseX = D2Common::PATH::DynamicPath::GetXPos(pSpawnedMinion->pPath.pDynamicPath);
+        goto spawn_tentacles_around_center;
+      }
+    } else {
+      eUnitType = pUnit->eUnitType;
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
+        nBaseX = pUnit->pPath.pStaticPath->nPosX;
+        goto spawn_tentacles_around_center;
+      }
+      if (pUnit->pPath.pDynamicPath) {
+        nBaseX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
         goto spawn_tentacles_around_center;
       }
     }

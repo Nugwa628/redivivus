@@ -494,7 +494,12 @@ void __fastcall WEATHER_SpawnSplash(int nScreenX, int nScreenY, int nWorldX, int
     nYOffset = pEnvironmentSplashes->pData;
     short int nSplashSlotIndex = (short int)(nSlot >> 0x10);
     uint32_t bIsPerspectiveActive = D2gfx::D2GFX::D2GFX_IsPerspectiveActive();
-    if (!bIsPerspectiveActive) {
+    if (bIsPerspectiveActive) {
+      nRoll = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
+      *(int32_t*)((int)nYOffset + nSplashSlotIndex * 0x18 + 4) = nRoll * 0x10000 + nWorldX;
+      nRoll = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
+      *(int32_t*)((int)nYOffset + nSplashSlotIndex * 0x18 + 8) = nRoll * 0x10000 + nWorldY;
+    } else {
       int nHalfRange;
       nRoll = Seed::RollBetweenMinAndMax(pSeed, 0, 0x50);
       nHalfRange = nRoll - 0x28;
@@ -506,11 +511,6 @@ void __fastcall WEATHER_SpawnSplash(int nScreenX, int nScreenY, int nWorldX, int
       nRange = Seed::RollBetweenMinAndMax(pSeed, -nHalfRange, nHalfRange * 2);
       *(int32_t*)((int)nYOffset + nSplashSlotIndex * 0x18 + 4) = nRange + nScreenX;
       *(int32_t*)((int)nYOffset + nSplashSlotIndex * 0x18 + 8) = nRoll + nScreenY;
-    } else {
-      nRoll = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
-      *(int32_t*)((int)nYOffset + nSplashSlotIndex * 0x18 + 4) = nRoll * 0x10000 + nWorldX;
-      nRoll = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
-      *(int32_t*)((int)nYOffset + nSplashSlotIndex * 0x18 + 8) = nRoll * 0x10000 + nWorldY;
     }
 
     D2SeedStrc sSeedNew = D2_SEED_NEXT(*pSeed);
@@ -932,19 +932,19 @@ static int WEATHER_UpdateParticleCount(D2SeedStrc * pSeed) {
     gnWeatherRngCountdown--;
     if (!gnWeatherRngCountdown) {
       D2SeedStrc DVar1;
-      if (!nWeatherParticleCountAct5) {
+      if (nWeatherParticleCountAct5) {
+        DVar1 = D2_SEED_NEXT(*pSeed);
+        *pSeed = DVar1;
+        gnWeatherRngCountdown = DVar1.nSeedLow % 0x36b + 0xfa;
+        nChangeRate = Seed::RollBetweenMinAndMax(pSeed, gnWeatherRngRangeMin, gnWeatherRngRangeMax);
+        gnWeatherRngParam = nChangeRate;
+      } else {
         seed64 = (uint64_t)pSeed->nSeedLow * 0x6ac690c5 + (uint64_t)pSeed->nSeedHigh;
         gnWeatherRngCountdown = (int)seed64 + (int)((seed64 & 0xffffffff) / 0x177) * -0x177 + 0x7d;
         DVar1 = D2_SEED_NEXT_VAL(seed64);
         nChangeRate = (int)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) * 0xe6c2b449);
         *pSeed = DVar1;
         gnWeatherRngParam = DVar1.nSeedLow % 0x47 + 0x5c;
-      } else {
-        DVar1 = D2_SEED_NEXT(*pSeed);
-        *pSeed = DVar1;
-        gnWeatherRngCountdown = DVar1.nSeedLow % 0x36b + 0xfa;
-        nChangeRate = Seed::RollBetweenMinAndMax(pSeed, gnWeatherRngRangeMin, gnWeatherRngRangeMax);
-        gnWeatherRngParam = nChangeRate;
       }
     }
     if (!gnWeatherTransitionProgress) {
@@ -1085,15 +1085,7 @@ void __fastcall WEATHER_DrawBubbles(D2DataArrayStrc * pBubbleArray, DC6 * * pDC6
     do {
       __frame0.nMaxY = ScreenSizeY - 0x2f;
       if (pEntry->nFlags) {
-        if (!__frame0.bPerspective) {
-          nScreenWidth = pEntry->nPosY;
-          nPositionX = pEntry->nPosX + nXOffset;
-          if (__frame0.nMinX <= nPositionX && nPositionX < __frame0.nMaxX && -1 < nScreenWidth && nScreenWidth < __frame0.nMaxY) {
-            sGfxData.pDC6 = pDC6Table[pEntry->nDC6Index];
-            sGfxData.nFrameNumber = pEntry->nFrameNumber;
-            D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nPositionX, nScreenWidth, -1, DRAW_LIGHTTRANSPARENT, nullptr);
-          }
-        } else {
+        if (__frame0.bPerspective) {
           eBorderType = D2gfx::D2GFX::D2GFX_IsInPerspectiveBounds(pEntry->nPosX, pEntry->nPosY);
           if (eBorderType) {
             D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(pEntry->nPosX, pEntry->nPosY, 0, &__frame0.nScreenX, &__frame0.nScreenY);
@@ -1109,6 +1101,14 @@ void __fastcall WEATHER_DrawBubbles(D2DataArrayStrc * pBubbleArray, DC6 * * pDC6
           }
 
           Fog::Src::DataArrays::FOG_ArrayFreeAtIndex(__frame0.pBubbleArraySaved, __frame0.nIndex << 0x10);
+        } else {
+          nScreenWidth = pEntry->nPosY;
+          nPositionX = pEntry->nPosX + nXOffset;
+          if (__frame0.nMinX <= nPositionX && nPositionX < __frame0.nMaxX && -1 < nScreenWidth && nScreenWidth < __frame0.nMaxY) {
+            sGfxData.pDC6 = pDC6Table[pEntry->nDC6Index];
+            sGfxData.nFrameNumber = pEntry->nFrameNumber;
+            D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nPositionX, nScreenWidth, -1, DRAW_LIGHTTRANSPARENT, nullptr);
+          }
         }
       }
 

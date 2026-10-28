@@ -148,9 +148,7 @@ void __fastcall STATSLISTEX_FunctionCallback(::SGAMEDATA * pGame, D2UnitStrc * p
     }
     if (0 < pStatCostTxt->itemevent1) {
       D2SUnitEventStrc* fEventFound;
-      if (!nNewValue) {
-        UNIT::SUnitEvent::SUNITEVENT_RemoveEventsByQueueAndOwner(pGame, pUnit, 2, fOldMaxStat);
-      } else {
+      if (nNewValue) {
         fEventFound = UNIT::SUnitEvent::UNITEVENT_FindByCallbackParams(pGame, pUnit, 2, fOldMaxStat, fOldMaxStat);
         if (!fEventFound) {
           SKILLS::SkillsServer::D2SetAuraEvent(pGame, pUnit, (uint8_t)pStatCostTxt->itemevent1, fOldMaxStat, 0, (int)pStatCostTxt->itemeventfunc1, 2, fOldMaxStat);
@@ -158,6 +156,8 @@ void __fastcall STATSLISTEX_FunctionCallback(::SGAMEDATA * pGame, D2UnitStrc * p
             SKILLS::SkillsServer::D2SetAuraEvent(pGame, pUnit, (uint8_t)pStatCostTxt->itemevent2, fOldMaxStat, 0, (int)pStatCostTxt->itemeventfunc2, 2, fOldMaxStat);
           }
         }
+      } else {
+        UNIT::SUnitEvent::SUNITEVENT_RemoveEventsByQueueAndOwner(pGame, pUnit, 2, fOldMaxStat);
       }
     }
 
@@ -312,20 +312,20 @@ void __fastcall STATSLISTEX_FunctionCallback(::SGAMEDATA * pGame, D2UnitStrc * p
         eState = (uint16_t)fOldMaxStat;
       if (true && (int)eState < sgptDataTable->nTxtStatesSize) {
         eCurrentState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, eState);
-        if (!nNewValue) {
-          if (eCurrentState == STATE_none) {
-            return;
-          }
-
-          SKILLS::SkillsServer::D2UpdateState(pUnit, eState, 1);
-          bStateActive = 0;
-        } else {
+        if (nNewValue) {
           if (eCurrentState != STATE_none) {
             return;
           }
 
           SKILLS::SkillsServer::D2UpdateState(pUnit, eState, 0);
           bStateActive = 1;
+        } else {
+          if (eCurrentState == STATE_none) {
+            return;
+          }
+
+          SKILLS::SkillsServer::D2UpdateState(pUnit, eState, 1);
+          bStateActive = 0;
         }
 
         D2Common::DATATBLS::ItemStats::SetState(pUnit, eState, bStateActive);
@@ -387,7 +387,7 @@ void __fastcall STATSLISTEX_FunctionCallback(::SGAMEDATA * pGame, D2UnitStrc * p
 }
 
 void __fastcall SendDropItemPacket(D2UnitStrc * pUnit, D2ClientStrc * pClient) {
-    if (!(pUnit && !(pUnit->eUnitFlags >> 4 & 1) && pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Run)) {
+    if (!(pUnit && !(((bool)(pUnit->eUnitFlags >> 4 & 1))) && pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Run)) {
       return;
     }
 
@@ -1058,7 +1058,7 @@ static BOOL __stdcall ITEMMODE_CheckDuplicateQuestItem(D2UnitStrc * pUnit, D2Uni
           nItemQuality = D2Common::ITEMS::Items::ITEM_GetItemData_nFileIndex(pUnit);
           if (0 <= nItemQuality && nItemQuality < sgptDataTable->nTxtUniqueItemsSize) {
             pUniqueTxt = sgptDataTable->pTxtUniqueItems + nItemQuality;
-            if (pUniqueTxt && pUniqueTxt->carry1) {
+            if (pUniqueTxt && (*((uint8_t *)pUniqueTxt + 0x2c) & gadwBitMasks[2])) {
               nUniqueIdx = (int)(short int)pUniqueTxt->wId;
             }
           }
@@ -2045,7 +2045,7 @@ void __fastcall ITEMS_RecalcEquippedItemStates(::SGAMEDATA * pGame, D2UnitStrc *
     int nItemQuality;
     int aItemValidateSnapshot[7];
     int bAnyItemReenabled;
-    if (!(pUnit && (pUnit->eUnitType == UNIT_PLAYER || pUnit->eUnitFlags >> 9 & 1))) {
+    if (!(pUnit && (pUnit->eUnitType == UNIT_PLAYER || ((bool)(pUnit->eUnitFlags >> 9 & 1))))) {
       return;
     }
 
@@ -4626,10 +4626,7 @@ BOOL __fastcall SERVER_Swap2HandItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DW
             D2Common::ITEMS::Items::ReturnFalse(pUnit, pBodyLocItem);
             D2Common::INVENTORY::Inventory::INVENTORY_SwapPrimaryWeaponOnRemoval(pInventory, pBodyLocItem);
             pPrimaryWeapon = D2Common::INVENTORY::Inventory::ItemBelongsToInventoryOfPlayer(pInventory, pBodyLocItem);
-            if (!pPrimaryWeapon) {
-              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcee);
-              exit(-1);
-            } else {
+            if (pPrimaryWeapon) {
               if (pBodyLocItem != pPrimaryWeapon) {
                 Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcef);
                 exit(-1);
@@ -4680,6 +4677,9 @@ BOOL __fastcall SERVER_Swap2HandItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DW
 
               *pdwParam = 1;
               return 0;
+            } else {
+              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcee);
+              exit(-1);
             }
           }
 

@@ -93,7 +93,7 @@ namespace D2Common::Chat::Ignorelist::IgnoreList {
 // Function declarations
 int32_t CloseAppendFile(::IgnoreList * pThis);
 int32_t GetPersistentSetting(::IgnoreList * pThis);
-void SavePersistentSetting(::IgnoreList * pThis, int32_t nPersistent);
+void __fastcall SavePersistentSetting(::IgnoreList * pThis, int32_t nEdxUnused, int32_t nPersistent);
 int32_t AppendLineToFile(::IgnoreList * pThis, char * szLine);
 // Writes the ignore list to its file: one ignored name pattern per line, then each ignored account prefixed with '!'.
 int32_t __fastcall SaveToFile(::IgnoreList * pThis);
@@ -102,10 +102,10 @@ int32_t GetMappedValue(::IgnoreList * pThis, char * szKey, char * szOut, int32_t
 int32_t RemoveByPattern(::IgnoreList * pThis, char * szPattern);
 int32_t RemoveByAccountName(::IgnoreList * pThis, char * szAccountName);
 // Returns whether the account name is on the ignore list. It tail-calls Fog::Debug::GuardStack, which returns its argument, so the result is already in EAX; typed void the reconstruction dropped every return value and callers tested an unassigned local.
-int32_t CheckAccountNameIgnored(::IgnoreList * pThis, char * szAccountName);
+int32_t __fastcall CheckAccountNameIgnored(::IgnoreList * pThis, int32_t nEdxUnused, char * szAccountName);
 int32_t CheckCharNameIgnored(::IgnoreList * pThis, char * szCharName);
 // Returns whether the player name is on the ignore list. Tail-calls Fog::Debug::GuardStack, which returns its argument, so the result is already in EAX; typed void the reconstruction dropped it.
-int32_t CheckIgnored(::IgnoreList * pThis, char * szPlayerName);
+int32_t __fastcall CheckIgnored(::IgnoreList * pThis, int32_t nEdxUnused, char * szPlayerName);
 void Destructor(::IgnoreList * pThis);
 ::IgnoreList * ScalarDeletingDestructor(::IgnoreList * pThis, uint32_t nFlags);
 // Adds a name pattern to the ignore list and returns the result. Tail-calls Fog::Debug::GuardStack, which returns its argument, so the value is already in EAX; typed void the reconstruction dropped it.
@@ -115,6 +115,6 @@ int32_t AddByAccountName(::IgnoreList * pThis, char * szAccountName);
 void __fastcall LoadFromFile(::IgnoreList * pThis);
 ::IgnoreList * Constructor(::IgnoreList * pThis);
 // @sourcefile .\Chat\Ignorelist.cpp
-void AddAccountMapping(::IgnoreList * pThis, char * szRaw, int32_t nRawLen);
+void __fastcall AddAccountMapping(::IgnoreList * pThis, int32_t nEdxUnused, char * szRaw, int32_t nRawLen);
 
 } // namespace D2Common::Chat::Ignorelist::IgnoreList

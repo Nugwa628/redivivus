@@ -701,15 +701,15 @@ void __stdcall InitializePoolSystem(D2PoolManagerStrc * * pPoolManager, char * s
         nSizeClass = 1;
       } else {
         nRegionSize = nParam - 1;
-        if (!nRegionSize) {
-          nSizeClass = 0;
-        } else {
+        if (nRegionSize) {
           nSizeClass = 0x1f;
           if (nRegionSize) {
             for (; !(nRegionSize >> nSizeClass); nSizeClass--) {}
           }
 
           nSizeClass++;
+        } else {
+          nSizeClass = 0;
         }
       }
 
@@ -727,10 +727,10 @@ void __stdcall InitializePoolSystem(D2PoolManagerStrc * * pPoolManager, char * s
     if (0 < (int)nPoolCount) {
       do {
         /* LPCRITICAL_SECTION lpCriticalSection for InitializeCriticalSection */ InitializeCriticalSection(&pNewManager->pPools[nPoolIndex].pSync);
-        if (!nPoolIndex) {
-          nBlockSize = 0x10;
-        } else {
+        if (nPoolIndex) {
           nBlockSize = 1 << ((char)nPoolIndex + 4U & 0x1f);
+        } else {
+          nBlockSize = 0x10;
         }
 
         pNewManager->pPools[nPoolIndex].nBlockSize = nBlockSize;

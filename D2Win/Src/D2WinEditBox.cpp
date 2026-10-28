@@ -1157,10 +1157,10 @@ BOOL __stdcall D2WINEDITBOX_CreateControl(D2ControlMsg * pControl, int eFormType
 
     uint32_t uVar1;
     uVar1 = pEditBox->sControl.dwState;
-    if (!(uVar1 & 4)) {
+    if (!(uVar1 & gadwBitMasks[2])) {
       return 0;
     }
-    if (!(uVar1 & 1)) {
+    if (!(uVar1 & gadwBitMasks[0])) {
       return 0;
     }
 
@@ -1584,7 +1584,7 @@ BOOL __fastcall D2WINEDITBOX_HandleKeyPress(::D2WinEditBox * pEditBox, uint8_t b
     }
 
     uint32_t nState = pEditBox->sControl.dwState;
-    if (!(nState & 4) || !(nState & 1)) {
+    if (!(nState & 4) || !(nState & gadwBitMasks[0])) {
       return 0;
     }
     if (bParam == 9 && pEditBox->nFlags & 4) {
@@ -1819,7 +1819,7 @@ BOOL __fastcall D2WINEDITBOX_HandleKeyRelease(::D2WinEditBox * pEditBox, char cP
 
     uint32_t bShiftHeld;
     bShiftHeld = pEditBox->sControl.dwState;
-    if (!(bShiftHeld & 4) || !(bShiftHeld & 1)) {
+    if (!(bShiftHeld & gadwBitMasks[2]) || !(bShiftHeld & gadwBitMasks[0])) {
       return 0;
     }
 
@@ -2007,7 +2007,7 @@ BOOL __fastcall D2WINEDITBOX_HandleKeyRelease(::D2WinEditBox * pEditBox, char cP
           }
 
           bShiftHeld = pNextControl->sControl.dwState;
-          if (bShiftHeld & 4 && bShiftHeld & 1) {
+          if (bShiftHeld & gadwBitMasks[2] && bShiftHeld & gadwBitMasks[0]) {
             break;
           }
 
@@ -2025,7 +2025,7 @@ BOOL __fastcall D2WINEDITBOX_HandleKeyRelease(::D2WinEditBox * pEditBox, char cP
           }
 
           bShiftHeld = pNextControl->sControl.dwState;
-          if (!(!(bShiftHeld & 4) || !(bShiftHeld & 1))) {
+          if (!(!(bShiftHeld & gadwBitMasks[2]) || !(bShiftHeld & gadwBitMasks[0]))) {
             break;
           }
 
@@ -2118,7 +2118,7 @@ BOOL __fastcall Draw(::D2WinEditBox * pEditBox) {
 
     uint32_t nState;
     nState = pEditBox->sControl.dwState;
-    if (!(nState & 4)) {
+    if (!(nState & gadwBitMasks[2])) {
       return 1;
     }
     if (!(nState & 1)) {
@@ -2378,10 +2378,10 @@ BOOL __stdcall PushFlag0x8(D2ControlMsg * pControlMsg) {
 
     uint32_t nNewTextLen;
     nNewTextLen = pEditBox->sControl.dwState;
-    if (!(nNewTextLen & 4)) {
+    if (!(nNewTextLen & gadwBitMasks[2])) {
       return 0;
     }
-    if (!(nNewTextLen & 1)) {
+    if (!(nNewTextLen & gadwBitMasks[0])) {
       return 0;
     }
 
@@ -2542,7 +2542,7 @@ BOOL __fastcall DrawFlag0x8(::D2WinEditBox * pEditBox) {
         exit(-1);
       }
       nVisibleLen = pEditBox->sControl.dwState;
-      if (!(nVisibleLen & 4 && nVisibleLen & 1)) {
+      if (!(nVisibleLen & gadwBitMasks[2] && nVisibleLen & 1)) {
         return 1;
       }
       nGlobalState = D2WinMain::D2WINMAIN_GetWinMainState();
@@ -2670,13 +2670,12 @@ BOOL __fastcall DrawFlag0x8(::D2WinEditBox * pEditBox) {
 ::D2WinEditBox * __fastcall D2WinEditBox(int32_t nPosX, int32_t nPosY, int32_t nSizeX, int32_t nSizeY, int32_t nInsetX, int32_t nInsetY, DC6 * pDC6, fpD2WinEditBoxSubmit pfnSubmit, OnPress pfnOnPress, uint32_t nFlags, uint32_t * pFontIds) {
     ::Push pfnPush;
     ::Draw pfnDraw;
-    ::D2WinEditBox* pNewEditBox = D2_NEW(::D2WinEditBox);
+    ::D2WinEditBox* pNewEditBox = ((::D2WinEditBox*)Fog::Memory::AllocClientMemory(sizeof(::D2WinEditBox), ".\\Src\\D2WinEditBox.cpp", 0x39, 0));
     memset(pNewEditBox, 0, 0x284);
     pNewEditBox->sControl.neD2FormType = FORM_EditBox;
-    int* pStateField = &pNewEditBox->sControl.dwState;
-    *pStateField |= 1;
+    pNewEditBox->sControl.dwState |= gadwBitMasks[0];
     pNewEditBox->sControl.pDC6 = pDC6;
-    pNewEditBox->sControl.dwState |= 4;
+    pNewEditBox->sControl.dwState |= gadwBitMasks[2];
     pNewEditBox->sControl.dwSizeX = nSizeX;
     pNewEditBox->sControl.dwSizeY = nSizeY;
     pNewEditBox->sControl.dwPosX = nPosX;
@@ -2709,12 +2708,12 @@ BOOL __fastcall DrawFlag0x8(::D2WinEditBox * pEditBox) {
     pNewEditBox->wszText[0] = L'\0';
     pNewEditBox->nCursorIndex = 0;
     pNewEditBox->nFlags = nFlags;
-    if (!pFontIds) {
-      pNewEditBox->nFontId = 1;
-      pNewEditBox->nMaxValue = 0;
-    } else {
+    if (pFontIds) {
       pNewEditBox->nFontId = *pFontIds;
       pNewEditBox->nMaxValue = pFontIds[1];
+    } else {
+      pNewEditBox->nFontId = 1;
+      pNewEditBox->nMaxValue = 0;
     }
 
     pNewEditBox->pNextTabEditBox = 0;

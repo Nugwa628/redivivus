@@ -1104,24 +1104,24 @@ void __fastcall CalculateBonusResistances(::SGAMEDATA * pGame, D2UnitStrc * pUni
     eD2QuestState eScrollState = QUESTSTATE_Step0x07;
     eD2Quests eQuestId = QUEST_PrisonOfIce;
     uint32_t nBonusTotal = 0;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[0], eQuestId, eScrollState);
+    D2UnitDataPlayerStrc* pPlayerData;
+    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[0], eQuestId, eScrollState);
     if (_bHasScrollQuestState) {
       nBonusTotal = 10;
     }
 
     eD2QuestState eScrollStateInner = QUESTSTATE_Step0x07;
     eD2Quests eQuestIdInner = QUEST_PrisonOfIce;
-    pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[1], eQuestIdInner, eScrollStateInner);
+
+    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[1], eQuestIdInner, eScrollStateInner);
     if (_bHasScrollQuestState) {
       nBonusTotal += 10;
     }
 
     eD2QuestState eScrollStateInner2 = QUESTSTATE_Step0x07;
     eD2Quests eQuestIdInner2 = QUEST_PrisonOfIce;
-    pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[2], eQuestIdInner2, eScrollStateInner2);
+
+    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[2], eQuestIdInner2, eScrollStateInner2);
     if (_bHasScrollQuestState) {
       nBonusTotal += 10;
     }

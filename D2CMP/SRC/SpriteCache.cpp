@@ -17122,7 +17122,7 @@ D2CelFileCacheEntryStrc * __stdcall SPRITECACHE_LoadDCC(char * szText, char * sz
           }
 
           nFrameIdx = 0;
-          if (pCacheEntry->nDirections) {
+          if ((uint32_t)pCacheEntry->nDirections > 0) {
             pPaletteCursor = pCacheEntry->adwDirectionOffsets;
             do {
               *pPaletteCursor = gdwSpriteCacheThreshold[pCacheEntry->nFramesPerDirection * nFrameIdx];
@@ -18334,7 +18334,7 @@ int __stdcall SPRITECACHE_GetOrLoadSprite(D2GfxDataStrc * pGfxData, int32_t bChe
     bLoadSuccess = 1;
     uint32_t bAsyncDone;
     bAsyncDone = 0;
-    if (1 < nFrames && nDirections) {
+    if (1 < nFrames && (uint32_t)nDirections > 0) {
       if (nHashEntry) {
         ppAsyncHandle = *(D2AsyncData_Line0x128**)(*(int*)(nHashEntry + 0x20) + 0xb0);
         if (!ppAsyncHandle) {
@@ -18441,7 +18441,7 @@ BOOL __stdcall SPRITECACHE_PrecacheSpriteSync(D2GfxDataStrc * pGfxData) {
 
         return 1;
       }
-      if (1 < nDirections && nFrames && !(pCodecHeader->dwCacheFlags & 1)) {
+      if (1 < nDirections && (uint32_t)nFrames > 0 && !(pCodecHeader->dwCacheFlags & 1)) {
         nPaletteShift = CelCmp::CELCMP_GetPaletteShiftValue(pGfxData->nDirection * pCodecHeader->nDirections >> 6, pCodecHeader->nDirections, nDirections, pGfxData->dwFlags & 4);
         if (pCodecHeader->nDirections < 2) {
           uVar2 = 1;

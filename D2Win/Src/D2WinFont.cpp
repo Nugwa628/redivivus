@@ -912,7 +912,7 @@ void __fastcall IMAGE_DrawDC6ImageOnScreen(DC6 * pDC6, int32_t nPosX, int32_t nP
     if (nParam == 1 || (nDrawX = nPosX , nParam == 2)) {
       DC6Block* pBlock;
       nFrameIdx = 0;
-      if (nFrameCount) {
+      if ((uint32_t)nFrameCount > 0) {
         do {
           sGfxData.nFrameNumber = nFrameIdx;
           pBlock = D2CMP::SRC::CelCmp::CELCMP_GetDC6BlockFromGfxData(&sGfxData);
@@ -1459,9 +1459,7 @@ void __stdcall Draw_UnitNameUnderCursor() {
     }
 
     __frame0.nClampedX = nXStart;
-    if (!DisplayedTooltip.nLoadProgress) {
-      D2gfx::D2GFX::D2GFX_DrawSolidRectEx(nXStart, nYEnd - __frame0.nCalcTextHeight, nXStart + nWidth, nYEnd, 0, DRAW_LESSTRANSPARENT);
-    } else {
+    if (DisplayedTooltip.nLoadProgress) {
       DWORD dwColor;
       dwColor = (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)((uint32_t)nBarTextHeight >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)gcTooltipBarColor);
       if (gcTooltipBarColor == '\0') {
@@ -1479,6 +1477,8 @@ void __stdcall Draw_UnitNameUnderCursor() {
         D2gfx::D2GFX::D2GFX_DrawSolidRectEx(nBarTextHeight, nTextWidth, nBarTextHeight + nFilledWidth, nYEnd, 0, DRAW_LESSTRANSPARENT);
         nXStart = __frame0.nClampedX;
       }
+    } else {
+      D2gfx::D2GFX::D2GFX_DrawSolidRectEx(nXStart, nYEnd - __frame0.nCalcTextHeight, nXStart + nWidth, nYEnd, 0, DRAW_LESSTRANSPARENT);
     }
 
     D2WINFONT_DrawWideString(DisplayedTooltip.wszString, nXStart, nYEnd - (int)((uint32_t)gaFontCache[gnLastUsedFontId].pFontTableHeader->nLineHeight * gnFontIdBody) / 10, nWidth, DisplayedTooltip.nColor, 1);

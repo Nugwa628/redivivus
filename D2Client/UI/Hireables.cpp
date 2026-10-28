@@ -604,11 +604,13 @@ void __stdcall UI_ToggleHirelingIconsVisibility() {
     eD2GSGameType eGameType;
     if (!gnHireDisplayMode) {
       eGameType = GAME::Game::CLIENT_GetD2GSGameType();
-      if (eGameType == GAMETYPE_SINGLEPLAYER) {
+      switch (eGameType) {
+      case GAMETYPE_SINGLEPLAYER: {
         gnHireDisplayMode = 2;
         gnHireIconHoverIndex = 0;
         Draw::SetUIFlag(UI_HIREICONS, UI_RESET, 0);
         return;
+      }
       }
 
       gnHireDisplayMode = 1;
@@ -622,10 +624,12 @@ void __stdcall UI_ToggleHirelingIconsVisibility() {
     }
 
     eGameType = GAME::Game::CLIENT_GetD2GSGameType();
-    if (eGameType == GAMETYPE_SINGLEPLAYER) {
+    switch (eGameType) {
+    case GAMETYPE_SINGLEPLAYER: {
       gnHireDisplayMode = 0;
       Draw::SetUIFlag(UI_HIREICONS, UI_SET, 0);
       return;
+    }
     }
 
     gnHireDisplayMode = 2;

@@ -188,7 +188,7 @@ DWORD __stdcall WaitForEmptyEvent(D2QServerStrc * pQServer, DWORD dwParam) {
     return dwWaitResult;
 }
 
-FogCritSectLockStrc * _unused_broken(FogCritSectLockStrc * pQServer, LPCRITICAL_SECTION pCriticalSection) {
+FogCritSectLockStrc * __fastcall _unused_broken(FogCritSectLockStrc * pQServer, int32_t nEdxUnused, LPCRITICAL_SECTION pCriticalSection) {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ pQServer->pCriticalSection = pCriticalSection;
     EnterCriticalSection(pCriticalSection);
     return pQServer;

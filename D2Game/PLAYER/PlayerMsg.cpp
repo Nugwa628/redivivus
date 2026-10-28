@@ -123,21 +123,21 @@ void __fastcall UpgradeLifeAndHitClass(D2UnitStrc * pUnit, D2ClientStrc * pClien
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       wPosY = (uint16_t)pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      wPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPos = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
       wPosY = (uint16_t)nPos;
+    } else {
+      wPosY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       wPosX = (uint16_t)pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      wPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
       wPosX = (uint16_t)nPos;
+    } else {
+      wPosX = 0;
     }
 
     GAME::SCmd::NET_D2GS_SERVER_Send_0x0D_UNITCHANGE_XY(pClient, '\r', '\0', pUnit->nUnitGUID, '\x13', wPosX, wPosY, (uint8_t)dwLastHitClass, (uint8_t)nPlayerLife);
@@ -160,11 +160,11 @@ void __fastcall SendReassignPlayer(D2UnitStrc * pUnitStrc, D2ClientStrc * pClien
     eUnitType = pUnitStrc->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       wPosX = (uint16_t)pUnitStrc->pPath.pStaticPath->nPosX;
-    } else if (!pUnitStrc->pPath.pDynamicPath) {
-      wPosX = 0;
-    } else {
+    } else if (pUnitStrc->pPath.pDynamicPath) {
       nPos = D2Common::PATH::DynamicPath::GetXPos(pUnitStrc->pPath.pDynamicPath);
       wPosX = (uint16_t)nPos;
+    } else {
+      wPosX = 0;
     }
 
     GAME::SCmd::NET_D2GS_SERVER_Send_0x15_WarpXY(pClient, '\x15', (uint8_t)pUnitStrc->eUnitType, pUnitStrc->nUnitGUID, wPosX, wPosY, bParam);
@@ -326,21 +326,21 @@ void __fastcall SendPlayerStop(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Client
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       wPosY = (uint16_t)pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      wPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPos = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
       wPosY = (uint16_t)nPos;
+    } else {
+      wPosY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       wPosX = (uint16_t)pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      wPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
       wPosX = (uint16_t)nPos;
+    } else {
+      wPosX = 0;
     }
 
     GAME::SCmd::NET_D2GS_SERVER_Send_0x0D_UNITCHANGE_XY(pClient, '\r', '\0', pUnit->nUnitGUID, (uint8_t)dwMoveMode, wPosX, wPosY, (uint8_t)dwLastHitClass, (uint8_t)nLifePct);
@@ -370,11 +370,11 @@ void __fastcall PLRMSG_SendPlayerStopToOtherClient(::SGAMEDATA * pGame, D2UnitSt
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       wPosX = (uint16_t)pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      wPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
       wPosX = (uint16_t)nPos;
+    } else {
+      wPosX = 0;
     }
 
     GAME::SCmd::NET_D2GS_SERVER_Send_0x0D_UNITCHANGE_XY(pClient, '\r', '\0', pUnit->nUnitGUID, (uint8_t)dwMoveMode, wPosX, wPosY, '\0', (uint8_t)nLifePct);
@@ -1432,7 +1432,7 @@ eD2ServerIncomingStatus __stdcall CastSkillOnLocation(D2UnitStrc * pUnit, ::SGAM
     if (!pSkillsTxt) {
       return SERVERSTATUS_BAD_DATA;
     }
-    if (0 < nCanUseSkill && (nCanUseSkill <= 2 || nCanUseSkill == 4) && pSkillsTxt->AttackNoMana) {
+    if (0 < nCanUseSkill && (nCanUseSkill <= 2 || nCanUseSkill == 4) && (*((uint8_t *)pSkillsTxt + 0x7) & gadwBitMasks[4])) {
       pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, SKILL_Attack, -1);
       nCanUseSkill = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pSkill);
     }
@@ -1469,7 +1469,7 @@ static void __stdcall PLAYER_ProcessSkillOnEntity(D2UnitStrc * pUnit, ::SGAMEDAT
     if (!pSkillTxtEntry) {
       return;
     }
-    if (0 < nSkillUsability && (nSkillUsability <= 2 || nSkillUsability == 4) && pSkillTxtEntry->AttackNoMana) {
+    if (0 < nSkillUsability && (nSkillUsability <= 2 || nSkillUsability == 4) && (*((uint8_t *)pSkillTxtEntry + 0x7) & gadwBitMasks[4])) {
       pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, SKILL_Attack, -1);
       nSkillUsability = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pSkill);
     }
@@ -1478,7 +1478,7 @@ static void __stdcall PLAYER_ProcessSkillOnEntity(D2UnitStrc * pUnit, ::SGAMEDAT
     }
 
     int nSkillModeIdx = D2Common::Skills::GetSkillMode(pUnit, pSkill);
-    if (!(nSkillModeIdx && (pSkillTxtEntry->TargetItem || 0 <= (int)eUnitType && ((int)eUnitType <= 1 || eUnitType == UNIT_MISSILE)))) {
+    if (!(nSkillModeIdx && ((*((uint8_t *)pSkillTxtEntry + 0x7) & gadwBitMasks[3]) || 0 <= (int)eUnitType && ((int)eUnitType <= 1 || eUnitType == UNIT_MISSILE)))) {
       return;
     }
 
@@ -1997,10 +1997,10 @@ eD2ServerIncomingStatus __fastcall SCMD_0x15_ChatMessage(::SGAMEDATA * pGame, D2
     D2ClientStrc* pSenderClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x9e7);
     char* nMsgLen = GAME::Clients::GetCharName(pSenderClient);
     szFiltered = Storm::Source::SSTR::SStrLen(nMsgLen);
-    if (!szFiltered) {
-      sPacket.szName[0] = '\0';
-    } else {
+    if ((uint32_t)szFiltered > 0) {
       Storm::Source::SSTR::SStrCopy(sPacket.szName, nMsgLen, 0x7fffffff);
+    } else {
+      sPacket.szName[0] = '\0';
     }
 
     szFiltered = Storm::Source::SSTR::SStrLen(pBuffer.szTarget);

@@ -1004,10 +1004,10 @@ void __fastcall MONUNIQUE_SpawnSuicideExplosion(D2UnitStrc * pUnit, int32_t nUMo
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     Missile::MakeMissileAtXY(pUnit, MISSILE_Suicidecorpseexplode, nPosY, nClassId, SKILL_Attack, 1);

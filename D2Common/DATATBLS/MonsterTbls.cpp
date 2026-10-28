@@ -1907,10 +1907,10 @@ void __stdcall TC_GenerateAutoItemTypeTreasureClasses() {
                       if (bTypeMatch && (nItemTypeStride == 0x21d8 || (bIsMissilePotion = ITEMS::Items::TXT_ItemTypes_CheckEquivalence(nItemClassIdx, ITEMTYPE_MissilePotion) , !bIsMissilePotion)) && nLevelStep - 3 < (int)(uint32_t)(uint8_t)pItemsTxt->nLevel && (int)(uint32_t)(uint8_t)pItemsTxt->nLevel <= nLevelStep) {
                         pItemTypesTxt = D2Game::ITEMS::Items::Drop::ItemTypes_GetLine((int)pItemsTxt->wType);
                         if (pItemTypesTxt) {
-                          if ((uint8_t)pItemTypesTxt->rarity <= 1) {
-                            nRarity = 1;
-                          } else {
+                          if (!((uint8_t)pItemTypesTxt->rarity <= 1)) {
                             nRarity = (uint32_t)(uint8_t)pItemTypesTxt->rarity;
+                          } else {
+                            nRarity = 1;
                           }
 
                           pTCEntry = AddOneParsedTCEntry(pNewTC);
@@ -2429,7 +2429,7 @@ D2ParsedTreasureClassStrc * __stdcall TC_LookupTreasureClassByName(char * szText
 // TC level-variant selector. TCs with same nGroup form a chain, select best match where TC.nLevel <= nLevel. Linear scan through variants, returns highest applicable TC or base TC if no variants.
 D2ParsedTreasureClassStrc * __stdcall TC_GetParsedTreasureClassByLevel(uint16_t nTreasureClassId, int32_t nLevel) {
     D2ParsedTreasureClassStrc* pLookAheadTC;
-    if (!(nTreasureClassId && (int)(uint32_t)nTreasureClassId < sgtDataTable.nParsedTreasureClassSize)) {
+    if (!((uint32_t)nTreasureClassId > 0 && (int)(uint32_t)nTreasureClassId < sgtDataTable.nParsedTreasureClassSize)) {
       return nullptr;
     }
 
@@ -3759,11 +3759,7 @@ void __fastcall MONSTERTBLS_ParseMonSeqField(char * szText, char * pRecord, uint
       if (4 < (uint32_t)((int)pTokenEnd - (int)(szText + 1))) {
         break;
       }
-      if (szText[1] == '\0') {
-        *(uint16_t*)(char*)&dwCodeBuf = (uint16_t)((uint16_t)(uint8_t)0x20 << 8 | (uint16_t)(uint8_t)cChar);
-        d2_store24((char*)&dwCodeBuf, (uint32_t)((uint32_t)((uint32_t)(uint8_t)0x20 << 16 | (uint32_t)(uint16_t)dwCodeBuf) & 0xffffffu));
-        dwCodeBuf = (uint32_t)((uint32_t)(uint8_t)0x20 << 24 | (uint32_t)((uint32_t)dwCodeBuf & 0xffffffu));
-      } else {
+      if (szText[1] != '\0') {
         *(uint16_t*)(char*)&dwCodeBuf = (uint16_t)((uint16_t)(uint8_t)szText[1] << 8 | (uint16_t)(uint8_t)cChar);
         if (szText[2] == '\0') {
           d2_store24((char*)&dwCodeBuf, (uint32_t)((uint32_t)((uint32_t)(uint8_t)0x20 << 16 | (uint32_t)(uint16_t)dwCodeBuf) & 0xffffffu));
@@ -3775,6 +3771,10 @@ void __fastcall MONSTERTBLS_ParseMonSeqField(char * szText, char * pRecord, uint
             dwCodeBuf = (uint32_t)((uint32_t)(uint8_t)szText[3] << 24 | (uint32_t)((uint32_t)dwCodeBuf & 0xffffffu));
           }
         }
+      } else {
+        *(uint16_t*)(char*)&dwCodeBuf = (uint16_t)((uint16_t)(uint8_t)0x20 << 8 | (uint16_t)(uint8_t)cChar);
+        d2_store24((char*)&dwCodeBuf, (uint32_t)((uint32_t)((uint32_t)(uint8_t)0x20 << 16 | (uint32_t)(uint16_t)dwCodeBuf) & 0xffffffu));
+        dwCodeBuf = (uint32_t)((uint32_t)(uint8_t)0x20 << 24 | (uint32_t)((uint32_t)dwCodeBuf & 0xffffffu));
       }
 
       nClassId = Fog::Src::Excel::GetClassIdFromName(sgtDataTable.pTxtCompCodeLink, dwCodeBuf, 1);

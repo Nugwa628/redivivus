@@ -2226,7 +2226,7 @@ eD2UnitType __fastcall CLIENT_GetEffectiveUnitType(D2UnitStrc * pUnit) {
     if (!pUnit) {
       return UNIT_COUNT;
     }
-    if (!(pUnit->eUnitFlagsEx >> 3 & 1)) {
+    if (!(((bool)(pUnit->eUnitFlagsEx >> 3 & 1)))) {
       return pUnit->eUnitType;
     }
 
@@ -2240,7 +2240,7 @@ eD2UnitType __fastcall CLIENT_GetEffectiveUnitType(D2UnitStrc * pUnit) {
 int __fastcall CLIENT_GetEffectiveAnimMode(D2UnitStrc * pUnit) {
     int nClassId;
     int32_t pnEffectiveAnimMode;
-    if (pUnit && pUnit->eUnitFlagsEx >> 3 & 1) {
+    if (pUnit && ((bool)(pUnit->eUnitFlagsEx >> 3 & 1))) {
       eD2UnitType eUnitType;
       eUnitType = pUnit->eUnitType;
       nClassId = pUnit->nClassId;
@@ -2257,7 +2257,7 @@ DWORD __fastcall CLIENT_GetEffectiveClassId(D2UnitStrc * pUnit) {
     if (!pUnit) {
       return -1;
     }
-    if (!(pUnit->eUnitFlagsEx >> 3 & 1)) {
+    if (!(((bool)(pUnit->eUnitFlagsEx >> 3 & 1)))) {
       return pUnit->nClassId;
     }
 

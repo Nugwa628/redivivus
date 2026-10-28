@@ -407,10 +407,10 @@ void __fastcall OBJMODE_UpdateProximityStateMachine(::SGAMEDATA * pGame, D2UnitS
     int nCounterAttacked;
     eD2ObjectAnimMode eAnimMode;
     int32_t pEventData;
-    if (!pUnit) {
-      eAnimMode = eD2ObjectAnimMode_ns::Neutral;
-    } else {
+    if (pUnit) {
       eAnimMode = pUnit->eAnimMode.eObjectMode;
+    } else {
+      eAnimMode = eD2ObjectAnimMode_ns::Neutral;
     }
 
     D2RoomStrc* pRoom;
@@ -419,7 +419,16 @@ void __fastcall OBJMODE_UpdateProximityStateMachine(::SGAMEDATA * pGame, D2UnitS
     cProximityState = pUnit->pUnitData.pUnitDataPlayer->szCharName[4];
     int nActivated;
     nActivated = 0;
-    if (cProximityState == '\0') {
+    if (cProximityState != '\0') {
+      if (cProximityState == '\x01') {
+        nActivated = 1;
+        goto scan_nearby_players;
+      }
+      if (cProximityState == '\x02' && eAnimMode != eD2ObjectAnimMode_ns::Neutral) {
+        D2Common::Units::SetupUpdateFlag(pUnit, 0);
+        pUnit->pUnitData.pUnitDataPlayer->szCharName[4] = '\0';
+      }
+    } else {
       int32_t nCollisionDist;
       scan_nearby_players:
       D2Common::Units::GetCoords(pUnit, &ptUnitCoords);
@@ -464,15 +473,6 @@ void __fastcall OBJMODE_UpdateProximityStateMachine(::SGAMEDATA * pGame, D2UnitS
         pObjectTxt = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(pUnit->nClassId);
         GAME::Event::SetEvent(pGame, pUnit, 3, (pObjectTxt->FrameCnt[1] >> 8) + 1 + pGame->dwGameFrame, nCollisionDist, pEventData);
         return;
-      }
-    } else {
-      if (cProximityState == '\x01') {
-        nActivated = 1;
-        goto scan_nearby_players;
-      }
-      if (cProximityState == '\x02' && eAnimMode != eD2ObjectAnimMode_ns::Neutral) {
-        D2Common::Units::SetupUpdateFlag(pUnit, 0);
-        pUnit->pUnitData.pUnitDataPlayer->szCharName[4] = '\0';
       }
     }
 
@@ -655,10 +655,10 @@ BOOL __fastcall OBJOP_ToggleDoor(D2ObjectOperateFnArg * pOperation) {
     uint32_t nSizeY = D2Common::Units::GetUnitSizeY(pOperation->sArg.pVictim);
     DWORD dwTickNow = GetTickCount();
     D2UnitStrc* pVictimUnit = pOperation->sArg.pVictim;
-    if (!pVictimUnit) {
-      eAnimMode = eD2ObjectAnimMode_ns::Neutral;
-    } else {
+    if (pVictimUnit) {
       eAnimMode = pVictimUnit->eAnimMode.eObjectMode;
+    } else {
+      eAnimMode = eD2ObjectAnimMode_ns::Neutral;
     }
     if (!(dwTickNow >= pVictimUnit->dwTickCount + 500 && true)) {
       return 1;
@@ -886,16 +886,16 @@ BOOL __fastcall OBJOP_OpenBreakableContainer(D2ObjectOperateFnArg * pOperation) 
       }
     }
 
-    pObjectTxt = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(pOperation->nObjectClassId);
-    if (!pObjectTxt->Mode[2]) {
+
+    if (!D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(pOperation->nObjectClassId)->Mode[2]) {
       return 1;
     }
 
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
     int32_t pEventData = 0;
     int32_t nEventArgZero = 0;
-    pObjectTxt = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(pOperation->nObjectClassId);
-    GAME::Event::SetEvent(pGame, pOperation->sArg.pVictim, 1, (pObjectTxt->FrameCnt[1] >> 8) + 1 + pGame->dwGameFrame, nEventArgZero, pEventData);
+
+    GAME::Event::SetEvent(pGame, pOperation->sArg.pVictim, 1, (D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(pOperation->nObjectClassId)->FrameCnt[1] >> 8) + 1 + pGame->dwGameFrame, nEventArgZero, pEventData);
     return 1;
 }
 
@@ -1297,10 +1297,7 @@ static BOOL __stdcall Shrines_GemShrine_SpawnGem(int32_t nItemClassId, D2UnitStr
     uint32_t uSearchFlag = 1;
     POINT* pNewPosition = &ptSpawnPos;
     D2UnitStrc* pSpawnedItem = (D2UnitStrc*)ITEMS::Items::Drop::FindBestSpotToSpawnItem(D2Common::Units::UNITS_GetRoom(pUnit2), &ptUnitCoords, pNewPosition, uSearchFlag, bSearchNeighbors);
-    if (!pSpawnedItem) {
-      BVar1 = 0;
-      pSpawnedItem = 0;
-    } else {
+    if (pSpawnedItem) {
       eInventoryPage ePreviousPage;
       memset(&sItemGenCtx, 0, 0x84);
       sItemGenCtx.pUnit = 0;
@@ -1308,9 +1305,9 @@ static BOOL __stdcall Shrines_GemShrine_SpawnGem(int32_t nItemClassId, D2UnitStr
       sItemGenCtx.wItemFormat = pGame->wItemFormat;
       sItemGenCtx.nItemClassid = nItemClassId;
       sItemGenCtx.nPosX = ptSpawnPos.x;
-      sItemGenCtx.pDrlgRoom = (D2RoomStrc*)pSpawnedItem;
       sItemGenCtx.dwMode = 3;
       sItemGenCtx.nPosY = ptSpawnPos.y;
+      sItemGenCtx.pDrlgRoom = (D2RoomStrc*)pSpawnedItem;
       sItemGenCtx.usually_one = 1;
       sItemGenCtx.eQuality = QUALITY_NORMAL;
       sItemGenCtx.pGame = pGame;
@@ -1333,6 +1330,9 @@ static BOOL __stdcall Shrines_GemShrine_SpawnGem(int32_t nItemClassId, D2UnitStr
         ITEMS::ItemMode::ITEMMODE_DeleteItemFromInventory(pGame, pUnit2, pUnit, 0);
         return 1;
       }
+    } else {
+      BVar1 = 0;
+      pSpawnedItem = 0;
     }
 
     return BVar1;
@@ -3808,7 +3808,7 @@ BOOL __fastcall OBJOP_OpenSparklyChest(D2ObjectOperateFnArg * pOperation) {
       *pDVar2 = sNextSeed;
       if (0x19 <= (int)(sNextSeed.nSeedLow % 100) || nGoldDropped || byNecroFlag) {
         iVar4 = 0;
-        for (; nDropCount; nDropCount--) {
+        for (; (uint32_t)nDropCount > 0; nDropCount--) {
           pRolledItem = (D2UnitStrc*)RollChestDrops(pOperation, eDropType);
           if (pRolledItem) {
             bMagicCheck0 = D2Common::ITEMS::Items::ITEM_CheckItemData_ItemQualityIsMagicOrBetter(pRolledItem);
@@ -4130,7 +4130,7 @@ D2UnitStrc ** __fastcall OBJMODE_RollChestDrops(D2ObjectOperateFnArg * pOperateA
     D2SeedStrc* pSeedPtr = pOperateArg->pSeed;
     D2SeedStrc seedNext = D2_SEED_NEXT(*pSeedPtr);
     *pSeedPtr = seedNext;
-    if (!(seedNext.nSeedLow % 100 >= 0x15)) {
+    if (!(seedNext.nSeedLow % 100 > 0x14)) {
       return RollChestDrops(pOperateArg, ITEMTYPE_None1);
     }
 

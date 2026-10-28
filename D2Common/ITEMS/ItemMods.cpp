@@ -1608,7 +1608,7 @@ BOOL __stdcall ITEMMOD_CanApplyAutomod(D2UnitStrc * pUnit, int32_t nParam) {
     }
 
     iVar1 = Items::ITEM_GetItemsTxt_bHasInv(pUnit);
-    if (!iVar1 || (nMaxSock = Items::ITEM_GetMaxSockCount(pUnit) , nMaxSock == '\0')) {
+    if (!iVar1 || (nMaxSock = Items::ITEM_GetMaxSockCount(pUnit) , (uint32_t)nMaxSock <= 0)) {
       nLoopIdx = *(int*)(nParam + 0x24);
       if (0 <= nLoopIdx && (nLoopIdx >= sgptDataTable->nTxtPropertiesSize || !(sgptDataTable->pTxtProperties + nLoopIdx) || sgptDataTable->pTxtProperties[nLoopIdx].stat[0] == 0xc2)) {
         return 0;
@@ -1832,13 +1832,7 @@ int32_t __fastcall ITEMMOD_AddStatToItem(D2UnitStrc * pUnit, int32_t nParam1, in
     if (!pStatsEx) {
       return 0;
     }
-    if (!nParam2) {
-      Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, eTargetStat, nParam3 << (pItemStatCost->valshift), (uint16_t)nParam12);
-      switch (nParam) {
-        case 0x3a:
-          Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, UNITSTAT_poison_count, 1, 0);
-      }
-    } else {
+    if (nParam2) {
       int nPoisonCount;
       Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, eTargetStat, nParam3 << (pItemStatCost->valshift), nParam12);
       switch (nParam) {
@@ -1848,6 +1842,12 @@ int32_t __fastcall ITEMMOD_AddStatToItem(D2UnitStrc * pUnit, int32_t nParam1, in
             Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_poison_count, 1, 0);
             return nParam3;
           }
+      }
+    } else {
+      Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, eTargetStat, nParam3 << (pItemStatCost->valshift), (uint16_t)nParam12);
+      switch (nParam) {
+        case 0x3a:
+          Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, UNITSTAT_poison_count, 1, 0);
       }
     }
 

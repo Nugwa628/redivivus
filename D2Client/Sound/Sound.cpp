@@ -5933,19 +5933,8 @@ void __fastcall SOUND_UpdateAllChannels(uint32_t nFrameTime) {
             }
 
             pSoundsTxt = DataTbls::TXT_sounds_GetLineBySoundId(pChanEntry->nSoundId);
-            if (!pSoundsTxt) {
-              occlusion_by_collision:
-              pUnit = UNIT::Player::GetPlayerUnit_UI();
-              bUiFlag = D2Common::Units::TestCollisionWithUnit(pUnit, pUnit_00, 2);
-              if (!bUiFlag) {
-                __frame0.fUnitDistSmooth = 0.0;
-              } else {
-                __frame0.fUnitDistSmooth = 0.5;
-              }
-            } else {
-              if (pSoundsTxt->Falloff == 4) {
-                __frame0.fUnitDistSmooth = 0.0;
-              } else {
+            if (pSoundsTxt) {
+              if (pSoundsTxt->Falloff != 4) {
                 if (pSoundsTxt->nGroupStartIndex != 0xca) {
                   goto occlusion_by_collision;
                 }
@@ -5957,6 +5946,17 @@ void __fastcall SOUND_UpdateAllChannels(uint32_t nFrameTime) {
                 } else {
                   __frame0.fUnitDistSmooth = 0.5;
                 }
+              } else {
+                __frame0.fUnitDistSmooth = 0.0;
+              }
+            } else {
+              occlusion_by_collision:
+              pUnit = UNIT::Player::GetPlayerUnit_UI();
+              bUiFlag = D2Common::Units::TestCollisionWithUnit(pUnit, pUnit_00, 2);
+              if (bUiFlag) {
+                __frame0.fUnitDistSmooth = 0.5;
+              } else {
+                __frame0.fUnitDistSmooth = 0.0;
               }
             }
 
@@ -6141,18 +6141,18 @@ void __fastcall SOUND_UpdateAllChannels(uint32_t nFrameTime) {
           nSoundVolumeLeftChannel = nFadeVolStart;
         }
       }
-      if (!__frame0.fClosestDist.nValue) {
-        nSoundVolumeRightChannel += 2;
-        if (100 < nSoundVolumeRightChannel) {
-          nSoundVolumeRightChannel = 100;
-          gnSoundVolumeUpdateFrame = __frame0.pFrameTime;
-          return;
-        }
-      } else {
+      if (__frame0.fClosestDist.nValue) {
         nSoundVolumeRightChannel += -2;
         if (nSoundVolumeRightChannel < 0x46) {
           gnSoundVolumeUpdateFrame = __frame0.pFrameTime;
           nSoundVolumeRightChannel = 0x46;
+          return;
+        }
+      } else {
+        nSoundVolumeRightChannel += 2;
+        if (100 < nSoundVolumeRightChannel) {
+          nSoundVolumeRightChannel = 100;
+          gnSoundVolumeUpdateFrame = __frame0.pFrameTime;
           return;
         }
       }

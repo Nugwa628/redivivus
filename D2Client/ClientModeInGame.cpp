@@ -645,7 +645,7 @@ int32_t __stdcall fAPPMODE_client_ReturnAppMode(HMODULE hModule, D2IniConfigStrc
 
 void __fastcall CLIENT_SetScreenResolution(DWORD RequestedScreenModeMaybe) {
     // Static local variables (originally global data)
-    static bool gbScreenResolutionChangeInitInProgress = true; D2_STATIC_GUARD(gbScreenResolutionChangeInitInProgress, "D2Client::ClientModeInGame::CLIENT_SetScreenResolution::gbScreenResolutionChangeInitInProgress");
+    static BOOL gbScreenResolutionChangeInitInProgress = true; D2_STATIC_GUARD(gbScreenResolutionChangeInitInProgress, "D2Client::ClientModeInGame::CLIENT_SetScreenResolution::gbScreenResolutionChangeInitInProgress");
 
     DWORD dwScreenSize = D2gfx::D2GFX::D2GFX_GetResolutionMode();
     if (RequestedScreenModeMaybe == dwScreenSize) {

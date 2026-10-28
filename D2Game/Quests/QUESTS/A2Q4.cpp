@@ -364,9 +364,7 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     D2UnitDataPlayerStrc* pControlSeed = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
     D2BitBufferStrc* pBitBuffer = pControlSeed->pQuestRecord[pGame->nDifficulty];
-    if (!pQuestArgs->pTarget) {
-      nTargetClassId = -1;
-    } else {
+    if (pQuestArgs->pTarget) {
       D2SeedStrc* pA2Q4Specific;
       nTargetClassId = pQuestArgs->pTarget->nClassId;
       if (nTargetClassId == 0x14b) {
@@ -381,16 +379,18 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, 0x14b, 7);
         return;
       }
+    } else {
+      nTargetClassId = -1;
     }
 
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_RewardAwaits);
     if (bQuestState) {
       nGossipLineIndex = 4;
     } else {
-      if (!pQuestArgs->pPlayer) {
-        nPlayerGUID = -1;
-      } else {
+      if (pQuestArgs->pPlayer) {
         nPlayerGUID = pQuestArgs->pPlayer->nUnitGUID;
+      } else {
+        nPlayerGUID = -1;
       }
 
       bQuestState = QUEST_HasPlayerParticipated(pQuestData, nPlayerGUID);

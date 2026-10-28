@@ -32,7 +32,7 @@ struct __attribute__((packed)) D2SubMissileAreaArgStrc {
 namespace D2Game::MISSILES::MissilesMode {
 
 // Function declarations
-uint32_t MISSILE_RollAttackHit(void * pThis, struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit1);
+uint32_t __fastcall MISSILE_RollAttackHit(void * pThis, int32_t nEdxUnused, struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit1);
 // MISSILE DAMAGE PACKET ASSEMBLY: Fills the caller's D2DamageStrc (memset 0x70, then +8 physical, +0x10 fire, +0x14/+0x18 burn, +0x1c lightning,
 // +0x20 magic, +0x24 cold, +0x28/+0x2c poison, +0x30 cold length, +0x38/+0x3c/+0x40 leech, +0x44 stun; deadly strike sets wResultFlags |= 0x2000).
 // The stack slot of pDamage is reused by MSVC for the damage-percent total, hence the pointer-typed arithmetic in the decompile.

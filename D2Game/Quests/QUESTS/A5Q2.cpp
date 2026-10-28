@@ -1209,8 +1209,11 @@ void __fastcall Q32_PrisonerTimerCallback(D2QuestDataStrc * pQuestData, D2UnitSt
       break;
     }
     case Walk: {
-      if (pA5Q2Data->abGroupWussiesKilled[nPrisonerGroupIdx] == 1) {
+      switch (pA5Q2Data->abGroupWussiesKilled[nPrisonerGroupIdx]) {
+      case 1: {
         pA5Q2Data->anPrisonerTimerCount[nPrisonerGroupIdx]++;
+        break;
+      }
       }
       if (5 < pA5Q2Data->anPrisonerTimerCount[nPrisonerGroupIdx]) {
         pA5Q2Data->abPrisonerArrivedAtPortal[nPrisonerGroupIdx] = 1;

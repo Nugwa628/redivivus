@@ -779,10 +779,10 @@ bool __fastcall Q36_ActiveFilter(D2QuestDataStrc * pQuestData, eD2MonsterClassId
 }
 
 // A5Q6 Eve of Destruction. fpSequenceFilter (linked to prerequisite QUEST_PrisonOfIce / Anya rescue). When this quest is active and not yet started (nStateFlag==0), latch bAnyaTransformed, force live nStateFlag=2, broadcast "in progress" (state 1), and push sub-steps to all players. Kicks the final quest into motion once Anya/prereq conditions are met.
-void __fastcall Q36_SequenceFilter(D2QuestDataStrc * pQuestData) {
+bool __fastcall Q36_SequenceFilter(D2QuestDataStrc * pQuestData) {
     D2QuestDataStrc* pA5Q6EveQuestData = GetQuestDataByQuestNoInternal(pQuestData->pGame, QUESTINT_EveOfDestruction);
     if (!(pA5Q6EveQuestData->bIsNotIntroduction && !pA5Q6EveQuestData->nStateFlag)) {
-      return;
+      return true;
     }
 
     pA5Q6EveQuestData->pQuestSpecificData.pA5Q6->bAnyaTransformed = 1;
@@ -790,6 +790,7 @@ void __fastcall Q36_SequenceFilter(D2QuestDataStrc * pQuestData) {
     pA5Q6EveQuestData->nQuestPacketFlags = '\0';
     QUEST_SetStateAndBroadcast(pA5Q6EveQuestData, 1, nullptr, (::fpExecuteOnUnitFunction)SendQuestBitsIfNeeded, true);
     UNIT::SUnit::IteratePlayerOrMonsterUnits(pA5Q6EveQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)SetStep0x2And0x3);
+    return true;
 }
 
 // A5Q6 Eve of Destruction (state-fn slot 0xe). If the player's quest is Completed(0), set Step0x10 (the "departed act V / acknowledged completion" bit). Small post-completion bookkeeping callback.

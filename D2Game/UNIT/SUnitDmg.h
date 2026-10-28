@@ -118,7 +118,7 @@ void __fastcall DAMAGE_CalculateOffensiveDamage(::SGAMEDATA * pGame, struct D2Un
 // KEY: Absorb happens AFTER resist (less effective than it seems).
 // Table at 0x00732980 (12 entries, 44 bytes): resist/pierce/absorb stats per element.
 void __fastcall DAMAGE_ApplyDefensiveReduction(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit2, struct D2UnitStrc * pUnit, struct D2DamageStrc * pBypassFlags);
-uint32_t DAMAGE_GetMonsterDrainEffectiveness(void * pThis, struct D2UnitStrc * pUnit);
+uint32_t __fastcall DAMAGE_GetMonsterDrainEffectiveness(void * pThis, int32_t nEdxUnused, struct D2UnitStrc * pUnit);
 // Core server-side damage-application routine. Validates the attacker can hit the victim (UNITS_CheckIfCanAttackTarget, town/killable rules) then optionally applies defensive reduction, dispatches hit/got-hit unit events, clamps physical damage to current HP, runs life/mana leech, healing, then subtracts total damage from the victim's hitpoints (clamping the sub-256 remainder to 0). Also applies drain (mana/stamina) and status effects: stun, cold, freeze, poison, burning. Sets wResultFlags death bit (2) when HP reaches 0, otherwise schedules HP-regen events for monsters and clears Assassin charge-up states; dispatches death events on kill. Mutates pDamage and victim stats in place.
 void __fastcall DAMAGE_ApplyDamageToUnit(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pVictim, int32_t bApplyDefenseReduction, struct D2DamageStrc * pDamage);
 // @sourcefile .\UNIT\SUnitDmg.cpp

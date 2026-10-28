@@ -797,7 +797,8 @@ void __stdcall TABLES_GetLangAbbreviation(char * szOutAbbrev, int32_t nFormat) {
         nLangIdx = 0;
       }
     }
-    if (nFormat == 1) {
+    switch (nFormat) {
+    case 1: {
       pcAbbrev = gaLanguageTable[nLangIdx].pszLangNameEng;
       do {
         cChar = *pcAbbrev;
@@ -807,6 +808,7 @@ void __stdcall TABLES_GetLangAbbreviation(char * szOutAbbrev, int32_t nFormat) {
       } while (cChar != '\0');
 
       return;
+    }
     }
     if (nFormat != 2) {
       if (nFormat != 3) {

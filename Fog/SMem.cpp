@@ -278,7 +278,7 @@ int32_t __stdcall SMemSizeClassBucketLookup(uint32_t nAllocSize) {
     if (!nAllocSize) {
       return -1;
     }
-    if ((char)nAllocSize != '\0') {
+    if ((uint32_t)((char)nAllocSize) > 0) {
       return g_SMemSizeClassTable[(uint8_t)nAllocSize];
     }
 

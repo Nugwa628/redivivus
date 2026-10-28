@@ -246,9 +246,7 @@ void __fastcall Q26_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     BOOL bStep0x05Set = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_JustCompleted);
-    if (!pQuestArgs->pTarget) {
-      nTargetClassId = -1;
-    } else {
+    if (pQuestArgs->pTarget) {
       nTargetClassId = pQuestArgs->pTarget->nClassId;
       if (nTargetClassId == 0x196) {
         bJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Step0x05);
@@ -257,6 +255,8 @@ void __fastcall Q26_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
           return;
         }
       }
+    } else {
+      nTargetClassId = -1;
     }
 
     bJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_RewardAwaits);

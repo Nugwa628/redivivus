@@ -228,7 +228,7 @@ int __fastcall PLRMODES_TryCancelModeAndMoveToLocation(::SGAMEDATA * pGame, D2Un
         return 1;
       }
     }
-    if (pSkillTxt->interrupt) {
+    if ((*((uint8_t *)pSkillTxt + 0x7) & gadwBitMasks[7])) {
       D2StatListExStrc* pConcStatList;
       eStunState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_concentration);
       if (eStunState == STATE_none) {
@@ -1094,14 +1094,14 @@ static void __stdcall PLRMODES_HandleDepletedAmmoOrThrowable(::SGAMEDATA * pGame
 void PLRMODES_CheckSwapWeaponSkill(eD2Skills * peSkillId, D2UnitStrc * pUnit) {
     eD2Skills eSkillId;
     D2SkillStrc* pSkill = D2Common::Units::GetLeftSkill(pUnit);
-    if (!pSkill) {
-      peSkillId[3] = ~SKILL_Attack;
-      peSkillId[1] = SKILL_Attack;
-    } else {
+    if (pSkill) {
       eSkillId = D2Common::Skills::GetOwnerGUID(pSkill);
       peSkillId[3] = eSkillId;
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\PLAYER\\PlrModes.cpp", 0x56e);
       peSkillId[1] = eSkillId;
+    } else {
+      peSkillId[3] = ~SKILL_Attack;
+      peSkillId[1] = SKILL_Attack;
     }
 
     pSkill = D2Common::Units::GetRightSkill(pUnit);
@@ -1531,13 +1531,13 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     send_unit_updates:
     UNIT::SUnitMsg::SERVER_UnitQueuePacketSend(pUnit, pClient);
     if (pUnit) {
-      if (pUnit->eUnitFlags >> 10 & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 10 & 1))) {
         UNIT::SUnitMsg::UNITMSG_SendSoundPacketToClient(pUnit, pClient);
       }
-      if (pUnit->eUnitFlags >> 8 & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 8 & 1))) {
         /* Is Valid Target */ UNIT::SUnitMsg::PLAYER_SendHoverTextToClient(pUnit, pClient);
       }
-      if (pUnit->eUnitFlags >> 0xf & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 0xf & 1))) {
         PlayerMsg::UpgradeLifeAndHitClass(pUnit, pClient);
       }
     }
@@ -1874,7 +1874,7 @@ void __fastcall PLRMODES_OnModeComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
       pSkill = D2Common::Units::GetCurrentSkill(pUnit);
       if (pSkill) {
         eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\PLAYER\\PlrModes.cpp", 0x779);
-        if (0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId && sgptDataTable->pTxtSkills[eSkillId].durability) {
+        if (0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId && (*((uint8_t *)&sgptDataTable->pTxtSkills[eSkillId] + 0x6) & gadwBitMasks[2])) {
           PLRMODES_CheckWeaponQuantityAndDurability(pGame, pUnit);
           PLRMODES_BreakZeroDurabilityWeapons(pGame, pUnit);
         }

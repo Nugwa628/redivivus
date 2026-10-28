@@ -121,14 +121,19 @@ void __stdcall GetIntensityFlagsForTile(int32_t nTileX, int32_t nTileY, int32_t 
 // Fills a 6×6 grid of D2GfxLightExStrc entries with full-white (RGB 0xFF, intensity 0xFF) light positions for roof/ortho lighting. When bBorderOnly is set, only the border cells are written. nSplitSide (1=left, 2=right) shifts nScreenX by ±ScreenSizeX/4 for split-screen support. Each cell position is computed from the (col, row) index and the base screen coords.
 static void __stdcall DRAW_CalcRoofLightGridOrtho(D2GfxLightExStrc * pLightEntry, int32_t nScreenX, int32_t nScreenY, int32_t bBorderOnly, int32_t nSplitSide) {
     int nHalfWidthAdj;
-    if (nSplitSide == 1) {
+    switch (nSplitSide) {
+    case 1: {
       nHalfWidthAdj = -((int)ScreenSizeX / 4);
-    } else {
+      break;
+    }
+    default: {
       if (nSplitSide != 2) {
         goto fill_light_grid;
       }
 
       nHalfWidthAdj = (int)ScreenSizeX / 4;
+      break;
+    }
     }
 
     nScreenX += nHalfWidthAdj;
@@ -446,9 +451,7 @@ void __fastcall DrawFloorByViewAndFloor(D2GameViewStrc * pGameView, D2DrawFloorS
     pDrawFloor->nWindowBorderType = bIsPerspective;
     pDrawFloor->pGameView = pGameView;
     D2RoomStrc* pRoom = UNIT::CUnit::GetCurrentRoom();
-    if (!pRoom) {
-      bDrawEdges = 0;
-    } else {
+    if (pRoom) {
       DWORD dwResMode;
       eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       pLevelTxt = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevelId);
@@ -457,6 +460,8 @@ void __fastcall DrawFloorByViewAndFloor(D2GameViewStrc * pGameView, D2DrawFloorS
       } else {
         bDrawEdges = 1;
       }
+    } else {
+      bDrawEdges = 0;
     }
 
     pDrawFloor->bPerspectiveHasEffectOnSprite = bDrawEdges;
@@ -552,10 +557,10 @@ void __fastcall DrawFloorByViewAndFloor(D2GameViewStrc * pGameView, D2DrawFloorS
     eD2UnitType ePlayerUnitType = pPlayer->eUnitType;
     if (ePlayerUnitType == UNIT_OBJECT || 3 < (int)ePlayerUnitType && (int)ePlayerUnitType <= 5) {
       nPlayerY = pPlayer->pPath.pStaticPath->nPosY;
-    } else if (!pPlayer->pPath.pDynamicPath) {
-      nPlayerY = 0;
-    } else {
+    } else if (pPlayer->pPath.pDynamicPath) {
       nPlayerY = D2Common::PATH::DynamicPath::GetYPos(pPlayer->pPath.pDynamicPath);
+    } else {
+      nPlayerY = 0;
     }
     if ((int)pGameView - pDrawFloor->nMinTileX < bDrawEdges) {
       DrawSubTile(pDrawFloor->nMinTileX - 5, nPlayerY, 0, -5, pDrawFloor);
@@ -821,12 +826,12 @@ void __stdcall WALL2_DrawUnderFloorTiles(D2GameViewStrc * pViewData, D2Wall2Cell
 
         nAlpha = pTileEntry->nCurrentAlpha;
         dwAlphaByte = (uint32_t)((uint32_t)((uint32_t)d2_load24((char*)&dwAlphaByte + 1) & 0xffffffu) << 8 | (uint32_t)(uint8_t)nAlpha);
-        if (!bIsPerspective) {
-          nScreenX = pViewData->pView.left - pViewData->nCenterX + pTileEntry->nScreenX;
-          nScreenY = pTileEntry->nScreenY - pViewData->nCenterY + pViewData->pView.top;
-        } else {
+        if (bIsPerspective) {
           nScreenX = pWallTileNode->nX;
           nScreenY = pWallTileNode->nY;
+        } else {
+          nScreenX = pViewData->pView.left - pViewData->nCenterX + pTileEntry->nScreenX;
+          nScreenY = pTileEntry->nScreenY - pViewData->nCenterY + pViewData->pView.top;
         }
         if (nAlpha != 0xff) {
           nScreenX = D2gfx::D2GFX::D2GFX_DrawTransWallTile(pTileEntry->pTileLibraryEntry, nScreenX, nScreenY, aWallLightSamples, nBorderType, nAlpha);
@@ -920,12 +925,12 @@ void __stdcall WALL2_DrawWallTilesWithAlpha(D2Wall2CellStrc * pWall2Cell, uint32
 
           nAlpha = pTileEntry->nCurrentAlpha;
           dwAlphaByte = (uint32_t)((uint32_t)((uint32_t)d2_load24((char*)&dwAlphaByte + 1) & 0xffffffu) << 8 | (uint32_t)(uint8_t)nAlpha);
-          if (!bIsPerspective) {
-            nPosX = pCameraView->pView.left - pCameraView->nCenterX + pTileEntry->nScreenX;
-            nScreenY = pTileEntry->nScreenY - pCameraView->nCenterY + pCameraView->pView.top;
-          } else {
+          if (bIsPerspective) {
             nPosX = pWallTileNode->nX;
             nScreenY = pWallTileNode->nY;
+          } else {
+            nPosX = pCameraView->pView.left - pCameraView->nCenterX + pTileEntry->nScreenX;
+            nScreenY = pTileEntry->nScreenY - pCameraView->nCenterY + pCameraView->pView.top;
           }
           if (nAlpha != 0xff) {
             nFadeCalc = D2gfx::D2GFX::D2GFX_DrawTransWallTile(pTileEntry->pTileLibraryEntry, nPosX, nScreenY, aWallLightSamples, nBorderType, nAlpha);

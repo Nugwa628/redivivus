@@ -104,7 +104,7 @@
 
 namespace D2Client::UI::Draw {
 
-static bool gbAutomapPanelOpened = 0; D2_STATIC_GUARD(gbAutomapPanelOpened, "D2Client::UI::Draw::gbAutomapPanelOpened");
+static BOOL gbAutomapPanelOpened = 0; D2_STATIC_GUARD(gbAutomapPanelOpened, "D2Client::UI::Draw::gbAutomapPanelOpened");
 
 void __stdcall PALETTE_LoadLoadingScreenPalette() {
     char acStack_20c[260];
@@ -120,7 +120,7 @@ void __fastcall SetActNo(int32_t nParam) {
 
 void __stdcall CleanupAfterLoadingAct() {
     // Static local variables (originally global data)
-    static bool gbCleanupAfterLoadingActFlag; D2_STATIC_GUARD_BSS(gbCleanupAfterLoadingActFlag, "D2Client::UI::Draw::CleanupAfterLoadingAct::gbCleanupAfterLoadingActFlag");
+    static BOOL gbCleanupAfterLoadingActFlag; D2_STATIC_GUARD_BSS(gbCleanupAfterLoadingActFlag, "D2Client::UI::Draw::CleanupAfterLoadingAct::gbCleanupAfterLoadingActFlag");
 
     if (gnLoadedActIndex) {
       Core::Archive::DC6_FreeAndDelete(gnLoadedActIndex);

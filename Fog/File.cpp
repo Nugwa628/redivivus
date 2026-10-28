@@ -206,7 +206,7 @@ void __fastcall CRASH_FormatStackTrace(DWORD dwThreadId, D2CrashFrameStrc * aFra
       (*pOutputCallback)(pReport, __frame0.szLineBuffer);
     }
 
-    for (; nNumFrames; nNumFrames--) {
+    for (; (uint32_t)nNumFrames > 0; nNumFrames--) {
       Engine::Application::DEBUG_FormatAddressInfo(aFrameAddrs->dwReturnAddr, __frame0.szAddressInfo);
       if (bIncludeThreadName == '\0') {
         __frame0.szAddressInfo[0] = '\0';
@@ -482,7 +482,7 @@ LONG __stdcall ERRORMANAGER_UnhandledExceptionFilter(_EXCEPTION_POINTERS * pExce
       sCrashReport.nSkipFrames = 0;
       nFilterResult = (*gpCurrentExceptionFilter)(&sCrashReport, gpCurrentExceptionContext);
       if (nFilterResult) {
-        return (uint32_t)(nFilterResult != 1) * 2 - 1;
+        return (uint32_t)((nFilterResult != 1) ? 1 : -1);
       }
     }
 

@@ -94,7 +94,7 @@ namespace D2Launch::MainMenus {
 
 static char dwIntroFrameRate_24_36[8] = { "640x146" }; D2_STATIC_GUARD(dwIntroFrameRate_24_36, "D2Launch::MainMenus::dwIntroFrameRate_24_36");
 static char dwIntroFrameRate_29_32[8] = { "640x292" }; D2_STATIC_GUARD(dwIntroFrameRate_29_32, "D2Launch::MainMenus::dwIntroFrameRate_29_32");
-static bool gbBNetConnectionProgressFlag = 0; D2_STATIC_GUARD(gbBNetConnectionProgressFlag, "D2Launch::MainMenus::gbBNetConnectionProgressFlag");
+static BOOL gbBNetConnectionProgressFlag = 0; D2_STATIC_GUARD(gbBNetConnectionProgressFlag, "D2Launch::MainMenus::gbBNetConnectionProgressFlag");
 
 void __fastcall MAINMENU_SetGlobalValue1(pfnUIMenuInstance pfnMenuInstance) {
     gpCurrentUIMenuInstance = pfnMenuInstance;
@@ -4821,7 +4821,7 @@ BOOL __stdcall MAINMENU_OnPressCreateHeroSinglePlayer(D2ControlMsg * pControlMsg
 
 void __stdcall UIMENU_ConfirmCreateCharacter() {
     // Static local variables (originally global data)
-    static char gbCreateCharDialogShown; D2_STATIC_GUARD_BSS(gbCreateCharDialogShown, "D2Launch::MainMenus::UIMENU_ConfirmCreateCharacter::gbCreateCharDialogShown");
+    static int32_t gbCreateCharDialogShown; D2_STATIC_GUARD_BSS(gbCreateCharDialogShown, "D2Launch::MainMenus::UIMENU_ConfirmCreateCharacter::gbCreateCharDialogShown");
 
     uint16_t* wszCharName;
     char szCharNameUtf8[256];

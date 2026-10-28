@@ -432,10 +432,7 @@ int __stdcall SSYSTEM_MemCompare(uint8_t * pLeft, uint8_t * pRight, uint32_t nLe
       pLeft += 4;
     }
 
-    if (!nLength) {
-      equal:
-      nResult = 0;
-    } else {
+    if (nLength) {
       int nDiff;
       compare_bytes:
       nDiff = (uint32_t)*pLeft - (uint32_t)*pRight;
@@ -461,6 +458,9 @@ int __stdcall SSYSTEM_MemCompare(uint8_t * pLeft, uint8_t * pRight, uint32_t nLe
       if (nDiff < 1) {
         return -1;
       }
+    } else {
+      equal:
+      nResult = 0;
     }
 
     return nResult;

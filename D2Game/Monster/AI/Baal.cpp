@@ -149,9 +149,7 @@ static int32_t __stdcall RiskAssignmentBaal(D2UnitStrc * pUnit, D2UnitStrc * pTa
     }
 
     pSkill = D2Common::Units::GetRightSkill(pTarget);
-    if (!pSkill) {
-      nRightAttackRank = 0;
-    } else {
+    if (pSkill) {
       nMeleeScore = D2Common::Skills::GetSkillLevel(pTarget, pSkill, 1);
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\Ai\\AiBaal.cpp", 0x7b);
       if ((int)eSkillId < 0 || (int)eSkillId >= sgptDataTable->nTxtSkillsCount) {
@@ -159,17 +157,19 @@ static int32_t __stdcall RiskAssignmentBaal(D2UnitStrc * pUnit, D2UnitStrc * pTa
       } else {
         nRightAttackRank = (uint32_t)(uint8_t)sgptDataTable->pTxtSkills[eSkillId].attackrank;
       }
+    } else {
+      nRightAttackRank = 0;
     }
 
     int nSkillThreatScore = nRightAttackRank * nMeleeScore + nLeftAttackRank * nLeftSkillLevel;
     nMeleeScore = 0;
-    if (!bInMeleeRange) {
+    if (bInMeleeRange) {
+      nMeleeScore = 100;
+    } else {
       bWallCollision = CollisionWithWall(pUnit, pTarget);
       if (bWallCollision) {
         nMeleeScore = 0x4b;
       }
-    } else {
-      nMeleeScore = 100;
     }
     if (pTarget && pTarget->eUnitType == UNIT_MONSTER) {
       nMonClassId = pTarget->nClassId;
@@ -562,7 +562,14 @@ static int32_t __stdcall AI_BAAL_ThroneRoomChooseAction(::SGAMEDATA * pGame, D2U
     anWeights[1] = nBaseWeight + (100 - nLifePercent);
     BOOL BVar1;
     BVar1 = AI_BAAL_HasPowerfulSkill(pUnit);
-    if (!BVar1) {
+    if (BVar1) {
+      if (nParam3) {
+        goto apply_far_weights;
+      }
+
+      anWeights[0xd] = 0x32;
+      anWeights[0xe] = 0x32;
+    } else {
       if (nParam3) {
         apply_far_weights:
         anWeights[0xd] = 0x19;
@@ -571,13 +578,6 @@ static int32_t __stdcall AI_BAAL_ThroneRoomChooseAction(::SGAMEDATA * pGame, D2U
         anWeights[3] = 0x23;
         anWeights[0xb] = 0x19;
       }
-    } else {
-      if (nParam3) {
-        goto apply_far_weights;
-      }
-
-      anWeights[0xd] = 0x32;
-      anWeights[0xe] = 0x32;
     }
     if (nParam4) {
       anWeights[5] = 0x3c;

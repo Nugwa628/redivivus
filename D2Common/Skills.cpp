@@ -1712,7 +1712,7 @@ void __stdcall SKILLS_GetStateTransformGfx(D2UnitStrc * pUnit, eD2UnitType * pUn
     if (!pUnit) {
       return;
     }
-    if (!(pUnit->eUnitFlagsEx >> 3 & 1)) {
+    if (!(((bool)(pUnit->eUnitFlagsEx >> 3 & 1)))) {
       return;
     }
 
@@ -2415,7 +2415,7 @@ uint32_t __stdcall SKILLS_CheckSkillFlagBit1(int32_t nSkillId) {
       return 0;
     }
 
-    return (uint8_t)*((uint8_t*)&sgptDataTable->pTxtSkills[nSkillId] + 0x6) & 2;
+    return (uint8_t)*((uint8_t*)&sgptDataTable->pTxtSkills[nSkillId] + 0x6) & gadwBitMasks[1];
 }
 
 // Strips all progressive (stackable/timed) states from a unit. Iterates sgptDataTable->pAllStatesDataTblFlag0x10 (states with flag 0x10 set), and for each state currently active on pUnit, removes the associated stat list via STATLIST_RemoveAndRecalc + FreeStatList and clears the state via SetState. Returns 1 if the unit type is eligible (ITEMSTATS_CheckItemStatCostFlag200Bit3), 0 otherwise.
@@ -3376,10 +3376,10 @@ void __stdcall SKILLS_AddOrRemoveItemSkill(D2UnitStrc * pUnit, int32_t nOwnerGUI
         }
       }
 
-      if (!pCurSkill) {
-        pSkillsList->pFirstSkill = pNewSkill->pNext;
-      } else {
+      if (pCurSkill) {
         pCurSkill->pNext = pNewSkill->pNext;
+      } else {
+        pSkillsList->pFirstSkill = pNewSkill->pNext;
       }
 
       Fog::Memory::FreeServerMemory(pUnit->pMemory, pNewSkill, ".\\SKILLS\\Skills.cpp", 0x5e7, 0);
@@ -3520,7 +3520,7 @@ uint32_t __fastcall SKILLS_HasRequiredWeaponOrQuantity(D2SkillStrc * pSkill, D2U
 
     D2SkillsTxt* pDVar1 = pSkill->pRecord;
     D2InventoryStrc* pInventory = pUnit->pInventory;
-    if (!pDVar1 || !pDVar1->scroll) {
+    if (!pDVar1 || !(*((uint8_t *)pDVar1 + 0x8) & gadwBitMasks[4])) {
       BOOL bGotWeaponInfo;
       nWeaponReqType = pDVar1->skill;
       switch (nWeaponReqType) {
@@ -3686,7 +3686,7 @@ int32_t __stdcall SKILLS_CanUseSkill(D2UnitStrc * pUnit, D2SkillStrc * pSkill) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8e9);
       exit(-1);
     }
-    if (!pSkill->pRecord || !pSkill->pRecord->InGame) {
+    if (!pSkill->pRecord || !(*((uint8_t *)pSkill->pRecord + 0x5) & gadwBitMasks[2])) {
       return 3;
     }
 
@@ -3697,7 +3697,7 @@ int32_t __stdcall SKILLS_CanUseSkill(D2UnitStrc * pUnit, D2SkillStrc * pSkill) {
     if (pSkill->pRecord->aura) {
       return 6;
     }
-    if (pSkill->pRecord->passive) {
+    if ((*((uint8_t *)pSkill->pRecord + 0x4) & gadwBitMasks[4])) {
       return 5;
     }
 

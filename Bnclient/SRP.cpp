@@ -276,7 +276,7 @@ void __fastcall SRP_CreateContext(D2Srp * * ppSrp) {
     *ppSrp = 0;
 }
 
-BOOL SRP_ExportPublicValues(D2Srp * * ppSrp, uint32_t * pnGeneratorLen, void * pGeneratorOut, uint32_t * pnModulusLen, void * pModulusOut) {
+BOOL __fastcall SRP_ExportPublicValues(D2Srp * * ppSrp, int32_t nEdxUnused, uint32_t * pnGeneratorLen, void * pGeneratorOut, uint32_t * pnModulusLen, void * pModulusOut) {
     if (!(*ppSrp)->bInitialized) {
       return 0;
     }
@@ -460,7 +460,7 @@ uint32_t __stdcall SRP_ParseChallenge(uint32_t * pContext, char * szText, uint32
     return (uint32_t)(nCompareResult == 1);
 }
 
-void SRP_ServerComputePublicB(void * pThis, int32_t nContextBase) {
+void __fastcall SRP_ServerComputePublicB(void * pThis, int32_t nEdxUnused, int32_t nContextBase) {
     BigData* pSmallKeyBigInt = SHA::SHA1_FromBigIntBytes((void*)(nContextBase + 0x20), 0x20);
     SRP_ExtractSessionKeyBytes(pThis, (void*)(nContextBase + 0x80), 0x20);
     BigData* pRandomKeyBigInt = SHA::SHA1_FromBigIntBytes((void*)(nContextBase + 0x80), 0x20);
@@ -479,7 +479,7 @@ void SRP_ServerComputePublicB(void * pThis, int32_t nContextBase) {
     SHA::SHA1_BigIntFree(pPublicB);
 }
 
-void SRP_ClientVerifyAndComputeKey(void * pThis, void * pContext, uint32_t * pServerProof) {
+void __fastcall SRP_ClientVerifyAndComputeKey(void * pThis, int32_t nEdxUnused, void * pContext, uint32_t * pServerProof) {
     // Frame slots -52..-4 are ONE object: &pServerPublicB is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {

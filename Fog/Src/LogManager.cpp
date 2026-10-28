@@ -103,7 +103,7 @@ void __stdcall DecodeCpuModelName(uint32_t nModel, int32_t nBrandId, char * pOut
               memcpy(pOutName, "Pentium OD486", 0xe);
               return;
             }
-            if (3 < nModel) {
+            if (4 <= nModel) {
               memcpy(pOutName, "Pentium MMX OD586", 0x12);
               return;
             }
@@ -1292,7 +1292,7 @@ void __fastcall ZeroListNode(uint32_t * pNode) {
 }
 
 // Scalar deleting destructor: MOV ESI,ECX takes this; TEST byte [EBP+8],1 is the free flag; RET 4; returns this in EAX. Parameters were listed in STORAGE order (bFreeMemory first), which is the argument-swap shape that crashed IGNORELIST_DtorScalar; a vtable caller passes (this, bFreeMemory).
-void * DestroyListNodeAndFree(void * pThis, uint8_t bFreeMemory) {
+void * __fastcall DestroyListNodeAndFree(void * pThis, int32_t nEdxUnused, uint8_t bFreeMemory) {
     pfnEHHandlerRoutine pfnSEHHandler = __GSHandlerCheck_EH_6c9d98;
     void* pPrevExceptionList = ExceptionList;
     ExceptionList = &pPrevExceptionList;
@@ -1332,11 +1332,11 @@ int * * __fastcall AllocateAndInsertMessageNode(int32_t nInsertMode, int32_t nPa
     void* pPrevExceptionList = ExceptionList;
     ExceptionList = &pPrevExceptionList;
     int** pNode = (int**)Storm::SMem::SMemAlloc(nPayloadSize + 0x24, s___AUMessage_LogManager___00708124, -2, dwAllocFlags | 8);
-    if (!pNode) {
-      pNode = 0;
-    } else {
+    if (pNode) {
       *pNode = 0;
       pNode[1] = 0;
+    } else {
+      pNode = 0;
     }
 
     dwSEHTryLevel = -1;

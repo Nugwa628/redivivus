@@ -416,8 +416,7 @@ BOOL __fastcall Q09_CheckBookOfSkillAndSound(::SGAMEDATA * pGame, D2UnitStrc * p
       if (pQuestData) {
         pBookItem = ITEMS::Items::Drop::HasQuestItem(pGame, pUnit, 0x20737361);
         if (!pBookItem) {
-          pnBookDropCount = &pQuestData->pQuestSpecificData.pA2Q1->nBookOfSkillDropCount;
-          (*pnBookDropCount)++;
+          pQuestData->pQuestSpecificData.pA2Q1->nBookOfSkillDropCount++;
         }
       }
     }

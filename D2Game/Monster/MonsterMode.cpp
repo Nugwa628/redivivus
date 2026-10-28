@@ -508,7 +508,7 @@ BOOL __fastcall MONSTER_OnDeathDispatch(::SGAMEDATA * pGame, D2MonsterKillStrc *
       return 1;
     }
     D2MonStatsTxt* pMonStats = sgptDataTable->pTxtMonStats + nClassId;
-    if (!(pMonStats && pMonStats->deathDmg)) {
+    if (!(pMonStats && (*((uint8_t *)pMonStats + 0xe) & gadwBitMasks[4]))) {
       return 1;
     }
     if (pVictim->eUnitType == UNIT_MONSTER && -1 < nClassId) {

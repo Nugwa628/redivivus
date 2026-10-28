@@ -128,7 +128,7 @@ void __fastcall DRAW_DrawRoomUnits(D2RoomStrc * pRoom) {
     D2RoomStrc* pRoomSaved = pRoom;
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &ppAdjacentRooms, (int*)&nRoomCount);
     uint32_t i = 0;
-    if (!nRoomCount) {
+    if ((uint32_t)nRoomCount <= 0) {
       return;
     }
 

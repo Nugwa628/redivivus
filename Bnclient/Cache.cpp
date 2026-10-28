@@ -431,18 +431,7 @@ BOOL __fastcall CACHE_ReadData(char * szKey, uint32_t * pCrc32Out, uint32_t * * 
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00881894);
       } else {
         nCrc32Computed = *(uint32_t*)(gpCacheBufferPoolFirst + nHashSlot * 0x10 + 0xc);
-        if (!(nCrc32Computed < gpCacheFileHeader->nBlockTableSize)) {
-          __frame0.nRebuildReason = 1;
-          rebuild_corrupt_cache:
-          Bnet::BnetLog_WriteLine("bncache.dat is corrupt (%d) - rebuilding archive", __frame0.nRebuildReason);
-          CACHE_Rebuild();
-          discard_output:
-          if (*ppDataBuf) {
-            Storm::SMem::SMemFree(*ppDataBuf, ".\\CACHE.CPP", 0x2de, 0);
-            *ppDataBuf = 0;
-          }
-          *pDataSizeOut = 0;
-        } else {
+        if (nCrc32Computed < gpCacheFileHeader->nBlockTableSize) {
           memset(&__frame0.entryHeader, 0, 0x144);
           nBlockEntryOffset = nCrc32Computed * 0x10;
           nHashSlot = __frame0.entryHeader.dwHeaderCrc32;
@@ -556,6 +545,17 @@ BOOL __fastcall CACHE_ReadData(char * szKey, uint32_t * pCrc32Out, uint32_t * * 
             szCorruptKey = __frame0.szKeySaved;
             goto delete_corrupt_entry;
           }
+        } else {
+          __frame0.nRebuildReason = 1;
+          rebuild_corrupt_cache:
+          Bnet::BnetLog_WriteLine("bncache.dat is corrupt (%d) - rebuilding archive", __frame0.nRebuildReason);
+          CACHE_Rebuild();
+          discard_output:
+          if (*ppDataBuf) {
+            Storm::SMem::SMemFree(*ppDataBuf, ".\\CACHE.CPP", 0x2de, 0);
+            *ppDataBuf = 0;
+          }
+          *pDataSizeOut = 0;
         }
 
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00881894);

@@ -657,15 +657,14 @@ BOOL __fastcall OBJOP_A2Q3_ActivateHoradricStaffAltar(D2ObjectOperateFnArg * pOp
 
           pHoradricStaffQuestData = GetQuestDataByQuestNoInternal(pTaintedSunQuestData->pGame, QUESTINT_TheHoradricStaff);
           if (pHoradricStaffQuestData) {
-            ppDroppedBodyPartCount = &pHoradricStaffQuestData->pQuestSpecificData.pA2Q2->nVipCount;
-            *ppDroppedBodyPartCount += nDroppedItemCount;
+            pHoradricStaffQuestData->pQuestSpecificData.pA2Q2->nVipCount += nDroppedItemCount;
           }
 
           Objects::ObjectsMode::RollChestDrops(pOperation, ITEMTYPE_Gold);
           pQuestSeed = GetQuestControlSeed(pOperation->sArg.pGame);
           seedNext = D2_SEED_NEXT(*pQuestSeed);
           *pQuestSeed = seedNext;
-          iDropLoop = seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 5) * -5 + 5;
+          iDropLoop = seedNext.nSeedLow % 5 + 5;
           if (0 < iDropLoop) {
             do {
               Objects::ObjectsMode::SpawnDrop(pOperation->sArg.pGame, pOperation->sArg.pVictim, 0x20646c67, QUALITY_NORMAL);
@@ -705,7 +704,7 @@ BOOL __fastcall OBJOP_A2Q3_ActivateHoradricStaffAltar(D2ObjectOperateFnArg * pOp
         pQuestSeed = GetQuestControlSeed(pOperation->sArg.pGame);
         seedNext = D2_SEED_NEXT(*pQuestSeed);
         *pQuestSeed = seedNext;
-        iDropLoop = seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 5) * -5 + 5;
+        iDropLoop = seedNext.nSeedLow % 5 + 5;
         if (0 < iDropLoop) {
           do {
             Objects::ObjectsMode::SpawnDrop(pOperation->sArg.pGame, pOperation->sArg.pVictim, 0x20646c67, QUALITY_NORMAL);
@@ -715,8 +714,7 @@ BOOL __fastcall OBJOP_A2Q3_ActivateHoradricStaffAltar(D2ObjectOperateFnArg * pOp
 
         pHoradricStaffQuestData = GetQuestDataByQuestNoInternal(pTaintedSunQuestData->pGame, QUESTINT_TheHoradricStaff);
         if (pHoradricStaffQuestData) {
-          ppDroppedBodyPartCount = &pHoradricStaffQuestData->pQuestSpecificData.pA2Q2->nVipCount;
-          *ppDroppedBodyPartCount += nDroppedItemCount;
+          pHoradricStaffQuestData->pQuestSpecificData.pA2Q2->nVipCount += nDroppedItemCount;
           return 0;
         }
       }

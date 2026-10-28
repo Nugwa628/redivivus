@@ -726,10 +726,10 @@ int __fastcall DRLGPATH_CalcDirectionVector(POINT * pPoint, uint32_t * pnParam, 
       nMinorMin = nMinXfp;
       nMinXfp = nMinCoord;
     }
-    if (!(nToXfp - nMinXfp)) {
-      nRatioIndex = 0;
-    } else {
+    if (nToXfp - nMinXfp) {
       nRatioIndex = (int)((nMajorMax - nMinorMin) * 0x7f) / (int)(nToXfp - nMinXfp);
+    } else {
+      nRatioIndex = 0;
     }
 
     uint32_t nDirIndex = gaPathDirectionVectors[nRatioIndex].nDirIndex;

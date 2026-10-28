@@ -1140,10 +1140,12 @@ void __fastcall BNSEND_GetConnectionState(uint32_t * pdwOutState) {
 
 int __fastcall BNCLIENT_SendLogonRequest(char * szUsername, char * szPassword) {
     DWORD dwClientToken = BNCLIENT_GetBNetClientToken();
-    if (!dwClientToken) {
+    switch (dwClientToken) {
+    case 0: {
       _net_sid::NET_SID_CLIENT_ResetRequireResponse(0x3a);
       NET_SID_CLIENT_Send_0x3A_LogonResponse2(szUsername, szPassword);
       return 1;
+    }
     }
     if (dwClientToken != 1) {
       return 0;
@@ -1178,10 +1180,12 @@ BOOL __stdcall BNCLIENT_WaitForLogonResponse() {
 
 int __fastcall BNCLIENT_SendCreateAccountRequest(char * szUsername, char * szPassword) {
     DWORD dwClientToken = BNCLIENT_GetBNetClientToken();
-    if (!dwClientToken) {
+    switch (dwClientToken) {
+    case 0: {
       _net_sid::NET_SID_CLIENT_ResetRequireResponse(0x3d);
       NET_SID_CLIENT_Send_0x3D_CreateAccount2(szUsername, szPassword);
       return 1;
+    }
     }
     if (dwClientToken != 1) {
       return 0;
@@ -1211,10 +1215,12 @@ BOOL __fastcall BNCLIENT_WaitForCreateAccountResponse(uint32_t * pOutResponseCou
 
 int __fastcall BNCLIENT_SendChangePasswordRequest(char * szUsername, char * szOldPassword, char * szNewPassword) {
     DWORD dwClientToken = BNCLIENT_GetBNetClientToken();
-    if (!dwClientToken) {
+    switch (dwClientToken) {
+    case 0: {
       _net_sid::NET_SID_CLIENT_ResetRequireResponse(0x31);
       NET_SID_CLIENT_Send_0x31_ChangePassword(szUsername, szOldPassword, szNewPassword);
       return 1;
+    }
     }
     if (dwClientToken != 1) {
       return 0;
@@ -2476,7 +2482,7 @@ BOOL __fastcall NET_SID_CLIENT_Incoming0x46(char * pBytes, size_t nSize) {
       exit(-1);
     }
 
-    for (; nEntryCount; nEntryCount--) {
+    for (; (uint32_t)nEntryCount > 0; nEntryCount--) {
       dwEntryId = *pEntryData;
       pMessageText = pEntryData + 1;
       pEntryData = pMessageText;
@@ -2485,11 +2491,7 @@ BOOL __fastcall NET_SID_CLIENT_Incoming0x46(char * pBytes, size_t nSize) {
         pEntryData = (uint32_t*)((int)pEntryData + 1);
       } while ((char)nInsertIndex != '\0');
 
-      if (!dwEntryId) {
-        if (g_pfnMotdCallback) {
-          (*g_pfnMotdCallback)();
-        }
-      } else {
+      if (dwEntryId) {
         if (g_nNewsMaxCacheSize.nCount) {
           nCacheByteOffset = g_nNewsMaxCacheSize.nCount * 0x408 + 4 + (int)g_nNewsMaxCacheSize.pEntries;
           nInsertIndex = g_nNewsMaxCacheSize.nCount;
@@ -2530,6 +2532,10 @@ BOOL __fastcall NET_SID_CLIENT_Incoming0x46(char * pBytes, size_t nSize) {
         *(uint32_t*)(nCacheByteOffset + (int)g_nNewsMaxCacheSize.pEntries) = 0;
         *(uint32_t*)(nCacheByteOffset + 4 + (int)g_nNewsMaxCacheSize.pEntries) = dwEntryId;
         strncpy((char*)(nCacheByteOffset + 8 + (int)g_nNewsMaxCacheSize.pEntries), (char*)pMessageText, 0x400);
+      } else {
+        if (g_pfnMotdCallback) {
+          (*g_pfnMotdCallback)();
+        }
       }
 
       next_news_entry:
@@ -2596,7 +2602,7 @@ BOOL __stdcall BNNEWS_LoadCachedNews() {
         g_nFirstUnreadNewsIndex = 0;
         __frame0.nLastEntryId = 0;
         __frame0.nEntriesRead = 0;
-        if (nEntryCount) {
+        if ((uint32_t)nEntryCount > 0) {
           do {
             nEntryCount = g_nNewsMaxCacheSize.nCount + 1;
             if (nEntryCount > g_nNewsMaxCacheSize.nCapacity) {

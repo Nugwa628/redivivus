@@ -47,10 +47,10 @@ static BOOL __stdcall SOUNDSMP_CreateSoundBuffer(uint32_t nFlags, D2SoundSmpStrc
     uint32_t uVar1 = g_nSoundSampleParam ? 0x80a0 : 0xa0;
     tBufferDesc.dwSize = 0x14;
     uint32_t u3DFlag = nFlags & 2;
-    if (!u3DFlag) {
-      tBufferDesc.dwFlags = uVar1 | 0x40;
-    } else {
+    if (u3DFlag) {
       tBufferDesc.dwFlags = uVar1 | 0x14;
+    } else {
+      tBufferDesc.dwFlags = uVar1 | 0x40;
     }
     tBufferDesc.dwBufferBytes = nBufSize;
     tBufferDesc.lpwfxFormat = &tWaveFormat;

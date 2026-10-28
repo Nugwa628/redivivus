@@ -506,7 +506,7 @@ void __fastcall OBJECT_InitializeObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
       } else {
         pUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
       }
-      if (pObjectsTxt->PreOperate && !(pUnit->eUnitFlags >> 7 & 1)) {
+      if (pObjectsTxt->PreOperate && !(((bool)(pUnit->eUnitFlags >> 7 & 1)))) {
         nPreOpSeedRoll = D2Client::Archive::UNIT_GetModuloFromSeed(pSeed, 0xe);
         if (!nPreOpSeedRoll) {
           D2Common::Units::SetupUpdateFlag(pUnit, 2);
@@ -1064,11 +1064,11 @@ D2UnitStrc * __stdcall OBJECT_PlaceWithCallback(::SGAMEDATA * pGame, int32_t nOb
     }
 
     int nYStart = sRoomCoords.dwYStart;
-    if (!pRoom) {
-      pSeedInit = 0;
+    if (pRoom) {
+      pSeedInit = &pRoom->sSeed;
       nRetries = 0;
     } else {
-      pSeedInit = &pRoom->sSeed;
+      pSeedInit = 0;
       nRetries = 0;
     }
 
@@ -1092,7 +1092,7 @@ D2UnitStrc * __stdcall OBJECT_PlaceWithCallback(::SGAMEDATA * pGame, int32_t nOb
           nCallbackResult = (*pfnProc)(pGame, nUnused, nX, nY);
           nYStart = sRoomCoords.dwYStart;
           if ((char)nCallbackResult != '\0') {
-            if (4 < nRetries) {
+            if (5 <= nRetries) {
               return nullptr;
             }
             if (!pRoom) {
@@ -1287,11 +1287,11 @@ D2UnitStrc * __stdcall OBJECT_PlaceAtBiasedPosition(::SGAMEDATA * pGame, int32_t
     if (!(sRoomCoords.dwXSize >= nSizeX + 2 && sRoomCoords.dwYSize >= nSizeY + 2)) {
       return nullptr;
     }
-    if (!pRoom) {
-      pSeed = 0;
+    if (pRoom) {
+      pSeed = &pRoom->sSeed;
       nRetries = 0;
     } else {
-      pSeed = &pRoom->sSeed;
+      pSeed = 0;
       nRetries = 0;
     }
 
@@ -1299,13 +1299,16 @@ D2UnitStrc * __stdcall OBJECT_PlaceAtBiasedPosition(::SGAMEDATA * pGame, int32_t
       uint32_t nCallbackResult;
       nYSize = sRoomCoords.dwYSize;
       nRoomWidth = sRoomCoords.dwXSize;
-      if (nBiasMode == 1) {
+      switch (nBiasMode) {
+      case 1: {
         nCandidateX = sRoomCoords.dwXSize >> 0x1f;
         nCallbackResult = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, sRoomCoords.dwXSize / 2);
         nCandidateX = ((int)(nRoomWidth + (nCandidateX & 3)) >> 2) + nCallbackResult + sRoomCoords.dwXStart;
         nCallbackResult = D2Client::SEED_RollRange(pSeed, 1, 2);
         nCandidateY = nCallbackResult + sRoomCoords.dwYStart;
-      } else {
+        break;
+      }
+      default: {
         if (nBiasMode != 2) {
           nCallbackResult = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, sRoomCoords.dwXSize - nSizeX - 1);
           nCandidateX = nCallbackResult + sRoomCoords.dwXStart;
@@ -1317,6 +1320,8 @@ D2UnitStrc * __stdcall OBJECT_PlaceAtBiasedPosition(::SGAMEDATA * pGame, int32_t
           nCallbackResult = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nYSize / 2);
           nCandidateY = ((int)nYSize / 4) + nCallbackResult + sRoomCoords.dwYStart;
         }
+        break;
+      }
       }
       if (nCandidateX && nCandidateY && sRoomCoords.dwXStart + 1 <= (int)(nCandidateX & 0xffff) && sRoomCoords.dwYStart + 1 <= (int)(nCandidateY & 0xffff) && (int)(nCandidateX & 0xffff) < sRoomCoords.dwXStart - 1 + sRoomCoords.dwXSize && (int)(nCandidateY & 0xffff) < sRoomCoords.dwYStart - 1 + sRoomCoords.dwYSize) {
         /* FARPROC lpfn for IsBadCodePtr */ bBadCodePtr = IsBadCodePtr((FARPROC)pfnProc);
@@ -1326,7 +1331,8 @@ D2UnitStrc * __stdcall OBJECT_PlaceAtBiasedPosition(::SGAMEDATA * pGame, int32_t
         }
 
         wCollisionResult = D2Common::Collision::CheckCollision_Vector(pRoom, nCandidateX, nCandidateY, nSizeX + 6, nSizeY + 6, 0x3f11);
-        if (wCollisionResult == COLBIT_NONE) {
+        switch (wCollisionResult) {
+        case COLBIT_NONE: {
           nCallbackResult = (*pfnProc)(pGame, dwCallbackArg, nCandidateX, nCandidateY);
           if ((char)nCallbackResult != '\0') {
             if (4 < nRetries) {
@@ -1340,6 +1346,8 @@ D2UnitStrc * __stdcall OBJECT_PlaceAtBiasedPosition(::SGAMEDATA * pGame, int32_t
             pSpawnedUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, nClassId, nCandidateX, nCandidateY, pGame, pRoom, 1, 0, nullptr);
             return pSpawnedUnit;
           }
+          break;
+        }
         }
       }
 
@@ -2544,11 +2552,11 @@ void __fastcall OBJECT_PopulateRoomObjects(::SGAMEDATA * pGame, D2RoomStrc * pRo
     if (!bBadCodePtr) {
       return;
     }
-    if (!pRoom) {
-      pRoomSeed = 0;
+    if (pRoom) {
+      pRoomSeed = &pRoom->sSeed;
       nObjGrpSlot = 0;
     } else {
-      pRoomSeed = &pRoom->sSeed;
+      pRoomSeed = 0;
       nObjGrpSlot = 0;
     }
 

@@ -1442,7 +1442,7 @@ void __fastcall SKILL_ProcessPeriodicAuraTick(::SGAMEDATA * pGame, D2UnitStrc * 
 
     GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSTATS, param_1);
     GAME::Event::SetEvent(pGame, pUnit, 9, SkillsServer::SKILLS_CalcPerDelayInterval(pGame, pUnit, pSkillTxt, eSkill, nParam), param_1, eSkill);
-    if (!pSkillTxt->immediate) {
+    if (!(*((uint8_t *)pSkillTxt + 0x5) & gadwBitMasks[7])) {
       return;
     }
 
@@ -1476,7 +1476,7 @@ void __fastcall SKILL_DeactivateAura(::SGAMEDATA * pGame, D2UnitStrc * pUnit, in
 
 BOOL __fastcall ITEMEVENT_PhysDamageOnAttacked(::SGAMEDATA * pGame, uint32_t nUnitEvent, D2UnitStrc * pUnit, D2UnitStrc * pTarget, D2DamageStrc * pDamage, eD2Skills eSkill, int32_t nSkillLvl) {
     D2DamageStrc sDamage;
-    if (!(pUnit && pTarget && pTarget->eUnitFlags >> 2 & 1)) {
+    if (!(pUnit && pTarget && ((bool)(pTarget->eUnitFlags >> 2 & 1)))) {
       return 0;
     }
 
@@ -1496,7 +1496,7 @@ BOOL __fastcall ITEMEVENT_PhysDamageOnAttacked(::SGAMEDATA * pGame, uint32_t nUn
 
 BOOL __fastcall ITEMEVENT_LightningDamageOnAttacked(::SGAMEDATA * pGame, uint32_t nUnitEvent, D2UnitStrc * pUnit, D2UnitStrc * pTarget, D2DamageStrc * pDamage, eD2Skills eSkill, int32_t nSkillLvl) {
     D2DamageStrc sDamage;
-    if (!(pUnit && pTarget && pTarget->eUnitFlags >> 2 & 1)) {
+    if (!(pUnit && pTarget && ((bool)(pTarget->eUnitFlags >> 2 & 1)))) {
       return 0;
     }
 
@@ -1516,7 +1516,7 @@ BOOL __fastcall ITEMEVENT_LightningDamageOnAttacked(::SGAMEDATA * pGame, uint32_
 
 BOOL __fastcall ITEMEVENT_FireDamageOnAttacked(::SGAMEDATA * pGame, uint32_t nUnitEvent, D2UnitStrc * pUnit, D2UnitStrc * pTarget, D2DamageStrc * pDamage, eD2Skills eSkill, int32_t nSkillLvl) {
     D2DamageStrc sDamage;
-    if (!(pUnit && pTarget && pTarget->eUnitFlags >> 2 & 1)) {
+    if (!(pUnit && pTarget && ((bool)(pTarget->eUnitFlags >> 2 & 1)))) {
       return 0;
     }
 
@@ -1537,7 +1537,7 @@ BOOL __fastcall ITEMEVENT_FireDamageOnAttacked(::SGAMEDATA * pGame, uint32_t nUn
 BOOL __fastcall ITEMEVENT_ColdDamageWithFreezeLength(::SGAMEDATA * pGame, uint32_t nUnitEvent, D2UnitStrc * pUnit, D2UnitStrc * pTarget, D2DamageStrc * pDamage, eD2Skills eSkill, int32_t nSkillLvl) {
     D2DamageStrc sDamage;
     D2UnitStrc* pAttacker = pUnit;
-    if (!(pUnit && pTarget && pTarget->eUnitFlags >> 2 & 1)) {
+    if (!(pUnit && pTarget && ((bool)(pTarget->eUnitFlags >> 2 & 1)))) {
       return 0;
     }
 
@@ -1578,12 +1578,12 @@ BOOL __fastcall ITEMEVENT_CrushingBlowChance(::SGAMEDATA * pGame, uint32_t nUnit
       D2MonStats2Txt* pMonStats2;
       pMonStats2 = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetMonStats2(pTarget->nClassId);
       if (pMonStats2) {
-        if (!pMonStats2->large) {
+        if (pMonStats2->large) {
+          nSizeThreshMask = 0x20;
+        } else {
           if (pMonStats2->isSmall) {
             nSizeThreshMask = 0x80;
           }
-        } else {
-          nSizeThreshMask = 0x20;
         }
       }
     }
@@ -2330,7 +2330,7 @@ BOOL __fastcall ITEMEVENT_LaunchMissileOnOwner(::SGAMEDATA * pGame, uint32_t nUn
     }
 
     D2MissilesTxt* pMissileTxt = D2Client::GetMissleById(pTarget->nClassId);
-    if (!pMissileTxt->ReturnFire) {
+    if (!(*((uint8_t *)pMissileTxt + 0x5) & gadwBitMasks[1])) {
       return 0;
     }
 

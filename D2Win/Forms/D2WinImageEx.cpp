@@ -91,12 +91,12 @@ BOOL __fastcall Draw(::D2WinImageEx * pImageEx) {
 
 // @sourcefile .\Src\D2WinImage.cpp
 ::D2WinImageEx * __fastcall D2WinImageEx(int32_t nPosX, int32_t nPosY, int32_t nSizeX, int32_t nSizeY, DC6 * pDC6, int32_t nBorderX, int32_t nBorderY) {
-    ::D2WinImageEx* pNewImageEx = D2_NEW(::D2WinImageEx);
+    ::D2WinImageEx* pNewImageEx = ((::D2WinImageEx*)Fog::Memory::AllocClientMemory(sizeof(::D2WinImageEx), ".\\Src\\D2WinImage.cpp", 0x3b, 0));
     memset(pNewImageEx, 0, 0x54);
     pNewImageEx->sImage.sControl.neD2FormType = FORM_Image;
     int* pDwState = &pNewImageEx->sImage.sControl.dwState;
     *pDwState |= 1;
-    pNewImageEx->sImage.sControl.dwState |= 4;
+    pNewImageEx->sImage.sControl.dwState |= gadwBitMasks[2];
     pNewImageEx->sImage.sControl.pDC6 = pDC6;
     pNewImageEx->sImage.sControl.dwPosX = nPosX;
     pNewImageEx->sImage.sControl.dwSizeX = nSizeX;

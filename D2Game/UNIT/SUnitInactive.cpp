@@ -381,7 +381,7 @@ static void __stdcall SUNITINACTIVE_RestoreMonsterStateFromInactive(::SGAMEDATA 
     } else {
       pAiCmd = sgptDataTable->pTxtMonStats + nMonStatsIdx;
     }
-    if (pAiCmd->interact || pAiCmd->npc || pAiCmd->inTown) {
+    if ((*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[1]) || (*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[0]) || (*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[2])) {
       D2MapAIStrc** ppMapAi;
       pAiCmdNpc = Ai::AiGeneral::AI_CreateCmdIfNotExists(pGame, (D2UnitStrc*)pnParam, 10, 0);
       if (pAiCmdNpc) {
@@ -478,7 +478,7 @@ static void SUNITINACTIVE_SaveMonsterStateToInactive(D2InactiveMonsterRecordStrc
       pInactiveMonsterRecord->nAiArgument = pDeadMarker;
       pInactiveMonsterRecord->nAiArgument2 |= gnMonsterStateFlagMask2;
     }
-    if (pAiCmd->interact || pAiCmd->npc || pAiCmd->inTown) {
+    if ((*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[1]) || pAiCmd->npc || (*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[2])) {
       D2MapAIStrc** ppMapAi;
       pAiCmdNpc = Ai::AiGeneral::AI_CreateCmdIfNotExists(pGame, (D2UnitStrc*)pnParam, 10, 0);
       if (pAiCmdNpc && pAiCmdNpc->nCmdArg[1]) {
@@ -945,10 +945,7 @@ BOOL __fastcall SUNITINACTIVE_CheckDeadMonsterAtCoords(::SGAMEDATA * pGame, D2Ro
     if (!pGame) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6da);
       exit(-1);
-    } else if (!pRoom) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6db);
-      exit(-1);
-    } else {
+    } else if (pRoom) {
       if (!(nPosX && nPosY)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6dc);
         exit(-1);
@@ -978,6 +975,9 @@ BOOL __fastcall SUNITINACTIVE_CheckDeadMonsterAtCoords(::SGAMEDATA * pGame, D2Ro
         }
       }
       return 0;
+    } else {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6db);
+      exit(-1);
     }
 }
 
@@ -1457,7 +1457,7 @@ static void __stdcall UNITS_ProcessDeadOrInactiveMonster(::SGAMEDATA * pGame, D2
         bShouldSave = false;
       }
     }
-    if (pUnit->eUnitFlags >> 9 & 1) {
+    if (((bool)(pUnit->eUnitFlags >> 9 & 1))) {
       bShouldSave = false;
     }
 

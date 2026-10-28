@@ -59,14 +59,14 @@ BOOL __fastcall Draw(::D2WinProgressBar * pProgressBar) {
 
 ::D2WinProgressBar * __fastcall D2WinProgressBar(int32_t dwPosX, int32_t dwPosY, int32_t dwSizeX, int32_t dwSizeY) {
     uint32_t dwState;
-    ::D2WinProgressBar* pNewBar = D2_NEW(::D2WinProgressBar);
+    ::D2WinProgressBar* pNewBar = ((::D2WinProgressBar*)Fog::Memory::AllocClientMemory(sizeof(::D2WinProgressBar), ".\\Src\\D2WinProgressBar.cpp", 0x1a, 0));
     memset(pNewBar, 0, 0x44);
     pNewBar->sControl.neD2FormType = FORM_ProgressBar;
     int* pStateField = &pNewBar->sControl.dwState;
     *pStateField |= 1;
     dwState = pNewBar->sControl.dwState;
     pNewBar->fCurrentProgress = 0.0;
-    pNewBar->sControl.dwState = dwState | 4;
+    pNewBar->sControl.dwState = dwState | gadwBitMasks[2];
     pNewBar->sControl.pDC6 = 0;
     pNewBar->sControl.dwPosX = dwPosX;
     pNewBar->sControl.dwPosY = dwPosY;

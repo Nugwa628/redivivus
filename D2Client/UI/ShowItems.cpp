@@ -103,7 +103,7 @@ void __stdcall DRAW_AltItems() {
         if (pItem) {
           for (; pItem; pItem = pItem->pRoomNext , nItemSlotIdx = nDrawCount) {
             nDrawCount = nItemSlotIdx;
-            if (pItem && pItem->eUnitFlagsEx >> 7 & 1 && pItem->eUnitType == UNIT_ITEM && nItemSlotIdx < 0x20) {
+            if (pItem && ((bool)(pItem->eUnitFlagsEx >> 7 & 1)) && pItem->eUnitType == UNIT_ITEM && nItemSlotIdx < 0x20) {
               gaGroundItemLabels[nItemSlotIdx].pItem = pItem;
               __frame0.pCurrentItem = pItem;
               if (!__frame0.bPerspectiveActive) {

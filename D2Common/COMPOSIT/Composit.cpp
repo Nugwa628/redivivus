@@ -310,7 +310,7 @@ BOOL __stdcall COMPOSIT_HasWeaponDrawn(D2UnitStrc * pUnit) {
     int32_t nAnimMode = -1;
     pUnit = (D2UnitStrc*)pUnit->nClassId;
     nAnimMode = Units::GetAnimOrSeqMode(pOrigUnit);
-    if (pOrigUnit->eUnitFlagsEx >> 3 & 1) {
+    if (((bool)(pOrigUnit->eUnitFlagsEx >> 3 & 1))) {
       Skills::SKILLS_GetStateTransformGfx(pOrigUnit, &eUnitType, (int*)&pUnit, &nAnimMode, ".\\COMPOSIT\\Composit.cpp", 0x236);
     }
 

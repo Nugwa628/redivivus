@@ -186,10 +186,10 @@ BOOL __stdcall Push(D2ControlMsg * pScrollbar) {
 
     uint32_t uVar1;
     uVar1 = pCtrl->sControl.dwState;
-    if (!(uVar1 & 4)) {
+    if (!(uVar1 & gadwBitMasks[2])) {
       return 1;
     }
-    if (!(uVar1 & 1)) {
+    if (!(uVar1 & gadwBitMasks[0])) {
       return 1;
     }
 
@@ -314,7 +314,7 @@ BOOL __fastcall Draw(::D2WinScrollbar * pScrollbar) {
       }
 
       dwCtrlState = pScrollbar->sControl.dwState;
-      if (!(dwCtrlState & 4 && dwCtrlState & 1)) {
+      if (!(dwCtrlState & gadwBitMasks[2] && dwCtrlState & gadwBitMasks[0])) {
         return 0;
       }
 
@@ -330,13 +330,13 @@ BOOL __fastcall Draw(::D2WinScrollbar * pScrollbar) {
         pScrollbar->nWheelLockFlag = 0;
       }
       if (pScrollbar->nWheelLockFlag) {
-        pScrollbarArg.uMsg = 0x201;
         pScrollbarArg.pControl = &pScrollbar->sControl;
+        pScrollbarArg.uMsg = 0x201;
         D2WinScrollbar::Push(&pScrollbarArg);
       }
       memset(&sGfxData, 0, 0x48);
       sGfxData.pDC6 = local_8;
-      sGfxData.nFrameNumber = (uint32_t)(pScrollbar->bDownArrowPressed != 0) * 2 + 1;
+      sGfxData.nFrameNumber = (uint32_t)((pScrollbar->bDownArrowPressed != 0) ? 3 : 1);
       sGfxData.nDirection = 0;
       D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nLine, nDrawY, -1, DRAW_SOLID, nullptr);
       sGfxData.nFrameNumber = 5;
@@ -363,7 +363,7 @@ BOOL __fastcall Draw(::D2WinScrollbar * pScrollbar) {
     pNewScrollbar->sControl.neD2FormType = FORM_Scrollbar;
     int* pStateField = &pNewScrollbar->sControl.dwState;
     *pStateField |= 1;
-    pNewScrollbar->sControl.dwState |= 4;
+    pNewScrollbar->sControl.dwState |= gadwBitMasks[2];
     pNewScrollbar->sControl.pDC6 = pDC6;
     pNewScrollbar->sControl.dwPosX = nPosX;
     pNewScrollbar->sControl.dwPosY = nPosY;

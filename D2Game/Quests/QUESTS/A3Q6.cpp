@@ -654,8 +654,7 @@ void __fastcall Q23_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
           pAttackerPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
           _bQuestState = D2Common::QuestRecord::GetQuestState(pAttackerPlayerData->pQuestRecord[pGameInner->nDifficulty], QUEST_TheGuardian, QUESTSTATE_Step0x11);
           if (!_bQuestState) {
-            piParticipantCount = &pQuestData->pQuestSpecificData.pA3Q6->nPlayerCount;
-            (*piParticipantCount)++;
+            pQuestData->pQuestSpecificData.pA3Q6->nPlayerCount++;
           }
 
           pGameInner = pQuestData->pGame;

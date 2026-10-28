@@ -229,8 +229,8 @@ uint8_t __fastcall Q14_TimerCreatePortal(::SGAMEDATA * pGame, D2QuestDataStrc * 
               D2Common::Units::SetupUpdateFlag(pDVar1, 2);
             } else {
               D2Common::Units::SetupUpdateFlag(pDVar1, 1);
-              pOrificeTxt = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(pDVar1->nClassId);
-              GAME::Event::SetEvent(pQuestData->pGame, pDVar1, 1, (pOrificeTxt->FrameCnt[1] >> 8) + pQuestData->pGame->dwGameFrame, 0, 0);
+
+              GAME::Event::SetEvent(pQuestData->pGame, pDVar1, 1, (D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(pDVar1->nClassId)->FrameCnt[1] >> 8) + pQuestData->pGame->dwGameFrame, 0, 0);
             }
           }
         }

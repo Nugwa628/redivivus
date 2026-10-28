@@ -59,7 +59,7 @@ typedef void (__stdcall *fnBinkFrameCallback)();
 
 namespace D2DDraw::Renderer::DirectDraw {
 
-static bool gbDDrawPaletteSet = 0; D2_STATIC_GUARD(gbDDrawPaletteSet, "D2DDraw::Renderer::DirectDraw::gbDDrawPaletteSet");
+static BOOL gbDDrawPaletteSet = 0; D2_STATIC_GUARD(gbDDrawPaletteSet, "D2DDraw::Renderer::DirectDraw::gbDDrawPaletteSet");
 
 BOOL __fastcall Initialize(HINSTANCE hInstance) {
     // Static local variables (originally global data)
@@ -341,7 +341,7 @@ BOOL __fastcall Initialize(HINSTANCE hInstance) {
     if (nLine) {
       bRegFlagsOk = Storm::Source::SReg::SRegLoadValue(szRegKey, "dwFlags", 0, (int32_t*)&gdwDDrawInitFlags);
       if (bRegFlagsOk) {
-        if (gdwDDrawInitFlags & 1) {
+        if (gdwDDrawInitFlags & gadwBitMasks[0]) {
           return 1;
         }
 
@@ -1035,8 +1035,8 @@ BOOL __stdcall InternalCutsceneWindow() {
     RENDERER_nWindowHeight = 0x1e0;
     gnDDrawSurfaceWidth = 0x1e0;
     DWORD nBitDepth = 0x10;
-    if (!(gdwDDrawInitFlags & 2)) {
-      if (gdwDDrawInitFlags & 4) {
+    if (!(gdwDDrawInitFlags & gadwBitMasks[1])) {
+      if (gdwDDrawInitFlags & gadwBitMasks[2]) {
         nBitDepth = 0x18;
       }
     } else {
@@ -1158,18 +1158,7 @@ BOOL EndScene1() {
 BOOL EndScene2() {
     int32_t nHResult;
     RECT rcDestLeft;
-    if (!gnDDrawFlipState) {
-      if (pDirectDrawSurface) {
-        rcDestLeft.right = RENDERER_nWindowWidth;
-        rcDestLeft.left = 0;
-        rcDestLeft.top = 0;
-        rcDestLeft.bottom = RENDERER_nWindowHeight;
-        nHResult = gpDDrawPrimarySurface->lpVtbl->BltFast(gpDDrawPrimarySurface, 0, 0, pDirectDrawSurface, &rcDestLeft, 0x10);
-        if (nHResult) {
-          goto blt_failed;
-        }
-      }
-    } else {
+    if (gnDDrawFlipState) {
       if (pDirectDrawSurface && gpDDrawBackBuffer && pDirectDrawSurface != gpDDrawBackBuffer) {
         rcDestLeft.right = RENDERER_nWindowWidth;
         rcDestLeft.left = 0;
@@ -1184,6 +1173,17 @@ BOOL EndScene2() {
       }
 
       gpDDrawPrimarySurface->lpVtbl->Flip(gpDDrawPrimarySurface, nullptr, 1);
+    } else {
+      if (pDirectDrawSurface) {
+        rcDestLeft.right = RENDERER_nWindowWidth;
+        rcDestLeft.left = 0;
+        rcDestLeft.top = 0;
+        rcDestLeft.bottom = RENDERER_nWindowHeight;
+        nHResult = gpDDrawPrimarySurface->lpVtbl->BltFast(gpDDrawPrimarySurface, 0, 0, pDirectDrawSurface, &rcDestLeft, 0x10);
+        if (nHResult) {
+          goto blt_failed;
+        }
+      }
     }
     if (!(gnDDrawPaletteSize && pDirectDrawPalette)) {
       return 1;
@@ -1385,7 +1385,7 @@ BOOL __fastcall InitPerspective(D2GfxSettingsStrc * pSettings, ::D2GfxHelperStrc
     pD2GFXRenderedDataStrc = pSettings;
     D2GfxRendereInitFunctionsStrc = pHelpers;
     D2ddDebugFont_Alloc();
-    if (!(gdwDDrawInitFlags & 1)) {
+    if (!(gdwDDrawInitFlags & gadwBitMasks[0])) {
       pGlideConfig = &gGlideOpenWindowConfig;
     } else {
       pGlideConfig = 0;

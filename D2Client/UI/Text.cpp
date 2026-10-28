@@ -5380,9 +5380,12 @@ void __fastcall TEXT_DrawMonsterHoverText(D2UnitStrc * pUnit) {
     ptScreenPos2.x -= lprcTextOverheadRect.left;
     ptScreenPos2.y += -0x1e - lprcTextOverheadRect.top;
     nBorderType = Path::DRAW_GetTypeOfBorder();
-    if (nBorderType == 1) {
+    switch (nBorderType) {
+    case 1: {
       nXOffset = -((int)ScreenSizeX / 4);
-    } else {
+      break;
+    }
+    default: {
       if (nBorderType != 2) {
         if (nBorderType == 3) {
           return;
@@ -5392,6 +5395,8 @@ void __fastcall TEXT_DrawMonsterHoverText(D2UnitStrc * pUnit) {
       }
 
       nXOffset = (int)ScreenSizeX / 4;
+      break;
+    }
     }
 
     ptScreenPos2.x += nXOffset;
@@ -5447,9 +5452,12 @@ void __fastcall TEXT_DrawObjectHoverText(D2UnitStrc * pUnit) {
     ptScreenPos.x -= lprcTextOverheadRect.left;
     ptScreenPos.y += -10 - lprcTextOverheadRect.top;
     nBorderType = Path::DRAW_GetTypeOfBorder();
-    if (nBorderType == 1) {
+    switch (nBorderType) {
+    case 1: {
       nXOffset = -((int)ScreenSizeX / 4);
-    } else {
+      break;
+    }
+    default: {
       if (nBorderType != 2) {
         if (nBorderType == 3) {
           return;
@@ -5459,6 +5467,8 @@ void __fastcall TEXT_DrawObjectHoverText(D2UnitStrc * pUnit) {
       }
 
       nXOffset = (int)ScreenSizeX / 4;
+      break;
+    }
     }
 
     ptScreenPos.x += nXOffset;

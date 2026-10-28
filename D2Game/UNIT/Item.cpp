@@ -662,20 +662,7 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe6);
       exit(-1);
     }
-    if (!pTargetUnit) {
-      byMoveParam2 = (uint8_t)gaUnitModeUpdateFields[eAnimMode * 6 + 4];
-      if (!gaUnitModeUpdateFields[eAnimMode * 6 + 1]) {
-        nTmp2 = D2Common::PATH::DynamicPath::GetXPos(pDynamicPath);
-        wTargetX = (uint16_t)nTmp2;
-        nTargetY = D2Common::PATH::DynamicPath::GetYPos(pDynamicPath);
-      } else {
-        nTmp2 = D2Common::PATH::DynamicPath::GetLastPathPointX(pDynamicPath);
-        wTargetX = (uint16_t)nTmp2;
-        nTargetY = D2Common::PATH::DynamicPath::GetLastPathPointY(pDynamicPath);
-      }
-
-      nPacketId = 0x67;
-    } else {
+    if (pTargetUnit) {
       byMoveParam2 = (uint8_t)gaUnitModeUpdateFields[eAnimMode * 6 + 5];
       wTargetX = (uint16_t)pTargetUnit->eUnitType;
       nTargetY = pTargetUnit->nUnitGUID;
@@ -690,6 +677,19 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
           nPacketId = 0x67;
         }
       }
+    } else {
+      byMoveParam2 = (uint8_t)gaUnitModeUpdateFields[eAnimMode * 6 + 4];
+      if (gaUnitModeUpdateFields[eAnimMode * 6 + 1]) {
+        nTmp2 = D2Common::PATH::DynamicPath::GetLastPathPointX(pDynamicPath);
+        wTargetX = (uint16_t)nTmp2;
+        nTargetY = D2Common::PATH::DynamicPath::GetLastPathPointY(pDynamicPath);
+      } else {
+        nTmp2 = D2Common::PATH::DynamicPath::GetXPos(pDynamicPath);
+        wTargetX = (uint16_t)nTmp2;
+        nTargetY = D2Common::PATH::DynamicPath::GetYPos(pDynamicPath);
+      }
+
+      nPacketId = 0x67;
     }
     if (false) {
       default_case:
@@ -807,21 +807,21 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
         eType = pUnit->eUnitType;
         if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType <= 5) {
           wPosY = (uint16_t)pUnit->pPath.pStaticPath->nPosY;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          wPosY = 0;
-        } else {
+        } else if (pUnit->pPath.pDynamicPath) {
           nPosRaw = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
           wPosY = (uint16_t)nPosRaw;
+        } else {
+          wPosY = 0;
         }
 
         eType = pUnit->eUnitType;
         if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType <= 5) {
           wPosX = (uint16_t)pUnit->pPath.pStaticPath->nPosX;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          wPosX = 0;
-        } else {
+        } else if (pUnit->pPath.pDynamicPath) {
           nPosRaw = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
           wPosX = (uint16_t)nPosRaw;
+        } else {
+          wPosX = 0;
         }
 
         GAME::SCmd::NET_D2GS_SERVER_Send_0x15_WarpXY(pClient, '\x15', (uint8_t)pUnit->eUnitType, pUnit->nUnitGUID, wPosX, wPosY, '\x01');
@@ -836,7 +836,7 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
 
     SUnitMsg::SERVER_UnitQueuePacketSend(pUnit, pClient);
     if (pUnit) {
-      if (pUnit->eUnitFlags >> 8 & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 8 & 1))) {
         SUnitMsg::PLAYER_SendHoverTextToClient(pUnit, pClient);
       }
       if (pUnit->eUnitFlagsEx & UNITFLAGEX_HASINV) {
@@ -859,10 +859,10 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
       }
 
       send_sound_and_health:
-      if (pUnit->eUnitFlags >> 10 & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 10 & 1))) {
         SUnitMsg::UNITMSG_SendSoundPacketToClient(pUnit, pClient);
       }
-      if (pUnit->eUnitFlags >> 0xf & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 0xf & 1))) {
         MONSTER_SendNpcHealthUpdate(pClient, pUnit);
       }
     }
@@ -877,7 +877,7 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     if (nMercType) {
       SUnitMsg::PLAYER_SendOverlayToClient(pUnit, pClient);
     }
-    if (!(pUnit && pUnit->eUnitFlags >> 0xb & 1)) {
+    if (!(pUnit && ((bool)(pUnit->eUnitFlags >> 0xb & 1)))) {
       return;
     }
 

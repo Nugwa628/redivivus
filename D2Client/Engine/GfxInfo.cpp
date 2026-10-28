@@ -475,7 +475,7 @@ int __stdcall GFX_LoadCompositCof(int * pnOutCofData, uint32_t nAnimMode, D2Unit
     if (!bResult) {
       return 0;
     }
-    if (pUnit && pUnit->eUnitFlagsEx >> 3 & 1) {
+    if (pUnit && ((bool)(pUnit->eUnitFlagsEx >> 3 & 1))) {
       D2UnitStrc* pOwner;
       BVar1 = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25);
       if (BVar1) {

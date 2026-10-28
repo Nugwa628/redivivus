@@ -282,7 +282,7 @@ uint8_t * * __stdcall VIEW_AllocPalettePointerTable2(uint32_t nDim, int32_t nSte
       nMidLeft = nDim;
       do {
         nAccum = nOuter << 0x10;
-        for (nStepLeft = nSteps; nStepLeft; nStepLeft--) {
+        for (nStepLeft = nSteps; (uint32_t)nStepLeft > 0; nStepLeft--) {
           *pWrite = gPaletteTransitionTable + ((int)nAccum / 65536 & 0xffU) * 0x100;
           pWrite++;
           nAccum += nMidScaled / nSteps;
@@ -487,17 +487,17 @@ void __stdcall VIEW_GenerateRandomViewParams(int32_t nStarIndex, int32_t bRespaw
     uint32_t nYPos;
     D2SeedStrc seed;
     D2SeedStrc* pStarSeed = gpArcaneStarsSeed;
-    if (!bRespawn) {
-      nStarXPos = Archive::UNIT_GetModuloFromSeed(gpArcaneStarsSeed, WindowSizeX);
-    } else {
+    if (bRespawn) {
       seed = D2_SEED_NEXT(*gpArcaneStarsSeed);
       *gpArcaneStarsSeed = seed;
       nStarXPos = (seed.nSeedLow & 7) - 1 + WindowSizeX;
+    } else {
+      nStarXPos = Archive::UNIT_GetModuloFromSeed(gpArcaneStarsSeed, WindowSizeX);
     }
 
     int nWindowHeight = WindowSizeY;
     gaArcaneStarXPos[nStarIndex] = nStarXPos;
-    if (nWindowHeight < 1) {
+    if (nWindowHeight <= 0) {
       nYPos = 0;
     } else if (!(nWindowHeight & nWindowHeight - 1U)) {
       seed = D2_SEED_NEXT(*pStarSeed);
@@ -1021,18 +1021,18 @@ void __fastcall ViewDraw2(D2GameViewStrc * pGameView) {
         gnDrawBackgroundRenderOffset = 0;
       }
     }
-    if (pGameView->sWall2.dwWall2PassMask & 1) {
+    if (pGameView->sWall2.dwWall2PassMask & gadwBitMasks[0]) {
       Draw::DRAW_WORLD_UnderFloor(pGameView);
     }
 
     Draw::dFloorDraw(pGameView);
     D2Client::Draw::Weather::DRAW_WORLD_RainEffectOnFloor();
-    if (pGameView->sWall2.dwWall2PassMask & 8) {
+    if (pGameView->sWall2.dwWall2PassMask & gadwBitMasks[3]) {
       Draw::dShadowPass(pGameView);
     }
 
     Draw::dWallPass(pGameView);
-    if (pGameView->sWall2.dwWall2PassMask & 2) {
+    if (pGameView->sWall2.dwWall2PassMask & gadwBitMasks[1]) {
       Draw::dRoofDraw(pGameView);
     }
     if (gnFrameDrawCounter) {

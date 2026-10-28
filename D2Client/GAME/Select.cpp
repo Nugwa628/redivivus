@@ -148,7 +148,7 @@ void SetSelectedUnit_I(D2UnitStrc * pUnit) {
         pMonStats = DataTbls::MonsterTbls::TXT_MonStats_GetLine(nErrorLine);
         if (pMonStats) {
           pMonStats2 = DataTbls::MonsterTbls::TXT_MonStats_GetMonStats2(nErrorLine);
-          if (pMonStats2 && !pMonStats->npc && pMonStats->Align != '\x01' && pMonStats2->isAtt) {
+          if (pMonStats2 && !(*((uint8_t *)pMonStats + 0xd) & gadwBitMasks[0]) && pMonStats->Align != '\x01' && pMonStats2->isAtt) {
             gnSelectConstant13_X = nErrorLine;
             if (!pMonStats2->inert) {
               gnSelectConstant13_Y = nErrorLine;
@@ -315,18 +315,18 @@ uint32_t __stdcall SELECT_IsDoorBlockingUnit(D2UnitStrc * pUnit, D2UnitStrc * pU
     }
 
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_UI();
-    if (!pPlayerUnit_lcl) {
+    if (pPlayerUnit_lcl) {
+      D2Common::Units::GetCoords(pPlayerUnit_lcl, &ptPlayerCoord);
+    } else {
       ptPlayerCoord.x = 0;
       ptPlayerCoord.y = 0;
-    } else {
-      D2Common::Units::GetCoords(pPlayerUnit_lcl, &ptPlayerCoord);
     }
 
     D2Common::Units::GetCoords(pUnit, &ptDoorCoord);
     D2Common::Units::GetCoords(pUnit2, &ptTargetCoord);
     D2ObjectsTxt* pObjectsTxt = D2Common::Units::GetObjectTxtRecordFromObject(pUnit2);
     if (pObjectsTxt->Orientation == '\x01') {
-      if ((uint32_t)ptTargetCoord.y <= (uint32_t)ptDoorCoord.y || (uint32_t)ptPlayerCoord.y <= (uint32_t)ptTargetCoord.y) {
+      if ((uint32_t)ptDoorCoord.y >= (uint32_t)ptTargetCoord.y || (uint32_t)ptTargetCoord.y >= (uint32_t)ptPlayerCoord.y) {
         if ((uint32_t)ptDoorCoord.y <= (uint32_t)ptTargetCoord.y) {
           return 1;
         }
@@ -352,11 +352,11 @@ static uint32_t __stdcall SELECT_IsUnitBehindDoor(D2UnitStrc * pUnit, D2UnitStrc
 
     D2ObjectsTxt* pObjectsTxt = D2Common::Units::GetObjectTxtRecordFromObject(pUnit2);
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_UI();
-    if (!pPlayerUnit_lcl) {
+    if (pPlayerUnit_lcl) {
+      D2Common::Units::GetCoords(pPlayerUnit_lcl, &ptPlayerCoord);
+    } else {
       ptPlayerCoord.x = 0;
       ptPlayerCoord.y = 0;
-    } else {
-      D2Common::Units::GetCoords(pPlayerUnit_lcl, &ptPlayerCoord);
     }
 
     D2Common::Units::GetCoords(pUnit2, &ptDoorCoord);
@@ -452,7 +452,7 @@ static D2UnitStrc * __stdcall SKILL_FindTargetInRange(D2SkillStrc * pSkill, D2Un
       *pY = nRadius;
     }
 
-    nFindFlags = pSkillsTxt->TargetCorpse ? 0x3002 : 0x2003;
+    nFindFlags = (*((uint8_t *)pSkillsTxt + 0x7) & gadwBitMasks[0]) ? 0x3002 : 0x2003;
     UNITFINDTEST nfpUnitTest = 0;
     eD2Skills eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\GAME\\Select.cpp", 0x301);
     if (eSkillId == SKILL_IronGolem) {
@@ -470,13 +470,13 @@ static D2UnitStrc * __stdcall SKILL_FindTargetInRange(D2SkillStrc * pSkill, D2Un
     memset(&sUnitFindArg, 0, 0x38);
     sUnitFindArg.nFlags = nFindFlags;
     sUnitFindArg.pAttacker = UNIT::Player::GetPlayerUnit_Net();
-    int nY = *pY;
     int nX = *pX;
+    int nY = *pY;
     D2UnitFindArgStrc* pFindArg = &sUnitFindArg;
     nRadius = 9;
-    sUnitFindArg.nDistance = 9;
     sUnitFindArg.nX = nX;
     sUnitFindArg.nY = nY;
+    sUnitFindArg.nDistance = 9;
     D2Common::Units::UnitFinds::InitializeUnitFindData(nullptr, &sUnitFindData, UNIT::CUnit::GetCurrentRoom(), nX, nY, nRadius, nfpUnitTest, pFindArg);
     sUnitFindData.nFlags = nFindFlags;
     D2Common::Units::UnitFinds::UNITFINDS_FindCullRange(&sUnitFindData);
@@ -544,10 +544,10 @@ static D2UnitStrc * __stdcall SELECT_FindTargetInFacingDirection(D2UnitStrc * pP
       eUnitType = pPlayerUnit_lcl->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nUnitY = pPlayerUnit_lcl->pPath.pStaticPath->nPosY;
-      } else if (!pPlayerUnit_lcl->pPath.pDynamicPath) {
-        nUnitY = 0;
-      } else {
+      } else if (pPlayerUnit_lcl->pPath.pDynamicPath) {
         nUnitY = D2Common::PATH::DynamicPath::GetYPos(pPlayerUnit_lcl->pPath.pDynamicPath);
+      } else {
+        nUnitY = 0;
       }
 
       nOffsetY = gnGameSelectGameState[nAdjustedDirIdx];
@@ -823,7 +823,7 @@ void __stdcall SELECT_UpdateSelectedUnit() {
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &ppRoomList, (int*)&nRoomCount);
     uint32_t nRoomIndex;
     nRoomIndex = 0;
-    if (nRoomCount) {
+    if ((uint32_t)nRoomCount > 0) {
       int iVar1;
       do {
         pIterUnit = ppRoomList[nRoomIndex]->pUnitList;

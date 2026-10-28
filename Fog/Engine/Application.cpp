@@ -224,8 +224,8 @@ static uint32_t __stdcall DEBUG_ParseModuleHeaders(short * * ppModuleBase, short
       }
     }
 
-    uint32_t nDirRVA = 0;
     uint32_t nDirSize = 0;
+    uint32_t nDirRVA = 0;
     bIsValidImage = DEBUG_ParsePEDebugDirectory(ppModuleBase, &nDirSize, (int*)&nDirRVA, (short int*)(pNtHeader + 6));
     bIsBadPtr = nDirSize;
     if ((char)bIsValidImage == '\0') {
@@ -275,7 +275,7 @@ static bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModuleP
 
     char* pDst = strrchr(aModuleInfo.szPath, 0x2f);
     char* pBasename = 0;
-    if (pDst) {
+    if ((uint32_t)pDst > 0) {
       pBasename = pDst;
     }
 
@@ -574,29 +574,7 @@ int __stdcall DEBUG_UnwindStackFrames(DWORD dwThreadId, D2CrashFrameStrc * pFram
     hOpenedThread = (HANDLE)0x0;
     uint32_t local_20;
     local_20 = uStack800;
-    if (!pContext) {
-      dwThreadIdOrSuspend = GetCurrentThreadId();
-      threadContext.ContextFlags = 0x10001;
-      if (dwThreadIdOrSuspend == dwThreadId) {
-        RtlCaptureContext(&threadContext);
-        goto walk_stack;
-      }
-
-      /* DWORD dwThreadId for OpenThread */ /* BOOL bInheritHandle for OpenThread */ /* DWORD dwDesiredAccess for OpenThread */ hThread = OpenThread(0x4a, 0, dwThreadId);
-      hOpenedThread = hThread;
-      /* HANDLE hThread for SuspendThread */ if (hThread) {
-        dwThreadIdOrSuspend = SuspendThread(hThread);
-        if (dwThreadIdOrSuspend != -1) {
-          /* LPCONTEXT lpContext for GetThreadContext */ /* HANDLE hThread for GetThreadContext */ bGetContextOk = GetThreadContext(hThread, &threadContext);
-          if (bGetContextOk) {
-            goto walk_stack;
-          }
-
-          /* HANDLE hThread for ResumeThread */ ResumeThread(hThread);
-          /* HANDLE hObject for CloseHandle */ CloseHandle(hThread);
-        }
-      }
-    } else {
+    if (pContext) {
       pCtxCopy = &threadContext;
       pSavedEsp = &uStack800;
       for (nCtxCopyCount = 0xb3; nCtxCopyCount; nCtxCopyCount--) {
@@ -656,6 +634,28 @@ int __stdcall DEBUG_UnwindStackFrames(DWORD dwThreadId, D2CrashFrameStrc * pFram
       if (hOpenedThread) {
         /* HANDLE hThread for ResumeThread */ ResumeThread(hThread);
         /* HANDLE hObject for CloseHandle */ CloseHandle(hThread);
+      }
+    } else {
+      dwThreadIdOrSuspend = GetCurrentThreadId();
+      threadContext.ContextFlags = 0x10001;
+      if (dwThreadIdOrSuspend == dwThreadId) {
+        RtlCaptureContext(&threadContext);
+        goto walk_stack;
+      }
+
+      /* DWORD dwThreadId for OpenThread */ /* BOOL bInheritHandle for OpenThread */ /* DWORD dwDesiredAccess for OpenThread */ hThread = OpenThread(0x4a, 0, dwThreadId);
+      hOpenedThread = hThread;
+      /* HANDLE hThread for SuspendThread */ if (hThread) {
+        dwThreadIdOrSuspend = SuspendThread(hThread);
+        if (dwThreadIdOrSuspend != -1) {
+          /* LPCONTEXT lpContext for GetThreadContext */ /* HANDLE hThread for GetThreadContext */ bGetContextOk = GetThreadContext(hThread, &threadContext);
+          if (bGetContextOk) {
+            goto walk_stack;
+          }
+
+          /* HANDLE hThread for ResumeThread */ ResumeThread(hThread);
+          /* HANDLE hObject for CloseHandle */ CloseHandle(hThread);
+        }
       }
     }
 
@@ -1246,7 +1246,7 @@ static void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgu
 // lpHandlerProc parameter of RegisterServiceCtrlHandlerA
 void __stdcall ERRORMANAGER_ServiceControlHandler(int32_t nServiceControl) {
     // Static local variables (originally global data)
-    static bool gbApplicationModeCommandLineArgumentFound = true; D2_STATIC_GUARD(gbApplicationModeCommandLineArgumentFound, "Fog::Engine::Application::ERRORMANAGER_ServiceControlHandler::gbApplicationModeCommandLineArgumentFound");
+    static BOOL gbApplicationModeCommandLineArgumentFound = true; D2_STATIC_GUARD(gbApplicationModeCommandLineArgumentFound, "Fog::Engine::Application::ERRORMANAGER_ServiceControlHandler::gbApplicationModeCommandLineArgumentFound");
 
     if (nServiceControl != 1) {
       if (nServiceControl == 4) {

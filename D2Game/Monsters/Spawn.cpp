@@ -656,7 +656,7 @@ D2UnitStrc * __fastcall SpawnMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, in
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     if (pMonStatCheck == (D2MonStatsTxt*)0x1) {
       eD2LevelId eLevelId2;
-      if (nMonCode < 0 || (nValidClassId = nMonCode , sgptDataTable->nTxtMonStatsSize <= nMonCode)) {
+      if (nMonCode < 0 || (nValidClassId = nMonCode , nMonCode >= sgptDataTable->nTxtMonStatsSize)) {
         nValidClassId = -1;
       }
       if (nValidClassId == 0x1f2) {

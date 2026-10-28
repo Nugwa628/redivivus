@@ -240,7 +240,7 @@ void DrawTruncatedText(::ListBoxImplementation * pThis, uint16_t * wszText, int 
     D2Win::Src::D2WinFont::DRAW_text(wszWorkBuffer, nX, nY, nColor, 0);
 }
 
-void AddItem(::ListBoxImplementation * pThis, uint16_t * wszLine0, uint16_t * wszLine1, uint16_t * wszLine2, uint16_t * wszLine3, uint16_t * wszLine4, uint16_t * wszLine5, uint32_t dwItemData, int nColor, BOOL bUseDefaultColor, int nFont) {
+void __fastcall AddItem(::ListBoxImplementation * pThis, int32_t nEdxUnused, uint16_t * wszLine0, uint16_t * wszLine1, uint16_t * wszLine2, uint16_t * wszLine3, uint16_t * wszLine4, uint16_t * wszLine5, uint32_t dwItemData, int nColor, BOOL bUseDefaultColor, int nFont) {
     if (pThis->nItemCount >= 0x80) {
       return;
     }
@@ -324,7 +324,7 @@ BOOL IsMouseOnScrollTrack(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pM
     return 1;
 }
 
-BOOL IsMouseInBounds(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
+BOOL __fastcall IsMouseInBounds(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
     uint32_t uVar1 = (uint32_t)pMsg->uLParam.sMousePos.nMouseX;
     uint32_t uVar2 = (uint32_t)pMsg->uLParam.sMousePos.nMouseY;
     if (!(pThis->nPosX < (int)uVar1 && (int)uVar1 < pThis->nWidth + pThis->nPosX && pThis->nPosY < (int)uVar2 && (int)uVar2 < pThis->nHeight + pThis->nPosY)) {
@@ -544,7 +544,7 @@ void __fastcall Draw(::ListBoxImplementation * pThis) {
     nScrollOffset = 0;
     memset(&sGfxData, 0, 0x48);
     sGfxData.pDC6 = gpMessageLogDC6;
-    sGfxData.nFrameNumber = (uint32_t)(pThis->bScrollUpPressed != 0) * 2 + 9;
+    sGfxData.nFrameNumber = (uint32_t)((pThis->bScrollUpPressed != 0) ? 11 : 9);
     sGfxData.nDirection = 0;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, pThis->nScrollBarX, pThis->nScrollBarY, -1, DRAW_SOLID, nullptr);
     int nVisibleLineCount;
@@ -558,7 +558,7 @@ void __fastcall Draw(::ListBoxImplementation * pThis) {
       } while (nVisibleLineCount < (int)pThis->field_0x180762);
     }
 
-    sGfxData.nFrameNumber = (uint32_t)(pThis->bScrollDownPressed != 0) * 2 + 8;
+    sGfxData.nFrameNumber = (uint32_t)((pThis->bScrollDownPressed != 0) ? 10 : 8);
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, pThis->nScrollBarX, pThis->nScrollBarY + nVisibleLineCount * 0xc, -1, DRAW_SOLID, nullptr);
     nVisibleLineCount = 0;
     int nVisibleItemCount;

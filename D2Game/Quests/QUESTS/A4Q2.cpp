@@ -196,12 +196,13 @@ bool __fastcall Q27_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 
 // [A4Q3 Terror's End] SequenceFilter: when the quest log is first opened and quest not yet started (nStateFlag==0) but introduced, bump internal nStateFlag to 1 (quest now in-progress / step0x02 displayable).
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a4q2.cpp
-void __fastcall Q27_SequenceFilter(D2QuestDataStrc * pQuestData) {
+bool __fastcall Q27_SequenceFilter(D2QuestDataStrc * pQuestData) {
     if (!(!pQuestData->nStateFlag && pQuestData->bIsNotIntroduction)) {
-      return;
+      return true;
     }
 
     QUEST_SetStateFlag(pQuestData, 1, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x91);
+    return true;
 }
 
 // [A4Q3 Terror's End] Per-player: mirror the internal nStateFlag progress into the persisted QUEST_TerrorsEnd record. nStateFlag 2 -> set Step0x02; nStateFlag 3 -> Step0x03 (if prev set) else Step0x04. No-op once quest Completed.

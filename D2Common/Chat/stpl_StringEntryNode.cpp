@@ -298,7 +298,7 @@ template<> TSExplicitList<::StringEntryNode, -572662307>* TSExplicitList<StringE
 }
 
 // stpl-orphan: a COMDAT copy in TSExplicitList<StringEntryNode, -572662307> that no member owns
-TSExplicitList<::StringEntryNode, -572662307>* CopyConstructor_Unreferenced(TSExplicitList<::StringEntryNode, -572662307>* pThis, TSExplicitList<::StringEntryNode, -572662307>* pSource) {
+TSExplicitList<::StringEntryNode, -572662307>* __fastcall CopyConstructor_Unreferenced(TSExplicitList<::StringEntryNode, -572662307>* pThis, int32_t nEdxUnused, TSExplicitList<::StringEntryNode, -572662307>* pSource) {
     uint32_t* pSentinelHead = (uint32_t*)&pThis->m_terminator;
     *pSentinelHead = 0;
     pThis->m_terminator.m_next = 0;
@@ -374,7 +374,7 @@ template<> void TSHashTable<StringEntryNode, HASHKEY_STRI>::InternalClear(int32_
     this->nFullnessIndicator = 0;
     this->tFullList.UnlinkAll();
     int32_t iBucket = 0;
-    if (!this->tSlotListArray.m_count) {
+    if ((uint32_t)this->tSlotListArray.m_count <= 0) {
       return;
     }
 

@@ -30,7 +30,6 @@ namespace D2Game::SKILLS::SkillSor {
 
 // Function declarations
 int32_t __fastcall GetTxtTableParam6(int32_t nParam);
-void SKILLSOR_OnInfernoExpire(struct D2UnitStrc * pUnit, ::SGAMEDATA * pGame);
 // Per-tick server handler for the Sorceress Inferno skill. Validates the skill/missile records, retrieves the cursor target position, then spawns an Inferno missile each tick for as many frames as the calc specifies. For monsters using Inferno it manages the inferno state and schedules the end-anim event via SetEvent; for players it sets up the anim timer events.
 BOOL __fastcall INFERNO_CastInfernoTick(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl2, eMissilesId eMissileId);
 // Starts or sustains a channelled Inferno cast. On first call (no STATE_inferno stat list), allocates a stat list, schedules a 0xC event at frame+20, attaches it, sets the expire callback, and activates STATE_inferno. On subsequent calls, refreshes the stat-list timeout to frame+6, reschedules the event, and calls INFERNO_CastInfernoTick to spawn the next missile tick. For monster casters, param1 is set to game-frame + calc[1] duration.

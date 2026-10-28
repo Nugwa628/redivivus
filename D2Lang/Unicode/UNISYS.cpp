@@ -597,7 +597,7 @@ BOOL __fastcall UNICODE_CheckLineBreakPosition(int32_t pWszText, int32_t nPos) {
     return 0;
 }
 
-void __fastcall STRING_ConvertCharToWchar(uint16_t * pwszBuffer, char * pszBuffer, int32_t nSize) {
+uint16_t * __fastcall STRING_ConvertCharToWchar(uint16_t * pwszBuffer, char * pszBuffer, int32_t nSize) {
     uint16_t* pWVar2;
     int nWideLen;
     uint16_t wszBuffer[1024];
@@ -626,10 +626,11 @@ void __fastcall STRING_ConvertCharToWchar(uint16_t * pwszBuffer, char * pszBuffe
     }
     if (wszBuffer[nCharsCopied] == L'\0') {
       pwszBuffer[nCharsCopied] = L'\0';
-      return;
+      return pwszBuffer;
     }
 
     pwszBuffer[nCharsCopied - 1] = L'\0';
+    return pwszBuffer;
 }
 
 uint16_t * __fastcall STRING_CopyCharToWCharWithSetMaxSize(uint16_t * pDestination, char * szSource, int32_t nSize) {
@@ -978,12 +979,12 @@ void UNICODE_AllocBuffer(uint32_t nSize) {
     Storm::SMem::SMemAlloc(nSize, "new[]", -1, 0);
 }
 
-void UNICODE_ReadByteRange(void * pThis, uint8_t * pByteRange) {
+void __fastcall UNICODE_ReadByteRange(void * pThis, int32_t nEdxUnused, uint8_t * pByteRange) {
     *(uint16_t*)pThis = (uint16_t)*pByteRange;
     *(uint16_t*)((int)pThis + 2) = (uint16_t)pByteRange[2];
 }
 
-uint32_t UNICODE_CheckByteInRange(void * pThis, uint8_t byValue) {
+uint32_t __fastcall UNICODE_CheckByteInRange(void * pThis, int32_t nEdxUnused, uint8_t byValue) {
     if (!(*(uint8_t*)pThis <= byValue && byValue <= *(uint8_t*)((int)pThis + 1))) {
       return 0;
     }

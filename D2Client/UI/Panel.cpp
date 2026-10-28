@@ -77,9 +77,9 @@
 
 namespace D2Client::UI::Panel {
 
-static bool gbPanelClickProcessed = true; D2_STATIC_GUARD(gbPanelClickProcessed, "D2Client::UI::Panel::gbPanelClickProcessed");
+static BOOL gbPanelClickProcessed = true; D2_STATIC_GUARD(gbPanelClickProcessed, "D2Client::UI::Panel::gbPanelClickProcessed");
 static uint32_t gaaBeltSlotHotkeyCommands[4] = { 0x17, 0x18, 0x19, 0x1a }; D2_STATIC_GUARD(gaaBeltSlotHotkeyCommands, "D2Client::UI::Panel::gaaBeltSlotHotkeyCommands");
-static bool gbPanelLeftBeltArrowClicked = 0; D2_STATIC_GUARD(gbPanelLeftBeltArrowClicked, "D2Client::UI::Panel::gbPanelLeftBeltArrowClicked");
+static BOOL gbPanelLeftBeltArrowClicked = 0; D2_STATIC_GUARD(gbPanelLeftBeltArrowClicked, "D2Client::UI::Panel::gbPanelLeftBeltArrowClicked");
 
 // JMP thunk
 void __stdcall thunk_CMD_UseBeltSlot1() {
@@ -703,8 +703,8 @@ void __stdcall PANEL_DrawStaminaBar() {
       }
     }
 
-    nCurStamina = 3;
     nCurStaminaUnits = nMaxStaminaUnits;
+    nCurStamina = 3;
     show_stamina_tooltip:
     pwszCursor = wszTooltip;
     for (iVar1 = 0x32; iVar1; iVar1--) {
@@ -1915,7 +1915,7 @@ void __stdcall PANEL_DrawBottomPanel() {
 
     D2Common::DATATBLS::BeltsTbls::GetBeltsLine(gnBeltPanelState, nScreenMode, &sBeltsTxt);
     uint32_t nSlotIndex = 0;
-    if ((uint8_t)sBeltsTxt.nBoxes) {
+    if ((uint32_t)((uint8_t)sBeltsTxt.nBoxes) > 0) {
       uint16_t uVar1;
       do {
         if (3 < (int)nSlotIndex && !gbPanelBeltSlotHovered) {
@@ -2005,7 +2005,7 @@ void __stdcall PANEL_DrawBottomPanel() {
 
 void __stdcall DRAW_UI_BordersAndOrbsAndFillers() {
     // Static local variables (originally global data)
-    static bool gbPanelBorderDrawn; D2_STATIC_GUARD_BSS(gbPanelBorderDrawn, "D2Client::UI::Panel::DRAW_UI_BordersAndOrbsAndFillers::gbPanelBorderDrawn");
+    static BOOL gbPanelBorderDrawn; D2_STATIC_GUARD_BSS(gbPanelBorderDrawn, "D2Client::UI::Panel::DRAW_UI_BordersAndOrbsAndFillers::gbPanelBorderDrawn");
     static uint32_t gpPanelBorderImage; D2_STATIC_GUARD_BSS(gpPanelBorderImage, "D2Client::UI::Panel::DRAW_UI_BordersAndOrbsAndFillers::gpPanelBorderImage");
 
     eD2LevelId eRoomLevelId;
@@ -2073,7 +2073,7 @@ void __stdcall INPUT_PanelLeftClickDown(D2UIMouseMsgStrc * pMsg) {
         pMsg->bHandled = 0;
         return;
       }
-      if (nMouseX - 0x75U < 0x31 && nMouseY <= ScreenSizeY) {
+      if (nMouseX - 0x75U <= 0x30 && nMouseY <= ScreenSizeY) {
         gpPanelClickedButton = 1;
         gbPanelLeftBeltArrowClicked = 1;
       } else if (nMouseX < ScreenSizeX - 0xa5 || ScreenSizeX - 0x75 < nMouseX || ScreenSizeY < nMouseY) {
@@ -2170,11 +2170,11 @@ void __stdcall INPUT_PanelLeftClickUp(D2UIMouseMsgStrc * pMsg) {
           }
 
           bFlag = ui::GetUIFlag(UI_SKILLSELECT);
-          if (!bFlag) {
-            Draw::SetUIFlag(UI_SKILLSELECT, UI_SET, 0);
+          if (bFlag) {
+            Draw::SetUIFlag(UI_SKILLSELECT, UI_RESET, 0);
             SpellSel::SPELLSEL_SetMouseHandFlag(1);
           } else {
-            Draw::SetUIFlag(UI_SKILLSELECT, UI_RESET, 0);
+            Draw::SetUIFlag(UI_SKILLSELECT, UI_SET, 0);
             SpellSel::SPELLSEL_SetMouseHandFlag(1);
           }
         } else if (nMouseX < ScreenSizeX - 0xa5 || ScreenSizeX - 0x75 < nMouseX || ScreenSizeY < nMouseY) {
@@ -2207,11 +2207,11 @@ void __stdcall INPUT_PanelLeftClickUp(D2UIMouseMsgStrc * pMsg) {
           }
 
           bFlag = ui::GetUIFlag(UI_SKILLSELECT);
-          if (!bFlag) {
-            Draw::SetUIFlag(UI_SKILLSELECT, UI_SET, 0);
+          if (bFlag) {
+            Draw::SetUIFlag(UI_SKILLSELECT, UI_RESET, 0);
             SpellSel::SPELLSEL_SetMouseHandFlag(0);
           } else {
-            Draw::SetUIFlag(UI_SKILLSELECT, UI_RESET, 0);
+            Draw::SetUIFlag(UI_SKILLSELECT, UI_SET, 0);
             SpellSel::SPELLSEL_SetMouseHandFlag(0);
           }
         }

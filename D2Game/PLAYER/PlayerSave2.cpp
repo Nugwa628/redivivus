@@ -1206,7 +1206,7 @@ int __fastcall ReadStatsLong(::SGAMEDATA * pGameStrc, D2UnitStrc * pUnit, short 
       if (!pStatCostTxt) {
         break;
       }
-      if (pStatCostTxt->csvbits == '\0') {
+      if ((uint32_t)pStatCostTxt->csvbits <= 0) {
         break;
       }
 

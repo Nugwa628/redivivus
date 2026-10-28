@@ -153,9 +153,9 @@ typedef int (__fastcall *pfnTextScrollComplete)(void * pUserParam, uint32_t nRea
 
 namespace D2Client::UI::ui {
 
-static bool gbUIStatButtonHovered = 0; D2_STATIC_GUARD(gbUIStatButtonHovered, "D2Client::UI::ui::gbUIStatButtonHovered");
-static bool gbUISkillButtonHovered = 0; D2_STATIC_GUARD(gbUISkillButtonHovered, "D2Client::UI::ui::gbUISkillButtonHovered");
-static bool gbUIStatScreenMouseDown = 0; D2_STATIC_GUARD(gbUIStatScreenMouseDown, "D2Client::UI::ui::gbUIStatScreenMouseDown");
+static BOOL gbUIStatButtonHovered = 0; D2_STATIC_GUARD(gbUIStatButtonHovered, "D2Client::UI::ui::gbUIStatButtonHovered");
+static BOOL gbUISkillButtonHovered = 0; D2_STATIC_GUARD(gbUISkillButtonHovered, "D2Client::UI::ui::gbUISkillButtonHovered");
+static BOOL gbUIStatScreenMouseDown = 0; D2_STATIC_GUARD(gbUIStatScreenMouseDown, "D2Client::UI::ui::gbUIStatScreenMouseDown");
 
 void __stdcall INPUT_ClearChatMessages(D2UIMouseMsgStrc * pMsg) {
     Text::TEXT_ClearChatMessages();
@@ -220,7 +220,7 @@ void __fastcall UI_TranslateWideCharacterLookup(uint16_t * wszText) {
     } while (i < nLength);
 }
 
-uint16_t * __fastcall AppendAsWideChar(uint16_t * wszText, char cParam) {
+uint16_t * __fastcall AppendAsWideChar(uint16_t * wszText, int32_t cParam) {
     // Frame slots -2064..-12 are ONE object: &wszBuffer is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     #pragma pack(push, 1)
@@ -416,7 +416,7 @@ int32_t __fastcall UI_GetMonsterHpBarValue(D2UnitStrc * pUnit) {
     if (nHpPercent) {
       return 0;
     }
-    if (pUnit->eUnitFlags >> 2 & 1) {
+    if (((bool)(pUnit->eUnitFlags >> 2 & 1))) {
       D2UnitStrc* pPlayerUnit_lcl;
       pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_UI();
       bCanInteract = UNIT::CUnit::CanInteractWith(pPlayerUnit_lcl, pUnit);
@@ -667,9 +667,7 @@ static void __stdcall UI_FormatPlayerNameAndStatus(D2UnitStrc * pUnit, uint16_t 
     uint16_t wszDeadName[128];
     char* pRosterName = GAME::Roster::GetPlayerRosterName(pUnit);
     char* pszRosterNameCopy = pRosterName;
-    if (!pUnit) {
-      nUnitGUID = -1;
-    } else {
+    if (pUnit) {
       uint16_t* pWszFill;
       if (pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Dead) {
         *pnHpBarValue = 0;
@@ -686,6 +684,8 @@ static void __stdcall UI_FormatPlayerNameAndStatus(D2UnitStrc * pUnit, uint16_t 
       }
 
       nUnitGUID = pUnit->nUnitGUID;
+    } else {
+      nUnitGUID = -1;
     }
 
     int32_t nHpPercent = GAME::Roster::GetRosterPlayerHpPercent(nUnitGUID);
@@ -694,10 +694,10 @@ static void __stdcall UI_FormatPlayerNameAndStatus(D2UnitStrc * pUnit, uint16_t 
     pbIsPartied[1] = false;
     pbIsPartied[2] = false;
     pbIsPartied[3] = false;
-    if (!pUnit) {
-      nUnitGUID = -1;
-    } else {
+    if (pUnit) {
       nUnitGUID = pUnit->nUnitGUID;
+    } else {
+      nUnitGUID = -1;
     }
 
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_UI();
@@ -941,7 +941,7 @@ void __stdcall UI_DrawStoredTooltip() {
 
 void __stdcall DRAW_UI_DeathMessage() {
     // Static local variables (originally global data)
-    static bool gbDeathMessageActive; D2_STATIC_GUARD_BSS(gbDeathMessageActive, "D2Client::UI::ui::DRAW_UI_DeathMessage::gbDeathMessageActive");
+    static BOOL gbDeathMessageActive; D2_STATIC_GUARD_BSS(gbDeathMessageActive, "D2Client::UI::ui::DRAW_UI_DeathMessage::gbDeathMessageActive");
 
     uint8_t nGameDifficulty;
     int nGoldLost;
@@ -1017,7 +1017,7 @@ void __stdcall DRAW_UI_DeathMessage() {
     D2Win::Src::D2WinFont::DRAW_text(wszDeathMessage, WindowSizeX / 2 - nTextWidth / 2, nDrawY, 1, 1);
     draw_exp_loss_line:
     nGameDifficulty = GAME::Game::GetDificulity();
-    if (nGameDifficulty == '\0') {
+    if ((uint32_t)nGameDifficulty <= 0) {
       return;
     }
 
@@ -1130,7 +1130,7 @@ void __stdcall UI_DrawPlayerStateOverlays() {
         pStatList = D2Common::Stats::StatsEx::GetStatsByState(pPlayerUnit_lcl, eState);
         if (pStatList) {
           pStateTxt = DataTbls::MonsterTbls::TXT_States_GetLine(eState);
-          if (pStateTxt && pStateTxt->pgsv && 0 < pStateTxt->pgsvoverlay && (int)pStateTxt->pgsvoverlay < sgptDataTable->nTxtOverlaySize) {
+          if (pStateTxt && (*((uint8_t *)pStateTxt + 0x10) & gadwBitMasks[4]) && 0 < pStateTxt->pgsvoverlay && (int)pStateTxt->pgsvoverlay < sgptDataTable->nTxtOverlaySize) {
             nStatId = pStateTxt->stat;
             if (0 <= nStatId && (int)nStatId <= sgptDataTable->nTxtItemStatCostSize) {
               nStatValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pPlayerUnit_lcl, (int)nStatId, 0);
@@ -2040,7 +2040,7 @@ void __fastcall DRAW_MonsterHealthBar(D2UnitStrc * pUnit) {
       pwszStr += 2;
     }
     int bIsMercenary = 0;
-    if (!pMonStats->interact && pMonStats->killable && pMonStats->NameStr) {
+    if (!(*((uint8_t *)pMonStats + 0xd) & gadwBitMasks[1]) && (*((uint8_t *)pMonStats + 0xd) & gadwBitMasks[7]) && pMonStats->NameStr) {
       D2RoomStrc* pRoom;
       if (!pUnit) {
         i = -1;
@@ -3915,8 +3915,8 @@ namespace D2Client::UI::ControlConfig {
 void __stdcall UI_UpdateConfigControlsState(int32_t nMouseXStack, int32_t nMouseYStack) {
     // Static local variables (originally global data)
     static int32_t gnUICtrlConfigHoveredControl; D2_STATIC_GUARD_BSS(gnUICtrlConfigHoveredControl, "D2Client::UI::ControlConfig::UI_UpdateConfigControlsState::gnUICtrlConfigHoveredControl");
-    static bool gbUICtrlConfigNeedRefresh; D2_STATIC_GUARD_BSS(gbUICtrlConfigNeedRefresh, "D2Client::UI::ControlConfig::UI_UpdateConfigControlsState::gbUICtrlConfigNeedRefresh");
-    static bool gbUICtrlConfigPendingKey; D2_STATIC_GUARD_BSS(gbUICtrlConfigPendingKey, "D2Client::UI::ControlConfig::UI_UpdateConfigControlsState::gbUICtrlConfigPendingKey");
+    static BOOL gbUICtrlConfigNeedRefresh; D2_STATIC_GUARD_BSS(gbUICtrlConfigNeedRefresh, "D2Client::UI::ControlConfig::UI_UpdateConfigControlsState::gbUICtrlConfigNeedRefresh");
+    static BOOL gbUICtrlConfigPendingKey; D2_STATIC_GUARD_BSS(gbUICtrlConfigPendingKey, "D2Client::UI::ControlConfig::UI_UpdateConfigControlsState::gbUICtrlConfigPendingKey");
     uint32_t* piVar1;
     uint32_t dwNowTick;
     DWORD dwTickCount;
@@ -5236,10 +5236,10 @@ static void __fastcall DRAW_UI_StatWindow_III(int32_t nX, int32_t nY, int32_t nV
 
     nErrorLine = nValue;
     pwszClear = D2Lang::StrTable::strtable::GetLocaleString(pMonStatsTxt->NameStr);
-    if (!(uint16_t*)nBlockRateOrDescStrId) {
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMessage, D2Lang::StrTable::strtable::GetLocaleString(0x2778), (uint16_t*)pwszClear, nErrorLine);
-    } else {
+    if ((uint16_t*)nBlockRateOrDescStrId) {
       D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMessage, D2Lang::StrTable::strtable::GetLocaleString(0x2779), (uint16_t*)nBlockRateOrDescStrId, nValue);
+    } else {
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMessage, D2Lang::StrTable::strtable::GetLocaleString(0x2778), (uint16_t*)pwszClear, nErrorLine);
     }
 
     D2Win::Src::D2WinFont::D2WINFONT_DrawTextWithBackgroundRect(wszMessage, gnPanelOffsetX + 0x8b, gnPanelOffsetY - 0x13b + ScreenSizeY, (uint32_t)(uint8_t)gbUIStatWindowDrawFlag, DRAW_LESSTRANSPARENT, 0);

@@ -422,11 +422,11 @@ static void __stdcall DRLGROOMTILE_InitWarpCacheTiles(uint32_t nPackedTileFlags,
       nOffsetY = gaWarpTileOffsetY[nWarpSubIdx * 2];
       pTileData = pDVar1->sRoomTiles.pFloorTiles + pDVar1->nFloors;
       pTileListHead = &pWarpCacheIter->pTileListClearedOnSelect;
-      if (!pTileListHead) {
-        pTileData->pNext = 0;
-      } else {
+      if (pTileListHead) {
         pTileData->pNext = *pTileListHead;
         *pTileListHead = pTileData;
+      } else {
+        pTileData->pNext = 0;
       }
 
       pDVar1->nFloors++;
@@ -869,10 +869,10 @@ void __fastcall InitRoomTiles(D2RoomExStrc * pRoomEx, D2DrlgGridStrc * pGrid, D2
       if (0 < nXMax) {
         do {
           nFlags = DrlgGrid::GetGridFlags(pGrid, nColIdx, nY);
-          if (!pOtherGrid) {
-            nCellFlags = CELLFLAGS_NONE;
-          } else {
+          if (pOtherGrid) {
             nCellFlags = DrlgGrid::GetGridFlags(pOtherGrid, nColIdx, nY);
+          } else {
+            nCellFlags = CELLFLAGS_NONE;
           }
 
           DRLGROOMTILE_ProcessTile(nFlags, pRoomEx, pMemory, nColIdx + nXOffset, nY + nYOffset, nTileParam, nCellFlags);

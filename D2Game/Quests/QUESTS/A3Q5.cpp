@@ -633,13 +633,7 @@ void __fastcall Q22_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D
     pLamEsenResult->bLamEsenComplete = bQuestState;
     /* GetQuestState(Blackened Temple=0x15, Step0x02=2): record step 2 -> live
                          nStateFlag 2/3 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Step0x02);
-    if (!bQuestState) {
-      /* GetQuestState(Blackened Temple=0x15, Step0x03=3): without Step0x02, step 3 ->
-                         nStateFlag 4/5 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Step0x03);
-      if (!bQuestState) {
-        return;
-      }
-    } else {
+    if (bQuestState) {
       /* GetQuestState(Blackened Temple=0x15, Step0x03=3): with Step0x02 set, step 3
                          -> nStateFlag 4/5 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Step0x03);
       if (!bQuestState) {
@@ -651,6 +645,12 @@ void __fastcall Q22_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D
         }
 
         pQuestData->nStateFlag = 2;
+        return;
+      }
+    } else {
+      /* GetQuestState(Blackened Temple=0x15, Step0x03=3): without Step0x02, step 3 ->
+                         nStateFlag 4/5 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Step0x03);
+      if (!bQuestState) {
         return;
       }
     }
@@ -1048,12 +1048,12 @@ void __fastcall Q22_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
           pDVar1->bCouncilMemberTracking = (bool)(char)((uint32_t)iVar2 >> 0x10);
           pDVar1->field_0x3 = (bool)(char)((uint32_t)iVar2 >> 0x18);
           pQuestData->nQuestPacketFlags = '\0';
-          if (!pDVar1->bJerhynAiActive) {
-            QUEST_SetStateFlag(pQuestData, 6, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q5.cpp", 0x3d1);
-            byBroadcastState = 4;
-          } else {
+          if (pDVar1->bJerhynAiActive) {
             QUEST_SetStateFlag(pQuestData, 7, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q5.cpp", 0x3cc);
             byBroadcastState = 0xd;
+          } else {
+            QUEST_SetStateFlag(pQuestData, 6, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q5.cpp", 0x3d1);
+            byBroadcastState = 4;
           }
 
           QUEST_SetStateAndBroadcast(pQuestData, byBroadcastState, nullptr, (::fpExecuteOnUnitFunction)Q22_PlayerNotifyCompleted, true);

@@ -2322,7 +2322,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xA9_UNITSTATE_OFF_EX(D2ClientStrc * pClien
     SCMD_QueuePacketForClient(((uint8_t*)&aPacket), 7, pClient);
 }
 
-void SCMD_WriteBooleanToBitBuffer(void * pThis, int32_t nBoolValue) {
+void __fastcall SCMD_WriteBooleanToBitBuffer(void * pThis, int32_t nEdxUnused, int32_t nBoolValue) {
     Fog::BitBuffer::WriteValueToBitBuffer((D2BitBufferStrc*)pThis, (uint32_t)(nBoolValue != 0), 1);
 }
 
@@ -2360,12 +2360,12 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
       *(uint16_t*)((char*)&aPacket + 5) = (uint16_t)pUnit->nClassId;
       if (false || false) {
         *(uint16_t*)((char*)&aPacket + 7) = (uint16_t)pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        aPacket[7] = 0;
-        aPacket[8] = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nScratch = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
         *(uint16_t*)((char*)&aPacket + 7) = (uint16_t)nScratch;
+      } else {
+        aPacket[7] = 0;
+        aPacket[8] = 0;
       }
 
       eUnitType = pUnit->eUnitType;
@@ -2388,9 +2388,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
 
       Fog::BitBuffer::WriteValueToBitBuffer(&bitBuffer, eAnimMode, 4);
       BVar1 = Monster::CheckComponents(pUnit);
-      if (!BVar1) {
-        Fog::BitBuffer::WriteValueToBitBuffer(&bitBuffer, 0, 1);
-      } else {
+      if (BVar1) {
         Fog::BitBuffer::WriteValueToBitBuffer(&bitBuffer, 1, 1);
         if (pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataPlayer) {
           pComponentBytes = pUnit->pUnitData.pUnitDataPlayer->szCharName + 4;
@@ -2403,10 +2401,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
                 nScratch = 1;
               } else {
                 nStatIndex = nComponentData - 1;
-                if (!nStatIndex) {
-                  nScratch = 0;
-                  bHasStats = 0;
-                } else {
+                if (nStatIndex) {
                   nIndex = 0x1f;
                   if (nStatIndex) {
                     for (; !(nStatIndex >> nIndex); nIndex--) {}
@@ -2414,6 +2409,9 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
 
                   nScratch = nIndex + 1;
                   bHasStats = nScratch;
+                } else {
+                  nScratch = 0;
+                  bHasStats = 0;
                 }
               }
 
@@ -2422,10 +2420,12 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
             } while ((int)nComponentIdx < 0x10);
           }
         }
+      } else {
+        Fog::BitBuffer::WriteValueToBitBuffer(&bitBuffer, 0, 1);
       }
 
       nComponentIdx = Monsters::CheckMonUModList(pUnit);
-      if (!nComponentIdx && !(pUnit->eUnitFlags >> 9 & 1)) {
+      if (!nComponentIdx && !(((bool)(pUnit->eUnitFlags >> 9 & 1)))) {
         nScratch = 1;
         nIndex = 0;
       } else {
@@ -2476,7 +2476,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
       }
 
       Fog::BitBuffer::WriteValueToBitBuffer(&bitBuffer, nIndex, nScratch);
-      if (!(pUnit->eUnitFlagsEx >> 10 & 1) || pUnit->eOwnerType != UNIT_PLAYER) {
+      if (!(((bool)(pUnit->eUnitFlagsEx >> 10 & 1))) || pUnit->eOwnerType != UNIT_PLAYER) {
         nScratch = 1;
         nStatIndex = 0;
       } else {
@@ -2488,10 +2488,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
       Fog::BitBuffer::WriteValueToBitBuffer(&bitBuffer, nStatIndex, nScratch);
       bHasStats = 0;
       pStatListEx = D2Common::Stats::StatsEx::GetStatList(pUnit, STATE_none, 0x40);
-      if (!pStatListEx) {
-        nSizeInBits = 1;
-        nScratch = 0;
-      } else {
+      if (pStatListEx) {
         nScratch = D2Common::Stats::StatsEx::CopyStatsToBuffer(pStatListEx, aStatBuf, 0x10);
         nStatCount = nScratch;
         if (nScratch < 1 || (nIndex = 0 , pDataTable = sgptDataTable , nScratch < 1)) {
@@ -2505,7 +2502,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
             nStatValue = aStatBuf[nIndex].nStatValue;
             if ((int)nStatIndex < pDataTable->nTxtItemStatCostSize) {
               pStatCostTxt = pDataTable->pTxtItemStatCost + nStatIndex;
-              if (pStatCostTxt && pStatCostTxt->dwItemStatFlags & ITEMSTATCOSTFLAG_SEND_OTHER && pStatCostTxt->sendBits != '\0') {
+              if (pStatCostTxt && pStatCostTxt->dwItemStatFlags & ITEMSTATCOSTFLAG_SEND_OTHER && (uint32_t)pStatCostTxt->sendBits > 0) {
                 if (!bHasStats) {
                   bHasStats = 1;
                   Fog::BitBuffer::WriteValueToBitBuffer(&bitBuffer, 1, 1);
@@ -2534,6 +2531,9 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
             nScratch = 0;
           }
         }
+      } else {
+        nSizeInBits = 1;
+        nScratch = 0;
       }
 
       Fog::BitBuffer::WriteValueToBitBuffer(&bitBuffer, nScratch, nSizeInBits);

@@ -65,8 +65,8 @@ void __stdcall SCMD_ConvertNumber(struct D2UnitDataMonsterStrc * cmdDef, char * 
 void __stdcall SCMD_ConvertString(char * str, struct D2UnitDataMonsterStrc * cmdDef, uint32_t * outConsumed);
 uint32_t SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset);
 ::SCMD * SCMD_GetListHead(::SCMD * pThis, ::SCMD * pNode);
-uint32_t SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode);
-void SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode);
+uint32_t __fastcall SCMD_GetNextOffset(::SCMD * pThis, int32_t nEdxUnused, ::SCMD * pNode);
+void __fastcall SCMD_UnlinkNode(::SCMD * pThis, int32_t nEdxUnused, ::SCMD * pNode);
 uint32_t SCMD_GetHandler(::SCMD * pThis, int nNodeOffset);
 void __fastcall SCMD_ClearList(struct D2StormListHead * nListPtr);
 void __fastcall SCMD_ClearAll(struct D2StormListHead * nListPtr);

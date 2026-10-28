@@ -238,7 +238,7 @@ static void DownloadSave(char * pBytes) {
     append_chunk:
     pDst = D2Game::Save::pRawSaveBuffer + D2Game::Save::nRawSaveBufferSize;
     int i = 0;
-    if (pBytes[1] != '\0') {
+    if ((uint32_t)pBytes[1] > 0) {
       int nByteOffset;
       nByteOffset = 7 - (int)pDst;
       do {
@@ -2191,18 +2191,18 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xA8_UNITSTATE_ONVAL_EX(char * pBytes) {
       if (!pItemStatCost) {
         return;
       }
-      if (pItemStatCost->sendBits == '\0') {
+      if ((uint32_t)pItemStatCost->sendBits <= 0) {
         return;
       }
 
       nStatParam = 0;
       if ((uint32_t)pItemStatCost->sendParamBits > 0) {
         nParamRaw = Fog::BitBuffer::ReadSigned(&bitBuffer, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
-        nStatParam = nParamRaw & 0xffff;
+        nStatParam = (uint16_t)nParamRaw;
       }
 
       nSendBits = pItemStatCost->sendBits;
-      if (nSendBits < 0x20 && pItemStatCost->dwItemStatFlags & ITEMSTATCOSTFLAG_SIGNED) {
+      if (nSendBits < 0x20 && pItemStatCost->dwItemStatFlags & gadwBitMasks[1]) {
         eSkill = Fog::BitBuffer::ReadSigned(&bitBuffer, (uint32_t)nSendBits);
       } else {
         eSkill = Fog::BitBuffer::ReadUnsigned(&bitBuffer, (uint32_t)nSendBits);
@@ -2266,7 +2266,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xAA_UNITSTATE_ALL_EX(char * pBytes) {
           if (!pItemStatCost) {
             return;
           }
-          if (pItemStatCost->sendBits == '\0') {
+          if ((uint32_t)pItemStatCost->sendBits <= 0) {
             return;
           }
 
@@ -2277,7 +2277,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xAA_UNITSTATE_ALL_EX(char * pBytes) {
           }
 
           nSendBits = pItemStatCost->sendBits;
-          if (nSendBits < 0x20 && pItemStatCost->dwItemStatFlags & ITEMSTATCOSTFLAG_SIGNED) {
+          if (nSendBits < 0x20 && pItemStatCost->dwItemStatFlags & gadwBitMasks[1]) {
             eSkill = Fog::BitBuffer::ReadSigned(&bitBuffer, (uint32_t)nSendBits);
           } else {
             eSkill = Fog::BitBuffer::ReadUnsigned(&bitBuffer, (uint32_t)nSendBits);
@@ -2302,7 +2302,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xAB(char * pBytes) {
     }
 
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
-    if (!(pUnit != pPlayerUnit_lcl && !(pUnit->eUnitFlags >> 9 & 1))) {
+    if (!(pUnit != pPlayerUnit_lcl && !(((bool)(pUnit->eUnitFlags >> 9 & 1))))) {
       return;
     }
     if (pUnit->eUnitType == UNIT_MONSTER) {
@@ -2508,7 +2508,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xAC(char * pPacketData) {
       }
 
       pItemStatCost = sgptDataTable->pTxtItemStatCost + nStatValue;
-      if (!(pItemStatCost && pItemStatCost->sendBits != '\0')) {
+      if (!(pItemStatCost && (uint32_t)pItemStatCost->sendBits > 0)) {
         break;
       }
 

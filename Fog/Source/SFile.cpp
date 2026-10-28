@@ -210,7 +210,7 @@ int __fastcall SFILE_GetInstallPath(LPSTR lpFilename, DWORD nSize) {
       return 0;
     }
     uint32_t uVar1 = Storm::Source::SSTR::SStrLen(lpFilename);
-    if (!(!uVar1 || lpFilename[uVar1 - 1] != '\\')) {
+    if (!((uint32_t)uVar1 <= 0 || lpFilename[uVar1 - 1] != '\\')) {
       return 1;
     }
     if (uVar1 + 1 == nSize) {
@@ -325,7 +325,7 @@ int __fastcall SFILE_MoveDirectoryRecursive(LPCSTR szSrcRoot, LPCSTR szDstRoot) 
           }
 
           uVar1 = Storm::Source::SSTR::SStrLen(szDstDir);
-          if ((!uVar1 || szSrcPath[uVar1 + 0x103] != '\\') && uVar1 != 0x103) {
+          if (((uint32_t)uVar1 <= 0 || szSrcPath[uVar1 + 0x103] != '\\') && uVar1 != 0x103) {
             szDstDir[uVar1] = '\\';
             szDstDir[uVar1 + 1] = '\0';
           }
@@ -395,7 +395,7 @@ void __fastcall GetAndCreateSavePath(char * pBuffer, size_t nSize) {
                 pcLen = szOldSavePath;
               } else {
                 uVar1 = Storm::Source::SSTR::SStrLen(szNewSavePath);
-                if ((!uVar1 || szOldSavePath[uVar1 + 0x103] != '\\') && uVar1 != 0x103) {
+                if (((uint32_t)uVar1 <= 0 || szOldSavePath[uVar1 + 0x103] != '\\') && uVar1 != 0x103) {
                   szNewSavePath[uVar1] = '\\';
                   szNewSavePath[uVar1 + 1] = '\0';
                 }
@@ -418,7 +418,7 @@ void __fastcall GetAndCreateSavePath(char * pBuffer, size_t nSize) {
       SFILE_GetSaveGamePath(pBuffer, nSize);
       if (nSize) {
         uVar1 = Storm::Source::SSTR::SStrLen(pBuffer);
-        if ((!uVar1 || pBuffer[uVar1 - 1] != '\\') && uVar1 + 1 != nSize) {
+        if (((uint32_t)uVar1 <= 0 || pBuffer[uVar1 - 1] != '\\') && uVar1 + 1 != nSize) {
           pBuffer[uVar1] = '\\';
           pBuffer[uVar1 + 1] = '\0';
         }

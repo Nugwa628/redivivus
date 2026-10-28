@@ -696,14 +696,7 @@ HANDLE __stdcall AUTOMAP_GetMapFileHandle() {
     __frame0.szRealmPath = '\0';
     memset(__frame0.local_32b, 0, 0x103);
     Fog::Source::SFile::GetAndCreateSavePath(&__frame1.szSavePath, 0x104);
-    if (RealmName[0] == '\0') {
-      open_in_save_dir:
-      sprintf(&__frame2.szFileName, "%s%s.map", &__frame1.szSavePath, D2Game::Save::szSaveCharacterName);
-      hFile = Fog::Source::SFile::thunk_CreateFileA(&__frame2.szFileName, 0xc0000000, 0, (LPSECURITY_ATTRIBUTES)0x0, 4, 0x80, (HANDLE)0x0);
-      if (hFile == (HANDLE)-1) {
-        return (HANDLE)-1;
-      }
-    } else {
+    if (RealmName[0] != '\0') {
       Storm::Source::SSTR::SStrPrintf(&__frame0.szRealmPath, 0x104, "%s%s\\", &__frame1.szSavePath, RealmName);
       Fog::Source::SFile::SafeCreateDirectoryTree(&__frame0.szRealmPath);
       Storm::Source::SSTR::SStrPrintf(&__frame2.szFileName, 0x104, "%s%s.map", &__frame0.szRealmPath, D2Game::Save::szSaveCharacterName);
@@ -713,6 +706,13 @@ HANDLE __stdcall AUTOMAP_GetMapFileHandle() {
       }
 
       Storm::Source::SSTR::SStrCopy(&__frame1.szSavePath, &__frame0.szRealmPath, 0x104);
+    } else {
+      open_in_save_dir:
+      sprintf(&__frame2.szFileName, "%s%s.map", &__frame1.szSavePath, D2Game::Save::szSaveCharacterName);
+      hFile = Fog::Source::SFile::thunk_CreateFileA(&__frame2.szFileName, 0xc0000000, 0, (LPSECURITY_ATTRIBUTES)0x0, 4, 0x80, (HANDLE)0x0);
+      if (hFile == (HANDLE)-1) {
+        return (HANDLE)-1;
+      }
     }
 
     __frame2.sSeedHeader.nHeaderMagic = 0;
@@ -722,7 +722,19 @@ HANDLE __stdcall AUTOMAP_GetMapFileHandle() {
     Fog::Source::SFile::thunk_ReadFile(hFile, &__frame2.sSeedHeader, 0x18, &__frame2.dwBytesRead, (LPOVERLAPPED)0x0);
     uint32_t nCurrentSlot;
     nCurrentSlot = __frame2.sSeedHeader.nSlotCursor;
-    if (__frame2.dwBytesRead == 0x18 && __frame2.sSeedHeader.nHeaderMagic == 0xc) {
+    if (!(__frame2.dwBytesRead == 0x18 && __frame2.sSeedHeader.nHeaderMagic == 0xc)) {
+      __frame2.sSeedHeader.nHeaderMagic = 0xc;
+      __frame2.sSeedHeader.nSlotCursor = 1;
+      __frame2.sSeedHeader.anSeedSlots[0] = D2GameGame0x546->nInitSeed;
+      i = 0;
+      do {
+        sprintf(&__frame2.szFileName, "%s%s.ma%d", &__frame1.szSavePath, D2Game::Save::szSaveCharacterName, i);
+        Fog::Source::SFile::thunk_DeleteFileA(&__frame2.szFileName);
+        i++;
+      } while (i < 4);
+
+      nCurrentSlot = 0;
+    } else {
       uint32_t uVar1;
       nNextSlot = 0;
       do {
@@ -746,18 +758,6 @@ HANDLE __stdcall AUTOMAP_GetMapFileHandle() {
       __frame2.sSeedHeader.nSlotCursor = uVar1;
       sprintf(&__frame2.szFileName, "%s%s.ma%d", &__frame1.szSavePath, D2Game::Save::szSaveCharacterName, nCurrentSlot);
       Fog::Source::SFile::thunk_DeleteFileA(&__frame2.szFileName);
-    } else {
-      __frame2.sSeedHeader.nHeaderMagic = 0xc;
-      __frame2.sSeedHeader.nSlotCursor = 1;
-      __frame2.sSeedHeader.anSeedSlots[0] = D2GameGame0x546->nInitSeed;
-      i = 0;
-      do {
-        sprintf(&__frame2.szFileName, "%s%s.ma%d", &__frame1.szSavePath, D2Game::Save::szSaveCharacterName, i);
-        Fog::Source::SFile::thunk_DeleteFileA(&__frame2.szFileName);
-        i++;
-      } while (i < 4);
-
-      nCurrentSlot = 0;
     }
 
     Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, 0, (PLONG)0x0, 0);
@@ -1075,7 +1075,7 @@ void __stdcall AUTOMAP_LoadLayerFromFile() {
           }
 
           nWordIndex = 0;
-          if (nWordCount) {
+          if ((uint32_t)nWordCount > 0) {
             do {
               wCellNo = *(uint16_t*)((int)nErrorAddress + nWordIndex * 2);
               if ((short int)wCellNo >= nAutoMapDC6FrameCount[0]) {

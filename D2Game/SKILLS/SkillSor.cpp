@@ -90,16 +90,16 @@ int32_t __fastcall GetTxtTableParam6(int32_t nParam) {
     return pSkillsRecord->Param[6];
 }
 
-void SKILLSOR_OnInfernoExpire(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void SKILLSOR_OnInfernoExpire(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     uint32_t nFrames = 1;
     D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_inferno, 0);
     GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_MODECHANGE, 0);
     if (pUnit) {
       int nMonStatIdx;
       nMonStatIdx = pUnit->nClassId;
-      if (-1 < nMonStatIdx && nMonStatIdx < sgptDataTable->nTxtMonStatsSize) {
+      if (0 <= nMonStatIdx && nMonStatIdx < sgptDataTable->nTxtMonStatsSize) {
         nMonStatIdx = (int)sgptDataTable->pTxtMonStats[nMonStatIdx].MonStatsEx;
-        D2MonStats2Txt* pMonStatsExRecord = (-1 < nMonStatIdx && nMonStatIdx < sgptDataTable->nTxtMonStatsExSize) ? &sgptDataTable->pTxtMonStatsEx[nMonStatIdx] : 0;
+        D2MonStats2Txt* pMonStatsExRecord = (0 <= nMonStatIdx && nMonStatIdx < sgptDataTable->nTxtMonStatsExSize) ? &sgptDataTable->pTxtMonStatsEx[nMonStatIdx] : 0;
         if (pMonStatsExRecord) {
           nFrames = (uint32_t)(uint8_t)pMonStatsExRecord->byInfernoLen;
         }
@@ -201,12 +201,12 @@ BOOL __fastcall INFERNO_BeginOrContinueChannel(::SGAMEDATA * pGame, D2UnitStrc *
     if (!pStatList) {
       int32_t nExpireFrame;
       nCalcDuration = pGame->dwGameFrame + 0x14;
-      if (!pUnit) {
-        nExpireFrame = -1;
-        eUnitType = UNIT_COUNT;
-      } else {
+      if (pUnit) {
         nExpireFrame = pUnit->nUnitGUID;
         eUnitType = pUnit->eUnitType;
+      } else {
+        nExpireFrame = -1;
+        eUnitType = UNIT_COUNT;
       }
 
       pStatList = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(pGame->pMemoryPool, 2, nCalcDuration, eUnitType, nExpireFrame);

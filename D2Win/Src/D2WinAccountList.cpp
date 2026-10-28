@@ -187,7 +187,7 @@ BOOL __fastcall Draw(::D2WinAccountList * pAccountList) {
     }
 
     uint32_t dwState = pAccountList->sControl.dwState;
-    if (!(dwState & 4 && dwState & 1 && pAccountList->pFirstEntry)) {
+    if (!(dwState & gadwBitMasks[2] && dwState & gadwBitMasks[0] && pAccountList->pFirstEntry)) {
       return 0;
     }
 
@@ -224,14 +224,13 @@ BOOL __fastcall Draw(::D2WinAccountList * pAccountList) {
 
 ::D2WinAccountList * __fastcall D2WinAccountList(int32_t nPosX, int32_t nPosY, int32_t nSizeX, int32_t nSizeY, int32_t nUserData, uint32_t * pdwFontData) {
     uint32_t dwState;
-    ::D2WinAccountList* pNewList = D2_NEW(::D2WinAccountList);
+    ::D2WinAccountList* pNewList = ((::D2WinAccountList*)Fog::Memory::AllocClientMemory(sizeof(::D2WinAccountList), ".\\Src\\D2WinAccountList.cpp", 0x24, 0));
     memset(pNewList, 0, 0x58);
     pNewList->sControl.neD2FormType = FORM_AccountList;
-    int* pStateField = &pNewList->sControl.dwState;
-    *pStateField |= 1;
+    pNewList->sControl.dwState |= gadwBitMasks[0];
     dwState = pNewList->sControl.dwState;
     pNewList->nUserData = nUserData;
-    pNewList->sControl.dwState = dwState | 4;
+    pNewList->sControl.dwState = dwState | gadwBitMasks[2];
     pNewList->sControl.dwSizeX = nSizeX;
     pNewList->sControl.dwPosX = nPosX;
     pNewList->sControl.dwPosY = nPosY;

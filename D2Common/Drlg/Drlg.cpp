@@ -160,11 +160,11 @@ static void __stdcall DRLGLEVEL_FreeLevelSubStructs(D2PoolManagerStrc * pMemory,
         pLevel->pRoomExStateFlags = 0;
       }
     } else if (!pLevel->pRoomExStateFlags) {
-      if (!pLevel->nRoomExCount) {
-        pLevel->nRoomExCount = 0;
-      } else {
+      if (pLevel->nRoomExCount) {
         pStateFlags = (int*)D2_ALLOC_POOL(pMemory, pLevel->nRoomExCount * 4);
         pLevel->pRoomExStateFlags = pStateFlags;
+      } else {
+        pLevel->nRoomExCount = 0;
       }
 
       memset(pLevel->pRoomExStateFlags, 0, pLevel->nRoomExCount * 4);
@@ -915,7 +915,7 @@ D2DrlgStrc * __fastcall DRLG_AllocDrlgActMisc(D2DrlgActStrc * pAct, eAct nActNo,
     D2PoolManagerStrc* pMemory;
     pMemory = DUNGEON::Dungeon::GetMemPoolFromAct(pAct);
     D2DrlgStrc* pDrlgActMisc;
-    pDrlgActMisc = D2_NEW_POOL(pMemory, D2DrlgStrc);
+    pDrlgActMisc = ((D2DrlgStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2DrlgStrc), ".\\DRLG\\Drlg.cpp", 0x3a, 0));
     memset(pDrlgActMisc, 0, 0x48c);
     pDrlgActMisc->pDS1MemPool = pDS1MemPool;
     pDrlgActMisc->pMemoryPool = pMemory;
@@ -2156,7 +2156,7 @@ uint32_t __fastcall DRLGROOMEX_RollLevelSubstitutionMask(D2RoomExStrc * pRoomEx,
     D2LvlSubTxt* pTxtLvlSubLine = DATATBLS::LvlTbls::TXT_LvlSub_GetLineFromSubType(nSubType);
     int nCurrentType = pTxtLvlSubLine->Type;
     uint32_t dwSubMask = 0;
-    uint8_t nSubIndex = 0;
+    uint32_t nSubIndex = 0;
     while (nCurrentType == nSubType) {
       D2SeedStrc sNewSeed;
       sNewSeed = D2_SEED_NEXT(pRoomEx->sSeed);
@@ -5065,7 +5065,7 @@ void __fastcall DRLGOUTJUNG_BuildKurastDocktownBorders(D2DrlgLevelStrc * pLevel)
     for (int nXIter = 1; nXIter < nX; nXIter++) {
 
 
-        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nXIter, 0, (uint32_t)(nXIter == nPortalX) * 8 + 0x25d, -1, 0);
+        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nXIter, 0, (uint32_t)((nXIter == nPortalX) ? 613 : 605), -1, 0);
 
     }
 
@@ -5073,7 +5073,7 @@ void __fastcall DRLGOUTJUNG_BuildKurastDocktownBorders(D2DrlgLevelStrc * pLevel)
     nYIter = 1;
     if (1 < nX) {
       do {
-        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nYIter, nY, (uint32_t)(nYIter == nX / 2) * 8 + 0x25e, -1, 0);
+        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nYIter, nY, (uint32_t)((nYIter == nX / 2) ? 614 : 606), -1, 0);
         nYIter = nYIter + 1 + (uint32_t)(nYIter == nX / 2);
       } while (nYIter < nX);
     }
@@ -5111,8 +5111,8 @@ void __fastcall DRLGOUTJUNG_BuildKurastUpperBorders(D2DrlgLevelStrc * pLevel) {
     }
     if (1 < nX) {
       do {
-        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nIter, 0, (uint32_t)(nIter == nPortalX2) * 8 + 0x26b, -1, 0);
-        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nIter, nY, (uint32_t)(nIter == nPortalX1) * 8 + 0x26c, -1, 0);
+        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nIter, 0, (uint32_t)((nIter == nPortalX2) ? 627 : 619), -1, 0);
+        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nIter, nY, (uint32_t)((nIter == nPortalX1) ? 628 : 620), -1, 0);
         nIter++;
       } while (nIter < nX);
     }
@@ -5147,7 +5147,7 @@ void __fastcall DRLGOUTJUNG_BuildKurastCausewayBorders(D2DrlgLevelStrc * pLevel)
     }
     if (1 < nX) {
       do {
-        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nIter, 0, (uint32_t)(nIter == nX / 2) * 8 + 0x27c, -1, 0);
+        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nIter, 0, (uint32_t)((nIter == nX / 2) ? 644 : 636), -1, 0);
         nIter = nIter + 1 + (uint32_t)(nIter == nX / 2);
       } while (nIter < nX);
     }
@@ -5155,7 +5155,7 @@ void __fastcall DRLGOUTJUNG_BuildKurastCausewayBorders(D2DrlgLevelStrc * pLevel)
     nIter = 1;
     if (1 < nX) {
       do {
-        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nIter, nY, (uint32_t)(nIter == nPortalX) * 8 + 0x27d, -1, 0);
+        Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nIter, nY, (uint32_t)((nIter == nPortalX) ? 645 : 637), -1, 0);
         nIter++;
       } while (nIter < nX);
     }

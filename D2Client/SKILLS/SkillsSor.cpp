@@ -303,10 +303,10 @@ BOOL __fastcall Skills_CltStFunc_CheckTargetInAuraRange(D2UnitStrc * pUnit, eD2S
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDistSq = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nDistSq = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nDistSq = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nDistSq = 0;
     }
 
     nDistSq = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(nDistSq, nCasterY, nTargetX, nTargetY);
@@ -385,7 +385,7 @@ BOOL __fastcall Skills_CltDoFunc_Sor_FrostNova(D2UnitStrc * pUnit, eD2Skills eSk
     }
 
     pRoom = UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nCoordsX, nTargetPosX);
-    if (!pSkillTxt->InTown) {
+    if (!(*((uint8_t *)pSkillTxt + 0x5) & gadwBitMasks[0])) {
       bGotCoords = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom);
       if (bGotCoords) {
         return 0;
@@ -545,7 +545,7 @@ BOOL __fastcall Skills_CltStFunc_CheckCasterHasRoomNotInTown(D2UnitStrc * pUnit,
     if (!pTxtRecord) {
       return 0;
     }
-    if (pTxtRecord->InTown) {
+    if ((*((uint8_t *)pTxtRecord + 0x5) & gadwBitMasks[0])) {
       return 1;
     }
 

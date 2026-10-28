@@ -70,7 +70,7 @@ void __fastcall SRP_ComputeClientProof(int32_t pThis, char * szUsername, void * 
 void __stdcall SRP_ComputeServerProof(void * pParam1, void * pParam2, void * pParam3, int32_t nParam);
 // @sourcefile .\SRP.cpp
 void __fastcall SRP_CreateContext(struct D2Srp * * ppSrp);
-BOOL SRP_ExportPublicValues(struct D2Srp * * ppSrp, uint32_t * pnGeneratorLen, void * pGeneratorOut, uint32_t * pnModulusLen, void * pModulusOut);
+BOOL __fastcall SRP_ExportPublicValues(struct D2Srp * * ppSrp, int32_t nEdxUnused, uint32_t * pnGeneratorLen, void * pGeneratorOut, uint32_t * pnModulusLen, void * pModulusOut);
 BOOL SRP_SetParameters(struct D2Srp * * ppSrp, uint32_t nGeneratorLen, uint8_t * pGeneratorBytes, uint32_t nModulusLen, uint8_t * pModulusBytes);
 // Seeds the SRP context's random state: loads *ppSrp and tail-jumps to SRP_InitializeRandomState(pSrp, dwSeed).
 // Provenance: 1.14d asm 00528620 MOV ECX,[ECX]; JMP 00527dd0.
@@ -81,8 +81,8 @@ void SRP_GenerateAccountCredentials(void * pThis, char * pCredsBuf, char * szUse
 BOOL SRP_ClientKeyExchange(void * pThis, struct D2SrpCredentialsStrc * pContext, void * pParam1, void * pParam2);
 BOOL __stdcall SRP_ClientVerifyServerProof(void * pSrpContext, int * pServerProof);
 uint32_t __stdcall SRP_ParseChallenge(uint32_t * pContext, char * szText, uint32_t * pModulusN, uint32_t * pGenerator, uint32_t * pServerPublicBBytes);
-void SRP_ServerComputePublicB(void * pThis, int32_t nContextBase);
-void SRP_ClientVerifyAndComputeKey(void * pThis, void * pContext, uint32_t * pServerProof);
+void __fastcall SRP_ServerComputePublicB(void * pThis, int32_t nEdxUnused, int32_t nContextBase);
+void __fastcall SRP_ClientVerifyAndComputeKey(void * pThis, int32_t nEdxUnused, void * pContext, uint32_t * pServerProof);
 void __stdcall SRP_ComputeFinalProof(int32_t nContextBase);
 
 } // namespace Bnclient::SRP

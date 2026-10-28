@@ -87,7 +87,7 @@ void __stdcall STRUCT_FreeAsyncData() {
       D2AsyncDataStrc* pMemoryToFree;
       nIndex = 0;
       pMemoryToFree = pD2AsyncDataStrc;
-      if (gnAsyncDataHandleBufferSize) {
+      if ((uint32_t)gnAsyncDataHandleBufferSize > 0) {
         do {
           pSlot = (void*)((uintptr_t)&pMemoryToFree->aSlots[0].hEvent + nSlotOffset);
           if (pSlot && *(HANDLE*)pSlot) {
@@ -151,7 +151,7 @@ D2AsyncDataSlotStrc * __stdcall ASYNCDATA_AllocSlot() {
 
     uint32_t nSlotIndex = 0;
     D2AsyncDataSlotStrc* pSlot = pD2AsyncDataStrc->aSlots;
-    if (gnAsyncDataHandleBufferSize) {
+    if ((uint32_t)gnAsyncDataHandleBufferSize > 0) {
       do {
         if (pSlot->bFree) {
           pSlot->bFree = 0;
@@ -164,7 +164,7 @@ D2AsyncDataSlotStrc * __stdcall ASYNCDATA_AllocSlot() {
     }
 
     nSlotIndex = 0;
-    if (gnAsyncDataHandleBufferSize) {
+    if ((uint32_t)gnAsyncDataHandleBufferSize > 0) {
       DWORD dwWaitResult;
       do {
         pCandidateSlot = (D2AsyncDataSlotStrc*)((uintptr_t)&pD2AsyncDataStrc->aSlots[0].hEvent + nByteOffset);

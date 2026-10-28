@@ -191,7 +191,7 @@ void __fastcall PLRSKILLS_StateSetFn01_ProgressiveCharge(D2UnitStrc * pUnit, eD2
     }
 
     D2StatesTxt* pDVar1 = sgptDataTable->pTxtStates + eState;
-    if (!(pDVar1 && pDVar1->pgsv && 0 < pDVar1->pgsvoverlay && (int)pDVar1->pgsvoverlay < sgptDataTable->nTxtOverlaySize && 0 <= pDVar1->stat && (int)pDVar1->stat <= sgptDataTable->nTxtItemStatCostSize)) {
+    if (!(pDVar1 && (*((uint8_t *)pDVar1 + 0x10) & gadwBitMasks[4]) && 0 < pDVar1->pgsvoverlay && (int)pDVar1->pgsvoverlay < sgptDataTable->nTxtOverlaySize && 0 <= pDVar1->stat && (int)pDVar1->stat <= sgptDataTable->nTxtItemStatCostSize)) {
       return;
     }
 
@@ -215,7 +215,7 @@ void __fastcall PLRSKILLS_StateRemFn01_ProgressiveCharge(D2UnitStrc * pUnit, eD2
     }
 
     D2StatesTxt* pDVar1 = sgptDataTable->pTxtStates + eState;
-    if (!(pDVar1 && pDVar1->pgsv && 0 < pDVar1->pgsvoverlay && (int)pDVar1->pgsvoverlay < sgptDataTable->nTxtOverlaySize && 0 <= pDVar1->stat && (int)pDVar1->stat <= sgptDataTable->nTxtItemStatCostSize)) {
+    if (!(pDVar1 && (*((uint8_t *)pDVar1 + 0x10) & gadwBitMasks[4]) && 0 < pDVar1->pgsvoverlay && (int)pDVar1->pgsvoverlay < sgptDataTable->nTxtOverlaySize && 0 <= pDVar1->stat && (int)pDVar1->stat <= sgptDataTable->nTxtItemStatCostSize)) {
       return;
     }
 
@@ -1102,7 +1102,7 @@ void __fastcall STATES_AddStateOverlays(D2UnitStrc * pUnit, eD2States eState) {
     }
 
     D2StatesTxt* pDVar1 = sgptDataTable->pTxtStates + eState;
-    if (!(pDVar1 && !pDVar1->nooverlays)) {
+    if (!(pDVar1 && !(*((uint8_t *)pDVar1 + 0x14) & gadwBitMasks[3]))) {
       return;
     }
     if (pDVar1->castoverlay < 0) {

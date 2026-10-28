@@ -274,10 +274,10 @@ void __fastcall Q05_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 
         pQuestData->fpSequenceFilter(pQuestData);
       }
-      if (!pQuestArgs->pPlayer) {
-        nPlayerGuid = -1;
-      } else {
+      if (pQuestArgs->pPlayer) {
         nPlayerGuid = pQuestArgs->pPlayer->nUnitGUID;
+      } else {
+        nPlayerGuid = -1;
       }
 
       iStoneIdx = 0;

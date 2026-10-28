@@ -999,14 +999,14 @@ bool __fastcall Q14_ActiveFilter(D2QuestDataStrc * pQuestData, eD2MonsterClassId
 }
 
 // A2Q6 "The Seven Tombs" — fpSequenceFilter: if quest not yet started (nStateFlag==0) and introduced, sets nStateFlag 1 (quest visible/started). Then chains into TheTaintedSun's sequence filter (the two Act2 quests are linked). No bitbuffer record changes.
-void __fastcall Q14_SequenceFilter(D2QuestDataStrc * pQuestData) {
+bool __fastcall Q14_SequenceFilter(D2QuestDataStrc * pQuestData) {
     if (!pQuestData->nStateFlag && pQuestData->bIsNotIntroduction == 1) {
       QUEST_SetStateFlag(pQuestData, 1, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q6.cpp", 0x3e9);
     }
 
     D2QuestDataStrc* pQuestData_00 = GetQuestDataByQuestNoInternal(pQuestData->pGame, QUESTINT_TheTaintedSun);
     if (!pQuestData_00) {
-      return;
+      return true;
     }
 
     BOOL BVar1 = IsBadCodePtr((FARPROC)pQuestData->fpSequenceFilter);
@@ -1016,6 +1016,7 @@ void __fastcall Q14_SequenceFilter(D2QuestDataStrc * pQuestData) {
     }
 
     pQuestData_00->fpSequenceFilter(pQuestData_00);
+    return true;
 }
 
 // A2Q6 "The Seven Tombs" — handler slot 0xe: on this event, clears the player's TheHoradricStaff record Step0x09 bit (cross-quest cleanup tying staff completion into the tombs quest).

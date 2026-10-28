@@ -376,7 +376,7 @@ D2BeltsTxt * __stdcall TXT_Belts_GetLine(int nIndex) {
     }
 }
 
-void __stdcall GetBeltsLine(int32_t nIndex, int32_t bHigherRes, D2BeltsTxt * pRecord) {
+int32_t __stdcall GetBeltsLine(int32_t nIndex, int32_t bHigherRes, D2BeltsTxt * pRecord) {
     int32_t iLoop;
     uint8_t byPadByte0;
     uint8_t byPadByte1;
@@ -398,6 +398,7 @@ void __stdcall GetBeltsLine(int32_t nIndex, int32_t bHigherRes, D2BeltsTxt * pRe
       pSrcEntry = (D2BeltsTxt*)&pSrcEntry->nBoxes;
       pRecord = (D2BeltsTxt*)&pRecord->nBoxes;
     }
+    return bHigherRes;
 }
 
 void __stdcall GetInvRectFromBeltsTxt(int32_t nIndex, int32_t bHigherRes, int32_t * pInvRect, int32_t nBoxId) {

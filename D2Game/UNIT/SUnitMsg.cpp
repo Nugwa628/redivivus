@@ -710,10 +710,7 @@ void __fastcall PLAYER_SendHoverTextToClient(D2UnitStrc * pUnit, D2ClientStrc * 
     uint8_t byUnitTypeFallback;
     D2GSPacketSrv0x26 sPacket;
     D2HoverTextStrc* pHoverText;
-    if (!pUnit) {
-      nGUIDFallback = -1;
-      byUnitTypeFallback = 6;
-    } else {
+    if (pUnit) {
       D2UnitStrc* pUnit_00;
       pHoverText = pUnit->pHoverText;
       if (pHoverText) {
@@ -747,6 +744,9 @@ void __fastcall PLAYER_SendHoverTextToClient(D2UnitStrc * pUnit, D2ClientStrc * 
 
       nGUIDFallback = pUnit->nUnitGUID;
       byUnitTypeFallback = (uint8_t)pUnit->eUnitType;
+    } else {
+      nGUIDFallback = -1;
+      byUnitTypeFallback = 6;
     }
 
     GAME::SCmd::NET_D2GS_SERVER_Send_CMD_BYTE_INT(pClient, 0x76, byUnitTypeFallback, nGUIDFallback);
@@ -1308,7 +1308,7 @@ void __fastcall SERVER_SendInitUnitPacket(::SGAMEDATA * pGame, D2UnitStrc * pUni
       MISSILES::Missiles::MISSILES_SendMissilePacket(pClient, pGameSaved, pUnit, nMiscVal);
       break;
       case UNIT_ITEM:
-        if (pUnit->eUnitFlags >> 4 & 1) {
+        if (((bool)(pUnit->eUnitFlags >> 4 & 1))) {
           if (pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Run && (dwTargetGUID = D2Client::UNIT::CheckFlags(pUnit, UNITFLAG_SENDREFRESHMSG) , dwTargetGUID != 0)) {
             GAME::SCmd::Send0x9CItemDroppedToGround(pClient, pPlayerUnit_lcl, pUnit, ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD));
           } else {

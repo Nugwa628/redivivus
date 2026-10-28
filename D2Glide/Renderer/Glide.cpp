@@ -308,9 +308,11 @@ BOOL ActivateWindow() {
 }
 
 BOOL __fastcall SetOption(int32_t nOption, int32_t nValue) {
-    if (nOption == 10) {
+    switch (nOption) {
+    case 10: {
       *(uint32_t*)nValue = gbGlideInScene;
       return 1;
+    }
     }
     if (nOption != 0xb) {
       return 0;
@@ -887,7 +889,7 @@ static void RENDERER_GLIDE_CalculateTextureSize(GlideTexInfoStrc * pTexInfo) {
       if (nLodLevel < 0x41) {
         if (nLodLevel < 0x21) {
           if (nLodLevel < 0x11) {
-            nTexWidthPow2 = (uint32_t)(8 < nLodLevel) * 8 + 8;
+            nTexWidthPow2 = (uint32_t)((8 < nLodLevel) ? 16 : 8);
           } else {
             nTexWidthPow2 = 0x20;
           }
@@ -907,7 +909,7 @@ static void RENDERER_GLIDE_CalculateTextureSize(GlideTexInfoStrc * pTexInfo) {
       if (nLodLevel < 0x41) {
         if (nLodLevel < 0x21) {
           if (nLodLevel < 0x11) {
-            nTexHeightPow2 = (uint32_t)(8 < nLodLevel) * 8 + 8;
+            nTexHeightPow2 = (uint32_t)((8 < nLodLevel) ? 16 : 8);
           } else {
             nTexHeightPow2 = 0x20;
           }
@@ -1221,12 +1223,12 @@ static void __stdcall RENDERER_GLIDE_DrawPalettedQuad(GlideTexInfoStrc * pGlideQ
     gGlideVertex0.aVertex[2].dwColor = gGlideVertex0.aVertex[0].dwColor;
     gGlideVertex0.aVertex[3].dwColor = gGlideVertex0.aVertex[0].dwColor;
     BOOL bPerspectiveEnabled = RENDERER_GLIDE_IsPerspectiveEnabled();
-    if (!bPerspectiveEnabled) {
-      nParam3 = pGlideQuad->nWidth;
-      nTexHeight = pGlideQuad->nHeight;
-    } else {
+    if (bPerspectiveEnabled) {
       nParam3 = pGlideQuad->nTexWidth;
       nTexHeight = pGlideQuad->nTexHeight;
+    } else {
+      nParam3 = pGlideQuad->nWidth;
+      nTexHeight = pGlideQuad->nHeight;
     }
 
     int nQuadLeft = pGlideQuad->nLeft;
@@ -2863,15 +2865,15 @@ void RENDERER_GLIDE_InitGroundTileVertices() {
         } else if (nCol == 5) {
           nEdgeAdjust = -1;
         }
-        if (!nRow) {
-          nRowEdgeAdjust = nEdgeAdjust - 1;
-          nEdgeAdjust++;
-        } else {
+        if (nRow) {
           nRowEdgeAdjust = nEdgeAdjust;
           if (nRow == 5) {
             nRowEdgeAdjust = nEdgeAdjust + 1;
             nEdgeAdjust--;
           }
+        } else {
+          nRowEdgeAdjust = nEdgeAdjust - 1;
+          nEdgeAdjust++;
         }
 
         pVertex->fOOW = 1.0;

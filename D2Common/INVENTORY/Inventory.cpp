@@ -202,11 +202,7 @@ static void __stdcall INVENTORY_RemoveItemFromGrid(D2UnitStrc * pItem, D2Invento
     }
     if (pPageList->pGridCells) {
       int32_t nX;
-      if (!bUseWidthHeight) {
-        nX = D2Client::Units::GetXPosFromDynamicPathUnit(pItem);
-        nY = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
-        pPageList->pGridCells[(uint32_t)pPageList->bWidth * nY + nX] = 0;
-      } else {
+      if (bUseWidthHeight) {
         nX = D2Client::Units::GetXPosFromDynamicPathUnit(pItem);
         nY = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
         ITEMS::Items::ITEM_GetItemsTxt_nWidthAndHeight(pItem, (char*)((uintptr_t)&bUseWidthHeight + 3), (char*)&byHeight, ".\\INVENTORY\\Inventory.cpp", 0x199);
@@ -228,6 +224,10 @@ static void __stdcall INVENTORY_RemoveItemFromGrid(D2UnitStrc * pItem, D2Invento
             nCellY++;
           } while (nCellY < (int)((uint32_t)byHeight + nY));
         }
+      } else {
+        nX = D2Client::Units::GetXPosFromDynamicPathUnit(pItem);
+        nY = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
+        pPageList->pGridCells[(uint32_t)pPageList->bWidth * nY + nX] = 0;
       }
     }
 
@@ -1156,7 +1156,7 @@ BOOL __stdcall INVENTORY_CheckGridCollisions(D2InventoryStrc * pInventory, D2Uni
     }
 
     ITEMS::Items::ITEM_GetItemsTxt_nWidthAndHeight(pUnit, (char*)((uintptr_t)&pInventory + 3), (char*)((uintptr_t)&nParam + 3), ".\\INVENTORY\\Inventory.cpp", 0x656);
-    if (!(*(uint8_t*)((char*)&pInventory + 3) != '\0' && *(uint8_t*)((char*)&nParam + 3) != '\0')) {
+    if (!((uint32_t)(*(uint8_t*)((char*)&pInventory + 3)) > 0 && (uint32_t)(*(uint8_t*)((char*)&nParam + 3)) > 0)) {
       return 0;
     }
 
@@ -1222,7 +1222,7 @@ BOOL __stdcall INVENTORY_CheckGridOccupancy(D2InventoryStrc * pInventory, D2Unit
     }
 
     ITEMS::Items::ITEM_GetItemsTxt_nWidthAndHeight(pUnit, (char*)((uintptr_t)&nPageByte + 3), (char*)((uintptr_t)&pInventory + 3), ".\\INVENTORY\\Inventory.cpp", 0x6bb);
-    if (!(*(uint8_t*)((char*)&nPageByte + 3) != '\0' && *(uint8_t*)((char*)&pInventory + 3) != '\0')) {
+    if (!((uint32_t)(*(uint8_t*)((char*)&nPageByte + 3)) > 0 && (uint32_t)(*(uint8_t*)((char*)&pInventory + 3)) > 0)) {
       return 0;
     }
 
@@ -4771,7 +4771,7 @@ BOOL CopyInventory(D2InventoryStrc * pInventory, D2UnitStrc * pUnit) {
     }
 
     uint8_t bHeight = pSrcGridInfo->bHeight;
-    if (!(bHeight && bWidth == pDstGridInfo->bWidth && bHeight == pDstGridInfo->bHeight && (uint32_t)pSrcGridInfo->pGridCells > 0 && pDstGridInfo->pGridCells)) {
+    if (!((uint32_t)bHeight > 0 && bWidth == pDstGridInfo->bWidth && bHeight == pDstGridInfo->bHeight && (uint32_t)pSrcGridInfo->pGridCells > 0 && pDstGridInfo->pGridCells)) {
       return 0;
     }
 

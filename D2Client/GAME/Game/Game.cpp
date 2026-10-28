@@ -2104,7 +2104,7 @@ void __stdcall GAMEDATA_DrawCharacterPortrait() {
         nHardcoreFlag = 0;
       }
     } else if (CLIENT_nDifficulty == '\x01') {
-      nTitleIndex = (uint32_t)((ePlayerStatus & PLAYERSTATUS_Expansion) != 0) * 2 + 8;
+      nTitleIndex = (uint32_t)(((ePlayerStatus & PLAYERSTATUS_Expansion) != 0) ? 10 : 8);
       if (!(ePlayerStatus & PLAYERSTATUS_Hardcore)) {
         nHardcoreFlag = 0;
       }
@@ -2814,7 +2814,7 @@ eD2ClientAppMode __stdcall pfModes_EnterGame() {
 }; D2_STATIC_GUARD(lpVersionInformation_007a0528, "D2Client::GAME::Game::pfModes_EnterGame::lpVersionInformation_007a0528");
     // also labelled: lpThreadId_QserverLoopThread, lpThreadId_007a05f0
 static uint32_t gdwHostGameThreadId; D2_STATIC_GUARD_BSS(gdwHostGameThreadId, "D2Client::GAME::Game::pfModes_EnterGame::gdwHostGameThreadId");
-    static bool gbExitingGamePadding; D2_STATIC_GUARD_BSS(gbExitingGamePadding, "D2Client::GAME::Game::pfModes_EnterGame::gbExitingGamePadding");
+    static BOOL gbExitingGamePadding; D2_STATIC_GUARD_BSS(gbExitingGamePadding, "D2Client::GAME::Game::pfModes_EnterGame::gbExitingGamePadding");
 
     int nRecordResult;
     uint8_t byPlayerStatus;

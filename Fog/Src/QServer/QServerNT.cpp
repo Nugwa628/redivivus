@@ -247,8 +247,8 @@ static int32_t __stdcall AcceptConnection(D2QServerStrc * pQServer, sockaddr * p
         }
       }
 
-      /* in_addr in for inet_ntoa */ szClientIpStr = inet_ntoa((in_addr)pClientIp->S_un_b);
-      LogManager::LOGMANAGER_TraceToModuleLog("HACK", "[sQSNTAccept]               *** Deleted socket %d (%s) - %s ***", FileHandle, szClientIpStr, dwRejectLogMsg);
+       /* in_addr in for inet_ntoa */
+      LogManager::LOGMANAGER_TraceToModuleLog("HACK", "[sQSNTAccept]               *** Deleted socket %d (%s) - %s ***", FileHandle, inet_ntoa((in_addr)pClientIp->S_un_b), dwRejectLogMsg);
       Safesock::closeSocket((SOCKET)FileHandle);
       return -1;
     }

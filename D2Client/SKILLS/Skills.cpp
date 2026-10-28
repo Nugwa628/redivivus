@@ -1119,13 +1119,13 @@ int32_t __stdcall SKILLS_CastSkillClient(eD2Skills eSkill, D2UnitStrc * pUnit, i
     }
 
     pLocalPlayerUnit = UNIT::CUnit::GetConfirmedTargetUnit(pUnit);
-    if (pLocalPlayerUnit && !pSkillTxtOrig->TargetAlly) {
+    if (pLocalPlayerUnit && !(*((uint8_t *)pSkillTxtOrig + 0x7) & gadwBitMasks[2])) {
       nSoundOrAllied = UNIT::CUnit::SKILL_IsTargetAlliedUnit(pUnit, (int*)pLocalPlayerUnit);
       if (nSoundOrAllied) {
         return 0;
       }
     }
-    if (!pSkillTxtOrig->InTown) {
+    if (!(*((uint8_t *)pSkillTxtOrig + 0x5) & gadwBitMasks[0])) {
       D2RoomStrc* pCurRoom;
       pCurRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       bInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pCurRoom);
@@ -1155,7 +1155,7 @@ int32_t __stdcall SKILLS_CastSkillClient(eD2Skills eSkill, D2UnitStrc * pUnit, i
     }
     if (eAnimMode == Death) {
       eDeadUnitState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_inferno);
-      if (eDeadUnitState != STATE_none && pSkillTxtOrig->repeat || !pUnit || pUnit->eUnitType != UNIT_PLAYER && pUnit->eUnitType != UNIT_MONSTER) {
+      if (eDeadUnitState != STATE_none && (*((uint8_t *)pSkillTxtOrig + 0x5) & gadwBitMasks[3]) || !pUnit || pUnit->eUnitType != UNIT_PLAYER && pUnit->eUnitType != UNIT_MONSTER) {
         goto run_client_start;
       }
 
@@ -1174,7 +1174,7 @@ int32_t __stdcall SKILLS_CastSkillClient(eD2Skills eSkill, D2UnitStrc * pUnit, i
         if (pUnit && (pUnit->eUnitType == UNIT_PLAYER || pUnit->eUnitType == UNIT_MONSTER)) {
           UNIT::UnitMode::UNITMODE_SetAnimMode(pUnit, eD2PlayerAnimMode_ns::Neutral);
         }
-        if (pSkillTxt->stsuccessonly) {
+        if ((*((uint8_t *)pSkillTxt + 0x5) & gadwBitMasks[4])) {
           return eSkillResult;
         }
       }
@@ -1508,12 +1508,12 @@ void __fastcall SKILL_ExecuteClientProgressWithAura(D2UnitStrc * pUnit, D2UnitSt
 
     BOOL bHadTarget = GetCooordinates(pUnit, (int32_t*)aSavedSP1X, (int32_t*)aSavedSP1Y);
     D2UnitStrc* pSavedTarget = UNIT::CUnit::GetConfirmedTargetUnit(pUnit);
-    if (!pUnit2) {
+    if (pUnit2) {
+      D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pUnit2);
+    } else {
       if (nTargetX && nTargetY) {
         D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, (int16_t)nTargetX, (int16_t)nTargetY);
       }
-    } else {
-      D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pUnit2);
     }
 
     int nSavedInitSeed = pUnit->nInitSeed;
@@ -1539,18 +1539,16 @@ void __fastcall SKILL_ExecuteClientProgressWithAura(D2UnitStrc * pUnit, D2UnitSt
     }
     if (-1 < pSkillTxt->cltprgfunc[nProgressIndex - 1] && pSkillTxt->cltprgfunc[nProgressIndex - 1] < SKILLCLTDOFUNCS_SIZE) {
       if (0 < pSkillTxt->cltmissile[0]) {
-        if (!pSkillTxt->lob) {
-          MakeMissileAtSkillTarget(pUnit, (int)pSkillTxt->cltmissile[0], eSkill, nSkillLevel);
-        } else {
+        if (pSkillTxt->lob) {
           GetCooordinates(pUnit, (int32_t*)&pUnitArg2Saved, (int32_t*)&pAuraStatList);
           UNIT::Missile::MISSILE_CreateFromUnitWithOffset(pUnit, (int)pSkillTxt->cltmissile[0], 0, 0, (uint32_t)pUnitArg2Saved, (uint32_t)pAuraStatList, eSkill, nSkillLevel, 0);
+        } else {
+          MakeMissileAtSkillTarget(pUnit, (int)pSkillTxt->cltmissile[0], eSkill, nSkillLevel);
         }
 
         pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
       }
-      if (!SKILLCLTDOFUNCS[pSkillTxt->cltprgfunc[nProgressIndex - 1]]) {
-        pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
-      } else {
+      if (SKILLCLTDOFUNCS[pSkillTxt->cltprgfunc[nProgressIndex - 1]]) {
         bPrgFuncResult = (*SKILLCLTDOFUNCS[pSkillTxt->cltprgfunc[nProgressIndex - 1]])(pUnit, eSkill, nSkillLevel);
         if (bPrgFuncResult) {
           if (0 < pSkillTxt->dosound) {
@@ -1569,6 +1567,8 @@ void __fastcall SKILL_ExecuteClientProgressWithAura(D2UnitStrc * pUnit, D2UnitSt
             }
           }
         }
+      } else {
+        pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
       }
     }
 
@@ -2099,10 +2099,10 @@ uint32_t __fastcall SKILL_SpawnRandomMissilesInArea(D2UnitStrc * pUnit, uint8_t 
       eUnitType = pUnitCur->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nDist = pUnitCur->pPath.pStaticPath->nPosX;
-      } else if (!pUnitCur->pPath.pDynamicPath) {
-        nDist = 0;
-      } else {
+      } else if (pUnitCur->pPath.pDynamicPath) {
         nDist = D2Common::PATH::DynamicPath::GetXPos(pUnitCur->pPath.pDynamicPath);
+      } else {
+        nDist = 0;
       }
 
       nDist = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(nDist, nCount, nSpawnY, nSpawnX);

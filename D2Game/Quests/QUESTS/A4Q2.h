@@ -41,7 +41,7 @@ void __fastcall Q26_PlayIzualCompleteSoundToAll(::SGAMEDATA * pGame);
 bool __fastcall Q27_ActiveFilter(struct D2QuestDataStrc * pQuestData, int32_t nTargetClassId, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2UnitStrc * pUnitEx);
 // [A4Q3 Terror's End] SequenceFilter: when the quest log is first opened and quest not yet started (nStateFlag==0) but introduced, bump internal nStateFlag to 1 (quest now in-progress / step0x02 displayable).
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a4q2.cpp
-void __fastcall Q27_SequenceFilter(struct D2QuestDataStrc * pQuestData);
+bool __fastcall Q27_SequenceFilter(struct D2QuestDataStrc * pQuestData);
 // [A4Q3 Terror's End] Per-player: mirror the internal nStateFlag progress into the persisted QUEST_TerrorsEnd record. nStateFlag 2 -> set Step0x02; nStateFlag 3 -> Step0x03 (if prev set) else Step0x04. No-op once quest Completed.
 BOOL __fastcall Q27_PlayerUpdateTerrorsEndState(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A4Q2 \"Terror's End\" — NPC gossip dispatch (callback slot 0x0b). Routes Tyrael (NPC 0x16f) and Hadriel (0xf6) dialog string IDs to quest effects: Tyrael str 0x2a9 sets bTyraelTalked, bumps nStateFlag=2, updates all players; str 0x2ac clears Step0x07; str 20000 (expansion) sets Step0x09 and spawns the Pandemonium portal via Q27_SpawnDiabloPortal. Hadriel str 0x2ad clears Step0x06; str 0x4e21 sets Step0x08.

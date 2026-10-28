@@ -1640,10 +1640,10 @@ static void __stdcall GAME_TrackGameStatistics(D2Game_Line0x13af * pStatRoot, in
     pNewNode->nValue = nNodeValue;
     pNewNode->nWins = 0;
     pNewNode->nLosses = 0;
-    if (!nGameToken) {
-      pNewNode->nLosses = 1;
-    } else {
+    if (nGameToken) {
       pNewNode->nWins = 1;
+    } else {
+      pNewNode->nLosses = 1;
     }
 
     pNewNode->pNext = pStatRoot->pNext;
@@ -1961,21 +1961,21 @@ static void __stdcall FlushClientPackets(::SGAMEDATA * pGame, int32_t nParam, D2
           return;
         }
         nErrorLine = D2Net::Game::Server::NET_D2GS_SERVER_SendPacketToClient(1, pClient->nClientNo, pPacketList->pBytes, pPacketList->nSize);
-        if (!nErrorLine) {
-          D2Net::Game::Server::WSAGetLastError();
-          bSendFailed = true;
-          pClient->dwPacketsInList++;
-          Clients::CLIENT_SetPacketList(pClient, (int32_t)pPacketList);
-          if (2 < pClient->dwPacketsInList) {
-            SERVER_DisconnectClient(pGame, pClient, 0);
-            return;
-          }
-        } else {
+        if ((uint32_t)nErrorLine > 0) {
           nParam++;
           pPacketList->nSize = 0;
           pPacketList->pNext = pClient->pEmpty;
           pClient->pEmpty = pPacketList;
           pClient->dwPacketsInList = 0;
+        } else {
+          D2Net::Game::Server::WSAGetLastError();
+          bSendFailed = true;
+          pClient->dwPacketsInList++;
+          Clients::CLIENT_SetPacketList(pClient, (int32_t)pPacketList);
+          if (3 <= pClient->dwPacketsInList) {
+            SERVER_DisconnectClient(pGame, pClient, 0);
+            return;
+          }
         }
         if ((pGame->nGameType == SGAMETYPE_OBNET_HOST || pGame->nGameType == SGAMETYPE_LAN_HOST) && 3 <= nParam) {
           break;

@@ -430,7 +430,7 @@ static BOOL __stdcall SKILL_CanUseAtLocation(D2UnitStrc * pUnit, int32_t nX, int
     if (!pRoom) {
       return 0;
     }
-    if (pSkillTxt[eSkill].InTown) {
+    if ((*((uint8_t *)&pSkillTxt[eSkill] + 0x5) & gadwBitMasks[0])) {
       return 1;
     }
 
@@ -490,18 +490,7 @@ BOOL __fastcall Skills_CltStFunc_SetupLeapTeleportDest(D2UnitStrc * pUnit, eD2Sk
     }
 
     _bUnitIsMonster = (uint32_t)(eUnitType == UNIT_MONSTER);
-    if (!_bUnitIsMonster) {
-      bGotCoords = Skills::GetCooordinates(pUnit, &nDestX, &nDestY);
-      if (bGotCoords) {
-        bGotCoords = SKILL_CanUseAtLocation(pUnit, nDestX, nDestY, eSkill);
-        if (bGotCoords) {
-          bGotCoords = SKILL_ValidateTeleportDestination(pUnit, nSkillLvl, &nDestX, &nDestY, eSkill);
-          if (bGotCoords) {
-            goto commit_destination;
-          }
-        }
-      }
-    } else {
+    if (_bUnitIsMonster) {
       pPlayerOrTarget = UNIT::CUnit::GetConfirmedTargetUnit(pUnit);
       if (!pPlayerOrTarget) {
         bGotCoords = Skills::GetCooordinates(pUnit, &nDestX, &nDestY);
@@ -550,6 +539,17 @@ BOOL __fastcall Skills_CltStFunc_SetupLeapTeleportDest(D2UnitStrc * pUnit, eD2Sk
         D2Common::Skills::SKILL_SetFlags(pSkill, 0x1080);
         Skills::SKILL_CreateActiveSkillStatList(pUnit);
         return 1;
+      }
+    } else {
+      bGotCoords = Skills::GetCooordinates(pUnit, &nDestX, &nDestY);
+      if (bGotCoords) {
+        bGotCoords = SKILL_CanUseAtLocation(pUnit, nDestX, nDestY, eSkill);
+        if (bGotCoords) {
+          bGotCoords = SKILL_ValidateTeleportDestination(pUnit, nSkillLvl, &nDestX, &nDestY, eSkill);
+          if (bGotCoords) {
+            goto commit_destination;
+          }
+        }
       }
     }
 
@@ -681,10 +681,10 @@ static void __stdcall CLIENT_UpdateSkillMissilePosition(D2SkillStrc * pSkill, in
     eTargetUnitType = pTargetUnit->eUnitType;
     if (eTargetUnitType == UNIT_OBJECT || 3 < (int)eTargetUnitType && (int)eTargetUnitType <= 5) {
       nTargetXPos = pTargetUnit->pPath.pStaticPath->nPosX;
-    } else if (!pTargetUnit->pPath.pDynamicPath) {
-      nTargetXPos = 0;
-    } else {
+    } else if (pTargetUnit->pPath.pDynamicPath) {
       nTargetXPos = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
+    } else {
+      nTargetXPos = 0;
     }
 
     nTargetXPos = nParam1 * 3 + nTargetXPos * -2;
@@ -820,20 +820,20 @@ static BOOL __stdcall CLIENT_PlaySkillSound(D2SkillStrc * pSkill, int32_t nParam
     int nUnitTypeOrMode = pDynamicPath->Coords.tFixed.x;
     if (nUnitTypeOrMode == 2 || 3 < nUnitTypeOrMode && nUnitTypeOrMode <= 5) {
       nXcoord = pDynamicPath->pServerPath->ScreenPos.y;
-    } else if (!pDynamicPath->pServerPath) {
-      nXcoord = 0;
-    } else {
+    } else if (pDynamicPath->pServerPath) {
       nXcoord = D2Common::PATH::DynamicPath::GetXPos(pDynamicPath->pServerPath);
+    } else {
+      nXcoord = 0;
     }
     if (nXcoord == nParam1) {
       nUnitTypeOrMode = pDynamicPath->Coords.tFixed.x;
       if (nUnitTypeOrMode == 2 || 3 < nUnitTypeOrMode && nUnitTypeOrMode <= 5) {
         *(uint16_t*)(char*)&nUnitTypeOrMode = pDynamicPath->pServerPath->nTargetX;
         *(uint16_t*)((char*)&nUnitTypeOrMode + 2) = pDynamicPath->pServerPath->nTargetY;
-      } else if (!pDynamicPath->pServerPath) {
-        nUnitTypeOrMode = 0;
-      } else {
+      } else if (pDynamicPath->pServerPath) {
         nUnitTypeOrMode = D2Common::PATH::DynamicPath::GetYPos(pDynamicPath->pServerPath);
+      } else {
+        nUnitTypeOrMode = 0;
       }
       if (nUnitTypeOrMode == nParam2) {
         goto on_landed;
@@ -1240,13 +1240,7 @@ BOOL __fastcall Skills_CltStFunc_CalcLeapDestViaPathfind(D2UnitStrc * pUnit, eD2
     D2Common::PATH::DynamicPath::PATH_SetPathType(pServerPath, 7);
     _bPathFound = D2Common::PATH::DynamicPath::PATH_CalculatePath(pServerPath, pUnit, 0);
     if (_bPathFound) {
-      if (!_bIsPlayer) {
-        nLine = 0x49f;
-        szSkillsBarCpp = ".\\SKILLS\\SkillsBar.cpp";
-        pMonStatsTxt = DataTbls::MonsterTbls::TXT_MonStats_GetLine(pUnit->nClassId);
-        nSkillFlags = (uint32_t)pMonStatsTxt->Velocity;
-        D2Common::PATH::DynamicPath::SetVelocities(pServerPath, nSkillFlags << 8, szSkillsBarCpp, nLine);
-      } else {
+      if (_bIsPlayer) {
         pCharStatsTxt = DataTbls::INV_GetCharStatsTxtLine(pUnit->nClassId);
         if (pCharStatsTxt) {
           nSkillFlags = (uint32_t)(uint8_t)pCharStatsTxt->WalkVelocity;
@@ -1254,6 +1248,12 @@ BOOL __fastcall Skills_CltStFunc_CalcLeapDestViaPathfind(D2UnitStrc * pUnit, eD2
           szSkillsBarCpp = ".\\SKILLS\\SkillsBar.cpp";
           D2Common::PATH::DynamicPath::SetVelocities(pServerPath, nSkillFlags << 8, szSkillsBarCpp, nLine);
         }
+      } else {
+        nLine = 0x49f;
+        szSkillsBarCpp = ".\\SKILLS\\SkillsBar.cpp";
+
+        nSkillFlags = (uint32_t)DataTbls::MonsterTbls::TXT_MonStats_GetLine(pUnit->nClassId)->Velocity;
+        D2Common::PATH::DynamicPath::SetVelocities(pServerPath, nSkillFlags << 8, szSkillsBarCpp, nLine);
       }
 
       D2Common::PATH::DynamicPath::PATH_SetCollisionPattern(pServerPath, 0x401);

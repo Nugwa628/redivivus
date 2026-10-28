@@ -637,7 +637,7 @@ int32_t __fastcall SKILLASS_GetChargeUpMissile(D2UnitStrc * pUnit, int32_t nSkil
     if (!pSkillTxt) {
       return -1;
     }
-    if (!pSkillTxt->progressive) {
+    if (!(*((uint8_t *)pSkillTxt + 0x4) & gadwBitMasks[2])) {
       return (int)pSkillTxt->srvmissile[1];
     }
 
@@ -676,7 +676,7 @@ uint32_t __fastcall SKILLASS_GetChargeUpCalcValue(D2UnitStrc * pUnit, eD2Skills 
     if (!pSkillTxt) {
       return 0;
     }
-    if (pSkillTxt->progressive) {
+    if ((*((uint8_t *)pSkillTxt + 0x4) & gadwBitMasks[2])) {
       D2StatListExStrc* pStatList;
       eAuraState = pSkillTxt->aurastate;
       if (eAuraState < 0 || (int)eAuraState >= sgptDataTable->nTxtStatesSize) {
@@ -2675,7 +2675,7 @@ static void __stdcall SKILLASS_ApplyLevelScaledBuffs(::SGAMEDATA * pGame, int32_
     pStatPtr = (short int*)(nParam1 + 0x98);
     nStatsRemaining = 5;
     do {
-      if (-1 < *pStatPtr && (int)*pStatPtr < sgptDataTable->nTxtItemStatCostSize) {
+      if (0 <= *pStatPtr && (int)*pStatPtr < sgptDataTable->nTxtItemStatCostSize) {
         nValue = D2Common::Skills::D2GetSkillCalc(pUnit, *(int32_t*)(nParam1 + 0xa8), eSkill, nParam2);
         D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, (int)*pStatPtr, nValue, 0);
       }

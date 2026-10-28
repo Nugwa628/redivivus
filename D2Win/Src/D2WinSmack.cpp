@@ -40,18 +40,7 @@ namespace D2Win::Src::D2WinSmack {
 char * __stdcall D2WINSMACK_GetTitlePrefixIndexFromClass(int pUnused, int32_t nClass, int32_t bHasModifier, int32_t bIsExpansion) {
     uint32_t nTitleIndex;
     bool bSignedGreaterOrEqual;
-    if (!bIsExpansion) {
-      if (nClass < 4) {
-        nTitleIndex = 0;
-        goto lookup_title_prefix;
-      }
-      if (nClass < 8) {
-        nTitleIndex = 1;
-        goto lookup_title_prefix;
-      }
-
-      bSignedGreaterOrEqual = nClass >= 0xc;
-    } else {
+    if (bIsExpansion) {
       if (nClass < 5) {
         nTitleIndex = 0;
         goto lookup_title_prefix;
@@ -62,6 +51,17 @@ char * __stdcall D2WINSMACK_GetTitlePrefixIndexFromClass(int pUnused, int32_t nC
       }
 
       bSignedGreaterOrEqual = nClass >= 0xf;
+    } else {
+      if (nClass < 4) {
+        nTitleIndex = 0;
+        goto lookup_title_prefix;
+      }
+      if (nClass < 8) {
+        nTitleIndex = 1;
+        goto lookup_title_prefix;
+      }
+
+      bSignedGreaterOrEqual = nClass >= 0xc;
     }
 
     nTitleIndex = bSignedGreaterOrEqual + 2;
@@ -135,7 +135,7 @@ BOOL __fastcall Draw(::D2WinSmack * pSmack) {
     }
 
     uint32_t dwState = pSmack->sControl.dwState;
-    if (!(dwState & 4 && dwState & 1)) {
+    if (!(dwState & gadwBitMasks[2] && dwState & gadwBitMasks[0])) {
       return 0;
     }
     if (gbSmackerKeepTempFile) {
@@ -158,7 +158,7 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
     }
 
     uint32_t uVar1 = pSmack->sControl.dwState;
-    if (!(uVar1 & 4 && uVar1 & 1)) {
+    if (!(uVar1 & gadwBitMasks[2] && uVar1 & gadwBitMasks[0])) {
       return 0;
     }
 
@@ -173,7 +173,7 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
 
 // @sourcefile .\Src\D2WinSmack.cpp
 ::D2WinSmack * __fastcall D2WinSmack(int32_t nParam1, int32_t nParam2, int32_t nWidth, int32_t nHeight, OnPress pfnOnPress) {
-    ::D2WinSmack* pSmack = D2_NEW(::D2WinSmack);
+    ::D2WinSmack* pSmack = ((::D2WinSmack*)Fog::Memory::AllocClientMemory(sizeof(::D2WinSmack), ".\\Src\\D2WinSmack.cpp", 0x23, 0));
     memset(pSmack, 0, 0x150);
     pSmack->sControl.neD2FormType = FORM_Smack;
     int* pState = &pSmack->sControl.dwState;

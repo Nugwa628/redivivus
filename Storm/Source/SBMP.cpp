@@ -98,10 +98,10 @@ static BOOL __fastcall SBMP_DecodeTGAPixels(uint8_t * pSrcData, uint8_t * pTgaHe
     }
 
     uint8_t bFlipV = pTgaHeader[0x11] >> 5 & 1;
-    if (!bFlipV) {
-      nRowStride = -((nHStep + nBytesPerPixelStored) * nWidth);
-    } else {
+    if (bFlipV) {
       nRowStride = (nBytesPerPixelStored - nHStep) * nWidth;
+    } else {
+      nRowStride = -((nHStep + nBytesPerPixelStored) * nWidth);
     }
     if (bFlipH) {
       pDstPixels += (nWidth - 1) * nBytesPerPixelStored;
@@ -810,7 +810,7 @@ static int SBMP_DetermineImageType(short magic) {
       return 2;
     }
 
-    return (uint32_t)(magic != 0x4d42) * 2 + 1;
+    return (uint32_t)((magic != 0x4d42) ? 3 : 1);
 }
 
 // @blizzard DecodeBmpFile (SBMP.CPP)
@@ -1051,7 +1051,7 @@ static void __stdcall SBMP_CompressGifByte(D2GifLzwEncoderStrc * pState, int pDs
 }
 
 // @blizzard CompressGifImage (SBMP.CPP)
-static int __fastcall SBMP_CompressGifImage(int nSrcLen, uint8_t * pSrcPixels, int pDstBuf) {
+int __fastcall SBMP_CompressGifImage(int nSrcLen, uint8_t * pSrcPixels, int pDstBuf) {
     D2GifLzwEncoderStrc sEncoder;
     int nDstOffset = pDstBuf;
     SSystem::SMemZero(&sEncoder, 0x134);
@@ -1180,13 +1180,7 @@ static int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels
     if (!palette || (bVar1 = true , iResult != 8)) {
       bVar1 = false;
     }
-    if (!pixels) {
-      if (!bVar1) {
-        return 1;
-      }
-
-      SFile::SFileSetFilePointer(hFile, -0x300, nullptr, 2);
-    } else {
+    if (pixels) {
       DWORD dwCurPos;
       dwCurPos = SFile::SFileGetFileSize(hFile, (LPDWORD)0x0);
       dwFileSize = SFile::SFileSetFilePointer(hFile, 0, nullptr, 1);
@@ -1195,6 +1189,12 @@ static int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels
       SFile::SFileReadFile(hFile, src, nSize, nullptr, 0);
       SBMP_UncompressPcxImage(nParam, pixels, nSize - (iResult == 8), src, width, (uint32_t)sPcxHeader.wBytesPerLine, (uint32_t)sPcxHeader.byPlanes);
       SMem::SMemFree(src, ".\\SOURCE\\SBMP.CPP", 0x474, 0);
+    } else {
+      if (!bVar1) {
+        return 1;
+      }
+
+      SFile::SFileSetFilePointer(hFile, -0x300, nullptr, 2);
     }
     if (bVar1) {
       SFile::SFileReadFile(hFile, abPalette, 0x300, nullptr, 0);

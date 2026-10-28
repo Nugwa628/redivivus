@@ -410,7 +410,8 @@ static void ESCMENU_HandleSliderDrag(int32_t nParam1, int32_t nParam2) {
       D2EscMenuItemStrc* pDVar1;
       nSelectedIndex = gnEscMenuSelectedIndex;
       pDVar1 = gpEscMenuCurrentTable + gnEscMenuSelectedIndex;
-      if (pDVar1->nMenuItemType == 2) {
+      switch (pDVar1->nMenuItemType) {
+      case 2: {
         nScreenCenterX = ScreenSizeX / 2;
         iVar3 = nScreenCenterX - 0x3b;
         nSliderTrackX = nScreenCenterX - 0x3c;
@@ -439,6 +440,8 @@ static void ESCMENU_HandleSliderDrag(int32_t nParam1, int32_t nParam2) {
 
           gnEscMenuSliderValue = 1;
         }
+        break;
+      }
       }
     }
     if (nPrevItemValue == gpEscMenuCurrentTable[nSelectedIndex].nImageIndex) {

@@ -1165,9 +1165,7 @@ static void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t 
           Storm::Source::SFile::SFileAuthenticateArchive(pArchiveHandle, &__frame0.dwAuthResult);
           if (!__frame0.dwAuthResult || 5 <= __frame0.dwAuthResult) {
             BVar1 = NET_CopyDllFromArchive(pArchiveHandle, szDestPath, &__frame1.cTempDllPath);
-            if (!BVar1) {
-              Debug::DEBUG_UnusedDebugFunction("<ERROR: Failed to extract ExtraWork DLL!>");
-            } else {
+            if (BVar1) {
               /* LPCSTR lpLibFileName for LoadLibraryA */ hModule = LoadLibraryA(&__frame1.cTempDllPath);
               if (!hModule) {
                 pDestPtr = "<ERROR: Failed to load ExtraWork DLL!>";
@@ -1215,6 +1213,8 @@ static void __fastcall NET_BNFTP_CLIENT_ProcessFile(uint32_t eFileType, int32_t 
                 /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(hModule);
                 szDestPath = (char*)szDestPathSave;
               }
+            } else {
+              Debug::DEBUG_UnusedDebugFunction("<ERROR: Failed to extract ExtraWork DLL!>");
             }
           } else {
             Debug::DEBUG_UnusedDebugFunction("<ERROR: Failed ExtraWork archive authentication!>");

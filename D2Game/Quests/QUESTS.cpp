@@ -1822,7 +1822,7 @@ void __fastcall SetRewardAndFinishFlags(D2QuestDataStrc * pQuestData, D2QuestArg
     }
 
     bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
-    if (!(bRewardAwaits && pQuestData->sQuestGUID.nPlayerCount)) {
+    if (!((uint32_t)bRewardAwaits > 0 && pQuestData->sQuestGUID.nPlayerCount)) {
       return;
     }
     if (!pQuestArgs->pPlayer) {
@@ -2349,13 +2349,13 @@ void RemoveQuestTimer(D2QuestDataStrc * pQuestData, QUESTUPDATE pQuestUpdate, ::
         break;
       }
       if (pMemoryToFree->pfUpdate == pQuestUpdate && pMemoryToFree->pQuest == pQuestData) {
-        if (!pPrevTimer) {
-          pQuestControl->pTimer = pMemoryToFree->pNext;
-        } else {
+        if (pPrevTimer) {
           pPrevTimer->pNext = pMemoryToFree->pNext;
+        } else {
+          pQuestControl->pTimer = pMemoryToFree->pNext;
         }
 
-        D2_FREE_POOL(pQuestData->pGame->pMemoryPool, pMemoryToFree);
+        Fog::Memory::FreeServerMemory(pQuestData->pGame->pMemoryPool, pMemoryToFree, ".\\QUESTS\\QUESTS.CPP", 0x43e, 0);
         return;
       }
 
@@ -2672,7 +2672,10 @@ void __fastcall QUEST_OnPlayerJoinGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       pQuestDataIter = 0;
       run_radament_filter:
       /* FARPROC lpfn for IsBadCodePtr */ bBadCodePtr = IsBadCodePtr((FARPROC)pQuestDataIter->fpSequenceFilter);
-      if (!bBadCodePtr) {
+      if (bBadCodePtr) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x650);
+        exit(-1);
+      } else {
         pQuestDataIter->fpSequenceFilter(pQuestDataIter);
         if (pGame->pQuestControl) {
           for (pQuestDataIter = pGame->pQuestControl->pQuestData; pQuestDataIter; pQuestDataIter = pQuestDataIter->pPrev) {
@@ -2685,7 +2688,10 @@ void __fastcall QUEST_OnPlayerJoinGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
         pQuestDataIter = 0;
         run_golden_bird_filter:
         /* FARPROC lpfn for IsBadCodePtr */ bBadCodePtr = IsBadCodePtr((FARPROC)pQuestDataIter->fpSequenceFilter);
-        if (!bBadCodePtr) {
+        if (bBadCodePtr) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x653);
+          exit(-1);
+        } else {
           pQuestDataIter->fpSequenceFilter(pQuestDataIter);
           if (pGame->pQuestControl) {
             for (pQuestDataIter = pGame->pQuestControl->pQuestData; pQuestDataIter; pQuestDataIter = pQuestDataIter->pPrev) {
@@ -2722,13 +2728,7 @@ void __fastcall QUEST_OnPlayerJoinGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x656);
             exit(-1);
           }
-        } else {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x653);
-          exit(-1);
         }
-      } else {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x650);
-        exit(-1);
       }
     }
 }
@@ -3121,9 +3121,7 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
       ptPos.y = (LONG)pQuestData->pQuestSpecificData.pA2Q4;
       if (((D2QuestDataA2Q4Strc*)ptPos.y)->bJerhynAiActive) {
         pPlayerData = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_MONSTER, ((D2QuestDataA2Q4Strc*)ptPos.y)->nJerhynMonsterGUID);
-        if (!pPlayerData) {
-          *(bool*)(ptPos.y + 0xc) = false;
-        } else {
+        if (pPlayerData) {
           if (pPlayerData->eUnitType == UNIT_MONSTER && pPlayerData->pUnitData.pUnitDataMonster) {
             pMonsterAi = pPlayerData->pUnitData.pUnitDataMonster->pMonsterAi;
           } else {
@@ -3136,6 +3134,8 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
             GAME::Server::RemoveObjects(pPlayerData, pQuestData->pGame);
             *(bool*)(ptPos.y + 0xc) = false;
           }
+        } else {
+          *(bool*)(ptPos.y + 0xc) = false;
         }
       }
       if (!*(bool*)(ptPos.y + 0xd) && *(bool*)(ptPos.y + 0x11)) {

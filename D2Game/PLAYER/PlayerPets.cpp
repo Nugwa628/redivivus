@@ -1026,8 +1026,8 @@ void __fastcall SendAllyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2UnitStrc* pAllyUnit;
     char* pTxtPetTypeEntry;
     uint8_t* pPetNode;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2UnitDataPlayerPetsStrc* pPets = pPlayerData->pPets;
+
+    D2UnitDataPlayerPetsStrc* pPets = D2Common::Units::GetPlayerData(pUnit)->pPets;
     if (!pPets) {
       return;
     }
@@ -1047,7 +1047,7 @@ void __fastcall SendAllyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
         pPetListEntry = (D2PetStrc*)&pPets->pPetList[nPetTypeIdx].pPets;
         if (pPetListEntry) {
           pTxtPetTypeEntry = pDataTable->pTxtPetType->baseicon + nTxtPetTypeStride - 0xf;
-          if (pTxtPetTypeEntry && pTxtPetTypeEntry[4] & 4U) {
+          if (pTxtPetTypeEntry && pTxtPetTypeEntry[4] & gadwBitMasks[2]) {
             for (pPetNode = *(uint8_t**)pPetListEntry; pPetNode; pPetNode = *(uint8_t**)(pPetNode + 0x14)) {
               if (!(*pPetNode & 1)) {
                 pAllyUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, *(uint32_t*)(pPetNode + 4));

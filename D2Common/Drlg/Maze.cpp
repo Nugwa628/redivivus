@@ -953,7 +953,7 @@ void __fastcall ForAllButDenOfEvil(D2DrlgLevelStrc * pLevel) {
     aShuffleTable[8] = 8;
     D2SeedStrc DVar3 = D2_SEED_NEXT(pLevel->sSeed);
     pLevel->sSeed = DVar3;
-    aShuffleTable[0xf] = DVar3.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar3) & 0xffffffff) / 0xf) * -0xf;
+    aShuffleTable[0xf] = DVar3.nSeedLow % 0xf;
     int nTargetCount = pLevel->nRoomExCount / 5 + 1;
     aShuffleTable[0] = 0;
     aShuffleTable[1] = 1;
@@ -983,9 +983,9 @@ void __fastcall ForAllButDenOfEvil(D2DrlgLevelStrc * pLevel) {
       pLevel->sSeed = DVar4;
       nSwapTemp = nShuffleCount - 1;
       nShuffleCount = nSwapTemp;
-      nShufflePos = aShuffleTable[DVar3.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar3) & 0xffffffff) / 0xf) * -0xf];
-      aShuffleTable[DVar3.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar3) & 0xffffffff) / 0xf) * -0xf] = aShuffleTable[DVar4.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar4) & 0xffffffff) / 0xf) * -0xf];
-      aShuffleTable[DVar4.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar4) & 0xffffffff) / 0xf) * -0xf] = nShufflePos;
+      nShufflePos = aShuffleTable[DVar3.nSeedLow % 0xf];
+      aShuffleTable[DVar3.nSeedLow % 0xf] = aShuffleTable[DVar4.nSeedLow % 0xf];
+      aShuffleTable[DVar4.nSeedLow % 0xf] = nShufflePos;
       nShufflePos = aShuffleTable[0xf];
     } while (nSwapTemp);
 

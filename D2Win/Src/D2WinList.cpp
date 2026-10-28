@@ -492,7 +492,7 @@ BOOL __stdcall Key(D2ControlMsg * pControlMsg) {
     int32_t nStrLen;
     int eFontType;
     D2WinListEntry* pTailEntry;
-    ::D2WinList* pList = D2_NEW(::D2WinList);
+    ::D2WinList* pList = ((::D2WinList*)Fog::Memory::AllocClientMemory(sizeof(::D2WinList), ".\\Src\\D2WinList.cpp", 0x2e, 0));
     memset(pList, 0, 0x6c);
     pList->sControl.neD2FormType = FORM_List;
     int* pItemCountPtr = &pList->sControl.dwState;
@@ -527,10 +527,10 @@ BOOL __stdcall Key(D2ControlMsg * pControlMsg) {
       D2WinListEntry* pDVar1;
       nSizeX = pnItemArray + 1;
       do {
-        pNewEntry = D2_NEW(D2WinListEntry);
+        pNewEntry = ((D2WinListEntry*)Fog::Memory::AllocClientMemory(sizeof(D2WinListEntry), ".\\Src\\D2WinList.cpp", 0x56, 0));
         wszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(*(uint16_t*)(nSizeX - 1));
         nStrLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszLocaleStr);
-        if (0xff < nStrLen) {
+        if (0x100 <= nStrLen) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x58);
           exit(-1);
         }
@@ -538,7 +538,7 @@ BOOL __stdcall Key(D2ControlMsg * pControlMsg) {
         D2Lang::Unicode::UNISYS::STRING_CopyWideString(pNewEntry->wszText, wszLocaleStr);
         D2WinFont::TEXT_CalcTextDimensions(wszLocaleStr, (int*)&pnFontType, (int*)&pnItemArray);
         pnFontType += 2;
-        if (pList->sEntriesControl.nMaxTextWidth < (int)pnFontType) {
+        if ((int)pnFontType > pList->sEntriesControl.nMaxTextWidth) {
           pList->sEntriesControl.nMaxTextWidth = (int32_t)pnFontType;
         }
 
@@ -552,9 +552,7 @@ BOOL __stdcall Key(D2ControlMsg * pControlMsg) {
         pNewEntry->nUserData = nSizeX[1];
         pNewEntry->pNext = 0;
         pTailEntry = pList->sEntriesControl.pFirstEntry;
-        if (!pTailEntry) {
-          pList->sEntriesControl.pFirstEntry = pNewEntry;
-        } else {
+        if (pTailEntry) {
           pDVar1 = pTailEntry->pNext;
           while (pDVar1) {
             pTailEntry = pTailEntry->pNext;
@@ -562,6 +560,8 @@ BOOL __stdcall Key(D2ControlMsg * pControlMsg) {
           }
 
           pTailEntry->pNext = pNewEntry;
+        } else {
+          pList->sEntriesControl.pFirstEntry = pNewEntry;
         }
 
         pItemCountPtr = &pList->sEntriesControl.nItemCount;

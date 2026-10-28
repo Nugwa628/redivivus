@@ -824,10 +824,10 @@ void __stdcall DRAW_UI_MiniPanel() {
       if (!bRightOpen) {
         memset(&sGfxData, 0, 0x48);
         sGfxData.pDC6 = gpMiniPanelBackgroundDC6;
-        if (!gbMiniPanelSinglePlayer) {
-          iVar1 = -0x54;
-        } else {
+        if (gbMiniPanelSinglePlayer) {
           iVar1 = -0x4a;
+        } else {
+          iVar1 = -0x54;
         }
 
         D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, ScreenSizeX / 2 + iVar1 - 3, ScreenSizeY - 0x2f, -1, DRAW_SOLID, nullptr);
@@ -850,10 +850,10 @@ void __stdcall DRAW_UI_MiniPanel() {
     if (!bRightOpen) {
       memset(&sGfxData, 0, 0x48);
       sGfxData.pDC6 = gpMiniPanelBackgroundDC6;
-      if (!gbMiniPanelSinglePlayer) {
-        iVar1 = ScreenSizeX / 2 + 0x23;
-      } else {
+      if (gbMiniPanelSinglePlayer) {
         iVar1 = ScreenSizeX / 2 + 0x38;
+      } else {
+        iVar1 = ScreenSizeX / 2 + 0x23;
       }
 
       D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, iVar1 - 2, ScreenSizeY - 0x2f, -1, DRAW_SOLID, nullptr);

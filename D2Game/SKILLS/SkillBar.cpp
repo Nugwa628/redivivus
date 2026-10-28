@@ -574,10 +574,10 @@ BOOL __fastcall Skills_SrvDoFunc_074_DoubleThrow(::SGAMEDATA * pGame, D2UnitStrc
     }
 
     uint32_t bIsPotion = D2Common::ITEMS::Items::ITEMS_IsA(pWeaponOrMissile, ITEMTYPE_MissilePotion);
-    if (!bIsPotion) {
-      pWeaponOrMissile = SkillsServer::CreatingAMissile(pGame, eMissileType, pUnit, eSkill, nSkillLvl, 0, 0, 0, 0, 1);
-    } else {
+    if (bIsPotion) {
       pWeaponOrMissile = SkillsServer::SKILLS_CreateMissileFromUnit(pGame, eMissileType, pUnit, eSkill, nSkillLvl, 0, 0, 0, 0, 1);
+    } else {
+      pWeaponOrMissile = SkillsServer::CreatingAMissile(pGame, eMissileType, pUnit, eSkill, nSkillLvl, 0, 0, 0, 0, 1);
     }
     if (!pWeaponOrMissile) {
       return 1;
@@ -641,12 +641,12 @@ BOOL __fastcall Skills_SrvDoFunc_075_GrimWard(::SGAMEDATA * pGame, D2UnitStrc * 
     if (!pMonStats2) {
       return 0;
     }
-    if (!pMonStats2->large) {
-      if (pMonStats2->isSmall) {
+    if (*((uint8_t *)pMonStats2 + 0x5) & gadwBitMasks[3]) {
+      eMissileId = (eMissilesId)pSkillsTxt->srvmissile[3];
+    } else {
+      if ((*((uint8_t *)pMonStats2 + 0x5) & gadwBitMasks[2])) {
         eMissileId = (eMissilesId)pSkillsTxt->srvmissile[2];
       }
-    } else {
-      eMissileId = (eMissilesId)pSkillsTxt->srvmissile[3];
     }
     if (!(0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
@@ -1453,7 +1453,7 @@ static BOOL __stdcall SKILLBAR_CanTargetPosition(D2UnitStrc * pUnit, int32_t nPa
     if (!pRoom) {
       return 0;
     }
-    if (pSkillsTxtBase->InTown) {
+    if ((*((uint8_t *)pSkillsTxtBase + 0x5) & gadwBitMasks[0])) {
       return 1;
     }
 
@@ -1498,22 +1498,7 @@ BOOL __fastcall SKILLBAR_SrvStFn40_Leap(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     }
 
     _bIsMonsterUnit = (uint32_t)(eUnitType == UNIT_MONSTER);
-    if (!_bIsMonsterUnit) {
-      nResult = SkillsServer::SKILLS_GetTargetOrCursorPos(pGame2, pUnit, (uint32_t*)&eSkill, &nDestY);
-      if (!nResult) {
-        return 0;
-      }
-
-      nResult = SKILLBAR_CanTargetPosition(pUnit, eSkill, nDestY, eSkillOrig);
-      if (!nResult) {
-        return 0;
-      }
-
-      nResult = SKILLBAR_FindValidLeapTarget(pUnit, nSkillLvl, (int*)&eSkill, (int*)&nDestY, eSkillOrig);
-      if (!nResult) {
-        return 0;
-      }
-    } else {
+    if (_bIsMonsterUnit) {
       int32_t eCollisionFlag;
       pTarget = UNIT::SUnit::GetTargetEx(pGame2, pUnit);
       if (!pTarget) {
@@ -1554,6 +1539,21 @@ BOOL __fastcall SKILLBAR_SrvStFn40_Leap(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 
       eSkill = local_18.x;
       nDestY = local_18.y;
+    } else {
+      nResult = SkillsServer::SKILLS_GetTargetOrCursorPos(pGame2, pUnit, (uint32_t*)&eSkill, &nDestY);
+      if (!nResult) {
+        return 0;
+      }
+
+      nResult = SKILLBAR_CanTargetPosition(pUnit, eSkill, nDestY, eSkillOrig);
+      if (!nResult) {
+        return 0;
+      }
+
+      nResult = SKILLBAR_FindValidLeapTarget(pUnit, nSkillLvl, (int*)&eSkill, (int*)&nDestY, eSkillOrig);
+      if (!nResult) {
+        return 0;
+      }
     }
 
     uint32_t nDestYSaved = nDestY;

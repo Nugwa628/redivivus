@@ -719,7 +719,7 @@ static void __stdcall PLAYER_ApplyCurrentSkillFlags(int32_t bIsLocalPlayer, D2Un
       SKILLS::Skills::SKILLS_CltSetSkillFromCurrent(pUnit);
       return;
     }
-    if (!(!bIsLocalPlayer && (!pUnit || !(pUnit->eUnitFlags >> 6 & 1)))) {
+    if (!(!bIsLocalPlayer && (!pUnit || !(((bool)(pUnit->eUnitFlags >> 6 & 1)))))) {
       return;
     }
 
@@ -764,12 +764,12 @@ BOOL __fastcall PlayerMessage(int32_t nMessageType, D2UnitStrc * pUnit, D2Server
     bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom);
     D2ServerMessageHandleStrc* pMessageSaved;
     pMessageSaved = pMessage;
-    if (!bIsInTown) {
-      eAnimMode = eD2PlayerAnimMode_ns::Neutral;
-      eNeutralMode = 2;
-    } else {
+    if (bIsInTown) {
       eAnimMode = TownNeutral;
       eNeutralMode = 6;
+    } else {
+      eAnimMode = eD2PlayerAnimMode_ns::Neutral;
+      eNeutralMode = 2;
     }
 
     switch (nMessageType) {
@@ -1281,7 +1281,7 @@ static void __stdcall PLAYER_InteractWithUnitByType(eD2UnitType eTargetUnitType,
       nInteractRange = 5;
       approach_or_interact:
       D2MonStatsTxt* pTxtRecord = pTargetUnit && pTargetUnit->eUnitType == UNIT_MONSTER && pTargetUnit && (nClassId = pTargetUnit->nClassId , 0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nClassId] : nullptr;
-      if (pTxtRecord && pTxtRecord->interact && pTxtRecord->npc) {
+      if (pTxtRecord && (*((uint8_t *)pTxtRecord + 0xd) & gadwBitMasks[1]) && (*((uint8_t *)pTxtRecord + 0xd) & gadwBitMasks[0])) {
         if (pTargetUnit->pPath.pDynamicPath) {
           D2Common::PATH::DynamicPath::ZeroPathPointsSize(pTargetUnit->pPath.pDynamicPath);
         }
@@ -1425,7 +1425,7 @@ static void __stdcall PLAYER_InteractWithUnitByType(eD2UnitType eTargetUnitType,
             nClassId = pTargetUnit->nClassId;
           }
         pMonStatsTxt = DataTbls::MonsterTbls::TXT_MonStats_GetLine(nClassId);
-        if (!pMonStatsTxt || (nInteractRange = 2 , !pMonStatsTxt->interact)) {
+        if (!pMonStatsTxt || (nInteractRange = 2 , !(*((uint8_t *)pMonStatsTxt + 0xd) & gadwBitMasks[1]))) {
           goto use_default_range;
         }
         goto approach_or_interact;
@@ -2551,7 +2551,7 @@ void __fastcall PLAYER_ProcessPlayerModeSimulation(D2UnitStrc * pUnit) {
     D2RoomStrc* pRoom;
     bool bStepDone;
     bool bHasPathTarget;
-    uint8_t byActionFrame;
+    uint32_t byActionFrame;
     eD2UnitType eUnitType;
     D2DynamicPathStrc* pDynPathAlt;
     D2UnitDataPlayerStrc* pPlayerData;
@@ -2588,7 +2588,7 @@ void __fastcall PLAYER_ProcessPlayerModeSimulation(D2UnitStrc * pUnit) {
         }
 
         byActionFrame = pUnit->nActionFrame;
-        if (bSkillStepDone && !(pUnit->eUnitFlags >> 6 & 1) && (byActionFrame == 1 || byActionFrame == 2 || byActionFrame == 3)) {
+        if (bSkillStepDone && !(((bool)(pUnit->eUnitFlags >> 6 & 1))) && (byActionFrame == 1 || byActionFrame == 2 || byActionFrame == 3)) {
           SKILLS::Skills::SKILLS_CltSetSkillFromCurrent(pUnit);
         }
       }
@@ -2618,7 +2618,7 @@ void __fastcall PLAYER_ProcessPlayerModeSimulation(D2UnitStrc * pUnit) {
       pUnit->nAnimSpeed = 0;
     }
 
-    if (pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Sequence && pUnit->eUnitFlags >> 0xe & 1) {
+    if (pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Sequence && ((bool)(pUnit->eUnitFlags >> 0xe & 1))) {
       Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     }
     if (gaPlayerModeAttribs[pUnit->eAnimMode.ePlayerMode].nCompleteMode != 1) {
@@ -2742,7 +2742,7 @@ D2RoomStrc * __fastcall DRLGROOM_FindBetterNearbyRoom(D2RoomStrc * pRoom, int32_
     DWORD nRoomCount = 0;
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &ppRoomList, (int*)&nRoomCount);
     uint32_t nRoomIdx = 0;
-    if (nRoomCount) {
+    if ((uint32_t)nRoomCount > 0) {
       D2RoomStrc* pTestRoom;
       do {
         if (ppRoomList[nRoomIdx]) {

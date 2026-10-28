@@ -506,17 +506,17 @@ void __stdcall CHAT_DrawIMECandidates() {
     }
 
     LPCANDIDATELIST pCandidateList = gpIMECandidateList;
-    if (!gpIMECandidateList->dwPageSize) {
-      nEndIndex = gpIMECandidateList->dwCount;
-      dwOffset = 0;
-      if (0x14 <= nEndIndex) {
-        nEndIndex = 0x14;
-      }
-    } else {
+    if (gpIMECandidateList->dwPageSize) {
       dwOffset = gpIMECandidateList->dwPageStart;
       nEndIndex = gpIMECandidateList->dwPageSize + dwOffset;
       if (gpIMECandidateList->dwCount < nEndIndex) {
         nEndIndex = gpIMECandidateList->dwCount;
+      }
+    } else {
+      nEndIndex = gpIMECandidateList->dwCount;
+      dwOffset = 0;
+      if (0x14 <= nEndIndex) {
+        nEndIndex = 0x14;
       }
     }
 
@@ -998,10 +998,7 @@ void __stdcall CHAT_ProcessBattleNetMessage() {
       case 10:
         {
           CHAT_ExtractWhisperPrefix(aMessageText, szWhisperPrefix);
-          if (szWhisperPrefix[0] == '\0') {
-            sender_label_plain:
-            sprintf(szSenderLabel, "%s", szWhisperPrefix);
-          } else {
+          if (szWhisperPrefix[0] != '\0') {
             if (szWhisperPrefix[0] == '*') {
               pbyWhisperTarget = (uint8_t*)CHAT_ExtractWhisperTarget(aMessageText);
               pbyPrefixScan = (uint8_t*)CHAT_ExtractWhisperTarget(szWhisperPrefix);
@@ -1013,6 +1010,9 @@ void __stdcall CHAT_ProcessBattleNetMessage() {
 
             szWhisperTarget = CHAT_ExtractWhisperTarget(aMessageText);
             sprintf(szSenderLabel, "%s (*%s)", szWhisperPrefix, szWhisperTarget);
+          } else {
+            sender_label_plain:
+            sprintf(szSenderLabel, "%s", szWhisperPrefix);
           }
 
           D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszPrefixW, szSenderLabel, 0x154);
@@ -1309,25 +1309,7 @@ static void __stdcall ChatCommandProcessor(uint16_t * pwInputMessage, char * psz
     }
 
     nCmpResult = CHAT_CompareCaseInsensitive(pszInput, "/ignorepersist");
-    if (!nCmpResult) {
-      ppIgnoreList = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
-      ppIgnoreList2 = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
-      pIgnoreListVtable = ppIgnoreList2->_vfptr;
-      nCmpResult = ppIgnoreList->_vfptr->GetPersistentSetting(ppIgnoreList);
-      pIgnoreListVtable->SavePersistentSetting(ppIgnoreList2, (uint32_t)!nCmpResult);
-      Fog::File::CONTAINER_InitializeBuffer(wszMsgBuffer2, 2, 0x104, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
-      D2Lang::UTF8_ConvertToWideChar(wszMsgBuffer2, "<BattleNet>: ", 0x208);
-      ppIgnoreList = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
-      nCmpResult = ppIgnoreList->_vfptr->GetPersistentSetting(ppIgnoreList);
-      wStringId = 0x2ba1;
-      if (!nCmpResult) {
-        wStringId = 0x2ba2;
-      }
-
-      pwLocaleString = D2Lang::StrTable::strtable::GetLocaleString(wStringId);
-      D2Lang::Unicode::UNISYS::AppendToBuffer(wszMsgBuffer2, pwLocaleString);
-      pwMessage = wszMsgBuffer2;
-    } else {
+    if (nCmpResult) {
       nCmpResult = CHAT_CompareCaseInsensitive(pszInput, "/ignore ");
       if (!nCmpResult || (nCmpResult = CHAT_CompareCaseInsensitive(pszInput, "/squelch ") , !nCmpResult)) {
         Fog::File::CONTAINER_InitializeBuffer(wszMsgBuffer3, 2, 0x208, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
@@ -1458,6 +1440,24 @@ static void __stdcall ChatCommandProcessor(uint16_t * pwInputMessage, char * psz
       }
 
       pwMessage = wszMsgBuffer1;
+    } else {
+      ppIgnoreList = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+      ppIgnoreList2 = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+      pIgnoreListVtable = ppIgnoreList2->_vfptr;
+      nCmpResult = ppIgnoreList->_vfptr->GetPersistentSetting(ppIgnoreList);
+      pIgnoreListVtable->SavePersistentSetting(ppIgnoreList2, (uint32_t)!nCmpResult);
+      Fog::File::CONTAINER_InitializeBuffer(wszMsgBuffer2, 2, 0x104, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+      D2Lang::UTF8_ConvertToWideChar(wszMsgBuffer2, "<BattleNet>: ", 0x208);
+      ppIgnoreList = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+      nCmpResult = ppIgnoreList->_vfptr->GetPersistentSetting(ppIgnoreList);
+      wStringId = 0x2ba1;
+      if (!nCmpResult) {
+        wStringId = 0x2ba2;
+      }
+
+      pwLocaleString = D2Lang::StrTable::strtable::GetLocaleString(wStringId);
+      D2Lang::Unicode::UNISYS::AppendToBuffer(wszMsgBuffer2, pwLocaleString);
+      pwMessage = wszMsgBuffer2;
     }
 
     print_reply:

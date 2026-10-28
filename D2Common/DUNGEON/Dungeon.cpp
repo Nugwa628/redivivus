@@ -332,7 +332,7 @@ uint32_t __stdcall DoRoomsTouchOrOverlap(D2RoomStrc * pRoom, D2RoomStrc * pRoom2
       if (!(nRoom1Left <= pRoom2->sCoords.sTileRect.right + iVar1)) {
         return 0;
       }
-      if (!(iVar1 <= pRoom->sCoords.sTileRect.right + nRoom1Left)) {
+      if (!(pRoom->sCoords.sTileRect.right + nRoom1Left >= iVar1)) {
         return 0;
       }
       iVar1 = pRoom2->sCoords.sTileRect.top;
@@ -1808,7 +1808,7 @@ static void AddRoomDataActual(D2RoomExStrc * pRoomEx, uint8_t nInitDepth) {
     InitNearRooms(pAct->pMemoryPool, pRoomEx, (uint32_t)(uint8_t)(nInitDepth + 1), pAct);
     uint32_t nDepth;
     nDepth = (uint32_t)nInitDepth;
-    if (pRoomEx->fRoomStatus >= nDepth) {
+    if ((int)pRoomEx->fRoomStatus >= (int)nDepth) {
       int nRefCheckIndex;
       nRefCheckIndex = 0;
       pnRefCount = pRoomEx->awRoomsInList;

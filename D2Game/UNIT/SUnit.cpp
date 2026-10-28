@@ -233,7 +233,7 @@ D2UnitStrc * __fastcall FindUnitFromTable(::SGAMEDATA * pGame, eD2UnitType eUnit
 
 // Returns the owner unit (parent) of the given unit. Checks eUnitFlagsEx bit 10 (has owner flag), then looks up eOwnerType/nOwnerGUID via FindUnitFromTable.
 D2UnitStrc * __fastcall GetOwnerUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitFlagsEx >> 10 & 1)) {
+    if (!(pUnit && ((bool)(pUnit->eUnitFlagsEx >> 10 & 1)))) {
       return nullptr;
     }
 
@@ -378,7 +378,7 @@ void __fastcall UNITS_SendUnitUpdateToClient(D2UnitStrc * pUnit, D2ClientStrc * 
     bool _bNeedsRoomUpdate;
     bool bNeedsRoomUpdate;
     _bNeedsRoomUpdate = D2Common::Units::NeedsRoomUpdate(pUnit);
-    if (!(_bNeedsRoomUpdate && (!pUnit || !(pUnit->eUnitFlags >> 4 & 1)))) {
+    if (!(_bNeedsRoomUpdate && (!pUnit || !(((bool)(pUnit->eUnitFlags >> 4 & 1)))))) {
       return;
     }
 
@@ -880,12 +880,12 @@ void __fastcall UNITS_SetupAnimTimerEventsWithDelay(::SGAMEDATA * pGame, D2UnitS
     uint32_t nNextEventFrame = pGame->dwGameFrame;
     int nFrameOffsetAccum = nNextEventFrame - (pUnit->nGfxCurrentFrame >> 8) - nDelay;
     pUnit->nGfxCurrentFrame = (nNextEventFrame - nFrameOffsetAccum) * 0x100;
-    if (!pUnit->pAnimSeq) {
-      nAnimSpeed = (uint32_t)pUnit->nAnimSpeed;
-      nTotalFrameCount = pUnit->nFrameCount;
-    } else {
+    if (pUnit->pAnimSeq) {
       nAnimSpeed = pUnit->nSeqAnimSpeed;
       nTotalFrameCount = pUnit->nSeqFrameCount;
+    } else {
+      nAnimSpeed = (uint32_t)pUnit->nAnimSpeed;
+      nTotalFrameCount = pUnit->nFrameCount;
     }
     if (!nAnimSpeed) {
       GAME::Event::SetEvent(pGame, pUnit, 1, pGame->dwGameFrame + 1, 0, 0);
@@ -933,12 +933,12 @@ void __fastcall UNITS_SetupAnimTimerEventsFromFrame(::SGAMEDATA * pGame, D2UnitS
     GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_ENDANIM, 0);
     uint32_t nNextEventFrame = pGame->dwGameFrame;
     pUnit->nGfxCurrentFrame = (nNextEventFrame - nFrame) * 0x100;
-    if (!pUnit->pAnimSeq) {
-      nAnimSpeed = (uint32_t)pUnit->nAnimSpeed;
-      nTotalFrameCount = pUnit->nFrameCount;
-    } else {
+    if (pUnit->pAnimSeq) {
       nAnimSpeed = pUnit->nSeqAnimSpeed;
       nTotalFrameCount = pUnit->nSeqFrameCount;
+    } else {
+      nAnimSpeed = (uint32_t)pUnit->nAnimSpeed;
+      nTotalFrameCount = pUnit->nFrameCount;
     }
     if (!nAnimSpeed) {
       GAME::Event::SetEvent(pGame, pUnit, 1, pGame->dwGameFrame + 1, 0, 0);
@@ -1198,7 +1198,7 @@ uint32_t __fastcall UNITS_CheckIfCanAttackTarget(::SGAMEDATA * pGame, D2UnitStrc
 }
 
 BOOL __fastcall UNITS_CheckSkillTargetAlignment(::SGAMEDATA * pGameStrc, int * pnParam, D2UnitStrc * pTarget, eD2Skills eSkill) {
-    if (!(pnParam && pTarget && (!*pnParam || pTarget->eUnitType == UNIT_MONSTER) && 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill && sgptDataTable->pTxtSkills[eSkill].TargetPet)) {
+    if (!(pnParam && pTarget && (!*pnParam || pTarget->eUnitType == UNIT_MONSTER) && 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill && (*((uint8_t *)&sgptDataTable->pTxtSkills[eSkill] + 0x7) & gadwBitMasks[1]))) {
       return 0;
     }
 
@@ -1425,7 +1425,7 @@ void __fastcall UNITS_UpdateRoomClientVisibility(::SGAMEDATA * pGame, D2UnitStrc
 
     uint32_t nOldClientIdx;
     nOldClientIdx = 0;
-    if (nCurrentClientsCount) {
+    if ((uint32_t)nCurrentClientsCount > 0) {
       D2UnitStrc* pOwnerUnit;
       do {
         if (nNewClientIdx >= nTargetClientsCount) {
@@ -1730,7 +1730,7 @@ uint32_t __fastcall UNITS_CanUseSkillOnTarget(::SGAMEDATA * pGame, D2UnitStrc * 
 
     eD2UnitType eMonsterOwnerType = eTargetUnitType;
     D2SkillsTxt* pSkillsTxt = D2Client::GAME::SCmd::TXT_Skills_GetLine(eSkill);
-    if (!(pSkillsTxt && pSkillsTxt->TargetAlly)) {
+    if (!(pSkillsTxt && (*((uint8_t *)pSkillsTxt + 0x7) & gadwBitMasks[2]))) {
       return 0;
     }
 

@@ -4083,7 +4083,7 @@ void __fastcall TXT_AllocTxt_itemstatcost(D2PoolManagerStrc * pMemory) {
                       break;
                     }
 
-                    sgtDataTable.pTxtItemStatCost->saveBits[nStatByteOffset - 0x18] |= 1;
+                    sgtDataTable.pTxtItemStatCost->saveBits[nStatByteOffset - 0x18] |= gadwBitMasks[0];
                   }
                 }
 

@@ -1283,7 +1283,7 @@ void __stdcall CELCMP_FixupOffsetsAndSerialize(int * pnParam, uint32_t * pdwPara
       nTotalFrames = pnParam[4] * pnParam[5];
       pFrameOffsets = (int*)(nTotalFrames * 4 + 0x18);
       pSerializedEnd = pFrameOffsets;
-      if (nTotalFrames) {
+      if ((uint32_t)nTotalFrames > 0) {
         pFrameSlot = pnParam + 0xd;
         pFrameEntry = nTotalFrames;
         pnParam = pFrameOffsets;

@@ -598,7 +598,7 @@ void __stdcall RENDERER_D3D_AllocateTextureCaches() {
     g_nBytesPerPixel = 2;
     g_bSupportsTextureCachingInternal = 0;
     uint32_t uSmallCacheAlloc = g_nVideoMemoryTotal;
-    if (!(gnD3DTextureCapFlags & 2) || 0xd00000 <= g_nVideoMemoryTotal) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[1]) || 0xd00000 <= g_nVideoMemoryTotal) {
       if (0x2000000 <= g_nVideoMemoryTotal) {
         uSmallCacheAlloc = 0x2000000;
       }
@@ -736,8 +736,8 @@ BOOL __stdcall RENDERER_D3D_InitializeCutsceneMode() {
     RENDERER_nWindowWidth = 0x280;
     RENDERER_nWindowHeight = 0x1e0;
     uint32_t nBitsPerPixel = 0x10;
-    if (!(gnD3DTextureCapFlags & 0x80)) {
-      if (gnD3DTextureCapFlags & 0x100) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[7])) {
+      if (gnD3DTextureCapFlags & gadwBitMasks[8]) {
         nBitsPerPixel = 0x18;
       }
     } else {
@@ -771,7 +771,7 @@ BOOL __stdcall BeginCutScene() {
     if (gnRenderState) {
       return 0;
     }
-    if (!(gnD3DTextureCapFlags & 0x80) && !(gnD3DTextureCapFlags & 0x100)) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[7]) && !(gnD3DTextureCapFlags & gadwBitMasks[8])) {
       return 1;
     }
 
@@ -785,7 +785,7 @@ void __fastcall SetGamma(int nGamma) {
     uint32_t aGammaRampRed[128];
     uint32_t aGammaRampGreen[128];
     uint32_t aGammaRampBlue[128];
-    if (!(gnD3DTextureCapFlags & 0x10)) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[4])) {
       return;
     }
 
@@ -1196,10 +1196,10 @@ HRESULT __stdcall RENDERER_D3D_EnumDisplayModeCallback(int * pDisplayModeDesc, i
     }
     if (nBitDepth == 0x20) {
       if (pDisplayModeDesc[3] == gnD3DEnumDisplayModeCacheWidth && pDisplayModeDesc[2] == gnD3DEnumDisplayModeCacheFormat) {
-        uModeFlags |= 2;
+        uModeFlags |= gadwBitMasks[1];
       }
       if (true && pDisplayModeDesc[3] == gnD3DEnumDisplayModeCacheHeight && pDisplayModeDesc[2] == gnD3DEnumDisplayModeCacheRefreshRate) {
-        uModeFlags |= 1;
+        uModeFlags |= gadwBitMasks[0];
       }
     }
     if (!uModeFlags) {
@@ -1214,7 +1214,7 @@ HRESULT __stdcall RENDERER_D3D_EnumDisplayModeCallback(int * pDisplayModeDesc, i
       if (nDDCallResult) {
         DIRECTD3D_LogError("SetDisplayMode (mode enumeration) failed!", nDDCallResult);
       } else {
-        if (!(uModeFlags & 1) && !(uModeFlags & 2)) {
+        if (!(uModeFlags & gadwBitMasks[0]) && !(uModeFlags & gadwBitMasks[1])) {
           nDDSurfDescSize.dwSize = 0x7c;
           memset(&nDDSurfDescSize.dwFlags, 0, 0x78);
           nDDSurfDescSize.dwFlags = 1;
@@ -1367,7 +1367,9 @@ BOOL __stdcall Direct3DCallBack(GUID * lpGUID, char * lpDriverDescription, char 
       pszErrorMsg = "Enumeration DirectDrawCreate failed";
     } else {
       hResult = __frame0.pDirectDraw1->lpVtbl->QueryInterface((IDirectDraw*)__frame0.pDirectDraw1, (IID*)&IID_IDirectDraw7, (LPVOID*)&g_pDirectDraw7);
-      if (!hResult) {
+      if (hResult) {
+        pszErrorMsg = "Enumeration failed to get DirectDraw4 interface";
+      } else {
         __frame0.pDirectDraw1->lpVtbl->Release((IDirectDraw*)__frame0.pDirectDraw1);
         __frame0.pDirectDraw1 = 0;
         hDeviceIdResult = g_pDirectDraw7->lpVtbl->GetDeviceIdentifier(g_pDirectDraw7, &sDeviceIdentifier, 0);
@@ -1385,7 +1387,9 @@ BOOL __stdcall Direct3DCallBack(GUID * lpGUID, char * lpDriverDescription, char 
         }
 
         hResult = g_pDirectDraw7->lpVtbl->QueryInterface(g_pDirectDraw7, (IID*)&D3DGuid, (LPVOID*)&g_pDirect3D7);
-        if (!hResult) {
+        if (hResult) {
+          pszErrorMsg = "Failed to get D3D interface";
+        } else {
           hResult = g_pDirectDraw7->lpVtbl->SetCooperativeLevel(g_pDirectDraw7, ghD3DEnumWindowHandle, 0x11);
           if (!hResult) {
             hResult = g_pDirectDraw7->lpVtbl->EnumDisplayModes(g_pDirectDraw7, 0, nullptr, pDeviceBlock, (void*)RENDERER_D3D_EnumDisplayModeCallback);
@@ -1662,11 +1666,7 @@ BOOL __stdcall Direct3DCallBack(GUID * lpGUID, char * lpDriverDescription, char 
           } else {
             pszErrorMsg = "SetCooperativeLevel failed";
           }
-        } else {
-          pszErrorMsg = "Failed to get D3D interface";
         }
-      } else {
-        pszErrorMsg = "Enumeration failed to get DirectDraw4 interface";
       }
     }
 
@@ -2082,7 +2082,7 @@ BOOL __fastcall Initialize(HINSTANCE hInstance) {
       if (iVar2) {
         iVar1 = Storm::Source::SReg::SRegLoadValue(szRegPath, "dwFlags", 0, (int32_t*)&gnD3DTextureCapFlags);
         if (iVar1) {
-          if (gnD3DTextureCapFlags & 1) {
+          if (gnD3DTextureCapFlags & gadwBitMasks[0]) {
             return 1;
           }
 
@@ -2449,7 +2449,7 @@ BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWnd) {
     iidData2.dwCaps = 4;
     nResult = g_pD3DSurfaceBackbuffer->lpVtbl->GetAttachedSurface(g_pD3DSurfaceBackbuffer, &iidData2, (void**)&D3DSurfaceSecondary);
     if (!nResult) {
-      if (gnD3DTextureCapFlags & 0x10) {
+      if (gnD3DTextureCapFlags & gadwBitMasks[4]) {
         nResult = g_pD3DSurfaceBackbuffer->lpVtbl->QueryInterface(g_pD3DSurfaceBackbuffer, (GUID*)gszRendererD3DDeviceInitializationCode, (void**)&g_pDDGammaControl);
         if (nResult) {
           DIRECTD3D_LogError("Failed to get gamma control interface!", nResult);
@@ -2522,7 +2522,7 @@ BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWnd) {
                 if (nResult) {
                   DIRECTD3D_LogError("Failed to get available local texture memory", nResult);
                 }
-                if (gnD3DTextureCapFlags & 2) {
+                if (gnD3DTextureCapFlags & gadwBitMasks[1]) {
                   iidData2.dwCaps2 = 0;
                   iidData2.dwCaps3 = 0;
                   iidData2.dwCaps4 = 0;
@@ -2769,7 +2769,7 @@ BOOL __fastcall InitPerspective(D2GfxSettingsStrc * pSettings, ::D2GfxHelperStrc
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x687);
       exit(-1);
     }
-    if (!(gnD3DTextureCapFlags & 1)) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[0])) {
       lpGUID = &gsD3DAdapterGuid;
     } else {
       lpGUID = 0;
@@ -4234,15 +4234,15 @@ void __fastcall DrawSolidSquare(POINT * pPoint, BYTE nSize, BYTE nPaletteIndex) 
 
 void __fastcall ClearScreen(BOOL bPartial) {
     RECT nViewportLeft;
-    if (gnD3DTextureCapFlags & 0x400) {
+    if (gnD3DTextureCapFlags & gadwBitMasks[10]) {
       RENDERER_D3D_ClearBackbuffer();
       return;
     }
 
     nViewportLeft.left = 0;
     nViewportLeft.top = 0;
-    nViewportLeft.bottom = RENDERER_nWindowHeight;
     nViewportLeft.right = RENDERER_nWindowWidth;
+    nViewportLeft.bottom = RENDERER_nWindowHeight;
     g_pD3DViewport->lpVtbl->Clear2(g_pD3DViewport, 1, &nViewportLeft, 1, -16777216, 0, 0);
 }
 
@@ -4915,7 +4915,41 @@ void __fastcall DrawGroundTile(D2TileLibraryEntryStrc * pTile, D2GfxLightExStrc 
     RENDERER_D3D_SetTextureFilterMode(iVar3);
     D3DVB_Lock pVBLockFn;
     pVBLockFn = g_pD3DGroundTileVB->lpVtbl->Lock;
-    if (!pD2GFXRenderedDataStrc->bLowQuality) {
+    if (pD2GFXRenderedDataStrc->bLowQuality) {
+      DVar2 = (*pVBLockFn)(g_pD3DGroundTileVB, 0x21, (void**)&nAlpha, nullptr);
+      if (DVar2) {
+        lock_failed:
+        DIRECTD3D_LogError("Vertex buffer lock failed!", DVar2);
+        return;
+      }
+
+      byLightIntensity = pLight->sLight.nIntensity;
+      *(uint32_t*)(nAlpha + 0x10) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
+      *(float*)nAlpha = (float)pLight->nX;
+      *(float*)(nAlpha + 4) = (float)pLight->nY;
+      byLightIntensity = pLight[5].sLight.nIntensity;
+      *(uint32_t*)(nAlpha + 0xb0) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
+      *(float*)(nAlpha + 0xa0) = (float)pLight[5].nX;
+      *(float*)(nAlpha + 0xa4) = (float)pLight[5].nY;
+      byLightIntensity = pLight[0x23].sLight.nIntensity;
+      *(uint32_t*)(nAlpha + 0x470) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
+      *(float*)(nAlpha + 0x460) = (float)pLight[0x23].nX;
+      *(float*)(nAlpha + 0x464) = (float)pLight[0x23].nY;
+      byLightIntensity = pLight[0x1e].sLight.nIntensity;
+      *(uint32_t*)(nAlpha + 0x3d0) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
+      *(float*)(nAlpha + 0x3c0) = (float)pLight[0x1e].nX;
+      *(float*)(nAlpha + 0x3c4) = (float)pLight[0x1e].nY;
+      DVar2 = g_pD3DGroundTileVB->lpVtbl->Unlock(g_pD3DGroundTileVB);
+      if (DVar2) {
+        unlock_failed:
+        DIRECTD3D_LogError("Vertex buffer unlock failed!", DVar2);
+        return;
+      }
+
+      dwIndexCount = 4;
+      lpwIndices = &gdwRendererMode;
+      DVar2 = 6;
+    } else {
       uint8_t* pLightCursor;
       DVar2 = (*pVBLockFn)(g_pD3DGroundTileVB, 0x21, (void**)&nAlpha, nullptr);
       if (DVar2) {
@@ -4974,40 +5008,6 @@ void __fastcall DrawGroundTile(D2TileLibraryEntryStrc * pTile, D2GfxLightExStrc 
       dwIndexCount = 0x41;
       DVar2 = 5;
       lpwIndices = &gpD3DGroundTileVertexBuffer;
-    } else {
-      DVar2 = (*pVBLockFn)(g_pD3DGroundTileVB, 0x21, (void**)&nAlpha, nullptr);
-      if (DVar2) {
-        lock_failed:
-        DIRECTD3D_LogError("Vertex buffer lock failed!", DVar2);
-        return;
-      }
-
-      byLightIntensity = pLight->sLight.nIntensity;
-      *(uint32_t*)(nAlpha + 0x10) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
-      *(float*)nAlpha = (float)pLight->nX;
-      *(float*)(nAlpha + 4) = (float)pLight->nY;
-      byLightIntensity = pLight[5].sLight.nIntensity;
-      *(uint32_t*)(nAlpha + 0xb0) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
-      *(float*)(nAlpha + 0xa0) = (float)pLight[5].nX;
-      *(float*)(nAlpha + 0xa4) = (float)pLight[5].nY;
-      byLightIntensity = pLight[0x23].sLight.nIntensity;
-      *(uint32_t*)(nAlpha + 0x470) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
-      *(float*)(nAlpha + 0x460) = (float)pLight[0x23].nX;
-      *(float*)(nAlpha + 0x464) = (float)pLight[0x23].nY;
-      byLightIntensity = pLight[0x1e].sLight.nIntensity;
-      *(uint32_t*)(nAlpha + 0x3d0) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
-      *(float*)(nAlpha + 0x3c0) = (float)pLight[0x1e].nX;
-      *(float*)(nAlpha + 0x3c4) = (float)pLight[0x1e].nY;
-      DVar2 = g_pD3DGroundTileVB->lpVtbl->Unlock(g_pD3DGroundTileVB);
-      if (DVar2) {
-        unlock_failed:
-        DIRECTD3D_LogError("Vertex buffer unlock failed!", DVar2);
-        return;
-      }
-
-      dwIndexCount = 4;
-      lpwIndices = &gdwRendererMode;
-      DVar2 = 6;
     }
 
     g_pD3DDevice->lpVtbl->DrawIndexedPrimitiveVB(g_pD3DDevice, DVar2, g_pD3DGroundTileVB, (WORD*)lpwIndices, dwIndexCount, 0x1c);
@@ -5226,7 +5226,7 @@ void __stdcall RENDERER_D3D_ResetSmackerSurfaces() {
     if (!gpD3DSmackerSystemSurface0[0]) {
       return;
     }
-    if (gnD3DTextureCapFlags & 0x400) {
+    if (gnD3DTextureCapFlags & gadwBitMasks[10]) {
       RENDERER_D3D_CopySurfacePixels(gpD3DSmackerVideoSurface0[0], gpD3DSmackerSystemSurface0[0], 0x40);
       RENDERER_D3D_CopySurfacePixels(gpD3DSmackerVideoSurface0[1], gpD3DSmackerSystemSurface0[1], 0x40);
       return;

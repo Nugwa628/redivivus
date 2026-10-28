@@ -938,7 +938,7 @@ void __fastcall D2COMP_DrawUnitShadow(uint32_t * pCompUnit) {
     uint8_t* pCOFLayerData;
     if (pCompUnit) {
       uint32_t nPositionY;
-      if (!(*pCompUnit & 1) || !(*pCompUnit & 4)) {
+      if (!(*pCompUnit & gadwBitMasks[0]) || !(*pCompUnit & gadwBitMasks[2])) {
         return;
       }
 
@@ -966,7 +966,7 @@ void __fastcall D2COMP_DrawUnitShadow(uint32_t * pCompUnit) {
             if (iVar1 <= 0) {
               return;
             }
-            if (!*pShadowLayerFlags) {
+            if ((uint32_t)(*pShadowLayerFlags) <= 0) {
               return;
             }
 
@@ -1020,10 +1020,10 @@ void __fastcall D2COMP_DrawCompositeUnit(uint32_t * pCompUnit, int32_t nDrawColo
     int32_t nDrawColorSaved = nDrawColor;
     if (pCompUnit) {
       int* pCOFEntry;
-      if (!(*pCompUnit & 1)) {
+      if (!(*pCompUnit & gadwBitMasks[0])) {
         return;
       }
-      if (*pCompUnit & 0x400) {
+      if (*pCompUnit & gadwBitMasks[10]) {
         if (!gpPentaSpinCursorDC6) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5fe);
           exit(-1);
@@ -1065,7 +1065,7 @@ void __fastcall D2COMP_DrawCompositeUnit(uint32_t * pCompUnit, int32_t nDrawColo
           nLayerTypeListOffset = D2COMP_ValidateCOFLayerData((uint32_t)(uint8_t)pCompUnit[1], nWeaponClass, pCOFLayerData);
           if (nLayerTypeListOffset) {
             nUnitFlags = *pCompUnit;
-            if (nUnitFlags & 0x20 && nUnitFlags & 0x10 || (eDrawMode = DRAW_SOLID , (nUnitFlags & 0x2000) != 0)) {
+            if (nUnitFlags & 0x20 && nUnitFlags & gadwBitMasks[4] || (eDrawMode = DRAW_SOLID , (nUnitFlags & gadwBitMasks[13]) != 0)) {
               eDrawMode = DRAW_TRANSPARENT;
             }
 
@@ -1112,7 +1112,7 @@ void __fastcall D2COMP_DrawCompositeUnit(uint32_t * pCompUnit, int32_t nDrawColo
                 gnPentaSpinCursorFrame = 0;
               }
             }
-            if (!(*pCompUnit & 0x200)) {
+            if (!(*pCompUnit & gadwBitMasks[9])) {
               return;
             }
             if (!gpUniqueCursorDC6) {
@@ -1408,7 +1408,10 @@ void * __stdcall LoadTxt(D2PoolManagerStrc * pMemory, char * szTxtName, D2BinFie
     D2ArchiveStrc** pRecord;
     char szFilePath[260];
     uint32_t nFileSize = 0;
-    if (!gbLoadBinFiles) {
+    if (gbLoadBinFiles) {
+      /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\%s%s", "DATA\\GLOBAL\\EXCEL", szTxtName, ".bin");
+      pArchive = (D2ArchiveStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(pMemory, szFilePath, &nFileSize, ".\\Src\\D2Comp.cpp", 0x958);
+    } else {
       int bIsCaseLevelDefs;
       bIsCaseLevelDefs = __stricmp(szTxtName, "leveldefs");
       if (!bIsCaseLevelDefs) {
@@ -1416,25 +1419,22 @@ void * __stdcall LoadTxt(D2PoolManagerStrc * pMemory, char * szTxtName, D2BinFie
       }
 
       pArchive = (D2ArchiveStrc*)D2COMP_LoadExcelTxtFile(pMemory, szTxtName, ".txt", &nFileSize);
-    } else {
-      /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\%s%s", "DATA\\GLOBAL\\EXCEL", szTxtName, ".bin");
-      pArchive = (D2ArchiveStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(pMemory, szFilePath, &nFileSize, ".\\Src\\D2Comp.cpp", 0x958);
     }
     if (!pArchive) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9e3);
       exit(-1);
     }
 
-    if (!gbLoadBinFiles) {
+    if (gbLoadBinFiles) {
+      pRowCountOrData = pArchive->pPrevLink;
+      pRecord = &pArchive->pNext;
+    } else {
       pBinFieldExcel = Fog::Src::Excel::STRUCT_CreateBinFieldExcelAndFillData(pArchive, nFileSize);
       pRowCountOrData = (D2ArchiveStrc*)Fog::Src::Excel::TXT_GetLinesCountFromBinFieldExcel(pBinFieldExcel);
       pRecord = (D2ArchiveStrc**)D2_ALLOC_POOL(nullptr, (int)pRowCountOrData * nLineLength);
       memset(pRecord, 0, (int)pRowCountOrData * nLineLength);
       Fog::Src::Excel::TXT_ParseDataAndPutIntoStructure(pBinFieldExcel, pBinFields, (char*)pRecord, (size_t)pRowCountOrData, nLineLength);
       Fog::Src::Excel::TXT_FreeBinFieldExcel(pBinFieldExcel);
-    } else {
-      pRowCountOrData = pArchive->pPrevLink;
-      pRecord = &pArchive->pNext;
     }
     if (!pSize) {
       return pRecord;
@@ -2289,47 +2289,7 @@ void __stdcall D2COMP_InitEmblemColorTables() {
 }
 
 char * __stdcall D2COMP_GetTitlePrefix(uint32_t nCharClass, uint32_t nTitleRank, int32_t nParam) {
-    if (!nParam) {
-      switch (nCharClass) {
-        case 0:
-
-        case 1:
-
-        case 6:
-
-        case 9:
-          switch (nTitleRank) {
-            case 1:
-              return "Dame ";
-            case 2:
-              return "Lady ";
-            case 3:
-              return "Baroness ";
-            case 4:
-              return "Countess ";
-            case 5:
-              return "Duchess ";
-            case 6:
-              return "Queen ";
-          }
-        return "";
-      }
-
-      switch (nTitleRank) {
-        case 1:
-          return "Sir ";
-        case 2:
-          return "Lord ";
-        case 3:
-          return "Baron ";
-        case 4:
-          return "Count ";
-        case 5:
-          return "Duke ";
-        case 6:
-          return "King ";
-      }
-    } else {
+    if (nParam) {
       switch (nCharClass) {
         case 0:
 
@@ -2370,6 +2330,46 @@ char * __stdcall D2COMP_GetTitlePrefix(uint32_t nCharClass, uint32_t nTitleRank,
         case 6:
           return "Guardian ";
       }
+    } else {
+      switch (nCharClass) {
+        case 0:
+
+        case 1:
+
+        case 6:
+
+        case 9:
+          switch (nTitleRank) {
+            case 1:
+              return "Dame ";
+            case 2:
+              return "Lady ";
+            case 3:
+              return "Baroness ";
+            case 4:
+              return "Countess ";
+            case 5:
+              return "Duchess ";
+            case 6:
+              return "Queen ";
+          }
+        return "";
+      }
+
+      switch (nTitleRank) {
+        case 1:
+          return "Sir ";
+        case 2:
+          return "Lord ";
+        case 3:
+          return "Baron ";
+        case 4:
+          return "Count ";
+        case 5:
+          return "Duke ";
+        case 6:
+          return "King ";
+      }
     }
 
     return "";
@@ -2394,7 +2394,7 @@ void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
     }
 
     uint32_t dwFlags = *pnParam;
-    if (!(dwFlags & 2)) {
+    if (!(dwFlags & gadwBitMasks[1])) {
       return;
     }
 
@@ -2415,10 +2415,10 @@ void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
     } else if (dwFlags & 0x20) {
       nDrawColor = 1;
     }
-    if (dwFlags & 0x100) {
+    if (dwFlags & gadwBitMasks[8]) {
       i = nCharClass + 0x15;
     }
-    if (!(dwFlags & 0x40) && !(dwFlags & 0x80)) {
+    if (!(dwFlags & 0x40) && !(dwFlags & gadwBitMasks[7])) {
       dwFlags = pnParam[0x8c];
       if (dwFlags == 0x44324456 || dwFlags == 0x44325354 || dwFlags == 0x44325850) {
         D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszTitleText, (uint16_t*)(pnParam + 0x53));
@@ -2499,7 +2499,7 @@ void __fastcall DRAW_OOG_ChannelPlayers(D2QuestDataA3Q6Strc * pA3Q6Data) {
       *(uint8_t*)((char*)&dwPlayerInfo + 1) = pA3Q6Data->bBridgeObjectValid;
       *(uint8_t*)((char*)&dwPlayerInfo + 2) = pA3Q6Data->bBridge2Valid;
       *(uint8_t*)((char*)&dwPlayerInfo + 3) = pA3Q6Data->bAcceptedQuest;
-      if (!(dwPlayerInfo & 8)) {
+      if (!(dwPlayerInfo & gadwBitMasks[3])) {
         return;
       }
 
@@ -2601,7 +2601,7 @@ void __fastcall DRAW_OOG_ChannelPlayers(D2QuestDataA3Q6Strc * pA3Q6Data) {
                   if (dwPlayerInfo <= 0x53534852) {
                     if (dwPlayerInfo == 0x53534852) {
                       szGameTypeName = "Starcraft Shareware";
-                    } else if (dwPlayerInfo < 0x44545355) {
+                    } else if (dwPlayerInfo <= 0x44545354) {
                       if (dwPlayerInfo == 0x44545354 || dwPlayerInfo == 0x4452544c) {
                         szGameTypeName = "Diablo";
                       } else if (dwPlayerInfo == 0x44534852) {
@@ -2610,14 +2610,14 @@ void __fastcall DRAW_OOG_ChannelPlayers(D2QuestDataA3Q6Strc * pA3Q6Data) {
                         unknown_product:
                         szGameTypeName = "Unknown";
                       }
-                    } else if (dwPlayerInfo == 0x4a535452) {
-                      szGameTypeName = "Starcraft";
-                    } else {
+                    } else if (dwPlayerInfo != 0x4a535452) {
                       if (dwPlayerInfo != 0x53455850) {
                         goto unknown_product;
                       }
 
                       szGameTypeName = "Brood War";
+                    } else {
+                      szGameTypeName = "Starcraft";
                     }
                   } else if (dwPlayerInfo < 0x57335851) {
                     if (dwPlayerInfo == 0x57335850) {
@@ -2926,7 +2926,7 @@ void __stdcall D2COMP_AllocTxt_EverythingItems() {
           gaCompCharacterCompositeItems[nDupCheckIdx].nItemTypeIndex = (int)*(short int*)((int)pItemsBase + nItemOffset + 0x11e);
           nCodeMapCount = gnCompWeaponClassCodeMapCount;
           nCodeMapIdx = 0;
-          if (gnCompWeaponClassCodeMapCount) {
+          if ((uint32_t)gnCompWeaponClassCodeMapCount > 0) {
             do {
               if (*(int*)((int)pItemsBase + nItemOffset + 0xc0) == gaCompWeaponClassCodeMap[nCodeMapIdx * 2]) {
                 iVar2 = gaCompWeaponClassCodeMap[nCodeMapIdx * 2 + 1];
@@ -2941,7 +2941,7 @@ void __stdcall D2COMP_AllocTxt_EverythingItems() {
           store_weapon_class:
           gaCompCharacterCompositeItems[nDupCheckIdx].nWeaponClass = gaCompWeaponClassByCodeIndex[iVar2];
           uVar1 = 0;
-          if (nCodeMapCount) {
+          if ((uint32_t)nCodeMapCount > 0) {
             do {
               if (*(int*)((int)pItemsBase + nItemOffset + 0xc4) == gaCompWeaponClassCodeMap[uVar1 * 2]) {
                 iVar2 = gaCompWeaponClassCodeMap[uVar1 * 2 + 1];
@@ -2983,9 +2983,7 @@ D2CharSelCompStrc * __stdcall AllocCharSelectComponent(uint32_t nPlayerClassId, 
     D2CharSelCompFlags eFlagsCopy;
     int32_t nErrorLine;
     D2CharSelCompStrc* pCharSelComp = ((D2CharSelCompStrc*)Fog::Memory::AllocClientMemory(sizeof(D2CharSelCompStrc), ".\\Src\\D2Comp.cpp", 0xc70, 0));
-    if (!pCharSelComp) {
-      nErrorLine = 0xc71;
-    } else {
+    if (pCharSelComp) {
       int* pCofCache;
       memset(pCharSelComp, 0, 0x234);
       pCofCache = (int*)Fog::Memory::AllocClientMemory(4, ".\\Src\\D2Comp.cpp", 0x866, 0);
@@ -3078,6 +3076,8 @@ D2CharSelCompStrc * __stdcall AllocCharSelectComponent(uint32_t nPlayerClassId, 
       }
 
       nErrorLine = 0x867;
+    } else {
+      nErrorLine = 0xc71;
     }
 
     void* nWeaponClass = Fog::Src::ErrorManager::GetInstructionPointer();

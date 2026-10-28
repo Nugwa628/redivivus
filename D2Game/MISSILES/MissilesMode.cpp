@@ -95,7 +95,7 @@
 
 namespace D2Game::MISSILES::MissilesMode {
 
-uint32_t MISSILE_RollAttackHit(void * pThis, D2UnitStrc * pUnit, D2UnitStrc * pUnit1) {
+uint32_t __fastcall MISSILE_RollAttackHit(void * pThis, int32_t nEdxUnused, D2UnitStrc * pUnit, D2UnitStrc * pUnit1) {
     int32_t nToHit = 0;
     if (pThis) {
       nToHit = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat((D2UnitStrc*)pThis, UNITSTAT_tohit, 0);
@@ -1456,7 +1456,11 @@ void __stdcall MISSILE_SetupTargetAndRange(D2UnitStrc * pUnit, D2UnitStrc * pUni
     D2Common::Units::Missile::SetTotalFrames(pUnit2, nRange);
     D2Common::Units::Missile::SetCurrentFrame(pUnit2, nRange);
     D2DynamicPathStrc* pDynamicPath = pUnit2->pPath.pDynamicPath;
-    if (!pUnit) {
+    if (pUnit) {
+      D2Common::PATH::DynamicPath::SetTarget(pDynamicPath, pUnit);
+      D2Common::Units::Missile::SetTargetX(pUnit2, 5);
+      nRange = D2Common::Collision::GetCollisionDistance(pUnit2, pUnit);
+    } else {
       nSkillLvl = D2Common::Units::Missile::GetTargetY(pUnit2);
       eUnitType = pUnit2->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
@@ -1481,10 +1485,6 @@ void __stdcall MISSILE_SetupTargetAndRange(D2UnitStrc * pUnit, D2UnitStrc * pUni
       D2Common::PATH::DynamicPath::SetSP1(pDynamicPath, (int16_t)nRange, (int16_t)nPosY);
       D2Common::Units::Missile::SetTargetX(pUnit2, 6);
       nRange = D2Common::Collision::GetDistanceToXY(pUnit2, nRange, nPosY);
-    } else {
-      D2Common::PATH::DynamicPath::SetTarget(pDynamicPath, pUnit);
-      D2Common::Units::Missile::SetTargetX(pUnit2, 5);
-      nRange = D2Common::Collision::GetCollisionDistance(pUnit2, pUnit);
     }
     if (nRange >= 0x19) {
       return;
@@ -4641,7 +4641,7 @@ void __fastcall Missiles_SrvDmgFunc_ElementalBonusVsUndeadDemon(::SGAMEDATA * pG
 
 void __fastcall Missiles_SrvDmgFunc_SetTargetNotControlled(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget, D2DamageStrc * pDamage) {
     D2UnitStrc* pOwner = UNIT::SUnit::GetOwnerUnit(pGame, pUnit);
-    if (!(pOwner && !(pOwner->eUnitFlags >> 9 & 1) && pTarget)) {
+    if (!(pOwner && !(((bool)(pOwner->eUnitFlags >> 9 & 1))) && pTarget)) {
       return;
     }
 
@@ -4884,12 +4884,12 @@ void __fastcall MISSMODE_ApplyMissileHitDamage(::SGAMEDATA * pGame, D2UnitStrc *
     eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pTarget, STATE_uninterruptable);
     if (eState == STATE_none) {
       uint32_t nSeedRoll;
-      if (!pMissilesTxt->GetHit) {
+      if (pMissilesTxt->GetHit) {
+        pEvent->wResultFlags |= 4;
+      } else {
         if (pMissilesTxt->SoftHit) {
           pEvent->wResultFlags |= 0x4000;
         }
-      } else {
-        pEvent->wResultFlags |= 4;
       }
       if (pMissilesTxt->KnockBack != '\0') {
         nSeedRoll = D2Client::Archive::UNIT_GetModuloFromSeed(&pUnit->sSeed, 100);
@@ -5175,7 +5175,7 @@ static void __stdcall MissileSrvDo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
 
     D2UnitStrc* pOwner;
     pOwner = UNIT::SUnit::GetOwnerUnit(pGame, pUnit);
-    if (!pTxtMissile->SrcTown) {
+    if (!(*((uint8_t *)pTxtMissile + 0x5) & gadwBitMasks[3])) {
       check_player_owner_in_town:
       if (pOwner && pOwner->eUnitType == UNIT_PLAYER && (pOwnerRoom = D2Common::Units::UNITS_GetRoom(pOwner) , pOwnerRoom != 0) && (bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pOwnerRoom) , bIsInTown != 0)) {
         goto free_missile;
@@ -5191,7 +5191,7 @@ static void __stdcall MissileSrvDo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
 
       goto check_player_owner_in_town;
     }
-    if (pTxtMissile->Town || (bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom) , !bIsInTown)) {
+    if ((*((uint8_t *)pTxtMissile + 0x5) & gadwBitMasks[2]) || (bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom) , !bIsInTown)) {
       nClassId = (*MISSILESSRVDOFUNCS[pTxtMissile->nSrvDoFunc])(pGame, pUnit);
       if (nClassId != 2) {
         return;

@@ -449,16 +449,16 @@ template<> ::StringEntryNode * TSHashTable<StringEntryNode, HASHKEY_STRI>::Inter
     TSLink<::StringEntryNode>* pBucketHead;
     uint32_t piVar2;
     ::StringEntryNode* pNode = (::StringEntryNode*)Storm::SMem::SMemAlloc(nExtraBytes + 0x18, s___AUStringEntryNode___0074364c, -2, dwFlags | 8);
-    if (!pNode) {
-      pNode = 0;
-      pBucketHead = &pList->m_terminator;
-    } else {
+    if (pNode) {
       pNode->m_linktoslot.m_prevlink = 0;
       pNode->m_linktoslot.m_next = 0;
       pNode->m_linktofull.m_prevlink = 0;
       pNode->m_linktofull.m_next = 0;
       pNode->m_key.szString = 0;
       pBucketHead = (TSLink<::StringEntryNode>*)((uintptr_t)&pNode->m_hashval + pList->m_linkoffset);
+    } else {
+      pNode = 0;
+      pBucketHead = &pList->m_terminator;
     }
 
     TSLink<::StringEntryNode>* pHeadEntry = pBucketHead->m_prevlink;
@@ -721,10 +721,10 @@ template<> int32_t TSHashTable<StringEntryNode, HASHKEY_STRI>::MonitorFullness(u
     if (0x3ff <= this->nSlotMask) {
       return 0;
     }
-    if (this->nFullnessIndicator <= 3) {
-      this->nFullnessIndicator = 0;
-    } else {
+    if (!(this->nFullnessIndicator <= 3)) {
       this->nFullnessIndicator -= 3;
+    } else {
+      this->nFullnessIndicator = 0;
     }
 
     uint32_t uEntry = this->tSlotListArray.m_data[nSlot].m_terminator.m_next;

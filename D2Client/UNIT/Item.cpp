@@ -625,7 +625,7 @@ static int32_t ITEM_GetItemDropSound(uint32_t * pnParam, D2UnitStrc * pUnit) {
         if (0 <= eItemQuality && eItemQuality < sgptDataTable->nTxtUniqueItemsSize) {
           pUniqueItemsTxt = sgptDataTable->pTxtUniqueItems + eItemQuality;
           if (pUniqueItemsTxt && 0 < pUniqueItemsTxt->dropsound) {
-            if (!(pnParam && pUniqueItemsTxt->dropsfxframe)) {
+            if (!((uint32_t)pnParam > 0 && pUniqueItemsTxt->dropsfxframe)) {
               return (int)pUniqueItemsTxt->dropsound;
             }
 

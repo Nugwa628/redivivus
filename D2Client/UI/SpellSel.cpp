@@ -79,7 +79,7 @@ static int32_t gSpellSelLeftSkillSlot12[16] = { 0 }; D2_STATIC_GUARD(gSpellSelLe
 static int32_t gSpellSelLeftSkillSlot13[16] = { 0 }; D2_STATIC_GUARD(gSpellSelLeftSkillSlot13, "D2Client::UI::SpellSel::gSpellSelLeftSkillSlot13");
 static int32_t gSpellSelLeftSkillSlot14[16] = { 0 }; D2_STATIC_GUARD(gSpellSelLeftSkillSlot14, "D2Client::UI::SpellSel::gSpellSelLeftSkillSlot14");
 static int32_t gSpellSelLeftSkillSlot15[16] = { 0 }; D2_STATIC_GUARD(gSpellSelLeftSkillSlot15, "D2Client::UI::SpellSel::gSpellSelLeftSkillSlot15");
-static bool gbSpellSelSkillTreeBackground = 0; D2_STATIC_GUARD(gbSpellSelSkillTreeBackground, "D2Client::UI::SpellSel::gbSpellSelSkillTreeBackground");
+static BOOL gbSpellSelSkillTreeBackground = 0; D2_STATIC_GUARD(gbSpellSelSkillTreeBackground, "D2Client::UI::SpellSel::gbSpellSelSkillTreeBackground");
 
 void __stdcall SPELLSEL_Initialize() {
     // Static local variables (originally global data)
@@ -924,7 +924,7 @@ void __stdcall SPELLSEL_AutoBindNonChargedSkills() {
       pSkill = D2Common::Skills::SKILLS_GetSkillByEnum(gSpellSelGridRegion.aLeftHandSlots[nGridIdx], pUnit);
       if (pSkill) {
         pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill);
-        if (pSkillsTxt && !pSkillsTxt->passive && nFreeSlot <= 0xf) {
+        if (pSkillsTxt && !(*((uint8_t *)pSkillsTxt + 0x4) & gadwBitMasks[4]) && nFreeSlot <= 0xf) {
           SPELLSEL_AssignSkillToSlot((uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)((uint32_t)_unused_ECX >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)0x10), nFreeSlot, nGridIdx);
           nFreeSlot++;
         }
@@ -1072,7 +1072,7 @@ void __fastcall SPELLSEL_DrawSkillGrid(D2UnitStrc * pUnit, int32_t nGridStartX, 
                       if ((uint32_t)pSkillDescTxt->ListPool > 0) {
                         dwSkillFlags = (uint32_t)pSkillDescTxt->ListPool;
                         if ((int)dwSkillFlags < 0x100) {
-                          if (aListPoolSeen[dwSkillFlags] != '\0') {
+                          if ((uint32_t)aListPoolSeen[dwSkillFlags] > 0) {
                             continue;
                           }
 
@@ -1752,7 +1752,7 @@ void __stdcall INPUT_SkillTreeLeftClick(D2UIMouseMsgStrc * pMsg) {
             if (pSkillTxt) {
               pSkillDesc = DataTbls::GetSkillDescription(eSkill);
               if (pSkillDesc) {
-                if (nSkillTreeActiveTab == (char)pSkillDesc->skillpage && (nTmpResult = SPELLSEL_GetSkillTreeRowOffset(pSkillDesc->skillrow) , nTmpResult - 0x30 < (int)nClickY && (int)nClickY < nTmpResult) && (nTmpResult = SPELLSEL_GetSkillTreeColumnOffset(pSkillDesc->skillcolumn) , nTmpResult < (int)nClickX && (int)nClickX < nTmpResult + 0x30 && !gaSpellSelSkillTreeState[nPrevActiveTab] && !pSkillTxt->passive)) {
+                if (nSkillTreeActiveTab == (char)pSkillDesc->skillpage && (nTmpResult = SPELLSEL_GetSkillTreeRowOffset(pSkillDesc->skillrow) , nTmpResult - 0x30 < (int)nClickY && (int)nClickY < nTmpResult) && (nTmpResult = SPELLSEL_GetSkillTreeColumnOffset(pSkillDesc->skillcolumn) , nTmpResult < (int)nClickX && (int)nClickX < nTmpResult + 0x30 && !gaSpellSelSkillTreeState[nPrevActiveTab] && !(*((uint8_t *)pSkillTxt + 0x4) & gadwBitMasks[4]))) {
                   GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT(0x3c, (int)pSkillTxt->skill, -1);
                   Draw::SetUIFlag(UI_SKILLTREE, UI_RESET, 0);
                 } else {
@@ -2191,19 +2191,7 @@ static void __stdcall DRAW_UI_SkillSkillsWithAvailableSkills() {
           nSkillDescIdx = (int)pSkillTxt->skilldesc;
           if (0 <= nSkillDescIdx && nSkillDescIdx < sgptDataTable->nTxtSkillDescSize && sgptDataTable->pTxtSkillDesc + nSkillDescIdx && nSkillTreeActiveTab == (char)sgptDataTable->pTxtSkillDesc[nSkillDescIdx].skillpage) {
             BVar1 = D2Common::Skills::SkillCalculateIfWeCanSkillThisSkill(pUnit, eSkill);
-            if (!BVar1) {
-              gaSpellSelSkillTreeState[nSkillIdx] = -1;
-              gbSpellSelSkillTreeNodeHovered[nSkillIdx] = 5;
-              pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, (int)pSkillTxt->skill, -1);
-              if (!pSkill || (nSkillDescIdx = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 1) , !nSkillDescIdx)) {
-                nGlobalPaletteShift = gbSpellSelSkillTreeNodeHovered[nSkillIdx];
-                nSkillIconState = gaSpellSelSkillTreeState[nSkillIdx];
-                nSkillDescIdx = 0;
-              } else {
-                nGlobalPaletteShift = gbSpellSelSkillTreeNodeHovered[nSkillIdx];
-                nSkillIconState = gaSpellSelSkillTreeState[nSkillIdx];
-              }
-            } else {
+            if (BVar1) {
               bCanSkill = 1;
               nCurLevel = 0;
               pCurSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1);
@@ -2212,7 +2200,7 @@ static void __stdcall DRAW_UI_SkillSkillsWithAvailableSkills() {
               }
 
               nNewSkills = DataTbls::SKILL_GetMaxLevelForSkill((int)pSkillTxt->skill);
-              if (nNewSkills <= nCurLevel) {
+              if (nCurLevel >= nNewSkills) {
                 bCanSkill = 0;
               }
 
@@ -2240,6 +2228,18 @@ static void __stdcall DRAW_UI_SkillSkillsWithAvailableSkills() {
 
               nGlobalPaletteShift = gbSpellSelSkillTreeNodeHovered[nSkillIdx];
               nSkillIconState = gaSpellSelSkillTreeState[nSkillIdx];
+            } else {
+              gaSpellSelSkillTreeState[nSkillIdx] = -1;
+              gbSpellSelSkillTreeNodeHovered[nSkillIdx] = 5;
+              pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, (int)pSkillTxt->skill, -1);
+              if (!pSkill || (nSkillDescIdx = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 1) , !nSkillDescIdx)) {
+                nGlobalPaletteShift = gbSpellSelSkillTreeNodeHovered[nSkillIdx];
+                nSkillIconState = gaSpellSelSkillTreeState[nSkillIdx];
+                nSkillDescIdx = 0;
+              } else {
+                nGlobalPaletteShift = gbSpellSelSkillTreeNodeHovered[nSkillIdx];
+                nSkillIconState = gaSpellSelSkillTreeState[nSkillIdx];
+              }
             }
 
             SKILLTREE_DrawSkillNode(eSkill, pSkillTxt, nSkillDescIdx, nSkillIconState, nGlobalPaletteShift);
@@ -2318,7 +2318,7 @@ static void __stdcall SKILLTREE_DrawAllSkillNodes() {
 
 void __stdcall DRAW_UI_SkillWindow() {
     // Static local variables (originally global data)
-    static bool gbSpellSelSkillTreeScrolling; D2_STATIC_GUARD_BSS(gbSpellSelSkillTreeScrolling, "D2Client::UI::SpellSel::DRAW_UI_SkillWindow::gbSpellSelSkillTreeScrolling");
+    static BOOL gbSpellSelSkillTreeScrolling; D2_STATIC_GUARD_BSS(gbSpellSelSkillTreeScrolling, "D2Client::UI::SpellSel::DRAW_UI_SkillWindow::gbSpellSelSkillTreeScrolling");
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
     D2Win::Src::D2WinFont::SetAndReturnLastFont(1);

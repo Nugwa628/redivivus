@@ -177,7 +177,7 @@ void __stdcall InitializeModeTokens() {
     exit(-1);
 }
 
-void __stdcall GFXUTIL_SetMissileCelFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pMissile) {
+static void __stdcall GFXUTIL_SetMissileCelFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pMissile) {
     if (!pMissile) {
       return;
     }
@@ -342,7 +342,7 @@ uint32_t __fastcall GFXUTIL_IsDC6BlockOnScreen(DC6Block * pDC6Block, int32_t nPa
 }
 
 // @sourcefile .\ENGINE\GfxUtil.cpp
-void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
+static void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
     bool bIsIdentified;
     int iVar6;
     D2SetItemsTxt* pSetItemsTxt;
@@ -450,7 +450,7 @@ static int32_t GFXUTIL_GetBodyLocWeaponToken(int32_t nBodyLoc, D2UnitStrc * pUni
     if (0x10 <= nBodyLoc) {
       return 0x2074696c;
     }
-    if (!pUnit || !(pUnit->eUnitFlagsEx >> 3 & 1)) {
+    if (!pUnit || !(((bool)(pUnit->eUnitFlagsEx >> 3 & 1)))) {
       pInventory = pUnit->pInventory;
     } else {
       int nWeaponClass;
@@ -802,7 +802,7 @@ BOOL __fastcall GFXUTIL_GetEtherealTransparency(D2UnitStrc * pUnit, int32_t nPar
     if (eUnitType != UNIT_PLAYER) {
       return 0;
     }
-    if (!pUnit || !(pUnit->eUnitFlagsEx >> 3 & 1) || (_bIsEthereal = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !_bIsEthereal || (pDVar2 = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pDVar2))) {
+    if (!pUnit || !(((bool)(pUnit->eUnitFlagsEx >> 3 & 1))) || (_bIsEthereal = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !_bIsEthereal || (pDVar2 = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pDVar2))) {
       pInventory = pUnit->pInventory;
     } else {
       pInventory = pDVar2->pInventory;
@@ -855,7 +855,7 @@ uint8_t * __fastcall GFXUTIL_GetItemColorForBodyLoc(D2UnitStrc * pUnit, int32_t 
     if (eUnitType != UNIT_PLAYER) {
       return pDefaultColor;
     }
-    if (!(pUnit->eUnitFlagsEx >> 3 & 1) || (bHasState = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !bHasState || (pOwnerUnit = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pOwnerUnit))) {
+    if (!(((bool)(pUnit->eUnitFlagsEx >> 3 & 1))) || (bHasState = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !bHasState || (pOwnerUnit = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pOwnerUnit))) {
       pInventory = pUnit->pInventory;
     } else {
       pInventory = pOwnerUnit->pInventory;
@@ -946,7 +946,7 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
     if (!pGfxInfo) {
       return 0;
     }
-    if (!pUnit || !(pUnit->eUnitFlagsEx >> 3 & 1) || (bHasState0x25 = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !bHasState0x25) || (pOwnerUnit = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pOwnerUnit)) {
+    if (!pUnit || !(((bool)(pUnit->eUnitFlagsEx >> 3 & 1))) || (bHasState0x25 = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !bHasState0x25) || (pOwnerUnit = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pOwnerUnit)) {
       pInventory = pUnit->pInventory;
     } else {
       pInventory = pOwnerUnit->pInventory;
@@ -972,7 +972,7 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
 
 // Build COF parameters from unit animation/equipment - determines graphics file, weapon, armor appearance
 // @sourcefile .\ENGINE\GfxUtil.cpp
-BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit, D2UnitStrc * pEquipContext, int * pOutItemClassId) {
+static BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit, D2UnitStrc * pEquipContext, int * pOutItemClassId) {
     int32_t nComponentIdx;
     D2GfxInfoUnkStrc* pGfxInfo;
     D2GfxInfoUnkStrc* pGfxInfoFallback;
@@ -1005,9 +1005,7 @@ BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUn
     BOOL BVar1;
     eD2UnitType eEffectiveUnitType;
     eEffectiveUnitType = UNIT_COUNT;
-    if (!pUnit) {
-      pGfxData->eUnitType = UNIT_COUNT;
-    } else {
+    if (pUnit) {
       eEffectiveUnitType = pUnit->eUnitType;
       nEffectiveClassId = pUnit->nClassId;
       pEffectiveMode = (D2UnitStrc*)D2Common::Units::GetAnimOrSeqMode(pUnit);
@@ -1022,6 +1020,8 @@ BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUn
       if (UNIT_COUNT < eEffectiveUnitType) {
         return 0;
       }
+    } else {
+      pGfxData->eUnitType = UNIT_COUNT;
     }
 
     switch (eEffectiveUnitType) {
@@ -1169,7 +1169,7 @@ BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUn
       default:
         iVar3 = pGfxData->nOverlayId;
       pGfxData->dwFlags |= 2;
-      if (!(-1 < iVar3 && iVar3 < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + iVar3)) {
+      if (!(0 <= iVar3 && iVar3 < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + iVar3)) {
         return 1;
       }
 
@@ -1179,3 +1179,150 @@ BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUn
 }
 
 } // namespace D2Client::Engine::GfxUtil
+
+namespace D2Client {
+
+int32_t __fastcall DC6_AssignParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit, DC6 * pDC6, int32_t nDirection, int32_t nFrameNumber, int * pnOutItemClassId, uint8_t nComponentType, D2UnitStrc * pEquipContext) {
+    pGfxData->pDC6 = pDC6;
+    pGfxData->nDirection = nDirection;
+    pGfxData->nFrameNumber = nFrameNumber;
+    pGfxData->nComponentType = nComponentType;
+    int32_t nResult = Engine::GfxUtil::GFXUTIL_BuildCofParams(pGfxData, pUnit, pEquipContext, pnOutItemClassId);
+    return nResult;
+}
+
+int32_t __fastcall GFXUTIL_CalcMaxSpriteHeight(D2UnitStrc * pUnit, uint8_t * pbParam, int32_t pLayerArray, int * pOutMaxY, int32_t nPaletteShift, uint32_t nParam) {
+    int nSpriteLoaded;
+    int32_t nOffsetY;
+    int32_t nDrawWorldOffsetY;
+    int32_t nWorldOffsetY;
+    int iVar1;
+    D2GfxDataStrc sGfxData;
+    int nOutItemClassId;
+    uint8_t byLayerIdCheck;
+    int nLoadedCount = 0;
+    int nLayerIdx = 0;
+    uint8_t* pLayerArrayBase = pbParam;
+    if (!*pbParam) {
+      return nLoadedCount;
+    }
+
+    do {
+      int nBuilt;
+      iVar1 = nLayerIdx;
+      byLayerIdCheck = *(uint8_t*)(nLayerIdx + pLayerArray);
+      if (0xf < byLayerIdCheck) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x59d);
+        exit(-1);
+      }
+
+      memset(&sGfxData, 0, 0x48);
+      sGfxData.nDirection = nPaletteShift;
+      sGfxData.nFrameNumber = nParam;
+      sGfxData.pDC6 = 0;
+      sGfxData.nComponentType = byLayerIdCheck;
+      nBuilt = Engine::GfxUtil::GFXUTIL_BuildCofParams(&sGfxData, pUnit, (D2UnitStrc*)-1, &nOutItemClassId);
+      if (nBuilt) {
+        nSpriteLoaded = D2CMP::SRC::SpriteCache::SPRITECACHE_GetOrLoadSprite(&sGfxData, 0, 1);
+        if (nSpriteLoaded && sGfxData.pDC6Block) {
+          nOffsetY = D2CMP::SRC::CelCmp::GetDC6OffsetY(sGfxData.pDC6Block);
+          nDrawWorldOffsetY = UI::Path::DRAW_GetWorldOffsetY();
+          nWorldOffsetY = D2Common::Units::GetTargetY(pUnit);
+          iVar1 = nWorldOffsetY + (nOffsetY - nDrawWorldOffsetY);
+          if (iVar1 > *pOutMaxY) {
+            *pOutMaxY = iVar1;
+          }
+
+          nLoadedCount++;
+          iVar1 = nLayerIdx;
+        }
+      }
+
+      nLayerIdx = iVar1 + 1;
+    } while (nLayerIdx < (int)(uint32_t)*pLayerArrayBase);
+
+    return nLoadedCount;
+}
+
+int32_t __fastcall GFXUTIL_GetOverlayFrameDelay(D2UnitStrc * pUnit, int32_t pOverlayEntry) {
+    D2GfxDataStrc sGfxData;
+    int nOutItemClassId;
+    memset(&sGfxData, 0, 0x48);
+    sGfxData.nOverlayId = *(int*)(pOverlayEntry + 4);
+    int nBuilt = *(int*)(pOverlayEntry + 0x18);
+    uint8_t byDirection = D2Common::Units::GetDirection(pUnit);
+    sGfxData.nDirection = (int)byDirection;
+    sGfxData.pDC6 = 0;
+    sGfxData.nComponentType = '\x01';
+    sGfxData.nFrameNumber = nBuilt;
+    BOOL nWeaponClass = Engine::GfxUtil::GFXUTIL_BuildCofParams(&sGfxData, nullptr, (D2UnitStrc*)-1, &nOutItemClassId);
+    if (!nWeaponClass) {
+      return 1;
+    }
+
+    nBuilt = D2CMP::SRC::SpriteCache::SPRITECACHE_GetOrLoadSprite(&sGfxData, 0, 1);
+    if (!nBuilt) {
+      return 1;
+    }
+
+    return sGfxData.nFrameCount << 8;
+}
+
+void __fastcall GFXUTIL_GetOverlayDimensions(D2UnitStrc * pUnit, int nPaletteShift, uint32_t nAnimMode, uint32_t * pOutWidth, uint32_t * pdwParam) {
+    D2GfxDataStrc sGfxData;
+    memset(&sGfxData, 0, 0x48);
+    sGfxData.nFrameNumber = nAnimMode;
+    sGfxData.pDC6 = 0;
+    sGfxData.nComponentType = '\x01';
+    sGfxData.nDirection = nPaletteShift;
+    BOOL nDimension = Engine::GfxUtil::GFXUTIL_BuildCofParams(&sGfxData, pUnit, (D2UnitStrc*)-1, (int*)&nAnimMode);
+    if (!nDimension) {
+      return;
+    }
+
+    int nCofBuilt = D2CMP::SRC::SpriteCache::SPRITECACHE_GetOrLoadSprite(&sGfxData, 0, 1);
+    if (!(nCofBuilt && sGfxData.pDC6Block)) {
+      return;
+    }
+
+    uint32_t uVar1 = D2CMP::SRC::CelCmp::GetDC6Width(sGfxData.pDC6Block);
+    *pOutWidth = uVar1;
+    int32_t iVar2 = D2CMP::SRC::CelCmp::GetDC6Height(sGfxData.pDC6Block);
+    *pdwParam = iVar2;
+}
+
+uint32_t __fastcall GFXUTIL_IsUnitSpriteOnScreen(D2UnitStrc * pUnit, int32_t nParam, int32_t nWorldY) {
+    D2GfxDataStrc sGfxData;
+    int nFrameMetrics2;
+    int nFrameMetrics;
+    int32_t nWorldOffsetX = UI::Path::DRAW_GetWorldOffsetX();
+    int nScreenX = nParam - nWorldOffsetX;
+    int32_t nWorldOffsetY = UI::Path::DRAW_GetWorldOffsetY();
+    int nOriginY = nWorldY - nWorldOffsetY;
+    D2GfxInfoUnkStrc* pGfxInfo = Engine::Gfx::GFX_IsUnitOnScreen(pUnit, nParam - nWorldOffsetX, nOriginY, 0, 0);
+    if (!pGfxInfo) {
+      return 0;
+    }
+
+    D2Common::Units::GetShiftedFrameMetrics(pUnit, &nFrameMetrics, &nFrameMetrics2);
+    memset(&sGfxData, 0, 0x48);
+    uint8_t byDirection = D2Common::Units::GetDirection(pUnit);
+    sGfxData.nDirection = (int)byDirection;
+    sGfxData.pDC6 = 0;
+    sGfxData.nFrameNumber = nFrameMetrics;
+    sGfxData.nComponentType = '\x01';
+    BOOL BVar1 = Engine::GfxUtil::GFXUTIL_BuildCofParams(&sGfxData, pUnit, (D2UnitStrc*)-1, &nWorldY);
+    if (!BVar1) {
+      return 0;
+    }
+
+    int nCofBuilt = D2CMP::SRC::SpriteCache::SPRITECACHE_GetOrLoadSprite(&sGfxData, 0, 1);
+    if (!(nCofBuilt && sGfxData.pDC6Block)) {
+      return 0;
+    }
+
+    uint32_t bOnScreen = Engine::GfxUtil::GFXUTIL_IsDC6BlockOnScreen(sGfxData.pDC6Block, nScreenX, nOriginY, 0);
+    return bOnScreen;
+}
+
+} // namespace D2Client

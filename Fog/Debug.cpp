@@ -6089,9 +6089,7 @@ BOOL __fastcall QuickStackWalkWithSymbols(char * szSearchPath, HANDLE hProcess, 
         bCarry = (uint32_t)((uint32_t)qwModInfoCycles + (uint32_t)nCycleSample) < (uint32_t)qwModInfoCycles;
         *(uint32_t*)(char*)&qwModInfoCycles = (uint32_t)qwModInfoCycles + nCycleSample;
         *(uint32_t*)((char*)&qwModInfoCycles + 4) = *(uint32_t*)((char*)&qwModInfoCycles + 4) + nCycleSample + (uint32_t)bCarry;
-        if (!__frame1.bHasLineInfo) {
-          Src::LogManager::LOGMANAGER_TraceToModuleLog(__frame1.szLogCategory, "    %08X  %s!%s+%04X", __frame0.stackFrame[0], __frame2.moduleInfo.ModuleName, pszSymName);
-        } else {
+        if (__frame1.bHasLineInfo) {
           pszRelFileName = Src::ErrorManager::StripPathPrefixToRelative(__frame1.pszFileName);
           nStrLen = Storm::Source::SSTR::SStrLen(__frame2.moduleInfo.ModuleName);
           __frame1.nLineNumber = 0x28 - nStrLen;
@@ -6102,6 +6100,8 @@ BOOL __fastcall QuickStackWalkWithSymbols(char * szSearchPath, HANDLE hProcess, 
           }
 
           Src::LogManager::LOGMANAGER_TraceToModuleLog(__frame1.szLogCategory, "    %08X  %s!%s+%04X  %*s%s,%d", __frame0.stackFrame[0], __frame2.moduleInfo.ModuleName, pszSymName, __frame2.nSymOffset, bOk, " ", pszRelFileName);
+        } else {
+          Src::LogManager::LOGMANAGER_TraceToModuleLog(__frame1.szLogCategory, "    %08X  %s!%s+%04X", __frame0.stackFrame[0], __frame2.moduleInfo.ModuleName, pszSymName);
         }
       }
 

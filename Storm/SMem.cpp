@@ -1193,7 +1193,18 @@ static uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFla
     }
 
     nBestFit = 0;
-    if (!ppBestSlot) {
+    if (ppBestSlot) {
+      pAllocBlock = (D2FogHeapBlockHdrStrc*)*ppBestSlot;
+      byBlockFlags = pAllocBlock->byFlags >> 4;
+      *ppBestSlot = (void*)pAllocBlock->dwHeapSignature;
+      nBestFit = byBlockFlags & 1;
+      pFreeBinHead = (void*)((uintptr_t)&pAllocBlock->wBlockSize + (uint32_t)pAllocBlock->wBlockSize);
+      if (pHeap->nFragCount && (byBlockFlags & 1 || pFreeBinHead != pHeap->pWriteCursor && *(uint8_t*)((int)pFreeBinHead + 3) & 2)) {
+        pHeap->nFragCount--;
+      }
+
+      SMemCoalesceFreeBlocks(&nUsedSize, pAllocBlock, (int*)&nTotalSize, pHeap);
+    } else {
       D2FogHeapDescStrc* pActiveHeap;
       nBinIndex = pHeap->nReserved;
       nNeededTotal = (int)pHeap->pWriteCursor + (nTotalSize - (int)pHeap);
@@ -1221,17 +1232,6 @@ static uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFla
 
       pAllocBlock = (D2FogHeapBlockHdrStrc*)pHeap->pWriteCursor;
       pHeap->pWriteCursor = (void*)((uintptr_t)&pAllocBlock->wBlockSize + nTotalSize);
-    } else {
-      pAllocBlock = (D2FogHeapBlockHdrStrc*)*ppBestSlot;
-      byBlockFlags = pAllocBlock->byFlags >> 4;
-      *ppBestSlot = (void*)pAllocBlock->dwHeapSignature;
-      nBestFit = byBlockFlags & 1;
-      pFreeBinHead = (void*)((uintptr_t)&pAllocBlock->wBlockSize + (uint32_t)pAllocBlock->wBlockSize);
-      if (pHeap->nFragCount && (byBlockFlags & 1 || pFreeBinHead != pHeap->pWriteCursor && *(uint8_t*)((int)pFreeBinHead + 3) & 2)) {
-        pHeap->nFragCount--;
-      }
-
-      SMemCoalesceFreeBlocks(&nUsedSize, pAllocBlock, (int*)&nTotalSize, pHeap);
     }
 
     pHeap->nBytesInUse += nSize;
@@ -1256,11 +1256,11 @@ static uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFla
     pDebugPage = (LPVOID)0x0;
     if (DebugMemory || ProtectMemory) {
       nBinIndex = iVar1 - (iVar1 - 1U & nNeededTotal);
-      if (!ProtectMemory) {
-        nBinIndex &= g_SMemPageSize - 4U;
-      } else {
+      if (ProtectMemory) {
         /* DWORD flProtect for VirtualAlloc */ nBinIndex &= iVar1 - 1U;
         /* DWORD flAllocationType for VirtualAlloc */ /* SIZE_T dwSize for VirtualAlloc */ /* LPVOID lpAddress for VirtualAlloc */ pDebugPage = VirtualAlloc((LPVOID)0x0, nBinIndex + 4 + nNeededTotal, 0x2000, 1);
+      } else {
+        nBinIndex &= g_SMemPageSize - 4U;
       }
     }
 

@@ -408,7 +408,7 @@ int __fastcall SKILLPAL_ApplyAuraStateToTarget(D2SkillCallbackContextStrc * pCon
               pItemStatCostTxt = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine(eUnitStat);
               pAuraArgs = pAuraArgsSaved;
               if (pItemStatCostTxt) {
-                if (!(pItemStatCostTxt->dwItemStatFlags & ITEMSTATCOSTFLAG_DIRECT)) {
+                if (!(pItemStatCostTxt->dwItemStatFlags & gadwBitMasks[4])) {
                   nStatResult = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pNewStatList, eUnitStat, 0);
                   if (nStatResult != nValue_00) {
                     D2Common::DATATBLS::ItemStats::D2StatesTogglegfx(pUnit, sAuraArg.eAuraState, 1);

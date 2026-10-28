@@ -162,7 +162,7 @@ BOOL __fastcall D2WINBUTTON_HandleMouseWheel(::D2WinButton * pButton, int32_t nW
 
     D2ControlMsg sMsg;
     dwState = pButton->sControl.dwState;
-    if (!(dwState & 1 && dwState & 4 && !pButton->bPressed && !pButton->bPressedInside && (0 < nWheelDelta && pButton->nButtonFlags & 8 || nWheelDelta < 0 && pButton->nButtonFlags & 0x10))) {
+    if (!(dwState & gadwBitMasks[0] && dwState & gadwBitMasks[2] && !pButton->bPressed && !pButton->bPressedInside && (0 < nWheelDelta && pButton->nButtonFlags & 8 || nWheelDelta < 0 && pButton->nButtonFlags & 0x10))) {
       return 0;
     }
 
@@ -289,7 +289,7 @@ BOOL __fastcall Draw(::D2WinButton * pButton) {
     dwState = pButton->sControl.dwState;
     int nFrameBase;
     nFrameBase = pButton->nCurrentImageIndex;
-    if (!(dwState & 4) || !(dwState & 1)) {
+    if (!(dwState & gadwBitMasks[2]) || !(dwState & gadwBitMasks[0])) {
       nFrameOffset = pButton->nFrameOffsetDisabled;
     } else {
       nFrameOffset = pButton->bPressed;
@@ -317,8 +317,8 @@ BOOL __fastcall Draw(::D2WinButton * pButton) {
 
     nFrameBase += nFrameOffset;
     draw_button:
-    if (pButton->sControl.pDC6 && dwState & 4) {
-      if (dwState & 1 || (eDrawMode = DRAW_TRANSPARENT , (pButton->nButtonFlags & 0x20) != 0)) {
+    if (pButton->sControl.pDC6 && dwState & gadwBitMasks[2]) {
+      if (dwState & gadwBitMasks[0] || (eDrawMode = DRAW_TRANSPARENT , (pButton->nButtonFlags & 0x20) != 0)) {
         eDrawMode = DRAW_SOLID;
       }
 
@@ -424,7 +424,7 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
     }
 
     uint32_t uVar1 = pButton->sControl.dwState;
-    if (!(uVar1 & 4) || !(uVar1 & 1)) {
+    if (!(uVar1 & 4) || !(uVar1 & gadwBitMasks[0])) {
       return 0;
     }
     if (pButton->nButtonFlags & 2U) {
@@ -471,7 +471,7 @@ BOOL __stdcall Mouse(D2ControlMsg * pControlMsg) {
     *piVar1 |= 2;
     dwState = pButton->sControl.dwState;
     bCallbackResult = 0;
-    if (!(dwState & 4) || !(dwState & 1)) {
+    if (!(dwState & gadwBitMasks[2]) || !(dwState & gadwBitMasks[0])) {
       pButton->sControl.dwState = dwState & -3;
       return 0;
     }

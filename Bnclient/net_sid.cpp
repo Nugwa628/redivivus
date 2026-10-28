@@ -830,10 +830,12 @@ BOOL __fastcall NET_SID_CLIENT_Incoming_AuthAccountLogon(char * pPacketData, siz
     }
 
     int iVar1 = *(int*)pPacketData;
-    if (!iVar1) {
+    switch (iVar1) {
+    case 0: {
       Debug::DEBUG_UnusedDebugFunction("Logon requires proof");
       iVar2 = NET_SID_CLIENT_Send_0x54_AuthAccountLogonProof(pPacketData + 4, pPacketData + 0x24);
       return iVar2;
+    }
     }
     if (iVar1 != 1) {
       BOOL dwStatusCode;
@@ -845,9 +847,11 @@ BOOL __fastcall NET_SID_CLIENT_Incoming_AuthAccountLogon(char * pPacketData, siz
 
       Debug::DEBUG_UnusedDebugFunction("Logon requires upgrade");
       dwStatusCode = NET_SID_CLIENT_Send_0x57_AuthAccountUpgrade(1);
-      if (!dwStatusCode) {
+      switch (dwStatusCode) {
+      case 0: {
         BNMESSQUEUE_SetStateIfZero(0x12);
         return 0;
+      }
       }
     } else {
       Debug::DEBUG_UnusedDebugFunction("Logon failed: Account unknown");
@@ -951,11 +955,13 @@ BOOL __fastcall NET_SID_CLIENT_Incoming_AuthAccountChangeProof(char * pPacketDat
     int dwStatusCode = *(int*)pPacketData;
     NET_SID_ClearSrpPassword();
     if (dwStatusCode) {
-      if (dwStatusCode == 2) {
+      switch (dwStatusCode) {
+      case 2: {
         Debug::DEBUG_UnusedDebugFunction("Change Proof failed: Invalid password");
         g_SIDPacketResponseFlags[0x55] = 1;
         BNMESSQUEUE_SetStateIfZero(0xe);
         return 1;
+      }
       }
       szFailureMessage = "Change Proof failed: Unknown result";
     } else {
@@ -2245,7 +2251,7 @@ int32_t __fastcall NET_SID_CLIENT_DecodeCDKeyHash(int * pnParam, uint32_t nParam
         }
       }
 
-      if ((char)pnParam[1] == '\0') {
+      if ((uint32_t)((char)pnParam[1]) <= 0) {
         NET_SID_CLIENT_GetSHAState(0, shaState);
         if (*pnParam == shaState[0]) {
           byDataByte = *(uint8_t*)((int)pnParam + 5);

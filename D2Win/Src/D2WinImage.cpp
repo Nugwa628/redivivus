@@ -171,7 +171,7 @@ BOOL __fastcall Draw(::D2WinImage * pImage) {
     }
 
     uint32_t dwState = pImage->sControl.dwState;
-    if (!(dwState & 4 && dwState & 1)) {
+    if (!(dwState & gadwBitMasks[2] && dwState & gadwBitMasks[0])) {
       return 0;
     }
     if (!pImage->sControl.pDC6) {
@@ -322,13 +322,12 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
 
 // @sourcefile .\Src\D2WinImage.cpp
 ::D2WinImage * __fastcall D2WinImage(int32_t nParam1, int32_t nParam2, int32_t nSizeX, int32_t nSizeY, DC6 * pDC6, OnPress pfnOnPress, D2WinImageHitArea * pHitAreas, ::Key pKey) {
-    ::D2WinImage* pNewImage = D2_NEW(::D2WinImage);
+    ::D2WinImage* pNewImage = ((::D2WinImage*)Fog::Memory::AllocClientMemory(sizeof(::D2WinImage), ".\\Src\\D2WinImage.cpp", 0x1d, 0));
     memset(pNewImage, 0, 0x4c);
     pNewImage->sControl.neD2FormType = FORM_Image;
-    int* pDwState = &pNewImage->sControl.dwState;
-    *pDwState |= 1;
+    pNewImage->sControl.dwState |= 1;
     pNewImage->sControl.pDC6 = pDC6;
-    pNewImage->sControl.dwState |= 4;
+    pNewImage->sControl.dwState |= gadwBitMasks[2];
     pNewImage->sControl.dwSizeX = nSizeX;
     pNewImage->sControl.dwSizeY = nSizeY;
     pNewImage->sControl.fpKey = pKey;
