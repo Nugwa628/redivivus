@@ -90,15 +90,15 @@ int __stdcall DRLGOUTDOOR_ValidateSubTilePlacement(D2UnkOutdoorStrc * pOutdoorCt
       dx = 0;
       if (0 < pSubRect->nWidth) {
         do {
-          if (!pSubLvl->pDrlgFile->nFloorLayers) {
-            floorFlag = 0;
-          } else {
+          if (pSubLvl->pDrlgFile->nFloorLayers) {
             floorFlag = DrlgGrid::GetGridFlags(&pSubLvl->pFloorGrid, pSubRect->nPosX + dx, pSubRect->nPosY + dy);
-          }
-          if (!pSubLvl->pDrlgFile->nWallLayers) {
-            wallFlag = 0;
           } else {
+            floorFlag = 0;
+          }
+          if (pSubLvl->pDrlgFile->nWallLayers) {
             wallFlag = DrlgGrid::GetGridFlags(pSubLvl->pWallGrid, pSubRect->nPosX + dx, pSubRect->nPosY + dy);
+          } else {
+            wallFlag = 0;
           }
 
           nGridIndex = pSubLvl->GridSize * dy + (pBaseGridY - pBaseGridY % nGridStride);
@@ -166,15 +166,15 @@ int __stdcall DRLGOUTDOOR_ApplySubTileToGrid(int nBaseX, int nBaseY, D2UnkOutdoo
       nCol = 0;
       if (0 < pCoords->nWidth) {
         do {
-          if (!pLvlSub->pDrlgFile->nWallLayers) {
-            uWallFlags = 0;
-          } else {
+          if (pLvlSub->pDrlgFile->nWallLayers) {
             uWallFlags = DrlgGrid::GetGridFlags(pLvlSub->pWallGrid, nCol + nWorldX, nOffset + nWorldY);
-          }
-          if (!pLvlSub->pDrlgFile->nFloorLayers) {
-            uFloorFlags = 0;
           } else {
+            uWallFlags = 0;
+          }
+          if (pLvlSub->pDrlgFile->nFloorLayers) {
             uFloorFlags = DrlgGrid::GetGridFlags(&pLvlSub->pFloorGrid, nCol + nWorldX, nOffset + nWorldY);
+          } else {
+            uFloorFlags = 0;
           }
 
           nResult = pLvlSub->GridSize * nOffset + (nBaseY - nBaseY % iVar1);
@@ -233,10 +233,10 @@ BOOL __stdcall DRLGOUTDOOR_MatchSubTileTypes(int32_t nParam1, int32_t nParam2, D
           if (nSubTileType != nRoomTileType) {
             return 0;
           }
-          if (!pLvlSubTxt->pDrlgFile->nFloorLayers) {
-            floorFlag = 0;
-          } else {
+          if (pLvlSubTxt->pDrlgFile->nFloorLayers) {
             floorFlag = DrlgGrid::GetGridFlags(&pLvlSubTxt->pFloorGrid, *pnParam + nCol, pnParam[1] + row);
+          } else {
+            floorFlag = 0;
           }
           if (floorFlag & 2) {
             uSubFlags = DrlgGrid::GetGridFlags(pDrlgUnkn->pFloorGrid, nCol + nParam1, nY);
