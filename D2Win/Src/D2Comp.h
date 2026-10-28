@@ -27,7 +27,6 @@ struct D2CompCharacterCompositeItemStrc {
 namespace D2Win::Src::D2Comp {
 
 // Function declarations
-void * D2COMP_AssertNotNull(void * pValue);
 void * __stdcall D2COMP_ValidateCOFLayerData(int32_t nLayerIndex, int32_t nFrameIndex, uint8_t * pbParam);
 void __fastcall D2COMP_PopulateComponentFromCOF(int32_t pCOFData, struct D2GfxDataStrc * pGfxData);
 uint8_t * __fastcall D2COMP_GetPaletteTransformTable(uint32_t nPaletteShift);

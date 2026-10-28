@@ -106,7 +106,6 @@ uint32_t __stdcall FILETOOLS_ExtractDirectory(char * szDest, char * nDestSize, c
 uint32_t __stdcall FILETOOLS_ExtractFilename(char * szDest, char * szSrcPath, char * nDestSize);
 bool __fastcall STRING_AppendBlizzardErrorSubfolderToPath(char * szPath);
 char * __stdcall STRING_AppendStringToString(char * szDest, int32_t nDestSize, char * szSrc);
-int STRING_FormatVarArgs(char * szFormat, char * szDest, int32_t nDestSize, ...);
 bool __fastcall FILETOOLS_StartApplicationWithCommandLine_UTF8(LPCSTR lpApplicationName, LPCSTR szCommandLine);
 bool __stdcall FILETOOLS_CheckIfFileExists_UTF8(LPCSTR lpMultiByteStr);
 FILE * __stdcall FILETOOLS_OpenFile_WriteMode_UTF8(LPCSTR lpMultiByteStr);

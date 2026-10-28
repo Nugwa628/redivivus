@@ -295,20 +295,6 @@ uint32_t CACHE_ComputeCRC32(int32_t nByteLen, uint8_t * pbData) {
     return ~dwCrcAccum;
 }
 
-void CACHE_DecryptBlock(uint32_t dwKey, uint32_t * pdwData, uint32_t nByteLen) {
-    uint32_t nLoopCount;
-    int nSeed = -0x11111112;
-    for (nLoopCount = nByteLen >> 2; nLoopCount; nLoopCount--) {
-      uint32_t dwPlain;
-      nSeed += *(int*)((int)g_pCacheCryptTable + (dwKey & 0xff) * 4 + 0x1000);
-      *pdwData ^= nSeed + dwKey;
-      dwPlain = *pdwData;
-      pdwData++;
-      dwKey = dwKey >> 0xb | ~dwKey * 0x200000 + 0x11111111;
-      nSeed = nSeed * 0x21 + 3 + dwPlain;
-    }
-}
-
 void CACHE_EncryptBlock(uint32_t nParam1, uint32_t nParam2, uint32_t * pnParam) {
     uint32_t nDwordCount;
     void* pCryptTableBase = g_pCacheCryptTable;
@@ -350,19 +336,6 @@ LPFILETIME * CACHE_GetFileTime(uint32_t nParam) {
     return &lpFileTime_008818ac;
 }
 
-uint32_t __stdcall CACHE_HashString(int32_t nParam, char * szText) {
-    uint32_t dwHash = 0x7fed7fed;
-    int nHashSeed = -0x11111112;
-    for (; szText && *szText != '\0'; szText++) {
-      int nUpperChar;
-      nUpperChar = toupper((int)*szText);
-      dwHash = dwHash + nHashSeed ^ *(uint32_t*)((int)g_pCacheCryptTable + (nParam * 0x100 + (int)(char)nUpperChar) * 4);
-      nHashSeed = nHashSeed * 0x21 + (int)(char)nUpperChar + 3 + dwHash;
-    }
-
-    return dwHash;
-}
-
 void __stdcall CACHE_InitCryptTable() {
     if (!g_pCacheCryptTable) {
       return;
@@ -391,66 +364,6 @@ void __stdcall CACHE_InitCryptTable() {
       pEntry++;
       nCount--;
     } while (nCount);
-}
-
-uint32_t __stdcall CACHE_FindHashEntry(uint32_t nParam, char * szText) {
-    uint32_t nHash0 = CACHE_HashString(0, szText);
-    uint32_t nHash1 = CACHE_HashString(1, szText);
-    uint32_t nHash2 = CACHE_HashString(2, szText);
-    uint32_t nHashTableMask = gpCacheFileHeader->nHashTableSize - 1;
-    uint32_t nStartHashSlot = nHashTableMask & nHash0;
-    int nHashSlotOffset = nStartHashSlot * 0x10;
-    int nBlockIdx = *(int*)(gpCacheBufferPoolFirst + nHashSlotOffset + 0xc);
-    uint32_t nFoundHashSlot = -1;
-    nHash0 = nStartHashSlot;
-    while (true) {
-      uint32_t* pdwHashEntry;
-      if (nBlockIdx == -1) {
-        return nFoundHashSlot;
-      }
-
-      pdwHashEntry = (uint32_t*)(gpCacheBufferPoolFirst + nHashSlotOffset);
-      if (*pdwHashEntry == nHash1 && pdwHashEntry[1] == nHash2 && nBlockIdx != -2) {
-        if (pdwHashEntry[2] == nParam) {
-          return nHash0;
-        }
-        if (!pdwHashEntry[2]) {
-          nFoundHashSlot = nHash0;
-        }
-      }
-
-      nHash0 = nHash0 + 1 & nHashTableMask;
-      if (nHash0 == nStartHashSlot) {
-        break;
-      }
-
-      nHashSlotOffset = nHash0 * 0x10;
-      nBlockIdx = *(int*)(gpCacheBufferPoolFirst + nHashSlotOffset + 0xc);
-    }
-
-    return nFoundHashSlot;
-}
-
-void CACHE_RemoveEntry(char * szText) {
-    uint32_t* pBlockIdxField;
-    uint32_t nHashSlot = CACHE_FindHashEntry(0, szText);
-    void* pCacheBlockTable = gpCacheBlockTable;
-    while (nHashSlot != -1) {
-      uint32_t uVar1;
-      pBlockIdxField = (uint32_t*)(gpCacheBufferPoolFirst + nHashSlot * 0x10 + 0xc);
-      uVar1 = *pBlockIdxField;
-      gpCacheBlockTable = pCacheBlockTable;
-      if (uVar1 < gpCacheFileHeader->nBlockTableSize) {
-        *(uint32_t*)((int)pCacheBlockTable + uVar1 * 0x10 + 8) = 0;
-        *(uint32_t*)((int)pCacheBlockTable + uVar1 * 0x10 + 0xc) = 0;
-      }
-
-      *pBlockIdxField = -2;
-      nHashSlot = CACHE_FindHashEntry(0, szText);
-      pCacheBlockTable = gpCacheBlockTable;
-    }
-
-    gpCacheBlockTable = pCacheBlockTable;
 }
 
 void CACHE_BuildFilePath(LPSTR szText) {

@@ -190,7 +190,7 @@ void __fastcall NET_SID_CLIENT_Send_0x07_ReportVersion(uint32_t dwExeHash, uint3
     NET_SID_CLIENT_Send(7, (char*)&sPacket, (size_t)(szFilenameCursor + (0x15 - (int)(sPacket.szExeInfo + 1))));
 }
 
-void NET_SID_CLIENT_Send_0x06_StartVersioning() {
+int NET_SID_CLIENT_Send_0x06_StartVersioning() {
     // Frame slots -288..-4 are ONE object: &dwExeChecksum is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -216,7 +216,7 @@ void NET_SID_CLIENT_Send_0x06_StartVersioning() {
     __frame0.sPacket.dwVersionByte = 0xe;
     _net_sid::NET_SID_CLIENT_ResetRequireResponse(6);
     int32_t nCRCOk = NET_SID_CLIENT_Send(6, (char*)&__frame0.sPacket, 0x10);
-    if (-1 < nCRCOk) {
+    if (0 <= nCRCOk) {
       bPatchPending = BnDownload::BNDOWNLOAD_HasPatchFilename();
       while (true) {
         if (bPatchPending) {
@@ -230,8 +230,7 @@ void NET_SID_CLIENT_Send_0x06_StartVersioning() {
 
         bIsExpansion = _net_sid::SID_GetReadyFlag();
         if (bIsExpansion) {
-          Fog::Debug::GuardStack();
-          return;
+          return 0;
         }
 
         /* DWORD dwMilliseconds for Sleep */ Sleep(10);
@@ -246,8 +245,7 @@ void NET_SID_CLIENT_Send_0x06_StartVersioning() {
         nCRCOk = BnDownload::BNDOWNLOAD_PerformCheckRevision(&__frame0.dwExeVerOut, &__frame0.dwExeChecksum, &__frame0.cExeInfoFirst);
         if (!nCRCOk) {
           BNMESSQUEUE_SetStateIfZero(1);
-          Fog::Debug::GuardStack();
-          return;
+          return 0;
         }
 
         BNSEND_SendRawBytes(gaBnSendRawBytesHeader, 2);
@@ -255,8 +253,7 @@ void NET_SID_CLIENT_Send_0x06_StartVersioning() {
         _net_sid::NET_SID_CLIENT_WaitForPacketId(7);
       }
     }
-
-    Fog::Debug::GuardStack();
+    return 0;
 }
 
 // @sourcefile .\BnSend.cpp

@@ -116,6 +116,153 @@
 typedef void (__fastcall *fnUnitIterCallback)(void * pUnit);
 #endif
 
+namespace D2Client::UNIT::Player {
+
+static D2UnitStrc * __stdcall FindUnit(int32_t nUnitGUID, D2UnitStrc * * ppUnitHashTable, eD2UnitType eUnitType, int32_t nListIndex) {
+    D2UnitStrc* pCurUnit = ppUnitHashTable[nListIndex];
+    while (true) {
+      if (!pCurUnit) {
+        return nullptr;
+      }
+      if (pCurUnit->nUnitGUID == nUnitGUID) {
+        break;
+      }
+
+      pCurUnit = pCurUnit->pListNext;
+    }
+
+    if (pCurUnit->eUnitType != eUnitType) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5a);
+      exit(-1);
+    }
+
+    return pCurUnit;
+}
+
+D2UnitStrc * __fastcall UNITS_FindClientSideUnit(int32_t nUnitGUID, eD2UnitType eUnitType) {
+    // GUARD, not a reproduction: the table is 6 x 128 pointers, so a type past 5 reads
+    // clean off it and FindUnit dereferences whatever it finds. The original has no such
+    // check because it never receives a bad type; ours did, from a packet whose body was
+    // garbage. Retire this once that sender is found - it is masking, not fixing.
+    if ((uint32_t)eUnitType > 5) {
+      return nullptr;
+    }
+    D2UnitStrc* pUnit = FindUnit(nUnitGUID, ServerSideUnitHashTables[eUnitType], eUnitType, nUnitGUID & 0x7f);
+    return pUnit;
+}
+
+D2UnitStrc * __fastcall UNITS_FindServerSideUnit(int32_t nUnitGUID, eD2UnitType eUnitType) {
+    // GUARD, not a reproduction: the table is 6 x 128 pointers, so a type past 5 reads
+    // clean off it and FindUnit dereferences whatever it finds. The original has no such
+    // check because it never receives a bad type; ours did, from a packet whose body was
+    // garbage. Retire this once that sender is found - it is masking, not fixing.
+    if ((uint32_t)eUnitType > 5) {
+      return nullptr;
+    }
+    D2UnitStrc* pUnit = FindUnit(nUnitGUID, ClientSideUnitHashTables[eUnitType], eUnitType, nUnitGUID & 0x7f);
+    return pUnit;
+}
+
+D2UnitStrc * __fastcall MISSILE_GetOwnerUnit(D2UnitStrc * pUnit) {
+    D2UnitStrc* pOwnerUnit;
+    eD2UnitType eOwnerType;
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x83);
+      exit(-1);
+    }
+    if (!(pUnit->eUnitFlagsEx >> 10 & 1)) {
+      return nullptr;
+    }
+
+    eD2UnitType eUnitType = pUnit->eOwnerType;
+    uint32_t nUnitGUID = pUnit->nOwnerGUID;
+    if (eUnitType == UNIT_MISSILE) {
+      pOwnerUnit = FindUnit(nUnitGUID, ClientSideUnitHashTables[3], UNIT_MISSILE, nUnitGUID & 0x7f);
+      return pOwnerUnit;
+    }
+
+    pOwnerUnit = FindUnit(nUnitGUID, ServerSideUnitHashTables[eUnitType], eUnitType, nUnitGUID & 0x7f);
+    return pOwnerUnit;
+}
+
+// Inserts pUnit into the appropriate global unit hash table (server-side or client-side, selected by UNITFLAG bit 0x21). Computes bucket from nUnitGUID &amp; 0x7f and inserts in ascending GUID order. Halts (ERROR_UnrecoverableInternalError_Halt) if the unit already exists in the table. Returns 1 on successful insert, 0 if the unit was already present (duplicate path).
+static uint32_t InsertIntoHashTable(D2UnitStrc * pUnit) {
+    D2UnitStrc* pPrevUnit;
+    uint32_t nHashBucket;
+    D2UnitStrc* pCurUnit;
+    D2UnitStrc* pNextUnit;
+    if (!pUnit || !(pUnit->eUnitFlags >> 0x15 & 1)) {
+      pPrevUnit = FindUnit(pUnit->nUnitGUID, ServerSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
+      if (!pPrevUnit) {
+        pPrevUnit = FindUnit(pUnit->nUnitGUID, ServerSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
+        if (pPrevUnit) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa5);
+          exit(-1);
+        }
+
+        goto insert_sorted;
+      }
+    } else {
+      D2UnitStrc* (*papDVar1)[128];
+      pPrevUnit = FindUnit(pUnit->nUnitGUID, ClientSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
+      if (!pPrevUnit) {
+        pPrevUnit = FindUnit(pUnit->nUnitGUID, ClientSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
+        if (pPrevUnit) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9c);
+          exit(-1);
+        }
+
+        insert_sorted:
+        UnitSnd::MuteOrUnmuteUnitSounds(pUnit, 1);
+        nHashBucket = pUnit->nUnitGUID & 0x7f;
+        if (!(pUnit->eUnitFlags >> 0x15 & 1)) {
+          papDVar1 = ServerSideUnitHashTables;
+        } else {
+          papDVar1 = ClientSideUnitHashTables;
+        }
+
+        pNextUnit = papDVar1[pUnit->eUnitType][nHashBucket];
+        pPrevUnit = 0;
+        while (true) {
+          pCurUnit = pNextUnit;
+          if (!(pCurUnit && (uint32_t)pCurUnit->nUnitGUID > (uint32_t)pUnit->nUnitGUID)) {
+            break;
+          }
+
+          pPrevUnit = pCurUnit;
+          pNextUnit = pCurUnit->pListNext;
+        }
+
+        pUnit->pListNext = pCurUnit;
+        if (!pPrevUnit) {
+          papDVar1[pUnit->eUnitType][nHashBucket] = pUnit;
+          return 1;
+        }
+
+        pPrevUnit->pListNext = pUnit;
+        return 1;
+      }
+    }
+
+    return 0;
+}
+
+static void CLIENT_SendIdlePlayerMessage(D2UnitStrc * pUnit) {
+    if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
+      return;
+    }
+
+    eD2PlayerAnimMode eAnimMode = pUnit->eAnimMode.ePlayerMode;
+    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
+    if (!(pRoom && (eAnimMode == eD2PlayerAnimMode_ns::Neutral || eAnimMode == TownNeutral))) {
+      return;
+    }
+
+    PlayerMessage(7, pUnit, nullptr, 1);
+}
+
+} // namespace D2Client::UNIT::Player
+
 namespace D2Client::UNIT::CUnit {
 
 static D2UnitStrc * ClientSideUnitHashTables_1__0_[6][128] = { 0 }; D2_STATIC_GUARD(ClientSideUnitHashTables_1__0_, "D2Client::UNIT::CUnit::ClientSideUnitHashTables_1__0_");
@@ -1849,7 +1996,7 @@ uint32_t __fastcall CanInteractWith(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     return 1;
 }
 
-void RemoveObject(int32_t nIndex, D2UnitStrc * * ppUnitTable, eD2UnitType eUnitType, int32_t nUnitGUID) {
+static void RemoveObject(int32_t nIndex, D2UnitStrc * * ppUnitTable, eD2UnitType eUnitType, int32_t nUnitGUID) {
     D2UnitStrc** ppNextSlot;
     D2UnitStrc* pUnit = ppUnitTable[nIndex];
     D2UnitStrc* pPrevUnit = 0;
@@ -1879,7 +2026,7 @@ void RemoveObject(int32_t nIndex, D2UnitStrc * * ppUnitTable, eD2UnitType eUnitT
     FreeAny(pUnit);
 }
 
-void RemoveObjectFromServerObjectTable(eD2UnitType eUnitType, uint32_t nUnitGUID) {
+void __fastcall RemoveObjectFromServerObjectTable(eD2UnitType eUnitType, uint32_t nUnitGUID) {
     CUnit::RemoveObject(nUnitGUID & 0x7f, ServerSideUnitHashTables[eUnitType], eUnitType, nUnitGUID);
 }
 
@@ -1888,7 +2035,7 @@ void __fastcall UNITS_RemoveFromClientHashTable(uint32_t dwUnitGUID, int32_t nUn
 }
 
 // Inserts a newly allocated unit into the server-side hash table. If insertion fails due to a GUID collision, evicts the existing unit and retries. If the retry also fails, frees pUnit and returns null. Returns pUnit on success.
-D2UnitStrc * FinalizeCreation(D2UnitStrc * pUnit) {
+static D2UnitStrc * FinalizeCreation(D2UnitStrc * pUnit) {
     uint32_t bInserted = Player::InsertIntoHashTable(pUnit);
     if (bInserted) {
       return pUnit;

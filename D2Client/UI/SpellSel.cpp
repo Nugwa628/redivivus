@@ -1932,16 +1932,16 @@ void __stdcall ClickOnScreenSkillWindow(D2UIMouseMsgStrc * pMsg) {
                         }
 
                         iVar1 = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxt->skpoints, eSkill, iVar1);
-                        if (nNewSkills < iVar1) {
+                        if (iVar1 > nNewSkills) {
                           goto release_pressed_node;
                         }
                       }
 
                       pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1);
-                      if (!pSkill) {
-                        iSkillResult = 0;
-                      } else {
+                      if (pSkill) {
                         iSkillResult = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 0);
+                      } else {
+                        iSkillResult = 0;
                       }
 
                       nNewSkills = DataTbls::SKILL_GetMaxLevelForSkill((int)pSkillTxt->skill);

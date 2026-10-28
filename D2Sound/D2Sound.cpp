@@ -200,13 +200,13 @@ void __fastcall SOUNDSMP_WriteToBuffer(D2SoundSmpStrc * ppSoundSmp, int nWritePo
     __frame0.pWriteCursor = __frame0.pLockedBuf1;
     while (true) {
       pBufEnd = ppSoundSmp->nPcmSize;
-      if (pBufEnd <= (uint32_t)nWritePos) {
+      if ((uint32_t)nWritePos >= pBufEnd) {
         iVar1 = ppSoundSmp->nMinBufSize;
         nWritePos = (uint32_t)(nWritePos - iVar1) % (pBufEnd - iVar1) + iVar1;
       }
 
       pChunkSize = nBytesToWrite;
-      if (pBufEnd - nWritePos <= (uint32_t)nBytesToWrite) {
+      if ((uint32_t)nBytesToWrite >= pBufEnd - nWritePos) {
         pChunkSize = pBufEnd - nWritePos;
       }
 
@@ -223,7 +223,7 @@ void __fastcall SOUNDSMP_WriteToBuffer(D2SoundSmpStrc * ppSoundSmp, int nWritePo
 
         pBufEnd = ppSoundSmp->nLoopEnd;
         if (pBufEnd != -1) {
-          if (pBufEnd <= (uint32_t)nLockOffset) {
+          if ((uint32_t)nLockOffset >= pBufEnd) {
             break;
           }
 
@@ -241,7 +241,7 @@ void __fastcall SOUNDSMP_WriteToBuffer(D2SoundSmpStrc * ppSoundSmp, int nWritePo
     }
 
     ppSoundSmp->pDSBuffer->lpVtbl->Unlock(ppSoundSmp->pDSBuffer, __frame0.pLockedBuf1, __frame0.pBytesLocked2, nullptr, 0);
-    if (!ppSoundSmp->bLooping && (uint32_t)ppSoundSmp->nPcmSize <= (uint32_t)ppSoundSmp->nWritePos) {
+    if (!ppSoundSmp->bLooping && (uint32_t)ppSoundSmp->nWritePos >= (uint32_t)ppSoundSmp->nPcmSize) {
       ppSoundSmp->bAtEnd = 1;
     }
 
@@ -265,73 +265,6 @@ void __fastcall SOUNDSMP_ClearBuffer(IDirectSoundBuffer * pSoundSmp, DWORD dwWri
     memset(pLockedBuf, 0, nBytesToClear);
     pSoundSmp->lpVtbl->Unlock(pSoundSmp, pLockedBuf, nBytesToClear, nullptr, 0);
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gSoundSmpCs);
-}
-
-BOOL __stdcall SOUNDSMP_CreateSoundBuffer(uint32_t nFlags, D2SoundSmpStrc * pSoundSmp) {
-    DSBUFFERDESC tBufferDesc;
-    WAVEFORMATEX tWaveFormat;
-    uint32_t dwEaxCapabilities;
-    uint8_t* pObstructionGuid;
-    IKsPropertySet** ppEaxInterface2;
-    Src::D2SoundSmp::SOUNDSMP_InitWaveFormat(&tWaveFormat, ((nFlags & 1) != 0) + 1);
-    tBufferDesc.dwReserved = 0;
-    uint32_t nBufSize = nFlags & 1 ? 0x40000 : 0x20000;
-    uint32_t uVar1 = g_nSoundSampleParam ? 0x80a0 : 0xa0;
-    tBufferDesc.dwSize = 0x14;
-    uint32_t u3DFlag = nFlags & 2;
-    if (!u3DFlag) {
-      tBufferDesc.dwFlags = uVar1 | 0x40;
-    } else {
-      tBufferDesc.dwFlags = uVar1 | 0x14;
-    }
-
-    tBufferDesc.dwBufferBytes = nBufSize;
-    tBufferDesc.lpwfxFormat = &tWaveFormat;
-    IDirectSound* pDSDevice = SOUND_GetSpeakerConfigFlag();
-    HRESULT nHResult = pDSDevice->lpVtbl->CreateSoundBuffer(pDSDevice, &tBufferDesc, (void**)&pSoundSmp->pDSBuffer, nullptr);
-    if (nHResult < 0) {
-      return 0;
-    }
-    if (u3DFlag) {
-      DWORD dw3DFlag;
-      nHResult = pSoundSmp->pDSBuffer->lpVtbl->QueryInterface(pSoundSmp->pDSBuffer, (GUID*)&gIID_IDirectSound3DBuffer, (void**)&pSoundSmp->pDS3DBuffer);
-      if (nHResult < 0) {
-        pSoundSmp->pDSBuffer->lpVtbl->Release(pSoundSmp->pDSBuffer);
-        return 0;
-      }
-      if (u3DFlag) {
-        dw3DFlag = SOUND_GetSound3DFlag();
-        if (dw3DFlag) {
-          ppEaxInterface2 = &pSoundSmp->pEaxInterface;
-          nHResult = pSoundSmp->pDS3DBuffer->lpVtbl->QueryInterface(pSoundSmp->pDS3DBuffer, (GUID*)&gIID_IKsPropertySet, (void**)ppEaxInterface2);
-          if (-1 < nHResult) {
-            dwEaxCapabilities = 0;
-            dw3DFlag = SOUND_GetSoundQualityFlag();
-            if (dw3DFlag == 1) {
-              pObstructionGuid = gaEAXPropertyGuid_ObstructionParams;
-            } else {
-              pObstructionGuid = gEAXPropertyGuid_Obstruction;
-            }
-
-            nHResult = (*ppEaxInterface2)->lpVtbl->QuerySupport(*ppEaxInterface2, pObstructionGuid, 1, (ULONG*)&dwEaxCapabilities);
-            if (!(-1 < nHResult && ((uint8_t)dwEaxCapabilities & 3) == 3)) {
-              (*ppEaxInterface2)->lpVtbl->Release(*ppEaxInterface2);
-              pSoundSmp->pDSBuffer->lpVtbl->Release(pSoundSmp->pDSBuffer);
-              return 0;
-            }
-          } else {
-            pSoundSmp->pDSBuffer->lpVtbl->Release(pSoundSmp->pDSBuffer);
-            return 0;
-          }
-        }
-      }
-    }
-
-    pSoundSmp->nBufSize = nBufSize;
-    pSoundSmp->nHalfBufSize = nBufSize >> 1;
-    pSoundSmp->dwFlags = nFlags;
-    pSoundSmp->nLoopEnd = -1;
-    return 1;
 }
 
 } // namespace D2Sound

@@ -2489,13 +2489,13 @@ int16_t GetSkillLongDescription(eD2Skills eSkill) {
     return sgptDataTable->pTxtSkillDesc[iVar1].strLong;
 }
 
-int16_t GetAltSkillDescription(eD2Skills eSkillId) {
-    if (!(-1 < (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId)) {
+static int16_t GetAltSkillDescription(eD2Skills eSkillId) {
+    if (!(0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId)) {
       return 0x1506;
     }
 
     int iVar1 = (int)sgptDataTable->pTxtSkills[eSkillId].skilldesc;
-    if (!(-1 < iVar1 && iVar1 < sgptDataTable->nTxtSkillDescSize && sgptDataTable->pTxtSkillDesc + iVar1)) {
+    if (!(0 <= iVar1 && iVar1 < sgptDataTable->nTxtSkillDescSize && sgptDataTable->pTxtSkillDesc + iVar1)) {
       return 0x1506;
     }
 
@@ -2540,7 +2540,7 @@ void __stdcall ApplyPassiveLightningMasteryDamage(int32_t nParam, int32_t * nMin
     *nMaxElemDamage = nBonus + nBaseDmg;
 }
 
-uint16_t GetDamageTypeLocale(int32_t nElemType) {
+static uint16_t GetDamageTypeLocale(int32_t nElemType) {
     switch (nElemType) {
       case 1:
         /* Fire Damage */ return 0x10a1;
@@ -2918,25 +2918,25 @@ static int __stdcall SKILLDESC_FormatRangeDivided(uint16_t * wszText, uint16_t n
 static int __stdcall SKILLDESC_FormatStringWithCalc(uint32_t dwSkillCalcCtx, uint16_t nFormatStringId, short * pStatValues, uint16_t * wszText) {
     int nClearCount;
     uint16_t wszResultBuf[256];
-    uint16_t* pWszStr = wszResultBuf;
-    for (nClearCount = 0x80; nClearCount; nClearCount--) {
-      pWszStr[0] = L'\0';
-      pWszStr[1] = L'\0';
-      pWszStr += 2;
-    }
+    uint16_t* pWszStr;
+    for (int i = 0; i < 0x100; i++) wszResultBuf[i] = 0;
+
+
+
+
 
     if (nFormatStringId == 0x1506) {
-      pWszStr = D2Lang::StrTable::strtable::GetLocaleString(0x1506);
-      D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, pWszStr);
-      pWszStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-      D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, pWszStr);
+
+      D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, D2Lang::StrTable::strtable::GetLocaleString(0x1506));
+
+      D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, D2Lang::StrTable::strtable::GetLocaleString(0xf9e));
       return 1;
     }
 
-    pWszStr = D2Lang::StrTable::strtable::GetLocaleString(nFormatStringId);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszResultBuf, pWszStr, (uint16_t*)pStatValues);
-    pWszStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
-    D2Lang::Unicode::UNISYS::AppendToBuffer(wszResultBuf, pWszStr);
+
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszResultBuf, D2Lang::StrTable::strtable::GetLocaleString(nFormatStringId), (uint16_t*)pStatValues);
+
+    D2Lang::Unicode::UNISYS::AppendToBuffer(wszResultBuf, D2Lang::StrTable::strtable::GetLocaleString(0xf9e));
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszResultBuf);
     return 1;
 }
@@ -3221,7 +3221,7 @@ static int __stdcall SKILLDESC_FormatThreeValues(int32_t pThis, uint16_t nLabel1
     uint16_t wszValueW[32];
     char szValueA[32];
     char* pszFmtStr;
-    memset(wszValueW, 0, 32 * sizeof(wszValueW[0]));
+    for (int i = 0; i < 32; i++) wszValueW[i] = 0;
     if (!pThis) {
       return 1;
     }
@@ -3297,7 +3297,7 @@ static int __stdcall DistanceToYardsText(uint16_t nLabelId, uint16_t * wszText, 
     uint16_t wStrIdYardsSingPlur;
     uint16_t wszYardsW16[32];
     char szYardsA[32];
-    memset(wszYardsW16, 0, 32 * sizeof(wszYardsW16[0]));
+    for (int i = 0; i < 32; i++) wszYardsW16[i] = 0;
     int nYardsFrac;
     nYardsFrac = nDistance * 10 / 3;
     int nYardsInt;
@@ -6115,7 +6115,7 @@ static int SKILLDESC_DescLine2D_SkillPassive(int32_t nParam1, uint16_t * wszText
     if (1 >= nParam1) {
       return 1;
     }
-    if (nParam2 < 0 || sgptDataTable->nTxtSkillsCount <= nParam2 || (pSkillsTxt = sgptDataTable->pTxtSkills + nParam2 , !pSkillsTxt) || nParam1 - 1 < 1) {
+    if (nParam2 < 0 || nParam2 >= sgptDataTable->nTxtSkillsCount || (pSkillsTxt = sgptDataTable->pTxtSkills + nParam2 , !pSkillsTxt) || nParam1 - 1 < 1) {
       nPassivePct = 0;
     } else {
       nPassivePct = (nParam1 - 2) * pSkillsTxt->Param[1] + pSkillsTxt->Param[0];
@@ -6516,11 +6516,11 @@ BOOL __fastcall SKILLDESC_GetSkillBonusText(D2UnitStrc * pUnit, int32_t nParam) 
     return __frame0.nMinDmgOut;
 }
 
-uint32_t __stdcall SKILLDESC_FormatValueWithSign(int32_t pThis, uint16_t wStrId, int32_t nParam, uint16_t * wszText) {
+static uint32_t __stdcall SKILLDESC_FormatValueWithSign(int32_t pThis, uint16_t wStrId, int32_t nParam, uint16_t * wszText) {
     uint16_t* pLocalStr;
     uint16_t wStringId;
     uint16_t wszValueStr[32];
-    memset(wszValueStr, 0, 32 * sizeof(wszValueStr[0]));
+    for (int i = 0; i < 32; i++) wszValueStr[i] = 0;
     int nWholePart;
     nWholePart = pThis / 0x19;
     int nFracPart;
@@ -6554,7 +6554,7 @@ uint32_t __stdcall SKILLDESC_FormatValueWithSign(int32_t pThis, uint16_t wStrId,
 }
 
 // Register params: nSkillLevel (EAX), nSkillId (ECX), pUnitStrc (EDX). Writes the signed synergy bonus line for cold/poison skills.
-void __fastcall SKILLDESC_DescLineB_SignedFormat(int32_t nSkillLevel, int32_t nSkillId, D2UnitStrc * pUnitStrc, uint16_t * wszText, D2SkillsTxt * pSkillsTxt) {
+static void __fastcall SKILLDESC_DescLineB_SignedFormat(int32_t nSkillLevel, int32_t nSkillId, D2UnitStrc * pUnitStrc, uint16_t * wszText, D2SkillsTxt * pSkillsTxt) {
     int32_t nSynergy = D2Common::Skills::SERVER_Synergy1(pUnitStrc, nSkillId, nSkillLevel, 0);
     if (!nSynergy) {
       return;
@@ -6570,7 +6570,7 @@ void __fastcall SKILLDESC_DescLineB_SignedFormat(int32_t nSkillLevel, int32_t nS
     SKILLDESC_FormatValueWithSign(nSynergy, 0x10aa, 0, wszText);
 }
 
-void __stdcall SKILLDESC_DescLineE_PerLevelBonus(int32_t nSkillId, D2UnitStrc * pUnit, uint16_t * wszText, int32_t nParam1, D2SkillsTxt * pSkillsTxt) {
+static int __stdcall SKILLDESC_DescLineE_PerLevelBonus(int32_t nSkillId, D2UnitStrc * pUnit, uint16_t * wszText, int32_t nParam1, D2SkillsTxt * pSkillsTxt) {
     bool bMinEqualsMax;
     uint16_t wszDamageRange[32];
     char szDamageRange[32];
@@ -6583,7 +6583,7 @@ void __stdcall SKILLDESC_DescLineE_PerLevelBonus(int32_t nSkillId, D2UnitStrc * 
     memset(wszDamageRange, 0, 32 * sizeof(wszDamageRange[0]));
     uint16_t nParam = GetDamageTypeLocale((uint32_t)pSkillsTxt->EType);
     if (!nParam) {
-      return;
+      return 1;
     }
     if (!nMinDamage) {
       bMinEqualsMax = !nMaxDmgScaled;
@@ -6602,6 +6602,7 @@ void __stdcall SKILLDESC_DescLineE_PerLevelBonus(int32_t nSkillId, D2UnitStrc * 
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszDamageRange);
     pWszLocale = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, pWszLocale);
+    return 1;
 }
 
 // Returns TRUE on both paths (004ede44 LEA EAX,[EBX+1] with EBX=0; 004ede87 MOV EAX,1); its one caller SKILLDESC_ProcessDescLine discards it.
@@ -7550,7 +7551,7 @@ void __fastcall SKILLDESC_BuildSkillTooltip_NoMaxLevelCheck(D2UnitStrc * pUnit, 
       pWszLocale += 2;
     }
 
-    if ((int)eSkill < sgptDataTable->nTxtSkillsCount && (nIter = (int)sgptDataTable->pTxtSkills->srvprgfunc + nSkillTxtOffset - 0x30 , nIter != 0) && (nIter = (int)*(short int*)(nIter + 0x194) , -1 < nIter && nIter < sgptDataTable->nTxtSkillDescSize && sgptDataTable->pTxtSkillDesc + nIter)) {
+    if ((int)eSkill < sgptDataTable->nTxtSkillsCount && (nIter = (int)sgptDataTable->pTxtSkills->srvprgfunc + nSkillTxtOffset - 0x30 , nIter != 0) && (nIter = (int)*(short int*)(nIter + 0x194) , 0 <= nIter && nIter < sgptDataTable->nTxtSkillDescSize && sgptDataTable->pTxtSkillDesc + nIter)) {
       wStrId = sgptDataTable->pTxtSkillDesc[nIter].strName;
     } else {
       wStrId = 0x1506;

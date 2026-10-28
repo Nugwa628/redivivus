@@ -5544,12 +5544,12 @@ int __fastcall RENDERER_D3D_InitializeTextureCachePool(D3DTextureCacheStrc * pCa
     int nBytesPerTexture = g_nBytesPerPixel * nTextureWidth * nTextureHeight;
     int nNodeIndex = (nAvailableMemory - nBaseMemoryUsed) / nBytesPerTexture;
     pCache->nMaxNodes = nNodeIndex;
-    if (0x3ff < nNodeIndex) {
+    if (0x400 <= nNodeIndex) {
       nNodeIndex = 0x400;
     }
 
     pCache->nMaxNodes = nNodeIndex;
-    D3DTextureCacheNodeStrc* _Dst = (D3DTextureCacheNodeStrc*)D2_ALLOC(nNodeIndex << 5);
+    D3DTextureCacheNodeStrc* _Dst = (D3DTextureCacheNodeStrc*)Fog::Memory::AllocClientMemory(nNodeIndex << 5, ".\\Src\\d3dTextureCache.cpp", 0x37, 0);
     pCache->pNodeBuffer = _Dst;
     memset(_Dst, 0, nNodeIndex << 5);
     nNodeIndex = 0;

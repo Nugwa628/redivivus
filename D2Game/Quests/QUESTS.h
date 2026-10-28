@@ -290,8 +290,6 @@ void __fastcall QUEST_HandleKhalimsWillCompletion(::SGAMEDATA * pGame, struct D2
 BOOL __fastcall Q32_CheckNearbyPrisoners(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnitFallback);
 // Quest item drop and callback functions for A1Q4 (Search for Cain), A1Q5 (Forgotten Tower), and A1Q6 (Sisters to the Slaughter)
 void __stdcall QUEST_AddPlayerGUIDToTrackingList(uint32_t nPlayerGUID, int32_t nParam1, int32_t nParam2);
-// A2Q4 (The Seven Tombs) quest timer callback that manages Jerhyn's replacement cycle: if Jerhyn's monster AI is still active it clears it (or removes the object unit if AI is absent), then once bShouldSpawnJerhyn is false spawns the Jerhyn NPC (classId 0xc9) at a position offset relative to whether the Seven Tombs quest has progressed, recording the spawn GUID and coordinates in the quest-specific data.
-void __stdcall ReplaceJerhyn(struct D2RoomStrc * pRoom, struct D2QuestDataStrc * pQuestData, POINT * pPoint);
 void __fastcall PlaceJerhyn(struct D2QuestDataStrc * pQuestData, struct D2ObjectInitFnArg * pObjectInitArg);
 void __fastcall PlaceGuardInFrontOfJerhyn(struct D2QuestDataStrc * pQuestData, struct D2ObjectInitFnArg * pObjectInitArg);
 bool __fastcall QUEST_CheckJerhynShouldBlock(::SGAMEDATA * pGame);

@@ -61,32 +61,6 @@ namespace Fog::Engine::Application {
 static uint32_t DEBUG_ParseRSDSDebugInfo(void * pDebugRecord, int32_t pModuleInfo);
 static uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo);
 
-bool DEBUG_CaptureThreadContext(uint32_t dwThreadId, LPCONTEXT pContext) {
-    pContext->ContextFlags = 0x1003f;
-    DWORD dwCurrentTid = GetCurrentThreadId();
-    if (dwCurrentTid == dwThreadId) {
-      RtlCaptureContext(pContext);
-      return true;
-    }
-
-    HANDLE hThread = OpenThread(0x4a, 0, dwThreadId);
-    if (!hThread) {
-      return false;
-    }
-
-    /* HANDLE hThread for SuspendThread */ dwCurrentTid = SuspendThread(hThread);
-    if (dwCurrentTid != -1) {
-      BOOL bGotContext;
-      /* LPCONTEXT lpContext for GetThreadContext */ /* HANDLE hThread for GetThreadContext */ bGotContext = GetThreadContext(hThread, pContext);
-      /* HANDLE hThread for ResumeThread */ ResumeThread(hThread);
-      /* HANDLE hObject for CloseHandle */ CloseHandle(hThread);
-      return bGotContext != 0;
-    }
-
-    /* HANDLE hObject for CloseHandle */ CloseHandle(hThread);
-    return false;
-}
-
 uint32_t DEBUG_GetPEImageType(short * nMagic) {
     if (*nMagic != 0x10b) {
       return *nMagic != 0x20b ? 0 : 0x2;
@@ -210,7 +184,7 @@ uint32_t __stdcall DEBUG_ParseDebugDataDirectory(uint32_t nCount, int32_t nBaseA
     return nDirIter & -256;
 }
 
-uint32_t __stdcall DEBUG_ParseModuleHeaders(short * * ppModuleBase, short * pModuleBase) {
+static uint32_t __stdcall DEBUG_ParseModuleHeaders(short * * ppModuleBase, short * pModuleBase) {
     /* UINT_PTR ucb for IsBadReadPtr */ /* void * lp for IsBadReadPtr */ *ppModuleBase = pModuleBase;
     uint32_t bIsBadPtr = IsBadReadPtr(pModuleBase, 0x40);
     if (!(!bIsBadPtr && *pModuleBase == 0x5a4d)) {
@@ -265,7 +239,7 @@ uint32_t __stdcall DEBUG_ParseModuleHeaders(short * * ppModuleBase, short * pMod
 
     void* pDebugDir = (void*)(nDirRVA + (int)pModuleBase);
     /* UINT_PTR ucb for IsBadReadPtr */ /* void * lp for IsBadReadPtr */ bIsValidImage = IsBadReadPtr(pDebugDir, nDirSize);
-    if (!(!bIsValidImage && 0x1b < bIsBadPtr)) {
+    if (!(!bIsValidImage && 0x1c <= bIsBadPtr)) {
       return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)(bIsValidImage >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)1);
     }
 
@@ -306,12 +280,12 @@ bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, in
     }
 
     pDst = strrchr(aModuleInfo.szPath, 0x5c);
-    if (pDst && pBasename < pDst) {
+    if (pDst && pDst > pBasename) {
       pBasename = pDst;
     }
 
     pDst = strrchr(aModuleInfo.szPath, 0x3a);
-    if (pDst && pBasename < pDst) {
+    if (pDst && pDst > pBasename) {
       pBasename = pDst;
     }
     if (pBasename) {

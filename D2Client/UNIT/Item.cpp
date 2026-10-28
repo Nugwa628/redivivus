@@ -1778,16 +1778,16 @@ void __fastcall HandleItemRemoveFromContainer(uint8_t * pBytes) {
         if (!nFlagResult) {
           bIsReload = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(stItemDetails.flags, ITEMFLAG_RELOAD);
           pBytesSaved2 = pBytesSaved;
-          if (!bIsReload) {
-            ITEM_DropItemToGroundWithMode((uint32_t)stItemDetails.nAnimMode, 0, stItemDetails.nInvPage, stItemDetails.x, pItem, stItemDetails.x);
-            pOwnerUnit = pOwnerUnitSaved;
-          } else {
+          if (bIsReload) {
             CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pBytesSaved + 4));
             pItem = ITEM_CreateItemFromBodyPacket(0, 0, 0, pBytesSaved2, &stItemDetails);
             if (!pItem) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), (int32_t)(D2InventoryStrc*)0x4dd);
               exit(-1);
             }
+          } else {
+            ITEM_DropItemToGroundWithMode((uint32_t)stItemDetails.nAnimMode, 0, stItemDetails.nInvPage, stItemDetails.x, pItem, stItemDetails.x);
+            pOwnerUnit = pOwnerUnitSaved;
           }
 
           D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, INVPAGE_None);

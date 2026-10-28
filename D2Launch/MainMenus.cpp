@@ -1306,14 +1306,14 @@ int __fastcall MAINMENU_SetClassDescriptionTooltip(int32_t bSetTooltip, int32_t 
       nSetTextArg3 = 0;
       nSetTextArg2 = false;
       nSetTextArg1 = 0;
-      pwszText = D2Lang::StrTable::strtable::GetLocaleString(wPrimaryStrId);
-      D2Win::Src::D2WinTextBox::SetText(gpCtlClassDescriptionTooltipPrimary, pwszText, nSetTextArg1, nSetTextArg2, nSetTextArg3);
+
+      D2Win::Src::D2WinTextBox::SetText(gpCtlClassDescriptionTooltipPrimary, D2Lang::StrTable::strtable::GetLocaleString(wPrimaryStrId), nSetTextArg1, nSetTextArg2, nSetTextArg3);
       D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ClearAllLines(gpCtlClassDescriptionTooltipSecondary);
       nAlignment = 0;
       nSetTextArg2 = false;
       nLineStyle = 0;
-      pwszText = D2Lang::StrTable::strtable::GetLocaleString(wSecondaryStrId);
-      D2Win::Src::D2WinTextBox::SetText(gpCtlClassDescriptionTooltipSecondary, pwszText, nLineStyle, nSetTextArg2, nAlignment);
+
+      D2Win::Src::D2WinTextBox::SetText(gpCtlClassDescriptionTooltipSecondary, D2Lang::StrTable::strtable::GetLocaleString(wSecondaryStrId), nLineStyle, nSetTextArg2, nAlignment);
       gnClassDescriptionTooltipClassId = nClassId;
       return 1;
     }
@@ -2767,12 +2767,12 @@ int __stdcall MAINMENU_PollMCPCreateGamePump(int nFrameIndex) {
 int __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextBox * pTextBox, int32_t nColor, uint8_t bCentered) {
     int nClearCount;
     uint16_t wszBuffer[1024];
-    uint16_t* pwszLineStart = wszBuffer;
-    for (nClearCount = 0x200; nClearCount; nClearCount--) {
-      pwszLineStart[0] = L'\0';
-      pwszLineStart[1] = L'\0';
-      pwszLineStart += 2;
-    }
+    uint16_t* pwszLineStart;
+    for (int i = 0; i < 0x400; i++) wszBuffer[i] = 0;
+
+
+
+
 
     D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(wszBuffer, wszText, 0x400);
     pwszLineStart = wszBuffer;

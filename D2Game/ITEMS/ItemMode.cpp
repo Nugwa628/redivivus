@@ -3171,7 +3171,7 @@ BOOL __fastcall ITEMMODE_CheckEquipRestrictions(::SGAMEDATA * pGame, D2UnitStrc 
 }
 
 // Maps a body location to its alternate (weapon-swap) slot. Fifty-four bytes: a pure ECX jump table writing only EAX, so EDX survives. ITEMMODE_EquipCorpseItems holds the main body item in EDX across this call and reads it back afterwards; with EDX declared killed the pointer was lost and corpse reclaim resolved the wrong item. The parameter arrives in a whole register - typing it from the single byte the body reads made the decompiler splice the indeterminate upper bytes back in as an uninitialised local.
-static int __fastcall ITEMMODE_GetAlternateBodyLoc(eD2BodyLocDWORD dwParam) {
+int __fastcall ITEMMODE_GetAlternateBodyLoc(eD2BodyLocDWORD dwParam) {
     switch (dwParam) {
       case BODYLOC_R_ARM:
         return 5;
@@ -3289,21 +3289,18 @@ uint32_t __fastcall ITEMMODE_ResolveEquipConflict(D2UnitStrc * pUnit, D2UnitStrc
 
           _bIsWeaponType = D2Common::ITEMS::Items::ITEMS_IsA(pUnit2, ITEMTYPE_Weapon);
           _bConflictIsWeapon = D2Common::ITEMS::Items::ITEMS_IsA(*ppConflict2, ITEMTYPE_Weapon);
-          if (!_bIsWeaponType) {
-            if (_bConflictIsWeapon) {
-              return (uint32_t)!*ppConflict1;
-            }
-          } else {
+          if (_bIsWeaponType) {
             if (!_bConflictIsWeapon) {
               return (uint32_t)!*ppConflict1;
             }
             if (pUnit->eUnitType == UNIT_MONSTER) {
               return 1;
             }
-            if (pUnit->nClassId == 4) {
+            switch (pUnit->nClassId) {
+            case 4: {
               return 1;
             }
-            if (pUnit->nClassId == 6) {
+            case 6: {
               _bIsWeaponType = D2Common::ITEMS::Items::ITEMS_IsA(pUnit2, ITEMTYPE_HandtoHand);
               if (_bIsWeaponType) {
                 _bIsWeaponType = D2Common::ITEMS::Items::ITEMS_IsA(*ppConflict2, ITEMTYPE_HandtoHand);
@@ -3311,6 +3308,12 @@ uint32_t __fastcall ITEMMODE_ResolveEquipConflict(D2UnitStrc * pUnit, D2UnitStrc
                   return 1;
                 }
               }
+              break;
+            }
+            }
+          } else {
+            if (_bConflictIsWeapon) {
+              return (uint32_t)!*ppConflict1;
             }
           }
 

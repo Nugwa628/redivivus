@@ -38,13 +38,11 @@ struct D2DebugModuleInfo {
 namespace Fog::Engine::Application {
 
 // Function declarations
-bool DEBUG_CaptureThreadContext(uint32_t dwThreadId, LPCONTEXT pContext);
 uint32_t DEBUG_GetPEImageType(short * nMagic);
 uint32_t DEBUG_ParsePEDebugDirectory(short * * pOutput, uint32_t * pnSize, int * pnRVA, short * pOptHeader);
 bool __stdcall DEBUG_IsValidDebugDirectorySize(uint32_t nDirSize);
 uint32_t __fastcall DEBUG_ParseDebugInfoFromMemory(uint32_t nDataSize, uint32_t * pDebugData, int pModuleInfoOut);
 uint32_t __stdcall DEBUG_ParseDebugDataDirectory(uint32_t nCount, int32_t nBaseAddress, int32_t pDirEntries, int32_t pOutput);
-uint32_t __stdcall DEBUG_ParseModuleHeaders(short * * ppModuleBase, short * pModuleBase);
 // Adds a loaded module to the crash dump module list by parsing PE headers
 bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, int32_t nPathLength, short * pModuleBase);
 bool __stdcall DEBUG_EnumerateModulesViaPsapi(int * pnParam);

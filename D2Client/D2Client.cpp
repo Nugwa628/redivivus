@@ -814,19 +814,6 @@ void __stdcall CMD_ReleaseHoldAltAndClearSelection() {
     GAME::Select::ClearSelectedUnit();
 }
 
-// Validates whether a command can be bound to mouse buttons (0x103-0x104). Returns false if command handler exists and button is left/right click, true otherwise. Used during key binding setup to prevent invalid mouse button assignments.
-BOOL CMD_ValidateMouseButtonBinding(int32_t nCmdIndex, uint16_t * pErrorCode, uint32_t nMouseButton) {
-    if (!((nMouseButton & 0xffff) - 0x103 <= 1 && gaCmdBindings[nCmdIndex].pfnAltHandler)) {
-      return 1;
-    }
-    if (!pErrorCode) {
-      return 0;
-    }
-
-    *pErrorCode = 0xf8a;
-    return 0;
-}
-
 int32_t SORT_CompareInts(int * pA, int * pB) {
     if (*pB > *pA) {
       return -1;
@@ -1219,22 +1206,6 @@ void __fastcall UNITMODE_ExecuteDeferredAction(D2UnitStrc * pUnit) {
 
     execute_action:
     UNIT::UnitMode::UNITMODE_ExecuteSkillAction(nActionType, pUnit, eTargetType, nUnitGUID, 0);
-}
-
-void SOUNDHDR_CompleteAsyncLoad(int32_t pSoundHdr) {
-    void* nAddress;
-    if (*(int*)(pSoundHdr + 0x86) != 1) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x40);
-      exit(-1);
-    }
-
-    nAddress = Fog::Src::AsyncData::ASYNCDATA_GetResult(*(D2AsyncData_Line0x128**)(pSoundHdr + 0x82));
-    *(void**)(pSoundHdr + 0x6c) = (void*)nAddress;
-    size_t nReadSize = Fog::Src::AsyncData::ASYNCDATA_GetReadSize(*(D2AsyncData_Line0x128**)(pSoundHdr + 0x82));
-    *(size_t*)(pSoundHdr + 0x70) = nReadSize;
-    *(uint32_t*)(pSoundHdr + 0x86) = 2;
-    GAME::Sound::SOUND_ParseStreamWavHeader(pSoundHdr);
-    gnSoundAsyncLoadCount--;
 }
 
 // The ECX slot that carries a function pointer was one variable holding three callees with two
@@ -1786,72 +1757,6 @@ int32_t __fastcall SEED_RollRange(D2SeedStrc * pSeed, int32_t nMin, int32_t nMax
     return (nRangeWidth - 1 & dSeedResult.nSeedLow) + nMin;
 }
 
-void __stdcall OBJECT_SetLightRGB(uint8_t byRed, uint8_t byGreen, uint8_t byBlue, uint16_t nRadius, D2UnitStrc * pUnit) {
-    D2LightMapStrc* pLightMap = pUnit->uSideData.pClientSide.pLight;
-    if (!nRadius) {
-      if (pLightMap) {
-        UNIT::CUnit::FreeLightMap(pUnit);
-        return;
-      }
-    } else {
-      if (!pLightMap) {
-        pLightMap = Draw::LightMap::AllocLightMap(pUnit, 2, (uint32_t)(nRadius >> 1), 0xff, byRed, byGreen, byBlue);
-        pUnit->uSideData.pClientSide.pLight = pLightMap;
-        if (!pLightMap) {
-          return;
-        }
-      }
-
-      Draw::LightMap::SetRadiusY(pLightMap, (uint32_t)(nRadius >> 1));
-    }
-}
-
-BOOL __fastcall OBJECT_CheckAutoLight(D2UnitStrc * pUnit, int32_t bSkipCofLoad) {
-    D2ObjectsTxt* pTxtLine = pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine;
-    if (!pTxtLine->EnvEffect) {
-      return 0;
-    }
-
-    int32_t nPeriodOfDay = D2Common::Environment::DRLGENV_GetPeriodOfDayFromAct(sgpDrlgAct, nullptr);
-    if (nPeriodOfDay) {
-      if (nPeriodOfDay - 1U <= 2) {
-        if (pUnit->eAnimMode.ePlayerMode == Death) {
-          pUnit->eAnimMode.ePlayerMode = eD2PlayerAnimMode_ns::Neutral;
-          if (!bSkipCofLoad) {
-            Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
-          }
-
-          D2Common::Units::InitAnimMode(pUnit);
-          UNIT::SetMonsterFlags(pUnit, UNITFLAG_TARGETABLE, (uint32_t)pTxtLine->Selectable[pUnit->eAnimMode.ePlayerMode]);
-        }
-
-        OBJECT_SetLightRGB(pTxtLine->Red, pTxtLine->Green, pTxtLine->Blue, (uint16_t)(uint8_t)pTxtLine->Lit[pUnit->eAnimMode.ePlayerMode], pUnit);
-        return 1;
-      }
-
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x66);
-      exit(-1);
-    }
-    if (!(pUnit->eAnimMode.ePlayerMode == Walk || pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Neutral)) {
-      return 0;
-    }
-
-    pUnit->eAnimMode.ePlayerMode = Death;
-    if (!bSkipCofLoad) {
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
-    }
-
-    D2Common::Units::InitAnimMode(pUnit);
-    OBJECT_SetLightRGB(pTxtLine->Red, pTxtLine->Green, pTxtLine->Blue, (uint16_t)(uint8_t)pTxtLine->Lit[pUnit->eAnimMode.ePlayerMode], pUnit);
-    if (pTxtLine->Selectable[pUnit->eAnimMode.ePlayerMode]) {
-      pUnit->eUnitFlags |= UNITFLAG_TARGETABLE;
-      return 1;
-    }
-
-    pUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
-    return 1;
-}
-
 int __stdcall TEXT_EmptyCallback() {
     return 0;
 }
@@ -1885,34 +1790,6 @@ void __stdcall TEXT_SetUnknownFlag(D2UIMouseMsgStrc * pMsg) {
     }
 
     UI::Inv::INV_HandleInventoryMouseMove(pMsg);
-}
-
-void ITEM_ToggleHandState(D2UnitStrc * pUnit) {
-    int32_t nSoundArg1;
-    int32_t nSoundArg2;
-    int32_t nSoundArg3;
-    if (gnPlayerCashDisplay == 1) {
-      eD2Sounds nSoundId;
-      gnPlayerCashDisplay = 2;
-      UI::ui::ITEM_SetItemOnHand(nullptr);
-      if (pUnit) {
-        gnCursorItemUnitId = pUnit->nUnitGUID;
-        nSoundArg3 = 0;
-        nSoundArg2 = 0;
-        nSoundArg1 = 0;
-
-        Sound::SOUND_PlaySound(UNIT::SOUND_GetIdFromUnit(pUnit), nullptr, nSoundArg1, nSoundArg2, nSoundArg3);
-        return;
-      }
-    } else if (gnPlayerCashDisplay == 2) {
-      gnPlayerCashDisplay = 1;
-      gnCursorItemUnitId = 0;
-      if (pUnit) {
-        UI::ui::ITEM_SetItemOnHand(pUnit);
-      }
-
-      Sound::SOUND_PlaySound(SOUND_CURSOR_PASS, nullptr, 0, 0, 0);
-    }
 }
 
 void __stdcall TEXT_HandleMouseMove() {

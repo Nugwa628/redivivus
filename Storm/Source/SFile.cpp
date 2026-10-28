@@ -507,7 +507,6 @@ static void __fastcall SFILE_ConvertRelativePathName(int32_t bStripDir, char * s
 
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szTmpPath, "%s%s", szSFileBasePath, szFileName);
     __fullpath(szOutPath, szTmpPath, 0x104);
-    Fog::Debug::GuardStack();
 }
 
 static uint32_t __stdcall SFILE_FindFileOnDisk(uint8_t bSearchFlags, LPCSTR szOutPath, char * szFileName) {

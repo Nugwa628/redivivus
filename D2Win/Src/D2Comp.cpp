@@ -64,7 +64,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2CharSelCompStrc) == 0x234, "D2_NE
 
 namespace D2Win::Src::D2Comp {
 
-void * D2COMP_AssertNotNull(void * pValue) {
+static void * D2COMP_AssertNotNull(void * pValue) {
     if (pValue) {
       return pValue;
     }
@@ -97,12 +97,12 @@ void * __stdcall D2COMP_ValidateCOFLayerData(int32_t nLayerIndex, int32_t nFrame
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x400);
       exit(-1);
     } else {
-      if (pbParam + ((uint32_t)pbParam[1] * nLayerIndex + 9 + nFrameIndex) * (uint32_t)*pbParam + (uint32_t)pbParam[1] + 0x1c) {
-        return pbParam + ((uint32_t)pbParam[1] * nLayerIndex + 9 + nFrameIndex) * (uint32_t)*pbParam + (uint32_t)pbParam[1] + 0x1c;
+      if (!(pbParam + ((uint32_t)pbParam[1] * nLayerIndex + 9 + nFrameIndex) * (uint32_t)*pbParam + (uint32_t)pbParam[1] + 0x1c)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x408);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x408);
-      exit(-1);
+      return pbParam + ((uint32_t)pbParam[1] * nLayerIndex + 9 + nFrameIndex) * (uint32_t)*pbParam + (uint32_t)pbParam[1] + 0x1c;
     }
 }
 
