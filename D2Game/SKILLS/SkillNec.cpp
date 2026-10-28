@@ -367,7 +367,8 @@ uint32_t __fastcall SKILLNEC_ValidateAttackableTarget(::SGAMEDATA * pGame, D2Uni
 
 void __fastcall SKILLNEC_AssignCurseAiBehavior(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nParam, D2NecroSkillArgStrc * pNecroSkillArg) {
     uint32_t nFunctionId;
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nParam)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= nParam && nParam < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nParam] : 0;
+    if (!pSkillsRecord) {
       return;
     }
 

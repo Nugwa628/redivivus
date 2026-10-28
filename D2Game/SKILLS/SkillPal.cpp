@@ -731,7 +731,8 @@ BOOL __fastcall SKILPAL_SrvStFn31_Charge(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     eD2MonsterAnimMode eAttackMode;
     D2MonsterKillStrc sMonsterKill;
     D2DynamicPathStrc* pDynPath;
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -1172,7 +1173,8 @@ BOOL __fastcall Skills_SrvDoFunc_073_BlessedHammer(::SGAMEDATA * pGame, D2UnitSt
     D2SkillArgStrc sSkillArg;
     uint32_t nTargetY;
     eD2Skills eSkillSaved = eSkill;
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 

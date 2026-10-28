@@ -2207,7 +2207,8 @@ uint32_t __fastcall MONSTERAI_GetThreatLevel(D2UnitStrc * pUnit) {
     }
 
     int pAiGeneral = pUnit->nClassId;
-    if (!(0 <= pAiGeneral && pAiGeneral < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + pAiGeneral)) {
+    D2MonStatsTxt* pMonStatsRecord = (0 <= pAiGeneral && pAiGeneral < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[pAiGeneral] : 0;
+    if (!pMonStatsRecord) {
       return 0;
     }
 
@@ -2836,7 +2837,8 @@ BOOL __fastcall MONSTERAI_HasSkillInSlots(D2UnitStrc * pUnit, int32_t nSkillId) 
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId)) {
+    D2MonStatsTxt* pMonStatsRecord = (0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nClassId] : 0;
+    if (!pMonStatsRecord) {
       return 0;
     }
 
@@ -5082,7 +5084,8 @@ static void __fastcall AI_Fn0_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
     }
 
     int nSkillId = (int)sVar1;
-    if (nSkillId < 0 || nSkillId >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + nSkillId)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= nSkillId && nSkillId < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nSkillId] : 0;
+    if (!pSkillsRecord) {
       pAiParam->pMonsterAiGeneral->dwArg0 = pGame->dwGameFrame;
       return;
     }

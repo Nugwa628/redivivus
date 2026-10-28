@@ -1161,7 +1161,8 @@ BOOL __fastcall Missiles_SrvHitFunc_AreaSplashDamage(::SGAMEDATA * pGame, D2Unit
       eD2Skills eSkill;
       eSkill = D2Common::Units::Missile::GetSkillId(pUnit);
       nSkillLevel = D2Common::Units::Missile::GetLevel(pUnit);
-      if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+      D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+      if (!pSkillsRecord) {
         return 1;
       }
 
@@ -2423,7 +2424,8 @@ BOOL __fastcall Missiles_SrvHitFunc_NoOp(::SGAMEDATA * pGame, D2UnitStrc * pMiss
 BOOL __fastcall Missiles_SrvHitFunc_ApplyTerrorNearMinion(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
     eD2Skills eSkill = D2Common::Units::Missile::GetSkillId(pUnit);
     int32_t nRange = D2Common::Units::Missile::GetLevel(pUnit);
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 1;
     }
 
@@ -3900,7 +3902,8 @@ BOOL __fastcall Missiles_SrvHitFunc_HealTargetRandom(::SGAMEDATA * pGame, D2Unit
 
     eD2Skills eSkill = D2Common::Units::Missile::GetSkillId(pUnit);
     int32_t nMaxHp = D2Common::Units::Missile::GetLevel(pUnit);
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 1;
     }
 
@@ -4497,7 +4500,8 @@ void __fastcall Missiles_SrvDmgFunc_PhysToElementalByCalc1(::SGAMEDATA * pGame, 
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId)) {
+    D2MissilesTxt* pMissilesRecord = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : 0;
+    if (!pMissilesRecord) {
       return;
     }
 
@@ -4528,7 +4532,8 @@ void __fastcall Missiles_SrvDmgFunc_RecalcElementalWithClear(::SGAMEDATA * pGame
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId)) {
+    D2MissilesTxt* pMissilesRecord = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : 0;
+    if (!pMissilesRecord) {
       return;
     }
 
@@ -4613,7 +4618,8 @@ void __fastcall Missiles_SrvDmgFunc_CopyColdLengthToFreezeLength(::SGAMEDATA * p
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId)) {
+    D2MissilesTxt* pMissilesRecord = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : 0;
+    if (!pMissilesRecord) {
       return;
     }
 
@@ -4734,7 +4740,8 @@ void __fastcall Missiles_SrvDmgFunc_SetStunLengthFromSkillParam(::SGAMEDATA * pG
     eD2Skills eSkillId = D2Common::Units::Missile::GetSkillId(pUnit);
     nClassId = pMissilesTxt[nClassId].dParam1;
     if (nClassId <= 0) {
-      if ((int)eSkillId < 0 || (int)eSkillId >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkillId)) {
+      D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkillId] : 0;
+      if (!pSkillsRecord) {
         pDamage->dwStunLen = 0;
         pDamage->dwHitClass = 0x60;
         return;

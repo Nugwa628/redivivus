@@ -2766,7 +2766,7 @@ void SKILLS_CalcPetSkillDamage(void * pThis, int * pnDamageOut) {
     }
 
     int nClassId = *(int*)((int)pThis + 4);
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId)) {
+    D2MonStatsTxt* pMonStatsRecord; pMonStatsRecord = (0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nClassId] : 0; if (!pMonStatsRecord) {
       return;
     }
 
@@ -2797,7 +2797,7 @@ int32_t __fastcall SetDamageOnEvent(D2UnitStrc * pUnit, D2DamageStrc * pEvent, e
 }
 
 void __fastcall SKILLS_AddRandomSkillDamage(D2UnitStrc * pUnit, int32_t * pDamageAccum, eD2Skills eSkill, int32_t nSkillLevel) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord; pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0; if (!pSkillsRecord) {
       return;
     }
 
@@ -3574,7 +3574,7 @@ static void __stdcall SetTimeoutEffect(::SGAMEDATA * pGame, int32_t timeoutFrame
 }
 
 void __fastcall SKILLS_ApplySkillDelay(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord; pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0; if (!pSkillsRecord) {
       return;
     }
 

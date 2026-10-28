@@ -83,7 +83,8 @@ typedef void (__fastcall *fpStatListExChangeCb)(::SGAMEDATA * pGame, D2UnitStrc 
 namespace D2Game::Monster {
 
 D2MonPropTxt * __fastcall MONSTER_GetMonPropTxtRecord(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nParam)) {
+    D2MonStatsTxt* pMonStatsRecord = (0 <= nParam && nParam < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nParam] : 0;
+    if (!pMonStatsRecord) {
       return nullptr;
     }
 
