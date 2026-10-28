@@ -4478,12 +4478,12 @@ static uint32_t __stdcall INVENTORY_GetEquipSwapAction(D2UnitStrc * pUnit, D2Uni
         uint32_t bCanMoveToPage = INVENTORY_CanMoveEquippedToPage(pInventory, pNewItem, nParam, ePage);
         return bCanMoveToPage ? 7 : 0;
       } else {
-        if (!pUnit) {
+        if (pUnit) {
+          bIsSocketable = INVENTORY_CanDualWieldItems(pUnit, pNewItem, pUnit1);
+          return 2 - (bIsSocketable != 0);
+        } else {
           return 1;
         }
-
-        bIsSocketable = INVENTORY_CanDualWieldItems(pUnit, pNewItem, pUnit1);
-        return 2 - (bIsSocketable != 0);
       }
     } else {
       if (pUnit2) {

@@ -7295,52 +7295,7 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
     }
 
     uTmpBits = ITEMS_IsA(pItemUnit, ITEMTYPE_AnyArmor);
-    if (!uTmpBits) {
-      uTmpBits = ITEMS_IsA(pItemUnit, ITEMTYPE_Weapon);
-      if (!uTmpBits) {
-        uTmpBits = ITEMS_IsA(pItemUnit, ITEMTYPE_Gold);
-        if (!uTmpBits) {
-          goto write_quantity_and_stats;
-        }
-
-        uTmpBits = Stats::StatsEx::STATSEX_GetCurrentStat(pItemUnit, UNITSTAT_gold, 0);
-        Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, (uint32_t)(0xfff < (int)uTmpBits), 1);
-        nBitValue = (int)uTmpBits < 0x1000 ? 0xc : 0x20;
-      } else {
-        if (sgptDataTable->nTxtItemStatCostSize < 0x4a) {
-          pItemStatCostLine = 0;
-        } else {
-          pItemStatCostLine = sgptDataTable->pTxtItemStatCost + 0x49;
-        }
-
-        nErrLine = Stats::StatsEx::SERVER_GetUnitStat(pItemUnit, UNITSTAT_maxdurability, 0);
-        bySaveBits = pItemStatCostLine->saveBits[0];
-        nBitValue = pItemStatCostLine->saveAdd[0] + nErrLine;
-        if (bySaveBits != 0x20) {
-          nClampedValue = nBitValue ? nBitValue : 0;
-          nBitValue = (1 << bySaveBits) - 1;
-          if (nClampedValue < nBitValue) {
-            nBitValue = nClampedValue;
-          }
-        }
-
-        Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, nBitValue, (uint32_t)bySaveBits);
-        if (!nErrLine) {
-          goto write_quantity_and_stats;
-        }
-        if (sgptDataTable->nTxtItemStatCostSize < 0x49) {
-          pItemStatCostLine = 0;
-        } else {
-          pItemStatCostLine = sgptDataTable->pTxtItemStatCost + 0x48;
-        }
-
-        nBitValue = (uint32_t)pItemStatCostLine->saveBits[0];
-        nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pItemUnit, UNITSTAT_durability, 0);
-        uTmpBits = nStatValue + pItemStatCostLine->saveAdd[0];
-      }
-
-      ITEMS_WriteClampedValueToBitBuffer(nBitValue, uTmpBits, pBitBuffer);
-    } else {
+    if (uTmpBits) {
       if (sgptDataTable->nTxtItemStatCostSize < 0x20) {
         pItemStatCostLine = 0;
       } else {
@@ -7397,6 +7352,51 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
 
         Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, nBitValue, (uint32_t)bySaveBits);
       }
+    } else {
+      uTmpBits = ITEMS_IsA(pItemUnit, ITEMTYPE_Weapon);
+      if (uTmpBits) {
+        if (sgptDataTable->nTxtItemStatCostSize < 0x4a) {
+          pItemStatCostLine = 0;
+        } else {
+          pItemStatCostLine = sgptDataTable->pTxtItemStatCost + 0x49;
+        }
+
+        nErrLine = Stats::StatsEx::SERVER_GetUnitStat(pItemUnit, UNITSTAT_maxdurability, 0);
+        bySaveBits = pItemStatCostLine->saveBits[0];
+        nBitValue = pItemStatCostLine->saveAdd[0] + nErrLine;
+        if (bySaveBits != 0x20) {
+          nClampedValue = nBitValue ? nBitValue : 0;
+          nBitValue = (1 << bySaveBits) - 1;
+          if (nClampedValue < nBitValue) {
+            nBitValue = nClampedValue;
+          }
+        }
+
+        Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, nBitValue, (uint32_t)bySaveBits);
+        if (!nErrLine) {
+          goto write_quantity_and_stats;
+        }
+        if (sgptDataTable->nTxtItemStatCostSize < 0x49) {
+          pItemStatCostLine = 0;
+        } else {
+          pItemStatCostLine = sgptDataTable->pTxtItemStatCost + 0x48;
+        }
+
+        nBitValue = (uint32_t)pItemStatCostLine->saveBits[0];
+        nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pItemUnit, UNITSTAT_durability, 0);
+        uTmpBits = nStatValue + pItemStatCostLine->saveAdd[0];
+      } else {
+        uTmpBits = ITEMS_IsA(pItemUnit, ITEMTYPE_Gold);
+        if (!uTmpBits) {
+          goto write_quantity_and_stats;
+        }
+
+        uTmpBits = Stats::StatsEx::STATSEX_GetCurrentStat(pItemUnit, UNITSTAT_gold, 0);
+        Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, (uint32_t)(0xfff < (int)uTmpBits), 1);
+        nBitValue = (int)uTmpBits < 0x1000 ? 0xc : 0x20;
+      }
+
+      ITEMS_WriteClampedValueToBitBuffer(nBitValue, uTmpBits, pBitBuffer);
     }
 
     write_quantity_and_stats:

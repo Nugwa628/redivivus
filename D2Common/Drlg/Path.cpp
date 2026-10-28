@@ -1440,7 +1440,7 @@ int32_t __stdcall DRLGPATH_GetWeightedDistancePacked(uint32_t nParam1, uint32_t 
         return gaPathWeightTable[nAbsDX + nAbsDY * 8] + 1;
       }
     }
-    if (nAbsDY >= nAbsDX) {
+    if (nAbsDX <= nAbsDY) {
       return nAbsDX + nAbsDY * 2;
     }
 
