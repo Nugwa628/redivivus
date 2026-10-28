@@ -1040,8 +1040,7 @@ void __fastcall Q35_OnPlayerDeath(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       return;
     }
 
-    int* pnResurrectionCount = &pQuestData->pQuestSpecificData.pA5Q5->nResurrectionCount;
-    (*pnResurrectionCount)++;
+    pQuestData->pQuestSpecificData.pA5Q5->nResurrectionCount++;
     pQuestData->pQuestSpecificData.pA5Q5->bAncientsFightStarted = 0;
     pQuestData->pQuestSpecificData.pA5Q5->bAncientsActive = 0;
     Q35_ResetAncientsArena(pGame, (int32_t)pQuestData, (int32_t)d2_bits_of(pQuestData->pQuestSpecificData));
@@ -1393,8 +1392,7 @@ BOOL __fastcall ResurrectAncients(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void 
     }
 
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_RiteOfPassage);
-    int* piVar1 = &pQuestData->pQuestSpecificData.pA5Q5->nPlayersOnSummit;
-    (*piVar1)++;
+    pQuestData->pQuestSpecificData.pA5Q5->nPlayersOnSummit++;
     return 0;
 }
 

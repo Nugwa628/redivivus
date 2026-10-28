@@ -328,8 +328,7 @@ void __fastcall Q28_PlayerCompleteForgeInAct4(::SGAMEDATA * pGame, D2UnitStrc * 
       return;
     }
 
-    int* pForgeCompletedCount = &pHellsForgeQuest->pQuestSpecificData.pA4Q3->nItemsToDrop;
-    (*pForgeCompletedCount)++;
+    pHellsForgeQuest->pQuestSpecificData.pA4Q3->nItemsToDrop++;
 }
 
 // A4Q3 Hell's Forge — OBJOP_A4Q3_HellforgeSmash (Objects_OperateFn49): the Hellforge operate handler — the core quest action. Bails if Hell's Forge already Completed/RewardAwaits. Branches on the forge object's anim mode: Death(idle) — if player carries Mephisto's Soulstone 'mss ', plays anim, broadcasts internal state 3, consumes the soulstone (this places the stone on the anvil); else plays "can't" sound and bumps stateFlag to 1. Walk(active) — if player has the Hellforge Hammer 'hfh ' equipped as weapon and has struck 3x, this is the SMASH: removes the hammer, sets JustCompleted+RewardAwaits, clears step-states, runs Q28_PlayerCompleteForgeInAct4 for the whole party, sets stateFlag 4 then broadcasts state 0xd, schedules the rune-drop event, marks other party members CannotComplete, and fires NotifyPlayersAboutEvent(0xe). Item codes: 'mss '=0x2073736d (Mephisto's Soulstone), 'hfh '=0x20686668 (Hellforge Hammer).
