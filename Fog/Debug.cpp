@@ -179,32 +179,6 @@ typedef BOOL (__stdcall *pfnStackWalk)(DWORD MachineType, HANDLE hProcess, HANDL
 typedef DWORD (__stdcall *pfnUnDecorateSymbolName)(char * DecoratedName, char * UnDecoratedName, DWORD UndecoratedLength, DWORD Flags);
 #endif
 
-namespace Fog::_3rdparty::crashy {
-
-static void __stdcall DebugThread() {
-    void* pSavedEsp;
-    EH4_EXCEPTION_REGISTRATION tSehFrame;
-    tSehFrame.TryLevel = -2;
-    tSehFrame.ExceptionHandler = __except_handler4;
-    tSehFrame.Next = (EH4_EXCEPTION_REGISTRATION*)ExceptionList;
-    tSehFrame.EncodedScopeTable = DEFAULT_SECURITY_COOKIE ^ 0x702290;
-    ExceptionList = &tSehFrame;
-    BOOL bDebuggerPresent = IsDebuggerPresent();
-    if (bDebuggerPresent == 1) {
-      THREADNAME_INFO tThreadNameInfo;
-      tThreadNameInfo.dwType = 0x1000;
-      tThreadNameInfo.szName = "MiniDump Thread";
-      tThreadNameInfo.dwThreadID = -1;
-      tThreadNameInfo.dwFlags = 0;
-      tSehFrame.TryLevel = 0;
-      /* ULONG_PTR * lpArguments for RaiseException */ /* DWORD nNumberOfArguments for RaiseException */ /* DWORD dwExceptionFlags for RaiseException */ /* DWORD dwExceptionCode for RaiseException */ RaiseException(0x406d1388, 0, 4, &tThreadNameInfo.dwType);
-    }
-
-    ExceptionList = tSehFrame.Next;
-}
-
-} // namespace Fog::_3rdparty::crashy
-
 namespace Fog::Debug {
 static void InitializeDebugInfoTable(D2FogDebugModuleTableStrc * pTable);
 
