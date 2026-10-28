@@ -1081,10 +1081,10 @@ static void __stdcall WALL2_InsertUnitShadowDraw(D2Wall2CellStrc * pWall2Cell, D
     eD2UnitType eVar3 = pUnit->eUnitType;
     if (eVar3 == UNIT_OBJECT || 3 < (int)eVar3 && (int)eVar3 <= 5) {
       nUnitPos = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nUnitPos = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nUnitPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nUnitPos = 0;
     }
 
     pDVar1->nX = nUnitPos * 8;
