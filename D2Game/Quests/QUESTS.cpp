@@ -3224,8 +3224,8 @@ void __fastcall PlaceJerhyn(D2QuestDataStrc * pQuestData, D2ObjectInitFnArg * pO
     }
 
     nSpawnX.x = pObjectInitArg->nX;
-    nSpawnX.y = pObjectInitArg->nY;
     D2RoomStrc* pSpawnRoom = pObjectInitArg->pRoom;
+    nSpawnX.y = pObjectInitArg->nY;
     FindSpawnableLocation(pSpawnRoom, &nSpawnX, 2, 0x100, &pSpawnRoom, 10, 100);
     D2UnitStrc* pSevenTombsData = Monster::Create::SpawnMonsterAtRoomPos(pQuestData->pGame, pSpawnRoom, nSpawnX.x, nSpawnX.y, 0xc9, eD2MonsterAnimMode_ns::Neutral, -1, 0);
     if (!pSevenTombsData) {

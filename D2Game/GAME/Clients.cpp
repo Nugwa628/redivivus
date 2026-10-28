@@ -2705,11 +2705,22 @@ void __fastcall CLIENT_RemoveFromAdjacentRooms(D2RoomStrc * pRoom, int32_t nClie
 }
 
 void __fastcall TellClientToLoadAct(::SGAMEDATA * pGame, D2ClientStrc * pClient) {
+    // Frame slots -32..-22 are ONE object: &byPacketId is passed out and the callee reaches the rest by byte offset.
+    // Separate locals let the compiler reorder them, so the run is one struct.
+    #pragma pack(push, 1)
+    struct __frame0_t {
+      uint8_t byPacketId;
+      int nCycleIndex;
+      int nTicks;
+      uint8_t bEclipse;
+    };
+    #pragma pack(pop)
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 10, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    __frame0_t __frame0;
     uint8_t _byActNoArg;
-    D2GSPacketSrv0x53 sPacket;
     uint8_t bEclipseOut[4];
-    int32_t nTicksOut;
-    int32_t nCycleOut;
+    int nTicksOut;
+    int nCycleOut;
     uint8_t byActNoArg;
     uint32_t uStack_7;
     uint8_t bActNo = GetAct(pClient);
@@ -2717,11 +2728,11 @@ void __fastcall TellClientToLoadAct(::SGAMEDATA * pGame, D2ClientStrc * pClient)
     eD2LevelId eTownLevelId = D2Common::DUNGEON::Dungeon::GetTownLevelIdFromAct(pGame->pAct[bActNo]);
     SCmd::NET_D2GS_SERVER_Send_0x03_NEWACT(pClient, '\x03', (uint8_t)_byActNoArg, pGame->pInitSeed.nSeedLow, pGame->pInitSeed.nSeedHigh, (uint16_t)eTownLevelId);
     D2Common::Environment::DRLGENV_GetCycleIndex_Ticks_EclipseFromAct(pGame->pAct[bActNo], &nCycleOut, &nTicksOut, (BOOL*)bEclipseOut);
-    sPacket.nTicks = nTicksOut;
-    sPacket.bEclipse = bEclipseOut[0];
-    sPacket.nHeader = 'S';
-    sPacket.nCycleIndex = nCycleOut;
-    SCmd::NET_D2GS_SERVER_Send_0x53_ACTTIMEOFDAY(pClient, &sPacket);
+    __frame0.byPacketId = 0x53;
+    __frame0.nCycleIndex = nCycleOut;
+    __frame0.nTicks = nTicksOut;
+    __frame0.bEclipse = bEclipseOut[0];
+    SCmd::NET_D2GS_SERVER_Send_0x53_ACTTIMEOFDAY(pClient, (D2GSPacketSrv0x53*)&__frame0.byPacketId);
 }
 
 } // namespace D2Game::GAME::Clients

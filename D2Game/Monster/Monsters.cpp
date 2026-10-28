@@ -1899,12 +1899,8 @@ void __fastcall MONSTER_SelfResurrect(::SGAMEDATA * pGame, D2UnitStrc * pUnit, u
       return;
     }
 
-    int32_t eCollisionFlag = 0x3c01;
-    int32_t eCollisionResult = 1;
-    int32_t iVar1 = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-    int32_t nX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    eCollisionFlags eCollision = D2Common::Collision::CheckCollision_BlockAll_Type(pRoom, nX, iVar1, eCollisionResult, eCollisionFlag);
+    int32_t iVar1;
+    eCollisionFlags eCollision = D2Common::Collision::CheckCollision_BlockAll_Type(D2Common::Units::UNITS_GetRoom(pUnit), D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), D2Client::Units::GetYPosFromDynamicPathUnit(pUnit), 1, 0x3c01);
     if (eCollision != COLBIT_NONE) {
       GAME::Event::SetEvent(pGame, pUnit, 7, pGame->dwGameFrame + 1 + pMonStatsTxt->aip[0][pGame->nDifficulty] * 10, 0, 0);
       return;

@@ -300,10 +300,22 @@ uint8_t * * __stdcall VIEW_AllocPalettePointerTable2(uint32_t nDim, int32_t nSte
 }
 
 void __stdcall VIEW_InitLookupTables() {
-    if (!gpViewPalPointerTable32x8) {
-      if (!gpViewPalByteTable32x16) {
-        if (!gpViewPalByteTable16x32) {
-          if (!gpViewPalPointerTable32x32) {
+    if (gpViewPalPointerTable32x8) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xca);
+      exit(-1);
+    } else {
+      if (gpViewPalByteTable32x16) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcb);
+        exit(-1);
+      } else {
+        if (gpViewPalByteTable16x32) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcc);
+          exit(-1);
+        } else {
+          if (gpViewPalPointerTable32x32) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcd);
+            exit(-1);
+          } else {
             if (gpViewPalByteTable32x40) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xce);
               exit(-1);
@@ -316,21 +328,9 @@ void __stdcall VIEW_InitLookupTables() {
             gpViewPalPointerTable32x32 = VIEW_AllocPalettePointerTable2(0x20, 0x20);
             gpViewPalByteTable32x40 = VIEW_AllocByteTable(0x20, 0x28);
             return;
-          } else {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcd);
-            exit(-1);
           }
-        } else {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcc);
-          exit(-1);
         }
-      } else {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcb);
-        exit(-1);
       }
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xca);
-      exit(-1);
     }
 }
 

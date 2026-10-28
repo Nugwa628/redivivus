@@ -1708,7 +1708,10 @@ void __fastcall DebugFillBackBuffer(int32_t nPosX, int32_t nPosY) {
 
 // @sourcefile .\Src\glSprite.cpp
 void __stdcall RENDERER_GLIDE_InitSpriteCache() {
-    if (!gpGlideSpriteBuffer) {
+    if (gpGlideSpriteBuffer) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4a);
+      exit(-1);
+    } else {
       BOOL bIsPerspective;
       if (gpGlideSpritePixelBuffer) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4b);
@@ -1728,12 +1731,8 @@ void __stdcall RENDERER_GLIDE_InitSpriteCache() {
       if (bIsPerspective) {
         return;
       }
-
       gnGlideSpriteSecondaryTMUEnabled = 1;
       return;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4a);
-      exit(-1);
     }
 }
 
