@@ -721,10 +721,10 @@ BOOL __fastcall Skills_CltStFunc_SetParamsFromTargetPositionEMon(D2UnitStrc * pU
     eD2UnitType eTargetType = pTarget->eUnitType;
     if (eTargetType == UNIT_OBJECT || 3 < (int)eTargetType && (int)eTargetType <= 5) {
       nPosX = pTarget->pPath.pStaticPath->nPosX;
-    } else if (!pTarget->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pTarget->pPath.pDynamicPath) {
       nPosX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
     D2Common::Skills::SKILL_SetParam1(pSkill, nPosX);
