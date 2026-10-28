@@ -353,7 +353,7 @@ BOOL __stdcall AreTileCoordinatesInsideRoom(D2RoomStrc * pRoom, int32_t nX, int3
     }
 
     nRectEdge = pRoom->sCoords.sTileRect.top;
-    if (!(nRectEdge <= nY && nY < pRoom->sCoords.sTileRect.bottom + nRectEdge)) {
+    if (!(nY >= nRectEdge && nY < pRoom->sCoords.sTileRect.bottom + nRectEdge)) {
       return 0;
     }
 
@@ -402,7 +402,7 @@ int32_t __stdcall FindRoomByTileCoordinates(D2DrlgActStrc * pDrlgAct, int32_t nX
       }
 
       nRoomEdge = pCurRoom->sCoords.sTileRect.left;
-      if (nRoomEdge <= nX && nX < pCurRoom->sCoords.sTileRect.right + nRoomEdge) {
+      if (nX >= nRoomEdge && nX < pCurRoom->sCoords.sTileRect.right + nRoomEdge) {
         nRoomEdge = pCurRoom->sCoords.sTileRect.top;
         if (nRoomEdge <= nY && nY < pCurRoom->sCoords.sTileRect.bottom + nRoomEdge) {
           break;
@@ -568,7 +568,7 @@ BOOL __fastcall AreSubtileCoordinatesInsideRoom(D2DrlgCoordsStrc * pDrlgCoords, 
     }
 
     nEdgePos = pDrlgCoords->WorldPosition.y;
-    if (!(nEdgePos <= nY && nY < pDrlgCoords->WorldSize.y + nEdgePos)) {
+    if (!(nY >= nEdgePos && nY < pDrlgCoords->WorldSize.y + nEdgePos)) {
       return 0;
     }
 

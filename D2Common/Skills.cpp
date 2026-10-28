@@ -733,12 +733,11 @@ static BOOL __stdcall SKILLS_CheckWeaponRequirements(D2UnitStrc * pUnit, D2Skill
     }
 
     iVar1 = SKILLS_CheckItemTypeRequirement(pRightItem, pUnit, &psSkillFields->skill, 1);
-    if (!iVar1) {
-      return 0;
+    if (iVar1) {
+      iVar1 = SKILLS_CheckItemTypeRequirement(pUnit, pRightItem, &psSkillFields->skill, 0);
+      return iVar1;
     }
-
-    iVar1 = SKILLS_CheckItemTypeRequirement(pUnit, pRightItem, &psSkillFields->skill, 0);
-    return iVar1;
+    return 0;
 }
 
 // Checks whether a skill's use-restriction condition is satisfied for the caster. Reads the restrict field from the skill record: 0 = requires no active poison state (returns true if not poisoned); 1 = always allowed; 2 = requires a poison state AND at least one of the skill's three state[] entries active on the unit. Returns 1 if the restriction passes, 0 otherwise. Returns 0 immediately if unit or skill pointer is null.
