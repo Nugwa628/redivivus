@@ -735,10 +735,10 @@ void __fastcall SKILL_ForEachUnitInRadius(D2UnitStrc * pUnit, int32_t nCenterX, 
               eUnitType = pUnit2->eUnitType;
               if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
                 nUnitXPos = pUnit2->pPath.pStaticPath->nPosX;
-              } else if (!pUnit2->pPath.pDynamicPath) {
-                nUnitXPos = 0;
-              } else {
+              } else if (pUnit2->pPath.pDynamicPath) {
                 nUnitXPos = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
+              } else {
+                nUnitXPos = 0;
               }
 
               nDistanceSq = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(nCenterXSaved, nCenterY, nUnitXPos, nUnitY);
