@@ -6,7 +6,7 @@
   "type": "decomp",
   "original": { "revision": "1.14d", "sha1": "af0ea93d2a652ceb11ac01ee2e4ae1ef613444c2" },
   "project": "Redivivus",
-  "status": "in-progress",
+  "status": "playable",
   "targets": ["Windows"],
   "toolchain": "Ghidra",
   "approach": "Ghidra decompilation of the 1.14d Game.exe, turned into C++ that builds by a generator; fixes go into Ghidra or the generator, not the output",
