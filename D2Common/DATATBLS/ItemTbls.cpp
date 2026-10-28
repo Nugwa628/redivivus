@@ -3678,11 +3678,11 @@ D2ItemRatioTxt * __stdcall TXT_QualityRatio_GetLine(uint32_t nItemClassId, uint3
 }
 
 int SORT_ItemDescPriority(LPCVOID pParam1, LPCVOID pParam2) {
-    if (*(short int*)((int)pParam1 + 2) >= *(short int*)((int)pParam2 + 2)) {
-      return (uint32_t)(*(short int*)((int)pParam1 + 2) != *(short int*)((int)pParam2 + 2));
+    if (*(short int*)((int)pParam1 + 2) < *(short int*)((int)pParam2 + 2)) {
+      return -1;
     }
 
-    return -1;
+    return (uint32_t)(*(short int*)((int)pParam1 + 2) != *(short int*)((int)pParam2 + 2));
 }
 
 // Builds the itemstatcost.txt field-descriptor array (52 columns) and compiles it into the in-memory ItemStatCost table via DataTbls::CompileTxt (record size 0x144), enforcing a max of 0x1FF stats (fatal error otherwise). Then post-processes op-relationships: clears each stat's aOpBaseDependents arrays to -1, derives the charged-skill-level bit count (clamped 1..8, default 6) and its mask, and for every stat with an op walks its op-base/op-stat references to populate the dependency graph (aOpBaseDependents, aOpRelations, bHasOpBaseDependencies/bHasOp4Or5Dependency flags) plus special-case stat flag bits. Finally collects stats with a nonzero descpriority, qsorts them via SORT_ItemDescPriority, and allocates/stores the sorted pItemStatCostDescPriority list. __fastcall, pMemory in ECX.

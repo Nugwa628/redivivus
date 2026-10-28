@@ -2390,14 +2390,10 @@ BOOL __stdcall STATES_RemoveAllProgressiveStates(D2UnitStrc * pUnit) {
 }
 
 eD2Skills __stdcall SKILLS_GetClassSkillByIndex(uint32_t nClassId, int32_t nSkillIndex) {
-    if (6 < nClassId) {
-      return ~SKILL_Attack;
+    if (nClassId <= 6 && nSkillIndex >= 0 && nSkillIndex < (&sgptDataTable->pSkillsPerClassCounter->Amazon)[nClassId]) {
+      return (int)sgptDataTable->pSkillsPerClassStrc[sgptDataTable->nSkillCountMaxPerClass * nClassId + nSkillIndex];
     }
-    if (!(0 <= nSkillIndex && nSkillIndex < (&sgptDataTable->pSkillsPerClassCounter->Amazon)[nClassId])) {
-      return ~SKILL_Attack;
-    }
-
-    return (int)sgptDataTable->pSkillsPerClassStrc[sgptDataTable->nSkillCountMaxPerClass * nClassId + nSkillIndex];
+    return ~SKILL_Attack;
 }
 
 int32_t __stdcall AmountOfSkillsByClassId(uint32_t nClassId) {
