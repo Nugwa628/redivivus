@@ -1194,12 +1194,15 @@ void __fastcall NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(D2ClientStrc * pClient, u
 
 void __fastcall NET_D2GS_SERVER_Send_0x78_TRADENAME(D2ClientStrc * pClient, D2GSPacketSrv0x78 * pPacketData) {
     uint8_t aPacket[21];
-    *(uint32_t*)(char*)&aPacket = *(uint32_t*)pPacketData;
-    *(uint32_t*)((char*)&aPacket + 4) = ((uint32_t*)pPacketData)[1];
-    *(uint32_t*)((char*)&aPacket + 8) = ((uint32_t*)pPacketData)[2];
-    *(uint32_t*)((char*)&aPacket + 12) = ((uint32_t*)pPacketData)[3];
-    *(uint32_t*)((char*)&aPacket + 16) = ((uint32_t*)pPacketData)[4];
-    aPacket[0x14] = *(uint8_t*)((uint32_t*)pPacketData + 5);
+    aPacket[0] = pPacketData->nPacketId;
+    aPacket[1] = pPacketData->szName[0];
+    aPacket[2] = pPacketData->szName[1];
+    aPacket[3] = pPacketData->szName[2];
+    *(uint32_t*)((char*)&aPacket + 4) = *(uint32_t*)(pPacketData->szName + 3);
+    *(uint32_t*)((char*)&aPacket + 8) = *(uint32_t*)(pPacketData->szName + 7);
+    *(uint32_t*)((char*)&aPacket + 12) = *(uint32_t*)(pPacketData->szName + 0xb);
+    *(uint32_t*)((char*)&aPacket + 16) = *(uint32_t*)(pPacketData->szName + 0xf);
+    aPacket[0x14] = *(uint8_t*)((uintptr_t)&pPacketData->nUnitGUID + 3);
     SCMD_QueuePacketForClient(aPacket, 0x15, pClient);
 }
 
@@ -1562,7 +1565,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(D2ClientStrc * pClient
     SCMD_QueuePacketForClient(aPacket, 0x22, pClient);
 }
 
-void __fastcall NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(D2ClientStrc * pClient, D2UnitStrc * pUnit, int32_t nItemSlot, BOOL bUseUnitGUID, int32_t nParam, uint16_t nSkillId) {
+void __fastcall NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(D2ClientStrc * pClient, D2UnitStrc * pUnit, int32_t nItemSlot, BOOL bUseUnitGUID, int32_t nParam, int16_t nSkillId) {
     D2GSPacketSrv0x3F tPacket;
     uint32_t dwUnitGUID;
     dwUnitGUID = 0;
@@ -2765,7 +2768,7 @@ void __fastcall Send0x9CItemPutInBelt(D2ClientStrc * pClient, D2UnitStrc * pUnit
     NET_D2GS_SERVER_Send_0x9C_ITEMEX(pClient, pItem, 0xe, eItemFlags, 0);
 }
 
-void __fastcall Send0x9CItemRemoveFromBelt(void * pThis, D2UnitStrc * pUnit, eD2ItemFlag eItemFlag) {
+void Send0x9CItemRemoveFromBelt(void * pThis, D2UnitStrc * pUnit, eD2ItemFlag eItemFlag) {
     NET_D2GS_SERVER_Send_0x9C_ITEMEX((D2ClientStrc*)pThis, pUnit, 0xf, eItemFlag, 0);
 }
 

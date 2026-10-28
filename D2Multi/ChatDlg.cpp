@@ -364,7 +364,6 @@ void __stdcall CHATDLG_UpdateChannelOkButtonState() {
 
 static int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
     int nUpper1;
-    int nUpper2;
     char cCur;
     char* pcEnd1 = szText1;
     pcEnd1 = pcEnd1 + strlen(pcEnd1) + 1;
@@ -383,9 +382,8 @@ static int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
       }
 
       nRemaining--;
-      nUpper1 = toupper((int)*szText1);
-      nUpper2 = toupper((int)*szText2);
-      if (nUpper1 != nUpper2) {
+      nUpper1 = toupper((int)*szText1) - toupper((int)*szText2);
+      if (nUpper1) {
         break;
       }
 
@@ -393,7 +391,7 @@ static int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
       szText2++;
     }
 
-    return (uint32_t)(nUpper1 != nUpper2 && -1 < nUpper1 - nUpper2) * 2 - 1;
+    return nUpper1 > 0 ? 1 : -1;
 }
 
 static BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {

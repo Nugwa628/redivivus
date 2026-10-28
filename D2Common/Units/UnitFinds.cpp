@@ -329,10 +329,10 @@ int32_t __stdcall TestUnit(D2UnitStrc * pUnit, D2UnitFindArgStrc * pUnitFindArg)
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       pUnitFindArg = (D2UnitFindArgStrc*)pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      pUnitFindArg = (D2UnitFindArgStrc*)PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       pUnitFindArg = 0;
+    } else {
+      pUnitFindArg = (D2UnitFindArgStrc*)PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     eD2UnitType eUnitTypeY = pTestUnit->eUnitType;

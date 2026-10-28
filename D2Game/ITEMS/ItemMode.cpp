@@ -2663,20 +2663,20 @@ static void __stdcall ITEMMODE_InitItemCreateContext(int dwParam, D2UnitStrc * p
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nModSeed = pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nModSeed = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nModSeed = 0;
+    } else {
+      nModSeed = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     pItemGenContext->nPosX = nModSeed;
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nPosY = 0;
+    } else {
+      nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
     }
 
     pItemGenContext->nPosY = nPosY;
@@ -2877,10 +2877,10 @@ void __fastcall ITEMMODE_DeleteItemFromCorpse(::SGAMEDATA * pGame, D2UnitStrc * 
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (pUnit->pPath.pDynamicPath) {
-        nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-      } else {
+      } else if (!pUnit->pPath.pDynamicPath) {
         nPosX = 0;
+      } else {
+        nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
       }
       D2Common::INVENTORY::Inventory::INVENTORY_OnBeltChanged_NoOp(pInventory, nPosX);
       Items::Drop::ITEM_DeleteItemAndFreeUnit(pGame, pUnit);
@@ -3096,9 +3096,13 @@ BOOL __fastcall ITEMMODE_CheckEquipRestrictions(::SGAMEDATA * pGame, D2UnitStrc 
         pCurItem = D2Common::INVENTORY::Inventory::INVENTORY_GetNextItem(pCurItem);
       }
       nKeyQty = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pKey, UNITSTAT_quantity, 0);
-      if (nKeyQty - 1 > 0) {
+      if (nKeyQty != 1 && -1 < nKeyQty - 1) {
         D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pKey, UNITSTAT_quantity, -1, 0);
-        GAME::SCmd::NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\ITEMS\\ItemMode.cpp", 0x1605), pKey, 1, 0x46, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pKey, UNITSTAT_quantity, 0), 0);
+        wStatLayer = 0;
+        bIsKey = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pKey, UNITSTAT_quantity, 0);
+        nErrorLine = 0x46;
+        bSendStatUpdate = '\x01';
+        GAME::SCmd::NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\ITEMS\\ItemMode.cpp", 0x1605), pKey, bSendStatUpdate, nErrorLine, bIsKey, wStatLayer);
         return 1;
       }
 
@@ -4364,10 +4368,10 @@ void __fastcall ITEMMODE_RemoveItemFromBelt(::SGAMEDATA * pGame, D2UnitStrc * pU
         eUnitType = pUnit_00->eUnitType;
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
           nPutResult = pUnit_00->pPath.pStaticPath->nPosX;
-        } else if (pUnit_00->pPath.pDynamicPath) {
-          nPutResult = D2Common::PATH::DynamicPath::GetXPos(pUnit_00->pPath.pDynamicPath);
-        } else {
+        } else if (!pUnit_00->pPath.pDynamicPath) {
           nPutResult = 0;
+        } else {
+          nPutResult = D2Common::PATH::DynamicPath::GetXPos(pUnit_00->pPath.pDynamicPath);
         }
 
         D2Common::INVENTORY::Inventory::INVENTORY_OnBeltChanged_NoOp(pInventorySaved, nPutResult);
@@ -6281,10 +6285,10 @@ BOOL __fastcall ITEMMODE_ProcessCorpsePickup(::SGAMEDATA * pGame, D2UnitStrc * p
       eUnitType = pClonedItem->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nCoord = pClonedItem->pPath.pStaticPath->nPosX;
-      } else if (pClonedItem->pPath.pDynamicPath) {
-        nCoord = D2Common::PATH::DynamicPath::GetXPos(pClonedItem->pPath.pDynamicPath);
-      } else {
+      } else if (!pClonedItem->pPath.pDynamicPath) {
         nCoord = 0;
+      } else {
+        nCoord = D2Common::PATH::DynamicPath::GetXPos(pClonedItem->pPath.pDynamicPath);
       }
 
       D2Common::Units::SetXForStaticUnit(pNewItem, nCoord);
@@ -6581,10 +6585,10 @@ static void __stdcall ITEMMODE_RemoveItemsFromCube(::SGAMEDATA * pGame, D2UnitSt
         eUnitType = pCarriedItem->eUnitType;
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
           nPutResult = pCarriedItem->pPath.pStaticPath->nPosX;
-        } else if (pCarriedItem->pPath.pDynamicPath) {
-          nPutResult = D2Common::PATH::DynamicPath::GetXPos(pCarriedItem->pPath.pDynamicPath);
-        } else {
+        } else if (!pCarriedItem->pPath.pDynamicPath) {
           nPutResult = 0;
+        } else {
+          nPutResult = D2Common::PATH::DynamicPath::GetXPos(pCarriedItem->pPath.pDynamicPath);
         }
 
         D2Common::INVENTORY::Inventory::UnusedDebug(".\\ITEMS\\ItemMode.cpp", 0x813, pCubeInventory, nPutResult, (int32_t)pPlayerInventory, (eInventoryPage)bInTrade, 0, nSrcInvPage);

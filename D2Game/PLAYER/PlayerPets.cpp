@@ -921,10 +921,10 @@ static void __stdcall PETS_RemoveDistantPets(::SGAMEDATA * pGame, D2UnitStrc * p
           eVar1 = pUnit->eUnitType;
           if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
             nOwnerX = pUnit->pPath.pStaticPath->nPosX;
-          } else if (pUnit->pPath.pDynamicPath) {
-            nOwnerX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-          } else {
+          } else if (!pUnit->pPath.pDynamicPath) {
             nOwnerX = 0;
+          } else {
+            nOwnerX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
           }
 
           nCalcDist = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(nOwnerX, nDist, nPetPosX, nPetPosY);

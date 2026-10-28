@@ -110,7 +110,7 @@ void __stdcall AUTOMAP_OnKeyDownEnd_NoOp(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall AUTOMAP_SetupPosition();
 void __fastcall AUTOMAP_CenterOnPlayer(int32_t bForceCenter);
 int32_t AUTOMAP_GetFade();
-void __fastcall AUTOMAP_SetFade(int32_t nAutomapFade);
+int32_t __fastcall AUTOMAP_SetFade(int32_t nAutomapFade);
 int32_t __stdcall AUTOMAP_GetCenters();
 void __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters);
 int32_t __stdcall AUTOMAP_GetLeft();
