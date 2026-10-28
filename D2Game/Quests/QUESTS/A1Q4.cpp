@@ -1914,12 +1914,13 @@ void __fastcall Q04_InitializeCainGibbetObject(int32_t nParam1, D2UnitStrc * * n
 // (by GUID, or -1) from quest list1. Bookkeeping only.
 void __fastcall Q04_RemovePlayerFromList(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
+    D2QuestDataA1Q4Strc* pA1Q4 = pQuestData->pQuestSpecificData.pA1Q4;
     if (!pUnit) {
-      QUESTGUID_RemovePlayerFromList(&pQuestData->pQuestSpecificData.pA1Q4->sQuestGUID1, -1);
+      QUESTGUID_RemovePlayerFromList(&pA1Q4->sQuestGUID1, -1);
       return;
     }
 
-    QUESTGUID_RemovePlayerFromList(&pQuestData->pQuestSpecificData.pA1Q4->sQuestGUID1, pUnit->nUnitGUID);
+    QUESTGUID_RemovePlayerFromList(&pA1Q4->sQuestGUID1, pUnit->nUnitGUID);
 }
 
 // A1Q4 — Objects_InitFn54: init callback for the Cain-cage object. Records its GUID

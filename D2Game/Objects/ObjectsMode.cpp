@@ -3259,9 +3259,9 @@ int __fastcall _x44PacketHandler(::SGAMEDATA * pGame, DWORD dwParam, DWORD param
 void __fastcall OBJMODE_HandleObjectDeactivation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pObject) {
     DWORD dwPlayerGUID;
     if (pObject) {
-      short int nClassId;
-      nClassId = (short int)pObject->nClassId;
-      if (nClassId == 0x50 || nClassId == 0x5a) {
+      int32_t nClassId;
+      nClassId = pObject->nClassId;
+      if ((uint16_t)nClassId == 0x50 || (uint16_t)nClassId == 0x5a) {
         if (!pUnit) {
           dwPlayerGUID = -1;
         } else {
@@ -3270,12 +3270,12 @@ void __fastcall OBJMODE_HandleObjectDeactivation(::SGAMEDATA * pGame, D2UnitStrc
 
         _x44PacketHandler(pGame, dwPlayerGUID, pObject->nUnitGUID, 0, 2);
       } else {
-        if (nClassId == 0x151) {
+        if ((uint16_t)nClassId == 0x151) {
           OBJMODE_ClearObjectUnitLink(pGame, pUnit, pObject);
           UNIT::SUnit::ClearInteractInfo(pUnit);
           return;
         }
-        if (nClassId == 0x98) {
+        if ((uint16_t)nClassId == 0x98) {
           D2Common::Units::SetupUpdateFlag(pObject, 0);
           UNIT::SUnit::ClearInteractInfo(pUnit);
           return;

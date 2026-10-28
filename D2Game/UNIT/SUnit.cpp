@@ -212,10 +212,8 @@ D2UnitStrc * __fastcall FindUnitFromTable(::SGAMEDATA * pGame, eD2UnitType eUnit
     }
     if (eUnitType == UNIT_WARP) {
       ppHashSlot = &pGame->pWarpTileList;
-    } else if (eUnitType < UNIT_WARP) {
-      ppHashSlot = (D2UnitStrc**)(pGame->szGameName + ganUnitHashTableBaseOffsets[eUnitType] + (nUnitGUID & 0x7f) * 4 - 0x2a);
     } else {
-      ppHashSlot = 0;
+      ppHashSlot = (uint32_t)eUnitType <= UNIT_ITEM ? (D2UnitStrc**)(pGame->szGameName + ganUnitHashTableBaseOffsets[eUnitType] + (nUnitGUID & 0x7f) * 4 - 0x2a) : 0;
     }
 
     D2UnitStrc* pUnit = *ppHashSlot;
@@ -264,10 +262,8 @@ void __fastcall UNITS_InsertUnitIntoHashTable(D2UnitStrc * pUnit, ::SGAMEDATA * 
     eD2UnitType eCachedUnitType = pUnit->eUnitType;
     if (eCachedUnitType == UNIT_WARP) {
       ppHashSlot = &pGame->pWarpTileList;
-    } else if (eCachedUnitType < UNIT_WARP) {
-      ppHashSlot = (D2UnitStrc**)(pGame->szGameName + ganUnitHashTableBaseOffsets[eCachedUnitType] + (pUnit->nUnitGUID & 0x7fU) * 4 - 0x2a);
     } else {
-      ppHashSlot = 0;
+      ppHashSlot = (uint32_t)eCachedUnitType <= UNIT_ITEM ? (D2UnitStrc**)(pGame->szGameName + ganUnitHashTableBaseOffsets[eCachedUnitType] + (pUnit->nUnitGUID & 0x7fU) * 4 - 0x2a) : 0;
     }
 
     D2UnitStrc* pNextUnit = *ppHashSlot;
