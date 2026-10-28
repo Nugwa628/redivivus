@@ -1835,13 +1835,13 @@ int32_t __fastcall ITEMMOD_AddStatToItem(D2UnitStrc * pUnit, int32_t nParam1, in
       return 0;
     }
     if (!nParam2) {
-      Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, eTargetStat, nParam3 << (pItemStatCost->valshift & 0x1fU), (uint16_t)nParam12);
+      Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, eTargetStat, nParam3 << (pItemStatCost->valshift), (uint16_t)nParam12);
       if (nParam == 0x3a) {
         Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, UNITSTAT_poison_count, 1, 0);
       }
     } else {
       int nPoisonCount;
-      Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, eTargetStat, nParam3 << (pItemStatCost->valshift & 0x1fU), nParam12);
+      Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, eTargetStat, nParam3 << (pItemStatCost->valshift), nParam12);
       if (nParam == 0x3a) {
         nPoisonCount = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatsEx, UNITSTAT_poison_count, 0);
         if (!nPoisonCount) {

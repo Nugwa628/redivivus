@@ -635,8 +635,7 @@ static void __stdcall Q27_SetTerrorsEndCompleted(D2BitBufferStrc * pBitBuffer, :
       return;
     }
 
-    int* pKillCounter = &pQuestData->pQuestSpecificData.pA4Q2->nPlayerCompletionCount;
-    (*pKillCounter)++;
+    pQuestData->pQuestSpecificData.pA4Q2->nPlayerCompletionCount++;
 }
 
 // [A4Q3 Terror's End] Party-member callback: if QUEST_TerrorsEnd not Completed for this player and they are physically in Act IV, complete the quest via Q27_SetTerrorsEndCompleted. nParam is the SGAMEDATA.
@@ -669,8 +668,8 @@ BOOL __fastcall Q27_PropagateCompletionToParty(::SGAMEDATA * pGame, D2UnitStrc *
       return 0;
     }
 
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 

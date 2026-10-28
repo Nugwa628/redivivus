@@ -198,8 +198,8 @@ uint32_t __fastcall A2Q6_GetNextFalseTombPortalClassIdForGame(::SGAMEDATA * pGam
 }
 
 // Q14 accessor: returns the "town/Duriel portal already created" flag from A2Q6 data (field_0x0B). Returns 1 (treat as created) if quest not introduced. Used to gate the stairs-to-tombs operate and portal creation.
-uint8_t __fastcall Q14_GetPortalCreatedFlag(::SGAMEDATA * pGame) {
-    D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSevenTombs);
+uint8_t __fastcall Q14_GetPortalCreatedFlag(struct D2QuestArgStrc * pQuestArg) {
+    D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pQuestArg->pGame, QUESTINT_TheSevenTombs);
     if (!(pQuestData && pQuestData->bIsNotIntroduction)) {
       return 1;
     }
@@ -507,8 +507,8 @@ void __fastcall Q14_OnStaffUsedInOrifice(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     QUEST_RemoveQuestItemFromPlayer(pGame, pUnit, 0x20747368);
     QUEST_RemoveQuestItemFromPlayer(pGame, pUnit, 0x20706976);
     QUEST_RemoveQuestItemFromPlayer(pGame, pUnit, 0x2066736d);
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId != -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId != 0xffff) {
       UNIT::Party::ExecuteFunctionForEveryPartyMember(pGame, nPartyId, (::fpExecuteOnUnitFunction)Q14_CompleteHoradricStaffOnPartyMember, 0);
     }
 

@@ -170,7 +170,7 @@ void __fastcall Q03_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
           QUEST_RemoveQuestItemFromPlayer(pQuestArgs->pGame, pQuestArgs->pPlayer, 0x206d6468);
           pA1Q3Data->nQuestItemCount--;
           nPartyId = UNIT::SUnit::GetPartyId(pQuestArgs->pPlayer);
-          if (nPartyId != -1) {
+          if (nPartyId != 0xffff) {
             UNIT::Party::ExecuteFunctionForEveryPartyMember(pQuestArgs->pGame, nPartyId, (::fpExecuteOnUnitFunction)Q03_AutoCompleteIfHighLevel, 0);
           }
           if (pQuestData->bIsNotIntroduction) {
@@ -562,8 +562,8 @@ static BOOL Q03_CheckPartyHasMalus(D2UnitStrc * pUnitStrc, D2QuestDataStrc * pQu
     }
 
     D2QuestDataA1Q3Strc* pQuestSpecific = pQuestData->pQuestSpecificData.pA1Q3;
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnitStrc);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnitStrc);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -612,7 +612,7 @@ bool __fastcall Q03_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
         iVar1 = QUEST_GetQuestRecordState(pQuestData->pGame, QUEST_ToolsOfTheTrade, 0xd);
         if (iVar1) {
           nCompletionState = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0);
-          *pbyStatusCode = (8 <= nCompletionState) * '\b' + '\x04';
+          *pbyStatusCode = (8 <= nCompletionState ? 0xc : 0x4);
         }
       }
     }
