@@ -2765,7 +2765,7 @@ void __fastcall Send0x9CItemPutInBelt(D2ClientStrc * pClient, D2UnitStrc * pUnit
     NET_D2GS_SERVER_Send_0x9C_ITEMEX(pClient, pItem, 0xe, eItemFlags, 0);
 }
 
-void Send0x9CItemRemoveFromBelt(void * pThis, D2UnitStrc * pUnit, eD2ItemFlag eItemFlag) {
+void __fastcall Send0x9CItemRemoveFromBelt(void * pThis, D2UnitStrc * pUnit, eD2ItemFlag eItemFlag) {
     NET_D2GS_SERVER_Send_0x9C_ITEMEX((D2ClientStrc*)pThis, pUnit, 0xf, eItemFlag, 0);
 }
 
