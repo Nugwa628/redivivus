@@ -3657,24 +3657,22 @@ D2ItemRatioTxt * __stdcall TXT_QualityRatio_GetLine(uint32_t nItemClassId, uint3
       do {
         if (uVar1 == (uint8_t)*(char*)((int)pEntry + 3) && bIsUpgradeable == *(uint8_t*)(pEntry + 1)) {
           wMinVal = *pEntry;
-          if (wMinVal <= nQualityTier && (int)nBestMinVal <= (int)(uint32_t)wMinVal) {
-            nBestMatchIdx = nRatioIdx;
+          if (wMinVal <= nQualityTier && (int)(uint32_t)wMinVal >= (int)nBestMinVal) {
             nBestMinVal = (uint32_t)wMinVal;
+            nBestMatchIdx = nRatioIdx;
           }
         }
 
         nRatioIdx++;
         pEntry += 0x22;
       } while (nRatioIdx < nTxtItemRatioSize);
+    }
 
-      if (-1 >= nBestMatchIdx) {
-        return nullptr;
-      }
-
-      return pTxtItemRatio + nBestMatchIdx;
-    } else {
+    if (nBestMatchIdx < 0) {
       return nullptr;
     }
+
+    return pTxtItemRatio + nBestMatchIdx;
 }
 
 int SORT_ItemDescPriority(LPCVOID pParam1, LPCVOID pParam2) {
