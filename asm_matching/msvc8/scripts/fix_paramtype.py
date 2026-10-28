@@ -219,6 +219,9 @@ def main():
         if not active:
             break
         failed = build_all() - failed_before
+        # A retyped parameter breaks a typed function pointer or a declaration
+        # elsewhere: the TU that fails names the function.
+        unclaimed = fixlib.claim_failed(active, tus_of, failed)
         # The new mangled names stand for the original functions, in the callers' references too.
         for e in active:
             s = next(iter(e.owners))
@@ -234,10 +237,13 @@ def main():
         bad = [e for e in active if tus_of[e.label] & failed or e.affects & lost
                or (sum(state[s][1] - base[s][1] for s in e.affects if s in state and s in base) < -fixlib.SIM_EPS
                    and not e.affects & won)]
-        print('round %d: %d edits, %d TUs failed, %d lost, %d won, %d to drop' % (
-            rnd + 1, len(active), len(failed), len(lost), len(won), len(bad)), flush=True)
-        if lost and not any(e.affects & lost for e in bad):
-            active = []                      # a loss no edit claims: keep nothing
+        print('round %d: %d edits, %d TUs failed (%s), %d lost, %d won, %d to drop' % (
+            rnd + 1, len(active), len(failed), ' '.join(sorted(unclaimed)) or 'all claimed',
+            len(lost), len(won), len(bad)), flush=True)
+        for e in bad:
+            print("  drop %s: %s" % (e.label, " ".join("%08x" % x for x in sorted(e.affects & lost)[:6])), flush=True)
+        if lost and not any(e.affects & lost for e in bad) or unclaimed and not bad:
+            active = []                      # a loss or failure no edit claims: keep nothing
         if not bad and not failed and active:
             break
         active = [e for e in active if e not in bad]

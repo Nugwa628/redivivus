@@ -361,3 +361,4 @@ fix_switch	8242adc	295	30	0	single
 fix_bitmask	84c0b3c	272	198	7	
 fix_shiftbit	84c0b3c	99	63	0	
 fix_bitmask --inverse	4eed109	12	5	4	
+fix_paramtype	9f8e948	12	0	0	no TU failed
