@@ -1240,7 +1240,7 @@ uint32_t __stdcall IsAtEndOfFrameCycle(D2UnitStrc * pUnit) {
       return (uint32_t)(pUnit->nFrameCount <= (int)pUnit->nAnimSpeed + pUnit->nGfxCurrentFrame);
     }
 
-    return (uint32_t)(pUnit->nFrameCount < 1);
+    return (uint32_t)(pUnit->nFrameCount <= 0);
 }
 
 void __stdcall GetShiftedFrameMetrics(D2UnitStrc * pUnit, int * pCurrentFrame, int * pFrameCount) {
@@ -1873,7 +1873,7 @@ int32_t __stdcall GetDefense(D2UnitStrc * pUnit) {
         }
       }
     }
-    if (nBaseArmor < 1) {
+    if (nBaseArmor <= 0) {
       nDexBonus = (int)((uint64_t)((int64_t)(nDexBonus * nBaseArmor) * -0x51eb851f) >> 0x20);
       nDexBonus = (nDexBonus >> 5) - (nDexBonus >> 0x1f);
     } else {

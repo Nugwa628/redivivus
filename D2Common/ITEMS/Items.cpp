@@ -431,7 +431,7 @@ void __stdcall ITEM_SetItemData_nItemLevel(D2UnitStrc * pUnit, int32_t nLevel) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataItem)) {
       return;
     }
-    if (nLevel < 1) {
+    if (nLevel <= 0) {
       nLevel = 1;
     }
 
@@ -5557,7 +5557,7 @@ int32_t __stdcall ITEM_LoadFromSaveData(D2UnitStrc * pUnit, uint8_t * pbParam, s
         *pnParam = 0;
       }
     }
-    if (nDeserializeResult < 1) {
+    if (nDeserializeResult <= 0) {
       *pUnitDataItemDetails = 1;
     }
 

@@ -621,7 +621,7 @@ static void __stdcall CreateObjectPresets2(uint32_t xOffset, D2DrlgGridStrc * pG
       pPreset->nFlags |= 1;
       pPreset->pPresetUnitNext = pMapStrc->pPresetUnit;
       pMapStrc->pPresetUnit = pPreset;
-      cellFlags = DrlgGrid::GetGridFlags(pGrid, (int)xOffset < 1 ? 0 : xOffset, yIndex);
+      cellFlags = DrlgGrid::GetGridFlags(pGrid, (int)xOffset <= 0 ? 0 : xOffset, yIndex);
       if (((uint8_t)(cellFlags >> 0x14) & 0x3f) == 4 && true) {
         switch (cellFlags >> 8 & 0xff) {
           case 0:

@@ -3973,7 +3973,7 @@ void __fastcall TXT_AllocTxt_itemstatcost(D2PoolManagerStrc * pMemory) {
     }
 
     sgtDataTable.nChargedSkillLevelBits = sgtDataTable.pTxtItemStatCost->nChargedSkillLevelBits;
-    if (sgtDataTable.nChargedSkillLevelBits < 1 || 8 < sgtDataTable.nChargedSkillLevelBits) {
+    if (sgtDataTable.nChargedSkillLevelBits <= 0 || 8 < sgtDataTable.nChargedSkillLevelBits) {
       sgtDataTable.nChargedSkillLevelBits = 6;
     }
 
