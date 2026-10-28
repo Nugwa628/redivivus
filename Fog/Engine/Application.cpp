@@ -968,7 +968,7 @@ void __stdcall CloseDiablo() {
     exit(-1);
 }
 
-void __fastcall MISC_ParseCommandLineAndPutIntoD2IniData(D2IniConfigStrc * pD2IniData, char * szText) {
+static void __fastcall MISC_ParseCommandLineAndPutIntoD2IniData(D2IniConfigStrc * pD2IniData, char * szText) {
     char* pcVar4;
     long int nConfigIdx;
     int nDstOffset;
