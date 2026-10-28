@@ -425,9 +425,9 @@ void __stdcall LogCpuInfo() {
         nType = nVersionLow >> 0xc & 3;
         nFamily = nVersionLow >> 8 & 0xf;
         nBrandId = GetCpuBrandId();
-        DecodeCpuModelName(nModel, nBrandId & 0xff, szModelName, nVendorIndex, nFamily, nType);
+        DecodeCpuModelName(nModel, (uint8_t)nBrandId, szModelName, nVendorIndex, nFamily, nType);
         LOGFILE_WriteStringToFile("Vendor:  %s", gaCpuVendorNames[nVendorIndex]);
-        LOGFILE_WriteStringToFile("Version: %s (Type %X, Family %X, Model %X, Stepping %X, Brand %X)", szModelName, nType, nFamily, nModel, nVersionLow & 0xf, nBrandId & 0xff);
+        LOGFILE_WriteStringToFile("Version: %s (Type %X, Family %X, Model %X, Stepping %X, Brand %X)", szModelName, nType, nFamily, nModel, nVersionLow & 0xf, (uint8_t)nBrandId);
         nBrandId = BenchmarkCpuSpeed();
         LOGFILE_WriteStringToFile("Speed: Approx. %d MHz", nBrandId);
         return;

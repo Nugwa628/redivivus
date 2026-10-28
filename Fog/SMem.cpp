@@ -279,7 +279,7 @@ int32_t __stdcall SMemSizeClassBucketLookup(uint32_t nAllocSize) {
       return -1;
     }
     if ((char)nAllocSize != '\0') {
-      return g_SMemSizeClassTable[nAllocSize & 0xff];
+      return g_SMemSizeClassTable[(uint8_t)nAllocSize];
     }
 
     uint8_t byClassByte = (uint8_t)(nAllocSize >> 8);
@@ -603,7 +603,7 @@ uint32_t __stdcall HashForName(char * szText) {
     char cCurChar = (char)uLowered;
     while (cCurChar != '\0') {
       uint8_t* pbNextChar;
-      wHash = (uint16_t)(uHashAccum >> 2) ^ gwSMemAllocDebugFlags[(uLowered ^ uHashAccum) & 0xff];
+      wHash = (uint16_t)(uHashAccum >> 2) ^ gwSMemAllocDebugFlags[(uint8_t)(uLowered ^ uHashAccum)];
       pbNextChar = (uint8_t*)(szText + 1);
       szText++;
       uHashAccum = (uint32_t)wHash;
