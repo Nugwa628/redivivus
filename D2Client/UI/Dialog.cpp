@@ -657,7 +657,7 @@ void __stdcall DIALOG_InitializeSystem() {
 void __stdcall DIALOG_CleanupSystem() {
     int32_t nHandlerCount;
     D2DialogStrc* pNextDialog;
-    D2DialogStrc* pDialogNode = gpDialogActual;
+    D2DialogStrc* pDialogNode;
     if (gnDialogStructAllocCount) {
       HWND hWnd;
       nHandlerCount = 0xe;
@@ -665,9 +665,9 @@ void __stdcall DIALOG_CleanupSystem() {
       nHandlerCount = 1;
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitDialogMouseWheel, nHandlerCount);
       gnDialogCounter--;
-      pDialogNode = gpDialogActual;
     }
 
+    pDialogNode = gpDialogActual;
     while (pDialogNode) {
       pNextDialog = pDialogNode->pPrev;
       Fog::Memory::FreeClientMemory(pDialogNode, ".\\UI\\dialog.cpp", 0x333, 0);

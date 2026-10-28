@@ -179,7 +179,10 @@ void __fastcall AUTOMAP_CenterOnPlayer(int32_t bForceCenter) {
     }
 
     AUTOMAP_SetupPosition();
-    if (MiniMapType != 1) {
+    switch (MiniMapType) {
+    case 1:
+      break;
+    default:
       AutoMapMoveX = 0;
       AutoMapMoveY = 0;
       return;
