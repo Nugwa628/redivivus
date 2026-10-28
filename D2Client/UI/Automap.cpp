@@ -1360,7 +1360,7 @@ void __stdcall AUTOMAP_RevealRoom(D2RoomStrc * pRoom, int32_t bForceReveal, D2Au
     D2RoomExStrc* pRoomEx = D2Common::DUNGEON::Dungeon::GetRoomExFromRoom(pRoom);
     D2DrlgTileDataStrc* pTiles = D2Common::DUNGEON::Dungeon::DRLGROOM_GetFloorTilesFromRoom(pRoom, (int*)&nTileCount);
     uint32_t i = 0;
-    if (nTileCount) {
+    if (nTileCount > 0) {
       pnTileFlags = &pTiles->nFlags;
       do {
         if (!(*pnTileFlags & 8U) && (*pnTileFlags & 0x20000U || bAutoMapRevealAll || bForceReveal)) {
@@ -1374,7 +1374,7 @@ void __stdcall AUTOMAP_RevealRoom(D2RoomStrc * pRoom, int32_t bForceReveal, D2Au
 
     pTiles = D2Common::DUNGEON::Dungeon::DRLGROOM_GetWallTilesFromRoom(pRoom, (int*)&nTileCount);
     i = 0;
-    if (nTileCount) {
+    if (nTileCount > 0) {
       pnTileFlags = &pTiles->nFlags;
       do {
         if (!(*pnTileFlags & 8U) && (*pnTileFlags & 0x20000U || bAutoMapRevealAll || bForceReveal)) {
