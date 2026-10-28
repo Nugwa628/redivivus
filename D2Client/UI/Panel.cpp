@@ -322,7 +322,6 @@ void __stdcall PANEL_DrawSkillIcons() {
       if (nSkillLevel <= 0) {
         nLine = 0x289;
         pszContext = ".\\UI\\panel.cpp";
-
         D2Common::Skills::SKILL_RemoveSkillCallback(pUnit, D2Common::Skills::GetSkillId(pSkill, ".\\UI\\panel.cpp", 0x289), pszContext, nLine);
         D2Common::Skills::SelectSkillLeft(pUnit, SKILL_Attack, -1);
         pSkill = D2Common::Units::GetLeftSkill(pUnit);
@@ -336,7 +335,6 @@ void __stdcall PANEL_DrawSkillIcons() {
       if (nSkillLevel <= 0) {
         nLine = 0x294;
         pszContext = ".\\UI\\panel.cpp";
-
         D2Common::Skills::SKILL_RemoveSkillCallback(pUnit, D2Common::Skills::GetSkillId(pSkill, ".\\UI\\panel.cpp", 0x294), pszContext, nLine);
         D2Common::Skills::SelectSkillRight(pUnit, 0, -1);
         pSkill = D2Common::Units::GetRightSkill(pUnit);
@@ -468,13 +466,11 @@ void __stdcall PANEL_DrawHealthOrb() {
     sGfxData.nDirection = 0;
     sGfxData.pDC6 = Hlthmana;
     sGfxData.nFrameNumber = 0;
-
     eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(UNIT::Player::GetPlayerUnit_UI(), eState);
     if (eState != STATE_none) {
       int nRegenWidth;
       nLayer = 0;
       eUnitStat = UNITSTAT_hpregen;
-
       nRegenWidth = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(UNIT::Player::GetPlayerUnit_UI(), eUnitStat, nLayer);
       nRegenWidth = nRegenWidth * 0x50 / 100;
       if (0x50 < nRegenWidth) {
@@ -493,7 +489,6 @@ void __stdcall PANEL_DrawHealthOrb() {
     }
 
     eState = STATE_poison;
-
     eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(UNIT::Player::GetPlayerUnit_UI(), eState);
     sGfxData.nFrameNumber = eState != STATE_none ? 2 : 0;
     if (nPercentHideFromBottom) {
@@ -527,13 +522,11 @@ void __stdcall PANEL_DrawManaOrb() {
     sGfxData.nDirection = 0;
     sGfxData.pDC6 = Hlthmana;
     sGfxData.nFrameNumber = 1;
-
     eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(UNIT::Player::GetPlayerUnit_UI(), eState);
     if (eState != STATE_none) {
       int nRegenWidth;
       nLayer = 0;
       eUnitStat = UNITSTAT_manarecovery;
-
       nRegenWidth = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(UNIT::Player::GetPlayerUnit_UI(), eUnitStat, nLayer);
       nRegenWidth = nRegenWidth * 0x50 / 100;
       if (0x50 < nRegenWidth) {
@@ -756,7 +749,6 @@ void __stdcall PANEL_DrawMenuButton() {
           goto draw_menu_button;
         }
       }
-
       sGfxData.nFrameNumber = 2;
     } else {
       if (gpPanelMenuButton) {
@@ -827,7 +819,6 @@ int __stdcall PANEL_CheckBeltUseBlocked() {
       case 2:
         return 1;
       case 1:
-
       case 4:
         return 2;
       case 0:
@@ -1280,7 +1271,6 @@ void __stdcall PANEL_DrawPanelLayout() {
         nStatValue = 1;
       }
 
-
       D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszHpFormatted, D2Lang::StrTable::strtable::GetLocaleString(0x1045), (uint16_t*)nStatValue, nMouseY);
       D2Lang::Unicode::UNISYS::AppendToBuffer(wszHpText, wszHpFormatted);
       nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszHpText);
@@ -1296,7 +1286,6 @@ void __stdcall PANEL_DrawPanelLayout() {
     uint16_t* pArgs = (uint16_t*)(nTextWidth >> 8);
     nTextWidth = D2Common::Stats::StatsEx::GetTxtMaxMana(pUnit);
     nMouseY = nTextWidth >> 8;
-
     D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszMpFormatted, D2Lang::StrTable::strtable::GetLocaleString(0x1046), pArgs, nMouseY);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszMpText, wszMpFormatted);
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszMpText);
@@ -1488,7 +1477,6 @@ void __stdcall ClickBelt(D2InventoryStrc * pInventory, int32_t nMouseY, int32_t 
       if (BVar1) {
         goto play_item_sound;
       }
-
       nBeltSlot = pBeltItem->nUnitGUID;
       nPacketId = 0x25;
     } else {
@@ -1592,7 +1580,6 @@ void __stdcall ClickBeltRight(uint32_t nBeltSlot, D2UnitStrc * pUnit, D2Inventor
       return;
     }
 
-
     int32_t nErrorLine = D2Common::Units::GetInventoryPage(pUnit, 0, GAME::Game::CLIENT_CheckExpansion());
     D2Common::DATATBLS::TokTbls::GetGridDimensions(nErrorLine, nScreenMode, &sGridCoords);
     pItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemInBeltSlot(pInventory, nBeltSlot);
@@ -1643,7 +1630,6 @@ void __stdcall ClickBeltRight(uint32_t nBeltSlot, D2UnitStrc * pUnit, D2Inventor
     int32_t nSoundArg3 = 0;
     int32_t nVolume = 0;
     nErrorLine = 0;
-
     Sound::SOUND_PlaySound(UNIT::ITEM_PlayItemUseSound(pItem), nullptr, nErrorLine, nVolume, nSoundArg3);
     gpPanelBeltSlot = 0;
 }
@@ -1799,7 +1785,6 @@ void __stdcall PANEL_DrawGoldAmount() {
     int32_t ePlayerClass = nClassId;
     int32_t nCurrentLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
     int32_t nCurrentExp = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_experience, 0);
-
     DWORD nNextLevelExp = D2Common::DATATBLS::DataTbls::TXT_Experience_GetLineLevel(ePlayerClass, D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0));
     int32_t nCurLevelExp = D2Common::DATATBLS::DataTbls::TXT_Experience_GetLineLevel(ePlayerClass, nCurrentLevel - 1);
     uint32_t nBarWidth = nNextLevelExp - nCurLevelExp;
@@ -1814,14 +1799,9 @@ void __stdcall PANEL_DrawGoldAmount() {
     uint16_t* pwsText;
     for (int i = 0; i < 0x64; i++) awsTooltip[i] = 0;
 
-
-
-
-
     if (ScreenSizeX / 2 - 0x92 <= nMouseX && nMouseX <= ScreenSizeX / 2 - 0x17 && ScreenSizeY - 0x2b <= nMouseY && nMouseY <= ScreenSizeY - 0x22) {
       DWORD nNextLevelExp2 = nNextLevelExp;
       nNextLevelExp = nNextLevelExp2;
-
       D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, awsTooltip, D2Lang::StrTable::strtable::GetLocaleString(0x1043), (uint16_t*)nCurrentExp, nNextLevelExp);
       D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(awsTooltip, ScreenSizeX / 2 - 0x92, ScreenSizeY - 0x33, 0, 1);
     }

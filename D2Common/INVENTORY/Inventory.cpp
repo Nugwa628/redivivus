@@ -548,7 +548,6 @@ BOOL __stdcall INVENTORY_PlaceItemInGrid(int32_t nnX, int32_t nnY, int32_t nPara
       if ((int)((nItemH & 0xff) + nnY) > (int)(uint32_t)local_28.nGridRows) {
         return 0;
       }
-
       pInvSizeInfo = (D2InventorySizesStrc*)&local_28;
       nGridPage = nParam1;
     } else {
@@ -2800,7 +2799,6 @@ int __stdcall INVENTORY_GetWeaponHandedness(D2UnitStrc * pUnit, D2InventoryStrc 
       if (!pRightArmItem) {
         return -1;
       }
-
       _bIsTwoHanded = ITEMS::Items::IsTwoHanded(pRightArmItem);
       pLeftArmItem = pRightArmItem;
     }
@@ -4434,12 +4432,10 @@ static BOOL INVENTORY_CanDualWieldItems(D2UnitStrc * pUnit, D2UnitStrc * pItem1,
         if (pCharUnit->nClassId != 6) {
           return 0;
         }
-
         bItemTypeMatch = ITEMS::Items::ITEMS_IsA(pItem1, ITEMTYPE_HandtoHand);
         if (!bItemTypeMatch) {
           return 0;
         }
-
         eShootsType = ITEMTYPE_HandtoHand;
         bItemTypeMatch = ITEMS::Items::ITEMS_IsA(pUnit, eShootsType);
       }
@@ -4527,7 +4523,6 @@ int32_t __stdcall INVENTORY_GetEquipActionForBodySlot(D2UnitStrc * pUnit, eD2Bod
       case BODYLOC_L_ARM:
         uVar1 = (nBodyLoc != BODYLOC_L_ARM) + 4;
       pCurrentSlotItem = INVENTORY_GetItemByGridOffset(pInventory, nBodyLoc);
-
       uVar1 = INVENTORY_GetEquipSwapAction(INVENTORY_GetItemByGridOffset(pInventory, uVar1), pItem, pUnit, uVar1, pCurrentSlotItem);
       return uVar1;
       case BODYLOC_SWAPPED_R_ARM:
@@ -4535,7 +4530,6 @@ int32_t __stdcall INVENTORY_GetEquipActionForBodySlot(D2UnitStrc * pUnit, eD2Bod
       case BODYLOC_SWAPPED_L_ARM:
         nPairedBodyLoc = (nBodyLoc != BODYLOC_SWAPPED_L_ARM) + 0xb;
       pCurrentSlotItem = INVENTORY_GetItemByGridOffset(pInventory, nBodyLoc);
-
       uVar1 = INVENTORY_GetEquipSwapAction(INVENTORY_GetItemByGridOffset(pInventory, nPairedBodyLoc), pItem, pUnit, nPairedBodyLoc, pCurrentSlotItem);
       return uVar1;
     }

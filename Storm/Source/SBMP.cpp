@@ -747,7 +747,6 @@ static void __fastcall SBMP_UncompressPcxImage(int dstSize, uint8_t * dst, int s
             if (nDstRemaining < (int)(_Size * bytesPerPixel)) {
               nRowBytes = nDstRemaining;
             }
-
             nRowBytes += nDstOff;
             for (; nDstOff < nRowBytes; nDstOff += bytesPerPixel) {
               dst[nDstOff] = bVar1;

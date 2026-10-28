@@ -77,12 +77,8 @@ void __stdcall InitPal() {
     memset(pPalShiftList, 0, nAllocSize);
     int nMonStatsCount = sgptDataTable->nTxtMonStatsSize;
     for (int i = 0; i < nMonStatsCount; i++) {
-
-
         *(int*)((int)pPalShiftList + i * 8) = i;
-
     }
-
 
     gpPalShiftEntryListHead = 0;
     BOOL bFileExists = D2Common::DATATBLS::DataTbls::CheckIfFileExists(nullptr, "Data\\Global\\Monsters\\RandTransforms.dat", &pRandTransformFile, 1);
@@ -276,12 +272,8 @@ void __stdcall PALSHIFT_InitPalShiftTable() {
     pPalShiftList = gpMonsterPalShiftList;
     memset(gpMonsterPalShiftList, 0, nTxtMonStatsCount * 8);
     for (int i = 0; i < nTxtMonStatsCount; i++) {
-
-
         *(int*)((int)pPalShiftList + i * 8) = i;
-
     }
-
 
     PALSHIFT_LoadMonsterPalShift(0x16b);
     PALSHIFT_LoadMonsterPalShift(0x16c);

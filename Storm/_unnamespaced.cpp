@@ -731,40 +731,24 @@ void StaticInit_6caa10() {
     int iVar1;
     uint16_t* pWVar2;
     for (int i = 0; i < 0x50; i++) UNICODE_007a2c80[i] = 0;
-
-
-
-
 }
 
 void StaticInit_6caa30() {
     int nWordsRemaining;
     uint16_t* pImmunityBuf1;
     for (int i = 0; i < 0x100; i++) gU16ImmunityStringBuffer1[i] = 0;
-
-
-
-
 }
 
 void StaticInit_6caa50() {
     int nWordsRemaining;
     uint16_t* pImmunityBuf2;
     for (int i = 0; i < 0x100; i++) gU16ImmunityStringBuffer2[i] = 0;
-
-
-
-
 }
 
 void StaticInit_6caa70() {
     int nWordsRemaining;
     uint16_t* pHealthBarBuf;
     for (int i = 0; i < 0x100; i++) gnMonsterHealthBarValue[i] = 0;
-
-
-
-
 }
 
 void StaticInit_6caa90() {

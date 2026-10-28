@@ -1169,7 +1169,6 @@ void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
         if (!gbMessageLoopActive && gpfnExitCallback) {
           (*gpfnExitCallback)();
         }
-
         /* MSG * lpMsg for TranslateMessage */ TranslateMessage(&windowMsg);
         /* MSG * lpMsg for DispatchMessageA */ DispatchMessageA(&windowMsg);
       } else {

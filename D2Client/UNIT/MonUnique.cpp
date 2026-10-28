@@ -384,7 +384,6 @@ void __fastcall MONUNIQUE_ApplyModifierBloodRaven(D2UnitStrc * pUnit, int32_t eM
 
     D2Common::Skills::AddSkill(pUnit, SKILL_MonTeleport, 1, 1, ".\\UNIT\\MonUnique.cpp", 0x157);
     uint32_t nMode = 4;
-
     D2Common::Skills::SetSkillMode(D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_MonTeleport, pUnit), nMode);
 }
 
@@ -665,7 +664,6 @@ void __fastcall MONUNIQUE_SpawnDeathMissile(D2UnitStrc * pUnit, int32_t eModifie
     int32_t nTotalFrames = (int32_t)pUnit;
     if (eModifier == 0x2a && (!pUnit || pUnit->eAnimMode.ePlayerMode == Death)) {
       nVelocity = D2Common::DATATBLS::MissileTbls::MISSILETBLS_CalculateVelocity(0x5a, 0);
-
       SKILLS::Skills::SKILL_SpawnMissilesAtTarget(pUnit, pUnit, MISSILE_Nova, ~MISSILE_Arrow, SKILL_Attack, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0), nVelocity);
     }
 
@@ -678,7 +676,6 @@ void __fastcall MONUNIQUE_SpawnDeathMissile(D2UnitStrc * pUnit, int32_t eModifie
       nLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
       eSkill = SKILL_Attack;
       nVelocity = Units::GetYPosFromDynamicPathUnit(pUnit);
-
       Missile::MakeMissileAtXY(pUnit, MISSILE_Corpsepoisoncloud, Units::GetXPosFromDynamicPathUnit(pUnit), nVelocity, eSkill, nLevel);
       return;
     }
@@ -687,7 +684,6 @@ void __fastcall MONUNIQUE_SpawnDeathMissile(D2UnitStrc * pUnit, int32_t eModifie
     }
 
     nVelocity = D2Common::DATATBLS::MissileTbls::MISSILETBLS_CalculateVelocity(0x77, 0);
-
     SKILLS::Skills::SKILL_SpawnMissilesAtTarget(pUnit, pUnit, MISSILE_Coldunique, ~MISSILE_Arrow, SKILL_Attack, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0), nVelocity);
 }
 

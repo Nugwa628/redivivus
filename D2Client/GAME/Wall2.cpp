@@ -1330,7 +1330,6 @@ void __fastcall WALL2_BuildSceneDrawList(D2GameViewStrc * pGameView, uint32_t nT
       } else {
         nGridRowIdx = 0;
       }
-
       eUnitType = pUnit->eUnitType;
       UNIT_CenterXCoordsDiv5 = nGridRowIdx / 5;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
@@ -1340,7 +1339,6 @@ void __fastcall WALL2_BuildSceneDrawList(D2GameViewStrc * pGameView, uint32_t nT
       } else {
         nGridRowIdx = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
       }
-
       eUnitType = pUnit->eUnitType;
       UNIT_CenterYCoordsDiv5 = nGridRowIdx / 5;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
@@ -1350,7 +1348,6 @@ void __fastcall WALL2_BuildSceneDrawList(D2GameViewStrc * pGameView, uint32_t nT
       } else {
         nPlayerX = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
       }
-
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPlayerY = pUnit->pPath.pStaticPath->nPosX;
@@ -1359,7 +1356,6 @@ void __fastcall WALL2_BuildSceneDrawList(D2GameViewStrc * pGameView, uint32_t nT
       } else {
         nPlayerY = 0;
       }
-
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       gnPlayerTileGridIndex = D2Common::DUNGEON::Dungeon::GetGridIndex(pRoom, nPlayerY, nPlayerX);
       D2Common::DUNGEON::Dungeon::CallRoomCallback(pGameViewLocal.pRoom, (ROOMCALLBACKFN)WALL2_CollectRoomTilesAndUnits, &pGameViewLocal);

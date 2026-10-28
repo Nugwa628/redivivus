@@ -487,7 +487,6 @@ void __fastcall SKILLEMONST_DetachFromHost(::SGAMEDATA * pGame, D2UnitStrc * pUn
     pUnit->eUnitFlags |= UNITFLAG_ISVALIDTARGET | UNITFLAG_CANBEATTACKED | UNITFLAG_TARGETABLE;
     GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_ACTIVESTATE, nEventParam);
     nParasiteBaseId = 0;
-
     Monster::AI::AttachCorrectAiFunctionToMonster(pGame, pUnit, UNIT::Monster::GetAiGeneral(pUnit), nParasiteBaseId);
 }
 
@@ -538,7 +537,6 @@ BOOL __fastcall Skills_SrvDoFunc_129_AttachOrDetachFromHost(::SGAMEDATA * pGame,
     int32_t bRelocateSucceeded = 1;
     uint32_t nPosX = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00);
     uint32_t nPosY = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00);
-
     bIsDead = UNIT::SUnit::SUNIT_RelocateUnit(pGame, pUnit, D2Common::Units::UNITS_GetRoom(pUnit_00), nPosY, nPosX, bRelocateSucceeded, bIsDead);
     if (!bIsDead) {
       return 0;

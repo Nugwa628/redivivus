@@ -264,7 +264,6 @@ void __fastcall SPELLSEL_DrawSkillTooltip(short * pSkillId, int32_t bShowExpande
     }
 
     short int wSkillId = *pSkillId;
-
     SkillDesc::SKILLDESC_BuildSkillShortTooltip(UNIT::Player::GetPlayerUnit_UI(), (int)wSkillId, nSkillDescId, nStatId, nDrawMode, nIconX, nIconY);
 }
 
@@ -383,7 +382,6 @@ void __fastcall SPELLSEL_DrawSkillLevel(int32_t pThis, int32_t nScreenX, int32_t
     }
 
     int32_t nTextWidth2 = 0x10;
-
     D2Lang::UTF8_ConvertToWideChar(wszLevelBuf, __itoa(pThis, szLevelBuf, 10), nTextWidth2);
     nTextWidth2 = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszLevelBuf);
     int32_t nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszLevelBuf);
@@ -952,25 +950,17 @@ void __fastcall SPELLSEL_DrawSkillRequirementTooltip(short * pwSkillId, int32_t 
     uint16_t* pWszStr;
     for (int i = 0; i < 0x100; i++) wszTooltip[i] = 0;
 
-
-
-
-
     uint16_t wStatName2Idx = SkillDesc::SKILLDESC_GetStatNameString((int)*pSkillId, 0);
-
     pWszStr = D2Lang::StrTable::strtable::GetLocaleString(SkillDesc::SKILLDESC_GetStatNameString((int)*pSkillId, 1));
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszTooltip, pWszStr);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, pWszSep);
-
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, D2Lang::StrTable::strtable::GetLocaleString(0x105c));
-
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, D2Lang::StrTable::strtable::GetLocaleString(0xf9d));
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ memset(wszNumBuf, 0, 10 * sizeof(wszNumBuf[0]));
     wsprintfA(szNumBuf, "%i", nChargeCount);
     D2Lang::UTF8_ConvertToWideChar(wszNumBuf, szNumBuf, 9);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, wszNumBuf);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, pWszSep);
-
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, D2Lang::StrTable::strtable::GetLocaleString(wStatName2Idx));
     D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(wszTooltip, nScreenX, nBoxBottomY - 0x32, bMouseOver, 1);
 }
@@ -1703,7 +1693,6 @@ void __stdcall SKILLTREE_RenderSkillTree() {
 
     int32_t nShowTooltip = 1;
     int32_t bMouseOver = 0;
-
     D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(D2Lang::StrTable::strtable::GetLocaleString(0x1030), nTooltipX, iVar1, bMouseOver, nShowTooltip);
 }
 
@@ -2089,7 +2078,6 @@ void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, D2SkillsTxt * pSkillTxt
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
     BOOL bCountBonuses = 0;
-
     int nSkillLevel = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1), bCountBonuses);
     int32_t nSkillBonus = D2Common::Skills::GetSkillBonus(pUnit, eSkill);
     if (!nSkillLevel && nSkillBonus && nSkillIconState != -1) {
@@ -2108,13 +2096,11 @@ void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, D2SkillsTxt * pSkillTxt
         nTextColor = 0;
         nTooltipParam = nDisplayLevel;
         nMouseX = nColumnX;
-
         SkillDesc::SKILLDESC_BuildSkillTooltip_NoMaxLevelCheck(UNIT::Player::GetPlayerUnit_UI(), eSkill, nColumnX, nTooltipParam, nTextColor, nMouseX, nSkillBonus);
       } else {
         nTextColor = 0;
         nTooltipParam = nDisplayLevel;
         nMouseX = nColumnX;
-
         SkillDesc::SKILLDESC_BuildSkillTooltip(UNIT::Player::GetPlayerUnit_UI(), eSkill, 0, nTooltipParam, nTextColor, nMouseX, nSkillBonus);
       }
     }
@@ -2133,7 +2119,6 @@ void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, D2SkillsTxt * pSkillTxt
       D2Win::Src::D2WinFont::SetAndReturnLastFont(4);
       nColumnX += -4;
     }
-
 
     nTooltipParam = D2Common::Skills::GetSkillBonus(UNIT::Player::GetPlayerUnit_UI(), eSkill);
     if (nTooltipParam < 1) {

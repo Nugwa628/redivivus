@@ -158,7 +158,6 @@ static void __stdcall UseQuanityAndDurability(::SGAMEDATA * pGame, int32_t nPara
             wLayer = 0;
             nDurabilityStat = 0x48;
             bSendStatUpdate = true;
-
             GAME::SCmd::NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\SkillAma.cpp", 0x9b), pUnit2, bSendStatUpdate, nDurabilityStat, bIsWeapon, wLayer);
             return;
           }
