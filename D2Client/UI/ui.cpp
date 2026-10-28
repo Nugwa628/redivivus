@@ -1846,20 +1846,20 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
 
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 0;
-          if (!pAllocCtx) {
-            gpCurrentDialog = 0;
-          } else {
+          if (pAllocCtx) {
             gpCurrentDialog = Spinner::SpinnerWrapper::Constructor((::SpinnerWrapper*)pAllocCtx, 0xdf, 0xdb, 0, (fpSpinnerRepeatAction)UI_GoldDialogScrollCallback);
+          } else {
+            gpCurrentDialog = 0;
           }
 
           nCleanupStage = -1;
           Dialog::AllocDialogSub(Dialog::gpDialog, gpCurrentDialog, 0, 0);
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 1;
-          if (!pAllocCtx) {
-            gpDialogDefaultActionCallback = 0;
-          } else {
+          if (pAllocCtx) {
             gpDialogDefaultActionCallback = Editbox::EditBoxWrapper::Constructor(pAllocCtx, 0x102, 0xe4, 100, 1, pnCurrentGold, 10, UI_GoldInputCallback_ReturnZero, 1);
+          } else {
+            gpDialogDefaultActionCallback = 0;
           }
 
           nCleanupStage = -1;
@@ -1870,10 +1870,10 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
 
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 2;
-          if (!pAllocCtx) {
-            gpUiGoldTransactionDialog = 0;
-          } else {
+          if (pAllocCtx) {
             gpUiGoldTransactionDialog = Button::ButtonWrapper::Constructor((::ButtonWrapper*)pAllocCtx, 0xfa, 0x11f, 0, UI_GoldDialogConfirmCallback);
+          } else {
+            gpUiGoldTransactionDialog = 0;
           }
 
           nCleanupStage = -1;
@@ -1881,10 +1881,10 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
           gpUiGoldTransactionDialog->pVtable->SetAccelerator(gpUiGoldTransactionDialog, 1);
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 3;
-          if (!pAllocCtx) {
-            gpUiGoldDialogCancelButton = 0;
-          } else {
+          if (pAllocCtx) {
             gpUiGoldDialogCancelButton = Button::ButtonWrapper::Constructor((::ButtonWrapper*)pAllocCtx, 0x163, 0x11f, 1, UI_ButtonCallback_CloseDialog);
+          } else {
+            gpUiGoldDialogCancelButton = 0;
           }
 
           nCleanupStage = -1;
