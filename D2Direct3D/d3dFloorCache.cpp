@@ -244,10 +244,10 @@ void __fastcall D3DFLOOR_EvictLRU(D3DFloorCacheStrc * pCache) {
       D3DFloorCacheNodeStrc* pNextNode;
       pNextNode = pEvictNode->pNext;
       pCache->pUsedHead = pNextNode;
-      if (!pNextNode) {
-        pCache->pUsedTail = 0;
-      } else {
+      if (pNextNode) {
         pNextNode->pPrev = 0;
+      } else {
+        pCache->pUsedTail = 0;
       }
 
       pEvictNode->pNext = 0;
