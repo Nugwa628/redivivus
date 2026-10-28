@@ -805,7 +805,7 @@ void __fastcall Objects_InitFn44(D2ObjectInitFnArg * pInitArg) {
 // [The Guardian (Q23)] fpSequenceFilter: when the player has the intro done (bIsNotIntroduction) but no
 // state flag yet, sets nStateFlag=1 and arms slot[2] (Q23_Callback_02). Bootstraps the acceptance step.
 void __fastcall Q23_SequenceFilter(D2QuestDataStrc * pQuestData) {
-    if (!(!pQuestData->nStateFlag && pQuestData->bIsNotIntroduction)) {
+    if (!(!pQuestData->nStateFlag && pQuestData->bIsNotIntroduction == 1)) {
       return;
     }
 

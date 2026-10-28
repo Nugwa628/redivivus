@@ -895,11 +895,11 @@ BOOL __fastcall Q27_PlayerCheckNearDiablo(::SGAMEDATA * pGame, D2UnitStrc * pUni
 // [A4Q3 Terror's End] Getter: returns the "all five Chaos Sanctuary seals activated" flag (field_0x13) from the A4Q2 quest-specific struct.
 BOOL __fastcall Q27_GetAllSealsActivated(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TerrorsEnd);
-    if (!pQuestData) {
-      return 0;
+    if (pQuestData) {
+      return (uint32_t)pQuestData->pQuestSpecificData.pA4Q2->bAllSealsActivated;
     }
 
-    return (uint32_t)pQuestData->pQuestSpecificData.pA4Q2->bAllSealsActivated;
+    return 0;
 }
 
 // [A4Q3 Terror's End] All-seals-activated trigger. Sets the seals-done flag, notifies players (event 0xc), then walks every room of Act IV's Chaos Sanctuary and force-kills all neutral living monsters (except Diablo 0xf3) — i.e. clears the seal bosses' minions when the final seal is hit, summoning Diablo.
