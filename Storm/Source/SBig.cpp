@@ -3045,9 +3045,9 @@ static void __stdcall BigBuffer_Div(BigBuffer * pQuotient, BigBuffer * pRemainde
           }
 
           nDividendLen = pQuotient->nStartWord;
-          if (pQuotient->nCount <= nDividendLen) {
+          if (nDividendLen >= pQuotient->nCount) {
             uNeeded = nDividendLen + 1;
-            if (pQuotient->nCapacity < uNeeded) {
+            if (uNeeded > pQuotient->nCapacity) {
               uBitIter2 = pQuotient->nGrowStep;
               if (!uBitIter2) {
                 if (uNeeded < 0x40) {
@@ -3292,9 +3292,9 @@ void __stdcall BigBuffer_Mul(BigBuffer * pnResult, BigBuffer * pnA, BigBuffer * 
 
         dwCarry = (uint32_t)((uint64_t)llProduct >> 0x20);
         uLen = pnAcc->nStartWord + iInnerNext + iOuter;
-        if (pnAcc->nCount <= uLen) {
+        if (uLen >= pnAcc->nCount) {
           uGrowStep = uLen + 1;
-          if (pnAcc->nCapacity < uGrowStep) {
+          if (uGrowStep > pnAcc->nCapacity) {
             uAlignedCap = pnAcc->nGrowStep;
             if (!uAlignedCap) {
               if (uGrowStep < 0x40) {
@@ -3474,9 +3474,9 @@ void __stdcall BigBuffer_Rand(BigBuffer * pnResult, BigBuffer * pnModulus, BigBu
     uint32_t i = 0;
     do {
       uNeededCount = self->nStartWord;
-      if (self->nCount <= uNeededCount) {
+      if (uNeededCount >= self->nCount) {
         uNewLen = uNeededCount + 1;
-        if (self->nCapacity < uNewLen) {
+        if (uNewLen > self->nCapacity) {
           uGrowStep = self->nGrowStep;
           if (!uGrowStep) {
             if (uNewLen < 0x40) {
@@ -3698,7 +3698,7 @@ void __stdcall BigBuffer_Square(BigBuffer * pnResult, BigBuffer * pnInput, BigSt
           uNeededCount = pnAcc->nStartWord + dwWordB;
           if (pnAcc->nCount <= uNeededCount) {
             uGrowStep = uNeededCount + 1;
-            if (pnAcc->nCapacity < uGrowStep) {
+            if (uGrowStep > pnAcc->nCapacity) {
               uGrowStep2 = pnAcc->nGrowStep;
               if (!uGrowStep2) {
                 if (uGrowStep < 0x40) {

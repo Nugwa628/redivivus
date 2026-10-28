@@ -1036,7 +1036,7 @@ void __fastcall AI_Baal_ExecuteAction(::SGAMEDATA * pGame, D2UnitStrc * pUnit, i
       if (nMonClassId < 0) {
         return;
       }
-      if (sgptDataTable->nTxtMonStatsSize <= nMonClassId) {
+      if (nMonClassId >= sgptDataTable->nTxtMonStatsSize) {
         return;
       }
 

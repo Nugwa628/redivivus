@@ -1529,7 +1529,7 @@ void __fastcall TEXT_HandleEventMessagePacket(D2Packet0x5aEventStructure * pMess
       pwszArg = D2Lang::StrTable::strtable::GetLocaleString(nKillFmtStrId);
       nLine = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pwszArg);
       nMonNameLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pwszLocale);
-      if (0x131 < nLine + 0x10 + nMonNameLen) {
+      if (0x132 <= nLine + 0x10 + nMonNameLen) {
         return;
       }
 

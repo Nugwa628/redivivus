@@ -642,7 +642,7 @@ uint32_t SCMD_RemoveNode(::SCMD * pThis, ::SCMD * pNode) {
     }
 
     SMem::SMemFree(pNode, s___AUCMDDEF___0074c47c, -2, 0);
-    return (int)uVar1 < 1 ? 0 : uVar1;
+    return (int)uVar1 <= 0 ? 0 : uVar1;
 }
 
 // @blizzard PerformConversion (SCMD.CPP)

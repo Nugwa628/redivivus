@@ -1146,10 +1146,10 @@ uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFlags, D2F
     uint8_t byBlockFlags;
     SMemCalculateAllocationLayout(nSize, &nIsLargeAlloc, (int*)&nTotalSize, &nUsedSize, &nLayoutHigh);
     uint32_t nBinIndex = nTotalSize >> 5;
-    if (7 < nBinIndex) {
+    if (8 <= nBinIndex) {
       nBinIndex = 8;
     }
-    if (3 < (uint32_t)pHeap->nFragCount && !pHeap->aFreeBins[nBinIndex]) {
+    if (4 <= (uint32_t)pHeap->nFragCount && !pHeap->aFreeBins[nBinIndex]) {
       SMEM_CombineFreeBlocks(pHeap);
     }
 
@@ -1197,9 +1197,9 @@ uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFlags, D2F
       D2FogHeapDescStrc* pActiveHeap;
       nBinIndex = pHeap->nReserved;
       nNeededTotal = (int)pHeap->pWriteCursor + (nTotalSize - (int)pHeap);
-      if (nBinIndex < nNeededTotal) {
+      if (nNeededTotal > nBinIndex) {
         nNeededTotal = nBinIndex * 2;
-        if (0xfffffff < nBinIndex) {
+        if (0x10000000 <= nBinIndex) {
           nNeededTotal = nBinIndex;
         }
 
@@ -1212,7 +1212,7 @@ uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFlags, D2F
         nNeededTotal = (int)pActiveHeap->pWriteCursor + (nTotalSize - (int)pActiveHeap);
         pHeap = pActiveHeap;
       }
-      if (pHeap->nCommitted < nNeededTotal) {
+      if (nNeededTotal > pHeap->nCommitted) {
         nBlockResult = SMemCommitMorePages(nNeededTotal, pHeap);
         if (!nBlockResult) {
           return nullptr;

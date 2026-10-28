@@ -5654,7 +5654,7 @@ BOOL __fastcall SOUND_IsChannelAvailable(uint32_t pChanA, uint32_t pChanB, int32
 
     uint32_t nStartTick1 = *(uint32_t*)(pChanA + 0x34);
     uint32_t nStartTick2 = *(uint32_t*)(pChanB + 0x34);
-    if (nStartTick1 >= nStartTick2 && nStartTick1 != nStartTick2) {
+    if (nStartTick2 <= nStartTick1 && nStartTick1 != nStartTick2) {
       return 1;
     }
     if (nStartTick1 >= nStartTick2) {

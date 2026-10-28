@@ -248,7 +248,7 @@ static void __stdcall SKILLSCLT_CreateMultiMissileDirected(int32_t nParam1, eD2S
     }
 
     eMissileSelected = eMissileA;
-    if (-1 < *(short int*)(nParam1 + 0xec)) {
+    if (0 <= *(short int*)(nParam1 + 0xec)) {
       if (*(short int*)(nParam1 + 0xee) < 0) {
         seedNext = D2_SEED_NEXT(*pSeed);
         *pSeed = seedNext;
@@ -324,7 +324,7 @@ BOOL __fastcall Skills_CltDoFunc_MultiMissileDirected(D2UnitStrc * pUnit, eD2Ski
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 

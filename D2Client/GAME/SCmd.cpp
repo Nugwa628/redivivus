@@ -2558,7 +2558,7 @@ static D2ServerCmdStrc * STRUCT_CreateAndPreprareServerCmd(D2UnitStrc * pUnit) {
       pTableEntry = &NET_D2GS_CLIENT_INCOMING[0].nExpectedSize;
       nMaxPacketSize = 0;
       do {
-        if ((D2NET_CLIENT_D2GStoCLT_Unit)pTableEntry[1] && nMaxPacketSize < *pTableEntry) {
+        if ((D2NET_CLIENT_D2GStoCLT_Unit)pTableEntry[1] && *pTableEntry > nMaxPacketSize) {
           nMaxPacketSize = *pTableEntry;
         }
         if (pTableEntry[4] && pTableEntry[3] > nMaxPacketSize) {
@@ -2671,7 +2671,7 @@ void __fastcall NET_D2GS_CLIENT_PacketHandle_to0xAF(char * pBytes, size_t nSize)
         }
 
         nConsumed = (uint16_t)nVariableSize;
-        if (0xae < byPacketId) {
+        if (0xaf <= byPacketId) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1449);
           exit(-1);
         }

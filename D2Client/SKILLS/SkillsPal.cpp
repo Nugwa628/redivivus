@@ -424,7 +424,7 @@ BOOL __fastcall Skills_CltStFunc_SetupHolyChargeMovement(D2UnitStrc * pUnit, eD2
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -590,7 +590,7 @@ BOOL __fastcall Skills_CltDoFunc_Pal_HolyBolt_Melee(D2UnitStrc * pUnit, eD2Skill
           }
         }
         if (!(nSkillFlags & 2)) {
-          if (nEventFrame <= (int)pUnit->nSeqFrame >> 8) {
+          if ((int)pUnit->nSeqFrame >> 8 >= nEventFrame) {
             D2Common::Units::SetSequenceFrame(pUnit, 0);
             pUnit->nFrameCount = nFrameRate << 8;
             D2Common::Skills::SKILL_SetFlags(pSkill, 1);

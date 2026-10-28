@@ -801,7 +801,7 @@ D2UnitStrc * __fastcall MakeMissile(D2SkillArgStrc * pSkillArg) {
     if ((int)eMissileId < 0) {
       return nullptr;
     }
-    if (sgptDataTable->nTxtMissilesSize <= (int)eMissileId) {
+    if ((int)eMissileId >= sgptDataTable->nTxtMissilesSize) {
       return nullptr;
     }
 
@@ -5206,7 +5206,7 @@ void __fastcall MISSILE_CreateTowardObject(int32_t nObjectId, D2UnitStrc * pUnit
     }
 
     eUnitType = pTargetObject->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nObjectX = pTargetObject->pPath.pStaticPath->nPosX;
     } else if (!pTargetObject->pPath.pDynamicPath) {
       nObjectX = 0;
@@ -10704,7 +10704,7 @@ static D2BaalFxSpiritSpawnStrc gaBaalFxSpiritSpawnSchedule[5] = {
         }
 
         eUnitType = pNearbyMon->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
           nNearbyMonPosY = pNearbyMon->pPath.pStaticPath->nPosY;
         } else if (!pNearbyMon->pPath.pDynamicPath) {
           nNearbyMonPosY = 0;
@@ -10921,7 +10921,7 @@ void __fastcall MISSILE_CltDoFn55_AncientDeathCenter(D2UnitStrc * pUnit) {
       sSeedStage2 = D2_SEED_NEXT_VAL(nSeedRaw1);
       pUnit->sSeed = sSeedStage2;
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosXTmp = pUnit->pPath.pStaticPath->nPosX;
       } else if (!pUnit->pPath.pDynamicPath) {
         nPosXTmp = 0;

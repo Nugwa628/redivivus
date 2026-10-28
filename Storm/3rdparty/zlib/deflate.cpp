@@ -1704,7 +1704,7 @@ uint32_t __fastcall deflate(z_stream * pStream, int32_t nFlush) {
         do {
           nHeader = pDeflateState->pending;
           if (nHeader == pDeflateState->pending_buf_size) {
-            if (pDeflateState->gzhead->hcrc && nCrcPendingStart < nHeader) {
+            if (pDeflateState->gzhead->hcrc && nHeader > nCrcPendingStart) {
               nChecksum = crc32::crc32(pStream->adler, pDeflateState->pending_buf + nCrcPendingStart, nHeader - nCrcPendingStart);
               pStream->adler = nChecksum;
             }
@@ -1725,7 +1725,7 @@ uint32_t __fastcall deflate(z_stream * pStream, int32_t nFlush) {
           bDone = false;
         } while (byOsFlags);
 
-        if (pDeflateState->gzhead->hcrc && nCrcPendingStart < pDeflateState->pending) {
+        if (pDeflateState->gzhead->hcrc && pDeflateState->pending > nCrcPendingStart) {
           nChecksum = crc32::crc32(pStream->adler, pDeflateState->pending_buf + nCrcPendingStart, pDeflateState->pending - nCrcPendingStart);
           pStream->adler = nChecksum;
         }
