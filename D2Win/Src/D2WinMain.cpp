@@ -807,16 +807,7 @@ void __stdcall D2WIN_HandleActivation(int32_t nParam) {
     static uint32_t gbWindowDeactivated; D2_STATIC_GUARD_BSS(gbWindowDeactivated, "D2Win::Src::D2WinMain::D2WIN_HandleActivation::gbWindowDeactivated");
 
     gbWindowIsActive = (uint32_t)(*(int*)(nParam + 8) != 0);
-    if (!*(int*)(nParam + 8)) {
-      if (!gbWindowDeactivated) {
-        gnSavedMusicVolume = D2Sound::Src::D2SoundFast::SOUND_GetMusicVolume();
-      }
-
-      gbWindowDeactivated = 1;
-      if (gbWindowed != 1) {
-        D2gfx::D2GFX::D2GFX_OnActivationChange(1);
-      }
-    } else {
+    if (*(int*)(nParam + 8)) {
       uint32_t nErrorState;
       nErrorState = Fog::Src::ErrorManager::GetErrorState();
       if (!nErrorState) {
@@ -826,6 +817,15 @@ void __stdcall D2WIN_HandleActivation(int32_t nParam) {
 
       D2Sound::Src::D2SoundFast::SOUND_SetMusicVolume(gnSavedMusicVolume);
       gbWindowDeactivated = 0;
+    } else {
+      if (!gbWindowDeactivated) {
+        gnSavedMusicVolume = D2Sound::Src::D2SoundFast::SOUND_GetMusicVolume();
+      }
+
+      gbWindowDeactivated = 1;
+      if (gbWindowed != 1) {
+        D2gfx::D2GFX::D2GFX_OnActivationChange(1);
+      }
     }
 
     BOOL bIsCutScene = D2gfx::D2GFX::D2GFX_CheckCutScene();
