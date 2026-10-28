@@ -164,11 +164,12 @@ void __fastcall SKILLSSOR_SetInfernoFrames(D2UnitStrc * pUnit, int32_t nParam) {
     }
 
     int nMissileClassId = pUnit->nClassId;
-    if (!(0 <= nMissileClassId && nMissileClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nMissileClassId)) {
+    D2MissilesTxt* pTxtRecord = 0 <= nMissileClassId && nMissileClassId < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[nMissileClassId] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    D2Common::Units::SetAnimationSpeed(pUnit, (int32_t)((int64_t)((uint64_t)(uint8_t)sgptDataTable->pTxtMissiles[nMissileClassId].AnimLen << 8) / (int64_t)nParam));
+    D2Common::Units::SetAnimationSpeed(pUnit, (int32_t)((int64_t)((uint64_t)(uint8_t)pTxtRecord->AnimLen << 8) / (int64_t)nParam));
 }
 
 // Client-side: spawns an Inferno (or Hydra-fire variant) missile for the Sorceress. Looks up cltmissilea/cltmissileb from SkillsTxt; randomly picks between them using the unit seed (50/50). Reads target coords via GetCooordinates, evaluates calc[0] for frame count (min 1), fires MakeMissile with nFlags=0x8020. If the missile is created and the unit has STATE_inferno active: advances the animation sequence to frame 8 (or decrements nGfxCurrentFrame by 0x200 if no anim sequence).
@@ -358,11 +359,12 @@ BOOL __fastcall Skills_CltDoFunc_Sor_FrostNova(D2UnitStrc * pUnit, eD2Skills eSk
     }
 
     eMissilesId ePrimaryMissileId = (eMissilesId)pSkillTxt->cltmissile[1];
-    if (!(0 <= (int)ePrimaryMissileId && (int)ePrimaryMissileId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + ePrimaryMissileId)) {
+    D2MissilesTxt* pTxtRecord = 0 <= (int)ePrimaryMissileId && (int)ePrimaryMissileId < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[ePrimaryMissileId] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    eMissilesId eSubMissileId = (eMissilesId)sgptDataTable->pTxtMissiles[ePrimaryMissileId].SubMissile1;
+    eMissilesId eSubMissileId = (eMissilesId)pTxtRecord->SubMissile1;
     if (!(0 <= (int)eSubMissileId && (int)eSubMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
@@ -539,10 +541,11 @@ BOOL __fastcall Skills_CltStFunc_CheckCasterHasRoomNotInTown(D2UnitStrc * pUnit,
     }
 
     pRoom = UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nPosX, nPosY);
-    if (!(pRoom && 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = pRoom && 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
-    if (sgptDataTable->pTxtSkills[eSkill].InTown) {
+    if (pTxtRecord->InTown) {
       return 1;
     }
 
@@ -555,7 +558,8 @@ BOOL __fastcall Skills_CltStFunc_CheckCasterHasRoomNotInTown(D2UnitStrc * pUnit,
 }
 
 BOOL __fastcall Skills_CltDoFunc_Sor_SimpleMakeMissile(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 

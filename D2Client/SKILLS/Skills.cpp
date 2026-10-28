@@ -2135,11 +2135,12 @@ static void __fastcall SKILLS_CltProcessActiveSkill(D2UnitStrc * pUnit, eD2Skill
     }
 
     eD2Skills eSkill = D2Common::Skills::GetSkillId(pSkill, ".\\SKILLS\\Skills.cpp", 0x93d);
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    switch (sgptDataTable->pTxtSkills[eSkill].srvdofunc) {
+    switch (pTxtRecord->srvdofunc) {
       case 0x43:
         SkillsPal::SKILL_StopAndClearUninterruptable(pUnit, eSkill);
       return;

@@ -1280,7 +1280,8 @@ static void __stdcall PLAYER_InteractWithUnitByType(eD2UnitType eTargetUnitType,
       use_default_range:
       nInteractRange = 5;
       approach_or_interact:
-      if (pTargetUnit && pTargetUnit->eUnitType == UNIT_MONSTER && pTargetUnit && (nClassId = pTargetUnit->nClassId , 0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) && sgptDataTable->pTxtMonStats + nClassId && sgptDataTable->pTxtMonStats[nClassId].interact && sgptDataTable->pTxtMonStats[nClassId].npc) {
+      D2MonStatsTxt* pTxtRecord = pTargetUnit && pTargetUnit->eUnitType == UNIT_MONSTER && pTargetUnit && (nClassId = pTargetUnit->nClassId , 0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nClassId] : nullptr;
+      if (pTxtRecord && pTxtRecord->interact && pTxtRecord->npc) {
         if (pTargetUnit->pPath.pDynamicPath) {
           D2Common::PATH::DynamicPath::ZeroPathPointsSize(pTargetUnit->pPath.pDynamicPath);
         }
@@ -2761,11 +2762,12 @@ int __fastcall PLAYER_GetMonsterOwnerId(D2UnitStrc * pnParam) {
 }
 
 int32_t __fastcall TXT_MonStats_GetBaseId_NoChecks(int32_t nMonsterId) {
-    if (!(0 <= nMonsterId && nMonsterId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonsterId)) {
+    D2MonStatsTxt* pTxtRecord = 0 <= nMonsterId && nMonsterId < sgptDataTable->nTxtMonStatsSize ? &sgptDataTable->pTxtMonStats[nMonsterId] : nullptr;
+    if (!pTxtRecord) {
       return nMonsterId;
     }
 
-    nMonsterId = (int32_t)sgptDataTable->pTxtMonStats[nMonsterId].BaseId;
+    nMonsterId = (int32_t)pTxtRecord->BaseId;
     return nMonsterId;
 }
 
@@ -2789,11 +2791,12 @@ BOOL __fastcall TXT_MonStats_MonStats2_GetFlagsByBitOffset(int32_t nMonStatsId, 
     }
 
     int nMonStats2Id = (int)sgptDataTable->pTxtMonStats[nMonStatsId].MonStatsEx;
-    if (!(0 <= nMonStats2Id && nMonStats2Id < sgptDataTable->nTxtMonStatsExSize && sgptDataTable->pTxtMonStatsEx + nMonStats2Id)) {
+    D2MonStats2Txt* pTxtRecord = 0 <= nMonStats2Id && nMonStats2Id < sgptDataTable->nTxtMonStatsExSize ? &sgptDataTable->pTxtMonStatsEx[nMonStats2Id] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    return (uint32_t)sgptDataTable->pTxtMonStatsEx[nMonStats2Id].aComponents[((int)nBitOffset >> 3) - 0x11] & gadwBitMasks[nBitOffset & corpseSel];
+    return (uint32_t)pTxtRecord->aComponents[((int)nBitOffset >> 3) - 0x11] & gadwBitMasks[nBitOffset & corpseSel];
 }
 
 int32_t __fastcall ValidateClassId(int32_t nClassId) {

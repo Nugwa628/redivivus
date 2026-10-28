@@ -837,8 +837,9 @@ uint32_t __fastcall MONSTER_CheckCatapultFiringPosition(D2UnitStrc * pUnit, D2Un
     if (-1 >= nBaseClassId) {
       return 0;
     }
-    if (nBaseClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nBaseClassId) {
-      nBaseClassId = (int)sgptDataTable->pTxtMonStats[nBaseClassId].BaseId;
+    D2MonStatsTxt* pTxtRecord = nBaseClassId < sgptDataTable->nTxtMonStatsSize ? &sgptDataTable->pTxtMonStats[nBaseClassId] : nullptr;
+    if (pTxtRecord) {
+      nBaseClassId = (int)pTxtRecord->BaseId;
     }
     if (!(0 <= nBaseClassId && nBaseClassId < sgptDataTable->nTxtMonStatsSize && nBaseClassId == 0x12a)) {
       return 0;

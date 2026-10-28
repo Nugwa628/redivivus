@@ -48,11 +48,12 @@ D2StatesTxt * __fastcall TXT_States_GetLine(eD2States eState) {
 }
 
 BOOL __fastcall TXT_MonStats_GetFlagsByBitOffset(int32_t nMonStatsId, TxtMonStatsField0x0c nBitOffset) {
-    if (!(0 <= nMonStatsId && nMonStatsId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonStatsId)) {
+    D2MonStatsTxt* pTxtRecord = 0 <= nMonStatsId && nMonStatsId < sgptDataTable->nTxtMonStatsSize ? &sgptDataTable->pTxtMonStats[nMonStatsId] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    return (uint32_t)(uint8_t)sgptDataTable->pTxtMonStats[nMonStatsId].Code[((int)nBitOffset >> 3) - 4] & gadwBitMasks[nBitOffset & primeevil];
+    return (uint32_t)(uint8_t)pTxtRecord->Code[((int)nBitOffset >> 3) - 4] & gadwBitMasks[nBitOffset & primeevil];
 }
 
 } // namespace D2Client::DataTbls::MonsterTbls

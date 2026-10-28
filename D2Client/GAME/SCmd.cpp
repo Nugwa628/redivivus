@@ -1027,11 +1027,12 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xA5_FORCESTOPSKILL(char * pBytes) {
     }
 
     eD2Skills eSkill = (eD2Skills)nSkill;
-    if (!((int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    switch (sgptDataTable->pTxtSkills[eSkill].srvdofunc) {
+    switch (pTxtRecord->srvdofunc) {
       case 0x43:
         SKILLS::SkillsPal::SKILL_StopAndClearUninterruptable(pUnit, eSkill);
       D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_skill_move, 0);

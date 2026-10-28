@@ -557,7 +557,8 @@ int32_t __fastcall Missiles_SrvDoFuncData_07(D2UnitStrc * pUnit, D2MissileCltCol
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId && sgptDataTable->pTxtMissiles[nClassId].CanDestroy)) {
+    D2MissilesTxt* pTxtRecord = 0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[nClassId] : nullptr;
+    if (!(pTxtRecord && pTxtRecord->CanDestroy)) {
       return 0;
     }
 
@@ -702,9 +703,10 @@ void __fastcall MISSILE_RemoveClientSide(D2UnitStrc * pUnit) {
     }
 
     int nClassId = pUnit->nClassId;
-    if (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId) {
+    D2MissilesTxt* pTxtRecord = 0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[nClassId] : nullptr;
+    if (pTxtRecord) {
       int32_t nSoundHandle;
-      sTravelSound = sgptDataTable->pTxtMissiles[nClassId].TravelSound;
+      sTravelSound = pTxtRecord->TravelSound;
       if (0 <= sTravelSound) {
         nSoundHandle = UnitSnd::UNITSND_GetMissileSound(pUnit, (int)sTravelSound);
         if (nSoundHandle) {
@@ -2705,7 +2707,8 @@ int32_t __fastcall MISSILE_CltHitFn18_MeteorCenter(D2UnitStrc * pUnit, D2UnitStr
 
     eD2Skills eSkill = D2Common::Units::Missile::GetSkillId(pUnit);
     int32_t nSkillLevel = D2Common::Units::Missile::GetLevel(pUnit);
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = -1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 1;
     }
 
@@ -3184,13 +3187,14 @@ int32_t __fastcall MISSILE_CltHitFn29_GrimWard(D2UnitStrc * pUnit, D2UnitStrc * 
 
     eD2Skills eSkill = D2Common::Units::Missile::GetSkillId(pUnit);
     int32_t nSkillLevel = D2Common::Units::Missile::GetLevel(pUnit);
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 1;
     }
 
     nClassId = pMissileTxt->cHitPar1;
     if (!nClassId) {
-      nClassId = D2Common::Skills::D2GetSkillCalc(pOwner, sgptDataTable->pTxtSkills[eSkill].calc[0], eSkill, nSkillLevel);
+      nClassId = D2Common::Skills::D2GetSkillCalc(pOwner, pTxtRecord->calc[0], eSkill, nSkillLevel);
       if (nClassId < 5) {
         nClassId = 5;
       }
@@ -4489,11 +4493,12 @@ int32_t __fastcall MISSILE_CltHitFn36_HellMeteorDown(D2UnitStrc * pUnit, D2UnitS
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId)) {
+    D2MissilesTxt* pTxtRecord = 0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[nClassId] : nullptr;
+    if (!pTxtRecord) {
       return 1;
     }
 
-    MISSILE_SpawnAreaOfEffect(pUnit, (int32_t*)gaMissile036_AoeSpawnData, 3, sgptDataTable->pTxtMissiles[nClassId].Param1, 0x19, 0x4b);
+    MISSILE_SpawnAreaOfEffect(pUnit, (int32_t*)gaMissile036_AoeSpawnData, 3, pTxtRecord->Param1, 0x19, 0x4b);
     return 1;
 }
 
@@ -4858,11 +4863,12 @@ int32_t __fastcall MISSILE_CltHitFn54_VinesTrail(D2UnitStrc * pUnit, D2UnitStrc 
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId)) {
+    D2MissilesTxt* pTxtRecord = 0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[nClassId] : nullptr;
+    if (!pTxtRecord) {
       return 1;
     }
 
-    short int nSubMissile = sgptDataTable->pTxtMissiles[nClassId].CltHitSubMissile1;
+    short int nSubMissile = pTxtRecord->CltHitSubMissile1;
     if (0 > nSubMissile) {
       return 1;
     }

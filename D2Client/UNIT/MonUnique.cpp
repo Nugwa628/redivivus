@@ -856,7 +856,8 @@ void __fastcall MONUNIQUE_ApplyModifierNihlathak(D2UnitStrc * pUnit, int32_t nUM
     eMissilesId eMissileId = eMissileClass;
     D2UnitStrc* pMissileSelf = pUnit;
     D2UnitStrc* pOwnerUnit = Player::MISSILE_GetOwnerUnit(pUnit);
-    if (!(pOwnerUnit && 0 <= (int)eMissileClass && (int)eMissileClass < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + eMissileClass && !sgptDataTable->pTxtMissiles[eMissileClass].NoMultiShot)) {
+    D2MissilesTxt* pTxtRecord = pOwnerUnit && 0 <= (int)eMissileClass && (int)eMissileClass < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[eMissileClass] : nullptr;
+    if (!(pTxtRecord && !pTxtRecord->NoMultiShot)) {
       return;
     }
 

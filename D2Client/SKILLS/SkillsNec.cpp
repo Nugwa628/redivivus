@@ -209,11 +209,12 @@ static uint32_t __stdcall SKILLSNEC_CltSetBoneWallGfx(eD2Skills eSkill, int32_t 
 }
 
 BOOL __fastcall Skills_CltStFunc_SetBoneWallGraphics(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    eMissilesId eCltMissileC = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].cltmissile[3];
+    eMissilesId eCltMissileC = (eMissilesId)pTxtRecord->cltmissile[3];
     if (!(0 <= (int)eCltMissileC && (int)eCltMissileC < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
@@ -247,7 +248,8 @@ BOOL __fastcall Skills_CltStFunc_CheckCorpseSetPositionParams(D2UnitStrc * pUnit
 
 BOOL __fastcall Skills_CltDoFunc_Nec_TargetedMissileAtParam(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     D2SkillArgStrc sSkillArg;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
@@ -460,7 +462,8 @@ int __fastcall SKILLSNEC_CltCreateBoneSpearMissile(D2UnitStrc * pUnit, eD2Skills
     }
 
     eMissilesId eMissileId = (eMissilesId)pSkillTxt->cltmissile[1];
-    if (!(0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize && 0 <= nParam2 && nParam2 < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nParam2)) {
+    D2MonStatsTxt* pTxtRecord = 0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize && 0 <= nParam2 && nParam2 < sgptDataTable->nTxtMonStatsSize ? &sgptDataTable->pTxtMonStats[nParam2] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
     if (!(nTargetX && nParam1)) {

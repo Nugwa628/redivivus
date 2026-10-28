@@ -87,11 +87,12 @@ BOOL __fastcall Skills_CltDoFunc_Bar_BloodParticlesOnTarget(D2UnitStrc * pUnit, 
 }
 
 BOOL __fastcall Skills_CltStFunc_AllocStatListByCltCalc(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    int32_t nSkillLevel = D2Common::Skills::D2GetSkillCalc(pUnit, sgptDataTable->pTxtSkills[eSkill].cltcalc[0], eSkill, nSkillLvl);
+    int32_t nSkillLevel = D2Common::Skills::D2GetSkillCalc(pUnit, pTxtRecord->cltcalc[0], eSkill, nSkillLvl);
     Skills::SKILLS_CltAllocStatListForSkill(pUnit, nSkillLevel);
     return 1;
 }

@@ -460,16 +460,18 @@ void __fastcall SPELLSEL_DrawSkillIconWithQuantity(DC6 * pDC6, short * pSkillId,
     D2GfxDataStrc sGfxData;
     D2InventoryStrc* pInventory;
     int nMouseXCheck = (int)*pSkillId;
-    if (!(0 <= nMouseXCheck && nMouseXCheck < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nMouseXCheck)) {
+    D2SkillsTxt* pTxtRecord = 0 <= nMouseXCheck && nMouseXCheck < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[nMouseXCheck] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    nMouseXCheck = (int)sgptDataTable->pTxtSkills[nMouseXCheck].skilldesc;
-    if (!(0 <= nMouseXCheck && nMouseXCheck < sgptDataTable->nTxtSkillDescSize && sgptDataTable->pTxtSkillDesc + nMouseXCheck)) {
+    nMouseXCheck = (int)pTxtRecord->skilldesc;
+    D2SkillDescTxt* pTxtRecord2 = 0 <= nMouseXCheck && nMouseXCheck < sgptDataTable->nTxtSkillDescSize ? &sgptDataTable->pTxtSkillDesc[nMouseXCheck] : nullptr;
+    if (!pTxtRecord2) {
       return;
     }
 
-    uint32_t bVar1 = sgptDataTable->pTxtSkillDesc[nMouseXCheck].iconcel;
+    uint32_t bVar1 = pTxtRecord2->iconcel;
     nMouseXCheck = ui::GetMouseX();
     int nMouseX = ui::GetMouseY();
     if (nSkillIdSlot <= nMouseXCheck && nMouseXCheck <= nSkillIdSlot + 0x30 && nIconX - 0x30 <= nMouseX && nMouseX <= nIconX) {
@@ -550,16 +552,18 @@ void __fastcall SPELLSEL_DrawSkillIcon(short * pSkillId, int32_t nSlotIndex, int
     }
 
     int nMouseX = (int)*pSkillId;
-    if (!(0 <= nMouseX && nMouseX < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nMouseX)) {
+    D2SkillsTxt* pTxtRecord = 0 <= nMouseX && nMouseX < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[nMouseX] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    nMouseX = (int)sgptDataTable->pTxtSkills[nMouseX].skilldesc;
-    if (!(0 <= nMouseX && nMouseX < sgptDataTable->nTxtSkillDescSize && sgptDataTable->pTxtSkillDesc + nMouseX)) {
+    nMouseX = (int)pTxtRecord->skilldesc;
+    D2SkillDescTxt* pTxtRecord2 = 0 <= nMouseX && nMouseX < sgptDataTable->nTxtSkillDescSize ? &sgptDataTable->pTxtSkillDesc[nMouseX] : nullptr;
+    if (!pTxtRecord2) {
       return;
     }
 
-    uint32_t byIconCel = sgptDataTable->pTxtSkillDesc[nMouseX].iconcel;
+    uint32_t byIconCel = pTxtRecord2->iconcel;
     nMouseX = ui::GetMouseX();
     int nMouseY = ui::GetMouseY();
     if (nIconX <= nMouseX && nMouseX <= nIconX + 0x30 && nIconY - 0x30 <= nMouseY && nMouseY <= nIconY) {
@@ -1030,8 +1034,9 @@ void __fastcall SPELLSEL_DrawSkillGrid(D2UnitStrc * pUnit, int32_t nGridStartX, 
         pSkillsTxt = D2Common::Skills::GetSkillsTxt(pCurSkill);
         if (pSkillsTxt) {
           nSkillId = (int)pSkillsTxt->skill;
-          if (-1 < nSkillId && nSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nSkillId) {
-            nSkillId = (int)sgptDataTable->pTxtSkills[nSkillId].skilldesc;
+          D2SkillsTxt* pTxtRecord = -1 < nSkillId && nSkillId < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[nSkillId] : nullptr;
+          if (pTxtRecord) {
+            nSkillId = (int)pTxtRecord->skilldesc;
             if (-1 < nSkillId && nSkillId < sgptDataTable->nTxtSkillDescSize) {
               pSkillDescTxt = sgptDataTable->pTxtSkillDesc + nSkillId;
               if (pSkillDescTxt && (!bWeaponSwap || (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[6])) && !pSkillsTxt->passive) {
@@ -2024,11 +2029,12 @@ void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, D2SkillsTxt * pSkillTxt
     D2GfxDataStrc sGfxData;
     uint16_t wszLevelBuf[10];
     char szLevelBuf[12];
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    int nColumnX = (int)sgptDataTable->pTxtSkills[eSkill].skilldesc;
+    int nColumnX = (int)pTxtRecord->skilldesc;
     if (!(0 <= nColumnX && nColumnX < sgptDataTable->nTxtSkillDescSize)) {
       return;
     }
@@ -2280,7 +2286,8 @@ void __stdcall SKILLTREE_DrawAllSkillNodes() {
         pSkillTxt = sgptDataTable->pTxtSkills + eSkill;
         if (pSkillTxt) {
           nSkillDescIdx = (int)pSkillTxt->skilldesc;
-          if (-1 < nSkillDescIdx && nSkillDescIdx < sgptDataTable->nTxtSkillDescSize && sgptDataTable->pTxtSkillDesc + nSkillDescIdx && nSkillTreeActiveTab == (char)sgptDataTable->pTxtSkillDesc[nSkillDescIdx].skillpage) {
+          D2SkillDescTxt* pTxtRecord = -1 < nSkillDescIdx && nSkillDescIdx < sgptDataTable->nTxtSkillDescSize ? &sgptDataTable->pTxtSkillDesc[nSkillDescIdx] : nullptr;
+          if (pTxtRecord && nSkillTreeActiveTab == (char)pTxtRecord->skillpage) {
             gaSpellSelSkillTreeState[nSkillIdx] = -1;
             gbSpellSelSkillTreeNodeHovered[nSkillIdx] = 5;
             pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnitCopy, eSkill, -1);
