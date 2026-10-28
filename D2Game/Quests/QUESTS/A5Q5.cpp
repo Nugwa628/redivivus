@@ -1055,8 +1055,7 @@ void __fastcall QUEST_OnPlayerLeaveArreatSummit(::SGAMEDATA * pGame, D2UnitStrc 
     }
 
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_RiteOfPassage);
-    int* pnPlayersOnSummit = &pQuestData->pQuestSpecificData.pA5Q5->nResurrectionCount;
-    (*pnPlayersOnSummit)--;
+    pQuestData->pQuestSpecificData.pA5Q5->nResurrectionCount--;
     D2QuestDataA5Q5Strc* pA5Q5Specific = pQuestData->pQuestSpecificData.pA5Q5;
     if (!(!pA5Q5Specific->nResurrectionCount && pA5Q5Specific->bAncientsActive)) {
       return;

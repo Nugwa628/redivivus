@@ -2289,8 +2289,7 @@ void __fastcall Q04_DropShieldRewards(D2QuestDataStrc * pQuestData, D2UnitStrc *
       return;
     }
 
-    int32_t* pShieldsRemaining = &pQuestSpecificData->sSub.nShieldsRemaining;
-    (*pShieldsRemaining)--;
+    pQuestSpecificData->sSub.nShieldsRemaining--;
     if (0 >= pQuestSpecificData->sSub.nShieldsRemaining) {
       return;
     }

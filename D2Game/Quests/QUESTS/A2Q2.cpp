@@ -563,8 +563,7 @@ void __fastcall Q10_AdjustStaffPieceCount(int pQuestArg, int nCountDelta) {
       return;
     }
 
-    int32_t* ppStaffCount = &pQuestData->pQuestSpecificData.pA2Q2->nVipCount;
-    *ppStaffCount += nCountDelta;
+    pQuestData->pQuestSpecificData.pA2Q2->nVipCount += nCountDelta;
 }
 
 // OBJOP_A2Q2_ArcaneSanctuaryPortalAndDrop2. Object-operate fn for the Tomb-chest /
