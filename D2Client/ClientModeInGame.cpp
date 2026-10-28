@@ -800,11 +800,11 @@ uint32_t __stdcall CLIENTMODE_Unused4(uint32_t dwUnused) {
     size_t nSize = D2Net::SRC::Client::NET_D2GS_CLIENT_ExtractPacketSize_from0xAE((char*)packetBuffer, 0x200);
     GAME::SCmd::NET_D2GS_CLIENT_PacketHandle_from0xAF(packetBuffer, nSize);
     DWORD dwNowTick = GetTickCount();
-    if (10000 >= dwNowTick - gdwLastPacketActivityTick) {
-      return (uint32_t)!D2GS_Connected;
+    if (dwNowTick - gdwLastPacketActivityTick > 10000) {
+      return 1;
     }
 
-    return 1;
+    return (uint32_t)!D2GS_Connected;
 }
 
 // pfModes_ShutdownServer: run MessageGameLoop while shutting down, free QServer, send 0xB0 to clients.
