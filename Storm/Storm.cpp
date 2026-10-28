@@ -196,7 +196,7 @@ int __fastcall HUFFMAN_DecompressBlock(uint8_t * pDst, int32_t nDstMax, uint16_t
     }
 
     uint32_t wWord = (uint32_t)pBitBuf[2];
-    if (wWord < 9) {
+    if (wWord <= 8) {
       wRefill = **pBitBuf;
       pBitBuf[2] = (uint16_t*)(wWord + 0x10);
       pBitBuf[1] = (uint16_t*)((uint32_t)pBitBuf[1] | (uint32_t)wRefill << ((uint8_t)wWord & 0x1f));

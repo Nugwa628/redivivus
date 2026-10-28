@@ -44,7 +44,6 @@ int __fastcall SERVERCMD_SendBufferToClient(int32_t nClientId, uint16_t wGuildFl
     sPacket.nGuildFlags = wGuildFlags;
     Storm::Source::SSTR::SStrCopy(sPacket.szPlayerName, szPlayerName, 0x10);
     int32_t iVar1 = D2Net::Game::Server::NET_D2GS_SERVER_SendPacketToClient(0, nClientId, (char*)&sPacket, 0x35);
-    Fog::Debug::GuardStack();
     return iVar1;
 }
 

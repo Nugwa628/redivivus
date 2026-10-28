@@ -169,7 +169,9 @@ void __fastcall Q14_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
     /* GetQuestState(TheSevenTombs, 3=Step0x03=Duriel-dead) — if set, gossip
                          message index = 3 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Step0x03);
-    if (!bQuestState) {
+    if (bQuestState) {
+      nMessageIndexMaybe = 3;
+    } else {
       int32_t nPlayerGUID;
       /* GetQuestState(TheSevenTombs, 4=Step0x04) — if set: Drognan(0xd2)->msg5,
                          else msg4 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Step0x04);
@@ -205,7 +207,7 @@ void __fastcall Q14_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (bQuestState == 1 && !bJustCompleted) {
         return;
       }
-      if (3 < pQuestData->nStateFlag && !bJustCompleted) {
+      if (4 <= pQuestData->nStateFlag && !bJustCompleted) {
         return;
       }
 
@@ -220,12 +222,10 @@ void __fastcall Q14_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         if (nMessageIndexMaybe == -1) {
           return;
         }
-        if (7 < nMessageIndexMaybe) {
+        if (8 <= nMessageIndexMaybe) {
           return;
         }
       }
-    } else {
-      nMessageIndexMaybe = 3;
     }
 
     AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, nMessageIndexMaybe);
@@ -266,7 +266,7 @@ BOOL __fastcall Q14_UpdateQuestRecordStep(::SGAMEDATA * pGame, D2UnitStrc * pUni
     }
 
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSevenTombs);
-    if (!(pQuestData && 1 < pQuestData->nStateFlag)) {
+    if (!(pQuestData && 2 <= pQuestData->nStateFlag)) {
       return 0;
     }
 
@@ -527,8 +527,8 @@ void __fastcall Q14_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         eLevel = LEVEL_LutGholein;
         nPlayerY = D2Client::Units::GetYPosFromDynamicPathUnit(pQuestArgs->pPlayer);
         nPlayerX = D2Client::Units::GetXPosFromDynamicPathUnit(pQuestArgs->pPlayer);
-        pRoom = D2Common::Units::UNITS_GetRoom(pQuestArgs->pPlayer);
-        bPortalSpawned = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, pQuestArgs->pPlayer, pRoom, nPlayerX, nPlayerY, eLevel, ppSpawnedPortal, nPortalClassId, bPortalSpawned);
+
+        bPortalSpawned = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, pQuestArgs->pPlayer, D2Common::Units::UNITS_GetRoom(pQuestArgs->pPlayer), nPlayerX, nPlayerY, eLevel, ppSpawnedPortal, nPortalClassId, bPortalSpawned);
         if (bPortalSpawned) {
           QUEST_SetStateFlag(pQuestData, 4, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q6.cpp", 0x241);
           UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestArgs->pGame, 0, pQuestArgs->pTarget, (::fpExecuteOnUnitFunction)Q14_CheckDurielLairAndComplete);
@@ -1091,7 +1091,7 @@ void __fastcall Q14_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->pNpcMessages = &A2Q6::aNpcGossipData;
     pQuestData->bIsActive = true;
     pQuestData->nStateFlag = 0;
-    D2QuestDataA2Q6Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA2Q6Strc);
+    D2QuestDataA2Q6Strc* pQuestSpecificData = ((D2QuestDataA2Q6Strc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2QuestDataA2Q6Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q6.cpp", 0x442, 0));
     pQuestData->pQuestSpecificData.pA2Q6 = pQuestSpecificData;
     pQuestData->nQuestIdReal = QUEST_TheSevenTombs;
     pQuestData->fpStatusFilter = Q14_StatusFilter;

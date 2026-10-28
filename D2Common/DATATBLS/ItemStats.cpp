@@ -30,7 +30,7 @@
 namespace D2Common::DATATBLS::ItemStats {
 
 void __stdcall SetState(D2UnitStrc * pUnit, eD2States eState, int32_t nParam) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return;
     }
 
@@ -45,7 +45,7 @@ eD2States __stdcall UNIT_GetUnitState(D2UnitStrc * pUnit, eD2States eState) {
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (!(-1 < (int)eUnitType && ((int)eUnitType < 2 || eUnitType == UNIT_MISSILE) && -1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eUnitType && ((int)eUnitType <= 1 || eUnitType == UNIT_MISSILE) && 0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return STATE_none;
     }
 
@@ -55,7 +55,7 @@ eD2States __stdcall UNIT_GetUnitState(D2UnitStrc * pUnit, eD2States eState) {
 
 void __stdcall D2StatesTogglegfx(D2UnitStrc * pUnit, uint32_t nParam, int32_t nParam2) {
     int32_t pGfxFlags = Stats::StatsEx::STATLIST_GetUnitGfxFlags(pUnit);
-    if (!(pGfxFlags && -1 < (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
+    if (!(pGfxFlags && 0 <= (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
       return;
     }
 
@@ -71,7 +71,7 @@ void __stdcall D2StatesTogglegfx(D2UnitStrc * pUnit, uint32_t nParam, int32_t nP
 }
 
 uint32_t __stdcall GetStateGfxFlag(D2UnitStrc * pUnit, eD2States eState) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -251,7 +251,7 @@ void __stdcall STATES_MoveToGfxFlags(D2UnitStrc * pUnit, uint32_t * pMaskWords) 
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray1(eD2States eState) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -264,7 +264,7 @@ BOOL __stdcall STATES_HasHideState(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray4(eD2States eState) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -329,7 +329,7 @@ BOOL __stdcall UNITS_IsShapeshifted(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray11(eD2States eState) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -337,7 +337,7 @@ uint32_t __stdcall ITEMSTATS_CheckStateFlagArray11(eD2States eState) {
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray12(uint32_t nParam) {
-    if (!(-1 < (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -345,7 +345,7 @@ uint32_t __stdcall ITEMSTATS_CheckStateFlagArray12(uint32_t nParam) {
 }
 
 uint32_t __stdcall STATES_IsStateActive(D2UnitStrc * pUnit, uint32_t nParam) {
-    if ((int)nParam < 0 || sgptDataTable->nTxtStatesSize <= (int)nParam) {
+    if ((int)nParam < 0 || (int)nParam >= sgptDataTable->nTxtStatesSize) {
       return 0;
     }
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
@@ -421,7 +421,7 @@ BOOL __stdcall STATES_HasCurseState(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray30(uint32_t nParam) {
-    if (!(-1 < (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -434,7 +434,7 @@ BOOL __stdcall STATES_HasMaxState(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray31(uint32_t nParam) {
-    if (!(-1 < (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -457,7 +457,7 @@ BOOL __stdcall STATES_HasDisguiseState(D2UnitStrc * pUnit) {
 }
 
 BOOL __stdcall ITEMSTATS_CheckUnitHasStateFlagIndex(D2UnitStrc * pUnit, uint32_t nFlagArrayIdx) {
-    if (!(pUnit && nFlagArrayIdx < 0x28)) {
+    if (!(pUnit && nFlagArrayIdx <= 0x27)) {
       return 0;
     }
 

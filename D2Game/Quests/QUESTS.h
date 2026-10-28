@@ -154,8 +154,6 @@ namespace D2Game::Quests::QUESTS {
 struct D2BitBufferStrc * __fastcall GetQuestBitBuffer(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 // @sourcefile .\QUESTS\QUESTS.CPP
 void __fastcall FreeQuestDataList(::SGAMEDATA * pGame, struct D2UnitQuestDataListStrc * pQuestDataList);
-// @sourcefile .\QUESTS\QUESTS.CPP
-BOOL __stdcall QUEST_AttachToUnit(::SGAMEDATA * pGame, struct D2QuestDataStrc * pQuestData, struct D2UnitStrc * pUnit);
 struct D2QuestDataStrc * __fastcall GetQuestDataByQuestNoInternal(::SGAMEDATA * pGame, eD2QuestsInternal eQuestNoInternal);
 // Looks up quest data by internal quest ID and attaches it to a unit. For QUESTINT_TheSearchForCain attaches to the cage object (classId 0x3d) and calls Q04_SetRescueTrigger; for QUESTINT_RadamentsLair attaches to Radament (0xe5); for QUESTINT_TheSummoner runs Q14 join noop on the Summoner (0xfa). Falls through to QUEST_AttachToUnit for all others.
 BOOL __fastcall QUEST_AttachToUnitByQuestId(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2QuestsInternal nQuestNoInternal);
@@ -163,11 +161,9 @@ void __fastcall AddGossipMessageOnMonster(struct D2QuestDataStrc * pQuestData, s
 // @sourcefile .\QUESTS\QUESTS.CPP
 void __fastcall FreeQuestControl(::SGAMEDATA * pGame);
 struct D2SeedStrc * __fastcall GetQuestControlSeed(::SGAMEDATA * pGame);
-void __stdcall QUEST_DispatchBroadcast(bool bFlag1, bool bFlag2, struct D2QuestArgStrc * pQuestArg);
-void __stdcall QUEST_DispatchToUnit(struct D2UnitStrc * pUnit, struct D2QuestArgStrc * pCall);
 // Called server-side when any monster dies. Resolves the effective killer (falls back to the first client in SP if killer is null, or traces a minion back to its owner). Checks if the dead monster is a super-unique with a quest-relevant hcIdx or a special class ID (Diablo seal infectors 0xF2/0xF3, Baal 0x220, super-unique 0x187), then dispatches a QUEST_EVENT=8 (monster killed) to the resolved player unit via QUEST_DispatchToUnit.
 void __fastcall QUEST_OnMonsterKilled(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pKiller);
-void __stdcall QUEST_OnPlayerEnteredArea(::SGAMEDATA * pGame, int32_t ePreviousLevelId, int32_t eEnteredLevelId, struct D2UnitStrc * pUnit);
+void __fastcall QUEST_OnPlayerEnteredArea(::SGAMEDATA * pGame, int32_t ePreviousLevelId, int32_t eEnteredLevelId, struct D2UnitStrc * pUnit);
 // Quest system hook called when a player disconnects. Iterates all items in the player's inventory looking for carried quest items (pItemTxt-&gt;bQuest != 0); for each found quest item fires fpQuestStateHandler[9] (the disconnect event handler) of the matching quest data node, validating the callback pointer with IsBadCodePtr first (halts on bad ptr). After the item loop, broadcasts quest event 10 (QUEST_EVENT_DISCONNECT_POST) to all quests via QUEST_DispatchBroadcast.
 void __fastcall QUEST_OnPlayerDisconnect(::SGAMEDATA * pGame, struct D2UnitStrc * pPlayer);
 void __fastcall QUEST_OnUnitInteraction_Unused(::SGAMEDATA * pGame, struct D2UnitStrc * pPlayer, struct D2UnitStrc * pUnit);
@@ -179,7 +175,7 @@ void __fastcall QUEST_OnNpcInteraction(struct D2ClientStrc * pClient, struct D2U
 //   MOV [EBP-0x14],EAX  -> questArg.pTarget (the one stack argument, [EBP+8])
 //   MOV [EBP-0x10],EDX  -> questArg.pPlayer (EDX)
 // Declaring only the stack argument left pGame and pPlayer as uninitialised locals and split the struct into loose dwTmp slots, so the broadcast received a garbage game pointer and a garbage player.
-void __stdcall QUEST_OnNpcDeactivate(::SGAMEDATA * pGame, struct D2UnitStrc * pPlayer, struct D2UnitStrc * pTarget);
+void __fastcall QUEST_OnNpcDeactivate(::SGAMEDATA * pGame, struct D2UnitStrc * pPlayer, struct D2UnitStrc * pTarget);
 void __fastcall QUEST_OnItemPickedUp(::SGAMEDATA * pGame, struct D2UnitStrc * pPlayer, struct D2UnitStrc * pUnit);
 void __fastcall QUEST_OnItemDropped(::SGAMEDATA * pGame, struct D2UnitStrc * pPlayer, struct D2UnitStrc * pUnit);
 void __fastcall QUEST_OnItemEvent_Unused(::SGAMEDATA * pGame, struct D2UnitStrc * pTarget);
@@ -191,8 +187,6 @@ void __fastcall AddQuestTimer(struct D2QuestDataStrc * pQuestData, QUESTUPDATE f
 // Determines the display byte to write into the quest-log packet for a single quest. Reads QUESTSTATE_JustCompleted and QUESTSTATE_CannotCompleteQuestInGame from the bit buffer, applies special-case logic for TheSearchForCain (Cain rescued check) and TheTaintedSun, and writes the resulting state byte into pQuestData2->nQuestNoInternal for the caller to pack into the log packet.
 void __fastcall QUEST_GetQuestLogDisplayState(struct D2QuestDataStrc * pQuestData, uint8_t * pQuestData2, struct D2BitBufferStrc * pBitBuffer);
 void __fastcall QUEST_DebugPrint(::SGAMEDATA * pGame, char * szMessage, char * szFile, int32_t nLine);
-// @sourcefile .\QUESTS\QUESTS.CPP
-void __stdcall QUEST_RemoveItemFromInventory(struct D2InventoryStrc * pInventory, struct D2UnitStrc * pUnit, ::SGAMEDATA * pGame, struct D2UnitStrc * pItem);
 void __fastcall QUEST_RemoveQuestItemFromPlayer(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint32_t dwItemCode);
 // Sends a 0x5D QuestState packet to the client for a specific quest identified by nInternalQuestNo. Looks up the matching D2QuestDataStrc, verifies the player is in the correct act, assembles the packet (quest flags + optional status-filter callback), appends extra data for Den of Evil (monsters remaining) or Rescue on Mount Arreat (prisoners remaining), then calls NET_D2GS_SERVER_Send_0x5D_QuestState.
 // @sourcefile .\QUESTS\QUESTS.CPP
@@ -228,9 +222,6 @@ void __fastcall QUEST_CheckGoldenBirdDrop(::SGAMEDATA * pGame, struct D2UnitStrc
 // NOTE: Register param types inferred (medium confidence): pGameStrc (ECX): SGAMEDATA *, pUnit (EDX): D2UnitStrc *
 void __fastcall QUEST_OnGoldenBirdCouncilKilled(::SGAMEDATA * pGameStrc, struct D2UnitStrc * pUnit);
 void __stdcall QUEST_MarkNPCsAsIntroduced(::SGAMEDATA * pGame, int32_t pNpcIdArray, struct D2UnitStrc * pUnit, int32_t nNpcIdCount);
-// Marks all NPCs in the destination act as already-introduced (spoken-with) for pUnit when an act transition occurs. Switches on eActNo (ACT_I through ACT_V; ACT_IV is a no-op) and iterates the corresponding NPCINTRO_ListActN table, calling INTRONPC_SetSpokenWithNPC_Intro2 for each entry. Ensures the player does not see first-meeting NPC intros upon entering the new act.
-void QUEST_GrantActTransitionReward(eAct eActNo, ::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-BOOL __stdcall INTRONPC_FillInPacketWithIntroNpcIds(struct D2UnitDataPlayerInteractedNPCStrc * pInteractedNPCs, int * aNpcList, int32_t nListSize, struct D2GSPacketSrv0x91 * pD2GSPacketSrv0x91);
 // Builds and sends packet 0x91 (NpcGossip) to the player's client for a given act, listing which intro NPCs the player has already spoken with. Selects the act-specific NPC list (Acts I/II/III/V), calls INTRONPC_FillInPacketWithIntroNpcIds to populate the packet, and sends it only if at least one NPC entry needs to be communicated.
 // @sourcefile .\QUESTS\QUESTS.CPP
 BOOL __fastcall INTRONPC_FillInPacketWithIntroNpcIdsInAct(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eAct nActNo);

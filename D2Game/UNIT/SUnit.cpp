@@ -130,12 +130,12 @@ void __fastcall UNITS_SetNextUnit(D2UnitStrc * pUnit, D2UnitStrc * pNext) {
 
 // 2022.01.09 - dzik
 D2UnitStrc * __fastcall GetNextUnit(D2UnitStrc * pUnit) {
-    if (pUnit) {
-      return pUnit->pListNext;
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xde);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xde);
-    exit(-1);
+    return pUnit->pListNext;
     return pUnit->pListNext;
 }
 
@@ -176,13 +176,12 @@ void __fastcall SetItemSeeds(D2UnitStrc * pUnit, D2SeedStrc * pSeed) {
     D2Common::ITEMS::Items::SetModSeed(pUnit, DVar1.nSeedLow);
     uint32_t nModSeedVal = D2Common::ITEMS::Items::GetModSeed(pUnit);
     D2SeedStrc* pItemSeed = D2Common::ITEMS::Items::GetItemSeed(pUnit);
-    pItemSeed->nSeedLow = nModSeedVal;
-    pItemSeed->nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(pItemSeed, nModSeedVal);
 }
 
 // Increments and returns pGame->anUnitGuidCounters[eUnitType] (+0x90), skipping -1. The incremented value IS the new unit's GUID and is returned in EAX; typing it void made every caller read the GUID out of an unassigned local.
 uint32_t __fastcall UNITS_IncrementUnitGUIDCounter(::SGAMEDATA * pGame, eD2UnitType eUnitType) {
-    if (5 < (int)eUnitType) {
+    if (6 <= (int)eUnitType) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1c4);
       exit(-1);
     }
@@ -300,7 +299,7 @@ void __fastcall UNITS_InsertUnitIntoHashTable(D2UnitStrc * pUnit, ::SGAMEDATA * 
 }
 
 // Removes pUnit from the game's per-type unit hash table (same slot logic as InsertUnitIntoHashTable). Walks the singly-linked bucket list to find the unit and unlinks it; no-ops silently if the unit is not found. Despite the name, contains no client-notification logic — it is purely a hash-table unlink.
-void UNITS_NotifyClientsUnitRemoved(D2UnitStrc * pGameUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void UNITS_NotifyClientsUnitRemoved(D2UnitStrc * pGameUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2UnitStrc* pCurUnit;
     D2UnitStrc** ppHashSlot;
     eD2UnitType eUnitType;
@@ -343,7 +342,7 @@ void UNITS_NotifyClientsUnitRemoved(D2UnitStrc * pGameUnit, ::SGAMEDATA * pGame,
     pPrevUnit->pListNext = pCurUnit->pListNext;
 }
 
-int32_t IsRoomOccupied(D2UnitStrc * pUnit) {
+static int32_t IsRoomOccupied(D2UnitStrc * pUnit) {
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (pRoom) {
       return (uint32_t)(pRoom->nClientsCount != 0);
@@ -359,14 +358,14 @@ void __fastcall SetClient(D2UnitStrc * pUnit, D2ClientStrc * pClient) {
       exit(-1);
     } else {
       D2UnitDataPlayerStrc* pPlayerData;
-      if (pUnit->eUnitType == UNIT_PLAYER) {
-        pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-        pPlayerData->pClient = pClient;
-        return;
+      if (pUnit->eUnitType != UNIT_PLAYER) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4bb);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4bb);
-      exit(-1);
+      pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+      pPlayerData->pClient = pClient;
+      return;
     }
 }
 
@@ -394,57 +393,57 @@ void __fastcall UNITS_SendUnitUpdateToClient(D2UnitStrc * pUnit, D2ClientStrc * 
 // Prepares a unit for reuse/recycling after removal from the game. Clears changed-stat flags, frees queued packets, clears animation mode and selected unit flags, processes pending inventory updates, and frees child stat lists. Per-type cleanup: resets player last-exp and arena dirty; for monsters clears summoner flags and teleport flag; for items clears REMOVED and NEW item flags. Halts if pUnit is null.
 void __fastcall UNITS_ResetUnitForReuse(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     uint32_t uVar1;
-    if (pUnit) {
-      uint32_t bHasChangedStats;
-      D2Common::Stats::StatsEx::STATLIST_ClearChangedStatFlags(pUnit);
-      SUnitMsg::SERVER_UnitQueuePacketFree(pUnit);
-      pUnit->eUnitFlags &= ~(UNITFLAG_INITSEEDSET | UNITFLAG_DOUPDATE);
-      D2Common::Units::ChangeAnimMode(pUnit, 0);
-      pUnit->eUnitFlags &= ~(UNITFLAG_UPGRLIFENHITCLASS | UNITFLAG_HASEVENTSOUND);
-      pUnit->eUnitFlagsEx &= -2168833;
-      D2Common::DATATBLS::ItemStats::STATES_ClearGfxFlags(pUnit);
-      ITEM_ProcessInventoryUpdates(pGame, pUnit);
-      bHasChangedStats = D2Common::Stats::StatsEx::STATLIST_HasChangedStats(pUnit);
-      if (bHasChangedStats) {
-        D2Common::Stats::StatsEx::STATLIST_FreeUnitChildStatLists(pUnit);
-      }
-
-      uVar1 = D2Common::Stats::StatsEx::STATLIST_HasChangedStats(pUnit);
-      if (uVar1) {
-        D2Common::Stats::StatsEx::STATLIST_FreeUnitChildStatLists(pUnit);
-      }
-
-      switch (pUnit->eUnitType) {
-        case UNIT_PLAYER:
-          D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_lastexp, -1, 0);
-        pUnit->eUnitFlags &= ~UNITFLAG_HASTXTMSG;
-        GAME::Arena::ARENA_ClearScoreDirty(pGame, pUnit);
-        return;
-        case UNIT_MONSTER:
-          pUnit->eUnitFlags &= ~UNITFLAG_HASTXTMSG;
-        if (pUnit->eUnitFlags >> 0xb & 1) {
-          pUnit->eUnitFlags &= ~UNITFLAG_SUMMONER;
-          D2Game::Monster::SetUnsetSummonerFlags(pUnit, 1, 0);
-        }
-
-        pUnit->eUnitFlagsEx &= ~UNITFLAGEX_TELEPORTED;
-        return;
-        case UNIT_OBJECT:
-          pUnit->eUnitFlags &= ~UNITFLAG_HASTXTMSG;
-        return;
-        case UNIT_ITEM:
-          pUnit->eUnitFlags &= ~UNITFLAG_SENDREFRESHMSG;
-        if (pUnit->eUnitType == UNIT_ITEM) {
-          D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, ITEMFLAG_REMOVED, 0);
-          D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, ITEMFLAG_NEW, 0);
-        }
-      }
-
-      return;
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x518);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x518);
-    exit(-1);
+    uint32_t bHasChangedStats;
+    D2Common::Stats::StatsEx::STATLIST_ClearChangedStatFlags(pUnit);
+    SUnitMsg::SERVER_UnitQueuePacketFree(pUnit);
+    pUnit->eUnitFlags &= ~(UNITFLAG_INITSEEDSET | UNITFLAG_DOUPDATE);
+    D2Common::Units::ChangeAnimMode(pUnit, 0);
+    pUnit->eUnitFlags &= ~(UNITFLAG_UPGRLIFENHITCLASS | UNITFLAG_HASEVENTSOUND);
+    pUnit->eUnitFlagsEx &= -2168833;
+    D2Common::DATATBLS::ItemStats::STATES_ClearGfxFlags(pUnit);
+    ITEM_ProcessInventoryUpdates(pGame, pUnit);
+    bHasChangedStats = D2Common::Stats::StatsEx::STATLIST_HasChangedStats(pUnit);
+    if (bHasChangedStats) {
+      D2Common::Stats::StatsEx::STATLIST_FreeUnitChildStatLists(pUnit);
+    }
+
+    uVar1 = D2Common::Stats::StatsEx::STATLIST_HasChangedStats(pUnit);
+    if (uVar1) {
+      D2Common::Stats::StatsEx::STATLIST_FreeUnitChildStatLists(pUnit);
+    }
+
+    switch (pUnit->eUnitType) {
+      case UNIT_PLAYER:
+        D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_lastexp, -1, 0);
+      pUnit->eUnitFlags &= ~UNITFLAG_HASTXTMSG;
+      GAME::Arena::ARENA_ClearScoreDirty(pGame, pUnit);
+      return;
+      case UNIT_MONSTER:
+        pUnit->eUnitFlags &= ~UNITFLAG_HASTXTMSG;
+      if (pUnit->eUnitFlags >> 0xb & 1) {
+        pUnit->eUnitFlags &= ~UNITFLAG_SUMMONER;
+        D2Game::Monster::SetUnsetSummonerFlags(pUnit, 1, 0);
+      }
+
+      pUnit->eUnitFlagsEx &= ~UNITFLAGEX_TELEPORTED;
+      return;
+      case UNIT_OBJECT:
+        pUnit->eUnitFlags &= ~UNITFLAG_HASTXTMSG;
+      return;
+      case UNIT_ITEM:
+        pUnit->eUnitFlags &= ~UNITFLAG_SENDREFRESHMSG;
+      if (pUnit->eUnitType == UNIT_ITEM) {
+        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, ITEMFLAG_REMOVED, 0);
+        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit, ITEMFLAG_NEW, 0);
+      }
+    }
+
+    return;
 }
 
 void __fastcall SetupUpdateEvent_AttachEventSound(D2UnitStrc * pUnit, eD2TimerTypeDWORD nUpdateType, D2UnitStrc * pUpdateUnit) {
@@ -510,28 +509,28 @@ void __fastcall GetTarget(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       exit(-1);
     } else {
       pDynamicPath_00 = pUnit->pPath.pDynamicPath;
-      if (pDynamicPath_00) {
-        pLookedUpUnit = D2Common::PATH::DynamicPath::GetTargetUnit(pDynamicPath_00);
-        if (!pLookedUpUnit) {
-          return;
-        }
+      if (!pDynamicPath_00) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x704);
+        exit(-1);
+      }
 
-        D2Common::PATH::DynamicPath::GetTargetTypeAndGUID(pDynamicPath_00, &eTargetType, (int*)&nTargetGUID);
-        pFreshLookup = FindUnitFromTable(pGame, eTargetType, nTargetGUID);
-        pCachedTarget = D2Common::PATH::DynamicPath::GetTargetUnit(pDynamicPath_00);
-        if (pFreshLookup != pCachedTarget) {
-          D2Common::PATH::DynamicPath::SetTarget(pDynamicPath_00, nullptr);
-        }
-        if (!(pFreshLookup && pFreshLookup->eUnitType == UNIT_ITEM && (pFreshLookup->eAnimMode.ePlayerMode == Walk || pFreshLookup->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Neutral))) {
-          return;
-        }
-
-        D2Common::PATH::DynamicPath::SetTarget(pDynamicPath_00, nullptr);
+      pLookedUpUnit = D2Common::PATH::DynamicPath::GetTargetUnit(pDynamicPath_00);
+      if (!pLookedUpUnit) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x704);
-      exit(-1);
+      D2Common::PATH::DynamicPath::GetTargetTypeAndGUID(pDynamicPath_00, &eTargetType, (int*)&nTargetGUID);
+      pFreshLookup = FindUnitFromTable(pGame, eTargetType, nTargetGUID);
+      pCachedTarget = D2Common::PATH::DynamicPath::GetTargetUnit(pDynamicPath_00);
+      if (pFreshLookup != pCachedTarget) {
+        D2Common::PATH::DynamicPath::SetTarget(pDynamicPath_00, nullptr);
+      }
+      if (!(pFreshLookup && pFreshLookup->eUnitType == UNIT_ITEM && (pFreshLookup->eAnimMode.ePlayerMode == Walk || pFreshLookup->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Neutral))) {
+        return;
+      }
+
+      D2Common::PATH::DynamicPath::SetTarget(pDynamicPath_00, nullptr);
+      return;
     }
 }
 
@@ -559,67 +558,67 @@ void __fastcall LinkPortalCoords(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
       exit(-1);
     } else {
       int32_t nCoordVal;
-      if (pUnit2) {
-        eUnitType = pUnit2->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-          nCoordVal = pUnit2->pPath.pStaticPath->nPosX;
-        } else if (!pUnit2->pPath.pDynamicPath) {
-          nCoordVal = 0;
-        } else {
-          nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
-        }
+      if (!pUnit2) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x755);
+        exit(-1);
+      }
 
-        pUnit->pUnitData.pUnitDataObject->nLinkedPortalX = nCoordVal;
-        eUnitTypeTmp = pUnit2->eUnitType;
-        if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp < 6) {
-          nCoordVal = pUnit2->pPath.pStaticPath->nPosY;
-        } else if (!pUnit2->pPath.pDynamicPath) {
-          nCoordVal = 0;
-        } else {
-          nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit2->pPath.pDynamicPath);
-        }
+      eUnitType = pUnit2->eUnitType;
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
+        nCoordVal = pUnit2->pPath.pStaticPath->nPosX;
+      } else if (!pUnit2->pPath.pDynamicPath) {
+        nCoordVal = 0;
+      } else {
+        nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
+      }
 
-        pUnit->pUnitData.pUnitDataObject->nLinkedPortalY = nCoordVal;
-        eUnitTypeTmp = pUnit->eUnitType;
-        if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp < 6) {
-          nCoordVal = pUnit->pPath.pStaticPath->nPosX;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          nCoordVal = 0;
-        } else {
-          nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-        }
+      pUnit->pUnitData.pUnitDataObject->nLinkedPortalX = nCoordVal;
+      eUnitTypeTmp = pUnit2->eUnitType;
+      if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
+        nCoordVal = pUnit2->pPath.pStaticPath->nPosY;
+      } else if (!pUnit2->pPath.pDynamicPath) {
+        nCoordVal = 0;
+      } else {
+        nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit2->pPath.pDynamicPath);
+      }
 
-        pUnit2->pUnitData.pUnitDataObject->nLinkedPortalX = nCoordVal;
-        eUnitTypeTmp = pUnit->eUnitType;
-        if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp < 6) {
-          nCoordVal = pUnit->pPath.pStaticPath->nPosY;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          nCoordVal = 0;
-        } else {
-          nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-        }
+      pUnit->pUnitData.pUnitDataObject->nLinkedPortalY = nCoordVal;
+      eUnitTypeTmp = pUnit->eUnitType;
+      if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
+        nCoordVal = pUnit->pPath.pStaticPath->nPosX;
+      } else if (!pUnit->pPath.pDynamicPath) {
+        nCoordVal = 0;
+      } else {
+        nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      }
 
-        pUnit2->pUnitData.pUnitDataObject->nLinkedPortalY = nCoordVal;
-        pRoom = D2Common::Units::UNITS_GetRoom(pUnit2);
-        if (pRoom) {
-          D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &roomCoords);
-          pUnit->pUnitData.pUnitDataMonster->nDurielUnk = roomCoords.sTileRect.left;
-          pUnit->pUnitData.pUnitDataObject->nY = roomCoords.sTileRect.top;
-        }
+      pUnit2->pUnitData.pUnitDataObject->nLinkedPortalX = nCoordVal;
+      eUnitTypeTmp = pUnit->eUnitType;
+      if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
+        nCoordVal = pUnit->pPath.pStaticPath->nPosY;
+      } else if (!pUnit->pPath.pDynamicPath) {
+        nCoordVal = 0;
+      } else {
+        nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      }
 
-        pRoom_00 = D2Common::Units::UNITS_GetRoom(pUnit);
-        if (!pRoom_00) {
-          return;
-        }
+      pUnit2->pUnitData.pUnitDataObject->nLinkedPortalY = nCoordVal;
+      pRoom = D2Common::Units::UNITS_GetRoom(pUnit2);
+      if (pRoom) {
+        D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &roomCoords);
+        pUnit->pUnitData.pUnitDataMonster->nDurielUnk = roomCoords.sTileRect.left;
+        pUnit->pUnitData.pUnitDataObject->nY = roomCoords.sTileRect.top;
+      }
 
-        D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom_00, &roomCoords);
-        pUnit2->pUnitData.pUnitDataMonster->nDurielUnk = roomCoords.sTileRect.left;
-        pUnit2->pUnitData.pUnitDataObject->nY = roomCoords.sTileRect.top;
+      pRoom_00 = D2Common::Units::UNITS_GetRoom(pUnit);
+      if (!pRoom_00) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x755);
-      exit(-1);
+      D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom_00, &roomCoords);
+      pUnit2->pUnitData.pUnitDataMonster->nDurielUnk = roomCoords.sTileRect.left;
+      pUnit2->pUnitData.pUnitDataObject->nY = roomCoords.sTileRect.top;
+      return;
     }
 }
 
@@ -637,25 +636,25 @@ D2UnitStrc * __fastcall UNITS_FindPortalOwnerUnit(::SGAMEDATA * pGame, D2UnitStr
     D2RoomStrc* pFoundRoom;
     D2UnitStrc* pOwnerUnit;
     int32_t nErrorLine;
-    if (pUnit) {
-      int32_t nX;
-      eActNo = D2Common::Drlg::GetActNoFromLevelNumber((eD2LevelId)pUnit->pUnitData.pUnitDataMonster->Components[0]);
-      nErrorLine = pUnit->pUnitData.pUnitDataObject->nY;
-      nX = pUnit->pUnitData.pUnitDataObject->nX;
-      pFoundRoom = D2Common::DUNGEON::Dungeon::FindRoomBySubtileCoordinates(pGame->pAct[eActNo], nX, nErrorLine);
-      if (!pFoundRoom) {
-        pFoundRoom = D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomFromActAndCoord(pGame->pAct[eActNo], nX, nErrorLine);
-        if (pFoundRoom) {
-          GAME::Server::SetSomeRoomFlags(pGame, pFoundRoom);
-        }
-      }
-
-      pOwnerUnit = FindUnitFromTable(pGame, pUnit->eOwnerType, pUnit->nOwnerGUID);
-      return pOwnerUnit;
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78a);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78a);
-    exit(-1);
+    int32_t nX;
+    eActNo = D2Common::Drlg::GetActNoFromLevelNumber((eD2LevelId)pUnit->pUnitData.pUnitDataMonster->Components[0]);
+    nErrorLine = pUnit->pUnitData.pUnitDataObject->nY;
+    nX = pUnit->pUnitData.pUnitDataObject->nX;
+    pFoundRoom = D2Common::DUNGEON::Dungeon::FindRoomBySubtileCoordinates(pGame->pAct[eActNo], nX, nErrorLine);
+    if (!pFoundRoom) {
+      pFoundRoom = D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomFromActAndCoord(pGame->pAct[eActNo], nX, nErrorLine);
+      if (pFoundRoom) {
+        GAME::Server::SetSomeRoomFlags(pGame, pFoundRoom);
+      }
+    }
+
+    pOwnerUnit = FindUnitFromTable(pGame, pUnit->eOwnerType, pUnit->nOwnerGUID);
+    return pOwnerUnit;
 }
 
 // Walks the game's player (eUnitType=0) or monster (eUnitType=1) hash table (128 slots), skipping dead/body units (STATE_playerbody check), and calls pfnCallback(pCallbackArg) for each live unit. Returns the first unit for which the callback returns 1, or NULL if none found or the unit type is unsupported. Validates pfnCallback with IsBadCodePtr before iterating.
@@ -697,7 +696,7 @@ D2UnitStrc * __fastcall IteratePlayerOrMonsterUnits(::SGAMEDATA * pGame, int eUn
 
           ppUnitTable++;
           nSlot++;
-          if (0x7f < nSlot) {
+          if (0x80 <= nSlot) {
             return nullptr;
           }
         } while (true);
@@ -733,7 +732,7 @@ void __fastcall IterateAllUnits(::SGAMEDATA * pGame, fpSUnitIterateCallback fpFu
 
       ppUnitBucket++;
       nSlot++;
-      if (0x7f < (int)nSlot) {
+      if (0x80 <= (int)nSlot) {
         return;
       }
     } while (true);
@@ -768,12 +767,12 @@ void __fastcall UNITS_SetupAnimTimerEvents(::SGAMEDATA * pGame, D2UnitStrc * pUn
     uint32_t nNextEventFrame = pGame->dwGameFrame;
     ::SGAMEDATA* pGameCopy = pGame;
     uint32_t nWeaponAnimClass = D2Common::Units::GetWeaponAnimClass(pUnit);
-    if (!pUnit->pAnimSeq) {
-      nAnimSpeed = (uint32_t)pUnit->nAnimSpeed;
-      nTotalFrameCount = pUnit->nFrameCount;
-    } else {
+    if (pUnit->pAnimSeq) {
       nAnimSpeed = pUnit->nSeqAnimSpeed;
       nTotalFrameCount = pUnit->nSeqFrameCount;
+    } else {
+      nAnimSpeed = (uint32_t)pUnit->nAnimSpeed;
+      nTotalFrameCount = pUnit->nFrameCount;
     }
     if (!nAnimSpeed) {
       GAME::Event::SetEvent(pGame, pUnit, 1, pGame->dwGameFrame + 1, 0, 0);
@@ -789,10 +788,10 @@ void __fastcall UNITS_SetupAnimTimerEvents(::SGAMEDATA * pGame, D2UnitStrc * pUn
       nFrameIndex = nAnimSpeedAccum >> 8;
       nNextEventFrame++;
       for (; iVar1 <= nFrameIndex && iVar1 < 0x90; iVar1++) {
-        if (!pUnit->pAnimSeq) {
-          nEventType = (uint32_t)pAnimData->pFrameFlags[iVar1];
-        } else {
+        if (pUnit->pAnimSeq) {
           D2Common::Merc::ANIM_GetEventFrame((int32_t)pUnit->pAnimSeq, iVar1 << 8, &nEventType);
+        } else {
+          nEventType = (uint32_t)pAnimData->pFrameFlags[iVar1];
         }
         if (nEventType) {
           switch (nEventType) {
@@ -855,10 +854,10 @@ void __fastcall UNITS_SetupAnimTimerEventsFromPercent(::SGAMEDATA * pGame, D2Uni
       nFrameOffset += nAnimSpeed;
       nAnimSpeedAccum += nAnimSpeed;
       for (; pCurEventFrame = nNextEventFrame , nFrameIdx <= nFrameOffset >> 8; nFrameIdx++) {
-        if (!pUnit->pAnimSeq) {
-          nEventType = (uint32_t)pAnimData->pFrameFlags[nFrameIdx];
-        } else {
+        if (pUnit->pAnimSeq) {
           D2Common::Merc::ANIM_GetEventFrame((int32_t)pUnit->pAnimSeq, nFrameIdx << 8, &nEventType);
+        } else {
+          nEventType = (uint32_t)pAnimData->pFrameFlags[nFrameIdx];
         }
         if (0 < (int)nEventType && (int)nEventType < 5) {
           GAME::Event::SetEvent(pGame, pUnit, 0, pCurEventFrame, nEventType, 0);
@@ -914,10 +913,10 @@ void __fastcall UNITS_SetupAnimTimerEventsWithDelay(::SGAMEDATA * pGame, D2UnitS
       nAnimSpeedAccum += nAnimSpeed;
       nFrameIndexShifted = nFrameOffsetAccum >> 8;
       for (; pCurEventFrame = nNextEventFrame , nFrameIdx <= nFrameIndexShifted; nFrameIdx++) {
-        if (!pUnit->pAnimSeq) {
-          nEventType = (uint32_t)pAnimData->pFrameFlags[nFrameIdx];
-        } else {
+        if (pUnit->pAnimSeq) {
           D2Common::Merc::ANIM_GetEventFrame((int32_t)pUnit->pAnimSeq, nFrameIdx << 8, &nEventType);
+        } else {
+          nEventType = (uint32_t)pAnimData->pFrameFlags[nFrameIdx];
         }
         if (0 < (int)nEventType && (int)nEventType < 5) {
           GAME::Event::SetEvent(pGame, pUnit, 0, pCurEventFrame, nEventType, 0);
@@ -967,10 +966,10 @@ void __fastcall UNITS_SetupAnimTimerEventsFromFrame(::SGAMEDATA * pGame, D2UnitS
       nAnimSpeedAccum += nAnimSpeed;
       nFrameIndexShifted = nFrameOffsetAccum >> 8;
       for (; pCurEventFrame = nNextEventFrame , nFrameIdx <= nFrameIndexShifted; nFrameIdx++) {
-        if (!pUnit->pAnimSeq) {
-          nEventType = (uint32_t)pAnimData->pFrameFlags[nFrameIdx];
-        } else {
+        if (pUnit->pAnimSeq) {
           D2Common::Merc::ANIM_GetEventFrame((int32_t)pUnit->pAnimSeq, nFrameIdx << 8, &nEventType);
+        } else {
+          nEventType = (uint32_t)pAnimData->pFrameFlags[nFrameIdx];
         }
         if (0 < (int)nEventType && (int)nEventType < 5) {
           GAME::Event::SetEvent(pGame, pUnit, 0, pCurEventFrame, nEventType, 0);
@@ -1004,59 +1003,59 @@ void __fastcall GetTypeAndMode(D2UnitStrc * pUnit, D2QServerUnitRecordStrc * pOu
       exit(-1);
     } else {
       D2UnitDataPlayerStrc* pPlayerData;
-      if (pUnit) {
-        if (pUnit->eUnitType == UNIT_PLAYER && (pPlayerData = D2Common::Units::GetPlayerData(pUnit) , pPlayerData != 0)) {
-          nCharNameDelta = 0x24 - (int)pPlayerData;
-          do {
-            cNameChar = pPlayerData->szCharName[0];
-            *(char*)((int)pOutRecord + nCharNameDelta + (int)pPlayerData) = cNameChar;
-            pPlayerData = (D2UnitDataPlayerStrc*)(pPlayerData->szCharName + 1);
-          } while (cNameChar != '\0');
-        } else {
-          pOutRecord->szCharName[0] = '\0';
-        }
-
-        pOutRecord->eUnitType = pUnit->eUnitType;
-        pOutRecord->nClassId = pUnit->nClassId;
-        pOutRecord->nUnitGUID = pUnit->nUnitGUID;
-        pOutRecord->eAnimMode = pUnit->eAnimMode;
-        eUnitType = pUnit->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-          nPosCoord = pUnit->pPath.pStaticPath->nPosX;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          nPosCoord = 0;
-        } else {
-          nPosCoord = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-        }
-
-        pOutRecord->nPosX = nPosCoord;
-        eUnitType = pUnit->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-          nPosY = pUnit->pPath.pStaticPath->nPosY;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          nPosY = 0;
-        } else {
-          nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-        }
-
-        pOutRecord->nPosY = nPosY;
-        pOutRecord->eOwnerType = pUnit->eOwnerType;
-        pOutRecord->nOwnerGUID = pUnit->nOwnerGUID;
-        return;
+      if (!pUnit) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9ab);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9ab);
-      exit(-1);
+      if (pUnit->eUnitType == UNIT_PLAYER && (pPlayerData = D2Common::Units::GetPlayerData(pUnit) , pPlayerData != 0)) {
+        nCharNameDelta = 0x24 - (int)pPlayerData;
+        do {
+          cNameChar = pPlayerData->szCharName[0];
+          *(char*)((int)pOutRecord + nCharNameDelta + (int)pPlayerData) = cNameChar;
+          pPlayerData = (D2UnitDataPlayerStrc*)(pPlayerData->szCharName + 1);
+        } while (cNameChar != '\0');
+      } else {
+        pOutRecord->szCharName[0] = '\0';
+      }
+
+      pOutRecord->eUnitType = pUnit->eUnitType;
+      pOutRecord->nClassId = pUnit->nClassId;
+      pOutRecord->nUnitGUID = pUnit->nUnitGUID;
+      pOutRecord->eAnimMode = pUnit->eAnimMode;
+      eUnitType = pUnit->eUnitType;
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
+        nPosCoord = pUnit->pPath.pStaticPath->nPosX;
+      } else if (!pUnit->pPath.pDynamicPath) {
+        nPosCoord = 0;
+      } else {
+        nPosCoord = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      }
+
+      pOutRecord->nPosX = nPosCoord;
+      eUnitType = pUnit->eUnitType;
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
+        nPosY = pUnit->pPath.pStaticPath->nPosY;
+      } else if (!pUnit->pPath.pDynamicPath) {
+        nPosY = 0;
+      } else {
+        nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      }
+
+      pOutRecord->nPosY = nPosY;
+      pOutRecord->eOwnerType = pUnit->eOwnerType;
+      pOutRecord->nOwnerGUID = pUnit->nOwnerGUID;
+      return;
     }
 }
 
 ::SGAMEDATA * __fastcall GetGamePointer(D2UnitStrc * pUnit) {
-    if (pUnit) {
-      return (::SGAMEDATA*)pUnit->uSideData.pClientSide.dwSfxAsyncTicks;
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa29);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa29);
-    exit(-1);
+    return (::SGAMEDATA*)pUnit->uSideData.pClientSide.dwSfxAsyncTicks;
     return (::SGAMEDATA*)pUnit->uSideData.pClientSide.dwSfxAsyncTicks;
 }
 
@@ -1071,12 +1070,12 @@ void __fastcall SetNecroPet(D2UnitStrc * pUnit, uint32_t nNecroPetGUID) {
 }
 
 int32_t __fastcall GetNecroPet(D2UnitStrc * pUnit) {
-    if (pUnit) {
-      return pUnit->pUnitData.pUnitDataMonster->nNecroPetGUID;
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa3c);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa3c);
-    exit(-1);
+    return pUnit->pUnitData.pUnitDataMonster->nNecroPetGUID;
     return pUnit->pUnitData.pUnitDataMonster->nNecroPetGUID;
 }
 
@@ -1092,12 +1091,12 @@ void __fastcall SetSparklyChestFlag(D2UnitStrc * pUnit, bool bIsSparklyChest) {
 
 // 2022.01.09 - dzik
 uint8_t __fastcall GetSparklyChestFlag(D2UnitStrc * pUnit) {
-    if (pUnit) {
-      return pUnit->uSideData.pServerSide.bSparkChest;
+    if (!pUnit) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa50);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa50);
-    exit(-1);
+    return pUnit->uSideData.pServerSide.bSparkChest;
     return pUnit->uSideData.pServerSide.bSparkChest;
 }
 
@@ -1123,12 +1122,10 @@ void __stdcall SetInteractInfo(D2UnitStrc * pUnit, eD2UnitType eInteractUnitType
       pPlayerData = D2Common::Units::GetPlayerData(pUnit);
       if (pPlayerData) {
         sprintf(acStack_58, "Player %s attempted to operate while busy\n", pPlayerData->szCharName);
-        Fog::Debug::GuardStack();
         return;
       }
     }
 
-    Fog::Debug::GuardStack();
 }
 
 // Clears pUnit's server-side interaction state: dwInteractGUID (+0x64) = -1, dwInteractType (+0x68) = UNIT_COUNT (6), bInteracting (+0x6c) = 0.
@@ -1214,7 +1211,7 @@ uint32_t __fastcall UNITS_CheckIfCanAttackTarget(::SGAMEDATA * pGame, D2UnitStrc
 }
 
 BOOL __fastcall UNITS_CheckSkillTargetAlignment(::SGAMEDATA * pGameStrc, int * pnParam, D2UnitStrc * pTarget, eD2Skills eSkill) {
-    if (!(pnParam && pTarget && (!*pnParam || pTarget->eUnitType == UNIT_MONSTER) && -1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill && sgptDataTable->pTxtSkills[eSkill].TargetPet)) {
+    if (!(pnParam && pTarget && (!*pnParam || pTarget->eUnitType == UNIT_MONSTER) && 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill && sgptDataTable->pTxtSkills[eSkill].TargetPet)) {
       return 0;
     }
 
@@ -1226,7 +1223,7 @@ BOOL __fastcall UNITS_CheckSkillTargetAlignment(::SGAMEDATA * pGameStrc, int * p
     return 1;
 }
 
-void __stdcall UNITS_OnAlignmentChanged(int32_t nParam, int32_t pStatEx, D2UnitStrc * pUnit, int32_t nStatValue) {
+static void __stdcall UNITS_OnAlignmentChanged(int32_t nParam, int32_t pStatEx, D2UnitStrc * pUnit, int32_t nStatValue) {
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
       return;
     }
@@ -1321,12 +1318,12 @@ void __fastcall SetUninterruptableState(D2UnitStrc * pUnit, int32_t nParam) {
       if (eDeathDelayState != STATE_none) {
         D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_death_delay, 0);
         pKillerUnit = GetKillerUnit(pGame, pUnit);
-        if (!pKillerUnit) {
-          SUnitDmg::SERVER_KillMonster(pGame, pUnit, nullptr, 1);
-        } else {
+        if (pKillerUnit) {
           memset(&sDamage, 0, 0x70);
           sDamage.wResultFlags |= 2;
           SUnitDmg::SERVER_GetHitCalculation(pGame, pKillerUnit, pUnit, &sDamage);
+        } else {
+          SUnitDmg::SERVER_KillMonster(pGame, pUnit, nullptr, 1);
         }
       }
     }
@@ -1444,7 +1441,7 @@ void __fastcall UNITS_UpdateRoomClientVisibility(::SGAMEDATA * pGame, D2UnitStrc
     if (nCurrentClientsCount) {
       D2UnitStrc* pOwnerUnit;
       do {
-        if (nTargetClientsCount <= nNewClientIdx) {
+        if (nNewClientIdx >= nTargetClientsCount) {
           if (nOldClientIdx < nCurrentClientsCount) {
             while (true) {
               if (!ppCurrentClientList) {
@@ -1498,7 +1495,7 @@ void __fastcall UNITS_UpdateRoomClientVisibility(::SGAMEDATA * pGame, D2UnitStrc
 
         pClient = ppCurrentClientList[nOldClientIdx];
         pClient_00 = (D2ClientStrc*)pRoom->nLastDeadGUIDs[nNewClientIdx - 0xe];
-        if (pClient < pClient_00) {
+        if (pClient_00 > pClient) {
           pOwnerUnit = GAME::Clients::CLIENTS_GetControlUnit(pClient, 0);
           if (pUnit != pOwnerUnit) {
             SUnitMsg::SERVER_SendInitUnitPacket(pGame, pUnit, ppCurrentClientList[nOldClientIdx]);
@@ -1570,9 +1567,6 @@ void __fastcall UNITS_PlaceUnitInRoom(D2UnitStrc * pUnit, int32_t nY, int32_t nX
 
       D2Common::Unit::DRLGROOM_AddUnitToRoom(pUnit, pRoom);
       break;
-      case UNIT_MISSILE:
-        D2Common::PATH::DynamicPath::AllocDynamicPath(pGame->pMemoryPool, pRoom, nY, nX, pUnit, 0);
-      break;
       case UNIT_ITEM:
         if (pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Run) {
           D2Common::Units::InitializeStaticPath(pUnit, pRoom, nY, nX);
@@ -1581,6 +1575,9 @@ void __fastcall UNITS_PlaceUnitInRoom(D2UnitStrc * pUnit, int32_t nY, int32_t nX
             D2Common::Unit::DRLGROOM_AddUnitToRoomList(pUnit, pRoom, UNIT_PLAYER);
           }
         }
+      break;
+      case UNIT_MISSILE:
+        D2Common::PATH::DynamicPath::AllocDynamicPath(pGame->pMemoryPool, pRoom, nY, nX, pUnit, 0);
       break;
       case UNIT_WARP:
         D2Common::Units::InitializeStaticPath(pUnit, pRoom, nY, nX);
@@ -1861,8 +1858,8 @@ BOOL __fastcall SUNIT_RelocateUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ro
         if (!bFindFreeSpace) {
           nCollisionMask = 0;
           eCollisionFlag_00 = 0x1c09;
-          dwErrorLine = D2Common::Units::GetUnitSizeX(pUnit);
-          pRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pRoom, &ptTarget, dwErrorLine, eCollisionFlag_00, nCollisionMask);
+
+          pRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pRoom, &ptTarget, D2Common::Units::GetUnitSizeX(pUnit), eCollisionFlag_00, nCollisionMask);
         }
         if (!pRoom) {
           return 0;
@@ -1889,10 +1886,10 @@ BOOL __fastcall SUNIT_RelocateUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ro
         eTargetLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
         GAME::SCmd::NET_D2GS_SERVER_Send_0x07_MapReveal(pPlayerClient, (uint8_t)eTargetLevelId, (uint16_t)roomCoords.sTileRect.left, (uint16_t)roomCoords.sTileRect.top);
         D2Common::Unit::ROOM_LinkUnitToUpdateList(pUnit);
-        if (!nRelocMode) {
-          pUnit->eUnitFlagsEx |= UNITFLAGEX_TELEPORTED;
-        } else {
+        if (nRelocMode) {
           pUnit->eUnitFlagsEx |= 0x800;
+        } else {
+          pUnit->eUnitFlagsEx |= UNITFLAGEX_TELEPORTED;
         }
 
         UNITS_UpdateRoomClientVisibility(pGameLocal, pUnit, nullptr);
@@ -1906,7 +1903,7 @@ BOOL __fastcall SUNIT_RelocateUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ro
         pPlayerData->aPosHistory[bVar1].nX = ptTarget.x;
         pPlayerData->aPosHistory[bVar1].nY = ptTarget.y;
         pPlayerData->nPosHistoryIndex += '\x01';
-        if (0x13 < pPlayerData->nPosHistoryIndex) {
+        if (0x14 <= pPlayerData->nPosHistoryIndex) {
           pPlayerData->nPosHistoryIndex = '\0';
         }
 
@@ -1943,61 +1940,61 @@ void __fastcall TakeStairs(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc *
     uint32_t bQuestCondMet;
     int32_t nErrorLine;
     sD2SUnitStairs.pGame = pGame;
-    if (pGame && pUnit) {
-      D2RoomStrc* pRoom;
-      pRoom = D2Common::Units::UNITS_GetRoom(pObject);
-      if (!pObject) {
-        nId = -1;
-      } else {
-        nId = pObject->nClassId;
-      }
+    if (!(pGame && pUnit)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), nErrorLine);
+      exit(-1);
+    }
 
-      pStaircaseUnit = D2Common::DUNGEON::Dungeon::TakeStairsInternal(pRoom, nId, &sD2SUnitStairs.pRoomEx);
-      if (!pStaircaseUnit) {
-        return;
-      }
+    D2RoomStrc* pRoom;
+    pRoom = D2Common::Units::UNITS_GetRoom(pObject);
+    if (!pObject) {
+      nId = -1;
+    } else {
+      nId = pObject->nClassId;
+    }
 
-      pDestRoom = D2Common::Units::UNITS_GetRoom(pStaircaseUnit);
-      sD2SUnitStairs.pRoom = pDestRoom;
-      sD2SUnitStairs.nX = D2Client::Units::GetXPosFromDynamicPathUnit(pStaircaseUnit);
-      sD2SUnitStairs.nY = D2Client::Units::GetYPosFromDynamicPathUnit(pStaircaseUnit);
-      if (pUnit->eUnitType != UNIT_PLAYER) {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15c);
-        exit(-1);
-      }
-
-      bAllowNeighboorRooms = 1;
-      eCollisionFlag_00 = 0x1c09;
-      iVar1 = D2Common::Units::GetUnitSizeX(pUnit);
-      pFreeRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pDestRoom, (POINT*)&sD2SUnitStairs, iVar1, eCollisionFlag_00, bAllowNeighboorRooms);
-      if (!pFreeRoom) {
-        return;
-      }
-
-      eSourceLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-      eDestLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pFreeRoom);
-      if (!(eDestLevelId != LEVEL_DurielsLair && eDestLevelId != LEVEL_TheWorldstoneKeepLevel1 && eDestLevelId != LEVEL_TheWorldstoneChamber && eDestLevelId != LEVEL_AncientsWay && eDestLevelId != LEVEL_DuranceOfHateLevel1 || (bRelocated = Quests::QUESTS::QUEST_CheckSpecialLevelCondition(sD2SUnitStairs.pGame, pUnit, eSourceLevelId, eDestLevelId) , !bRelocated))) {
-        return;
-      }
-
-      bQuestCondMet = sD2SUnitStairs.nY;
-      bRelocated = sD2SUnitStairs.nX;
-      bAllowNeighboorRooms = SUNIT_RelocateUnit(sD2SUnitStairs.pGame, pUnit, sD2SUnitStairs.pRoom, sD2SUnitStairs.nX, sD2SUnitStairs.nY, 0, 0);
-      if (!bAllowNeighboorRooms) {
-        return;
-      }
-
-      sD2SUnitStairs.pRoom = (D2RoomStrc*)SUNIT_GetClient(pUnit, ".\\UNIT\\SUnit.cpp", 0x178);
-      nFinalX = sD2SUnitStairs.pRoomEx->sSeed.nSeedLow + bRelocated;
-      bRelocOk = sD2SUnitStairs.pRoomEx->sSeed.nSeedHigh + bQuestCondMet;
-      PLAYER::PlayerModes::PLRMODES_MoveToLocation(sD2SUnitStairs.pGame, pUnit, nullptr, 2, nFinalX, bRelocOk, 0);
-      iVar1 = D2Common::Units::GetCurrentLifePercentage(pUnit);
-      GAME::SCmd::NET_D2GS_SERVER_Send_0x0D_UNITCHANGE_XY((D2ClientStrc*)sD2SUnitStairs.pRoom, '\r', (uint8_t)pUnit->eUnitType, pUnit->nUnitGUID, '\x01', (uint16_t)nFinalX, (uint16_t)bRelocOk, '\0', (uint8_t)iVar1);
+    pStaircaseUnit = D2Common::DUNGEON::Dungeon::TakeStairsInternal(pRoom, nId, &sD2SUnitStairs.pRoomEx);
+    if (!pStaircaseUnit) {
       return;
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), nErrorLine);
-    exit(-1);
+    pDestRoom = D2Common::Units::UNITS_GetRoom(pStaircaseUnit);
+    sD2SUnitStairs.pRoom = pDestRoom;
+    sD2SUnitStairs.nX = D2Client::Units::GetXPosFromDynamicPathUnit(pStaircaseUnit);
+    sD2SUnitStairs.nY = D2Client::Units::GetYPosFromDynamicPathUnit(pStaircaseUnit);
+    if (pUnit->eUnitType != UNIT_PLAYER) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15c);
+      exit(-1);
+    }
+
+    bAllowNeighboorRooms = 1;
+    eCollisionFlag_00 = 0x1c09;
+
+    pFreeRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pDestRoom, (POINT*)&sD2SUnitStairs, D2Common::Units::GetUnitSizeX(pUnit), eCollisionFlag_00, bAllowNeighboorRooms);
+    if (!pFreeRoom) {
+      return;
+    }
+
+    eSourceLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+    eDestLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pFreeRoom);
+    if (!(eDestLevelId != LEVEL_DurielsLair && eDestLevelId != LEVEL_TheWorldstoneKeepLevel1 && eDestLevelId != LEVEL_TheWorldstoneChamber && eDestLevelId != LEVEL_AncientsWay && eDestLevelId != LEVEL_DuranceOfHateLevel1 || (bRelocated = Quests::QUESTS::QUEST_CheckSpecialLevelCondition(sD2SUnitStairs.pGame, pUnit, eSourceLevelId, eDestLevelId) , !bRelocated))) {
+      return;
+    }
+
+    bQuestCondMet = sD2SUnitStairs.nY;
+    bRelocated = sD2SUnitStairs.nX;
+    bAllowNeighboorRooms = SUNIT_RelocateUnit(sD2SUnitStairs.pGame, pUnit, sD2SUnitStairs.pRoom, sD2SUnitStairs.nX, sD2SUnitStairs.nY, 0, 0);
+    if (!bAllowNeighboorRooms) {
+      return;
+    }
+
+    sD2SUnitStairs.pRoom = (D2RoomStrc*)SUNIT_GetClient(pUnit, ".\\UNIT\\SUnit.cpp", 0x178);
+    nFinalX = sD2SUnitStairs.pRoomEx->sSeed.nSeedLow + bRelocated;
+    bRelocOk = sD2SUnitStairs.pRoomEx->sSeed.nSeedHigh + bQuestCondMet;
+    PLAYER::PlayerModes::PLRMODES_MoveToLocation(sD2SUnitStairs.pGame, pUnit, nullptr, 2, nFinalX, bRelocOk, 0);
+    iVar1 = D2Common::Units::GetCurrentLifePercentage(pUnit);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x0D_UNITCHANGE_XY((D2ClientStrc*)sD2SUnitStairs.pRoom, '\r', (uint8_t)pUnit->eUnitType, pUnit->nUnitGUID, '\x01', (uint16_t)nFinalX, (uint16_t)bRelocOk, '\0', (uint8_t)iVar1);
+    return;
 }
 
 // Server-side unit factory. Position is WORLD SUBTILES; bPlaceInRoom=1 routes through UNITS_PlaceUnitInRoom + AllocObjectData.
@@ -2029,10 +2026,10 @@ D2UnitStrc * __fastcall CreateUnit(eD2UnitType eUnitType, int32_t nClassId, int3
     pAllocUnit->nClassId = nClassId;
     pAllocUnit->pMemory = pGame->pMemoryPool;
     pAllocUnit->uSideData.pServerSide.pGame = pGame;
-    if (!pGame->bExpansion) {
-      pAllocUnit->eUnitFlagsEx &= ~UNITFLAGEX_ISEXPANSION;
-    } else {
+    if (pGame->bExpansion) {
       pAllocUnit->eUnitFlagsEx |= UNITFLAGEX_ISEXPANSION;
+    } else {
+      pAllocUnit->eUnitFlagsEx &= ~UNITFLAGEX_ISEXPANSION;
     }
 
     pAllocUnit->eUnitFlagsEx |= UNITFLAGEX_SERVERUNIT;
@@ -2078,7 +2075,7 @@ D2UnitStrc * __fastcall CreateUnit(eD2UnitType eUnitType, int32_t nClassId, int3
                          object data, links the Objects.txt row (pUnitDataObject->pTxtObjectsLine),
                          assigns a static path, calls OBJECT_InitializeObject, then optionally places
                          in room and applies corpse collision.
-                         Source file UNIT/SUnit.cpp (__FILE__ literal at 005553b4). */ pObjectData = D2_NEW_POOL(pGame->pMemoryPool, D2UnitDataObjectStrc);
+                         Source file UNIT/SUnit.cpp (__FILE__ literal at 005553b4). */ pObjectData = ((D2UnitDataObjectStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2UnitDataObjectStrc), ".\\UNIT\\SUnit.cpp", 0x264, 0));
         pAllocUnit->pUnitData.pUnitDataObject = pObjectData;
         memset(pObjectData, 0, 0x38);
         pDVar1 = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(nClassId);
@@ -2086,11 +2083,6 @@ D2UnitStrc * __fastcall CreateUnit(eD2UnitType eUnitType, int32_t nClassId, int3
         pAllocUnit->eAnimMode.ePlayerMode = nInitialMode;
         D2Common::Units::AllocStaticPath(pAllocUnit);
         Objects::OBJECT_InitializeObject(pGame, pAllocUnit, (int32_t)pMonsterData, pRoom, nPosX, nPosY);
-        break;
-        case UNIT_MISSILE:
-          /* Jump-table branch of CreateUnit for UNIT_MISSILE (dispatched via
-                         UNIT_FillFunctions[eUnitType]). */ pAllocUnit->eAnimMode.ePlayerMode = nInitialMode;
-        MISSILES::Missiles::STRUCT_FillDataMissile(pGame, pAllocUnit, (int32_t)pMonsterData);
         break;
         case UNIT_ITEM:
           /* Jump-table branch of CreateUnit for UNIT_ITEM (dispatched via
@@ -2100,6 +2092,11 @@ D2UnitStrc * __fastcall CreateUnit(eD2UnitType eUnitType, int32_t nClassId, int3
                          variants). */ pAllocUnit->eAnimMode.ePlayerMode = nInitialMode;
         D2Common::Units::AllocStaticPath(pAllocUnit);
         ITEMS::Items::Drop::ITEM_InitializeDroppedItem(pAllocUnit, pGame, (int32_t)pMonsterData, (uint32_t)pRoom);
+        break;
+        case UNIT_MISSILE:
+          /* Jump-table branch of CreateUnit for UNIT_MISSILE (dispatched via
+                         UNIT_FillFunctions[eUnitType]). */ pAllocUnit->eAnimMode.ePlayerMode = nInitialMode;
+        MISSILES::Missiles::STRUCT_FillDataMissile(pGame, pAllocUnit, (int32_t)pMonsterData);
         break;
         case UNIT_WARP:
           /* Jump-table branch of CreateUnit for UNIT_WARP (dispatched via
@@ -2132,7 +2129,7 @@ D2UnitStrc * __fastcall CreateUnit(eD2UnitType eUnitType, int32_t nClassId, int3
     return pAllocUnit;
 }
 
-void ClearInteractOnFreePlayer(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void ClearInteractOnFreePlayer(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     if (!pUnit->uSideData.pServerSide.bInteracting) {
       return;
     }
@@ -2141,7 +2138,8 @@ void ClearInteractOnFreePlayer(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     if (!pInteractedUnit) {
       return;
     }
-    if (pInteractedUnit->eUnitType == UNIT_MONSTER) {
+    switch (pInteractedUnit->eUnitType) {
+    case UNIT_MONSTER: {
       D2MonsterAiStrc* pMonsterAi;
       pMonsterAi = 0;
       if (pInteractedUnit->pUnitData.pUnitDataMonster) {
@@ -2150,12 +2148,15 @@ void ClearInteractOnFreePlayer(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
 
       D2Game::Monster::MonsterAI::FreeSpecificAiForUnit(pGame, pUnit, pMonsterAi);
       sunitproxy::SUNITPROXY_RemovePlayerFromNpc(pGame, pUnit, (D2PoolManagerStrc*)pInteractedUnit);
-    } else if (pInteractedUnit->eUnitType == UNIT_OBJECT) {
+      break;
+    }
+    case UNIT_OBJECT: {
       Objects::ObjectsMode::OBJMODE_OnWaypointFinish(pGame, pInteractedUnit);
       pUnit->uSideData.pServerSide.dwInteractGUID = -1;
       pUnit->uSideData.pServerSide.dwInteractType = UNIT_COUNT;
       pUnit->uSideData.pServerSide.bInteracting = 0;
       return;
+    }
     }
 
     pUnit->uSideData.pServerSide.dwInteractGUID = -1;
@@ -2209,83 +2210,83 @@ void __fastcall FreeServerUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5c);
       exit(-1);
     } else {
-      if ((int)pUnit->eUnitType < 6) {
-        UNITS_UnlinkUnitFromRoom(pUnit, pGame, 0);
-        pQuestDataList = pUnit->uSideData.pServerSide.pQuestEventList;
-        if (pQuestDataList) {
-          Quests::QUESTS::FreeQuestDataList(pGame, pQuestDataList);
-          pUnit->uSideData.pClientSide.nSfxMode = 0;
-        }
-
-        switch (pUnit->eUnitType) {
-          case UNIT_PLAYER:
-            GAME::Targets::UNIT_FreeUnitNodes(pGame, pUnit);
-          PLAYER::Player::PLAYER_DestroyPortalPair(pGame, pUnit);
-          Party::PARTY_RemoveUnitFromParty(pGame, pUnit);
-          PLAYER::Player::PLAYER_FreeAllResources(pGame, pUnit);
-          if (pUnit->pPath.pStaticPath) {
-            D2Common::PATH::Path::STRUCT_FreePath(pGame->pMemoryPool, pUnit->pPath.pStaticPath);
-            pUnit->pPath.pStaticPath = 0;
-          }
-
-          break;
-          case UNIT_MONSTER:
-            GAME::Targets::MONSTER_FreeUnitNodes(pGame, pUnit);
-          if (pUnit->pPath.pStaticPath) {
-            D2Common::PATH::Path::STRUCT_FreePath(pGame->pMemoryPool, pUnit->pPath.pStaticPath);
-            pUnit->pPath.pStaticPath = 0;
-          }
-
-          D2Game::Monster::MONSTER_FreeAllResources(pGame, pUnit);
-          break;
-          case UNIT_OBJECT:
-            Objects::OBJECT_FreeObjectData(pGame, pUnit);
-          D2Common::Units::FreeStaticPath(pUnit);
-          D2_FREE_POOL(pGame->pMemoryPool, pUnit->pUnitData.pUnitDataPlayer);
-          break;
-          case UNIT_MISSILE:
-            if (pUnit->pPath.pStaticPath) {
-              D2Common::PATH::Path::STRUCT_FreePath(pGame->pMemoryPool, pUnit->pPath.pStaticPath);
-              pUnit->pPath.pStaticPath = 0;
-            }
-          MISSILES::Missiles::ClearMissileUnitData(pGame, pUnit);
-          break;
-          case UNIT_ITEM:
-            ITEMS::Items::Drop::ITEM_FreeItemInventoryAndTimers(pGame, pUnit);
-          D2Common::ITEMS::Items::ITEMDATA_Free(pGame->pMemoryPool, pUnit);
-          case UNIT_WARP:
-            D2Common::Units::FreeStaticPath(pUnit);
-        }
-
-        SUnitEvent::UNITEVENT_FreeAllEvents(pGame, pUnit);
-        SUnitMsg::SERVER_UnitQueuePacketFree(pUnit);
-        D2Common::Units::Free(pUnit);
-        return;
+      if (!((int)pUnit->eUnitType < 6)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x61);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x61);
-      exit(-1);
+      UNITS_UnlinkUnitFromRoom(pUnit, pGame, 0);
+      pQuestDataList = pUnit->uSideData.pServerSide.pQuestEventList;
+      if (pQuestDataList) {
+        Quests::QUESTS::FreeQuestDataList(pGame, pQuestDataList);
+        pUnit->uSideData.pClientSide.nSfxMode = 0;
+      }
+
+      switch (pUnit->eUnitType) {
+        case UNIT_PLAYER:
+          GAME::Targets::UNIT_FreeUnitNodes(pGame, pUnit);
+        PLAYER::Player::PLAYER_DestroyPortalPair(pGame, pUnit);
+        Party::PARTY_RemoveUnitFromParty(pGame, pUnit);
+        PLAYER::Player::PLAYER_FreeAllResources(pGame, pUnit);
+        if (pUnit->pPath.pStaticPath) {
+          D2Common::PATH::Path::STRUCT_FreePath(pGame->pMemoryPool, pUnit->pPath.pStaticPath);
+          pUnit->pPath.pStaticPath = 0;
+        }
+
+        break;
+        case UNIT_MONSTER:
+          GAME::Targets::MONSTER_FreeUnitNodes(pGame, pUnit);
+        if (pUnit->pPath.pStaticPath) {
+          D2Common::PATH::Path::STRUCT_FreePath(pGame->pMemoryPool, pUnit->pPath.pStaticPath);
+          pUnit->pPath.pStaticPath = 0;
+        }
+
+        D2Game::Monster::MONSTER_FreeAllResources(pGame, pUnit);
+        break;
+        case UNIT_OBJECT:
+          Objects::OBJECT_FreeObjectData(pGame, pUnit);
+        D2Common::Units::FreeStaticPath(pUnit);
+        Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pUnit->pUnitData.pUnitDataPlayer, ".\\UNIT\\SUnit.cpp", 0xa4, 0);
+        break;
+        case UNIT_MISSILE:
+          if (pUnit->pPath.pStaticPath) {
+            D2Common::PATH::Path::STRUCT_FreePath(pGame->pMemoryPool, pUnit->pPath.pStaticPath);
+            pUnit->pPath.pStaticPath = 0;
+          }
+        MISSILES::Missiles::ClearMissileUnitData(pGame, pUnit);
+        break;
+        case UNIT_ITEM:
+          ITEMS::Items::Drop::ITEM_FreeItemInventoryAndTimers(pGame, pUnit);
+        D2Common::ITEMS::Items::ITEMDATA_Free(pGame->pMemoryPool, pUnit);
+        case UNIT_WARP:
+          D2Common::Units::FreeStaticPath(pUnit);
+      }
+
+      SUnitEvent::UNITEVENT_FreeAllEvents(pGame, pUnit);
+      SUnitMsg::SERVER_UnitQueuePacketFree(pUnit);
+      D2Common::Units::Free(pUnit);
+      return;
     }
 }
 
 // 2022.01.09 - dzik
 void __fastcall FreeWarpUnits(::SGAMEDATA * pGame) {
     D2UnitStrc* pUnit;
-    if (pGame) {
-      D2UnitStrc* pNextUnit;
-      pUnit = pGame->pWarpTileList;
-      while (pUnit) {
-        pNextUnit = pUnit->pListNext;
-        FreeServerUnit(pGame, pUnit);
-        pUnit = pNextUnit;
-      }
-
-      pGame->pWarpTileList = 0;
-      return;
+    if (!pGame) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12d);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x12d);
-    exit(-1);
+    D2UnitStrc* pNextUnit;
+    pUnit = pGame->pWarpTileList;
+    while (pUnit) {
+      pNextUnit = pUnit->pListNext;
+      FreeServerUnit(pGame, pUnit);
+      pUnit = pNextUnit;
+    }
+
+    pGame->pWarpTileList = 0;
+    return;
 }
 
 D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom, eD2UnitType eUnitType, int nClassId, int32_t nX, int32_t nY, int32_t bInitItem, uint32_t dwParam8) {
@@ -2305,7 +2306,6 @@ D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
           goto flag_created_unit;
         }
         if (nClassId == 0x23d) {
-          Fog::Debug::GuardStack();
           return nullptr;
         }
       }
@@ -2315,7 +2315,6 @@ D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
       if (eUnitType == UNIT_ITEM) {
         if (!pDVar1) {
           pCreatedUnit = pDVar1;
-          Fog::Debug::GuardStack();
           return pDVar1;
         }
 
@@ -2325,7 +2324,6 @@ D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
         iVar2 = ITEMS::Items::Drop::ITEM_InitItemBaseStats(pGame, &pCreatedUnit, &sItemGenCtx, 1);
         if (!iVar2) {
           FreeServerUnit(pGame, pCreatedUnit);
-          Fog::Debug::GuardStack();
           return nullptr;
         }
       }
@@ -2338,7 +2336,6 @@ D2UnitStrc * __fastcall SpawnUnitByType(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
     }
 
     pCreatedUnit = pDVar1;
-    Fog::Debug::GuardStack();
     return pDVar1;
 }
 
@@ -2494,16 +2491,16 @@ void __fastcall UNITS_FreeInventoryItems(::SGAMEDATA * pGame, D2UnitStrc * pUnit
             nInvLocPackedXY = (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)nInvLocY << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)eInvPage);
             iVar1 = D2Common::Units::GetInventoryPage(pUnit, nInvLocPackedXY, pGame->bExpansion);
             eItemUnitType = pCarriedItem->eUnitType;
-            if (eItemUnitType == UNIT_OBJECT || 3 < (int)eItemUnitType && (int)eItemUnitType < 6) {
+            if (eItemUnitType == UNIT_OBJECT || 3 < (int)eItemUnitType && (int)eItemUnitType <= 5) {
               nItemPosY = pCarriedItem->pPath.pStaticPath->nPosY;
-            } else if (!pCarriedItem->pPath.pDynamicPath) {
-              nItemPosY = 0;
-            } else {
+            } else if (pCarriedItem->pPath.pDynamicPath) {
               nItemPosY = D2Common::PATH::DynamicPath::GetYPos(pCarriedItem->pPath.pDynamicPath);
+            } else {
+              nItemPosY = 0;
             }
 
             eCarriedUnitType = pCarriedItem->eUnitType;
-            if (eCarriedUnitType == UNIT_OBJECT || 3 < (int)eCarriedUnitType && (int)eCarriedUnitType < 6) {
+            if (eCarriedUnitType == UNIT_OBJECT || 3 < (int)eCarriedUnitType && (int)eCarriedUnitType <= 5) {
               nItemPosX = pCarriedItem->pPath.pStaticPath->nPosX;
             } else if (!pCarriedItem->pPath.pDynamicPath) {
               nItemPosX = 0;

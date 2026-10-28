@@ -45,7 +45,7 @@ namespace D2Client::GAME::Record {
 
 // @sourcefile .\GAME\Record.cpp
 void __stdcall AllocGameRecord() {
-    D2GameRecordStrc* pRecord = D2_NEW(D2GameRecordStrc);
+    D2GameRecordStrc* pRecord = ((D2GameRecordStrc*)Fog::Memory::AllocClientMemory(sizeof(D2GameRecordStrc), ".\\GAME\\Record.cpp", 0x35, 0));
     pRecord->nEntrySize = 0;
     pRecord->nPlaybackIndex = 0;
     gpCurrentGameRecord->pNext = pRecord;
@@ -54,7 +54,7 @@ void __stdcall AllocGameRecord() {
 }
 
 void __stdcall AddGameEntry(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
-    if (499 < gpCurrentGameRecord->nEntrySize) {
+    if (500 <= gpCurrentGameRecord->nEntrySize) {
       AllocGameRecord();
     }
 
@@ -72,7 +72,7 @@ void __fastcall HandleWinProcMsg(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     if (!SettedUp) {
       return;
     }
-    if (uMsg < 0x112) {
+    if (uMsg <= 0x111) {
       if (uMsg != 0x111) {
         switch (uMsg) {
           case 0x10:
@@ -173,14 +173,14 @@ void __stdcall LoadGameRecordFromFile() {
       D2GameRecordStrc* pBlock;
       do {
         if (nBlockIndex) {
-          pBlock = D2_NEW(D2GameRecordStrc);
+          pBlock = ((D2GameRecordStrc*)Fog::Memory::AllocClientMemory(sizeof(D2GameRecordStrc), ".\\GAME\\Record.cpp", 0x35, 0));
           pBlock->nEntrySize = 0;
           pBlock->nPlaybackIndex = 0;
           gpCurrentGameRecord->pNext = pBlock;
           pBlock->pNext = 0;
           gpCurrentGameRecord = pBlock;
         }
-        if (lpBuffer_007a2768.nLastBlockEntries < 0x1f5) {
+        if (lpBuffer_007a2768.nLastBlockEntries <= 0x1f4) {
           gsGameRecordContext.nEntrySize = lpBuffer_007a2768.nLastBlockEntries;
           if (nBlockIndex + 1 != lpBuffer_007a2768.nBlockCount) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x100);
@@ -205,7 +205,7 @@ void __stdcall FreeGameRecord() {
     while (pMemoryToFree) {
       D2GameRecordStrc* pNextRecord;
       pNextRecord = pMemoryToFree->pNext;
-      D2_FREE(pMemoryToFree);
+      Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\GAME\\Record.cpp", 0x120, 0);
       pMemoryToFree = pNextRecord;
     }
 }
@@ -232,8 +232,8 @@ void __fastcall GAME_ReplayRecordedWindowMessage(D2GameRecordEntryStrc * pIndex)
     uint32_t wParam = pIndex->wParam;
     BOOL* pOutResult1 = &__frame0.nOutResult1;
     uint32_t uMsg = pIndex->uMsg;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    Storm::WindowHandle::SMsgDispatchMessage(hWnd, uMsg, wParam, dwLParam, pOutResult1, (LRESULT*)pOutResult2);
+
+    Storm::WindowHandle::SMsgDispatchMessage(D2gfx::D2GFX::GetHwnd(), uMsg, wParam, dwLParam, pOutResult1, (LRESULT*)pOutResult2);
 }
 
 void __stdcall SetupRecording() {
@@ -295,13 +295,13 @@ void __stdcall RecordCurrentStep() {
     }
 
     int32_t nEntryIndex = Game::GetEntryIndex();
-    if (lpBuffer_007a2768.nStepCount <= nEntryIndex) {
+    if (nEntryIndex >= lpBuffer_007a2768.nStepCount) {
       gbIsPlaybackActive = 0;
       return;
     }
 
     int nPlaybackPos = gpCurrentGameRecord->nPlaybackIndex;
-    if (499 < nPlaybackPos) {
+    if (500 <= nPlaybackPos) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x189);
       exit(-1);
     }
@@ -322,7 +322,7 @@ void __stdcall RecordCurrentStep() {
       if (!pNextBlock && pBlock->nEntrySize == pBlock->nPlaybackIndex) {
         break;
       }
-      if (499 < pBlock->nPlaybackIndex) {
+      if (500 <= pBlock->nPlaybackIndex) {
         pBlock = pNextBlock;
         gpCurrentGameRecord = pNextBlock;
       }
@@ -331,7 +331,7 @@ void __stdcall RecordCurrentStep() {
       }
 
       pEntry = pBlock->pEntry + pBlock->nPlaybackIndex;
-      if (nEntryIndex < pEntry->nGameIndex) {
+      if (pEntry->nGameIndex > nEntryIndex) {
         return;
       }
     }

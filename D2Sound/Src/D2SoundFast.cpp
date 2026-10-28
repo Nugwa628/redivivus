@@ -62,7 +62,7 @@ void __stdcall SOUND_ResetAmbientSoundFlags() {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x52);
         exit(-1);
       }
-      if (nCount <= i) {
+      if (i >= nCount) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x53);
         exit(-1);
       }
@@ -158,7 +158,11 @@ void __stdcall SOUND_PlayNextAmbientSound() {
       SOUND_ResetAmbientSoundFlags();
       bResetDone = true;
       play_unplayed_track:
-      if (!gbSoundFastPathActive) {
+      if (gbSoundFastPathActive) {
+        pAmbientEntry = Sound::SOUND_GetAmbientSoundEntry(0);
+        gbSoundFastPathActive = 0;
+        nAmbientCount = gaAmbientSoundFlags;
+      } else {
         nRandIdx = rand();
         nRandIdx %= gaAmbientSoundFlags;
         nAmbientCount = gaAmbientSoundFlags;
@@ -174,7 +178,7 @@ void __stdcall SOUND_PlayNextAmbientSound() {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x52);
             exit(-1);
           }
-          if (nAmbientCount <= nRandIdx) {
+          if (nRandIdx >= nAmbientCount) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x53);
             exit(-1);
           }
@@ -185,7 +189,7 @@ void __stdcall SOUND_PlayNextAmbientSound() {
           }
           if (pAmbientEntry[1]) {
             nRandIdx++;
-            if (nAmbientCount <= nRandIdx) {
+            if (nRandIdx >= nAmbientCount) {
               nRandIdx = 0;
             }
 
@@ -194,10 +198,6 @@ void __stdcall SOUND_PlayNextAmbientSound() {
 
           break;
         }
-      } else {
-        pAmbientEntry = Sound::SOUND_GetAmbientSoundEntry(0);
-        gbSoundFastPathActive = 0;
-        nAmbientCount = gaAmbientSoundFlags;
       }
       bHasStreamBuffer = gpMusicStreamBuffer != 0;
       szSoundFile = (char*)*pAmbientEntry;
@@ -237,17 +237,17 @@ void __stdcall SOUND_LoadRegistrySettings() {
     }
 
     bReadMasterVol = Storm::Source::SReg::SRegLoadValue("Diablo II", "Master Volume", 0, (int32_t*)&dwRegValue);
-    if (bReadMasterVol && dwRegValue < 0x65) {
+    if (bReadMasterVol && dwRegValue <= 0x64) {
       g_nSoundMasterVolume = dwRegValue;
     }
 
     bReadMasterVol = Storm::Source::SReg::SRegLoadValue("Diablo II", "Music Volume", 0, (int32_t*)&dwRegValue);
-    if (bReadMasterVol && dwRegValue < 0x65) {
+    if (bReadMasterVol && dwRegValue <= 0x64) {
       g_nSoundMusicVolume = dwRegValue;
     }
 
     bReadMasterVol = Storm::Source::SReg::SRegLoadValue("Diablo II", "Positional Bias", 0, (int32_t*)&dwRegValue);
-    if (bReadMasterVol && dwRegValue < 0x65) {
+    if (bReadMasterVol && dwRegValue <= 0x64) {
       g_nSoundPositionalBias = dwRegValue;
     }
 
@@ -257,7 +257,7 @@ void __stdcall SOUND_LoadRegistrySettings() {
     }
 
     bReadMasterVol = Storm::Source::SReg::SRegLoadValue("Diablo II", "Options Music", 0, (int32_t*)&dwRegValue);
-    if (!(bReadMasterVol && dwRegValue < 2)) {
+    if (!(bReadMasterVol && dwRegValue <= 1)) {
       return;
     }
 
@@ -363,7 +363,7 @@ void __fastcall SOUND_LoadWavFile(char * szText) {
       return;
     }
 
-    void* pWavEntry = D2_ALLOC(0x60);
+    void* pWavEntry = Fog::Memory::AllocClientMemory(0x60, ".\\Src\\D2SoundFast.cpp", 0x85, 0);
     *(void**)((int)pWavEntry + 0x5c) = (void*)gpWavFileCacheListHead;
     *(int**)((int)pWavEntry + 0x50) = (int*)pArchive;
     *(uint32_t*)((int)pWavEntry + 0x54) = nAllocSize;
@@ -444,7 +444,7 @@ BOOL __stdcall SOUND_IsAnySoundEffectPlaying() {
       }
 
       ppSoundBuffer++;
-    } while ((int)ppSoundBuffer < (uintptr_t)&gpaSoundEffectBuffers + 32);
+    } while ((int)ppSoundBuffer < (int)((uintptr_t)&gpaSoundEffectBuffers + 32));
 
     return 0;
 }
@@ -463,7 +463,7 @@ void __stdcall SOUND_FadeOutAllSoundEffects() {
       }
 
       ppSoundBuffer++;
-    } while ((int)ppSoundBuffer < (uintptr_t)&gpaSoundEffectBuffers + 32);
+    } while ((int)ppSoundBuffer < (int)((uintptr_t)&gpaSoundEffectBuffers + 32));
 }
 
 int __stdcall SOUND_IsSoundEffectsInitialized() {
@@ -480,23 +480,23 @@ void __stdcall SOUND_FreeSoundEffectBuffers() {
     do {
       D2SoundSmp::SOUNDSMP_Stop(*ppSoundBuffer);
       ppSoundBuffer++;
-    } while ((int)ppSoundBuffer < (uintptr_t)&gpaSoundEffectBuffers + 32);
+    } while ((int)ppSoundBuffer < (int)((uintptr_t)&gpaSoundEffectBuffers + 32));
 
     ppSoundBuffer = gpaSoundEffectBuffers;
     do {
       D2SoundSmp::SOUNDSMP_Destroy(*ppSoundBuffer);
       *ppSoundBuffer = 0;
       ppSoundBuffer++;
-    } while ((int)ppSoundBuffer < (uintptr_t)&gpaSoundEffectBuffers + 32);
+    } while ((int)ppSoundBuffer < (int)((uintptr_t)&gpaSoundEffectBuffers + 32));
 
     while (gpWavFileCacheListHead) {
       void* nNextCacheEntry;
       nNextCacheEntry = *(void**)((int)gpWavFileCacheListHead + 0x5c);
       if (*(void**)((int)gpWavFileCacheListHead + 0x50)) {
-        D2_FREE(*(void**)((int)gpWavFileCacheListHead + 0x50));
+        Fog::Memory::FreeClientMemory(*(void**)((int)gpWavFileCacheListHead + 0x50), ".\\Src\\D2SoundFast.cpp", 0x62, 0);
       }
 
-      D2_FREE(gpWavFileCacheListHead);
+      Fog::Memory::FreeClientMemory(gpWavFileCacheListHead, ".\\Src\\D2SoundFast.cpp", 0x63, 0);
       gpWavFileCacheListHead = nNextCacheEntry;
     }
 

@@ -427,21 +427,21 @@ uint32_t __stdcall SStrPack(LPSTR szText, char * szSource, uint32_t nBufferLengt
     return 0;
 }
 
-uint32_t D2vsprintf(char * szFormat, size_t nSize, char * pBuffer, va_list pArgs) {
+static uint32_t D2vsprintf(char * szFormat, size_t nSize, char * pBuffer, va_list pArgs) {
     uint32_t nWritten;
-    if (!nSize) {
-      nWritten = 0;
-    } else {
+    if (nSize) {
       if (nSize == 0x7fffffff) {
         nWritten = vsprintf(pBuffer, szFormat, pArgs);
         return nWritten;
       }
 
       nWritten = __vsnprintf(pBuffer, nSize, szFormat, pArgs);
-      if (nSize <= nWritten) {
+      if (nWritten >= nSize) {
         pBuffer[nSize - 1] = '\0';
         return nSize - 1;
       }
+    } else {
+      nWritten = 0;
     }
 
     return nWritten;
@@ -536,7 +536,7 @@ uint32_t __stdcall SStrToUnsigned(char * szText) {
       if (nValue < 10) {
         pScan = szText + 1;
         nDigit = (int)szText[1] - 0x30;
-        if (9 < nDigit) {
+        if (10 <= nDigit) {
           return nValue;
         }
 
@@ -695,7 +695,7 @@ uint32_t __stdcall SStrHash(char * pszText, uint8_t bCaseSensitive, uint32_t nSe
       if (!(bCaseSensitive & 1)) {
         while (nChar) {
           pszText++;
-          if (nChar - 0x61 < 0x1a) {
+          if (nChar - 0x61 <= 0x19) {
             nChar -= 0x20;
           }
           if (nChar == 0x2f) {
@@ -929,7 +929,7 @@ int __stdcall SStrHashHT(uint8_t * pszText) {
     uint8_t bChar = *pszText;
     uint8_t* pWrite = szUpper;
     for (nLen = 0; nChar = (uint32_t)bChar , nChar && (pszText++ , nLen < 0x3ff); nLen++) {
-      if (nChar - 0x61 < 0x1a) {
+      if (nChar - 0x61 <= 0x19) {
         bChar -= 0x20;
       } else if (nChar == 0x2f) {
         bChar = 0x5c;
@@ -942,7 +942,6 @@ int __stdcall SStrHashHT(uint8_t * pszText) {
 
     *pWrite = 0;
     uint32_t uVar1 = SSTR_JenkinsHash((int*)szUpper, nLen, 0);
-    Fog::Debug::GuardStack();
     return uVar1;
 }
 

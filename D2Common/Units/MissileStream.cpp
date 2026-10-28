@@ -76,7 +76,7 @@ void __stdcall AllocMissileStream(D2UnitStrc * pUnit) {
       pMemory = pUnit->pMemory;
     }
 
-    pStream = D2_NEW_POOL(pMemory, D2MissileStreamStrc);
+    pStream = ((D2MissileStreamStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2MissileStreamStrc), ".\\UNITS\\MisStream.cpp", 0x2e, 0));
     pStream->pStream = 0;
     pStream->nStreamSize = 0;
     Missile::SetStream(pUnit, pStream);
@@ -95,7 +95,7 @@ void __stdcall FreeMissileStream(D2UnitStrc * pUnit) {
         pMemoryPool = pUnit->pMemory;
       }
 
-      D2_FREE_POOL(pMemoryPool, pMemoryToFree->pStream);
+      Fog::Memory::FreeServerMemory(pMemoryPool, pMemoryToFree->pStream, ".\\UNITS\\MisStream.cpp", 0x3b, 0);
     }
     if (!pUnit) {
       pMemoryPool = 0;
@@ -103,7 +103,7 @@ void __stdcall FreeMissileStream(D2UnitStrc * pUnit) {
       pMemoryPool = pUnit->pMemory;
     }
 
-    D2_FREE_POOL(pMemoryPool, pMemoryToFree);
+    Fog::Memory::FreeServerMemory(pMemoryPool, pMemoryToFree, ".\\UNITS\\MisStream.cpp", 0x3c, 0);
 }
 
 int32_t __fastcall Return1(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {

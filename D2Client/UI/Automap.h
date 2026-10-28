@@ -132,31 +132,20 @@ void __stdcall AUTOMAP_RebalanceTreeLeft(struct D2AutomapCellStrc * * ppCell);
 int32_t __fastcall AUTOMAP_InsertCellIntoTree(struct D2AutomapCellStrc * pAutomapCell1, struct D2AutomapCellStrc * pAutomapCell2);
 // @sourcefile .\UI\automap.cpp
 struct D2AutomapCellStrc * __stdcall AUTOMAP_AllocCell();
-// AUTOMAP_RevealTile - Reveals a single tile on the automap.
-// Looks up the automap cell index from LevelType/Orientation/Index/SubIndex
-// via automap.txt data. Converts tile world position to screen coordinates
-// and inserts the cell into the AVL tree. Wall tiles (type >= 15)
-// get a Y offset of +24 pixels.
-// Source: .\\UI\\automap.cpp
-void __stdcall AUTOMAP_RevealTile(struct D2RoomExStrc * pRoomEx, struct D2AutomapCellStrc * pAutomapCell, struct D2DrlgTileDataStrc * pTileData);
 void __stdcall AUTOMAP_AddCellByCoords(int16_t nCellNo, int16_t nPixelX, int16_t nPixelY, struct D2AutomapCellStrc * pAutomapCell1, struct D2AutomapCellStrc * pAutomapCell2);
 void __stdcall AUTOMAP_AddCellForUnit(int32_t nParam, struct D2AutomapCellStrc * pAutomapCell, struct D2UnitStrc * pUnit);
 HANDLE __stdcall AUTOMAP_GetMapFileHandle();
-void AUTOMAP_SaveLayerToFile(struct D2AutomapFileEntryStrc * pEntry);
 void __fastcall AUTOMAP_CalcCellTreeSize(struct D2AutomapCellStrc * pAutomapCell, uint32_t * nSize);
 void __fastcall AUTOMAP_SerializeCellTree(struct D2AutomapCellStrc * pAutomapCell);
 // @sourcefile .\UI\automap.cpp
 void __stdcall AUTOMAP_SaveCurrentLayer();
 // @sourcefile .\UI\automap.cpp
 void __stdcall AUTOMAP_FreeCurrentLayerCells();
-void __stdcall AUTOMAP_InvalidateLayerEntry(int32_t nEntryOffset, HANDLE hFile, uint32_t * pLayerOffsets);
 // @sourcefile .\UI\automap.cpp
 void __stdcall AUTOMAP_LoadLayerFromFile();
 void __stdcall AUTOMAP_SwitchLayer(struct D2AutomapLayerStrc * pAutomapLayer);
 // @sourcefile .\UI\automap.cpp
 void __stdcall AUTOMAP_AllocLayer(int32_t nLayer);
-// @sourcefile .\UI\automap.cpp
-struct D2AutomapLayerStrc * AUTOMAP_AddLayer(int32_t nLayer);
 void __stdcall AUTOMAP_RevealUnitsInRoom(struct D2RoomStrc * pRoom, struct D2AutomapCellStrc * pAutomapCell);
 // AUTOMAP_RevealRoom - Reveals all tiles and units in a room on the automap.
 // Iterates floor tiles and wall tiles, checking visibility flags (0x20000).
@@ -224,15 +213,6 @@ void __stdcall AUTOMAP_Free();
 void __stdcall AUTOMAP_InitPaletteColors();
 int __stdcall AUTOMAP_GetMiniMapType();
 void __fastcall AUTOMAP_SetMiniMapType(int32_t nMiniMapType);
-void __stdcall AUTOMAP_DrawTextCentered(int32_t nCenterX, int32_t nBaseY, uint8_t byColor, char * szText);
-void __stdcall AUTOMAP_DrawXMarker(int32_t nX, DWORD nColor, int32_t nY);
-// AUTOMAP_DrawUnitMarker - Draws an X marker and optional name for a unit on the automap.
-// For players: draws X + party member name if AutoMapPartyNames enabled.
-// For monsters: draws X + NPC name if interact flag set; draws transformed players.
-// For objects: draws waypoint label (string 0xCF3) for red portals (classId 0x10B).
-// Source: .\\UI\\automap.cpp
-// @sourcefile .\UI\automap.cpp
-void AUTOMAP_DrawUnitMarker(struct D2UnitStrc * pUnit);
 void AUTOMAP_DrawPartyMember(struct D2RosterStrc * pRoster);
 void __stdcall AUTOMAP_DrawPlayersAndParty();
 // AUTOMAP_Draw - Main automap rendering entry point.

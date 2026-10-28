@@ -316,7 +316,7 @@ void __stdcall SMemResetHeapStats() {
     static uint32_t g_SMemHeapStatsCount; D2_STATIC_GUARD_BSS(g_SMemHeapStatsCount, "Fog::SMem::SMemResetHeapStats::g_SMemHeapStatsCount");
 
     int nStatsRemaining;
-    if (g_SMemHeapStatsCount) {
+    if ((uint32_t)g_SMemHeapStatsCount > 0) {
       int* pStatEntry;
       pStatEntry = &gaSMemHeapStats[0].nIntervalStat0;
       nStatsRemaining = g_SMemHeapStatsCount;
@@ -636,7 +636,7 @@ void __stdcall SMEM_TitleCaseString(mcp0x03data * pMcpData) {
 
     do {
       char cCurChar;
-      if (0x3ff < nIndex) {
+      if (0x400 <= nIndex) {
         Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x78);
         exit(-1);
       }
@@ -1083,7 +1083,6 @@ char * __fastcall SMemFormat64BitWithSeparators(char * szText, uint32_t nWidth, 
       if (szTempBuf + (nClampedWidth - 1) <= pcWrite2) {
         memset(szText, 0x2a, nClampedWidth - 1);
         szText[nWidthCopy - 1] = '\0';
-        Debug::GuardStack();
         return szText;
       }
 
@@ -1115,7 +1114,6 @@ char * __fastcall SMemFormat64BitWithSeparators(char * szText, uint32_t nWidth, 
     }
 
     *szText = '\0';
-    Debug::GuardStack();
     return pcWrite2;
 }
 

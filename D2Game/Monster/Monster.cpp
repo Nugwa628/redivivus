@@ -163,7 +163,7 @@ void __fastcall MONSTER_SetVelocityAndTransition(::SGAMEDATA * pGame, D2UnitStrc
       int32_t nClassId;
       nClassId = pUnit->nClassId;
       nUnitMode = pUnit->eAnimMode.eMonsterMode;
-      if (-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) {
+      if (0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) {
         pMonStatsTxt = sgptDataTable->pTxtMonStats + nClassId;
         goto set_velocity_and_transition;
       }
@@ -201,7 +201,7 @@ void __fastcall FreeMonsters(::SGAMEDATA * pGame) {
 void __fastcall MONSTER_FreeAllResources(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     int nClassId;
     UNIT::SUnitDmg::FreeCombat(pGame, pUnit);
-    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || sgptDataTable->nTxtMonStatsSize <= nClassId || !(sgptDataTable->pTxtMonStats + nClassId) || !sgptDataTable->pTxtMonStats[nClassId].interact) {
+    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || nClassId >= sgptDataTable->nTxtMonStatsSize || !(sgptDataTable->pTxtMonStats + nClassId) || !sgptDataTable->pTxtMonStats[nClassId].interact) {
       UNIT::SUnit::UNITS_FreeInventoryItems(pGame, pUnit);
       D2Common::INVENTORY::Inventory::STRUCT_FreeInventory(pUnit->pInventory);
     }
@@ -251,7 +251,7 @@ void __fastcall MONSTERAI_TriggerMageThink(::SGAMEDATA * pGame, D2UnitStrc * pUn
     }
 
     eD2MonsterClassId nMonBaseId = D2Client::UNIT::Player::TXT_MonStats_GetBaseId(pUnit);
-    if ((int)nMonBaseId < 0 || sgptDataTable->nTxtMonStatsSize <= (int)nMonBaseId) {
+    if ((int)nMonBaseId < 0 || (int)nMonBaseId >= sgptDataTable->nTxtMonStatsSize) {
       nMonBaseId = ~MonsterUnitSkeleton1;
     }
 
@@ -359,17 +359,17 @@ void __fastcall MONSTER_RollComponentAppearance(int32_t nParam, D2UnitStrc * pUn
     }
     if (!nParam || !*(uint8_t*)(nParam + 3)) {
       D2SeedStrc DVar1;
-      if (false || !pUnit->pUnitData.pUnitDataPlayer) {
-        pComponentData = 0;
-      } else {
+      if (!(false || !pUnit->pUnitData.pUnitDataPlayer)) {
         pComponentData = pUnit->pUnitData.pUnitDataPlayer->szCharName + 4;
+      } else {
+        pComponentData = 0;
       }
 
       nComponentIndex = 0;
       nLoopCount = 0x10;
       do {
         nRollResult = D2Common::DATATBLS::OverlayTbls::GetComponentsData(pUnit, nComponentIndex);
-        if ((int)nRollResult < 1) {
+        if ((int)nRollResult <= 0) {
           byComponent = 0;
         } else {
           nSeedLow = pUnit->sSeed.nSeedLow;
@@ -381,7 +381,7 @@ void __fastcall MONSTER_RollComponentAppearance(int32_t nParam, D2UnitStrc * pUn
           } else {
             DVar1 = (D2SeedStrc)((uint64_t)nSeedLow * 0x6ac690c5 + nSeedHighU);
             pUnit->sSeed = DVar1;
-            byComponent = (uint8_t)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) % (uint64_t)nRollResult);
+            byComponent = (uint8_t)(DVar1.nSeedLow % nRollResult);
           }
         }
 
@@ -452,16 +452,16 @@ void __fastcall MONSTER_CreateAndEquipItem(::SGAMEDATA * pGame, D2UnitStrc * pUn
     uint32_t nItemUnitGUID = pItemUnit->nUnitGUID;
     D2MonEquipEntryStrc** ppItemCodeEntry = &ppItemId;
     int32_t bDoEquip = 1;
-    eD2BodyLoc eBodyLoc = D2Common::ITEMS::Items::GetBodyLocation(pItemUnit);
-    BOOL bEquipped = ITEMS::ItemMode::SERVER_EquipItemToBodyLoc(pGame, pUnit, nItemUnitGUID, eBodyLoc, bDoEquip, (uint32_t*)ppItemCodeEntry);
+
+    BOOL bEquipped = ITEMS::ItemMode::SERVER_EquipItemToBodyLoc(pGame, pUnit, nItemUnitGUID, D2Common::ITEMS::Items::GetBodyLocation(pItemUnit), bDoEquip, (uint32_t*)ppItemCodeEntry);
     if (!bEquipped) {
       UNIT::SUnit::FreeServerUnit(pGame, pItemUnit);
       return;
     }
 
     int32_t nDurStatLayer = 0;
-    int32_t nMaxDurability = D2Common::Stats::StatsEx::GetTxtMaxDurability(pItemUnit);
-    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pItemUnit, UNITSTAT_durability, nMaxDurability, nDurStatLayer);
+
+    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pItemUnit, UNITSTAT_durability, D2Common::Stats::StatsEx::GetTxtMaxDurability(pItemUnit), nDurStatLayer);
 }
 
 // Force-kills all living, non-boss, neutral-alignment monsters of class nAltMonClassId or nAltMonClassId2 in the specified level (or all rooms of the act if eLevel==LEVEL_None). For each match, sets the Death skill and executes the lifecycle transition via MONSTERAI_ExecuteLifecycleTransition.
@@ -507,7 +507,7 @@ void __fastcall MONSTER_KillAllInLevel(::SGAMEDATA * pGame, int32_t nAltMonClass
 }
 
 // Server-side: fully initializes a spawned monster's stats/skills/inventory. Bails unless pUnit is a valid UNIT_MONSTER with MonStats/MonStatsEx records. Rolls component appearance, applies act-boss name bytes (classId 0x137/0x138), computes level/difficulty scaling (player-count multipliers), then SETs resistances, block, attack/velocity/animrate, HP (rolled min..max + player% bonus, capped 0x7FFFFF, x256), armorclass, experience and HP-regen via STATLIST_SetUnitStat. Applies difficulty scaling, attaches a second stat list, creates player or NPC inventory, builds the skills list (8 skills from MonStatsEx with level bonus + mode), sets CANBEATTACKED/PETIGNORE flags, rolls up-to-6 random monster properties (MonProp txt, per-difficulty chance), and equips summon items. Halts on bad HP-regen value.
-void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32_t nParam, D2UnitStrc * pUnit) {
+static void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32_t nParam, D2UnitStrc * pUnit) {
     uint32_t dwTmpStat;
     uint32_t nTmpVal;
     eD2LevelId eRoomLevelId;
@@ -541,7 +541,7 @@ void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32
     if (nTmpInt < 0) {
       return;
     }
-    if (sgptDataTable->nTxtMonStatsSize <= nTmpInt) {
+    if (nTmpInt >= sgptDataTable->nTxtMonStatsSize) {
       return;
     }
 
@@ -550,7 +550,7 @@ void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32
     if (nMonStatsExId < 0) {
       return;
     }
-    if (sgptDataTable->nTxtMonStatsExSize <= nMonStatsExId) {
+    if (nMonStatsExId >= sgptDataTable->nTxtMonStatsExSize) {
       return;
     }
 
@@ -565,7 +565,7 @@ void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32
     int nMonClassId;
     nMonClassId = nTmpInt;
     MONSTER_RollComponentAppearance(nParam, pUnit);
-    if (sgptDataTable->nTxtMonStatsSize <= nTmpInt) {
+    if (nTmpInt >= sgptDataTable->nTxtMonStatsSize) {
       nTmpInt = -1;
     }
     if (nTmpInt == 0x137) {
@@ -585,7 +585,7 @@ void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32
     MONSTER_InitLevelDifficultyScaling(pGame, &monLevelData, pRoom, pUnit);
     uint8_t byDifficultyIdx;
     byDifficultyIdx = pGame->nDifficulty;
-    if (byDifficultyIdx) {
+    if ((uint32_t)byDifficultyIdx > 0) {
       if (1 < byDifficultyIdx) {
         nParam = 2;
         goto init_stats_for_difficulty;
@@ -604,7 +604,7 @@ void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32
     }
 
     uint32_t nPlayerCount = 1;
-    if (0 < (int)monLevelData.nPlayerMultiplyer3) {
+    if (1 <= (int)monLevelData.nPlayerMultiplyer3) {
       nPlayerCount = monLevelData.nPlayerMultiplyer3;
     }
 
@@ -639,7 +639,7 @@ void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32
     nTmpVal = D2Client::Archive::RANDOM_RandomNumberSelector(&pUnit->sSeed, sMonStats.nMaxHP - sMonStats.nMinHP + 1);
     int32_t nScaledStat = D2Client::Stats::D2ApplyPercent(nTmpVal + sMonStats.nMinHP, monLevelData.nPlayerMultiplyer, 100);
     nTmpInt = nTmpVal + sMonStats.nMinHP + nScaledStat;
-    if (0x7fffff < nTmpInt) {
+    if (0x800000 <= nTmpInt) {
       nTmpInt = 0x7fffff;
     }
 
@@ -656,86 +656,86 @@ void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32
       exit(-1);
     } else {
       D2SeedStrc DVar1;
-      if (!(dwHpRegenRaw & -4096)) {
-        nScaledStat = 0;
-        if (dwHpRegenRaw) {
-          if ((int)(0x7fffffff / (int64_t)(int)dwHpRegenRaw) < nTmpInt) {
-            nScaledStat = (nTmpInt >> 0xc) * dwHpRegenRaw;
-          } else {
-            nScaledStat = (int)(dwHpRegenRaw * nTmpInt) >> 0xc;
-          }
-        }
-
-        D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hpregen, nScaledStat, 0);
-        D2Common::Monsters::MONSTERS::MONSTER_ApplyDifficultyScaling(pUnit, pGame->bExpansion, pGame->nDifficulty);
-        pStatsEx = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(pGame->pMemoryPool, 1, 0, UNIT_MONSTER, pUnit->nUnitGUID);
-        D2Common::Stats::StatsEx::STATLIST_AttachStatListToUnit(pUnit, pStatsEx, 1);
-        if (pMonStatsTxt->inventory) {
-          if (!pMonStatsTxt->interact) {
-            D2Common::INVENTORY::Inventory::STRUCT_CreatePlayerInventory(nullptr, pUnit);
-          } else {
-            nScaledStat = D2Client::UNIT::Player::ValidateClassId(nMonClassId);
-            pNpcInventory = UNIT::sunitproxy::SUNITPROXY_GetNpcInventory(pGame, nScaledStat);
-            pUnit->pInventory = pNpcInventory;
-          }
-        }
-
-        pSkillsList = D2Common::Skills::STRUCT_CreateSkillsList(pGame->pMemoryPool);
-        pUnit->pSkillsList = pSkillsList;
-        pRoom = (D2RoomStrc*)pMonStatsTxt->aSkill;
-        nTmpInt = 0;
-        do {
-          if (-1 < *(short int*)&pRoom->ppRoomList && '\0' < pMonStatsTxt->aSkLvl[nTmpInt]) {
-            SKILLS::SkillsServer::SetSkill(pUnit, (int)*(short int*)&pRoom->ppRoomList, (int)pMonStatsTxt->aSkLvl[nTmpInt] + monLevelData.nMonsterSkillBonus, 0);
-            if (-1 < pMonStatsTxt->aSkMode[nTmpInt]) {
-              nTmpVal = (uint32_t)pMonStatsTxt->aSkMode[nTmpInt];
-              pSkill = D2Common::Skills::SKILLS_GetSkillByEnum((int)*(short int*)&pRoom->ppRoomList, pUnit);
-              D2Common::Skills::SetSkillMode(pSkill, nTmpVal);
-            }
-          }
-
-          pRoom = (D2RoomStrc*)((uintptr_t)&pRoom->ppRoomList + 2);
-          nTmpInt++;
-        } while (nTmpInt < 8);
-
-        D2Common::Monsters::MONSTERS::MONSTERS_OnInitMonster_NoOp(pUnit, monLevelData.nMonsterSkillBonus);
-        if (uMonTxt.pMonStats2Txt->isAtt) {
-          pUnit->eUnitFlags |= UNITFLAG_CANBEATTACKED;
-        }
-        if (pMonStatsTxt->petIgnore) {
-          pUnit->eUnitFlags |= UNITFLAG_PETIGNORE;
-        }
-
-        uMonTxt.pMonPropTxt = MONSTER_GetMonPropTxtRecord(pUnit->nClassId);
-        /* uMonTxt now holds a D2MonPropTxt* (MONSTER_GetMonPropTxtRecord); see
-                         00573d35. */ if (uMonTxt.pMonPropTxt) {
-          pRoom = (D2RoomStrc*)(uMonTxt.pMonPropTxt->entry + nParam);
-          nPlayerCount = 0;
-          do {
-            if ((int)pRoom->ppRoomList < 0) {
-              break;
-            }
-            if (uMonTxt.pMonPropTxt->chance[nParam][nPlayerCount] == '\0') {
-              D2Common::ITEMS::ItemMods::ITEMMOD_ApplyPropertyToUnitStatsExpansion(0, nullptr, pUnit, 0, 0, 0, (D2SetsTxtFStrc*)pRoom, 0, 0x40, 0);
-            } else {
-              DVar1 = D2_SEED_NEXT(pUnit->sSeed);
-              pUnit->sSeed = DVar1;
-              if ((int)(DVar1.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) / 100) * -100) < (int)(uint32_t)(uint8_t)uMonTxt.pMonPropTxt->chance[nParam][nPlayerCount]) {
-                D2Common::ITEMS::ItemMods::ITEMMOD_ApplyPropertyToUnitStatsExpansion(0, nullptr, pUnit, 0, 0, 0, (D2SetsTxtFStrc*)pRoom, 0, 0x40, 0);
-              }
-            }
-
-            pRoom = (D2RoomStrc*)&pRoom->pRoomEx;
-            nPlayerCount++;
-          } while ((int)nPlayerCount < 6);
-        }
-
-        SKILLS::SkillAss::SKILLASS_EquipSummonItems(pGame, nullptr, pUnit, -1, nMonLevel, nMonLevel, 1);
-        return;
+      if (dwHpRegenRaw & -4096) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdf);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdf);
-      exit(-1);
+      nScaledStat = 0;
+      if (dwHpRegenRaw) {
+        if (nTmpInt > (int)(0x7fffffff / (int64_t)(int)dwHpRegenRaw)) {
+          nScaledStat = (nTmpInt >> 0xc) * dwHpRegenRaw;
+        } else {
+          nScaledStat = (int)(dwHpRegenRaw * nTmpInt) >> 0xc;
+        }
+      }
+
+      D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hpregen, nScaledStat, 0);
+      D2Common::Monsters::MONSTERS::MONSTER_ApplyDifficultyScaling(pUnit, pGame->bExpansion, pGame->nDifficulty);
+      pStatsEx = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(pGame->pMemoryPool, 1, 0, UNIT_MONSTER, pUnit->nUnitGUID);
+      D2Common::Stats::StatsEx::STATLIST_AttachStatListToUnit(pUnit, pStatsEx, 1);
+      if (pMonStatsTxt->inventory) {
+        if (pMonStatsTxt->interact) {
+          nScaledStat = D2Client::UNIT::Player::ValidateClassId(nMonClassId);
+          pNpcInventory = UNIT::sunitproxy::SUNITPROXY_GetNpcInventory(pGame, nScaledStat);
+          pUnit->pInventory = pNpcInventory;
+        } else {
+          D2Common::INVENTORY::Inventory::STRUCT_CreatePlayerInventory(nullptr, pUnit);
+        }
+      }
+
+      pSkillsList = D2Common::Skills::STRUCT_CreateSkillsList(pGame->pMemoryPool);
+      pUnit->pSkillsList = pSkillsList;
+      pRoom = (D2RoomStrc*)pMonStatsTxt->aSkill;
+      nTmpInt = 0;
+      do {
+        if (0 <= *(short int*)&pRoom->ppRoomList && '\0' < pMonStatsTxt->aSkLvl[nTmpInt]) {
+          SKILLS::SkillsServer::SetSkill(pUnit, (int)*(short int*)&pRoom->ppRoomList, (int)pMonStatsTxt->aSkLvl[nTmpInt] + monLevelData.nMonsterSkillBonus, 0);
+          if (0 <= pMonStatsTxt->aSkMode[nTmpInt]) {
+            nTmpVal = (uint32_t)pMonStatsTxt->aSkMode[nTmpInt];
+            pSkill = D2Common::Skills::SKILLS_GetSkillByEnum((int)*(short int*)&pRoom->ppRoomList, pUnit);
+            D2Common::Skills::SetSkillMode(pSkill, nTmpVal);
+          }
+        }
+
+        pRoom = (D2RoomStrc*)((uintptr_t)&pRoom->ppRoomList + 2);
+        nTmpInt++;
+      } while (nTmpInt < 8);
+
+      D2Common::Monsters::MONSTERS::MONSTERS_OnInitMonster_NoOp(pUnit, monLevelData.nMonsterSkillBonus);
+      if (uMonTxt.pMonStats2Txt->isAtt) {
+        pUnit->eUnitFlags |= UNITFLAG_CANBEATTACKED;
+      }
+      if (pMonStatsTxt->petIgnore) {
+        pUnit->eUnitFlags |= UNITFLAG_PETIGNORE;
+      }
+
+      uMonTxt.pMonPropTxt = MONSTER_GetMonPropTxtRecord(pUnit->nClassId);
+      /* uMonTxt now holds a D2MonPropTxt* (MONSTER_GetMonPropTxtRecord); see
+                       00573d35. */ if (uMonTxt.pMonPropTxt) {
+        pRoom = (D2RoomStrc*)(uMonTxt.pMonPropTxt->entry + nParam);
+        nPlayerCount = 0;
+        do {
+          if ((int)pRoom->ppRoomList < 0) {
+            break;
+          }
+          if (uMonTxt.pMonPropTxt->chance[nParam][nPlayerCount] == '\0') {
+            D2Common::ITEMS::ItemMods::ITEMMOD_ApplyPropertyToUnitStatsExpansion(0, nullptr, pUnit, 0, 0, 0, (D2SetsTxtFStrc*)pRoom, 0, 0x40, 0);
+          } else {
+            DVar1 = D2_SEED_NEXT(pUnit->sSeed);
+            pUnit->sSeed = DVar1;
+            if ((int)(DVar1.nSeedLow % 100) < (int)(uint32_t)(uint8_t)uMonTxt.pMonPropTxt->chance[nParam][nPlayerCount]) {
+              D2Common::ITEMS::ItemMods::ITEMMOD_ApplyPropertyToUnitStatsExpansion(0, nullptr, pUnit, 0, 0, 0, (D2SetsTxtFStrc*)pRoom, 0, 0x40, 0);
+            }
+          }
+
+          pRoom = (D2RoomStrc*)&pRoom->pRoomEx;
+          nPlayerCount++;
+        } while ((int)nPlayerCount < 6);
+      }
+
+      SKILLS::SkillAss::SKILLASS_EquipSummonItems(pGame, nullptr, pUnit, -1, nMonLevel, nMonLevel, 1);
+      return;
     }
 }
 
@@ -764,7 +764,7 @@ void __fastcall STRUCT_FillDataMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, 
     pUnitDataMonster->pPathParamOrName.pPathParam = pMonsterAiParam;
     D2MonsterAiStrc* pMonsterAi = MonsterAI::AllocMonsterAI(pGame);
     pUnitDataMonster->pMonsterAi = pMonsterAi;
-    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || sgptDataTable->nTxtMonStatsSize <= nClassId) {
+    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || nClassId >= sgptDataTable->nTxtMonStatsSize) {
       pMonStatsTxt = 0;
     } else {
       pMonStatsTxt = sgptDataTable->pTxtMonStats + nClassId;
@@ -781,9 +781,7 @@ void __fastcall STRUCT_FillDataMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, 
 
     AI::AttachCorrectAiFunctionToMonster(pGame, pUnit, pAiGeneralInit, 0);
     eD2LevelId eRoomLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    if (!pUnit) {
-      eAnimMode = Death;
-    } else {
+    if (pUnit) {
       if (pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster) {
         pUnit->pUnitData.pUnitDataMonster->eLevelId = eRoomLevelId;
       }
@@ -794,6 +792,8 @@ void __fastcall STRUCT_FillDataMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, 
         UNIT::SUnit::InitAnimFrame(pUnit);
         return;
       }
+    } else {
+      eAnimMode = Death;
     }
 
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, eAnimMode);
@@ -804,7 +804,7 @@ void __fastcall MONSTER_TransformMonsterClass(::SGAMEDATA * pGame, D2UnitStrc * 
     if (!pUnit || pUnit->eUnitType != UNIT_MONSTER) {
       return;
     }
-    if (!(-1 < (int)nMonStatId && (int)nMonStatId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonStatId && sgptDataTable->pTxtMonStats[nMonStatId].enabled)) {
+    if (!(0 <= (int)nMonStatId && (int)nMonStatId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonStatId && sgptDataTable->pTxtMonStats[nMonStatId].enabled)) {
       return;
     }
 

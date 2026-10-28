@@ -108,10 +108,10 @@ void __fastcall NPCMENU_HandleMercListPacket(int32_t nParam) {
       Sound::SOUND_PlaySound(0x11ff, pUnit, 0, 0, 0);
       return;
     }
-    if (!_Interaction::bInteractingWithNpc) {
-      pInteractedNpc = 0;
-    } else {
+    if (!(!_Interaction::bInteractingWithNpc)) {
       pInteractedNpc = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
+    } else {
+      pInteractedNpc = 0;
     }
     if (pUnit == pInteractedNpc) {
       return;
@@ -175,8 +175,8 @@ int __stdcall NPCMENU_ShowMercResurrectDialog() {
     }
 
     int32_t nRosterPetGUID = 0;
-    D2UnitStrc* pMerc = UNIT::Player::GetPlayerUnit_UI();
-    nRosterPetGUID = GAME::RosterPets::GetRosterPetGUID(pMerc, 7, nRosterPetGUID);
+    D2UnitStrc* pMerc;
+    nRosterPetGUID = GAME::RosterPets::GetRosterPetGUID(UNIT::Player::GetPlayerUnit_UI(), 7, nRosterPetGUID);
     if (nRosterPetGUID == -1) {
       BOOL bIsExpansion;
       bIsExpansion = GAME::Game::CLIENT_CheckExpansion();
@@ -185,8 +185,8 @@ int __stdcall NPCMENU_ShowMercResurrectDialog() {
         return 0;
       }
 
-      pMerc = UNIT::Player::GetPlayerUnit_UI();
-      nRosterPetGUID = GAME::RosterPets::CountRostersForUnitFilterBySkill(pMerc, 7);
+
+      nRosterPetGUID = GAME::RosterPets::CountRostersForUnitFilterBySkill(UNIT::Player::GetPlayerUnit_UI(), 7);
       if (!nRosterPetGUID && nMercNameId == -1) {
         NPCMENU_HireMerc();
         return 0;

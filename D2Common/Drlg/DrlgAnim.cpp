@@ -74,12 +74,12 @@ void __fastcall DRLGROOMTILE_CountAnimTilesFromGrid(D2RoomExStrc * pRoomEx, D2Dr
             if (pOrientGrid) {
               pOrientation = (D2DrlgCoordStrc*)DrlgGrid::GetGridFlags(pOrientGrid, nCellX, nKillEdgeY);
             }
-            if (!nGridFlags) {
-              nMainIndex = 0;
-              nSubIndex = 0;
-            } else {
+            if (nGridFlags) {
               nMainIndex = (uint8_t)(nGridFlags >> 0x14) & 0x3f;
               nSubIndex = nGridFlags >> 8;
+            } else {
+              nMainIndex = 0;
+              nSubIndex = 0;
             }
 
             nMatchCount = D2CMP::DUNGEON::Dungeon::TILEPROJECT_LookupTilesInAllProjects(pRoomExCtx->apTiles, (int32_t)pOrientation, (uint32_t)nMainIndex, nSubIndex & 0xff, aTileResults, 0x28);
@@ -88,11 +88,11 @@ void __fastcall DRLGROOMTILE_CountAnimTilesFromGrid(D2RoomExStrc * pRoomEx, D2Dr
               if (nTileLibFlags & 0x100) {
                 nCellY = nMatchCount - 1;
                 if (!(nGridFlags & 2)) {
-                  if (!(nGridFlags & 1)) {
-                    piVar1 = &pTileGrid->sRoomTiles.nRoofTilesCount;
+                  if (nGridFlags & 1) {
+                    piVar1 = &pTileGrid->sRoomTiles.nWallTilesCount;
                     *piVar1 += nCellY;
                   } else {
-                    piVar1 = &pTileGrid->sRoomTiles.nWallTilesCount;
+                    piVar1 = &pTileGrid->sRoomTiles.nRoofTilesCount;
                     *piVar1 += nCellY;
                   }
                 } else {
@@ -114,7 +114,7 @@ void __fastcall DRLGROOMTILE_CountAnimTilesFromGrid(D2RoomExStrc * pRoomEx, D2Dr
     } while (nKillEdgeY < nCellY);
 }
 
-void AnimateTile(D2RoomExStrc * pRoomEx) {
+static void AnimateTile(D2RoomExStrc * pRoomEx) {
     D2DrlgAnimTileGridStrc* pAnimTile;
     int* dwTmp;
     if (!(pRoomEx->eRoomExFlags & 0x8000000U && pRoomEx->pRoomTiles)) {
@@ -199,7 +199,7 @@ void __fastcall DRLGANIM_AllocAnimatedTiles(D2DrlgGridStrc * pGrids, D2RoomExStr
               }
 
               nMatchCount = D2CMP::DUNGEON::Dungeon::TILEPROJECT_LookupTilesInAllProjects(pRoomExIter->apTiles, pTileEntryIter[1], (uint32_t)nOrientation, nIndex & 0xff, aTileResults, 0x28);
-              pAnimTileGrid = D2_NEW_POOL(pMemory, D2DrlgAnimTileGridStrc);
+              pAnimTileGrid = ((D2DrlgAnimTileGridStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2DrlgAnimTileGridStrc), ".\\DRLG\\DrlgAnim.cpp", 0x9b, 0));
               pAnimTileGrid->ppTileData = 0;
               pAnimTileGrid->nFrameStep = 0;
               pAnimTileGrid->pNext = 0;
@@ -257,7 +257,7 @@ void __fastcall DRLGANIM_AllocAnimatedTiles(D2DrlgGridStrc * pGrids, D2RoomExStr
                     }
                   }
 
-                  if (nMatchCount <= nIndex) {
+                  if (nIndex >= nMatchCount) {
                     Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcb);
                     exit(-1);
                   }
@@ -287,7 +287,6 @@ void __fastcall DRLGANIM_AllocAnimatedTiles(D2DrlgGridStrc * pGrids, D2RoomExStr
       }
     }
 
-    Fog::Debug::GuardStack();
 }
 
 // Wrapper calling DRLGANIM_AllocAnimatedTiles for wall/floor/shadow.

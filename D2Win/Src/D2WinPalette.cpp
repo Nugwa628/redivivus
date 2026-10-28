@@ -33,7 +33,7 @@ void __stdcall D2WINPALETTE_LoadPalettes() {
       *pPaletteTableEntry = pPaletteData;
       pPaletteData += 0x100;
       pPaletteTableEntry++;
-    } while ((int)pPaletteData < (uintptr_t)&gPaletteDataBase[12544]);
+    } while ((int)pPaletteData < (int)((uintptr_t)&gPaletteDataBase[12544]));
 
     pPaletteTableEntry = aPaletteTable + 0x34;
     pPaletteData = gPaletteTransposeBase;
@@ -41,7 +41,7 @@ void __stdcall D2WINPALETTE_LoadPalettes() {
       *pPaletteTableEntry = pPaletteData;
       pPaletteData += 0x100;
       pPaletteTableEntry++;
-    } while ((int)pPaletteData < (uintptr_t)&gPaletteTransposeBase[3328]);
+    } while ((int)pPaletteData < (int)((uintptr_t)&gPaletteTransposeBase[3328]));
 
     aPaletteTable[0x41] = gPaletteAct2;
     aPaletteTable[0x42] = gPaletteAct5;
@@ -64,7 +64,7 @@ void __stdcall DRAW_SetOrReloadPalleteMain() {
     if (gbGammaShiftActive) {
       DWORD dwTickCount;
       dwTickCount = GetTickCount();
-      if (dwTickCount - gdwPaletteShiftStartTick < 0x7d1) {
+      if (dwTickCount - gdwPaletteShiftStartTick <= 0x7d0) {
         return;
       }
 
@@ -116,8 +116,8 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
     int nSrcLine = 99;
     char* szSrcFile = ".\\Src\\D2WinPalette.cpp";
     uint32_t* pFileSize = 0;
-    D2PoolManagerStrc* pDatFileData = D2WinArchive::ReturnZero();
-    void* pDatFileHandle = Fog::Archive::D2FILE_AllocAndLoadD2File(pDatFileData, szText1, pFileSize, szSrcFile, nSrcLine);
+    D2PoolManagerStrc* pDatFileData;
+    void* pDatFileHandle = Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szText1, pFileSize, szSrcFile, nSrcLine);
     uint32_t nPaletteIdx = 0;
     do {
       aAlphaTable[nPaletteIdx * 4] = 0;
@@ -127,8 +127,8 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
     int32_t nSrcLine2 = 0x72;
     szSrcFile = ".\\Src\\D2WinPalette.cpp";
     pFileSize = 0;
-    pDatFileData = D2WinArchive::ReturnZero();
-    PALETTEENTRY* pMemoryToFree = (PALETTEENTRY*)Fog::Archive::D2FILE_AllocAndLoadD2File(pDatFileData, szText2, pFileSize, szSrcFile, nSrcLine2);
+
+    PALETTEENTRY* pMemoryToFree = (PALETTEENTRY*)Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szText2, pFileSize, szSrcFile, nSrcLine2);
     PALETTEENTRY* pSrcArchive = pMemoryToFree;
     PALETTEENTRY* pDstIndexCounter = MostLikelyCurrentPalletePtr;
     for (nCount = 0x100; nCount; nCount--) {
@@ -217,8 +217,8 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
 
     D2WINPALETTE_LoadPalettes();
     D2gfx::D2GFX::D2GFX_SetPalette(MostLikelyCurrentPalletePtr);
-    D2_FREE(pDatFileHandle);
-    D2_FREE(pMemoryToFree);
+    Fog::Memory::FreeClientMemory(pDatFileHandle, ".\\Src\\D2WinPalette.cpp", 0x96, 0);
+    Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\Src\\D2WinPalette.cpp", 0x99, 0);
     return 1;
 }
 
@@ -237,7 +237,7 @@ BOOL __fastcall D2WINPAL_LoadActPalette(uint8_t nParam) {
     return nResult;
 }
 
-void __stdcall LoadPalette(char * szDatFile, char * szPl2File) {
+int __stdcall LoadPalette(char * szDatFile, char * szPl2File) {
     char szDatFullPath[260];
     if (!szDatFile) {
       char szPl2FullPath[260];
@@ -245,11 +245,12 @@ void __stdcall LoadPalette(char * szDatFile, char * szPl2File) {
       /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szDatFullPath, "%s\\%s", "DATA\\GLOBAL", "palette\\act1\\pal.pl2");
       D2WINPAL_LoadPaletteFiles(szPl2FullPath, szDatFullPath);
       D2Comp::D2COMP_InitEmblemColorTables();
-      return;
+      return 1;
     }
 
     D2WINPAL_LoadPaletteFiles(szDatFile, szPl2File);
     D2Comp::D2COMP_InitEmblemColorTables();
+    return 1;
 }
 
 void __fastcall D2WINPAL_SetGammaRamp(uint32_t dwParam) {
