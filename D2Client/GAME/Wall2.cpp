@@ -539,10 +539,10 @@ void __fastcall WALL2_ScheduleSoundSequence(uint32_t dwParam1, int32_t nParam1, 
       if (pStopHandle) {
         nActiveSoundId = D2Client::Sound::SOUND_GetSoundId(pStopHandle);
         if (nActiveSoundId) {
-          if (!nBlockIdx) {
-            pStopHandle = 0;
-          } else {
+          if (nBlockIdx) {
             pStopHandle = pSoundTxt->Block[nBlockIdx - 1];
+          } else {
+            pStopHandle = 0;
           }
 
           nSoundHdrOffset = D2Client::Sound::SoundHdr::SOUNDHDR_GetGlobal0();
@@ -662,10 +662,10 @@ static void WALL2_InsertUnitDrawBelow(D2Wall2DrawListStrc * pDrawList, D2UnitStr
     eD2UnitType eVar3 = pUnit->eUnitType;
     if (eVar3 == UNIT_OBJECT || 3 < (int)eVar3 && (int)eVar3 <= 5) {
       nUnitPos = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nUnitPos = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nUnitPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nUnitPos = 0;
     }
 
     pDVar1->nX = nUnitPos * 8;
@@ -786,21 +786,7 @@ void __stdcall WALL2_AddWallTile(D2Wall2DrawListStrc * pDrawList, D2Wall2CellStr
       int32_t iVar3;
       iVar3 = WALL2_IsTileOccludingPlayer(pTileData, pRoom);
       nDrawEntryIdx = pTileData->nTransitionFlags;
-      if (!iVar3) {
-        if (!(nDrawEntryIdx & 1)) {
-          goto insert_draw_entry;
-        }
-
-        pTileData->nAlphaStart = 0x80;
-        pTileData->nAlphaEnd = 0xff;
-        if (pTileData->nCurrentAlpha == 0x80) {
-          pTileData->nFadeEndTime = nFadeEndTime;
-        } else {
-          pTileData->nFadeEndTime = (int)((0x80 - (uint32_t)pTileData->nCurrentAlpha) * 500) / 0x7f + nFadeEndTime;
-        }
-
-        nDrawEntryIdx = nDrawEntryIdx & -2 | 2;
-      } else {
+      if (iVar3) {
         if (nDrawEntryIdx & 1) {
           goto insert_draw_entry;
         }
@@ -814,6 +800,20 @@ void __stdcall WALL2_AddWallTile(D2Wall2DrawListStrc * pDrawList, D2Wall2CellStr
           pTileData->nFadeEndTime = (int)((pTileData->nCurrentAlpha - 0xff) * 500) / 0x7f + nFadeEndTime;
           nDrawEntryIdx |= 3;
         }
+      } else {
+        if (!(nDrawEntryIdx & 1)) {
+          goto insert_draw_entry;
+        }
+
+        pTileData->nAlphaStart = 0x80;
+        pTileData->nAlphaEnd = 0xff;
+        if (pTileData->nCurrentAlpha == 0x80) {
+          pTileData->nFadeEndTime = nFadeEndTime;
+        } else {
+          pTileData->nFadeEndTime = (int)((0x80 - (uint32_t)pTileData->nCurrentAlpha) * 500) / 0x7f + nFadeEndTime;
+        }
+
+        nDrawEntryIdx = nDrawEntryIdx & -2 | 2;
       }
 
       pTileData->nTransitionFlags = nDrawEntryIdx;
@@ -1027,10 +1027,10 @@ static void __stdcall WALL2_InsertUnitDraw(D2Wall2CellStrc * pWall2Cell, D2UnitS
     eD2UnitType eVar3 = pUnit->eUnitType;
     if (eVar3 == UNIT_OBJECT || 3 < (int)eVar3 && (int)eVar3 <= 5) {
       nUnitPos = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nUnitPos = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nUnitPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nUnitPos = 0;
     }
 
     pDVar1->nX = nUnitPos * 8;
@@ -1081,10 +1081,10 @@ static void __stdcall WALL2_InsertUnitShadowDraw(D2Wall2CellStrc * pWall2Cell, D
     eD2UnitType eVar3 = pUnit->eUnitType;
     if (eVar3 == UNIT_OBJECT || 3 < (int)eVar3 && (int)eVar3 <= 5) {
       nUnitPos = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nUnitPos = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nUnitPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nUnitPos = 0;
     }
 
     pDVar1->nX = nUnitPos * 8;

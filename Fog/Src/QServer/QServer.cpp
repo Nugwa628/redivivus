@@ -390,13 +390,13 @@ void __fastcall HACKL_RemoveIpFromHacklist(D2QServerStrc * pQServer, uint32_t nI
       pEntry = pCurEntry->pNext;
       pPrevEntry = pCurEntry;
       if (pCurEntry->ipAddress.S_un.S_addr == nIpAddress) {
-        if (!pNextEntry) {
+        if (pNextEntry) {
+          pNextEntry->pNext = pEntry;
+          D2_FREE(pCurEntry);
+        } else {
           pQServer->ppHacklistBuckets[nBucketIndex] = pQServer->ppHacklistBuckets[nBucketIndex]->pNext;
           Fog::Memory::FreeClientMemory(pCurEntry, ".\\Src\\QServer\\QServer.cpp", 0x4d7, 0);
           pNextEntry = 0;
-        } else {
-          pNextEntry->pNext = pEntry;
-          D2_FREE(pCurEntry);
         }
 
         pQServer->nHacklistSize--;
@@ -1518,10 +1518,10 @@ int __stdcall Shutdown(D2QServerStrc * pQServer, char * pBytes, int nSize) {
       BroadcastToAllClients(pQServer, pBytes, nSize);
     }
     if (pQServer->neD2GSConnectionType != CONNECTIONTYPE_SINGLEPLAYER && pQServer->neD2GSConnectionType != CONNECTIONTYPE_SINGLEPLAYERUNCAPPED) {
-      if (!pQServer->bUseNtLocalMode) {
-        QServer::QServer98::QSERVER_CloseAllConnections(pQServer);
-      } else {
+      if (pQServer->bUseNtLocalMode) {
         QServer::QServerNT::AwaitAndClose(pQServer);
+      } else {
+        QServer::QServer98::QSERVER_CloseAllConnections(pQServer);
       }
     }
 
@@ -1863,10 +1863,10 @@ void __fastcall RecvForClient(D2QServerStrc * pQServer, D2QServerClientConnectio
         }
 
         /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pQServer->csClientLifecycle);
-        if (!pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx]) {
-          pQServer->ppModePacketQueueHeads[__frame0.nQueueModeIdx] = pPacketNode;
-        } else {
+        if (pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx]) {
           pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx]->pNext = pPacketNode;
+        } else {
+          pQServer->ppModePacketQueueHeads[__frame0.nQueueModeIdx] = pPacketNode;
         }
 
         pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx] = pPacketNode;

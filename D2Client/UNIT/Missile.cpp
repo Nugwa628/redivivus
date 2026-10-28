@@ -591,7 +591,7 @@ void __fastcall MISSILE_InitMissileUnit(D2UnitStrc * pUnit, D2RoomStrc * pRoom, 
 
     D2Common::PATH::DynamicPath::PATH_ChangeCollisionType(pDynamicPath, eCollisionFlag);
     D2Common::PATH::DynamicPath::PATH_SetCollisionPattern(pDynamicPath, MISSILECLTCOLLIDEFUNCS[(uint8_t)pMissileTxt->CollideType].nFlags);
-    if (pMissileTxt->CanDestroy) {
+    if ((*((uint8_t*)pMissileTxt + 0x4) & gadwBitMasks[4])) {
       pUnit->eUnitFlags |= UNITFLAG_CANBEATTACKED;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_CANBEATTACKED;
@@ -680,7 +680,7 @@ int MISSILE_CheckAndDecrementPierce(D2UnitStrc * pUnit) {
     } else {
       pMissileTxt = sgptDataTable->pTxtMissiles + nMissileClassId;
     }
-    if (!pMissileTxt->Pierce) {
+    if (!(*((uint8_t*)pMissileTxt + 0x4) & gadwBitMasks[2])) {
       return nResult;
     }
 
@@ -721,7 +721,7 @@ void __fastcall MISSILE_RemoveClientSide(D2UnitStrc * pUnit) {
       return;
     }
 
-    CUnit::RemoveObjectFromServerObjectTable(pUnit->eUnitType, pUnit->nUnitGUID);
+    CUnit::RemoveObjectFromServerObjectTable(pUnit->nUnitGUID, pUnit->eUnitType);
 }
 
 // Computes and stores the pierce count for missile pUnit against target pUnit2 (player or monster only). Checks MissilesTxt pierce flag (bit 2); if set, sums UNITSTAT_skill_pierce + UNITSTAT_item_pierce on the target, then runs a seeded RNG loop (up to 4 iterations) comparing random%100 against pierce chance to count successful pierces. Writes the result to missile's UNITSTAT_pierce_idx stat. Uses UNITSTAT_pierce_idx on the target as the RNG seed index for non-local players.
@@ -742,7 +742,7 @@ void __stdcall MISSILE_CalculatePierceCount(D2UnitStrc * pUnit, D2UnitStrc * pUn
     } else {
       pMissileTxt = sgptDataTable->pTxtMissiles + nMissileClassId;
     }
-    if (!pMissileTxt->Pierce) {
+    if (!(*((uint8_t*)pMissileTxt + 0x4) & gadwBitMasks[2])) {
       return;
     }
 
@@ -874,7 +874,7 @@ D2UnitStrc * __fastcall MakeMissile(D2SkillArgStrc * pSkillArg) {
     nSlowPct = 100;
     uint32_t nVelForPath;
     nVelForPath = nVelocityRaw;
-    if (pSkillArg->pOwner && pMissileTxt->CanSlow) {
+    if (pSkillArg->pOwner && (*((uint8_t*)pMissileTxt + 0x4) & gadwBitMasks[3])) {
       eD2States eSlowState;
       eSlowState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pSkillArg->pOwner, STATE_slowmissiles);
       if (eSlowState != STATE_none) {
@@ -912,11 +912,7 @@ D2UnitStrc * __fastcall MakeMissile(D2SkillArgStrc * pSkillArg) {
         if (pTargetUnit) {
           goto retarget_if_overlapping;
         }
-      } else if (!pTargetUnit) {
-        if (nDestXLocal == nMissileX && nDestY == nY) {
-          SKILLS::Skills::GetPositionNextToPlayerDirection(pDVar6, &nDestXLocal, &nDestY);
-        }
-      } else {
+      } else if (pTargetUnit) {
         retarget_if_overlapping:
         if (pDVar6 && pTargetUnit != pDVar6) {
           nDistX = Units::GetXPosFromDynamicPathUnit(pDVar6);
@@ -929,6 +925,10 @@ D2UnitStrc * __fastcall MakeMissile(D2SkillArgStrc * pSkillArg) {
               pTargetUnit = 0;
             }
           }
+        }
+      } else {
+        if (nDestXLocal == nMissileX && nDestY == nY) {
+          SKILLS::Skills::GetPositionNextToPlayerDirection(pDVar6, &nDestXLocal, &nDestY);
         }
       }
 
@@ -2087,10 +2087,10 @@ void __fastcall MISSILE_CreatePatternAtUnitPos(D2UnitStrc * pUnit, int32_t nRadi
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
     MISSILE_SpawnMissilesInArea(pUnit, nPosX, nPosY, nRadius, nMissileId, eSkill, nSkillLevel, nChance, nStep);
@@ -6257,7 +6257,7 @@ void __fastcall MISSILE_ClientFrameUpdate(D2UnitStrc * pUnit) {
 
       pRoom = Player::DRLGROOM_FindBetterNearbyRoom(nullptr, nX, nPosY);
     }
-    if (!pMissileTxt->Town) {
+    if (!(*((uint8_t*)pMissileTxt + 0x5) & gadwBitMasks[2])) {
       bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom);
       if (bIsInTown) {
         MISSILE_RemoveClientSide(pUnit);
@@ -6512,7 +6512,7 @@ D2UnitStrc * __fastcall MISSILE_ClientHitExplode(D2UnitStrc * pUnit, D2UnitStrc 
       return pExplosion;
     }
 
-    CUnit::RemoveObjectFromServerObjectTable(pUnit->eUnitType, pUnit->nUnitGUID);
+    CUnit::RemoveObjectFromServerObjectTable(pUnit->nUnitGUID, pUnit->eUnitType);
     return pExplosion;
 }
 

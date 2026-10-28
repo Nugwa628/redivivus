@@ -182,10 +182,10 @@ static int __stdcall D3DFLOOR_AllocateNodeFromFreeList(D3DFloorCacheStrc * pCach
       D3DFloorCacheNodeStrc* pNewFreeHead;
       pNewFreeHead = pNode->pNext;
       pCache->pFreeHead = pNewFreeHead;
-      if (!pNewFreeHead) {
-        pCache->pFreeTail = 0;
-      } else {
+      if (pNewFreeHead) {
         pNewFreeHead->pPrev = 0;
+      } else {
+        pCache->pFreeTail = 0;
       }
 
       pNode->pNext = 0;
@@ -244,10 +244,10 @@ void __fastcall D3DFLOOR_EvictLRU(D3DFloorCacheStrc * pCache) {
       D3DFloorCacheNodeStrc* pNextNode;
       pNextNode = pEvictNode->pNext;
       pCache->pUsedHead = pNextNode;
-      if (!pNextNode) {
-        pCache->pUsedTail = 0;
-      } else {
+      if (pNextNode) {
         pNextNode->pPrev = 0;
+      } else {
+        pCache->pUsedTail = 0;
       }
 
       pEvictNode->pNext = 0;
@@ -348,10 +348,10 @@ void __fastcall D3DFLOOR_Free(D3DFloorCacheStrc * pCache, BOOL bInvalidateAll) {
           if (pCurNode) {
             pNextNode = pCurNode->pNext;
             pCache->pUsedHead = pNextNode;
-            if (!pNextNode) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextNode) {
               pNextNode->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pCurNode->pNext = 0;
@@ -400,10 +400,10 @@ int32_t __fastcall D3DFLOOR_EnsureAvailableNode(D3DFloorCacheStrc * pCache) {
           if (pNode) {
             pNextNode = pNode->pNext;
             pCache->pUsedHead = pNextNode;
-            if (!pNextNode) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextNode) {
               pNextNode->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pNode->pNext = 0;
@@ -432,10 +432,10 @@ int32_t __fastcall D3DFLOOR_EnsureAvailableNode(D3DFloorCacheStrc * pCache) {
       } else {
         pNextNode = pNode->pNext;
         pCache->pFreeHead = pNextNode;
-        if (!pNextNode) {
-          pCache->pFreeTail = 0;
-        } else {
+        if (pNextNode) {
           pNextNode->pPrev = 0;
+        } else {
+          pCache->pFreeTail = 0;
         }
 
         pNode->pNext = 0;

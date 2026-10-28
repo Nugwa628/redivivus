@@ -133,89 +133,73 @@ void __fastcall RENDERER_D3D_ConvertPalettedTo16Bit(uint8_t * pSrc8Bit, uint16_t
 }
 
 void __fastcall RENDERER_D3D_SetBlendMode(int nBlendMode) {
-    DWORD dwValue;
     if (!(!g_nCurrentTextureOpMode || nBlendMode != g_nCurrentTextureOpMode)) {
       return;
     }
-    if (nBlendMode != 1) {
-      if (nBlendMode != 2) {
-        g_nCurrentTextureOpMode = nBlendMode;
-        return;
-      }
-
-      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 1, 3);
-      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 4, 3);
-      dwValue = 0;
-    } else {
+    switch (nBlendMode) {
+    case 1:
       g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 1, 4);
       g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 4, 4);
-      dwValue = 1;
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0xf, 1);
+      break;
+    case 2:
+      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 1, 3);
+      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 4, 3);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0xf, 0);
+      break;
     }
 
-    g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0xf, dwValue);
     g_nCurrentTextureOpMode = nBlendMode;
 }
 
 // Sets Direct3D alpha blending mode. Mode 1=opaque, 2=additive, 3=modulate, 4=alpha blend. Caches current mode to avoid redundant state changes.
 void __fastcall SetBlendMode(int nBlendMode) {
-    uint32_t uVar1;
-    if (!g_nCurrentAlphaBlendMode || (uVar1 = g_nCurrentAlphaBlendMode , nBlendMode != g_nCurrentAlphaBlendMode)) {
-      DWORD uDestBlendFactor;
-      uVar1 = nBlendMode;
-      switch (nBlendMode) {
-        case 1:
-          g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 0);
-        g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 2);
-        uDestBlendFactor = 1;
-        break;
-        case 2:
-          g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
-        g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 2);
-        uDestBlendFactor = 2;
-        break;
-        case 3:
-          g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
-        g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 1);
-        uDestBlendFactor = 3;
-        break;
-        case 4:
-          g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
-        g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 5);
-        uDestBlendFactor = 6;
-        break;
-        default:
-          {
-            g_nCurrentAlphaBlendMode = uVar1;
-            return;
-          }
-      }
-
-      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, uDestBlendFactor);
-      uVar1 = nBlendMode;
+    if (!(!g_nCurrentAlphaBlendMode || nBlendMode != g_nCurrentAlphaBlendMode)) {
+      return;
     }
 
-    g_nCurrentAlphaBlendMode = uVar1;
+    switch (nBlendMode) {
+    case 1:
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 0);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 2);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, 1);
+      break;
+    case 2:
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 2);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, 2);
+      break;
+    case 3:
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 1);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, 3);
+      break;
+    case 4:
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 5);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, 6);
+      break;
+    }
+
+    g_nCurrentAlphaBlendMode = nBlendMode;
 }
 
 void __fastcall RENDERER_D3D_SetTextureFilterMode(int nFilterMode) {
-    DWORD dwValue;
     if (!(!g_nCurrentFilterMode || nFilterMode != g_nCurrentFilterMode)) {
       return;
     }
-    if (nFilterMode == 1) {
-      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x10, 1);
-      dwValue = 1;
-    } else {
-      if (nFilterMode != 2) {
-        g_nCurrentFilterMode = nFilterMode;
-        return;
-      }
 
+    switch (nFilterMode) {
+    case 1:
+      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x10, 1);
+      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x11, 1);
+      break;
+    case 2:
       g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x10, 2);
-      dwValue = 2;
+      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x11, 2);
+      break;
     }
 
-    g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x11, dwValue);
     g_nCurrentFilterMode = nFilterMode;
 }
 
@@ -2592,9 +2576,9 @@ BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWnd) {
 }
 
 // @sourcefile .\Src\d3dCore.cpp
-void Release() {
+BOOL Release() {
     if (!g_bD3DCoreInitialized) {
-      return;
+      return 1;
     }
 
     RENDERER_D3D_ReleaseSmackerBuffer();
@@ -2615,6 +2599,7 @@ void Release() {
     }
 
     g_bD3DCoreInitialized = 0;
+    return 1;
 }
 
 BOOL __fastcall CreateWindow(HWND hWnd, int nResolutionMode) {

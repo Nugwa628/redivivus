@@ -145,13 +145,13 @@ void __stdcall AUTOMAP_SetupPosition() {
       AUTOMAP_CenterOnPlayer(1);
       return;
     }
-    if (!AutoMapLeft) {
-      gnAutomapCenterX = ScreenSizeX * 2 / 3;
-      nAutomapCenterY = 0x4e;
-    } else {
+    if (AutoMapLeft) {
       gnAutomapCenterX = 0;
       bNotMercPurchase = Hireables::HIREABLE_IsNotInMercPurchaseMode();
       nAutomapCenterY = bNotMercPurchase ? 0x60 : 0;
+    } else {
+      gnAutomapCenterX = ScreenSizeX * 2 / 3;
+      nAutomapCenterY = 0x4e;
     }
 
     gnAutomapPanelOffsetX = gnAutomapCenterX;
@@ -195,7 +195,7 @@ int32_t AUTOMAP_GetFade() {
     return nAutoMapFade;
 }
 
-void __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
+int32_t __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
     if (MiniMapType == 1 && nAutomapFade == 1) {
       nAutomapFade = (bAutoMapFade ? -2 : 0) + 2;
       nAutoMapFade = 1;
@@ -204,44 +204,49 @@ void __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMapFade", 0, nAutomapFade);
     bAutoMapFade = nAutomapFade;
     nAutoMapFade = nAutomapFade;
+    return nAutomapFade;
 }
 
 int32_t __stdcall AUTOMAP_GetCenters() {
     return nAutoMapCenters;
 }
 
-void __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters) {
+int32_t __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Centers", 0, nAutoMapCenters);
     Automap::nAutoMapCenters = nAutoMapCenters;
+    return nAutoMapCenters;
 }
 
 int32_t __stdcall AUTOMAP_GetLeft() {
     return AutoMapLeft;
 }
 
-void __fastcall AUTOMAP_SetLeft(int32_t nAutoMapLeft) {
+int32_t __fastcall AUTOMAP_SetLeft(int32_t nAutoMapLeft) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Left", 0, nAutoMapLeft);
     AutoMapLeft2 = nAutoMapLeft;
     AutoMapLeft3 = nAutoMapLeft;
     AutoMapLeft = nAutoMapLeft;
+    return nAutoMapLeft;
 }
 
 BOOL __stdcall AUTOMAP_GetParty() {
     return nAutoMapParty;
 }
 
-void __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty) {
+int32_t __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Party", 0, nAutoMapParty);
     Automap::nAutoMapParty = nAutoMapParty;
+    return nAutoMapParty;
 }
 
 int32_t __stdcall AUTOMAP_GetPartyNames() {
     return AutoMapPartyNames;
 }
 
-void __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames) {
+int32_t __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Party Names", 0, nAutoMapPartyNames);
     AutoMapPartyNames = nAutoMapPartyNames;
+    return nAutoMapPartyNames;
 }
 
 void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, D2AutomapCellStrc * * ppRootNode) {
@@ -787,9 +792,7 @@ static void AUTOMAP_SaveLayerToFile(D2AutomapFileEntryStrc * pEntry) {
 
     __frame0.nEntryOffset = dwHeader[pEntry->nLayer];
     __frame0.dwFileSize = GetFileSize(hFile, (LPDWORD)0x0);
-    if (!__frame0.nEntryOffset) {
-      dwHeader[pEntry->nLayer] = __frame0.dwFileSize;
-    } else {
+    if (__frame0.nEntryOffset) {
       int nPrevEntryOffset;
       do {
         Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, __frame0.nEntryOffset, (PLONG)0x0, 0);
@@ -799,6 +802,8 @@ static void AUTOMAP_SaveLayerToFile(D2AutomapFileEntryStrc * pEntry) {
 
       Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, nPrevEntryOffset, (PLONG)0x0, 0);
       Fog::Source::SFile::thunk_WriteFile(hFile, (LPCVOID)&__frame0.dwFileSize, 4, &__frame0.dwBytesTransferred, (LPOVERLAPPED)0x0);
+    } else {
+      dwHeader[pEntry->nLayer] = __frame0.dwFileSize;
     }
 
     Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, 0, (PLONG)0x0, 0);
@@ -1355,7 +1360,7 @@ void __stdcall AUTOMAP_RevealRoom(D2RoomStrc * pRoom, int32_t bForceReveal, D2Au
     D2RoomExStrc* pRoomEx = D2Common::DUNGEON::Dungeon::GetRoomExFromRoom(pRoom);
     D2DrlgTileDataStrc* pTiles = D2Common::DUNGEON::Dungeon::DRLGROOM_GetFloorTilesFromRoom(pRoom, (int*)&nTileCount);
     uint32_t i = 0;
-    if (nTileCount) {
+    if (nTileCount > 0) {
       pnTileFlags = &pTiles->nFlags;
       do {
         if (!(*pnTileFlags & 8U) && (*pnTileFlags & 0x20000U || bAutoMapRevealAll || bForceReveal)) {
@@ -1369,7 +1374,7 @@ void __stdcall AUTOMAP_RevealRoom(D2RoomStrc * pRoom, int32_t bForceReveal, D2Au
 
     pTiles = D2Common::DUNGEON::Dungeon::DRLGROOM_GetWallTilesFromRoom(pRoom, (int*)&nTileCount);
     i = 0;
-    if (nTileCount) {
+    if (nTileCount > 0) {
       pnTileFlags = &pTiles->nFlags;
       do {
         if (!(*pnTileFlags & 8U) && (*pnTileFlags & 0x20000U || bAutoMapRevealAll || bForceReveal)) {
@@ -2396,7 +2401,6 @@ void __stdcall AUTOMAP_Init() {
 }; D2_STATIC_GUARD(gnAutoMapInitialZoomLevel, "D2Client::UI::Automap::AUTOMAP_Init::gnAutoMapInitialZoomLevel");
 
     int nCellId;
-    uint32_t* pPriorityValue;
     int32_t nRegValue = 0;
     AUTOMAP_LoadDC6Sprites();
     uint32_t* pPriorityTable = gnAutoMapCellPriority;
@@ -2409,9 +2413,8 @@ void __stdcall AUTOMAP_Init() {
     do {
       uint32_t nCellIndex;
       nCellIndex = *pCellEntry;
-      pPriorityValue = pCellEntry + 1;
+      gnAutoMapCellPriority[nCellIndex] = pCellEntry[1];
       pCellEntry += 2;
-      gnAutoMapCellPriority[nCellIndex] = *pPriorityValue;
     } while ((int)pCellEntry < (int)(gnAutoMapInitialZoomLevel + 98));
     // The original's bound is `pCellEntry < 0x7113e0`, and 0x7113e0 is where nAutoMapCenters
     // happens to sit immediately after this 49-pair table - so the compiler spelled "the end of

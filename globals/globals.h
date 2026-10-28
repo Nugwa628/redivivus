@@ -2957,7 +2957,7 @@ extern int D2GS_Connected;
 extern int ServerLoadingComplete;
 extern BOOL D2CLIENT_ExitVar3;
 // Level load in-progress flag: set on unload complete, cleared on load complete.
-extern bool gLevelLoadInProgress;
+extern BOOL gLevelLoadInProgress;
 // Exit cutscene state: pending id + played flag.
 extern D2ExitCutsceneState gExitCutsceneState;
 extern D2ExitCutsceneState gExitCutscenePlayed;
@@ -2973,7 +2973,7 @@ extern uint32_t gQueuedPrimaryClick;
 extern int gQueuedSecondaryClick;
 extern uint32_t gbMouseButtonEventPending;
 // Run modifier key state; adds run flag to ClickMap (cleared on key-up).
-extern bool gRunKeyDown;
+extern BOOL gRunKeyDown;
 // Click modifier key state used to add flag 0x4 in GetMouseClickFlags.
 extern int gClickModifierDown;
 extern uint32_t gnQueuedPrimaryClickX;
@@ -3425,9 +3425,9 @@ extern uint32_t gnUICtrlConfigButton3State;
 // Indices: [0] list area  [1] up arrow  [2] down arrow  [3] scroll bar  [4] scroll thumb  [5] below thumb  [6] tab/button row.
 extern int gaControlConfigRegionMouseState[7];
 extern uint32_t gnUICtrlConfigScrollOffset;
-extern uint8_t g_ControlConfigUIState;
+extern uint32_t g_ControlConfigUIState;
 extern int gnUICtrlConfigActiveButton;
-extern bool gbUICtrlConfigKeyBindMode;
+extern BOOL gbUICtrlConfigKeyBindMode;
 extern DC6 * gpUICtrlConfigScrollbarDC6;
 extern int gnUICtrlConfigPendingKeyStrId;
 extern unsigned int gdwUICtrlConfigKeyBindTimestamp;
@@ -3947,7 +3947,7 @@ extern D2BNetGatewayAccessStr ActualRealmInfo;
 // lpCriticalSection parameter of DeleteCriticalSection
 extern _RTL_CRITICAL_SECTION lpCriticalSection_00881860;
 extern int gnBnetLogFileHandle;
-extern bool gbBnetLogInitialized;
+extern BOOL gbBnetLogInitialized;
 extern D2BnCacheFileHeaderStrc * gpCacheFileHeader;
 extern void * gpCacheBlockTable;
 extern void * g_pCacheCryptTable;

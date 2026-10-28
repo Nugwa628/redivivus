@@ -1221,9 +1221,7 @@ static BOOL TEXT_FormatEventMessage(int32_t pEventData, uint16_t * wszText) {
     for (int i = 0; i < 16; i++) awszPlayerName[i] = 0;
     D2UnitStrc* pPlayerUnit_lcl;
     pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_UI();
-    if (!pRoster) {
-      szRosterName[0] = '\0';
-    } else {
+    if (pRoster) {
       char* pszSrc;
       pszSrc = GAME::Roster::GetRosterName(pRoster);
       pszDst = szRosterName;
@@ -1233,6 +1231,8 @@ static BOOL TEXT_FormatEventMessage(int32_t pEventData, uint16_t * wszText) {
         pszSrc++;
         pszDst++;
       } while (cNameCh != '\0');
+    } else {
+      szRosterName[0] = '\0';
     }
 
     D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(awszPlayerName, szRosterName, 0x10);
@@ -4338,7 +4338,7 @@ void __stdcall TEXT_OpenMessageLogDialog() {
 
 void __stdcall TEXT_DestroyMessageLogDialog() {
     if (Dialog::DialogHandle) {
-      Dialog::FreeDialogStrc();
+      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::DialogHandle);
       Dialog::DialogHandle = 0;
     }
     if (!gpTextMessageLogHead) {
@@ -5174,7 +5174,7 @@ void __stdcall TEXT_FreeEverything() {
       gpStaticTextPopup = 0;
     }
     if (Dialog::DialogHandle) {
-      Dialog::FreeDialogStrc();
+      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::DialogHandle);
       Dialog::DialogHandle = 0;
     }
     if (gpTextMessageLogHead) {

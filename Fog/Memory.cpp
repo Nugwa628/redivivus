@@ -416,10 +416,10 @@ void * __fastcall ReallocTrackedAllocation(D2PoolManagerStrc * pManager, void * 
       pPrev = (void*)pCurrent;
     }
 
-    if (!pPrev) {
-      pManager->pOverflow[(int)pAllocBase % 0x3ff] = *(uint8_t**)pCurrent;
-    } else {
+    if (pPrev) {
       *(uint32_t*)pPrev = *(uint32_t*)pCurrent;
+    } else {
+      pManager->pOverflow[(int)pAllocBase % 0x3ff] = *(uint8_t**)pCurrent;
     }
 
     void* pNewAlloc = realloc(pAllocBase, nNewSize + 4);

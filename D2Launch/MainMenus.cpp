@@ -527,10 +527,10 @@ void __fastcall MAINMENU_CreateMessageBox(uint16_t * wszText1, uint16_t * wszTex
       D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pForm, 1);
       D2Win::Src::D2WinMain::SetUnsetFlag0x08(pForm, 1);
       gaPredefinedForms[0x11a].nLabelAsLocaleStringId = nButton1LabelId;
-      if (!nParam2) {
-        gaPredefinedForms[0x11a].nExtraParam = nParam1 ? 0xd : 0;
-      } else {
+      if (nParam2) {
         gaPredefinedForms[0x11a].nExtraParam = 0x1b;
+      } else {
+        gaPredefinedForms[0x11a].nExtraParam = nParam1 ? 0xd : 0;
       }
       gaPredefinedForms[0x11a].fpOnPressCallback = pfnOnPress1;
       nLine = 0x11a;
@@ -569,16 +569,16 @@ void __stdcall UIMENU_PleaseWaitWithCancelButton() {
     FORMS_DestroyList();
     gbMainMenuUIActive = 1;
     gnMainMenuConnectFlag = 0;
-    if (!gnIsFecharPalette) {
-      pBackgroundForm = FORMS_CreateAnyFormFromList(0xde);
-      D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pBackgroundForm, 0);
-      pCancelButton = FORMS_CreateAnyFormFromList(0xdf);
-      nTextBoxFormId = 0xe0;
-    } else {
+    if (gnIsFecharPalette) {
       pBackgroundForm = FORMS_CreateAnyFormFromList(0xf7);
       D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pBackgroundForm, 0);
       pCancelButton = FORMS_CreateAnyFormFromList(0xfa);
       nTextBoxFormId = 0xf9;
+    } else {
+      pBackgroundForm = FORMS_CreateAnyFormFromList(0xde);
+      D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pBackgroundForm, 0);
+      pCancelButton = FORMS_CreateAnyFormFromList(0xdf);
+      nTextBoxFormId = 0xe0;
     }
 
     ::D2WinTextBox* pTextBox = (::D2WinTextBox*)FORMS_CreateAnyFormFromList(nTextBoxFormId);
@@ -823,18 +823,18 @@ void MAINMENU_GetLocalizedFilePath(char * szPathFormat, char * szOutPath, char *
     }
 
     uint32_t nLanguageCode = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
-    if (!nLanguageCode) {
-      sprintf(szOutPath, szPathFormat, "DATA\\LOCAL", "CHI", szResolution);
-      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, szOutPath, 0, (void**)&pFileHandle);
-      if (bOpened) {
-        Storm::Source::SFile::SFileCloseFile(pFileHandle);
-      }
-    } else {
+    if (nLanguageCode) {
       sprintf(szOutPath, szPathFormat, "DATA\\LOCAL", "ENG", szResolution);
       bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, szOutPath, 0, (void**)&pFileHandle);
       if (bOpened) {
         Storm::Source::SFile::SFileCloseFile(pFileHandle);
         return;
+      }
+    } else {
+      sprintf(szOutPath, szPathFormat, "DATA\\LOCAL", "CHI", szResolution);
+      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, szOutPath, 0, (void**)&pFileHandle);
+      if (bOpened) {
+        Storm::Source::SFile::SFileCloseFile(pFileHandle);
       }
     }
 }
@@ -4339,12 +4339,12 @@ void __stdcall UIMENU_CreateHeroSinglePlayer() {
       if (OogCurrentCharSelectionMode != CHAR_SELECTION_BNET) {
         goto add_class_portraits;
       }
-      if (!nCharacterSelectionIndex) {
-        gpCtlCreateCharLadderLabel = (::D2WinTextBox*)FORMS_CreateAnyFormFromListExEx(0xc1);
-        nTextAlign = 0xc2;
-      } else {
+      if (nCharacterSelectionIndex) {
         gpCtlCreateCharLadderLabel = (::D2WinTextBox*)FORMS_CreateAnyFormFromListExEx(0xc3);
         nTextAlign = 0xc4;
+      } else {
+        gpCtlCreateCharLadderLabel = (::D2WinTextBox*)FORMS_CreateAnyFormFromListExEx(0xc1);
+        nTextAlign = 0xc2;
       }
     } else {
       gpCtlCreateCharHardcoreLabel = (::D2WinTextBox*)FORMS_CreateAnyFormFromListExEx(0xca);
@@ -4357,12 +4357,12 @@ void __stdcall UIMENU_CreateHeroSinglePlayer() {
       if (OogCurrentCharSelectionMode != CHAR_SELECTION_BNET) {
         goto add_class_portraits;
       }
-      if (!nCharacterSelectionIndex) {
-        gpCtlCreateCharLadderLabel = (::D2WinTextBox*)FORMS_CreateAnyFormFromListExEx(0xbf);
-        nTextAlign = 0xc0;
-      } else {
+      if (nCharacterSelectionIndex) {
         gpCtlCreateCharLadderLabel = (::D2WinTextBox*)FORMS_CreateAnyFormFromListExEx(0xc1);
         nTextAlign = 0xc2;
+      } else {
+        gpCtlCreateCharLadderLabel = (::D2WinTextBox*)FORMS_CreateAnyFormFromListExEx(0xbf);
+        nTextAlign = 0xc0;
       }
     }
 

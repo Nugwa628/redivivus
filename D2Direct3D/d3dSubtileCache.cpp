@@ -177,10 +177,10 @@ static int __stdcall D3DSUBTILE_AllocateNodeFromFreeList(D3DSubtileCacheStrc * p
       D3DSubtileCacheNodeStrc* pNewFreeHead;
       pNewFreeHead = pNode->pNext;
       pCache->pFreeHead = pNewFreeHead;
-      if (!pNewFreeHead) {
-        pCache->pFreeTail = 0;
-      } else {
+      if (pNewFreeHead) {
         pNewFreeHead->pPrev = 0;
+      } else {
+        pCache->pFreeTail = 0;
       }
 
       pNode->pNext = 0;
@@ -303,10 +303,10 @@ void __fastcall D3DSUBTILE_Free(D3DSubtileCacheStrc * pCache, BOOL bInvalidateAl
           if (pNode) {
             pNextUsed = pNode->pNext;
             pCache->pUsedHead = pNextUsed;
-            if (!pNextUsed) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextUsed) {
               pNextUsed->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pNode->pNext = 0;
@@ -355,10 +355,10 @@ int32_t __fastcall D3DSUBTILE_EnsureAvailableNode(D3DSubtileCacheStrc * pCache) 
           if (pFreeNode) {
             pNextUsedNode = pFreeNode->pNext;
             pCache->pUsedHead = pNextUsedNode;
-            if (!pNextUsedNode) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextUsedNode) {
               pNextUsedNode->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pFreeNode->pNext = 0;
@@ -387,10 +387,10 @@ int32_t __fastcall D3DSUBTILE_EnsureAvailableNode(D3DSubtileCacheStrc * pCache) 
       } else {
         pNextUsedNode = pFreeNode->pNext;
         pCache->pFreeHead = pNextUsedNode;
-        if (!pNextUsedNode) {
-          pCache->pFreeTail = 0;
-        } else {
+        if (pNextUsedNode) {
           pNextUsedNode->pPrev = 0;
+        } else {
+          pCache->pFreeTail = 0;
         }
 
         pFreeNode->pNext = 0;

@@ -122,10 +122,10 @@ static void __stdcall CLIENT_SetAnimModeAndMoveToCurrentPos(eD2PlayerAnimMode nA
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nY = 0;
     }
     if (!(nX && nY)) {
       return;
@@ -670,7 +670,7 @@ uint32_t __stdcall PLAYER_CheckSkillUsability(int * pnUsabilityCode, D2UnitStrc 
     if (!pSkillsTxt) {
       return 0;
     }
-    if (0 < nUsabilityCode && (nUsabilityCode <= 2 || nUsabilityCode == 4) && pSkillsTxt->AttackNoMana) {
+    if (0 < nUsabilityCode && (nUsabilityCode <= 2 || nUsabilityCode == 4) && (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[4])) {
       D2SkillStrc* pSkill;
       pSkill = D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_Attack, pUnit);
       *ppSkill = pSkill;
@@ -1449,14 +1449,14 @@ static uint32_t INPUT_ValidateSkillAction(D2UnderMouseStrc * pUnderMouse) {
       }
 
       pRoom = D2Common::Units::UNITS_GetRoom(pUnderMouse->pPlayer);
-      if (!pSkillsTxt->InTown) {
+      if (!(*((uint8_t*)pSkillsTxt + 0x5) & gadwBitMasks[0])) {
         bRoomInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom);
         if (bRoomInTown) {
           UnitSnd::UNITSND_PlayPlayerSound(pUnderMouse->pPlayer, 0x18);
           return 0;
         }
       }
-      if (pSkillsTxt->passive) {
+      if ((*((uint8_t*)pSkillsTxt + 0x4) & gadwBitMasks[4])) {
         return 0;
       }
     }
@@ -1705,7 +1705,7 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
         if (iVar1) {
           if (*ppSkill) {
             pSkillsTxt2 = D2Common::Skills::GetSkillsTxt(*ppSkill);
-            if (pSkillsTxt2 && pSkillsTxt2->TargetItem) {
+            if (pSkillsTxt2 && (*((uint8_t*)pSkillsTxt2 + 0x7) & gadwBitMasks[3])) {
               bValid = PLAYER_CheckSkillUsability(nullptr, pUnderMouse->pPlayer, ppSkill);
               if (!bValid) {
                 return;
@@ -1718,7 +1718,7 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
 
           bIsInteractable = pUnit->eUnitFlags >> 2 & 1;
           if (bIsInteractable) {
-            if (!pSkillsTxt->TargetPet && !pSkillsTxt->TargetAlly) {
+            if (!(*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[1]) && !pSkillsTxt->TargetAlly) {
               bIsInteractable = CUnit::CanInteractWith(pPlayerUnit_lcl, pUnit);
             }
             if (bIsInteractable) {
@@ -1782,7 +1782,7 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
         }
         if ((uint8_t)dwFlags & 4) {
           pMonStatsTxt = DataTbls::MonsterTbls::TXT_MonStats_GetLine(pUnit->nClassId);
-          if (pMonStatsTxt && pMonStatsTxt->interact) {
+          if (pMonStatsTxt && (*((uint8_t*)pMonStatsTxt + 0xd) & gadwBitMasks[1])) {
             PLAYER_InteractWithUnitByType(UNIT_MONSTER, nTargetUnitGUID, pUnderMouse);
             return;
           }
@@ -1794,13 +1794,13 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
       eD2Skills eSkillId;
       if (!(*(uint8_t*)&pUnderMouse->flags & 2) || nWeaponClass == 1) {
         choose_unit_or_ground:
-        if (pUnit->eUnitType != UNIT_MONSTER || (iVar1 = CUnit::IsActive(pUnit) , !iVar1) || pSkillsTxt->TargetCorpse) {
+        if (pUnit->eUnitType != UNIT_MONSTER || (iVar1 = CUnit::IsActive(pUnit) , !iVar1) || (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[0])) {
           goto use_on_target_unit;
         }
       } else {
         eTargetType = pUnit->eUnitType;
         if (eTargetType == UNIT_OBJECT || eTargetType == UNIT_ITEM) {
-          if (pSkillsTxt->TargetItem) {
+          if ((*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[3])) {
             bForceInteract = true;
             goto choose_unit_or_ground;
           }
@@ -2276,7 +2276,7 @@ void __fastcall PLAYER_HandlePlayerDeath(D2GSPacketSrv0x74 * pDeathMsg) {
           nUnitGUID = pItem->nUnitGUID;
         }
 
-        CUnit::RemoveObjectFromServerObjectTable(eUnitType, nUnitGUID);
+        CUnit::RemoveObjectFromServerObjectTable(nUnitGUID, eUnitType);
       }
     }
 }

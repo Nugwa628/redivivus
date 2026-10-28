@@ -730,17 +730,17 @@ void __stdcall ShowUnrecoverableErrorDialog(int32_t nParam, char * szText, int n
 
     __vsnprintf(szFormattedMessageBuffer, 0x1000, szSourceFile, vaArgs);
     szFormattedMessageBuffer[0xfff] = '\0';
-    if (!szText) {
+    if (szText) {
+      pScan = szFormattedMessageBuffer;
+      szRelativePath2 = StripPathPrefixToRelative(szText);
+      Storm::Source::SSTR::SStrPrintf(szFinalErrorMessage, 0x1000, "%s\nLocation : %s, line #%d\nExpression : %s", gaErrorTypeNames[nParam], szRelativePath2, nLine, pScan);
+    } else {
       nCopyIdx = 0;
       do {
         pScan = szFormattedMessageBuffer + nCopyIdx;
         szFinalErrorMessage[nCopyIdx] = *pScan;
         nCopyIdx++;
       } while (*pScan != '\0');
-    } else {
-      pScan = szFormattedMessageBuffer;
-      szRelativePath2 = StripPathPrefixToRelative(szText);
-      Storm::Source::SSTR::SStrPrintf(szFinalErrorMessage, 0x1000, "%s\nLocation : %s, line #%d\nExpression : %s", gaErrorTypeNames[nParam], szRelativePath2, nLine, pScan);
     }
 
     Storm::Source::SSTR::SStrPrintf(szTitleBuffer, 0x100, "%s Error", "Diablo II");

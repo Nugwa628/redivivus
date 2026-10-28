@@ -147,20 +147,20 @@ static uint32_t __stdcall SKILLSNEC_CltSetBoneWallGfx(eD2Skills eSkill, int32_t 
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDeltaX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nDeltaX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nDeltaX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nDeltaX = 0;
     }
 
     nDeltaX = nTargetX - nDeltaX;
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nNormDeltaX = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nNormDeltaX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nNormDeltaX = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nNormDeltaX = 0;
     }
 
     nNormDeltaX = nTargetY - nNormDeltaX;
@@ -299,20 +299,20 @@ BOOL __fastcall Skills_CltStFunc_CheckSelectableCorpseSetParams(D2UnitStrc * pUn
     eD2UnitType eTargetType = pTarget->eUnitType;
     if (eTargetType == UNIT_OBJECT || 3 < (int)eTargetType && (int)eTargetType <= 5) {
       nTargetPos = pTarget->pPath.pStaticPath->nPosX;
-    } else if (!pTarget->pPath.pDynamicPath) {
-      nTargetPos = 0;
-    } else {
+    } else if (pTarget->pPath.pDynamicPath) {
       nTargetPos = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
+    } else {
+      nTargetPos = 0;
     }
 
     D2Common::Skills::SKILL_SetParam1(pSkill, nTargetPos);
     eTargetType = pTarget->eUnitType;
     if (eTargetType == UNIT_OBJECT || 3 < (int)eTargetType && (int)eTargetType <= 5) {
       nTargetPos = pTarget->pPath.pStaticPath->nPosY;
-    } else if (!pTarget->pPath.pDynamicPath) {
-      nTargetPos = 0;
-    } else {
+    } else if (pTarget->pPath.pDynamicPath) {
       nTargetPos = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
+    } else {
+      nTargetPos = 0;
     }
 
     D2Common::Skills::SKILL_SetParam2(pSkill, nTargetPos);
