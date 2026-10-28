@@ -603,7 +603,7 @@ void __fastcall SOUNDHDR_ClearReferenceCounts(eD2Sounds eSound) {
 // @sourcefile .\Sound\SoundHdr.cpp
 void __fastcall SOUNDHDR_FreeSoundBuffer(int32_t nSoundId) {
     D2SoundsTxt* pSound;
-    if (!pTxtSounds || nSoundId < 0 || nTxtSoundsSize <= nSoundId) {
+    if (!pTxtSounds || nSoundId < 0 || nSoundId >= (int)nTxtSoundsSize) {
       pSound = 0;
     } else {
       pSound = pTxtSounds + nSoundId;
@@ -687,7 +687,7 @@ BOOL __stdcall SOUNDHDR_EvictLeastRecentlyUsed(int32_t nBytesNeeded, int32_t bMu
 }
 
 float __fastcall SOUNDHDR_GetFalloffMin(int32_t nSoundId) {
-    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nTxtSoundsSize <= nSoundId ? 0 : pTxtSounds + nSoundId;
+    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nSoundId >= (int)nTxtSoundsSize ? 0 : pTxtSounds + nSoundId;
     switch (pSound->Falloff) {
       case 2:
         return 200.0;
@@ -701,7 +701,7 @@ float __fastcall SOUNDHDR_GetFalloffMin(int32_t nSoundId) {
 }
 
 float __fastcall SOUNDHDR_GetFalloffMax(int32_t nSoundId) {
-    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nTxtSoundsSize <= nSoundId ? 0 : pTxtSounds + nSoundId;
+    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nSoundId >= (int)nTxtSoundsSize ? 0 : pTxtSounds + nSoundId;
     switch (pSound->Falloff) {
       case 0:
         return 400.0;
@@ -724,7 +724,7 @@ int32_t __fastcall SOUNDHDR_RandomizeSoundFromGroup(int32_t nSoundId) {
     if (!pTxtSounds) {
       return nSoundId;
     }
-    if (nSoundId < 0 || nTxtSoundsSize <= nSoundId) {
+    if (nSoundId < 0 || nSoundId >= (int)nTxtSoundsSize) {
       pSound = 0;
     } else {
       pSound = pTxtSounds + nSoundId;
@@ -774,7 +774,7 @@ void __fastcall SOUNDHDR_BuildSoundPath(int32_t nSoundId, uint32_t * pszOutPath)
     char* pszDst;
     uint32_t nDwordCount;
     char cChar;
-    if (!pTxtSounds || nSoundId < 0 || nTxtSoundsSize <= nSoundId) {
+    if (!pTxtSounds || nSoundId < 0 || nSoundId >= (int)nTxtSoundsSize) {
       pSound = 0;
     } else {
       pSound = pTxtSounds + nSoundId;
@@ -847,7 +847,7 @@ void __fastcall SOUNDHDR_BuildSoundPath(int32_t nSoundId, uint32_t * pszOutPath)
 }
 
 void __fastcall SOUNDHDR_UpdateLRUTimestamp(int32_t nSoundId) {
-    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nTxtSoundsSize <= nSoundId ? 0 : pTxtSounds + nSoundId;
+    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nSoundId >= (int)nTxtSoundsSize ? 0 : pTxtSounds + nSoundId;
     pSound->nLRUTimestamp = gnCurrentGameAudioVolume;
     D2Sound::D2SoundUntil::SOUND_sD2SoundSmp_Free((int**)&gpSoundLRUListHead, nSoundId);
     D2Sound::D2SoundUntil::SOUNDUTIL_AppendToLinkedList(&gpSoundLRUListHead, nSoundId);
@@ -901,7 +901,7 @@ void __fastcall SOUNDHDR_LoadSoundFile(int32_t nSoundId, int32_t bForceSync, int
     D2MPQFileStrc* pMpqFile;
     int32_t* pSoundDataBytes;
     char* szSourceFile;
-    if (!pTxtSounds || nSoundId < 0 || nTxtSoundsSize <= nSoundId) {
+    if (!pTxtSounds || nSoundId < 0 || nSoundId >= (int)nTxtSoundsSize) {
       pSound = 0;
     } else {
       pSound = pTxtSounds + nSoundId;

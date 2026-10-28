@@ -2580,7 +2580,7 @@ void __stdcall OOGUTIL_UpdateLevelRestrictionControls() {
       byColor = 0;
       nTextAlign = 4;
       D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148b), nTextAlign, (bool)byColor, dwTextFlags);
-      nTextAlign = 4;
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), 4, false, 0);
     } else {
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveImage, 1);
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveArrowButton, 1);
@@ -2593,12 +2593,9 @@ void __stdcall OOGUTIL_UpdateLevelRestrictionControls() {
       bVar1 = false;
       nTextAlign = 5;
       D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148b), nTextAlign, bVar1, dwTextFlags);
-      nTextAlign = 5;
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), 5, false, 0);
     }
 
-    dwTextFlags = 0;
-    bVar1 = false;
-    D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), nTextAlign, bVar1, dwTextFlags);
     OOGUTIL_RefreshGameList();
 }
 
@@ -2757,7 +2754,7 @@ BOOL __stdcall OOGUTIL_OnPressLevelRestrictionCheckbox(D2ControlMsg * pControlMs
       byColor = 0;
       nTextAlign = 4;
       D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148b), nTextAlign, (bool)byColor, dwTextFlags);
-      nTextAlign = 4;
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), 4, false, 0);
     } else {
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveImage, 1);
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveArrowButton, 1);
@@ -2770,12 +2767,9 @@ BOOL __stdcall OOGUTIL_OnPressLevelRestrictionCheckbox(D2ControlMsg * pControlMs
       bVar1 = false;
       nTextAlign = 5;
       D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148b), nTextAlign, bVar1, dwTextFlags);
-      nTextAlign = 5;
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), 5, false, 0);
     }
 
-    dwTextFlags = 0;
-    bVar1 = false;
-    D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), nTextAlign, bVar1, dwTextFlags);
     OOGUTIL_RefreshGameList();
     return 1;
 }
