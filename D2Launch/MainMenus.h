@@ -265,6 +265,7 @@ int __stdcall MAINMENU_PollMCPConnectionPump(int nFrameIndex);
 int __stdcall MAINMENU_PollMCPCharLogonPump(int nFrameIndex);
 int __stdcall MAINMENU_PollMCPJoinGamePump(int nFrameIndex);
 int __stdcall MAINMENU_PollMCPCreateGamePump(int nFrameIndex);
+int __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextBox * pTextBox, int32_t nColor, uint8_t bCentered);
 void __fastcall UIMENU_CreatePopupWithContent(uint16_t * wszTitle, uint16_t * wszContent, pfnUIMenuInstance pMenuInstance);
 void __fastcall UIMENU_CreatePopupWithContentAndFooter(uint16_t * wszTitle, uint16_t * wszContent, uint16_t * wszFooter, pfnUIMenuInstance pMenuInstance);
 void __fastcall UIMENU_CrashingCantTestIt(uint16_t * wszText1, uint16_t * wszText2, uint16_t * wszText3, uint16_t * wszText4, pfnUIMenuInstance pfnMenuInstance);

@@ -84,6 +84,7 @@ namespace Storm::SMem {
 // @blizzard GetHandleByCaller (SMEM.CPP)
 // @blizzard LockHeapByBlockPtr (SMEM.CPP)
 // @blizzard Warning (SMEM.CPP)
+void __stdcall SMEM_Warning(uint32_t * pnName, int32_t nSourceLine, DWORD dwErrorCode);
 // @blizzard ComputePageSize (SMEM.CPP)
 void __stdcall SMEM_ComputePageSize();
 // @blizzard FreeHeap (SMEM.CPP)

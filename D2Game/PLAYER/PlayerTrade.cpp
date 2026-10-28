@@ -1847,7 +1847,7 @@ void TRADE_SendTradeCompleteToPlayers(void * pThis, D2UnitStrc * pUnit, D2UnitDa
 }
 
 // @sourcefile .\PLAYER\PlrTrade.cpp
-static void __stdcall SetStatsOnEar(BOOL bHardcore, D2UnitStrc * pUnit, D2UnitStrc * pOther) {
+void __stdcall SetStatsOnEar(BOOL bHardcore, D2UnitStrc * pUnit, D2UnitStrc * pOther) {
     char* szPlayerName;
     eD2ItemTypes eItemType = D2Common::ITEMS::Items::ITEM_GetItemData_wType(pOther);
     if (eItemType == ITEMTYPE_PlayerBodyPart) {
