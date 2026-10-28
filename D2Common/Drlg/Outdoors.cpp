@@ -1456,7 +1456,7 @@ void __fastcall InitAct4OutdoorLevel(D2DrlgLevelStrc * pLevel) {
     if (0x68 > eLevelId) {
       return;
     }
-    /* Level is in act 4 */ if (eLevelId < 0x6b) {
+    /* Level is in act 4 */ if (eLevelId <= 0x6a) {
       /* Before river of flames */ DRLGOUTPLACE_PlaceAct4SpecialPresets(pLevel);
       AddAct124SecondaryBorder(pLevel, 1, 799);
       AddAct124SecondaryBorder(pLevel, 2, 799);
