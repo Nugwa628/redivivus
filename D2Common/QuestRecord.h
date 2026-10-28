@@ -19,7 +19,7 @@ namespace D2Common::QuestRecord {
 // Function declarations
 BOOL __stdcall GetQuestState(struct D2BitBufferStrc * pBitBuffer, eD2Quests nQuestId, eD2QuestState eQuestState);
 void __stdcall SetQuestState(struct D2BitBufferStrc * pBitBuffer, eD2Quests nQuestId, eD2QuestState eQuestState);
-uint8_t __stdcall UnsetQuestState(struct D2BitBufferStrc * pBitBuffer, eD2Quests nQuestId, eD2QuestState eQuestState);
+bool __stdcall UnsetQuestState(struct D2BitBufferStrc * pBitBuffer, eD2Quests nQuestId, eD2QuestState eQuestState);
 void __stdcall UnsetQuestStepStates(struct D2BitBufferStrc * pBitBuffer, eD2Quests nQuestId);
 // @sourcefile .\QuestRecord\QuestRecord.cpp
 struct D2BitBufferStrc * __stdcall CreateBitBuffer(struct D2PoolManagerStrc * pMemory);
