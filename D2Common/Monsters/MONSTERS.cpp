@@ -785,20 +785,20 @@ void __stdcall MONSTER_GetSpawnParameters(D2UnitStrc * pUnit, int * pnMonId, uin
           eUnitType = pUnitIn->eUnitType;
           if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
             nClassId = pUnitIn->pPath.pStaticPath->nPosX;
-          } else if (!pUnitIn->pPath.pDynamicPath) {
-            nClassId = 0;
-          } else {
+          } else if (pUnitIn->pPath.pDynamicPath) {
             nClassId = PATH::DynamicPath::GetXPos(pUnitIn->pPath.pDynamicPath);
+          } else {
+            nClassId = 0;
           }
 
           *pnPosX = nClassId - 2;
           eUnitTypeForY = pUnitIn->eUnitType;
           if (eUnitTypeForY == UNIT_OBJECT || 3 < (int)eUnitTypeForY && (int)eUnitTypeForY < 6) {
             nClassId = pUnitIn->pPath.pStaticPath->nPosY;
-          } else if (!pUnitIn->pPath.pDynamicPath) {
-            nClassId = 0;
-          } else {
+          } else if (pUnitIn->pPath.pDynamicPath) {
             nClassId = PATH::DynamicPath::GetYPos(pUnitIn->pPath.pDynamicPath);
+          } else {
+            nClassId = 0;
           }
 
           *pnPosY = nClassId - 2;

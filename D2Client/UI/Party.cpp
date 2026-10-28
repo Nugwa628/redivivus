@@ -390,7 +390,7 @@ void __stdcall UI_DrawPlayerNameInParty() {
     Fog::Memory::FreeClientMemory(wszMessage, ".\\UI\\Party.cpp", 0x21a, 0);
 }
 
-void __stdcall ResetPartyUi() {
+int32_t __stdcall ResetPartyUi() {
     int nCounter;
     FreeAllUiParty();
     int nPositionY = 0x5a;
@@ -401,6 +401,8 @@ void __stdcall ResetPartyUi() {
       nPositionY += 0x26;
       pRosterPlayer = GAME::Roster::GetNextRosterPlayer(pRosterPlayer);
     }
+
+    return 0;
 }
 
 void __stdcall UI_DrawPartyButtons(D2UiPartyStrc * pUiParty) {
