@@ -1095,8 +1095,7 @@ static void __stdcall COMCALLBACK_AppendChatWithUser(uint32_t dwParam, char * sz
     uint16_t wszMain[576];
     uint16_t* pStr = wszMain;
     for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
@@ -1737,8 +1736,7 @@ static void __stdcall COMCALLBACK_FormatWhisperReply(uint8_t * pbReplyText, uint
 
     uint16_t* pwszClear = wszUnicode;
     for (nCmp = 0x120; nCmp; nCmp--) {
-      pwszClear[0] = L'\0';
-      pwszClear[1] = L'\0';
+      *(uint32_t*)pwszClear = 0;
       pwszClear += 2;
     }
 
@@ -2163,8 +2161,7 @@ D2ChannelUserStrc * __stdcall COMCALLBACK_CreateChannelUserEntry(char * szUserna
         sprintf(szChannelUserCount, "%s (%d)", gszCurrentChannelName, gnChannelUserCount);
         pwszClear = wszChannelTitleBuffer;
         for (nResult = 0x120; nResult; nResult--) {
-          pwszClear[0] = L'\0';
-          pwszClear[1] = L'\0';
+          *(uint32_t*)pwszClear = 0;
           pwszClear += 2;
         }
         D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszChannelTitleBuffer, szChannelUserCount, 0x240);
@@ -2301,8 +2298,7 @@ void __stdcall COMCALLBACK_RemoveChannelUser(char * szUsername) {
     sprintf(szChannelUserCount, "%s (%d)", gszCurrentChannelName, gnChannelUserCount);
     uint16_t* pwszClear = wszChannelTitleBuffer;
     for (nResult = 0x120; nResult; nResult--) {
-      pwszClear[0] = L'\0';
-      pwszClear[1] = L'\0';
+      *(uint32_t*)pwszClear = 0;
       pwszClear += 2;
     }
 

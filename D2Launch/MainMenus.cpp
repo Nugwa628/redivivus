@@ -757,8 +757,7 @@ void __stdcall UIMENU_MainScreenBeforeMenu() {
     __frame0.wszWideBuffer = L'\0';
     uint16_t* pWidePtr = __frame0.wszWideBufferRest;
     for (nBufferSize = 0xff; nBufferSize; nBufferSize--) {
-      pWidePtr[0] = L'\0';
-      pWidePtr[1] = L'\0';
+      *(uint32_t*)pWidePtr = 0;
       pWidePtr += 2;
     }
 
@@ -1656,8 +1655,7 @@ int __fastcall MAINMENU_DisplayCredits(int nUnused) {
     uint16_t* bCopied1 = awLineBuf;
     uint16_t* pwTextBuf = pwCursor;
     for (i = 0x200; i; i--) {
-      bCopied1[0] = L'\0';
-      bCopied1[1] = L'\0';
+      *(uint32_t*)bCopied1 = 0;
       bCopied1 += 2;
     }
 
@@ -1702,15 +1700,13 @@ int __fastcall MAINMENU_DisplayCredits(int nUnused) {
 
           bCopied1 = awCol1;
           for (i = 0x80; i; i--) {
-            bCopied1[0] = L'\0';
-            bCopied1[1] = L'\0';
+            *(uint32_t*)bCopied1 = 0;
             bCopied1 += 2;
           }
 
           bCopied1 = awCol2;
           for (i = 0x80; i; i--) {
-            bCopied1[0] = L'\0';
-            bCopied1[1] = L'\0';
+            *(uint32_t*)bCopied1 = 0;
             bCopied1 += 2;
           }
 
@@ -2103,16 +2099,14 @@ void __stdcall UIMENU_ShowRealmNameOnButton() {
     Storm::Source::SSTR::SStrCopy(szGateway, Bnclient::BNGatewayAccess::Name(pGateway, pGateway->nCurGatewayIdx), nLen);
     uint16_t* pwScratch = awGatewayW;
     for (i = 0x80; i; i--) {
-      pwScratch[0] = L'\0';
-      pwScratch[1] = L'\0';
+      *(uint32_t*)pwScratch = 0;
       pwScratch += 2;
     }
 
     D2Lang::UTF8_ConvertToWideChar(awGatewayW, szGateway, 0x100);
     pwScratch = awFormat;
     for (i = 0x80; i; i--) {
-      pwScratch[0] = L'\0';
-      pwScratch[1] = L'\0';
+      *(uint32_t*)pwScratch = 0;
       pwScratch += 2;
     }
 

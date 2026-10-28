@@ -850,8 +850,7 @@ static int32_t __stdcall D2WINEDITBOX_HandleMouseClick(int * pEditBox, short * p
         nLine = D2WinFont::D2WINFONT_GetStringPixelWidth(wszCursorChar, 2);
         pWideBufIter = wszLineBuffer;
         for (nZeroCount = 0x80; nZeroCount; nZeroCount--) {
-          pWideBufIter[0] = L'\0';
-          pWideBufIter[1] = L'\0';
+          *(uint32_t*)pWideBufIter = 0;
           pWideBufIter += 2;
         }
 
@@ -952,8 +951,7 @@ void __stdcall D2WINEDITBOX_HandleTextSelection(int * pEditBox, int * pX, int * 
       if (*pEditBox == 1) {
         pWideBufIter = wszEditText;
         for (nLineWidth = 0x96; nLineWidth; nLineWidth--) {
-          pWideBufIter[0] = L'\0';
-          pWideBufIter[1] = L'\0';
+          *(uint32_t*)pWideBufIter = 0;
           pWideBufIter += 2;
         }
 
@@ -970,8 +968,7 @@ void __stdcall D2WINEDITBOX_HandleTextSelection(int * pEditBox, int * pX, int * 
         nCursorWidth = D2WinFont::D2WINFONT_GetStringPixelWidth(wszCursorChar, 2);
         pWideBufIter = wszLineWidthBuf;
         for (nClampedY = 0x80; nClampedY; nClampedY--) {
-          pWideBufIter[0] = L'\0';
-          pWideBufIter[1] = L'\0';
+          *(uint32_t*)pWideBufIter = 0;
           pWideBufIter += 2;
         }
 

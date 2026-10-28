@@ -510,8 +510,7 @@ static void UI_BuildUberBossImmunityString(D2UnitStrc * pUnit) {
         bHasPrevious = wszBuffer[0] != L'\0';
         pWszFill = wszLine;
         for (nResist = 0x80; nResist; nResist--) {
-          pWszFill[0] = L'\0';
-          pWszFill[1] = L'\0';
+          *(uint32_t*)pWszFill = 0;
           pWszFill += 2;
         }
 
@@ -990,8 +989,7 @@ void __stdcall DRAW_UI_DeathMessage() {
     uint16_t* pDwFill;
     pDwFill = wszDeathMessage;
     for (nGoldLost = 0x80; nGoldLost; nGoldLost--) {
-      pDwFill[0] = L'\0';
-      pDwFill[1] = L'\0';
+      *(uint32_t*)pDwFill = 0;
       pDwFill += 2;
     }
 
@@ -2038,8 +2036,7 @@ void __fastcall DRAW_MonsterHealthBar(D2UnitStrc * pUnit) {
     draw_hover_unit_label:
     pwszStr = wszNameBuf;
     for (i = 0x400; i; i--) {
-      pwszStr[0] = L'\0';
-      pwszStr[1] = L'\0';
+      *(uint32_t*)pwszStr = 0;
       pwszStr += 2;
     }
     int bIsMercenary = 0;
@@ -5962,8 +5959,7 @@ void __stdcall DRAW_UI_StatWindow_I() {
     do {
       nStatPts2 = wszStatDescBuf;
       for (nDrawY = 0x32; nDrawY; nDrawY--) {
-        nStatPts2[0] = L'\0';
-        nStatPts2[1] = L'\0';
+        *(uint32_t*)nStatPts2 = 0;
         nStatPts2 += 2;
       }
 
@@ -6038,8 +6034,7 @@ void __stdcall DRAW_UI_StatWindow_I() {
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, gnPanelOffsetX + 0x80, gnPanelOffsetY - 0x3c + ScreenSizeY, -1, DRAW_SOLID, nullptr);
     nStatPts2 = wszTextBuf;
     for (nMouseXCast = 0x40; nMouseXCast; nMouseXCast--) {
-      nStatPts2[0] = L'\0';
-      nStatPts2[1] = L'\0';
+      *(uint32_t*)nStatPts2 = 0;
       nStatPts2 += 2;
     }
 

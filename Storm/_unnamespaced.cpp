@@ -775,8 +775,7 @@ void StaticInit_6caaf0() {
     int nWordsRemaining;
     uint16_t* pChatInputBuf = gwszChatInputText;
     for (nWordsRemaining = 0x80; nWordsRemaining; nWordsRemaining--) {
-      pChatInputBuf[0] = L'\0';
-      pChatInputBuf[1] = L'\0';
+      *(uint32_t*)pChatInputBuf = 0;
       pChatInputBuf += 2;
     }
 

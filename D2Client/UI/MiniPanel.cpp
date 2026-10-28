@@ -749,8 +749,7 @@ static void __stdcall MINIPANEL_ShowTooltip(int32_t nX, int32_t nY, int32_t nBut
 
     uint16_t* pLocaleStr = wszTooltip;
     for (i = 100; i; i--) {
-      pLocaleStr[0] = L'\0';
-      pLocaleStr[1] = L'\0';
+      *(uint32_t*)pLocaleStr = 0;
       pLocaleStr += 2;
     }
 

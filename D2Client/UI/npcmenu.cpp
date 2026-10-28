@@ -2525,8 +2525,7 @@ void __stdcall NPCMENU_OpenInteractionDialog() {
     uint16_t* pnOptionCallback;
     pnOptionCallback = wszNpcName;
     for (nMenuEntryIdx = 0x28; nMenuEntryIdx; nMenuEntryIdx--) {
-      pnOptionCallback[0] = L'\0';
-      pnOptionCallback[1] = L'\0';
+      *(uint32_t*)pnOptionCallback = 0;
       pnOptionCallback += 2;
     }
 
@@ -2575,8 +2574,7 @@ void __stdcall NPCMENU_OpenInteractionDialog() {
         do {
           pnOptionCallback = wszOptionText;
           for (iVar1 = 0x100; iVar1; iVar1--) {
-            pnOptionCallback[0] = L'\0';
-            pnOptionCallback[1] = L'\0';
+            *(uint32_t*)pnOptionCallback = 0;
             pnOptionCallback += 2;
           }
 
@@ -3571,8 +3569,7 @@ int __stdcall NPCMENU_BuildMercHireMenu() {
 
         pszDialogPtr = wszMercDesc;
         for (nLoopCounter = 0x4b; nLoopCounter; nLoopCounter--) {
-          pszDialogPtr[0] = L'\0';
-          pszDialogPtr[1] = L'\0';
+          *(uint32_t*)pszDialogPtr = 0;
           pszDialogPtr += 2;
         }
 

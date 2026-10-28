@@ -251,8 +251,7 @@ static void __stdcall CHATDLG_FormatFileTimeToDate(FILETIME * pFileTime, int32_t
     _SYSTEMTIME systemTime;
     uint16_t* pwszWide = wszWideBuf;
     for (nZeroCount = 0x80; nZeroCount; nZeroCount--) {
-      pwszWide[0] = L'\0';
-      pwszWide[1] = L'\0';
+      *(uint32_t*)pwszWide = 0;
       pwszWide += 2;
     }
 
@@ -412,8 +411,7 @@ static BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
     gnNotifyEnabled = (uint32_t)!gnNotifyEnabled;
     uint16_t* pwszZeroFill = wszMessage;
     for (i = 0x80; i; i--) {
-      pwszZeroFill[0] = L'\0';
-      pwszZeroFill[1] = L'\0';
+      *(uint32_t*)pwszZeroFill = 0;
       pwszZeroFill += 2;
     }
 
@@ -1038,8 +1036,7 @@ void __stdcall CHATDLG_RefreshGameNameDisplay() {
     uint16_t* pwszClearCursor;
     pwszClearCursor = awszGameNames;
     for (nClearCount = 0x100; nClearCount; nClearCount--) {
-      pwszClearCursor[0] = L'\0';
-      pwszClearCursor[1] = L'\0';
+      *(uint32_t*)pwszClearCursor = 0;
       pwszClearCursor += 2;
     }
 
