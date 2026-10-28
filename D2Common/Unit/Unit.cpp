@@ -79,7 +79,7 @@ static BOOL __stdcall DRLGROOM_ValidateUnitPosition(int32_t nParam, D2RoomStrc *
     } else {
       nUnitY = 0;
     }
-    if (!pRoom || (nRoomXStart = pRoom->sCoords.dwXStart , nUnitX < nRoomXStart) || pRoom->sCoords.dwXSize + nRoomXStart <= nUnitX || (nUnitX = pRoom->sCoords.dwYStart , nUnitY < nUnitX || pRoom->sCoords.dwYSize + nUnitX <= nUnitY)) {
+    if (!pRoom || (nRoomXStart = pRoom->sCoords.dwXStart , nUnitX < nRoomXStart) || nUnitX >= pRoom->sCoords.dwXSize + nRoomXStart || (nUnitX = pRoom->sCoords.dwYStart , nUnitY < nUnitX || nUnitY >= pRoom->sCoords.dwYSize + nUnitX)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e);
       exit(-1);
     } else {

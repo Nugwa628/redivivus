@@ -1548,7 +1548,7 @@ int32_t __stdcall SERVER_Synergy1(D2UnitStrc * pUnit, int32_t eSkillId, int32_t 
 int32_t __stdcall SKILLS_GetCharClassFromSkillId(int32_t eSkillId) {
     int32_t nCharClass;
     char cCharClass;
-    if (!(eSkillId < 0 || sgptDataTable->nTxtSkillsCount <= eSkillId || !(sgptDataTable->pTxtSkills + eSkillId) || (cCharClass = sgptDataTable->pTxtSkills[eSkillId].charclass , nCharClass = (int32_t)cCharClass , cCharClass < '\0'))) {
+    if (!(0 > eSkillId || eSkillId >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkillId) || (cCharClass = sgptDataTable->pTxtSkills[eSkillId].charclass , nCharClass = (int32_t)cCharClass , cCharClass < '\0'))) {
       return nCharClass;
     }
 
@@ -1563,7 +1563,7 @@ uint32_t __stdcall SKILLS_GetCharClassFromSkillId_Validated(int32_t eSkillId, in
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd79);
       exit(-1);
     }
-    if (eSkillId < 0 || sgptDataTable->nTxtSkillsCount <= eSkillId || !(sgptDataTable->pTxtSkills + eSkillId) || (cCharClass = sgptDataTable->pTxtSkills[eSkillId].charclass , nCharClass = (int)cCharClass , cCharClass < '\0')) {
+    if (0 > eSkillId || eSkillId >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkillId) || (cCharClass = sgptDataTable->pTxtSkills[eSkillId].charclass , nCharClass = (int)cCharClass , cCharClass < '\0')) {
       nCharClass = 7;
     }
 
@@ -3393,7 +3393,7 @@ static BOOL SKILLS_HasEnoughManaForSkill(D2SkillStrc * pSkillStrc, D2UnitStrc * 
         nEffectiveLevel = iVar1 + nLevelBonusCalc;
         pMaxLevelEntry = (int)nEffectiveLevel <= 0 ? 0 : nEffectiveLevel;
         pSkillTxt = DATATBLS::DataTbls::TXT_Experience_GetMaxLevel(0);
-        if (pSkillTxt <= (int)pMaxLevelEntry) {
+        if ((int)pMaxLevelEntry >= pSkillTxt) {
           pMaxLevelEntry = DATATBLS::DataTbls::TXT_Experience_GetMaxLevel(0);
         }
       }

@@ -113,7 +113,7 @@ eMissilesId __stdcall MONSTER_GetMissileForAnimEvent(D2UnitStrc * pUnit, int32_t
         }
 
         nEventFrame++;
-        if (pCurrentFrame < nEventFrame) {
+        if (nEventFrame > pCurrentFrame) {
           return ~MISSILE_Arrow;
         }
       }
@@ -317,7 +317,7 @@ BOOL __stdcall MONSTER_IsAndarielNormal(D2UnitStrc * pUnit, int32_t nParam) {
         nBaseId = (int)sgptDataTable->pTxtMonStats[nBaseId].BaseId;
       }
     }
-    if (!(nBaseId == (0x4e < sgptDataTable->nTxtMonStatsSize ? 0x4e : -1) && !nParam)) {
+    if (!((0x4e < sgptDataTable->nTxtMonStatsSize ? 0x4e : -1) == nBaseId && !nParam)) {
       return 0;
     }
 

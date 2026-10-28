@@ -3333,7 +3333,7 @@ void __fastcall TXT_AllocTxt_gems(D2PoolManagerStrc * pMemory) {
         *(short int*)((int)nTxtGemsSize.pTable->aWeaponMods + nGemsSize - 4) = (short int)nTxtGemsBase;
         __frame0.nGemIdx++;
         nGemsSize += 0xc0;
-      } while (__frame0.nGemIdx < nTxtGemsSize.nSize);
+      } while (nTxtGemsSize.nSize > __frame0.nGemIdx);
     }
 
     nGemsSize = 0;
@@ -4338,7 +4338,7 @@ void __stdcall ITEMTBLS_FreeProperties() {
 }
 
 int TXT_Gamble_SortFunction(LPCVOID pParam1, LPCVOID pParam2) {
-    if (*(uint32_t*)((int)pParam2 + 4) < *(uint32_t*)((int)pParam1 + 4)) {
+    if (*(uint32_t*)((int)pParam1 + 4) > *(uint32_t*)((int)pParam2 + 4)) {
       return 1;
     } else {
       return -(uint32_t)(*(uint32_t*)((int)pParam1 + 4) < *(uint32_t*)((int)pParam2 + 4));

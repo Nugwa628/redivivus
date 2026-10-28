@@ -1676,7 +1676,7 @@ static void __stdcall DRLGOUTDOOR_CopyPresetUnitsFromSubTxt(int32_t roomX, int32
       presetX1 = pCurrentPreset[2];
       if (presetX1 > presetX0) {
         presetY1 = pCurrentPreset[6];
-        if (presetY0 < presetY1 && presetX1 < rectX1 + presetX0 && presetY1 < rectY1 + presetY0) {
+        if (presetY1 > presetY0 && presetX1 < rectX1 + presetX0 && presetY1 < rectY1 + presetY0) {
           DrlgRoom::AllocPresetUnit(pRoomCtx->pRoomEx, pMemory, pCurrentPreset[5], pCurrentPreset[1], *pCurrentPreset, presetX1 - presetX0 + worldYBase, presetY1 - presetY0 + worldXBase);
           presetX0 = rectX0;
           presetY0 = rectY0;
@@ -5316,7 +5316,7 @@ static void __stdcall DRLGOUTROOM_PlaceRiverCrossingPreset(D2DrlgLevelStrc * pDr
       }
 
       nYIter++;
-      if ((int)nUsableRows <= nYIter) {
+      if (nYIter >= (int)nUsableRows) {
         return;
       }
     } while (true);

@@ -1008,7 +1008,7 @@ int32_t __fastcall PropertyFunc_EnhancedDamage(int32_t nType, D2UnitStrc * pUnit
       }
 
       byMaxDam = pItemsTxt->n2HandMaxDam;
-      if ((uint8_t)pItemsTxt->n2HandMaxDam <= (uint8_t)pItemsTxt->nMaxDam) {
+      if ((uint8_t)pItemsTxt->nMaxDam >= (uint8_t)pItemsTxt->n2HandMaxDam) {
         byMaxDam = pItemsTxt->nMaxDam;
       }
 

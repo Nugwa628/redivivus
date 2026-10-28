@@ -1005,7 +1005,7 @@ void __fastcall SpawnAct12Waypoint(D2DrlgLevelStrc * pLevel) {
       }
 
       nGridWidth++;
-      if ((int)nGridHeight <= nGridWidth) {
+      if (nGridWidth >= (int)nGridHeight) {
         return;
       }
     }

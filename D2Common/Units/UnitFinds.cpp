@@ -145,7 +145,7 @@ D2UnitStrc * __stdcall FindUnitInNeighboredRooms(D2RoomStrc * pRoom, eD2UnitType
 static BOOL CheckRoomIfNotInRange(D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nDistance) {
     D2DrlgRoomCoordsStrc pCoords;
     DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &pCoords);
-    if (!(pCoords.dwXStart < nX - nDistance && pCoords.dwYStart < nY - nDistance && nX + nDistance < pCoords.dwXSize + pCoords.dwXStart && nY + nDistance < pCoords.dwYSize + pCoords.dwYStart)) {
+    if (!(nX - nDistance > pCoords.dwXStart && pCoords.dwYStart < nY - nDistance && nX + nDistance < pCoords.dwXSize + pCoords.dwXStart && nY + nDistance < pCoords.dwYSize + pCoords.dwYStart)) {
       return 1;
     }
 
@@ -159,7 +159,7 @@ static BOOL CheckRoomIfInRange(D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32
       if (nX - nDistance <= pRoomCoords.dwXSize + pRoomCoords.dwXStart && (pRoomCoords.dwYStart <= nY + nDistance || nY - nDistance <= pRoomCoords.dwYSize + pRoomCoords.dwYStart)) {
         return 1;
       }
-    } else if (pRoomCoords.dwYStart <= nY + nDistance || nY - nDistance <= pRoomCoords.dwYSize + pRoomCoords.dwYStart) {
+    } else if (nY + nDistance >= pRoomCoords.dwYStart || nY - nDistance <= pRoomCoords.dwYSize + pRoomCoords.dwYStart) {
       return 1;
     }
 

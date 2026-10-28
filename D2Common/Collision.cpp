@@ -680,7 +680,7 @@ D2UnitStrc * __stdcall CallCollisionFunction(D2RoomStrc * pRoom, int32_t nX, int
                 case 2:
 
                 case 6:
-                  if (nCandidatePosX - 1 <= nX && nX <= nCandidatePosX + 1 && nCandidatePosY - 1 <= nY) {
+                  if (nX >= nCandidatePosX - 1 && nCandidatePosX + 1 >= nX && nY >= nCandidatePosY - 1) {
                     iVar1 = nCandidatePosY + 1;
                     test_y_upper_bound:
                     bSignedLessOrEqual = nY <= iVar1;
@@ -731,7 +731,7 @@ D2UnitStrc * __stdcall CallCollisionFunction(D2RoomStrc * pRoom, int32_t nX, int
 
                 break;
                 case 8:
-                  if (nCandidatePosX - 2 <= nX && nX <= nCandidatePosX + 2 && nCandidatePosY - 2 <= nY) {
+                  if (nX >= nCandidatePosX - 2 && nCandidatePosX + 2 >= nX && nY >= nCandidatePosY - 2) {
                     iVar1 = nCandidatePosY + 2;
                     goto test_y_upper_bound;
                   }
@@ -2494,7 +2494,7 @@ void __fastcall COLLISION_FindFreeCoordSpiral(D2RoomStrc * pRoom, POINT * pPoint
           pRoomForY = pCurrentRoom;
           pPoint->y = nCheckX;
           nTestY = nCheckX;
-          if (nCheckX < sRoomCoords.dwYStart || sRoomCoords.dwYSize + sRoomCoords.dwYStart <= nCheckX) {
+          if (nCheckX < sRoomCoords.dwYStart || nCheckX >= sRoomCoords.dwYSize + sRoomCoords.dwYStart) {
             pRoomForY = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pCurrentRoom, pPoint->x, nCheckX);
             nCheckY = nRadiusNeg;
           }
