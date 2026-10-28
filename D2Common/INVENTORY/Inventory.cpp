@@ -1977,15 +1977,15 @@ BOOL __stdcall INVENTORY_GetEquippedShield(D2InventoryStrc * pInventory, D2UnitS
     if (ppUnit) {
       *ppUnit = 0;
     }
-    if (pInventory->nSignatureMagic == 0x1020304) {
+    if (pInventory->nSignatureMagic != 0x1020304) {
+      pUnit = 0;
+    } else {
       pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
       if (!pGridInfo) {
         pUnit = 0;
       } else {
         pUnit = pGridInfo->pGridCells[4];
       }
-    } else {
-      pUnit = 0;
     }
 
     _BVar1 = ITEMS::Items::ITEM_CheckIfItemIsNotBrokenAndNotDisabled(pUnit);

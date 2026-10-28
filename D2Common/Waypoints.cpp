@@ -132,16 +132,17 @@ D2WaypointStrc * __stdcall Alloc(D2PoolManagerStrc * pMemory) {
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 BOOL __fastcall WAYPOINT_UpgradeSignature(D2WaypointStrc * pWaypoint) {
     uint16_t uVar1 = pWaypoint->nSignature;
-    if (uVar1 == 0x102) {
+    if (uVar1 != 0x102) {
+      if (uVar1 && uVar1 != 0x101) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x113);
+        exit(-1);
+      }
+
+      pWaypoint->nSignature = 0x102;
+      return 0;
+    } else {
       return 1;
     }
-    if (uVar1 && uVar1 != 0x101) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x113);
-      exit(-1);
-    }
-
-    pWaypoint->nSignature = 0x102;
-    return 0;
 }
 
 // @sourcefile .\WayPoint\Waypoint.cpp

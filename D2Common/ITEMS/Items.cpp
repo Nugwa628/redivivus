@@ -942,14 +942,15 @@ BOOL __stdcall INVENTORY_CheckIfItemCanBeAutoBelted(D2InventoryStrc * pInventory
         exit(-1);
       }
 
-      if (pItemsTxt->bAutoBelt != '\0') {
+      if (pItemsTxt->bAutoBelt == '\0') {
+        BVar1 = INVENTORY::Inventory::INVENTORY_CanAutoBeltItem(pInventory, pUnit);
+        if (BVar1 != -1) {
+          return 1;
+        }
+        return 0;
+      } else {
         return 1;
       }
-      BVar1 = INVENTORY::Inventory::INVENTORY_CanAutoBeltItem(pInventory, pUnit);
-      if (BVar1 != -1) {
-        return 1;
-      }
-      return 0;
     }
 }
 
@@ -1511,11 +1512,11 @@ uint32_t __stdcall ITEM_CheckIfItemHasDurability(D2UnitStrc * pUnit) {
 
 bool __stdcall TXT_Items_GetGemSockets(uint32_t nItemClassId) {
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
-    if (pItemsTxt) {
+    if (!pItemsTxt) {
+      return false;
+    } else {
       return pItemsTxt->bGemSockets;
     }
-
-    return false;
 }
 
 int32_t __stdcall ITEM_GetSocketsCount(D2UnitStrc * pUnit) {
