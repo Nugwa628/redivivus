@@ -180,43 +180,48 @@ void __stdcall OVERLAYTBLS_FreeOverlayTables() {
 }
 
 int32_t __stdcall OVERLAYTBLS_GetFrames(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
+    D2OverlayTxt * pTxt = (0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize) ? &sgptDataTable->pTxtOverlay[nParam] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return sgptDataTable->pTxtOverlay[nParam].Frames;
+    return pTxt->Frames;
 }
 
 uint32_t __stdcall OVERLAYTBLS_GetPreDraw(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
+    D2OverlayTxt * pTxt = (0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize) ? &sgptDataTable->pTxtOverlay[nParam] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return (uint32_t)(uint8_t)sgptDataTable->pTxtOverlay[nParam].PreDraw;
+    return (uint32_t)(uint8_t)pTxt->PreDraw;
 }
 
 int32_t __stdcall OVERLAYTBLS_GetXOffset(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
+    D2OverlayTxt * pTxt = (0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize) ? &sgptDataTable->pTxtOverlay[nParam] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return sgptDataTable->pTxtOverlay[nParam].Xoffset;
+    return pTxt->Xoffset;
 }
 
 int32_t __stdcall OVERLAYTBLS_GetYOffset(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
+    D2OverlayTxt * pTxt = (0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize) ? &sgptDataTable->pTxtOverlay[nParam] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return sgptDataTable->pTxtOverlay[nParam].Yoffset;
+    return pTxt->Yoffset;
 }
 
 uint32_t __stdcall OVERLAYTBLS_GetTrans(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
+    D2OverlayTxt * pTxt = (0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize) ? &sgptDataTable->pTxtOverlay[nParam] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return (uint32_t)(uint8_t)sgptDataTable->pTxtOverlay[nParam].Trans;
+    return (uint32_t)(uint8_t)pTxt->Trans;
 }
 
 uint32_t __stdcall OVERLAYTBLS_GetLightRadiusAndRGB(int32_t nOverlayId, int * pnInitRadius, int * pnRadius, char * pbyRed, char * pbyGreen, char * pbyBlue) {
@@ -246,19 +251,21 @@ uint32_t __stdcall OVERLAYTBLS_GetLightRadiusAndRGB(int32_t nOverlayId, int * pn
 }
 
 int32_t __stdcall OVERLAYTBLS_Get1ofN(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
+    D2OverlayTxt * pTxt = (0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize) ? &sgptDataTable->pTxtOverlay[nParam] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return sgptDataTable->pTxtOverlay[nParam]._1ofN;
+    return pTxt->_1ofN;
 }
 
 uint32_t __stdcall OVERLAYTBLS_GetDir(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
+    D2OverlayTxt * pTxt = (0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize) ? &sgptDataTable->pTxtOverlay[nParam] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return (uint32_t)(uint8_t)sgptDataTable->pTxtOverlay[nParam].Dir;
+    return (uint32_t)(uint8_t)pTxt->Dir;
 }
 
 // 2022.01.09 - dzik

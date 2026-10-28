@@ -296,10 +296,11 @@ uint32_t __fastcall MONSTER_IsBossOrChampion(D2UnitStrc * pUnit) {
     }
 
     int pMonData = pUnit->nClassId;
-    if (!(0 <= pMonData && pMonData < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + pMonData)) {
+    D2MonStatsTxt * pTxt = (0 <= pMonData && pMonData < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[pMonData] : NULL;
+    if (!pTxt) {
       return 0;
     }
-    if (!(!sgptDataTable->pTxtMonStats[pMonData].npc && !sgptDataTable->pTxtMonStats[pMonData].inTown)) {
+    if (!(!pTxt->npc && !pTxt->inTown)) {
       return 1;
     }
 
@@ -329,11 +330,12 @@ uint32_t __stdcall IsDemon(D2UnitStrc * pUnit) {
     }
 
     int pMonStatsTxt = pUnit->nClassId;
-    if (!(0 <= pMonStatsTxt && pMonStatsTxt < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + pMonStatsTxt)) {
+    D2MonStatsTxt * pTxt = (0 <= pMonStatsTxt && pMonStatsTxt < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[pMonStatsTxt] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return (uint32_t)(sgptDataTable->pTxtMonStats[pMonStatsTxt].demon != 0);
+    return (uint32_t)(pTxt->demon != 0);
 }
 
 BOOL __stdcall MONSTER_IsMonsterUndead(D2UnitStrc * pUnit) {

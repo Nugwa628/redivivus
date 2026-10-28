@@ -304,11 +304,12 @@ int32_t __stdcall GetHitClass(D2UnitStrc * pUnit) {
     }
 
     int nMissileClassId = pUnit->nClassId;
-    if (!(0 <= nMissileClassId && nMissileClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nMissileClassId)) {
+    D2MissilesTxt * pTxt = (0 <= nMissileClassId && nMissileClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nMissileClassId] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return (uint32_t)(uint8_t)sgptDataTable->pTxtMissiles[nMissileClassId].HitClass;
+    return (uint32_t)(uint8_t)pTxt->HitClass;
 }
 
 void __stdcall SetActivateFrame(D2UnitStrc * pUnit, int32_t nActivateFrame) {
@@ -776,11 +777,12 @@ int32_t __stdcall GetMaxDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int32_t 
 }
 
 uint8_t __stdcall GetElemTypeFromMissileId(int32_t nMissileId) {
-    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nMissileId)) {
+    D2MissilesTxt * pTxt = (0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nMissileId] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return sgptDataTable->pTxtMissiles[nMissileId].EType;
+    return pTxt->EType;
 }
 
 // Returns the minimum elemental damage for a missile at a given level. Same structure as GetMinDamage but reads D2MissilesTxt EMin + MinELev1 level breakpoint and EDmgSymPerCalc calc expression. Result is shifted left by HitShift. Returns 0 for non-missile units or invalid IDs.

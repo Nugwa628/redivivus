@@ -1904,11 +1904,12 @@ int32_t __stdcall GetAttackRate(D2UnitStrc * pUnit) {
     }
 
     nDexterity = pUnit->nClassId;
-    if (!(0 <= nDexterity && nDexterity < sgptDataTable->nTxtCharStatsSize && sgptDataTable->pTxtCharStats + nDexterity)) {
+    D2CharStatsTxt * pTxt = (0 <= nDexterity && nDexterity < sgptDataTable->nTxtCharStatsSize) ? &sgptDataTable->pTxtCharStats[nDexterity] : NULL;
+    if (!pTxt) {
       return nToHit;
     }
 
-    return sgptDataTable->pTxtCharStats[nDexterity].ToHitFactor + nToHit;
+    return pTxt->ToHitFactor + nToHit;
 }
 
 // Returns 1 if the monster unit is considered to have a shield for block/defense purposes. Hard-codes TRUE for Diablo, DoomKnight, and DiabloClone; FALSE for Wolf. For other monsters, reads the body component slot 7 code, resolves it via MONSTER_GetComponentOverlay, then looks up the item code: returns 1 if the resolved item's wType is 2 (shield base type). Returns 0 on any lookup failure.
