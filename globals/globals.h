@@ -2957,7 +2957,7 @@ extern int D2GS_Connected;
 extern int ServerLoadingComplete;
 extern BOOL D2CLIENT_ExitVar3;
 // Level load in-progress flag: set on unload complete, cleared on load complete.
-extern bool gLevelLoadInProgress;
+extern BOOL gLevelLoadInProgress;
 // Exit cutscene state: pending id + played flag.
 extern D2ExitCutsceneState gExitCutsceneState;
 extern D2ExitCutsceneState gExitCutscenePlayed;
