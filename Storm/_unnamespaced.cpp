@@ -786,7 +786,7 @@ void StaticInit_6cab10() {
     int nDwordsRemaining;
     uint8_t* pChatHistoryBuf = gaChatHistoryBuffer;
     for (nDwordsRemaining = 0x404; nDwordsRemaining; nDwordsRemaining--) {
-      uint32_t* pZero = (uint32_t*)pChatHistoryBuf; for (int nZero = 0x1; nZero; nZero--) *pZero++ = 0;
+      *(uint32_t*)pChatHistoryBuf = 0;
       pChatHistoryBuf += 4;
     }
 }

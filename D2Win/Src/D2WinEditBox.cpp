@@ -2197,7 +2197,8 @@ BOOL __fastcall Draw(::D2WinEditBox * pEditBox) {
 
       nLineCharCount = 0;
       bLineWrapped = 0;
-      uint32_t* pZero = (uint32_t*)szLineSegment; for (int nZero = 0x40; nZero; nZero--) *pZero++ = 0;
+      uint32_t* pZero = (uint32_t*)szLineSegment;
+      for (int nZero = 0x40; nZero; nZero--) *pZero++ = 0;
       cCurChar = *pcLineStart;
       pcLineEnd = pcLineStart;
       while (true) {
