@@ -539,11 +539,12 @@ int32_t __stdcall STATLIST_GetStatFromBaseArray(D2StatListExStrc * pStatList, eD
     if (!pStatList) {
       return 0;
     }
-    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
+    D2ItemStatCostTxt * pTxt = (0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize) ? &sgptDataTable->pTxtItemStatCost[eUnitStat] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    int32_t nStatValue = STATLIST_LookupBaseStatWithMinAccr(sgptDataTable->pTxtItemStatCost + eUnitStat, pStatList, eUnitStat * 0x10000 + (uint16_t)nParam);
+    int32_t nStatValue = STATLIST_LookupBaseStatWithMinAccr(pTxt, pStatList, eUnitStat * 0x10000 + (uint16_t)nParam);
     return nStatValue;
 }
 
@@ -551,14 +552,15 @@ int32_t __stdcall SERVER_GetUnitStat(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, 
     if (!pUnit) {
       return 0;
     }
-    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
+    D2ItemStatCostTxt * pTxt = (0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize) ? &sgptDataTable->pTxtItemStatCost[eUnitStat] : NULL;
+    if (!pTxt) {
       return 0;
     }
     if (!pUnit->pStatsEx) {
       return 0;
     }
 
-    int32_t nStatValue = STATLIST_LookupBaseStatWithMinAccr(sgptDataTable->pTxtItemStatCost + eUnitStat, pUnit->pStatsEx, eUnitStat * 0x10000 + (uint16_t)nParam);
+    int32_t nStatValue = STATLIST_LookupBaseStatWithMinAccr(pTxt, pUnit->pStatsEx, eUnitStat * 0x10000 + (uint16_t)nParam);
     return nStatValue;
 }
 
@@ -566,11 +568,12 @@ int32_t __stdcall STATLIST_GetMinimalStatValueShifted(D2StatListExStrc * pStatsE
     if (!pStatsEx) {
       return 0;
     }
-    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
+    D2ItemStatCostTxt * pTxt = (0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize) ? &sgptDataTable->pTxtItemStatCost[eUnitStat] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    int32_t nStatValue = TXT_ItemStatCost_GetMinimumStatValueShifted(sgptDataTable->pTxtItemStatCost + eUnitStat, pStatsEx, eUnitStat * 0x10000 + (uint16_t)nParam);
+    int32_t nStatValue = TXT_ItemStatCost_GetMinimumStatValueShifted(pTxt, pStatsEx, eUnitStat * 0x10000 + (uint16_t)nParam);
     return nStatValue;
 }
 
@@ -583,11 +586,12 @@ int __stdcall STATSEX_GetCurrentStat(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, 
     if (!pUnit->pStatsEx) {
       return 0;
     }
-    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
+    D2ItemStatCostTxt * pTxt = (0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize) ? &sgptDataTable->pTxtItemStatCost[eUnitStat] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    int nValue = TXT_ItemStatCost_GetMinimumStatValueShifted(sgptDataTable->pTxtItemStatCost + eUnitStat, pUnit->pStatsEx, eUnitStat * 0x10000 + (uint32_t)nLayer);
+    int nValue = TXT_ItemStatCost_GetMinimumStatValueShifted(pTxt, pUnit->pStatsEx, eUnitStat * 0x10000 + (uint32_t)nLayer);
     return nValue;
 }
 
@@ -2715,11 +2719,12 @@ void __stdcall STATLIST_DeactivateItemStats(D2UnitStrc * pUnit, D2UnitStrc * pIt
 }
 
 BOOL __fastcall SKILLS_ValidateSkillDescIndex(int32_t nParam) {
-    if (!(-1 < nParam && nParam < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nParam)) {
+    D2SkillsTxt * pTxt = (-1 < nParam && nParam < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nParam] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    int nSkillDescIndex = (int)sgptDataTable->pTxtSkills[nParam].skilldesc;
+    int nSkillDescIndex = (int)pTxt->skilldesc;
     if (!(-1 < nSkillDescIndex && nSkillDescIndex < sgptDataTable->nTxtSkillDescSize)) {
       return 0;
     }
