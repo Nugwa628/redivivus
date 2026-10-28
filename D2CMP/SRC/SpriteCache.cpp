@@ -17637,10 +17637,10 @@ static D2SpriteCacheEntryStrc * __stdcall SPRITECACHE_Query(int32_t nParam1, int
       } else {
         nNextNode = nEntry->pNext;
         pGfxMemory->pFreeHead = nNextNode;
-        if (!nNextNode) {
-          pGfxMemory->pFreeTail = 0;
-        } else {
+        if (nNextNode) {
           nNextNode->pPrev = 0;
+        } else {
+          pGfxMemory->pFreeTail = 0;
         }
 
         nEntry->pNext = 0;
