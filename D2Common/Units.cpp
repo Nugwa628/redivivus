@@ -1618,7 +1618,10 @@ int32_t __stdcall GetCurrentLifePercentage(D2UnitStrc * pUnit) {
 }
 
 BOOL __stdcall IsSoftMonster(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
       return 0;
     }
 
@@ -2044,7 +2047,13 @@ int32_t __stdcall GetBlockRate(D2UnitStrc * pUnit, BOOL bExpansion) {
 D2UnitStrc * __stdcall GetEquippedWeapon(D2UnitStrc * pUnit) {
     int32_t nBodyLoc;
     BOOL bSwitch;
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pInventory)) {
+    if (!pUnit) {
+      return nullptr;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
+      return nullptr;
+    }
+    if (!pUnit->pInventory) {
       return nullptr;
     }
 
@@ -2652,7 +2661,10 @@ BOOL __fastcall CanSwitchAI(int32_t nMonsterId) {
     }
 
     uint32_t dwStatFlag = D2Client::Source::ClientEngine::GetSomeMonsterStatFlag(nMonsterId, 2);
-    if (!(dwStatFlag && !pMonStats->boss)) {
+    if (!dwStatFlag) {
+      return 0;
+    }
+    if (pMonStats->boss) {
       return 0;
     }
 
@@ -2737,12 +2749,24 @@ BOOL __stdcall CanDualWield(D2UnitStrc * pUnit) {
 BOOL __stdcall IsCorpseUseable(D2UnitStrc * pUnit) {
     bool _bHasPassiveState;
     bool bHasPassiveState;
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->eAnimMode.ePlayerMode == Kick)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
+      return 0;
+    }
+    if (pUnit->eAnimMode.ePlayerMode != Kick) {
       return 0;
     }
 
     D2MonStats2Txt* pMonStats2 = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetMonStats2(pUnit->nClassId);
-    if (!(pMonStats2 && !pMonStats2->deadCol && pMonStats2->corpseSel)) {
+    if (!pMonStats2) {
+      return 0;
+    }
+    if (pMonStats2->deadCol) {
+      return 0;
+    }
+    if (!pMonStats2->corpseSel) {
       return 0;
     }
 

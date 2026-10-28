@@ -2479,7 +2479,19 @@ uint32_t __fastcall ITEMPROP_AddStat_FixedOrRolledMaxDamageAware(uint32_t dwPara
 }
 
 uint32_t __fastcall ITEMPROP_SetIndestructible(uint32_t dwParam1, D2UnitStrc * pUnit, D2UnitStrc * pUnit2, uint32_t nParam1, uint32_t dwParam2, int32_t nParam, uint32_t dwParam3, uint32_t dwParam4, int32_t nParam2, uint32_t nParam3, uint32_t dwParam5) {
-    if (!(pUnit2 && pUnit2->eUnitType == UNIT_ITEM && nParam1 && 0x98 < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost != (D2ItemStatCostTxt*)-49248)) {
+    if (!pUnit2) {
+      return 0;
+    }
+    if (pUnit2->eUnitType != UNIT_ITEM) {
+      return 0;
+    }
+    if (!nParam1) {
+      return 0;
+    }
+    if (!(0x98 < sgptDataTable->nTxtItemStatCostSize)) {
+      return 0;
+    }
+    if (!(sgptDataTable->pTxtItemStatCost != (D2ItemStatCostTxt*)-49248)) {
       return 0;
     }
 

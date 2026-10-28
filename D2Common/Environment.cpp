@@ -414,7 +414,10 @@ BOOL __stdcall DRLGENV_UpdateCycleIndex(D2DrlgActStrc * pDrlgAct, int32_t nActNo
         return 1;
       }
     }
-    if (!(nOldEnvData == pEnv->nEnvironmentData && nOldTimeIndex == pEnv->nTimeIndex)) {
+    if (nOldEnvData != pEnv->nEnvironmentData) {
+      return 1;
+    }
+    if (nOldTimeIndex != pEnv->nTimeIndex) {
       return 1;
     }
 

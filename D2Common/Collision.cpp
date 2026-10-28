@@ -1399,7 +1399,10 @@ eCollisionFlags __stdcall CheckCollision_Cross(D2RoomStrc * pRoom, int32_t nX, i
     }
 
     D2RoomCollisionGridStrc* pCollisionGrid = DUNGEON::Dungeon::DRLGROOM_GetCollisionGridFromRoom(pRoom_00);
-    if (!(pCollisionGrid && pCollisionGrid->pMapStart)) {
+    if (!pCollisionGrid) {
+      return eFlagMask;
+    }
+    if (!pCollisionGrid->pMapStart) {
       return eFlagMask;
     }
 

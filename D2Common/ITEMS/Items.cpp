@@ -115,7 +115,10 @@ uint32_t __stdcall ITEMS_SearchItemCodeTable(D2UnitStrc * pUnit, int32_t dwConte
     static int nItemsEventMethodSize = 0x4; D2_STATIC_GUARD(nItemsEventMethodSize, "D2Common::ITEMS::Items::ITEMS_SearchItemCodeTable::nItemsEventMethodSize");
 
     D2ItemCalcContextStrc sCalcContext;
-    if (!(sgptDataTable->pItemsCode && nOffset < (uint32_t)sgptDataTable->nItemsCodeSize)) {
+    if (!sgptDataTable->pItemsCode) {
+      return 0;
+    }
+    if (!(nOffset < (uint32_t)sgptDataTable->nItemsCodeSize)) {
       return 0;
     }
 
@@ -2348,12 +2351,21 @@ uint32_t __stdcall ITEM_GetItemData_eD2ItemFlag_IsEthereal(D2UnitStrc * pUnit) {
 
 int32_t ITEMS_CountContainerItems(D2UnitStrc * pItem) {
     int nCount = 0;
-    if (!(pItem && pItem->eUnitType == UNIT_ITEM)) {
+    if (!pItem) {
+      return 0;
+    }
+    if (pItem->eUnitType != UNIT_ITEM) {
       return 0;
     }
 
     D2ItemsTxt* pItemTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pItem->nClassId);
-    if (!(pItemTxt && pItemTxt->bHasInv && pItem->pInventory)) {
+    if (!pItemTxt) {
+      return 0;
+    }
+    if (!pItemTxt->bHasInv) {
+      return 0;
+    }
+    if (!pItem->pInventory) {
       return 0;
     }
 
@@ -5948,7 +5960,16 @@ BOOL __stdcall ITEM_CheckEquipRequirements(D2UnitStrc * pUnit, D2UnitStrc * pCha
     if (pnLevel) {
       *pnLevel = _bLevelOk;
     }
-    if (!(_bStrOk && _bDexOk && _bLevelOk && eItemFlags != ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD))) {
+    if (!_bStrOk) {
+      return 0;
+    }
+    if (!_bDexOk) {
+      return 0;
+    }
+    if (!_bLevelOk) {
+      return 0;
+    }
+    if (!(eItemFlags != ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD))) {
       return 0;
     }
 
@@ -6667,12 +6688,24 @@ int32_t __stdcall ITEMS_CalculateRepairAllCost(::SGAMEDATA * unk, D2UnitStrc * p
 }
 
 uint32_t __stdcall ITEM_IsActiveCharm(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
-    if (!(pUnit && (pUnit->eUnitType != UNIT_ITEM || (!pUnit->pUnitData.pUnitDataItem || (pUnit->pUnitData.pUnitDataItem->dwItemFlags & ITEMFLAG_BROKEN) == ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD)) && (!pUnit->pUnitData.pUnitDataMissile || (pUnit->pUnitData.pUnitDataMissile->eOwnerType & ITEMFLAG_DISABLED) == UNIT_PLAYER)))) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (!((pUnit->eUnitType != UNIT_ITEM || (!pUnit->pUnitData.pUnitDataItem || (pUnit->pUnitData.pUnitDataItem->dwItemFlags & ITEMFLAG_BROKEN) == ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD)) && (!pUnit->pUnitData.pUnitDataMissile || (pUnit->pUnitData.pUnitDataMissile->eOwnerType & ITEMFLAG_DISABLED) == UNIT_PLAYER)))) {
       return 0;
     }
 
     uint32_t bIsInInventory = ITEMS_IsA(pUnit, ITEMTYPE_Charm);
-    if (!(bIsInInventory && pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataItem && pUnit->pUnitData.pUnitDataItem->ePage == INVPAGE_INVENTORY)) {
+    if (!bIsInInventory) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_ITEM) {
+      return 0;
+    }
+    if (!pUnit->pUnitData.pUnitDataItem) {
+      return 0;
+    }
+    if (pUnit->pUnitData.pUnitDataItem->ePage != INVPAGE_INVENTORY) {
       return 0;
     }
 
