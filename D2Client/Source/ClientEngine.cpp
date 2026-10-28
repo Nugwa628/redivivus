@@ -554,10 +554,10 @@ void __fastcall CLIENT_SpawnTowerMistEffect(D2UnitStrc * pUnit) {
       eFindType = pTarget->eUnitType;
       if (eFindType == UNIT_OBJECT || 3 < (int)eFindType && (int)eFindType <= 5) {
         nY = pTarget->pPath.pStaticPath->nPosY;
-      } else if (!pTarget->pPath.pDynamicPath) {
-        nY = 0;
-      } else {
+      } else if (pTarget->pPath.pDynamicPath) {
         nY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
+      } else {
+        nY = 0;
       }
     } else {
       eFindType = pUnit->eUnitType;
