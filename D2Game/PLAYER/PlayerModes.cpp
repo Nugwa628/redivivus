@@ -385,7 +385,8 @@ static BOOL PLRMODES_DrainStamina(D2UnitStrc * pUnit) {
     }
 
     int nStaminaDrain = pUnit->nClassId;
-    if (!(0 <= nStaminaDrain && nStaminaDrain < sgptDataTable->nTxtCharStatsSize && sgptDataTable->pTxtCharStats + nStaminaDrain)) {
+    D2CharStatsTxt* pCharStatsRecord = (0 <= nStaminaDrain && nStaminaDrain < sgptDataTable->nTxtCharStatsSize) ? &sgptDataTable->pTxtCharStats[nStaminaDrain] : 0;
+    if (!pCharStatsRecord) {
       return 0;
     }
 

@@ -427,7 +427,7 @@ int32_t __fastcall DAMAGE_GetMonsterDelayByDifficulty(D2UnitStrc * pUnit, D2Unit
     }
 
     int nVictimClassId = pMonster->nClassId;
-    if (!(0 <= nVictimClassId && nVictimClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nVictimClassId)) {
+    D2MonStatsTxt* pMonStatsRecord; pMonStatsRecord = (0 <= nVictimClassId && nVictimClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nVictimClassId] : 0; if (!pMonStatsRecord) {
       return -0x32;
     }
 
@@ -750,7 +750,7 @@ static void __stdcall DAMAGE_ApplyMonsterTypeBonusDamage(D2UnitStrc * pUnit, D2D
     }
 
     int nMonTypeCount = pnParam[1];
-    if (!(0 <= nMonTypeCount && nMonTypeCount < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonTypeCount)) {
+    D2MonStatsTxt* pMonStatsRecord; pMonStatsRecord = (0 <= nMonTypeCount && nMonTypeCount < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nMonTypeCount] : 0; if (!pMonStatsRecord) {
       return;
     }
 
@@ -3181,7 +3181,7 @@ void __fastcall DAMAGE_AddSkillBonusDamage(D2UnitStrc * pUnit, eD2Skills eSkill,
 }
 
 void __fastcall SKILL_CalculateDamageForEvent(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget, eD2Skills eSkill, int32_t nParam, D2DamageStrc * pDamage) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord; pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0; if (!pSkillsRecord) {
       return;
     }
 

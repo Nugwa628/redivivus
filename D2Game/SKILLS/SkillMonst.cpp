@@ -198,7 +198,8 @@ BOOL __fastcall Skills_SrvDoFunc_084_SpawnMinionsAndSuicide(::SGAMEDATA * pGame,
 BOOL __fastcall Skills_SrvDoFunc_085_FireUpgradedMissile(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     int32_t nClassId;
     eD2Skills eSkillOrig = eSkill;
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -352,7 +353,8 @@ BOOL __fastcall Skills_SrvDoFunc_086_SelfHeal(::SGAMEDATA * pGame, D2UnitStrc * 
 BOOL __fastcall Skills_SrvDoFunc_087_SpawnBehindTarget(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     eD2MonsterAnimMode eAnimMode;
     int nOffsetY;
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -440,7 +442,8 @@ BOOL __fastcall Skills_SrvDoFunc_088_FireMissileFromBodyPart(::SGAMEDATA * pGame
     int nOffsetX;
     uint32_t nFrameIdx;
     uint8_t byBodyPartIdx;
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -755,7 +758,8 @@ BOOL __fastcall SKILLMONST_SrvStFn49_NestSpawn(::SGAMEDATA * pGame, D2UnitStrc *
     eD2MonsterAnimMode eAnimMode;
     int32_t nSpawnY;
     eD2Skills eSkillOrig = eSkill;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -1022,7 +1026,8 @@ BOOL __fastcall SKILLMONST_SrvStFn53_MonInferno(::SGAMEDATA * pGame, D2UnitStrc 
 }
 
 static void __stdcall SKILLASSN_GetTrapHealthBonus(uint32_t dwUnused, eD2Skills eSkill, D2UnitStrc * pUnit, int32_t nSkillLvl, D2UnitStrc * pMissileUnit) {
-    if ((int)eSkill < 0 || sgptDataTable->nTxtSkillsCount <= (int)eSkill || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return;
     }
     if (!pMissileUnit) {
@@ -2061,7 +2066,8 @@ BOOL __fastcall Skills_SrvDoFunc_105_FireParallelMissileVolley(::SGAMEDATA * pGa
 }
 
 BOOL __fastcall Skills_SrvDoFunc_106_FireMissileRingOnTarget(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 

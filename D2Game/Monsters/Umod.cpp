@@ -668,7 +668,8 @@ void __fastcall ExtraFast(D2UnitStrc * pUnit, int32_t nIndex, BOOL bUnknown) {
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId)) {
+    D2MonStatsTxt* pMonStatsRecord = (0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nClassId] : 0;
+    if (!pMonStatsRecord) {
       return;
     }
 

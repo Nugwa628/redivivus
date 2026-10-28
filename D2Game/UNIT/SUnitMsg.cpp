@@ -417,7 +417,7 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
           while (0 <= (int)nSetBitIdx) {
             aStateFlagDwords[((int)nSetBitIdx >> 5) + nDwordIdxSaved] &= gadwInvBitMasks[nSetBitIdx & 0x1f];
             eState = nSetBitIdx + nStateBaseIdx;
-            if ((int)eState < 0 || (int)eState >= sgptDataTable->nTxtStatesSize || !(sgptDataTable->pTxtStates + eState)) {
+            D2StatesTxt* pStatesRecord; pStatesRecord = (0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize) ? &sgptDataTable->pTxtStates[eState] : 0; if (!pStatesRecord) {
               nFlagDwordVal = *pFlagDword;
             } else if (sgptDataTable->pTxtStates[eState].nosend) {
               nFlagDwordVal = *pFlagDword;

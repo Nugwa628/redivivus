@@ -89,7 +89,8 @@ typedef void (__fastcall *PFN_StatExpireCallback)(D2UnitStrc * pUnit, eD2States 
 namespace D2Game::SKILLS::SkillAss {
 
 D2MonEquipTxt * __fastcall SKILLBAR_GetVelocityAndSpreadForMissile(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nParam)) {
+    D2MonStatsTxt* pMonStatsRecord = (0 <= nParam && nParam < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nParam] : 0;
+    if (!pMonStatsRecord) {
       return nullptr;
     }
 
@@ -1359,7 +1360,8 @@ BOOL __fastcall Skills_SrvDoFunc_041_BladeFury(::SGAMEDATA * pGame, D2UnitStrc *
     pUnit->sSeed = DVar1;
     sSeedCopy.nSeedHigh = 0x29a;
     sSeedCopy.nSeedLow = DVar1.nSeedLow;
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -2645,7 +2647,8 @@ static void __stdcall SKILLASS_ApplyLevelScaledBuffs(::SGAMEDATA * pGame, int32_
     if (1 >= nParam2) {
       return;
     }
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       nHpBonusPerLevelPct = 0;
     } else {
       nHpBonusPerLevelPct = sgptDataTable->pTxtSkills[eSkill].Param[0];
@@ -3374,7 +3377,8 @@ BOOL __fastcall Skills_SrvDoFunc_142_BladeShield_SpinDamage(::SGAMEDATA * pGame,
 }
 
 BOOL __fastcall Skills_SrvDoFunc_054_BladeShield_Activate(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 

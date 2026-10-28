@@ -1866,7 +1866,8 @@ void __stdcall SKILL_GetAttackRateForWeapon(D2SkillStrc * pSkill, D2UnitStrc * p
     }
 
     int nCharClassId = pUnit->nClassId;
-    if (!(0 <= nCharClassId && nCharClassId < sgptDataTable->nTxtCharStatsSize && sgptDataTable->pTxtCharStats + nCharClassId)) {
+    D2CharStatsTxt* pCharStatsRecord = (0 <= nCharClassId && nCharClassId < sgptDataTable->nTxtCharStatsSize) ? &sgptDataTable->pTxtCharStats[nCharClassId] : 0;
+    if (!pCharStatsRecord) {
       return;
     }
 

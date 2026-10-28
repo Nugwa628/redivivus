@@ -897,7 +897,8 @@ static void __stdcall SKILLDRUID_GetSummonDamageBonus(D2SkillsTxt * pSkillTxt, :
 
 static void __stdcall SKILLDRUID_CreateAuraMissile(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTargetUnit, int32_t nDuration, int32_t nSkillLvl, eD2Skills eSkill) {
     D2SkillArgStrc sSkillArg;
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return;
     }
 
@@ -1039,7 +1040,8 @@ BOOL __fastcall Skills_SrvDoFunc_123_Tornado(::SGAMEDATA * pGame, D2UnitStrc * p
     D2SkillArgStrc sSkillArg;
     uint32_t nTargetY;
     uint32_t nTargetX;
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 

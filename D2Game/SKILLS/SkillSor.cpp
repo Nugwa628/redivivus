@@ -82,7 +82,8 @@
 namespace D2Game::SKILLS::SkillSor {
 
 int32_t __fastcall GetTxtTableParam6(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nParam)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= nParam && nParam < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nParam] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -181,7 +182,8 @@ BOOL __fastcall INFERNO_BeginOrContinueChannel(::SGAMEDATA * pGame, D2UnitStrc *
     D2SkillStrc* pSkill;
     eD2UnitType eUnitType;
     int32_t nInitParam;
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
     if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
@@ -334,7 +336,8 @@ BOOL __fastcall SKILLSOR_SrvStFn12_TargetInAuraRange(::SGAMEDATA * pGame, D2Unit
 }
 
 BOOL __fastcall SKILLSOR_SrvStFn13_ThunderStorm(::SGAMEDATA * pGame, D2UnitStrc * pAttacker, eD2Skills eD2Skill, int nSkillLvl) {
-    if (!(0 <= (int)eD2Skill && (int)eD2Skill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eD2Skill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eD2Skill && (int)eD2Skill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eD2Skill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -525,7 +528,8 @@ BOOL __fastcall Skills_SrvDoFunc_018_Armor(::SGAMEDATA * pGame, D2UnitStrc * pUn
 }
 
 BOOL __fastcall Skills_SrvDoFunc_019_Inferno(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -1140,7 +1144,8 @@ BOOL __fastcall Skills_SrvDoFunc_027_Teleport(::SGAMEDATA * pGame, D2UnitStrc * 
 BOOL __fastcall Skills_SrvDoFunc_028_Meteor_Blizzard(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     bool _bCollisionOk;
     bool bCollisionOk;
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 

@@ -105,7 +105,8 @@ BOOL __fastcall Skills_SrvDoFunc_125_CatapultFireBomb(::SGAMEDATA * pGame, D2Uni
     D2SkillArgStrc sSkillArg;
     uint32_t nTargetYOrX;
     eD2Skills eSkillId = eSkill;
-    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -751,7 +752,8 @@ BOOL __fastcall Skills_SrvDoFunc_131_ConditionalTransformOrBuff(::SGAMEDATA * pG
 BOOL __fastcall Skills_SrvDoFunc_132_FireClassUpgradedMissile(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     int32_t nMonClassId;
     eD2Skills eSkill_00 = eSkill;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -839,7 +841,8 @@ BOOL __fastcall Skills_SrvDoFunc_133_SetDeathSpawnState(::SGAMEDATA * pGame, D2U
     bool _bCanSpawn;
     bool bCanSpawn;
     D2StateExArgStrc sStateArg;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
     if (pUnit) {
@@ -1122,7 +1125,8 @@ BOOL __fastcall Skills_SrvDoFunc_138_FirePerpendicularMissileLine(::SGAMEDATA * 
 BOOL __fastcall Skills_SrvDoFunc_139_FireOrthogonalMissile(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     uint32_t nCursorY;
     uint32_t nCursorX;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -1157,7 +1161,8 @@ BOOL __fastcall SKILLEMONST_SrvStFn63_CorpseCycler(::SGAMEDATA * pGame, D2UnitSt
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
       return 0;
     }
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
