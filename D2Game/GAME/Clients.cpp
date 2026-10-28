@@ -1504,7 +1504,7 @@ bool __fastcall HasWeaponSwapped(D2ClientStrc * pClient) {
 }
 
 void __fastcall SetWeaponSwap(D2ClientStrc * pClient, uint8_t bWeaponSwapped) {
-    pClient->bWeaponSwap = (bool)bWeaponSwapped;
+    *(uint8_t*)&pClient->bWeaponSwap = bWeaponSwapped;
 }
 
 void __fastcall SERVER_PutPacketInQueueList(D2ClientStrc * pClient, D2PacketListStrc * pPacketList) {

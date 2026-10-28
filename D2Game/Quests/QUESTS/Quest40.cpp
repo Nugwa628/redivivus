@@ -41,7 +41,7 @@
 namespace D2Game::Quests::QUESTS::Quest40 {
 
 uint32_t __fastcall TXT_SuperUniquesHardcoded_GetSuperUniqueIndex(uint32_t nHardcodedIndex) {
-    if (nHardcodedIndex < 0x42) {
+    if (nHardcodedIndex <= 0x41) {
       return (uint32_t)(uint16_t)sgptDataTable->aTxtSuperUniquesHardcoded[nHardcodedIndex];
     }
 
