@@ -218,7 +218,10 @@ static BOOL PATH_FindAlternateAroundObstacle(D2PathTypeArg * pPathState) {
 }
 static uint32_t PATH_CanMonsterPathInArea(D2UnitStrc * pUnit, uint16_t * pPathData) {
     uint16_t nMidY;
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
+    if (!pUnit) {
+      return 1;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
       return 1;
     }
     uint32_t bIsBossOrChamp = Monsters::MONSTERS::MONSTER_IsBossOrChampion(pUnit);

@@ -364,7 +364,10 @@ D2LightMapStrc * __stdcall SwapLightMap(D2UnitStrc * pUnit, D2LightMapStrc * pLi
 }
 
 uint32_t __stdcall SKILLS_GetUnitField0xa8_0x14(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->pSkillsList)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (!pUnit->pSkillsList) {
       return 0;
     }
 
@@ -1117,7 +1120,13 @@ int32_t __stdcall TXT_Skills_GetReqLevel(eD2Skills eSkill) {
 }
 
 int32_t __stdcall SKILL_GetRequiredLevel(D2UnitStrc * pUnit, eD2Skills eSkill) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    if (!(0 <= (int)eSkill)) {
+      return 0x7fffffff;
+    }
+    if (!((int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+      return 0x7fffffff;
+    }
+    if (!(sgptDataTable->pTxtSkills + eSkill)) {
       return 0x7fffffff;
     }
 
@@ -1238,12 +1247,18 @@ BOOL __stdcall SkillCalculateIfWeCanSkillThisSkill(D2UnitStrc * pUnit, eD2Skills
 }
 
 uint32_t __stdcall SpendSkillPointOnSkill(D2UnitStrc * pUnit, eD2Skills eSkill) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill)) {
+      return 0;
+    }
+    if (!((int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
     D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + eSkill;
-    if (!(pSkillTxt && pSkillTxt->InGame)) {
+    if (!pSkillTxt) {
+      return 0;
+    }
+    if (!pSkillTxt->InGame) {
       return 0;
     }
 
@@ -1289,7 +1304,10 @@ uint32_t __stdcall SKILLS_CalcToHit(D2UnitStrc * pUnit, eD2Skills eSkill, int32_
           case -1:
             return (nSkillLevel - 1) * pSkillTxt->LevToHit + pSkillTxt->ToHit;
         }
-        if (!(sgptDataTable->pSkillsCode && nToHitCalcIdx < (uint32_t)sgptDataTable->nSkillsCodeSize)) {
+        if (!sgptDataTable->pSkillsCode) {
+          return 0;
+        }
+        if (!(nToHitCalcIdx < (uint32_t)sgptDataTable->nSkillsCodeSize)) {
           return 0;
         }
 
@@ -1437,12 +1455,18 @@ static int32_t SKILLS_ApplyElementalMasteryBonus(eD2ElementalDamageTypeDWORD eEl
 int32_t __stdcall SERVER_MinDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t nSkillLevel, BOOL bApplyMastery) {
     int32_t nElemMasteryBonus;
     D2DataTableTxtStrc* pDataTable = sgptDataTable;
-    if (!(0 <= eSkillId && eSkillId < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= eSkillId)) {
+      return 0;
+    }
+    if (!(eSkillId < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
     D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + eSkillId;
-    if (!(pSkillTxt && 0 < nSkillLevel)) {
+    if (!pSkillTxt) {
+      return 0;
+    }
+    if (!(0 < nSkillLevel)) {
       return 0;
     }
 
@@ -1460,7 +1484,10 @@ int32_t __stdcall SERVER_MinDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t
         nDamage += nElemMasteryBonus;
       }
     }
-    if (!(bApplyMastery && pUnit)) {
+    if (!bApplyMastery) {
+      return nDamage;
+    }
+    if (!pUnit) {
       return nDamage;
     }
 
@@ -1472,12 +1499,18 @@ int32_t __stdcall SERVER_MinDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t
 int32_t __stdcall SERVER_MaxDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t nSkillLevel, int32_t bApplyElemBonus) {
     int32_t nElemMasteryBonus;
     D2DataTableTxtStrc* pDataTable = sgptDataTable;
-    if (!(-1 < eSkillId && eSkillId < sgptDataTable->nTxtSkillsCount)) {
+    if (!(-1 < eSkillId)) {
+      return 0;
+    }
+    if (!(eSkillId < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
     D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + eSkillId;
-    if (!(pSkillTxt && 0 < nSkillLevel)) {
+    if (!pSkillTxt) {
+      return 0;
+    }
+    if (!(0 < nSkillLevel)) {
       return 0;
     }
 
@@ -1495,7 +1528,10 @@ int32_t __stdcall SERVER_MaxDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t
         nDamage += nElemMasteryBonus;
       }
     }
-    if (!(bApplyElemBonus && pUnit)) {
+    if (!bApplyElemBonus) {
+      return nDamage;
+    }
+    if (!pUnit) {
       return nDamage;
     }
 
@@ -1508,12 +1544,18 @@ int32_t __stdcall SERVER_MaxDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t
 int32_t __stdcall SERVER_Synergy1(D2UnitStrc * pUnit, int32_t eSkillId, int32_t nSkillLevel, int32_t nUnused) {
     int nLevelLenOffset;
     D2SkillCalcContextStrc sCalcCtx;
-    if (!(0 <= eSkillId && eSkillId < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= eSkillId)) {
+      return 0;
+    }
+    if (!(eSkillId < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
     D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + eSkillId;
-    if (!(pSkillTxt && 0 < nSkillLevel)) {
+    if (!pSkillTxt) {
+      return 0;
+    }
+    if (!(0 < nSkillLevel)) {
       return 0;
     }
     if (nSkillLevel < 0x11) {
@@ -1528,7 +1570,13 @@ int32_t __stdcall SERVER_Synergy1(D2UnitStrc * pUnit, int32_t eSkillId, int32_t 
 
     uint32_t uCalcResult = pSkillTxt->ELenSymPerCalc;
     int32_t nSynergyLen = pSkillTxt->ELen + nLevelLenOffset;
-    if (!(uCalcResult != -1 && sgptDataTable->pSkillsCode && uCalcResult < (uint32_t)sgptDataTable->nSkillsCodeSize)) {
+    if (uCalcResult == -1) {
+      return nSynergyLen;
+    }
+    if (!sgptDataTable->pSkillsCode) {
+      return nSynergyLen;
+    }
+    if (!(uCalcResult < (uint32_t)sgptDataTable->nSkillsCodeSize)) {
       return nSynergyLen;
     }
 
@@ -1787,7 +1835,13 @@ int32_t __stdcall SKILLS_GetSkillWeaponClass(D2UnitStrc * pUnit, D2SkillStrc * p
 }
 
 uint32_t __stdcall SKILLS_CheckMonsterCorpseSelectable(int32_t bCheckDead, D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && (pUnit->eAnimMode.ePlayerMode == Kick || bCheckDead && pUnit->eAnimMode.ePlayerMode == Death))) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
+      return 0;
+    }
+    if (!((pUnit->eAnimMode.ePlayerMode == Kick || bCheckDead && pUnit->eAnimMode.ePlayerMode == Death))) {
       return 0;
     }
 
@@ -1801,7 +1855,13 @@ uint32_t __stdcall SKILLS_CheckMonsterCorpseSelectable(int32_t bCheckDead, D2Uni
 }
 
 uint32_t __stdcall D2CheckIfCorpseIsConsumable(D2UnitStrc * pUnit, int32_t bCheckDead) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && (pUnit->eAnimMode.ePlayerMode == Kick || bCheckDead && pUnit->eAnimMode.ePlayerMode == Death))) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
+      return 0;
+    }
+    if (!((pUnit->eAnimMode.ePlayerMode == Kick || bCheckDead && pUnit->eAnimMode.ePlayerMode == Death))) {
       return 0;
     }
 
@@ -1815,7 +1875,10 @@ uint32_t __stdcall D2CheckIfCorpseIsConsumable(D2UnitStrc * pUnit, int32_t bChec
     if (!bCorpseSelFlag) {
       return 0;
     }
-    if (!(0 <= nMonStatsId && nMonStatsId < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nMonStatsId)) {
+      return (uint32_t)(*(volatile uint8_t*)0x32 != 0);
+    }
+    if (!(nMonStatsId < sgptDataTable->nTxtMonStatsSize)) {
       return (uint32_t)(*(volatile uint8_t*)0x32 != 0);
     }
 
@@ -2441,7 +2504,13 @@ int32_t __stdcall SKILL_GetConcentrationDamageBonus(D2UnitStrc * pUnit, int32_t 
     }
 
     int32_t nDamagePct = Stats::StatsEx::STATLIST_GetBaseStatValue(pConcentrationStatList, UNITSTAT_damagepercent, 0);
-    if (!(0 <= nSkillId && nSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nSkillId)) {
+    if (!(0 <= nSkillId)) {
+      return 0;
+    }
+    if (!(nSkillId < sgptDataTable->nTxtSkillsCount)) {
+      return 0;
+    }
+    if (!(sgptDataTable->pTxtSkills + nSkillId)) {
       return 0;
     }
 
@@ -2932,7 +3001,10 @@ uint32_t __fastcall SKILLS_EvalSkillDescCalc_Chained(eD2Skills eSkill, uint8_t b
 
 int32_t __stdcall D2GetSkillCalc(D2UnitStrc * pUnit, int32_t calc, eD2Skills eSkill, int32_t nSkillLvl) {
     D2SkillCalcContextStrc sCalcCtx;
-    if (!(sgptDataTable->pSkillsCode && (uint32_t)calc < (uint32_t)sgptDataTable->nSkillsCodeSize)) {
+    if (!sgptDataTable->pSkillsCode) {
+      return 0;
+    }
+    if (!((uint32_t)calc < (uint32_t)sgptDataTable->nSkillsCodeSize)) {
       return 0;
     }
 
@@ -2945,7 +3017,10 @@ int32_t __stdcall D2GetSkillCalc(D2UnitStrc * pUnit, int32_t calc, eD2Skills eSk
 
 uint32_t __stdcall SKILLS_EvalDescCalcBytecode(D2UnitStrc * pUnit, uint32_t nCalcOffset, eD2Skills eSkillId, int32_t nSkillLevel) {
     D2SkillCalcContextStrc sCalcCtx;
-    if (!(sgptDataTable->pSkillDescCode && nCalcOffset < (uint32_t)sgptDataTable->nSkillDescCodeSize)) {
+    if (!sgptDataTable->pSkillDescCode) {
+      return 0;
+    }
+    if (!(nCalcOffset < (uint32_t)sgptDataTable->nSkillDescCodeSize)) {
       return 0;
     }
 
@@ -3576,7 +3651,10 @@ static uint32_t SKILLS_CheckItemChargesRemaining(D2UnitStrc * pUnit, D2SkillStrc
 }
 
 static uint32_t __stdcall SKILL_IsDelayExpired(D2SkillStrc * pSkill, D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
+    if (!pUnit) {
+      return 1;
+    }
+    if (pUnit->eUnitType != UNIT_PLAYER) {
       return 1;
     }
 

@@ -291,7 +291,10 @@ void __fastcall SetSuperUniqueName(D2UnitStrc * pUnit, uint16_t * wszText) {
 
 uint32_t __fastcall MONSTER_IsBossOrChampion(D2UnitStrc * pUnit) {
     uint8_t* puVar1;
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
       return 0;
     }
 
@@ -300,7 +303,10 @@ uint32_t __fastcall MONSTER_IsBossOrChampion(D2UnitStrc * pUnit) {
     if (!pTxt) {
       return 0;
     }
-    if (!(!pTxt->npc && !pTxt->inTown)) {
+    if (pTxt->npc) {
+      return 1;
+    }
+    if (pTxt->inTown) {
       return 1;
     }
 
@@ -325,7 +331,10 @@ BOOL __stdcall MONSTER_IsAndarielNormal(D2UnitStrc * pUnit, int32_t nParam) {
 }
 
 uint32_t __stdcall IsDemon(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
       return 0;
     }
 
@@ -340,13 +349,19 @@ uint32_t __stdcall IsDemon(D2UnitStrc * pUnit) {
 
 BOOL __stdcall MONSTER_IsMonsterUndead(D2UnitStrc * pUnit) {
     uint8_t* puVar1;
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
       return 0;
     }
 
     int pMonStatsTxt = pUnit->nClassId;
     D2MonStatsTxt * pTxt = (0 <= pMonStatsTxt && pMonStatsTxt < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[pMonStatsTxt] : NULL;
-    if (!(pTxt && (pTxt->lUndead || pTxt->hUndead))) {
+    if (!pTxt) {
+      return 0;
+    }
+    if (!((pTxt->lUndead || pTxt->hUndead))) {
       return 0;
     }
 
@@ -364,7 +379,13 @@ uint32_t __stdcall UnitIsMarkedBoss(D2MonStatsTxt * pMonStatsTxt, D2UnitStrc * p
 
 // 2022.01.09 - dzik
 BOOL __stdcall CheckIfMonsterIsDead(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && (pUnit->eAnimMode.ePlayerMode == Death || pUnit->eAnimMode.ePlayerMode == Kick))) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_MONSTER) {
+      return 0;
+    }
+    if (!((pUnit->eAnimMode.ePlayerMode == Death || pUnit->eAnimMode.ePlayerMode == Kick))) {
       return 0;
     }
 
@@ -562,7 +583,10 @@ int32_t __stdcall GetMonsterBaseId(D2RoomStrc * pRoom, int32_t nMonsterId) {
 }
 
 uint32_t __stdcall MONSTERS_CheckMonStatFlag0xc_Bit7(D2UnitStrc * pnParam) {
-    if (!(pnParam && pnParam->eUnitType == UNIT_MONSTER)) {
+    if (!pnParam) {
+      return 0;
+    }
+    if (pnParam->eUnitType != UNIT_MONSTER) {
       return 0;
     }
 
