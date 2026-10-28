@@ -2044,7 +2044,7 @@ void __fastcall QSERVER_DestroyGameByToken(uint32_t nToken) {
     ::SGAMEDATA* pGame = pQServerState->TSHashTable<::SGAMEDATA, HASHKEY_NONE>::Ptr(nToken, &pQServerState->tKey);
     if (!pGame) {
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection->m_critsect);
-      return nullptr;
+      return pGame;
     }
     if (!pGame->lpCriticalSection) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1181);
@@ -2170,7 +2170,7 @@ int32_t __stdcall QSERVER_CountExpansionGames() {
       }
 
       pTokenEntry++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenEntry) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenEntry) {
         return nCount;
       }
     } while (true);
@@ -2238,9 +2238,9 @@ void __stdcall QSERVER_GetGameListByAge(short * pHistogramOut, int32_t nMaxMinut
 }
 
 uint32_t __stdcall QSERVER_GetClientCountByServerId(uint16_t nServerId) {
+    ::SGAMEDATA* nToken = 0;
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gQServerGameListCs);
     ::SGAMEDATA* pGame = gaQServerGameByToken[nServerId];
-    ::SGAMEDATA* nToken = 0;
     if (pGame && pGame != (::SGAMEDATA*)-1) {
       nToken = pGame;
     }
@@ -2773,8 +2773,8 @@ uint32_t __fastcall QSERVER_FindGameTokenByName(char * szGameName) {
 // Inline QSERVER_GetFirstActiveGame: returns that game's pInitSeed.nSeedLow and leaves its critical section, or 0 with no game; halts (line 4196) when the game has no critical section.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 uint32_t __stdcall QSERVER_GetFirstActiveGameSeed() {
-    EnterCriticalSection(&gQServerGameListCs);
     ::SGAMEDATA* nToken = 0;
+    EnterCriticalSection(&gQServerGameListCs);
     if (gaQServerGameByToken[1] && gaQServerGameByToken[1] != (::SGAMEDATA*)-1) {
       nToken = gaQServerGameByToken[1];
     }
@@ -3020,7 +3020,7 @@ int32_t __stdcall SrvProcessAllGames(int32_t bLimitFrameSkip) {
       }
 
       nToken++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)nToken) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)nToken) {
         if (!bTickedAnyGame) {
           return 0;
         }
