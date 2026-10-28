@@ -1436,15 +1436,15 @@ BOOL __fastcall OBJOP_A5Q5_AncientsQuestStateQuery(D2ObjectOperateFnArg * pOpera
     bool _bQuestCompleted;
     bool bQuestCompleted;
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
-    _bQuestCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_RiteOfPassage, QUESTSTATE_Completed);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty];
+    _bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_RiteOfPassage, QUESTSTATE_Completed);
     if (!_bQuestCompleted) {
       return 0;
     }
 
     ::SGAMEDATA* pGame2 = pOperation->sArg.pGame;
-    D2UnitDataPlayerStrc* pPlayerData2 = D2Common::Units::GetPlayerData(pOperation->pAttacker);
-    _bQuestCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData2->pQuestRecord[pGame2->nDifficulty], QUEST_RiteOfPassage, QUESTSTATE_Step0x04);
+    D2BitBufferStrc* pQuestRecord2 = D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame2->nDifficulty];
+    _bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord2, QUEST_RiteOfPassage, QUESTSTATE_Step0x04);
     if (_bQuestCompleted) {
       return 0;
     }
