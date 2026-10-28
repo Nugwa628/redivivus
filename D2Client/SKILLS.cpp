@@ -1963,7 +1963,7 @@ BOOL __fastcall Skills_CltDoFunc_AuraState_OverlayOnCaster(D2UnitStrc * pUnit, e
     if (!pSkillTxt) {
       return 0;
     }
-    if (pSkillTxt->progressive) {
+    if ((*((uint8_t*)pSkillTxt + 0x4) & gadwBitMasks[2])) {
       D2StatListExStrc* pStatListEx;
       sAuraState = pSkillTxt->aurastate;
       if (0 <= sAuraState && (int)sAuraState < sgptDataTable->nTxtStatesSize && 0 <= pSkillTxt->aurastat[0] && (int)pSkillTxt->aurastat[0] < sgptDataTable->nTxtItemStatCostSize) {
