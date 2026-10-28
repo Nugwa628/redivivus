@@ -374,11 +374,12 @@ uint32_t __stdcall PATH_RecalculatePath(D2UnitStrc * pUnit, int32_t nParam) {
       return 0;
     }
     if (!(pDynamicPath->nFlags & 0x10)) {
-      if (pUnit->eUnitType == UNIT_MONSTER) {
-        bPathCalcOk = DynamicPath::GetDistanceCastedToInt(pDynamicPath);
-        if (!bPathCalcOk) {
-          return 0;
-        }
+      switch (pUnit->eUnitType) {
+        case UNIT_MONSTER:
+          bPathCalcOk = DynamicPath::GetDistanceCastedToInt(pDynamicPath);
+          if (!bPathCalcOk) {
+            return 0;
+          }
       }
 
       Unit::ROOM_LinkUnitToUpdateList(pUnit);

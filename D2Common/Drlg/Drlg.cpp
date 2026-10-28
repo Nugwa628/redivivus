@@ -413,21 +413,23 @@ static void DRLGWARP_InitLevelWarpCoordinates(D2DrlgLevelStrc * pDrlgLevelStrc) 
 void __stdcall InitLevel(D2DrlgLevelStrc * pLevel) {
     D2Common::Seed::InitSeed_Param_666(&pLevel->sSeed, pLevel->pDrlg->dwStartSeed + pLevel->eD2LevelId);
     int drlgType = pLevel->eDrlgType;
-    if (drlgType == 1) {
-      Maze::DRLGMAZE_GenerateLevel(pLevel);
-    } else {
-      if (drlgType == 2) {
-        Preset::DRLGPRESET_InitializeRoomEx(pLevel);
-        DRLG_ApplyRoomExStateFlags(pLevel);
-        DRLGWARP_InitLevelWarpCoordinates(pLevel);
-        return;
-      }
-      if (drlgType == 3) {
-        Outdoors::DRLGOUTDOOR_GenerateLevel(pLevel);
-        DRLG_ApplyRoomExStateFlags(pLevel);
-        DRLGWARP_InitLevelWarpCoordinates(pLevel);
-        return;
-      }
+    switch (drlgType) {
+      case 1:
+        Maze::DRLGMAZE_GenerateLevel(pLevel);
+        break;
+      default:
+        if (drlgType == 2) {
+          Preset::DRLGPRESET_InitializeRoomEx(pLevel);
+          DRLG_ApplyRoomExStateFlags(pLevel);
+          DRLGWARP_InitLevelWarpCoordinates(pLevel);
+          return;
+        }
+        if (drlgType == 3) {
+          Outdoors::DRLGOUTDOOR_GenerateLevel(pLevel);
+          DRLG_ApplyRoomExStateFlags(pLevel);
+          DRLGWARP_InitLevelWarpCoordinates(pLevel);
+          return;
+        }
     }
 
     DRLG_ApplyRoomExStateFlags(pLevel);

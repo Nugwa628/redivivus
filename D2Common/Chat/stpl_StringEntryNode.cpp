@@ -133,14 +133,17 @@ template<> void TSExplicitList<StringEntryNode, -572662307>::LinkNode(::StringEn
     } else {
       pDstSlot = &this->m_terminator;
     }
-    if (nLinkType != 1) {
-      TSLink<::StringEntryNode>* pTVar1;
-      pTVar1 = pDstSlot->m_prevlink;
-      pSrcSlot->m_prevlink = pTVar1;
-      pSrcSlot->m_next = pTVar1->m_next;
-      pTVar1->m_next = (int)pNode;
-      pDstSlot->m_prevlink = pSrcSlot;
-      return;
+    switch (nLinkType) {
+      case 1:
+        break;
+      default:
+        TSLink<::StringEntryNode>* pTVar1;
+        pTVar1 = pDstSlot->m_prevlink;
+        pSrcSlot->m_prevlink = pTVar1;
+        pSrcSlot->m_next = pTVar1->m_next;
+        pTVar1->m_next = (int)pNode;
+        pDstSlot->m_prevlink = pSrcSlot;
+        return;
     }
 
     pSrcSlot->m_prevlink = pDstSlot;

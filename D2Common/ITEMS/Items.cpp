@@ -4006,29 +4006,33 @@ BOOL __stdcall ITEM_CheckIfItemCanBeNamed(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x67d);
       exit(-1);
     }
-    if (pUnit->eUnitType == UNIT_ITEM) {
-      eItemType = TXT_Items_GetType(pUnit->nClassId);
-      if (eItemType == ITEMTYPE_Gold) {
-        return 0;
-      }
+    switch (pUnit->eUnitType) {
+      case UNIT_ITEM:
+        eItemType = TXT_Items_GetType(pUnit->nClassId);
+        if (eItemType == ITEMTYPE_Gold) {
+          return 0;
+        }
     }
     if (!(pUnit->eUnitType != UNIT_ITEM || !pUnit->pUnitData.pUnitDataItem || (pUnit->pUnitData.pUnitDataItem->dwItemFlags & ITEMFLAG_MONSTER) == ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD))) {
       return 0;
     }
 
     eItemType = ITEM_GetItemData_wType(pUnit);
-    if (eItemType == ITEMTYPE_PlayerBodyPart) {
-      return 0;
+    switch (eItemType) {
+      case ITEMTYPE_PlayerBodyPart:
+        return 0;
     }
 
     eItemType = ITEM_GetItemData_wType(pUnit);
-    if (eItemType == ITEMTYPE_BowQuiver) {
-      return 0;
+    switch (eItemType) {
+      case ITEMTYPE_BowQuiver:
+        return 0;
     }
 
     eItemType = ITEM_GetItemData_wType(pUnit);
-    if (eItemType == ITEMTYPE_CrossbowQuiver) {
-      return 0;
+    switch (eItemType) {
+      case ITEMTYPE_CrossbowQuiver:
+        return 0;
     }
 
     BOOL bBroken = CheckItemFlag(pUnit, ITEMFLAG_BROKEN, 0x12f7, ".\\ITEMS\\Items.cpp");

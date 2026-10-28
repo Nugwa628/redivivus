@@ -190,8 +190,9 @@ void __stdcall Free(D2UnitStrc * pUnit) {
 
     Stats::StatsEx::STATLIST_FreeStatListMemory(pUnit);
     Skills::SKILLS_FreeSkillList(pUnit);
-    if (pUnit->eUnitType == UNIT_MONSTER) {
-      Fog::Memory::FreeServerMemory(pUnit->pMemory, pUnit->pUnitData.pUnitDataPlayer, ".\\UNITS\\Units.cpp", 0x69a, 0);
+    switch (pUnit->eUnitType) {
+      case UNIT_MONSTER:
+        Fog::Memory::FreeServerMemory(pUnit->pMemory, pUnit->pUnitData.pUnitDataPlayer, ".\\UNITS\\Units.cpp", 0x69a, 0);
     }
 
     pUnit->eUnitType = UNIT_COUNT;
@@ -542,26 +543,29 @@ int32_t __fastcall GetCollisionType(D2UnitStrc * pUnit) {
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT) {
-      pObjectsTxt = pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine;
-      if (!pObjectsTxt->IsDoor) {
-        if (!(pObjectsTxt->SubClass & 4U)) {
-          return (uint32_t)(pObjectsTxt->BlockMissile != '\0') * 4 + 0x400;
+    switch (eUnitType) {
+      case UNIT_OBJECT:
+        pObjectsTxt = pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine;
+        if (!pObjectsTxt->IsDoor) {
+          if (!(pObjectsTxt->SubClass & 4U)) {
+            return (uint32_t)(pObjectsTxt->BlockMissile != '\0') * 4 + 0x400;
+          }
+
+          return 0x8000;
+        }
+        if (!pObjectsTxt->BlocksVis) {
+          return pObjectsTxt->BlockMissile != '\0' ? 0x804 : 0x400;
         }
 
-        return 0x8000;
-      }
-      if (!pObjectsTxt->BlocksVis) {
-        return pObjectsTxt->BlockMissile != '\0' ? 0x804 : 0x400;
-      }
-
-      return 0x806;
+        return 0x806;
     }
-    if (eUnitType == UNIT_ITEM) {
-      return 0x200;
+    switch (eUnitType) {
+      case UNIT_ITEM:
+        return 0x200;
     }
-    if (eUnitType == UNIT_WARP) {
-      return 1;
+    switch (eUnitType) {
+      case UNIT_WARP:
+        return 1;
     }
 
     nLine = PATH::DynamicPath::GetCollisionType(pUnit->pPath.pDynamicPath);
@@ -1143,11 +1147,15 @@ uint32_t __fastcall UNITS_CheckAnimateAtFrameEnd(int32_t nAnimMode, eD2UnitType 
 }
 
 static int __stdcall UNITS_GetAnimFrameSkip(int32_t nAnimMode, int32_t nParam, eD2UnitType eUnitType) {
-    if (eUnitType == UNIT_PLAYER) {
-      return gaPlayerAnimModeCheckTable[nAnimMode * 5 + 4];
+    switch (eUnitType) {
+      case UNIT_PLAYER:
+        return gaPlayerAnimModeCheckTable[nAnimMode * 5 + 4];
     }
-    if (eUnitType != UNIT_MONSTER) {
-      return 0;
+    switch (eUnitType) {
+      case UNIT_MONSTER:
+        break;
+      default:
+        return 0;
     }
     if (nParam >= 0x19a) {
       return gaAnimTableExpansion[nAnimMode * 5 + 4];
@@ -1821,11 +1829,15 @@ int32_t __stdcall GetOverlayHeight(D2UnitStrc * pUnit) {
     if (pUnit) {
       eUnitType = pUnit->eUnitType;
     }
-    if (eUnitType == UNIT_PLAYER) {
-      return 1;
+    switch (eUnitType) {
+      case UNIT_PLAYER:
+        return 1;
     }
-    if (eUnitType != UNIT_MONSTER) {
-      return 0;
+    switch (eUnitType) {
+      case UNIT_MONSTER:
+        break;
+      default:
+        return 0;
     }
     if (!pUnit) {
       nClassId = -1;
@@ -1961,8 +1973,11 @@ BOOL __fastcall HasShield(D2UnitStrc * pUnit) {
     if (!pItemsTxt) {
       return 0;
     }
-    if (pItemsTxt->wType != 2) {
-      return 0;
+    switch (pItemsTxt->wType) {
+      case 2:
+        break;
+      default:
+        return 0;
     }
 
     return 1;
@@ -1979,43 +1994,45 @@ int32_t __stdcall GetBlockRate(D2UnitStrc * pUnit, BOOL bExpansion) {
     if (pUnit) {
       eUnitType = pUnit->eUnitType;
     }
-    if (eUnitType == UNIT_PLAYER) {
-      int32_t nShieldResult;
-      nShieldResult = INVENTORY::Inventory::INVENTORY_GetEquippedShield(pUnit->pInventory, nullptr);
-      if (nShieldResult) {
-        nToBlock = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_toblock, 0);
-        iVar1 = pUnit->nClassId;
-        if (iVar1 < 0 || iVar1 >= sgptDataTable->nTxtCharStatsSize) {
-          pCharStats = 0;
-        } else {
-          pCharStats = sgptDataTable->pTxtCharStats + iVar1;
-        }
-
-        nToBlock += (uint32_t)(uint8_t)pCharStats->BlockFactor;
-        if (bExpansion) {
-          iVar1 = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_dexterity, 0);
-          nLevel = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
-          if (nLevel <= 1) {
-            nLevel = 1;
+    switch (eUnitType) {
+      case UNIT_PLAYER:
+        int32_t nShieldResult;
+        nShieldResult = INVENTORY::Inventory::INVENTORY_GetEquippedShield(pUnit->pInventory, nullptr);
+        if (nShieldResult) {
+          nToBlock = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_toblock, 0);
+          iVar1 = pUnit->nClassId;
+          if (iVar1 < 0 || iVar1 >= sgptDataTable->nTxtCharStatsSize) {
+            pCharStats = 0;
+          } else {
+            pCharStats = sgptDataTable->pTxtCharStats + iVar1;
           }
 
-          nToBlock = (iVar1 - 0xf) * nToBlock / (nLevel * 2);
-        }
-      } else {
-        return 0;
-      }
-    } else {
-      if (eUnitType != UNIT_MONSTER) {
-        return 0;
-      }
-      if (!pUnit || (iVar1 = pUnit->nClassId , iVar1 < 0) || sgptDataTable->nTxtMonStatsSize <= iVar1 || !(sgptDataTable->pTxtMonStats + iVar1) || !sgptDataTable->pTxtMonStats[iVar1].NoShldBlock) {
-        nClassId = HasShield(pUnit);
-        if (!nClassId) {
+          nToBlock += (uint32_t)(uint8_t)pCharStats->BlockFactor;
+          if (bExpansion) {
+            iVar1 = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_dexterity, 0);
+            nLevel = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
+            if (nLevel <= 1) {
+              nLevel = 1;
+            }
+
+            nToBlock = (iVar1 - 0xf) * nToBlock / (nLevel * 2);
+          }
+        } else {
           return 0;
         }
-      }
+        break;
+      default:
+        if (eUnitType != UNIT_MONSTER) {
+          return 0;
+        }
+        if (!pUnit || (iVar1 = pUnit->nClassId , iVar1 < 0) || sgptDataTable->nTxtMonStatsSize <= iVar1 || !(sgptDataTable->pTxtMonStats + iVar1) || !sgptDataTable->pTxtMonStats[iVar1].NoShldBlock) {
+          nClassId = HasShield(pUnit);
+          if (!nClassId) {
+            return 0;
+          }
+        }
 
-      nToBlock = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_toblock, 0);
+        nToBlock = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_toblock, 0);
     }
     if (nToBlock >= 0x4b) {
       return 0x4b;
@@ -3438,8 +3455,11 @@ void __stdcall UpdateAnimSpeed(D2UnitStrc * pUnit, char * szFile, int32_t nLine)
       nFastStat = GetDiminishedStat(pUnit_00, 3);
       nBaseFrameTime = 0x32;
       nSpeedBonus = DATATBLS::ItemStats::UNIT_GetUnitState(pUnit_00, STATE_holyshield);
-      if (nSpeedBonus != STATE_none) {
-        nBaseFrameTime = 100;
+      switch (nSpeedBonus) {
+        case STATE_none:
+          break;
+        default:
+          nBaseFrameTime = 100;
       }
 
       nVelocityPct = (uint32_t)(pDVar1->nAnimSpeed * (nBaseFrameTime + nFastStat)) / 100;

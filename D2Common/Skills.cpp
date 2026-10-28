@@ -1286,8 +1286,9 @@ uint32_t __stdcall SKILLS_CalcToHit(D2UnitStrc * pUnit, eD2Skills eSkill, int32_
         }
 
         uint32_t nToHitCalcIdx = pSkillTxt->ToHitCalc;
-        if (nToHitCalcIdx == -1) {
-          return (nSkillLevel - 1) * pSkillTxt->LevToHit + pSkillTxt->ToHit;
+        switch (nToHitCalcIdx) {
+          case -1:
+            return (nSkillLevel - 1) * pSkillTxt->LevToHit + pSkillTxt->ToHit;
         }
         if (!(sgptDataTable->pSkillsCode && nToHitCalcIdx < (uint32_t)sgptDataTable->nSkillsCodeSize)) {
           return 0;

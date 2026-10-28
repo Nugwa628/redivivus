@@ -557,8 +557,11 @@ BOOL __stdcall INVENTORY_PlaceItemInGrid(int32_t nnX, int32_t nnY, int32_t nPara
         pInvSizeInfo = &gsInventoryBodyLocGridSize;
         nGridPage = 0;
       } else {
-        if (nParam1 != 1) {
-          return 0;
+        switch (nParam1) {
+          case 1:
+            break;
+          default:
+            return 0;
         }
 
         pInvSizeInfo = &g_InventorySizesDefaultConfig;
@@ -637,9 +640,12 @@ BOOL __stdcall INVENTORY_PlaceItemInGrid(int32_t nnX, int32_t nnY, int32_t nPara
       ITEMS::Items::ITEM_SetItemData_ePage(pUnit, (char)nParam1 - INVPAGE_MERC);
     }
     if (nParam1) {
-      if (nParam1 != 1) {
-        *(uint8_t*)((int)ppItemDataPtr + 0xd) = 1;
-        return 1;
+      switch (nParam1) {
+        case 1:
+          break;
+        default:
+          *(uint8_t*)((int)ppItemDataPtr + 0xd) = 1;
+          return 1;
       }
 
       *(uint8_t*)((int)ppItemDataPtr + 0xd) = 2;
@@ -2746,25 +2752,29 @@ int __stdcall INVENTORY_GetWeaponHandedness(D2UnitStrc * pUnit, D2InventoryStrc 
     D2UnitStrc* pLeftArmItem;
     D2UnitStrc* pRightArmItem;
     if (pInventory) {
-      if (pInventory->nSignatureMagic == 0x1020304) {
-        pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
-        if (!pGridInfo) {
+      switch (pInventory->nSignatureMagic) {
+        case 0x1020304:
+          pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
+          if (!pGridInfo) {
+            pLeftArmItem = 0;
+          } else {
+            pLeftArmItem = pGridInfo->pGridCells[5];
+          }
+          break;
+        default:
           pLeftArmItem = 0;
-        } else {
-          pLeftArmItem = pGridInfo->pGridCells[5];
-        }
-      } else {
-        pLeftArmItem = 0;
       }
-      if (pInventory->nSignatureMagic == 0x1020304) {
-        pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
-        if (!pGridInfo) {
+      switch (pInventory->nSignatureMagic) {
+        case 0x1020304:
+          pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
+          if (!pGridInfo) {
+            pRightArmItem = 0;
+          } else {
+            pRightArmItem = pGridInfo->pGridCells[4];
+          }
+          break;
+        default:
           pRightArmItem = 0;
-        } else {
-          pRightArmItem = pGridInfo->pGridCells[4];
-        }
-      } else {
-        pRightArmItem = 0;
       }
       if (pLeftArmItem) {
         BOOL BVar2;

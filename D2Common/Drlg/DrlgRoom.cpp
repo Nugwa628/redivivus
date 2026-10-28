@@ -1034,8 +1034,11 @@ uint32_t __fastcall CheckLOSDraw(D2RoomExStrc * pRoomEx) {
 // Delegates to DRLGOUTROOM_HasOutdoorBorderFlag if nPresetType == 1.
 // Caller: DRLGROOM_HasOutdoorBorder
 uint32_t __fastcall DRLGROOMEX_IsPresetWithOutdoorBorder(D2RoomExStrc * pRoomEx) {
-    if (pRoomEx->nPresetType != 1) {
-      return 0;
+    switch (pRoomEx->nPresetType) {
+      case 1:
+        break;
+      default:
+        return 0;
     }
 
     uint32_t bHasOutdoorBorder = DRLGOUTROOM_HasOutdoorBorderFlag(pRoomEx);
