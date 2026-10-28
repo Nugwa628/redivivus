@@ -763,7 +763,7 @@ void __fastcall TXT_CharStats_DefineWideStringClass(D2CharStatsTxt * pTxtCharSta
 
 // One-time startup loader for the many small single-column code/name lookup tables in DataTbls. Always compiles compcode. If sgtDataTable.bUseTxt is set, also creates a TxtLink struct and compiles each of: playerclass, bodylocs, storepage, elemtypes, hitclass, colors, hiredesc, monmode, plrmode, monai, monplace, skillcalc, misscalc, skills, events. Each is a CODE4 or NAME_I_WORD keyed table whose compiled pointer + link are stored into the corresponding sgtDataTable.pTxt*/pTxt*Link/nTxt*Size globals. Allocates from pMemory. Pure init side-effects, no return.
 // @sourcefile .\DATATBLS\DataTbls.cpp
-static void TXT_AllocTxt_VariousSmallTables(D2PoolManagerStrc * pMemory) {
+void TXT_AllocTxt_VariousSmallTables(D2PoolManagerStrc * pMemory) {
     D2BinFieldInputStrc events[2];
     D2BinFieldInputStrc colors[2];
     D2BinFieldInputStrc skills[2];

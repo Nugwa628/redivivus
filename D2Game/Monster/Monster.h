@@ -22,7 +22,7 @@ struct D2MonEquipEntryStrc {
     /* 0x00 */ uint32_t dwItemCode;
     /* 0x04 */ uint8_t nBodyLoc;
     /* 0x05 */ uint8_t nFlag;
-    /* 0x06 */ struct { uint8_t e0, e1; } _pad06;
+    /* 0x06 */ uint8_t _pad06[2];
 };
 
 union D2MonStatsExTxtSlot {
