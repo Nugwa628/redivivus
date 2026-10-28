@@ -1081,11 +1081,11 @@ eD2LevelId __fastcall GetLevelIdFromPopulatedRoomEx(D2RoomExStrc * pRoomEx) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x26b);
       exit(-1);
     }
-    if (!(pRoomEx->eRoomExFlags & 0x800000U)) {
-      return pRoomEx->pLevel->eD2LevelId;
+    if (pRoomEx->eRoomExFlags & 0x800000U) {
+      return LEVEL_None;
     }
 
-    return LEVEL_None;
+    return pRoomEx->pLevel->eD2LevelId;
 }
 
 BOOL __fastcall HasWaypoint(D2RoomExStrc * pRoomEx) {

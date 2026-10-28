@@ -1374,11 +1374,10 @@ BOOL __stdcall IsDoor(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe10);
       exit(-1);
     }
-    if (pUnit->eUnitType != UNIT_OBJECT) {
-      return 0;
+    if (pUnit->eUnitType == UNIT_OBJECT) {
+      return (uint32_t)pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->IsDoor;
     }
-
-    return (uint32_t)pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->IsDoor;
+    return 0;
 }
 
 BOOL __fastcall CheckIfObjectOrientationIs1(D2UnitStrc * pUnit) {
@@ -1765,11 +1764,10 @@ int32_t __stdcall GetNameOffsetFromObject(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfd3);
       exit(-1);
     }
-    if (pUnit->eUnitType != UNIT_OBJECT) {
-      return 0;
+    if (pUnit->eUnitType == UNIT_OBJECT) {
+      return pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->NameOffset;
     }
-
-    return pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->NameOffset;
+    return 0;
 }
 
 uint8_t __stdcall GetObjectPortalFlags(D2UnitStrc * pUnit) {
@@ -3185,12 +3183,11 @@ uint32_t __fastcall GetHitClassForPlayerOrMonster(D2UnitStrc * pUnit) {
 
 uint32_t __fastcall GetWeaponClass(D2UnitStrc * pUnit) {
     D2UnitStrc* pWeapon = GetWeaponBySkill(pUnit, 1);
-    if (!pWeapon) {
-      return 0;
+    if (pWeapon) {
+      uint16_t wWeaponClass = ITEMS::Items::ITEM_GetWeaponAnimClass(pWeapon);
+      return (uint32_t)wWeaponClass;
     }
-
-    uint16_t wWeaponClass = ITEMS::Items::ITEM_GetWeaponAnimClass(pWeapon);
-    return (uint32_t)wWeaponClass;
+    return 0;
 }
 
 // Activates/deactivates item stat lists for dual-wield players based on the skill currently being cast (nParam). Calls GetWeaponBySkill to determine the active weapon, compares it to the equipped weapon, and calls STATLIST_SetItemStatActive to mark the correct weapon's stat list active (1) and the other inactive (0). No-ops if the unit cannot dual-wield.
