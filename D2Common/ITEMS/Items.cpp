@@ -1496,7 +1496,7 @@ uint32_t __stdcall ITEM_CheckIfItemHasDurability(D2UnitStrc * pUnit) {
     }
 
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pUnit->nClassId);
-    if (!(pItemsTxt && pItemsTxt->bNoDurability == '\0' && pItemsTxt->bDurability != '\0')) {
+    if (!(pItemsTxt && pItemsTxt->bNoDurability == '\0' && (uint8_t)pItemsTxt->bDurability > 0)) {
       return 0;
     }
 
@@ -2622,7 +2622,7 @@ static void __stdcall ITEMS_DeserializeSingleStat(uint32_t nFileVersion, eD2Unit
     }
 
     uVar1 = Fog::BitBuffer::ReadUnsigned(pBitBuffer, nSaveBits);
-    Stats::StatsEx::D2AddStatToStatsListEx(pStatList, eUnitStat, uVar1 - nSaveAdd << (*(uint8_t*)(pItemStatCost + 0x18) & 0x1f), nParamLo);
+    Stats::StatsEx::D2AddStatToStatsListEx(pStatList, eUnitStat, uVar1 - nSaveAdd << *(uint8_t*)(pItemStatCost + 0x18), nParamLo);
 }
 
 // Deserializes the header fields of a D2 item from a packed bit-stream into a D2UnitDataItemDetailsStrc. Reads flags (32 bits), skips 10 bits (version + destination prefix), decodes the 3-bit destination: if stored/socketed (3 or 5) reads 16-bit x/y grid coords; otherwise reads body-loc, x, y, and inventory page. Handles the BODYPART (ear) special case for the item code tag, applies a legacy "nec " -> "neg " fixup for saves pre-version 0x5D, converts the 4-char code to a classId, and reads the socket count for non-compact non-crude items.

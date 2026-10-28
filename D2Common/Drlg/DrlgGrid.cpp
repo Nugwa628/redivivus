@@ -482,9 +482,9 @@ void __fastcall DRLGGRID_InitGridCells(D2PoolManagerStrc * pMemory, D2DrlgGridSt
     pDrlgGrid->pCellsRowOffsets = pRowOffsets;
     memset(pRowOffsets, 0, nAllocSize);
     pDrlgGrid->pCellsFlags = (eD2GridCellFlags*)(pDrlgGrid->pCellsRowOffsets + nHeight);
+    int nOffset = 0;
     int nRow = 0;
     if (0 < nHeight) {
-      int nOffset = 0;
       do {
         pDrlgGrid->pCellsRowOffsets[nRow] = nOffset;
         nOffset += nWidth;
@@ -525,9 +525,9 @@ void __fastcall DRLGGRID_AllocGrid(D2PoolManagerStrc * pMemory, D2DrlgGridStrc *
     pDrlgGrid->pCellsFlags = pCellsFlags;
     int* pRowOffsets = (int*)Fog::Memory::AllocServerMemory(pMemory, nHeight * 4, ".\\DRLG\\DrlgGrid.cpp", 0x1d0, 0);
     pDrlgGrid->pCellsRowOffsets = pRowOffsets;
+    int nOffset = 0;
     int nRow = 0;
     if (0 < nHeight) {
-      int nOffset = 0;
       do {
         pDrlgGrid->pCellsRowOffsets[nRow] = nOffset;
         nRow++;

@@ -2630,13 +2630,13 @@ void __stdcall STATLIST_SetItemStatActive(D2UnitStrc * pUnit, D2UnitStrc * pItem
       }
     }
     if (pStatsEx->sStatList.pUnitAttached == pUnit) {
-      if (!nParam) {
-        if (!(pStatsEx->sStatList.nFlags & 0x40000000U)) {
-          STATLIST_DeactivateItemStats(pUnit, pItem);
+      if (nParam) {
+        if (pStatsEx->sStatList.nFlags & 0x40000000U) {
+          STATLIST_ActivateItemStats(pUnit, pItem);
           return;
         }
-      } else if (pStatsEx->sStatList.nFlags & 0x40000000U) {
-        STATLIST_ActivateItemStats(pUnit, pItem);
+      } else if (!(pStatsEx->sStatList.nFlags & 0x40000000U)) {
+        STATLIST_DeactivateItemStats(pUnit, pItem);
         return;
       }
     } else {

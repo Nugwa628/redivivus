@@ -315,7 +315,7 @@ static void __stdcall DRLGROOMTILE_SetWarpTileDirection(D2DrlgTileLinkStrc * pTi
 }
 
 static BOOL __stdcall DRLGROOMTILE_CreateExitWarp(uint32_t nTileFlags, int32_t nXTileId, int32_t nX, int32_t nYTileId, D2RoomExStrc * pRoomEx) {
-    D2LvlWarpTxt* pWarpInfo = DrlgRoom::DRLGLEVEL_GetWarpsIdIfExistsAndSetup(pRoomEx->pLevel, (uint8_t)(nTileFlags >> 0x14) & 0x3f, nX != 0xb ? 0x6c : 0x72);
+    D2LvlWarpTxt* pWarpInfo = DrlgRoom::DRLGLEVEL_GetWarpsIdIfExistsAndSetup(pRoomEx->pLevel, (uint8_t)(nTileFlags >> 0x14) & 0x3f, nX == 0xb ? 0x72 : 0x6c);
     if (!pWarpInfo) {
       return 0;
     }
