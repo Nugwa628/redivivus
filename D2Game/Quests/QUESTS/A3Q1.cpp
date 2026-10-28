@@ -227,8 +227,8 @@ void __fastcall Q18_InitObjectMode(D2QuestDataStrc * pQuestData, D2ObjectInitFnA
 
 // Q18_PlayerNotifyCompleted — Lam Esen's Tome. Broadcast callback (passed to QUEST_SetStateAndBroadcast). For the given player, if the quest is Completed/FinishedInPreviousGame AND it has the JustCompleted or CannotCompleteQuestInGame transient flag set, push a quest update (msg 0xf) to that player; otherwise no-op. Read-only on the record.
 BOOL __fastcall Q18_PlayerNotifyCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_LamEsensTome, QUESTSTATE_Completed);
     /* GetQuestState(LamEsensTome, state 0xf=FinishedInPreviousGame) — completed
                          OR finished-prior gates the notify */ /* GetQuestState(LamEsensTome, state 0xd=JustCompleted) — must NOT be
@@ -249,8 +249,8 @@ BOOL __fastcall Q18_PlayerNotifyCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUni
 
 // Q18_PlayerUpdateTomeState — Lam Esen's Tome. Per-player sync callback (run via IteratePlayerOrMonsterUnits). If the player has neither Completed nor RewardAwaits set, and the live quest data nStateFlag is 2 or 3 (tome found / returning), persist QUESTSTATE_Step0x02 into that player's record so the journal/UI reflects in-progress.
 BOOL __fastcall Q18_PlayerUpdateTomeState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_LamEsensTome, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -280,8 +280,8 @@ void __fastcall Q18_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t nTargetClassId;
     uint32_t nGossipIndex;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_LamEsensTome, QUESTSTATE_Completed);
     BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_LamEsensTome, QUESTSTATE_JustCompleted);
     if (!pQuestArgs->pTarget) {
@@ -339,8 +339,8 @@ BOOL __fastcall CompleteQuestStates(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
       return 0;
     }
 
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_LamEsensTome, QUESTSTATE_Completed);
     if (bQuestState) {
       return 0;
@@ -370,8 +370,8 @@ BOOL __fastcall CompleteQuestStates(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
 
 // RewardStatPoints — Lam Esen's Tome reward grant (run via IteratePlayerOrMonsterUnits, after CompleteQuestStates). If the player's record has RewardAwaits set, grant +5 stat points (UNITSTAT_statpts) — Lam Esen's reward — send quest update 0xf, then clear RewardAwaits so the reward is one-time. (NOTE: real-game Lam Esen reward is +5 stat points, matching code; the task's "Golden Bird +20 life" does not apply to this TU.)
 BOOL __fastcall RewardStatPoints(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_LamEsensTome, QUESTSTATE_RewardAwaits);
     if (BVar2 != 1) {
       return 0;
@@ -386,8 +386,8 @@ BOOL __fastcall RewardStatPoints(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void *
 
 // LockCompletingQuest — Lam Esen's Tome (run via IteratePlayerOrMonsterUnits). For any player who is neither Completed nor RewardAwaits at the moment the quest finalizes in this game, persist QUESTSTATE_CannotCompleteQuestInGame so latecomers cannot re-trigger completion/reward in the current game session.
 BOOL __fastcall LockCompletingQuest(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_LamEsensTome, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -426,8 +426,8 @@ void __fastcall Q18_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     }
 
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestCompleted == 1) {
       return;
@@ -457,8 +457,8 @@ void __fastcall Q18_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     D2QuestDataA3Q1Strc* pA3Q1Data = pQuestData->pQuestSpecificData.pA3Q1;
     short int nNPCNo = pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_LamEsensTome, QUESTSTATE_Completed);
     if (!(bQuestState != 1 && nNPCNo == 0xfe)) {
       return;
@@ -583,8 +583,8 @@ BOOL __fastcall OBJOP_A3Q1_KhalimsRelicAltar(D2ObjectOperateFnArg * pOperation) 
     }
 
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
-    BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_LamEsensTome, QUESTSTATE_Completed);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty];
+    BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_LamEsensTome, QUESTSTATE_Completed);
     if (bQuestCompleted == 1) {
       UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pOperation->pAttacker, 0x13, pOperation->pAttacker);
       return 0;
