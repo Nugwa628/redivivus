@@ -540,7 +540,7 @@ void __fastcall SOUNDHDR_Init(uint32_t bBackgroundActive) {
 }
 
 void __fastcall SOUNDHDR_AdjustReferenceCount(int32_t nSoundId, int32_t nDelta) {
-    if (!(nSoundId && pTxtSounds && -1 < nSoundId && nSoundId < nTxtSoundsSize)) {
+    if (!(nSoundId && pTxtSounds && 0 <= nSoundId && (int)nSoundId < (int)nTxtSoundsSize)) {
       return;
     }
 
@@ -560,7 +560,7 @@ void __fastcall SOUNDHDR_AdjustReferenceCount(int32_t nSoundId, int32_t nDelta) 
       if (nGroupIdx < 0 || (pCurSound = pGroupSound , nTxtSoundsSize <= nGroupIdx)) {
         pCurSound = 0;
       }
-      if (!pCurSound->nRefCount && nDelta == -1) {
+      if ((uint32_t)pCurSound->nRefCount <= 0 && nDelta == -1) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1dc);
         exit(-1);
       }

@@ -646,7 +646,7 @@ BOOL __stdcall FindDiagonalNonCollisionCoords(D2RoomStrc * pRoom, int * pX, int 
               pDiagOffset++;
               nStopTileIdx = nWrapAroundIdx;
               nSearchTileIdx = nSavedSearchIdx;
-            } while ((int)pDiagOffset < (uintptr_t)((char*)&gaPathDiagonalOffsets + sizeof(gaPathDiagonalOffsets)));
+            } while ((int)pDiagOffset < (int)((uintptr_t)((char*)&gaPathDiagonalOffsets + sizeof(gaPathDiagonalOffsets))));
           }
         }
       }

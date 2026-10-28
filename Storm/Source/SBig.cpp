@@ -808,7 +808,7 @@ void TSBaseArray_Uc_Copy(uint32_t * pArray, uint32_t nCount, uint8_t * pSrc) {
     }
 
     uint32_t nIndex = 0;
-    if (nCount) {
+    if ((uint32_t)nCount > 0) {
       do {
         if ((uint8_t*)(pArray[2] + nIndex)) {
           *(uint8_t*)(pArray[2] + nIndex) = *pSrc;
@@ -835,7 +835,7 @@ void TSBaseArray_UcAlt_Copy(uint32_t * pArray, uint32_t nCount, uint8_t * pSrc) 
     }
 
     uint32_t nIndex = 0;
-    if (nCount) {
+    if ((uint32_t)nCount > 0) {
       do {
         if ((uint8_t*)(pArray[2] + nIndex)) {
           *(uint8_t*)(pArray[2] + nIndex) = *pSrc;

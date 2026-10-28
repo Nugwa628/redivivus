@@ -1167,7 +1167,7 @@ D2TextLineStrc * __fastcall D2WINFONT_WordWrapString(uint16_t * wszText, int * p
 
         goto next_segment;
       }
-      if (nMaxWidth < nFitPixelWidth) {
+      if (nFitPixelWidth > nMaxWidth) {
         nSegEnd = nStrLen;
         if (nSegStart < nStrLen) {
           do {
@@ -1368,7 +1368,7 @@ int32_t __fastcall SetAndReturnLastFont(int32_t nFontId) {
 
           nCacheIdx++;
           pReturnFont = pSavedFont;
-        } while ((int)&gaFontCache[nCacheIdx] < (uintptr_t)((char*)&gaFontCache + sizeof(gaFontCache)));
+        } while ((int)((int)&gaFontCache[nCacheIdx]) < (int)((uintptr_t)((char*)&gaFontCache + sizeof(gaFontCache))));
       }
 
       gppDC6FontCache = (DC6**)&pNewCacheEntry->pFontDC6;

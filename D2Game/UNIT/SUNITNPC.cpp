@@ -612,7 +612,7 @@ void __fastcall SUNITNPC_FillNpcStore(::SGAMEDATA * pGame, D2UnitStrc * pPlayer,
           }
           if ((uint16_t)pTradeItemTxt->wVersion < 100 || (pItemTxtTmp = pTradeItemTxt , 99 < pGame2->wItemFormat)) {
             pTradeItemTxt = 0;
-            if (nItemsToGen) {
+            if ((uint32_t)nItemsToGen > 0) {
               do {
                 eQuality = SUNITNPC_RollStoreItemQuality(pNpcControl, nStoreItemLevel);
                 pGeneratedItem = SUNITNPC_GenerateNpcItems(pNpcUnit, *(uint32_t*)((int)pGameNpc->sTrade.pTradeList1 + nTradeListOffset + 4), pGame2, 1, eQuality, nStoreItemLevel, nPlayerLevel);
@@ -642,7 +642,7 @@ void __fastcall SUNITNPC_FillNpcStore(::SGAMEDATA * pGame, D2UnitStrc * pPlayer,
               pItemTxtTmp = pTradeItemTxt;
               while (true) {
                 pTradeItemTxt = (D2ItemsTxt*)nScrollsToGen;
-                if (!pTradeItemTxt) {
+                if ((uint32_t)pTradeItemTxt <= 0) {
                   break;
                 }
 
@@ -2662,7 +2662,7 @@ void __fastcall HireMercFromNpc(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, int32
       nMercClassId = pHirelingTxt->classId;
       nNameRange = nNameLast - nNameFirst + 1;
       pNpcData = pNpcDataSaved;
-      if (nNameFirst <= nNameLast) {
+      if ((int)nNameFirst <= (int)nNameLast) {
         iHireSlot = 0;
         pSlotAvail = (int*)(pHireList + 0xc);
         pSlotInUse = (int*)(pHireList + 8);

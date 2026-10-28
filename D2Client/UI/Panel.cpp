@@ -1070,7 +1070,7 @@ void __stdcall DRAW_EquipmentNeedArrows() {
     PANEL_DrawBeltSlots(2);
     check_quantity_warnings:
     nSlotIndex = 0;
-    if (!gnInventoryWarningSlotCount) {
+    if ((uint32_t)gnInventoryWarningSlotCount <= 0) {
       return;
     }
 
@@ -1080,7 +1080,7 @@ void __stdcall DRAW_EquipmentNeedArrows() {
         bVar1 = D2Common::ITEMS::Items::ITEM_GetItemsTxt_bQntWarning(pItem);
         if (bVar1) {
           nWarningItemIndex = 0;
-          if (gnInventoryWarningItemCount) {
+          if ((uint32_t)gnInventoryWarningItemCount > 0) {
             pWarningEntry = gaInventoryWarningItems_nWarningKind_col[0] + 4;
             do {
               if ((*(int (*)[5])(pWarningEntry - 4))[0] == 1) {

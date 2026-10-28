@@ -356,7 +356,7 @@ void __stdcall DRAW_DrawRoomWallTiles(D2RoomStrc * pRoom) {
 
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &roomCoords);
     uint32_t i = 0;
-    if (nTileCount) {
+    if ((uint32_t)nTileCount > 0) {
       pTile = &pWallTiles->nPosY;
       do {
         if ((D2RoomCoordListStrc*)pTile[1]) {

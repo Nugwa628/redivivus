@@ -927,7 +927,7 @@ static void RENDERER_GLIDE_CalculateTextureSize(GlideTexInfoStrc * pTexInfo) {
 
     pTexInfo->nTexHeight = nTexHeightPow2;
     uint32_t nMaxDimPow2 = nTexWidthPow2;
-    if (nTexWidthPow2 <= nTexHeightPow2) {
+    if ((int)nTexWidthPow2 <= (int)nTexHeightPow2) {
       nMaxDimPow2 = nTexHeightPow2;
     }
     if (nMaxDimPow2 == 0x100) {
@@ -1771,7 +1771,7 @@ int32_t __fastcall RENDERER_GLIDE_InitDebugFont(FxU32 nParam2, int32_t nParam) {
       nTexAddress += nTexStride;
       nGlyphOffset += 0x80;
       pTexStartAddr++;
-    } while ((int)pTexStartAddr < (uintptr_t)((char*)&gaGlideDebugFontTexStartAddrs + sizeof(gaGlideDebugFontTexStartAddrs)));
+    } while ((int)pTexStartAddr < (int)((uintptr_t)((char*)&gaGlideDebugFontTexStartAddrs + sizeof(gaGlideDebugFontTexStartAddrs))));
 
     D2_FREE(pTexBuf);
     gfGlideDebugFontVertex0X = 0.0;
@@ -2442,7 +2442,7 @@ void __stdcall RENDERER_GLIDE_InitPerspectiveTables() {
       } while (nCol < 3);
 
       nRow++;
-    } while ((int)pfGammaEntry < (uintptr_t)((char*)&gaGlidePerspectiveVertices + sizeof(gaGlidePerspectiveVertices) + 16));
+    } while ((int)pfGammaEntry < (int)((uintptr_t)((char*)&gaGlidePerspectiveVertices + sizeof(gaGlidePerspectiveVertices) + 16)));
 
     if (gbGlidePerspectiveTablesInitialized) {
       return;
@@ -2463,7 +2463,7 @@ void __stdcall RENDERER_GLIDE_InitPerspectiveTables() {
       piPerspEntry[0xb] <<= 0x10;
       piPerspEntry[0xc] <<= 0x10;
       piPerspEntry += 0x12;
-    } while ((int)piPerspEntry < (uintptr_t)&gaGlideWallCornerTable + 736);
+    } while ((int)piPerspEntry < (int)((uintptr_t)&gaGlideWallCornerTable + 736));
 
     gbGlidePerspectiveTablesInitialized = 1;
 }
@@ -2585,7 +2585,7 @@ BOOL __fastcall RENDERER_GLIDE_DrawShadowTilePerspective(D2TileLibraryEntryStrc 
 
           nWorldYFixed += 0x8000;
           bAnyDrawn += 0x8000;
-        } while ((int)pfVertexSlot < (uintptr_t)((char*)&gaGlidePerspectiveVertices + sizeof(gaGlidePerspectiveVertices)));
+        } while ((int)pfVertexSlot < (int)((uintptr_t)((char*)&gaGlidePerspectiveVertices + sizeof(gaGlidePerspectiveVertices))));
 
         (*GLIDEDLL_grDrawVertexArray_12)(4, 10, gapGlideStripVertexPtrsA);
         (*GLIDEDLL_grDrawVertexArray_12)(4, 10, gapGlideStripVertexPtrsB);
@@ -2787,7 +2787,7 @@ int32_t __stdcall RENDERER_GLIDE_DrawWallTilePerspective(int32_t nScreenPanels, 
 
           fScreenMinX.nValue++;
           pfVertexSlot += 3;
-        } while ((int)pfVertexSlot < (uintptr_t)((char*)&gGlidePerspectiveVertexBuffer + 52));
+        } while ((int)pfVertexSlot < (int)((uintptr_t)((char*)&gGlidePerspectiveVertexBuffer + 52)));
 
         (*GLIDEDLL_grDrawVertexArray_12)(4, 10, gapGlideStripVertexPtrsA);
         (*GLIDEDLL_grDrawVertexArray_12)(4, 10, gapGlideStripVertexPtrsB);
@@ -2912,7 +2912,7 @@ void RENDERER_GLIDE_InitGroundTileVertices() {
       ppVertexPtrs[10] = (void*)((int)pfVertexX + 0x8c);
       pfVertexX = (void*)((int)pfVertexX + 0xa8);
       ppVertexPtrs += 0xc;
-    } while ((int)pfVertexX < (uintptr_t)((char*)&gaGlideGroundTileVertices + sizeof(gaGlideGroundTileVertices)));
+    } while ((int)pfVertexX < (int)((uintptr_t)((char*)&gaGlideGroundTileVertices + sizeof(gaGlideGroundTileVertices))));
 }
 
 BOOL __fastcall DrawGroundTile(D2TileLibraryEntryStrc * pTile, D2GfxLightExStrc * pLight, int32_t nPosX, int32_t nPosY, int32_t nWorldXpos, int32_t nWorldYpos, BYTE nAlpha, int32_t nScreenPanels, void * pTileData) {
@@ -3012,7 +3012,7 @@ BOOL __fastcall DrawGroundTile(D2TileLibraryEntryStrc * pTile, D2GfxLightExStrc 
     do {
       bResult = (*GLIDEDLL_grDrawVertexArray_12)(4, 0xc, ppVertexPtrs);
       ppVertexPtrs += 0xc;
-    } while ((int)ppVertexPtrs < (uintptr_t)((char*)&gapGlideGroundStripVertexPtrs + sizeof(gapGlideGroundStripVertexPtrs)));
+    } while ((int)ppVertexPtrs < (int)((uintptr_t)((char*)&gapGlideGroundStripVertexPtrs + sizeof(gapGlideGroundStripVertexPtrs))));
 
     return bResult;
 }

@@ -1501,7 +1501,7 @@ void __stdcall DRLGROOMEX_LinkNearRoomsByVis(D2PoolManagerStrc * pMemory, D2Room
       nSrcOccurrenceIndex = 0;
       nDstOccurrenceIndex = 0;
       nSrcOccurCountBeforeSlot = 0;
-      if (srcVisSlot) {
+      if ((uint32_t)srcVisSlot > 0) {
         do {
           if (*pSrcVisArray == dstLevelId) {
             nSrcOccurrenceIndex++;

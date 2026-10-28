@@ -55,7 +55,7 @@ DWORD __stdcall QSERVER_CooperativeThreadMain(void * lpThreadParam) {
               }
             } else {
               nLastGameCount = nCurrentGameCount;
-              if (nCurrentGameCount < _StaticFour) {
+              if ((int)nCurrentGameCount < (int)_StaticFour) {
                 nFlags = (uint32_t)(D2IniData_client->nDifficulty == 1);
                 if (D2IniData_client->nDifficulty == 2) {
                   nFlags = 2;

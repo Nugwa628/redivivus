@@ -165,7 +165,7 @@ static void __stdcall DRLGLOGIC_SetGridDoorFlags(D2DrlgGridStrc * pGrid, D2RoomE
     D2DrlgTileDataStrc* pTileData;
     D2DrlgTileGridStrc* pRoomTiles = pRoomEx->pRoomTiles;
     uint32_t nTileIndex = 0;
-    if (!pRoomTiles->sRoomTiles.nWallTilesCount) {
+    if ((uint32_t)pRoomTiles->sRoomTiles.nWallTilesCount <= 0) {
       return;
     }
 
@@ -191,7 +191,7 @@ void __stdcall DRLGLOGIC_SetGridWallFlags(D2RoomExStrc * pRoomEx, D2DrlgGridStrc
     D2DrlgTileDataStrc* pTileEntry;
     D2DrlgTileGridStrc* pRoomTiles = pRoomEx->pRoomTiles;
     uint32_t nTileIndex = 0;
-    if (pRoomTiles->sRoomTiles.nWallTilesCount) {
+    if ((uint32_t)pRoomTiles->sRoomTiles.nWallTilesCount > 0) {
       uint32_t nWallFlags;
       nTileByteOffset = 0;
       do {
@@ -207,7 +207,7 @@ void __stdcall DRLGLOGIC_SetGridWallFlags(D2RoomExStrc * pRoomEx, D2DrlgGridStrc
     }
 
     uint32_t nNearIndex = 0;
-    if (!pRoomEx->nDrlgRoomsExNearCount) {
+    if ((uint32_t)pRoomEx->nDrlgRoomsExNearCount <= 0) {
       return;
     }
 
@@ -240,7 +240,7 @@ void __stdcall DRLGLOGIC_FillTileGridFlags(D2RoomExStrc * pRoomEx) {
     D2DrlgTileDataStrc* pTileData;
     D2DrlgTileGridStrc* pRoomTiles = pRoomEx->pRoomTiles;
     uint32_t nTileIndex = 0;
-    if (!pRoomTiles->sRoomTiles.nWallTilesCount) {
+    if ((uint32_t)pRoomTiles->sRoomTiles.nWallTilesCount <= 0) {
       return;
     }
 

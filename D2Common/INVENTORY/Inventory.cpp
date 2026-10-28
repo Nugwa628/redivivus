@@ -4652,7 +4652,7 @@ BOOL CopyInventory(D2InventoryStrc * pInventory, D2UnitStrc * pUnit) {
     }
 
     uint8_t bHeight = pSrcGridInfo->bHeight;
-    if (!(bHeight && bWidth == pDstGridInfo->bWidth && bHeight == pDstGridInfo->bHeight && pSrcGridInfo->pGridCells && pDstGridInfo->pGridCells)) {
+    if (!(bHeight && bWidth == pDstGridInfo->bWidth && bHeight == pDstGridInfo->bHeight && (uint32_t)pSrcGridInfo->pGridCells > 0 && pDstGridInfo->pGridCells)) {
       return 0;
     }
 

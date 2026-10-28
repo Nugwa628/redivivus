@@ -970,7 +970,7 @@ uint16_t * __fastcall GetName(D2UnitStrc * pUnit) {
 
           D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &pAdjacentRooms, (int*)&nAdjacentCount);
           nIdx = 0;
-          if (nAdjacentCount) {
+          if ((uint32_t)nAdjacentCount > 0) {
             do {
               if (pAdjacentRooms[nIdx] != pRoom) {
                 pWarpUnit = CUNIT_IterateUntilWarp((int*)pAdjacentRooms[nIdx]->pUnitList);

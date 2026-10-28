@@ -610,7 +610,7 @@ BOOL __fastcall CACHE_WriteData(char * szCacheKey, LPCVOID pDataToWrite, uint32_
     CACHE_RemoveEntry(szCacheKey);
     uint32_t nHashCount;
     nHashCount = gpCacheFileHeader->nBlockTableSize;
-    if (nHashCount) {
+    if ((uint32_t)nHashCount > 0) {
       pBlockEntry = (uint32_t*)((int)gpCacheBlockTable + 4);
       do {
         if (!pBlockEntry[2] && *pBlockEntry >= nDataSize + 0x144) {
@@ -627,7 +627,7 @@ BOOL __fastcall CACHE_WriteData(char * szCacheKey, LPCVOID pDataToWrite, uint32_
     if (nBlockIdx >= nHashCount) {
       FILETIME* pCurrentFileTime;
       nBlockIdx = 0;
-      if (nHashCount) {
+      if ((uint32_t)nHashCount > 0) {
         nSearchBlockOffset = 0;
         do {
           if (*(uint32_t*)(nSearchBlockOffset + 4 + (int)gpCacheBlockTable) >= nDataSize + 0x144) {
@@ -664,7 +664,7 @@ BOOL __fastcall CACHE_WriteData(char * szCacheKey, LPCVOID pDataToWrite, uint32_
     }
     if (nBlockIdx < pFileHeader->nBlockTableSize) {
       nHashCount = 0;
-      if (pFileHeader->nHashTableSize) {
+      if ((uint32_t)pFileHeader->nHashTableSize > 0) {
         pBlockEntry = (uint32_t*)(gpCacheBufferPoolFirst + 0xc);
         do {
           if (*pBlockEntry == nBlockIdx) {

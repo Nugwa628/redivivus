@@ -496,7 +496,7 @@ int32_t __stdcall UNITFINDS_FindCullRange(D2UnitFindDataStrc * pUnitFindData) {
     int nFoundCount = 0;
     int nIndex = 0;
     uint32_t nRoomIdxInner = 0;
-    if (nRoomCount) {
+    if ((uint32_t)nRoomCount > 0) {
       BOOL bIsInTown;
       do {
         nRoomIdx = nRoomIdxInner;

@@ -173,7 +173,7 @@ template<> void TSGrowableArray<TSExplicitList<StringEntryNode, -572662307>>::Re
     if (nCapacityOrig < this->m_count) {
       nAlloc = nCapacityOrig;
     }
-    if (nAlloc) {
+    if ((uint32_t)nAlloc > 0) {
       uint32_t* puVar1;
       pBucket = pBlock;
       do {
@@ -240,7 +240,7 @@ template<> void TSGrowableArray<TSExplicitList<StringEntryNode, -572662307>>::De
     TSLink<::StringEntryNode>* nHead;
     uint32_t uLink;
     uint32_t nBucketIdx = 0;
-    if (this->m_count) {
+    if ((uint32_t)this->m_count > 0) {
       TSLink<::StringEntryNode>* pTVar1;
       do {
         pBucket = &this->m_data[nBucketIdx];
@@ -569,7 +569,7 @@ template<> void TSHashTable<StringEntryNode, HASHKEY_STRI>::GrowListArray() {
     tempList.m_linkoffset = 4;
     tempList.m_terminator.m_next = (int)pCurEntry;
     uint32_t nIterCount = 0;
-    if (nOldBucketCount) {
+    if ((uint32_t)nOldBucketCount > 0) {
       int nBucketByteOff;
       nBucketByteOff = 0;
       ppTempHead = tempList.m_terminator.m_prevlink;
@@ -613,7 +613,7 @@ template<> void TSHashTable<StringEntryNode, HASHKEY_STRI>::GrowListArray() {
 
     pCurEntry = pNewBucketCount;
     pThis->tSlotListArray.SetCount((uint32_t)pNewBucketCount);
-    if (pCurEntry) {
+    if ((uint32_t)pCurEntry > 0) {
       nBucketOffset = 0;
       nIterCount = (uint32_t)pCurEntry;
       do {

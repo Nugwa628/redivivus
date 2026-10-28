@@ -1525,7 +1525,7 @@ uint32_t __stdcall SFILE_InternalReadAligned(D2MPQFileStrc * pArchive, uint32_t 
           }
 
           nCount = 0;
-          if (pArchive->nSectorCount) {
+          if ((uint32_t)pArchive->nSectorCount > 0) {
             pSectorOffsets = pArchive->pSectorTable;
             do {
               if (*pSectorOffsets > pSectorOffsets[1]) {
@@ -4690,7 +4690,7 @@ int __stdcall SFileReadFileEx2(D2MPQFileStrc * pFileHandle, void * pOutputBuffer
 
         nChunkBytes = (nChunkCount - 1 + nTotalReadSize) / nChunkCount;
         nChunkIndex = 0;
-        if (nChunkBytes) {
+        if ((uint32_t)nChunkBytes > 0) {
           bChecksumMatch = !lpOverlapped;
           nChunkOffset = 0;
           do {
@@ -4712,7 +4712,7 @@ int __stdcall SFileReadFileEx2(D2MPQFileStrc * pFileHandle, void * pOutputBuffer
 
             nChunkOffset += nChunkCount;
             nChunkIndex++;
-          } while (nChunkIndex < nChunkBytes);
+          } while (nChunkBytes > nChunkIndex);
         }
 
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00779068);
@@ -4890,7 +4890,7 @@ static int SFILE_LoadAttributes(D2ArchiveStrc * pArchive, int pAttributesBuffer,
           nExpectedSize += nNumEntries * 0x10;
         }
         if (nAttrFileSize == nExpectedSize) {
-          if (nAttrFlags & 1 && nNumEntries) {
+          if (nAttrFlags & 1 && (uint32_t)nNumEntries > 0) {
             pDstEntry = (uint32_t*)(pAttributesBuffer + 0x18);
             nResult = nNumEntries;
             do {
@@ -4900,7 +4900,7 @@ static int SFILE_LoadAttributes(D2ArchiveStrc * pArchive, int pAttributesBuffer,
               nResult--;
             } while (nResult);
           }
-          if (nAttrFlags & 2 && nNumEntries) {
+          if (nAttrFlags & 2 && (uint32_t)nNumEntries > 0) {
             pDstEntry = (uint32_t*)(pAttributesBuffer + 0x10);
             nResult = nNumEntries;
             do {
@@ -4911,7 +4911,7 @@ static int SFILE_LoadAttributes(D2ArchiveStrc * pArchive, int pAttributesBuffer,
               nResult--;
             } while (nResult);
           }
-          if (nAttrFlags & 4 && nNumEntries) {
+          if (nAttrFlags & 4 && (uint32_t)nNumEntries > 0) {
             pDstEntry = (uint32_t*)(pAttributesBuffer + 0x24);
             do {
               pDstEntry[-2] = *pSrcAttr;
