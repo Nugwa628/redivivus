@@ -25,6 +25,14 @@ and the conditional jump or set after it, aligned with the original's, where
     character `'\\0'` Ghidra prints for a byte; the test may be bare -
     `if (!n)`, `!(!n || ...)`, `} while (n);`, a for loop's guard
     `for (; n; n--)` (Lane E's P13: Blizzard's `n > 0` on an unsigned n).
+    A register zeroed earlier on every path to the compare, past calls if
+    it is callee-saved, is found by propagation (zero_on_all_paths).
+  * the same with the jump inverted: `jne` where the original has `jbe`
+    (`je` for `ja`) - the if/else written the other way round as well. The
+    branches are swapped (fix_ifelse.swap_at) and the negated condition
+    written unsigned, one edit: `if (!p) {A} else {B}` becomes `if
+    ((uint32_t)p > 0) {B} else {A}` (GFX_PrecacheMonsterCofSprites,
+    0046f650). Either half alone leaves the jump wrong.
   * the same relation with the other signedness (`jl` against `jb`, ...): the
     original compared unsigned where the tree compares signed, or the other
     way round - a variable's type; the operands get a cast to what the
@@ -84,6 +92,11 @@ NEW_REL = {(+1, '>'): '>=', (+1, '<='): '<', (-1, '<'): '<=', (-1, '>='): '>'}
 # unsigned jump says it was; ours may be signed, so the rewrite is kept only
 # where VC8 then emits the original's jump (site_check).
 UNSIGNED_ZERO = {('e', 'be'): 'le0', ('ne', 'a'): 'gt0'}
+# The same with the jump inverted too: `if (x == 0) {A} else {B}` compiles to
+# `jne B` where the original has `jbe A` - Blizzard's `if (x > 0) {B} else
+# {A}`. The branches are swapped (fix_ifelse.swap_at) and the condition, now
+# `x != 0`, written unsigned in one edit: either alone leaves the jump wrong.
+INVERTED_ZERO = {('ne', 'be'): 'swap_gt0', ('e', 'a'): 'swap_le0'}
 # The same relation, the other signedness: the comparison is made unsigned
 # (or signed) with a cast on its operands - what the original compared,
 # whatever the operands' declared types.
@@ -170,15 +183,85 @@ def zero_operand(view, i):
     for k in range(i - 1, max(-1, i - 16), -1):
         v = view[k]
         if any(view[k].addr < t <= view[i].addr for t in targets):
-            return None
-        if v.mnemonic in ANY_JCC or v.mnemonic in ('jmp', 'call') or v.mnemonic.startswith('ret'):
-            return None
-        if re.match(r'^(?:xor|sub)\s+%s,\s*%s$' % (r, r), v.text):
+            break
+        if v.mnemonic in ANY_JCC or v.mnemonic == 'jmp' or v.mnemonic.startswith('ret') or \
+                (v.mnemonic == 'call' and r not in CALLEE_SAVED):
+            break
+        if zeroes(v, r):
             return m.group('x'), 0
-        dst = v.text.split(None, 1)[1].split(',')[0].strip() if ' ' in v.text else ''
-        if FULL.get(dst) == r and v.mnemonic not in ('cmp', 'test', 'push'):
+        if writes(v, r):
             return None
+    if zero_on_all_paths(view, i, r):
+        return m.group('x'), 0
     return None
+
+
+CALLEE_SAVED = ('ebx', 'esi', 'edi')
+ZEROING = re.compile(r'^(?:(?:xor|sub)\s+(?P<a>e[abcd]x|e[sd]i),\s*(?P=a)|mov\s+(?P<b>e[abcd]x|e[sd]i),\s*0)$')
+STRING_OP = re.compile(r'^(?:rep\w*\s+)?(?:movs|stos|lods|scas|cmps)[bwd]?\b')
+
+
+def zeroes(v, r):
+    m = ZEROING.match(v.text)
+    return bool(m) and (m.group('a') or m.group('b')) == r
+
+
+def writes(v, r):
+    """Whether the instruction can change register r (its full name)."""
+    t = v.text
+    if ' ' not in t:
+        return v.mnemonic in ('cdq', 'cpuid', 'rdtsc', 'popal', 'popad')
+    ops = [o.strip() for o in t.split(None, 1)[1].split(',')]
+    if FULL.get(ops[0]) == r and v.mnemonic not in ('cmp', 'test', 'push'):
+        return True
+    if v.mnemonic in ('xchg', 'xadd', 'cmpxchg') and any(FULL.get(o) == r for o in ops):
+        return True
+    if r in ('esi', 'edi', 'ecx') and STRING_OP.match(t):
+        return True
+    if r in ('eax', 'edx') and v.mnemonic in ('mul', 'imul', 'div', 'idiv') and len(ops) == 1:
+        return True
+    return False
+
+
+def zero_on_all_paths(view, i, r):
+    """Whether r holds zero at view[i] on every path from the entry: a
+    forward propagation over the function's jumps, r known zero after a
+    zeroing, unknown after any write, and after a call unless r is
+    callee-saved (VC8 keeps 0 in EDI for a whole loop and compares `cmp
+    dword ptr [g_0075af98], edi` far from the `xor edi, edi`, past calls,
+    where zero_operand's straight run does not reach). An indirect jump or a
+    handler frame (fs:) leaves the edges unknown: no proof then."""
+    if any((v.mnemonic == 'jmp' and not JUMP_TO.match(v.text)) or 'fs:' in v.text for v in view):
+        return False
+    index = {v.addr: k for k, v in enumerate(view)}
+    state = [None] * len(view)              # None: not reached; else whether r is zero on every path so far
+    state[0] = False
+    work = [0]
+    while work:
+        k = work.pop()
+        v, z = view[k], state[k]
+        if zeroes(v, r):
+            z = True
+        elif writes(v, r) or (v.mnemonic == 'call' and r not in CALLEE_SAVED):
+            z = False
+        m = v.mnemonic
+        jt = JUMP_TO.match(v.text)
+        t = index.get(int(jt.group(1), 0)) if jt else None
+        nxt = k + 1 if k + 1 < len(view) else None
+        if m.startswith('ret') or m in ('int3', 'hlt', 'ud2'):
+            succ = []
+        elif m == 'jmp':
+            succ = [t] if t is not None else []
+        elif jt or m.startswith('loop'):
+            succ = ([t] if t is not None else []) + ([nxt] if nxt is not None else [])
+        else:
+            succ = [nxt] if nxt is not None else []
+        for s in succ:
+            new = z if state[s] is None else (state[s] and z)
+            if new != state[s]:
+                state[s] = new
+                work.append(s)
+    return state[i] is True
 
 
 REGS = re.compile(r'\b(e[abcd]x|e[sd]i|ebp|esp|[abcd][lh]|[abcd]x|si|di)\b')
@@ -255,10 +338,13 @@ def sites(ours, ref):
             continue
         ca, cb = cond(ja.mnemonic), cond(jb.mnemonic)
         a, b = cmp_operand(ours[i]), cmp_operand(ref[j])
-        if (ca, cb) in UNSIGNED_ZERO and (a is None or b is None):
+        if ((ca, cb) in UNSIGNED_ZERO or (ca, cb) in INVERTED_ZERO) and (a is None or b is None):
             a, b = a or zero_operand(ours, i), b or zero_operand(ref, j)
         if a is not None and b is not None and a[1] == 0 and b[1] == 0 and (ca, cb) in UNSIGNED_ZERO:
             out.append((ours[i], UNSIGNED_ZERO[(ca, cb)], 0, cb))
+            continue
+        if a is not None and b is not None and a[1] == 0 and b[1] == 0 and (ca, cb) in INVERTED_ZERO:
+            out.append((ours[i], INVERTED_ZERO[(ca, cb)], 0, cb))
             continue
         if (ca, cb) in SIGN_FLIP and (a is None) == (b is None) and (a is None or a[1] == b[1]):
             out.append((ours[i], SIGN_FLIP[(ca, cb)], a[1] if a else None, cb))
@@ -404,6 +490,13 @@ def rewrite_zero(line, kind, count):
     want, new_op = ('==', '<=') if kind == 'le0' else ('!=', '>')
     found = [(m, False) for m in EQ_RIGHT.finditer(line) if m.group('op') == want] + \
             [(m, True) for m in EQ_LEFT.finditer(line) if m.group('op') == want]
+    if not found:
+        # The other equality: which of the two the jump tests depends on the
+        # layout too (`if (c != '\0')` skipping its body on `je`); `x != 0`
+        # is `(uint32_t)x > 0` and `x == 0` `(uint32_t)x <= 0` all the same.
+        want, new_op = ('!=', '>') if kind == 'le0' else ('==', '<=')
+        found = [(m, False) for m in EQ_RIGHT.finditer(line) if m.group('op') == want] + \
+                [(m, True) for m in EQ_LEFT.finditer(line) if m.group('op') == want]
     if not found and count == 1 and not EQ_RIGHT.search(line) and not EQ_LEFT.search(line):
         # No `== 0` written: a bare test, `x` being `x != 0` and `!x` `x == 0` -
         # which of the two the jump tests depends on the layout, not on kind.
@@ -536,18 +629,31 @@ def candidates(rows, model, syms, status, pats):
         own = tu.lower() + '.cpp'
         per_line = collections.defaultdict(list)
         expect = collections.defaultdict(set)
+        expect_by = collections.defaultdict(list)
         for insn, delta, k, cb in found:
             at = f.line_at(insn.addr)
             if at and at[0].lower().replace('\\', '/').endswith(own):
                 per_line[at[1]].append((delta, k))
-                if delta in ('unsigned', 'signed', 'le0', 'gt0'):
+                if delta in ('unsigned', 'signed', 'le0', 'gt0') or delta in INVERTED_ZERO.values():
                     expect[at[1]].add(cb)
+                    expect_by[at[1]].append((delta, cb))
         if not per_line:
             continue
-        text = fixlib.read(cpp).split('\n')
+        whole = fixlib.read(cpp)
+        text = whole.split('\n')
         for ln, lst in sorted(per_line.items()):
             if not 0 < ln <= len(text):
                 continue
+            if any(d in INVERTED_ZERO.values() for d, _k in lst):
+                # A swap is the whole statement's edit: only where it is the line's one kind
+                # of site; beside others it is left out and they are taken as before.
+                if len(set(lst)) == 1:
+                    if swap_zero(whole, ln, text[ln - 1], lst[0][0], len(lst)) is not None:
+                        out[tu].append((s, name, ln, text[ln - 1], (lst[0][0], len(lst)), True, sym,
+                                        frozenset(expect.get(ln, ()))))
+                    continue
+                lst = [(d, k) for d, k in lst if d not in INVERTED_ZERO.values()]
+                expect[ln] = {c for d, c in expect_by[ln] if d not in INVERTED_ZERO.values()}
             new = text[ln - 1]
             ok, gain = True, False
             for (delta, k), n in collections.Counter(lst).items():
@@ -566,6 +672,37 @@ def candidates(rows, model, syms, status, pats):
             if ok and new != text[ln - 1]:
                 out[tu].append((s, name, ln, text[ln - 1], new, gain, sym, frozenset(expect.get(ln, ()))))
     return out
+
+
+def swap_zero(text, ln, old, kind, count):
+    """The text with the if/else at line `ln` swapped and its condition, now
+    negated, written as the original's unsigned test against zero; None
+    unless the line still reads `old`, has an else and takes the rewrite."""
+    from fix_ifelse import swap_at          # fix_ifelse imports this module
+    starts = [0] + [k + 1 for k, c in enumerate(text) if c == '\n']
+    if ln > len(starts) or not text.startswith(old + '\n', starts[ln - 1]):
+        return None
+    new = swap_at(text, starts[ln - 1])
+    if new is None:
+        return None
+    lines = new.split('\n')
+    line = rewrite_zero(lines[ln - 1], kind[len('swap_'):], count)
+    if line is None:
+        return None
+    lines[ln - 1] = line
+    return '\n'.join(lines)
+
+
+def edit_for(cpp, ln, old, new):
+    """A line edit; for a swap (`new` is (kind, count)) the swap made again
+    on the file as it is when the edit is applied."""
+    if isinstance(new, str):
+        return line_edit(cpp, ln, old, new)
+
+    def fn(texts):
+        t = swap_zero(texts[cpp], ln, old, new[0], new[1])
+        return None if t is None else {cpp: t}
+    return fn
 
 
 def site_check(tu, sym, ln, expect):
@@ -612,6 +749,9 @@ def main():
     if not args.apply:
         for tu in sorted(cands):
             for s, name, ln, old, new, _gain, _sym, _expect in cands[tu]:
+                if not isinstance(new, str):
+                    swapped = swap_zero(fixlib.read(os.path.join(REPO, tu + '.cpp')), ln, old, new[0], new[1])
+                    new = '%s  [%s, branches swapped]' % (swapped.split('\n')[ln - 1], new[0])
                 print('%s:%d  %08x %s\n    - %s\n    + %s' % (tu, ln, s, name.rsplit('::', 1)[-1], old.strip(), new.strip()))
         return 0
     quarantined = audit.load_quarantine(os.path.join(BUILD, 'quarantine.tsv'))
@@ -619,7 +759,7 @@ def main():
     groups = {}
     for tu in sorted(cands):
         cpp = os.path.join(REPO, tu + '.cpp')
-        groups[tu] = ([fixlib.Edit('%s:%d' % (tu, ln), [s], [s], line_edit(cpp, ln, old, new),
+        groups[tu] = ([fixlib.Edit('%s:%d' % (tu, ln), [s], [s], edit_for(cpp, ln, old, new),
                                    require_gain=gain and not expect,
                                    check=site_check(tu, sym, ln, expect) if expect else None)
                        for s, _name, ln, old, new, gain, sym, expect in cands[tu]], [cpp])

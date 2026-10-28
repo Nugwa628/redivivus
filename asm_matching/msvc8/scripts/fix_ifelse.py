@@ -166,7 +166,7 @@ def candidates(rows, model, syms, status, pats, negated=True):
             if own_lines:
                 for ln in range(min(own_lines), min(max(own_lines), len(starts)) + 1):
                     m = NEGATED_IF.match(text, starts[ln - 1])
-                    if m and simple_operand(m.group('x')):
+                    if m and simple_operand(m.group('x') or m.group('y')):
                         lines.append((ln, True))
         done = set()
         for ln, trial in lines:
@@ -185,8 +185,10 @@ def candidates(rows, model, syms, status, pats, negated=True):
     return out
 
 
-# `if (!x) {` or `} else if (!x) {`, x one operand: no top-level && || ?:
-NEGATED_IF = re.compile(r'[ \t]*(?:\} else )?if \(!(?!=)(?P<x>[^&|?\n]+)\) \{[ \t]*$', re.M)
+# `if (!x) {` or `} else if (!x) {`, x one operand: no top-level && || ?: -
+# or the same test written out, `x == 0`, `x == NULL`, `c == '\0'`.
+NEGATED_IF = re.compile(r'[ \t]*(?:\} else )?if \((?:!(?!=)(?P<x>[^&|?\n]+)|(?P<y>[^&|?\n=!<>]+) == '
+                        r'(?:0[uU]?|0x0|NULL|nullptr|\'\\0\'))\) \{[ \t]*$', re.M)
 
 
 def simple_operand(x):

@@ -331,9 +331,9 @@ names the evidence its rule rests on.
 |-|-|-|
 | `fix_static.py` | every function extern | a file-local function `static`: VC8 then gives it a register convention of its own (an argument in EAX, ESI, ..., or a `__fastcall` that leaves EDX or ECX unused), which the original shows - a register it reads, or pushes on and never pops, at entry |
 | `fix_refile.py` | a function in the file of its Ghidra namespace, though the original passes it arguments in registers from callers filed elsewhere (`evidence/objects.tsv`, kind `object`) | the function and its callers in one file - the one the annotations around them name, else the one holding most of them - at their addresses, `static` where only that file calls them, each in a block of its own namespace: names stay, files change |
-| `fix_compare.py` | Ghidra's canonical comparison: `-1 < x`, `x < 5`, `b <= a` | the form the instruction shows: `x >= 0`, `x <= 4`, `a >= b` |
+| `fix_compare.py` | Ghidra's canonical comparison: `-1 < x`, `x < 5`, `b <= a`; `x != 0` where the original's unsigned jump shows `x > 0` (with the if/else swapped where the jump is inverted too) | the form the instruction shows: `x >= 0`, `x <= 4`, `a >= b`, `(uint32_t)x > 0` |
 | `fix_assert.py` | `if (ok) { return x; } halt(); exit(-1);` | the assertion first: `if (!ok) { halt(); exit(-1); } return x;` |
-| `fix_ifelse.py` | `if (!c) { B } else { A }`, where a jump shows it - or, kept only where its function gets more similar, any `if (!x)` of one operand | the branches in the order VC8 lays out: `if (c) { A } else { B }` |
+| `fix_ifelse.py` | `if (!c) { B } else { A }`, where a jump shows it - or, kept only where its function gets more similar, any `if (!x)` or `if (x == 0)` of one operand | the branches in the order VC8 lays out: `if (c) { A } else { B }` |
 | `fix_switch.py` | an if-chain on one variable, `if (v == A) {…} else if (v == B) {…}`, or consecutive `if (v == A) {… return;}` blocks | the `switch (v)` the original lowers to subtractions |
 | `fix_guardstack.py` | `Fog::Debug::GuardStack();` where the original checks its stack cookie | nothing: under `/GS` VC8 emits the check itself |
 | `fix_uninline.py` | the body of a helper marked inline in the Ghidra database, e.g. `seed.nSeedLow = v; seed.nSeedHigh = 0x29a;` | the call: `InitSeed_Param_666(&seed, v)` |

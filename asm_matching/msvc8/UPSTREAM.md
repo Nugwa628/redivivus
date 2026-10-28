@@ -18,6 +18,10 @@ the constant (`cmp x, 4` against `cmp x, 5`), the strictness of the jump
 (`jl` against `jle`) and the order of the operands. Example:
 FILETOOLS_GetUserMyDocumentsDiabloIIGameLogsFolder (0040f000), `-1 < nResult`
 compiles to `cmp eax, -1; jle`, the original has `test eax, eax; jl`.
+An unsigned `x > 0` comes out as `x != 0`; where the original's `jbe`
+stands against the tree's `jne` the if/else is also the other way round,
+and both are restored together (GFX_PrecacheMonsterCofSprites, 0046f650:
+`if (c == '\0') {A} else {B}` is `if ((uint32_t)c > 0) {B} else {A}`).
 
 **Assertions in front of the code they guard** (`fix_assert.py`). Blizzard's
 assertion is `if (!(cond)) { ERROR_UnrecoverableInternalError_Halt(...);

@@ -21,7 +21,10 @@ function becomes `bool`. A setter whose original hands back what it was
 given - EAX at every ret the same argument, read from its stack slot or
 copied from ECX/EDX on entry (AUTOMAP_SetFade, Lane E's P2: `mov eax, esi`
 before `ret`) - returns that parameter, as its type, where it is a dword
-the body never assigns (arg_at_returns). Callers did not use a value
+the body never assigns (arg_at_returns). A static function may have a
+convention of its own, an argument in any register, the callee-saved ones
+too: there EAX holding one such register unchanged at every ret returns the
+function's one parameter that qualifies. Callers did not use a value
 before and do not now. Only free functions named nowhere but in calls,
 their definition and their own header's declaration are taken - or under
 an explicit cast, `(void *)F`, which still compiles with another return
@@ -73,7 +76,7 @@ def returned_values(ours, ref, rx=SET_EAX):
 _FRAME_SLOT = re.compile(r'(?:dword|word|byte) ptr \[ebp \+ (0x[0-9a-f]+|\d+)\]')
 
 
-def arg_at_returns(decoded):
+def arg_at_returns(decoded, own_convention=False):
     """The one argument EAX holds at every ret of the original, or None:
     ('stack', k) for the k-th stack argument (`mov eax, dword ptr [ebp + 8 +
     4k]` in a function with an EBP frame, a slot nothing writes or takes the
@@ -109,6 +112,11 @@ def arg_at_returns(decoded):
     state = [None] * len(insns)
     state[0] = {r: None for r in regs}
     state[0].update(ecx=('reg', 'ecx'), edx=('reg', 'edx'))
+    if own_convention:
+        # A static function VC8 gave a convention of its own takes arguments in
+        # other registers too, the callee-saved ones. (Not EAX: an argument
+        # there, never written, would be at every ret without being returned.)
+        state[0].update({r: ('reg', r) for r in ('ebx', 'esi', 'edi')})
     work = [0]
     while work:
         k = work.pop()
@@ -154,6 +162,12 @@ def arg_at_returns(decoded):
                 state[j] = new
                 work.append(j)
     at = {state[k]['eax'] for k, i in enumerate(insns) if i.mnemonic.startswith('ret') and state[k] is not None}
+    # A jump out of the function is a tail call: it returns what the callee
+    # leaves in EAX (AUTOMAP_SetMiniMapType, 0045a720: `mov eax, ecx` serves
+    # its early ret only; the other path ends `jmp fn_00457640`).
+    if any(i.mnemonic == 'jmp' and i.target is not None and i.target not in index and state[k] is not None
+           for k, i in enumerate(insns)):
+        at.add(None)
     return at.pop() if len(at) == 1 and None not in at else None
 
 
@@ -174,10 +188,11 @@ def split_params(params):
 WORD_PARAM = re.compile(r'^(?P<type>(?:const\s+)?(?:unsigned\s+)?[A-Za-z_]\w*(?:\s*\*+\s*|\s+))(?P<name>[A-Za-z_]\w*)$')
 
 
-def returned_param(src, leaf, arg, conv):
+def returned_param(src, leaf, arg, conv, own_convention=False):
     """(type, name) of the parameter `arg` (arg_at_returns) of `leaf` as
     defined in `src`, or None: a dword-sized parameter the body never
-    assigns."""
+    assigns. Under a convention of the function's own, which parameter a
+    register carries is not known: there it is the one such parameter."""
     m = re.search(def_pattern(leaf), src, re.M)
     if not m:
         return None
@@ -187,6 +202,11 @@ def returned_param(src, leaf, arg, conv):
                           for p in pm):
         return None                      # not every argument one dword: the slots would not count right
     kind, k = arg
+    if own_convention:
+        if kind != 'reg':
+            return None
+        fit = [q for q in range(len(pm)) if returned_param(src, leaf, ('stack', q), 'YA')]
+        return returned_param(src, leaf, ('stack', fit[0]), 'YA') if len(fit) == 1 else None
     if conv == 'YI':
         k = {'ecx': 0, 'edx': 1}.get(k) if kind == 'reg' else k + 2
     elif kind == 'reg':
@@ -274,8 +294,8 @@ def candidates(rows, model, syms, status, pats):
         cpp, hdr = os.path.join(REPO, tu + '.cpp'), os.path.join(REPO, tu + '.h')
         if len(vals) != 1 or at_rets != {next(iter(vals)) & (0xff if rtype != 'int' else 0xffffffff)}:
             # Not one constant on every path: perhaps one argument.
-            arg = arg_at_returns(model[s][0]) if not f.static else None
-            got = arg and returned_param(fixlib.read(cpp), leaf, arg, rest[:2])
+            arg = arg_at_returns(model[s][0], own_convention=f.static)
+            got = arg and returned_param(fixlib.read(cpp), leaf, arg, rest[:2], own_convention=f.static)
             if not got:
                 continue
             rtype, v = got
