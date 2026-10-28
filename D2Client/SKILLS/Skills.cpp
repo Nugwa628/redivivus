@@ -1304,7 +1304,7 @@ uint32_t __fastcall SKILL_ExecuteClientDoFunc(D2UnitStrc * pUnit, eD2Skills eSki
           nOffsetY += nTargetY;
         }
       }
-      if (pSkillTxt->lob) {
+      if ((*((uint8_t*)pSkillTxt + 0x4) & gadwBitMasks[1])) {
         pMissileUnit = UNIT::Missile::MISSILE_CreateFromUnitWithOffset(pUnitSaved, (int)pSkillTxt->cltmissile[0], nTargetX, nTargetY, nOffsetX, nOffsetY, eSkillId, nSkillLevel, 0);
       } else {
         pMissileUnit = Skills::MakeMissile((int)pSkillTxt->cltmissile[0], pUnitSaved, eSkillId, nSkillLevel, nTargetX, nTargetY, nOffsetX, nOffsetY);
