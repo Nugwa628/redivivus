@@ -264,10 +264,10 @@ void __fastcall PLRSKILLS_StateSetFn03_Blaze(D2UnitStrc * pUnit, eD2States eStat
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
     int nSkillLevel = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
     D2SkillStrc* pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1);
-    if (!pSkill) {
-      nCurSkillLvl = 0;
-    } else {
+    if (pSkill) {
       nCurSkillLvl = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 1);
+    } else {
+      nCurSkillLvl = 0;
     }
     if (nCurSkillLvl == nSkillLevel) {
       return;
