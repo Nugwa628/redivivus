@@ -1983,12 +1983,10 @@ void __fastcall MISSILE_CreatePeriodicAreaSub(D2UnitStrc * pUnit, D2UnitStrc * p
 
 void __fastcall MISSILE_CreateDirectionalSub(D2UnitStrc * pUnit, eMissilesId nMissileId) {
     int32_t nSkillLevel = D2Common::Units::Missile::GetLevel(pUnit);
-
     D2UnitStrc* pNewMissile = MakeMissileAtXY(pUnit, nMissileId, 0, 0, D2Common::Units::Missile::GetSkillId(pUnit), nSkillLevel);
     if (!pNewMissile) {
       return;
     }
-
 
     D2Common::PATH::DynamicPath::SetDirectionAndNewDirection(pNewMissile->pPath.pDynamicPath, D2Common::PATH::DynamicPath::GetDirection(pUnit->pPath.pDynamicPath));
 }
@@ -5615,7 +5613,6 @@ int32_t __fastcall MISSILE_CltHitFn41_DurielDeathRock(D2UnitStrc * pUnit, D2Unit
     eD2Skills eSkill;
     SKILLS::Skills::SKILL_SpawnRandomMissilesInArea(pUnit, (uint8_t*)0x16d, 3, 6, D2Common::Units::Missile::GetSkillId(pUnit), nLevel);
     nLevel = D2Common::Units::Missile::GetLevel(pUnit);
-
     MakeMissileAtXY(pUnit, MISSILE_Durieldeathsmoke, 0, 0, D2Common::Units::Missile::GetSkillId(pUnit), nLevel);
     return 1;
 }
@@ -5831,7 +5828,6 @@ static void __stdcall MISSILE_CreateDebrisWithCollision(int32_t nParam1, D2UnitS
     eD2CollisionUnitSize nCollideWidth = COLLISION_UNIT_SIZE_BIG;
     int32_t nX = nParam1;
     int32_t nY = nParam2;
-
     eCollisionFlags eCollision = D2Common::Collision::CheckCollision_BlockAll_Width(D2Common::Units::UNITS_GetRoom(pUnit), nX, nY, nCollideWidth, eCollisionFlag);
     if (eCollision != COLLIDE_NONE) {
       return;

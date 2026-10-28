@@ -1315,7 +1315,7 @@ void __fastcall ITEM_HandleUnsocketItems(D2UnitStrc * pUnit) {
         pFirstItem = D2Common::INVENTORY::Inventory::INVENTORY_GetNextItem(pBodyItem);
         pCarriedItem = D2Common::INVENTORY::Inventory::GetCarriedItem(pBodyItem);
         if (!pCarriedItem) {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0xd4f);
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd4f);
           exit(-1);
         }
 
@@ -1325,11 +1325,11 @@ void __fastcall ITEM_HandleUnsocketItems(D2UnitStrc * pUnit) {
           D2Common::INVENTORY::Inventory::INVENTORY_SwapPrimaryWeaponOnRemoval(pInventory, pCarriedItem);
           pNextItem = D2Common::INVENTORY::Inventory::ItemBelongsToInventoryOfPlayer(pInventory, pCarriedItem);
           if (!pNextItem) {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0xd5a);
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd5a);
             exit(-1);
           } else {
             if (pNextItem != pCarriedItem) {
-              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0xd5b);
+              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd5b);
               exit(-1);
             }
 
@@ -1338,17 +1338,14 @@ void __fastcall ITEM_HandleUnsocketItems(D2UnitStrc * pUnit) {
               dwParam2 = D2Common::INVENTORY::Inventory::INVENTORY_IsItemLocationValid(pInventory, pCarriedItem);
               D2Common::INVENTORY::Inventory::NullSub_2Arg(pInventory, dwParam2);
             }
-
             D2Common::ITEM_ProcessSetItemEquip(pUnit, pNextItem, 1, 1);
             if (pUnit->eUnitType == UNIT_PLAYER) {
               D2Common::INVENTORY::Inventory::GetEquipedWeapon(pUnit->pInventory);
             }
-
             bIsBroken = D2Common::ITEMS::Items::CheckItemFlag(pNextItem, ITEMFLAG_BROKEN, 0x96, ".\\UNIT\\Item.cpp");
             if (!bIsBroken) {
               D2Common::Stats::StatsEx::STATLIST_RemoveFromOwnerAndRecalc(pUnit, pNextItem);
             }
-
             ITEM_RecalcAllEquippedItems_EBX(pUnit);
             continue;
           }
@@ -2994,12 +2991,10 @@ void __stdcall ITEM_HandleSwapBeltOldItem(uint8_t * pBytes, D2UnitDataItemDetail
         if (pPlayer->eUnitType == UNIT_PLAYER) {
           D2Common::INVENTORY::Inventory::GetEquipedWeapon(pPlayer->pInventory);
         }
-
         bIsBroken = D2Common::ITEMS::Items::CheckItemFlag(pUnit, ITEMFLAG_BROKEN, 0x96, ".\\UNIT\\Item.cpp");
         if (!bIsBroken) {
           D2Common::Stats::StatsEx::STATLIST_RemoveFromOwnerAndRecalc(pPlayer, pUnit);
         }
-
         D2Common::INVENTORY::Inventory::INVENTORY_OnBeltChanged_NoOp(pInventory, (uint32_t)itemDetails->x);
         ITEM_DropItemToGroundWithMode((uint32_t)itemDetails->nAnimMode, 0, itemDetails->nInvPage, 0, pUnit, 0);
         D2Common::INVENTORY::Inventory::CopyInventoryOfPlayerOrFree(pInventory, pUnit);
