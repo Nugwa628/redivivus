@@ -187,7 +187,7 @@ bool __fastcall Q20_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
     if (bQuestState) {
       /* GetQuestState JustCompleted(0xd): if fresh, +2 -> display code 0x0d
                          (completion glow) else 0x0b */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_BladeOfTheOldReligion, QUESTSTATE_JustCompleted);
-      *nUnknown = (bQuestState != 0) * '\x02' + '\v';
+      *nUnknown = (bQuestState != 0 ? 0xd : 0xb);
       return true;
     }
 

@@ -14426,7 +14426,7 @@ void __fastcall AITHINK_Fn1_NpcBarb(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
     newSeed = D2_SEED_NEXT_VAL(uSeedCalc1);
     uint32_t nSeedLow3 = newSeed.nSeedLow;
     pUnit->sSeed = newSeed;
-    bWalkResult = MONSTERAI_CommandWalkToCoords(pGame, pUnit, (int)uSeedCalc1 + (int)((uSeedCalc1 & 0xffffffff) / 0x14) * -0x14 - 10 + nPosX, ((uint32_t)((nSeedCalc4 & 1) != 0) * 2 - 1) * -0x1e + nSeedLow3 / 0x14 * -0x14 + nSeedLow3 - 10 + nAiParam);
+    bWalkResult = MONSTERAI_CommandWalkToCoords(pGame, pUnit, (int)uSeedCalc1 + (int)((uSeedCalc1 & 0xffffffff) / 0x14) * -0x14 - 10 + nPosX, (((nSeedCalc4 & 1) != 0 ? 0x1 : -1)) * -0x1e + nSeedLow3 / 0x14 * -0x14 + nSeedLow3 - 10 + nAiParam);
     if (bWalkResult) {
       return;
     }
