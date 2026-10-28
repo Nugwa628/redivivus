@@ -612,7 +612,7 @@ bool __fastcall Q03_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
         iVar1 = QUEST_GetQuestRecordState(pQuestData->pGame, QUEST_ToolsOfTheTrade, 0xd);
         if (iVar1) {
           nCompletionState = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0);
-          *pbyStatusCode = (8 <= nCompletionState ? 0xc : 0x4);
+          *pbyStatusCode = (8 <= nCompletionState) * '\b' + '\x04';
         }
       }
     }
