@@ -100,11 +100,11 @@ void __fastcall ITEMDROP_AddToDropList(int * pnDropCount, int32_t pDropListArr, 
 }
 
 int32_t __stdcall ITEMDROP_GetDropListEntry(int32_t pDropListBase, int32_t nEntryIdx, int32_t nMaxEntries) {
-    if (nMaxEntries >= nEntryIdx) {
-      return pDropListBase + nEntryIdx * 8;
+    if (nMaxEntries < nEntryIdx) {
+      return 0;
     }
 
-    return 0;
+    return pDropListBase + nEntryIdx * 8;
 }
 
 void __fastcall ITEM_InitializeDroppedItem(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, int32_t dwUnitGUID, uint32_t dwUnused) {

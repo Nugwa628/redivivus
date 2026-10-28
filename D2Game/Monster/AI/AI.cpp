@@ -2003,11 +2003,11 @@ int32_t __fastcall GetCollisionDistanceFromXY(D2UnitStrc * pUnit, int32_t nTarge
     if (nDiffY < 0) {
       nDiffY = -nDiffY;
     }
-    if (nDiffY >= nDiffX) {
-      return (nDiffX + nDiffY * 2) / 2;
+    if (nDiffY < nDiffX) {
+      return (nDiffY + nDiffX * 2) / 2;
     }
 
-    return (nDiffY + nDiffX * 2) / 2;
+    return (nDiffX + nDiffY * 2) / 2;
 }
 
 int32_t __fastcall MONSTERAI_GetDistanceToCoords(D2UnitStrc * pUnit, int32_t nX, int32_t nY) {
@@ -19894,11 +19894,11 @@ int32_t __fastcall DecideMephistoAlternateTarget(::SGAMEDATA * pGame, D2UnitStrc
 
     DVar1 = D2_SEED_NEXT(pUnit->sSeed);
     pUnit->sSeed = DVar1;
-    if ((int)(DVar1.nSeedLow % 100) >= (int)*(short int*)(nMonStatsOffset + 0x62 + (uint32_t)pGame->nDifficulty * 2)) {
-      return fallback;
+    if (!((int)(DVar1.nSeedLow % 100) >= (int)*(short int*)(nMonStatsOffset + 0x62 + (uint32_t)pGame->nDifficulty * 2))) {
+      return searchParams.nMaxScanRadius;
     }
 
-    return searchParams.nMaxScanRadius;
+    return fallback;
 }
 
 // Server-side primary AI think function for the Mephisto act boss. Reads its AI state (dwArg0/1/2 in the D2AiGeneralStrc passed via pAiParam) plus current life%, distance to target and difficulty to pick the next action: melee, teleport-on-collision/range, or weighted-random cast among MonStats Skill1..6 (Sk*mode). Uses the unit RNG seed for all rolls. Mutates dwArg0 (skill-rotation counter), dwArg1 (sub-phase) and dwArg2 (next skill-state); issues moves/casts and schedules the next think via PlanNextAiMove. No return value.

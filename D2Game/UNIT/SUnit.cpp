@@ -196,11 +196,11 @@ uint32_t __fastcall UNITS_IncrementUnitGUIDCounter(::SGAMEDATA * pGame, eD2UnitT
 }
 
 int32_t __stdcall UNITS_GetHashTableSlot(eD2UnitType eUnitType, ::SGAMEDATA * pGame, uint32_t nUnitGUID) {
-    if (eUnitType >= UNIT_WARP) {
-      return 0;
+    if (eUnitType < UNIT_WARP) {
+      return (int32_t)(pGame->szGameName + ganUnitHashTableBaseOffsets[eUnitType] + (nUnitGUID & 0x7f) * 4 - 0x2a);
     }
 
-    return (int32_t)(pGame->szGameName + ganUnitHashTableBaseOffsets[eUnitType] + (nUnitGUID & 0x7f) * 4 - 0x2a);
+    return 0;
 }
 
 // Finds a unit by type and GUID in the game's unit hash tables. Walks the unit linked list (pNext at offset 0xE4) matching dwUnitId.
@@ -247,12 +247,11 @@ D2UnitStrc * __fastcall GetKillerUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 800);
       exit(-1);
     }
-    if (!(pUnit->eUnitFlagsEx & UNITFLAGEX_STORELASTATTACKER)) {
-      return nullptr;
+    if (pUnit->eUnitFlagsEx & UNITFLAGEX_STORELASTATTACKER) {
+      return FindUnitFromTable(pGame, pUnit->eKillerType, pUnit->nKillerGUID);
     }
 
-    D2UnitStrc* pKillerUnit = FindUnitFromTable(pGame, pUnit->eKillerType, pUnit->nKillerGUID);
-    return pKillerUnit;
+    return nullptr;
 }
 
 // Inserts pUnit into the game's per-type unit hash table, keyed on (nUnitGUID & 0x7F). Warp tiles use a dedicated list; other types use ganUnitHashTableBaseOffsets. Maintains sorted order by GUID descending; halts with an unrecoverable error if a duplicate GUID is detected.
@@ -1710,12 +1709,11 @@ int32_t __fastcall UNITS_ProcessUnitMovement(::SGAMEDATA * pGame, D2UnitStrc * p
 }
 
 D2UnitStrc * __fastcall GetInteractedNpc(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    if (!pUnit->uSideData.pServerSide.bInteracting) {
-      return nullptr;
+    if (pUnit->uSideData.pServerSide.bInteracting) {
+      return FindUnitFromTable(pGame, pUnit->uSideData.pServerSide.dwInteractType, pUnit->uSideData.pServerSide.dwInteractGUID);
     }
 
-    D2UnitStrc* pNpc = FindUnitFromTable(pGame, pUnit->uSideData.pServerSide.dwInteractType, pUnit->uSideData.pServerSide.dwInteractGUID);
-    return pNpc;
+    return nullptr;
 }
 
 // Returns 1 if pUnit (must be a player) can use eSkill on the target described by peUnitType. Applies only to skills flagged with bit 2 of flags4 in Skills.txt (party-targeted skills). For monster targets, resolves the owner player. Returns 1 only if caster and target share the same non-(-1) party ID, i.e. are in the same party.

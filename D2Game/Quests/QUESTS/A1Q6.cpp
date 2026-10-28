@@ -729,11 +729,11 @@ bool __fastcall Q06_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 
 // A1Q6 small accessor: returns a quest-specific flag byte ([pQuestSpecific+0x194]) when the quest's active byte (+9) is set, else returns 1 (default). No quest-record state access.
 uint32_t __fastcall Q06_GetQuestSpecificFlag(D2QuestDataStrc * pQuestData) {
-    if (!pQuestData->bIsNotIntroduction) {
-      return 1;
+    if (pQuestData->bIsNotIntroduction) {
+      return (uint32_t)pQuestData->pQuestSpecificData.pA1Q6->bAndarielKilled;
     }
 
-    return (uint32_t)pQuestData->pQuestSpecificData.pA1Q6->bAndarielKilled;
+    return 1;
 }
 
 // A1Q6 fpSequenceFilter: if stateFlag==0 and quest is live (bIsNotIntroduction), schedules Q06_QuestUpdate on a 0x14-tick timer to introduce the quest. No quest-record access.

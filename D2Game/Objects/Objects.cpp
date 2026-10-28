@@ -2768,11 +2768,11 @@ void __fastcall OBJECTS_SetUnitIdInTimerArg(D2UnitStrc * pUnit, int32_t nParam) 
 
 int32_t __fastcall GetUnitGUIDFromUnitTimerArg(D2UnitStrc * pUnit) {
     D2TimerArgStrc* pTimerArg = D2Common::Units::GetTimerArg(pUnit);
-    if (!pTimerArg) {
-      return -1;
+    if (pTimerArg) {
+      return pTimerArg->nUnitGUID;
     }
 
-    return pTimerArg->nUnitGUID;
+    return -1;
 }
 
 void __fastcall Objects_InitFn16(D2ObjectInitFnArg * pInitArg) {

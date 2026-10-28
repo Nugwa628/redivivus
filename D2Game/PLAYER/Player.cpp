@@ -1204,11 +1204,11 @@ D2UnitStrc * __fastcall PLAYER_GetActiveWeaponForSkill(D2UnitStrc * pUnit) {
     }
 
     bCanDualWield = D2Common::ITEMS::Items::ITEM_CheckIfItemIsNotBrokenAndNotDisabled(pWeaponResult);
-    if (!bCanDualWield) {
-      return pEquippedWeapon;
+    if (bCanDualWield) {
+      return pWeaponResult;
     }
 
-    return pWeaponResult;
+    return pEquippedWeapon;
 }
 
 // Recalculates active stat-list flags for dual-wield weapon slots on pUnit. If nParam is non-zero, deactivates stat lists for currently equipped and primary weapons (cleanup pass). Then, if the unit can dual-wield, activates the correct weapon's stat list based on the active-weapon-for-skill selection: primary-only, swap-only, or the dual-wield split. Uses STATLIST_SetItemStatActive(1=active, 0=inactive).

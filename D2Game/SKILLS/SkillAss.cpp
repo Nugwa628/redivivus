@@ -115,11 +115,11 @@ BOOL __fastcall SKILLASS_SrvStFn22_PsychicHammer(::SGAMEDATA * pGame, D2UnitStrc
     }
 
     bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(D2Common::Units::UNITS_GetRoom(pTarget));
-    if (bIsInTown) {
-      return 0;
+    if (!bIsInTown) {
+      return (uint32_t)(pTarget->eUnitType < UNIT_OBJECT);
     }
 
-    return (uint32_t)(pTarget->eUnitType < UNIT_OBJECT);
+    return 0;
 }
 
 // Server-side hit handler for Assassin Tiger Strike. Validates skill and runs the setup function (SrvStFunc_22), then fetches the current target, applies skill bonus damage, and rolls a critical-hit chance using the unit seed (result flag 0x8). Sets result flag 0x2 if target HP is nearly zero. Selects the skill calc slot based on target class (normal/champion/boss/player) to determine crit percentage. Finalises via SERVER_GetHitCalculation.

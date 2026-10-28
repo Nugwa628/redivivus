@@ -233,11 +233,11 @@ static uint32_t __stdcall SKILLAMZ_CreateLightningFuryBolts(int32_t nParam1, int
         nBoltCountOffset = 0;
       }
     }
-    if (iVar1 > gnLightningFuryBoltCount) {
-      return 0;
+    if (iVar1 <= gnLightningFuryBoltCount) {
+      return gaAmzLightningFuryBoltTable[iVar1][nBoltCountOffset];
     }
 
-    return gaAmzLightningFuryBoltTable[iVar1][nBoltCountOffset];
+    return 0;
 }
 
 // Find Potion SrvDoFunc. Gets the target corpse, validates it is revive-eligible and not already flagged STATE_corpse_noselect, marks it no-select, rolls the unit seed mod 100 against calc[0] drop chance, and on success resolves a potion item code via SKILLAMZ_CreateLightningFuryBolts then drops it via SKILLS_DropItemByCode. Returns 1 if the corpse was processed.
