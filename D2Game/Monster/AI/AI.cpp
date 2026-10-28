@@ -10857,7 +10857,7 @@ int32_t __fastcall AI_Diablo_DecideAction(D2AiGeneralStrc * pDiabloAiCtx, D2Unit
     return 0xb;
 }
 
-bool __fastcall AI_IsTargetWithinBossRange(D2UnitStrc * pSource, D2UnitStrc * pTarget) {
+BOOL __fastcall AI_IsTargetWithinBossRange(D2UnitStrc * pSource, D2UnitStrc * pTarget) {
     int32_t nY;
     uint32_t nRange;
     if (!pSource) {
