@@ -548,8 +548,8 @@ void __fastcall Q23_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * p
       return;
     }
 
-    eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
+
+    eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom));
     if (neAct != ACT_III) {
       return;
     }

@@ -594,8 +594,8 @@ uint8_t __fastcall QuitGameAfterDia(::SGAMEDATA * pGame, D2QuestDataStrc * pQues
         if (pDVar2) {
           pQuestSpecificA4Q2 = pDVar1;
           nY = D2Client::Units::GetYPosFromDynamicPathUnit(pDVar2);
-          nX = D2Client::Units::GetXPosFromDynamicPathUnit(pDVar2);
-          pDVar2 = Q27_SpawnDiablo(pQuestData->pGame, D2Common::Units::UNITS_GetRoom(pDVar2), nX, nY, pQuestSpecificA4Q2);
+
+          pDVar2 = Q27_SpawnDiablo(pQuestData->pGame, D2Common::Units::UNITS_GetRoom(pDVar2), D2Client::Units::GetXPosFromDynamicPathUnit(pDVar2), nY, pQuestSpecificA4Q2);
           if (pDVar2) {
             *(uint8_t*)((int)pDVar1->sQuestGUID.aPlayerGUID + 2) = 0;
             *(uint8_t*)((int)pDVar1->sQuestGUID.aPlayerGUID + 1) = 0;

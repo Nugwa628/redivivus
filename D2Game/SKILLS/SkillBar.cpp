@@ -1083,8 +1083,8 @@ void __fastcall SKILL_DeactivateAndRestoreCollision(::SGAMEDATA * pGameStrc, D2U
     if (nCollideX && nCollideY) {
       eD2CollisionShapeType nUnitWidth;
       eCollisionFlag_00 = eCollisionFlag;
-      nUnitWidth = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);
-      D2Common::Collision::RemoveCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nCollideX, nCollideY, nUnitWidth, eCollisionFlag_00);
+
+      D2Common::Collision::RemoveCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nCollideX, nCollideY, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), eCollisionFlag_00);
     }
 
     D2Common::PATH::DynamicPath::PATH_ChangeCollisionType(pDynamicPath, eCollisionFlag);

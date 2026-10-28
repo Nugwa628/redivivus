@@ -5076,21 +5076,21 @@ BOOL __fastcall DRLGOUTDOOR_ValidateSecondaryBorderCell(D2DrlgLevelStrc * pLevel
 void __fastcall DRLGOUTJUNG_BuildKurastDocktownBorders(D2DrlgLevelStrc * pLevel) {
     int nY = pLevel->sCoordinatesAndSize.WorldSize.x;
     int nYIter = pLevel->sCoordinatesAndSize.WorldSize.y;
-    int nPortalX = (int)(nY + (nY >> 0x1f & 7U)) >> 3;
+    int nPortalX = (int)nY / 8;
     int nX = nPortalX - 1;
-    nY = ((int)(nYIter + (nYIter >> 0x1f & 7U)) >> 3) - 1;
+    nY = ((int)nYIter / 8) - 1;
     if (!pLevel->pDrlg->bJungleInterlink) {
       nPortalX += -2;
     } else {
       nPortalX = 1;
     }
-    if (1 < nX) {
-      int nXIter = 1;
-      do {
+    for (int nXIter = 1; nXIter < nX; nXIter++) {
+
+
         Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nXIter, 0, (uint32_t)(nXIter == nPortalX) * 8 + 0x25d, -1, 0);
-        nXIter++;
-      } while (nXIter < nX);
+
     }
+
 
     nYIter = 1;
     if (1 < nX) {
@@ -5120,9 +5120,9 @@ void __fastcall DRLGOUTJUNG_BuildKurastUpperBorders(D2DrlgLevelStrc * pLevel) {
     int nPortalX1;
     int nY = pLevel->sCoordinatesAndSize.WorldSize.x;
     int nX = pLevel->sCoordinatesAndSize.WorldSize.y;
-    int nPortalX2 = (int)(nY + (nY >> 0x1f & 7U)) >> 3;
+    int nPortalX2 = (int)nY / 8;
     int nIter = 1;
-    nY = ((int)(nX + (nX >> 0x1f & 7U)) >> 3) - 1;
+    nY = ((int)nX / 8) - 1;
     nX = nPortalX2 - 1;
     if (!pLevel->pDrlg->bJungleInterlink) {
       nPortalX1 = nPortalX2 - 2;
@@ -5158,9 +5158,9 @@ void __fastcall DRLGOUTJUNG_BuildKurastUpperBorders(D2DrlgLevelStrc * pLevel) {
 void __fastcall DRLGOUTJUNG_BuildKurastCausewayBorders(D2DrlgLevelStrc * pLevel) {
     int nIter = pLevel->sCoordinatesAndSize.WorldSize.x;
     int nY = pLevel->sCoordinatesAndSize.WorldSize.y;
-    int nPortalX = (int)(nIter + (nIter >> 0x1f & 7U)) >> 3;
+    int nPortalX = (int)nIter / 8;
     nIter = 1;
-    nY = ((int)(nY + (nY >> 0x1f & 7U)) >> 3) - 1;
+    nY = ((int)nY / 8) - 1;
     int nX = nPortalX - 1;
     if (!pLevel->pDrlg->bJungleInterlink) {
       nPortalX = 1;

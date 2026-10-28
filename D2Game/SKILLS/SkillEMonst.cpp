@@ -536,8 +536,8 @@ BOOL __fastcall Skills_SrvDoFunc_129_AttachOrDetachFromHost(::SGAMEDATA * pGame,
 
     int32_t bRelocateSucceeded = 1;
     uint32_t nPosX = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00);
-    uint32_t nPosY = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00);
-    bIsDead = UNIT::SUnit::SUNIT_RelocateUnit(pGame, pUnit, D2Common::Units::UNITS_GetRoom(pUnit_00), nPosY, nPosX, bRelocateSucceeded, bIsDead);
+
+    bIsDead = UNIT::SUnit::SUNIT_RelocateUnit(pGame, pUnit, D2Common::Units::UNITS_GetRoom(pUnit_00), D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), nPosX, bRelocateSucceeded, bIsDead);
     if (!bIsDead) {
       return 0;
     }
@@ -892,8 +892,8 @@ BOOL __fastcall Skills_SrvDoFunc_134_AreaExplosionAttack(::SGAMEDATA * pGame, D2
 
     SkillsServer::SKILLS_AddRandomSkillDamage(pUnit, &sDamage.dwHitFlags, eSkill, nSkillLvl);
     SkillsServer::SetDamageOnEvent(pUnit, &sDamage, eSkill, nSkillLvl);
-    nAuraRange = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillRecord->aurarangecalc, eSkill, nSkillLvl);
-    SkillsServer::SKILLS_ApplyAreaDamage(pGame, pUnit, 0, 0, nAuraRange, &sDamage, 0);
+
+    SkillsServer::SKILLS_ApplyAreaDamage(pGame, pUnit, 0, 0, D2Common::Skills::D2GetSkillCalc(pUnit, pSkillRecord->aurarangecalc, eSkill, nSkillLvl), &sDamage, 0);
     return 1;
 }
 

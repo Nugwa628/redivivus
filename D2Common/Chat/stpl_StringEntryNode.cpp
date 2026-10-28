@@ -314,7 +314,7 @@ template<> ::StringEntryNode * TSHashTable<StringEntryNode, HASHKEY_STRI>::Next(
     }
 
     uAbsOffset = this->tFullList.m_terminator.m_next;
-    return (::StringEntryNode*)((int)uAbsOffset < 1 ? 0 : uAbsOffset);
+    return (::StringEntryNode*)((int)uAbsOffset <= 0 ? 0 : uAbsOffset);
 }
 
 template<> void TSHashObject<StringEntryNode, HASHKEY_STRI>::Destructor() {

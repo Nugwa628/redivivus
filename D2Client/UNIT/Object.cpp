@@ -958,7 +958,7 @@ bool __fastcall OBJECT_ClientFn_TimedSpecial1Or2_23to33s(D2UnitStrc * pUnit) {
       pUnit->nGfxCurrentFrame = (uint32_t)pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->Start[5];
       DVar3 = D2_SEED_NEXT(*pSeed);
       *pSeed = DVar3;
-      if (!((uint64_t)d2_bits_of(DVar3) & 1)) {
+      if (!(DVar3.nSeedLow & 1)) {
         iVar5 = 4;
       } else {
         iVar5 = 3;

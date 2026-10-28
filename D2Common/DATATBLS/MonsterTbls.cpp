@@ -4477,10 +4477,10 @@ BOOL __fastcall MONSTERTBLS_GetMonSeqFrameCount(int32_t nMonTypeId, int32_t nChe
     int nNewStackSize;
     int32_t typeStack[128];
     short int wEquiv3;
-    if (nCheckTypeId < 1) {
+    if (nCheckTypeId <= 0) {
       return 0;
     }
-    if (nMonTypeId < 1 || sgtDataTable.nTxtMonTypeSize <= nMonTypeId) {
+    if (nMonTypeId <= 0 || nMonTypeId >= sgtDataTable.nTxtMonTypeSize) {
       return 0;
     }
 
@@ -4493,7 +4493,7 @@ BOOL __fastcall MONSTERTBLS_GetMonSeqFrameCount(int32_t nMonTypeId, int32_t nChe
       if (nCheckTypeId == nCurrentTypeId) {
         return 1;
       }
-      if (sgtDataTable.nTxtMonTypeSize <= nCurrentTypeId) {
+      if (nCurrentTypeId >= sgtDataTable.nTxtMonTypeSize) {
         return 0;
       }
       if (0x7c < nNewStackSize) {

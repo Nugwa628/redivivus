@@ -3095,8 +3095,8 @@ void __stdcall NPCMENU_HandleTradeAccepted() {
       dwErrorCode = 0;
       dwCallbackArg = 0;
       pfnDrawCallback = NPCMENU_GetCurrentMenuId;
-      nY = ui::GetMouseY();
-      Dialog::gpNpcTradeErrorDialog = Dialog::AllocDialogStrc(ui::GetMouseX(), nY, pfnDrawCallback, dwCallbackArg, dwErrorCode, dwBorder, dwHighlight, nAlignArg, nColorArg, dwFontArg, dwScrollable);
+
+      Dialog::gpNpcTradeErrorDialog = Dialog::AllocDialogStrc(ui::GetMouseX(), ui::GetMouseY(), pfnDrawCallback, dwCallbackArg, dwErrorCode, dwBorder, dwHighlight, nAlignArg, nColorArg, dwFontArg, dwScrollable);
       Dialog::DIALOG_SetHighlightStyle(Dialog::gpNpcTradeErrorDialog, 1);
       dwBorder = 0;
       dwCallbackArg = 0;

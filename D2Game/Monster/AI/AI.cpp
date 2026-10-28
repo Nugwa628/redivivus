@@ -2302,8 +2302,8 @@ uint32_t __fastcall AI_ForEachFn05_ScanTargetsByThreat(::SGAMEDATA * pGame, D2Un
             pAiGeneral = UNIT::Monster::GetAiGeneral(pOther);
             if (pAiGeneral->nAiFlags & 8) {
               nY = D2Client::Units::GetYPosFromDynamicPathUnit(pOther);
-              nOtherX = D2Client::Units::GetXPosFromDynamicPathUnit(pOther);
-              pGridIndex = (D2UnitStrc*)D2Common::DUNGEON::Dungeon::GetGridIndex(D2Common::Units::UNITS_GetRoom(pOther), nOtherX, nY);
+
+              pGridIndex = (D2UnitStrc*)D2Common::DUNGEON::Dungeon::GetGridIndex(D2Common::Units::UNITS_GetRoom(pOther), D2Client::Units::GetXPosFromDynamicPathUnit(pOther), nY);
               if (ppResults[4] == pGridIndex) {
                 *(uint16_t*)&pAiGeneral->nAiFlags = (uint16_t)pAiGeneral->nAiFlags | 8;
                 ppResults[2] = 0;
@@ -8248,8 +8248,8 @@ void __fastcall AITHINK_Fn1_Hireable(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2
       nGridIndex = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);
       iVar1 = 0x40;
       bWalkOk = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-      nUnitGridCell = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-      bWalkOk = D2Common::Collision::CheckCollision_BlockPlayer_Type(D2Common::Units::UNITS_GetRoom(pUnit), nUnitGridCell, bWalkOk, nGridIndex, iVar1);
+
+      bWalkOk = D2Common::Collision::CheckCollision_BlockPlayer_Type(D2Common::Units::UNITS_GetRoom(pUnit), D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), bWalkOk, nGridIndex, iVar1);
       if (bWalkOk) {
         bHasCollision = true;
         nMaxFollowDist = 6;
@@ -8278,11 +8278,11 @@ void __fastcall AITHINK_Fn1_Hireable(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2
       }
 
       bWalkOk = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00);
-      nUnitGridCell = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00);
-      bWalkOk = D2Common::DUNGEON::Dungeon::GetGridIndex(D2Common::Units::UNITS_GetRoom(pUnit_00), nUnitGridCell, bWalkOk);
+
+      bWalkOk = D2Common::DUNGEON::Dungeon::GetGridIndex(D2Common::Units::UNITS_GetRoom(pUnit_00), D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), bWalkOk);
       nUnitGridCell = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-      iVar1 = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-      nUnitGridCell = D2Common::DUNGEON::Dungeon::GetGridIndex(D2Common::Units::UNITS_GetRoom(pUnit), iVar1, nUnitGridCell);
+
+      nUnitGridCell = D2Common::DUNGEON::Dungeon::GetGridIndex(D2Common::Units::UNITS_GetRoom(pUnit), D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nUnitGridCell);
       if (nUnitGridCell != bWalkOk) {
         HirelingFollowOwnerAction(pGame, pUnit_00, pUnit, 0, 1, 0x3c, 0);
         return;
@@ -8851,8 +8851,8 @@ void __fastcall AI_Fn1_GenericSpawner(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
           nDistToTarget = sgptDataTable->nTxtMonStatsSize;
           bSpawnOk = 0;
           nUnitY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-          nUnitX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-          BVar2 = MONSTERAI_CanSpawnMonsterAt(0x210 < nDistToTarget ? 0x210 : -1, D2Common::Units::UNITS_GetRoom(pUnit), nUnitX, nUnitY, bSpawnOk);
+
+          BVar2 = MONSTERAI_CanSpawnMonsterAt(0x210 < nDistToTarget ? 0x210 : -1, D2Common::Units::UNITS_GetRoom(pUnit), D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nUnitY, bSpawnOk);
           if (BVar2) {
             pAiGeneral->dwArg1++;
             MONSTERAI_CommandSkillSequence(pGame, pUnit, SKILL_Nest, pTarget, 0, 0);
@@ -19303,8 +19303,8 @@ void __fastcall AITHINK_Fn1_FoulCrowNest(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       nFramesSinceLastSpawn = sgptDataTable->nTxtMonStatsSize;
       bCanSpawn = 0;
       nUnitY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-      nUnitX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-      BVar1 = MONSTERAI_CanSpawnMonsterAt(0xce < nFramesSinceLastSpawn ? 0xce : -1, D2Common::Units::UNITS_GetRoom(pUnit), nUnitX, nUnitY, bCanSpawn);
+
+      BVar1 = MONSTERAI_CanSpawnMonsterAt(0xce < nFramesSinceLastSpawn ? 0xce : -1, D2Common::Units::UNITS_GetRoom(pUnit), D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nUnitY, bCanSpawn);
       if (BVar1) {
         pMonsterAiGeneral->dwArg1++;
         SERVER_UNIT_CastSkill(pGame, pUnit, pMonStats->aSkMode[0], (int)pMonStats->aSkill[0], pAttacker, 0, 0);
@@ -19403,8 +19403,8 @@ void __fastcall AITHINK_Fn1_Sarcophagus(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
       nFramesSinceLastSpawn = sgptDataTable->nTxtMonStatsSize;
       bCanSpawn = 0;
       nUnitY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-      nUnitX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-      BVar1 = MONSTERAI_CanSpawnMonsterAt(0xe4 < nFramesSinceLastSpawn ? 0xe4 : -1, D2Common::Units::UNITS_GetRoom(pUnit), nUnitX, nUnitY, bCanSpawn);
+
+      BVar1 = MONSTERAI_CanSpawnMonsterAt(0xe4 < nFramesSinceLastSpawn ? 0xe4 : -1, D2Common::Units::UNITS_GetRoom(pUnit), D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nUnitY, bCanSpawn);
       if (BVar1) {
         nFramesSinceLastSpawn = pGame->dwGameFrame;
         pMonsterAiGeneral->dwArg1++;
@@ -21263,8 +21263,8 @@ void __fastcall AI_Fn1_SandMaggotQueen(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       }
 
       nMoveMode = 8;
-      nUnitY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-      MONSTERAI_CommandMoveToPosition(pGame, pUnit, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nUnitY, nMoveMode);
+
+      MONSTERAI_CommandMoveToPosition(pGame, pUnit, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), D2Client::Units::GetYPosFromDynamicPathUnit(pUnit), nMoveMode);
       RestartAiThink(pGame, pUnit, (int)pMonStats->aip[1][pGame->nDifficulty]);
       pAiGeneral->dwArg1 = 1;
       return;

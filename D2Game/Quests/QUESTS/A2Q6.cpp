@@ -400,8 +400,8 @@ void __fastcall Q14_SetDurielCompleteOnPartyMember(::SGAMEDATA * pGame, D2UnitSt
       return;
     }
 
-    eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
+
+    eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom));
     if (neAct != ACT_II) {
       return;
     }
@@ -524,8 +524,8 @@ void __fastcall Q14_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         pSpecificData->bPortalSpawnInProgress = 1;
         eLevel = LEVEL_LutGholein;
         nPlayerY = D2Client::Units::GetYPosFromDynamicPathUnit(pQuestArgs->pPlayer);
-        nPlayerX = D2Client::Units::GetXPosFromDynamicPathUnit(pQuestArgs->pPlayer);
-        bPortalSpawned = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, pQuestArgs->pPlayer, D2Common::Units::UNITS_GetRoom(pQuestArgs->pPlayer), nPlayerX, nPlayerY, eLevel, ppSpawnedPortal, nPortalClassId, bPortalSpawned);
+
+        bPortalSpawned = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, pQuestArgs->pPlayer, D2Common::Units::UNITS_GetRoom(pQuestArgs->pPlayer), D2Client::Units::GetXPosFromDynamicPathUnit(pQuestArgs->pPlayer), nPlayerY, eLevel, ppSpawnedPortal, nPortalClassId, bPortalSpawned);
         if (bPortalSpawned) {
           QUEST_SetStateFlag(pQuestData, 4, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q6.cpp", 0x241);
           UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestArgs->pGame, 0, pQuestArgs->pTarget, (::fpExecuteOnUnitFunction)Q14_CheckDurielLairAndComplete);

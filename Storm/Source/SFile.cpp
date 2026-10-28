@@ -101,7 +101,7 @@ void __fastcall SFILE_CopyStreamBuffer4(uint32_t * pDest, uint32_t * pSrc) {
 uint32_t SFILE_DecompressLzw_BufferRead(void * pDstBuf, uint32_t * pnBytesRequested, void * pReadState) {
     uint32_t nAvail = *(int*)((int)pReadState + 0x10) - *(int*)((int)pReadState + 4);
     uint32_t nReadLen = *pnBytesRequested;
-    if (nAvail <= *pnBytesRequested) {
+    if (*pnBytesRequested >= nAvail) {
       nReadLen = nAvail;
     }
 

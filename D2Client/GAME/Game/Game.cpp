@@ -240,8 +240,8 @@ void __stdcall ProcessQueuedPrimaryClick() {
       return;
     }
 
-    int nY = UI::ui::GetMouseY();
-    UNIT::Player::ClickMap(1, UI::ui::GetMouseX(), nY, mouseEventFlags);
+
+    UNIT::Player::ClickMap(1, UI::ui::GetMouseX(), UI::ui::GetMouseY(), mouseEventFlags);
 }
 
 // Immediate primary click handling: reset click state and call ClickMap(2,...).
@@ -2410,7 +2410,7 @@ uint32_t __stdcall CLIENT_GameLoopFrame(uint32_t dwUnused) {
     UpdateFrameStats();
     uint32_t frameElapsed;
     frameElapsed = gClientGameData.uGlobalTickCountA - gClientGameData.uGlobalElapsed;
-    if (uGlobalTickCountB <= frameElapsed) {
+    if (frameElapsed >= uGlobalTickCountB) {
       gClientGameData.uGlobalElapsed = gClientGameData.uGlobalTickCountA;
       didTick = true;
       if (gClientGameData.uGlobalTickCountA < (uint32_t)gClientGameData.gdwCatchupTimeoutTick) {
@@ -2479,7 +2479,7 @@ uint32_t __stdcall CLIENT_GameLoopFrame(uint32_t dwUnused) {
         if (0x1c < (int)nFpsDrawn) {
           nFrameSkipLevel = 0;
         }
-        if ((int)nFrameSkipLevel < gnFrameSkipCounter) {
+        if (gnFrameSkipCounter > (int)nFrameSkipLevel) {
           gnFrameSkipCounter = 0;
         }
       } else if (0x16 < (int)gClientGameData.fps_drawn) {

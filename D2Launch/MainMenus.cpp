@@ -5449,8 +5449,8 @@ BOOL __stdcall MAINMENU_Unused19(D2ControlMsg * pControlMsg) {
       pfnBtn1Press = (OnPress)MAINMENU_DismissPopup;
       pfnBtn2Press = pAccountResult;
       pfnBtn3Press = pAccountResult;
-      pwszEmail1 = D2Lang::StrTable::strtable::GetLocaleString(0x2b5d);
-      MAINMENU_CreateMessageBox(D2Lang::StrTable::strtable::GetLocaleString(0x2b5c), pwszEmail1, nMsgBoxTitleId, (int32_t)pAccountResult, pfnBtn1Press, pfnBtn2Press, nMsgBoxArg5, (int32_t)pfnBtn3Press);
+
+      MAINMENU_CreateMessageBox(D2Lang::StrTable::strtable::GetLocaleString(0x2b5c), D2Lang::StrTable::strtable::GetLocaleString(0x2b5d), nMsgBoxTitleId, (int32_t)pAccountResult, pfnBtn1Press, pfnBtn2Press, nMsgBoxArg5, (int32_t)pfnBtn3Press);
       return 1;
     }
 
