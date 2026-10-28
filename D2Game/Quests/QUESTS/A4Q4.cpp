@@ -44,8 +44,8 @@ void __fastcall Q30_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_HellsForge, QUESTSTATE_Completed);
     /* GetQuestState(HellsForge[0x1b], state 1=RewardAwaits) — forge done, reward
                          pending */ /* GetQuestState(HellsForge[0x1b], state 0xd=JustCompleted) — forge just
@@ -86,8 +86,8 @@ bool __fastcall Q30_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
     }
 
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer_00 = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer_00 = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer_00, QUEST_HellsForge, QUESTSTATE_Completed);
     /* GetQuestState(HellsForge[0x1b], 1=RewardAwaits) */ /* GetQuestState(HellsForge[0x1b], 0xd=JustCompleted) — if none set, forge not
                          started -> Tyrael active (return true) */ if (!bQuestState) {
