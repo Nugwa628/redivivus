@@ -742,7 +742,7 @@ void __stdcall MISSILE_CalculatePierceCount(D2UnitStrc * pUnit, D2UnitStrc * pUn
     } else {
       pMissileTxt = sgptDataTable->pTxtMissiles + nMissileClassId;
     }
-    if (!pMissileTxt->Pierce) {
+    if (!(*((uint8_t*)pMissileTxt + 0x4) & gadwBitMasks[2])) {
       return;
     }
 
