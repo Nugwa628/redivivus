@@ -4597,38 +4597,38 @@ void __stdcall UI_UpdateNewStatSkillIcons() {
     D2UnitStrc* pUnit;
     pUnit = UNIT::Player::GetPlayerUnit_UI();
     bUIFlag = GetUIFlag(UI_NEWSTATS);
-    if (!bUIFlag) {
-      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_statpts, 0);
-      if (!nPointsAvailable || (bUIFlag = GetUIFlag(UI_STATSCREEN) , bUIFlag != 0)) {
-        goto update_new_skills_icon;
-      }
-
-      neD2UIvarsSetType = UI_SET;
-    } else {
+    if (bUIFlag) {
       nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_statpts, 0);
       if (nPointsAvailable) {
         goto update_new_skills_icon;
       }
 
       neD2UIvarsSetType = UI_RESET;
+    } else {
+      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_statpts, 0);
+      if (!nPointsAvailable || (bUIFlag = GetUIFlag(UI_STATSCREEN) , bUIFlag != 0)) {
+        goto update_new_skills_icon;
+      }
+
+      neD2UIvarsSetType = UI_SET;
     }
 
     Draw::SetUIFlag(UI_NEWSTATS, neD2UIvarsSetType, 0);
     update_new_skills_icon:
     bUIFlag = GetUIFlag(UI_NEWSKILLS);
-    if (!bUIFlag) {
+    if (bUIFlag) {
+      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
+      if (nPointsAvailable < 1) {
+        Draw::SetUIFlag(UI_NEWSKILLS, UI_RESET, 0);
+        return;
+      }
+    } else {
       nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
       if (0 < nPointsAvailable) {
         bUIFlag = GetUIFlag(UI_SKILLTREE);
         if (!bUIFlag) {
           Draw::SetUIFlag(UI_NEWSKILLS, UI_SET, 0);
         }
-      }
-    } else {
-      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
-      if (nPointsAvailable < 1) {
-        Draw::SetUIFlag(UI_NEWSKILLS, UI_RESET, 0);
-        return;
       }
     }
 }
