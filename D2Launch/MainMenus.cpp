@@ -3456,7 +3456,8 @@ BOOL fpInsertPlayCd() {
     D2ControlStrc* pForm = FORMS_CreateAnyFormFromList(0xde);
     D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pForm, 1);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08(pForm, 1);
-    D2Win::Src::D2WinMain::SetUnsetFlag0x08(FORMS_CreateAnyFormFromList(0x3c), 1);
+    pForm = FORMS_CreateAnyFormFromList(0x3c);
+    D2Win::Src::D2WinMain::SetUnsetFlag0x08(pForm, 1);
     ::D2WinTextBox* pTextBox = (::D2WinTextBox*)FORMS_CreateAnyFormFromList(0xd9);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08((D2ControlStrc*)pTextBox, 1);
     int nTextPadC = 0;
@@ -5623,8 +5624,10 @@ BOOL __stdcall MAINMENU_OnPressShowExpansionCreditsPage(D2ControlMsg * pControlM
     D2ControlStrc* pFormControl = FORMS_CreateAnyFormFromList(0xda);
     D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pFormControl, 1);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08(pFormControl, 1);
-    D2Win::Src::D2WinMain::SetUnsetFlag0x08(FORMS_CreateAnyFormFromList(0xdb), 1);
-    D2Win::Src::D2WinMain::SetUnsetFlag0x08(FORMS_CreateAnyFormFromList(0xdc), 1);
+    pFormControl = FORMS_CreateAnyFormFromList(0xdb);
+    D2Win::Src::D2WinMain::SetUnsetFlag0x08(pFormControl, 1);
+    pFormControl = FORMS_CreateAnyFormFromList(0xdc);
+    D2Win::Src::D2WinMain::SetUnsetFlag0x08(pFormControl, 1);
     ::D2WinTextBox* pTextBox = (::D2WinTextBox*)FORMS_CreateAnyFormFromList(0xdd);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08((D2ControlStrc*)pTextBox, 1);
     int nAlignment = 0;

@@ -290,7 +290,7 @@ void __fastcall PLRSKILLS_StateSetFn04_SourceUnit(D2UnitStrc * pUnit, eD2States 
     }
 
     eD2UnitType eUnitType = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_source_unit_type, 0);
-    if (eUnitType >= UNIT_COUNT) {
+    if ((uint32_t)eUnitType >= UNIT_COUNT) {
       return;
     }
 
