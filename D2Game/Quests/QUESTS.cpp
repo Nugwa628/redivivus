@@ -823,11 +823,10 @@ void __fastcall QUEST_SendQuestUpdateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * 
       return;
     }
 
-    sPacket.nExtra = 0;
+    memset(&sPacket, 0, sizeof(sPacket));
     sPacket.nQuestId = (uint8_t)nInternalQuestNo;
     sPacket.nPacketId = ']';
     sPacket.nAlertFlags = pQuestData->nQuestPacketFlags;
-    sPacket.nFilterStatus = '\0';
     D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
     D2BitBufferStrc* pBitBufferEx = pQuestRecord;
     if (!pQuestData->fpStatusFilter) {
@@ -1982,10 +1981,9 @@ void __fastcall SendQuestState(D2UnitStrc * pUnit, int32_t nQuestId) {
     sPacket.nAlertFlags = '\0';
     sPacket.nFilterStatus = '\0';
     sPacket.nQuestId = (uint8_t)nQuestId;
-    sPacket.nExtra = 0;
+    memset(&sPacket, 0, sizeof(sPacket));
     sPacket.nPacketId = ']';
     sPacket.nAlertFlags = '\x02';
-    sPacket.nFilterStatus = '\0';
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xd69);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &sPacket);
 }

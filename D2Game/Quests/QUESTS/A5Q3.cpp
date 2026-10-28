@@ -179,11 +179,10 @@ void __fastcall Q33_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q3.cpp
 void __fastcall Q33_SendQuestStatePacket(D2UnitStrc * pUnit) {
     D2GSPacketSrv0x5D aPacketBuf;
-    aPacketBuf.nExtra = 0;
+    memset(&aPacketBuf, 0, sizeof(aPacketBuf));
     aPacketBuf.nPacketId = ']';
     aPacketBuf.nQuestId = '!';
     aPacketBuf.nAlertFlags = ' ';
-    aPacketBuf.nFilterStatus = '\0';
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q3.cpp", 0x11e);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &aPacketBuf);
 }
@@ -574,11 +573,10 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         pnIceScrollCount = &pDVar1->nIceItemCount;
         (*pnIceScrollCount)++;
         pClient = UNIT::SUnit::SUNIT_GetClient(pQuestArgs->pPlayer, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q3.cpp", 0x214);
-        nNpcNo.nExtra = 0;
+        memset(&nNpcNo, 0, sizeof(nNpcNo));
         nNpcNo.nPacketId = ']';
         nNpcNo.nQuestId = '!';
         nNpcNo.nAlertFlags = '\x01';
-        nNpcNo.nFilterStatus = '\0';
         GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &nNpcNo);
         pDVar1->bIceScrollCollected = 1;
         return;
@@ -596,11 +594,10 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
             /* SetQuestState(Step0x08): Malah turn-in (dlg 0x4ea4) accepted, "rt2 " gift
                          granted */ D2Common::QuestRecord::SetQuestState(pBitBufferRecord, QUEST_PrisonOfIce, QUESTSTATE_Step0x08);
             pClient = UNIT::SUnit::SUNIT_GetClient(pQuestArgs->pPlayer, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q3.cpp", 0x22b);
-            nNpcNo.nExtra = 0;
+            memset(&nNpcNo, 0, sizeof(nNpcNo));
             nNpcNo.nPacketId = ']';
             nNpcNo.nQuestId = '!';
             nNpcNo.nAlertFlags = '\x02';
-            nNpcNo.nFilterStatus = '\0';
             GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &nNpcNo);
             bQuestStateResult = D2Common::QuestRecord::GetQuestState(pBitBufferRecord, QUEST_PrisonOfIce, QUESTSTATE_Step0x09);
             if (bQuestStateResult) {
@@ -708,11 +705,10 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         return;
       }
 
-      nNpcNo.nExtra = 0;
+      memset(&nNpcNo, 0, sizeof(nNpcNo));
       nNpcNo.nPacketId = ']';
       nNpcNo.nQuestId = '!';
       nNpcNo.nAlertFlags = '\x10';
-      nNpcNo.nFilterStatus = '\0';
       pItemTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(pQuestSpecificData->nClassId);
       if (pItemTxt && 0 < pItemTxt->wDropSound) {
         nNpcNo.nExtra = pItemTxt->wDropSound;
