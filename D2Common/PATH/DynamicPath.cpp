@@ -1591,13 +1591,13 @@ uint32_t __stdcall PATH_CalculatePath(D2DynamicPathStrc * pDynamicPath, D2UnitSt
                   }
 
                   uVar9 = pDynamicPath_00->dwPathPoints;
-                  if (!pDynamicPath_00->dwPathPoints) {
+                  if (pDynamicPath_00->dwPathPoints) {
+                    pDynamicPath_00->nFlags = dwFlags | 0x20;
+                    return uVar9;
+                  } else {
                     pDynamicPath_00->nFlags = dwFlags & -33;
                     return uVar9;
                   }
-
-                  pDynamicPath_00->nFlags = dwFlags | 0x20;
-                  return uVar9;
                 }
               }
             }
@@ -1657,13 +1657,7 @@ void __stdcall AllocDynamicPath(D2PoolManagerStrc * pMemory, D2RoomStrc * pRoom,
     pDynamicPath->SaveCoords[0].nY = (uint16_t)nY;
     eD2UnitType eUnitType;
     eUnitType = pUnit_00->eUnitType;
-    if (eUnitType == UNIT_PLAYER) {
-      pDynamicPath->nCollisionFlag = 0x80;
-      pDynamicPath->nCollisionPattern = 0x1c09;
-      PATH_SetPathType(pDynamicPath, 7);
-      pDynamicPath->nDistMax = 0x49;
-      pDynamicPath->nIdaStarVariable = 0x46;
-    } else {
+    if (eUnitType != UNIT_PLAYER) {
       if (eUnitType == UNIT_MONSTER) {
         pDynamicPath->nCollisionFlag = 0x100;
         if (!pDynamicPath->pOwner || pDynamicPath->pOwner->eUnitType != UNIT_PLAYER) {
@@ -1701,6 +1695,12 @@ void __stdcall AllocDynamicPath(D2PoolManagerStrc * pMemory, D2RoomStrc * pRoom,
         pDynamicPath->nCollisionPattern = 0;
         PATH_SetPathType(pDynamicPath, 4);
       }
+    } else {
+      pDynamicPath->nCollisionFlag = 0x80;
+      pDynamicPath->nCollisionPattern = 0x1c09;
+      PATH_SetPathType(pDynamicPath, 7);
+      pDynamicPath->nDistMax = 0x49;
+      pDynamicPath->nIdaStarVariable = 0x46;
     }
 
     place_and_set_screen_pos:
@@ -1803,16 +1803,16 @@ void __stdcall PATH_RestoreMonsterCollision(D2UnitStrc * pUnit, int32_t nParam) 
 
     restore_collision:
     pRoom = Units::UNITS_GetRoom(pUnit);
-    if (!pRoom) {
+    if (pRoom) {
+      PATH_RemoveUnitCollision(pUnit, 1);
+      pUnit->pPath.pDynamicPath->nUnitWidth = nMonStatId;
+      PATH_ChangeCollisionType(pDynamicPath, 0x100);
+      PATH_AddUnitCollision(pUnit);
+    } else {
       pUnit->pPath.pDynamicPath->nUnitWidth = nMonStatId;
       PATH_ChangeCollisionType(pDynamicPath, 0x100);
       return;
     }
-
-    PATH_RemoveUnitCollision(pUnit, 1);
-    pUnit->pPath.pDynamicPath->nUnitWidth = nMonStatId;
-    PATH_ChangeCollisionType(pDynamicPath, 0x100);
-    PATH_AddUnitCollision(pUnit);
 }
 
 void __stdcall thunk_PATH_AddUnitCollision(D2UnitStrc * pUnit) {

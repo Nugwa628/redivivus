@@ -909,19 +909,19 @@ void __stdcall LVLTBLS_FreeLevelsTxt() {
 }
 
 int32_t __stdcall TXT_Levels_GetMonLvlForDifficulty(eD2LevelId eLevel, eD2Difficulty nDifficulty, BOOL bIsExpansion) {
-    if (!(nDifficulty < (DIFFICULTY_HELL | DIFFICULTY_NIGHTMARE) && 0 < (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize)) {
+    if (nDifficulty < (DIFFICULTY_HELL | DIFFICULTY_NIGHTMARE) && 0 < (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize) {
+      D2LevelsTxt* pLevelsTxt = sgptDataTable->pTxtLevels + eLevel;
+      if (!pLevelsTxt) {
+        return 1;
+      }
+      if (bIsExpansion) {
+        return (int)pLevelsTxt->MonLvlEx[nDifficulty];
+      } else {
+        return (int)pLevelsTxt->MonLvl[nDifficulty];
+      }
+    } else {
       return 1;
     }
-
-    D2LevelsTxt* pLevelsTxt = sgptDataTable->pTxtLevels + eLevel;
-    if (!pLevelsTxt) {
-      return 1;
-    }
-    if (!bIsExpansion) {
-      return (int)pLevelsTxt->MonLvl[nDifficulty];
-    }
-
-    return (int)pLevelsTxt->MonLvlEx[nDifficulty];
 }
 
 // Scans the LevelDefs table for levels with the Portal flag set, counts them, allocates a server array (gpPortalLevelArray) of that size, and fills it with the level indices. Used at startup to build the list of portal-accessible levels. Halts if write index exceeds the counted portal level count.

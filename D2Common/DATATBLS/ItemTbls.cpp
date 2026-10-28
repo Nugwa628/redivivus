@@ -4338,11 +4338,11 @@ void __stdcall ITEMTBLS_FreeProperties() {
 }
 
 int TXT_Gamble_SortFunction(LPCVOID pParam1, LPCVOID pParam2) {
-    if (*(uint32_t*)((int)pParam2 + 4) >= *(uint32_t*)((int)pParam1 + 4)) {
+    if (*(uint32_t*)((int)pParam2 + 4) < *(uint32_t*)((int)pParam1 + 4)) {
+      return 1;
+    } else {
       return -(uint32_t)(*(uint32_t*)((int)pParam1 + 4) < *(uint32_t*)((int)pParam2 + 4));
     }
-
-    return 1;
 }
 
 // One-time loader for gamble.txt. Compiles the binary "gamble" table (code field only), resolves each item code to a class id via the items link, then sorts the entries by level and builds two side-tables: GambleTable (sorted class-id array) and gnItemTblsCacheSize (per-level upper-bound cache for [1..99]).
@@ -5090,7 +5090,10 @@ void __fastcall TXT_AllocTxt_runes(D2PoolManagerStrc * pMemory) {
     aFieldDefs[0x2f].fpLinker = 0;
     sgtDataTable.pTxtRunesLink = Fog::Src::Excel::STRUCT_CreateTxtLinkStrc(".\\DATATBLS\\ItemTbls.cpp", 0x8ff);
     BOOL bSrvBinExists = ITEMTBLS_CheckIfDataFileExists(".txt", pMemory, "runessrv");
-    if (!bSrvBinExists) {
+    if (bSrvBinExists) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x904);
+      exit(-1);
+    } else {
       uint32_t nStringId;
       bSrvBinExists = ITEMTBLS_CheckIfDataFileExists(".bin", pMemory, "runessrv");
       if (!bSrvBinExists) {
@@ -5116,9 +5119,6 @@ void __fastcall TXT_AllocTxt_runes(D2PoolManagerStrc * pMemory) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x908);
         exit(-1);
       }
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x904);
-      exit(-1);
     }
 }
 

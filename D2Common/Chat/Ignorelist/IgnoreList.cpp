@@ -205,12 +205,12 @@ int32_t CheckCharNameIgnored(::IgnoreList * pThis, char * szCharName) {
     }
 
     _bIsEnabled = pThis->_vfptr->GetPersistentSetting(pThis);
-    if (!_bIsEnabled) {
+    if (_bIsEnabled) {
+      ::StringEntryNode* pEntry = pThis->tIgnoredPatterns.Ptr(szCharName);
+      return (uint32_t)(pEntry != 0);
+    } else {
       return 0;
     }
-
-    ::StringEntryNode* pEntry = pThis->tIgnoredPatterns.Ptr(szCharName);
-    return (uint32_t)(pEntry != 0);
 }
 
 // Returns whether the player name is on the ignore list. Tail-calls Fog::Debug::GuardStack, which returns its argument, so the result is already in EAX; typed void the reconstruction dropped it.

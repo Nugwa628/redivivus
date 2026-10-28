@@ -2458,13 +2458,13 @@ uint32_t __fastcall ITEMPROP_AddStat_FixedOrRolledMaxDamageAware(uint32_t dwPara
         return 0;
       }
     }
-    if ((short int)nParam2 != 0x16) {
+    if ((short int)nParam2 == 0x16) {
+      ITEMPROP_AddMaxDamage(dwParam1, pUnit, pUnit2, nParam1, nParam, 0x16, 0, nParam12, nParam3, nParam4, dwParam4);
+      return nParam12;
+    } else {
       ITEMMOD_AddStatToItem(pUnit, nParam1, nParam, (short int)nParam2, 0, nParam12, nParam3, pUnit2, nParam4);
       return nParam12;
     }
-
-    ITEMPROP_AddMaxDamage(dwParam1, pUnit, pUnit2, nParam1, nParam, 0x16, 0, nParam12, nParam3, nParam4, dwParam4);
-    return nParam12;
 }
 
 uint32_t __fastcall ITEMPROP_SetIndestructible(uint32_t dwParam1, D2UnitStrc * pUnit, D2UnitStrc * pUnit2, uint32_t nParam1, uint32_t dwParam2, int32_t nParam, uint32_t dwParam3, uint32_t dwParam4, int32_t nParam2, uint32_t nParam3, uint32_t dwParam5) {

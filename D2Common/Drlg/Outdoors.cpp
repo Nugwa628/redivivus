@@ -1198,12 +1198,7 @@ static void DRLGOUTDOOR_CreateOutdoorRoomExGrid(D2DrlgLevelStrc * pLevel) {
         do {
           floorFlags = DrlgGrid::GetGridFlags(&pOutdoorsData->sGridLink, nGridX, gridY);
           dwOutdoorFlags = DrlgGrid::GetGridFlags(&pOutdoorsData->sGridOutdoor, nGridX, gridY);
-          if (!(dwOutdoorFlags & 0x200)) {
-            if (!(dwOutdoorFlags & 0x100)) {
-              tileTypeFlags = DrlgGrid::GetGridFlags(&pOutdoorsDataStable->sGridMisc, nGridX, gridY);
-              OutPlace::DRLGOUTROOM_CreateOutdoorRoomEx(pLevel, worldX, worldY, 8, 8, floorFlags, dwOutdoorFlags, tileTypeFlags, outdoorRoomStyle);
-            }
-          } else {
+          if (dwOutdoorFlags & 0x200) {
             tileTypeFlags = DrlgGrid::GetGridFlags(&pOutdoorsDataStable->sGridPreset, nGridX, gridY);
             if (tileTypeFlags) {
               mapCoords.nPosX = worldX;
@@ -1213,6 +1208,11 @@ static void DRLGOUTDOOR_CreateOutdoorRoomExGrid(D2DrlgLevelStrc * pLevel) {
               pDrlgMap = Preset::DRLGPRESET_AllocDrlgMap(pLevel, tileTypeFlags, &mapCoords, &pLevel->sSeed);
               Preset::DRLGPRESET_SetPickedFileInDrlgMap(pDrlgMap, dwOutdoorFlags >> 0x10 & 0xf);
               Preset::BuildArea(pLevel, pDrlgMap, floorFlags, 0);
+            }
+          } else {
+            if (!(dwOutdoorFlags & 0x100)) {
+              tileTypeFlags = DrlgGrid::GetGridFlags(&pOutdoorsDataStable->sGridMisc, nGridX, gridY);
+              OutPlace::DRLGOUTROOM_CreateOutdoorRoomEx(pLevel, worldX, worldY, 8, 8, floorFlags, dwOutdoorFlags, tileTypeFlags, outdoorRoomStyle);
             }
           }
 

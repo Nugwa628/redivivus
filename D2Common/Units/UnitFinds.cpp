@@ -513,16 +513,16 @@ int32_t __stdcall UNITFINDS_FindCullRange(D2UnitFindDataStrc * pUnitFindData) {
 
               pNextUnit = pUnit->pRoomNext;
               nRoomIdxInner = nRoomIdx;
-              if (!pFindData->fpUnitTest) {
-                iVar1 = TestUnit(pUnit, pFindData->pUnitFindArg);
-              } else {
+              if (pFindData->fpUnitTest) {
                 /* FARPROC lpfn for IsBadCodePtr */ bBadPtr = IsBadCodePtr((FARPROC)pFindData->fpUnitTest);
-                if (bBadPtr) {
+                if (!bBadPtr) {
+                  iVar1 = pFindData->fpUnitTest(pUnit, pFindData->pUnitFindArg);
+                } else {
                   Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int)Fog::Src::ErrorManager::GetInstructionPointer(), 0x13e);
                   exit(-1);
                 }
-
-                iVar1 = pFindData->fpUnitTest(pUnit, pFindData->pUnitFindArg);
+              } else {
+                iVar1 = TestUnit(pUnit, pFindData->pUnitFindArg);
               }
 
               nRoomIdx = nRoomIdxInner;

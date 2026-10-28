@@ -91,10 +91,11 @@ BOOL __stdcall ANIMDATA_CompareNames(uint32_t * pdwName1, uint32_t * pdwName2) {
         exit(-1);
       }
 
-      if (*pdwName1 == *pdwName2) {
+      if (*pdwName1 != *pdwName2) {
+        return 0;
+      } else {
         return (uint32_t)(pdwName1[1] == pdwName2[1]);
       }
-      return 0;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd9);
       exit(-1);

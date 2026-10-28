@@ -388,12 +388,12 @@ uint32_t __stdcall PATH_RecalculatePath(D2UnitStrc * pUnit, int32_t nParam) {
 
     int nPathType = pDynamicPath->ePathType;
     if (nPathType == 2 || nPathType == 0xd || nPathType == 0xf) {
-      if (!nParam) {
+      if (nParam) {
+        pDynamicPath->ePathType = 0xd;
+      } else {
         pDynamicPath->ePathType = 2;
         pDynamicPath->nTargetX = pDynamicPath->nSavedTargetX;
         pDynamicPath->nTargetY = pDynamicPath->nSavedTargetY;
-      } else {
-        pDynamicPath->ePathType = 0xd;
       }
 
       bPathCalcOk = DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
