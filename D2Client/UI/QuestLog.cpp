@@ -749,7 +749,7 @@ static int32_t __stdcall QUESTLOG_HitTestActTab(uint32_t nY, uint32_t nX) {
 void __stdcall QUESTLOG_AcknowledgeNewQuests() {
     D2BitBufferStrc* pBitBuffer;
     int nIndex = 0;
-    if (0 >= gQuestLog.nQuestLogQuestCount) {
+    if (0 >= (int)gQuestLog.nQuestLogQuestCount) {
       return;
     }
 
