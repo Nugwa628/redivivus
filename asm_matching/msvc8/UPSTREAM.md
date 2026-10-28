@@ -28,7 +28,11 @@ ASYNCDATA_GetReadSize (0040aa40) matches once it is put back.
 **If/else branches in the original's order** (`fix_ifelse.py`). VC8 lays an
 if/else out in source order, the then-branch falling through; where the
 original falls through into what the tree has as the else branch, the
-branches are swapped and the condition negated (DumpLog, 004082e0).
+branches are swapped and the condition negated (DumpLog, 004082e0). With
+the branches the other way round the layouts often do not align, so every
+`if (!x) {A} else {B}` of one operand is also tried as `if (x) {B} else {A}`
+and kept where its function comes out more similar: Blizzard tests the
+pointer first and handles its absence after.
 
 **`static` for file-local functions the original passes arguments in
 registers** (`fix_static.py`). VC8 gives a static function whose every call
@@ -168,7 +172,8 @@ from functions the tree inlines them into.
 database types `void` whose original loads EAX with a constant before it
 returns (`mov eax, 1` ahead of the epilogue:
 NET_SID_CLIENT_Send_0x3D_CreateAccount2, 0051a740) returned that value; where
-it is one constant on every path the fixer restores it. Functions that return
+it is one constant on every path the fixer restores it. A setter whose EAX holds the
+same argument at every return (AUTOMAP_SetFade) returns that parameter. Functions that return
 different values on different paths are left for the database: which `return`
 gets which value is the signature's and the body's to say. The ones an earlier
 version of the fixer retyped with one value were set by hand from EAX at each

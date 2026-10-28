@@ -21,7 +21,10 @@ and the conditional jump or set after it, aligned with the original's, where
   * against zero, `je`/`jne` where the original has `jbe`/`ja`: an unsigned
     `x <= 0` / `x > 0` that Ghidra prints as `x == 0` / `x != 0`, written
     `(uint32_t)x <= 0` - the same test for every x. The zero may be a
-    register VC8 zeroed for something else (zero_operand).
+    register VC8 zeroed for something else (zero_operand), or the
+    character `'\\0'` Ghidra prints for a byte; the test may be bare -
+    `if (!n)`, `!(!n || ...)`, `} while (n);`, a for loop's guard
+    `for (; n; n--)` (Lane E's P13: Blizzard's `n > 0` on an unsigned n).
   * the same relation with the other signedness (`jl` against `jb`, ...): the
     original compared unsigned where the tree compares signed, or the other
     way round - a variable's type; the operands get a cast to what the
@@ -87,15 +90,19 @@ UNSIGNED_ZERO = {('e', 'be'): 'le0', ('ne', 'a'): 'gt0'}
 SIGN_FLIP = {('l', 'b'): 'unsigned', ('le', 'be'): 'unsigned', ('g', 'a'): 'unsigned', ('ge', 'ae'): 'unsigned',
              ('b', 'l'): 'signed', ('be', 'le'): 'signed', ('a', 'g'): 'signed', ('ae', 'ge'): 'signed'}
 CAST = {'unsigned': '(uint32_t)', 'signed': '(int)'}
-EQ_RIGHT = re.compile(r' (?P<op>==|!=) (?P<k>0[uU]?|0x0[uU]?)(?![\w.])')
-EQ_LEFT = re.compile(r'(?<![\w.)\]])(?P<k>0[uU]?|0x0[uU]?) (?P<op>==|!=) ')
+# Zero, also as the character Ghidra prints for a byte: `c == '\0'`.
+EQ_RIGHT = re.compile(r' (?P<op>==|!=) (?P<k>0[uU]?|0x0[uU]?|\'\\0\')(?![\w.])')
+EQ_LEFT = re.compile(r'(?<![\w.)\]])(?P<k>0[uU]?|0x0[uU]?|\'\\0\') (?P<op>==|!=) ')
 MIRROR = {'<': '>', '<=': '>=', '>': '<', '>=': '<='}
-# A bare truth test - `if (p)`, `!p && ...`, `... || q)` - of a plain operand or a
-# dereference, `*(int*)(p + 0x200)`.
-TRUTH_OPERAND = (r'(?:\*?[A-Za-z_]\w*(?:(?:\.|->)[A-Za-z_]\w*|\[[^\[\]]*\])*'
+# A bare truth test - `if (p)`, `!p && ...`, `... || q)`, `} while (n);`, a
+# for loop's `; n;`, inside parentheses `if (!(!n || ...` - of a plain
+# operand, maybe under an integer cast, or a dereference, `*(int*)(p + 0x200)`.
+INT_CAST = r'\((?:u?int(?:8|16|32)_t|int|char|short|DWORD|WORD|BYTE)\)'
+TRUTH_OPERAND = (r'(?:(?:' + INT_CAST + r')?\*?[A-Za-z_]\w*(?:(?:\.|->)[A-Za-z_]\w*|\[[^\[\]]*\])*'
                  r'|\*\((?:u?int(?:8|16|32)_t|int|char|short|DWORD|WORD|BYTE)\s*\*\)\((?:[^()]|\([^()]*\))*\))')
-BARE_TEST = re.compile(r'(?:(?<=\bif \()|(?<=\bwhile \()|(?<=&& )|(?<=\|\| ))(?P<neg>!?)(?P<x>' + TRUTH_OPERAND +
-                       r')(?=\)(?: \{)?\s*$| &&| \|\||\) &&|\) \|\|)')
+BARE_TEST = re.compile(r'(?:(?<=\bif \()|(?<=\bwhile \()|(?<=&& )|(?<=\|\| )|(?<=\(\()|(?<=!\())(?P<neg>!?)(?P<x>' +
+                       TRUTH_OPERAND + r')(?=\)(?: \{)?\s*$|\);\s*$| &&| \|\||\) &&|\) \|\|)')
+FOR_GUARD = re.compile(r'(?<=\bfor \()[^;()]*; (?P<neg>!?)(?P<x>' + TRUTH_OPERAND + r'); ')
 
 MIRROR_JCC = {'l': 'g', 'g': 'l', 'le': 'ge', 'ge': 'le', 'b': 'a', 'a': 'b', 'be': 'ae', 'ae': 'be'}
 CMP_REG = re.compile(r'^cmp\s+(?P<a>.+?),\s*(?P<b>[^,]+)$')
@@ -400,12 +407,12 @@ def rewrite_zero(line, kind, count):
     if not found and count == 1 and not EQ_RIGHT.search(line) and not EQ_LEFT.search(line):
         # No `== 0` written: a bare test, `x` being `x != 0` and `!x` `x == 0` -
         # which of the two the jump tests depends on the layout, not on kind.
-        bare = list(BARE_TEST.finditer(line))
+        bare = list(BARE_TEST.finditer(line)) + list(FOR_GUARD.finditer(line))
         if len(bare) != 1:
             return None
         m = bare[0]
         test = '%s %s 0' % (wrap(m.group('x'), CAST['unsigned']), '<=' if m.group('neg') else '>')
-        return line[:m.start()] + test + line[m.end():]
+        return line[:m.start('neg')] + test + line[m.end('x'):]
     if len(found) != count:
         return None
     out = line
@@ -413,11 +420,17 @@ def rewrite_zero(line, kind, count):
         if left:
             op_at = m.start() + len(m.group('k')) + 1
             lo, hi = operand_bounds(out, op_at, op_at + 2)
-            out = out[:m.start()] + '%s %s ' % (m.group('k'), MIRROR[new_op]) + wrap(out[m.end():hi], CAST['unsigned']) + out[hi:]
+            out = out[:m.start()] + '%s %s ' % (zero(m), MIRROR[new_op]) + wrap(out[m.end():hi], CAST['unsigned']) + out[hi:]
         else:
             lo, hi = operand_bounds(out, m.start() + 1, m.start() + 3)
-            out = out[:lo] + wrap(out[lo:m.start()], CAST['unsigned']) + ' %s %s' % (new_op, m.group('k')) + out[m.end():]
+            out = out[:lo] + wrap(out[lo:m.start()], CAST['unsigned']) + ' %s %s' % (new_op, zero(m)) + out[m.end():]
     return out
+
+
+def zero(m):
+    """The zero of an EQ_RIGHT/EQ_LEFT match as the unsigned comparison
+    writes it: a number, not the character '\\0'."""
+    return '0' if m.group('k').startswith("'") else m.group('k')
 
 
 def rewrite_sign(line, kind, k, count):
