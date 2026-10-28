@@ -78,7 +78,6 @@ typedef void (__fastcall *pfnMCPGameListEntry)(uint32_t nEntryField0, uint32_t n
 #endif
 
 namespace D2Multi::Launcher {
-
 static void __stdcall CHATDLG_AddMultiLineText(::D2WinTextBox * pTextBox, int32_t bAddBlankLine, char * szText, int32_t nColor) {
     char* pcNextLine;
     char* pcNewlinePos;
@@ -99,10 +98,8 @@ static void __stdcall CHATDLG_AddMultiLineText(::D2WinTextBox * pTextBox, int32_
             if (*pcCur == '\0') {
               break;
             }
-
             pcCur++;
           } while (*pcCur != '\n');
-
           pcNextLine = pcCur;
           pcNewlinePos = 0;
           if (*pcCur == '\n') {
@@ -111,7 +108,6 @@ static void __stdcall CHATDLG_AddMultiLineText(::D2WinTextBox * pTextBox, int32_
             pcNewlinePos = pcCur;
           }
         }
-
         D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(pTextBox, szText, nColor);
         if (bAddBlankLine) {
           D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(pTextBox, "", nColor);
@@ -119,7 +115,6 @@ static void __stdcall CHATDLG_AddMultiLineText(::D2WinTextBox * pTextBox, int32_
         if (pcNewlinePos) {
           *pcNewlinePos = '\n';
         }
-
         szText = pcNextLine;
         if (*pcNextLine == '\0') {
           return;
@@ -127,9 +122,7 @@ static void __stdcall CHATDLG_AddMultiLineText(::D2WinTextBox * pTextBox, int32_
       } while (true);
     }
 }
-
 } // namespace D2Multi::Launcher
-
 namespace D2Multi::ChatDlg {
 
 static char gaChatDlgHistoryBuffer_1__0_[10][256] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; D2_STATIC_GUARD(gaChatDlgHistoryBuffer_1__0_, "D2Multi::ChatDlg::gaChatDlgHistoryBuffer_1__0_");
@@ -531,7 +524,6 @@ BOOL __stdcall CHATDLG_DetectCDKeyInString(char * szText) {
         if (cCur == '-' || cCur == ' ') {
           goto check_key_complete;
         }
-
         nCharsCollected = 0;
       }
 
@@ -1594,17 +1586,7 @@ void __fastcall CHATDLG_HandleChatListClick(int32_t nStartRank, int32_t nRankCou
 
 
       for (int i = 0; i < 0x100; i++) wszNamePart[i] = 0;
-
-
-
-
-
-
       for (int i = 0; i < 0x100; i++) wszEmptyMsg[i] = 0;
-
-
-
-
 
       OOGUtilities::OOGUTIL_GetProfileCharacterName(sScratch);
       D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszNamePart, "Player \'%s\' is not on the ladder.", 0x100);
@@ -1905,9 +1887,7 @@ uint32_t __fastcall CHATDLG_ReadUserProfile(char * szAccount, char * szSex, char
 }
 
 } // namespace D2Multi::ChatDlg
-
 namespace D2Multi::OOGUtilities {
-
 // Handles the /reply command for out-of-game chat. Parses the reply target from gszOogReplyCommandBuffer, validates token count is exactly 2 (command + message), and formats a whisper message ("/w *target message") to send via the network interface. Shows error messages if no reply target exists or if command syntax is incorrect.
 static uint32_t OOGUTIL_HandleReplyCommand(char * szText1, char * szText2) {
     int nTokenCount;
@@ -1924,18 +1904,11 @@ static uint32_t OOGUTIL_HandleReplyCommand(char * szText1, char * szText2) {
     if (!(!nCmdCmp && (szText2[(int)pcScan - (int)(szText1 + 1)] == ' ' || szText2[(int)pcScan - (int)(szText1 + 1)] == '\0'))) {
       return 0;
     }
-
     pcScan = gszOogReplyCommandBuffer;
     char* pcEnd = pcScan + strlen(pcScan);
     pcScan = pcEnd + 1;
     if (pcEnd == gszOogReplyCommandBuffer) {
-
       for (int i = 0; i < 0x100; i++) wszOutputBuffer[i] = 0;
-
-
-
-
-
       sprintf(szMessageBuffer, "Nobody to reply to!");
     } else {
       BOOL BVar1;
@@ -1946,7 +1919,6 @@ static uint32_t OOGUTIL_HandleReplyCommand(char * szText1, char * szText2) {
         pcScan[(int)(szTokenBuffer - (int)szText2)] = cVar1;
         pcScan++;
       } while (cVar1 != '\0');
-
       szDelimiter[0] = ' ';
       szDelimiter[1] = '\0';
       pcScan = strtok(szTokenBuffer, szDelimiter);
@@ -1960,32 +1932,24 @@ static uint32_t OOGUTIL_HandleReplyCommand(char * szText1, char * szText2) {
             ChatDlg::UIMENU_DrawTitleOnCenterSmaller(pwszErrorMsg, OOG::OOGUTIL_DrawCallback_SetModeAndClearMsgLoop);
             return 1;
           }
-
           sprintf(szMessageBuffer, "/w *%s %s", gszOogReplyCommandBuffer, szText2 + ((int)pcScan - (int)szTokenBuffer));
           pNetworkUnknown->pfnSendChatCommand((uint8_t*)szMessageBuffer);
           return 1;
         }
-
         pcScan = strtok(nullptr, szDelimiter);
       }
-
       Fog::File::CONTAINER_InitializeBuffer(wszOutputBuffer, 2, 0x100, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
       sprintf(szMessageBuffer, "Correct usage is: %s (message)", szText1);
     }
-
     D2Lang::UTF8_ConvertToWideChar(wszOutputBuffer, szMessageBuffer, 0x100);
     if (!gpChatMessagesTextBox) {
       return 1;
     }
-
     D2Win::Src::D2WinTextBox::SetText(gpChatMessagesTextBox, wszOutputBuffer, 1, false, 1);
     return 1;
 }
-
 } // namespace D2Multi::OOGUtilities
-
 namespace D2Multi::ChatDlg {
-
 // Registered through MCPCONNECT_SetMessageCallback, so its ABI is fixed by the dispatch at
 // 0044b13d: 'call eax' with exactly ONE push (0044b139), ECX = byte [pBytes+1] and
 // EDX = nSize-2. That is __fastcall(ECX, EDX, one stack dword), which this function's own
@@ -2045,9 +2009,7 @@ BOOL __stdcall CHATDLG_OnPressLadderClassicHardcore(D2ControlMsg * pControlMsg) 
 }
 
 } // namespace D2Multi::ChatDlg
-
 namespace D2Multi::OOGUtilities {
-
 void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
     char* pcVar1;
     bool bCmdResult;
@@ -2067,18 +2029,15 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
     if (nHandled) {
       return;
     }
-
     nHandled = OOGUTIL_HandleReplyCommand("/reply", szText);
     if (nHandled) {
       return;
     }
-
     BOOL nResult;
     nResult = ChatDlg::CHATDLG_HandleNotifyCommand("/d2notify", szText);
     if (nResult) {
       return;
     }
-
     int32_t nCmdMatch;
     nCmdMatch = ChatDlg::someStrCompare(szText, "/ignorepersist");
     if (!nCmdMatch) {
@@ -2095,12 +2054,10 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
         ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
         return;
       }
-
       pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba1);
       ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
       return;
     }
-
     nCmdMatch = ChatDlg::someStrCompare(szText, "/ignore ");
     if (!nCmdMatch || (nCmdMatch = ChatDlg::someStrCompare(szText, "/squelch ") , !nCmdMatch)) {
       Fog::File::CONTAINER_InitializeBuffer(wszFormatBuffer, 2, 0x208, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
@@ -2112,7 +2069,6 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
       if (!nCmdMatch) {
         return;
       }
-
       D2Lang::UTF8_ConvertToWideChar(wszNameWide, pcVar1, 0x22);
       ppIgnoreListThis = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
       nCmdMatch = ppIgnoreListThis->_vfptr->AddByPattern(ppIgnoreListThis, pcVar1);
@@ -2121,7 +2077,6 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
         pwszFmtTemplate = D2Lang::StrTable::strtable::GetLocaleString(0x2ba3);
         goto print_ignore_result;
       }
-
       nErrorStrId = 0x2ba4;
     } else {
       nCmdMatch = ChatDlg::someStrCompare(szText, "/unignore ");
@@ -2138,12 +2093,10 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
               ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
               return;
             }
-
             pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba7);
             ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
             return;
           }
-
           nCmdMatch = ChatDlg::someStrCompare(szText, "/unfiltermsg ");
           if (!nCmdMatch) {
             ChatDlg::CHATDLG_ParseCommandArgument(0x104, szText, szArgBuffer);
@@ -2154,19 +2107,16 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
               ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
               return;
             }
-
             pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba9);
             ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
             return;
           }
-
           nCmdMatch = ChatDlg::someStrCompare(szText, "/homechannel ");
           if (!nCmdMatch || (nCmdMatch = ChatDlg::someStrCompare(szText, "/defaultchannel ") , !nCmdMatch) || (nCmdMatch = ChatDlg::someStrCompare(szText, "/home ") , !nCmdMatch)) {
             ChatDlg::CHATDLG_ParseCommandArgument(0x20, szText, szChannelName);
             Storm::Source::SReg::SRegSaveString((uint32_t*)"Diablo II", "Default Channel", 0, szChannelName);
             return;
           }
-
           nCmdMatch = ChatDlg::someStrCompare(szText, "/home");
           if (nCmdMatch) {
             nResult = pNetworkUnknown->pfnIsSocketConnected();
@@ -2174,22 +2124,18 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
               pNetworkUnknown->pfnSendChatCommand((uint8_t*)szText);
               return;
             }
-
             pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x14e7);
             ChatDlg::UIMENU_DrawTitleOnCenterSmaller(pwszMsg, OOG::OOGUTIL_DrawCallback_SetModeAndClearMsgLoop);
             return;
           }
-
           nCmdMatch = Storm::Source::SReg::SRegLoadString("Diablo II", "Default Channel", 0, szChannelName, 0x20);
           if (!nCmdMatch) {
             return;
           }
-
           OOGUTIL_JoinChannelAndDestroyForms(szChannelName);
           return;
         }
       }
-
       Fog::File::CONTAINER_InitializeBuffer(wszFormatBuffer, 2, 0x208, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
       Fog::File::CONTAINER_InitializeBuffer(wszOutputBuffer, 2, 0x208, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
       Fog::File::CONTAINER_InitializeBuffer(wszNameWide, 2, 0x22, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
@@ -2203,10 +2149,8 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
         pwszFmtTemplate = D2Lang::StrTable::strtable::GetLocaleString(0x2ba5);
         goto print_ignore_result;
       }
-
       nErrorStrId = 0x2ba6;
     }
-
     pwszMsg = wszNameWide;
     pwszFmtTemplate = D2Lang::StrTable::strtable::GetLocaleString(nErrorStrId);
     print_ignore_result:
@@ -2214,7 +2158,6 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszOutputBuffer, wszFormatBuffer);
     ChatDlg::CHATDLG_AppendTextToTextBox(wszOutputBuffer, 3);
 }
-
 int __fastcall OOGUTIL_SendChatMessage(char * szText, int32_t bUseChannelPrefix) {
     char* pszSrc;
     uint16_t* wszSubTitle;
@@ -2235,7 +2178,6 @@ int __fastcall OOGUTIL_SendChatMessage(char * szText, int32_t bUseChannelPrefix)
         pszSrc++;
       } while (cFirstChar != '\0');
     }
-
     BOOL nMatch = ChatDlg::CHATDLG_FindSubstringMatch(*(int32_t*)D2IniData_multiplayer->padding_0x3C3, *(int32_t*)(D2IniData_multiplayer->padding_0x3C3 + 4), szText);
     if (nMatch) {
       wszSubTitle = D2Lang::StrTable::strtable::GetLocaleString(0x2b38);
@@ -2246,15 +2188,12 @@ int __fastcall OOGUTIL_SendChatMessage(char * szText, int32_t bUseChannelPrefix)
         nSendResult = CHAT_SendOutOfGameMessage();
         return nSendResult;
       }
-
       wszSubTitle = D2Lang::StrTable::strtable::GetLocaleString(0x2b7b);
       nTitleStrId = 0x2b7a;
     }
-
     uint16_t* wszTitle = D2Lang::StrTable::strtable::GetLocaleString(nTitleStrId);
     ChatDlg::UIMENU_DrawTitleAndSubtitleOnCenterScreen(wszTitle, wszSubTitle);
     gszOogChatInputBuffer[0] = '\0';
     return 0;
 }
-
 } // namespace D2Multi::OOGUtilities

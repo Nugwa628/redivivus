@@ -376,7 +376,6 @@ void __fastcall SKILL_DrawChargeTrail(D2UnitStrc * pUnit, uint32_t nParticleType
           pXpos = &nTrailCount;
           nPerspAngle = 0x60;
           nPrecisionY = D2Common::Units::GetPrecisionY(pUnit);
-
           D2gfx::D2GFX::D2GFX_PerspecitveScalePosition(D2Common::Units::GetPrecisionX(pUnit), nPrecisionY, nPerspAngle, (int*)pXpos, (int*)pYpos, bOrder);
           nPrecisionY = UI::Path::DRAW_GetWorldOffsetX();
           nTrailCount += nPrecisionY;
@@ -643,7 +642,6 @@ BOOL __fastcall Skills_CltDoFunc_Pal_HolyBolt_Melee(D2UnitStrc * pUnit, eD2Skill
       if (pCurrentTarget || (pCurrentTarget = Skills::SKILL_FindClosestTargetWithStats(pUnit, 0, 0, 3, 3, -1, nullptr) , pCurrentTarget != 0)) {
         pSavedTarget = 0;
         nFrameRate = Units::GetYPosFromDynamicPathUnit(pCurrentTarget);
-
         D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pCurrentTarget), nFrameRate, pSavedTarget);
         return 1;
       }

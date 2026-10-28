@@ -715,7 +715,6 @@ void __stdcall QSHackUnlistIP(D2QServerStrc * pQServer, in_addr pIp, char * szFi
     }
 
     uint32_t uVar1 = nLine;
-
     LogManager::LOGMANAGER_TraceToModuleLog("HACK", "[HACKLIST]  IP:%s  QSHackUnlistIP() from FILE:%s  LINE:%d", inet_ntoa(pIp), szFile2, uVar1);
     HACKL_RemoveIpFromHacklist(pQServer, (uint32_t)pIp.S_un, nLine);
 }
@@ -1308,7 +1307,6 @@ D2QServerClientContainerStrc * __fastcall AddClient(D2QServerStrc * pQServer, SO
     pQServer->nConnectedClients++;
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&pQServer->csClientLifecycle);
     SOCKET sock = client->client.socket;
-
     QSERVER_LOG("QSRV", "[QSrvAddClient]  Added client %d %s on socket %d", client->client.nClientToken, inet_ntoa((in_addr)client->client.ipAddress.S_un.S_un_b), sock);
     return client;
 }
@@ -1684,7 +1682,6 @@ void __stdcall BanClient(D2QServerStrc * pQServer, int nClientId, char * szFile,
     _struct_1227 sClientIpAddr = pClientConn->ipAddress.S_un.S_un_b;
     char* szLogFile = szFile;
     int nLogLine = nLine;
-
     LogManager::LOGMANAGER_TraceToModuleLog("HACK", "[HACKLIST]  IP:%s  QSHackList() from FILE:%s  LINE:%d", inet_ntoa((in_addr)sClientIpAddr), szLogFile, nLogLine);
     CloseRemoteConnection(pQServer, nClientId, szFile, nLine);
     BanIpAddress(pQServer, szFile, (uint32_t)d2_bits_of(sClientIpAddr), nLine);
@@ -1711,7 +1708,6 @@ void __stdcall DisconnectAndBanIp(D2QServerStrc * pQServer, uint32_t nIpAddress,
 
     szLogFile = szFile;
     int nLogLine = nLine;
-
     LogManager::LOGMANAGER_TraceToModuleLog("HACK", "[HACKLIST]  IP:%s  QSHackListIP() from FILE:%s  LINE:%d", inet_ntoa((in_addr)nIpAddress), szLogFile, nLogLine);
     BanIpAddress(pQServer, szFile, nIpAddress, nLine);
 }

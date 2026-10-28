@@ -315,13 +315,11 @@ void __fastcall PlaceAct1245OutdoorBorders(D2DrlgLevelStrc * pLevel) {
           if (pCurVertex->nPosX < pNextVertex->nPosX) {
             nCornerPresetId = pCurVertex->nPosX;
           }
-
           nCornerPresetId = park_1c * park_24 / 2 + nCornerPresetId;
           nCurY = pCurVertex->nPosY;
           if (pCurVertex->nPosY >= pNextVertex->nPosY) {
             nCurY = pNextVertex->nPosY;
           }
-
           nCurY = park_1c * park_2c / 2 + nCurY;
           nPresetId = nDx + 2 + nDy * 2;
           Outdoors::SpawnOutdoorLevelPresetEx(park_18, nCornerPresetId, nCurY, gnOutPlaceGridHeightByAct[nPresetId * 2], -1, 0);
@@ -364,7 +362,6 @@ void __fastcall PlaceAct1245OutdoorBorders(D2DrlgLevelStrc * pLevel) {
           } else if (0 < nCurY) {
             nCurY += 2;
           }
-
           nCurY += nNextDy * 2;
         } else {
           if (nDx < 0) {
@@ -379,11 +376,9 @@ void __fastcall PlaceAct1245OutdoorBorders(D2DrlgLevelStrc * pLevel) {
             if (0 < nNextDx) {
               nCurY = nNextDx + 2;
             }
-
             nCurY += nNextDy;
           }
         }
-
         nCornerPresetId = gaOutPlaceAdjacentRoadIndex[nCornerPresetId + nCurY * 9 + nDy + 0x28];
         if (nCornerPresetId != -1) {
           if (!((int)nRoadTypeB < 4)) {
@@ -391,7 +386,6 @@ void __fastcall PlaceAct1245OutdoorBorders(D2DrlgLevelStrc * pLevel) {
           } else {
             nCornerPresetId = gnOutdoorsGridWidthByLevel[nRoadTypeB + nCornerPresetId * 4 + 1];
           }
-
           spawn_vertex_preset:
           if (nCornerPresetId == 0x13) {
             if (pCurVertex->nDirection == 1) {

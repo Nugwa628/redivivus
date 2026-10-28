@@ -329,7 +329,6 @@ void __fastcall PLRSKILLS_StateSetFn05_ChangeClass(D2UnitStrc * pUnit, eD2States
     int32_t nDir = 1;
     int32_t nYPos = Units::GetYPosFromDynamicPathUnit(pUnit);
     int nTargetY = nYPos + 10;
-
     D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pDynamicPath, Units::GetXPosFromDynamicPathUnit(pUnit), nTargetY, nDir);
 }
 

@@ -3671,7 +3671,6 @@ int __stdcall SFileCloseFile(D2MPQFileStrc * pMPQFile) {
 
 // @blizzard SFileOpenFile (SFILE.CPP)
 int32_t __stdcall SFileOpenFile(char * szFilename, D2MPQFileStrc * * ppFile) {
-
     int nResult = SFileOpenFileEx(nullptr, szFilename, SFILE_GetOpenFlags(), (void**)ppFile);
     return nResult;
 }

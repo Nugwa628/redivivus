@@ -49,14 +49,11 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2DialogStrc) == 0xb10, "D2_NEW(D2D
 #define RECON_FPTD_fpDialogFunc
 typedef int (__stdcall *fpDialogFunc)();
 #endif
-
 namespace D2Client::UI::ui {
-
 static void UI_ScrollNpcMenuList(int32_t nParam1, D2DialogStrc * pDialog) {
     if (1 >= pDialog->nClickableCount) {
       return;
     }
-
     int iSelectedIndex = pDialog->nSelectedLine;
     do {
       iSelectedIndex += nParam1;
@@ -68,17 +65,14 @@ static void UI_ScrollNpcMenuList(int32_t nParam1, D2DialogStrc * pDialog) {
         }
       }
     } while (!pDialog->aStringData[iSelectedIndex].nCallbackParam);
-
     Sound::SOUND_PlaySound(SOUND_CURSOR_PASS, nullptr, 0, 0, 0);
     pDialog->nSelectedLine = iSelectedIndex;
 }
-
 static int32_t DIALOG_HandleMouseUpEvent(D2DialogStrc * pDialog, D2UIMouseMsgStrc * pMsg) {
     int nEntryY;
     if (!pDialog) {
       return -1;
     }
-
     int32_t uMouseY = (int32_t)pMsg->uLParam.sMousePos.nMouseY;
     uint32_t uVar1 = (uint32_t)pMsg->uLParam.sMousePos.nMouseX;
     int nItemIndex = 0;
@@ -86,7 +80,6 @@ static int32_t DIALOG_HandleMouseUpEvent(D2DialogStrc * pDialog, D2UIMouseMsgStr
     if (0 >= pDialog->nSubCounter) {
       return -1;
     }
-
     int32_t* pEntry = &pDialog->aStringData[0].nYPos;
     do {
       if (pEntry[7] == 1) {
@@ -98,22 +91,18 @@ static int32_t DIALOG_HandleMouseUpEvent(D2DialogStrc * pDialog, D2UIMouseMsgStr
           }
         }
       }
-
       nScrollOffset += *pEntry;
       nItemIndex++;
       pEntry += 0x44;
     } while (nItemIndex < pDialog->nSubCounter);
-
     return -1;
 }
-
 static int __stdcall DIALOG_HandleMouseDownEvent(D2DialogStrc * pDialog, D2UIMouseMsgStrc * pMsg) {
     int32_t nErrorLine;
     if (!pDialog) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe1);
       exit(-1);
     }
-
     int nPrevHighlight = pDialog->nSelectedLine;
     nErrorLine = DIALOG_HandleMouseUpEvent(pDialog, pMsg);
     pDialog->nSelectedLine = nErrorLine;
@@ -121,11 +110,9 @@ static int __stdcall DIALOG_HandleMouseDownEvent(D2DialogStrc * pDialog, D2UIMou
     if (!(nErrorLine != nPrevHighlight && nErrorLine != -1)) {
       return 0;
     }
-
     Sound::SOUND_PlaySound(SOUND_CURSOR_PASS, nullptr, 0, 0, 0);
     return 1;
 }
-
 } // namespace D2Client::UI::ui
 
 namespace D2Client::UI::Dialog {
@@ -310,7 +297,6 @@ void __stdcall INPUT_DialogMouseDown(D2UIMouseMsgStrc * pMsg) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1aa);
             exit(-1);
           }
-
           pDialog->fpDialogFunc1();
         }
       }
@@ -675,10 +661,8 @@ void __stdcall DIALOG_CleanupSystem() {
     if (gnDialogStructAllocCount) {
       HWND hWnd;
       nHandlerCount = 0xe;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUIDialogFlagInit, nHandlerCount);
       nHandlerCount = 1;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitDialogMouseWheel, nHandlerCount);
       gnDialogCounter--;
       pDialogNode = gpDialogActual;
@@ -794,10 +778,8 @@ D2DialogStrc * __fastcall AllocDialogStrcWithBackground(int32_t nX, int32_t nY, 
       gnDialogStructAllocCount = 1;
       DIALOG_RegisterHandler();
       nHandler = 0xe;
-
       _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUIDialogFlagInit, nHandler);
       nHandler = 1;
-
       _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitDialogMouseWheel, nHandler);
       gnDialogCounter++;
       if (gnDialogCounter_b == 1) {
@@ -858,7 +840,6 @@ D2DialogStrc * __fastcall AllocDialogStrc(int32_t nX, int32_t nY, fpDialogFunc f
     HWND hWnd;
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUIDialogFlagInit, nCount);
     nCount = 1;
-
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitDialogMouseWheel, nCount);
     gnDialogCounter++;
     if (gnDialogCounter_b != 1) {
@@ -881,10 +862,8 @@ void __stdcall FreeDialogStrc() {
       HWND hWnd;
       ui::UI_RegisterAutoMapEventHandlers(1);
       nHandlerCount = 0xe;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUIDialogFlagInit, nHandlerCount);
       nHandlerCount = 1;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitDialogMouseWheel, nHandlerCount);
       Inv::INV_SetInventoryActive(1);
       GAME::Select::SELECT_SetExclusionRect(nullptr);
@@ -947,14 +926,12 @@ void __fastcall DIALOG_DrawBackground(D2DialogStrc * pDialog) {
       sGfxData.pDC6 = pDialog->pBackgroundDC6;
       D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, sBgRect.left, nBottom, -1, DRAW_SOLID, nullptr);
     }
-
     for (pSub = pDialog->pDialogSub; pSub; pSub = pSub->pNext) {
       self = pSub->pWidget;
       if (self) {
         self->pVtable->Draw(self);
       }
     }
-
     nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(1);
     nYAccum = 0;
     nStringIdx = 0;
@@ -977,14 +954,12 @@ void __fastcall DIALOG_DrawBackground(D2DialogStrc * pDialog) {
             gpDialogBackgroundDC6++;
           }
         }
-
         D2Win::Src::D2WinFont::DRAW_text((uint16_t*)(piStringData - 0x40), nBottom, nColor_lcl, nFont, 0);
         nYAccum += piStringData[-4];
         nStringIdx++;
         piStringData += 0x44;
       } while (nStringIdx < pDialog->nSubCounter);
     }
-
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nPrevFont);
     return;
 }
@@ -1139,7 +1114,6 @@ void __fastcall DIALOG_RecalculateLayout(D2DialogStrc * pDialog) {
           DIALOG_CenterStringLine(pDialog, iVar1);
           iVar1++;
         } while (iVar1 < pDialog->nSubCounter);
-
         return;
       }
     }

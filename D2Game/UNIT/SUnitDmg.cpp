@@ -545,7 +545,6 @@ static void __stdcall DAMAGE_ApplyFreeze(D2UnitStrc * pUnit, int32_t nParam, D2U
       }
 
       pVictimCopy = pUnit2;
-
       nCheckResult = D2Common::Monsters::MONSTERS::UnitIsMarkedBoss(D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetLine(nMonStatsId), pVictimCopy);
       if (nCheckResult || (nCheckResult = Monsters::CheckMonsterType(pUnit2, 8) , nCheckResult != 0)) {
         DAMAGE_ApplyCold(pUnit, nParam, pUnit2);
@@ -678,7 +677,6 @@ uint32_t __fastcall DAMAGE_CalculatePhysicalDamage(D2UnitStrc * pUnit, int32_t n
       if (!nParam1) {
         goto apply_percent_and_roll;
       }
-
       nAttrBonus = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_strength, 0);
     }
 
@@ -2068,7 +2066,6 @@ void __fastcall SERVER_KillMonster(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Un
     GAME::Event::Dispatch::Monster::SetCurrentSkill(pUnit, Death, &pMonsterKill);
     if (pAttacker) {
       nAttackerYPos = D2Client::Units::GetYPosFromDynamicPathUnit(pAttacker);
-
       nDirection = D2Common::Units::GetDirectionToCoords(pUnit, D2Client::Units::GetXPosFromDynamicPathUnit(pAttacker), nAttackerYPos);
       *(uint8_t*)(char*)&nDirection = (uint8_t)nDirection;
     } else {
@@ -2906,11 +2903,8 @@ void __fastcall DAMAGE_CalculateAndApplyDamage(::SGAMEDATA * pGame, D2UnitStrc *
 
     DAMAGE_AddDamageListEntry((int32_t)pGame, &pDamage->dwHitFlags, (int*)pUnit, (int*)pVictim);
 }
-
 } // namespace D2Game::UNIT::SUnitDmg
-
 namespace D2Common::Unit::SUnitDmg {
-
 // Rolls a unit's passive defensive avoidance against an incoming attack. For players in Run/Walk mode (or matching monster mode) rolls passive_evade; otherwise checks dodge (passive_dodge) when nParam==0 or avoid (passive_avoid) when nParam!=0, plus a weapon-class-0xD parry/block path keyed on DAMAGE_GetSkillDamageBonus. Uses the unit RNG seed (advances pUnit->sSeed). Returns a result bitcode: 0x10 (block/parry), 8 (evade), 4 (dodge), 2 (avoid), or 0 (none). __fastcall with pUnit in ESI, attacker pUnit2 in EDI.
 static uint32_t __stdcall DAMAGE_CheckDefenseEvasion(int32_t nParam, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     int32_t nParryBonus;
@@ -2936,7 +2930,6 @@ static uint32_t __stdcall DAMAGE_CheckDefenseEvasion(int32_t nParam, D2UnitStrc 
           if (nParam < 1) {
             return 0;
           }
-
           dwSeedLow = pUnit->sSeed.nSeedLow;
           roll_evade:
           DVar1 = D2_SEED_NEXT(pUnit->sSeed);
@@ -2951,11 +2944,9 @@ static uint32_t __stdcall DAMAGE_CheckDefenseEvasion(int32_t nParam, D2UnitStrc 
           if (nParam > nAvoidChance) {
             return nRandRoll;
           }
-
           nRandRoll = nWeaponClass2;
           return nRandRoll;
         }
-
         nParryBonus = D2Game::UNIT::SUnitDmg::DAMAGE_GetSkillDamageBonus(pUnit);
         if (0 < nParryBonus) {
           COMPOSIT::Composit::COMPOSIT_GetWeaponClassWithTransform(pUnit, pUnit->pInventory, &nWeaponClass2, -1, 1);
@@ -2972,7 +2963,6 @@ static uint32_t __stdcall DAMAGE_CheckDefenseEvasion(int32_t nParam, D2UnitStrc 
             }
           }
         }
-
         goto roll_dodge_or_avoid;
       }
       if (eAnimMode == eD2PlayerAnimMode_ns::Skill3 || eAnimMode == Walk) {
@@ -2980,12 +2970,10 @@ static uint32_t __stdcall DAMAGE_CheckDefenseEvasion(int32_t nParam, D2UnitStrc 
         if (nParam < 1) {
           return 0;
         }
-
         dwSeedLow = pUnit->sSeed.nSeedLow;
         goto roll_evade;
       }
     }
-
     nParryBonus = D2Game::UNIT::SUnitDmg::DAMAGE_GetSkillDamageBonus(pUnit);
     if (0 < nParryBonus) {
       COMPOSIT::Composit::COMPOSIT_GetWeaponClassWithTransform(pUnit, pUnit->pInventory, &nWeaponClass3, -1, 1);
@@ -3002,7 +2990,6 @@ static uint32_t __stdcall DAMAGE_CheckDefenseEvasion(int32_t nParam, D2UnitStrc 
         }
       }
     }
-
     roll_dodge_or_avoid:
     if (!nParam) {
       nDodgeChance = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_passive_dodge, 0);
@@ -3033,9 +3020,7 @@ static uint32_t __stdcall DAMAGE_CheckDefenseEvasion(int32_t nParam, D2UnitStrc 
     }
     return 0;
 }
-
 } // namespace D2Common::Unit::SUnitDmg
-
 namespace D2Game::UNIT::SUnitDmg {
 
 // Returns the highest weapon-type-conditional skill damage bonus (stat 0x15C) applicable to the unit's currently equipped weapons (left and right arm slots). Iterates all bonus entries; an entry with ITEMTYPE_None1 matches unconditionally. Returns 0 if unit is null or no matching bonus is found.

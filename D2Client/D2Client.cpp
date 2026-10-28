@@ -1628,7 +1628,6 @@ void __fastcall TRADE_SendGoldToPartner(uint32_t nParam) {
       D2UnitStrc* pUnit;
       nLayer = 0;
       eUnitStat = UNITSTAT_gold;
-
       gnTradePlayerGoldAmount = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(UNIT::Player::GetPlayerUnit_UI(), eUnitStat, nLayer);
       if (nParam >= gnTradePlayerGoldAmount) {
         GAME::Msg::NET_D2GS_CLIENT_Send_SHORT_SHORT_SHORT(0x4f, 8, (int16_t)(gnTradePlayerGoldAmount >> 0x10), (int16_t)gnTradePlayerGoldAmount);
@@ -1807,7 +1806,6 @@ void __stdcall TEXT_HandleMouseMove() {
     int32_t nDialogX = 0;
     uint32_t uShadow = 0;
     uint32_t uTextColor = 0xf;
-
     UI::Dialog::AddStringData(UI::Dialog::gpHoradricCubeDialog, D2Lang::StrTable::strtable::GetLocaleString(0xd19), uTextColor, uShadow, nDialogX, uAlignment, uTransFlag, nDialogY);
     gnPlayerCashDisplay = 3;
     if (!nHoradricCubeUIState) {

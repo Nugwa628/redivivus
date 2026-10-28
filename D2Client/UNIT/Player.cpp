@@ -99,9 +99,7 @@ typedef void (__fastcall *fpStatListExChangeCb)(::SGAMEDATA * pGame, D2UnitStrc 
 #define RECON_FPTD_fnUnitIterCallback
 typedef void (__fastcall *fnUnitIterCallback)(void * pUnit);
 #endif
-
 namespace D2Client::Engine {
-
 static void __stdcall CLIENT_SetAnimModeAndMoveToCurrentPos(eD2PlayerAnimMode nAnimMode, BOOL bMovePlayerUnit, D2UnitStrc * pUnit) {
     int nX;
     int nY;
@@ -109,12 +107,10 @@ static void __stdcall CLIENT_SetAnimModeAndMoveToCurrentPos(eD2PlayerAnimMode nA
     if (!bMovePlayerUnit) {
       return;
     }
-
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
     if (pUnit != pPlayerUnit_lcl) {
       return;
     }
-
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pUnit->pPath.pStaticPath->nPosX;
@@ -123,7 +119,6 @@ static void __stdcall CLIENT_SetAnimModeAndMoveToCurrentPos(eD2PlayerAnimMode nA
     } else {
       nX = 0;
     }
-
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY = pUnit->pPath.pStaticPath->nPosY;
@@ -135,10 +130,8 @@ static void __stdcall CLIENT_SetAnimModeAndMoveToCurrentPos(eD2PlayerAnimMode nA
     if (!(nX && nY)) {
       return;
     }
-
     UNIT::Path::PATH_MoveUnitToPoint(pUnit, (uint16_t)nX, nY, 0, 0, 0);
 }
-
 } // namespace D2Client::Engine
 
 namespace D2Client::UNIT::Player {
@@ -604,7 +597,6 @@ static void CLIENT_ResolvePlayerCollision(D2UnitStrc * pUnit) {
     }
 
     int32_t iVar1 = 0xc01;
-
     eCollisionFlags eCollideResult = D2Common::Collision::CheckCollision_BlockAll_Type(pRoom, sTilePos.x, sTilePos.y, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), iVar1);
     if (eCollideResult == COLLIDE_NONE) {
       return;
@@ -612,7 +604,6 @@ static void CLIENT_ResolvePlayerCollision(D2UnitStrc * pUnit) {
 
     BOOL bAllowNeighboorRooms = 1;
     int32_t eCollisionFlag = 0xc01;
-
     D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pRoom, &sTilePos, D2Common::Units::GetUnitSizeX(pUnit), eCollisionFlag, bAllowNeighboorRooms);
     CUnit::CLIENT_TeleportUnitToPosition(pUnit, sTilePos.x, sTilePos.y, 0);
 }
@@ -1040,7 +1031,6 @@ void __stdcall PLAYER_InteractWithObject(int32_t nParam1, D2UnderMouseStrc * pUn
     bool bCanInteract = true;
     if (pObject->nClassId == 0x3b) {
       eState = STATE_just_portaled;
-
       eCurseState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(GetPlayerUnit_UI(), eState);
       if (eCurseState != STATE_none) {
         bCanInteract = false;
@@ -1182,7 +1172,6 @@ static void PLAYER_ExecuteSkillWithAura(int32_t nTargetGUID, eD2UnitType eTarget
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x549);
               exit(-1);
             }
-
             nSrcXPos = Units::GetXPosFromDynamicPathUnit(pUnderMouse->pPlayer);
             nCurDist = Units::GetYPosFromDynamicPathUnit(pUnderMouse->pPlayer);
             nDstX = Units::GetXPosFromDynamicPathUnit(pUnderMouse->pTarget);
@@ -1408,7 +1397,6 @@ static void __stdcall PLAYER_InteractWithUnitByType(eD2UnitType eTargetUnitType,
           Engine::StoreLastSkillHit(0x13, pUnderMouse->pPlayer, eTargetUnitType, nTargetGUID);
           return;
         }
-
         UnitMode::UNITMODE_ExecuteSkillAction(UNITMODEACTION_ITEM_INTERACT, pUnderMouse->pPlayer, eTargetUnitType, nTargetGUID, 0);
         break;
         default:
@@ -1439,7 +1427,6 @@ static void __stdcall PLAYER_InteractWithUnitByType(eD2UnitType eTargetUnitType,
         if (!pMonStatsTxt || (nInteractRange = 2 , !pMonStatsTxt->interact)) {
           goto use_default_range;
         }
-
         goto approach_or_interact;
       }
     }
@@ -2243,13 +2230,11 @@ void __fastcall PLAYER_HandlePlayerDeath(D2GSPacketSrv0x74 * pDeathMsg) {
       nPosY = (int16_t)nTmpPos;
       nTmpPos = Units::GetXPosFromDynamicPathUnit(pUnit);
       nPosX = (int16_t)nTmpPos;
-
       BVar2 = D2Common::PATH::Path::PATH_GetCollisionMaskAt(pDynamicPath, pKillerOrCorpse, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY);
       if (!BVar2) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xaba);
         exit(-1);
       }
-
 
       D2Common::PATH::DynamicPath::SetDirectionAndNewDirection(pKillerOrCorpse->pPath.pDynamicPath, D2Common::PATH::DynamicPath::GetDirection(pUnit->pPath.pDynamicPath));
     }

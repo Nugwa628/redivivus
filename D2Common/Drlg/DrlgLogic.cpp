@@ -45,7 +45,6 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2RoomCoordListStrc) == 0x30, "D2_N
 
 
 namespace D2Common::Drlg::DrlgGrid {
-
 // Iterates grid cells, builds coord entries for each non-flagged cell.
 static void DRLGLOGIC_PopulateGridCoordIndices(int * pnParam) {
     uint32_t nCellFlags;
@@ -55,7 +54,6 @@ static void DRLGLOGIC_PopulateGridCoordIndices(int * pnParam) {
     if (0 > nHeight) {
       return;
     }
-
     do {
       int nGridX;
       nGridX = 0;
@@ -69,20 +67,15 @@ static void DRLGLOGIC_PopulateGridCoordIndices(int * pnParam) {
             if ((nCellFlags & 0x1e0ff00) == 0x1e00000 || (int)nCellFlags < 0) {
               pnParam[7] |= 0x20000000;
             }
-
             DRLGGRID_FloodFillGridCoords(pnParam, nGridX, nGridY, -1);
           }
-
           nGridX++;
         } while (nGridX <= nWidth);
       }
-
       nGridY++;
     } while (nGridY <= nHeight);
 }
-
 } // namespace D2Common::Drlg::DrlgGrid
-
 namespace D2Common::Drlg::DrlgLogic {
 
 // @sourcefile .\DRLG\DrlgLogic.cpp

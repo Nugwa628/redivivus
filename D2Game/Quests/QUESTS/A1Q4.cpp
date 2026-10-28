@@ -850,7 +850,6 @@ uint8_t __fastcall Q04_SpawnTristramPortal(::SGAMEDATA * pGame, D2QuestDataStrc 
     eD2LevelId eLevel = LEVEL_Tristram;
     nStonesY += 4;
     nStonesX += 4;
-
     bIgnoreSpawnLoc = SKILLS::SkillsServer::SERVER_SpawnPortal(pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nStonesX, nStonesY, eLevel, ppPortalUnitOut, nClassId, bIgnoreSpawnLoc);
     if (!bIgnoreSpawnLoc) {
       return '\0';
@@ -960,7 +959,6 @@ bool __fastcall Q04_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
                          complete and the reward not available and the hero carries the Horadric
                          Scroll: active */ if (pQuestData->nStateFlag == 4 && !bCompleted && !bRewardAwaits) {
         dwItemCode = 0x20736b62;
-
         pFoundItem = ITEMS::Items::Drop::HasQuestItem(UNIT::SUnit::GetGamePointer(pUnit), pUnit, dwItemCode);
         if (pFoundItem) {
           return true;
@@ -1254,7 +1252,6 @@ BOOL __fastcall OBJOP_A1Q4_ActivateInifussTree(D2ObjectOperateFnArg * pOperation
         pGame = pOperation->sArg.pGame;
         GAME::Event::SetEvent(pGame, pOperation->sArg.pVictim, 7, pGame->dwGameFrame + 0x11, 0, 0);
         _bQuestState = 0;
-
         D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(D2Common::Units::UNITS_GetRoom(pOperation->sArg.pVictim), _bQuestState);
         D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_JustCompleted);
         D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_RewardAwaits);
@@ -2448,7 +2445,6 @@ void __fastcall Q04_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
         if (pUnit && pA1Q4SubCast->sSub.bPendingCairnActivation && !pA1Q4SubCast->sSub.bCairnMonsterSaved) {
           nY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
           nX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-
           Q04_SpawnDeckardCainNpc(D2Common::Units::UNITS_GetRoom(pUnit), pQuestArgs->pGame, nX, nY);
           return;
         }

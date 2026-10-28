@@ -1741,7 +1741,6 @@ void __fastcall D3D_RenderSubtileToTexture(D2GroundSubTileStrc * pSubTile) {
         } else {
           Renderer::RENDERER_D3D_CopySurfacePixels(pSubtileNodeBuffer[iVar2 - 1].pSurface, gpD3DSubtileSystemSurface, 0x20);
         }
-
         g_pD3DDevice->lpVtbl->SetTexture(g_pD3DDevice, 0, pSubtileNodeBuffer[iVar2 - 1].pTexture);
         return;
       } else {

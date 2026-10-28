@@ -1446,7 +1446,6 @@ void __stdcall AUTOMAP_Update() {
     if (!pRoom) {
       return;
     }
-
     papRooms = 0;
     nRoomCount = 0;
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &papRooms, (int*)&nRoomCount);
@@ -1458,17 +1457,14 @@ void __stdcall AUTOMAP_Update() {
     if ((uint32_t)nRoomCount <= 0) {
       return;
     }
-
     do {
       eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(papRooms[i]);
       pLevelDefs = D2Common::DATATBLS::LvlTbls::TXT_LevelDefs_GetLine(eLevelId);
       if (nErrorLine == pLevelDefs->Layer) {
         AUTOMAP_RevealRoom(papRooms[i], 0, pAutomapLayer);
       }
-
       i++;
     } while (i < nRoomCount);
-
     return;
 }
 
@@ -2180,10 +2176,6 @@ void __stdcall AUTOMAP_DrawVersion() {
     uint16_t* pZeroFill;
     for (int i = 0; i < 0x64; i++) aWStack_130[i] = 0;
 
-
-
-
-
     Storm::Source::SSTR::SStrPrintf(szVersionUtf8, 100, "v %d.%d%c", 1, 0xe, 'd');
     D2Lang::UTF8_ConvertToWideChar(aWStack_130, szVersionUtf8, 100);
     int32_t nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(aWStack_130);
@@ -2221,14 +2213,7 @@ void __stdcall AUTOMAP_DrawDifficulty() {
 
     uint16_t* pZeroFill;
     for (int i = 0; i < 0x12c; i++) wText[i] = 0;
-
-
-
-
-
-
     int32_t nTextWidth = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(D2Lang::StrTable::strtable::GetLocaleString(nDiffStringId));
-
     int32_t nFormatLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(D2Lang::StrTable::strtable::GetLocaleString(0x1057));
     if (!(nTextWidth + 3 + nFormatLen < 300)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb2a);
@@ -2722,18 +2707,15 @@ static void AUTOMAP_DrawUnitMarker(D2UnitStrc * pUnit) {
       if (!nAutoMapParty) {
         return;
       }
-
       pNameUnit = UNIT::Player::GetPlayerUnit_UI();
       if (pUnit == pNameUnit) {
         return;
       }
-
       pNameUnit = pUnit;
       if (*(uint8_t*)(char*)&uUnitColor.ePlayerMode == nAutoMapColorParty) {
         if (!nAutoMapParty) {
           return;
         }
-
         pPlayerData = D2Common::Units::GetPlayerData(pUnit);
         AUTOMAP_DrawTextCentered(xLocation, yLocation, 2, pPlayerData->szCharName);
         return;
@@ -2798,7 +2780,6 @@ void __stdcall AUTOMAP_DrawPlayersAndParty() {
     int i = 0;
     __frame0.pRoomList = 0;
     __frame0.nRoomCount = 0;
-
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(D2Common::Units::UNITS_GetRoom(pUnit), pppRoomList, pNumRooms);
     int nNumRooms = __frame0.nRoomCount;
     if (0 < __frame0.nRoomCount) {
@@ -2818,7 +2799,6 @@ void __stdcall AUTOMAP_DrawPlayersAndParty() {
 
     for (pRoster = GAME::Roster::GetNextRosterPlayer(pRoster); pRoster; pRoster = GAME::Roster::GetNextRosterPlayer(pRoster)) {
       int32_t nMemberGUID;
-
       pUnit = UNIT::Player::UNITS_FindClientSideUnit(GAME::Roster::GetRosterGUID(pRoster), UNIT_PLAYER);
       if (!pUnit) {
         nMemberPartyId = GAME::Roster::GetRosterPartyId(pRoster);

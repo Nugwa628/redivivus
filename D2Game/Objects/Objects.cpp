@@ -646,7 +646,6 @@ void __fastcall Objects_InitFn01(D2ObjectInitFnArg * pInitArg) {
           *(uint8_t*)(char*)&nShrineTypeArg = 4;
         }
       }
-
       nShrineId = OBJECT_SelectRandomShrineType(pInitArg->pGame, eLevelId, (uint8_t)nShrineTypeArg, pInitArg->pRoom);
     } else {
       int32_t nShrinesCount;
@@ -2353,21 +2352,17 @@ int32_t __fastcall OBJECT_PopulateGridItems(::SGAMEDATA * pGame, D2RoomStrc * pR
 }
 
 } // namespace D2Game::Objects
-
 namespace D2Game::Objects::ArmorWeapon {
-
 // Populates a room region with armor/weapon rack objects of the given nRackType. Uses the game's control seed to pick a rack variant (even/odd), looks up the Objects.txt entry for size, then sweeps the DRLG coordinate space (horizontally for even variant, vertically for odd) calling ROOM_CheckSpawnCollision and CreateUnit at each valid grid position. Aborts with a fatal error if pRoom is null at spawn time.
 void __stdcall Roll(::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2DrlgRoomCoordsStrc * pDrlgCoords, int32_t nRackType) {
     // Static local variables (originally global data)
     static int RackType[4] = { 0x68, 0x69, 0x6a, 0x6b }; D2_STATIC_GUARD(RackType, "D2Game::Objects::ArmorWeapon::Roll::RackType");
     static int RackTypeCount = 0x2; D2_STATIC_GUARD(RackTypeCount, "D2Game::Objects::ArmorWeapon::Roll::RackTypeCount");
-
     BOOL nCollisionResultX;
     D2CoordStrc sSpawnCoord;
     if (nRackType >= RackTypeCount) {
       return;
     }
-
     D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
     D2SeedStrc DVar2 = D2_SEED_NEXT(*pCtrlSeed);
     *pCtrlSeed = DVar2;
@@ -2389,10 +2384,8 @@ void __stdcall Roll(::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2DrlgRoomCoordsStr
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb12);
             exit(-1);
           }
-
           UNIT::SUnit::CreateUnit(UNIT_OBJECT, RackType[nRackType * 2], uVar5, iVar1 + 1, pGame, pRoom, 1, 0, nullptr);
         }
-
         nObjSizeX = pDVar4->SizeX;
       }
     } else {
@@ -2409,10 +2402,8 @@ void __stdcall Roll(::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2DrlgRoomCoordsStr
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb25);
               exit(-1);
             }
-
             UNIT::SUnit::CreateUnit(UNIT_OBJECT, RackType[iVar3], iVar6, nCurY, pGame, pRoom, 1, 0, nullptr);
           }
-
           nObjSizeY = pDVar4->SizeY;
           nCurY += nObjSizeY * 2;
           if (uVar5 <= nCurY) {
@@ -2422,11 +2413,8 @@ void __stdcall Roll(::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2DrlgRoomCoordsStr
       }
     }
 }
-
 } // namespace D2Game::Objects::ArmorWeapon
-
 namespace D2Game::Objects {
-
 // Decides whether and which object-populate sub-function to run for a room. Returns 0 immediately if the room area fails a minimum-density threshold (objRng[2] < objRng[3]*10). Rolls the object-control seed to get a base chance, adjusts a density bonus (+5/+10) based on room fill ratio, and skips if the roll exceeds the density+12 threshold. Collects enabled populate-type indices from dwPopulateMask bits, randomly picks one, then dispatches to the corresponding function pointer from the global populate-function table at 0x731e68, passing &sRoomCoords.
 static int32_t __stdcall OBJECT_RollAndDispatchPopulateFn(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32_t dwPopulateMask, int32_t pObjRng) {
     D2DrlgRoomCoordsStrc sRoomCoords;

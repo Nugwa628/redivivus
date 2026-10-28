@@ -738,7 +738,6 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
     } else {
       __frame0.pDumpData = *(uint8_t**)pDumpHeader;
     }
-
     __frame0.pLogFile = FindOrOpenLogFileSlot(pbVar2, &__frame0.local_160);
     if (__frame0.pLogFile) {
       Storm::Source::SSTR::SStrPrintf(__frame0.szTimePrefix, 0x20, "%02d:%02d:%02d.%03d  ", (uint32_t)*(uint16_t*)(pLogRecord + 0x1c), (uint32_t)*(uint16_t*)(pLogRecord + 0x1e), (uint32_t)*(uint16_t*)(pLogRecord + 0x20), (uint32_t)*(uint16_t*)(pLogRecord + 0x22));
@@ -751,29 +750,24 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
         if ((uint32_t)__frame0.nBytesRemaining <= 0) {
           break;
         }
-
         iVar1 = (int)pbVar2 - (int)__frame0.pDumpData;
         if (!*(int*)(pDumpHeader + 8)) {
           iVar1 = *(int*)pDumpHeader + iVar1;
         }
-
         pLineCursor = __frame0.szTimePrefix;
         if (!nChunkLen) {
           pLineCursor = __frame0.szContPrefix;
         }
-
         pRecordBody = "%s%s%04X:";
         if (!*(int*)(pDumpHeader + 8)) {
           pRecordBody = "%s%s%08X:";
         }
-
         fprintf(__frame0.pLogFile, pRecordBody, pLineCursor, pDumpHeader + 0x14, iVar1);
         __frame0.local_160 = 0;
         nChunkLen = __frame0.nBytesRemaining;
         if (0x10 <= __frame0.nBytesRemaining) {
           nChunkLen = 0x10;
         }
-
         /* UINT_PTR ucb for IsBadReadPtr */ /* void * lp for IsBadReadPtr */ __frame0.szLineBuf[0] = '\0';
         bBadPtr = IsBadReadPtr(pbVar2, nChunkLen);
         if (bBadPtr) {
@@ -788,7 +782,6 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
               if (!(nColumn & 3)) {
                 pRecordBody = " %02X";
               }
-
               Storm::Source::SSTR::SStrPrintf(__frame0.szLineBuf + ((int)pLineCursor - (int)(__frame0.szLineBuf + 1)), 0x100 - ((int)pLineCursor - (int)(__frame0.szLineBuf + 1)), pRecordBody, (uint32_t)pbVar2[nColumn]);
               nColumn++;
             } while (nColumn < nChunkLen);

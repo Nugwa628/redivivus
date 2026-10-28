@@ -4633,7 +4633,6 @@ uint32_t PKWARE_ProcessItemInventory(TDcmpStruct * nParam) {
           if (nRangeCheckResult) {
             return 0x306;
           }
-
           nDecodedValue = (uint32_t)nParam->offs2EB4[nParam->bit_buff & 0xff];
         }
 

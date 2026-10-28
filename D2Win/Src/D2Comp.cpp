@@ -77,7 +77,6 @@ static void * D2COMP_AssertNotNull(void * pValue) {
 static void * __stdcall D2COMP_LoadAndValidateCOFFile(char * szCOFFilePath, uint32_t * pnSize) {
     int32_t nLineNum = 0x3eb;
     char* pszSourceFile = ".\\Src\\D2Comp.cpp";
-
     void* nAddress = Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szCOFFilePath, pnSize, pszSourceFile, nLineNum);
     if (!nAddress) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3ec);
@@ -1913,7 +1912,6 @@ void __stdcall D2COMP_CreateCompositeUnit(uint32_t * pCompUnit, uint32_t nPlayer
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x867);
         exit(-1);
       }
-
       *pCofCacheEntry = 0;
       pCompUnit[0x2e] = (uint32_t)pCofCacheEntry;
       pCompUnit[7] = nPlayerClassId;
@@ -1926,7 +1924,6 @@ void __stdcall D2COMP_CreateCompositeUnit(uint32_t * pCompUnit, uint32_t nPlayer
       } else {
         pCompUnit[9] = 1;
       }
-
       pCompUnit[8] = nAnimMode;
       *pCompUnit |= 1;
       nWeaponClass = *pCompUnit;
@@ -1963,24 +1960,20 @@ void __stdcall D2COMP_CreateCompositeUnit(uint32_t * pCompUnit, uint32_t nPlayer
         if (cCodeByte != -1) {
           *pCodeDst = cCodeByte - 1;
         }
-
         cCodeByte = szText[2];
         pCodeDst[1] = cCodeByte;
         if (cCodeByte != -1) {
           pCodeDst[1] = cCodeByte - 1;
         }
-
         cCodeByte = szText[3];
         pCodeDst[2] = cCodeByte;
         if (cCodeByte != -1) {
           pCodeDst[2] = cCodeByte - 1;
         }
-
         pCodeDst += 4;
         szText += 4;
         nCofResult--;
       } while (nCofResult);
-
       BVar1 = D2COMP_ValidateAndLoadCOFForUnit((D2CharSelCompStrc*)pCompUnit);
       if (!BVar1) {
         return;
@@ -2409,10 +2402,6 @@ void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
     uint16_t* pWCharClear;
     for (int i = 0; i < 0x100; i++) wszTitleText[i] = 0;
 
-
-
-
-
     uint32_t dwGameType = pnParam[7];
     i = nCharClass + 6;
     int32_t nDrawColor = 0;
@@ -2438,12 +2427,7 @@ void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
       }
     } else {
       szTitlePrefix = D2COMP_GetTitlePrefix(dwGameType, (dwFlags >> 5 & 1) * 3 + (dwFlags >> 7 & 1) * 2 + (dwFlags >> 6 & 1), dwFlags >> 0xc & 1);
-
       for (int i = 0; i < 0x100; i++) wszTitlePrefix[i] = 0;
-
-
-
-
 
       D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszTitlePrefix, szTitlePrefix, 0xff);
       for (int i = 0; i < 0x100; i++) wszTitleText[i] = 0;
@@ -2451,12 +2435,7 @@ void __fastcall D2COMP_DrawUnitNameAndTitle(uint32_t * pnParam) {
       D2Lang::Unicode::UNISYS::AppendToBuffer(wszTitleText, (uint16_t*)(pnParam + 0x53));
     }
 
-
     for (int i = 0; i < 0x100; i++) wszTempAppend[i] = 0;
-
-
-
-
 
     nLine = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength((uint16_t*)(pnParam + 0x73));
     if (nLine) {

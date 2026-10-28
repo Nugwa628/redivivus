@@ -177,7 +177,6 @@ int32_t __stdcall NET_D2GS_SERVER_SendPacketToClient(int32_t nMode, int32_t nCli
           nSendResult = Fog::Src::SendPacketByClientId(pQServer, nClientId, pBuffer + 1, pbCompressedSize);
           return nSendResult ? pbCompressedSize : 0;
         }
-
         nSize_00 = pbCompressedEnd + 2;
         pBuffer[0] = (uint8_t)(nSize_00 >> 8) | 0xf0;
         pBuffer[1] = (char)nSize_00;

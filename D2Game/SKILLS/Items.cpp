@@ -174,7 +174,6 @@ eD2Skills __stdcall ITEMMOD_RollStaffModSkills(D2UnitStrc * pUnit, eD2Skills eSk
         dwUnitGUID = D2Client::UNIT::GetGUID(pUnit);
         eUnitType = UNIT_ITEM;
         nStatListFlags = 0x40;
-
         pStatsEx = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(D2Client::UNIT::CUnitEvent::GetMemPool(pUnit), nStatListFlags, (int32_t)pStatsEx, eUnitType, dwUnitGUID);
         D2Common::Stats::StatsEx::STATLIST_AttachStatListToUnit(pUnit, pStatsEx, 1);
         if (pStatsEx) {
@@ -313,7 +312,6 @@ void __stdcall STAFFMOD_RollStaffModSkills(D2UnitStrc * pUnit, int32_t nSkillId,
         eUnitType = UNIT_ITEM;
         nExpireFrame = 0;
         nStatListFlags = 0x40;
-
         pStatsEx = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(D2Client::UNIT::CUnitEvent::GetMemPool(pUnit), nStatListFlags, nExpireFrame, eUnitType, dwUnitGUID);
         D2Common::Stats::StatsEx::STATLIST_AttachStatListToUnit(pUnit, pStatsEx, 1);
         if (pStatsEx) {
@@ -986,7 +984,6 @@ BOOL __stdcall ITEMMOD_GenerateRareAffixes(D2ItemGenContextStrc * pItemGenContex
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x31d);
           exit(-1);
         }
-
         pRolledAffixIdx = ITEMMOD_RollMagicAffixClassic(pUnit, 1, 1, 0, 1, *pPrefixTablePtr, 0);
         if (!(short int)pRolledAffixIdx) {
           bPrefixExhausted = true;

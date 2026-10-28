@@ -127,7 +127,6 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
     int32_t nSrcLine2 = 0x72;
     szSrcFile = ".\\Src\\D2WinPalette.cpp";
     pFileSize = 0;
-
     PALETTEENTRY* pMemoryToFree = (PALETTEENTRY*)Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szText2, pFileSize, szSrcFile, nSrcLine2);
     PALETTEENTRY* pSrcArchive = pMemoryToFree;
     PALETTEENTRY* pDstIndexCounter = MostLikelyCurrentPalletePtr;

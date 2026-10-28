@@ -173,16 +173,12 @@ void __stdcall FreeHireablesList() {
     int nIconCount = sgptDataTable->nTxtPetTypeSize * 5;
     D2HireablesListStrc* pMemoryToFree = gpHireablesList;
     for (int nIconIdx = 0; nIconIdx < nIconCount; nIconIdx++) {
-
-
         if ((&pMemoryToFree->pIcon)[nIconIdx]) {
           Core::Archive::DC6_FreeAndDelete((&pMemoryToFree->pIcon)[nIconIdx]);
           pMemoryToFree = gpHireablesList;
         }
 
-
     }
-
 
     Fog::Memory::FreeServerMemory(nullptr, pMemoryToFree, ".\\UI\\Hireables.cpp", 0xb7, 0);
     gpHireablesList = 0;
@@ -741,7 +737,6 @@ static void __stdcall UI_DrawHirelingNameFromUnit(int32_t nX, int32_t nY, D2Unit
 
     memset(wszName, 0, 0x40);
     size_t nNameMaxChars = 0x20;
-
     D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(wszName, UNIT::CUnit::GetName(pUnit), nNameMaxChars);
     wszName[0x1f] = L'\0';
     DrawHirelingName(nX, nY, 0, wszName);
@@ -809,7 +804,6 @@ static BOOL __stdcall UI_DrawPartyMembersHirelingIcons(int * pnY, int * pnYOffse
             DrawHealthBar(nRosterGUID, 0, *pnX);
             nIconDrawX = *pnY;
             nX = *pnX;
-
             UI_DrawHirelingNameFromString(GAME::Roster::GetRosterName(pRoster), nX, nIconDrawX);
             if (*pnYOffset) {
               *pnY -= *pnYOffset;
@@ -921,7 +915,6 @@ static BOOL __stdcall HIRELING_DrawSummonIcon(D2UnitStrc * pUnit, int32_t * nY, 
     }
     if (nRosterCount == 1 && nSingleFlag) {
       uint32_t nRosterGUID;
-
       DrawHealthBar(GAME::RosterPets::GetRosterPetGUID(pUnit, nSkillId, 0), nSkillId, *nX);
       nRosterCount = nRosterCountSaved;
     }
