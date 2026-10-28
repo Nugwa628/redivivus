@@ -84,7 +84,7 @@ BOOL __stdcall RENDERER_GLIDE_IsPerspectiveMode();
 BOOL __stdcall RENDERER_GLIDE_InitTextureMemory();
 BOOL __stdcall RENDERER_GLIDE_DestroyWindow();
 void __fastcall PlayCutScene(char * szFile, int32_t nResolutionMode, void * fpFrame);
-void Release();
+BOOL Release();
 BOOL __fastcall CreateWindow(HWND hWnd, int32_t nResolutionMode);
 void __fastcall EndCutScene(HWND hWnd, int32_t nResolutionMode, int32_t nWindowState);
 BOOL __fastcall ResizeWindow(HWND hWnd, BOOL bForceResize);

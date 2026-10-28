@@ -2576,9 +2576,9 @@ BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWnd) {
 }
 
 // @sourcefile .\Src\d3dCore.cpp
-void Release() {
+BOOL Release() {
     if (!g_bD3DCoreInitialized) {
-      return;
+      return 1;
     }
 
     RENDERER_D3D_ReleaseSmackerBuffer();
@@ -2599,6 +2599,7 @@ void Release() {
     }
 
     g_bD3DCoreInitialized = 0;
+    return 1;
 }
 
 BOOL __fastcall CreateWindow(HWND hWnd, int nResolutionMode) {
