@@ -267,8 +267,7 @@ BOOL __fastcall Q10_OnScrollPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void
       return 0;
     }
 
-    int32_t* ppScrollCount = &pQuestData->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount;
-    (*ppScrollCount)++;
+    pQuestData->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount++;
     return 0;
 }
 
@@ -297,8 +296,7 @@ BOOL __fastcall Q10_OnStaffOrViperPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       return 0;
     }
 
-    int32_t* ppDropCounter = &pQuestItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount;
-    (*ppDropCounter)++;
+    pQuestItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount++;
     return 0;
 }
 
@@ -316,8 +314,7 @@ BOOL __fastcall Q10_OnHoradricCubePickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       return 0;
     }
 
-    int32_t* ppCubeCount = &pCubeItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount;
-    (*ppCubeCount)++;
+    pCubeItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount++;
     return 0;
 }
 
