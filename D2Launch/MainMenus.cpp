@@ -569,16 +569,16 @@ void __stdcall UIMENU_PleaseWaitWithCancelButton() {
     FORMS_DestroyList();
     gbMainMenuUIActive = 1;
     gnMainMenuConnectFlag = 0;
-    if (!gnIsFecharPalette) {
-      pBackgroundForm = FORMS_CreateAnyFormFromList(0xde);
-      D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pBackgroundForm, 0);
-      pCancelButton = FORMS_CreateAnyFormFromList(0xdf);
-      nTextBoxFormId = 0xe0;
-    } else {
+    if (gnIsFecharPalette) {
       pBackgroundForm = FORMS_CreateAnyFormFromList(0xf7);
       D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pBackgroundForm, 0);
       pCancelButton = FORMS_CreateAnyFormFromList(0xfa);
       nTextBoxFormId = 0xf9;
+    } else {
+      pBackgroundForm = FORMS_CreateAnyFormFromList(0xde);
+      D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(pBackgroundForm, 0);
+      pCancelButton = FORMS_CreateAnyFormFromList(0xdf);
+      nTextBoxFormId = 0xe0;
     }
 
     ::D2WinTextBox* pTextBox = (::D2WinTextBox*)FORMS_CreateAnyFormFromList(nTextBoxFormId);
