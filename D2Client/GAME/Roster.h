@@ -46,7 +46,6 @@ struct __attribute__((packed)) D2RosterPetStrc {
 namespace D2Client::GAME::Roster {
 
 // Function declarations
-struct D2RosterStrc * GetRosterPlayerByGUID(int32_t nRosterGUID);
 struct D2RosterStrc * __stdcall GetPlayerRoster();
 // @sourcefile .\GAME\Roster.cpp
 void FreeRosterLinkList(struct D2RosterStrc * pRoster);
