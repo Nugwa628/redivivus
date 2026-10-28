@@ -373,7 +373,7 @@ static void __stdcall SPELLSEL_DrawKeyBindingsForLeftHand(int32_t nSlotIndex, sh
     SPELLSEL_DrawKeyBindingText(0x35, nIconX + 0x22, nIconY - 0x23, 4);
 }
 
-void __fastcall SPELLSEL_DrawSkillLevel(int32_t pThis, int32_t nScreenX, int32_t nIconY) {
+static void __fastcall SPELLSEL_DrawSkillLevel(int32_t pThis, int32_t nScreenX, int32_t nIconY) {
     uint16_t wszLevelBuf[16];
     char szLevelBuf[16];
     for (int i = 0; i < 16; i++) wszLevelBuf[i] = 0;
