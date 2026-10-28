@@ -968,7 +968,7 @@ static void LIGHTMAP_ApplyLightWithPixelMap(D2LightMapStrc * pLightMap) {
     int nCurX;
     int nYLoopCount;
     int nXLoopCount;
-    uint8_t nGamma;
+    uint32_t nGamma;
     int nRadius = pLightMap->nRadiusX;
     if (!(0 < nRadius && nRadius < 0x100)) {
       return;

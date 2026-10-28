@@ -430,7 +430,7 @@ static void __stdcall ITEM_ReequipItemOnBody(D2UnitStrc * pUnit, int32_t bApplyE
 static void ITEM_RecalcAllEquippedItems_EBX(D2UnitStrc * pUnit) {
     bool _bNeedsGfxReload;
     bool _bReequippedThisPass;
-    uint8_t bVar1;
+    uint32_t bVar1;
     eD2BodyLoc eBodyLoc;
     D2UnitStrc* pEquipItem;
     D2UnitStrc* pCarriedItem;

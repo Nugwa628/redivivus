@@ -4061,7 +4061,7 @@ BOOL __fastcall OBJOP_OpenBossChestSpawnUniques(D2ObjectOperateFnArg * pOperatio
     int nMonIdx;
     BOOL bMostOfTimesTrue;
     BOOL bSetOrNotUnknown;
-    uint8_t nMonCount;
+    uint32_t nMonCount;
     uint16_t nX;
     uint16_t nY;
     D2RoomCoordListStrc* pRoomCoordsNull;

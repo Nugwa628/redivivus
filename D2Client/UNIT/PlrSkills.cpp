@@ -1310,7 +1310,7 @@ D2StatListExStrc * __fastcall NET_D2GS_CLIENT_HandleAddSTatUnit(D2UnitStrc * pUn
       return nullptr;
     }
 
-    char byOldAlignment = '\0';
+    int32_t byOldAlignment = '\0';
     if (eUnitStat == UNITSTAT_alignment) {
       byOldAlignment = '\x04';
     }

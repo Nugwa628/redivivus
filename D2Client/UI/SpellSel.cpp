@@ -469,7 +469,7 @@ void __fastcall SPELLSEL_DrawSkillIconWithQuantity(DC6 * pDC6, short * pSkillId,
       return;
     }
 
-    uint8_t bVar1 = sgptDataTable->pTxtSkillDesc[nMouseXCheck].iconcel;
+    uint32_t bVar1 = sgptDataTable->pTxtSkillDesc[nMouseXCheck].iconcel;
     nMouseXCheck = ui::GetMouseX();
     int nMouseX = ui::GetMouseY();
     if (nSkillIdSlot <= nMouseXCheck && nMouseXCheck <= nSkillIdSlot + 0x30 && nIconX - 0x30 <= nMouseX && nMouseX <= nIconX) {
@@ -559,7 +559,7 @@ void __fastcall SPELLSEL_DrawSkillIcon(short * pSkillId, int32_t nSlotIndex, int
       return;
     }
 
-    uint8_t byIconCel = sgptDataTable->pTxtSkillDesc[nMouseX].iconcel;
+    uint32_t byIconCel = sgptDataTable->pTxtSkillDesc[nMouseX].iconcel;
     nMouseX = ui::GetMouseX();
     int nMouseY = ui::GetMouseY();
     if (nIconX <= nMouseX && nMouseX <= nIconX + 0x30 && nIconY - 0x30 <= nMouseY && nMouseY <= nIconY) {

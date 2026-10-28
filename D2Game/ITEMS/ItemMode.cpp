@@ -3530,7 +3530,7 @@ void __fastcall ITEMMODE_ProcessItemFlags(::SGAMEDATA * pGame, D2UnitStrc * pUni
 // @sourcefile .\ITEMS\ItemMode.cpp
 void __fastcall ITEMMODE_SetItemFlags(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     int nOwnerGUID;
-    uint8_t byUnitType;
+    uint32_t byUnitType;
     eD2Skills eSkill = ITEMMODE_GetItemSkillId(pUnit2);
     if (eSkill == ~SKILL_Attack) {
       return;

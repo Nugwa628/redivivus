@@ -739,7 +739,7 @@ int32_t __stdcall IITEM_GetItemsTxt_dwNormCode(D2UnitStrc * pUnit) {
 }
 
 static int __stdcall ITEMS_nullsub(int nMaxLvlReq, D2MagicAffixTxt * pAffixTxt, D2UnitStrc * pPlayer) {
-    uint8_t bVar1;
+    uint32_t bVar1;
     if (!pAffixTxt) {
       return nMaxLvlReq;
     }
@@ -3030,7 +3030,7 @@ uint32_t __fastcall ITEM_CalcRequiredLevel(D2UnitStrc * pUnit, D2UnitStrc * pUni
     int nIdx;
     D2StatStrc anSkillOnItemBuf[64];
     int nAffixByteOffset;
-    uint8_t bLvlReq;
+    uint32_t bLvlReq;
     char cCharClass;
     if (!pUnit || pUnit->eUnitType != UNIT_ITEM || !pUnit->pUnitData.pUnitDataItem) {
       uAffix = QUALITY_NORMAL;
@@ -5866,8 +5866,8 @@ BOOL __stdcall ITEM_CheckEquipRequirements(D2UnitStrc * pUnit, D2UnitStrc * pCha
       eItemFlags = ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD);
     }
 
-    uint16_t wReqStr = pItemsTxt->nReqStr;
-    uint16_t wReqDex = pItemsTxt->wReqDex;
+    uint32_t wReqStr = pItemsTxt->nReqStr;
+    uint32_t wReqDex = pItemsTxt->wReqDex;
     int nDexAdjust = 0;
     int32_t nReqPercentMod = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pUnit, UNITSTAT_item_req_percent, 0);
     if (nReqPercentMod) {

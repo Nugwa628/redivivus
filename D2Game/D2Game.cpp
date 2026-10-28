@@ -366,7 +366,7 @@ uint32_t __fastcall SKILLS_AreaEffect_TrackBestUnitByUnitId(D2SkillCallbackConte
 }
 
 void __fastcall SUNITDMG_StatExpireCallback_ResumeAI(D2UnitStrc * pUnit, eD2States eState, int32_t nParam) {
-    uint8_t byAIDelay;
+    uint32_t byAIDelay;
     BOOL bIsModeZeroDeath = UNIT::SUnit::CheckForModeZeroDeath(pUnit);
     if (bIsModeZeroDeath) {
       uint32_t bStateActive;

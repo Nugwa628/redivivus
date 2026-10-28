@@ -1614,7 +1614,7 @@ static void MONSTER_ProcessSkillAnimation(D2UnitStrc * pUnit) {
       }
     }
 
-    uint8_t nActionFrame = pUnit->nActionFrame;
+    uint32_t nActionFrame = pUnit->nActionFrame;
     if (nActionFrame == 4 || bCastHandled && (bResult = CheckFlags(pUnit, UNITFLAG_SKSRVDOFUNC) , !bResult) && (nActionFrame == 1 || nActionFrame == 2 || nActionFrame == 3)) {
       SKILLS::Skills::SKILLS_CltSetSkillFromCurrent(pUnit);
     } else {

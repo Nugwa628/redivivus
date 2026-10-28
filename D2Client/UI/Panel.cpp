@@ -669,7 +669,7 @@ void __stdcall PANEL_DrawStaminaBar() {
       gbPanelStaminaColorRed = (uint8_t)nPaletteColor;
     }
 
-    uint8_t byBarColor;
+    uint32_t byBarColor;
     byBarColor = gbPanelGoldColorGreen;
     if (nMaxStamina + 5 < nCurStamina || (nTmp = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x18) , nTmp != 0)) {
       nMaxStamina = nCurStamina;
