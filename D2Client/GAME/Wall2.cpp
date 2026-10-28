@@ -786,21 +786,7 @@ void __stdcall WALL2_AddWallTile(D2Wall2DrawListStrc * pDrawList, D2Wall2CellStr
       int32_t iVar3;
       iVar3 = WALL2_IsTileOccludingPlayer(pTileData, pRoom);
       nDrawEntryIdx = pTileData->nTransitionFlags;
-      if (!iVar3) {
-        if (!(nDrawEntryIdx & 1)) {
-          goto insert_draw_entry;
-        }
-
-        pTileData->nAlphaStart = 0x80;
-        pTileData->nAlphaEnd = 0xff;
-        if (pTileData->nCurrentAlpha == 0x80) {
-          pTileData->nFadeEndTime = nFadeEndTime;
-        } else {
-          pTileData->nFadeEndTime = (int)((0x80 - (uint32_t)pTileData->nCurrentAlpha) * 500) / 0x7f + nFadeEndTime;
-        }
-
-        nDrawEntryIdx = nDrawEntryIdx & -2 | 2;
-      } else {
+      if (iVar3) {
         if (nDrawEntryIdx & 1) {
           goto insert_draw_entry;
         }
@@ -814,6 +800,20 @@ void __stdcall WALL2_AddWallTile(D2Wall2DrawListStrc * pDrawList, D2Wall2CellStr
           pTileData->nFadeEndTime = (int)((pTileData->nCurrentAlpha - 0xff) * 500) / 0x7f + nFadeEndTime;
           nDrawEntryIdx |= 3;
         }
+      } else {
+        if (!(nDrawEntryIdx & 1)) {
+          goto insert_draw_entry;
+        }
+
+        pTileData->nAlphaStart = 0x80;
+        pTileData->nAlphaEnd = 0xff;
+        if (pTileData->nCurrentAlpha == 0x80) {
+          pTileData->nFadeEndTime = nFadeEndTime;
+        } else {
+          pTileData->nFadeEndTime = (int)((0x80 - (uint32_t)pTileData->nCurrentAlpha) * 500) / 0x7f + nFadeEndTime;
+        }
+
+        nDrawEntryIdx = nDrawEntryIdx & -2 | 2;
       }
 
       pTileData->nTransitionFlags = nDrawEntryIdx;
