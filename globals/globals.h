@@ -3427,7 +3427,7 @@ extern int gaControlConfigRegionMouseState[7];
 extern uint32_t gnUICtrlConfigScrollOffset;
 extern uint8_t g_ControlConfigUIState;
 extern int gnUICtrlConfigActiveButton;
-extern bool gbUICtrlConfigKeyBindMode;
+extern BOOL gbUICtrlConfigKeyBindMode;
 extern DC6 * gpUICtrlConfigScrollbarDC6;
 extern int gnUICtrlConfigPendingKeyStrId;
 extern unsigned int gdwUICtrlConfigKeyBindTimestamp;
