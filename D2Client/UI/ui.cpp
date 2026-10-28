@@ -6725,10 +6725,10 @@ BOOL __stdcall NPCSHOP_IsRepairTabActive() {
     }
     if (gnPlayerCashDisplay == 2) {
       pDVar1 = UNIT::Player::GetPlayerUnit_UI();
-      if (!pDVar1) {
-        pDVar1 = 0;
-      } else {
+      if (pDVar1) {
         pDVar1 = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pDVar1->pInventory);
+      } else {
+        pDVar1 = 0;
       }
 
       ITEM_SetItemOnHand(pDVar1);
@@ -6738,10 +6738,10 @@ BOOL __stdcall NPCSHOP_IsRepairTabActive() {
     if (!nHoradricCubeUIState) {
       int nUnitType;
       pDVar1 = UNIT::Player::GetPlayerUnit_UI();
-      if (!pDVar1) {
-        nUnitType = -1;
-      } else {
+      if (pDVar1) {
         nUnitType = pDVar1->nUnitGUID;
+      } else {
+        nUnitType = -1;
       }
 
       GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT_INT(0x44, nUnitType, gnNpcShopActiveTab, 0, 2);
