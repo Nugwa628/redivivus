@@ -999,7 +999,7 @@ eD2PlayerClassID __stdcall CLIENT_GetDefaultCharClass() {
 
 // Returns 1 if arena mode is active (bit 8 of CLIENT_ArenaFlags is set), indicating the game session is running in arena/PvP mode.
 uint32_t __stdcall CLIENT_IsArenaMode() {
-    return CLIENT_ArenaFlags >> 8 & 1;
+    return (uint32_t)CLIENT_ArenaFlags >> 8 & 1;
 }
 
 void __stdcall INPUT_HandleIMEComposition(D2UIMouseMsgStrc * pMsg) {

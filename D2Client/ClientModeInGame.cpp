@@ -84,7 +84,7 @@ int32_t __fastcall fAPPMODE_client_ReturnAppMode_Caller(D2IniConfigStrc * pD2Ini
 }
 
 void __fastcall ClientAppModeQueue(eD2ClientAppMode eAppMode) {
-    if (4 < gClientAppModeQueueCounter) {
+    if ((int)gClientAppModeQueueCounter >= 5) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xaa);
       exit(-1);
     }

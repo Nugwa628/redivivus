@@ -1126,7 +1126,7 @@ void __fastcall NET_D2GS_CLIENT_Send_0x5D(int32_t nActionType, uint32_t nPlayerG
     NET_D2GS_CLIENT_Send(&local_c.nId, 7);
 }
 
-void __fastcall NET_D2GS_CLIENT_Send_0x5E(uint8_t nActionType, int32_t nPlayerGUID) {
+void __fastcall NET_D2GS_CLIENT_Send_0x5E(int32_t nActionType, int32_t nPlayerGUID) {
     D2GSPacketClt0x5E local_c;
     local_c.nId = 0x5e;
     local_c.nActionType = nActionType;

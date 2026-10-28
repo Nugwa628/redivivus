@@ -825,26 +825,26 @@ void __stdcall CLIENT_BossDeath_Baal() {
 }
 
 static int __stdcall CLIENT_GetDenOfEvilLightIntensity(uint8_t * pRed, uint8_t * pGreen, uint8_t * pBlue) {
-    if (::DenOfEvilLight) {
-      return 0;
+    if (!::DenOfEvilLight) {
+      uint32_t bQuestAvailable = GetQuestAvailabilityByIndex(0, 1);
+      if (!bQuestAvailable) {
+        return 0;
+      }
+
+      *pRed = 0xff;
+      int nTimerTick = gnDenOfEvilLightTimerTick;
+      bool bTimerUninit = gnDenOfEvilLightTimerTick == -1;
+      *pGreen = 0x40;
+      *pBlue = 0x30;
+      if (bTimerUninit) {
+        return 0x50;
+      }
+
+      float fVar1 = Fog::MATH_sinTable_f32_LookupOffset(nTimerTick * 0x80 / 0x1e);
+      return (int)(fVar1 * 80.0);
     }
 
-    uint32_t bQuestAvailable = GetQuestAvailabilityByIndex(0, 1);
-    if (!bQuestAvailable) {
-      return 0;
-    }
-
-    *pRed = 0xff;
-    int nTimerTick = gnDenOfEvilLightTimerTick;
-    bool bTimerUninit = gnDenOfEvilLightTimerTick == -1;
-    *pGreen = 0x40;
-    *pBlue = 0x30;
-    if (bTimerUninit) {
-      return 0x50;
-    }
-
-    float fVar1 = Fog::MATH_sinTable_f32_LookupOffset(nTimerTick * 0x80 / 0x1e);
-    return (int)(fVar1 * 80.0);
+    return 0;
 }
 
 int __fastcall ROOM_GetLevelLightColor(D2RoomStrc * pRoom, char * pRed, char * pGreen, char * pBlue) {
@@ -893,7 +893,7 @@ void __stdcall ClientLight_UpdateLightTimers() {
     }
     if (!::DenOfEvilLight && gnDenOfEvilLightTimerTick != -1) {
       gnDenOfEvilLightTimerTick++;
-      if (0x1d < gnDenOfEvilLightTimerTick) {
+      if ((int)gnDenOfEvilLightTimerTick >= 0x1e) {
         ::DenOfEvilLight = 1;
         ClientLight_ApplyDenOfEvilLighting();
       }
@@ -903,7 +903,7 @@ void __stdcall ClientLight_UpdateLightTimers() {
     }
 
     gnDiabloSpawnLightTimer++;
-    if (0x1d >= gnDiabloSpawnLightTimer) {
+    if ((int)gnDiabloSpawnLightTimer < 0x1e) {
       return;
     }
 

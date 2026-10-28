@@ -5806,7 +5806,7 @@ static BOOL INV_IsMouseOverTransmuteBtn(int32_t nX, int32_t nY) {
 }
 
 static BOOL CheckSomeCoords(int32_t nX, int32_t nY) {
-    if (!(gnPanelOffsetX + 0x90 < nX && nX < gnPanelOffsetX + 0xb8 && gnPanelOffsetY - 0xdf + ScreenSizeY < nY && nY < gnPanelOffsetY - 0xb7 + ScreenSizeY)) {
+    if (!(nX > gnPanelOffsetX + 0x90 && nX < gnPanelOffsetX + 0xb8 && nY > gnPanelOffsetY - 0xdf + ScreenSizeY && nY < gnPanelOffsetY - 0xb7 + ScreenSizeY)) {
       return 0;
     }
 
