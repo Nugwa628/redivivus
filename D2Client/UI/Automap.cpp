@@ -195,7 +195,7 @@ int32_t AUTOMAP_GetFade() {
     return nAutoMapFade;
 }
 
-void __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
+int32_t __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
     if (MiniMapType == 1 && nAutomapFade == 1) {
       nAutomapFade = (bAutoMapFade ? -2 : 0) + 2;
       nAutoMapFade = 1;
@@ -204,6 +204,7 @@ void __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMapFade", 0, nAutomapFade);
     bAutoMapFade = nAutomapFade;
     nAutoMapFade = nAutomapFade;
+    return nAutomapFade;
 }
 
 int32_t __stdcall AUTOMAP_GetCenters() {
