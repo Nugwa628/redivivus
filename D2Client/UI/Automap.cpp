@@ -1295,8 +1295,9 @@ void __stdcall AUTOMAP_RevealUnitsInRoom(D2RoomStrc * pRoom, D2AutomapCellStrc *
             nAutomapCel = pUnit->nClassId;
             if (0 <= nAutomapCel && nAutomapCel < sgptDataTable->nTxtMonStatsSize) {
               nAutomapCel = (int)sgptDataTable->pTxtMonStats[nAutomapCel].MonStatsEx;
-              if (0 <= nAutomapCel && nAutomapCel < sgptDataTable->nTxtMonStatsExSize && sgptDataTable->pTxtMonStatsEx + nAutomapCel) {
-                nAutomapCel = sgptDataTable->pTxtMonStatsEx[nAutomapCel].nAutomapCel;
+              D2MonStats2Txt* pTxtRecord = 0 <= nAutomapCel && nAutomapCel < sgptDataTable->nTxtMonStatsExSize ? &sgptDataTable->pTxtMonStatsEx[nAutomapCel] : nullptr;
+              if (pTxtRecord) {
+                nAutomapCel = pTxtRecord->nAutomapCel;
                 if (nAutomapCel) {
                   AUTOMAP_AddCellForUnit(nAutomapCel, pAutomapCell, pUnit);
                 }

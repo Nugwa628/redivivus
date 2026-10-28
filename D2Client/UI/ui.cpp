@@ -5703,13 +5703,14 @@ static void __stdcall DRAW_UI_StatWindow_II(int32_t bUpperEnabled, int32_t bLowe
     pClearPtr = D2Lang::StrTable::strtable::GetLocaleString(0x103f);
     D2Win::Src::D2WinFont::DRAW_text(pClearPtr, nX, nMonsterIdx, dwColor, bMultiLineCenter);
     nMonsterIdx = GAME::Select::SELECT_GetConstant13_X();
-    if (!(0 <= nMonsterIdx && nMonsterIdx < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonsterIdx)) {
+    D2MonStatsTxt* pTxtRecord = 0 <= nMonsterIdx && nMonsterIdx < sgptDataTable->nTxtMonStatsSize ? &sgptDataTable->pTxtMonStats[nMonsterIdx] : nullptr;
+    if (!pTxtRecord) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xec);
       exit(-1);
     }
 
     uint16_t* wszFmt;
-    pClearPtr = D2Lang::StrTable::strtable::GetLocaleString(sgptDataTable->pTxtMonStats[nMonsterIdx].NameStr);
+    pClearPtr = D2Lang::StrTable::strtable::GetLocaleString(pTxtRecord->NameStr);
     wszFmt = D2Lang::StrTable::strtable::GetLocaleString(0x2777);
     D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x80, wszMonNameTooltip, wszFmt, (uint16_t*)pClearPtr, bUpperEnabled);
     D2Win::Src::D2WinFont::DRAW_text(wszMonNameTooltip, gaStatWindowRowLayout[nBtnIndex * 6 + 4] + gnPanelOffsetX, gaStatWindowRowLayout[nBtnIndex * 6 + 5] + gnPanelOffsetY - 0x1e0 + ScreenSizeY, 0, 0);

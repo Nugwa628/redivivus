@@ -183,11 +183,12 @@ void __stdcall GFXUTIL_SetMissileCelFile(D2GfxDataStrc * pGfxData, D2UnitStrc * 
     }
 
     int nMissileTxtIdx = pMissile->nClassId;
-    if (!(0 <= nMissileTxtIdx && nMissileTxtIdx < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nMissileTxtIdx)) {
+    D2MissilesTxt* pTxtRecord = 0 <= nMissileTxtIdx && nMissileTxtIdx < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[nMissileTxtIdx] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    pGfxData->szFilename = sgptDataTable->pTxtMissiles[nMissileTxtIdx].CelFile;
+    pGfxData->szFilename = pTxtRecord->CelFile;
 }
 
 // @sourcefile .\ENGINE\GfxUtil.cpp
@@ -430,11 +431,12 @@ void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
 }
 
 static int32_t GFXUTIL_GetOverlayNumDirections(int32_t nParam) {
-    if (!(0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
+    D2OverlayTxt* pTxtRecord = 0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize ? &sgptDataTable->pTxtOverlay[nParam] : nullptr;
+    if (!pTxtRecord) {
       return 1;
     }
 
-    return (uint32_t)(uint8_t)sgptDataTable->pTxtOverlay[nParam].NumDirections;
+    return (uint32_t)(uint8_t)pTxtRecord->NumDirections;
 }
 
 static int32_t GFXUTIL_GetBodyLocWeaponToken(int32_t nBodyLoc, D2UnitStrc * pUnit) {

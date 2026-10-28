@@ -3341,7 +3341,8 @@ static D2UnitStrc * GetSetItem(int32_t nId, D2InventoryStrc * pInventory) {
           eVar1 = D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pCarriedItem);
           if ((eVar1 == INVPAGE_INVENTORY || eVar1 == INVPAGE_CUBE || eVar1 == INVPAGE_STASH || eVar1 == INVPAGE_None) && ((iVar1 = D2Common::INVENTORY::Inventory::ITEM_GetItemData_eD2InventoryGridType(pUnit) , iVar1 == 1 || iVar1 == 3) || iVar1 == 4)) {
             nQuality = D2Common::ITEMS::Items::ITEM_GetItemData_nFileIndex(pCarriedItem);
-            if (0 <= nQuality && nQuality < sgptDataTable->nTxtSetItemsSize && sgptDataTable->pTxtSetItems + nQuality && sgptDataTable->pTxtSetItems[nQuality].nId == nId) {
+            D2SetItemsTxt* pTxtRecord = 0 <= nQuality && nQuality < sgptDataTable->nTxtSetItemsSize ? &sgptDataTable->pTxtSetItems[nQuality] : nullptr;
+            if (pTxtRecord && pTxtRecord->nId == nId) {
               break;
             }
           }

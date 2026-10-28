@@ -239,11 +239,12 @@ void __fastcall PLRSKILLS_StateSetFn02_CloakOfShadows(D2UnitStrc * pUnit, eD2Sta
 
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
     int nSkillLvl = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    int32_t nAuraLen = D2Common::Skills::D2GetSkillCalc(pUnit, sgptDataTable->pTxtSkills[eSkill].auralencalc, eSkill, nSkillLvl);
+    int32_t nAuraLen = D2Common::Skills::D2GetSkillCalc(pUnit, pTxtRecord->auralencalc, eSkill, nSkillLvl);
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     UI::CmdTbl::CMD_InitKeyConfigUI(5, nAuraLen * 3 / 5, nAuraLen * 2 / 5, eLevelId, 0);
 }
@@ -855,11 +856,12 @@ void __fastcall PLRSKILLS_StateSetFn16_StackOverlay(D2UnitStrc * pUnit, eD2State
     int nStackCount = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_skill_frenzy, 0);
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
     int nSkillLvl = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    int32_t nMaxOverlays = D2Common::Skills::D2GetSkillCalc(pUnit, sgptDataTable->pTxtSkills[eSkill].calc[1], eSkill, nSkillLvl);
+    int32_t nMaxOverlays = D2Common::Skills::D2GetSkillCalc(pUnit, pTxtRecord->calc[1], eSkill, nSkillLvl);
     if (0 >= nMaxOverlays) {
       return;
     }
@@ -1336,7 +1338,8 @@ D2StatListExStrc * __fastcall NET_D2GS_CLIENT_HandleAddSTatUnit(D2UnitStrc * pUn
     } else if ((int)eUnitStat < 0) {
       return pStatList;
     }
-    if (!((int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat && sgptDataTable->pTxtItemStatCost[eUnitStat].dwItemStatFlags & ITEMSTATCOSTFLAG_UPDATEANIMRATE)) {
+    D2ItemStatCostTxt* pTxtRecord = (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize ? &sgptDataTable->pTxtItemStatCost[eUnitStat] : nullptr;
+    if (!(pTxtRecord && pTxtRecord->dwItemStatFlags & ITEMSTATCOSTFLAG_UPDATEANIMRATE)) {
       return pStatList;
     }
 

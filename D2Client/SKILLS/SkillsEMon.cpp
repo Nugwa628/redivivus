@@ -340,11 +340,12 @@ BOOL __fastcall Skills_CltStFunc_CastMissileWithPositionOffset(D2UnitStrc * pUni
 }
 
 BOOL __fastcall Skills_CltStFunc_SpawnCltMissileAtSelf(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    eMissilesId nMissileId = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].cltmissile[1];
+    eMissilesId nMissileId = (eMissilesId)pTxtRecord->cltmissile[1];
     if (!(0 <= (int)nMissileId && (int)nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 1;
     }
@@ -355,11 +356,12 @@ BOOL __fastcall Skills_CltStFunc_SpawnCltMissileAtSelf(D2UnitStrc * pUnit, eD2Sk
 }
 
 BOOL __fastcall Skills_CltDoFunc_EMon_CastAttackMissileB(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    eMissilesId nMissileId = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].cltmissile[2];
+    eMissilesId nMissileId = (eMissilesId)pTxtRecord->cltmissile[2];
     if (!(0 <= (int)nMissileId && (int)nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 1;
     }
@@ -373,11 +375,12 @@ BOOL __fastcall Skills_CltDoFunc_EMon_CastAttackMissileB(D2UnitStrc * pUnit, eD2
 BOOL __fastcall Skills_CltDoFunc_EMon_OffsetParticleMissile(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     int32_t nSpriteOffsetX;
     int nSpriteOffsetY;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    eMissilesId nMissileId = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].cltmissile[2];
+    eMissilesId nMissileId = (eMissilesId)pTxtRecord->cltmissile[2];
     if (!(0 <= (int)nMissileId && (int)nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 1;
     }
