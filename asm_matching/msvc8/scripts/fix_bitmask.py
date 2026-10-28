@@ -15,7 +15,8 @@ flag byte a one-bit bitfield, `if (pMonStats2->isSmall)`.
 The sites are taken in a function the original reads the table in at a
 constant index n, more often than ours does:
 
-  - `E & K`, `E | K`, `E |= K`, K a power of two 1 << n, the constant
+  - `E & K`, `E | K`, `E |= K`, K a power of two 1 << n - a literal, or
+    an enumerator or constexpr a header gives that value -, the constant
     standing alone (closed by `)`, `;`, `,`, `?`, `&&`, `||`, `==`, `!=`):
     K becomes gadwBitMasks[n], a primary expression of the same value;
   - a one-bit uint8_t bitfield `X->flag` (or `X.flag`) read where only its
@@ -46,8 +47,22 @@ import ours as ourslib  # noqa: E402
 from oracle_config import BUILD, ORACLE, REPO  # noqa: E402
 
 TABLE = '?gadwBitMasks@@3PAIA'
-CONST = re.compile(r'(?<![&|])(?P<op>&|\||\|=)\s*(?P<k>0x[0-9a-fA-F]+|\d+)[uUlL]*'
+CONST = re.compile(r'(?<![&|])(?P<op>&|\||\|=)\s*(?P<k>0x[0-9a-fA-F]+|\d+|[A-Z_][A-Z0-9_]*\b)[uUlL]*'
                    r'(?=\s*(?:\)|;|,|\?|&&|\|\||==|!=))')
+ENUMERATOR = re.compile(r'^\s*(?:constexpr\s+[\w:]+\s+)?(?P<n>[A-Z_][A-Z0-9_]*)\s*=\s*(?P<v>0x[0-9a-fA-F]+|\d+)'
+                        r'[uUlL]*\s*[,;]?\s*(?://.*)?$', re.M)
+
+
+def enumerators():
+    """Name -> value of the enumerators (and constexpr constants) the tree's
+    headers give a literal value; names given two values left out."""
+    p = subprocess.run(['git', '-C', REPO, 'grep', '-h', '-E',
+                        r'^\s*(constexpr\s+[A-Za-z_:0-9]+\s+)?[A-Z_][A-Z0-9_]*\s*=\s*(0x[0-9a-fA-F]+|[0-9]+)',
+                        '--', '*.h'], capture_output=True, text=True)
+    seen = collections.defaultdict(set)
+    for m in ENUMERATOR.finditer(p.stdout):
+        seen[m.group('n')].add(int(m.group('v'), 0))
+    return {n: next(iter(v)) for n, v in seen.items() if len(v) == 1}
 FIELD = re.compile(r'(?P<x>[A-Za-z_]\w*(?:(?:->|\.)[A-Za-z_]\w*|\[[^\[\]]*\])*)(?P<op>->|\.)(?P<f>[A-Za-z_]\w*)\b'
                    r'(?!\s*(?:\(|\[|->|\.|[-+*/%&|^]?=(?!=)|\+\+|--))')
 BITDECL = re.compile(r'^\s*/\* 0x(?P<off>[0-9A-Fa-f]+) \*/ uint8_t (?P<name>\w+) : (?P<w>\d+);')
@@ -122,7 +137,7 @@ def boolean_at(line, a, b):
     return bool(re.search(r'\b(if|while)\s*\($', before)) and after.startswith(')')
 
 
-def sites(lines, lo, hi, want, offs, fields):
+def sites(lines, lo, hi, want, offs, fields, names):
     """[(line index, new line, n)] of the rewrites in lines[lo..hi]."""
     found = collections.defaultdict(list)
     for k in range(lo, hi + 1):
@@ -131,8 +146,8 @@ def sites(lines, lo, hi, want, offs, fields):
         if code.lstrip().startswith(('#', '/*', '*')):
             continue
         for m in CONST.finditer(code):
-            v = int(m.group('k'), 0)
-            if v <= 0 or v & (v - 1) or v.bit_length() - 1 not in want:
+            v = int(m.group('k'), 0) if m.group('k')[0].isdigit() else names.get(m.group('k'))
+            if v is None or v <= 0 or v & (v - 1) or v.bit_length() - 1 not in want:
                 continue
             n = v.bit_length() - 1
             found[n].append((k, m.start('k'), m.end('k') + len(code[m.end('k'):]) - len(code[m.end('k'):].lstrip('uUlL')),
@@ -183,6 +198,7 @@ def site_edit(cpp, ln, old, a, b, new):
 def candidates(rows, status, model, syms, pats, lo):
     """tu -> [(original start, line index, old line, start, end, new text)]."""
     fields = bitfields()
+    names = enumerators()
     out = collections.defaultdict(list)
     for tu in sorted({r[3] for r in rows}):
         if pats and not any(p in tu for p in pats):
@@ -210,7 +226,7 @@ def candidates(rows, status, model, syms, pats, lo):
                 continue
             if lines is None:
                 lines = fixlib.read(cpp).split('\n')
-            for k, a, b, new, _n in sites(lines, min(mine) - 1, max(mine) - 1, want, offs, fields):
+            for k, a, b, new, _n in sites(lines, min(mine) - 1, max(mine) - 1, want, offs, fields, names):
                 out[tu].append((s, k, lines[k], a, b, new))
     return out
 
