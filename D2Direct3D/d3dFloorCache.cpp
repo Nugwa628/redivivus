@@ -348,10 +348,10 @@ void __fastcall D3DFLOOR_Free(D3DFloorCacheStrc * pCache, BOOL bInvalidateAll) {
           if (pCurNode) {
             pNextNode = pCurNode->pNext;
             pCache->pUsedHead = pNextNode;
-            if (!pNextNode) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextNode) {
               pNextNode->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pCurNode->pNext = 0;
