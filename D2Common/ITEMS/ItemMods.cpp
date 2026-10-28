@@ -1821,11 +1821,7 @@ int32_t __fastcall ITEMMOD_AddStatToItem(D2UnitStrc * pUnit, int32_t nParam1, in
     }
 
     eD2UnitStat eTargetStat = (eD2UnitStat)nParam;
-    if (!(0 <= (int)eTargetStat && (int)eTargetStat < sgptDataTable->nTxtItemStatCostSize)) {
-      return 0;
-    }
-
-    D2ItemStatCostTxt* pItemStatCost = sgptDataTable->pTxtItemStatCost + eTargetStat;
+    D2ItemStatCostTxt* pItemStatCost = (0 <= (int)eTargetStat && (int)eTargetStat < sgptDataTable->nTxtItemStatCostSize) ? &sgptDataTable->pTxtItemStatCost[eTargetStat] : NULL;
     if (!pItemStatCost) {
       return 0;
     }
