@@ -178,7 +178,6 @@ DWORD __fastcall D2FILE_GetFileSize(D2PoolManagerStrc * pMemory, D2MPQFileStrc *
     } else {
       dwFileSizeResult = Fog::Source::SFile::ERRORMANAGER_FGetFileSize(pFile, pFileSizeOut);
       if (dwFileSizeResult) {
-        Fog::Debug::GuardStack();
         return dwFileSizeResult;
       }
 
@@ -198,7 +197,6 @@ void __fastcall D2FILE_SeekFile(D2PoolManagerStrc * pMemory, D2MPQFileStrc * pFi
     } else {
       nSeekResult = Fog::Source::SFile::SFILE_SetFilePointerThunk(pFile, nDistanceToMove, pnNewPos, dwMoveMethod);
       if (nSeekResult != -1) {
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -227,7 +225,6 @@ void __fastcall D2FILE_ReadFile(D2PoolManagerStrc * pMemory, D2MPQFileStrc * pFi
       D2FILE_ReadFile_HaltTail(0x92);
     }
 
-    Fog::Debug::GuardStack();
 }
 
 void __stdcall D2FILE_ReadFile_HaltTail(int nLine) {
@@ -255,7 +252,7 @@ pfnFaultError __fastcall RegisterExitFunction(pfnFaultError pfnNewCallback) {
     return pfnPrevCallback;
 }
 
-void __stdcall FAULT_TerminateCurrentProcess() {
+static void __stdcall FAULT_TerminateCurrentProcess() {
     UINT uExitCode = -1;
     HANDLE hProcess = GetCurrentProcess();
     /* HANDLE hProcess for TerminateProcess */ TerminateProcess(hProcess, uExitCode);
@@ -355,7 +352,6 @@ void FAULT_ShowFormattedErrorWithArgs(uint32_t nErrorCode, ...) {
     FAULT_LookupErrorString(nErrorCode, szErrorMsg, 0x200);
     /* va_list arglist for wvsprintfA */ /* LPCSTR param_2 for wvsprintfA */ /* LPSTR param_1 for wvsprintfA */ wvsprintfA(szFormattedMsg, szErrorMsg, (va_list)((uint8_t*)&nErrorCode + 4));
     FAULT_ShowErrorMessageBox(szFormattedMsg);
-    Fog::Debug::GuardStack();
 }
 
 LPVOID __fastcall D2MEM_VirtualAlloc(SIZE_T nSize) {
@@ -733,42 +729,42 @@ void __stdcall QSERVER_InitGlobalGameState() {
 
 void StaticInit_6caa10() {
     int iVar1;
-    uint16_t* pWVar2 = UNICODE_007a2c80;
-    for (iVar1 = 0x28; iVar1; iVar1--) {
-      pWVar2[0] = L'\0';
-      pWVar2[1] = L'\0';
-      pWVar2 += 2;
-    }
+    uint16_t* pWVar2;
+    for (int i = 0; i < 0x50; i++) UNICODE_007a2c80[i] = 0;
+
+
+
+
 }
 
 void StaticInit_6caa30() {
     int nWordsRemaining;
-    uint16_t* pImmunityBuf1 = gU16ImmunityStringBuffer1;
-    for (nWordsRemaining = 0x80; nWordsRemaining; nWordsRemaining--) {
-      pImmunityBuf1[0] = 0;
-      pImmunityBuf1[1] = 0;
-      pImmunityBuf1 += 2;
-    }
+    uint16_t* pImmunityBuf1;
+    for (int i = 0; i < 0x100; i++) gU16ImmunityStringBuffer1[i] = 0;
+
+
+
+
 }
 
 void StaticInit_6caa50() {
     int nWordsRemaining;
-    uint16_t* pImmunityBuf2 = gU16ImmunityStringBuffer2;
-    for (nWordsRemaining = 0x80; nWordsRemaining; nWordsRemaining--) {
-      pImmunityBuf2[0] = 0;
-      pImmunityBuf2[1] = 0;
-      pImmunityBuf2 += 2;
-    }
+    uint16_t* pImmunityBuf2;
+    for (int i = 0; i < 0x100; i++) gU16ImmunityStringBuffer2[i] = 0;
+
+
+
+
 }
 
 void StaticInit_6caa70() {
     int nWordsRemaining;
-    uint16_t* pHealthBarBuf = gnMonsterHealthBarValue;
-    for (nWordsRemaining = 0x80; nWordsRemaining; nWordsRemaining--) {
-      pHealthBarBuf[0] = 0;
-      pHealthBarBuf[1] = 0;
-      pHealthBarBuf += 2;
-    }
+    uint16_t* pHealthBarBuf;
+    for (int i = 0; i < 0x100; i++) gnMonsterHealthBarValue[i] = 0;
+
+
+
+
 }
 
 void StaticInit_6caa90() {
@@ -788,7 +784,7 @@ void StaticInit_6caab0() {
 }
 
 void StaticInit_6caad0() {
-    memset(gwKeyNameBuffer, 0, 4 * sizeof(gwKeyNameBuffer[0]));
+    for (int i = 0; i < 4; i++) gwKeyNameBuffer[i] = 0;
 }
 
 void StaticInit_6caaf0() {
@@ -807,24 +803,24 @@ void StaticInit_6cab10() {
     int nDwordsRemaining;
     uint8_t* pChatHistoryBuf = gaChatHistoryBuffer;
     for (nDwordsRemaining = 0x404; nDwordsRemaining; nDwordsRemaining--) {
-      memset(pChatHistoryBuf, 0, 4 * sizeof(pChatHistoryBuf[0]));
+      for (int i = 0; i < 4; i++) pChatHistoryBuf[i] = 0;
       pChatHistoryBuf += 4;
     }
 }
 
 void StaticInit_6cab30() {
-    memset(gwcIMECompositionString, 0, 32 * sizeof(gwcIMECompositionString[0]));
+    for (int i = 0; i < 32; i++) gwcIMECompositionString[i] = 0;
 }
 
 void StaticInit_6cab90() {
-    memset(gwcImeCompositionBuffer, 0, 32 * sizeof(gwcImeCompositionBuffer[0]));
+    for (int i = 0; i < 32; i++) gwcImeCompositionBuffer[i] = 0;
 }
 
 void StaticInit_6cabf0() {
     int nDwordsRemaining;
     uint8_t* pInvRecipeBuf = gpInvRecipeScrollImage;
     for (nDwordsRemaining = 0x800; nDwordsRemaining; nDwordsRemaining--) {
-      memset(pInvRecipeBuf, 0, 4 * sizeof(pInvRecipeBuf[0]));
+      for (int i = 0; i < 4; i++) pInvRecipeBuf[i] = 0;
       pInvRecipeBuf += 4;
     }
 }
@@ -866,7 +862,7 @@ void StaticInit_6cad00() {
 }
 
 void StaticInit_6cad10() {
-    memset(gNpcMenuConfirmDialogStrings, 0, 40 * sizeof(gNpcMenuConfirmDialogStrings[0]));
+    for (int i = 0; i < 40; i++) gNpcMenuConfirmDialogStrings[i] = 0;
 }
 
 void StaticInit_6cad80() {

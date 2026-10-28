@@ -105,9 +105,6 @@ void LOGMGR_DeleteHighResTimerLock();
 // Atomic 64-bit store of *pllValue into *pllTarget: LOCK CMPXCHG8B retried until it succeeds, so the old value is never kept (ECX=target, EDX=value).
 // @renamed-from AtomicCompareExchange64 (asm 004107be JNZ loops back to the CMPXCHG8B)
 void __fastcall Atomic64Store(int64_t * pllTarget, int64_t * pllValue);
-// Atomic 64-bit read of *pllSource into *pllResult via LOCK CMPXCHG8B: the comparand EDX:EAX is the don't-care ECX:EBX, and either path leaves the current value in EDX:EAX (ECX=result, EDX=source). The EBX half is not a parameter: callers at 00410a1c and 00410a9a set only ECX and EDX.
-// @renamed-from AtomicExchange64 (it never changes *pllSource)
-void __fastcall Atomic64Load(int64_t * pllResult, int64_t * pllSource);
 void __stdcall GetFreeDiskSpaceForSavePath();
 void GetGlobalMemoryStatus(LPMEMORYSTATUS pMemoryStatus);
 int __stdcall IsWindowsNT();

@@ -987,7 +987,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
             goto finish_token;
           }
         *pbByteCodeOutput = 0;
-        Debug::GuardStack();
         return 0;
         case 1:
           if (0 < __frame0.nOpStackTop) {
@@ -1002,7 +1001,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
               nPrecedence = SKILLS_GetOpcodePrecedence(__frame0.aTokenBuf, pOpcodeInfo, nFunctionArg);
               if (__frame0.nPrecedenceDepth < nPrecedence || nMaxOutputSize <= nBytesWritten) {
                 *pbByteCodeOutput = 0;
-                Debug::GuardStack();
                 return 0;
               }
 
@@ -1011,9 +1009,8 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
               *pbWritePtr = __frame0.aTokenBuf;
               pbFinalWrite = pbWritePtr + 1;
               if (__frame0.aTokenBuf == 1) {
-                if (nMaxOutputSize <= (int)pbFinalWrite - (int)pbByteCodeOutput) {
+                if ((int)pbFinalWrite - (int)pbByteCodeOutput >= nMaxOutputSize) {
                   *pbByteCodeOutput = 0;
-                  Debug::GuardStack();
                   return 0;
                 }
 
@@ -1025,9 +1022,8 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
 
               __frame0.nOpStackTop--;
               pbWritePtr = pbFinalWrite;
-              if (__frame0.nOpStackTop < 1) {
+              if (__frame0.nOpStackTop <= 0) {
                 *pbByteCodeOutput = 0;
-                Debug::GuardStack();
                 return 0;
               }
             }
@@ -1038,7 +1034,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
             }
           }
         *pbByteCodeOutput = 0;
-        Debug::GuardStack();
         return 0;
         case 2:
           bToken = 3;
@@ -1100,15 +1095,15 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
         bHasVarRef = true;
         goto finish_token;
         case 0x12:
-          if (__frame0.nOpStackTop < 0x40) {
-            __frame0.aOpStackTokenTypes[__frame0.nOpStackTop] = 1;
-            __frame0.aOpStackTokenValues[__frame0.nOpStackTop] = __frame0.dwTokenValue;
-            __frame0.nOpStackTop++;
+          if (!(__frame0.nOpStackTop < 0x40)) {
+            *pbByteCodeOutput = 0;
+            pbWritePtr = 0;
             __frame0.bLastWasValue = 1;
             bHasVarRef = true;
           } else {
-            *pbByteCodeOutput = 0;
-            pbWritePtr = 0;
+            __frame0.aOpStackTokenTypes[__frame0.nOpStackTop] = 1;
+            __frame0.aOpStackTokenValues[__frame0.nOpStackTop] = __frame0.dwTokenValue;
+            __frame0.nOpStackTop++;
             __frame0.bLastWasValue = 1;
             bHasVarRef = true;
           }
@@ -1121,7 +1116,6 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
       finish_token:
       if (!pbWritePtr) {
         *pbByteCodeOutput = 0;
-        Debug::GuardStack();
         return 0;
       }
       __frame0.aTokenBuf = 0;
@@ -1136,12 +1130,10 @@ int __stdcall SKILLS_ParseCalcExpression(char * szExpressionString, uint8_t * pb
         pbWritePtr = SKILLS_EmitFormulaBytecode(pbWritePtr, (uint8_t*)__frame0.aOpStackTokenTypes, pbByteCodeOutput, nMaxOutputSize, 0, nullptr, 0);
       }
 
-      Debug::GuardStack();
       return (int)pbWritePtr - (int)pbByteCodeOutput;
     }
 
     *pbByteCodeOutput = 0;
-    Debug::GuardStack();
     return 0;
 }
 

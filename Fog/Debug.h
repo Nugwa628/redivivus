@@ -283,10 +283,8 @@ int CompareUintDescending(LPCVOID pParam1, LPCVOID pParam2);
 void FormatModuleDebugString(char * szText, struct D2FogDebugModuleEntryStrc * pModule);
 void __fastcall FormatAddressDebugString(uint32_t * pAddrInfo, char * pSymInfo, char * szOutput);
 void __fastcall EnumerateAndDumpAllFunctions(fnCrashOutputLine pOutputCallback, ::Report * pReport);
-void InitializeDebugInfoTable(struct D2FogDebugModuleTableStrc * pTable);
-void __stdcall DEBUG_UnloadStackCrawlDbgHelp();
+int __stdcall DEBUG_UnloadStackCrawlDbgHelp();
 void __fastcall DumpThreadContext(HANDLE hHandle);
-BOOL __stdcall GetSourceLineWithRetry(HANDLE hProcess, DWORD nAddress, void * pdwDisplacement, void * pLine);
 // @sourcefile .\Src\Exceptions.cpp
 // Frees a D2FogModuleNodeStrc list (next at +0x20c); both callers pass the module list from LoadSymbolsForAllModules/EnumerateModulesPsapi.
 void __fastcall FOG_FreeModuleList(struct D2FogModuleNodeStrc * pModuleList);
@@ -295,13 +293,11 @@ struct D2FogModuleNodeStrc * __stdcall EnumerateModulesToolhelp32(uint32_t dwPro
 // Enumerates process modules using PSAPI library. Loads PSAPI.DLL, queries module list, retrieves module paths and base names, constructs sorted list of module information for debugging.
 // @sourcefile .\Src\Exceptions.cpp
 struct D2FogModuleNodeStrc * __stdcall EnumerateModulesPsapi(HANDLE hProcess);
-struct D2FogModuleNodeStrc * __stdcall EnumerateAndLogModules(HANDLE hProcess, uint32_t dwProcessId);
 struct D2FogModuleNodeStrc * __fastcall FindModuleContainingAddress(uint32_t nAddress, struct D2FogModuleNodeStrc * pModuleList);
 // Dumps stack memory with symbol annotations. Formats raw stack bytes as hex, identifies pointer values, and looks up module/symbol information for each dword.
 void __fastcall DumpAnnotatedStackMemory(HANDLE hSymHandle, CONTEXT * pContext, struct D2FogModuleNodeStrc * pModuleListHead);
 struct D2FogModuleNodeStrc * __stdcall LoadSymbolsForAllModules(HANDLE hProcess, uint32_t dwProcessId);
 BOOL __fastcall FILETOOLS_GetExecutableFolderPath(LPSTR lpFilename, DWORD nSize);
-int BuildSymbolSearchPath(char * szSearchPath);
 // @sourcefile .\Src\Exceptions.cpp
 int __stdcall InitializeSymbolsWithRefcount();
 int __fastcall CleanupSymbolsWithRefcount(int32_t bForceCleanup);

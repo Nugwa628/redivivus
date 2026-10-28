@@ -50,17 +50,17 @@ static int gaNPCSpokenBitIndexMap_1__0_[35][2] = { 0 }; D2_STATIC_GUARD(gaNPCSpo
 
 void __fastcall PLAYER_SetSpokenWithNPC(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, int32_t nMonStatsId) {
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    if (0 < gnNPCSpokenBitIndexMapCount) {
-      int i = 0;
-      do {
+    for (int i = 0; i < gnNPCSpokenBitIndexMapCount; i++) {
+
+
         if (gaNPCSpokenBitIndexMap[i][0] == nMonStatsId) {
           Fog::BitBuffer::SetBitAtOffset((char*)pPlayerData->pInteractedNPCs[pGame->nDifficulty]->pIntro->pBuffer, gaNPCSpokenBitIndexMap[i][1]);
           return;
         }
 
-        i++;
-      } while (i < gnNPCSpokenBitIndexMapCount);
+
     }
+
 
     Fog::BitBuffer::SetBitAtOffset((char*)pPlayerData->pInteractedNPCs[pGame->nDifficulty]->pIntro->pBuffer, 0);
 }
@@ -68,51 +68,51 @@ void __fastcall PLAYER_SetSpokenWithNPC(D2UnitStrc * pUnit, ::SGAMEDATA * pGame,
 BOOL __fastcall PLAYER_CheckIfSpokenWithNPC(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, int32_t nMonStatsId) {
     BOOL bSpoken;
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    if (0 < gnNPCSpokenBitIndexMapCount) {
-      int i = 0;
-      do {
+    for (int i = 0; i < gnNPCSpokenBitIndexMapCount; i++) {
+
+
         if (gaNPCSpokenBitIndexMap[i][0] == nMonStatsId) {
           bSpoken = Fog::BitBuffer::CheckBitAtOffset((char*)pPlayerData->pInteractedNPCs[pGame->nDifficulty]->pIntro->pBuffer, gaNPCSpokenBitIndexMap[i][1]);
           return bSpoken;
         }
 
-        i++;
-      } while (i < gnNPCSpokenBitIndexMapCount);
+
     }
+
 
     bSpoken = Fog::BitBuffer::CheckBitAtOffset((char*)pPlayerData->pInteractedNPCs[pGame->nDifficulty]->pIntro->pBuffer, 0);
     return bSpoken;
 }
 
 void __fastcall INTRONPC_SetSpokenWithNPC_Intro2(D2UnitDataPlayerInteractedNPCStrc * pInteractedNPCs, int32_t nMonStatsId) {
-    if (0 < gnNPCSpokenBitIndexMapCount) {
-      int i = 0;
-      do {
+    for (int i = 0; i < gnNPCSpokenBitIndexMapCount; i++) {
+
+
         if (gaNPCSpokenBitIndexMap[i][0] == nMonStatsId) {
           Fog::BitBuffer::SetBitAtOffset((char*)pInteractedNPCs->pIntro2->pBuffer, gaNPCSpokenBitIndexMap[i][1]);
           return;
         }
 
-        i++;
-      } while (i < gnNPCSpokenBitIndexMapCount);
+
     }
+
 
     Fog::BitBuffer::SetBitAtOffset((char*)pInteractedNPCs->pIntro2->pBuffer, 0);
 }
 
 BOOL __fastcall INTRONPC_CheckIfSpokenWithNPC_Intro2(D2UnitDataPlayerInteractedNPCStrc * pInteractedNPCs, int32_t nMonStatsId) {
     BOOL bSpoken;
-    if (0 < gnNPCSpokenBitIndexMapCount) {
-      int i = 0;
-      do {
+    for (int i = 0; i < gnNPCSpokenBitIndexMapCount; i++) {
+
+
         if (gaNPCSpokenBitIndexMap[i][0] == nMonStatsId) {
           bSpoken = Fog::BitBuffer::CheckBitAtOffset((char*)pInteractedNPCs->pIntro2->pBuffer, gaNPCSpokenBitIndexMap[i][1]);
           return bSpoken;
         }
 
-        i++;
-      } while (i < gnNPCSpokenBitIndexMapCount);
+
     }
+
 
     bSpoken = Fog::BitBuffer::CheckBitAtOffset((char*)pInteractedNPCs->pIntro2->pBuffer, 0);
     return bSpoken;
@@ -120,17 +120,17 @@ BOOL __fastcall INTRONPC_CheckIfSpokenWithNPC_Intro2(D2UnitDataPlayerInteractedN
 
 void __fastcall PLAYER_UnsetSpokenWithNPC_Intro2(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nMonStatsId) {
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    if (0 < gnNPCSpokenBitIndexMapCount) {
-      int i = 0;
-      do {
+    for (int i = 0; i < gnNPCSpokenBitIndexMapCount; i++) {
+
+
         if (gaNPCSpokenBitIndexMap[i][0] == nMonStatsId) {
           Fog::BitBuffer::UnsetBitAtOffset((char*)pPlayerData->pInteractedNPCs[pGame->nDifficulty]->pIntro2->pBuffer, gaNPCSpokenBitIndexMap[i][1]);
           return;
         }
 
-        i++;
-      } while (i < gnNPCSpokenBitIndexMapCount);
+
     }
+
 
     Fog::BitBuffer::UnsetBitAtOffset((char*)pPlayerData->pInteractedNPCs[pGame->nDifficulty]->pIntro2->pBuffer, 0);
 }
@@ -161,14 +161,14 @@ void __fastcall PLAYERINTRO_CopyIntroDataIndirect(int32_t pSrc, uint32_t * pdwPa
 
 // @sourcefile .\PLAYER\PlrIntro.cpp
 D2UnitDataPlayerInteractedNPCStrc * __fastcall STRUCT_AllocPlayerInteractedNPC(::SGAMEDATA * pGame) {
-    D2UnitDataPlayerInteractedNPCStrc* pInteractedNPC = D2_NEW_POOL(pGame->pMemoryPool, D2UnitDataPlayerInteractedNPCStrc);
-    D2BitBufferStrc* pBitBuf = D2_NEW_POOL(pGame->pMemoryPool, D2BitBufferStrc);
-    uint8_t* pRawBuf = (uint8_t*)D2_ALLOC_POOL(pGame->pMemoryPool, 8);
+    D2UnitDataPlayerInteractedNPCStrc* pInteractedNPC = ((D2UnitDataPlayerInteractedNPCStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2UnitDataPlayerInteractedNPCStrc), ".\\PLAYER\\PlrIntro.cpp", 0xc4, 0));
+    D2BitBufferStrc* pBitBuf = ((D2BitBufferStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2BitBufferStrc), ".\\PLAYER\\PlrIntro.cpp", 0xc5, 0));
+    uint8_t* pRawBuf = (uint8_t*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, 8, ".\\PLAYER\\PlrIntro.cpp", 0xc6, 0);
     memset(pRawBuf, 0, 8 * sizeof(pRawBuf[0]));
     Fog::BitBuffer::InitBitBuffer(pBitBuf, pRawBuf, 8);
     pInteractedNPC->pIntro = pBitBuf;
-    pBitBuf = D2_NEW_POOL(pGame->pMemoryPool, D2BitBufferStrc);
-    pRawBuf = (uint8_t*)D2_ALLOC_POOL(pGame->pMemoryPool, 8);
+    pBitBuf = ((D2BitBufferStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2BitBufferStrc), ".\\PLAYER\\PlrIntro.cpp", 0xcb, 0));
+    pRawBuf = (uint8_t*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, 8, ".\\PLAYER\\PlrIntro.cpp", 0xcc, 0);
     memset(pRawBuf, 0, 8 * sizeof(pRawBuf[0]));
     Fog::BitBuffer::InitBitBuffer(pBitBuf, pRawBuf, 8);
     pInteractedNPC->pIntro2 = pBitBuf;
@@ -178,17 +178,17 @@ D2UnitDataPlayerInteractedNPCStrc * __fastcall STRUCT_AllocPlayerInteractedNPC(:
 // @sourcefile .\PLAYER\PlrIntro.cpp
 void __fastcall PLAYERDATA_FreeInteractedNPCs(::SGAMEDATA * pGame, D2UnitDataPlayerInteractedNPCStrc * pInteractedNPCs) {
     if (pInteractedNPCs->pIntro) {
-      D2_FREE_POOL(pGame->pMemoryPool, pInteractedNPCs->pIntro->pBuffer);
-      D2_FREE_POOL(pGame->pMemoryPool, pInteractedNPCs->pIntro);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pInteractedNPCs->pIntro->pBuffer, ".\\PLAYER\\PlrIntro.cpp", 0xdb, 0);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pInteractedNPCs->pIntro, ".\\PLAYER\\PlrIntro.cpp", 0xdc, 0);
       pInteractedNPCs->pIntro = 0;
     }
     if (pInteractedNPCs->pIntro2) {
-      D2_FREE_POOL(pGame->pMemoryPool, pInteractedNPCs->pIntro2->pBuffer);
-      D2_FREE_POOL(pGame->pMemoryPool, pInteractedNPCs->pIntro2);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pInteractedNPCs->pIntro2->pBuffer, ".\\PLAYER\\PlrIntro.cpp", 0xe1, 0);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pInteractedNPCs->pIntro2, ".\\PLAYER\\PlrIntro.cpp", 0xe2, 0);
       pInteractedNPCs->pIntro2 = 0;
     }
 
-    D2_FREE_POOL(pGame->pMemoryPool, pInteractedNPCs);
+    Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pInteractedNPCs, ".\\PLAYER\\PlrIntro.cpp", 0xe5, 0);
 }
 
 } // namespace D2Game::PLAYER::PlayerIntro

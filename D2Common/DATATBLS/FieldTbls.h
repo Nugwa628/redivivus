@@ -31,7 +31,7 @@ void __stdcall FIELDTBLS_InitFieldData(struct D2ExpFieldFileStrc * pArchive, uin
 // Frees the global field table data and zeroes all field dimensions/offsets.
 // Source: .\\DATATBLS\\FieldTbls.cpp
 // @sourcefile .\DATATBLS\FieldTbls.cpp
-void __stdcall FIELDTBLS_FreeFieldData();
+int __stdcall FIELDTBLS_FreeFieldData();
 // Returns the center offsets (half width, half height) of the loaded field data.
 void __stdcall FIELDTBLS_GetFieldCenterOffsets(uint32_t * pdwHalfWidth, uint32_t * pdwHalfHeight);
 // Allocates and zeroes an 8-byte POINT (x=0, y=0) from the server pool, used as the

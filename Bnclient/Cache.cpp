@@ -87,7 +87,6 @@ int32_t __stdcall CACHE_Open() {
     if (ghCacheFileHandle == (HANDLE)-1) {
       CACHE_FreeAll();
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00881894);
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -113,7 +112,6 @@ int32_t __stdcall CACHE_Open() {
       if (ghCacheFileHandle == (HANDLE)-1) {
         CACHE_FreeAll();
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00881894);
-        Fog::Debug::GuardStack();
         return 0;
       }
 
@@ -126,7 +124,7 @@ int32_t __stdcall CACHE_Open() {
       gpCacheBufferPoolFirst = pHashTableBuf;
       gpCacheFileHeader->dwHashTableOffset = 0x2c;
       pHeaderBuf->nHashTableSize = 0x400;
-      if (nCrc32 < 0x402d) {
+      if (nCrc32 <= 0x402c) {
         nCrc32 = 0x402c;
       }
 
@@ -146,7 +144,7 @@ int32_t __stdcall CACHE_Open() {
       pHeaderBuf = gpCacheFileHeader;
       nCrc32 = gpCacheFileHeader->dwFileSize;
       gpCacheFileHeader->dwBlockTableOffset = 0x402c;
-      if (nCrc32 < 0x802d) {
+      if (nCrc32 <= 0x802c) {
         nCrc32 = 0x802c;
       }
 
@@ -204,7 +202,7 @@ int32_t __stdcall CACHE_Open() {
       }
 
       nTableByteSize = nCrc32 * 0x10;
-      if (__frame0.nFileSize < pHeaderBuf->dwHashTableOffset + nTableByteSize) {
+      if (pHeaderBuf->dwHashTableOffset + nTableByteSize > __frame0.nFileSize) {
         nErrorCode = 7;
         goto warn_invalid_cache;
       }
@@ -231,7 +229,7 @@ int32_t __stdcall CACHE_Open() {
       }
 
       nTableByteSize = nCrc32 * 0x10;
-      if (__frame0.nFileSize < gpCacheFileHeader->dwBlockTableOffset + nTableByteSize) {
+      if (gpCacheFileHeader->dwBlockTableOffset + nTableByteSize > __frame0.nFileSize) {
         nErrorCode = 10;
         goto warn_invalid_cache;
       }
@@ -257,7 +255,6 @@ int32_t __stdcall CACHE_Open() {
     gbCacheIsOpen = 1;
     unlock_and_succeed:
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00881894);
-    Fog::Debug::GuardStack();
     return 1;
 }
 
@@ -273,7 +270,6 @@ void __stdcall CACHE_Rebuild() {
     CACHE_BuildFilePath(szFilePath);
     /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(szFilePath);
     CACHE_Open();
-    Fog::Debug::GuardStack();
 }
 
 // Reads cached data from bncache.dat using key lookup, validates CRC32, and returns decrypted data buffer
@@ -326,15 +322,30 @@ BOOL __fastcall CACHE_ReadData(char * szKey, uint32_t * pCrc32Out, uint32_t * * 
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00881894);
       } else {
         nCrc32Computed = *(uint32_t*)(gpCacheBufferPoolFirst + nHashSlot * 0x10 + 0xc);
-        if (nCrc32Computed < gpCacheFileHeader->nBlockTableSize) {
+        if (!(nCrc32Computed < gpCacheFileHeader->nBlockTableSize)) {
+          __frame0.nRebuildReason = 1;
+          rebuild_corrupt_cache:
+          Bnet::BnetLog_WriteLine("bncache.dat is corrupt (%d) - rebuilding archive", __frame0.nRebuildReason);
+          CACHE_Rebuild();
+          discard_output:
+          if (*ppDataBuf) {
+            Storm::SMem::SMemFree(*ppDataBuf, ".\\CACHE.CPP", 0x2de, 0);
+            *ppDataBuf = 0;
+          }
+          *pDataSizeOut = 0;
+        } else {
           memset(&__frame0.entryHeader, 0, 0x144);
           nBlockEntryOffset = nCrc32Computed * 0x10;
           nHashSlot = __frame0.entryHeader.dwHeaderCrc32;
           if (*(uint32_t*)(nBlockEntryOffset + 0xc + (int)gpCacheBlockTable) & 0xc0000000) {
             /* DWORD dwMoveMethod for SetFilePointer */ /* PLONG lpDistanceToMoveHigh for SetFilePointer */ /* LONG lDistanceToMove for SetFilePointer */ /* HANDLE hFile for SetFilePointer */ SetFilePointer(ghCacheFileHandle, *(LONG*)(nBlockEntryOffset + (int)gpCacheBlockTable), (PLONG)0x0, 0);
             /* LPOVERLAPPED lpOverlapped for ReadFile */ /* LPDWORD lpNumberOfBytesRead for ReadFile */ /* DWORD nNumberOfBytesToRead for ReadFile */ /* LPVOID lpBuffer for ReadFile */ /* HANDLE hFile for ReadFile */ ReadFile(ghCacheFileHandle, &__frame0.entryHeader, 4, &__frame0.nBytesRead, (LPOVERLAPPED)0x0);
-            if (__frame0.nBytesRead == 4) {
-              if (__frame0.entryHeader.dwHeaderSize == 0x144) {
+            if (__frame0.nBytesRead != 4) {
+              __frame0.nRebuildReason = 2;
+            } else {
+              if (__frame0.entryHeader.dwHeaderSize != 0x144) {
+                __frame0.nRebuildReason = 3;
+              } else {
                 /* LPOVERLAPPED lpOverlapped for ReadFile */ /* LPDWORD lpNumberOfBytesRead for ReadFile */ /* DWORD nNumberOfBytesToRead for ReadFile */ /* LPVOID lpBuffer for ReadFile */ /* HANDLE hFile for ReadFile */ ReadFile(ghCacheFileHandle, &__frame0.entryHeader.dwUnk04, 0x140, &__frame0.nBytesRead, (LPOVERLAPPED)0x0);
                 nHashSlot = __frame0.entryHeader.dwHeaderCrc32;
                 if (__frame0.nBytesRead == 0x140) {
@@ -359,11 +370,7 @@ BOOL __fastcall CACHE_ReadData(char * szKey, uint32_t * pCrc32Out, uint32_t * * 
                 }
 
                 __frame0.nRebuildReason = 4;
-              } else {
-                __frame0.nRebuildReason = 3;
               }
-            } else {
-              __frame0.nRebuildReason = 2;
             }
 
             goto rebuild_corrupt_cache;
@@ -440,28 +447,15 @@ BOOL __fastcall CACHE_ReadData(char * szKey, uint32_t * pCrc32Out, uint32_t * * 
             szCorruptKey = __frame0.szKeySaved;
             goto delete_corrupt_entry;
           }
-        } else {
-          __frame0.nRebuildReason = 1;
-          rebuild_corrupt_cache:
-          Bnet::BnetLog_WriteLine("bncache.dat is corrupt (%d) - rebuilding archive", __frame0.nRebuildReason);
-          CACHE_Rebuild();
-          discard_output:
-          if (*ppDataBuf) {
-            Storm::SMem::SMemFree(*ppDataBuf, ".\\CACHE.CPP", 0x2de, 0);
-            *ppDataBuf = 0;
-          }
-          *pDataSizeOut = 0;
         }
 
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00881894);
         if (!__frame0.nCorruptReason && !__frame0.nRebuildReason) {
-          Fog::Debug::GuardStack();
           return 1;
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -498,7 +492,6 @@ BOOL __fastcall CACHE_WriteData(char * szCacheKey, LPCVOID pDataToWrite, uint32_
     uint32_t nBlockIdx;
     nBlockIdx = 0;
     if (!szCacheKey || *szCacheKey == '\0' || !pDataToWrite || !nDataSize || !pFileTime || !nCacheExpiry || !gbCacheIsOpen || 0x1000000 < nDataSize) {
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -511,7 +504,7 @@ BOOL __fastcall CACHE_WriteData(char * szCacheKey, LPCVOID pDataToWrite, uint32_
     if (nHashCount) {
       pBlockEntry = (uint32_t*)((int)gpCacheBlockTable + 4);
       do {
-        if (!pBlockEntry[2] && nDataSize + 0x144 <= *pBlockEntry) {
+        if (!pBlockEntry[2] && *pBlockEntry >= nDataSize + 0x144) {
           break;
         }
 
@@ -522,13 +515,13 @@ BOOL __fastcall CACHE_WriteData(char * szCacheKey, LPCVOID pDataToWrite, uint32_
 
     D2BnCacheFileHeaderStrc* pFileHeader;
     pFileHeader = gpCacheFileHeader;
-    if (nHashCount <= nBlockIdx) {
+    if (nBlockIdx >= nHashCount) {
       FILETIME* pCurrentFileTime;
       nBlockIdx = 0;
       if (nHashCount) {
         nSearchBlockOffset = 0;
         do {
-          if (nDataSize + 0x144 <= *(uint32_t*)(nSearchBlockOffset + 4 + (int)gpCacheBlockTable)) {
+          if (*(uint32_t*)(nSearchBlockOffset + 4 + (int)gpCacheBlockTable) >= nDataSize + 0x144) {
             /* DWORD dwMoveMethod for SetFilePointer */ /* PLONG lpDistanceToMoveHigh for SetFilePointer */ /* LONG lDistanceToMove for SetFilePointer */ /* HANDLE hFile for SetFilePointer */ SetFilePointer(ghCacheFileHandle, *(LONG*)(nSearchBlockOffset + (int)gpCacheBlockTable), (PLONG)0x0, 0);
             memset(&__frame0.entryHeaderSize, 0, 0x144);
             /* LPOVERLAPPED lpOverlapped for ReadFile */ /* LPDWORD lpNumberOfBytesRead for ReadFile */ /* DWORD nNumberOfBytesToRead for ReadFile */ /* LPVOID lpBuffer for ReadFile */ /* HANDLE hFile for ReadFile */ ReadFile(ghCacheFileHandle, &__frame0.entryHeaderSize, 4, &__frame0.nBytesReadWrite, (LPOVERLAPPED)0x0);
@@ -644,9 +637,13 @@ BOOL __fastcall CACHE_WriteData(char * szCacheKey, LPCVOID pDataToWrite, uint32_
         __frame0.abEntryHeader.dwHeaderCrc32 = ~nBlockIdx;
         /* DWORD dwMoveMethod for SetFilePointer */ /* PLONG lpDistanceToMoveHigh for SetFilePointer */ /* LONG lDistanceToMove for SetFilePointer */ /* HANDLE hFile for SetFilePointer */ SetFilePointer(ghCacheFileHandle, *(LONG*)(nBlockEntryOffset + (int)gpCacheBlockTable), (PLONG)0x0, 0);
         /* LPOVERLAPPED lpOverlapped for WriteFile */ /* LPDWORD lpNumberOfBytesWritten for WriteFile */ /* DWORD nNumberOfBytesToWrite for WriteFile */ /* LPCVOID lpBuffer for WriteFile */ /* HANDLE hFile for WriteFile */ WriteFile(ghCacheFileHandle, (LPCVOID)&__frame0.abEntryHeader, 0x144, &__frame0.nBytesReadWrite, (LPOVERLAPPED)0x0);
-        if (__frame0.nBytesReadWrite == 0x144) {
+        if (__frame0.nBytesReadWrite != 0x144) {
+          nRebuildReason = 0xd;
+        } else {
           /* LPOVERLAPPED lpOverlapped for WriteFile */ /* LPDWORD lpNumberOfBytesWritten for WriteFile */ /* DWORD nNumberOfBytesToWrite for WriteFile */ /* LPCVOID lpBuffer for WriteFile */ /* HANDLE hFile for WriteFile */ WriteFile(ghCacheFileHandle, pDataToWrite, nDataSize, &__frame0.nBytesReadWrite, (LPOVERLAPPED)0x0);
-          if (__frame0.nBytesReadWrite == nDataSize) {
+          if (__frame0.nBytesReadWrite != nDataSize) {
+            nRebuildReason = 0xe;
+          } else {
             nBlockIdx = gpCacheFileHeader->nHashTableSize;
             if (nBlockIdx < 0x400) {
               nBlockIdx = 0x400;
@@ -709,11 +706,7 @@ BOOL __fastcall CACHE_WriteData(char * szCacheKey, LPCVOID pDataToWrite, uint32_
               Storm::SMem::SMemFree(pBlockEntry, ".\\CACHE.CPP", 0x39d, 0);
               nRebuildReason = 0xf;
             }
-          } else {
-            nRebuildReason = 0xe;
           }
-        } else {
-          nRebuildReason = 0xd;
         }
       } else {
         nRebuildReason = 0xc;
@@ -735,7 +728,6 @@ BOOL __fastcall CACHE_WriteData(char * szCacheKey, LPCVOID pDataToWrite, uint32_
     CACHE_Rebuild();
     cleanup:
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00881894);
-    Fog::Debug::GuardStack();
     return (uint32_t)!nRebuildReason;
 }
 

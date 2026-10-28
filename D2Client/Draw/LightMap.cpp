@@ -63,12 +63,12 @@ D2LightMapStrc * __fastcall AllocLightMap(D2UnitStrc * pUnit, int32_t nLightType
     if (nDiameter < 1) {
       return nullptr;
     }
-    if (0x11 < nDiameter) {
+    if (0x12 <= nDiameter) {
       nDiameter = 0x12;
     }
 
     nLightMapSize++;
-    D2LightMapStrc* pLightMap = D2_NEW(D2LightMapStrc);
+    D2LightMapStrc* pLightMap = ((D2LightMapStrc*)Fog::Memory::AllocClientMemory(sizeof(D2LightMapStrc), ".\\DRAW\\dLightMap.cpp", 0xff, 0));
     eD2UnitType eUnitType = UNIT_COUNT;
     if (pUnit) {
       eUnitType = pUnit->eUnitType;
@@ -121,7 +121,7 @@ void __fastcall SetRadiusY(D2LightMapStrc * pLightMap, int32_t nValue) {
     if (0 >= nValue) {
       return;
     }
-    if (0x11 < nValue) {
+    if (0x12 <= nValue) {
       nValue = 0x12;
     }
     if (!pLightMap) {
@@ -136,14 +136,14 @@ void __fastcall LIGHTMAP_SetRadius(D2LightMapStrc * pLightMap, int32_t nParam) {
     if (0 >= nParam) {
       return;
     }
-    if (0x11 < nParam) {
+    if (0x12 <= nParam) {
       nParam = 0x12;
     }
     if (!pLightMap) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x141);
       exit(-1);
     }
-    if (0x11 < nParam) {
+    if (0x12 <= nParam) {
       nParam = 0x12;
     }
 
@@ -155,19 +155,19 @@ void __fastcall LIGHTMAP_SetRadius(D2LightMapStrc * pLightMap, int32_t nParam) {
 
     pLightMap->bPixelMapReady = 0;
     if (pLightMap->pPixelMap) {
-      D2_FREE(pLightMap->pPixelMap);
+      Fog::Memory::FreeClientMemory(pLightMap->pPixelMap, ".\\DRAW\\dLightMap.cpp", 0x14a, 0);
     }
 
     pLightMap->pPixelMap = 0;
 }
 
 int32_t __fastcall GetRadiusX(D2LightMapStrc * pLightMap) {
-    if (pLightMap) {
-      return pLightMap->nRadiusX >> 3;
+    if (!pLightMap) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x155);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x155);
-    exit(-1);
+    return pLightMap->nRadiusX >> 3;
     return pLightMap->nRadiusX >> 3;
 }
 
@@ -198,23 +198,23 @@ void __fastcall FreeLightMap(D2LightMapStrc * pLightMap) {
         exit(-1);
       }
       if (pDVar1 == pLightMap) {
-        if (pDVar1) {
-          if (!pPrevLightMap) {
-            gpLightMap = pDVar1->pPrev;
-          } else {
-            pPrevLightMap->pPrev = pDVar1->pPrev;
-          }
-          if (pLightMap->pPixelMap) {
-            D2_FREE(pLightMap->pPixelMap);
-          }
-
-          D2_FREE(pLightMap);
-          nFreedLightMapsCounter++;
-          return;
+        if (!pDVar1) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x17a);
+          exit(-1);
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x17a);
-        exit(-1);
+        if (!pPrevLightMap) {
+          gpLightMap = pDVar1->pPrev;
+        } else {
+          pPrevLightMap->pPrev = pDVar1->pPrev;
+        }
+        if (pLightMap->pPixelMap) {
+          Fog::Memory::FreeClientMemory(pLightMap->pPixelMap, ".\\DRAW\\dLightMap.cpp", 0x181, 0);
+        }
+
+        Fog::Memory::FreeClientMemory(pLightMap, ".\\DRAW\\dLightMap.cpp", 0x183, 0);
+        nFreedLightMapsCounter++;
+        return;
       }
 
       pPrevLightMap = pDVar1;
@@ -238,7 +238,7 @@ void __fastcall LIGHTMAP_ValidateAndReset(D2LightMapStrc * pLightMap) {
     }
 }
 
-void __stdcall LIGHTMAP_FillGridRect(int nYStart, uint32_t nColorARGB, int nXStart, int nYEnd, int nXEnd) {
+static void __stdcall LIGHTMAP_FillGridRect(int nYStart, uint32_t nColorARGB, int nXStart, int nYEnd, int nXEnd) {
     uint32_t* pCell;
     int nColCount;
     uint8_t byBlue;
@@ -334,20 +334,20 @@ void __stdcall LIGHTMAP_InitFromPlayerAndRooms(uint32_t bForceBlack) {
             nXStart = roomCoords.dwXStart - gnLightmapWorldRefreshFlag;
             nXEnd = roomCoords.dwXSize + nXStart;
             pRoom = pPlayerRoom;
-            if (nXStart < 0x31 && -1 < nXEnd) {
+            if (nXStart <= 0x30 && 0 <= nXEnd) {
               nYStart = roomCoords.dwYStart - gnLightmapBufferState;
               nYEnd = roomCoords.dwYSize + nYStart;
-              if (nYStart < 0x31 && -1 < nYEnd) {
+              if (nYStart <= 0x30 && 0 <= nYEnd) {
                 if (nXStart < 0) {
                   nXStart = 0;
                 }
-                if (0x2f < nXEnd) {
+                if (0x30 <= nXEnd) {
                   nXEnd = 0x2f;
                 }
                 if (nYStart < 0) {
                   nYStart = 0;
                 }
-                if (0x2f < nYEnd) {
+                if (0x30 <= nYEnd) {
                   nYEnd = 0x2f;
                 }
 
@@ -374,40 +374,40 @@ void __stdcall LIGHTMAP_ClearToBlack() {
     LIGHTMAP_FillGridRect(0, 0, 0, 0x2f, 0x2f);
 }
 
-void __stdcall LIGHTMAP_AddLightToCell(int nX, int nIntensity, uint8_t nRed, uint8_t nGreen, uint8_t nBlue, int nY) {
+static void __stdcall LIGHTMAP_AddLightToCell(int nX, int nIntensity, uint8_t nRed, uint8_t nGreen, uint8_t nBlue, int nY) {
     uint32_t nNewGreen;
     uint32_t nFalloff;
     uint32_t nCellY = (nY >> 3) - gnLightmapWorldRefreshFlag;
-    if (nCellY >= 0x30) {
+    if (nCellY > 0x2f) {
       return;
     }
 
     uint32_t nCellX = (nX >> 3) - gnLightmapBufferState;
-    if (nCellX >= 0x30) {
+    if (nCellX > 0x2f) {
       return;
     }
 
     int nCellOffset = nCellX * 0x30 + nCellY;
     nCellX = (uint32_t)gaLightMapCells[nCellOffset].nCellIntensity;
     nCellY = nCellX + nIntensity;
-    if (0xfe < nCellY) {
+    if (0xff <= nCellY) {
       nCellY = 0xff;
     }
     if (gbLightmapColorEnabled) {
       uint32_t nNewRed;
       nFalloff = gnLightmapInterpolationState[nCellY + 1];
       nNewRed = (gaLightMapCells[nCellOffset].nRed * nCellX + (uint32_t)nRed * nIntensity) * nFalloff >> 0x10;
-      if (0xff < nNewRed) {
+      if (0xff < (int)nNewRed) {
         nNewRed = 0xff;
       }
 
       nNewGreen = (gaLightMapCells[nCellOffset].nGreen * nCellX + (uint32_t)nGreen * nIntensity) * nFalloff >> 0x10;
-      if (0xff < nNewGreen) {
+      if (0xff < (int)nNewGreen) {
         nNewGreen = 0xff;
       }
 
       nCellX = (gaLightMapCells[nCellOffset].nBlue * nCellX + (uint32_t)nBlue * nIntensity) * nFalloff >> 0x10;
-      if (0xff < nCellX) {
+      if (0xff < (int)nCellX) {
         nCellX = 0xff;
       }
 
@@ -560,7 +560,7 @@ void __fastcall LIGHTMAP_SampleGridToBuffer(int unused, D2LightMapStrc * pLightM
     } while (nYRowsLeft);
 }
 
-void __stdcall LIGHTMAP_ComputeInterpolationDir(int nSrcX, int nSrcY, D2LightMapStrc * pLightMap) {
+static void __stdcall LIGHTMAP_ComputeInterpolationDir(int nSrcX, int nSrcY, D2LightMapStrc * pLightMap) {
     int nDeltaX;
     nDeltaX = pLightMap->nGridX - nSrcX;
     uint32_t nDeltaY;
@@ -1036,7 +1036,7 @@ void LIGHTMAP_ApplyLightWithPixelMap(D2LightMapStrc * pLightMap) {
     }
 }
 
-void __stdcall LIGHTMAP_UpdateSingleLight(int nQuality, D2LightMapStrc * pLightMap) {
+static void __stdcall LIGHTMAP_UpdateSingleLight(int nQuality, D2LightMapStrc * pLightMap) {
     int32_t nPrecisionX;
     int32_t nPrecisionY;
     int nRadius;
@@ -1063,14 +1063,14 @@ void __stdcall LIGHTMAP_UpdateSingleLight(int nQuality, D2LightMapStrc * pLightM
       if (pLightMap->nLightType == 2) {
         pLightMap->bPixelMapReady = 0;
         if (pLightMap->pPixelMap) {
-          D2_FREE(pLightMap->pPixelMap);
+          Fog::Memory::FreeClientMemory(pLightMap->pPixelMap, ".\\DRAW\\dLightMap.cpp", 0x4cc, 0);
         }
 
         pLightMap->pPixelMap = 0;
       }
 
       nRadius = pLightMap->nRadiusX;
-      if (nRadius < pLightMap->nRadiusY) {
+      if (pLightMap->nRadiusY > nRadius) {
         nRadius += 8;
       } else {
         nRadius += -8;
@@ -1078,7 +1078,7 @@ void __stdcall LIGHTMAP_UpdateSingleLight(int nQuality, D2LightMapStrc * pLightM
 
       pLightMap->nRadiusX = nRadius;
     }
-    if (0xff < pLightMap->nRadiusX) {
+    if (0x100 <= pLightMap->nRadiusX) {
       pLightMap->nRadiusX = 0xf8;
     }
     if (pLightMap->bFading && pLightMap->nRadiusX < 1) {
@@ -1211,21 +1211,21 @@ void __stdcall dLightMapUpdate() {
     int nQualityLevel;
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_UI();
     eD2UnitType eUnitType = pPlayerUnit_lcl->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPlayerX = pPlayerUnit_lcl->pPath.pStaticPath->nPosX;
-    } else if (!pPlayerUnit_lcl->pPath.pDynamicPath) {
-      nPlayerX = 0;
-    } else {
+    } else if (pPlayerUnit_lcl->pPath.pDynamicPath) {
       nPlayerX = D2Common::PATH::DynamicPath::GetXPos(pPlayerUnit_lcl->pPath.pDynamicPath);
+    } else {
+      nPlayerX = 0;
     }
 
     eUnitType = pPlayerUnit_lcl->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nQualityLevel = pPlayerUnit_lcl->pPath.pStaticPath->nPosY;
-    } else if (!pPlayerUnit_lcl->pPath.pDynamicPath) {
-      nQualityLevel = 0;
-    } else {
+    } else if (pPlayerUnit_lcl->pPath.pDynamicPath) {
       nQualityLevel = D2Common::PATH::DynamicPath::GetYPos(pPlayerUnit_lcl->pPath.pDynamicPath);
+    } else {
+      nQualityLevel = 0;
     }
 
     gnLightmapBufferState = nQualityLevel - 0x18;
@@ -1252,10 +1252,10 @@ void __stdcall LIGHTMAP_FreeAll() {
       D2LightMapStrc* pNextNode;
       pNextNode = pMemoryToFree->pPrev;
       if (pMemoryToFree->pPixelMap) {
-        D2_FREE(pMemoryToFree->pPixelMap);
+        Fog::Memory::FreeClientMemory(pMemoryToFree->pPixelMap, ".\\DRAW\\dLightMap.cpp", 0x57d, 0);
       }
 
-      D2_FREE(pMemoryToFree);
+      Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\DRAW\\dLightMap.cpp", 0x57f, 0);
       pMemoryToFree = pNextNode;
     }
 

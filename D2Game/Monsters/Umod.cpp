@@ -55,7 +55,7 @@ void __fastcall MONUMOD_RollNameSeed(D2UnitStrc * pUnit, int32_t nIndex, BOOL bU
     pUnit->pUnitData.pUnitDataMonster->nNameSeed = (uint16_t)sSeedNext.nSeedLow;
 }
 
-void UMOD_IncreaseMonsterHp(uint32_t nUmodConstant, D2UnitStrc * pUnit) {
+static void UMOD_IncreaseMonsterHp(uint32_t nUmodConstant, D2UnitStrc * pUnit) {
     int nHpBonus;
     uint32_t nBaseHp;
     nBaseHp = D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit);
@@ -68,13 +68,13 @@ void UMOD_IncreaseMonsterHp(uint32_t nUmodConstant, D2UnitStrc * pUnit) {
         nHpBonus = (int)nUmodConstant / 100 * nBaseHp;
         goto apply_hp_bonus;
       }
-    } else if (0x63f < (int)(nBaseHp & -16)) {
+    } else if (0x640 <= (int)(nBaseHp & -16)) {
       nHpBonus = (int)nBaseHp / 100 * nUmodConstant;
       goto apply_hp_bonus;
     }
 
     int64_t nDivResult;
-    nDivResult = __alldiv((uint32_t)((int64_t)(int)nBaseHp * (int64_t)(int)nUmodConstant), (uint32_t)((uint64_t)((int64_t)(int)nBaseHp * (int64_t)(int)nUmodConstant) >> 0x20), 100, 0);
+    nDivResult = (int64_t)((int64_t)(int)nBaseHp * (int64_t)(int)nUmodConstant) / 100;
     nHpBonus = (int)nDivResult;
     apply_hp_bonus:
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_maxhp, nBaseHp + nHpBonus, 0);
@@ -140,7 +140,7 @@ void __fastcall MONUMOD_ApplyChampionStats(D2UnitStrc * pUnit, int32_t nIndex, B
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize)) {
       return;
     }
 
@@ -153,7 +153,7 @@ void __fastcall MONUMOD_ApplyChampionStats(D2UnitStrc * pUnit, int32_t nIndex, B
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_level, nDamageBonus - 1, 0);
     uint32_t nExp = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_experience, 0);
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_experience, nExp + nExp / 5 * -2, 0);
-    if (sgptDataTable->nTxtMonUmodSize < 0xc) {
+    if (sgptDataTable->nTxtMonUmodSize <= 0xb) {
       nDamageBonus = 0;
     } else if (sgptDataTable->pTxtMonUmod == (D2MonUModTxt*)-352) {
       nDamageBonus = 0;
@@ -193,7 +193,7 @@ void __fastcall MONUMOD_ApplyChampionStats(D2UnitStrc * pUnit, int32_t nIndex, B
 
       nBaseMonId = (int)(0x800 / (int64_t)(int)nVelocity) - 0x80;
       if (10 < nBaseMonId) {
-        if (99 < nBaseMonId) {
+        if (100 <= nBaseMonId) {
           nBaseMonId = 100;
         }
 
@@ -236,7 +236,7 @@ void __fastcall MONUMOD_ApplyColdEnchant(D2UnitStrc * pUnit, int32_t nIndex, BOO
     MONUMOD_ApplyChampionStats(pUnit, nIndex, bUnknown);
     uint8_t byDifficulty;
     byDifficulty = pGame->nDifficulty;
-    if (byDifficulty) {
+    if ((uint32_t)byDifficulty > 0) {
       if (1 < byDifficulty) {
         bUnknown = 2;
         goto add_cold_damage;
@@ -256,14 +256,14 @@ void __fastcall MONUMOD_ApplyColdEnchant(D2UnitStrc * pUnit, int32_t nIndex, BOO
     }
     int nLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
     int nLevelIdx = nLevel;
-    if (nLevel < 2) {
+    if (nLevel <= 1) {
       nLevelIdx = 1;
     }
 
     int nLvlTableIdx = sgptDataTable->nTxtMonLvlSize - 1;
     if (nLevelIdx < nLvlTableIdx) {
       nLvlTableIdx = nLevel;
-      if (nLevel < 2) {
+      if (nLevel <= 1) {
         nLvlTableIdx = 1;
       }
     }
@@ -322,8 +322,8 @@ void __fastcall MONUMOD_ApplyFanatic(D2UnitStrc * pUnit, int32_t nIndex, BOOL bU
     if (pDiffLevels) {
       int32_t nValidatedId;
       nValue = pDiffLevels->ChampionDamageBonus * 300 / 100;
-      nBaseClassId = D2Client::UNIT::Player::TXT_MonStats_GetBaseId(pUnit);
-      nValidatedId = D2Client::UNIT::Player::ValidateClassId(nBaseClassId);
+
+      nValidatedId = D2Client::UNIT::Player::ValidateClassId(D2Client::UNIT::Player::TXT_MonStats_GetBaseId(pUnit));
       nBaseClassId = nValue;
       if (nValidatedId == 0x76) {
         nBaseClassId = nValue / 2;
@@ -377,27 +377,27 @@ void __fastcall MagicResist(D2UnitStrc * pUnit, int32_t nIndex, BOOL bUnknown) {
     if (99 < nDmgRes) {
       bUnknown++;
     }
-    if (99 < nMagicRes) {
+    if (100 <= nMagicRes) {
       bUnknown++;
     }
-    if ((uint32_t)bUnknown >= 2) {
+    if ((int)((uint32_t)bUnknown) >= 2) {
       return;
     }
     if (nIndex == 8) {
       if (nColdRes < 100) {
         D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_coldresist, nColdRes + 0x28, 0);
-        if (99 < nColdRes + 0x28) {
+        if (100 <= nColdRes + 0x28) {
           bUnknown++;
         }
       }
-      if ((uint32_t)bUnknown < 2) {
+      if ((int)((uint32_t)bUnknown) < 2) {
         if (nFireRes < 100) {
           D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_fireresist, nFireRes + 0x28, 0);
-          if (99 < nFireRes + 0x28) {
+          if (100 <= nFireRes + 0x28) {
             bUnknown++;
           }
         }
-        if ((uint32_t)bUnknown < 2 && nLightRes < 100) {
+        if ((int)((uint32_t)bUnknown) < 2 && nLightRes < 100) {
           D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_lightresist, nLightRes + 0x28, 0);
           if (99 < nLightRes + 0x28) {
             return;
@@ -428,18 +428,18 @@ void __fastcall MagicResist(D2UnitStrc * pUnit, int32_t nIndex, BOOL bUnknown) {
       if (nIndex == 0x1b) {
         if (nColdRes < 0x4b) {
           D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_coldresist, nColdRes + 0x14, 0);
-          if (99 < nColdRes + 0x14) {
+          if (100 <= nColdRes + 0x14) {
             bUnknown++;
           }
         }
-        if ((uint32_t)bUnknown < 2) {
+        if ((int)((uint32_t)bUnknown) < 2) {
           if (nFireRes < 0x4b) {
             D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_fireresist, nFireRes + 0x14, 0);
-            if (99 < nFireRes + 0x14) {
+            if (100 <= nFireRes + 0x14) {
               bUnknown++;
             }
           }
-          if ((uint32_t)bUnknown < 2 && nLightRes < 0x4b) {
+          if ((int)((uint32_t)bUnknown) < 2 && nLightRes < 0x4b) {
             D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_lightresist, nLightRes + 0x14, 0);
             if (99 < nLightRes + 0x14) {
               return;
@@ -459,8 +459,8 @@ void __fastcall TeleHeal(D2UnitStrc * pUnit, int32_t nIndex, BOOL bUnknown) {
 
     SKILLS::SkillsServer::SetSkill(pUnit, SKILL_MonTeleport, 1, 1);
     uint32_t nMode = 4;
-    D2SkillStrc* pSkill = D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_MonTeleport, pUnit);
-    D2Common::Skills::SetSkillMode(pSkill, nMode);
+
+    D2Common::Skills::SetSkillMode(D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_MonTeleport, pUnit), nMode);
     Monster::AI::SetUnsetAiFlags0x20(pUnit, 1);
 }
 
@@ -534,7 +534,7 @@ void __fastcall AuraEnchanted(D2UnitStrc * pUnit, int32_t nIndex, BOOL bUnknown)
     }
 
     bUnknown = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
-    if (bUnknown < 1) {
+    if (bUnknown <= 0) {
       bUnknown = 1;
     }
 

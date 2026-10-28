@@ -65,7 +65,6 @@ uint32_t __stdcall SStrLen(char * szText);
 // @sourcefile-storm .\SOURCE\SSTR.CPP  (first-party: SStrDup's own SMemAlloc call site names it)
 // @wasnamed SSTR_AppendStringOptimized
 uint32_t __stdcall SStrPack(LPSTR szText, char * szSource, uint32_t nBufferLength);
-uint32_t D2vsprintf(char * szFormat, size_t nSize, char * pBuffer, va_list pArgs);
 // @oracle PPC Mac Storm 1.10b export table (337 named TVector symbols), the authoritative Storm API.
 // @oracle-signature SStrPrintf(char *, unsigned long, const char *, ...)
 // @oracle-basis The only __cdecl varargs formatter in the module: (out, size, format, ...), NULL guard on out and

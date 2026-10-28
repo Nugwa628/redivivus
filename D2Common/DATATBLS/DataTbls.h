@@ -48,11 +48,6 @@ void __fastcall DATATBLS_BuildStatesDataBitMask(struct D2StatesDataTbls * pState
 void __fastcall DATATBLS_BuildStatesDataList(struct D2AllStatesDataTbl * * ppAllStatesData, short * pCounter, uint32_t nFlag);
 // @sourcefile .\DATATBLS\DataTbls.cpp
 void __fastcall TXT_States_AllocItemTypesStateDataTable(struct D2AllStatesDataTbl * * ppAllStatesData, short * pCounter, int32_t nOffset);
-void GetPlayerClassIdToName(int32_t nClassId, char * szResult, size_t nSize);
-void GetMonsterClassIdToName(int32_t nClassId, char * szResult, size_t nSize);
-void GetObjectClassIdToName(int32_t nClassId, char * szResult, size_t nSize);
-void GetItemClassIdToName(int32_t nClassId, char * szResult, size_t nSize);
-void GetMissileClassIdToName(int32_t nClassId, char * szResult, size_t nSize);
 char * __stdcall GetUnitClassIdToName(struct D2UnitStrc * pUnit, char * szResult, size_t nSize);
 char * __stdcall GetNameByClassIdAndType(eD2UnitType eUnitType, int16_t nClassId, char * szResult, size_t nSize);
 void __stdcall StoreDataTables(uint32_t szFileName, struct D2InventoryToBeUpdatedStrc * pInventoryToBeUpdated, size_t nSize, uint32_t dwVersion);

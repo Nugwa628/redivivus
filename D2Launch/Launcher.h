@@ -36,7 +36,6 @@ BOOL __stdcall CHARSEL_OpenRealmChangeDialog(struct D2ControlMsg * pControlMsg);
 BOOL __stdcall CHARSEL_HandleCharListClick(struct D2ControlMsg * pControlMsg);
 void __stdcall CHARSEL_ParseRealmCharList(char * szRealmName, char * szText, int32_t bShouldCache);
 BOOL __stdcall CHARSEL_OnPressPumpRealmCharListLoad(struct D2ControlMsg * pControlMsg);
-void CHARSEL_RequestRealmCharList(char * szRealmName);
 void __fastcall CHARSEL_LoadCharList(char * szText);
 // Initializes character selection screen. Creates 8 D2WinTextBox controls stored in gaCharSelScreenSlotControls[0-7] for character name display slots. Sets up UI callbacks, loads DC6 assets, initializes character list data structures.
 void __stdcall CHARSEL_InitCharSelScreen();
@@ -45,7 +44,7 @@ BOOL __stdcall CHARSEL_OnPressLoadCharListForPreferredRealm(struct D2ControlMsg 
 BOOL __stdcall CHARSEL_HandleRealmChange(struct D2ControlMsg * pMsg);
 BOOL __stdcall HandleUpdateToExpansion(struct D2ControlMsg * pControlMsg);
 BOOL __stdcall LAUNCHER_StartGameWithSelectedCharacter(struct D2ControlMsg * pControlMsg);
-void __fastcall LAUNCHER_InitNetworkLobbyQueue(struct D2IniConfigStrc * pIniConfig);
+int __fastcall LAUNCHER_InitNetworkLobbyQueue(struct D2IniConfigStrc * pIniConfig);
 void __stdcall LAUNCHER_SetBusyFlag();
 void __stdcall LAUNCHER_ClearBusyFlag();
 BOOL __stdcall LAUNCHER_GetBusyFlag();
@@ -56,7 +55,6 @@ int __stdcall LAUNCHER_PumpChangePasswordResponse(int nFrameIndex);
 void __stdcall LAUNCHER_DisconnectFromBnet();
 // Displays out-of-game error/message dialogs. Error code determines which localized string to show. Custom data used for character names or custom messages.
 int __fastcall ShowOogErrorDialog(struct D2OogErrorDataStrc * pErrorData);
-void __fastcall LAUNCHER_ShowOogErrorDialog_ForEnterEmail(eOogErrorCode eErrorCode, void * pCustomData);
 uint32_t __stdcall CLIENT_ConnectToBattleNet();
 int __fastcall EnterEmailMessagePumper(struct D2IniConfigStrc * pIniConfig, int32_t bCreateAccount, int32_t nResponseCode);
 void __stdcall UIMENU_MainMenuWithoutMenuButWithDiabloLogo();

@@ -967,23 +967,23 @@ void __fastcall LINKEDLIST_InsertNode(void * pNewItem, int32_t nInsertMode, void
     if (pNodeLink->pPrevLink) {
       LINKEDLIST_UnlinkNodeSelf(pNodeLink);
     }
-    if (!pRefItem) {
-      pAnchorLink = &pList->head;
-    } else {
+    if (pRefItem) {
       pAnchorLink = LINKEDLIST_GetOffset(pRefItem, pList);
-    }
-    if (nInsertMode == 1) {
-      pNodeLink->pPrevLink = pAnchorLink;
-      pNodeLink->pNext = pAnchorLink->pNext;
-      pPrevLinkField = LINKEDLIST_GetNodePointer(pList->nLinkOffset, pAnchorLink);
-      pPrevLinkField->pPrevLink = pNodeLink;
-      pAnchorLink->pNext = (int)pNewItem;
     } else {
+      pAnchorLink = &pList->head;
+    }
+    if (nInsertMode != 1) {
       pPrevLinkField = pAnchorLink->pPrevLink;
       pNodeLink->pPrevLink = pPrevLinkField;
       pNodeLink->pNext = pPrevLinkField->pNext;
       pPrevLinkField->pNext = (int)pNewItem;
       pAnchorLink->pPrevLink = pNodeLink;
+    } else {
+      pNodeLink->pPrevLink = pAnchorLink;
+      pNodeLink->pNext = pAnchorLink->pNext;
+      pPrevLinkField = LINKEDLIST_GetNodePointer(pList->nLinkOffset, pAnchorLink);
+      pPrevLinkField->pPrevLink = pNodeLink;
+      pAnchorLink->pNext = (int)pNewItem;
     }
 }
 

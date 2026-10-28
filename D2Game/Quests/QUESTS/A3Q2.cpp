@@ -130,13 +130,13 @@ void __fastcall Q19_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
       pQuestData->pQuestSpecificData.pA3Q2->bQuestCompleted = true;
       pQuestData->sStateFunctions.fpQuestStateHandler[2] = Q19_Callback02_NpcDeactivate;
       return;
-      case 0x220:
-        /* SetQuestState(KhalimsWill, Step0x06): dialog 0x220 -> Khalim's Heart step
-                         discussed/turned in */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_KhalimsWill, QUESTSTATE_Step0x06);
-      return;
       case 0x221:
         /* SetQuestState(KhalimsWill, Step0x03): dialog 0x221 -> Khalim's Eye step
                          discussed/turned in */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_KhalimsWill, QUESTSTATE_Step0x03);
+      return;
+      case 0x220:
+        /* SetQuestState(KhalimsWill, Step0x06): dialog 0x220 -> Khalim's Heart step
+                         discussed/turned in */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_KhalimsWill, QUESTSTATE_Step0x06);
       return;
       case 0x222:
         /* SetQuestState(KhalimsWill, Step0x04): dialog 0x222 -> Khalim's Brain step
@@ -180,15 +180,15 @@ void __fastcall Q19_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // Q19_SendQuestStatePacket (Khalim's Will). Builds and sends the 0x5D quest-state packet to the player's client conveying which Khalim's Will sub-stage/relic message to display. No QuestRecord transitions; pure client notification.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a3q2.cpp
 void __fastcall Q19_SendQuestStatePacket(uint8_t bStateByte, D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    uint8_t aPacketFrame[8];
-    aPacketFrame[4] = 0;
-    aPacketFrame[5] = 0;
-    aPacketFrame[3] = bStateByte;
-    aPacketFrame[2] = pQuestData->nQuestPacketFlags;
-    aPacketFrame[0] = 0x5d;
-    aPacketFrame[1] = 0x10;
+    struct { uint8_t e0, e1, e2, e3, e4, e5, e6, e7; } aPacketFrame;
+    ((uint8_t*)&aPacketFrame)[4] = 0;
+    ((uint8_t*)&aPacketFrame)[5] = 0;
+    ((uint8_t*)&aPacketFrame)[3] = bStateByte;
+    ((uint8_t*)&aPacketFrame)[2] = pQuestData->nQuestPacketFlags;
+    ((uint8_t*)&aPacketFrame)[0] = 0x5d;
+    ((uint8_t*)&aPacketFrame)[1] = 0x10;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pQuestArgs->pPlayer, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q2.cpp", 0x238);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, (D2GSPacketSrv0x5D*)aPacketFrame);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, (D2GSPacketSrv0x5D*)((uint8_t*)&aPacketFrame));
 }
 
 // Q19_Callback_04 (Khalim's Will). Item-interaction handler fired when player handles a Khalim relic / assembled Khalim's Will. Gates on QUEST_AbleGoToAct3=Completed and quest not already Completed. Inspects which of the 4 relics (Flail 0x20316671, Eye 0x20796571, Brain 0x20726271, Heart 0x20726871) and the combined Khalim's Will (0x20326671) the player holds, plus sub-steps 0x02-0x07, then sends the appropriate Q19_SendQuestStatePacket message. Reads quest state only; no SetQuestState here.
@@ -565,7 +565,7 @@ BOOL __fastcall OBJOP_A3Q2_KhalimsRelicPortalDrop1(D2ObjectOperateFnArg * pOpera
     int iHeartDropIdx = 0;
     D2SeedStrc seedNext = D2_SEED_NEXT(*pControlSeed);
     *pControlSeed = seedNext;
-    int iVar2 = seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 5) * -5 + 5;
+    int iVar2 = seedNext.nSeedLow % 5 + 5;
     if (0 < iVar2) {
       do {
         Objects::ObjectsMode::SpawnDrop(pOperation->sArg.pGame, pOperation->sArg.pVictim, 0x20646c67, QUALITY_NORMAL);
@@ -610,7 +610,7 @@ BOOL __fastcall OBJOP_A3Q2_KhalimsRelicPortalDrop2(D2ObjectOperateFnArg * pOpera
     int iEyeDropIdx = 0;
     D2SeedStrc seedNext = D2_SEED_NEXT(*pControlSeed);
     *pControlSeed = seedNext;
-    int iVar2 = seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 5) * -5 + 5;
+    int iVar2 = seedNext.nSeedLow % 5 + 5;
     if (0 < iVar2) {
       do {
         Objects::ObjectsMode::SpawnDrop(pOperation->sArg.pGame, pOperation->sArg.pVictim, 0x20646c67, QUALITY_NORMAL);
@@ -655,7 +655,7 @@ BOOL __fastcall OBJOP_A3Q2_KhalimsRelicPortalDrop3(D2ObjectOperateFnArg * pOpera
     int iBrainDropIdx = 0;
     D2SeedStrc seedNext = D2_SEED_NEXT(*pControlSeed);
     *pControlSeed = seedNext;
-    int iVar2 = seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 5) * -5 + 5;
+    int iVar2 = seedNext.nSeedLow % 5 + 5;
     if (0 < iVar2) {
       do {
         Objects::ObjectsMode::SpawnDrop(pOperation->sArg.pGame, pOperation->sArg.pVictim, 0x20646c67, QUALITY_NORMAL);
@@ -993,7 +993,7 @@ void __fastcall Q19_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->sStateFunctions.fpQuestStateHandler[0xd] = Q19_Callback13_PlayerStartedGame;
     pQuestData->sStateFunctions.fpQuestStateHandler[10] = Q19_Callback10_PlayerLeavesGame;
     pQuestData->sStateFunctions.fpQuestStateHandler[4] = Q19_Callback04_ItemPickedUp;
-    D2QuestDataA3Q2Strc* pQuestSpecificData = D2_NEW_POOL(pQuestDataInternal->pMemoryPool, D2QuestDataA3Q2Strc);
+    D2QuestDataA3Q2Strc* pQuestSpecificData = ((D2QuestDataA3Q2Strc*)Fog::Memory::AllocServerMemory(pQuestDataInternal->pMemoryPool, sizeof(D2QuestDataA3Q2Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q2.cpp", 0x39b, 0));
     pQuestData->pQuestSpecificData.pA3Q2 = pQuestSpecificData;
     memset(pQuestSpecificData, 0, 0xb0);
     pQuestSpecificData->nOrbUpdateMode = 0;

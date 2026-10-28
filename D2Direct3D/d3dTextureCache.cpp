@@ -31,7 +31,7 @@ void __fastcall D3DTEXCACHE_SetPalette(D3DTextureCacheStrc * pCache, void * pPal
 
     while (!(int)pCache->pNodeBuffer[nNodeIndex].pSurface || (pSurface = pCache->pNodeBuffer[nNodeIndex].pSurface , nResult = pSurface->lpVtbl->SetPalette(pSurface, (IDirectDrawPalette*)pPalette) , !nResult)) {
       nNodeIndex++;
-      if (pCache->nMaxNodes - 1 <= nNodeIndex) {
+      if (nNodeIndex >= pCache->nMaxNodes - 1) {
         return;
       }
     }
@@ -39,7 +39,7 @@ void __fastcall D3DTEXCACHE_SetPalette(D3DTextureCacheStrc * pCache, void * pPal
     Renderer::DIRECTD3D_LogError("SetPalette (texture surface)", nResult);
 }
 
-void __fastcall D3DTEXCACHE_InsertNodeAtTail(D3DTextureCacheNodeStrc * pNode, D3DTextureCacheStrc * pCache) {
+static void __fastcall D3DTEXCACHE_InsertNodeAtTail(D3DTextureCacheNodeStrc * pNode, D3DTextureCacheStrc * pCache) {
     if (!pCache->pUsedHead) {
       pCache->pUsedHead = pNode;
       pCache->pUsedTail = pNode;
@@ -91,16 +91,13 @@ D3DTextureCacheNodeStrc * __fastcall D3DTEXCACHE_RemoveNodeByIndex(D3DTextureCac
     return pTargetNode;
 }
 
-int __stdcall D3DTEXCACHE_AllocateNodeFromFreeList(D3DTextureCacheStrc * pCache) {
+static int __stdcall D3DTEXCACHE_AllocateNodeFromFreeList(D3DTextureCacheStrc * pCache) {
     if (pCache->nUsedCount == pCache->nMaxNodes) {
       return 0;
     }
 
     D3DTextureCacheNodeStrc* pDVar1 = pCache->pFreeHead;
-    if (!pDVar1) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd7);
-      exit(-1);
-    } else {
+    if (pDVar1) {
       D3DTextureCacheNodeStrc* pNewFreeHead;
       pNewFreeHead = pDVar1->pNext;
       pCache->pFreeHead = pNewFreeHead;
@@ -112,46 +109,49 @@ int __stdcall D3DTEXCACHE_AllocateNodeFromFreeList(D3DTextureCacheStrc * pCache)
 
       pDVar1->pNext = 0;
       pDVar1->pPrev = 0;
-      if (pDVar1->nIndex < pCache->nMaxNodes) {
-        if (!pCache->pUsedHead) {
-          pCache->nUsedCount++;
-          pCache->pUsedHead = pDVar1;
-          pCache->pUsedTail = pDVar1;
-          return pDVar1->nIndex + 1;
-        }
+      if (!(pDVar1->nIndex < pCache->nMaxNodes)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd8);
+        exit(-1);
+      }
 
-        pCache->pUsedTail->pNext = pDVar1;
-        pDVar1->pPrev = pCache->pUsedTail;
+      if (!pCache->pUsedHead) {
         pCache->nUsedCount++;
+        pCache->pUsedHead = pDVar1;
         pCache->pUsedTail = pDVar1;
         return pDVar1->nIndex + 1;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd8);
+      pCache->pUsedTail->pNext = pDVar1;
+      pDVar1->pPrev = pCache->pUsedTail;
+      pCache->nUsedCount++;
+      pCache->pUsedTail = pDVar1;
+      return pDVar1->nIndex + 1;
+    } else {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd7);
       exit(-1);
     }
 }
 
 void __fastcall D3DTEXCACHE_InvalidateByIndex(D3DTextureCacheStrc * pCache, int nIndex) {
     D3DTextureCacheNodeStrc* pNode;
-    if (pCache->nUsedCount < 2) {
+    if (pCache->nUsedCount <= 1) {
       return;
     }
     if (!nIndex) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf5);
       exit(-1);
-    } else if (pCache->nMaxNodes < nIndex) {
+    } else if (nIndex > pCache->nMaxNodes) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf6);
       exit(-1);
     } else {
-      if (0 < nIndex) {
-        pNode = D3DTEXCACHE_RemoveNodeByIndex(pCache, nIndex - 1);
-        D3DTEXCACHE_InsertNodeAtTail(pNode, pCache);
-        return;
+      if (!(1 <= nIndex)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf8);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf8);
-      exit(-1);
+      pNode = D3DTEXCACHE_RemoveNodeByIndex(pCache, nIndex - 1);
+      D3DTEXCACHE_InsertNodeAtTail(pNode, pCache);
+      return;
     }
 }
 
@@ -238,7 +238,7 @@ void __fastcall D3DTEXCACHE_Free(D3DTextureCacheStrc * pCache, BOOL bInvalidateA
         }
       }
       if (pCache->pNodeBuffer) {
-        D2_FREE(pCache->pNodeBuffer);
+        Fog::Memory::FreeClientMemory(pCache->pNodeBuffer, ".\\Src\\d3dTextureCache.cpp", 0x94, 0);
         pCache->pNodeBuffer = 0;
       }
 

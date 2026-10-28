@@ -92,10 +92,9 @@ void SendPlayerEvent(void * pThis, uint32_t pUnitGid, uint8_t bParam) {
     }
 
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5A_SYSTEMMSG((D2ClientStrc*)pThis, &sEventPacket);
-    Fog::Debug::GuardStack();
 }
 
-void __stdcall SendPlayerInfo(uint16_t nParam, uint32_t nParam2, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2) {
+static void __stdcall SendPlayerInfo(uint16_t nParam, uint32_t nParam2, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2) {
     UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pUnit2);
     UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit2, pUnit);
     uint32_t uFlags = UNIT::PlayerList::PLAYERLIST_GetFlagsMasked(pUnit, pUnit2, (uint32_t)nParam);
@@ -112,8 +111,8 @@ void __fastcall PARTYSCREEN_TogglePlayerSquelch(::SGAMEDATA * pGame, D2UnitStrc 
     uint32_t bIsConnected;
     uint8_t bParam;
     uint8_t bEventType;
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x4a);
-    uint32_t bIsConnectedFlag = GAME::Clients::CLIENT_TestFileFlags(pClient, 4);
+    D2ClientStrc* pClient;
+    uint32_t bIsConnectedFlag = GAME::Clients::CLIENT_TestFileFlags(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x4a), 4);
     if (!bIsConnectedFlag) {
       return;
     }
@@ -130,8 +129,8 @@ void __fastcall PARTYSCREEN_TogglePlayerSquelch(::SGAMEDATA * pGame, D2UnitStrc 
       bIsConnected = pUnit->nUnitGUID;
     }
 
-    pClient = UNIT::SUnit::SUNIT_GetClient(pTarget, ".\\PLAYER\\PartyScreen.cpp", 0x65);
-    SendPlayerEvent(pClient, bIsConnected, bParam);
+
+    SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pTarget, ".\\PLAYER\\PartyScreen.cpp", 0x65), bIsConnected, bParam);
 }
 
 void __fastcall PARTYSCREEN_UpdateMuteRelation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget, uint32_t bNewState, uint32_t dwParam) {
@@ -158,7 +157,7 @@ void __fastcall PARTYSCREEN_UpdateSquelchRelation(::SGAMEDATA * pGame, D2UnitStr
     GAME::SCmd::NET_D2GS_SERVER_Send_0x75_UPDATEROSTER(pTarget, pUnit);
 }
 
-void RefreshPlayerStatus(D2UnitStrc * pUnit1, D2UnitStrc * pUnit2) {
+static void RefreshPlayerStatus(D2UnitStrc * pUnit1, D2UnitStrc * pUnit2) {
     int nUnit2GUID;
     int nUnit1GUID = !pUnit1 ? -1 : pUnit1->nUnitGUID;
     if (!pUnit2) {
@@ -211,8 +210,8 @@ void __fastcall AssignPlayerToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uin
         }
 
         bEventType = '\a';
-        self = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0xb7);
-        SendPlayerEvent(self, pUnitGid, bEventType);
+
+        SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0xb7), pUnitGid, bEventType);
       }
     }
 
@@ -261,8 +260,8 @@ void __fastcall PARTYSCREEN_AcceptPartyInvite(::SGAMEDATA * pGame, D2UnitStrc * 
     }
 
     uint8_t bParam = '\b';
-    D2ClientStrc* self = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0xe9);
-    SendPlayerEvent(self, nPartyId, bParam);
+
+    SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0xe9), nPartyId, bParam);
     __frame0.nInviteeGUID = (uint32_t)(uint16_t)(uintptr_t)pInvitee;
     __frame0.pIterArg0 = pInviteeCopy;
     __frame0.pIterArg1 = pUnit;
@@ -295,8 +294,8 @@ void __fastcall PARTYSCREEN_SetMutualPlayerRelationship(int32_t nParam, D2UnitSt
       }
 
       bEventType = '\x06';
-      pClient = UNIT::SUnit::SUNIT_GetClient(pInvitee, ".\\PLAYER\\PartyScreen.cpp", 0x112);
-      SendPlayerEvent(pClient, nInviterGUID, bEventType);
+
+      SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pInvitee, ".\\PLAYER\\PartyScreen.cpp", 0x112), nInviterGUID, bEventType);
     }
 
     UNIT::PlayerList::Send0x8bRelationshipStatus(pUnit, pInvitee);
@@ -320,8 +319,8 @@ void __fastcall PARTYSCREEN_SendPartyInvite(int32_t nParam, D2UnitStrc * pUnit, 
       }
 
       bEventType = '\x05';
-      pClient = UNIT::SUnit::SUNIT_GetClient(pTarget, ".\\PLAYER\\PartyScreen.cpp", 0x132);
-      SendPlayerEvent(pClient, nInviterGUID, bEventType);
+
+      SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pTarget, ".\\PLAYER\\PartyScreen.cpp", 0x132), nInviterGUID, bEventType);
     }
 
     UNIT::PlayerList::Send0x8bRelationshipStatus(pUnit, pTarget);
@@ -341,8 +340,8 @@ void __fastcall PARTY_SendPlayerLeftEvent(uint32_t dwUnused, D2UnitStrc * pUnit,
     }
 
     uint8_t bEventType = '\t';
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x143);
-    SendPlayerEvent(pClient, nOtherGUID, bEventType);
+
+    SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x143), nOtherGUID, bEventType);
 }
 
 void __fastcall SendPlayerPartyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
@@ -373,7 +372,7 @@ void __fastcall PARTYSCREEN_SetHostileForPlayer(::SGAMEDATA * pGame, D2UnitStrc 
     }
 
     int32_t nUnitLevel = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0);
-    if (8 >= nUnitLevel) {
+    if (9 > nUnitLevel) {
       return;
     }
 
@@ -386,8 +385,8 @@ void __fastcall PARTYSCREEN_SetHostileForPlayer(::SGAMEDATA * pGame, D2UnitStrc 
     }
 
     uint8_t bEventType = '\x03';
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x187);
-    SendPlayerEvent(pClient, nTargetGUID, bEventType);
+
+    SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x187), nTargetGUID, bEventType);
 }
 
 // @sourcefile .\PLAYER\PartyScreen.cpp
@@ -406,13 +405,13 @@ void __stdcall PARTYSCREEN_SetHostileWithParty(::SGAMEDATA * pGame, D2UnitStrc *
       }
 
       bEventType = '\x03';
-      pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x19c);
-      SendPlayerEvent(pClient, nUnitGUID, bEventType);
+
+      SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x19c), nUnitGUID, bEventType);
       return;
     }
 
     int32_t nTargetLevel = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit2, UNITSTAT_level, 0);
-    if (8 >= nTargetLevel) {
+    if (9 > nTargetLevel) {
       return;
     }
 
@@ -532,26 +531,26 @@ eD2ServerIncomingStatus __fastcall PlayerScreen_DispatchAction(::SGAMEDATA * pGa
     return SERVERSTATUS_OK;
 }
 
-void __fastcall PARTYSCREEN_ClearHostileRelation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
-    if (pUnit && pUnit->eUnitType == UNIT_PLAYER) {
-      UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
-      UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 0);
-      return;
+int __fastcall PARTYSCREEN_ClearHostileRelation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
+    if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15);
-    exit(-1);
+    UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
+    UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 0);
+    return 1;
 }
 
 void __fastcall PARTYSCREEN_SetHostileRelation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
-    if (pUnit && pUnit->eUnitType == UNIT_PLAYER) {
-      UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
-      UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 1);
-      return;
+    if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x24);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x24);
-    exit(-1);
+    UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
+    UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 1);
+    return;
 }
 
 uint32_t __fastcall PLAYERSCREEN_CheckUnitsCanSeeEachOther(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pOtherUnit) {

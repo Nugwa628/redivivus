@@ -54,7 +54,7 @@ typedef void (__fastcall *fpSUnitIterateCallback)(::SGAMEDATA * pGame, D2UnitStr
 
 namespace D2Game::UNIT::PlayerList {
 
-DWORD * PLAYERLIST_FindEntry(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static DWORD * PLAYERLIST_FindEntry(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     D2UnitPlayerListStrc* pDVar1;
     int nTargetGUID;
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
@@ -102,7 +102,7 @@ void __fastcall PLAYERLIST_AddPlayerEntry(::SGAMEDATA * pGame, D2UnitStrc * pUni
       return;
     }
 
-    D2UnitPlayerListStrc* pNewEntry = D2_NEW_POOL(pGame->pMemoryPool, D2UnitPlayerListStrc);
+    D2UnitPlayerListStrc* pNewEntry = ((D2UnitPlayerListStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2UnitPlayerListStrc), ".\\UNIT\\PlayerList.cpp", 0x6d, 0));
     pNewEntry->nUnitGUID = 0;
     pNewEntry->nRelationshipFlags = 0;
     pNewEntry->nHostileDelay = 0;
@@ -151,13 +151,13 @@ void __fastcall PLAYERLIST_RemoveFromList(::SGAMEDATA * pGame, D2UnitStrc * pUni
       }
     }
 
-    if (!pPrevEntry) {
-      pPlayerData->pPlayerList = pMemoryToFree->pNext;
-    } else {
+    if (pPrevEntry) {
       pPrevEntry->pNext = pMemoryToFree->pNext;
+    } else {
+      pPlayerData->pPlayerList = pMemoryToFree->pNext;
     }
 
-    D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+    Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\PlayerList.cpp", 0x97, 0);
 }
 
 // Updates the relationship flags between pUnit and pTargetUnit in pUnit's player list, then sends packet 0x8C (RelationshipUpdate) to pTargetUnit's client. dwFlagMask selects which relationship bits to modify; nParam=0 clears them, non-zero sets them. No-op if the two units are the same or no list entry exists for pTargetUnit.
@@ -518,7 +518,7 @@ void __fastcall PLAYERDATA_FreePlayerList(::SGAMEDATA * pGame, D2UnitStrc * pUni
     while (pMemoryToFree) {
       D2UnitPlayerListStrc* pNextEntry;
       pNextEntry = pMemoryToFree->pNext;
-      D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\PlayerList.cpp", 0x4e, 0);
       pMemoryToFree = pNextEntry;
     }
 

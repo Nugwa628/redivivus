@@ -154,10 +154,7 @@ namespace D2Game::SKILLS::Items {
 // Function declarations
 // Appends one {affixIndex, affixTxt} pair to a weighted-roll candidate list and RETURNS THE NEW COUNT. Writes pAffixTxt at [pCandidatePairs + nCount*8 + 4] and nAffixIndex at [pCandidatePairs + nCount*8], then returns nCount + 1. At the 0x1ff cap it writes nothing and returns nCount unchanged.
 // The return is the count: nCount arrives in EAX and 005c0d14 ADD EAX,0x1 falls into the RET.
-int32_t __stdcall SKILLITEMS_SetDispatchTableEntry(int32_t pCandidatePairs, int32_t pAffixTxt, int32_t nAffixIndex, int32_t nCount);
 int32_t __stdcall SKILLITEMS_GetDispatchTableRange(int32_t pDispatchTable, int32_t nParam1, int32_t nParam2);
-// Returns max(nValue * nPercent / 100, nMinimum): nValue in EAX, nMinimum in ESI, nPercent on the stack (RET 4); the throw-damage scaling of the crude-quality item mods. Was named SKILLITEMS_NoOp.
-int32_t __stdcall SKILLITEMS_ApplyPercentWithMinimum(int32_t nValue, int32_t nMinimum, int32_t nPercent);
 // Rolls 1-3 staff mod skills. Classic: tier-based (5 skills per tier). Expansion: type-restricted (skill.itypea1 must match item). Skill level: [1, 3]. Applies via STATLIST_AddStatValue(UNITSTAT_item_singleskill).
 eD2Skills __stdcall ITEMMOD_RollStaffModSkills(struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillBaseId);
 // Expansion staff mod skill roller. Filters skills by itypea1/itypeb1/itypec1 matching item type. Counts valid, rolls RNG % count, walks to nth skill. Returns skill ID + level [1, 3].
@@ -166,8 +163,6 @@ void __stdcall STAFFMOD_RollStaffModSkills(struct D2UnitStrc * pUnit, int32_t nS
 void __fastcall StaffMod(struct D2UnitStrc * pUnit, struct D2ItemGenContextStrc * pItemData);
 // Magic affix selection (prefix or suffix). Version-aware dispatch: wItemVersion 0-99 = classic (ITEMMOD_RollMagicAffixClassic), 100+ = expansion (ITEMMOD_RollMagicAffixVersioned). Returns affix index or 0 on failure.
 uint32_t __stdcall ITEMMOD_RollMagicAffix(struct D2UnitStrc * pUnit, int32_t bIsSuffix, int bExclude, int32_t bApplyStats, int nParam4, int nForcedAffix);
-// Returns 1 if pUnit (an item) has any magic prefix or suffix whose affix group ID matches nGroupId, else 0. Iterates up to 3 prefix slots then up to 3 suffix slots, looking up each affix ID via TXT_magicaffixes_GetLine and comparing the group field. Used to gate skill behavior on item modifier groups.
-BOOL HasSufixOrPrefix(int32_t nGroupId, struct D2UnitStrc * pUnit);
 // Rolls one magic prefix or suffix (classic, non-expansion ruleset) for an item using the magicprefix/magicsuffix txt tables. Advances the item's mod-seed RNG, computes an effective magic level (item level adjusted by the base item's magic_lvl), then walks the candidate affix range - filtering by suffix/prefix flag, level min/max, version, item type/class, quality, group exclusion and existing affixes - accumulating frequency weights into a scratch list, and picks one by weighted RNG. Returns the affix index + 1, or 0 on no roll.
 // bIsPrefix and nAutoMagicGroup select which sub-table range to walk: automagic when nAutoMagicGroup is set, prefix when bIsPrefix is set, suffix otherwise. nExcludeGroup is an already-rolled group id to skip.
 // The last five arguments are INTEGERS. They were typed D2ItemsTxt *, which is not merely cosmetic: the decompiler then wrote the loop counter's increment as `pBaseItemTxt->szFlippyFile + 1`, so the emitted C++ advanced it by offsetof(szFlippyFile)+1 instead of by 1, and the group compare became `&pExclude2[-1].pad422 + 1`. Every caller passes small literals - ITEMMOD_GenerateRareAffixes passes 1, 0, and a group id read out of the item's own affix table - which is what gave it away.
@@ -192,8 +187,6 @@ BOOL __fastcall RollingItem(struct D2UnitStrc * pUnit, struct D2ItemGenContextSt
 BOOL __fastcall ITEMMOD_RollRareAffixes(struct D2UnitStrc * pUnit, struct D2ItemGenContextStrc * pItemGenContext);
 // Returns the book-table index for a scroll or tome item. Fetches the global book table via TXT_Books_GetTableInfo; looks up the item's class code in that table, matching either the book code (nParam==0) or the scroll code (nParam!=0). Returns the matched index, or the total book count if not found, or -1 if the table is null.
 int32_t __fastcall ITEMMOD_GetScrollBookIndex(struct D2UnitStrc * pUnit, int32_t nParam);
-// Selects and applies a set-item affix to pUnit during item generation. Builds a weighted candidate list from pTxtSetItems entries whose item code, level, and version match the item; if pItemGenContext->dwFileIndex (1-based) names a matching set item it is used directly, otherwise one is chosen by weighted random from the item's seed. Calls ApplyRuneAndGemStats(4) to stamp the set stats. Returns 1 on success, 0 if no candidate found.
-BOOL __stdcall ITEMMOD_GenerateSetItem(struct D2ItemGenContextStrc * pItemGenContext, struct D2UnitStrc * pUnit);
 // Body continues at 005c276a, the JNZ target of 005c2761 - a branch, not a call. Ghidra had a CALL_RETURN flow override there and a separate function named 'ITEMMOD_GenerateUniqueItemInternal'; that made EBP look like a parameter and turned this frame's locals into wild pointers.
 // Retired notes from 'ITEMMOD_GenerateUniqueItemInternal':
 // Server-side: attempts to convert an item into a random Set item. Doubles the item's durability/maxdurability (clamped to 255), counts eligible set entries from sgptDataTable->pTxtSets (version<100), then uses the item's RNG seed to pick a set index. Iterates the set's items to find one whose base-item code matches this unit, sets that file index, marks it IDENTIFIED, and applies rune/gem stats. Restores the original seed (low=saved, high=0x29a) on failure. Returns 1 if an item was assigned, 0 otherwise.

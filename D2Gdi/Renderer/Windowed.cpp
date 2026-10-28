@@ -48,7 +48,7 @@ namespace D2Gdi::Renderer::Windowed {
 BOOL __fastcall InitPerspective(D2GfxSettingsStrc * pSettings, ::D2GfxHelperStrc * pHelpers) {
     pD2GFXRenderedDataStrc = pSettings;
     D2GfxRendereInitFunctionsStrc = pHelpers;
-    RENDERER_SelectedRendererCore = D2_NEW(D2RendererCoreStrc);
+    RENDERER_SelectedRendererCore = ((D2RendererCoreStrc*)Fog::Memory::AllocClientMemory(sizeof(D2RendererCoreStrc), ".\\Src\\gdiCore.cpp", 0x4b, 0));
     /* LPCRITICAL_SECTION lpCriticalSection for InitializeCriticalSection */ InitializeCriticalSection(&RENDERER_SelectedRendererCore->sLock);
     return 1;
 }
@@ -60,7 +60,7 @@ BOOL Release() {
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&RENDERER_SelectedRendererCore->sLock);
-    D2_FREE(RENDERER_SelectedRendererCore);
+    Fog::Memory::FreeClientMemory(RENDERER_SelectedRendererCore, ".\\Src\\gdiCore.cpp", 0x59, 0);
     RENDERER_SelectedRendererCore = 0;
     return 1;
 }
@@ -70,7 +70,7 @@ void ClearCaches() {
 }
 
 // Allocates the GDI DIB section for windowed software rendering. Maps resolution mode (0=640×480, 1/2=800×600, 3=1360×700) to window dimensions, creates BITMAPINFO header with 8-bit indexed color, calls CreateDIBSection to allocate shared bitmap memory. Stores HBITMAP handle in RENDERER_WINDOWED_hDIBitmap global and pixel buffer pointer in ppvBits_007c9154. Initializes Y-buffer table via fpFillYBufferTable callback.
-void __stdcall RENDERER_WINDOWED_AllocateDIBSection(int nResolutionMode) {
+static void __stdcall RENDERER_WINDOWED_AllocateDIBSection(int nResolutionMode) {
     int iVar1;
     int iVar2;
     BITMAPINFO256 sBitmapInfo;
@@ -373,14 +373,14 @@ void __fastcall RENDERER_WINDOWED_GetPalette(HPALETTE * phPalette, RGBQUAD * * p
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x222);
       exit(-1);
     } else {
-      if (ppRgbQuad) {
-        *phPalette = RENDERER_WINDOWED_hPalette;
-        *ppRgbQuad = prgbq_00989c40;
-        return;
+      if (!ppRgbQuad) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x223);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x223);
-      exit(-1);
+      *phPalette = RENDERER_WINDOWED_hPalette;
+      *ppRgbQuad = prgbq_00989c40;
+      return;
     }
 }
 
@@ -393,15 +393,15 @@ void __fastcall RENDERER_WINDOWED_GetFramebufferInfo(uint32_t * ppvBitsOut, uint
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x231);
       exit(-1);
     } else {
-      if (pnWidthOut) {
-        *ppvBitsOut = (uint32_t)(uintptr_t)gpRenderBackBufferBits;
-        *pnHeightOut = RENDERER_nWindowHeight;
-        *pnWidthOut = RENDERER_nWindowWidth;
-        return;
+      if (!pnWidthOut) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x232);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x232);
-      exit(-1);
+      *ppvBitsOut = (uint32_t)(uintptr_t)gpRenderBackBufferBits;
+      *pnHeightOut = RENDERER_nWindowHeight;
+      *pnWidthOut = RENDERER_nWindowWidth;
+      return;
     }
 }
 
@@ -466,12 +466,12 @@ void __stdcall RENDERER_WINDOWED_ValidateDC6Visibility(DC6Block * pDC6Block, int
 }
 
 // Calculates clipped crop rectangle for DC6 image rendering. Takes input crop rect + DC6 position/dimensions, clamps to window bounds, calculates top/bottom skip lines for partial draws. Outputs adjusted crop rect (nClippedLeft, nClippedRight, skipTop, visibleHeight) to pOutput array. Used to optimize blits by pre-calculating which scanlines to draw.
-int __fastcall RENDERER_WINDOWED_CalculateCropRect(uint32_t * pCropRect, DC6Block * pDC6Block, int nPosY, int nPosX, uint32_t * pOutput) {
+static int __fastcall RENDERER_WINDOWED_CalculateCropRect(uint32_t * pCropRect, DC6Block * pDC6Block, int nPosY, int nPosX, uint32_t * pOutput) {
     int32_t nSpriteWidth = D2CMP::SRC::CelCmp::GetDC6Width(pDC6Block);
     int32_t nOffsetX = D2CMP::SRC::CelCmp::GetDC6Height(pDC6Block);
     uint32_t uClampedLeft = (int)*pCropRect < 1 ? 0 : *pCropRect;
     uint32_t nClippedRight = pCropRect[1];
-    if (RENDERER_nWindowWidth <= (int)nClippedRight) {
+    if ((int)nClippedRight >= RENDERER_nWindowWidth) {
       nClippedRight = RENDERER_nWindowWidth;
     }
     if ((int)uClampedLeft > (int)nClippedRight) {
@@ -485,7 +485,7 @@ int __fastcall RENDERER_WINDOWED_CalculateCropRect(uint32_t * pCropRect, DC6Bloc
 
     uint32_t uClampedBottom = (int)pCropRect[2] < 1 ? 0 : pCropRect[2];
     uint32_t uClampedTop = pCropRect[3];
-    if (RENDERER_nWindowHeight <= (int)pCropRect[3]) {
+    if ((int)pCropRect[3] >= RENDERER_nWindowHeight) {
       uClampedTop = RENDERER_nWindowHeight;
     }
     if ((int)uClampedBottom > (int)uClampedTop) {
@@ -505,17 +505,17 @@ int __fastcall RENDERER_WINDOWED_CalculateCropRect(uint32_t * pCropRect, DC6Bloc
     } else {
       pOutput[2] = 0;
     }
-    if (nOffsetY - nOffsetX < (int)uClampedBottom) {
-      pOutput[3] = nOffsetY - pOutput[2] - uClampedBottom + 1;
-    } else {
+    if (!(nOffsetY - nOffsetX < (int)uClampedBottom)) {
       pOutput[3] = nOffsetX - pOutput[2];
+    } else {
+      pOutput[3] = nOffsetY - pOutput[2] - uClampedBottom + 1;
     }
-    if ((int)pOutput[3] >= 1) {
-      return 0;
+    if (!((int)pOutput[3] > 0)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd1);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd1);
-    exit(-1);
+    return 0;
     return 0;
 }
 
@@ -743,12 +743,12 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
     int nBlendMode;
     uint8_t* pPaletteTable = RENDERER_WINDOWED_GetPalettePointer(nDrawMode, (uint32_t*)&nBlendMode);
     uint32_t uMaxX = RENDERER_nWindowWidth - 1;
-    uint32_t uClampedYStart = nXStart < 1 ? 0 : nXStart;
-    if ((int)uMaxX <= (int)uClampedYStart) {
+    uint32_t uClampedYStart = nXStart <= 0 ? 0 : nXStart;
+    if ((int)uClampedYStart >= (int)uMaxX) {
       uClampedYStart = uMaxX;
     }
 
-    uint32_t uClampedXStart = nXEnd < 1 ? 0 : nXEnd;
+    uint32_t uClampedXStart = nXEnd <= 0 ? 0 : nXEnd;
     if ((int)uClampedXStart < (int)uMaxX) {
       uMaxX = uClampedXStart;
     }
@@ -819,22 +819,22 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
 
 void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, BYTE nAlpha) {
     int nDrawMode;
-    if (nAlpha < 0xc0) {
-      if (nAlpha < 0x80) {
-        if (nAlpha < 0x40) {
+    if (!(nAlpha < 0xc0)) {
+      nDrawMode = 5;
+    } else {
+      if (!(nAlpha < 0x80)) {
+        nDrawMode = 2;
+      } else {
+        if (!(nAlpha < 0x40)) {
+          nDrawMode = 1;
+        } else {
           if (nAlpha == '\0') {
             return;
           }
 
           nDrawMode = 0;
-        } else {
-          nDrawMode = 1;
         }
-      } else {
-        nDrawMode = 2;
       }
-    } else {
-      nDrawMode = 5;
     }
 
     Windowed::DrawSolidRectEx(nXStart, nYStart, nXEnd, nYEnd, dwColor, nDrawMode);
@@ -842,7 +842,7 @@ void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEn
 
 // Windowed GDI renderer helper functions - DIB section allocation, palette conversion, line drawing (Bresenham), crop rect calculation, Smacker video blitting
 void __fastcall RENDERER_WINDOWED_DrawPixel(int nPosX, int nPosY, BYTE byColor) {
-    if (!(-1 < nPosX && nPosX < RENDERER_nWindowWidth && -1 < nPosY && nPosY < RENDERER_nWindowHeight)) {
+    if (!(0 <= nPosX && nPosX < RENDERER_nWindowWidth && 0 <= nPosY && nPosY < RENDERER_nWindowHeight)) {
       return;
     }
 
@@ -936,9 +936,9 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
     nSqrtIter = 0;
     int nStepCount = 0;
     int nY = nStartY;
-    while (nStartY < 0 || RENDERER_nWindowHeight <= nStartY || nX < 0 || RENDERER_nWindowWidth <= nX) {
+    while (nStartY < 0 || nStartY >= RENDERER_nWindowHeight || nX < 0 || nX >= RENDERER_nWindowWidth) {
       nSqrtIter += nDistSq;
-      if (0xffff < nSqrtIter || nSqrtIter < -0xffff) {
+      if (0x10000 <= nSqrtIter || nSqrtIter <= -0x10000) {
         nStartY = (int)(nSqrtIter + (nSqrtIter >> 0x1f & 0xffffU)) >> 0x10;
         nX += nStartY;
         nSqrtIter += nStartY * -0x10000;
@@ -968,7 +968,7 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
 
     while (true) {
       nSqrtIter += nDistSq;
-      if (0xffff < nSqrtIter || nSqrtIter < -0xffff) {
+      if (0x10000 <= nSqrtIter || nSqrtIter <= -0x10000) {
         nStartY = (int)(nSqrtIter + (nSqrtIter >> 0x1f & 0xffffU)) >> 0x10;
         nX += nStartY;
         pbCurrent += nStartY;
@@ -977,12 +977,12 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
       if (nX < 0) {
         return;
       }
-      if (RENDERER_nWindowWidth <= nX) {
+      if (nX >= RENDERER_nWindowWidth) {
         return;
       }
 
       nAccumX += nStepX;
-      if (0xffff < nAccumX || nAccumX < -0xffff) {
+      if (0x10000 <= nAccumX || nAccumX <= -0x10000) {
         nStartY = (int)(nAccumX + (nAccumX >> 0x1f & 0xffffU)) >> 0x10;
         nY += nStartY;
         pbCurrent += RENDERER_nWindowWidth * nStartY;
@@ -991,13 +991,13 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
       if (nY < 0) {
         break;
       }
-      if (RENDERER_nWindowHeight <= nY) {
+      if (nY >= RENDERER_nWindowHeight) {
         return;
       }
 
       nStepCount++;
       *pbCurrent = byColorParam;
-      if (nDistance <= nStepCount) {
+      if (nStepCount >= nDistance) {
         return;
       }
     }
@@ -1011,7 +1011,7 @@ void __fastcall DrawRect(uint8_t * pRect, int nPaletteIndex) {
     POINT nTop;
     int32_t dwErrorCode;
     nTop.x = *(LONG*)pRect;
-    if (*(int*)(pRect + 8) < nTop.x) {
+    if (nTop.x > *(int*)(pRect + 8)) {
       dwErrorCode = 0x126;
     } else {
       uint32_t uHeight;
@@ -1050,33 +1050,33 @@ void __fastcall DrawRectEx(uint8_t * pRect, int nPaletteIndex) {
     POINT nX2_save;
     POINT nX2_copy;
     nX1.x = *(LONG*)pRect;
-    if (*(int*)(pRect + 8) < nX1.x) {
+    if (nX1.x > *(int*)(pRect + 8)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x142);
       exit(-1);
     } else {
       uint8_t byColorParam;
       nX1_copy.y = *(LONG*)(pRect + 4);
-      if (nX1_copy.y <= *(int*)(pRect + 0xc)) {
-        if (!(*(int*)(pRect + 8) != nX1.x && *(int*)(pRect + 0xc) != nX1_copy.y)) {
-          return;
-        }
+      if (!(nX1_copy.y <= *(int*)(pRect + 0xc))) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x143);
+        exit(-1);
+      }
 
-        nX2_save.x = *(LONG*)(pRect + 8);
-        nX1.y = *(LONG*)(pRect + 0xc);
-        byColorParam = (uint8_t)nPaletteIndex;
-        nX1_copy.x = nX1.x;
-        nX2_save.y = nX1.y;
-        nX2_copy.x = nX2_save.x;
-        nX2_copy.y = nX1_copy.y;
-        RENDERER_WINDOWED_DrawLineBresenham(&nX2_copy, &nX1_copy, byColorParam);
-        RENDERER_WINDOWED_DrawLineBresenham(&nX2_save, &nX2_copy, byColorParam);
-        RENDERER_WINDOWED_DrawLineBresenham(&nX1, &nX2_save, byColorParam);
-        RENDERER_WINDOWED_DrawLineBresenham(&nX1_copy, &nX1, byColorParam);
+      if (!(*(int*)(pRect + 8) != nX1.x && *(int*)(pRect + 0xc) != nX1_copy.y)) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x143);
-      exit(-1);
+      nX2_save.x = *(LONG*)(pRect + 8);
+      nX1.y = *(LONG*)(pRect + 0xc);
+      byColorParam = (uint8_t)nPaletteIndex;
+      nX1_copy.x = nX1.x;
+      nX2_save.y = nX1.y;
+      nX2_copy.x = nX2_save.x;
+      nX2_copy.y = nX1_copy.y;
+      RENDERER_WINDOWED_DrawLineBresenham(&nX2_copy, &nX1_copy, byColorParam);
+      RENDERER_WINDOWED_DrawLineBresenham(&nX2_save, &nX2_copy, byColorParam);
+      RENDERER_WINDOWED_DrawLineBresenham(&nX1, &nX2_save, byColorParam);
+      RENDERER_WINDOWED_DrawLineBresenham(&nX1_copy, &nX1, byColorParam);
+      return;
     }
 }
 
@@ -1085,7 +1085,7 @@ void __fastcall DrawSolidRect(tagRECT * pRect, uint8_t nPaletteIndex) {
     size_t _Size;
     int nRight = pRect->left;
     int iVar1 = pRect->right;
-    if (iVar1 < nRight) {
+    if (nRight > iVar1) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15e);
       exit(-1);
     }
@@ -1093,19 +1093,19 @@ void __fastcall DrawSolidRect(tagRECT * pRect, uint8_t nPaletteIndex) {
     int nBottom = pRect->top;
     int nTop = pRect->bottom;
     if (nBottom <= nTop) {
-      if (!(-1 < iVar1 && nRight < RENDERER_nWindowWidth && -1 < nTop && nBottom < RENDERER_nWindowHeight)) {
+      if (!(0 <= iVar1 && nRight < RENDERER_nWindowWidth && 0 <= nTop && nBottom < RENDERER_nWindowHeight)) {
         return;
       }
       if (nRight < 0) {
         pRect->left = 0;
       }
-      if (RENDERER_nWindowWidth <= iVar1) {
+      if (iVar1 >= RENDERER_nWindowWidth) {
         pRect->right = RENDERER_nWindowWidth - 1;
       }
       if (nBottom < 0) {
         pRect->top = 0;
       }
-      if (RENDERER_nWindowHeight <= nTop) {
+      if (nTop >= RENDERER_nWindowHeight) {
         pRect->bottom = RENDERER_nWindowHeight - 1;
       }
 
@@ -1195,10 +1195,10 @@ BOOL __fastcall DrawShadowTile(D2TileLibraryEntryStrc * pTile, int32_t nPosX, in
       if (nClipLeft <= nScreenX && nScreenX < nClipRight && -0x21 < nScreenY && nScreenY < iVar1) {
         nVisCount = 1;
         bAllocOk = RENDERER_WINDOWED_CheckBlendedShadowsEnabled();
-        if (!bAllocOk) {
-          D2GfxRendereInitFunctionsStrc->nfpDrawVisTile(pTile->pSubTiles[nTileIndex].pPixelData, nScreenX, nScreenY);
-        } else {
+        if (bAllocOk) {
           D2GfxRendereInitFunctionsStrc->nfpDrawBlendedVisTile((int)pTile->pSubTiles[nTileIndex].pPixelData, nScreenX, nScreenY, 0xc0);
+        } else {
+          D2GfxRendereInitFunctionsStrc->nfpDrawVisTile(pTile->pSubTiles[nTileIndex].pPixelData, nScreenX, nScreenY);
         }
       }
 

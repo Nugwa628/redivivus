@@ -60,18 +60,6 @@ BOOL __fastcall Q33_OnFrozenAnyaKilled(::SGAMEDATA * pGame, struct D2UnitStrc * 
 // stateFlag 0->1. Once past that, chains to the next quest's sequence filter (nSequenceQuestId) so dependent quests
 // (Betrayal of Harrogath) get re-evaluated. Halts on IsBadCodePtr of the chained fn ptr.
 void __fastcall Q33_SequenceFilter(struct D2QuestDataStrc * pQuestData);
-// Q33_SpawnAnyaAndPortal (PrisonOfIce): when the frozen-Anya OBJECT exists, spawns the rescued-Anya MONSTER (0x200)
-// at its coords, hands over the preset/DRLG map AI, then creates a town portal OBJECT (classId 0xbd) in a nearby room.
-// Records GUIDs in pA5Q3. Re-runs Q33_SequenceFilter afterward. Drives the post-rescue Anya escort/portal sequence.
-void __stdcall Q33_SpawnAnyaAndPortal(struct D2QuestDataStrc * pQuestData, struct D2QuestDataA5Q3Strc * pA5Q3);
-// Q33_KillMonsterHelper (PrisonOfIce): generic helper to instantly kill a monster — clears AI sub, zeroes path,
-// fires AITHINK timer, sets hitpoints=0, applies Dead skill + lifecycle transition, relinks to update list.
-// Used to despawn quest monsters (frozen/rescued Anya placeholders).
-void __fastcall A5Q3_KillMonsterInstantly(struct D2UnitStrc * pUnitStrc, ::SGAMEDATA * * pGameStrc);
-// Q33_CleanupQuestMonsters (PrisonOfIce): tears down the spawned Anya quest units. For the rescued-Anya monster (0x200)
-// and the second Anya unit (0x202): finds it (or removes the inactive record), clears AI sub, applies Dead + lifecycle
-// transition, frees DRLG/collision and removes from room. Clears the spawned/active flags in pA5Q3.
-void Q33_CleanupQuestMonsters(struct D2QuestDataStrc * pQuestData);
 // Q33_KillAnyaMonsterTimer (PrisonOfIce): quest timer that instantly kills the rescued-Anya monster (table type 1) —
 // clear AI sub, zero path, AITHINK, hp=0, Dead skill + lifecycle transition, relink. Used to finalize the escort.
 void __fastcall Q33_KillAnyaMonsterTimer(::SGAMEDATA * pGame);
@@ -129,9 +117,6 @@ void __fastcall Q33_Callback14_PlayerJoinedGame(struct D2QuestDataStrc * pQuestD
 // sets the shared flag pA5Q3->field_0xE2=1 (note: reads the quest data via QUESTINT_ToolsOfTheTrade internal-no which the
 // union aliases here). Used to test whether anyone in the party still carries the Scroll of Resistance.
 void __fastcall Q33_CheckPlayerHasScrollOfResistance(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// Q33_CheckPartyHasScrollOfResistance (PrisonOfIce): returns 1 if this player holds the "ice " scroll, else scans the
-// whole party via Q33_CheckPlayerHasScrollOfResistance and returns whether anyone holds it (field_0xE2).
-uint32_t Q33_CheckPartyHasScrollOfResistance(int32_t nParam, struct D2UnitStrc * pUnit);
 // A5Q3 (Prison of Ice) fpStatusFilter callback. Writes a quest-log display sub-state byte into *nUnknown based on the player's per-difficulty bit-buffer. If Completed: returns true with *nUnknown=0. If RewardAwaits/JustCompleted: maps Step0x08/Step0x09 flags to values 5/6/0xd. Otherwise: checks party for Scroll of Resistance (4), CannotComplete (0xc), or falls back to nStateFlagPrev. Always returns true.
 bool __fastcall Q33_StatusFilter(struct D2QuestDataStrc * pQuestData, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown);
 // Q33_InitData (PrisonOfIce constructor): allocates the 0x114-byte A5Q3 quest-specific block and wires the quest:

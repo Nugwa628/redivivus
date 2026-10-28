@@ -1667,7 +1667,7 @@ void __stdcall DRAW_DebugFillRect(int32_t nRowStart, int32_t nRowStride) {
     do {
       nMaxRow = *(int*)((int)gnFastCmpEffectMapMinRow + nMinRow);
       pbPixel = (uint8_t*)(*(int*)((int)gnFastCmpEffectMapMaxRow + nMinRow) + nRowBase);
-      if (0x28 < nMaxRow) {
+      if (0x29 <= nMaxRow) {
         nMaxRow = 0x29;
       }
       if (pbPixel < (uint8_t*)(nMaxRow + nRowBase)) {
@@ -1684,7 +1684,7 @@ void __stdcall DRAW_DebugFillRect(int32_t nRowStart, int32_t nRowStride) {
       if (nMaxRow < 0x28) {
         nMaxRow = 0x28;
       }
-      if ((uint8_t*)(nMaxRow + nRowBase) < pbPixel) {
+      if (pbPixel > (uint8_t*)(nMaxRow + nRowBase)) {
         pEffectOffset = gaFastCmpEffectPixelOffsetTable + *(int*)((int)gnFastCmpEffectMapMinRow + nMinRow) + nWorkspaceOffset;
         do {
           *pbPixel = pbPixel[*pEffectOffset];
@@ -1706,7 +1706,7 @@ void __stdcall DRAW_DebugFillRect(int32_t nRowStart, int32_t nRowStride) {
       iVar1 = *(int*)((int)gnFastCmpEffectMapMaxRow + nMaxRow + 0x13c);
       nMinRow2 = *(int*)((int)gnFastCmpEffectMapMinRow + nMaxRow + 0x13c);
       pbPixel = (uint8_t*)(iVar1 + nMinRow);
-      if (0x28 < nMinRow2) {
+      if (0x29 <= nMinRow2) {
         nMinRow2 = 0x29;
       }
       if (pbPixel < (uint8_t*)(nMinRow2 + nMinRow)) {
@@ -1724,7 +1724,7 @@ void __stdcall DRAW_DebugFillRect(int32_t nRowStart, int32_t nRowStride) {
       if (nMinRow2 < 0x28) {
         nMinRow2 = 0x28;
       }
-      if ((uint8_t*)(nMinRow2 + nMinRow) < pbPixel) {
+      if (pbPixel > (uint8_t*)(nMinRow2 + nMinRow)) {
         pEffectOffset = gaFastCmpEffectPixelOffsetTable + iVar1 + nWorkspaceOffset;
         do {
           *pbPixel = pbPixel[*pEffectOffset];
@@ -1736,7 +1736,7 @@ void __stdcall DRAW_DebugFillRect(int32_t nRowStart, int32_t nRowStride) {
       nWorkspaceOffset += -0x50;
       nMinRow -= nRowStride;
       nMaxRow += -4;
-    } while (-0x9d < nMaxRow);
+    } while (-0x9c <= nMaxRow);
 }
 
 void __fastcall FASTCMP_DecompressRLEWithAlpha(BYTE * pFrameBlock, BYTE * pDst, int32_t nDrawX, int32_t nClipLeft, int32_t nClipRight, uint32_t nDstPitch, int32_t nSkipRows, int32_t nRowCount, BYTE * pBlendTable, uint8_t byBlendColor) {
@@ -1778,7 +1778,7 @@ void __fastcall FASTCMP_DecompressRLEWithAlpha(BYTE * pFrameBlock, BYTE * pDst, 
         while (true) {
           bRLEToken = *pbRLEData;
           pbRLEData++;
-          if (-1 < (char)bRLEToken) {
+          if (0 <= (char)bRLEToken) {
             break;
           }
 
@@ -1820,10 +1820,10 @@ void __fastcall FASTCMP_DecompressRLEWithAlpha(BYTE * pFrameBlock, BYTE * pDst, 
         }
 
         nClipSkip = -nDrawX + nClipLeft;
-        nClipSkip = (int)nClipSkip < 1 ? 0 : nClipSkip;
+        nClipSkip = (int)nClipSkip <= 0 ? 0 : nClipSkip;
         nCopyCount = -nDrawX + nClipRight;
-        nCopyCount = (int)nCopyCount < 1 ? 0 : nCopyCount;
-        if ((int)nRunLen <= (int)nCopyCount) {
+        nCopyCount = (int)nCopyCount <= 0 ? 0 : nCopyCount;
+        if ((int)nCopyCount >= (int)nRunLen) {
           nCopyCount = nRunLen;
         }
 

@@ -58,6 +58,8 @@ typedef HRESULT (__stdcall *pfnSHGetKnownFolderPath)(GUID * rfid, DWORD dwFlags,
 #endif
 
 namespace Fog::Engine::Application {
+static uint32_t DEBUG_ParseRSDSDebugInfo(void * pDebugRecord, int32_t pModuleInfo);
+static uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo);
 
 bool DEBUG_CaptureThreadContext(uint32_t dwThreadId, LPCONTEXT pContext) {
     pContext->ContextFlags = 0x1003f;
@@ -312,10 +314,10 @@ bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, in
     if (pDst && pBasename < pDst) {
       pBasename = pDst;
     }
-    if (!pBasename) {
-      pBasename = aModuleInfo.szPath;
-    } else {
+    if (pBasename) {
       pBasename++;
+    } else {
+      pBasename = aModuleInfo.szPath;
     }
 
     pDst = aModuleInfo.szPath;
@@ -327,11 +329,9 @@ bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, in
 
     uint32_t nParseResult = DEBUG_ParseModuleHeaders((short int**)&aModuleInfo, pModuleBase);
     if ((char)nParseResult == '\0') {
-      Debug::GuardStack();
       return true;
     }
     if (!pModuleList) {
-      Debug::GuardStack();
       return false;
     }
 
@@ -345,7 +345,6 @@ bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, in
 
     (*pModuleList)++;
     nMbLen = *pModuleList;
-    Debug::GuardStack();
     return nMbLen < 0x100;
 }
 
@@ -370,8 +369,8 @@ bool __stdcall DEBUG_EnumerateModulesViaPsapi(int * pnParam) {
     pfnGetModuleBaseNameW pGetModuleBaseNameW;
     uint32_t nModuleCount;
     HANDLE hProcess2;
-    __frame0.dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)&hProcess;
     __frame0.pList = pnParam;
+    __frame0.dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)&hProcess;
     hProcess = GetCurrentProcess();
     HMODULE hModule = LoadLibraryW(L"psapi.dll");
     if (hModule) {
@@ -405,7 +404,6 @@ bool __stdcall DEBUG_EnumerateModulesViaPsapi(int * pnParam) {
           }
 
           /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(hModule);
-          Debug::GuardStack();
           return true;
         }
       }
@@ -413,7 +411,6 @@ bool __stdcall DEBUG_EnumerateModulesViaPsapi(int * pnParam) {
       /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(hModule);
     }
 
-    Debug::GuardStack();
     return false;
 }
 
@@ -440,11 +437,9 @@ bool DEBUG_EnumerateModulesViaToolhelp32(int * pModuleList) {
       }
 
       /* HANDLE hObject for CloseHandle */ CloseHandle(hSnapshot);
-      Debug::GuardStack();
       return true;
     }
 
-    Debug::GuardStack();
     return false;
 }
 
@@ -524,7 +519,7 @@ void __stdcall DEBUG_ExtractDebugDirectory32(uint32_t dwParam, uint32_t * pnRVA,
     *pnSize = nSize;
 }
 
-uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
+static uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
     uint32_t bIsBadPtr = IsBadReadPtr(pDebugRecord, 0x14);
     if (bIsBadPtr) {
       return bIsBadPtr & -256;
@@ -545,7 +540,7 @@ uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
     return 1;
 }
 
-uint32_t DEBUG_ParseRSDSDebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
+static uint32_t DEBUG_ParseRSDSDebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
     uint32_t bIsBadPtr = IsBadReadPtr(pDebugRecord, 0x1c);
     if (bIsBadPtr) {
       return bIsBadPtr & -256;
@@ -661,7 +656,7 @@ int __stdcall DEBUG_UnwindStackFrames(DWORD dwThreadId, D2CrashFrameStrc * pFram
           if (threadContext.Ebp <= (uintptr_t)__frame0.pCurEsp) {
             break;
           }
-          if (__frame0.pStackTop < (uint32_t*)(threadContext.Ebp + 8)) {
+          if ((uint32_t*)(threadContext.Ebp + 8) > __frame0.pStackTop) {
             break;
           }
 
@@ -685,7 +680,6 @@ int __stdcall DEBUG_UnwindStackFrames(DWORD dwThreadId, D2CrashFrameStrc * pFram
         }
 
         ExceptionList = tSehFrame.Next;
-        Debug::GuardStack();
         return nFrameCount;
       }
       if (hOpenedThread) {
@@ -696,11 +690,10 @@ int __stdcall DEBUG_UnwindStackFrames(DWORD dwThreadId, D2CrashFrameStrc * pFram
 
     nFrameCount = 0;
     ExceptionList = tSehFrame.Next;
-    Debug::GuardStack();
     return nFrameCount;
 }
 
-void __stdcall DEBUG_FormatAddressInfo(uint32_t nAddress, char * pOutput) {
+bool __stdcall DEBUG_FormatAddressInfo(uint32_t nAddress, char * pOutput) {
     char* pSep;
     char* pBasename;
     char szModulePath[260];
@@ -717,17 +710,17 @@ void __stdcall DEBUG_FormatAddressInfo(uint32_t nAddress, char * pOutput) {
     if (bGotModule) {
       pSep = strrchr(szModulePath, 0x2f);
       pBasename = 0;
-      if (pSep) {
+      if ((uint32_t)pSep > 0) {
         pBasename = pSep;
       }
 
       pSep = strrchr(szModulePath, 0x5c);
-      if (pSep && pBasename < pSep) {
+      if (pSep && pSep > pBasename) {
         pBasename = pSep;
       }
 
       pSep = strrchr(szModulePath, 0x3a);
-      if (pSep && pBasename < pSep) {
+      if (pSep && pSep > pBasename) {
         pBasename = pSep;
       }
 
@@ -745,17 +738,17 @@ void __stdcall DEBUG_FormatAddressInfo(uint32_t nAddress, char * pOutput) {
     Debug::GetSourceLineForAddress(nAddress, szModulePath, pLineField);
     pSep = strrchr(szModulePath, 0x2f);
     pBasename = 0;
-    if (pSep) {
+    if ((uint32_t)pSep > 0) {
       pBasename = pSep;
     }
 
     pSep = strrchr(szModulePath, 0x5c);
-    if (pSep && pBasename < pSep) {
+    if (pSep && pSep > pBasename) {
       pBasename = pSep;
     }
 
     pSep = strrchr(szModulePath, 0x3a);
-    if (pSep && pBasename < pSep) {
+    if (pSep && pSep > pBasename) {
       pBasename = pSep;
     }
 
@@ -765,7 +758,7 @@ void __stdcall DEBUG_FormatAddressInfo(uint32_t nAddress, char * pOutput) {
     }
 
     _strncpy_s(pSrcFileField, 0x100, pSep, -1);
-    Debug::GuardStack();
+    return true;
 }
 
 // Global operator delete: frees p through Storm SMemFree with the delete source tag, and ignores null. Counterpart of MISC_OperatorNewShim.
@@ -818,7 +811,6 @@ void __stdcall MISC_GetValueFromD2Ini(D2IniConfigStrc * pD2IniData) {
       nEntryOffset += 0x5c;
     } while (nEntryOffset < 0x14d8);
 
-    Debug::GuardStack();
 }
 
 int32_t __stdcall INI_FindConfigValueIndex(uint8_t * pbArgName) {
@@ -860,7 +852,7 @@ uint32_t __fastcall INI_IsDelimiterChar(char cChar) {
     return 0;
 }
 
-void INI_StripDelimiters(char * szText) {
+static void INI_StripDelimiters(char * szText) {
     int nWriteIdx;
     int nDelimIdx;
     char aWorkBuf[260];
@@ -905,7 +897,6 @@ void INI_StripDelimiters(char * szText) {
         do {
           if (aWorkBuf[nDelimIdx] == aWorkBuf[nReadIdx + 4]) {
             szText[nWriteIdx] = '\0';
-            Debug::GuardStack();
             return;
           }
 
@@ -919,7 +910,6 @@ void INI_StripDelimiters(char * szText) {
     }
 
     szText[nWriteIdx] = '\0';
-    Debug::GuardStack();
 }
 
 int __fastcall INI_ParseCommandLineArg(uint8_t * pbArgName, char * szCmdLine, int32_t pOutValue) {
@@ -997,7 +987,6 @@ int __fastcall INI_ParseCommandLineArg(uint8_t * pbArgName, char * szCmdLine, in
 
     *(uint8_t*)(pOutValue + nCmdLen) = 0;
     INI_StripDelimiters((char*)pOutValue);
-    Debug::GuardStack();
     return nConfigIdx;
 }
 
@@ -1060,7 +1049,6 @@ void __fastcall MISC_ParseCommandLineAndPutIntoD2IniData(D2IniConfigStrc * pD2In
       } while (nPos < iVar1);
     }
 
-    Debug::GuardStack();
 }
 
 void __fastcall MISC_InitD2IniAndIgnorelist(D2IniConfigStrc * D2IniData, char * szCommandLine) {
@@ -1109,15 +1097,15 @@ int32_t __stdcall ApplicationRunCurrentMode(D2IniConfigStrc * pD2IniData) {
       Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x133);
       exit(-1);
     } else {
-      if (ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown) {
-        CurrentApplication = ApplicationBootstrapArray[geD2ApplicationMode].pfnInit(WinMain_hInstance);
-        modeResult = (**CurrentApplication)(pD2IniData);
-        ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown();
-        return modeResult;
+      if (!ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown) {
+        Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x134);
+        exit(-1);
       }
 
-      Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x134);
-      exit(-1);
+      CurrentApplication = ApplicationBootstrapArray[geD2ApplicationMode].pfnInit(WinMain_hInstance);
+      modeResult = (**CurrentApplication)(pD2IniData);
+      ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown();
+      return modeResult;
     }
 }
 
@@ -1177,7 +1165,6 @@ void __stdcall SystemSurvey_WriteProductLanugageToLocaleFile() {
     }
 
     D2TRACE("ApplicationMain returned");
-    Debug::GuardStack();
 }
 
 BOOL __stdcall ReturnTrue() {
@@ -1237,7 +1224,6 @@ void __stdcall CreateRegedit() {
       /* LPCSTR lpPathName for SetCurrentDirectoryA */ SetCurrentDirectoryA(&__frame1.szInstallPath);
     }
 
-    Debug::GuardStack();
 }
 
 uint32_t __stdcall ERRORMANAGER_TryGetProcAddress(HMODULE hModule, FARPROC * ppfnProc, LPCSTR szText) {
@@ -1251,7 +1237,7 @@ uint32_t __stdcall ERRORMANAGER_TryGetProcAddress(HMODULE hModule, FARPROC * ppf
 }
 
 // @sourcefile .\Main.cpp
-void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD2ApplicationMode * eAppMode, char * szText) {
+static void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD2ApplicationMode * eAppMode, char * szText) {
     // Static local variables (originally global data)
     static char * gApplicationModeCommandLineArgumentArray[6] = { s_modstate0_006cc928, s_client_006cc920, s_server_006cc918, s_multiplayer_006cc90c, s_launcher_006cc900, s_expand_006cc8f8 }; D2_STATIC_GUARD(gApplicationModeCommandLineArgumentArray, "Fog::Engine::Application::CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument::gApplicationModeCommandLineArgumentArray");
 
@@ -1261,7 +1247,7 @@ void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD
     char* pszModeStr;
     char* pszCmdToken = szText;
     pszCmdToken = pszCmdToken + strlen(pszCmdToken) + 1;
-    char* szCmdLineCopy = (char*)D2_ALLOC((size_t)(pszCmdToken + (1 - (int)(szText + 1))));
+    char* szCmdLineCopy = (char*)Fog::Memory::AllocClientMemory((size_t)(pszCmdToken + (1 - (int)(szText + 1))), ".\\Main.cpp", 0x1ba, 0);
     Storm::Source::SSTR::SStrCopy(szCmdLineCopy, szText, (int32_t)(pszCmdToken + (1 - (int)(szText + 1))));
     pszCmdToken = strtok(szCmdLineCopy, "-");
     while (pszCmdToken) {
@@ -1282,7 +1268,7 @@ void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD
       pszCmdToken = strtok(nullptr, "-");
     }
 
-    D2_FREE(szCmdLineCopy);
+    Fog::Memory::FreeClientMemory(szCmdLineCopy, ".\\Main.cpp", 0x1e0, 0);
 }
 
 // lpHandlerProc parameter of RegisterServiceCtrlHandlerA
@@ -1345,7 +1331,6 @@ void __fastcall PreInitApplication(int32_t argc, char * * argv) {
 
     D2TRACE("ApplicationMain");
     D2Client::Engine::Application::ApplicationMain(WinMain_hInstance, &pD2IniData, eAppMode);
-    Debug::GuardStack();
 }
 
 // WinMain: decide server/service vs client, load advapi, then PreInitApplication.

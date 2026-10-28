@@ -74,17 +74,17 @@ void __fastcall TASK_LinkTaskToList(D2LinkNodeStrc * pList, D2LinkNodeStrc * pLi
       exit(-1);
     } else {
       D2LinkNodeStrc* pPrevNode;
-      if (pLink) {
-        pLink->pNext = pList;
-        pPrevNode = pList->pPrev;
-        pLink->pPrev = pPrevNode;
-        pPrevNode->pNext = pLink;
-        pList->pPrev = pLink;
-        return;
+      if (!pLink) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78);
-      exit(-1);
+      pLink->pNext = pList;
+      pPrevNode = pList->pPrev;
+      pLink->pPrev = pPrevNode;
+      pPrevNode->pNext = pLink;
+      pList->pPrev = pLink;
+      return;
     }
 }
 
@@ -101,17 +101,17 @@ void __fastcall LINKLIST_AppendToList(D2LinkNodeStrc * * ppList, D2LinkNodeStrc 
       exit(-1);
     } else {
       pDVar1 = *ppList;
-      if (pDVar1) {
-        pNode->pNext = pDVar1;
-        pDVar2 = pDVar1->pPrev;
-        pNode->pPrev = pDVar2;
-        pDVar2->pNext = pNode;
-        pDVar1->pPrev = pNode;
-        return;
+      if (!pDVar1) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6c);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6c);
-      exit(-1);
+      pNode->pNext = pDVar1;
+      pDVar2 = pDVar1->pPrev;
+      pNode->pPrev = pDVar2;
+      pDVar2->pNext = pNode;
+      pDVar1->pPrev = pNode;
+      return;
     }
 }
 
@@ -160,7 +160,7 @@ void __stdcall TASK_LeaveQueueCriticalSection(D2TaskQueueSlotStrc * pSlot) {
     if (!pSlot) {
       return;
     }
-    if (0x1f < pSlot->nSlotIndex) {
+    if (0x20 <= pSlot->nSlotIndex) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x97);
       exit(-1);
     }
@@ -170,7 +170,7 @@ void __stdcall TASK_LeaveQueueCriticalSection(D2TaskQueueSlotStrc * pSlot) {
 
 // Inserts pTaskNode into pSlot->sTaskList in timestamp order. Register call: pSlot@ECX, pTaskNode@EDX, nDelay@EAX. Adds nDelay to the node's timestamp (+0), walks sTaskList along its +0 links past entries whose timestamp is later (signed difference > 0), and links the node's list link (pTaskNode+0xc) in before the first entry that is not later. Halts at line 0x6c if the walk ends on NULL, 0x6d if the node link is NULL.
 // Provenance: asm 00564400..00564459.
-void TASK_InsertTaskAtTimestamp(D2TaskQueueSlotStrc * pSlot, D2TaskNodeStrc * pTaskNode, int32_t nDelay) {
+static void TASK_InsertTaskAtTimestamp(D2TaskQueueSlotStrc * pSlot, D2TaskNodeStrc * pTaskNode, int32_t nDelay) {
     D2LinkNodeStrc* pDVar1;
     D2LinkNodeStrc* pInsertPos;
     pTaskNode->dwTimestamp += nDelay;
@@ -185,17 +185,17 @@ void TASK_InsertTaskAtTimestamp(D2TaskQueueSlotStrc * pSlot, D2TaskNodeStrc * pT
       exit(-1);
     } else {
       D2LinkNodeStrc* pDVar2;
-      if (pDVar1) {
-        pDVar1->pNext = pInsertPos;
-        pDVar2 = pInsertPos->pPrev;
-        pTaskNode->sLink.pPrev = pDVar2;
-        pDVar2->pNext = pDVar1;
-        pInsertPos->pPrev = pDVar1;
-        return;
+      if (!pDVar1) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6d);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6d);
-      exit(-1);
+      pDVar1->pNext = pInsertPos;
+      pDVar2 = pInsertPos->pPrev;
+      pTaskNode->sLink.pPrev = pDVar2;
+      pDVar2->pNext = pDVar1;
+      pInsertPos->pPrev = pDVar1;
+      return;
     }
 }
 
@@ -213,7 +213,7 @@ void __stdcall TASK_MoveTasksToSlotAndLinkSlot(D2TaskQueueSlotStrc * pSlot) {
     nTailCycleCount = gnTaskQueueTailIndex / gnTaskQueueSlotCounter;
     uint32_t nSlotMask;
     nSlotMask = gnTaskQueueSlotCounter - 1;
-    if (0x1f < nSlotMask) {
+    if (0x20 <= nSlotMask) {
       nSlotMask = 0x20;
     }
 
@@ -288,16 +288,16 @@ void __stdcall TASK_MoveTasksToSlotAndLinkSlot(D2TaskQueueSlotStrc * pSlot) {
     }
 
     pSlotNode = &pSlot->sSlotLink;
-    if (pSlotNode) {
-      pSlotNode->pNext = &gsTaskQueueListHead;
-      pSlot->sSlotLink.pPrev = gsTaskQueueListHead.pPrev;
-      gsTaskQueueListHead.pPrev->pNext = pSlotNode;
-      gsTaskQueueListHead.pPrev = pSlotNode;
-      return;
+    if (!pSlotNode) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78);
-    exit(-1);
+    pSlotNode->pNext = &gsTaskQueueListHead;
+    pSlot->sSlotLink.pPrev = gsTaskQueueListHead.pPrev;
+    gsTaskQueueListHead.pPrev->pNext = pSlotNode;
+    gsTaskQueueListHead.pPrev = pSlotNode;
+    return;
 }
 
 // Scheduled-task callback that drives one game's server tick. Looks up+locks the game by token (pTaskNode->dwUserData), runs ServerGameLoop and FlushAllClientPackets, then either reschedules itself in the per-bucket task queue (nParam&0x1f) for the next tick, or — if the game is empty/expired (idle >300s or frame in the shutdown window) — disconnects all clients (0xB0 ConnectionTerminated + cleanup), destroys the game by token, and unlinks/frees its task node. Uses the task-queue critical sections; halts via Fog ErrorManager on queue-invariant violations.
@@ -342,13 +342,13 @@ void __stdcall TASK_GameTickCallback(uint32_t nParam, D2TaskNodeStrc * pTaskNode
       }
 
       TASK_InsertTaskAtTimestamp(pDVar1, pTaskNode, 0x28);
-      if (pDVar1->nSlotIndex < 0x20) {
-        /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(aTaskQueueCriticalSections + pDVar1->nSlotIndex);
-        return;
+      if (!(pDVar1->nSlotIndex < 0x20)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x97);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x97);
-      exit(-1);
+      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(aTaskQueueCriticalSections + pDVar1->nSlotIndex);
+      return;
     }
 
     D2ClientStrc* pClient;
@@ -394,7 +394,7 @@ void __stdcall TASK_GameTickCallback(uint32_t nParam, D2TaskNodeStrc * pTaskNode
 
       TASK_UnlinkTaskFromList(pSlotLink);
       TASK_LinkTaskToList(&gsTaskQueueListHead, pSlotLink);
-      D2_FREE(pTaskNode);
+      Fog::Memory::FreeClientMemory(pTaskNode, ".\\GAME\\Task.cpp", 0x309, 0);
     }
 
     gnTaskQueueTailIndex--;
@@ -448,7 +448,7 @@ uint32_t __stdcall TASK_AllocateTaskQueue() {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(aTaskQueueCriticalSections + nSlotIndex);
     if (!gaTaskQueueHeadArray[nSlotIndex]) {
       D2LinkNodeStrc* pDVar1;
-      pNewSlot = D2_NEW_POOL(nullptr, D2TaskQueueSlotStrc);
+      pNewSlot = ((D2TaskQueueSlotStrc*)Fog::Memory::AllocServerMemory(nullptr, sizeof(D2TaskQueueSlotStrc), ".\\GAME\\Task.cpp", 0x3fb, 0));
       pNewSlot->nSlotIndex = nSlotIndex;
       pNewSlot->nTaskCount = 0;
       pDVar1 = &pNewSlot->sTaskList;
@@ -504,19 +504,19 @@ BOOL __fastcall TASK_EnqueueGameTask(D2TaskNodeStrc * pTaskNode, uint32_t dwCall
         pSlotLink->pNext->pPrev = pSlotLink->pPrev;
         pSlotLink->pPrev->pNext = pSlotLink->pNext;
         pNewTaskLink = gsTaskQueueListHead.pNext;
-        if (gsTaskQueueListHead.pNext) {
-          pSlotLink->pNext = gsTaskQueueListHead.pNext;
-          pTailLink = pNewTaskLink->pPrev;
-          pSlotLink->pPrev = pTailLink;
-          pTailLink->pNext = pSlotLink;
-          pNewTaskLink->pPrev = pSlotLink;
-          bSuccess = 1;
-          /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_0088caa8);
-          return bSuccess;
+        if (!gsTaskQueueListHead.pNext) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6c);
+          exit(-1);
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6c);
-        exit(-1);
+        pSlotLink->pNext = gsTaskQueueListHead.pNext;
+        pTailLink = pNewTaskLink->pPrev;
+        pSlotLink->pPrev = pTailLink;
+        pTailLink->pNext = pSlotLink;
+        pNewTaskLink->pPrev = pSlotLink;
+        bSuccess = 1;
+        /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_0088caa8);
+        return bSuccess;
       }
     }
 
@@ -542,12 +542,12 @@ int32_t __fastcall TASK_DequeueReadyTask(uint32_t nSlotToken, D2TaskNodeStrc * *
       uint32_t uVar2;
       uVar2 = TASK_GetTimestamp();
       nResult = ((D2TaskNodeStrc*)((char*)pReadyTask - 0xc))->dwTimestamp - uVar2;
-      if (nResult < 1) {
+      if (nResult <= 0) {
         TASK_UnlinkTaskFromList(pReadyTask);
         *ppTaskOut = (D2TaskNodeStrc*)((char*)pReadyTask - 0xc);
       }
     }
-    if (0x1f < pDVar1->nSlotIndex) {
+    if (0x20 <= pDVar1->nSlotIndex) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x97);
       exit(-1);
     }

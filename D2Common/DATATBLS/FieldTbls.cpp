@@ -88,9 +88,9 @@ void __stdcall FIELDTBLS_InitFieldData(D2ExpFieldFileStrc * pArchive, uint32_t d
 // Frees the global field table data and zeroes all field dimensions/offsets.
 // Source: .\\DATATBLS\\FieldTbls.cpp
 // @sourcefile .\DATATBLS\FieldTbls.cpp
-void __stdcall FIELDTBLS_FreeFieldData() {
+int __stdcall FIELDTBLS_FreeFieldData() {
     if (gpFieldDataTable) {
-      D2_FREE_POOL(nullptr, gpFieldDataTable);
+      Fog::Memory::FreeServerMemory(nullptr, gpFieldDataTable, ".\\DATATBLS\\FieldTbls.cpp", 0x5b, 0);
     }
 
     gpFieldDataTable = 0;
@@ -99,6 +99,7 @@ void __stdcall FIELDTBLS_FreeFieldData() {
     gnFieldDataTableSize = 0;
     gnFieldTableHalfWidth = 0;
     gnFieldTableHalfHeight = 0;
+    return 1;
 }
 
 // Returns the center offsets (half width, half height) of the loaded field data.
@@ -113,7 +114,7 @@ void __stdcall FIELDTBLS_GetFieldCenterOffsets(uint32_t * pdwHalfWidth, uint32_t
 // allocates its own storage and returns it.
 // @sourcefile .\DATATBLS\FieldTbls.cpp
 POINT * __stdcall FIELDTBLS_AllocPoint() {
-    POINT* pPoint = D2_NEW_POOL(nullptr, POINT);
+    POINT* pPoint = ((POINT*)Fog::Memory::AllocServerMemory(nullptr, sizeof(POINT), ".\\DATATBLS\\FieldTbls.cpp", 0x87, 0));
     if (!pPoint) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x88);
       exit(-1);
@@ -134,7 +135,7 @@ void __stdcall FIELDTBLS_FreePoint(POINT * pPoint) {
       exit(-1);
     }
 
-    D2_FREE_POOL(nullptr, pPoint);
+    Fog::Memory::FreeServerMemory(nullptr, pPoint, ".\\DATATBLS\\FieldTbls.cpp", 0x94, 0);
 }
 
 void __stdcall SetXY(POINT * pPoint, LONG nX, LONG nY) {
@@ -150,12 +151,12 @@ void __stdcall SetXY(POINT * pPoint, LONG nX, LONG nY) {
 // Reads a byte value from the field data at the given world coordinates.
 // Used for automap or collision field lookups. Halts on null input.
 uint32_t __stdcall FIELDTBLS_GetFieldValueAtCoords(int * pnFieldOrigin, int32_t nX, int32_t nY) {
-    if (pnFieldOrigin) {
-      return (uint32_t)*(uint8_t*)((int)gpFieldDataTable + nX + ((nY - pnFieldOrigin[1]) * 0x100 - *pnFieldOrigin));
+    if (!pnFieldOrigin) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb0);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb0);
-    exit(-1);
+    return (uint32_t)*(uint8_t*)((int)gpFieldDataTable + nX + ((nY - pnFieldOrigin[1]) * 0x100 - *pnFieldOrigin));
     return (uint32_t)*(uint8_t*)((int)gpFieldDataTable + nX + ((nY - pnFieldOrigin[1]) * 0x100 - *pnFieldOrigin));
 }
 
@@ -217,7 +218,6 @@ void __fastcall FIELDTBLS_LoadExpFieldFile(D2PoolManagerStrc * pMemory) {
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\expfield.d2", "DATA\\GLOBAL");
     D2ExpFieldFileStrc* pArchive = (D2ExpFieldFileStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(pMemory, szFilePath, &nFileSize, ".\\DATATBLS\\FieldTbls.cpp", 0x28);
     FIELDTBLS_InitFieldData(pArchive, nFileSize);
-    Fog::Debug::GuardStack();
 }
 
 } // namespace D2Common::DATATBLS::FieldTbls

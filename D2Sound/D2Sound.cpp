@@ -142,16 +142,16 @@ char * __fastcall SOUND_GetDirectSoundErrorString(int hResult) {
       }
 
       switch (hResult) {
+        case -0x7787ff9c:
+          return "DSERR_BADFORMAT";
         case -0x7787ffe2:
           return "DSERR_CONTROLUNAVAIL";
         case -0x7787ffce:
           return "DSERR_INVALIDCALL";
-        case -0x7787ffba:
-          return "DSERR_PRIOLEVELNEEDED";
-        case -0x7787ff9c:
-          return "DSERR_BADFORMAT";
         case -0x7787ff88:
           return "DSERR_NODRIVER";
+        case -0x7787ffba:
+          return "DSERR_PRIOLEVELNEEDED";
       }
     } else if (hResult < -0x7787ff55) {
       if (hResult == -0x7787ff56) {
@@ -277,16 +277,16 @@ BOOL __stdcall SOUNDSMP_CreateSoundBuffer(uint32_t nFlags, D2SoundSmpStrc * pSou
     tBufferDesc.dwReserved = 0;
     uint32_t nBufSize = nFlags & 1 ? 0x40000 : 0x20000;
     uint32_t uVar1 = g_nSoundSampleParam ? 0x80a0 : 0xa0;
-    uint32_t u3DFlag = nFlags & 2;
     tBufferDesc.dwSize = 0x14;
+    uint32_t u3DFlag = nFlags & 2;
     if (!u3DFlag) {
       tBufferDesc.dwFlags = uVar1 | 0x40;
     } else {
       tBufferDesc.dwFlags = uVar1 | 0x14;
     }
 
-    tBufferDesc.lpwfxFormat = &tWaveFormat;
     tBufferDesc.dwBufferBytes = nBufSize;
+    tBufferDesc.lpwfxFormat = &tWaveFormat;
     IDirectSound* pDSDevice = SOUND_GetSpeakerConfigFlag();
     HRESULT nHResult = pDSDevice->lpVtbl->CreateSoundBuffer(pDSDevice, &tBufferDesc, (void**)&pSoundSmp->pDSBuffer, nullptr);
     if (nHResult < 0) {

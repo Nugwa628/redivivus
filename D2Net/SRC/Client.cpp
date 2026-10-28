@@ -507,7 +507,7 @@ void __stdcall NET_D2GS_ConnectToServer(eD2GSConnectionType neD2GSConnectionType
     /* LPCRITICAL_SECTION lpCriticalSection for InitializeCriticalSection */ pD2PacketClient_to_0xAE = 0;
     pD2PacketClient_from_0xAF = 0;
     InitializeCriticalSection(&lpCriticalSection_00882ce8);
-    pD2PacketsClientBuffer = D2_NEW(D2PacketsClientStrc);
+    pD2PacketsClientBuffer = ((D2PacketsClientStrc*)Fog::Memory::AllocClientMemory(sizeof(D2PacketsClientStrc), ".\\SRC\\Client.cpp", 0xc8, 0));
     memset(pD2PacketsClientBuffer, 0, 0x7bc);
     ::D2Net::Game::Server::NET_D2GS_CLIENT_SetD2GSConnectionType(neD2GSConnectionType);
     BOOL BVar1 = ::D2Net::Game::Server::NET_D2GS_CLIENT_CheckIfConnectionTypeIsSinglePlayer();
@@ -524,7 +524,7 @@ void __stdcall NET_D2GS_ConnectToServer(eD2GSConnectionType neD2GSConnectionType
 void __stdcall NET_CLIENT_ShutdownConnection() {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882ce8);
     if (pD2PacketsClientBuffer) {
-      D2_FREE(pD2PacketsClientBuffer);
+      Fog::Memory::FreeClientMemory(pD2PacketsClientBuffer, ".\\SRC\\Client.cpp", 0xda, 0);
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ pD2PacketsClientBuffer = 0;
@@ -588,11 +588,11 @@ int __stdcall NET_D2GS_CLIENT_ParseRecvBufferIntoPacketQueues() {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x129);
         exit(-1);
       }
-      if ((int)pBytesSize < (int)nPacketSize) {
+      if ((int)nPacketSize > (int)pBytesSize) {
         break;
       }
 
-      pNewPacket = D2_NEW(D2OnePacketClientStrc);
+      pNewPacket = ((D2OnePacketClientStrc*)Fog::Memory::AllocClientMemory(sizeof(D2OnePacketClientStrc), ".\\SRC\\Client.cpp", 0x12c, 0));
       pNewPacket->nSize = nPacketSize;
       pNewPacket->nTickCount = 0;
       pNewPacket->pD2PacketClientNext = 0;
@@ -620,7 +620,7 @@ int __stdcall NET_D2GS_CLIENT_ParseRecvBufferIntoPacketQueues() {
       }
 
       ppTailNext = &pD2PacketClient_to_0xAE;
-      if (0xae < (uint8_t)pBytes->pBytes[0]) {
+      if (0xaf <= (uint8_t)pBytes->pBytes[0]) {
         ppTailNext = &pD2PacketClient_from_0xAF;
       }
 
@@ -641,7 +641,6 @@ int __stdcall NET_D2GS_CLIENT_ParseRecvBufferIntoPacketQueues() {
       memmove(pWalkBuffer, pBytes, pBytesSize);
     }
 
-    Fog::Debug::GuardStack();
     return bHasCompressionPacket;
 }
 
@@ -771,7 +770,6 @@ DWORD __stdcall ThreadClientToServer(void * lpThreadParam) {
         /* LPCSTR lpOutputString for OutputDebugStringA */ lpOutputString = "Client thread close #6\n";
         exit_thread:
         OutputDebugStringA(lpOutputString);
-        Fog::Debug::GuardStack();
         return 0;
       }
     } while (true);
@@ -787,7 +785,7 @@ void __fastcall NET_CLIENT_SendPacketToServer(void * pUnused, uint16_t nPacketSi
     ::D2Net::Game::Server::NET_SendPacketToClient(pPacket, nPacketSize);
 }
 
-int32_t NET_SendPacketToD2GSOnline(char * pBytes, size_t * nSize) {
+static int32_t NET_SendPacketToD2GSOnline(char * pBytes, size_t * nSize) {
     int32_t nSendResult = send(CLIENT_SocketToServer, pBytes, (int)nSize, 0);
     if (nSendResult != -1) {
       return nSendResult;
@@ -836,11 +834,11 @@ void __fastcall NET_D2GS_CLIENT_HandleIncomingBufferAndCreatePacket(char * pByte
     char* nPacketSize = pBytes;
     while (true) {
       D2OnePacketClientStrc* pNewPacket;
-      if ((int)pBytesSize < 1) {
+      if ((int)pBytesSize <= 0) {
         return;
       }
 
-      pNewPacket = D2_NEW(D2OnePacketClientStrc);
+      pNewPacket = ((D2OnePacketClientStrc*)Fog::Memory::AllocClientMemory(sizeof(D2OnePacketClientStrc), ".\\SRC\\Client.cpp", 0x1fd, 0));
       nSizeResult = ::D2Net::Game::Server::NET_D2GS_CLIENT_GetIncomingPacketSizeFromTableAndVariableSize(pBytes, pBytesSize, (uint32_t*)&nPacketSize);
       if (!nSizeResult) {
         return;
@@ -848,7 +846,7 @@ void __fastcall NET_D2GS_CLIENT_HandleIncomingBufferAndCreatePacket(char * pByte
       if ((char*)0x204 < nPacketSize) {
         break;
       }
-      if ((int)nPacketSize < 1) {
+      if ((int)nPacketSize <= 0) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x204);
         exit(-1);
       }

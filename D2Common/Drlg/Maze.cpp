@@ -286,7 +286,7 @@ void __stdcall DRLGMAZE_PickRoomPresets(D2RoomExStrc * pRoomEx) {
 
           sNewSeed = D2_SEED_NEXT(pNeighbor->sSeed);
           pNeighbor->sSeed = sNewSeed;
-          if ((int)(sNewSeed.nSeedLow + (int)(((uint64_t)d2_bits_of(sNewSeed) & 0xffffffff) / 1000) * -1000) < pMazeTxt->Merge) {
+          if ((int)(sNewSeed.nSeedLow % 1000) < pMazeTxt->Merge) {
             nDirection = GetDirectionFromCoordinates(&pNeighbor->sCoords, &pRoomEx->sCoords);
             if (nDirection != DIRECTION_INVALID) {
               DrlgRoom::DRLGROOMEX_AllocNodesForBothRoomEx(pNeighbor, pRoomEx, nDirection);
@@ -302,7 +302,7 @@ void __stdcall DRLGMAZE_PickRoomPresets(D2RoomExStrc * pRoomEx) {
 }
 
 // Allocates a new maze room, sets its size from LvlMaze.txt, attempts to replace the source room at the given direction, and picks presets if successful. EDI is callee-saved, not a parameter: pushed at 00670d79 and overwritten at 00670d84 before any read (1.14d asm).
-D2RoomExStrc * __stdcall AllocateRoomEx(D2RoomExStrc * pSourceRoom, eDrlgDirection eNeighborDir, int bPickPresets) {
+static D2RoomExStrc * __stdcall AllocateRoomEx(D2RoomExStrc * pSourceRoom, eDrlgDirection eNeighborDir, int bPickPresets) {
     D2RoomExStrc* pDrlgRoomExAllocated = DrlgRoom::DRLGROOMEX_AllocRoomEx(pSourceRoom->pLevel, 2);
     D2LvlMazeTxt* pMaze = pDrlgRoomExAllocated->pLevel->pDrlgLevelData.pTxtLvlMaze;
     pDrlgRoomExAllocated->sCoords.WorldSize.x = pMaze->SizeX;
@@ -410,7 +410,7 @@ D2RoomExStrc * __stdcall ReplaceRoomWith(int32_t nDirection, int32_t nPresetInde
 }
 
 // DRLG maze generator: builds a closed rectangular ring/grid of maze RoomEx blocks starting from pLevel->pRoomExFirst. Allocates rooms (DRLGROOMEX_AllocRoomEx), sizes them from the maze .txt (D2LvlMazeTxt SizeX/SizeY), and links them in the four cardinal directions (dir codes 1/0/3/2) via ReplaceRoomWithNewRoom + DRLGROOMEX_AllocNodesForBothRoomEx, freeing rooms whose placement fails. nGridSize sets the side length (e.g. 2 => 2x2). Finally closes the loop by linking the last room back to the first and picks presets for each room.
-void __stdcall DRLGMAZE_BuildRoomGrid(int32_t nGridSize, D2DrlgLevelStrc * pLevel) {
+static void __stdcall DRLGMAZE_BuildRoomGrid(int32_t nGridSize, D2DrlgLevelStrc * pLevel) {
     D2LvlMazeTxt* pDVar1;
     int bPlaceOk;
     D2RoomExStrc* pFirstRoom = pLevel->pRoomExFirst;
@@ -518,7 +518,7 @@ void __stdcall DRLGMAZE_BuildRoomGrid(int32_t nGridSize, D2DrlgLevelStrc * pLeve
     DRLGMAZE_PickRoomPreset(pFirstRoom, 1);
 }
 
-D2RoomExStrc * GetRandomRoomExFromLevel(D2DrlgLevelStrc * pLevel) {
+D2RoomExStrc * __fastcall GetRandomRoomExFromLevel(D2DrlgLevelStrc * pLevel) {
     uint32_t nSeedLowOld;
     D2SeedStrc sSeed;
     uint32_t nSelectedRoom = pLevel->nRoomExCount;
@@ -598,7 +598,7 @@ void __stdcall DRLGMAZE_ExpandRoomsWithPresets(D2DrlgLevelStrc * pLevel, uint32_
     D2LvlMazeTxt* pLvlMazeTxt;
     D2DrlgPresetRoomStrc* pRoomExData;
     D2PoolManagerStrc* pMemPool = pLevel->pDrlg->pMemoryPool;
-    D2RoomExStrc** pRoomPtrArray = (D2RoomExStrc**)D2_ALLOC_POOL(pMemPool, pLevel->nRoomExCount * 4);
+    D2RoomExStrc** pRoomPtrArray = (D2RoomExStrc**)Fog::Memory::AllocServerMemory(pMemPool, pLevel->nRoomExCount * 4, ".\\DRLG\\Maze.cpp", 0x271, 0);
     D2RoomExStrc* pRoomIter = pLevel->pRoomExFirst;
     int nRoomCount = pLevel->nRoomExCount;
     int nRoomIdx = 0;
@@ -643,7 +643,7 @@ void __stdcall DRLGMAZE_ExpandRoomsWithPresets(D2DrlgLevelStrc * pLevel, uint32_
       }
     }
 
-    D2_FREE_POOL(pMemPool, pRoomPtrArray);
+    Fog::Memory::FreeServerMemory(pMemPool, pRoomPtrArray, ".\\DRLG\\Maze.cpp", 0x288, 0);
 }
 
 // Initialises the Throne of Destruction (Baal's chamber) level layout. Advances the first room's seed to pick a random direction (0-3), looks up two preset IDs from the gaBaalChamberPresets table for that direction, allocates and assigns them via DRLGMAZE_AllocRoomExAndPickPreset, then expands surrounding rooms with presets.
@@ -840,7 +840,7 @@ D2RoomExStrc * __fastcall DRLGMAZE_FindRightMostRoom(D2DrlgLevelStrc * pLevel) {
     D2RoomExStrc* pRoomEx;
     D2RoomExStrc* pRightMost = 0;
     for (pRoomEx = pLevel->pRoomExFirst; pRoomEx; pRoomEx = pRoomEx->pRoomExNext) {
-      if (!pRightMost || pRightMost->sCoords.WorldPosition.x < pRoomEx->sCoords.WorldPosition.x) {
+      if (!pRightMost || pRoomEx->sCoords.WorldPosition.x > pRightMost->sCoords.WorldPosition.x) {
         bCanPlace = DRLGMAZE_CanPlaceRoomInDirection(DIRECTION_SOUTHWEST, (int*)pRoomEx);
         if (bCanPlace) {
           pRightMost = pRoomEx;
@@ -857,7 +857,7 @@ D2RoomExStrc * __fastcall DRLGMAZE_FindBottomMostRoom(D2DrlgLevelStrc * pLevel) 
     D2RoomExStrc* pRoomEx;
     D2RoomExStrc* pBottomMost = 0;
     for (pRoomEx = pLevel->pRoomExFirst; pRoomEx; pRoomEx = pRoomEx->pRoomExNext) {
-      if (!pBottomMost || pBottomMost->sCoords.WorldPosition.y < pRoomEx->sCoords.WorldPosition.y) {
+      if (!pBottomMost || pRoomEx->sCoords.WorldPosition.y > pBottomMost->sCoords.WorldPosition.y) {
         bCanPlace = DRLGMAZE_CanPlaceRoomInDirection(DIRECTION_NORTHWEST, (int*)pRoomEx);
         if (bCanPlace) {
           pBottomMost = pRoomEx;
@@ -1010,7 +1010,7 @@ void __fastcall ForAllButDenOfEvil(D2DrlgLevelStrc * pLevel) {
 
 // Selects a random preset file index for a maze level using the level's seed and LvlPrest table.
 // @sourcefile .\DRLG\Maze.cpp
-int __stdcall DRLGMAZE_SelectRandomPresetFile(int nPresetFile, D2DrlgLevelStrc * pLevel, int * pState) {
+static int __stdcall DRLGMAZE_SelectRandomPresetFile(int nPresetFile, D2DrlgLevelStrc * pLevel, int * pState) {
     D2DrlgLevelLinkNodeStrc* pNode;
     eLvlTypes nLevelType;
     if (nPresetFile != -1) {
@@ -1024,7 +1024,7 @@ int __stdcall DRLGMAZE_SelectRandomPresetFile(int nPresetFile, D2DrlgLevelStrc *
     nFirstFile = *(int*)pState[2];
     uint32_t nResult;
     nResult = pLevel->nLevelType - 3;
-    if (nResult >= 0x21) {
+    if (nResult > 0x20) {
       return nResult;
     }
 
@@ -1094,7 +1094,7 @@ int __stdcall DRLGMAZE_SelectRandomPresetFile(int nPresetFile, D2DrlgLevelStrc *
       }
     }
 
-    pNode = D2_NEW_POOL(pLevel->pDrlg->pMemoryPool, D2DrlgLevelLinkNodeStrc);
+    pNode = ((D2DrlgLevelLinkNodeStrc*)Fog::Memory::AllocServerMemory(pLevel->pDrlg->pMemoryPool, sizeof(D2DrlgLevelLinkNodeStrc), ".\\DRLG\\Maze.cpp", 0x780, 0));
     pNode->dwData2 = 0;
     pNode->pNext = 0;
     pNode->dwData0 = nFirstFile;
@@ -1111,7 +1111,7 @@ int __stdcall DRLGMAZE_SelectRandomPresetFile(int nPresetFile, D2DrlgLevelStrc *
     return nResult;
 }
 
-void __stdcall InitAllRoomsEx(D2RoomExStrc * pRoomEx, D2DrlgLevelStrc * pLevel) {
+static void __stdcall InitAllRoomsEx(D2RoomExStrc * pRoomEx, D2DrlgLevelStrc * pLevel) {
     BOOL bSingleRoom;
     D2DrlgOrthStrc* pDVar2;
     D2DrlgPresetRoomStrc* pDVar1 = pRoomEx->pRoomExData.pRoomExDataPreset;
