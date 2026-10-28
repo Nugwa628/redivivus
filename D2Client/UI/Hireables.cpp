@@ -242,7 +242,7 @@ static void __stdcall GetAndDrawHirelingName(int32_t nX, int32_t nY, int32_t nPe
     DrawHirelingName(nX, nY, 0, wszName);
 }
 
-void __fastcall UI_DrawHirelingNameFromString(char * szText, int32_t nX, int32_t nY) {
+static void __fastcall UI_DrawHirelingNameFromString(char * szText, int32_t nX, int32_t nY) {
     uint16_t szString[32];
     for (int i = 0; i < 32; i++) szString[i] = 0;
     D2Lang::UTF8_ConvertToWideChar(szString, szText, 0x20);
