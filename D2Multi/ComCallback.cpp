@@ -1094,12 +1094,12 @@ BOOL __stdcall COMCALLBACK_ValidateGameJoinability() {
 int __fastcall PrintChannelText(uint32_t dwParam, char * szText, int32_t nColor) {
     int i;
     uint16_t wszText[576];
-    uint16_t* pStr = wszText;
-    for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x240; i++) wszText[i] = 0;
+
+
+
+
 
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszText, szText, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(wszText);

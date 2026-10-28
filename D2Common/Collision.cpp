@@ -1889,7 +1889,7 @@ void __stdcall RemoveCollision_Vector(D2RoomStrc * pRoom, int32_t nX, int32_t nY
 }
 
 // ORs eCollisionFlag into the 5-cell cross pattern centered at (nX,nY): the center cell and its 4 cardinal neighbours. Each cell is resolved through DRLGROOM_FindBetterNearbyRoom so cross-room boundaries are handled. Inverse of RemoveCollision_Cross. Used to mark unit presence / blocking around a subtile position.
-void __stdcall AddCollision_Cross(D2RoomStrc * pRoom, int32_t nX, int32_t nY, eCollisionFlags eCollisionFlag) {
+static void __stdcall AddCollision_Cross(D2RoomStrc * pRoom, int32_t nX, int32_t nY, eCollisionFlags eCollisionFlag) {
     eCollisionFlags* peVar1;
     D2RoomCollisionGridStrc* pCollisionGrid;
     D2RoomStrc* pBetterRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nX - 1, nY);
@@ -1942,7 +1942,7 @@ void __stdcall AddCollision_Cross(D2RoomStrc * pRoom, int32_t nX, int32_t nY, eC
     *peVar1 |= eCollisionFlag;
 }
 
-void __stdcall COLLISN_SetCellMask(D2RoomStrc * pRoom, int32_t nX, int32_t nY, eCollisionFlags eCollisionFlag) {
+static void __stdcall COLLISN_SetCellMask(D2RoomStrc * pRoom, int32_t nX, int32_t nY, eCollisionFlags eCollisionFlag) {
     D2RoomStrc* pBetterRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nX, nY);
     if (!pBetterRoom) {
       return;

@@ -108,8 +108,6 @@ uint32_t __fastcall PLAYER_GetAppearanceBytes(uint32_t * pAppearanceOut, uint32_
 uint32_t __fastcall PLAYER_GetMercAppearanceBytes(uint32_t * pAppearanceOut, uint32_t nBufSize);
 // Teleports a player unit to a new room/position (via PATH_CheckCollisionFlags) and, if the unit was in a movement mode, re-issues the appropriate walk/run PlayerMessage to resume movement toward the previous target unit or coordinates.
 void __fastcall CLIENT_WarpPlayerAndContinueMove(struct D2UnitStrc * pUnit, struct D2RoomStrc * pRoom, uint16_t nNewX, uint16_t nNewY);
-// Client-side stamina-depletion handler for the local player. When the player's stamina hits 0, cancels any active run/walk: if chasing a unit target, re-issues a follow message; otherwise captures the current destination, frees any pending light map, resets the current skill, and transitions the unit to Walk or TownWalk mode (or falls back to CLIENT_SetAnimModeAndMoveToCurrentPos if no valid path target). No-ops for non-local or non-zero stamina units.
-void CLIENT_CancelRunAndWalk(struct D2UnitStrc * pUnit);
 // Per-frame client-side state machine driving a player unit's current animation mode. Uses gaPlayerInitStats[playerMode] flag columns to decide behavior: steps the path and plays footstep sounds for moving modes, advances/handles the skill cast step (setting skill flags and re-issuing the current skill) for action modes, and advances or clamps the animation frame per the mode's loop/freeze attribute. On animation completion it transitions the mode: KnockBack restores position/velocity and reverts to GetHit; players with a queued skill set a pending-interact flag; otherwise it clears the current skill, frees the light map, and reverts to Neutral/TownNeutral. Also reloads the COF when needed, handles room-change updates, interpolates facing direction, cancels run/walk, applies active damage-state skill effects, and resolves player collision.
 // @blizzard UnitProcessPlayerModeSimulation
 void __fastcall PLAYER_ProcessPlayerModeSimulation(struct D2UnitStrc * pUnit);
@@ -121,13 +119,9 @@ int32_t __fastcall TXT_MonStats_GetBaseId(struct D2UnitStrc * pUnit);
 // The parameter arrives in a whole register; typing it from the single byte the body reads made the decompiler splice the indeterminate upper bytes back in as an uninitialised local, which then indexed an array with garbage in its high bits.
 BOOL __fastcall TXT_MonStats_MonStats2_GetFlagsByBitOffset(int32_t nMonStatsId, TXTMonStats2Field0x04DWORD nBitOffset);
 int32_t __fastcall ValidateClassId(int32_t nClassId);
-struct D2UnitStrc * __stdcall FindUnit(int32_t nUnitGUID, struct D2UnitStrc * * ppUnitHashTable, eD2UnitType eUnitType, int32_t nListIndex);
 struct D2UnitStrc * __fastcall UNITS_FindClientSideUnit(int32_t nUnitGUID, eD2UnitType eUnitType);
 struct D2UnitStrc * __fastcall UNITS_FindServerSideUnit(int32_t nUnitGUID, eD2UnitType eUnitType);
 struct D2UnitStrc * __fastcall MISSILE_GetOwnerUnit(struct D2UnitStrc * pUnit);
-// Inserts pUnit into the appropriate global unit hash table (server-side or client-side, selected by UNITFLAG bit 0x21). Computes bucket from nUnitGUID &amp; 0x7f and inserts in ascending GUID order. Halts (ERROR_UnrecoverableInternalError_Halt) if the unit already exists in the table. Returns 1 on successful insert, 0 if the unit was already present (duplicate path).
-uint32_t InsertIntoHashTable(struct D2UnitStrc * pUnit);
-void CLIENT_SendIdlePlayerMessage(struct D2UnitStrc * pUnit);
 void __stdcall PLAYER_PlaceUnitInRoom(int32_t nParam1, struct D2RoomStrc * pRoom, struct D2UnitStrc * pUnit, int32_t nParam2);
 void __fastcall CLIENT_UpdateMonsterAllegiance(struct D2UnitStrc * pUnit, char byOldAllegiance, char byNewAllegiance);
 void __stdcall CLIENT_ClearServerAndClientUnitLists();

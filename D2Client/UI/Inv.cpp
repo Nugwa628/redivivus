@@ -311,7 +311,7 @@ static void INV_DrawBodySlotHighlight(int * pnParam, int32_t nColorIndex) {
     Engine::GfxInfo::D2GFX_DrawSolidRectExBySize(nStartX, nStartY, (uint32_t)*(uint8_t*)(pnParam + 4), (uint32_t)*(uint8_t*)((int)pnParam + 0x11), (uint32_t)gaInvHighlightColors[nColorIndex], DRAW_VERYTRANSPARENT);
 }
 
-static BOOL __fastcall IsInInventoryScreenRange(int32_t nX, int32_t nY) {
+BOOL __fastcall IsInInventoryScreenRange(int32_t nX, int32_t nY) {
     if (!(pInventoryScreenCoordinates.nLeft <= nX && nX < pInventoryScreenCoordinates.nRight && pInventoryScreenCoordinates.nTop <= nY && nY <= pInventoryScreenCoordinates.nBottom)) {
       return 0;
     }

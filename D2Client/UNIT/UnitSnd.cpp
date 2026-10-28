@@ -1000,9 +1000,9 @@ void __stdcall UNITSND_StopAllCombatSounds(D2UnitStrc * pUnit) {
     }
 }
 
-eD2Sounds __stdcall UNITSND_GetModeChangeSound(int32_t nPrevMode, D2UnitStrc * pUnit, int32_t nNewMode) {
+static eD2Sounds __stdcall UNITSND_GetModeChangeSound(int32_t nPrevMode, D2UnitStrc * pUnit, int32_t nNewMode) {
     DWORD nClassId = GetSndUnitClassId(pUnit);
-    if (0x23c < nClassId || 7 < nNewMode) {
+    if (0x23d <= nClassId || 8 <= nNewMode) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe72);
       exit(-1);
     }

@@ -60,7 +60,7 @@ void __stdcall FIELDTBLS_InitFieldData(D2ExpFieldFileStrc * pArchive, uint32_t d
     uint32_t nHeight = pArchive->nHeight;
     uint32_t nWidth = pArchive->nWidth;
     size_t nAllocSize = nWidth * nHeight;
-    void* nErrAddress = D2_ALLOC_POOL(nullptr, nAllocSize);
+    void* nErrAddress = Fog::Memory::AllocServerMemory(nullptr, nAllocSize, ".\\DATATBLS\\FieldTbls.cpp", 0x3e, 0);
     if (!nErrAddress) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x40);
       exit(-1);

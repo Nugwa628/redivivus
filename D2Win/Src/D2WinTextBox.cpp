@@ -184,7 +184,7 @@ int __fastcall D2WINTEXTBOX_SetLineCellTextW(::D2WinTextBox * pnTextBox, uint16_
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1fa);
       exit(-1);
     } else {
-      if (!(nCol < (int)pnTextBox->sStyleControl.fpPush)) {
+      if (!((int)pnTextBox->sStyleControl.fpPush > nCol)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1fb);
         exit(-1);
       }
@@ -1497,7 +1497,7 @@ int __fastcall D2WINTEXTBOX_AddLines(::D2WinTextBox * pnParam, uint16_t * wszTex
           pAllocedText = (uint16_t*)Fog::Memory::AllocClientMemory(nLine * 2 + 2, ".\\Src\\D2WinTextBox.cpp", 0x1b0, 0);
           *pNewEntry = (uint32_t)(uintptr_t)pAllocedText;
           D2Lang::Unicode::UNISYS::STRING_CopyWideString(pAllocedText, wszText);
-          memset(pNewEntry + 1, 0, 4 * sizeof(pNewEntry[0]));
+          for (int i = 1; i < 5; i++) pNewEntry[i] = 0;
           pNewEntry[5] = nLineStyle;
           *(bool*)(pNewEntry + 6) = bIndent;
           pNewEntry[7] = 0;

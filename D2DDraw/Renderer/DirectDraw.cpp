@@ -1008,7 +1008,9 @@ static BOOL InternalOpenWindow(int32_t nResolutionMode) {
           ddSurfDesc.dwFlags = 7;
           ddSurfDesc.ddsCaps = 0x840;
           nLine = pWindowHandleBuffer->lpVtbl->CreateSurface(pWindowHandleBuffer, &ddSurfDesc, (void**)&pDirectDrawSurface, nullptr);
-          if (!nLine) {
+          if (nLine) {
+            szErrorMsg = "CreateSurface (render) failed!";
+          } else {
             nLine = gpDDrawPrimarySurface->lpVtbl->SetPalette(gpDDrawPrimarySurface, pDirectDrawPalette);
             if (!nLine) {
               gbDDrawWindowInitialized = 1;
@@ -1017,8 +1019,6 @@ static BOOL InternalOpenWindow(int32_t nResolutionMode) {
             }
 
             szErrorMsg = "SetPalette failed!";
-          } else {
-            szErrorMsg = "CreateSurface (render) failed!";
           }
         }
       }

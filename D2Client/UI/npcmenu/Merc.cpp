@@ -78,7 +78,7 @@ void __fastcall NPCMENU_SetSelectedMercIndex(int16_t nParam) {
       }
 
       pMercEntry++;
-    } while ((int)pMercEntry < (uintptr_t)((char*)&D2Client::Merc::D2MercForHire + sizeof(D2Client::Merc::D2MercForHire)));
+    } while ((int)pMercEntry < (int)((uintptr_t)((char*)&D2Client::Merc::D2MercForHire + sizeof(D2Client::Merc::D2MercForHire))));
 
     Hireables::UI_InitializeHirelingIconsUI();
 }

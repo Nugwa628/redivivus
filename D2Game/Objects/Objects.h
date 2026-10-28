@@ -179,7 +179,6 @@ void __fastcall Objects_InitFn34(struct D2ObjectInitFnArg * pInitArg);
 void __fastcall Objects_InitFn05(struct D2ObjectInitFnArg * pInitArg);
 void __fastcall Objects_InitFn11(struct D2ObjectInitFnArg * pInitArg);
 void __fastcall Objects_InitFn51(struct D2ObjectInitFnArg * pInitArg);
-BOOL __stdcall ROOM_CheckSpawnCollision(struct D2RoomStrc * pRoom, uint32_t nParam1, int * pnParam1, uint32_t nParam2, int * pnParam2);
 // Spawns a game object of nObjClassId at a random collision-free tile within pRoom, respecting nXMargin/nYMargin insets. Uses the object control RNG seed (advanced via the 0x6AC690C5 LCG) to pick candidate coordinates up to 5 times, checking SPAWN_UNIT_COLLISION each attempt. Returns the spawned D2UnitStrc* on success, or null if the room is too small or all retries fail. Halts with an internal error if pRoom is null at spawn time.
 struct D2UnitStrc * __stdcall OBJECT_PlaceAtRandomPosition(::SGAMEDATA * pGame, int32_t nObjClassId, int32_t nXMargin, int32_t nYMargin, struct D2RoomStrc * pRoom);
 // Places a new object unit (UNIT_OBJECT) at a randomly chosen collision-free position within pRoom, subject to a caller-supplied acceptance callback. Reads room coordinates, retries up to 5 times picking random (X,Y) offsets inside the room boundary (excluding the 1-tile border), checks collision via CheckCollision_Vector, and calls pfnProc(X,Y) — only spawning if pfnProc returns non-zero and no collision. Returns the spawned D2UnitStrc* or null if all retries fail or the room is too small for nSizeX×nSizeY.

@@ -222,7 +222,7 @@ int __fastcall PLRSAVE_RestoreItemFromSaveData(::SGAMEDATA * pGame, D2UnitStrc *
 
 // Server-side: restores one saved item onto a player by its saved animMode (storage location), dispatching: Death/default=drop to ground at the item's path position (SERVER_ItemToInventory); Neutral=equip to its body-loc (SERVER_EquipItemToBodyLoc); Walk=place in belt (ITEM_TryPlaceInBelt at the item's X); GetHit=copy into player inventory and apply as a quest reward (ITEMMODE_ApplyQuestReward); TownWalk=nest into the container item identified by eBodyLocation (PutItemInItem, container GUID at +0xc). Run/TownNeutral and any mode > TownWalk fail. Returns 0 on success, 0xc on failure. Used during character load to repopulate a player's items.
 // @sourcefile .\PLAYER\PlrSave.cpp
-static int __fastcall PLRSAVE_RestoreItemToUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pSourceItem, int32_t eBodyLocation) {
+int __fastcall PLRSAVE_RestoreItemToUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pSourceItem, int32_t eBodyLocation) {
     eD2BodyLoc eBodyLoc;
     eD2ItemAnimMode eAnimMode;
     int32_t nPosY;
@@ -513,10 +513,10 @@ static int __fastcall PLRSAVE_RestoreItemToBodyLoc(D2UnitStrc * pUnit, ::SGAMEDA
       }
 
       D2Common::Units::SetupUpdateFlag(pUnit, 4);
-      if (!pUnit) {
-        dwItemGUID = -1;
-      } else {
+      if (pUnit) {
         dwItemGUID = pUnit->nUnitGUID;
+      } else {
+        dwItemGUID = -1;
       }
 
       nPlaceResult = ITEMS::ItemMode::PutItemInItem(pGame, pUnit2, dwItemGUID, *(DWORD*)(nParam + 0xc), (int32_t*)&pItem, 0, 1, 0, 0);

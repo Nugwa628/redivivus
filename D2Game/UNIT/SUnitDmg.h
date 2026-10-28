@@ -99,8 +99,6 @@ namespace D2Game::UNIT::SUnitDmg {
 uint32_t __fastcall DAMAGE_CheckMonsterTypeVsMonsterType(uint32_t nMonTypeA, int32_t nMonTypeB);
 uint32_t __stdcall DAMAGE_RollPhysicalDamageRange(int32_t nDamageRange, int32_t nMinPctBonus, struct D2UnitStrc * pUnit, int32_t nDamageMin, int32_t nRangePctBonus, uint32_t nDamageAccum);
 int32_t __stdcall DAMAGE_ApplyManaToUnit(int32_t nParam, struct D2UnitStrc * pUnit);
-// Applies the STATE_stunned state to pUnit2 for nParam game-frames. Skips if nParam &lt; 1, if the target is a non-stunable monster (boss, zero-velocity, or rolls against a 90% stun-chance for monster-type 8), or clamps mercs to 13 frames and others to 250. Re-uses an existing stun stat-list if present (updates timeout + event), otherwise allocates a new one and attaches it.
-void __stdcall DAMAGE_ApplyStun(struct D2UnitStrc * pUnit, int32_t nParam, struct D2UnitStrc * pUnit2);
 // @sourcefile .\UNIT\SUnitDmg.cpp
 void __fastcall DAMAGE_OnColdExpire(struct D2UnitStrc * pUnit, eD2States eState, uint32_t dwParam);
 int32_t __fastcall DAMAGE_GetMonsterDelayByDifficulty(struct D2UnitStrc * pUnit, struct D2UnitStrc * pMonster);

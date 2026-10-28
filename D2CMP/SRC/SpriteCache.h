@@ -118,8 +118,6 @@ struct DC6Block * __stdcall SPRITECACHE_FindFrameBlock(struct D2GfxDataStrc * pG
 // Waits for the cache block's async load, copies nFramesPerDir into pGfxData->nFrameCount and returns
 // SPRITECACHE_FindFrameBlock over the loaded buffer. No hash is involved.
 struct DC6Block * SPRITECACHE_GetFrameBlock(struct D2CelCacheBlockStrc * pCacheBlock, struct D2GfxDataStrc * pGfxData);
-// @sourcefile .\SRC\SpriteCache.cpp
-void __stdcall SPRITECACHE_LoadAndCacheDC6(struct D2CelFileCacheEntryStrc * pCelEntry, struct D2GfxDataStrc * pGfxData, struct D2CelCacheBlockStrc * pCacheBlock);
 uint32_t __stdcall SPRITECACHE_GetTotalEntries();
 uint32_t __stdcall SPRITECACHE_GetCacheSize();
 int __stdcall SPRITECACHE_GetMaxSize();
@@ -141,9 +139,6 @@ struct D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_EvictEntry(struct D2GfxMe
 void __fastcall SPRITECACHE_AllocateMemory(void * pCache, int32_t nParam2);
 void __fastcall SPRITECACHE_FreeMemory(struct D2GfxMemoryStrc * pGfxMemory, void * pParam, int32_t nFreedSize, uint32_t bEvictPriority);
 uint32_t __stdcall SPRITECACHE_DecodeFrameByIndex(uint32_t * pReadBuffer, size_t nReadSize, struct D2SpriteDecodeRequestStrc * pRequest);
-// Load CEL sprite from archive into cache with optional palette override. Custom calling convention: ECX=path, EDX=codec header, EDI=cache entry, 3 stdcall stack params.
-// @sourcefile .\SRC\SpriteCache.cpp
-void __stdcall SPRITECACHE_LoadCelFileAndCache(char * szCelPath, struct D2CelFileCacheEntryStrc * pCelEntry, struct D2CelCacheBlockStrc * pCacheEntry, struct D2GfxDataStrc * pGfxData, int32_t nDirection, int32_t nFrameCount);
 // @sourcefile .\SRC\SpriteCache.cpp
 void __fastcall SPRITECACHE_ReleaseMemory(struct D2GfxMemoryStrc * pGfxMemory);
 // @sourcefile .\SRC\SpriteCache.cpp
@@ -151,7 +146,6 @@ void * * __fastcall SPRITECACHE_AllocEntry2(struct D2GfxMemoryStrc * pGfxMemory,
 // Initialises the sprite/CEL data cache. All four parameters are stack scalars, none a pointer: dwCacheBytes (0x800000) and dwUnitCacheBytes (0x7d000) are byte counts, the latter forwarded as a size to 00609020. dwAvailMemOverride, when 0, makes the function query system memory and apply SUB EAX,0xb00000 / CMP EAX,0x4000000. Typed as pointers, the 0x800000 byte count was emitted as a pointer into whatever object happened to contain that address.
 void __stdcall GFX_InitCelDataCache(uint32_t nFlags, uint32_t dwCacheBytes, uint32_t dwUnitCacheBytes, uint32_t dwAvailMemOverride);
 void __stdcall SPRITECACHE_Shutdown(int32_t nParam);
-BOOL __stdcall SPRITECACHE_LoadCelAndCache(struct D2CelFileCacheEntryStrc * pCelEntry, int32_t dwParam, int32_t nParam1, char * szText, struct D2GfxDataStrc * pGfxData);
 int __stdcall SPRITECACHE_GetOrLoadSprite(struct D2GfxDataStrc * pGfxData, int32_t bCheckOnly, int32_t nParam2);
 // Server sprite precache sync. GuardStack tail confirms BOOL return: GuardStack(1) on two early-out success paths, GuardStack(nLoadResult) on the cache-and-load path, GuardStack(0) on failure.
 BOOL __stdcall SPRITECACHE_PrecacheSpriteSync(struct D2GfxDataStrc * pGfxData);

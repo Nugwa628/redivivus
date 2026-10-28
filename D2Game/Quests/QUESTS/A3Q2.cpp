@@ -908,7 +908,7 @@ bool __fastcall Q19_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
 
     /* GetQuestState(KhalimsWill, Step0x02): quest-started bit gates the "in
                          progress" status flag */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_KhalimsWill, QUESTSTATE_Step0x02);
-    if (bQuestState || pQuestData->bIsNotIntroduction && 1 < pQuestData->nStateFlag) {
+    if (bQuestState || pQuestData->bIsNotIntroduction && 2 <= pQuestData->nStateFlag) {
       *nUnknown = '\x01';
     }
 

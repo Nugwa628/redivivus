@@ -166,7 +166,7 @@ void DrawScrollbar(::ListBoxImplementation * pThis) {
     pThis->field_0x180756 = nScrollStart;
 }
 
-static int __fastcall GetVisibleItemCount(::ListBoxImplementation * pThis) {
+int __fastcall GetVisibleItemCount(::ListBoxImplementation * pThis) {
     uint32_t nTotalItems = (uint32_t)pThis->nItemCount;
     int nAccumHeight = 0;
     int i = 0;
@@ -198,9 +198,9 @@ static int __fastcall GetVisibleItemCount(::ListBoxImplementation * pThis) {
 
         nAccumHeight += pThis->nItemSpacing;
       }
-      if (pThis->nHeight - 0x14 < nAccumHeight) {
+      if (nAccumHeight > pThis->nHeight - 0x14) {
         i -= pThis->nFirstVisibleIndex;
-        if (0 >= i) {
+        if (1 > i) {
           return 1;
         }
 
@@ -356,12 +356,12 @@ int OnMouseWheel(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     return 1;
 }
 
-static void __fastcall EnsureSelectionVisible(::ListBoxImplementation * pThis) {
+void __fastcall EnsureSelectionVisible(::ListBoxImplementation * pThis) {
     uint32_t nSelIdx = pThis->nSelectedIndex;
     if ((int)nSelIdx < (int)pThis->nFirstVisibleIndex) {
       pThis->nFirstVisibleIndex = nSelIdx;
     }
-    if ((int)(pThis->nVisibleRows + pThis->nFirstVisibleIndex) > (int)nSelIdx) {
+    if ((int)nSelIdx < (int)(pThis->nVisibleRows + pThis->nFirstVisibleIndex)) {
       return;
     }
 
@@ -574,7 +574,7 @@ void __fastcall Draw(::ListBoxImplementation * pThis) {
       uint16_t (*pawVar1)[1024];
       pItemEntry = &pThis->aItems[nItemIdx].dwAuxData;
       do {
-        if (0x7f < (int)nItemIdx) {
+        if (0x80 <= (int)nItemIdx) {
           break;
         }
         if (pThis->nSelectedIndex == nItemIdx && pThis->pfnOnItemActivated) {

@@ -244,7 +244,7 @@ void ReplaceAreas(D2DrlgLevelStrc * pLevel) {
       }
 
       pRoomData = pRoomEx->pRoomExData.pRoomExDataPreset;
-      if (pRoomData->nLevelPrest >= 0x1ad) {
+      if (pRoomData->nLevelPrest > 0x1ac) {
         break;
       }
 
@@ -252,17 +252,17 @@ void ReplaceAreas(D2DrlgLevelStrc * pLevel) {
     }
 
     switch (pRoomData->nLevelPrest) {
-      case 0x1bc:
-        nRoll = 3;
+      case 0x1be:
+        nRoll = 0;
       break;
       case 0x1bd:
         nRoll = 1;
       break;
-      case 0x1be:
-        nRoll = 0;
-      break;
       case 0x1bf:
         nRoll = 2;
+      break;
+      case 0x1bc:
+        nRoll = 3;
       break;
       default:
         nErrorLine = 0x519;
@@ -270,7 +270,7 @@ void ReplaceAreas(D2DrlgLevelStrc * pLevel) {
       exit(-1);
     }
 
-    if (0x36 < pLevel->eD2LevelId && pLevel->eD2LevelId < 0x3b) {
+    if (0x37 <= pLevel->eD2LevelId && pLevel->eD2LevelId <= 0x3a) {
       ReplaceRoom(gaDrlgReplaceAreas_A + nRoll, pLevel, &nRoll);
     }
     if (pLevel->eD2LevelId == 0x39) {
