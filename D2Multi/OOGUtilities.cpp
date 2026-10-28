@@ -1948,16 +1948,16 @@ void __stdcall OOGUTIL_CloseProfileDialog() {
 // Returns 1. Entry proven by the fpOnPressCallback pointer at 0070e9a0 (RET 0x4).
 BOOL __stdcall OOGUTIL_OnPressProfileLadder(D2ControlMsg * pControlMsg) {
     OOGUTIL_CloseProfileDialog();
-    if (!gnProfileUserExpansionFlag) {
+    if (gnProfileUserExpansionFlag) {
       if (gnProfileUserHardcoreFlag) {
-        ChatDlg::CHATDLG_OpenLadderClassicHardcore();
+        ChatDlg::CHATDLG_OpenLadderExpansionHardcore();
       } else {
-        ChatDlg::CHATDLG_OpenLadderClassicSoftcore();
+        ChatDlg::CHATDLG_OpenLadderExpansionSoftcore();
       }
     } else if (gnProfileUserHardcoreFlag) {
-      ChatDlg::CHATDLG_OpenLadderExpansionHardcore();
+      ChatDlg::CHATDLG_OpenLadderClassicHardcore();
     } else {
-      ChatDlg::CHATDLG_OpenLadderExpansionSoftcore();
+      ChatDlg::CHATDLG_OpenLadderClassicSoftcore();
     }
 
     ChatDlg::CHATDLG_RequestLadderRank(gszProfileCharacterName, gnProfileUserHardcoreFlag, gnProfileUserExpansionFlag);

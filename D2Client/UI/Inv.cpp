@@ -6203,7 +6203,7 @@ void __stdcall INV_DrawHirelingName(D2UnitStrc * pUnit) {
     size_t nMaxChars = 0x20;
     uint16_t* pwTruncate;
     D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(wszNameBuf, UNIT::CUnit::GetName(pUnit), nMaxChars);
-    *(uint32_t*)((char*)&wszNameBuf + 60) &= 0xffff;
+    wszNameBuf[31] = 0;
     pwTruncate = wszNameBuf + 0x1f;
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszNameBuf);
     while (0xa0 < nTextWidth) {

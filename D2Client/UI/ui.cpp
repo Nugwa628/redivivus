@@ -4649,7 +4649,7 @@ BOOL __fastcall UI_IsMouseOnStatButton(int32_t nPanelMode, int32_t nMouseX, int3
     } else if (0x20 < nMouseX - 0x29U) {
       return 0;
     }
-    if (!(ScreenSizeY - 0x8b < nMouseY && nMouseY < ScreenSizeY - 0x66)) {
+    if (!(nMouseY > ScreenSizeY - 0x8b && nMouseY < ScreenSizeY - 0x66)) {
       return 0;
     }
 

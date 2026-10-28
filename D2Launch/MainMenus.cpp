@@ -1163,8 +1163,7 @@ void __stdcall UIMENU_AreYouSureToCreateHardcoreCharacter() {
     int nSetTextArg3 = 0;
     bool nSetTextArg2 = false;
     int32_t nSetTextArg1 = 0;
-    uint16_t* szText = D2Lang::StrTable::strtable::GetLocaleString(0x14b7);
-    D2Win::Src::D2WinTextBox::SetText(pControl2, szText, nSetTextArg1, nSetTextArg2, nSetTextArg3);
+    D2Win::Src::D2WinTextBox::SetText(pControl2, D2Lang::StrTable::strtable::GetLocaleString(0x14b7), nSetTextArg1, nSetTextArg2, nSetTextArg3);
 }
 
 // Validates character name input as user types. First character must be a-z or A-Z (rejects '-' and '_' at start). If nTextLen is 0 (first char position), rejects non-alpha. Also rejects consecutive '-' or '_' characters by checking if previous character was the same special char. Returns 1 if valid, 0 if invalid.
