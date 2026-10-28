@@ -3160,10 +3160,10 @@ D2UnitStrc * __fastcall MONSTERAI_FindBestTarget(::SGAMEDATA * pGame, D2UnitStrc
       if (!bLOSDrawBlocked) {
         bNeedLOS = (int32_t)!((uint8_t)pMonsterAiGeneral->nAiFlags >> 3 & 1);
         if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
-          if (!pUnit->pUnitData.pUnitDataPlayer) {
-            pMonDataPtr = 0;
-          } else {
+          if (pUnit->pUnitData.pUnitDataPlayer) {
             pMonDataPtr = pUnit->pUnitData.pUnitDataPlayer->dwTradeState;
+          } else {
+            pMonDataPtr = 0;
           }
           if (bNeedLOS && pMonDataPtr) {
             nLastAttackerFlag = *(int*)(pMonDataPtr + 0x24);
@@ -10400,10 +10400,10 @@ int32_t __fastcall CalculateRiskAncientsAndDiablo(::SGAMEDATA * pGameStrc, D2Uni
     int nPlayerFireRes = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pTarget, UNITSTAT_fireresist, 0);
     int nPlayerLightRes = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pTarget, UNITSTAT_lightresist, 0);
     int nPlayerMagicRes = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pTarget, UNITSTAT_magicresist, 0);
-    if (!bIsInMeleeRange) {
-      nPlayerColdRes = 0;
-    } else {
+    if (bIsInMeleeRange) {
       nPlayerColdRes = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pTarget, UNITSTAT_coldresist, 0);
+    } else {
+      nPlayerColdRes = 0;
     }
 
     int nMaxDmg = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pTarget, UNITSTAT_maxdamage, 0);

@@ -876,10 +876,10 @@ void __fastcall UnitQueuePacket0xA1(D2UnitStrc * pUnit, uint16_t nParam, int32_t
     if (nOldValue == nNewValue) {
       return;
     }
-    if (!pUnit) {
-      pMemory = 0;
-    } else {
+    if (pUnit) {
       pMemory = pUnit->pMemory;
+    } else {
+      pMemory = 0;
     }
 
     D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pMemory, 0x18);
