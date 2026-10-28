@@ -145,13 +145,13 @@ void __stdcall AUTOMAP_SetupPosition() {
       AUTOMAP_CenterOnPlayer(1);
       return;
     }
-    if (!AutoMapLeft) {
-      gnAutomapCenterX = ScreenSizeX * 2 / 3;
-      nAutomapCenterY = 0x4e;
-    } else {
+    if (AutoMapLeft) {
       gnAutomapCenterX = 0;
       bNotMercPurchase = Hireables::HIREABLE_IsNotInMercPurchaseMode();
       nAutomapCenterY = bNotMercPurchase ? 0x60 : 0;
+    } else {
+      gnAutomapCenterX = ScreenSizeX * 2 / 3;
+      nAutomapCenterY = 0x4e;
     }
 
     gnAutomapPanelOffsetX = gnAutomapCenterX;
