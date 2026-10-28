@@ -1978,10 +1978,8 @@ BOOL __fastcall PORTAL_ActivateOrDeactivatePortalObject(::SGAMEDATA * * ppGame) 
 // @sourcefile .\QUESTS\QUESTS.CPP
 void __fastcall SendQuestState(D2UnitStrc * pUnit, int32_t nQuestId) {
     D2GSPacketSrv0x5D sPacket;
-    sPacket.nAlertFlags = '\0';
-    sPacket.nFilterStatus = '\0';
-    sPacket.nQuestId = (uint8_t)nQuestId;
     memset(&sPacket, 0, sizeof(sPacket));
+    sPacket.nQuestId = (uint8_t)nQuestId;
     sPacket.nPacketId = ']';
     sPacket.nAlertFlags = '\x02';
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xd69);
