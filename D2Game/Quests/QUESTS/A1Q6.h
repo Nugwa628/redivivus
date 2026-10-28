@@ -41,6 +41,7 @@ void __fastcall Q06_Callback03_ChangedLevel(struct D2QuestDataStrc * pQuestData,
 BOOL __fastcall Q06_PlayCompletionSound(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A1Q6 helper: mark Sisters-to-the-Slaughter complete + grant reward for one player. Sets JustCompleted and RewardAwaits in the player's quest record, then SetClientStatus(1, difficulty) to flag the act-progress/Act2-unlock client state. Called from Andariel-death and L4-entry paths.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
+void __stdcall Q06_SetQuestCompletedAndReward(::SGAMEDATA * pQuestControl, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer);
 // A1Q6 per-player callback: if player record not Completed/FinishedInPreviousGame and player is in Catacombs Level 4, register them on all three NPC GUID lists (Cain/Akara/Kashya) and call Q06_SetQuestCompletedAndReward. Credits players present in the boss room when Andariel dies.
 BOOL __fastcall Q06_OnPlayerEnterCatacombsL4(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A1Q6 per-party-member callback: if record not Completed/RewardAwaits and member is anywhere in Act I, register them on all three NPC GUID lists and Q06_SetQuestCompletedAndReward. Spreads quest credit/reward to party members in Act I (invoked via Q06_PropagateRewardToParty).

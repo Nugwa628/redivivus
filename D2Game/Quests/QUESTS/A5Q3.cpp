@@ -102,8 +102,8 @@ namespace D2Game::Quests::QUESTS::A5Q3 {
 // Pushes log update (0x21) to a player ONLY when the quest is genuinely freshly done:
 // (Completed || FinishedInPreviousGame) && !JustCompleted && !CannotCompleteQuestInGame. Otherwise no-op.
 BOOL __fastcall Q33_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestStateResult = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_PrisonOfIce, QUESTSTATE_Completed);
     if (bQuestStateResult || (bQuestStateResult = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_PrisonOfIce, QUESTSTATE_FinishedInPreviousGame) , bQuestStateResult != 0)) {
       bQuestStateResult = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_PrisonOfIce, QUESTSTATE_JustCompleted);
@@ -123,8 +123,8 @@ BOOL __fastcall Q33_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, vo
 // mirrors the in-memory quest stateFlag into the player's QuestRecord bits: stateFlag==2 -> set Step0x02 (talked to Malah / intro),
 // stateFlag==3 -> set Step0x03 (Anya found/in progress).
 BOOL __fastcall Q33_UpdateQuestStep(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_PrisonOfIce, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -179,10 +179,11 @@ void __fastcall Q33_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q3.cpp
 void __fastcall Q33_SendQuestStatePacket(D2UnitStrc * pUnit) {
     D2GSPacketSrv0x5D aPacketBuf;
-    memset(&aPacketBuf, 0, sizeof(aPacketBuf));
+    aPacketBuf.nExtra = 0;
     aPacketBuf.nPacketId = ']';
     aPacketBuf.nQuestId = '!';
     aPacketBuf.nAlertFlags = ' ';
+    aPacketBuf.nFilterStatus = '\0';
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q3.cpp", 0x11e);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &aPacketBuf);
 }
@@ -544,8 +545,8 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     D2QuestDataA5Q3Strc* pRewardList = pQuestData->pQuestSpecificData.pA5Q3;
     *(uint32_t*)(char*)&nNpcNo = (uint32_t)(uint16_t)pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBufferRecord = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBufferRecord = pPlayerData->pQuestRecord[pGame->nDifficulty];
     if (*(uint16_t*)(char*)&nNpcNo == 0x201) {
       D2QuestDataA5Q3Strc* pDVar1;
       if ((short int)nMessageIndex == 0x4e94) {
@@ -573,10 +574,11 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         pnIceScrollCount = &pDVar1->nIceItemCount;
         (*pnIceScrollCount)++;
         pClient = UNIT::SUnit::SUNIT_GetClient(pQuestArgs->pPlayer, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q3.cpp", 0x214);
-        memset(&nNpcNo, 0, sizeof(nNpcNo));
+        nNpcNo.nExtra = 0;
         nNpcNo.nPacketId = ']';
         nNpcNo.nQuestId = '!';
         nNpcNo.nAlertFlags = '\x01';
+        nNpcNo.nFilterStatus = '\0';
         GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &nNpcNo);
         pDVar1->bIceScrollCollected = 1;
         return;
@@ -594,10 +596,11 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
             /* SetQuestState(Step0x08): Malah turn-in (dlg 0x4ea4) accepted, "rt2 " gift
                          granted */ D2Common::QuestRecord::SetQuestState(pBitBufferRecord, QUEST_PrisonOfIce, QUESTSTATE_Step0x08);
             pClient = UNIT::SUnit::SUNIT_GetClient(pQuestArgs->pPlayer, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q3.cpp", 0x22b);
-            memset(&nNpcNo, 0, sizeof(nNpcNo));
+            nNpcNo.nExtra = 0;
             nNpcNo.nPacketId = ']';
             nNpcNo.nQuestId = '!';
             nNpcNo.nAlertFlags = '\x02';
+            nNpcNo.nFilterStatus = '\0';
             GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &nNpcNo);
             bQuestStateResult = D2Common::QuestRecord::GetQuestState(pBitBufferRecord, QUEST_PrisonOfIce, QUESTSTATE_Step0x09);
             if (bQuestStateResult) {
@@ -705,10 +708,11 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         return;
       }
 
-      memset(&nNpcNo, 0, sizeof(nNpcNo));
+      nNpcNo.nExtra = 0;
       nNpcNo.nPacketId = ']';
       nNpcNo.nQuestId = '!';
       nNpcNo.nAlertFlags = '\x10';
+      nNpcNo.nFilterStatus = '\0';
       pItemTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(pQuestSpecificData->nClassId);
       if (pItemTxt && 0 < pItemTxt->wDropSound) {
         nNpcNo.nExtra = pItemTxt->wDropSound;
@@ -746,14 +750,14 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 // Q33_PropagateCompleteToParty (PrisonOfIce): iterator cb. If this player has JustCompleted set, propagate completion
 // to every party member via Q33_SetCompleteForPartyMember. Spreads the "Anya rescued" credit across the party.
 BOOL __fastcall Q33_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_PrisonOfIce, QUESTSTATE_JustCompleted);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_PrisonOfIce, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }
 
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -765,8 +769,8 @@ BOOL __fastcall Q33_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * p
 // RewardAwaits, not JustCompleted) it sets CannotCompleteQuestInGame and pushes a 0x21 quest-state packet — locks
 // out players who joined too late to get credit this game.
 BOOL __fastcall Q33_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_PrisonOfIce, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -802,8 +806,8 @@ void __fastcall Q33_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     eD2QuestState eQuestState;
     uint32_t nGossipIndex;
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_JustCompleted);
     D2UnitStrc* pTargetUnit = pQuestArgs->pTarget;
@@ -1202,8 +1206,8 @@ void __fastcall Q33_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2
     }
 
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestStateResult = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_PrisonOfIce, QUESTSTATE_RewardAwaits);
     if (bQuestStateResult) {
       return;
@@ -1253,8 +1257,8 @@ static uint32_t Q33_CheckPartyHasScrollOfResistance(int32_t nParam, D2UnitStrc *
     }
 
     int32_t pnQuestSpecificData = *(int32_t*)(nParam + 0x18);
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 

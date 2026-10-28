@@ -208,10 +208,10 @@ static D2UnitStrc * __stdcall SelectTargetBaal(::SGAMEDATA * pGame, int * pnPara
     int nCandidateCount = 0;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nAnchorX = pUnit2->pPath.pStaticPath->nPosX;
-    } else if (pUnit2->pPath.pDynamicPath) {
-      nAnchorX = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit2->pPath.pDynamicPath) {
       nAnchorX = 0;
+    } else {
+      nAnchorX = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
     }
 
     eUnitType = pUnit2->eUnitType;
