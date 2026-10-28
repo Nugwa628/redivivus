@@ -140,10 +140,7 @@ static void MINIPANEL_CalculateButtonPositions(int32_t bIsExpansion) {
       nButtonX += 0x15;
       gnMiniPanelButtonX[uVar1] = nButtonX;
       gnMiniPanelButtonY[uVar1] = nButtonY;
-      if (!bSinglePlayer) {
-        gnMiniPanelButtonFrame[uVar1] = uVar1;
-        nFrameBase = uVar1 * 2;
-      } else {
+      if (bSinglePlayer) {
         if (uVar1 == 3) {
           nFrameAdjust += 2;
           nStateAdjust++;
@@ -151,6 +148,9 @@ static void MINIPANEL_CalculateButtonPositions(int32_t bIsExpansion) {
 
         gnMiniPanelButtonFrame[uVar1] = nStateAdjust + uVar1;
         nFrameBase = nFrameAdjust + uVar1 * 2;
+      } else {
+        gnMiniPanelButtonFrame[uVar1] = uVar1;
+        nFrameBase = uVar1 * 2;
       }
 
       gnMiniPanelButtonState6[uVar1] = nFrameBase;
