@@ -1478,19 +1478,11 @@ void __stdcall GetPortalLevelArrayFromPortalFlags(D2PoolManagerStrc * pMemory, i
 int32_t __stdcall GetPortalFlagFromLevelId(eD2LevelId eLevel) {
     int nArrayCount;
     eD2LevelId* pPortalLevelArray = DATATBLS::LvlTbls::GetPortalLevelArrayFromPortalFlags((uint32_t*)&nArrayCount);
-    int nBitIndex = 0;
-    if (0 >= nArrayCount) {
-      return 0;
-    }
-
-    do {
+    for (int nBitIndex = 0; nBitIndex < nArrayCount; nBitIndex++, pPortalLevelArray++) {
       if (eLevel == *pPortalLevelArray) {
-        return 1 << ((uint8_t)nBitIndex & 0x1f);
+        return 1 << nBitIndex;
       }
-
-      nBitIndex++;
-      pPortalLevelArray++;
-    } while (nBitIndex < nArrayCount);
+    }
 
     return 0;
 }
