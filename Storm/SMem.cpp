@@ -346,7 +346,7 @@ static void __stdcall SMemCoalesceFreeBlocks(int * pnFreeTotal, D2FogHeapBlockHd
       uint16_t* pFreeBlock;
       pFreeBlock = (uint16_t*)((uintptr_t)&pBlock->wBlockSize + nUsedSizeSnap);
       *pFreeBlock = (short int)nFreeSize;
-      nFreeSize = (nFreeSize & 0xffff) >> 5;
+      nFreeSize = (uint16_t)nFreeSize >> 5;
       *(uint8_t*)(pFreeBlock + 1) = 0;
       *(uint8_t*)((int)pFreeBlock + 3) = 2;
       if (8 <= nFreeSize) {

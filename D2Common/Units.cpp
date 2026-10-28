@@ -859,7 +859,7 @@ int32_t __stdcall GetInventoryPage(D2UnitStrc * pUnit, int32_t nInvPage, BOOL bL
     eD2UnitType eUnitType = pUnit->eUnitType;
     int iVar1 = -1;
     if (eUnitType == UNIT_PLAYER) {
-      switch (nInvPage & 0xff) {
+      switch ((uint8_t)nInvPage) {
         case 1:
           return 6;
         case 2:
@@ -1578,7 +1578,7 @@ void __stdcall SetOverlay(D2UnitStrc * pUnit, uint32_t nOverlay, int32_t nParam)
     }
 
     Stats::StatsEx::STATLIST_ClearOverlayFlags(pUnit);
-    Stats::StatsEx::STATLIST_SetStatValueSimple(pStatsEx, UNITSTAT_unit_dooverlay, nOverlay & 0xffff, nParam);
+    Stats::StatsEx::STATLIST_SetStatValueSimple(pStatsEx, UNITSTAT_unit_dooverlay, (uint16_t)nOverlay, nParam);
     Unit::ROOM_LinkUnitToUpdateList(pUnit);
 }
 

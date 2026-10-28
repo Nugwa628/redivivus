@@ -2868,7 +2868,7 @@ eD2ServerIncomingStatus __fastcall SUNITNPC_SellItem(::SGAMEDATA * pGame, D2Unit
       GAME::SCmd::NET_D2GS_SERVER_Send_0x2A_NpcTransaction(pClient, 0x2a, bVar13, eVar9, iVar14, bVar16);
       return SERVERSTATUS_BAD_PARAMS;
     }
-    if (pClonedItem->eAnimMode.ePlayerMode != (nMode & 0xffff)) {
+    if (pClonedItem->eAnimMode.ePlayerMode != (uint16_t)nMode) {
       bVar16 = 0;
       iVar14 = -1;
       eVar9 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pPlayer, UNITSTAT_gold, 0);
@@ -3027,7 +3027,7 @@ eD2ServerIncomingStatus __fastcall SUNITNPC_SellItem(::SGAMEDATA * pGame, D2Unit
       if (uVar2) {
         eVar9 = 1;
         wMagicSuffix = D2Common::ITEMS::Items::GetMagicSuffix(pDVar5, 0);
-        iVar4 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine(wMagicSuffix & 0xffff);
+        iVar4 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine((uint16_t)wMagicSuffix);
         eSkill = *(eD2Skills*)((int)iVar4 + 8);
         SUNITNPC_ApplyScrollSkill(pPlayer, eSkill, eVar9);
       } else {
@@ -3036,7 +3036,7 @@ eD2ServerIncomingStatus __fastcall SUNITNPC_SellItem(::SGAMEDATA * pGame, D2Unit
           eVar9 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pDVar5, UNITSTAT_quantity, 0);
           if (0 <= eVar9) {
             wMagicSuffix = D2Common::ITEMS::Items::GetMagicSuffix(pDVar5, 0);
-            iVar4 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine(wMagicSuffix & 0xffff);
+            iVar4 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine((uint16_t)wMagicSuffix);
             eSkill = *(eD2Skills*)((int)iVar4 + 0xc);
             SUNITNPC_ApplyScrollSkill(pPlayer, eSkill, eVar9);
           }

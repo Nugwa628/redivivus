@@ -990,7 +990,7 @@ void __fastcall SetRosterHpAndArea(int32_t nRosterGUID, int32_t nHpPercent, eD2L
     }
 
     pRoster->nHpPercent = nHpPercent;
-    pRoster->eLevelId = eLevel & 0xffff;
+    pRoster->eLevelId = (uint16_t)eLevel;
     ROSTER_RebuildPlayerParty();
     UI::Party::ResetPartyUi();
 }

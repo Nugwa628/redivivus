@@ -2620,7 +2620,7 @@ static void AUTOMAP_DrawUnitMarker(D2UnitStrc * pUnit) {
         if (AutoMapPartyNames && pUnit && pUnit->nClassId == 0x10b) {
           pUnitTypeOrName = (uint16_t*)D2Win::Src::D2WinFont::SetAndReturnLastFont(6);
           wPortalLabel = D2Lang::StrTable::strtable::GetLocaleString(0xcf3);
-          dwTextColor = uUnitColor.ePlayerMode & 0xff;
+          dwTextColor = (uint8_t)uUnitColor.ePlayerMode;
           bHasInteract = 0;
           nTemp += -0x12;
           nTargetX = D2Win::Src::D2WinFont::DRAW_text0(wPortalLabel);

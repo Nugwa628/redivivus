@@ -2104,7 +2104,7 @@ void __fastcall DrawSolidRectEx(int32_t nXStart, int32_t nYStart, int32_t nXEnd,
     fV0X[2].fY = fV0X[1].fY;
     fV0X[3].fX = fV0X[2].fX;
     fV0X[3].fY = fV0X[0].fY;
-    nClampedXStart = RENDERER_GLIDE_ScalePaletteValue(dwColor & 0xff);
+    nClampedXStart = RENDERER_GLIDE_ScalePaletteValue((uint8_t)dwColor);
     nClampedXStart &= -256;
     switch (nDrawMode) {
       case 0:
@@ -2192,7 +2192,7 @@ void __fastcall DrawSolidRectAlpha(int32_t nXStart, int32_t nYStart, int32_t nXE
     fV0X[2].fY = fV0X[1].fY;
     fV0X[3].fX = fV0X[2].fX;
     fV0X[3].fY = fV0X[0].fY;
-    nScaledColor = RENDERER_GLIDE_ScalePaletteValue(dwColor & 0xff);
+    nScaledColor = RENDERER_GLIDE_ScalePaletteValue((uint8_t)dwColor);
     (*GLIDEDLL_grConstantColorValue_4)(nScaledColor & -256 | (uint32_t)nAlpha);
     (*GLIDEDLL_grDrawVertexArrayContiguous_16)(5, 4, fV0X, 0x1c);
     (*GLIDEDLL_grChromakeyMode_4)(1);
@@ -2204,7 +2204,7 @@ void __fastcall DrawLine(int32_t nXStart, int32_t nYStart, int32_t nXEnd, int32_
       return;
     }
 
-    uint32_t nScaledColor = RENDERER_GLIDE_ScalePaletteValue(dwColor & 0xff);
+    uint32_t nScaledColor = RENDERER_GLIDE_ScalePaletteValue((uint8_t)dwColor);
     RENDERER_GLIDE_SetColorCombine(2);
     if (nAlpha == 0xff) {
       RENDERER_GLIDE_SetAlphaBlendMode(1);

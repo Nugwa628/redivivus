@@ -1437,7 +1437,7 @@ void __stdcall UI_UpdateCursorAnimationTimer() {
 void __stdcall UI_SendMouseMoveMessage() {
     int nMouseY = GetMouseY();
     uint32_t lParam = GetMouseX();
-    lParam = lParam & 0xffff | nMouseY << 0x10;
+    lParam = (uint16_t)lParam | nMouseY << 0x10;
     uint32_t wParam = 0;
     UINT Msg = 0x200;
     HWND hWnd = D2gfx::D2GFX::GetHwnd();

@@ -3837,7 +3837,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
     int32_t nUnitWidth = pPathArg->nUnitWidth;
     int32_t eCollisionFlag_00 = pPathArg->nCollisionPattern;
     uint32_t nPackedDst = *pnParam;
-    int nDeltaX = (nPackedDst & 0xffff) - (nPackedSrc & 0xffff);
+    int nDeltaX = (uint16_t)nPackedDst - ((uint16_t)nPackedSrc);
     int nDeltaY = (nPackedDst >> 0x10) - (nPackedSrc >> 0x10);
     uint32_t nPackedCur = nPackedSrc;
     int nStepsX = nDeltaX;
@@ -3862,7 +3862,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
             nPackedPrev = nPackedCur;
             nCurY = nCurY + (uint16_t)(0 <= nDeltaY) * 2 - 1;
             nPackedCur = (uint32_t)((uint32_t)(uint16_t)nCurY << 16 | (uint32_t)(uint16_t)(short int)nPackedCur);
-            iVar1 = Collision::CheckCollision_BlockPlayer_Type(pRoom, nPackedSrc & 0xffff, (uint32_t)nCurY, nUnitWidth, eCollisionFlag_00);
+            iVar1 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint16_t)nPackedSrc, (uint32_t)nCurY, nUnitWidth, eCollisionFlag_00);
             if (iVar1) {
               break;
             }
@@ -4414,7 +4414,7 @@ D2DrlgRoomAStarNodeStrc * __stdcall DRLGPATH_AStarExpandNode(int32_t nMaxCost, D
       }
 
       *ppHashSlot = (int)nGCost;
-      nHashIdx = (nTargetPacked & 0xffff) - nNeighborXu;
+      nHashIdx = (uint16_t)nTargetPacked - nNeighborXu;
       if (nHashIdx < 0) {
         nHashIdx = -nHashIdx;
       }

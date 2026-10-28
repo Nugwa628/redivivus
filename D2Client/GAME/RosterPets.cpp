@@ -430,7 +430,7 @@ void __fastcall UpdateLifeAndArea(DWORD nRosterGUID, int32_t nHpPercent, eD2Leve
     }
 
     pRosterPet->nHpPercent = nHpPercent;
-    pRosterPet->eLevelId = eLevel & 0xffff;
+    pRosterPet->eLevelId = (uint16_t)eLevel;
     if (pRosterPet->nSkillID != 7) {
       return;
     }

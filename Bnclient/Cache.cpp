@@ -286,7 +286,7 @@ int32_t __stdcall CACHE_Open() {
       pHashEntryInit = pHeaderBuf;
       do {
         nErrorCode = nInitCounter;
-        nCrc32 = nCrc32 >> 8 ^ gaBnCacheCrc32Table[((uint8_t)pHashEntryInit->dwSignature ^ nCrc32) & 0xff];
+        nCrc32 = nCrc32 >> 8 ^ gaBnCacheCrc32Table[(uint8_t)((uint8_t)pHashEntryInit->dwSignature ^ nCrc32)];
         nInitCounter = nErrorCode - 1;
         pHashEntryInit = (D2BnCacheFileHeaderStrc*)((uintptr_t)&pHashEntryInit->dwSignature + 1);
       } while (nInitCounter);

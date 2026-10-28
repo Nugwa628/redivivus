@@ -722,7 +722,7 @@ void __fastcall MERC_HireAndReplaceMerc(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     pMinion->eUnitFlags |= UNITFLAG_ISREVIVE;
     Ai::AiGeneral::AssignMinionOwner(pGame, pMinion, pUnit->nUnitGUID, pUnit->eUnitType, 0, 0);
     if (nMercLevelOverride == -1) {
-      pHirelingTxt = D2Common::DATATBLS::MonsterTbls::GetHirelingText(pGame->bExpansion, sMercHireData.nId & 0xffff, sMercHireData.nLevel);
+      pHirelingTxt = D2Common::DATATBLS::MonsterTbls::GetHirelingText(pGame->bExpansion, (uint16_t)sMercHireData.nId, sMercHireData.nLevel);
       if (!pHirelingTxt) {
         return;
       }

@@ -710,7 +710,7 @@ static void __stdcall SKILLS_UseChargedSkillCharge(::SGAMEDATA * pGame, D2SkillS
       __frame0.nRemainingCharges = nMaxChargeCount;
     }
 
-    uint32_t nStatValue = nMaxChargeCount * 0x100 + (__frame0.nRemainingCharges & 0xff);
+    uint32_t nStatValue = nMaxChargeCount * 0x100 + (uint8_t)__frame0.nRemainingCharges;
     D2Common::Stats::StatsEx::STATLIST_SetStatValueInBaseArraySafe(__frame0.pChargedStatList, UNITSTAT_item_charged_skill, nStatValue, nParam, pWeaponUnit);
     int32_t nStatId = 0xcc;
     char bForceUpdate = '\x01';

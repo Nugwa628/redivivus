@@ -1214,7 +1214,7 @@ int __fastcall ReadStatsLong(::SGAMEDATA * pGameStrc, D2UnitStrc * pUnit, short 
       nStatSubIndex = 0;
       if ((uint32_t)pStatCostTxt->csvparam > 0) {
         nSubIndexRaw = Fog::BitBuffer::ReadSigned(&bitBuf, (uint32_t)(uint8_t)pStatCostTxt->csvparam);
-        nStatSubIndex = nSubIndexRaw & 0xffff;
+        nStatSubIndex = (uint16_t)nSubIndexRaw;
       }
 
       byCsvBitWidth = pStatCostTxt->csvbits;

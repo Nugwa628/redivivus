@@ -4084,7 +4084,7 @@ void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEn
     fV0x[2].fY = fV0x[1].fY;
     fV0x[3].fX = fV0x[2].fX;
     fV0x[3].fY = fV0x[0].fY;
-    uint32_t uVar1 = PALETTE_GetColorByIndex(dwColor & 0xff);
+    uint32_t uVar1 = PALETTE_GetColorByIndex((uint8_t)dwColor);
     fV0x[0].dwDiffuse = uVar1 & 0xffffff | (uint32_t)nAlpha << 0x18;
     fV0x[1].dwDiffuse = fV0x[0].dwDiffuse;
     fV0x[2].dwDiffuse = fV0x[0].dwDiffuse;
@@ -4098,7 +4098,7 @@ void __fastcall DrawLine(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD d
       return;
     }
 
-    uint32_t dwRGBColor = PALETTE_GetColorByIndex(dwColor & 0xff);
+    uint32_t dwRGBColor = PALETTE_GetColorByIndex((uint8_t)dwColor);
     RENDERER_D3D_SetBlendMode(2);
     if (nAlpha == 0xff) {
       SetBlendMode(1);

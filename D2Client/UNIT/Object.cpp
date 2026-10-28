@@ -164,7 +164,7 @@ void __fastcall AllocObjectData(D2UnitStrc * pUnit, D2RoomStrc * pRoom, int32_t 
     eD2LevelId eLevelId;
     BOOL nAutoLightResult;
     pUnit->uSideData.pClientSide.pLight = 0;
-    pUnit->eAnimMode.ePlayerMode = nInitMode & 0xff;
+    pUnit->eAnimMode.ePlayerMode = (uint8_t)nInitMode;
     D2UnitDataObjectStrc* pObjectData = ((D2UnitDataObjectStrc*)Fog::Memory::AllocClientMemory(sizeof(D2UnitDataObjectStrc), ".\\UNIT\\Object.cpp", 0x76, 0));
     pUnit->pUnitData.pUnitDataObject = pObjectData;
     memset(pObjectData, 0, 0x38);

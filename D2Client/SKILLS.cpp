@@ -1246,8 +1246,8 @@ void __fastcall SKILLSCLT_SetMissilePathExtended(D2UnitStrc * pUnit, int32_t nIn
       do {
         nCurDir += nSerpentineAmp * nSerpentineSign;
         nSP1Y = D2Common::Monsters::MONSTERS::MONSTERS_GetGfxOffsetTable2((uint8_t)nCurDir & 0x3f);
-        nCurX += gnSkillSynergiesTableIndex[nSP1Y & 0xff];
-        nCurY += gnSkillSynergiesTableOffset[nSP1Y & 0xff];
+        nCurX += gnSkillSynergiesTableIndex[(uint8_t)nSP1Y];
+        nCurY += gnSkillSynergiesTableOffset[(uint8_t)nSP1Y];
         pPathPoints[nPathFrameIdx].nX = (uint16_t)nCurX;
         pPathPoints[nPathFrameIdx].nY = (uint16_t)nCurY;
         if (!(nPathFrameIdx % gnSkillDescLayoutPos_0072d98c)) {

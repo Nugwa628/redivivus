@@ -2392,7 +2392,7 @@ int32_t __stdcall QSERVER_ExportUnitListByServerId(uint32_t nServerId, void * pO
     D2QServerUnitRecordStrc* pOutCursor;
     int32_t nExported = 0;
     EnterCriticalSection(&gQServerGameListCs);
-    ::SGAMEDATA* pGame = gaQServerGameByToken[nServerId & 0xffff];
+    ::SGAMEDATA* pGame = gaQServerGameByToken[(uint16_t)nServerId];
     ::SGAMEDATA* nToken = 0;
     if (pGame && pGame != (::SGAMEDATA*)-1) {
       nToken = pGame;

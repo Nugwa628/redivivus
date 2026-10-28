@@ -473,7 +473,7 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
 
                           Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nStatId, 9);
                           if (pItemStatCost->sendParamBits) {
-                            Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nStatSubIndex & 0xffff, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
+                            Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint16_t)nStatSubIndex, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
                           }
 
                           Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nValue, (uint32_t)(uint8_t)pItemStatCost->sendBits);
@@ -629,7 +629,7 @@ void __fastcall PLAYER_SendStateDeltaToClient(D2UnitStrc * pUnit, D2ClientStrc *
 
                                 Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nStatId, 9);
                                 if (pItemStatCost->sendParamBits) {
-                                  Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nStatSubIndex & 0xffff, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
+                                  Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint16_t)nStatSubIndex, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
                                 }
 
                                 Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nValue, (uint32_t)(uint8_t)pItemStatCost->sendBits);

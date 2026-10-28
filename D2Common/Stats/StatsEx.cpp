@@ -544,7 +544,7 @@ int32_t __stdcall STATLIST_GetStatFromBaseArray(D2StatListExStrc * pStatList, eD
       return 0;
     }
 
-    int32_t nStatValue = STATLIST_LookupBaseStatWithMinAccr(sgptDataTable->pTxtItemStatCost + eUnitStat, pStatList, eUnitStat * 0x10000 + (nParam & 0xffff));
+    int32_t nStatValue = STATLIST_LookupBaseStatWithMinAccr(sgptDataTable->pTxtItemStatCost + eUnitStat, pStatList, eUnitStat * 0x10000 + (uint16_t)nParam);
     return nStatValue;
 }
 
@@ -559,7 +559,7 @@ int32_t __stdcall SERVER_GetUnitStat(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, 
       return 0;
     }
 
-    int32_t nStatValue = STATLIST_LookupBaseStatWithMinAccr(sgptDataTable->pTxtItemStatCost + eUnitStat, pUnit->pStatsEx, eUnitStat * 0x10000 + (nParam & 0xffff));
+    int32_t nStatValue = STATLIST_LookupBaseStatWithMinAccr(sgptDataTable->pTxtItemStatCost + eUnitStat, pUnit->pStatsEx, eUnitStat * 0x10000 + (uint16_t)nParam);
     return nStatValue;
 }
 
@@ -571,7 +571,7 @@ int32_t __stdcall STATLIST_GetMinimalStatValueShifted(D2StatListExStrc * pStatsE
       return 0;
     }
 
-    int32_t nStatValue = TXT_ItemStatCost_GetMinimumStatValueShifted(sgptDataTable->pTxtItemStatCost + eUnitStat, pStatsEx, eUnitStat * 0x10000 + (nParam & 0xffff));
+    int32_t nStatValue = TXT_ItemStatCost_GetMinimumStatValueShifted(sgptDataTable->pTxtItemStatCost + eUnitStat, pStatsEx, eUnitStat * 0x10000 + (uint16_t)nParam);
     return nStatValue;
 }
 
@@ -2118,7 +2118,7 @@ BOOL __stdcall STATLIST_SetStatValue(D2StatListExStrc * pStatEx, eD2UnitStat eUn
       return 0;
     }
 
-    int32_t nShiftedStat = eUnitStat * 0x10000 + (low & 0xffff);
+    int32_t nShiftedStat = eUnitStat * 0x10000 + (uint16_t)low;
     D2StatInfoStrc* pParam = &pStatEx->sStatList.sBaseStats;
     long int lVar1 = Logging::STATLIST_BinarySearchStatById(nShiftedStat, (int*)pParam);
     if (lVar1 < 0 || (pStatEntry = pParam->pStatInfo + lVar1 , !pStatEntry)) {
@@ -2169,7 +2169,7 @@ void __stdcall STATLIST_SetStatValueInBaseArray(D2StatListExStrc * pStatList, eD
       return;
     }
 
-    int32_t nShiftedStat = eUnitStat * 0x10000 + (nLayer & 0xffff);
+    int32_t nShiftedStat = eUnitStat * 0x10000 + (uint16_t)nLayer;
     D2StatInfoStrc* pParam = &pStatList->sStatList.sBaseStats;
     long int lVar1 = Logging::STATLIST_BinarySearchStatById(nShiftedStat, (int*)pParam);
     if (lVar1 < 0 || (pStatEntry = pParam->pStatInfo + lVar1 , !pStatEntry)) {
@@ -2217,7 +2217,7 @@ void __stdcall STATLIST_SetUnitStat(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, i
       return;
     }
 
-    STATLIST_TrackChangedStat(eUnitStat * 0x10000 + (nLayer & 0xffffU), pUnit->pStatsEx);
+    STATLIST_TrackChangedStat(eUnitStat * 0x10000 + (uint16_t)nLayer, pUnit->pStatsEx);
 }
 
 void __stdcall thunk_STATLIST_AddStatValue(D2StatListExStrc * pStatList, eD2UnitStat eUnitStat, int32_t nParam, uint16_t nParam2) {

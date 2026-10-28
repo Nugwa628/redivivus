@@ -1067,7 +1067,7 @@ static void __stdcall PLRMODES_HandleDepletedAmmoOrThrowable(::SGAMEDATA * pGame
                   nQuantity = -1;
                 }
                 if (nQuantity == pReloadItem->nClassId) {
-                  pSlotItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemByGridOffset(pWeaponOwner->pInventory, nBodyLocWord & 0xff);
+                  pSlotItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemByGridOffset(pWeaponOwner->pInventory, (uint8_t)nBodyLocWord);
                   if (!pSlotItem) {
                     bIsBroken = ITEMS::ItemMode::ITEMMODE_ProcessItemBuy((D2UnitStrc**)pGame, pWeaponOwner, pReloadItem->nUnitGUID, (eD2BodyLoc)nBodyLocWord);
                     if (bIsBroken) {
@@ -1395,7 +1395,7 @@ static BOOL PLRMODES_RegenHp(D2UnitStrc * pUnit) {
 
     nNewHpPct128 = 0x80;
     send_hp_pct_if_changed:
-    nHpRegen = (nLastSentHpPct & 0xff) - (nNewHpPct128 & 0xff);
+    nHpRegen = (uint8_t)nLastSentHpPct - ((uint8_t)nNewHpPct128);
     if (nHpRegen < 0) {
       nHpRegen = -nHpRegen;
     }
@@ -1404,7 +1404,7 @@ static BOOL PLRMODES_RegenHp(D2UnitStrc * pUnit) {
     }
 
     UNIT::SUnitMsg::UnitQueuePacket0xAB(pUnit, (uint8_t)nNewHpPct128);
-    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_last_sent_hp_pct, nNewHpPct128 & 0xff, 0);
+    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_last_sent_hp_pct, (uint8_t)nNewHpPct128, 0);
     return 1;
 }
 

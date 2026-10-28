@@ -1020,7 +1020,7 @@ D2UnitStrc * __stdcall OBJECT_PlaceAtRandomPosition(::SGAMEDATA * pGame, int32_t
       }
 
       nY += sRoomCoords.dwYStart;
-      if (dwTmp && nY && sRoomCoords.dwXStart + 1 <= (int)(dwTmp & 0xffff) && sRoomCoords.dwYStart + 1 <= (int)(nY & 0xffff) && (int)(dwTmp & 0xffff) < sRoomCoords.dwXStart - 1 + sRoomCoords.dwXSize && (int)(nY & 0xffff) < sRoomCoords.dwYStart - 1 + sRoomCoords.dwYSize) {
+      if (dwTmp && nY && sRoomCoords.dwXStart + 1 <= (int)((uint16_t)dwTmp) && sRoomCoords.dwYStart + 1 <= (int)((uint16_t)nY) && (int)((uint16_t)dwTmp) < sRoomCoords.dwXStart - 1 + sRoomCoords.dwXSize && (int)((uint16_t)nY) < sRoomCoords.dwYStart - 1 + sRoomCoords.dwYSize) {
         nCandX = dwTmp;
         wCollisionResult = D2Common::Collision::CheckCollision_Vector(pRoom, dwTmp, nY, nXMargin + 6, nYMargin + 6, 0x3f11);
         if (wCollisionResult == COLBIT_NONE) {
@@ -1079,7 +1079,7 @@ D2UnitStrc * __stdcall OBJECT_PlaceWithCallback(::SGAMEDATA * pGame, int32_t nOb
       nX = nCallbackResult + sRoomCoords.dwXStart;
       nCallbackResult = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, sRoomCoords.dwYSize - nSizeY - 1);
       nY = nCallbackResult + nYStart;
-      if (nX && nY && sRoomCoords.dwXStart + 1 <= (int)(nX & 0xffff) && nYStart + 1 <= (int)(nY & 0xffff) && (int)(nX & 0xffff) < sRoomCoords.dwXStart - 1 + sRoomCoords.dwXSize && (int)(nY & 0xffff) < nYStart - 1 + sRoomCoords.dwYSize) {
+      if (nX && nY && sRoomCoords.dwXStart + 1 <= (int)((uint16_t)nX) && nYStart + 1 <= (int)((uint16_t)nY) && (int)((uint16_t)nX) < sRoomCoords.dwXStart - 1 + sRoomCoords.dwXSize && (int)((uint16_t)nY) < nYStart - 1 + sRoomCoords.dwYSize) {
         /* FARPROC lpfn for IsBadCodePtr */ bBadCodePtr = IsBadCodePtr((FARPROC)pfnProc);
         if (bBadCodePtr) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x588);

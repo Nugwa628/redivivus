@@ -1288,7 +1288,7 @@ void __stdcall DRAW_BuildAdditiveBlendTable(LPPALETTEENTRY pPalette) {
           nBlueSum = 0xff;
         }
 
-        nGreenSum = D2GFX_GetColorWithAlphaFromPallete(pPalette, 0x100, uVar1, nRedSum & 0xff, nBlueSum & 0xff);
+        nGreenSum = D2GFX_GetColorWithAlphaFromPallete(pPalette, 0x100, uVar1, (uint8_t)nRedSum, (uint8_t)nBlueSum);
         ptDest->peRed = (uint8_t)nGreenSum;
         ptDest += 0x40;
         nInnerLoop--;
@@ -1833,7 +1833,7 @@ void __stdcall DRAW_BuildHSLTransformTables(LPPALETTEENTRY pPalette, LPPALETTEEN
     do {
       fVar3 = __CIsqrt((long double)((uint32_t)*pbSrcPalEntry * (uint32_t)*pbSrcPalEntry + (uint32_t)((tagPALETTEENTRY*)(pbSrcPalEntry - 1))->peRed * (uint32_t)((tagPALETTEENTRY*)(pbSrcPalEntry - 1))->peRed + (uint32_t)pbSrcPalEntry[1] * (uint32_t)pbSrcPalEntry[1]));
       nTableIndex = (uint32_t)std::nearbyint(fVar3);
-      nTableIdx = nTableIndex & 0xff;
+      nTableIdx = (uint8_t)nTableIndex;
       nPaletteIndex = D2GFX_GetColorWithAlphaFromPallete(pPalette, 0x100, nTableIdx, 0, 0);
       pDestEntry[-0x40].peRed = (uint8_t)nPaletteIndex;
       nPaletteIndex = D2GFX_GetColorWithAlphaFromPallete(pPalette, 0x100, 0, nTableIdx, 0);

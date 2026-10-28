@@ -2273,7 +2273,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xAA_UNITSTATE_ALL_EX(char * pBytes) {
           nStatParam = 0;
           if ((uint32_t)pItemStatCost->sendParamBits > 0) {
             nParamRaw = Fog::BitBuffer::ReadSigned(&bitBuffer, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
-            nStatParam = nParamRaw & 0xffff;
+            nStatParam = (uint16_t)nParamRaw;
           }
 
           nSendBits = pItemStatCost->sendBits;
@@ -2439,7 +2439,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xAC(char * pPacketData) {
       }
 
       /* nameID  */ nReadBits = Fog::BitBuffer::ReadUnsigned(&bitBuffer, 0x10);
-      nBitVal = nReadBits & 0xff;
+      nBitVal = (uint8_t)nReadBits;
       nReadBits = Fog::BitBuffer::ReadUnsigned(&bitBuffer, 1);
       if (nReadBits) {
         /* OwnerGid  */ nOwnerGUID = Fog::BitBuffer::ReadUnsigned(&bitBuffer, 0x20);
@@ -2451,7 +2451,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xAC(char * pPacketData) {
 
     sCreateMonster.eMonsterType = (int32_t)wMonsterFlagBits;
     sCreateMonster.nMonstatId = (int32_t)nPacketMonstatId;
-    sCreateMonster.eUnitType = eUnitTypeBits & 0xff;
+    sCreateMonster.eUnitType = (uint8_t)eUnitTypeBits;
     sCreateMonster.nOwnerGUID = nOwnerGUID;
     sCreateMonster.nUnitGUID = nPacketUnitGUID;
     sCreateMonster.nX = (uint32_t)wPacketX;
@@ -2670,7 +2670,7 @@ void __fastcall NET_D2GS_CLIENT_PacketHandle_to0xAF(char * pBytes, size_t nSize)
           break;
         }
 
-        nConsumed = nVariableSize & 0xffff;
+        nConsumed = (uint16_t)nVariableSize;
         if (0xae < byPacketId) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1449);
           exit(-1);
@@ -2692,7 +2692,7 @@ void __fastcall NET_D2GS_CLIENT_PacketHandle_to0xAF(char * pBytes, size_t nSize)
 
             pUnit = UNIT::Player::UNITS_FindClientSideUnit(nLine, eUnitType);
             if (pUnit) {
-              NET_D2GS_CLIENT_PutIncomingBytesIntoServerCmdStructure(nConsumed & 0xffff, pUnit, pBytes);
+              NET_D2GS_CLIENT_PutIncomingBytesIntoServerCmdStructure((uint16_t)nConsumed, pUnit, pBytes);
               pBytes = (char*)pCurrentPacket;
               byPacketId = byPacketIdSaved;
             }
@@ -2717,16 +2717,16 @@ void __fastcall NET_D2GS_CLIENT_PacketHandle_to0xAF(char * pBytes, size_t nSize)
             pTableEntry->fpIncomingHandler(pBytes);
           }
         } else {
-          if ((nVariableSize & 0xffff) != uVar1) {
+          if ((uint16_t)nVariableSize != uVar1) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1450);
             exit(-1);
           }
-          if (uVar1 == -1 || (nVariableSize & 0xffff) == uVar1) {
+          if (uVar1 == -1 || (uint16_t)nVariableSize == uVar1) {
             goto dispatch_packet;
           }
         }
 
-        uVar1 = nConsumed & 0xffff;
+        uVar1 = (uint16_t)nConsumed;
         gnTotalPacketBytesProcessed += uVar1;
         nRemaining -= uVar1;
         pBytes += uVar1;

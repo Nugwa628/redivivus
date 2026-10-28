@@ -545,10 +545,10 @@ BOOL __fastcall NET_D2GS_SERVER_Send_LifeManaStaminaLocationUpdate(D2UnitStrc * 
     if (pDynamicPath) {
       char byPosY;
       dwGold = D2Common::PATH::DynamicPath::GetXSP1(pDynamicPath);
-      *(uint8_t*)(char*)&bForceUpdate = (char)(nUnitPosX & 0xffff);
+      *(uint8_t*)(char*)&bForceUpdate = (char)((uint16_t)nUnitPosX);
       byVelX = (char)bForceUpdate - (char)dwGold;
       dwGold = D2Common::PATH::DynamicPath::GetYSP1(pDynamicPath);
-      byPosY = (char)(nUnitPosY & 0xffff);
+      byPosY = (char)((uint16_t)nUnitPosY);
       byVelY = byPosY - (char)dwGold;
     }
 
@@ -581,12 +581,12 @@ BOOL __fastcall NET_D2GS_SERVER_Send_LifeManaStaminaLocationUpdate(D2UnitStrc * 
             goto send_gold_exp_and_cache_vitals;
           }
 
-          nHpDiff = (uint32_t)pBasics->x - (nUnitPosX & 0xffff);
+          nHpDiff = (uint32_t)pBasics->x - ((uint16_t)nUnitPosX);
           if (nHpDiff < 0) {
             nHpDiff = -nHpDiff;
           }
           if (nHpDiff < 2) {
-            nHpDiff = (uint32_t)pBasics->y - (nUnitPosY & 0xffff);
+            nHpDiff = (uint32_t)pBasics->y - ((uint16_t)nUnitPosY);
             if (nHpDiff < 0) {
               nHpDiff = -nHpDiff;
             }
@@ -1275,7 +1275,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x01_WalkToLocation(::SGAMEDATA * pGame,
       return (eD2ServerIncomingStatus)nStatus;
     }
 
-    PlayerModes::PLRMODES_MoveToLocation(pGame, pUnit, nullptr, 2, (uint32_t)pPacket & 0xffff, nSize & 0xffff, 0);
+    PlayerModes::PLRMODES_MoveToLocation(pGame, pUnit, nullptr, 2, (uint32_t)pPacket & 0xffff, (uint16_t)nSize, 0);
     nStatus = 0;
     return (eD2ServerIncomingStatus)nStatus;
 }
@@ -1530,7 +1530,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x05_LeftSkillOnLocation(::SGAMEDATA * p
     int32_t nLayer = 0;
     nPierceIdx = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_pierce_idx, 0);
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_pierce_idx, nPierceIdx + 1, nLayer);
-    uint32_t nTargetY = nSize & 0xffff;
+    uint32_t nTargetY = (uint16_t)nSize;
     uint32_t nTargetX = (uint32_t)pPacket & 0xffff;
     pLeftSkill = D2Common::Units::GetLeftSkill(pUnit);
     CastSkillOnLocation(pUnit, pGame, nTargetX, nTargetY, pLeftSkill);
@@ -1677,7 +1677,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x0C_RightSkillOnLocation(::SGAMEDATA * 
     int32_t nLayer = 0;
     nPierceIdx = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_pierce_idx, 0);
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_pierce_idx, nPierceIdx + 1, nLayer);
-    uint32_t nTargetY = nSize & 0xffff;
+    uint32_t nTargetY = (uint16_t)nSize;
     uint32_t nTargetX = (uint32_t)pPacket & 0xffff;
     pRightSkill = D2Common::Units::GetRightSkill(pUnit);
     CastSkillOnLocation(pUnit, pGame, nTargetX, nTargetY, pRightSkill);
@@ -3183,7 +3183,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x3A_AllocStatPoint(::SGAMEDATA * pGame,
     *(uint8_t*)(char*)&wStatPacked = pPacket->nStatId;
     *(uint8_t*)((char*)&wStatPacked + 1) = pPacket->nRepeatCount;
     int nRemaining = (wStatPacked >> 8) + 1;
-    if (!((wStatPacked & 0xff) <= 0xf && wStatPacked >> 8 < 100)) {
+    if (!((uint8_t)wStatPacked <= 0xf && wStatPacked >> 8 < 100)) {
       return SERVERSTATUS_BAD_PARAMS;
     }
 
@@ -3193,7 +3193,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x3A_AllocStatPoint(::SGAMEDATA * pGame,
       }
 
       nRemaining--;
-      nAssignResult = UNIT::SUnitMsg::PLAYER_AssignStatPoint(pUnit, wStatPacked & 0xff);
+      nAssignResult = UNIT::SUnitMsg::PLAYER_AssignStatPoint(pUnit, (uint8_t)wStatPacked);
     } while (nAssignResult);
 
     return SERVERSTATUS_BAD_DATA;

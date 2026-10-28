@@ -800,7 +800,7 @@ void __fastcall QUEST_SendQuestUpdateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * 
       return;
     }
 
-    while (pQuestData->nQuestNoInternal != (nInternalQuestNo & 0xff)) {
+    while (pQuestData->nQuestNoInternal != (uint8_t)nInternalQuestNo) {
       pQuestData = pQuestData->pPrev;
       if (!pQuestData) {
         return;
@@ -901,7 +901,7 @@ void __fastcall QUEST_OnNpcGossip(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, uin
       }
     }
 
-    questArg.sQuestArgs.sNpcActivate.nIndex = nGossipIndex & 0xffff;
+    questArg.sQuestArgs.sNpcActivate.nIndex = (uint16_t)nGossipIndex;
     QUEST_DispatchBroadcast(true, true, &questArg);
 }
 

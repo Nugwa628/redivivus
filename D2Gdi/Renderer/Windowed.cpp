@@ -574,8 +574,8 @@ void __fastcall DrawShiftedImage(D2GfxDataStrc * pData, int nPosX, int nPosY, DW
     uint8_t* pRenderArg1 = 0;
     uint8_t* pPalette = 0;
     uint8_t* pRenderArg2 = RENDERER_WINDOWED_GetPalettePointer(nDrawMode, (uint32_t*)&nSpriteHeight);
-    if ((dwGamma & 0xff) != 0xff) {
-      pRenderArg1 = gpPaletteTable[((int)(dwGamma & 0xff) >> 3) + 3];
+    if ((uint8_t)dwGamma != 0xff) {
+      pRenderArg1 = gpPaletteTable[((int)((uint8_t)dwGamma) >> 3) + 3];
     }
     if (nDrawMode == 7) {
       pRenderArg1 = gpPaletteTable[0x46];
@@ -796,7 +796,7 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
             nRowsLeft = uMaxX - uClampedYStart;
             do {
               nRowsLeft--;
-              *pbPixel = pPaletteTable[(uint32_t)*pbPixel * 0x100 + (dwColor & 0xff)];
+              *pbPixel = pPaletteTable[(uint32_t)*pbPixel * 0x100 + (uint8_t)dwColor];
               pbPixel++;
             } while (nRowsLeft);
           }
@@ -809,7 +809,7 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
     } else if (nWidth) {
       do {
         nWidth--;
-        memset(pbScanline, dwColor & 0xff, uMaxX - uClampedYStart);
+        memset(pbScanline, (uint8_t)dwColor, uMaxX - uClampedYStart);
         pbScanline += RENDERER_nWindowWidth;
       } while (nWidth);
 

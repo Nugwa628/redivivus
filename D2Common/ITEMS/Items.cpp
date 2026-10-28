@@ -2613,7 +2613,7 @@ static void __stdcall ITEMS_DeserializeSingleStat(uint32_t nFileVersion, eD2Unit
 
     if (0 < nSize) {
       uVar1 = Fog::BitBuffer::ReadUnsigned(pBitBuffer, nSize);
-      nParamLo = uVar1 & 0xffff;
+      nParamLo = (uint16_t)uVar1;
     }
 
     uVar1 = Fog::BitBuffer::ReadUnsigned(pBitBuffer, nSaveBits);
@@ -3045,9 +3045,9 @@ uint32_t __fastcall ITEM_CalcRequiredLevel(D2UnitStrc * pUnit, D2UnitStrc * pUni
         wPrefix = GetMagicPrefix(pUnit, 0);
       pPrefixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint32_t)wPrefix);
       uAffixIdx = GetMagicSuffix(pUnit, 0);
-      pSuffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(uAffixIdx & 0xffff);
+      pSuffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)uAffixIdx);
       uAffixIdx = GetAutoMagic(pUnit);
-      pAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(uAffixIdx & 0xffff);
+      pAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)uAffixIdx);
       nIdx = ITEMS_nullsub(0, pPrefixTxt, pUnit2);
       nIdx = ITEMS_nullsub(nIdx, pSuffixTxt, pUnit2);
       nMaxLvlReqTmp = ITEMS_nullsub(nIdx, pAffixTxt, pUnit2);
@@ -3269,7 +3269,7 @@ uint32_t __fastcall ITEM_CalcRequiredLevel(D2UnitStrc * pUnit, D2UnitStrc * pUni
         if ((int)(uint32_t)(uint16_t)anSkillOnItemBuf[nAffixByteOffset].wSubIndex < sgptDataTable->nTxtSkillsCount) {
           pSkillTxt = sgptDataTable->pTxtSkills + (uint16_t)anSkillOnItemBuf[nAffixByteOffset].wSubIndex;
           if (pSkillTxt) {
-            if (!pUnit2 || (eUnitType = D2Client::Units::GetType(pUnit2) , eUnitType != UNIT_PLAYER) || (cCharClass = pSkillTxt->charclass , cCharClass < '\0' || '\x06' < cCharClass || (uAffixIdx = D2Client::UNIT::GetClassId(pUnit2) , (uAffixIdx & 0xff) != (int)cCharClass))) {
+            if (!pUnit2 || (eUnitType = D2Client::Units::GetType(pUnit2) , eUnitType != UNIT_PLAYER) || (cCharClass = pSkillTxt->charclass , cCharClass < '\0' || '\x06' < cCharClass || (uAffixIdx = D2Client::UNIT::GetClassId(pUnit2) , (uint8_t)uAffixIdx != (int)cCharClass))) {
               nClassId = (int)pSkillTxt->reqlevel + 6;
             } else {
               nClassId = (uint32_t)pSkillTxt->reqlevel;
@@ -6149,7 +6149,7 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
           }
         } else {
           uVar4 = GetMagicSuffix(pItem, 0);
-          pBooksTxt = DATATBLS::ItemTbls::TXT_Books_GetLine(uVar4 & 0xffff);
+          pBooksTxt = DATATBLS::ItemTbls::TXT_Books_GetLine((uint16_t)uVar4);
           if (!pBooksTxt) {
             iVar3 = 0xbba;
             goto HaltInternalError;
@@ -6199,7 +6199,7 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
       iVar7 = 0;
       __frame0.nQualityMod = 0;
       uVar4 = GetAutoMagic(pItem);
-      pMagicAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(uVar4 & 0xffff);
+      pMagicAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)uVar4);
       uVar4 = iVar1 >> 0x1f;
       if (pMagicAffixTxt) {
         if (iVar1 < 0x10000 || !pMagicAffixTxt->multiply) {
@@ -6275,7 +6275,7 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
             }
 
             wMagicSuffixId = GetMagicSuffix(pItem, nAffixIter);
-            pMagicAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(wMagicSuffixId & 0xffff);
+            pMagicAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)wMagicSuffixId);
             if (pMagicAffixTxt) {
               if (iVar1 < 0x10000 || !pMagicAffixTxt->multiply) {
                 iVar5 = pMagicAffixTxt->multiply;
@@ -6348,7 +6348,7 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
           }
 
           wMagicSuffixId = GetMagicSuffix(pItem, 0);
-          pMagicAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(wMagicSuffixId & 0xffff);
+          pMagicAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)wMagicSuffixId);
           if (pMagicAffixTxt) {
             if (iVar1 <= 0xffff || !pMagicAffixTxt->multiply) {
               iVar5 = pMagicAffixTxt->multiply;

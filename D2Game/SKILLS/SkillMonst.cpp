@@ -370,7 +370,7 @@ BOOL __fastcall Skills_SrvDoFunc_087_SpawnBehindTarget(::SGAMEDATA * pGame, D2Un
     int nSpawnX = D2Common::Units::GetDirectionToCoords(pUnit, nTargetX, nTargetY);
     uint32_t nGfxOffset = D2Common::Monsters::MONSTERS::MONSTERS_GetGfxOffsetTable2((uint8_t)nSpawnX);
     uint32_t nGfxDirMasked = nGfxOffset & 7;
-    D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(BYTE_ARRAY_006e3138[nGfxDirMasked & 0xff], &nSkillLvl, &nOffsetY);
+    D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(BYTE_ARRAY_006e3138[(uint8_t)nGfxDirMasked], &nSkillLvl, &nOffsetY);
     nTargetY = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
     nSpawnX = nTargetY + nSkillLvl;
     nTargetY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
@@ -2641,8 +2641,8 @@ void __fastcall SKILLMONST_SpiderLayTrail(::SGAMEDATA * pGame, D2UnitStrc * pUni
         memcpy(abyDirLookup, "\n\b\x16\x14\x12\x10\x0e\f", 8);
         nPathFlags = D2Common::PATH::DynamicPath::UpdateDirection(pDynamicPath);
         nPathFlags = D2Common::Monsters::MONSTERS::MONSTERS_GetGfxOffsetTable2((uint8_t)nPathFlags);
-        abyDirLookup[4] = abyDirLookup[nPathFlags & 0xff];
-        D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(abyDirLookup[nPathFlags & 0xff], &nOffsetX, &nOffsetY);
+        abyDirLookup[4] = abyDirLookup[(uint8_t)nPathFlags];
+        D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(abyDirLookup[(uint8_t)nPathFlags], &nOffsetX, &nOffsetY);
         bApplyBonus = 1;
         *(uint32_t*)((char*)&abyDirLookup + 4) = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_SpiderLay, pUnit), bApplyBonus);
         eUnitType = pUnit->eUnitType;
