@@ -477,7 +477,7 @@ template<> void TSGrowableArray<SGAMEDATA>::ReallocData(uint32_t nAlloc) {
     if (nCapacity < this->m_count) {
       nAlloc = nCapacity;
     }
-    if (nAlloc) {
+    if ((uint32_t)nAlloc > 0) {
       ::SGAMEDATA* this_00;
       nByteOffset = 0;
       pGameEntry = pOldBuffer;

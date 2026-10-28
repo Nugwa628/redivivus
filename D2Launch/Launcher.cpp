@@ -178,7 +178,7 @@ BOOL __stdcall CHARSEL_HandleCharListClick(D2ControlMsg * pControlMsg) {
         nSlotIndex++;
       } while (nSlotIndex < gnCharSelScreenSlotCount);
     }
-    if (D2Client::CharScreen::TotalCurrentChars < g_nCharSelNavigationIndex + nSlotIndex) {
+    if ((int)D2Client::CharScreen::TotalCurrentChars < (int)(g_nCharSelNavigationIndex + nSlotIndex)) {
       return 0;
     }
 

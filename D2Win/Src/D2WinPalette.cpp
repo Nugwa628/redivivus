@@ -202,7 +202,7 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
       }
 
       uAlphaR = (uint32_t)*pSrcBytes * 0xaa / 100;
-      if (0xff < uAlphaR) {
+      if (0xff < (int)uAlphaR) {
         uAlphaR = 0xff;
       }
 

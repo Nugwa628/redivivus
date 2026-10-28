@@ -870,7 +870,7 @@ static void LIGHTMAP_ApplyCollisionOccludedLight(D2LightMapStrc * pLightMap) {
         } while (nCellRight < 0x40);
 
         nCollisionY++;
-      } while ((int)pCollisionCell < (uintptr_t)((char*)&gaLightmapInterpBuffer + sizeof(gaLightmapInterpBuffer)));
+      } while ((int)pCollisionCell < (int)((uintptr_t)((char*)&gaLightmapInterpBuffer + sizeof(gaLightmapInterpBuffer))));
 
       if (2 <= nRadiusCells) {
         nCoordYBottom = nGridCellY * 8 + 0x14;

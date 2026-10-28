@@ -75,7 +75,7 @@ uint32_t __fastcall SSignatureVerifyStream_GetSignatureLength(D2SsigContextStrc 
 void __fastcall SSignatureVerifyStream_ProvideData(D2SsigContextStrc * pContext, uint8_t * pData, size_t nDataLen) {
     uint32_t nRemaining = nDataLen - pContext->nBufferSize;
     if (-1 < (int)nRemaining) {
-      if (pContext->nBytesBuffered) {
+      if ((uint32_t)pContext->nBytesBuffered > 0) {
         Sha1_Append(pContext->pDataBuffer, pContext->nBytesBuffered, &pContext->sSha1);
       }
       if (0 < (int)nRemaining) {

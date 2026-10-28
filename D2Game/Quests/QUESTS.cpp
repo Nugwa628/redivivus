@@ -1720,7 +1720,7 @@ void __fastcall QUESTGUID_SetPlayerCountToZero(D2QuestGUIDStrc * pQuestGUID) {
 // @evidence Takes D2QuestDataStrc + D2QuestArgStrc, resolves the player
 // GUID (-1 if none) and delegates to 00545240. A wrapper, not the list operation itself.
 void __fastcall QUESTGUID_RemovePlayerFromQuest(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    if (!pQuestData->sQuestGUID.nPlayerCount) {
+    if ((uint32_t)pQuestData->sQuestGUID.nPlayerCount <= 0) {
       return;
     }
     if (!pQuestArgs->pPlayer) {

@@ -685,7 +685,7 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
     } while (nFillIdx < 0x1e);
 
     nLoopIdx = 0;
-    if (nNumCodes) {
+    if ((uint32_t)nNumCodes > 0) {
       do {
         if (*(short int*)(pBitLengths + nLoopIdx * 2)) {
           aOutCodes[aOffset[*(uint16_t*)(pBitLengths + nLoopIdx * 2)]] = (uint16_t)nLoopIdx;
@@ -751,7 +751,7 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
         byCurBits = (uint8_t)nCurBits;
         byOpBits = byCurLength - byCurBits;
         uVar1 = *pSortedCode;
-        if ((int)(uint32_t)uVar1 < nMatchLimit) {
+        if (nMatchLimit > (int)(uint32_t)uVar1) {
           dwTableEntry = (uint32_t)(uint32_t)((uint32_t)((uint32_t)(uint16_t)uVar1 << 8 | (uint32_t)(uint8_t)byOpBits) & 0xffffffu) << 8;
         } else if (nMatchLimit < (int)(uint32_t)uVar1) {
           dwTableEntry = (uint32_t)((uint32_t)(uint16_t)pBaseTable[*pSortedCode] << 16 | (uint32_t)(uint16_t)((uint16_t)(uint8_t)byOpBits << 8 | (uint16_t)(uint8_t)(char)pExtraTable[*pSortedCode]));

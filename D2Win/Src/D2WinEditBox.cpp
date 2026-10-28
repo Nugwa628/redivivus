@@ -2194,7 +2194,7 @@ BOOL __fastcall Draw(::D2WinEditBox * pEditBox) {
     }
 
     do {
-      if (iVar3 <= nYEnd_00 - nYEnd) {
+      if (nYEnd_00 - nYEnd >= iVar3) {
         return 1;
       }
 

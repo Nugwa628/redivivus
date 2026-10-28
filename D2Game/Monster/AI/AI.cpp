@@ -2561,7 +2561,7 @@ uint32_t __stdcall ForEachCallType1(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2M
       uVar1 = ppDStack_10[uStack_8]->nClientsCount;
       ppDVar2 = ppDStack_10[uStack_8]->pClients;
       uVar4 = 0;
-      if (uVar1) {
+      if ((uint32_t)uVar1 > 0) {
         do {
           pOther = GAME::Clients::CLIENTS_GetControlUnit(ppDVar2[uVar4], 0);
           if (pOther) {
@@ -5530,7 +5530,7 @@ void __fastcall AI_Fn1_Megademon(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiPa
       D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_inferno, 0);
     }
     if (bEngagedInCombat) {
-      if (-1 < pMonStats->aSkill[0] && pAiGeneral->dwArg0 < pGame->dwGameFrame) {
+      if (0 <= pMonStats->aSkill[0] && pGame->dwGameFrame > pAiGeneral->dwArg0) {
         sNewSeed = D2_SEED_NEXT(*pSeed);
         *pSeed = sNewSeed;
         if ((int)(sNewSeed.nSeedLow % 100) < (int)pMonStats->aip[1][pGame->nDifficulty]) {
@@ -7129,7 +7129,7 @@ int32_t __fastcall HirelingFollowOwnerAction(::SGAMEDATA * pGame, D2UnitStrc * p
             if (0x14 <= (int)pOwnerDynamicPath) {
               uVar2 = AI::GetDistance(pMerc, pOwner);
               bRun = uVar2 >> 2;
-              if ((uint32_t)bRun < 4) {
+              if ((int)((uint32_t)bRun) < 4) {
                 bRun = 4;
               }
 
@@ -9877,7 +9877,7 @@ void __fastcall AITHINK_Fn1_NpcOutOfTown(::SGAMEDATA * pGame, D2UnitStrc * pUnit
         if (nQuestResult) {
           if (pPhaseCmd->nCmdArg[3] < 8) {
             nDistToTarget = MONSTERAI_GetDistanceToCoords(pUnit, ptDest.x, ptDest.y);
-            if (nDistToTarget) {
+            if ((uint32_t)nDistToTarget > 0) {
               WalkToCoords(pGame, pUnit, ptDest.x, ptDest.y);
               return;
             }
@@ -9979,7 +9979,7 @@ void __fastcall AITHINK_Fn1_GoodNpcRanged(::SGAMEDATA * pGame, D2UnitStrc * pUni
     D2SeedStrc seedNext;
     seedNext = (D2SeedStrc)(lVar1 + (uint64_t)pUnit->sSeed.nSeedHigh);
     *pSeed = seedNext;
-    if (seedNext.nSeedLow % 100 < 0x14) {
+    if ((int)(seedNext.nSeedLow % 100) < 0x14) {
       WalkRandomOffset(pGame, pUnit, 5);
       return;
     }
@@ -11229,13 +11229,13 @@ void __fastcall AITHINK_Fn1_Diablo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ai
       nDistToHomePt = MONSTERAI_GetDistanceToCoords(pUnit, nSkillIdx, (int32_t)pMonStat);
       pMonAi = 0;
       nAiParam = 0x0;
-      if (nSkillIdx > (int)nTargetRisk) {
+      if ((int)nTargetRisk < nSkillIdx) {
         pMonAi = (D2MonsterAiCmdStrc*)-1;
       }
       if (nSkillIdx < (int)nTargetRisk) {
         pMonAi = (D2MonsterAiCmdStrc*)0x1;
       }
-      if (nTargetPosY < (int)pMonStat) {
+      if ((int)pMonStat > nTargetPosY) {
         nAiParam = -1;
       }
       if ((int)pMonStat < nTargetPosY) {
@@ -14707,7 +14707,7 @@ void __fastcall AITHINK_Fn1_Wussie(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ai
             *(uint16_t*)((char*)&byPacketCmd.nUnitGUID + 2) = (uint16_t)((uint64_t)lVar1 >> 0x20);
             newSeed = (D2SeedStrc)(lVar1 + (uint64_t)pUnit->sSeed.nSeedHigh);
             *pSeed = newSeed;
-            if (newSeed.nSeedLow % 100 < 0x46) {
+            if ((int)(newSeed.nSeedLow % 100) < 0x46) {
               MONSTERAI_CommandWalkToUnit(pGame, pUnit, pPortal, 7);
               return;
             }
@@ -17614,12 +17614,12 @@ void __fastcall AITHINK_Fn1_Vulture(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
 
           nLandingDist = MONSTERAI_GetDistanceToCoords(pUnit, nLandingX, nLandingY);
           while (nLandingDist < (int)pTargetCopy) {
-            if (nLandingX < nUnitPosX) {
+            if (nUnitPosX > nLandingX) {
               nLandingX--;
             } else if (nUnitPosX < nLandingX) {
               nLandingX++;
             }
-            if (nLandingY < (int)nUnitPosY) {
+            if ((int)nUnitPosY > nLandingY) {
               nLandingY--;
             } else if ((int)nUnitPosY < nLandingY) {
               nLandingY++;
@@ -19963,7 +19963,7 @@ void __fastcall AITHINK_Fn1_Mephisto(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2
       sNewSeed = D2_SEED_NEXT(*pSeed);
       nSkillState = 0;
       *pSeed = sNewSeed;
-      if (sNewSeed.nSeedLow % 100 < 0x41) {
+      if ((int)(sNewSeed.nSeedLow % 100) < 0x41) {
         sNewSeed = D2_SEED_NEXT_VAL(sNewSeed);
         *pSeed = sNewSeed;
         if (0x40 < sNewSeed.nSeedLow % 100 && currentDistance <= 5) {
@@ -20107,12 +20107,12 @@ void __fastcall AITHINK_Fn1_Mephisto(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2
             bCarryFlag = true;
           }
         }
-        if (pGame->nDifficulty && (bCarryFlag || 0x1e < currentDistance)) {
+        if ((uint32_t)pGame->nDifficulty > 0 && (bCarryFlag || 0x1e < currentDistance)) {
           SERVER_UNIT_CastSkill(pGame, pUnit, pMonStats->aSkMode[5], (int)pMonStats->aSkill[5], pTargetUnit, 0, 0);
           goto roll_approach_next_think;
         }
       }
-      if (currentDistance < 0xf && (int)nSeedLowResult < bCmdResult && pGame->nDifficulty) {
+      if (currentDistance < 0xf && (int)nSeedLowResult < bCmdResult && (uint32_t)pGame->nDifficulty > 0) {
         SERVER_UNIT_CastSkill(pGame, pUnit, pMonStats->aSkMode[4], (int)pMonStats->aSkill[4], pTargetUnit, 0, 0);
       } else if ((int)nSeedLowResult < bCmdResult * 2) {
         SERVER_UNIT_CastSkill(pGame, pUnit, pMonStats->aSkMode[3], (int)pMonStats->aSkill[3], pTargetUnit, 0, 0);

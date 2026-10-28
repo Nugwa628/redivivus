@@ -708,7 +708,7 @@ void __stdcall DRAW_HideTaskbarAppBars() {
       }
 
       nEdge++;
-    } while ((int)&gaD2GFXWindowPlacements[nEdge] < (uintptr_t)((char*)&gaD2GFXWindowPlacements + sizeof(gaD2GFXWindowPlacements)));
+    } while ((int)((int)&gaD2GFXWindowPlacements[nEdge]) < (int)((uintptr_t)((char*)&gaD2GFXWindowPlacements + sizeof(gaD2GFXWindowPlacements))));
 }
 
 void D2GFX_ResetViewport() {

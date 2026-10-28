@@ -1537,7 +1537,7 @@ BOOL __fastcall OBJOP_A1Q4_ActivateHoradricMalusSmith(D2ObjectOperateFnArg * pOp
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pUnitPlayerData, pppRoomList, (int*)pNumRooms);
       pRoomListEnd = 0;
       pMissileRoom = __frame0.pExistingPortal;
-      if (__frame0.pExistingPortal) {
+      if ((uint32_t)__frame0.pExistingPortal > 0) {
         do {
           pMissileUnit = __frame0.ppRoomList[(int)pRoomListEnd]->pUnitList;
           do {

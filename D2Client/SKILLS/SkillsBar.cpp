@@ -641,7 +641,7 @@ void __fastcall SKILL_CreateLeapArcParticle(D2UnitStrc * pUnit, D2SkillStrc * pS
       }
 
       nArcOffsetZ++;
-    } while ((int)(uint32_t*)&gaLeapArcParticleOffsetZ[nArcOffsetZ].nMaxDist < (uintptr_t)((char*)&gaLeapArcParticleOffsetZ + 12));
+    } while ((int)((int)(uint32_t*)&gaLeapArcParticleOffsetZ[nArcOffsetZ].nMaxDist) < (int)((uintptr_t)((char*)&gaLeapArcParticleOffsetZ + 12)));
 
     nArcOffsetZ = gaLeapArcParticleOffsetZ[nArcOffsetZ].nSlope * nParam1 + gaLeapArcParticleOffsetZ[nArcOffsetZ].nIntercept;
     if (nArcOffsetZ < 500) {

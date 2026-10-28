@@ -342,7 +342,7 @@ static BOOL __stdcall BnetDownloadFile(SOCKET hSocket, char * szText, FILETIME *
     uint8_t* pRecvBuf = (uint8_t*)Storm::SMem::SMemAlloc(nFileSize, ".\\BnDownload.cpp", 0x385, 8);
     uint32_t nBytesReceived = 0;
     *ppOutBuffer = pRecvBuf;
-    if (nFileSize) {
+    if ((uint32_t)nFileSize > 0) {
       uint32_t len;
       do {
         len = nFileSize - nBytesReceived;

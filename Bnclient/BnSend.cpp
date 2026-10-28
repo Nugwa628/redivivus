@@ -687,7 +687,7 @@ uint32_t __fastcall NET_SID_CLIENT_Send_0x27_WriteUserData(char * szAccount, uin
     uint32_t nIdx;
     uint32_t nLen = Storm::Source::SSTR::SStrLen(szAccount);
     int iVar1 = nLen + 1;
-    if (nCount) {
+    if ((uint32_t)nCount > 0) {
       uint32_t nValueLen;
       ppszValueScan = pszValues;
       nIdx = nCount;
@@ -709,7 +709,7 @@ uint32_t __fastcall NET_SID_CLIENT_Send_0x27_WriteUserData(char * szAccount, uin
     nLen = Storm::Source::SSTR::SStrCopy(pPacketBuf + 8, szAccount, 0x7fffffff);
     char* szBufferOutput = pPacketBuf + nLen + 9;
     nIdx = 0;
-    if (nCount) {
+    if ((uint32_t)nCount > 0) {
       do {
         nLen = Storm::Source::SSTR::SStrCopy(szBufferOutput, pszKeys[nIdx], 0x7fffffff);
         szBufferOutput = szBufferOutput + nLen + 1;
@@ -718,7 +718,7 @@ uint32_t __fastcall NET_SID_CLIENT_Send_0x27_WriteUserData(char * szAccount, uin
     }
 
     nIdx = 0;
-    if (nCount) {
+    if ((uint32_t)nCount > 0) {
       do {
         nLen = Storm::Source::SSTR::SStrCopy(szBufferOutput, pszValues[nIdx], 0x7fffffff);
         szBufferOutput = szBufferOutput + nLen + 1;
@@ -746,7 +746,7 @@ void __fastcall BNSEND_StoreReadUserData(uint8_t * pbReadData, size_t nSize) {
 uint32_t __fastcall NET_SID_CLIENT_Send_0x26_ReadUserData(char * szAccount, uint32_t nCount, uint32_t nRequestId, char * * pszKeys) {
     uint32_t nLen = Storm::Source::SSTR::SStrLen(szAccount);
     int iVar1 = nLen + 1;
-    if (nCount) {
+    if ((uint32_t)nCount > 0) {
       uint32_t nIdx = 0;
       do {
         nLen = Storm::Source::SSTR::SStrLen(pszKeys[nIdx]);
@@ -765,7 +765,7 @@ uint32_t __fastcall NET_SID_CLIENT_Send_0x26_ReadUserData(char * szAccount, uint
     nLen = Storm::Source::SSTR::SStrCopy(pPacketBuf + 0xc, szAccount, 0x7fffffff);
     char* szBufferOutput = pPacketBuf + nLen + 0xd;
     nRequestId = 0;
-    if (nCount) {
+    if ((uint32_t)nCount > 0) {
       do {
         nLen = Storm::Source::SSTR::SStrCopy(szBufferOutput, pszKeys[nRequestId], 0x7fffffff);
         szBufferOutput = szBufferOutput + nLen + 1;
@@ -2341,7 +2341,7 @@ static void __fastcall BNNEWS_ReallocateNewsTable(D2BnNewsTableStrc * pNewsTable
     if (dwNewCapacity < pNewsTable->nCount) {
       nCopyCount = dwNewCapacity;
     }
-    if (nCopyCount) {
+    if ((uint32_t)nCopyCount > 0) {
       int nDwordsLeft;
       nByteOffset = 0;
       dwNewCapacity = nCopyCount;

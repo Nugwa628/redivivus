@@ -674,7 +674,7 @@ static void __fastcall SBMP_UncompressPcxImage(int dstSize, uint8_t * dst, int s
     uint8_t* pSrcEnd = dst;
     do {
       uint32_t byVal;
-      if (pDstEnd <= pSrcEnd || pSrcPos <= pDstRow) {
+      if (pSrcEnd >= pDstEnd || pDstRow >= pSrcPos) {
         return;
       }
 
@@ -704,7 +704,7 @@ static void __fastcall SBMP_UncompressPcxImage(int dstSize, uint8_t * dst, int s
         }
       } else {
         nRLECount = byVal & 0x3f;
-        if ((uint32_t)((int)pDstEnd - (int)dst) <= (byVal & 0x3f)) {
+        if ((byVal & 0x3f) >= (uint32_t)((int)pDstEnd - (int)dst)) {
           nRLECount = (int)pDstEnd - (int)dst;
         }
 
@@ -712,14 +712,14 @@ static void __fastcall SBMP_UncompressPcxImage(int dstSize, uint8_t * dst, int s
         pSrc = pDstRow + 2;
         nDstRemaining = (int)pDstEnd - (int)dst;
         do {
-          if (width <= nRunLen) {
+          if (nRunLen >= width) {
             nColIdx = stride - nRunLen;
             if (nRLECount < stride - nRunLen) {
               nColIdx = nRLECount;
             }
 
             nRunLen += nColIdx;
-            if (stride <= nRunLen) {
+            if (nRunLen >= stride) {
               nRunLen -= stride;
               nPlaneIdx--;
               if (nPlaneIdx < 0) {

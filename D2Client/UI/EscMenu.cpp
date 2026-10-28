@@ -660,7 +660,7 @@ void __fastcall ESCMENU_LoadLocalizedImages(int * pMenuHeader, D2EscMenuItemStrc
             pMenuTable[__frame0.nItemIndex].pDC6Main = pLoadedDC6;
             if (nSubImageCount == 1) {
               nSubImageCount = pMenuTable[__frame0.nItemIndex].nSubImageCount;
-              if (!nSubImageCount || 4 < nSubImageCount) {
+              if ((uint32_t)nSubImageCount <= 0 || 4 < nSubImageCount) {
                 ESCMENU_LoadLocalizedImages_HaltTail(0x4fe);
               }
 

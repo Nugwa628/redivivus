@@ -4349,7 +4349,7 @@ void __stdcall RENDERER_D3D_InitPerspectiveVertexBuffer() {
       } while (nNextCol < 3);
 
       iRow++;
-    } while ((int)pNextVertexRHW < (uintptr_t)((char*)&gaD3DPerspectiveStripVertices + sizeof(gaD3DPerspectiveStripVertices) + 12));
+    } while ((int)pNextVertexRHW < (int)((uintptr_t)((char*)&gaD3DPerspectiveStripVertices + sizeof(gaD3DPerspectiveStripVertices) + 12)));
 
     uint32_t* pWallCornerFixup = (uint32_t*)&gaD3DWallCornerTable[1].nY;
     do {
@@ -4366,7 +4366,7 @@ void __stdcall RENDERER_D3D_InitPerspectiveVertexBuffer() {
       pWallCornerFixup[0xb] <<= 0x10;
       pWallCornerFixup[0xc] <<= 0x10;
       pWallCornerFixup += 0x12;
-    } while ((int)pWallCornerFixup < (uintptr_t)&gaD3DWallCornerTable + 736);
+    } while ((int)pWallCornerFixup < (int)((uintptr_t)&gaD3DWallCornerTable + 736));
 }
 
 // NOTE: Register params: pTileLibraryEntryStrc (ECX): D2TileLibraryEntryStrc *, nTilePosX (EDX): int
@@ -4491,7 +4491,7 @@ int __fastcall RENDERER_D3D_RenderShadowTileWithPerspective(D2TileLibraryEntrySt
 
           nFixedScreenX += 0x8000;
           _bRendered += 0x8000;
-        } while ((int)pfVertex < (uintptr_t)((char*)&gaD3DPerspectiveStripVertices + sizeof(gaD3DPerspectiveStripVertices)));
+        } while ((int)pfVertex < (int)((uintptr_t)((char*)&gaD3DPerspectiveStripVertices + sizeof(gaD3DPerspectiveStripVertices))));
 
         g_pD3DDevice->lpVtbl->DrawIndexedPrimitive(g_pD3DDevice, 5, 0x1c4, gaD3DPerspectiveStripVertices, 0xf, gaD3DPerspectiveStripIndices, 0x16, 0x1c);
         _bRendered = 1;
@@ -4701,7 +4701,7 @@ BOOL __stdcall RENDERER_D3D_RenderWallTileWithPerspective(int nScreenPanels, D2T
 
           fLayerIndex.nValue++;
           pfVertexOuter += 3;
-        } while ((int)pfVertexOuter < (uintptr_t)((char*)&gaD3DPerspectiveVertices + 64));
+        } while ((int)pfVertexOuter < (int)((uintptr_t)((char*)&gaD3DPerspectiveVertices + 64)));
 
         g_pD3DDevice->lpVtbl->DrawIndexedPrimitive(g_pD3DDevice, 5, 0x1c4, gaD3DPerspectiveStripVertices, 0xf, gaD3DPerspectiveStripIndices, 0x16, 0x1c);
         nMidZ = 1;
@@ -5038,7 +5038,7 @@ void __stdcall RENDERER_D3D_InitLightingTable() {
 
       pTableRow += 0x100;
       nRow++;
-    } while ((int)pTableRow < (uintptr_t)((char*)&g_aLightingTable + sizeof(g_aLightingTable)));
+    } while ((int)pTableRow < (int)((uintptr_t)((char*)&g_aLightingTable + sizeof(g_aLightingTable))));
 }
 
 void __fastcall SetGlobalLight(BYTE nRed, BYTE nGreen, BYTE nBlue) {

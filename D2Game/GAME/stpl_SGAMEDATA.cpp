@@ -222,7 +222,7 @@ template<> void TSHashTable<SGAMEDATA, HASHKEY_NONE>::GrowListArray() {
     pendingList.m_linkoffset = 4;
     pendingList.m_terminator.m_next = (int)pOldBucket;
     uint32_t nBucketIdx = 0;
-    if (nNewMask) {
+    if ((uint32_t)nNewMask > 0) {
       int nOldBucketIdx;
       nOldBucketIdx = 0;
       pPendingHead2 = pendingList.m_terminator.m_prevlink;
@@ -266,7 +266,7 @@ template<> void TSHashTable<SGAMEDATA, HASHKEY_NONE>::GrowListArray() {
 
     pOldBucket = nNewBucketCount;
     pThis->tSlotListArray.SetCount((uint32_t)nNewBucketCount);
-    if (pOldBucket) {
+    if ((uint32_t)pOldBucket > 0) {
       nResetBucketOffset = 0;
       nBucketIdx = (uint32_t)pOldBucket;
       do {

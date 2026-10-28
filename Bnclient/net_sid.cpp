@@ -1601,7 +1601,7 @@ void __fastcall NET_SID_CLIENT_BigNumMultiplyAccumulate(int32_t nWords, uint32_t
     uint32_t* pSrcWord;
     uint32_t* srcPtr = pSrc + nWords;
     uint32_t* pOutWord = pDst + nWords;
-    if (!nWords) {
+    if ((uint32_t)nWords <= 0) {
       return;
     }
 

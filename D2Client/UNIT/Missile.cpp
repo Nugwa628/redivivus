@@ -2034,7 +2034,7 @@ void __fastcall MISSILE_SpawnMissilesInArea(D2UnitStrc * pUnit, int32_t nCenterX
               pUnit->sSeed = sSeedTmp;
               nRandResult = (uint32_t)(sSeedTmp.nSeedLow % nChance);
             }
-            if (nRandResult) {
+            if ((uint32_t)nRandResult > 0) {
               continue;
             }
           }

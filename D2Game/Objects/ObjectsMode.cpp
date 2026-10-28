@@ -784,7 +784,7 @@ BOOL __fastcall OBJOP_UseWaygate(D2ObjectOperateFnArg * pOperation) {
 
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &pAdjRooms, (int*)&nAdjRoomCount);
       uAdjRoomIdx = 0;
-      if (nAdjRoomCount) {
+      if ((uint32_t)nAdjRoomCount > 0) {
         do {
           if (pAdjRooms[uAdjRoomIdx] != pRoom) {
             for (pWarpUnit = pAdjRooms[uAdjRoomIdx]->pUnitList; pWarpUnit; pWarpUnit = pWarpUnit->pRoomNext) {

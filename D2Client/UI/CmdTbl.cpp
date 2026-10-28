@@ -746,7 +746,7 @@ BOOL __fastcall CMD_SetKeyBinding(int32_t nCmdIndex, int32_t nSlot, uint32_t nKe
           }
 
           nIndex++;
-        } while ((int)&g_KeyBindingsTable[nIndex].wKeyCode < (uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 4));
+        } while ((int)((int)&g_KeyBindingsTable[nIndex].wKeyCode) < (int)((uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 4)));
 
         nIndex = 0;
         pBinding2 = &g_KeyBindingsTable[0].nSlot;

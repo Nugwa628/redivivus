@@ -1028,7 +1028,7 @@ void __fastcall Q32_OnBarricadeDestroyed(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pAttackerRoom, &ppAdjacentRooms, (int*)&nRoomCount);
     uint32_t nRoomIndex;
     nRoomIndex = 0;
-    if (!nRoomCount) {
+    if ((uint32_t)nRoomCount <= 0) {
       return;
     }
 

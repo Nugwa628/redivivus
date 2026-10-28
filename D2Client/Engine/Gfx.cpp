@@ -554,7 +554,7 @@ static void __stdcall GFX_BuildMonsterCofPath(uint32_t nModeId, LPSTR szOutputPa
     }
 
     uint32_t nPathIndex = 0;
-    if (gnMonsterCofPathCount) {
+    if ((uint32_t)gnMonsterCofPathCount > 0) {
       do {
         if (nModeId == gnMonsterCofPathBuildTotalItems[nPathIndex].nMode) {
           dwTokenChars = gnMonsterCofPathBuildTotalItems[nPathIndex].dwToken;
@@ -897,7 +897,7 @@ static D2GfxInfoUnkStrc * __stdcall GFX_AsyncLoadUnitSprites(int32_t nAsyncBlock
                 exit(-1);
               } else {
                 nLayerIdx = 0;
-                if (!*pCofIdentity) {
+                if ((uint32_t)(*pCofIdentity) <= 0) {
                   return __frame0.pRetVal;
                 }
 
@@ -1938,7 +1938,7 @@ static D2GfxInfoUnkStrc * __stdcall GFX_DrawUnitComponents(int32_t nWorldX, uint
               }
 
               nLayerIdx = 0;
-              if (*pCofIdentityData) {
+              if ((uint32_t)(*pCofIdentityData) > 0) {
                 do {
                   byLayerComponent = pCofLayerData[nLayerIdx];
                   nLayerComponentU = (uint32_t)byLayerComponent;
