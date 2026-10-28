@@ -702,12 +702,13 @@ BOOL __fastcall Q04_MarkCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
 
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_CannotCompleteQuestInGame);
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
+    D2QuestDataA1Q4Strc* pA1Q4Data = pQuestData->pQuestSpecificData.pA1Q4;
     if (!pUnit) {
-      QUESTGUID_AddPlayerToList(&pQuestData->pQuestSpecificData.pA1Q4->sQuestGUID1, -1);
+      QUESTGUID_AddPlayerToList(&pA1Q4Data->sQuestGUID1, -1);
       return 0;
     }
 
-    QUESTGUID_AddPlayerToList(&pQuestData->pQuestSpecificData.pA1Q4->sQuestGUID1, pUnit->nUnitGUID);
+    QUESTGUID_AddPlayerToList(&pA1Q4Data->sQuestGUID1, pUnit->nUnitGUID);
     return 0;
 }
 
