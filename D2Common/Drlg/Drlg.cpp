@@ -5600,10 +5600,7 @@ static BOOL __stdcall DRLGOUTROOM_SpawnRandomOutdoorDecorations(int32_t nPresetT
     uint32_t uVar1;
     D2SeedStrc newSeed = D2_SEED_NEXT(pDrlgLevelStrc->sSeed);
     pDrlgLevelStrc->sSeed = newSeed;
-    if (!(newSeed.nSeedLow & 3)) {
-      Outdoors::SpawnRandomOutdoorDS1(pDrlgLevelStrc, nPresetType, -1);
-      uVar1 = Outdoors::SpawnRandomOutdoorDS1(pDrlgLevelStrc, nPresetType, -1);
-    } else {
+    if (newSeed.nSeedLow & 3) {
       BOOL BVar2;
       uVar1 = Outdoors::SpawnRandomOutdoorDS1(pDrlgLevelStrc, nPresetType, -1);
       if (bAllowDouble) {
@@ -5615,6 +5612,9 @@ static BOOL __stdcall DRLGOUTROOM_SpawnRandomOutdoorDecorations(int32_t nPresetT
           return BVar2;
         }
       }
+    } else {
+      Outdoors::SpawnRandomOutdoorDS1(pDrlgLevelStrc, nPresetType, -1);
+      uVar1 = Outdoors::SpawnRandomOutdoorDS1(pDrlgLevelStrc, nPresetType, -1);
     }
 
     return uVar1;

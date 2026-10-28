@@ -113,11 +113,11 @@ D2DrlgActStrc * __stdcall AllocAct(BYTE nActNo, int32_t dwInitSeed, BOOL bClient
     pAct->bClientSide = bClientSide;
     pAct->nActNo = nActNo;
     pAct->pMemory = pMemory;
-    if (!bClientSide) {
+    if (bClientSide) {
+      pDrlg = Drlg::DRLG_AllocDrlgActMisc(pAct, nActNo, nullptr, dwInitSeed, LEVEL_None, 1, pGame, nDifficulty, pfAutoMap, pfTownAutoMap);
+    } else {
       pAct->nLevelId = eLevel;
       pDrlg = Drlg::DRLG_AllocDrlgActMisc(pAct, nActNo, nullptr, dwInitSeed, eLevel, 0, pGame, nDifficulty, pfAutoMap, pfTownAutoMap);
-    } else {
-      pDrlg = Drlg::DRLG_AllocDrlgActMisc(pAct, nActNo, nullptr, dwInitSeed, LEVEL_None, 1, pGame, nDifficulty, pfAutoMap, pfTownAutoMap);
     }
 
     pAct->pDrlg = pDrlg;
