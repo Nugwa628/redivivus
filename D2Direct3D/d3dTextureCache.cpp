@@ -165,10 +165,10 @@ void __fastcall D3DTEXCACHE_InvalidateByTilePtr(D3DTextureCacheStrc * pCache) {
       D3DTextureCacheNodeStrc* pNextUsedNode;
       pNextUsedNode = pUsedNode->pNext;
       pCache->pUsedHead = pNextUsedNode;
-      if (!pNextUsedNode) {
-        pCache->pUsedTail = 0;
-      } else {
+      if (pNextUsedNode) {
         pNextUsedNode->pPrev = 0;
+      } else {
+        pCache->pUsedTail = 0;
       }
 
       pUsedNode->pNext = 0;
