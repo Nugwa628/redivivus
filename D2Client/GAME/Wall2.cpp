@@ -662,10 +662,10 @@ static void WALL2_InsertUnitDrawBelow(D2Wall2DrawListStrc * pDrawList, D2UnitStr
     eD2UnitType eVar3 = pUnit->eUnitType;
     if (eVar3 == UNIT_OBJECT || 3 < (int)eVar3 && (int)eVar3 <= 5) {
       nUnitPos = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nUnitPos = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nUnitPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nUnitPos = 0;
     }
 
     pDVar1->nX = nUnitPos * 8;
