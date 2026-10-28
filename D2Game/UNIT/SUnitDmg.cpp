@@ -750,7 +750,7 @@ static void __stdcall DAMAGE_ApplyMonsterTypeBonusDamage(D2UnitStrc * pUnit, D2D
     }
 
     int nMonTypeCount = pnParam[1];
-    if (!(-1 < nMonTypeCount && nMonTypeCount < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonTypeCount)) {
+    if (!(0 <= nMonTypeCount && nMonTypeCount < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonTypeCount)) {
       return;
     }
 
@@ -1698,11 +1698,7 @@ static void __stdcall DAMAGE_ApplyLifeAndManaLeech(::SGAMEDATA * pGame, D2UnitSt
       DAMAGE_ApplyManaToUnit((int)nLeechAmount / 64, pAttacker);
       eUnitType = UNIT_MONSTER;
     }
-    if (!pDmgStrc->dwLifeLeech) {
-      if (eUnitType == UNIT_PLAYER) {
-        return;
-      }
-    } else {
+    if (pDmgStrc->dwLifeLeech) {
       nMaxHp = D2Client::Stats::D2ApplyPercent(nManaStat, pDmgStrc->dwLifeLeech, 100);
       if (pDefender != (D2UnitStrc*)0x64) {
         nMaxHp = D2Client::Stats::D2ApplyPercent(nMaxHp, (int32_t)pDefender, 100);
@@ -1718,6 +1714,10 @@ static void __stdcall DAMAGE_ApplyLifeAndManaLeech(::SGAMEDATA * pGame, D2UnitSt
       uMercType = D2Client::Archive::UNIT_GetModuloFromSeed(&pAttacker->sSeed, 2);
       if (!uMercType) {
         D2Common::Units::SetOverlay(pAttacker, 0x97, 0);
+        return;
+      }
+    } else {
+      if (eUnitType == UNIT_PLAYER) {
         return;
       }
     }

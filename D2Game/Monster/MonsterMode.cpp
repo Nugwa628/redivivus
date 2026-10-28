@@ -554,7 +554,7 @@ BOOL __fastcall MONSTER_OnDeathDispatch(::SGAMEDATA * pGame, D2MonsterKillStrc *
             nClassId = (int)(nCEDamageScaled * 0x3c) / 100;
           } else if ((int)(nCEDamageScaled & -16) < 0x640) {
             nMulResult = __allmul(nCEDamageScaled, (int)nCEDamageScaled >> 0x1f, 0x3c, 0);
-            nMulResult = __alldiv((uint32_t)nMulResult, (uint32_t)((uint64_t)nMulResult >> 0x20), 100, 0);
+            nMulResult = (int64_t)nMulResult / 100;
             nClassId = (int)nMulResult;
           } else {
             nClassId = (int)nCEDamageScaled / 100 * 0x3c;

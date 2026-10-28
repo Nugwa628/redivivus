@@ -515,8 +515,8 @@ BOOL __fastcall Skills_CltDoFunc_Ama_Strafe(D2UnitStrc * pUnit, eD2Skills eSkill
     }
 
     int32_t nFacing = 0;
-    nShotsLeft = Units::GetYPosFromDynamicPathUnit(pNextTarget);
-    D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pNextTarget), nShotsLeft, nFacing);
+
+    D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pNextTarget), Units::GetYPosFromDynamicPathUnit(pNextTarget), nFacing);
     D2Common::Skills::SKILL_SetParam2(pSkill, pNextTarget->eUnitType);
     D2Common::Skills::SKILL_SetParam3(pSkill, pNextTarget->nUnitGUID);
     Skills::SKILLS_ApplyDamageReduction((int32_t)pUnit, GetTxtSkillParam5(eCurrentSkill));
@@ -604,8 +604,8 @@ BOOL __fastcall Skills_CltDoFunc_Ama_PiercingShot(D2UnitStrc * pUnit, eD2Skills 
     int nExcludeGUID = pConfirmedTarget->nUnitGUID;
     uint32_t* pNullOut = 0;
     uint32_t nSearchFlags = 3;
-    int32_t nConfirmedTargetY = Units::GetYPosFromDynamicPathUnit(pConfirmedTarget);
-    D2UnitStrc* pSecondaryTarget = Skills::SKILL_FindClosestTargetWithStats(pUnit, Units::GetXPosFromDynamicPathUnit(pConfirmedTarget), nConfirmedTargetY, nSearchRange, nSearchFlags, nExcludeGUID, pNullOut);
+
+    D2UnitStrc* pSecondaryTarget = Skills::SKILL_FindClosestTargetWithStats(pUnit, Units::GetXPosFromDynamicPathUnit(pConfirmedTarget), Units::GetYPosFromDynamicPathUnit(pConfirmedTarget), nSearchRange, nSearchFlags, nExcludeGUID, pNullOut);
     if (!pSecondaryTarget) {
       return 0;
     }

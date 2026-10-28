@@ -379,8 +379,8 @@ D2UnitStrc * __fastcall SUNITNPC_GenerateNpcItems(D2UnitStrc * pUnit, uint32_t n
       pInventory = 0;
       nInvY = 1;
       nInvX = 1;
-      nYPos = D2Client::Units::GetYPosFromDynamicPathUnit(pCreatedItem);
-      nItemQuality = ITEMS::ItemMode::SERVER_ItemToInventory(".\\UNIT\\SUNITNPC.CPP", 0x16c, pGame_00, pUnit, nUnitGUID, D2Client::Units::GetXPosFromDynamicPathUnit(pCreatedItem), nYPos, nInvX, nInvY, pInventory);
+
+      nItemQuality = ITEMS::ItemMode::SERVER_ItemToInventory(".\\UNIT\\SUNITNPC.CPP", 0x16c, pGame_00, pUnit, nUnitGUID, D2Client::Units::GetXPosFromDynamicPathUnit(pCreatedItem), D2Client::Units::GetYPosFromDynamicPathUnit(pCreatedItem), nInvX, nInvY, pInventory);
       if (!nItemQuality) {
         if ((char)nParam2 != '\x01') {
           sunitproxy::SUNITPROXY_AddItemToNpcProxy(pUnit, pGame_00, pCreatedItem, 0);
@@ -391,8 +391,8 @@ D2UnitStrc * __fastcall SUNITNPC_GenerateNpcItems(D2UnitStrc * pUnit, uint32_t n
         pInventory = 0;
         nMercInvSlot = 1;
         nParam1_00 = 1;
-        nUnitGUID = D2Client::Units::GetYPosFromDynamicPathUnit(pCreatedItem);
-        nItemQuality = ITEMS::ItemMode::SERVER_ItemToInventory(".\\UNIT\\SUNITNPC.CPP", 0x172, pGame_00, pUnit, nParam2, D2Client::Units::GetXPosFromDynamicPathUnit(pCreatedItem), nUnitGUID, nParam1_00, nMercInvSlot, pInventory);
+
+        nItemQuality = ITEMS::ItemMode::SERVER_ItemToInventory(".\\UNIT\\SUNITNPC.CPP", 0x172, pGame_00, pUnit, nParam2, D2Client::Units::GetXPosFromDynamicPathUnit(pCreatedItem), D2Client::Units::GetYPosFromDynamicPathUnit(pCreatedItem), nParam1_00, nMercInvSlot, pInventory);
         if (!nItemQuality) {
           sunitproxy::SUNITPROXY_AddItemToNpcProxy(pUnit, pGame_00, pCreatedItem, 0);
           return nullptr;

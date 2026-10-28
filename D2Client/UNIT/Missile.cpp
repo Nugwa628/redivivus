@@ -300,8 +300,8 @@ static BOOL MISSILE_RetargetClosest(D2UnitStrc * pUnit) {
     uint32_t* pClosestUnit = 0;
     int pExcludeUnit = -1;
     uint32_t nTargetFlags = 3;
-    int32_t nDestX = Units::GetYPosFromDynamicPathUnit(pUnit);
-    pOwner = SKILLS::Skills::SKILL_FindClosestTargetWithStats(pOwner, Units::GetXPosFromDynamicPathUnit(pUnit), nDestX, nSearchRadius, nTargetFlags, pExcludeUnit, pClosestUnit);
+
+    pOwner = SKILLS::Skills::SKILL_FindClosestTargetWithStats(pOwner, Units::GetXPosFromDynamicPathUnit(pUnit), Units::GetYPosFromDynamicPathUnit(pUnit), nSearchRadius, nTargetFlags, pExcludeUnit, pClosestUnit);
     MISSILE_SetupHoming(pOwner, pUnit);
     return 0;
 }
@@ -2270,8 +2270,8 @@ int32_t __fastcall MISSILE_CltHitFn01_FireExplosion(D2UnitStrc * pUnit, D2UnitSt
 
     uint32_t nHitPar2 = pMissileTxt->cHitPar2;
     int32_t nStep = 1;
-    int32_t nSkillLevel = D2Common::Units::Missile::GetLevel(pUnit);
-    MISSILE_CreatePatternAtUnitPos(pUnit, pMissileTxt->cHitPar1, MISSILE_Fireexplosion2, D2Common::Units::Missile::GetSkillId(pUnit), nSkillLevel, nHitPar2, nStep);
+
+    MISSILE_CreatePatternAtUnitPos(pUnit, pMissileTxt->cHitPar1, MISSILE_Fireexplosion2, D2Common::Units::Missile::GetSkillId(pUnit), D2Common::Units::Missile::GetLevel(pUnit), nHitPar2, nStep);
     return 1;
 }
 
@@ -3154,8 +3154,8 @@ int32_t __fastcall MISSILE_CltHitFn28_PantherPotGreen(D2UnitStrc * pUnit, D2Unit
       nClassId = 1;
     }
 
-    int32_t nSkillLevel = D2Common::Units::Missile::GetLevel(pUnit);
-    MISSILE_Create8DirectionalClient(pOwner, pHitTarget, (int)pMissileTxt->CltHitSubMissile1, D2Common::Units::Missile::GetSkillId(pUnit), nSkillLevel, nClassId);
+
+    MISSILE_Create8DirectionalClient(pOwner, pHitTarget, (int)pMissileTxt->CltHitSubMissile1, D2Common::Units::Missile::GetSkillId(pUnit), D2Common::Units::Missile::GetLevel(pUnit), nClassId);
     return 1;
 }
 
@@ -4572,8 +4572,8 @@ int32_t __fastcall MISSILE_CltHitFn47_CatapultSpikeBall(D2UnitStrc * pUnit, D2Un
 
     nSkillLevel = D2Common::Units::Missile::GetLevel(pUnit);
     eSkill = D2Common::Units::Missile::GetSkillId(pUnit);
-    nCount = Units::GetYPosFromDynamicPathUnit(pUnit);
-    MakeMissileAtXY(pUnit, (int)pMissileTxt->CltHitSubMissile2, Units::GetXPosFromDynamicPathUnit(pUnit), nCount, eSkill, nSkillLevel);
+
+    MakeMissileAtXY(pUnit, (int)pMissileTxt->CltHitSubMissile2, Units::GetXPosFromDynamicPathUnit(pUnit), Units::GetYPosFromDynamicPathUnit(pUnit), eSkill, nSkillLevel);
     return 1;
 }
 
@@ -4971,8 +4971,8 @@ int32_t __fastcall MISSILE_CltHitFn57_BaalSpawnMonsters(D2UnitStrc * pUnit, D2Un
 
     uint32_t nSpread = pMissileTxt->cHitPar2;
     int32_t nCount = 1;
-    int32_t nLevel = D2Common::Units::Missile::GetLevel(pUnit);
-    MISSILE_CreatePatternAtUnitPos(pUnit, pMissileTxt->cHitPar1, (int)pMissileTxt->CltHitSubMissile1, D2Common::Units::Missile::GetSkillId(pUnit), nLevel, nSpread, nCount);
+
+    MISSILE_CreatePatternAtUnitPos(pUnit, pMissileTxt->cHitPar1, (int)pMissileTxt->CltHitSubMissile1, D2Common::Units::Missile::GetSkillId(pUnit), D2Common::Units::Missile::GetLevel(pUnit), nSpread, nCount);
     return 1;
 }
 
@@ -7554,8 +7554,8 @@ void __fastcall MISSILE_CltDoFn17_CurseCenter(D2UnitStrc * pUnit) {
                   }
 
                   nDensity = (4 < (int)nStreamRange) + 1;
-                  nRemainingFrames = D2Common::Units::Missile::GetLevel(pUnit);
-                  MISSILE_CreatePatternAtUnitPos(pUnit, nStreamRange, eStreamMissile, D2Common::Units::Missile::GetSkillId(pUnit), nRemainingFrames, nInnerRange, nDensity);
+
+                  MISSILE_CreatePatternAtUnitPos(pUnit, nStreamRange, eStreamMissile, D2Common::Units::Missile::GetSkillId(pUnit), D2Common::Units::Missile::GetLevel(pUnit), nInnerRange, nDensity);
                 }
               }
 

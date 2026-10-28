@@ -94,7 +94,7 @@ namespace D2Common::Skills {
 
 // Calculates a skill parameter value using Param[6] and Param[7] from SkillsTxt. Formula: (level - 1) * Param[7] + Param[6]. Returns 0 if skill ID or level is invalid.
 int32_t __fastcall SKILLS_CalcSkillParam(eD2Skills eSkill, int32_t nParam) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
@@ -1279,7 +1279,7 @@ uint32_t __stdcall SKILLS_CalcToHit(D2UnitStrc * pUnit, eD2Skills eSkill, int32_
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -1441,7 +1441,7 @@ static int32_t SKILLS_ApplyElementalMasteryBonus(eD2ElementalDamageTypeDWORD eEl
 int32_t __stdcall SERVER_MinDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t nSkillLevel, BOOL bApplyMastery) {
     int32_t nElemMasteryBonus;
     D2DataTableTxtStrc* pDataTable = sgptDataTable;
-    if (!(-1 < eSkillId && eSkillId < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= eSkillId && eSkillId < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
@@ -1512,7 +1512,7 @@ int32_t __stdcall SERVER_MaxDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t
 int32_t __stdcall SERVER_Synergy1(D2UnitStrc * pUnit, int32_t eSkillId, int32_t nSkillLevel, int32_t nUnused) {
     int nLevelLenOffset;
     D2SkillCalcContextStrc sCalcCtx;
-    if (!(-1 < eSkillId && eSkillId < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= eSkillId && eSkillId < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
@@ -2574,7 +2574,7 @@ uint32_t __stdcall SKILLDESC_EvalDescCalcValue(D2UnitStrc * pUnit, uint8_t bPara
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -2647,12 +2647,12 @@ uint32_t __stdcall SKILLDESC_EvalDescCalcValue(D2UnitStrc * pUnit, uint8_t bPara
         uResult = SKILLS_CalcToHit(pUnit, eSkill, nParam);
       return uResult;
       case 0x15:
-        if ((int)nParam < 1) {
+        if ((int)nParam <= 0) {
           return 0;
         }
       return (int)((int)pSkillTxt->lvlmana * (nParam - 1) + (int)pSkillTxt->mana << ((uint8_t)pSkillTxt->manashift & 0x1f)) >> 8;
       case 0x16:
-        if ((int)nParam < 1) {
+        if ((int)nParam <= 0) {
           return 0;
         }
       return (int)(((int)pSkillTxt->lvlmana * (nParam - 1) + (int)pSkillTxt->mana) * 0x19) / 2 << ((uint8_t)pSkillTxt->manashift & 0x1f) >> 8;
@@ -2691,7 +2691,7 @@ uint32_t __stdcall SKILLDESC_EvalDescCalcValue(D2UnitStrc * pUnit, uint8_t bPara
       case 0x1e:
 
       case 0x21:
-        if ((int)nParam < 1) {
+        if ((int)nParam <= 0) {
           return 0;
         }
       pSkillDescTxt = D2Client::DataTbls::GetSkillDescription(eSkill);
@@ -2712,7 +2712,7 @@ uint32_t __stdcall SKILLDESC_EvalDescCalcValue(D2UnitStrc * pUnit, uint8_t bPara
       case 0x1f:
 
       case 0x22:
-        if ((int)nParam < 1) {
+        if ((int)nParam <= 0) {
           return 0;
         }
       pSkillDescTxt = D2Client::DataTbls::GetSkillDescription(eSkill);
@@ -2768,7 +2768,7 @@ uint32_t __stdcall SKILLDESC_EvalDescCalcValue(D2UnitStrc * pUnit, uint8_t bPara
       uResult = D2Common::Skills::GetSkillLevel(pUnit, pSkillInst, 0);
       return uResult;
       case 0x2a:
-        if ((int)nParam < 1) {
+        if ((int)nParam <= 0) {
           return 0;
         }
       return (int)pSkillTxt->lvlmana * (nParam - 1) + (int)pSkillTxt->mana << ((uint8_t)pSkillTxt->manashift & 0x1f);
@@ -2777,7 +2777,7 @@ uint32_t __stdcall SKILLDESC_EvalDescCalcValue(D2UnitStrc * pUnit, uint8_t bPara
       case 0x2d:
 
       case 0x2f:
-        if ((int)nParam < 1) {
+        if ((int)nParam <= 0) {
           return 0;
         }
       pSkillDescTxt = D2Client::DataTbls::GetSkillDescription(eSkill);
@@ -3015,7 +3015,7 @@ void __stdcall SKILLS_UpdatePassiveSkillStats(D2UnitStrc * pUnit, eD2Skills eSki
 
           nCalcValue = D2GetSkillCalc(pCaster, ((D2UnitStrc*)pUnit2)->eUnitType, eSkill, nSkillLvl);
           nPassiveItype = (uint32_t)(uint16_t)pPassiveCalcPtr->passiveitype;
-          if (pPassiveCalcPtr->passiveitype < 1) {
+          if (pPassiveCalcPtr->passiveitype <= 0) {
             nPassiveItype = 0;
             nStatId = *pPassiveStat;
           } else {
@@ -3605,7 +3605,7 @@ static uint32_t __stdcall SKILL_IsDelayExpired(D2SkillStrc * pSkill, D2UnitStrc 
     short int nSkillId = pSkillTxt->skill;
     int32_t nSkillLevel = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 1);
     int32_t nDelayFrames = D2GetSkillCalc(pUnit, pSkillTxt->delay, (int)nSkillId, nSkillLevel);
-    return (uint32_t)(nDelayFrames < 1);
+    return (uint32_t)(nDelayFrames <= 0);
 }
 
 // Validates whether pUnit can currently activate pSkill. Returns an error code: 0=ok/can use (via SKILL_IsDelayExpired returning non-zero producing 8), 1=not enough mana or start-mana check failed, 2=no item charges or missing required weapon/quantity, 3=skill record missing or flag2 bit2 clear (not usable), 4=restriction check failed, 5=skill flag bit4 set, 6=skill flag bit5 set, 7=skill level zero. Halts with an internal error if pSkill is null.

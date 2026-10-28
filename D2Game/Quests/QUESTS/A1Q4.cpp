@@ -2444,8 +2444,8 @@ void __fastcall Q04_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
         pUnit = UNIT::SUnit::FindUnitFromTable(pQuestArgs->pGame, UNIT_OBJECT, pA1Q4SubCast->sSub.field_0x54);
         if (pUnit && pA1Q4SubCast->sSub.bPendingCairnActivation && !pA1Q4SubCast->sSub.bCairnMonsterSaved) {
           nY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-          nX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-          Q04_SpawnDeckardCainNpc(D2Common::Units::UNITS_GetRoom(pUnit), pQuestArgs->pGame, nX, nY);
+
+          Q04_SpawnDeckardCainNpc(D2Common::Units::UNITS_GetRoom(pUnit), pQuestArgs->pGame, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nY);
           return;
         }
       }

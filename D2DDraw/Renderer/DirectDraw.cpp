@@ -2059,13 +2059,13 @@ void __fastcall RENDERER_DDRAW_DrawLine(POINT * pStartPoint, POINT * pEndPoint, 
       }
 
       nAccumulatorY += nDeltaY;
-      if (0xffff < nAccumulatorY || nAccumulatorY < -0xffff) {
+      if (0x10000 <= nAccumulatorY || nAccumulatorY <= -0x10000) {
         nStepY = (int)nAccumulatorY / 65536;
         nStepX = nCurrentY + nStepY;
         nAccumulatorY += nStepY * -0x10000;
         nCurrentY = nStepX;
       }
-      if (nLineLength <= nPixelsDrawn) {
+      if (nPixelsDrawn >= nLineLength) {
         return;
       }
 

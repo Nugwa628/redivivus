@@ -100,21 +100,20 @@ int32_t __fastcall AllocObjectControl(::SGAMEDATA * pGame) {
       exit(-1);
     }
 
-    D2ObjectControlStrc* pObjectControl = D2_NEW_POOL(pGame->pMemoryPool, D2ObjectControlStrc);
+    D2ObjectControlStrc* pObjectControl = ((D2ObjectControlStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2ObjectControlStrc), ".\\OBJECTS\\objrgn.cpp", 0x2a, 0));
     pGame->pObjectControl = pObjectControl;
     D2Common::Seed::SEED_InitDefault(&pObjectControl->sSeed);
     D2SeedStrc sSeedNext = D2_SEED_NEXT(pGame->pGameSeed);
     aShrineClassCounts[8] = sSeedNext.nSeedLow;
     pGame->pGameSeed = sSeedNext;
-    pObjectControl->sSeed.nSeedLow = aShrineClassCounts[8];
-    pObjectControl->sSeed.nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(&pObjectControl->sSeed, aShrineClassCounts[8]);
     pObjectControl->aLevelsRng[0] = 0;
     pObjectControl->pSub0x1110 = 0;
     eD2LevelId eLevel = LEVEL_RogueEncampment;
     if (1 < sgptDataTable->nTxtLevelsSize) {
       pShrinesRngIter = (D2ObjectRngShrines*)(pObjectControl->aLevelsRng + 1);
       do {
-        pLevelObjRng = D2_NEW_POOL(pGame->pMemoryPool, D2ObjectRngStrc);
+        pLevelObjRng = ((D2ObjectRngStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2ObjectRngStrc), ".\\OBJECTS\\objrgn.cpp", 0x36, 0));
         nShrinesTxtCount = (int32_t)D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevel);
         memset(pLevelObjRng, 0, 0x90);
         pLevelObjRng->nMonClassId = -1;
@@ -148,7 +147,7 @@ int32_t __fastcall AllocObjectControl(::SGAMEDATA * pGame) {
     do {
       if (0 < aShrineClassCounts[nShrineClassIdxLoop]) {
         nAllocSize = aShrineClassCounts[nShrineClassIdxLoop] * 4;
-        pShrineClassRng = (int*)D2_ALLOC_POOL(pGame->pMemoryPool, nAllocSize);
+        pShrineClassRng = (int*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, nAllocSize, ".\\OBJECTS\\objrgn.cpp", 0x54, 0);
         pShrinesRngIter->aShrinesRng[0] = (uint8_t*)pShrineClassRng;
         memset(pShrineClassRng, 0, nAllocSize);
       }

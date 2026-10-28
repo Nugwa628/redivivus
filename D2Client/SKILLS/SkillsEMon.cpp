@@ -349,13 +349,13 @@ BOOL __fastcall Skills_CltStFunc_SpawnCltMissileAtSelf(D2UnitStrc * pUnit, eD2Sk
       return 1;
     }
 
-    int32_t nY = Units::GetYPosFromDynamicPathUnit(pUnit);
-    UNIT::Missile::CastAttack(pUnit, nMissileId, Units::GetXPosFromDynamicPathUnit(pUnit), nY, eSkill, nSkillLvl);
+
+    UNIT::Missile::CastAttack(pUnit, nMissileId, Units::GetXPosFromDynamicPathUnit(pUnit), Units::GetYPosFromDynamicPathUnit(pUnit), eSkill, nSkillLvl);
     return 1;
 }
 
 BOOL __fastcall Skills_CltDoFunc_EMon_CastAttackMissileB(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
       return 0;
     }
 
@@ -365,8 +365,8 @@ BOOL __fastcall Skills_CltDoFunc_EMon_CastAttackMissileB(D2UnitStrc * pUnit, eD2
     }
 
     int32_t nForcedLvl1 = 1;
-    int32_t nY = Units::GetYPosFromDynamicPathUnit(pUnit);
-    D2UnitStrc* pMissileUnit = UNIT::Missile::CastAttack(pUnit, nMissileId, Units::GetXPosFromDynamicPathUnit(pUnit), nY, eSkill, nForcedLvl1);
+
+    D2UnitStrc* pMissileUnit = UNIT::Missile::CastAttack(pUnit, nMissileId, Units::GetXPosFromDynamicPathUnit(pUnit), Units::GetYPosFromDynamicPathUnit(pUnit), eSkill, nForcedLvl1);
     return (uint32_t)(pMissileUnit != 0);
 }
 
@@ -909,8 +909,8 @@ BOOL __fastcall Skills_CltDoFunc_EMon_VineAttack(D2UnitStrc * pUnit, eD2Skills e
         pNullGameArg = 0;
         fpSkillValidCheck = (fpMissileSrvDoFuncData)SKILLSCLT_CheckSkillIsValid;
         nHitCount = Units::GetYPosFromDynamicPathUnit(pUnit);
-        nTargetX = Units::GetXPosFromDynamicPathUnit(pUnit);
-        pHitUnit = D2Common::Collision::CallCollisionFunction(D2Common::Units::UNITS_GetRoom(pUnit), nTargetX, nHitCount, fpSkillValidCheck, pNullGameArg, nTargetY);
+
+        pHitUnit = D2Common::Collision::CallCollisionFunction(D2Common::Units::UNITS_GetRoom(pUnit), Units::GetXPosFromDynamicPathUnit(pUnit), nHitCount, fpSkillValidCheck, pNullGameArg, nTargetY);
         if (pHitUnit) {
           UNIT::Missile::MISSILE_ClientHitExplode(pHitUnit, nullptr, 0);
         }

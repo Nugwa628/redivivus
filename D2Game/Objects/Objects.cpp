@@ -540,7 +540,7 @@ static int32_t __stdcall OBJECT_SelectRandomShrineType(::SGAMEDATA * pGame, uint
       D2SeedStrc* pObjSeed;
       nRandIdx = pShrinesRng->nShrinesCount[byShrineCategory];
       pObjSeed = ObjectsRgn::GetObjectControlSeed(pGame);
-      if ((int)nRandIdx < 1) {
+      if ((int)nRandIdx <= 0) {
         nRandIdx = 0;
       } else if (!(nRandIdx & nRandIdx - 1)) {
         DVar1 = D2_SEED_NEXT(*pObjSeed);
@@ -634,9 +634,7 @@ void __fastcall Objects_InitFn01(D2ObjectInitFnArg * pInitArg) {
     if (nShrineId) {
       if (nShrineId == 1) {
         *(uint8_t*)(char*)&nShrineTypeArg = 2;
-      } else if (nShrineId == 2) {
-        *(uint8_t*)(char*)&nShrineTypeArg = 3;
-      } else {
+      } else if (nShrineId != 2) {
         pRandSeed = pInitArg->pSeed;
         seedRolled = D2_SEED_NEXT(*pRandSeed);
         *pRandSeed = seedRolled;
@@ -645,6 +643,8 @@ void __fastcall Objects_InitFn01(D2ObjectInitFnArg * pInitArg) {
         } else {
           *(uint8_t*)(char*)&nShrineTypeArg = 4;
         }
+      } else {
+        *(uint8_t*)(char*)&nShrineTypeArg = 3;
       }
       nShrineId = OBJECT_SelectRandomShrineType(pInitArg->pGame, eLevelId, (uint8_t)nShrineTypeArg, pInitArg->pRoom);
     } else {
@@ -2821,7 +2821,7 @@ void __fastcall Objects_PopulateFn2(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
       bDensityThreshold = '\x01';
       nMaxRetries = 0x1e;
     } else {
-      if ((uint32_t)nChancePercent < sNewSeed.nSeedLow % 100) {
+      if (sNewSeed.nSeedLow % 100 > (uint32_t)nChancePercent) {
         return;
       }
     }
@@ -2860,7 +2860,7 @@ void __fastcall Objects_PopulateFn2(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
         ObjectsRgn::OBJECT_IncrementLevelSpawnCount(pGameLocal, eLevelId);
         record_spawn_point:
         eUnitType = pUnit->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
           nY = pUnit->pPath.pStaticPath->nPosY;
         } else if (pUnit->pPath.pDynamicPath) {
           nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
@@ -2869,7 +2869,7 @@ void __fastcall Objects_PopulateFn2(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
         }
 
         eUnitType = pUnit->eUnitType;
-        if (eUnitType != UNIT_OBJECT && ((int)eUnitType < 4 || 5 < (int)eUnitType)) {
+        if (eUnitType != UNIT_OBJECT && ((int)eUnitType <= 3 || 5 < (int)eUnitType)) {
           if (pUnit->pPath.pDynamicPath) {
             nXPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
             ObjectsRgn::AddPointsToLevelRngPoints1(pGameSave, eLevelId, nXPos, nY);

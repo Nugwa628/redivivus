@@ -946,13 +946,13 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
       }
 
       nAccumX += nStepX;
-      if (0xffff < nAccumX || nAccumX < -0xffff) {
+      if (0x10000 <= nAccumX || nAccumX <= -0x10000) {
         nAccumY = (int)nAccumX / 65536;
         nStartY = nY + nAccumY;
         nAccumX += nAccumY * -0x10000;
         nY = nStartY;
       }
-      if (nDistance <= nStepCount) {
+      if (nStepCount >= nDistance) {
         return;
       }
 

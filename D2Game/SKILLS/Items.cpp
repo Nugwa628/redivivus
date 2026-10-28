@@ -402,9 +402,9 @@ uint32_t __stdcall ITEMMOD_RollMagicAffix(D2UnitStrc * pUnit, int32_t bIsSuffix,
     nItemLvl = D2Common::ITEMS::Items::ITEM_GetItemData_nItemLevel(pUnit);
     uint32_t pCurAffix;
     pCurAffix = nItemLvl + 2;
-    if (!((int)pCurAffix < 2)) {
+    if (!((int)pCurAffix <= 1)) {
       nParam4 = pCurAffix;
-      if (0x62 < (int)pCurAffix) {
+      if (0x63 <= (int)pCurAffix) {
         nParam4 = 99;
       }
     } else {
@@ -1116,7 +1116,7 @@ BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2UnitStrc *
     do {
       seedState = D2_SEED_NEXT(*pSeed);
       *pSeed = seedState;
-      if (nSuffixCount == 3 || nPrefixCount != 3 && (uint64_t)d2_bits_of(seedState) & 1) {
+      if (nSuffixCount == 3 || nPrefixCount != 3 && seedState.nSeedLow & 1) {
         nDupRetries = 0;
         do {
           sVar4 = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);

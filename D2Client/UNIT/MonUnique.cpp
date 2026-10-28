@@ -663,8 +663,8 @@ void __fastcall MONUNIQUE_SpawnDeathMissile(D2UnitStrc * pUnit, int32_t eModifie
 
     int32_t nTotalFrames = (int32_t)pUnit;
     if (eModifier == 0x2a && (!pUnit || pUnit->eAnimMode.ePlayerMode == Death)) {
-      nVelocity = D2Common::DATATBLS::MissileTbls::MISSILETBLS_CalculateVelocity(0x5a, 0);
-      SKILLS::Skills::SKILL_SpawnMissilesAtTarget(pUnit, pUnit, MISSILE_Nova, ~MISSILE_Arrow, SKILL_Attack, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0), nVelocity);
+
+      SKILLS::Skills::SKILL_SpawnMissilesAtTarget(pUnit, pUnit, MISSILE_Nova, ~MISSILE_Arrow, SKILL_Attack, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0), D2Common::DATATBLS::MissileTbls::MISSILETBLS_CalculateVelocity(0x5a, 0));
     }
 
     D2Common::Units::GetShiftedFrameMetrics(pUnit, &bApply, &nTotalFrames);
@@ -675,16 +675,16 @@ void __fastcall MONUNIQUE_SpawnDeathMissile(D2UnitStrc * pUnit, int32_t eModifie
       int32_t nX;
       nLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
       eSkill = SKILL_Attack;
-      nVelocity = Units::GetYPosFromDynamicPathUnit(pUnit);
-      Missile::MakeMissileAtXY(pUnit, MISSILE_Corpsepoisoncloud, Units::GetXPosFromDynamicPathUnit(pUnit), nVelocity, eSkill, nLevel);
+
+      Missile::MakeMissileAtXY(pUnit, MISSILE_Corpsepoisoncloud, Units::GetXPosFromDynamicPathUnit(pUnit), Units::GetYPosFromDynamicPathUnit(pUnit), eSkill, nLevel);
       return;
     }
     if (eModifier != 0x12) {
       return;
     }
 
-    nVelocity = D2Common::DATATBLS::MissileTbls::MISSILETBLS_CalculateVelocity(0x77, 0);
-    SKILLS::Skills::SKILL_SpawnMissilesAtTarget(pUnit, pUnit, MISSILE_Coldunique, ~MISSILE_Arrow, SKILL_Attack, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0), nVelocity);
+
+    SKILLS::Skills::SKILL_SpawnMissilesAtTarget(pUnit, pUnit, MISSILE_Coldunique, ~MISSILE_Arrow, SKILL_Attack, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0), D2Common::DATATBLS::MissileTbls::MISSILETBLS_CalculateVelocity(0x77, 0));
 }
 
 void __fastcall MONUNIQUE_DurielDeathAndSpawn(D2UnitStrc * pUnit, int32_t nUMod, int32_t nParam2) {

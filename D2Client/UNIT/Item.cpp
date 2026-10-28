@@ -1637,13 +1637,7 @@ void __fastcall HandleItemPutInContainer(uint8_t * pbParam) {
     if (pItem) {
       uint8_t ePage;
       nFlagResult = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(sItemDetails.flags, ITEMFLAG_RELOAD);
-      if (!nFlagResult) {
-        ePage = sItemDetails.nInvPage;
-        ITEM_SetAnimModeAndPlace(pItem, nullptr, (uint32_t)sItemDetails.x, (uint32_t)sItemDetails.y, (uint32_t)sItemDetails.nAnimMode, 0);
-        D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, ePage);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, sItemDetails.flags, 1);
-      } else {
+      if (nFlagResult) {
         pBelongsResult = D2Common::INVENTORY::Inventory::ItemBelongsToInventoryOfPlayer(pPlayerUnit_lcl->pInventory, pItem);
         if (pBelongsResult) {
           eInvPage = D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pItem);
@@ -1671,6 +1665,12 @@ void __fastcall HandleItemPutInContainer(uint8_t * pbParam) {
         if (!pItem) {
           return;
         }
+      } else {
+        ePage = sItemDetails.nInvPage;
+        ITEM_SetAnimModeAndPlace(pItem, nullptr, (uint32_t)sItemDetails.x, (uint32_t)sItemDetails.y, (uint32_t)sItemDetails.nAnimMode, 0);
+        D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, ePage);
+        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
+        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, sItemDetails.flags, 1);
       }
     } else {
       pItem = ITEM_CreateItemFromGroundPacket(0, 0, 1, pbParam, &sItemDetails);

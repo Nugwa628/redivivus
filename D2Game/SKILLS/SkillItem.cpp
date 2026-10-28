@@ -2094,8 +2094,8 @@ BOOL __fastcall ITEMEVENT_CastOnAttack(::SGAMEDATA * pGame, uint32_t nUnitEvent,
         return 1;
       }
 
-      nCastY = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-      Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, eProcSkill, eSkillLevel, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), nCastY, nProcChance);
+
+      Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, eProcSkill, eSkillLevel, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath), nProcChance);
     } else if (pTarget) {
       Monster::AI::SKILL_CastOnTargetUnit(pTarget, eProcSkill, eSkillLevel, pTarget, 0);
       return 1;
@@ -2134,8 +2134,8 @@ BOOL __fastcall ITEMEVENT_CastOnStriking(::SGAMEDATA * pGame, uint32_t nUnitEven
     nProcChance = 0;
     if (!pTarget) {
       uint32_t nCastX;
-      nRandRoll = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-      Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, eProcSkill, eSkillLevel, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), nRandRoll, nProcChance);
+
+      Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, eProcSkill, eSkillLevel, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath), nProcChance);
       return 1;
     }
 
@@ -2165,8 +2165,8 @@ BOOL __fastcall ITEMEVENT_CastOnDeath(::SGAMEDATA * pGame, uint32_t nUnitEvent, 
     nProcChance = 0;
     if (!pTarget) {
       uint32_t nCastY;
-      nCastY = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-      Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, eProcSkill, eSkillLevel, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), nCastY, nProcChance);
+
+      Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, eProcSkill, eSkillLevel, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath), nProcChance);
       return 1;
     }
 

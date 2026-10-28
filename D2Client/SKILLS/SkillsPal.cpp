@@ -641,8 +641,8 @@ BOOL __fastcall Skills_CltDoFunc_Pal_HolyBolt_Melee(D2UnitStrc * pUnit, eD2Skill
       pUnit->nFrameCount = (nFrameRate - ((int)pUnit->nSeqFrame >> 8)) * 0x100;
       if (pCurrentTarget || (pCurrentTarget = Skills::SKILL_FindClosestTargetWithStats(pUnit, 0, 0, 3, 3, -1, nullptr) , pCurrentTarget != 0)) {
         pSavedTarget = 0;
-        nFrameRate = Units::GetYPosFromDynamicPathUnit(pCurrentTarget);
-        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pCurrentTarget), nFrameRate, pSavedTarget);
+
+        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pCurrentTarget), Units::GetYPosFromDynamicPathUnit(pCurrentTarget), pSavedTarget);
         return 1;
       }
     } else {

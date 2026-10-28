@@ -2224,8 +2224,8 @@ void __fastcall ITEMMODE_DeleteItemFromInventory(::SGAMEDATA * pGame, D2UnitStrc
           iVar1 = D2Common::Units::GetInventoryPage(pUnit, nItem, pGame->bExpansion);
           eDestPage = (eInventoryPage)iVar1;
           dwReserved = 0;
-          iVar1 = D2Client::Units::GetYPosFromDynamicPathUnit(pItemSaved);
-          D2Common::INVENTORY::Inventory::UnusedDebug(".\\ITEMS\\ItemMode.cpp", 0xf7b, pInventory, D2Client::Units::GetXPosFromDynamicPathUnit(pItemSaved), iVar1, eDestPage, dwReserved, nItem);
+
+          D2Common::INVENTORY::Inventory::UnusedDebug(".\\ITEMS\\ItemMode.cpp", 0xf7b, pInventory, D2Client::Units::GetXPosFromDynamicPathUnit(pItemSaved), D2Client::Units::GetYPosFromDynamicPathUnit(pItemSaved), eDestPage, dwReserved, nItem);
           D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItemSaved, INVPAGE_None);
           if (bSendRemovePacket) {
             UNIT::SUnitMsg::SendRemoveObject(pItemSaved, UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\ITEMS\\ItemMode.cpp", 0xf7e));
@@ -3396,7 +3396,7 @@ D2UnitStrc * __fastcall ITEMMODE_ValidateSocketedItems(::SGAMEDATA * pGameStrc, 
       }
 
       nBookMaxQty = D2Common::ITEMS::Items::ITEM_GetMaxStack(pBookItem);
-    } while (nBookMaxQty <= nBookQty);
+    } while (nBookQty >= nBookMaxQty);
 
     *pnBrokenCount = nBookMaxQty - nBookQty;
     return pBookItem;
@@ -4143,8 +4143,8 @@ BOOL __fastcall SERVER_TakeItemToCursor(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
               }
 
               nReserved = 0;
-              iVar1 = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
-              D2Common::INVENTORY::Inventory::UnusedDebug(".\\ITEMS\\ItemMode.cpp", 0x965, pTargetInventory, D2Client::Units::GetXPosFromDynamicPathUnit(pItem), iVar1, eDestPage, nReserved, nInventory);
+
+              D2Common::INVENTORY::Inventory::UnusedDebug(".\\ITEMS\\ItemMode.cpp", 0x965, pTargetInventory, D2Client::Units::GetXPosFromDynamicPathUnit(pItem), D2Client::Units::GetYPosFromDynamicPathUnit(pItem), eDestPage, nReserved, nInventory);
               D2Common::ITEMS::Items::ITEM_SetItemData_ePreviousPage(pItem, eSrcPage);
               D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, INVPAGE_None);
               if (bCopyInv) {

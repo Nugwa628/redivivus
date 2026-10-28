@@ -51,7 +51,7 @@ int8_t AddAttachment(::Report * pThis, char * szPath, int8_t bCopyToReportDir) {
     local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     ::Report* pFileReg;
     pFileReg = pThis;
-    if (0xf < pThis->nAttachmentCount) {
+    if (0x10 <= pThis->nAttachmentCount) {
       return '\0';
     }
     if (bCopyToReportDir == '\0') {

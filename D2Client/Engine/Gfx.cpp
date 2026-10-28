@@ -2532,8 +2532,8 @@ BOOL __fastcall GFX_DrawUnitSelectionShape(D2UnitStrc * pUnit) {
       pScreenYOut = &__frame0.nScreenY;
       pScreenXOut = &__frame0.nScreenX;
       nWorldOffsetVal = D2Common::Units::GetPrecisionY(pUnit);
-      nParticleXY = D2Common::Units::GetPrecisionX(pUnit);
-      D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(nParticleXY, nWorldOffsetVal, nCoord, pScreenXOut, pScreenYOut);
+
+      D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(D2Common::Units::GetPrecisionX(pUnit), nWorldOffsetVal, nCoord, pScreenXOut, pScreenYOut);
       nCallResult = UI::Path::DRAW_GetTypeOfBorder();
       if (nCallResult == 1) {
         nParticleOffset = -((int)ScreenSizeX / 4);

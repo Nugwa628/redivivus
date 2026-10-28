@@ -163,8 +163,8 @@ BOOL __fastcall Skills_SrvDoFunc_064_Sacrifice(::SGAMEDATA * pGame, D2UnitStrc *
     }
 
     n100Percent = 100;
-    nPercent = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxtBase[eSkill].calc[1], eSkill, nSkillLvl);
-    sDamage.dwPhysDamage = D2Client::Stats::D2ApplyPercent(nDmgFromHit, nPercent, n100Percent);
+
+    sDamage.dwPhysDamage = D2Client::Stats::D2ApplyPercent(nDmgFromHit, D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxtBase[eSkill].calc[1], eSkill, nSkillLvl), n100Percent);
     sDamage.dwDmgTotal = sDamage.dwPhysDamage;
     UNIT::SUnitDmg::DAMAGE_ApplyDamageToUnit(pGame, pUnit, pUnit, 0, &sDamage);
     UNIT::SUnitDmg::SERVER_GetHitCalculation(pGame, pUnit, pUnit, &sDamage);

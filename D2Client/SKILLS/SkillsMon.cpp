@@ -1096,8 +1096,8 @@ BOOL __fastcall Skills_CltDoFunc_Mon_DirectionalBeam(D2UnitStrc * pUnit, eD2Skil
     if (pTarget) {
       int32_t nTargetX;
       bFaceTarget = 0;
-      nSrcY = Units::GetYPosFromDynamicPathUnit(pTarget);
-      D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pTarget), nSrcY, bFaceTarget);
+
+      D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pTarget), Units::GetYPosFromDynamicPathUnit(pTarget), bFaceTarget);
       nSrcY = Units::GetXPosFromDynamicPathUnit(pTarget);
       nTargetX = Units::GetXPosFromDynamicPathUnit(pUnit);
       sSkillArg.nUnitX = nSrcY - nTargetX;

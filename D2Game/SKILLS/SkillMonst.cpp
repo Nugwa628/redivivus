@@ -606,8 +606,8 @@ BOOL __fastcall Skills_SrvDoFunc_089_ChargeLeapAttack(::SGAMEDATA * pGame, D2Uni
     GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_ENDANIM, 0);
     if (pUnit->nActionFrame == 2) {
       pUnit->nActionFrame = 0;
-      nTargetGuid = D2Common::Skills::SKILL_GetParam4(pSkill);
-      pTargetUnit = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Skills::SKILL_GetParam3(pSkill), nTargetGuid);
+
+      pTargetUnit = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Skills::SKILL_GetParam3(pSkill), D2Common::Skills::SKILL_GetParam4(pSkill));
       if (pTargetUnit) {
         UNIT::SUnitDmg::DAMAGE_ProcessCombatQueueEntry(pGame, pUnit, pTargetUnit, 0);
         return 1;
@@ -637,8 +637,8 @@ BOOL __fastcall Skills_SrvDoFunc_089_ChargeLeapAttack(::SGAMEDATA * pGame, D2Uni
         D2Common::Skills::SKILL_SetFlags(pSkill, 0);
         UNIT::SUnit::SetUninterruptableState(pUnit, 0);
         nLandY = 0x100;
-        nType = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);
-        D2Common::Collision::RemoveCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nMonBaseId, nLandX, nType, nLandY);
+
+        D2Common::Collision::RemoveCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nMonBaseId, nLandX, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), nLandY);
         D2Common::PATH::DynamicPath::PATH_ChangeCollisionType(pDynamicPath, 0x100);
         D2Common::PATH::DynamicPath::PATH_SetCollisionPattern(pDynamicPath, 0x3c01);
         D2Common::PATH::DynamicPath::PATH_SetPathType(pDynamicPath, 0x65);
@@ -648,8 +648,8 @@ BOOL __fastcall Skills_SrvDoFunc_089_ChargeLeapAttack(::SGAMEDATA * pGame, D2Uni
           return 1;
         }
 
-        nTargetGuid = D2Common::Skills::SKILL_GetParam4(pSkill);
-        pTargetUnit = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Skills::SKILL_GetParam3(pSkill), nTargetGuid);
+
+        pTargetUnit = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Skills::SKILL_GetParam3(pSkill), D2Common::Skills::SKILL_GetParam4(pSkill));
         if (!pTargetUnit) {
           return 1;
         }
@@ -1640,8 +1640,8 @@ BOOL __fastcall Skills_SrvDoFunc_101_FireDirectionalMissile(::SGAMEDATA * pGame,
     if (pUnit_00) {
       int32_t nTargetX;
       nFaceDir = 0;
-      nSrcOrDelta = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00);
-      D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), nSrcOrDelta, nFaceDir);
+
+      D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00), nFaceDir);
       nSrcOrDelta = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00);
       nTargetX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
       sSkillArg.nUnitX = nSrcOrDelta - nTargetX;
