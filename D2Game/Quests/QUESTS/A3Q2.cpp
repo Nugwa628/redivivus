@@ -67,8 +67,8 @@ namespace D2Game::Quests::QUESTS::A3Q2 {
 
 // Q19_PlayerNotifyKhalimsWill (Khalim's Will, QUEST_KhalimsWill=A3Q5; file mislabeled "a3q2"). Broadcast callback run per-player when quest enters RewardAwaits. If this player hasn't Completed it and didn't finish it in a previous game, pushes quest-update event 0x10 (Khalim's Will turn-in) to their client. Reads quest state only; no transitions.
 BOOL __fastcall Q19_PlayerNotifyKhalimsWill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_KhalimsWill, QUESTSTATE_Completed);
     if (bQuestState) {
       return 0;
@@ -323,8 +323,8 @@ void __fastcall Q19_Callback04_ItemPickedUp(D2QuestDataStrc * pQuestData, D2Ques
 // Q19_Callback_13 (Khalim's Will). Quest-load/refresh handler. If not Completed: if Step0x07 not set but Step0x02 set, sets in-memory StateFlag=2/prev=7 (mid-quest resume). Also resumes StateFlag=2 when the quest GUID player-bitmask is non-empty. Reads QuestRecord; mutates only in-memory StateFlag.
 void __fastcall Q19_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_KhalimsWill, QUESTSTATE_Completed);
     if (bQuestState) {
       return;
@@ -363,7 +363,7 @@ BOOL __fastcall OBJOP_UseStairDirect(D2ObjectOperateFnArg * pOperation) {
 }
 
 // Q19_IsKhalimsWillNotComplete (Khalim's Will). Predicate: returns true when the in-memory A3Q2 quest data exists, is active, and its GUID-tracked completion marker (aPlayerGUID[2]) != 2 (i.e. relic-pedestal sequence not finished). Reads quest data struct only.
-bool __fastcall Q19_IsKhalimsWillNotComplete(::SGAMEDATA * pGame) {
+BOOL __fastcall Q19_IsKhalimsWillNotComplete(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_KhalimsWill);
     if (!(pQuestData && pQuestData->bIsNotIntroduction)) {
       return false;
@@ -465,8 +465,8 @@ void __fastcall Objects_InitFn42(D2ObjectInitFnArg * pInitArg) {
 
 // Q19_OnPlayerCubeKhalimsWill (Khalim's Will). Callback when a player has the assembled Khalim's Will (transmuting relics in the cube). Reads Completed (and RewardAwaits when not complete) and updates the quest GUID per-player counters tracking who has assembled the Will. State reads only; no SetQuestState.
 void __fastcall Q19_OnPlayerCubeKhalimsWill(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar3 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_KhalimsWill, QUESTSTATE_Completed);
     if (!BVar3) {
       /* GetQuestState(KhalimsWill, RewardAwaits): turn-in pending state read (result
@@ -503,8 +503,7 @@ BOOL __fastcall Q19_CheckPlayerHasKhalimsEye(::SGAMEDATA * pGame, D2UnitStrc * p
       return 0;
     }
 
-    int32_t* piVar1 = &pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount;
-    (*piVar1)++;
+    pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount++;
     return 0;
 }
 
@@ -525,8 +524,7 @@ BOOL __fastcall Q19_CheckPlayerHasKhalimsBrain(::SGAMEDATA * pGame, D2UnitStrc *
       return 0;
     }
 
-    int32_t* piVar1 = &pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount;
-    (*piVar1)++;
+    pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount++;
     return 0;
 }
 
@@ -547,8 +545,7 @@ BOOL __fastcall Q19_CheckPlayerHasKhalimsHeart(::SGAMEDATA * pGame, D2UnitStrc *
       return 0;
     }
 
-    int32_t* piVar1 = &pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount;
-    (*piVar1)++;
+    pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount++;
     return 0;
 }
 

@@ -406,10 +406,10 @@ static void __stdcall CLIENT_AddUnitToProximitySortedList(int32_t nX, D2UnitStrc
     }
     if (false || false) {
       nDeltaX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nDeltaX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nDeltaX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nDeltaX = 0;
     }
 
     nDeltaX = nX - nDeltaX;
@@ -420,10 +420,10 @@ static void __stdcall CLIENT_AddUnitToProximitySortedList(int32_t nX, D2UnitStrc
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDeltaY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nDeltaY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nDeltaY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nDeltaY = 0;
     }
 
     nDeltaY = nY - nDeltaY;
@@ -2346,10 +2346,10 @@ void __fastcall UnusedClientJoinGame2(::SGAMEDATA * pGame, D2ClientStrc * pClien
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       *(D2DrlgActStrc**)&bActNo = (D2DrlgActStrc*)pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      *(D2DrlgActStrc**)&bActNo = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       *(D2DrlgActStrc**)&bActNo = (D2DrlgActStrc*)D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      *(D2DrlgActStrc**)&bActNo = 0;
     }
 
     eUnitType = pUnit->eUnitType;

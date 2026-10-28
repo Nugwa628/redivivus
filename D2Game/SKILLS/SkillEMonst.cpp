@@ -1342,11 +1342,8 @@ BOOL __fastcall Skills_SrvDoFunc_140_BaalTentacle(::SGAMEDATA * pGame, D2UnitStr
 }
 
 BOOL __fastcall fpBaalWaveFunction(::SGAMEDATA * pGame, D2UnitStrc * pAttacker, D2UnitStrc * pUnit, int32_t nSkillLvl, uint32_t dwParam) {
-    bool _bResult;
-    bool bResult;
     D2Common::Units::SetTargetUnitForDynamicUnit(pAttacker, pUnit);
-    _bResult = SkillNec::SKILLNEC_CorpseExplosionDispatch(pGame, pAttacker, SKILL_BaalCorpseExplode, nSkillLvl);
-    return _bResult;
+    return SkillNec::SKILLNEC_CorpseExplosionDispatch(pGame, pAttacker, SKILL_BaalCorpseExplode, nSkillLvl);
 }
 
 // SrvDoFunc 141: initiates Baal's corpse explosion wave. Builds a D2BaalWaveParamStrc from the caster's position, sets skill to SKILL_BaalCorpseExplode, computes wave distance from Param[4]+Param[5]*(lvl-1), assigns fpBaalWaveFunction callback, then calls SKILLS_ForEachUnitBaalWave to propagate the wave.
@@ -1417,10 +1414,10 @@ D2UnitStrc * __fastcall SKILLEMONST_FindNearbyCorpse(::SGAMEDATA * pGame, D2Unit
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       sUnitFindArg.nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      sUnitFindArg.nY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       sUnitFindArg.nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      sUnitFindArg.nY = 0;
     }
 
     memset(&sUnitFindArg, 0, 0x38);

@@ -140,8 +140,8 @@ void __fastcall Q12_Callback10_PlayerLeavesGame(D2QuestDataStrc * pQuestData, D2
 
 // A2Q4 - NotifyArcaneComplete. Per-player journal-update callback used as the broadcast fn for QUEST_SetStateAndBroadcast. Sends a quest-update packet (subcmd 0xb) to the player ONLY when the Sanctuary record is in a "completed-ish" state: (Completed(0) OR FinishedInPreviousGame(0xf)) AND NOT JustCompleted(0xd) AND NOT CannotCompleteQuestInGame(0xe). Otherwise no-op.
 BOOL __fastcall Q12_NotifyArcaneComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Completed);
     if (BVar2 || (BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_FinishedInPreviousGame) , BVar2 != 0)) {
       BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_JustCompleted);
@@ -159,8 +159,8 @@ BOOL __fastcall Q12_NotifyArcaneComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit
 
 // A2Q4 - UpdateQuestRecord. Per-player iterator callback: mirrors the in-memory quest stateFlag into the persisted quest-record step bits. Skips if Completed(0) or RewardAwaits(1) already set. Maps nStateFlag: 2->Step0x02, 3->Step0x03; 4 with prev 2/3 -> Step0x04, prev 4 -> Step0x05. Drives the journal progression as the player talks to NPCs / opens the Cellar.
 BOOL __fastcall Q12_UpdateQuestRecord(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -277,8 +277,8 @@ void __fastcall Q12_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 
     D2QuestDataA2Q4Strc* pA2Q4Specific = pQuestData->pQuestSpecificData.pA2Q4;
     ::SGAMEDATA* pSVar1 = pQuestArg->pGame;
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pQuestArg->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pSVar1->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArg->pPlayer)->pQuestRecord[pSVar1->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if ((short int)nNPCNo == 0x14b) {
       if ((nMessageIndex & 0xffff) == 0xba) {
         /* SetQuestState Step0x07 - Drognan first hint about Summoner (msg 0xba) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Step0x07);
@@ -430,8 +430,8 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
 // A2Q4 - SetCannotComplete. Per-player iterator callback (nParam = unit, byte[0x6d]=difficulty). If the Sanctuary is neither Completed(0) nor RewardAwaits(1), sets CannotCompleteQuestInGame(0xe) on that player's record - marks the quest unreachable this game (e.g. portal placed but reward not earned by this player).
 BOOL __fastcall Q12_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -448,8 +448,8 @@ BOOL __fastcall Q12_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, v
 
 // A2Q4 - CheckArcaneAndReward. Per-player iterator callback: the actual quest-COMPLETE grant. If not already Completed(0)/RewardAwaits(1) and the player is standing in LEVEL_ArcaneSanctuary, sets the full completion bit set on the record: JustCompleted(0xd), RewardAwaits(1), Completed(0), clears all step bits, then re-sets Step0x08+Step0x07; finally propagates completion to every party member via Q12_SetArcaneCompleteOnPartyMember.
 BOOL __fastcall Q12_CheckArcaneAndReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Completed);
     if (BVar1 == 1) {
       return 0;
@@ -476,8 +476,8 @@ BOOL __fastcall Q12_CheckArcaneAndReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     /* UnsetQuestStepStates (0x65c3e0) - clear all step bits before final flags */ D2Common::QuestRecord::UnsetQuestStepStates(pBitBuffer, QUEST_TheArcaneSanctuary);
     /* SetQuestState Step0x08 - re-set journal sub-state after step clear */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Step0x08);
     /* SetQuestState Step0x07 - re-set journal sub-state after step clear */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Step0x07);
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -711,8 +711,8 @@ void __fastcall Objects_InitFn30(D2ObjectInitFnArg * pInitArg) {
 
 // A2Q4 (A2Q6/Duriel-related) - Q14_CheckDurielProximity. Per-player iterator: if The Seven Tombs (Duriel) is not Completed(0)/RewardAwaits(1) and the player is within ~31 units of the tracked Duriel-quest coords, sets the proximity flag and records the player GUID. Reads A2Q4 quest data block (shared union) for the coords. Returns 1 on trigger.
 BOOL __fastcall Q14_CheckDurielProximity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -784,8 +784,8 @@ BOOL __fastcall Q12_GetSummonerCoords(::SGAMEDATA * pGame, D2CoordStrc * pCoord)
 
 // A2Q4 - CheckJustCompleted. Per-player iterator: reads (queries, does not write) the JustCompleted(0xd) bit of the Sanctuary record for each player. Side-effect-free probe used during the staff-altar operate flow alongside CheckArcaneAndReward/SetCannotComplete.
 BOOL __fastcall Q12_CheckJustCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheArcaneSanctuary, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheArcaneSanctuary, QUESTSTATE_JustCompleted);
     return 0;
 }
 

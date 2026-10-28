@@ -115,8 +115,8 @@ bool __fastcall Q10_IsRadamentCompleted(::SGAMEDATA * pGame) {
 // FinishedInPreviousGame, OR when JustCompleted/CannotCompleteQuestInGame is set;
 // returns 0 once fully closed out. Drives whether to push a quest-log update to client.
 static BOOL __stdcall Q10_CheckHoradricStaffState(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
     if (!BVar2) {
       BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_FinishedInPreviousGame);
@@ -162,8 +162,8 @@ uint8_t __stdcall Q10_CheckQuestItemsForDialog(D2UnitStrc * pUnit, D2QuestDataSt
     BOOL bQuestStepSet;
     *pOutput = 0xff;
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2UnitStrc* pFoundItem = ITEMS::Items::Drop::HasQuestItem(pQuestData->pGame, pUnit, 0x20747368);
     if (!pFoundItem) {
       pFoundItem = ITEMS::Items::Drop::HasQuestItem(pQuestData->pGame, pUnit, 0x20786f62);
@@ -250,8 +250,8 @@ bool __fastcall Q10_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 // not past Step0x03, bumps a counter in A2Q2 quest-specific data so the portal-drop
 // loop knows how many scrolls to spawn. No QuestRecord writes.
 BOOL __fastcall Q10_OnScrollPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -267,8 +267,7 @@ BOOL __fastcall Q10_OnScrollPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void
       return 0;
     }
 
-    int32_t* ppScrollCount = &pQuestData->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount;
-    (*ppScrollCount)++;
+    pQuestData->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount++;
     return 0;
 }
 
@@ -276,8 +275,8 @@ BOOL __fastcall Q10_OnScrollPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void
 // ('msf ') drop path. For each player not yet Completed who holds neither 'msf ' nor
 // 'tsh ' (Staff of Kings), bumps the A2Q2 drop counter. No QuestRecord writes.
 BOOL __fastcall Q10_OnStaffOrViperPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pQuestData->pQuestRecord[pGame->nDifficulty], QUEST_TheHoradricStaff, QUESTSTATE_Completed);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
     if (bCompleted) {
       return 0;
     }
@@ -297,8 +296,7 @@ BOOL __fastcall Q10_OnStaffOrViperPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       return 0;
     }
 
-    int32_t* ppDropCounter = &pQuestItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount;
-    (*ppDropCounter)++;
+    pQuestItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount++;
     return 0;
 }
 
@@ -316,8 +314,7 @@ BOOL __fastcall Q10_OnHoradricCubePickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       return 0;
     }
 
-    int32_t* ppCubeCount = &pCubeItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount;
-    (*ppCubeCount)++;
+    pCubeItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount++;
     return 0;
 }
 
@@ -386,8 +383,8 @@ void __fastcall Q10_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     uint8_t byItemDialogMsg;
     uint32_t nGossipMsgIndex;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_JustCompleted);
     BOOL bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
     if (!pQuestArgs->pTarget) {
@@ -471,8 +468,8 @@ void __fastcall Q10_Callback04_ItemPickedUp(D2QuestDataStrc * pQuestData, D2Ques
     uint32_t nItemClassId = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2ItemsTxt* pItemTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    BOOL bStep0x03Set = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TheHoradricStaff, QUESTSTATE_Step0x03);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    BOOL bStep0x03Set = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheHoradricStaff, QUESTSTATE_Step0x03);
     pQuestData->nQuestPacketFlags = '\0';
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pQuestArgs->pPlayer);
     eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
@@ -531,8 +528,8 @@ void __fastcall Q10_Callback05_ItemDropped(D2QuestDataStrc * pQuestData, D2Quest
 
     D2ItemsTxt* pItemsTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if (pItemsTxt->dwCode == 0x20706976) {
       /* GetQuestState Step0x04 (viper dropped: is the "told" bit set?) */ bQuestStateFlag = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Step0x04);
       if (bQuestStateFlag) {
@@ -772,8 +769,8 @@ void __fastcall Q10_OnStaffAssembledViaCube(::SGAMEDATA * pGame, D2UnitStrc * pU
       pA2Q2Data->nAssembledByPlayerGUID = nAssemblerGUID;
     }
 
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pQuestData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     QUEST_SendQuestInfoToUnit(pGame, pUnit);
     /* SetQuestState Step0x11 (Horadric Staff assembled in cube) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Step0x11);
     A2Q4::Q12_OnHoradricStaffAssembled(pGame);

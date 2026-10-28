@@ -258,8 +258,7 @@ static void __stdcall STATLIST_TrackChangedStat(int32_t nShiftedStat, D2StatList
     }
 
     pStatInfo->pChangedStatIds[nInsertPos] = nShiftedStat;
-    short int* pwCount = &pStatEx->sChangedStats.wCount;
-    (*pwCount)++;
+    pStatEx->sChangedStats.wCount++;
 }
 
 // Binary-searches the base stat array of pStatList for a packed stat key (wStatIndex:wSubIndex = nParam). If found and the ItemStatCost entry has FMIN flag set, the stat list is owned by a player/monster unit, and the raw value is below the minaccr threshold, returns minaccr left-shifted by valshift instead. Otherwise returns the raw stat value, or 0 if not found. Uses a custom calling convention (pStatList in EBX, nParam in EDI).
