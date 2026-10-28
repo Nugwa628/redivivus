@@ -551,20 +551,20 @@ BOOL __fastcall Skills_SrvDoFunc_008_MultipleShot(::SGAMEDATA * pGame, D2UnitStr
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDirX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nDirX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nDirX = 0;
+    } else {
+      nDirX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     nDirX = nTargetX - nDirX;
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDirY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nDirY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nDirY = 0;
+    } else {
+      nDirY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
     }
 
     nDirY = nTargetY - nDirY;
@@ -752,37 +752,37 @@ BOOL __fastcall Skills_SrvDoFunc_011_ChargedStrike(::SGAMEDATA * pGame, D2UnitSt
     eD2UnitType eUnitType = pTarget->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nX = pTarget->pPath.pStaticPath->nPosX;
-    } else if (pTarget->pPath.pDynamicPath) {
-      nX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
-    } else {
+    } else if (!pTarget->pPath.pDynamicPath) {
       nX = 0;
+    } else {
+      nX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
     }
 
     eUnitType = pTarget->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nY = pTarget->pPath.pStaticPath->nPosY;
-    } else if (pTarget->pPath.pDynamicPath) {
-      nY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
-    } else {
+    } else if (!pTarget->pPath.pDynamicPath) {
       nY = 0;
+    } else {
+      nY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
     }
 
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nSrcX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nSrcX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nSrcX = 0;
+    } else {
+      nSrcX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nUnitY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nUnitY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nUnitY = 0;
+    } else {
+      nUnitY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
     }
 
     sSkillArg.nMissileTxtNo = SkillAss::SKILLASS_GetChargeUpMissile(pUnit, eSkill);
@@ -999,19 +999,19 @@ BOOL __fastcall Skills_SrvDoFunc_014_LightningStrike(::SGAMEDATA * pGame, D2Unit
     eD2UnitType eUnitType = pTarget->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nTargetY = pTarget->pPath.pStaticPath->nPosY;
-    } else if (pTarget->pPath.pDynamicPath) {
-      nTargetY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
-    } else {
+    } else if (!pTarget->pPath.pDynamicPath) {
       nTargetY = 0;
+    } else {
+      nTargetY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
     }
 
     eUnitType = pTarget->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nTargetX = pTarget->pPath.pStaticPath->nPosX;
-    } else if (pTarget->pPath.pDynamicPath) {
-      nTargetX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
-    } else {
+    } else if (!pTarget->pPath.pDynamicPath) {
       nTargetX = 0;
+    } else {
+      nTargetX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
     }
 
     D2UnitStrc* pAreaHitUnit = SkillsServer::SKILLS_FindNextUnitInAreaByGUID(pGame, pUnit, nTargetX, nTargetY, nSearchRadius, 3, nAfterGUID, nullptr);

@@ -119,8 +119,8 @@ void __fastcall Q04_UpdateCainNpcAnimState(int32_t pCainUnit, D2UnitStrc * * pTa
 // terminal/about-to-change state: (Completed OR FinishedInPreviousGame) AND NOT
 // JustCompleted AND NOT CannotCompleteQuestInGame. Otherwise returns without sending.
 BOOL __fastcall Q04_NotifyQuestStateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_Completed);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_FinishedInPreviousGame) , bQuestState != 0)) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_JustCompleted);
@@ -142,8 +142,8 @@ BOOL __fastcall Q04_NotifyQuestStateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * p
 // nStateFlag==2 -> set Step0x02; nStateFlag in 3..5 -> set Step0x03.
 // Run via IteratePlayerOrMonsterUnits whenever the server step advances.
 BOOL __fastcall Q04_SyncQuestStepToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pQuestData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestDone = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_Completed);
     if (bQuestDone == 1) {
       return 0;
@@ -557,10 +557,11 @@ static void __stdcall QuestStartDebugNotify(D2QuestDataStrc * pQuestData) {
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q4.cpp
 void __fastcall Q04_SendQuestStatePacket(D2UnitStrc * pUnit) {
     D2GSPacketSrv0x5D abyPacketBuf;
-    memset(&abyPacketBuf, 0, sizeof(abyPacketBuf));
+    abyPacketBuf.nExtra = 0;
     abyPacketBuf.nPacketId = ']';
     abyPacketBuf.nQuestId = '\x04';
     abyPacketBuf.nAlertFlags = '\x01';
+    abyPacketBuf.nFilterStatus = '\0';
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q4.cpp", 0x265);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &abyPacketBuf);
 }
@@ -688,8 +689,8 @@ static void __stdcall Q04_SpawnDeckardCainNpc(D2RoomStrc * pRoom, ::SGAMEDATA * 
 // so they can't finish it this game) and add them to quest list1. Run when the quest
 // is advanced past the point a latecomer could legitimately complete it.
 BOOL __fastcall Q04_MarkCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_Completed);
     if (bQuestState) {
       return 0;
@@ -702,13 +703,12 @@ BOOL __fastcall Q04_MarkCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
 
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_CannotCompleteQuestInGame);
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
-    D2QuestDataA1Q4Strc* pA1Q4Data = pQuestData->pQuestSpecificData.pA1Q4;
     if (!pUnit) {
-      QUESTGUID_AddPlayerToList(&pA1Q4Data->sQuestGUID1, -1);
+      QUESTGUID_AddPlayerToList(&pQuestData->pQuestSpecificData.pA1Q4->sQuestGUID1, -1);
       return 0;
     }
 
-    QUESTGUID_AddPlayerToList(&pA1Q4Data->sQuestGUID1, pUnit->nUnitGUID);
+    QUESTGUID_AddPlayerToList(&pQuestData->pQuestSpecificData.pA1Q4->sQuestGUID1, pUnit->nUnitGUID);
     return 0;
 }
 
@@ -1012,8 +1012,8 @@ bool __fastcall Q04_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 // (credit the rescue to the whole party) and push the quest info to their client.
 // Driven by Q04_CompleteOnEnterTristram / OBJOP_A1Q4_ActivateInifussTree party loops.
 void __fastcall Q04_AutoCompleteForActIPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
     BOOL BVar3 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_Completed);
     if (BVar3 == 1) {
       return;
@@ -1051,8 +1051,8 @@ void __fastcall Q04_AutoCompleteForActIPlayer(::SGAMEDATA * pGame, D2UnitStrc * 
 // RewardAwaits, push quest info, then credit every party member via
 // Q04_AutoCompleteForActIPlayer. This is the "rescued Cain by reaching Tristram" path.
 BOOL __fastcall Q04_CompleteOnEnterTristram(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -1076,8 +1076,8 @@ BOOL __fastcall Q04_CompleteOnEnterTristram(::SGAMEDATA * pGame, D2UnitStrc * pU
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_JustCompleted);
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_RewardAwaits);
     QUEST_SendQuestInfoToUnit(pGame, pUnit);
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -1089,8 +1089,8 @@ BOOL __fastcall Q04_CompleteOnEnterTristram(::SGAMEDATA * pGame, D2UnitStrc * pU
 // For players not yet Completed/RewardAwaits, set CannotCompleteQuestInGame and send
 // the 0x5d quest-state packet. Used to lock out players who can no longer finish.
 BOOL __fastcall Q04_SetQuestCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -1257,7 +1257,7 @@ BOOL __fastcall OBJOP_A1Q4_ActivateInifussTree(D2ObjectOperateFnArg * pOperation
         D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_RewardAwaits);
         QUEST_SendQuestInfoToUnit(pOperation->sArg.pGame, pOperation->pAttacker);
         nPartyId = UNIT::SUnit::GetPartyId(pOperation->pAttacker);
-        if (nPartyId != 0xffff) {
+        if (nPartyId != -1) {
           UNIT::Party::ExecuteFunctionForEveryPartyMember(pOperation->sArg.pGame, nPartyId, (::fpExecuteOnUnitFunction)Q04_AutoCompleteForActIPlayer, 0);
           return 0;
         }
@@ -1330,8 +1330,8 @@ void __fastcall Objects_InitFn06(uint32_t * pdwParam) {
 // Step0x04 (the Cairn-stones-solved sub-step) so the journal reflects the puzzle
 // solution. Driven by the party loop in OBJOP_A1Q4_ActivateHoradricMalusSmith.
 void __fastcall Q04_HandleNpcInteraction(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_Completed);
     if (bCompleted == 1) {
       return;
@@ -1574,7 +1574,7 @@ BOOL __fastcall OBJOP_A1Q4_ActivateHoradricMalusSmith(D2ObjectOperateFnArg * pOp
       __frame0.pQuestData->nQuestPacketFlags = '\0';
       QUEST_SetStateAndBroadcast(__frame0.pQuestData, 4, pOperation->pAttacker, (::fpExecuteOnUnitFunction)Q04_NotifyQuestStateToPlayer, true);
       nPartyId = UNIT::SUnit::GetPartyId(pOperation->pAttacker);
-      if (nPartyId != 0xffff) {
+      if (nPartyId != -1) {
         UNIT::Party::ExecuteFunctionForEveryPartyMember(pOperation->sArg.pGame, nPartyId, (::fpExecuteOnUnitFunction)Q04_HandleNpcInteraction, 0);
       }
 
@@ -1767,10 +1767,10 @@ BOOL __fastcall Q04_SetSecretCowLevelDiscovered(::SGAMEDATA * pGame, D2UnitStrc 
       return 0;
     }
 
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2UnitDataPlayerStrc* pUnitPlayerData = D2Common::Units::GetPlayerData(pUnit);
     /* SetQuestState(Step0x10=10): Secret Cow Level "discovered" flag — Cow Level
                          state is stored in the A1Q4 (Search for Cain) quest record, not its own quest
-                          */ D2Common::QuestRecord::SetQuestState(pQuestRecord, QUEST_TheSearchForCain, QUESTSTATE_Step0x10);
+                          */ D2Common::QuestRecord::SetQuestState(pUnitPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TheSearchForCain, QUESTSTATE_Step0x10);
     return 0;
 }
 
@@ -2289,7 +2289,8 @@ void __fastcall Q04_DropShieldRewards(D2QuestDataStrc * pQuestData, D2UnitStrc *
       return;
     }
 
-    pQuestSpecificData->sSub.nShieldsRemaining--;
+    int32_t* pShieldsRemaining = &pQuestSpecificData->sSub.nShieldsRemaining;
+    (*pShieldsRemaining)--;
     if (0 >= pQuestSpecificData->sSub.nShieldsRemaining) {
       return;
     }
@@ -2622,11 +2623,7 @@ void __fastcall Q04_InitData(D2QuestDataStrc * pQuestData) {
     pQuestSpecificData->sSub.nStonesUnitGUID = 0;
     pQuestSpecificData->sSub.nCairnAnimState = 0;
     pQuestSpecificData->sSub.bQuestObjectsActivated = false;
-    pQuestSpecificData->sSub.bPortalSpawnPending[0] = 0;
-    pQuestSpecificData->sSub.bPortalSpawnPending[1] = 0;
-    pQuestSpecificData->sSub.bPortalSpawnPending[2] = 0;
-    pQuestSpecificData->sSub.bPortalSpawnPending[3] = 0;
-    pQuestSpecificData->sSub.bPortalSpawnPending[4] = 0;
+    memset(pQuestSpecificData->sSub.bPortalSpawnPending, 0, 5 * sizeof(pQuestSpecificData->sSub.bPortalSpawnPending[0]));
     pQuestSpecificData->sSub.bCairnMonsterSaved = false;
     pQuestSpecificData->sSub.bPendingCairnActivation = false;
     pQuestSpecificData->sSub.bPortalArmed = false;
@@ -2643,8 +2640,8 @@ void __fastcall Q04_InitData(D2QuestDataStrc * pQuestData) {
 // non-present players via Q04_MarkCannotComplete. The scripted/forced-completion entry.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q4.cpp
 void __fastcall ForceStartQuest(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestState == 1) {
