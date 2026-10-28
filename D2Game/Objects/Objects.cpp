@@ -1820,7 +1820,7 @@ void __fastcall Objects_PopulateFn9(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
       return;
     }
 
-    for (nSpawnTarget = (int)((sRoomCoords.dwYSize * sRoomCoords.dwXSize >> 7) * (uint32_t)nDensity) >> 8; 0 < nSpawnTarget; nSpawnTarget--) {
+    for (nSpawnTarget = (int)((sRoomCoords.dwXSize * sRoomCoords.dwYSize >> 7) * (uint32_t)nDensity) >> 8; 0 < nSpawnTarget; nSpawnTarget--) {
       pSpawnedUnit = OBJECT_PlaceAtRandomPosition(pGameSave, nObjectClassId, nObjSizeX, nObjSizeY, pRoom);
       if (pSpawnedUnit) {
         if (pObjectsTxt->Selectable[pSpawnedUnit->eAnimMode.ePlayerMode]) {
