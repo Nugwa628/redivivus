@@ -716,8 +716,6 @@ void __stdcall ESCMENU_Initialize() {
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 260, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     int32_t nFrameWidth;
-    D2EscMenuHeaderStrc* pSaveExitHeader;
-    D2EscMenuItemStrc* pSaveExitTable;
     D2GfxDataStrc sStarGfxData;
     ESCMENU_LoadLocalizedImages(&gEscMenuHeaderInitData.nItemCount, gaEscMenuMainTable);
     ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderOptions.nItemCount, gaEscMenuOptionsTable);
@@ -725,15 +723,12 @@ void __stdcall ESCMENU_Initialize() {
     BOOL bIsExpansion = Fog::D2CheckExpansionGame();
     if (bIsExpansion) {
       ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderDeleteChar.nItemCount, gaEscMenuDeleteCharTable);
-      pSaveExitTable = gaEscMenuExpansionSaveExitTable;
-      pSaveExitHeader = &gaEscMenuHeaderExpansionSaveExit;
+      ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderExpansionSaveExit.nItemCount, gaEscMenuExpansionSaveExitTable);
     } else {
       ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderSwitchClass.nItemCount, gaEscMenuSwitchClassTable);
-      pSaveExitTable = gaEscMenuClassicSaveExitTable;
-      pSaveExitHeader = &gaEscMenuHeaderExpansionOptions;
+      ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderExpansionOptions.nItemCount, gaEscMenuClassicSaveExitTable);
     }
 
-    ESCMENU_LoadLocalizedImages(&pSaveExitHeader->nItemCount, pSaveExitTable);
     gpEscMenuItemCount = &gEscMenuHeaderInitData;
     gpEscMenuCurrentTable = gaEscMenuMainTable;
     __frame0.szWidgetPath = '\0';
