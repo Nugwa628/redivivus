@@ -370,7 +370,7 @@ D2AnimDataStrc * __stdcall TXT_AnimTbls_Get() {
 }
 
 D2DifficultyLevelsTxt * __stdcall GetDifficultyLevels(uint32_t nDifficulty) {
-    DWORD nIndex = (int)nDifficulty < 1 ? 0 : nDifficulty;
+    DWORD nIndex = (int)nDifficulty <= 0 ? 0 : nDifficulty;
     if ((int)(sgtDataTable.nTxtDifficultyLevelsSize - 1U) > (int)nIndex) {
       return sgtDataTable.pTxtDifficultyLevels + nIndex;
     }
@@ -1636,7 +1636,7 @@ DWORD __stdcall TXT_Experience_GetExpRatio(int32_t nLevel) {
     if (!sgtDataTable.pTxtExperience) {
       return 0;
     }
-    if (nLevel < 1) {
+    if (nLevel <= 0) {
       return sgtDataTable.pTxtExperience->ExpRatio;
     }
     if (nLevel > sgtDataTable.pTxtExperience->Class[0]) {
@@ -4355,7 +4355,7 @@ void __fastcall TXT_AllocTxt_pettype(D2PoolManagerStrc * pMemory) {
       exit(-1);
     }
 
-    /* Why it adjust size ? */ sgtDataTable.nTxtPetTypeSize = sgtDataTable.nTxtPetTypeSize < 1 ? 0 : sgtDataTable.nTxtPetTypeSize;
+    /* Why it adjust size ? */ sgtDataTable.nTxtPetTypeSize = sgtDataTable.nTxtPetTypeSize <= 0 ? 0 : sgtDataTable.nTxtPetTypeSize;
     if (0xff >= sgtDataTable.nTxtPetTypeSize) {
       return;
     }

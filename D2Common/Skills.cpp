@@ -580,12 +580,12 @@ static int32_t __stdcall SKILLS_CheckItemTypeRequirement(D2UnitStrc * pUnit, D2U
     short int sTypeId;
     if (!pUnit) {
       uint32_t bIsOfType;
-      if (psSkillFields[nHandIdx * 2 + 0x12] < 1 && psSkillFields[nHandIdx * 3 + 0xc] < 1) {
+      if (psSkillFields[nHandIdx * 2 + 0x12] <= 0 && psSkillFields[nHandIdx * 3 + 0xc] <= 0) {
         return 1;
       }
 
       sTypeId = psSkillFields[0xc];
-      if ((sTypeId == 0x2d || sTypeId == 0x2e || sTypeId == 0x43) && psSkillFields[0xf] < 1) {
+      if ((sTypeId == 0x2d || sTypeId == 0x2e || sTypeId == 0x43) && psSkillFields[0xf] <= 0) {
         bIsOfType = ITEMS::Items::ITEMS_IsA(nullptr, ITEMTYPE_Weapon);
         if (!bIsOfType) {
           bIsOfType2 = ITEMS::Items::ITEMS_IsA(pUnit2, ITEMTYPE_Weapon);
@@ -594,7 +594,7 @@ static int32_t __stdcall SKILLS_CheckItemTypeRequirement(D2UnitStrc * pUnit, D2U
           }
         }
       }
-      if (!(psSkillFields[0xc] == 0x43 && psSkillFields[0xf] < 1)) {
+      if (!(psSkillFields[0xc] == 0x43 && psSkillFields[0xf] <= 0)) {
         return 0;
       }
 
@@ -705,7 +705,7 @@ static BOOL __stdcall SKILLS_CheckWeaponRequirements(D2UnitStrc * pUnit, D2Skill
     if (!psSkillFields) {
       return 0;
     }
-    if (psSkillFields->etypea1 < 1 && psSkillFields->itypea1 < 1) {
+    if (psSkillFields->etypea1 <= 0 && psSkillFields->itypea1 <= 0) {
       return 1;
     }
 
@@ -1673,7 +1673,7 @@ void __stdcall SKILLS_GetStateTransformGfx(D2UnitStrc * pUnit, eD2UnitType * pUn
     }
 
     int32_t nStateIdx = 0;
-    if ((short int)sgptDataTable->nAllStatesDataTblFlag0x10Size < 1) {
+    if ((short int)sgptDataTable->nAllStatesDataTblFlag0x10Size <= 0) {
       return;
     }
 
@@ -2306,9 +2306,9 @@ int __stdcall SKILL_GetArrowModifierSkill(D2UnitStrc * pUnit, int * pnParam) {
         }
 
         nStatLevel = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pUnit, UNITSTAT_item_magicarrow, 0);
-        if (nStatLevel < 1) {
+        if (nStatLevel <= 0) {
           iVar1 = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pUnit, UNITSTAT_item_explosivearrow, 0);
-          if (iVar1 < 1) {
+          if (iVar1 <= 0) {
             return 0x1f;
           }
           if (!pnParam) {
@@ -3261,7 +3261,7 @@ void __stdcall SKILLS_AddOrRemoveItemSkill(D2UnitStrc * pUnit, int32_t nOwnerGUI
     if (pUnit->eUnitType != UNIT_PLAYER) {
       return;
     }
-    if (nLevel < 1) {
+    if (nLevel <= 0) {
       return;
     }
     if ((int)eSkill < 0) {
@@ -3673,7 +3673,7 @@ void __stdcall SKILLS_SetSkillLevelBonus(D2UnitStrc * pUnit, eD2Skills eSkill, i
     pFoundSkill = GetSkillByIdAndOwner(pUnit, eSkill, -1);
     if (!pFoundSkill) {
       D2SkillStrc* pVerifySkill;
-      if (nLevelBonus < 1) {
+      if (nLevelBonus <= 0) {
         return;
       }
 

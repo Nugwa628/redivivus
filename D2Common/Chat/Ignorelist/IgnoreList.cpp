@@ -175,7 +175,7 @@ int32_t CheckAccountNameIgnored(::IgnoreList * pThis, char * szAccountName) {
           uVar1 = pThis->tIgnoredAccounts.tFullList.m_terminator.m_next;
           pCurEntry = (::StringEntryNode*)((int)uVar1 <= 0 ? 0 : uVar1);
           while (true) {
-            if ((int)pCurEntry < 1) {
+            if ((int)pCurEntry <= 0) {
               return 0;
             }
 

@@ -1985,7 +1985,7 @@ static void __stdcall TC_ParseTreasureClassEntry(D2ParsedTreasureClassStrc * pPa
     int32_t nItemClassId;
     long int nParsedInt;
     char* pProb;
-    if (nProb < 1) {
+    if (nProb <= 0) {
       return;
     }
     if (*szItemCode == '\"') {
@@ -2035,7 +2035,7 @@ static void __stdcall TC_ParseTreasureClassEntry(D2ParsedTreasureClassStrc * pPa
 
     int32_t nNodeId;
     nNodeId = Fog::Src::Excel::GetLinkNodeIndex(sgtDataTable.pTxtMonsterTblsLink, szItemCode, 0);
-    if (nNodeId < 1) {
+    if (nNodeId <= 0) {
       if (!sgtDataTable.pTxtUniqueItemsLink || (nNodeId = Fog::Src::Excel::GetLinkNodeIndex(sgtDataTable.pTxtUniqueItemsLink, szItemCode, 0) , nNodeId <= 0)) {
         if (!sgtDataTable.pTxtSetItemsLink) {
           return;

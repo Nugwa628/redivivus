@@ -354,7 +354,7 @@ static int32_t __stdcall STATLIST_CalcFullStatFromChildren(int32_t nStatId, D2It
 
         nCount2 = (int)pChildStatArray->wStatCount;
         nCount = 0;
-        if (nCount2 < 1) {
+        if (nCount2 <= 0) {
           child_stat_absent:
           nCount = 0;
         } else {

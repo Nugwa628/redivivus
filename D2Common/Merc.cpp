@@ -149,7 +149,7 @@ static D2MonSeqMonsterTbls * __stdcall GetMonsterSequenceTable(D2UnitStrc * pUni
     }
 
     uint32_t nSequenceId = Skills::GetSequenceId(pUnit, pCurSkill);
-    if ((int)nSequenceId < 1) {
+    if ((int)nSequenceId <= 0) {
       return nullptr;
     }
 

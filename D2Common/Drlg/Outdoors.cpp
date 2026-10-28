@@ -655,7 +655,7 @@ BOOL __fastcall SpawnOutdoorLevelPreset(D2DrlgLevelStrc * pLevel, int32_t nLevel
       nShuffleCount = nTotalCells;
       if (0 < (int)nTotalCells) {
         do {
-          if ((int)nTotalCells < 1) {
+          if ((int)nTotalCells <= 0) {
             nRandIdxA = 0;
           } else {
             nRandIdxA = pLevel->sSeed.nSeedLow;
@@ -766,7 +766,7 @@ BOOL __fastcall SpawnRandomOutdoorDS1(D2DrlgLevelStrc * pLevel, int32_t nLvlPres
       nGridWidthM2 = nTotalCells;
       if (0 < (int)nTotalCells) {
         do {
-          if ((int)nTotalCells < 1) {
+          if ((int)nTotalCells <= 0) {
             nRandIdxA = 0;
           } else {
             nRandIdxA = pLevel->sSeed.nSeedLow;
@@ -942,7 +942,7 @@ void __fastcall SpawnAct12Waypoint(D2DrlgLevelStrc * pLevel) {
       if (0 < (int)nGridHeight) {
         do {
           nGridHeightCopy = nShuffleIdxA;
-          if ((int)nGridHeight < 1) {
+          if ((int)nGridHeight <= 0) {
             nShuffleIdxA = 0;
           } else {
             lVar1 = (uint64_t)pLevel->sSeed.nSeedLow * 0x6ac690c5;
@@ -1052,7 +1052,7 @@ void __fastcall SpawnAct12Shrines(D2DrlgLevelStrc * pLevel, int32_t nShrines) {
       nShuffleIdx = nTotalCells;
       if (0 < (int)nTotalCells) {
         do {
-          if ((int)nTotalCells < 1) {
+          if ((int)nTotalCells <= 0) {
             nRandIdxA = 0;
           } else {
             nRandIdxA = pLevel->sSeed.nSeedLow;
