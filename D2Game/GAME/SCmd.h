@@ -267,7 +267,7 @@ void __fastcall Send0x9DItemSwapBodyItem(struct D2ClientStrc * pClient, struct D
 void __fastcall Send0x9DItemWeaponSwitch(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, eD2ItemFlag eItemFlag);
 // Sends opcode 0x3E item-stat-update packet to pClient. Encodes unit GUID, equipped flag, stat ID (9 bits), stat value (variable size), and stat layer/count (8 or 16 bits) into a bit-buffer inside a 34-byte stack packet, then sends it.
 void __fastcall NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, char bIsEquipped, int32_t nStatId, uint32_t nStatValue, uint16_t nStatLayerOrCount);
-void __fastcall NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, int32_t nItemSlot, BOOL bUseUnitGUID, int32_t nParam, int16_t nSkillId);
+void __fastcall NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, int32_t nItemSlot, BOOL bUseUnitGUID, int32_t nParam, uint16_t nSkillId);
 void __fastcall NET_D2GS_SERVER_Send_0x40_ITEMSETFLAG(struct D2ClientStrc * pClient, struct D2UnitStrc * pTargetUnit, uint32_t dwSkillId, uint32_t dwSkillLevel);
 void __fastcall Send0x9DItemAutoUnequip(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, eD2ItemFlag eItemFlag);
 void __fastcall NET_D2GS_SERVER_Send_0x42_DESTROYHANDITEM(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit);
@@ -390,7 +390,7 @@ void __fastcall Send0x9CItemAddQuantity(struct D2ClientStrc * pClient, struct D2
 void __fastcall Send0x9CItemSwapInContainer(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, eD2ItemFlag eItemFlags);
 // @sourcefile .\GAME\SCmd.cpp
 void __fastcall Send0x9CItemPutInBelt(struct D2ClientStrc * pClient, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, eD2ItemFlag eItemFlags);
-void Send0x9CItemRemoveFromBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
+void __fastcall Send0x9CItemRemoveFromBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
 void Send0x9CItemSwapInBelt(void * pThis, struct D2UnitStrc * pUnit, eD2ItemFlag eItemFlag);
 void Send0x9CItemToCursor(void * pThis, struct D2UnitStrc * pUnit);
 // @sourcefile .\GAME\SCmd.cpp
