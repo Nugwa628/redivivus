@@ -441,8 +441,7 @@ void __fastcall UpdateLifeAndArea(DWORD nRosterGUID, int32_t nHpPercent, eD2Leve
     }
 
     int32_t nLayer = 0;
-    int32_t nMaxHp = D2Common::Stats::StatsEx::GetTxtMaxHp(pRosterUnit);
-    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pRosterUnit, UNITSTAT_hitpoints, nMaxHp * nHpPercent / 100, nLayer);
+    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pRosterUnit, UNITSTAT_hitpoints, D2Common::Stats::StatsEx::GetTxtMaxHp(pRosterUnit) * nHpPercent / 100, nLayer);
 }
 
 int32_t __fastcall GetRosterPerHPPercent(int32_t nRosterGUID) {

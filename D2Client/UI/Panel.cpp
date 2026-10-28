@@ -1488,8 +1488,7 @@ void __stdcall ClickBelt(D2InventoryStrc * pInventory, int32_t nMouseY, int32_t 
     nSoundArg3 = 0;
     int32_t nSoundArg2 = 0;
     nSoundArg1 = 0;
-    eD2Sounds nSoundId = UNIT::SOUND_GetIdFromUnit(pCursorItem_lcl);
-    Sound::SOUND_PlaySound(nSoundId, nullptr, nSoundArg1, nSoundArg2, nSoundArg3);
+    Sound::SOUND_PlaySound(UNIT::SOUND_GetIdFromUnit(pCursorItem_lcl), nullptr, nSoundArg1, nSoundArg2, nSoundArg3);
 }
 
 static void CLIENT_HandleBeltMouseDown(D2InventoryStrc * pInventory, int32_t nMouseY, int32_t nMouseX) {
@@ -1644,8 +1643,7 @@ void __stdcall CMD_UseBeltSlot1() {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    uint16_t wShiftKeyState = GetKeyState(0x10);
-    ClickBeltRight(0, pUnit, pUnit->pInventory, wShiftKeyState & 0x8000);
+    ClickBeltRight(0, pUnit, pUnit->pInventory, GetKeyState(0x10) & 0x8000);
 }
 
 // Key-command handler for belt slot 2. If not exiting and the player is alive and
@@ -1664,8 +1662,7 @@ void __stdcall CMD_UseBeltSlot2() {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    uint16_t wShiftKeyState = GetKeyState(0x10);
-    ClickBeltRight(1, pUnit, pUnit->pInventory, wShiftKeyState & 0x8000);
+    ClickBeltRight(1, pUnit, pUnit->pInventory, GetKeyState(0x10) & 0x8000);
 }
 
 // Key-command handler for belt slot 3. If not exiting and the player is alive and
@@ -1684,8 +1681,7 @@ void __stdcall CMD_UseBeltSlot3() {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    uint16_t wShiftKeyState = GetKeyState(0x10);
-    ClickBeltRight(2, pUnit, pUnit->pInventory, wShiftKeyState & 0x8000);
+    ClickBeltRight(2, pUnit, pUnit->pInventory, GetKeyState(0x10) & 0x8000);
 }
 
 // Key-command handler for belt slot 4. If not exiting and the player is alive and
@@ -1704,8 +1700,7 @@ void __stdcall CMD_UseBeltSlot4() {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    uint16_t wShiftKeyState = GetKeyState(0x10);
-    ClickBeltRight(3, pUnit, pUnit->pInventory, wShiftKeyState & 0x8000);
+    ClickBeltRight(3, pUnit, pUnit->pInventory, GetKeyState(0x10) & 0x8000);
 }
 
 void __fastcall PANEL_SetBeltSlotHoverFlag(uint32_t nIndex, int32_t byValue) {

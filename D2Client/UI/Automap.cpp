@@ -2166,8 +2166,7 @@ void __stdcall AUTOMAP_DrawExpansionTag() {
     BOOL bMultiLineCenter = 0;
     int32_t dwColor = 4;
     nY = AUTOMAP_TextHeightOffset;
-    int32_t nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wText);
-    D2Win::Src::D2WinFont::DRAW_text(wText, WindowSizeX - nTextWidth - 0x10, nY, dwColor, bMultiLineCenter);
+    D2Win::Src::D2WinFont::DRAW_text(wText, WindowSizeX - D2Win::Src::D2WinFont::DRAW_text0(wText) - 0x10, nY, dwColor, bMultiLineCenter);
     AUTOMAP_TextHeightOffset += 0x10;
 }
 
