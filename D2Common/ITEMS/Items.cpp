@@ -121,7 +121,7 @@ uint32_t __stdcall ITEMS_SearchItemCodeTable(D2UnitStrc * pUnit, int32_t dwConte
 
     sCalcContext.pUnit = pUnit;
     sCalcContext.nContext = dwContext;
-    uint32_t nFormulaResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)(sgptDataTable->pItemsCode + nOffset), sgptDataTable->nItemsCodeSize - nOffset, Stats::StatsEx::nullsub, aItemsEventMethod, nItemsEventMethodSize, &sCalcContext);
+    uint32_t nFormulaResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)sgptDataTable->pItemsCode + nOffset), sgptDataTable->nItemsCodeSize - nOffset, Stats::StatsEx::nullsub, aItemsEventMethod, nItemsEventMethodSize, &sCalcContext);
     return nFormulaResult;
 }
 
@@ -271,7 +271,7 @@ void __stdcall SetAutoMagic(D2UnitStrc * pUnit, int16_t wAutoMagic) {
 }
 
 // Returns magic suffix ID at nIndex (offset 0x3E + nIndex*2) from D2UnitDataItemStrc. Returns 0 if unit is null, not an item, or has no item data.
-int GetMagicSuffix(D2UnitStrc * pUnit, int nIndex) {
+int __stdcall GetMagicSuffix(D2UnitStrc * pUnit, int nIndex) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM)) {
       return (uint32_t)pUnit & -65536;
     }
@@ -325,7 +325,7 @@ void __stdcall SetRareSuffix(D2UnitStrc * pUnit, int16_t wRareSuffix) {
     pUnit->pUnitData.pUnitDataItem->wRareSuffix = wRareSuffix;
 }
 
-BOOL CheckItemFlag(D2UnitStrc * pUnit, eD2ItemFlag neD2ItemFlag, int32_t nParam, char * szText) {
+BOOL __stdcall CheckItemFlag(D2UnitStrc * pUnit, eD2ItemFlag neD2ItemFlag, int32_t nParam, char * szText) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataItem)) {
       return 0;
     }
@@ -410,7 +410,7 @@ eD2ItemCmd __stdcall ITEM_GetItemData_eD2ItemCmd(D2UnitStrc * pUnit) {
     return pUnit->pUnitData.pUnitDataItem->eItemCmd;
 }
 
-int32_t ITEM_GetItemData_nItemLevel(D2UnitStrc * pUnit) {
+int32_t __stdcall ITEM_GetItemData_nItemLevel(D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM)) {
       return 1;
     }
@@ -1606,7 +1606,7 @@ uint32_t __stdcall ITEMS_IsA(D2UnitStrc * pUnit, eD2ItemTypes eItemType) {
     }
 
     eD2ItemTypes eItemType1 = TXT_Items_GetType(pUnit->nClassId);
-    if (gadwBitMasks[eItemType & ITEMTYPE_Hammer] & *(uint32_t*)(sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eItemType1 + ((int)eItemType >> 5)) * 4)) {
+    if (gadwBitMasks[eItemType & ITEMTYPE_Hammer] & *(uint32_t*)((uint8_t*)sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eItemType1 + ((int)eItemType >> 5)) * 4)) {
       return 1;
     }
 
@@ -1620,7 +1620,7 @@ uint32_t __stdcall ITEMS_IsA(D2UnitStrc * pUnit, eD2ItemTypes eItemType) {
       return 0;
     }
 
-    return *(uint32_t*)(sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * (int)eType2 + ((int)eItemType >> 5)) * 4) & gadwBitMasks[eItemType & ITEMTYPE_Hammer];
+    return *(uint32_t*)((uint8_t*)sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * (int)eType2 + ((int)eItemType >> 5)) * 4) & gadwBitMasks[eItemType & ITEMTYPE_Hammer];
 }
 
 uint32_t __stdcall TXT_Items_GetBitFieldAnd0x01(uint32_t nItemClassId) {
@@ -2339,7 +2339,7 @@ BOOL __stdcall ITEMS_CheckChargedSkillFullyCharged(D2UnitStrc * pItem, bool * pO
     return _bResult;
 }
 
-uint32_t ITEM_GetItemData_eD2ItemFlag_IsEthereal(D2UnitStrc * pUnit) {
+uint32_t __stdcall ITEM_GetItemData_eD2ItemFlag_IsEthereal(D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType == UNIT_ITEM && pUnit->pUnitData.pUnitDataItem)) {
       return 0;
     }

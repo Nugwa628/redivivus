@@ -1303,7 +1303,7 @@ uint32_t __stdcall SKILLS_CalcToHit(D2UnitStrc * pUnit, eD2Skills eSkill, int32_
     sCalcCtx.pUnit = pUnit;
     sCalcCtx.nSkillId = eSkill;
     sCalcCtx.nSkillLevel = nSkillLevel;
-    uint32_t uFormulaResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)(sgptDataTable->pSkillsCode + nToHitCalcIdx), sgptDataTable->nSkillsCodeSize - nToHitCalcIdx, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
+    uint32_t uFormulaResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)sgptDataTable->pSkillsCode + nToHitCalcIdx), sgptDataTable->nSkillsCodeSize - nToHitCalcIdx, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
     return uFormulaResult;
 }
 
@@ -1459,7 +1459,7 @@ int32_t __stdcall SERVER_MinDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t
       sCalcCtx.pUnit = pUnit;
       sCalcCtx.nSkillId = eSkillId;
       sCalcCtx.nSkillLevel = nSkillLevel;
-      uCalcResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)(pDataTable->pSkillsCode + uCalcResult), pDataTable->nSkillsCodeSize - uCalcResult, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
+      uCalcResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)pDataTable->pSkillsCode + uCalcResult), pDataTable->nSkillsCodeSize - uCalcResult, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
       if (uCalcResult) {
         nElemMasteryBonus = D2Client::Stats::D2ApplyPercent(nDamage, uCalcResult, 100);
         nDamage += nElemMasteryBonus;
@@ -1494,7 +1494,7 @@ int32_t __stdcall SERVER_MaxDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t
       sCalcCtx.pUnit = pUnit;
       sCalcCtx.nSkillId = eSkillId;
       sCalcCtx.nSkillLevel = nSkillLevel;
-      uCalcResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)(pDataTable->pSkillsCode + uCalcResult), pDataTable->nSkillsCodeSize - uCalcResult, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
+      uCalcResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)pDataTable->pSkillsCode + uCalcResult), pDataTable->nSkillsCodeSize - uCalcResult, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
       if (uCalcResult) {
         nElemMasteryBonus = D2Client::Stats::D2ApplyPercent(nDamage, uCalcResult, 100);
         nDamage += nElemMasteryBonus;
@@ -1540,7 +1540,7 @@ int32_t __stdcall SERVER_Synergy1(D2UnitStrc * pUnit, int32_t eSkillId, int32_t 
     sCalcCtx.nSkillLevel = nSkillLevel;
     sCalcCtx.pUnit = pUnit;
     sCalcCtx.nSkillId = eSkillId;
-    uCalcResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)(sgptDataTable->pSkillsCode + uCalcResult), sgptDataTable->nSkillsCodeSize - uCalcResult, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
+    uCalcResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)sgptDataTable->pSkillsCode + uCalcResult), sgptDataTable->nSkillsCodeSize - uCalcResult, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
     if (!uCalcResult) {
       return nSynergyLen;
     }
@@ -2909,7 +2909,7 @@ uint32_t __stdcall SKILLDESC_EvalDescCalcValue(D2UnitStrc * pUnit, uint8_t bPara
     sCalcCtx.nSkillId = eSkill;
     sCalcCtx.pUnit = pUnit;
     sCalcCtx.nSkillLevel = nParam;
-    nCalcOffset = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)(sgptDataTable->pSkillsCode + nCalcOffset), sgptDataTable->nSkillsCodeSize - nCalcOffset, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
+    nCalcOffset = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)sgptDataTable->pSkillsCode + nCalcOffset), sgptDataTable->nSkillsCodeSize - nCalcOffset, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
     return nCalcOffset;
 }
 
@@ -2959,7 +2959,7 @@ int32_t __stdcall D2GetSkillCalc(D2UnitStrc * pUnit, int32_t calc, eD2Skills eSk
     sCalcCtx.pUnit = pUnit;
     sCalcCtx.nSkillId = eSkill;
     sCalcCtx.nSkillLevel = nSkillLvl;
-    uint32_t nCalcResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)(sgptDataTable->pSkillsCode + calc), sgptDataTable->nSkillsCodeSize - calc, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
+    uint32_t nCalcResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)sgptDataTable->pSkillsCode + calc), sgptDataTable->nSkillsCodeSize - calc, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
     return nCalcResult;
 }
 
@@ -2972,7 +2972,7 @@ uint32_t __stdcall SKILLS_EvalDescCalcBytecode(D2UnitStrc * pUnit, uint32_t nCal
     sCalcCtx.pUnit = pUnit;
     sCalcCtx.nSkillId = eSkillId;
     sCalcCtx.nSkillLevel = nSkillLevel;
-    uint32_t uResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)(sgptDataTable->pSkillDescCode + nCalcOffset), sgptDataTable->nSkillDescCodeSize - nCalcOffset, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
+    uint32_t uResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)sgptDataTable->pSkillDescCode + nCalcOffset), sgptDataTable->nSkillDescCodeSize - nCalcOffset, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
     return uResult;
 }
 
