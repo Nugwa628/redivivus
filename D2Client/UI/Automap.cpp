@@ -211,38 +211,42 @@ int32_t __stdcall AUTOMAP_GetCenters() {
     return nAutoMapCenters;
 }
 
-void __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters) {
+int32_t __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Centers", 0, nAutoMapCenters);
     Automap::nAutoMapCenters = nAutoMapCenters;
+    return nAutoMapCenters;
 }
 
 int32_t __stdcall AUTOMAP_GetLeft() {
     return AutoMapLeft;
 }
 
-void __fastcall AUTOMAP_SetLeft(int32_t nAutoMapLeft) {
+int32_t __fastcall AUTOMAP_SetLeft(int32_t nAutoMapLeft) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Left", 0, nAutoMapLeft);
     AutoMapLeft2 = nAutoMapLeft;
     AutoMapLeft3 = nAutoMapLeft;
     AutoMapLeft = nAutoMapLeft;
+    return nAutoMapLeft;
 }
 
 BOOL __stdcall AUTOMAP_GetParty() {
     return nAutoMapParty;
 }
 
-void __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty) {
+int32_t __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Party", 0, nAutoMapParty);
     Automap::nAutoMapParty = nAutoMapParty;
+    return nAutoMapParty;
 }
 
 int32_t __stdcall AUTOMAP_GetPartyNames() {
     return AutoMapPartyNames;
 }
 
-void __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames) {
+int32_t __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Party Names", 0, nAutoMapPartyNames);
     AutoMapPartyNames = nAutoMapPartyNames;
+    return nAutoMapPartyNames;
 }
 
 void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, D2AutomapCellStrc * * ppRootNode) {
