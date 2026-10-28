@@ -422,20 +422,20 @@ D2UnitStrc * __fastcall MakeMissile(eMissilesId neMissilesId, D2UnitStrc * pUnit
     sSkillArg.pOwner = pUnit;
     if (eOwnerUnitType == UNIT_OBJECT || 3 < (int)eOwnerUnitType && (int)eOwnerUnitType <= 5) {
       nOwnerPos = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nOwnerPos = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nOwnerPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nOwnerPos = 0;
     }
 
     sSkillArg.nX = nOwnerPos + nOffsetX;
     eOwnerUnitType = pUnit->eUnitType;
     if (eOwnerUnitType == UNIT_OBJECT || 3 < (int)eOwnerUnitType && (int)eOwnerUnitType <= 5) {
       nOwnerPos = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nOwnerPos = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nOwnerPos = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nOwnerPos = 0;
     }
 
     sSkillArg.nY = nOwnerPos + nOffsetY;
