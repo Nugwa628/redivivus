@@ -1449,14 +1449,14 @@ static uint32_t INPUT_ValidateSkillAction(D2UnderMouseStrc * pUnderMouse) {
       }
 
       pRoom = D2Common::Units::UNITS_GetRoom(pUnderMouse->pPlayer);
-      if (!pSkillsTxt->InTown) {
+      if (!(*((uint8_t*)pSkillsTxt + 0x5) & gadwBitMasks[0])) {
         bRoomInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom);
         if (bRoomInTown) {
           UnitSnd::UNITSND_PlayPlayerSound(pUnderMouse->pPlayer, 0x18);
           return 0;
         }
       }
-      if (pSkillsTxt->passive) {
+      if ((*((uint8_t*)pSkillsTxt + 0x4) & gadwBitMasks[4])) {
         return 0;
       }
     }
