@@ -6511,17 +6511,7 @@ static void INV_DrawHirelingStats(D2UnitStrc * pUnit) {
         }
 
         pDmgTypeStatArray = (eD2UnitStat*)D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxdamage, 0);
-        if (!pRightArmItem) {
-          iServerStat = UNIT::GetClassId(pUnit);
-          if (iServerStat == 0x10f) {
-            eStatId = UNITSTAT_dexterity;
-          } else {
-            eStatId = UNITSTAT_strength;
-          }
-
-          iDamageValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eStatId, 0);
-          iStatRaw += iDamageValue;
-        } else {
+        if (pRightArmItem) {
           bResult = D2Common::ITEMS::Items::IsTwoHanded(pRightArmItem);
           if (bResult) {
             iDamageValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pRightArmItem, UNITSTAT_mindamage, 0);
@@ -6551,6 +6541,16 @@ static void INV_DrawHirelingStats(D2UnitStrc * pUnit) {
           iServerStat = D2Common::Skills::SKILLS_GetItemBonusDamage(pUnit, pRightArmItem, nullptr, 1);
           iStatRaw += iServerStat;
           iStatBonusPct = D2Common::Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pRightArmItem, UNITSTAT_item_normaldamage, 0);
+        } else {
+          iServerStat = UNIT::GetClassId(pUnit);
+          if (iServerStat == 0x10f) {
+            eStatId = UNITSTAT_dexterity;
+          } else {
+            eStatId = UNITSTAT_strength;
+          }
+
+          iDamageValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eStatId, 0);
+          iStatRaw += iDamageValue;
         }
         if (iStatRaw <= -0x5a) {
           iStatRaw = -0x5a;
