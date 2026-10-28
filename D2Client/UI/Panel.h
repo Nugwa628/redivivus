@@ -95,7 +95,7 @@ void __stdcall CMD_UseBeltSlot3();
 // It reads no colour and returns nothing.
 // The gbPanelStat*Color globals it tests are likewise misnamed belt-slot flags.
 void __stdcall CMD_UseBeltSlot4();
-void __fastcall PANEL_SetBeltSlotHoverFlag(uint32_t nIndex, uint8_t byValue);
+void __fastcall PANEL_SetBeltSlotHoverFlag(uint32_t nIndex, int32_t byValue);
 void __stdcall PANEL_ClearBeltSlotHover();
 // Stores nState in gnBeltPanelState; halts (panel.cpp line 2823) when nState is negative.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.

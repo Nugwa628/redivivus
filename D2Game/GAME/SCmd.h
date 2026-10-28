@@ -196,9 +196,9 @@ void __fastcall NET_D2GS_SERVER_Send_0x6D_UNITCHANGE_MONSTERNEUTRAL(struct D2Cli
 // "Reassign" in their names; they warp a unit like the other two.
 void __fastcall NET_D2GS_SERVER_Send_0x15_WarpXY(struct D2ClientStrc * pClient, uint8_t nPacketId, uint8_t nUnitType, uint32_t nUnitGUID, uint16_t wX, uint16_t wY, uint8_t bParam);
 // Server-to-client map reveal. Opcode 0x07, 6 bytes. Reveals automap area around tile coordinate.
-void __fastcall NET_D2GS_SERVER_Send_0x07_MapReveal(struct D2ClientStrc * pClient, uint8_t nAreaId, uint16_t nTileX, uint16_t nTileY);
+void __fastcall NET_D2GS_SERVER_Send_0x07_MapReveal(struct D2ClientStrc * pClient, int32_t nAreaId, uint16_t nTileX, uint16_t nTileY);
 // Server-to-client map hide. Opcode 0x08, 6 bytes.
-void __fastcall NET_D2GS_SERVER_Send_0x08_REMOVEROOM(struct D2ClientStrc * pClient, uint8_t bParam, uint16_t nTileX, uint16_t nTileY);
+void __fastcall NET_D2GS_SERVER_Send_0x08_REMOVEROOM(struct D2ClientStrc * pClient, int32_t bParam, uint16_t nTileX, uint16_t nTileY);
 // Server-to-client level warp assignment. Opcode 0x09.
 void __fastcall NET_D2GS_SERVER_Send_0x09_NEWUNIT(struct D2ClientStrc * pClient, uint8_t nPacketId, uint8_t nLevelId, uint32_t dwGUID, uint8_t bParam, uint16_t wX, uint16_t wY);
 // Server-to-client world object assignment. Opcode 0x51.
