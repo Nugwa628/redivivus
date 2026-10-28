@@ -592,8 +592,8 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x0E_UNITCHANGE_ID(D2UnitStrc * pUnit, c
 void __fastcall NET_D2GS_CLIENT_Incoming0x0F_UNITCHANGE_XYPOS(D2UnitStrc * pUnit, char * pBytes) {
     D2ServerMessageHandleStrc msg;
     msg.nSkillId = (uint32_t)*(uint16_t*)(pBytes + 7);
-    msg.nTargetUnitType = (uint32_t)(uint8_t)pBytes[0xb];
     msg.nItemId = (uint32_t)*(uint16_t*)(pBytes + 9);
+    msg.nTargetUnitType = (uint32_t)(uint8_t)pBytes[0xb];
     UNIT::Path::PATH_MoveUnitToPoint(pUnit, *(uint16_t*)(pBytes + 0xc), (uint32_t)*(uint16_t*)(pBytes + 0xe), 0, 0, 0);
     UNIT::UnitMode::HandleMessage((uint32_t)(uint8_t)pBytes[6], pUnit, &msg, 1);
 }
@@ -621,10 +621,10 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x67_UNITCHANGE_MONSTERXYPATH(D2UnitStrc
 void __fastcall NET_D2GS_CLIENT_Incoming0x68_UNITCHANGE_MONSTERIDPATH(D2UnitStrc * pUnit, char * pBytes) {
     D2ServerMessageHandleStrc msg;
     msg.nSkillId = (uint32_t)(uint8_t)pBytes[10];
-    msg.nTargetUnitType = (uint32_t)(uint8_t)pBytes[0xf];
     msg.nItemId = *(uint32_t*)(pBytes + 0xb);
-    msg.nSkillLvl = (int)*(short int*)(pBytes + 0x12);
+    msg.nTargetUnitType = (uint32_t)(uint8_t)pBytes[0xf];
     msg.nTargetUnitId = (uint32_t)(uint8_t)pBytes[0x11];
+    msg.nSkillLvl = (int)*(short int*)(pBytes + 0x12);
     msg.nMaxDistance = (uint32_t)(uint8_t)pBytes[0x14];
     msg.nTargetX = (int32_t)(uint8_t)pBytes[0x10];
     UNIT::Path::PATH_MoveUnitToPoint(pUnit, *(uint16_t*)(pBytes + 6), (uint32_t)*(uint16_t*)(pBytes + 8), 0, 0, 0);

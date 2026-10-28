@@ -1261,9 +1261,7 @@ BOOL __fastcall ITEM_CastFireballOnTarget(::SGAMEDATA * pGame, D2UnitStrc * pUni
       return BVar1;
     }
 
-    nItemClassId = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-
-    BVar1 = Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, SKILL_FireBall, 1, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), nItemClassId, nCastParam);
+    BVar1 = Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, SKILL_FireBall, 1, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath), nCastParam);
     return BVar1;
 }
 

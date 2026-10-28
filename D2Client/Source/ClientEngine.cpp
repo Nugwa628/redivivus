@@ -373,9 +373,7 @@ void __stdcall CLIENT_QuestEvent_FreeAnyaFromIce() {
 
     int32_t nSkillLevel = 1;
     eD2Skills eSkill = SKILL_Attack;
-    int32_t nY = Units::GetYPosFromDynamicPathUnit(pUnit);
-
-    pPlayer = UNIT::Missile::CastAttack(pPlayer, MISSILE_AnyaCenter, Units::GetXPosFromDynamicPathUnit(pUnit), nY, eSkill, nSkillLevel);
+    pPlayer = UNIT::Missile::CastAttack(pPlayer, MISSILE_AnyaCenter, Units::GetXPosFromDynamicPathUnit(pUnit), Units::GetYPosFromDynamicPathUnit(pUnit), eSkill, nSkillLevel);
     if (!pPlayer) {
       return;
     }

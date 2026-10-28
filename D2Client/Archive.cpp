@@ -456,14 +456,13 @@ uint32_t __fastcall UNIT_GetModuloFromSeed(D2SeedStrc * pSeed, uint32_t nModulo)
       return 0;
     }
 
-    int64_t lVar1 = (uint64_t)pSeed->nSeedLow * 0x6ac690c5;
     if (nModulo & nModulo - 1) {
-      DVar2 = (D2SeedStrc)(lVar1 + (uint64_t)pSeed->nSeedHigh);
+      DVar2 = D2_SEED_NEXT(*pSeed);
       *pSeed = DVar2;
       return (uint32_t)(DVar2.nSeedLow % nModulo);
     }
 
-    DVar2 = (D2SeedStrc)(lVar1 + (uint64_t)pSeed->nSeedHigh);
+    DVar2 = D2_SEED_NEXT(*pSeed);
     *pSeed = DVar2;
     return nModulo - 1 & DVar2.nSeedLow;
 }

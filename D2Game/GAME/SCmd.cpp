@@ -155,8 +155,8 @@ void __fastcall NET_D2GS_SERVER_Send_0x01_NEWGAME(D2ClientStrc * pClient, uint8_
     struct { uint8_t e0, e1, e2, e3, e4, e5, e6, e7; } aPacketBuf;
     ((uint8_t*)&aPacketBuf)[0] = nPacketId;
     *(uint32_t*)((char*)&aPacketBuf + 2) = Arena::ARENA_GetFlags(pGame);
-    ((uint8_t*)&aPacketBuf)[6] = pGame->bExpansion != 0;
     ((uint8_t*)&aPacketBuf)[1] = pGame->nDifficulty;
+    ((uint8_t*)&aPacketBuf)[6] = pGame->bExpansion != 0;
     ((uint8_t*)&aPacketBuf)[7] = pGame->eGameType != GAMETYPE_SINGLEPLAYER;
     SCMD_QueuePacketForClient(((uint8_t*)&aPacketBuf), 8, pClient);
 }
@@ -860,10 +860,10 @@ void __fastcall NET_D2GS_SERVER_Send_0x20_STATCHANGE_PLAYER(D2ClientStrc * pClie
       exit(-1);
     }
 
+    ((uint8_t*)&aPacket)[0] = nPacketId;
     *(uint32_t*)((char*)&aPacket + 1) = nUnitGUID;
     ((uint8_t*)&aPacket)[5] = (uint8_t)nAttributeId;
     *(uint32_t*)((char*)&aPacket + 6) = dwValue;
-    ((uint8_t*)&aPacket)[0] = nPacketId;
     SCMD_QueuePacketForClient(((uint8_t*)&aPacket), 10, pClient);
 }
 
@@ -983,11 +983,11 @@ void __fastcall NET_D2GS_SERVER_Send_0x22_UpdateItemSkill(D2ClientStrc * pClient
 // Server-to-client set skill assignment. Opcode 0x23.
 void __fastcall NET_D2GS_SERVER_Send_0x23_SetSkill(D2ClientStrc * pClient, uint8_t bParam, uint32_t dwSkillId, uint8_t nSkillSlot, uint16_t wSkill, uint32_t dwReserved) {
     struct { uint8_t e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12; } aPacket;
-    ((uint8_t*)&aPacket)[0] = 0x23;
+    ((uint8_t*)&aPacket)[6] = nSkillSlot;
     ((uint8_t*)&aPacket)[1] = bParam;
     *(uint32_t*)((char*)&aPacket + 2) = dwSkillId;
-    ((uint8_t*)&aPacket)[6] = nSkillSlot;
     *(uint16_t*)((char*)&aPacket + 7) = wSkill;
+    ((uint8_t*)&aPacket)[0] = 0x23;
     *(uint32_t*)((char*)&aPacket + 9) = dwReserved;
     SCMD_QueuePacketForClient(((uint8_t*)&aPacket), 0xd, pClient);
 }
@@ -1803,10 +1803,10 @@ void __fastcall NET_D2GS_SERVER_Send_0x4C_UnitCastSkill_Target_0x4D_UnitCastSkil
 
 void __fastcall NET_D2GS_SERVER_Send_0x28_PlayerQuestInfo(D2ClientStrc * pClient, uint8_t nPacketId, uint32_t nUpdateType, uint32_t nUnitGUID, D2BitBufferStrc * pBitBuffer, uint8_t nActionType) {
     D2GSPacketSrv0x28 sPacket0x28;
-    sPacket0x28.nUnitGUID = nUnitGUID;
     sPacket0x28.nUpdateType = (uint8_t)nUpdateType;
-    sPacket0x28.nActionType = nActionType;
     sPacket0x28.nPacketId = nPacketId;
+    sPacket0x28.nUnitGUID = nUnitGUID;
+    sPacket0x28.nActionType = nActionType;
     D2Common::QuestRecord::CopyQuestBitBuffer(pBitBuffer, sPacket0x28.szQuestBits, 0x60, 0);
     SCMD_QueuePacketForClient(&sPacket0x28.nPacketId, 0x67, pClient);
 }
@@ -1916,8 +1916,8 @@ void __fastcall NET_D2GS_SERVER_Send_0x60_SETWARPDEST(D2ClientStrc * pClient, D2
     struct { uint8_t e0, e1, e2, e3, e4, e5, e6; } aPacket;
     ((uint8_t*)&aPacket)[0] = 0x60;
     ((uint8_t*)&aPacket)[1] = D2Common::Units::GetObjectPortalFlags(pUnit);
-    *(uint32_t*)((char*)&aPacket + 3) = pUnit->nUnitGUID;
     ((uint8_t*)&aPacket)[2] = pUnit->pUnitData.pUnitDataMonster->Components[0];
+    *(uint32_t*)((char*)&aPacket + 3) = pUnit->nUnitGUID;
     SCMD_QueuePacketForClient(((uint8_t*)&aPacket), 7, pClient);
 }
 
@@ -2044,9 +2044,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x82_PortalOwnership(::SGAMEDATA * pGame, D
       nOwnerGUID = Objects::GetUnitGUIDFromUnitTimerArg(pUnit);
       pUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_PLAYER, nOwnerGUID);
       if (pUnit) {
-        nBufferOutputLength = 0x10;
-        pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-        Storm::Source::SSTR::SStrCopy((char*)(aPacket + 5), pPlayerData->szCharName, nBufferOutputLength);
+        Storm::Source::SSTR::SStrCopy((char*)(aPacket + 5), D2Common::Units::GetPlayerData(pUnit)->szCharName, 0x10);
         *(uint32_t*)((char*)&aPacket + 1) = pUnit->nUnitGUID;
         *(uint32_t*)((char*)&aPacket + 21) = dwPortalObjGUID;
         *(uint32_t*)((char*)&aPacket + 25) = dwPortalGUIDArg;

@@ -1033,16 +1033,12 @@ static void ITEM_ApplySpecialTypePropertiesExp(D2UnitStrc * pUnit, D2ItemGenCont
     bTypeCheck = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Scroll);
     if (bTypeCheck) {
       int32_t nScrollBookIdx;
-      nSuffixSlot = 0;
-      nScrollBookIdx = SKILLS::Items::ITEMMOD_GetScrollBookIndex(pUnit, 1);
-      D2Common::ITEMS::Items::SetMagicSuffix(pUnit, (int16_t)nScrollBookIdx, nSuffixSlot);
+      D2Common::ITEMS::Items::SetMagicSuffix(pUnit, (int16_t)SKILLS::Items::ITEMMOD_GetScrollBookIndex(pUnit, 1), 0);
     }
 
     bTypeCheck = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Book);
     if (bTypeCheck) {
-      nIndex = 0;
-      nScrollIdx = SKILLS::Items::ITEMMOD_GetScrollBookIndex(pUnit, 0);
-      D2Common::ITEMS::Items::SetMagicSuffix(pUnit, (int16_t)nScrollIdx, nIndex);
+      D2Common::ITEMS::Items::SetMagicSuffix(pUnit, (int16_t)SKILLS::Items::ITEMMOD_GetScrollBookIndex(pUnit, 0), 0);
     }
 
     SKILLS::Items::StaffMod(pUnit, pItemGenContext);
