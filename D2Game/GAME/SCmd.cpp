@@ -1562,7 +1562,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(D2ClientStrc * pClient
     SCMD_QueuePacketForClient(aPacket, 0x22, pClient);
 }
 
-void __fastcall NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(D2ClientStrc * pClient, D2UnitStrc * pUnit, int32_t nItemSlot, BOOL bUseUnitGUID, int32_t nParam, int16_t nSkillId) {
+void __fastcall NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(D2ClientStrc * pClient, D2UnitStrc * pUnit, int32_t nItemSlot, BOOL bUseUnitGUID, int32_t nParam, uint16_t nSkillId) {
     D2GSPacketSrv0x3F tPacket;
     uint32_t dwUnitGUID;
     dwUnitGUID = 0;
