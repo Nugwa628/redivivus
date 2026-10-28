@@ -1185,11 +1185,7 @@ void __stdcall Draw_EquipmentNeedToRepairBody() {
       nRepairState = 0;
       bIsShield = 0;
       bIsQuiver = 0;
-      if (!pItem) {
-        if (eEquipSlot != BODYLOC_R_ARM && eEquipSlot != BODYLOC_L_ARM) {
-          Draw_EquipmentNeedToRepairBody_1(bIsQuiver, bIsShield, eEquipSlot, nRepairState);
-        }
-      } else {
+      if (pItem) {
         bHasDurability = D2Common::ITEMS::Items::ITEM_CheckIfItemHasDurability(pItem);
         if (bHasDurability) {
           BVar1 = D2Common::ITEMS::Items::IsStackable(pItem);
@@ -1210,6 +1206,10 @@ void __stdcall Draw_EquipmentNeedToRepairBody() {
         }
 
         Draw_EquipmentNeedToRepairBody_1(bIsQuiver, bIsShield, eEquipSlot, nRepairState);
+      } else {
+        if (eEquipSlot != BODYLOC_R_ARM && eEquipSlot != BODYLOC_L_ARM) {
+          Draw_EquipmentNeedToRepairBody_1(bIsQuiver, bIsShield, eEquipSlot, nRepairState);
+        }
       }
 
       pSlotLocEntry2++;
