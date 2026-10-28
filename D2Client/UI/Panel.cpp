@@ -1528,11 +1528,7 @@ static void CLIENT_HandleBeltMouseDown(D2InventoryStrc * pInventory, int32_t nMo
 
     pItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemInBeltSlot(pInventory, nBeltSlot);
     gnBeltSlotUnderCursor = nBeltSlot;
-    if (!pItem) {
-      gpPanelBeltSlot = 0;
-      gpPanelBeltLastHoverItem = 0;
-      gpPanelBeltHoverItem = 0;
-    } else {
+    if (pItem) {
       int32_t nItemXPos;
       gpPanelBeltSlot = 1;
       if (pItem != gpPanelBeltLastHoverItem) {
@@ -1544,6 +1540,10 @@ static void CLIENT_HandleBeltMouseDown(D2InventoryStrc * pInventory, int32_t nMo
         gnBeltTooltipY = aInvRect[2];
         return;
       }
+    } else {
+      gpPanelBeltSlot = 0;
+      gpPanelBeltLastHoverItem = 0;
+      gpPanelBeltHoverItem = 0;
     }
 }
 
