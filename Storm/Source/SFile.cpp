@@ -3553,10 +3553,10 @@ D2StormAsyncOpStrc * __stdcall SFILE_IssueRequest(uint32_t nFileOffset, uint32_t
     int bArgsValid;
     D2StormAsyncOpStrc* pPrevBack;
     D2StormAsyncOpStrc* pRequest = 0;
-    if (!pChunkWritePtr && !pStream) {
-      bArgsValid = 0;
-    } else {
+    if (pChunkWritePtr && !pStream) {
       bArgsValid = -1;
+    } else {
+      bArgsValid = 0;
     }
     if (!bArgsValid) {
       SErr::SErrSetLastError(0x57);
