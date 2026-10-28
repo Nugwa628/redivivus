@@ -1586,10 +1586,10 @@ static uint32_t CLIENT_CheckIfUnitPositionsMatch(D2UnitStrc * pnUnit1, D2UnitStr
     eUnitType = pnUnit2->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnit2Y = pnUnit2->pPath.pStaticPath->nPosY;
-    } else if (!pnUnit2->pPath.pDynamicPath) {
-      nUnit2Y = 0;
-    } else {
+    } else if (pnUnit2->pPath.pDynamicPath) {
       nUnit2Y = D2Common::PATH::DynamicPath::GetYPos(pnUnit2->pPath.pDynamicPath);
+    } else {
+      nUnit2Y = 0;
     }
     if (!(nUnit1X == nUnit2X && nUnit1Y == nUnit2Y)) {
       return 0;
