@@ -148,7 +148,7 @@ void __fastcall NPCMENU_HandleMercListPacket(int32_t nParam) {
 
 void __stdcall NPCMENU_ResurrectMerc() {
     if (Dialog::gpNpcMercListDialog) {
-      Dialog::FreeDialogStrc();
+      Dialog::FreeDialogStrc(nullptr);
       if (gpNpcMenuMercListBox) {
         gpNpcMenuMercListBox->pVtable->ScalarDeletingDestructor(gpNpcMenuMercListBox, 1);
       }
