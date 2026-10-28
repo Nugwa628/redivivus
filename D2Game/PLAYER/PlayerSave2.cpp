@@ -655,7 +655,7 @@ int __fastcall SaveCorpseItems(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t
         pInventory = pDVar3->pInventory;
         if (pInventory) {
           nItemCount = D2Common::INVENTORY::Inventory::ITEM_ItemsInItem(pInventory);
-          if (nItemCount) {
+          if ((uint32_t)nItemCount > 0) {
             pFirstItem = D2Common::INVENTORY::Inventory::INVENTORY_GetFirstItem(pInventory);
             nTotalCost = 1;
             while (pFirstItem) {
@@ -911,7 +911,7 @@ int __fastcall CalculateGetFlags(::SGAMEDATA * pGame, uint32_t dwCharacterStatus
       if (pGame->nDifficulty && (bIsExpansionChar && nTitleProgress < 5 || nTitleProgress < 4)) {
         return 0xd;
       }
-    } else if (bIsExpansionChar && nTitleProgress < 10 || nTitleProgress < 8) {
+    } else if ((uint32_t)bIsExpansionChar > 0 && nTitleProgress < 10 || nTitleProgress < 8) {
       return 0xe;
     }
 
@@ -1252,7 +1252,7 @@ int __fastcall ReadStats(::SGAMEDATA * pGameStrc, D2UnitStrc * pUnit, short * * 
     }
 
     int32_t nPresentStatsCount = Fog::Save::SAVE_CalculateChecksum(pBitmaskBase, nBitmaskBytes);
-    if (pBitmaskBase + nPresentStatsCount * 4 + nBitmaskBytes > (unsigned char*)pEndBuf) {
+    if ((int)(pBitmaskBase + nPresentStatsCount * 4 + nBitmaskBytes) > (int)((unsigned char*)pEndBuf)) {
       return 0x12;
     }
 

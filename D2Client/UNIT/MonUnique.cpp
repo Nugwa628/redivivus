@@ -570,7 +570,7 @@ void __fastcall MONUNIQUE_ApplyModifierEffects(D2UnitStrc * pUnit) {
       }
 
       pInitFuncIter++;
-    } while ((int)pInitFuncIter < (uintptr_t)((char*)&gaMonUniqueBaseModIds + sizeof(gaMonUniqueBaseModIds)));
+    } while ((int)pInitFuncIter < (int)((uintptr_t)((char*)&gaMonUniqueBaseModIds + sizeof(gaMonUniqueBaseModIds))));
 
     int i = 0;
     do {

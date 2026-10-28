@@ -4358,7 +4358,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x61_MercEquipItem(::SGAMEDATA * pGame, 
     D2UnitStrc* pCursorItem_lcl = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pUnit->pInventory);
     if (!pCursorItem_lcl) {
       eD2ServerIncomingStatus eVar1;
-      if (nBodyLoc) {
+      if ((uint32_t)nBodyLoc > 0) {
         eVar1 = EquipOrUnequipMercItem(pUnit, (uint32_t)nBodyLoc, pMerc, pGame);
         return (eD2ServerIncomingStatus)eVar1;
       }

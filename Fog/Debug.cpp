@@ -951,7 +951,7 @@ void FormatModuleDebugString(char * szText, D2FogDebugModuleEntryStrc * pModule)
     uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     *szText = '\0';
     szTimeStampSuffix[0] = '\0';
-    if (pModule->dwTimestamp) {
+    if ((uint32_t)pModule->dwTimestamp > 0) {
       __snprintf_s(szTimeStampSuffix, 0x10, -1, " %8x", pModule->dwTimestamp);
     }
 
@@ -979,13 +979,13 @@ void __fastcall FormatAddressDebugString(uint32_t * pAddrInfo, char * pSymInfo, 
       nWritten = __snprintf_s(szOutput + nOffset, 0x400 - nOffset, -1, "%*s", 0x15 - nOffset, " ");
       nOffset += nWritten;
     }
-    if (*pSymInfo != '\0' || *(int*)(pSymInfo + 0x200)) {
+    if (*pSymInfo != '\0' || (uint32_t)(*(int*)(pSymInfo + 0x200)) > 0) {
       nWritten = __snprintf_s(szOutput + nOffset, 0x400 - nOffset, -1, " %s+%llu", pSymInfo, (uint64_t)nSymDisplacement << 0x20);
       nOffset += nWritten;
     }
 
     nWritten = __snprintf_s(szOutput + nOffset, 0x400 - nOffset, -1, "%s", szParamDetail);
-    if (pSymInfo[0x244] != '\0' || *(int*)(pSymInfo + 0x344)) {
+    if (pSymInfo[0x244] != '\0' || (uint32_t)(*(int*)(pSymInfo + 0x344)) > 0) {
       __snprintf_s(szOutput + nOffset + nWritten, 0x400 - (nOffset + nWritten), -1, " (%s,%u)", pSymInfo + 0x244, *(uint32_t*)(pSymInfo + 0x344));
     }
 

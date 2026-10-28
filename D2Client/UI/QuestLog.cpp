@@ -774,7 +774,7 @@ static int __fastcall QUESTLOG_ScrollCompleteCallback_ClearButton(void * pUserPa
 
 static void QUESTLOG_ShowQuestDescription(uint32_t nActIndex) {
     int nIndex = 0;
-    if (0 >= gQuestLog.nQuestLogQuestCount) {
+    if (0 >= (int)gQuestLog.nQuestLogQuestCount) {
       return;
     }
 
@@ -827,7 +827,7 @@ void __fastcall QUESTLOG_HandleSpecialPacket(int32_t nParam) {
 }
 
 void __stdcall QUESTLOG_CloseAndFreeImages() {
-    if (gQuestLog.nQuestLogActiveAct_b < 5) {
+    if ((int)gQuestLog.nQuestLogActiveAct_b < 5) {
       QUESTLOG_AcknowledgeNewQuests();
     }
 

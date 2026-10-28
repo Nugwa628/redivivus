@@ -3153,7 +3153,7 @@ static void __stdcall INV_FormatAttackSpeedText(uint16_t * wszText, D2UnitStrc *
       }
 
       nWeaponSpeed++;
-    } while ((int)&gnAttackSpeedBoostDisplayValue[nWeaponSpeed] < (uintptr_t)((char*)&gnAttackSpeedBoostDisplayValue + sizeof(gnAttackSpeedBoostDisplayValue)));
+    } while ((int)((int)&gnAttackSpeedBoostDisplayValue[nWeaponSpeed]) < (int)((uintptr_t)((char*)&gnAttackSpeedBoostDisplayValue + sizeof(gnAttackSpeedBoostDisplayValue))));
 
 
     for (int i = 0; i < 0x100; i++) wszSpeedLabel[i] = 0;
@@ -4701,7 +4701,7 @@ void __stdcall DRAW_UI_Inventory_DrawShop() {
         nTabX += 0x50;
         nTabIdx++;
         pTabState = (PD2NpcShopTabHasItems)((int)pTabState + 0x12);
-      } while (nTabIdx < AmountOfNPCTabs);
+      } while ((int)nTabIdx < (int)AmountOfNPCTabs);
     }
 
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nPrevFont);
@@ -7043,7 +7043,7 @@ static void INV_DrawHirelingEquippedItems(D2UnitStrc * pMercUnit) {
       }
 
       local_10++;
-    } while ((int)(uint32_t*)&gaHirelingBodySlotScreenCoords[local_10].nLeft < (uintptr_t)((char*)&gaHirelingBodySlotScreenCoords + sizeof(gaHirelingBodySlotScreenCoords)));
+    } while ((int)((int)(uint32_t*)&gaHirelingBodySlotScreenCoords[local_10].nLeft) < (int)((uintptr_t)((char*)&gaHirelingBodySlotScreenCoords + sizeof(gaHirelingBodySlotScreenCoords))));
 }
 
 void __stdcall INV_HandleMercInvLeftDown(D2UIMouseMsgStrc * pMsg) {
@@ -7201,7 +7201,7 @@ void __stdcall INV_HandleMercInvLeftClick(D2UIMouseMsgStrc * pMsg) {
           }
 
           nBodySlotIdx++;
-        } while ((int)((int)(uint32_t*)&gaHirelingBodySlotScreenCoords[nBodySlotIdx].nRight) < (int)((uintptr_t)((char*)&gaHirelingBodySlotScreenCoords + sizeof(gaHirelingBodySlotScreenCoords) + 4)));
+        } while ((int)((uintptr_t)((char*)&gaHirelingBodySlotScreenCoords + sizeof(gaHirelingBodySlotScreenCoords) + 4)) > (int)((int)(uint32_t*)&gaHirelingBodySlotScreenCoords[nBodySlotIdx].nRight));
 
         GAME::Game::GAMEDATA_ClearQueuedClicks();
         consume_click:

@@ -231,7 +231,7 @@ int __fastcall SFILE_GetBlizzardAppDataPath(char * szOutPath, uint32_t nMaxLen) 
       Storm::Source::SSTR::SStrPack(cAppDataPath, "\\Blizzard Entertainment", 0x7fffffff);
       if (nMaxLen) {
         nSrcPathLen = Storm::Source::SSTR::SStrLen(cAppDataPath);
-        if (!nSrcPathLen || cAppDataPath[nSrcPathLen - 1] != '\\') {
+        if ((uint32_t)nSrcPathLen <= 0 || cAppDataPath[nSrcPathLen - 1] != '\\') {
           if (nSrcPathLen + 1 == nMaxLen) {
             return 0;
           }
@@ -430,7 +430,7 @@ void __fastcall GetAndCreateSavePath(char * pBuffer, size_t nSize) {
     }
     if (nSize) {
       uVar1 = Storm::Source::SSTR::SStrLen(pBuffer);
-      if (!uVar1 || pBuffer[uVar1 - 1] != '\\') {
+      if ((uint32_t)uVar1 <= 0 || pBuffer[uVar1 - 1] != '\\') {
         if (uVar1 + 1 == nSize) {
           return;
         }

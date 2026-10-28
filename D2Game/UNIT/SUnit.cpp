@@ -1487,7 +1487,7 @@ void __fastcall UNITS_UpdateRoomClientVisibility(::SGAMEDATA * pGame, D2UnitStrc
 
         pClient = ppCurrentClientList[nOldClientIdx];
         pClient_00 = (D2ClientStrc*)pRoom->nLastDeadGUIDs[nNewClientIdx - 0xe];
-        if (pClient < pClient_00) {
+        if (pClient_00 > pClient) {
           pOwnerUnit = GAME::Clients::CLIENTS_GetControlUnit(pClient, 0);
           if (pUnit != pOwnerUnit) {
             SUnitMsg::SERVER_SendInitUnitPacket(pGame, pUnit, ppCurrentClientList[nOldClientIdx]);

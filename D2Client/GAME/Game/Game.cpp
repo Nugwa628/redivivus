@@ -1084,7 +1084,7 @@ uint32_t __stdcall DrawBetaScreen(uint32_t dwUnused) {
       }
 
       nScreenIndex = (uint32_t)gBetaScreenIndex;
-      if ((int)nScreenIndex < gnBetaScreenCount) {
+      if ((int)nScreenIndex < (int)gnBetaScreenCount) {
         /* `DrawBetaScreen` caches the DC6 at `gD2QServer.congratsBgImage` when nullptr.
                           */ if (!gBetaScreenEntries[nScreenIndex].cachedImage) {
           /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szImagePath, "%s\\ui\\betascreens\\%s", "DATA\\GLOBAL", gBetaScreenEntries[nScreenIndex].fileName);

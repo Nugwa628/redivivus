@@ -244,7 +244,7 @@ static uint32_t CHARSEL_IsBetaRealm(uint16_t * wszText) {
       }
 
       ppwszRealmName++;
-    } while ((int)ppwszRealmName < (uintptr_t)((char*)&pBetaRealmNames + sizeof(pBetaRealmNames)));
+    } while ((int)ppwszRealmName < (int)((uintptr_t)((char*)&pBetaRealmNames + sizeof(pBetaRealmNames))));
 
     return 0;
 }
@@ -1754,7 +1754,7 @@ BOOL __stdcall CHARSEL_OnPressScrollCharListDown(D2ControlMsg * pControlMsg) {
     if (gnCharSelScreenSlotCount + g_nCharSelNavigationIndex >= D2Client::CharScreen::TotalCurrentChars) {
       return 1;
     }
-    if (D2Client::CharScreen::nSelectedCharIndex < D2Client::CharScreen::TotalCurrentChars - 1) {
+    if ((int)D2Client::CharScreen::nSelectedCharIndex < (int)(D2Client::CharScreen::TotalCurrentChars - 1)) {
       D2Client::CharScreen::nSelectedCharIndex++;
     }
 

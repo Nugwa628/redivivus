@@ -972,7 +972,7 @@ void __fastcall D2COMP_DrawUnitShadow(uint32_t * pCompUnit) {
 
             while (true) {
               bVar1 = *(uint8_t*)(nLayerIndex + (int)nErrAddr);
-              if (bVar1 >= 0x10) {
+              if ((int)bVar1 >= 0x10) {
                 break;
               }
 
@@ -1933,7 +1933,7 @@ void __stdcall D2COMP_CreateCompositeUnit(uint32_t * pCompUnit, uint32_t nPlayer
       *pCompUnit = nWeaponClass | 6;
       do {
         pSlotCode[0x10] = 1;
-        if (!*pbyEquipSlots || *pbyEquipSlots == 0xff) {
+        if ((uint32_t)(*pbyEquipSlots) <= 0 || *pbyEquipSlots == 0xff) {
           *pSlotCode = 0;
         } else {
           D2COMP_ValidateEquippedItemForClass(nSlot, pbyEquipSlots);
@@ -2024,7 +2024,7 @@ void __stdcall D2COMP_SetAnimationSpeed(D2CharSelCompStrc * pCompUnit, uint8_t b
 
     uint8_t byClampedSpeed = pCompUnit->nNumDirections;
     if (bySpeedCopy < byClampedSpeed) {
-      if (bySpeed) {
+      if ((uint32_t)bySpeed > 0) {
         pCompUnit->nAnimSpeed = bySpeed;
         return;
       }
@@ -3015,7 +3015,7 @@ D2CharSelCompStrc * __stdcall AllocCharSelectComponent(uint32_t nPlayerClassId, 
         do {
           pComponentCode[0x10] = 1;
           bComponentIndex = *pbyEquipSlots;
-          if (!bComponentIndex || gnMaxCharacters <= (int)(uint32_t)bComponentIndex || bComponentIndex == 0xff) {
+          if ((uint32_t)bComponentIndex <= 0 || (int)(uint32_t)bComponentIndex >= gnMaxCharacters || bComponentIndex == 0xff) {
             *pComponentCode = 0;
           } else {
             D2COMP_ValidateEquippedItemForClass(nComponentSlot, pbyEquipSlots);

@@ -804,7 +804,7 @@ void __stdcall WALL2_DrawUnderFloorTiles(D2GameViewStrc * pViewData, D2Wall2Cell
         }
 
         nLightIdx = 0;
-        if (nLightCount) {
+        if ((uint32_t)nLightCount > 0) {
           do {
             View::DRAW_CoordIsInCoord(pWallTileNode->nX + piVar1[nLightIdx * 2] * 8, pWallTileNode->nY + piVar1[nLightIdx * 2 + 1] * 8, (uint8_t*)&dwAlpha, byColorRG, byColorRG + 1, &byBlue);
             byMaskedIntensity = (uint8_t)dwAlpha ? (uint8_t)dwAlpha : 0;

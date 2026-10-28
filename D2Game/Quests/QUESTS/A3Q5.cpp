@@ -304,7 +304,7 @@ BOOL __fastcall Q22_PlayerCheckNearTravincal(::SGAMEDATA * pGame, D2UnitStrc * p
 
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &pAdjRoomList, (int*)&nAdjRoomCount);
       iAdjRoomIdx = 0;
-      if (nAdjRoomCount) {
+      if ((uint32_t)nAdjRoomCount > 0) {
         do {
           if (pAdjRoomList[iAdjRoomIdx] == pTargetRoom) {
             _bSameOrAdjacentRoom = 1;

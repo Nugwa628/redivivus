@@ -4425,7 +4425,7 @@ D2DrlgRoomAStarNodeStrc * __stdcall DRLGPATH_AStarExpandNode(int32_t nMaxCost, D
       }
 
       nMinDelta = nHashIdx;
-      if (nDirIndex <= nHashIdx) {
+      if (nHashIdx >= nDirIndex) {
         nMinDelta = nDirIndex;
         if (nDirIndex < nHashIdx) {
           nDirIndex = nHashIdx;
@@ -5045,7 +5045,7 @@ int32_t __fastcall DRLGOUTDOOR_GetSecondaryBorderPresetFromLvlSub(D2DrlgLevelStr
         }
 
         pLvlSubEntry += 5;
-      } while ((int)pLvlSubEntry < (uintptr_t)((char*)&gaAct5BorderPresetTable + sizeof(gaAct5BorderPresetTable)));
+      } while ((int)pLvlSubEntry < (int)((uintptr_t)((char*)&gaAct5BorderPresetTable + sizeof(gaAct5BorderPresetTable))));
 
       nErrorCode = 0x1a5;
     }
@@ -6443,7 +6443,7 @@ int * __stdcall DRLGOUTROOM_PathSearchStep(int * * ppNodeList, int32_t nMaxFCost
         }
 
         nHMin = nFCost;
-        if (nHCost <= nFCost) {
+        if (nFCost >= nHCost) {
           nHMin = nHCost;
           if (nHCost < nFCost) {
             nHCost = nFCost;

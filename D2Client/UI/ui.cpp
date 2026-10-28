@@ -3646,7 +3646,7 @@ void __fastcall UI_ScrollConfigListVertical(int32_t nParam) {
     int iVar1 = (int)lRowCount;
     nNewOffset = gnUICtrlConfigScrollOffset;
     if (nParam < 0) {
-      if (0 < gnUICtrlConfigScrollOffset) {
+      if (0 < (int)gnUICtrlConfigScrollOffset) {
         nNewOffset = gnUICtrlConfigScrollOffset - 1;
       }
       if (nNewOffset < 0) {
@@ -3758,7 +3758,7 @@ void __fastcall UI_ScrollConfigListHorizontal(int32_t nParam) {
 static int32_t UI_GetControlConfigRowAtY(int32_t nParam) {
     int nCurRow;
     int i = 0;
-    if (gnUICtrlConfigScrollOffset < gnUICtrlConfigTotalRows) {
+    if ((int)gnUICtrlConfigScrollOffset < (int)gnUICtrlConfigTotalRows) {
       int nCurrentRowY;
       nCurrentRowY = (WindowSizeY - 0x1a4) / 2 + 0x3a;
       nCurRow = gnUICtrlConfigScrollOffset;
@@ -5526,7 +5526,7 @@ void __stdcall INPUT_StatScreenMouseDown(D2UIMouseMsgStrc * pMsg) {
 
           pMsg = (D2UIMouseMsgStrc*)((uintptr_t)&pMsg->hWnd + 1);
           pBtnEntry = (uint32_t*)((int)pBtnEntry + 0xe);
-        } while ((int)pBtnEntry < (uintptr_t)((char*)&gaStatScreenButtons + sizeof(gaStatScreenButtons)));
+        } while ((int)pBtnEntry < (int)((uintptr_t)((char*)&gaStatScreenButtons + sizeof(gaStatScreenButtons))));
       }
 
       pBtnIdx->bHandled = 1;

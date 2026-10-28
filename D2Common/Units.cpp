@@ -871,7 +871,7 @@ int32_t __stdcall GetInventoryPage(D2UnitStrc * pUnit, int32_t nInvPage, BOOL bL
       }
 
       i = 0;
-      if (nPlayerInventoryPageSize) {
+      if ((uint32_t)nPlayerInventoryPageSize > 0) {
         while (pUnit->nClassId != aPlayerInventoryPage[i * 2]) {
           i++;
           if (nPlayerInventoryPageSize <= i) {

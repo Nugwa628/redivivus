@@ -1772,7 +1772,7 @@ int __fastcall PLRSAVE_RestoreItemsFromStream(::SGAMEDATA * pGame, D2UnitStrc * 
     nSubItemCount = 0;
     uint32_t nItemIndex;
     nItemIndex = 0;
-    if (!nHeaderItemCount) {
+    if ((uint32_t)nHeaderItemCount <= 0) {
       store_bytes_read:
       *pBytesRead = nTotalBytesRead;
       nSubSocketIdx = 0;

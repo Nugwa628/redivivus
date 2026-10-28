@@ -863,7 +863,7 @@ BOOL __stdcall ITEM_CheckIfBothItemsAreSameTypeOfPotions(D2UnitStrc * pUnit, D2U
     bool bMatchUnit = false;
     bool bMatchItemEx = false;
     uint32_t nIdx = 0;
-    if (gnHealingPotionCodeCount) {
+    if ((uint32_t)gnHealingPotionCodeCount > 0) {
       do {
         if (!bMatchUnit && pItemsTxtUnit->dwCode == gadwHealingPotionCodes[nIdx]) {
           bMatchUnit = true;
@@ -882,7 +882,7 @@ BOOL __stdcall ITEM_CheckIfBothItemsAreSameTypeOfPotions(D2UnitStrc * pUnit, D2U
     bMatchUnit = false;
     bMatchItemEx = false;
     nIdx = 0;
-    if (gnManaPotionCodeCount) {
+    if ((uint32_t)gnManaPotionCodeCount > 0) {
       do {
         if (!bMatchUnit && pItemsTxtUnit->dwCode == gadwManaPotionCodes[nIdx]) {
           bMatchUnit = true;
@@ -3085,7 +3085,7 @@ uint32_t __fastcall ITEM_CalcRequiredLevel(D2UnitStrc * pUnit, D2UnitStrc * pUni
           } else {
             bLvlReq = pSuffixTxt->classlevelreq;
           }
-          if ((uint32_t)nMaxLvlReq <= (uint32_t)bLvlReq) {
+          if ((int)((uint32_t)nMaxLvlReq) <= (int)((uint32_t)bLvlReq)) {
             nMaxLvlReq = (uint32_t)bLvlReq;
           }
         }
@@ -3139,7 +3139,7 @@ uint32_t __fastcall ITEM_CalcRequiredLevel(D2UnitStrc * pUnit, D2UnitStrc * pUni
           } else {
             bLvlReq = pPrefixTxt->classlevelreq;
           }
-          if ((uint32_t)nMaxLvlReq <= (uint32_t)bLvlReq) {
+          if ((int)((uint32_t)nMaxLvlReq) <= (int)((uint32_t)bLvlReq)) {
             nMaxLvlReq = (uint32_t)bLvlReq;
           }
         }
@@ -3149,7 +3149,7 @@ uint32_t __fastcall ITEM_CalcRequiredLevel(D2UnitStrc * pUnit, D2UnitStrc * pUni
           } else {
             bLvlReq = pSuffixTxt->classlevelreq;
           }
-          if ((uint32_t)nMaxLvlReq <= (uint32_t)bLvlReq) {
+          if ((int)((uint32_t)nMaxLvlReq) <= (int)((uint32_t)bLvlReq)) {
             nMaxLvlReq = (uint32_t)bLvlReq;
           }
         }
@@ -3866,7 +3866,7 @@ uint8_t * __stdcall GetItemColor(D2UnitStrc * pUnit, D2UnitStrc * pItem, char * 
       pPaletteResult = D2CMP::Pallete::PALETTE_GetItemPalette((uint32_t)(uint8_t)pItemsTxt->bInvTrans, (int)pSetItemTxt->invtransform);
       return pPaletteResult;
       default:
-        if (pItem->eUnitType != UNIT_ITEM || (pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pItem->nClassId) , !pItemsTxt) || !pItemsTxt->bHasInv || (bValidColor = ITEM_GetMaxSockCount(pItem) , bValidColor == '\0')) {
+        if (pItem->eUnitType != UNIT_ITEM || (pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pItem->nClassId) , !pItemsTxt) || (uint32_t)pItemsTxt->bHasInv <= 0 || (bValidColor = ITEM_GetMaxSockCount(pItem) , bValidColor == '\0')) {
           goto try_automagic_color;
         }
       if (pItem->eUnitType == UNIT_ITEM) {
@@ -5906,7 +5906,7 @@ BOOL __stdcall ITEM_CheckEquipRequirements(D2UnitStrc * pUnit, D2UnitStrc * pCha
       } else if (bIncludeSocketedStats) {
         bIncludeSocketedStats = 0;
         ITEMS_SumSocketedItemStats(UNITSTAT_dexterity, &bIncludeSocketedStats, pUnit);
-        if (nStatValue - bIncludeSocketedStats < 1) {
+        if (nStatValue - bIncludeSocketedStats <= 0) {
           _bDexOk = 0;
         }
         if (nStatValue - bIncludeSocketedStats < nAdjustedReq) {

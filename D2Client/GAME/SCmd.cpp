@@ -1176,7 +1176,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x18_PLAYERCOMMONSTATCHANGE_BIG(char * p
     if (0x80 < nDeltaX) {
       nDeltaX -= 0x100;
     }
-    if (0x80 < nDeltaY) {
+    if (0x80 < (int)nDeltaY) {
       nDeltaY -= 0x100;
     }
 
@@ -1227,7 +1227,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x95_PLAYERCOMMONSTATCHANGE_MEDIUM(char 
     if (0x80 < nDeltaX) {
       nDeltaX -= 0x100;
     }
-    if (0x80 < nDeltaY) {
+    if (0x80 < (int)nDeltaY) {
       nDeltaY -= 0x100;
     }
 
@@ -1272,7 +1272,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x96_PlayerLeave(char * pBytes) {
     if (0x80 < nDeltaX) {
       nDeltaX -= 0x100;
     }
-    if (0x80 < nDeltaY) {
+    if (0x80 < (int)nDeltaY) {
       nDeltaY -= 0x100;
     }
 
@@ -1295,7 +1295,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x21_SETSKILLLEVEL(char * pBytes) {
 // Client handler for S2C packet 0x93 (8 bytes). Reads player GUID, signed bonus delta, element type filter, and skill page filter. Finds the player unit client-side, then calls SKILLS_CltUpdateSkillList to walk all skills and adjust bonuses matching the element/page criteria. Removes skills whose level drops to 0. Dead code in 1.14d — server never sends this packet.
 void __fastcall NET_D2GS_CLIENT_RecvSkillTabBonusDelta(char * pBytes) {
     uint32_t nBonusDelta = (uint32_t)(uint8_t)pBytes[5];
-    if (0x80 < nBonusDelta) {
+    if (0x80 < (int)nBonusDelta) {
       nBonusDelta -= 0x100;
     }
 

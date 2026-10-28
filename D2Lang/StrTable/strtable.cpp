@@ -426,7 +426,7 @@ void __fastcall STRTABLE_NormalizeLanguageCode(char * szText) {
 
       nIndex++;
       pcNormalized = gaLanguageTable[0].pszLangCodeNormalized;
-    } while ((int)&gaLanguageTable[nIndex] < (uintptr_t)((char*)&gaLanguageTable + sizeof(gaLanguageTable)));
+    } while ((int)((int)&gaLanguageTable[nIndex]) < (int)((uintptr_t)((char*)&gaLanguageTable + sizeof(gaLanguageTable))));
 
     do {
       cChar = *pcNormalized;

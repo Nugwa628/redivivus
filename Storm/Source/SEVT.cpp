@@ -44,7 +44,7 @@ void __stdcall SEVT_CopyIdHashTable(uint32_t * * pDstTable, int * pSrcTable) {
     ppDstCursor = (uint32_t*)SMem::SMemAlloc((int)ppDstCursor * 4, ".\\SOURCE\\SEVT.CPP", 0x3e, 0);
     uint32_t nBucket = 0;
     *pDstTable = ppDstCursor;
-    if (!pSrcTable[1]) {
+    if ((uint32_t)pSrcTable[1] <= 0) {
       return;
     }
 

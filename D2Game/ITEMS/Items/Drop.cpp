@@ -3897,7 +3897,7 @@ void __fastcall SERVER_ITEM_RollItemToDrop(::SGAMEDATA * pGame, D2UnitStrc * pUn
                   do {
                     nEntryIdx = (nLoopUnroll - nPicksRemaining) / 2 + nPicksRemaining;
                     iVar1 = pNestedTC->pEntries[nEntryIdx].nCumulativeWeightExpansion;
-                    if ((int)uVar18 > iVar1) {
+                    if (iVar1 < (int)uVar18) {
                       nPicksRemaining = nEntryIdx + 1;
                       nEntryIdx = nLoopUnroll;
                     } else if (iVar1 <= (int)uVar18) {
@@ -3977,7 +3977,7 @@ void __fastcall SERVER_ITEM_RollItemToDrop(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
                     wTempMod = *(uint16_t*)((uintptr_t)&pTCStack[0].nFromTCOffset0x32 + nStackOffset);
                     local_550[1] = (int32_t)wTempMod;
-                    if (wTempMod) {
+                    if ((uint32_t)wTempMod > 0) {
                       sNewSeed = D2_SEED_NEXT(pUnit->sSeed);
                       pUnit->sSeed = sNewSeed;
                       if ((sNewSeed.nSeedLow & 0x3ff) < (uint32_t)local_550[1]) {

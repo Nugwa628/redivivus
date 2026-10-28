@@ -283,10 +283,10 @@ int32_t __stdcall SMemSizeClassBucketLookup(uint32_t nAllocSize) {
     }
 
     uint8_t byClassByte = (uint8_t)(nAllocSize >> 8);
-    if (byClassByte) {
+    if ((uint32_t)byClassByte > 0) {
       return g_SMemSizeClassTable[byClassByte] + 8;
     }
-    if (*(uint8_t*)((char*)&nAllocSize + 2)) {
+    if ((uint32_t)(*(uint8_t*)((char*)&nAllocSize + 2)) > 0) {
       return g_SMemSizeClassTable[*(uint8_t*)((char*)&nAllocSize + 2)] + 0x10;
     }
     if (!*(uint8_t*)((char*)&nAllocSize + 3)) {

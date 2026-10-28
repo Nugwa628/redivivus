@@ -841,7 +841,7 @@ void __stdcall WALL2_AddWallTile(D2Wall2DrawListStrc * pDrawList, D2Wall2CellStr
         pPrevNode->pNext = pDVar1;
         return;
       }
-      if ((*(uint32_t*)((int)pDVar1->pData + 0x14) >> 0xe & 7) < (*(uint32_t*)((int)pPrevNode->pData + 0x14) >> 0xe & 7)) {
+      if ((int)((*(uint32_t*)((int)pDVar1->pData + 0x14) >> 0xe & 7)) < (int)((*(uint32_t*)((int)pPrevNode->pData + 0x14) >> 0xe & 7))) {
         pDVar1->pNext = pPrevNode;
         if (!pCurNode) {
           pWall2Cell->pWallList = pDVar1;
@@ -900,7 +900,7 @@ static void __stdcall WALL2_AddLowerWallTile(D2Wall2DrawListStrc * pDrawList, D2
       do {
         pLastNode = pNextNode;
         pCmpEntry = pPrevNode;
-        if ((*(uint32_t*)((int)pDVar1->pData + 0x14) >> 0xe & 7) < (*(uint32_t*)((int)pCmpEntry->pData + 0x14) >> 0xe & 7)) {
+        if ((int)((*(uint32_t*)((int)pDVar1->pData + 0x14) >> 0xe & 7)) < (int)((*(uint32_t*)((int)pCmpEntry->pData + 0x14) >> 0xe & 7))) {
           pDVar1->pNext = pCmpEntry;
           pLastNode = pCmpEntry;
           if (!pCurNode) {
@@ -953,7 +953,7 @@ static void __stdcall WALL2_AddRoofTile(D2Wall2DrawListStrc * pDrawList, D2Wall2
 
     pPrevNode = 0;
     for (pNextNode = pDVar3->pNext; pCurNode = pDVar3 , pNextNode != 0; pNextNode = pNextNode->pNext) {
-      if ((*(uint32_t*)((int)pDVar1->pData + 0x14) >> 0xe & 7) < (*(uint32_t*)((int)pCurNode->pData + 0x14) >> 0xe & 7)) {
+      if ((int)((*(uint32_t*)((int)pDVar1->pData + 0x14) >> 0xe & 7)) < (int)((*(uint32_t*)((int)pCurNode->pData + 0x14) >> 0xe & 7))) {
         pDVar1->pNext = pCurNode;
         if (!pPrevNode) {
           pWall2Cell->pRoofPassList = pDVar1;

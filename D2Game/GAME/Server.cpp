@@ -1786,7 +1786,7 @@ void __fastcall RemoveObject(D2ClientStrc * pClient, D2UnitStrc * pUnit) {
 
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pClient->pRoom, &pAdjacentRooms, (int*)&nAdjacentCount);
     uint32_t nAdjacentIdx = 0;
-    if (!nAdjacentCount) {
+    if ((uint32_t)nAdjacentCount <= 0) {
       return;
     }
 
@@ -2081,7 +2081,7 @@ void __stdcall RequestHostedGames(int32_t nParam) {
       }
 
       pTokenCursor++;
-    } while ((int)pTokenCursor < (uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken)));
+    } while ((int)pTokenCursor < (int)((uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken))));
 
     ServerCmd::SERVERCMD_SendBufferToClient(nParam, 0xffff, 0, "");
 }

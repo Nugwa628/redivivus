@@ -147,7 +147,7 @@ static uint32_t __stdcall SCOMP_ADPCMEncode(uint32_t nMaxOutSize, short * pInSam
     aChannelState[2] = 0x2c;
     aChannelState[3] = 0x2c;
     uint32_t nChannel = 0;
-    if (nChannels) {
+    if ((uint32_t)nChannels > 0) {
       do {
         nSample = *pInSamples;
         aChannelState[nChannel] = (int)nSample;
@@ -289,7 +289,7 @@ static short * __stdcall SCOMP_ADPCMDecode(short * pOut, uint32_t nOutSize, int3
     uint32_t nChannel = 0;
     short int* pOutStart = pOut;
     uint8_t* pInEnd = (uint8_t*)(pIn + nInSize);
-    if (nChannels) {
+    if ((uint32_t)nChannels > 0) {
       do {
         nSample = *(short int*)pInCur;
         pInCur += 2;
