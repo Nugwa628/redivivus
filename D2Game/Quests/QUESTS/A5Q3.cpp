@@ -1188,9 +1188,7 @@ void __fastcall Q33_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D
 void __fastcall Q33_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     D2UnitStrc* pScrollItem = ITEMS::Items::Drop::HasQuestItem(pQuestArgs->pGame, pQuestArgs->pPlayer, 0x20656369);
     if (pScrollItem) {
-      int32_t* pnScrollCount;
-      pnScrollCount = &pQuestData->pQuestSpecificData.pA5Q3->nIceItemCount;
-      (*pnScrollCount)++;
+      pQuestData->pQuestSpecificData.pA5Q3->nIceItemCount++;
     }
     if (!(!pQuestData->bIsNotIntroduction || 5 <= pQuestData->nStateFlag)) {
       return;
@@ -1656,11 +1654,11 @@ bool __fastcall Q33_IsAnyaInTown(::SGAMEDATA * pGame) {
 // (aPlayerGUID[0x1c]==0). Used to gate rescue interaction.
 uint32_t __fastcall Q33_IsFrozenAnyaAlive(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_PrisonOfIce);
-    if (pQuestData) {
-      return (uint32_t)!pQuestData->pQuestSpecificData.pA5Q3->nAnyaState;
+    if (!pQuestData) {
+      return 0;
     }
 
-    return 0;
+    return (uint32_t)!pQuestData->pQuestSpecificData.pA5Q3->nAnyaState;
 }
 
 // Q33_OnNpcNotifyPlayers (PrisonOfIce): when quest active and prev<2, broadcasts stateFlag 2 (Anya's prison

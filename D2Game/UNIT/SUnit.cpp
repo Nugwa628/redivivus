@@ -340,11 +340,11 @@ static void UNITS_NotifyClientsUnitRemoved(D2UnitStrc * pGameUnit, ::SGAMEDATA *
 
 static int32_t IsRoomOccupied(D2UnitStrc * pUnit) {
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    if (pRoom) {
-      return (uint32_t)(pRoom->nClientsCount != 0);
+    if (!pRoom) {
+      return 0;
     }
 
-    return 0;
+    return (uint32_t)(pRoom->nClientsCount != 0);
 }
 
 // 2022.01.09 - dzik
@@ -738,11 +738,11 @@ void __fastcall SetTimerListIfUnitExists(D2UnitStrc * pUnit, D2TimerStrc * pTime
 }
 
 D2TimerStrc * __fastcall GetTimerList(D2UnitStrc * pUnit) {
-    if (pUnit) {
-      return pUnit->pTimerList;
+    if (!pUnit) {
+      return nullptr;
     }
 
-    return nullptr;
+    return pUnit->pTimerList;
 }
 
 void __fastcall UNITS_ClearAnimTimerEvents(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
