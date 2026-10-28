@@ -126,7 +126,7 @@ static D2GridScreenCoordinates gnTradePage2ScreenTop = {}; D2_STATIC_GUARD(gnTra
 static D2GridScreenCoordinates gnTradePage2ScreenBottom = {}; D2_STATIC_GUARD(gnTradePage2ScreenBottom, "D2Client::UI::Inv::gnTradePage2ScreenBottom");
 static D2GridScreenCoordinates gnTradePage2ScreenLeft = {}; D2_STATIC_GUARD(gnTradePage2ScreenLeft, "D2Client::UI::Inv::gnTradePage2ScreenLeft");
 static D2GridScreenCoordinates gnTradePage2ScreenRight = {}; D2_STATIC_GUARD(gnTradePage2ScreenRight, "D2Client::UI::Inv::gnTradePage2ScreenRight");
-static bool gbInvOverlayFlag = 0; D2_STATIC_GUARD(gbInvOverlayFlag, "D2Client::UI::Inv::gbInvOverlayFlag");
+static BOOL gbInvOverlayFlag = 0; D2_STATIC_GUARD(gbInvOverlayFlag, "D2Client::UI::Inv::gbInvOverlayFlag");
 
 void __stdcall InitializeiInventoryPages() {
     // Static local variables (originally global data)
