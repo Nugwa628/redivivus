@@ -1675,7 +1675,7 @@ void __stdcall FreePlayerData(D2PoolManagerStrc * pMemory, D2UnitStrc * pUnit) {
         Waypoints::Free(pMemory, *(D2WaypointStrc**)(pUnit->pUnitData.pUnitDataPlayer->szCharName + iActIdx));
         iActIdx += 4;
       } while (iActIdx < 0x28);
-      Txt::Cube::FIELDTBLS_FreePlayerData_STUB();
+      Txt::Cube::FIELDTBLS_FreePlayerData_STUB(pUnit);
       Fog::Memory::FreeServerMemory(pMemory, pUnit->pUnitData.pUnitDataPlayer, ".\\UNITS\\Units.cpp", 0xf76, 0);
       pUnit->pUnitData.pUnitDataPlayer = 0;
       return;
