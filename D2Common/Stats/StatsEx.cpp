@@ -747,7 +747,10 @@ D2StatListExStrc * __stdcall GetStatsByFlags(D2UnitStrc * pUnit, uint32_t nStatL
 
 D2StatListExStrc * __stdcall GetStatListByStateOrFlagsIfNotExists(D2UnitStrc * pUnit, eD2States eState, uint32_t nStatListFlags) {
     D2StatListExStrc* pStatListEx = pUnit->pStatsEx;
-    if (!(pStatListEx && pStatListEx->sStatList.nFlags & 0x80000000U)) {
+    if (!pStatListEx) {
+      return nullptr;
+    }
+    if (!(pStatListEx->sStatList.nFlags & 0x80000000U)) {
       return nullptr;
     }
     if (eState != STATE_none) {
