@@ -2102,11 +2102,10 @@ int32_t __fastcall SKILLS_CalculateSynergyValue_Recursive(int32_t nLevel, int32_
       nResult = SKILLS_CalculateSynergyValue_Recursive(nLevel - 1, nMinVal, nMaxVal);
       return nResult + 1;
     }
-    if (nMaxVal >= nCurrentVal) {
-      return nCurrentVal;
+    if (nCurrentVal > nMaxVal) {
+      nCurrentVal = nMaxVal;
     }
 
-    nCurrentVal = nMaxVal;
     return nCurrentVal;
 }
 
