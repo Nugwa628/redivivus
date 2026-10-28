@@ -171,13 +171,14 @@ D2UnitStrc * __stdcall AllocUnit(D2PoolManagerStrc * pMemory, eD2UnitType eUnitT
     memset(pUnit, 0, 0xf4);
     pUnit->eUnitType = eUnitType;
     pUnit->pMemory = pMemory;
-    if (eUnitType != UNIT_MONSTER) {
-      return pUnit;
+    switch (eUnitType) {
+      case UNIT_MONSTER: {
+        D2UnitDataMonsterStrc* local_EAX_79 = ((D2UnitDataMonsterStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2UnitDataMonsterStrc), ".\\UNITS\\Units.cpp", 0x67b, 0));
+        pUnit->pUnitData.pUnitDataMonster = local_EAX_79;
+        memset(local_EAX_79, 0, 0x60);
+        break;
+      }
     }
-
-    D2UnitDataMonsterStrc* local_EAX_79 = ((D2UnitDataMonsterStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2UnitDataMonsterStrc), ".\\UNITS\\Units.cpp", 0x67b, 0));
-    pUnit->pUnitData.pUnitDataMonster = local_EAX_79;
-    memset(local_EAX_79, 0, 0x60);
     return pUnit;
 }
 
@@ -788,8 +789,10 @@ uint32_t __stdcall NeedsRoomUpdate(D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x9ec);
       exit(-1);
     }
-    if (!(pUnit->eUnitType != UNIT_OBJECT && pUnit->eUnitType != UNIT_ITEM)) {
-      return (uint32_t)pUnit->pPath.pStaticPath->bRoomNeedsUpdate;
+    switch (pUnit->eUnitType) {
+      case UNIT_OBJECT:
+      case UNIT_ITEM:
+        return (uint32_t)pUnit->pPath.pStaticPath->bRoomNeedsUpdate;
     }
 
     uint32_t bNeedsUpdate = PATH::DynamicPath::Get0x02Flag(pUnit->pPath.pDynamicPath);
