@@ -2277,18 +2277,14 @@ static void __stdcall ITEM_HandleSwapBodyUnequipItem(uint8_t * pPacketData, D2Un
     if (pOwnerUnit->eUnitType == UNIT_PLAYER) {
       D2UnitStrc* pBelongsResult;
       pInventory = pOwnerUnit->pInventory;
-      if (!pInventory) {
-        nErrorLineVal = 0x6ef;
-      } else {
+      if (pInventory) {
         pBodyItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemByGridOffset(pInventory, (uint32_t)pUnitDataItemDetails->nBodyLoc);
         Units::IfPlayer(pOwnerUnit);
         D2Common::INVENTORY::Inventory::INVENTORY_SwapPrimaryWeaponOnRemoval(pInventory, pBodyItem);
         SRC::CelCmp::GFX_ClearAllModeFlags(pOwnerUnit, (uint32_t)pPacketData[3]);
         D2Common::INVENTORY::Inventory::GetCurrentItemOnBodyLocation(pOwnerUnit, pInventory, &pBodyItem, (uint32_t)pUnitDataItemDetails->nBodyLoc);
         pBelongsResult = D2Common::INVENTORY::Inventory::ItemBelongsToInventoryOfPlayer(pInventory, pBodyItem);
-        if (!pBelongsResult) {
-          nErrorLineVal = 0x6f7;
-        } else {
+        if (pBelongsResult) {
           if (pBelongsResult == pBodyItem) {
             if (pOwnerUnit->eUnitType == UNIT_PLAYER) {
               D2Common::INVENTORY::Inventory::GetEquipedWeapon(pOwnerUnit->pInventory);
@@ -2332,7 +2328,11 @@ static void __stdcall ITEM_HandleSwapBodyUnequipItem(uint8_t * pPacketData, D2Un
           }
 
           nErrorLineVal = 0x6f8;
+        } else {
+          nErrorLineVal = 0x6f7;
         }
+      } else {
+        nErrorLineVal = 0x6ef;
       }
     }
 
