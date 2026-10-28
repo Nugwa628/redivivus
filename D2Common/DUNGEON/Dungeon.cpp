@@ -1114,10 +1114,9 @@ int32_t __stdcall DRLGROOM_GetIdleTicks(D2RoomStrc * pRoom) {
     }
     if (pRoom->nClientsCount) {
       pRoom->nIdleTicks = 0;
-      return pRoom->nIdleTicks;
+    } else {
+      pRoom->nIdleTicks++;
     }
-
-    pRoom->nIdleTicks++;
     return pRoom->nIdleTicks;
 }
 
