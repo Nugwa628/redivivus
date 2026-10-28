@@ -1695,7 +1695,7 @@ BOOL __fastcall QUESTGUID_SearchForValueInIntArray32(D2QuestGUIDStrc * pQuestGUI
 BOOL __fastcall QUEST_HasPlayerParticipated(D2QuestDataStrc * pQuestData, int32_t nPlayerGUID) {
     uint32_t nPlayerCount = (uint32_t)pQuestData->sQuestGUID.nPlayerCount;
     int nSearchIdx = 0;
-    if (!nPlayerCount) {
+    if ((int)nPlayerCount <= 0) {
       return 0;
     }
 

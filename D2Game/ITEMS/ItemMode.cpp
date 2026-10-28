@@ -769,8 +769,10 @@ static void ITEMMODE_ResetSkillToDefault(D2SkillStrc * pSkill, D2UnitStrc * pUni
     }
 
     int32_t nCanUse = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pDefaultSkill);
-    if (!(nCanUse != 2 && nCanUse != 7)) {
-      return;
+    switch (nCanUse) {
+      case 2:
+      case 7:
+        return;
     }
 
     SKILLS::SkillsServer::Server_SelectSkill(pUnit, nParam, eSkillId, nSkillGUID);
@@ -1987,8 +1989,10 @@ static void ITEMMODE_ValidateItemQuality(D2UnitStrc * pUnit, int * nParam) {
     }
 
     nCanUse = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pSwapSkill);
-    if (!(nCanUse != 2 && nCanUse != 7)) {
-      return;
+    switch (nCanUse) {
+      case 2:
+      case 7:
+        return;
     }
 
     SKILLS::SkillsServer::Server_SelectSkill(pUnit, 0, nParam[3], nParam[5]);
@@ -3402,11 +3406,7 @@ D2UnitStrc * __fastcall ITEMMODE_ValidateSocketedItems(::SGAMEDATA * pGameStrc, 
 // @sourcefile .\ITEMS\ItemMode.cpp
 void __fastcall ITEMMODE_CheckItemEthereal(::SGAMEDATA * pGameStrc, D2UnitStrc * pUnit, D2UnitStrc * pItem, int32_t bForce) {
     D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pItem, UNITSTAT_quantity, bForce, 0);
-    uint16_t wStatLayer = 0;
-    uint32_t nNewQty = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pItem, UNITSTAT_quantity, 0);
-    eD2UnitStat eStatId = UNITSTAT_quantity;
-    bool bUpdateFlag = true;
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\ITEMS\\ItemMode.cpp", 0x18e0), pItem, bUpdateFlag, eStatId, nNewQty, wStatLayer);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\ITEMS\\ItemMode.cpp", 0x18e0), pItem, 1, UNITSTAT_quantity, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pItem, UNITSTAT_quantity, 0), 0);
     ITEMMODE_UpdateBookSkillQuantity(bForce, pUnit, pItem);
 }
 

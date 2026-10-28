@@ -947,7 +947,7 @@ void __fastcall AI_ClearSwitchAiTargetParamsCallback(::SGAMEDATA * pGame, D2Unit
 void __fastcall MONSTEREVENT_DefaultCallback(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2TimerTypeDWORD eTimerType, int32_t nArg1, int32_t nArg2) {
     bool _bIsModeZeroDeath;
     bool bIsModeZeroDeath;
-    if (UNITEVENTCALLBACK_REMOVESKILLCOOLDOWN < eTimerType) {
+    if ((uint32_t)UNITEVENTCALLBACK_REMOVESKILLCOOLDOWN < (uint32_t)eTimerType) {
       return;
     }
     if (false) {

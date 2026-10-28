@@ -15502,7 +15502,7 @@ static uint32_t __fastcall MONSTERAI_FindEnergyMonster(uint32_t dwUnused, D2Unit
     }
 
     uint32_t nDist = AI::GetDistance(pUnit, pCandidate);
-    return ~-(uint32_t)(0x19 < nDist) & (uint32_t)pCandidate;
+    return nDist > 0x19 ? 0 : (uint32_t)pCandidate;
 }
 
 void __fastcall AITHINK_Fn1_PutridDefiler(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
@@ -19257,10 +19257,7 @@ void __fastcall AITHINK_Fn1_MaggotEgg(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
       goto kill_self_if_cast_done;
     }
 
-    BOOL bKillRemoveOwner;
-    bKillRemoveOwner = 1;
-    pTarget = UNIT::SUnit::GetTargetEx(pGame, pUnit);
-    UNIT::SUnitDmg::SERVER_KillMonster(pGame, pUnit, pTarget, bKillRemoveOwner);
+    UNIT::SUnitDmg::SERVER_KillMonster(pGame, pUnit, UNIT::SUnit::GetTargetEx(pGame, pUnit), 1);
     wait_next_think:
     PlanNextAiMove(pGame, pUnit, (int)pMonStats->aip[0][pGame->nDifficulty]);
 }

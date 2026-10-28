@@ -734,8 +734,8 @@ int32_t __stdcall ITEMMOD_RollMagicAffixClassic(D2UnitStrc * pItem, int32_t bIsS
 
 // Expansion magic affix selection using uniform random. Counts valid candidates, rolls RNG % count, walks list to nth valid affix. Max 252 retries for group exclusion.
 int16_t __fastcall ITEMMOD_RollMagicAffixVersioned(D2UnitStrc * pUnit, int32_t nParam, int bExclude, int32_t param_1, int nParam4, int nForcedAffix) {
-    int16_t wItemVersion = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-    if (wItemVersion) {
+    uint16_t wItemVersion = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
+    if (wItemVersion >= 1) {
       int32_t nClassicAffixResult;
       nClassicAffixResult = ITEMMOD_RollMagicAffixClassic(pUnit, nParam, bExclude, param_1, nParam4, nForcedAffix, 0);
       return (int16_t)nClassicAffixResult;
@@ -747,8 +747,8 @@ int16_t __fastcall ITEMMOD_RollMagicAffixVersioned(D2UnitStrc * pUnit, int32_t n
 
 // Version dispatcher: tail-calls ITEMMOD_RollMagicAffixClassic (char*, "affix index+1") or ITEMMOD_RollMagicAffix (uint32_t, "affix index") as a bare statement, dropping the result both branches compute.
 int __fastcall ITEMMOD_RollMagicAffixVersionedEx(D2UnitStrc * pUnit, int32_t nParam, int bExclude, int32_t param_1, int nParam4, int nForcedAffix, int nParam6) {
-    int16_t wItemVersion = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-    if (wItemVersion) {
+    uint16_t wItemVersion = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
+    if (wItemVersion >= 1) {
       int32_t nClassicAffixResult;
       nClassicAffixResult = ITEMMOD_RollMagicAffixClassic(pUnit, nParam, bExclude, param_1, nParam4, nForcedAffix, nParam6);
       return nClassicAffixResult;
@@ -891,8 +891,8 @@ static uint32_t __fastcall GetMaxToRoll(int32_t pThis, D2UnitStrc * pUnit) {
 // Version dispatcher: tail-calls GetMaxToRoll or ITEMMOD_GetMaxAffixGroupClassic, both uint32_t-returning ("chosen affix table index + 1, or 0"), as a bare statement.
 uint32_t __fastcall ITEMMOD_SelectMagicAffixVersioned(D2UnitStrc * pUnit, int32_t nParam) {
     uint32_t uVar1;
-    int16_t wItemVersion = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-    if (wItemVersion) {
+    uint16_t wItemVersion = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
+    if (wItemVersion >= 1) {
       uVar1 = GetMaxToRoll(nParam, pUnit);
       return uVar1;
     }
