@@ -2737,12 +2737,13 @@ eCollisionFlags __fastcall UpdateGetCollision_Width(D2RoomStrc * pOldRoom, int32
     return eOldCollision;
 }
 
-void __fastcall UpdateCollision_Width(D2RoomStrc * pOldRoom, int32_t nOldX, int32_t nOldY, D2RoomStrc * pRoom, int32_t nX, int32_t nY, eD2CollisionUnitSize nWidth, int32_t eCollisionFlag) {
+uint16_t __fastcall UpdateCollision_Width(D2RoomStrc * pOldRoom, int32_t nOldX, int32_t nOldY, D2RoomStrc * pRoom, int32_t nX, int32_t nY, eD2CollisionUnitSize nWidth, int32_t eCollisionFlag) {
     if (pOldRoom) {
       RemoveCollision_Width(pOldRoom, nOldX, nOldY, nWidth, eCollisionFlag);
     }
 
     AddCollision_Width(pRoom, nX, nY, nWidth, eCollisionFlag);
+    return 0;
 }
 
 int32_t __fastcall UpdateGetCollision_Type(D2RoomStrc * pOldRoom, int32_t nOldX, int32_t nOldY, D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nType, int32_t eCollisionFlag, int32_t eCollFlags) {

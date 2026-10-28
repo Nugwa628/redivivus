@@ -1751,8 +1751,8 @@ uint32_t __fastcall UNITS_CanUseSkillOnTarget(::SGAMEDATA * pGame, D2UnitStrc * 
       }
     }
 
-    int16_t nCasterPartyId = GetPartyId(pUnit);
-    if (nCasterPartyId == -1) {
+    uint16_t nCasterPartyId = GetPartyId(pUnit);
+    if (nCasterPartyId == 0xffff) {
       return 0;
     }
 
@@ -1761,7 +1761,7 @@ uint32_t __fastcall UNITS_CanUseSkillOnTarget(::SGAMEDATA * pGame, D2UnitStrc * 
       return 0;
     }
 
-    int16_t nTargetPartyId = GetPartyId(pTargetUnit);
+    uint16_t nTargetPartyId = GetPartyId(pTargetUnit);
     return (uint32_t)(nCasterPartyId == nTargetPartyId);
 }
 

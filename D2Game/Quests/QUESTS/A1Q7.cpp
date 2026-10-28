@@ -107,8 +107,8 @@ bool __fastcall Q07_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
     }
 
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pPlayerBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pPlayerBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pPlayerBitBuffer, QUEST_DenOfEvil, QUESTSTATE_Completed);
     /* If NPC quest 1 state is different of just completed, completed, reward
                          awaits: active.
