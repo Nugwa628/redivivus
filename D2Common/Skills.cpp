@@ -2464,11 +2464,11 @@ eD2Skills __stdcall SKILLS_GetClassSkillByIndex(uint32_t nClassId, int32_t nSkil
 }
 
 int32_t __stdcall AmountOfSkillsByClassId(uint32_t nClassId) {
-    if (nClassId > 6) {
-      return 0;
+    if (nClassId <= 6) {
+      return (&sgptDataTable->pSkillsPerClassCounter->Amazon)[nClassId];
     }
 
-    return (&sgptDataTable->pSkillsPerClassCounter->Amazon)[nClassId];
+    return 0;
 }
 
 int __stdcall SKILL_CalcAttackFrames(D2UnitStrc * pUnit) {
