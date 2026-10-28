@@ -192,7 +192,7 @@ void __fastcall QUEST_RemoveQuestItemFromPlayer(::SGAMEDATA * pGame, struct D2Un
 // @sourcefile .\QUESTS\QUESTS.CPP
 void __fastcall QUEST_SendQuestUpdateToPlayer(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nInternalQuestNo);
 void __stdcall QUEST_SendQuestUpdateToPlayer_HaltTail(int nLine);
-void __fastcall QUEST_SetStateAndBroadcast(struct D2QuestDataStrc * pQuestData, int32_t nPrevStateFlag, struct D2UnitStrc * pUnit, ::fpExecuteOnUnitFunction fpFunction, bool bExecute);
+void __fastcall QUEST_SetStateAndBroadcast(struct D2QuestDataStrc * pQuestData, uint8_t nPrevStateFlag, struct D2UnitStrc * pUnit, ::fpExecuteOnUnitFunction fpFunction, bool bExecute);
 void __fastcall QUEST_SetStateFlag(struct D2QuestDataStrc * pQuestData, int32_t nState, char * szSourceFile, uint32_t nSourceLine);
 void __fastcall QUEST_OnNpcGossip(::SGAMEDATA * pGame, struct D2UnitStrc * pPlayer, uint32_t nNpcGUID, uint32_t nGossipIndex);
 void QUEST_ResetQuestDataForReconnect(eD2QuestsInternal nQuestNoInternal, ::SGAMEDATA * pGame);
@@ -256,7 +256,7 @@ BOOL __fastcall PORTAL_ActivateOrDeactivatePortalObject(::SGAMEDATA * * ppGame);
 // @sourcefile .\QUESTS\QUESTS.CPP
 void __fastcall SendQuestState(struct D2UnitStrc * pUnit, int32_t nQuestId);
 // @sourcefile .\QUESTS\QUESTS.CPP
-void __fastcall QUEST_SendQuestStatePacket(struct D2UnitStrc * pUnit, int32_t bQuestId, uint8_t bReasoned);
+void __fastcall QUEST_SendQuestStatePacket(struct D2UnitStrc * pUnit, uint8_t bQuestId, uint8_t bReasoned);
 void __stdcall QUEST_StubEmpty(uint32_t nUnused);
 // Quest helper that spawns a monster (nMonstatClassId) at or near a desired tile (nSpawnX,nSpawnY) in pRoom. First nudges the point inward if it lies outside the room's DRLG bounds (up to 0x15 diagonal steps), then FindSpawnableLocation searches for a collision-free spot (COLLIDE_MONSTER) and SpawnMonsters as Neutral. On failure it retries with a wider search radius, optionally relocating to a better nearby room (DRLGROOM_FindBetterNearbyRoom), up to ~0x14 attempts, finally falling back to the original coords. If bSetResurrectFlag is set, ORs UNITFLAG_ISRESURRECT|UNITFLAG_ISINIT onto the spawned monster. No return; side effect is the created monster unit.
 struct D2UnitStrc * __fastcall QUEST_SpawnMonsterNearCoords(::SGAMEDATA * pGame, int32_t nSpawnX, int32_t nSpawnY, struct D2RoomStrc * pRoom, int32_t bSetResurrectFlag, uint32_t nMonstatClassId);
