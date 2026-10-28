@@ -729,10 +729,10 @@ static void MONSTER_SpawnRandomAttachedMissile(D2UnitStrc * pUnit) {
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nErrLine = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nErrLine = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nErrLine = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nErrLine = 0;
     }
 
     D2UnitStrc* pMissileUnit = Missile::CastAttack(pUnit, nMissileId, nErrLine, nRandMissileIdx, SKILL_Attack, 1);
