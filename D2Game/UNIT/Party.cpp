@@ -461,7 +461,7 @@ void __fastcall ExecuteFunctionForEveryPartyMember(::SGAMEDATA * pGame, int16_t 
       }
     }
 
-    if (nPartyId == 0xffff) {
+    if (nPartyId == -1) {
       return;
     }
 
@@ -485,8 +485,8 @@ void __fastcall FindUnitWithFilter(::SGAMEDATA * pGame, D2UnitStrc * pUnit, pfnP
     }
 
     eD2LevelId dwLevelNo = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom1);
-    uint16_t nPartyId = SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       (*fpFilter)(pGame, pUnit, pDataForFunction);
       return;
     }
@@ -528,8 +528,8 @@ static void __stdcall GoldCalculations(D2UnitStrc * pUnit, int * pnParam1, int *
 void __fastcall BroadcastAutomapAllyPartyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2UnitPartyControlSubSub* pSubSub;
     D2ClientStrc* pClient = SUnit::SUNIT_GetClient(pUnit, ".\\UNIT\\Party.cpp", 0x24f);
-    uint16_t nPartyId = SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return;
     }
 
@@ -598,7 +598,7 @@ void __fastcall PARTY_RemoveUnitFromParty(::SGAMEDATA * pGame, D2UnitStrc * pUni
       nUnitGUID = pUnit->nUnitGUID;
       if (pUnit->eUnitType == UNIT_PLAYER) {
         nPartyId = GetPartyIdFromUnit(pGame, pUnit);
-        if (nPartyId == 0xffff) {
+        if (nPartyId == -1) {
           return;
         }
 
@@ -647,8 +647,8 @@ void __fastcall PARTY_RemoveUnitFromParty(::SGAMEDATA * pGame, D2UnitStrc * pUni
 
 uint32_t __fastcall GetPartiedUnitsLevelSum(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     uint32_t nLevelSum = 0;
-    uint16_t nPartyId = SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       uint32_t nLevel;
       nLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
       return nLevel;

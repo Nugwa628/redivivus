@@ -449,13 +449,13 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
                           nValue = uVar1;
                           if (bySendBits < 0x20) {
                             if (pItemStatCost->dwItemStatFlags & ITEMSTATCOSTFLAG_SIGNED) {
-                              nMaxVal = -1 << (bySendBits - 1);
+                              nMaxVal = -1 << (bySendBits - 1 & 0x1f);
                               nClampedVal = uVar1;
                               if ((int)uVar1 <= (int)nMaxVal) {
                                 nClampedVal = nMaxVal;
                               }
 
-                              nValue = (1 << (bySendBits - 1)) - 1;
+                              nValue = (1 << (bySendBits - 1 & 0x1f)) - 1;
                               if ((int)nClampedVal < (int)nValue) {
                                 nValue = uVar1;
                                 if ((int)uVar1 <= (int)nMaxVal) {
@@ -463,7 +463,7 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
                                 }
                               }
                             } else {
-                              nMaxVal = (1 << (bySendBits)) - 1;
+                              nMaxVal = (1 << (bySendBits & 0x1f)) - 1;
                               nValue = (int)uVar1 < 1 ? 0 : uVar1;
                               if ((int)nMaxVal <= (int)nValue) {
                                 nValue = nMaxVal;
@@ -605,19 +605,19 @@ void __fastcall PLAYER_SendStateDeltaToClient(D2UnitStrc * pUnit, D2ClientStrc *
                                 nValue = uVar1;
                                 if (bySendBits < 0x20) {
                                   if (!(pItemStatCost->dwItemStatFlags & ITEMSTATCOSTFLAG_SIGNED)) {
-                                    nMaxVal = (1 << (bySendBits)) - 1;
+                                    nMaxVal = (1 << (bySendBits & 0x1f)) - 1;
                                     nValue = (int)uVar1 < 1 ? 0 : uVar1;
                                     if ((int)nMaxVal <= (int)nValue) {
                                       nValue = nMaxVal;
                                     }
                                   } else {
-                                    nMaxVal = -1 << (bySendBits - 1);
+                                    nMaxVal = -1 << (bySendBits - 1 & 0x1f);
                                     nClampedVal = uVar1;
                                     if ((int)uVar1 <= (int)nMaxVal) {
                                       nClampedVal = nMaxVal;
                                     }
 
-                                    nValue = (1 << (bySendBits - 1)) - 1;
+                                    nValue = (1 << (bySendBits - 1 & 0x1f)) - 1;
                                     if ((int)nClampedVal < (int)nValue) {
                                       nValue = uVar1;
                                       if ((int)uVar1 <= (int)nMaxVal) {
@@ -876,10 +876,10 @@ void __fastcall UnitQueuePacket0xA1(D2UnitStrc * pUnit, uint16_t nParam, int32_t
     if (nOldValue == nNewValue) {
       return;
     }
-    if (pUnit) {
-      pMemory = pUnit->pMemory;
-    } else {
+    if (!pUnit) {
       pMemory = 0;
+    } else {
+      pMemory = pUnit->pMemory;
     }
 
     D2SUnitMsgStrc* pMsg = (D2SUnitMsgStrc*)D2_ALLOC_POOL(pMemory, 0x18);

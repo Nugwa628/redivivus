@@ -50,13 +50,13 @@ void __fastcall Q17_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     }
 
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
     if (!(nMessageIndex == 0x1d1 || nMessageIndex == 0x1d2)) {
       return;
     }
 
     /* SetQuestState(QUEST_SpokeToHratli, QUESTSTATE_Completed) — flag self player
-                         as having spoken to Hratli */ D2Common::QuestRecord::SetQuestState(pQuestRecord, QUEST_SpokeToHratli, QUESTSTATE_Completed);
+                         as having spoken to Hratli */ D2Common::QuestRecord::SetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_SpokeToHratli, QUESTSTATE_Completed);
     /* SetQuestRecordState(QUEST_SpokeToHratli, QUESTSTATE_JustCompleted=0xd) —
                          broadcast just-completed (triggers quest-log/UI update) */ QUEST_SetQuestRecordState(pQuestData->pGame, QUEST_SpokeToHratli, QUESTSTATE_JustCompleted);
 }
@@ -68,8 +68,8 @@ void __fastcall Q17_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_SpokeToHratli, QUESTSTATE_Completed);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_SpokeToHratli, QUESTSTATE_Completed);
     if (bQuestCompleted) {
       return;
     }
@@ -103,8 +103,8 @@ bool __fastcall Q17_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 // A3Q0 handler [0x0d] — player join / quest refresh. If this player already has SpokeToHratli Completed, re-broadcast it as JustCompleted so the joining client's quest log syncs. No new progress.
 void __fastcall Q17_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    BOOL bIsQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_SpokeToHratli, QUESTSTATE_Completed);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    BOOL bIsQuestCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_SpokeToHratli, QUESTSTATE_Completed);
     if (bIsQuestCompleted != 1) {
       return;
     }

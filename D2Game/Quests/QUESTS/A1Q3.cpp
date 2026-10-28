@@ -61,8 +61,8 @@ namespace D2Game::Quests::QUESTS::A1Q3 {
 
 // Q03_NpcGossipHandler (A1Q3 "Tools of the Trade") — gossip/announce callback bound via QUEST_SetStateAndBroadcast. Decides whether to push a quest-update (msg=3) to the player. Suppresses the update unless the quest is finishing right now: only sends if (Completed OR FinishedInPreviousGame) AND NOT JustCompleted AND NOT CannotCompleteQuestInGame. State transitions: none (read-only; emits QUEST_SendQuestUpdateToPlayer).
 BOOL __fastcall Q03_NpcGossipHandler(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
     /* GetQuestState(FinishedInPreviousGame=0xf) */ /* GetQuestState(JustCompleted=0xd) — must NOT be set to send update */ /* GetQuestState(CannotCompleteQuestInGame=0xe) — must NOT be set */ if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_FinishedInPreviousGame) , bQuestState != 0)) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_JustCompleted);
@@ -80,8 +80,8 @@ BOOL __fastcall Q03_NpcGossipHandler(::SGAMEDATA * pGame, D2UnitStrc * pUnit, vo
 
 // Q03_SyncQuestProgress (A1Q3) — per-unit iterator callback (IteratePlayerOrMonsterUnits) that mirrors the shared quest's nStateFlag into each player's quest record. If quest not yet Completed and reward not yet awaiting: read QuestData.nStateFlag and persist it as a record bit. Transitions: nStateFlag==2 -> SetQuestState Step0x02; nStateFlag==3 or 4 -> SetQuestState Step0x03.
 BOOL __fastcall Q03_SyncQuestProgress(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pQuestData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestDone = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
     if (bQuestDone == 1) {
       return 0;
@@ -144,8 +144,8 @@ void __fastcall Q03_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     short int nNpcClassId = pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo;
     D2QuestDataA1Q2Strc* pA1Q2Data = (D2QuestDataA1Q2Strc*)ITEMS::Items::Drop::HasQuestItem(pQuestArgs->pGame, pQuestArgs->pPlayer, 0x206d6468);
     ::SGAMEDATA* pPlayerData = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pPlayerData->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pMalusItem = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pMalusItem->pQuestRecord[pPlayerData->nDifficulty];
     if (nNpcClassId != 0x9a) {
       return;
     }
@@ -170,7 +170,7 @@ void __fastcall Q03_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
           QUEST_RemoveQuestItemFromPlayer(pQuestArgs->pGame, pQuestArgs->pPlayer, 0x206d6468);
           pA1Q3Data->nQuestItemCount--;
           nPartyId = UNIT::SUnit::GetPartyId(pQuestArgs->pPlayer);
-          if (nPartyId != 0xffff) {
+          if (nPartyId != -1) {
             UNIT::Party::ExecuteFunctionForEveryPartyMember(pQuestArgs->pGame, nPartyId, (::fpExecuteOnUnitFunction)Q03_AutoCompleteIfHighLevel, 0);
           }
           if (pQuestData->bIsNotIntroduction) {
@@ -223,8 +223,8 @@ void __fastcall Q03_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t nTargetClassId;
     uint8_t nStateFlag;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pMalusItem = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pMalusItem->pQuestRecord[pGame->nDifficulty];
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_JustCompleted);
     BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
     if (!pQuestArgs->pTarget) {
@@ -264,8 +264,8 @@ void __fastcall Q03_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 // DeactivateToolsOfTrade (A1Q3) — finalizes/closes out the quest for a player. Unconditionally SetQuestState Completed and UnsetQuestState RewardAwaits. If the quest was NOT already FinishedInPreviousGame, deactivate the shared quest object (bIsActive=false) and debug-log "deactivated tools of trade". State transitions: -> Completed, clears RewardAwaits.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q3.cpp
 void __fastcall DeactivateToolsOfTrade(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     /* SetQuestState(Completed=0) — finalize quest as done */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
     /* UnsetQuestState(RewardAwaits=1) — reward consumed/closed */ D2Common::QuestRecord::UnsetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_RewardAwaits);
     BOOL bFinishedInPrevGame = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_FinishedInPreviousGame);
@@ -356,8 +356,8 @@ bool __stdcall MallusHandler(D2QuestDataStrc * pQuestData) {
 // Q03_Callback_04 (A1Q3) — state-4 handler (player has picked up / is carrying the Malus). One-shot: if Step0x06 record bit not set, SetQuestState Step0x06 and play the Malus pickup sound event (event sound 0x24). Always broadcast state 2 (in-progress) via Q03_NpcGossipHandler. Transition: -> Step0x06 (first time only).
 void __fastcall Q03_Callback04_ItemPickedUp(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Step0x06);
     if (!BVar1) {
       /* SetQuestState(Step0x06=6) — mark Malus-pickup sound fired (one-shot) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Step0x06);
@@ -453,8 +453,8 @@ BOOL __fastcall OBJOP_A1Q3_DenOfEvil_CheckCompletion(D2ObjectOperateFnArg * pOpe
     }
 
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestStateSet = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
     /* GetQuestState(RewardAwaits=1) — don't drop Malus if reward already pending
                           */ if (bQuestStateSet == 1) {
@@ -562,8 +562,8 @@ static BOOL Q03_CheckPartyHasMalus(D2UnitStrc * pUnitStrc, D2QuestDataStrc * pQu
     }
 
     D2QuestDataA1Q3Strc* pQuestSpecific = pQuestData->pQuestSpecificData.pA1Q3;
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnitStrc);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnitStrc);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -612,7 +612,7 @@ bool __fastcall Q03_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
         iVar1 = QUEST_GetQuestRecordState(pQuestData->pGame, QUEST_ToolsOfTheTrade, 0xd);
         if (iVar1) {
           nCompletionState = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0);
-          *pbyStatusCode = (8 <= nCompletionState ? 0xc : 0x4);
+          *pbyStatusCode = (8 <= nCompletionState) * '\b' + '\x04';
         }
       }
     }
@@ -657,8 +657,8 @@ void __fastcall Q03_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D
     }
 
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestState) {
       return;
