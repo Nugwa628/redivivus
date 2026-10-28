@@ -1396,7 +1396,7 @@ static int32_t __stdcall SKILLS_CalculateBaseDamageFromStats(int32_t nType, D2Un
 }
 
 // Applies an Sorceress elemental mastery passive bonus to a base damage value. Given an element type (fire/lightning/cold/freeze/poison), reads the corresponding passive mastery stat from pUnit and scales nBaseDamage by that percentage via D2ApplyPercent. Returns the adjusted damage, or 0 if no mastery bonus or unrecognized element type.
-int32_t SKILLS_ApplyElementalMasteryBonus(eD2ElementalDamageTypeDWORD eElementType, int32_t nBaseDamage, D2UnitStrc * pUnit) {
+static int32_t SKILLS_ApplyElementalMasteryBonus(eD2ElementalDamageTypeDWORD eElementType, int32_t nBaseDamage, D2UnitStrc * pUnit) {
     int nMasteryBonus;
     int32_t nAdjustedDamage;
     switch (eElementType) {
