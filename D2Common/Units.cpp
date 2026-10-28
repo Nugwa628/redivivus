@@ -304,6 +304,9 @@ int32_t __stdcall GetUnitSizeX(D2UnitStrc * pUnit) {
       break;
       case UNIT_OBJECT:
         return pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->SizeX;
+      case UNIT_ITEM:
+      case UNIT_WARP:
+        return 1;
       case UNIT_MISSILE:
         pMissilesTxt = D2Client::GetMissleById(pUnit->nClassId);
       if (pMissilesTxt) {
@@ -311,8 +314,6 @@ int32_t __stdcall GetUnitSizeX(D2UnitStrc * pUnit) {
       }
 
       break;
-      case UNIT_ITEM:
-        return 1;
     }
 
     return 0;
@@ -338,6 +339,9 @@ int32_t __stdcall GetUnitSizeY(D2UnitStrc * pUnit) {
       break;
       case UNIT_OBJECT:
         return pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->SizeY;
+      case UNIT_ITEM:
+      case UNIT_WARP:
+        return 1;
       case UNIT_MISSILE:
         pMissilesTxt = D2Client::GetMissleById(pUnit->nClassId);
       if (pMissilesTxt) {
@@ -345,8 +349,6 @@ int32_t __stdcall GetUnitSizeY(D2UnitStrc * pUnit) {
       }
 
       break;
-      case UNIT_ITEM:
-        return 1;
     }
 
     return 0;

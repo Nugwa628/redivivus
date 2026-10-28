@@ -87,20 +87,20 @@ void __stdcall FreeArenaTxt() {
 // Builds sgCharTemplateLevelIndex (int[64]): for each CharTemplate level the index of its first row. Rows (stride 0xf0, level byte at +0x1f) must be sorted by ascending level; halts at line 0x5c otherwise.
 static void __stdcall TXT_BuildCharTemplateLevelIndex(D2CharTemplateTxt * pCharTemplateTxt, int32_t nCount) {
     memset(sgCharTemplateLevelIndex, 0, 0x100);
-    uint32_t nPrevLevel = 0;
+    int nPrevLevel = 0;
     int i = 0;
     if (0 >= nCount) {
       return;
     }
 
     do {
-      uint32_t nLevel;
-      nLevel = (uint32_t)pCharTemplateTxt[i].level;
-      if (nLevel < nPrevLevel) {
+      int nLevel;
+      nLevel = pCharTemplateTxt[i].level;
+      if (nPrevLevel > nLevel) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5c);
         exit(-1);
       }
-      if (nPrevLevel < nLevel) {
+      if (nLevel > nPrevLevel) {
         sgCharTemplateLevelIndex[nLevel] = i;
         nPrevLevel = nLevel;
       }
