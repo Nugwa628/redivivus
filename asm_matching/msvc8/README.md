@@ -351,10 +351,11 @@ names the evidence its rule rests on.
 | `fix_forloop.py` | a rotated loop, `if (0 < n) { int i = 0; do { B; i++; } while (i < n); }` | the for loop it was, `for (int i = 0; i < n; i++) { B }`: VC8 then initialises the counter before the test, as the original does |
 | `fix_fastcall.py` | `__cdecl`/`__stdcall` on a function whose original takes its first arguments in ECX (and EDX) and pops what `__fastcall` leaves on the stack | `__fastcall`, judged on the function and every caller |
 | `fix_paramtype.py` | a `uint8_t` or `uint16_t` parameter of a `__fastcall` function, where the original's callers load the whole of ECX or EDX (`mov edx, 5` against our `mov dl, 5`) | `int32_t`, judged on the function and every caller |
+| `fix_globalwidth.py` | a global or static typed `bool`, `uint8_t`, `uint16_t`, ..., by the accesses Ghidra saw: `mov byte ptr [g], 1` | the dword the original reads and writes, `mov dword ptr [g], 1`: `BOOL`, `int32_t` or `uint32_t` in every declaration, judged on the whole tree |
 | `fix_restore.py` | after a regeneration, the generator's body again for a function that matched before it | the body it matched with, from the old tree's commit (`fix_restore.py REV OLD_AUDIT`), kept only where the function then matches again |
 
 `oracle fix` runs them all (`scripts/fix_all.py`): conventions first
-(`fix_refile`, `fix_static`, then `--demote`, then `fix_fastcall`, `fix_paramtype`), the local rewrites after, the whole cycle
+(`fix_refile`, `fix_static`, then `--demote`, then `fix_fastcall`, `fix_paramtype`, `fix_globalwidth`), the local rewrites after, the whole cycle
 again while a round still keeps edits - their rules interact (a static
 function changes its callers; a comparison written back lets an if/else line
 up). It is also what a regenerated tree is put through, and what
@@ -410,7 +411,7 @@ map (`bracket`, `align`) and `tulayout.py` order our functions by source line
 | `scripts/diffgrams.py`, `classify.py`, `tulayout.py` | what differs, over all pairs |
 | `scripts/commit.py` | commit the branch's way (CLAUDE.md, "Commits"): tooling amended into the first commit, source changes as a new commit |
 | `scripts/objects.py` | `evidence/objects.tsv`: functions the tree files apart from the callers they share a register convention with, and declared conventions the original contradicts - for upstream |
-| `scripts/fixlib.py`, `fix_static.py`, `fix_refile.py`, `fix_compare.py`, `fix_assert.py`, `fix_ifelse.py`, `fix_switch.py`, `fix_guardstack.py`, `fix_idioms.py`, `fix_bitmask.py`, `fix_localtype.py`, `fix_uninline.py`, `fix_return.py`, `fix_gsbuffer.py`, `fix_stringops.py`, `fix_nestcall.py`, `fix_allocargs.py`, `fix_order.py`, `fix_permute.py`, `fix_caseorder.py`, `fix_forloop.py`, `fix_fastcall.py`, `fix_paramtype.py`, `fix_restore.py`, `fix_all.py`, `tidy_blanks.py` | systematic fixes, kept only where confirmed; `oracle fix` runs them all |
+| `scripts/fixlib.py`, `fix_static.py`, `fix_refile.py`, `fix_compare.py`, `fix_assert.py`, `fix_ifelse.py`, `fix_switch.py`, `fix_guardstack.py`, `fix_idioms.py`, `fix_bitmask.py`, `fix_localtype.py`, `fix_uninline.py`, `fix_return.py`, `fix_gsbuffer.py`, `fix_stringops.py`, `fix_nestcall.py`, `fix_allocargs.py`, `fix_order.py`, `fix_permute.py`, `fix_caseorder.py`, `fix_forloop.py`, `fix_fastcall.py`, `fix_paramtype.py`, `fix_globalwidth.py`, `fix_restore.py`, `fix_all.py`, `tidy_blanks.py` | systematic fixes, kept only where confirmed; `oracle fix` runs them all |
 | `scripts/oracle_config.py` | which build directory a configuration uses |
 | `scripts/objdiff.py` | do two builds contain the same code |
 | `scripts/abcompare.py` | baseline vs experiment, module by module |

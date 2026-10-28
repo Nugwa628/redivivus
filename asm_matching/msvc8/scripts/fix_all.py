@@ -6,7 +6,7 @@
 The fixers' rules interact: a function made static changes its callers, a
 comparison written back lets an if/else line up. So they run in a fixed order
 - files and conventions first (fix_refile, fix_static, then its --demote,
-fix_fastcall, fix_paramtype), then the local rewrites - and the cycle repeats while a round
+fix_fastcall, fix_paramtype, fix_globalwidth), then the local rewrites - and the cycle repeats while a round
 still keeps edits, at most N rounds.
 This is also what a regenerated tree is run through (UPSTREAM.md). Each
 fixer records its run in evidence/fixes.tsv; the audit at the end is the
@@ -18,7 +18,7 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FIXERS = [['fix_refile.py'], ['fix_static.py'], ['fix_static.py', '--demote'], ['fix_fastcall.py'], ['fix_paramtype.py'], ['fix_compare.py'],
+FIXERS = [['fix_refile.py'], ['fix_static.py'], ['fix_static.py', '--demote'], ['fix_fastcall.py'], ['fix_paramtype.py'], ['fix_globalwidth.py'], ['fix_compare.py'],
           ['fix_assert.py'], ['fix_ifelse.py'], ['fix_switch.py'], ['fix_caseorder.py'], ['fix_forloop.py'],
           ['fix_guardstack.py'], ['fix_allocargs.py'], ['fix_idioms.py'], ['fix_bitmask.py'], ['fix_localtype.py'], ['fix_uninline.py'], ['fix_return.py'],
           ['fix_gsbuffer.py'], ['fix_stringops.py'], ['fix_nestcall.py'], ['fix_order.py'],
