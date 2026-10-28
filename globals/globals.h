@@ -3947,7 +3947,7 @@ extern D2BNetGatewayAccessStr ActualRealmInfo;
 // lpCriticalSection parameter of DeleteCriticalSection
 extern _RTL_CRITICAL_SECTION lpCriticalSection_00881860;
 extern int gnBnetLogFileHandle;
-extern bool gbBnetLogInitialized;
+extern BOOL gbBnetLogInitialized;
 extern D2BnCacheFileHeaderStrc * gpCacheFileHeader;
 extern void * gpCacheBlockTable;
 extern void * g_pCacheCryptTable;
