@@ -193,7 +193,7 @@ uint32_t __fastcall SKILLSASS_GetPrgCalcByAuraLevel(D2UnitStrc * pUnit, eD2Skill
     if (!pSkillTxt) {
       return 0;
     }
-    if (pSkillTxt->progressive) {
+    if ((*((uint8_t*)pSkillTxt + 0x4) & gadwBitMasks[2])) {
       D2StatListExStrc* pStatListEx;
       sAuraState = pSkillTxt->aurastate;
       if (sAuraState < 0 || (int)sAuraState >= sgptDataTable->nTxtStatesSize) {
