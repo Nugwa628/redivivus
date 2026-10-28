@@ -1269,7 +1269,7 @@ void __stdcall DRLGROOM_RemoveRoomFromAct(D2DrlgActStrc * pDrlgAct, D2RoomStrc *
 }
 
 void __stdcall DRLGROOM_SwapActiveRoomExBetweenLevels(D2RoomStrc * pRoom, D2RoomStrc * pRoom2) {
-    D2RoomExStrc* pRoomEx1 = !pRoom ? 0 : pRoom->pRoomEx;
+    D2RoomExStrc* pRoomEx1 = pRoom ? pRoom->pRoomEx : 0;
     if (pRoom2) {
       Drlg::ChangeActiveRoomBetweenLevels(pRoomEx1, pRoom2->pRoomEx);
       return;
