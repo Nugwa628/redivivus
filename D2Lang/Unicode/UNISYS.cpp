@@ -644,7 +644,8 @@ uint16_t * __fastcall STRING_CopyCharToWCharWithSetMaxSize(uint16_t * pDestinati
         i++;
       } while (i < nSize);
     }
-    if (szSource[i] == '\0') {
+    switch (szSource[i]) {
+    case '\0':
       pDestination[i] = L'\0';
       return pDestination;
     }

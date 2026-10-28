@@ -2056,7 +2056,8 @@ static BOOL INPUT_HandleRightClickRepeat(D2UnderMouseStrc * pUnderMouse) {
 static BOOL INPUT_HandleRightClickWithPet(D2UnderMouseStrc * pUnderMouse) {
     IsUnitNotMoving(pUnderMouse);
     int32_t nUnitGUID = GAME::RosterPets::GetRosterPetGUID(pUnderMouse->pPlayer, 7, 0);
-    if (nUnitGUID == -1) {
+    switch (nUnitGUID) {
+    case -1:
       return 0;
     }
 

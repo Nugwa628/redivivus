@@ -918,7 +918,8 @@ static D2UnitStrc * CUNIT_IterateUntilWarp(int * pnParam) {
 uint16_t * __fastcall ROOM_GetWarpDestinationName(D2RoomStrc * pRoom, D2UnitStrc * pWarpUnit) {
     eD2LevelId eDestLevel = !pWarpUnit ? ~LEVEL_None : pWarpUnit->nClassId;
     eDestLevel = D2Common::DUNGEON::Dungeon::GetWarpDestinationLevel(pRoom, eDestLevel);
-    if (eDestLevel == LEVEL_None) {
+    switch (eDestLevel) {
+    case LEVEL_None:
       return nullptr;
     }
 
