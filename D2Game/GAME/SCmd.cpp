@@ -591,7 +591,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x15_WarpXY(D2ClientStrc * pClient, uint8_t
 }
 
 // Server-to-client map reveal. Opcode 0x07, 6 bytes. Reveals automap area around tile coordinate.
-void __fastcall NET_D2GS_SERVER_Send_0x07_MapReveal(D2ClientStrc * pClient, uint8_t nAreaId, uint16_t nTileX, uint16_t nTileY) {
+void __fastcall NET_D2GS_SERVER_Send_0x07_MapReveal(D2ClientStrc * pClient, int32_t nAreaId, uint16_t nTileX, uint16_t nTileY) {
     struct { uint8_t e0, e1, e2, e3, e4, e5; } aPacket;
     *(uint16_t*)((char*)&aPacket + 1) = nTileX;
     ((uint8_t*)&aPacket)[0] = 7;
@@ -601,7 +601,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x07_MapReveal(D2ClientStrc * pClient, uint
 }
 
 // Server-to-client map hide. Opcode 0x08, 6 bytes.
-void __fastcall NET_D2GS_SERVER_Send_0x08_REMOVEROOM(D2ClientStrc * pClient, uint8_t bParam, uint16_t nTileX, uint16_t nTileY) {
+void __fastcall NET_D2GS_SERVER_Send_0x08_REMOVEROOM(D2ClientStrc * pClient, int32_t bParam, uint16_t nTileX, uint16_t nTileY) {
     struct { uint8_t e0, e1, e2, e3, e4, e5; } aPacket;
     *(uint16_t*)((char*)&aPacket + 1) = nTileX;
     ((uint8_t*)&aPacket)[0] = 8;

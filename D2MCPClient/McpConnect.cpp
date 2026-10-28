@@ -503,7 +503,7 @@ void __fastcall NET_MCP_CLIENT_Send_0x07_CharLogon(char * szText) {
     Fog::Src::D2QSSocket::NET_MCP_CLIENT_Send(D2Client::MCP::MCPD2QSSocket, &__frame0.byPacketId, (uint16_t)(uintptr_t)(__frame0.pStrLen + 1));
 }
 
-void __fastcall NET_MCP_CLIENT_Send_0x03_CreateGame(mcp0x03data * pMcpData, int16_t nRequestId) {
+void __fastcall NET_MCP_CLIENT_Send_0x03_CreateGame(mcp0x03data * pMcpData, int32_t nRequestId) {
     MCP_CREATEGAME sPacket;
     SetD2GSJoinResult(0);
     sPacket.nGameFlags = pMcpData->nGameFlags;
