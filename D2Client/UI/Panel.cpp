@@ -273,7 +273,7 @@ void __fastcall SPELLSEL_DrawSkillIcon(D2UnitStrc * pUnit, D2SkillStrc * pSkill,
 
     DC6* pSkillIconDC6 = SpellSel::ARCHIVE_LoadSpellsClassSkillicon(&pSkillTxt->skill);
     GLOBALPALLETE ePalette = SpellSel::SPELLSEL_GetSkillPalette(pUnit, pSkill);
-    if (!pSkillTxt->InTown) {
+    if (!(*((uint8_t*)pSkillTxt + 0x5) & gadwBitMasks[0])) {
       D2RoomStrc* pRoom;
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       if (pRoom) {
