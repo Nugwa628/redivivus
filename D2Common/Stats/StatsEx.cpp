@@ -258,7 +258,8 @@ static void __stdcall STATLIST_TrackChangedStat(int32_t nShiftedStat, D2StatList
     }
 
     pStatInfo->pChangedStatIds[nInsertPos] = nShiftedStat;
-    pStatEx->sChangedStats.wCount++;
+    short int* pwCount = &pStatEx->sChangedStats.wCount;
+    (*pwCount)++;
 }
 
 // Binary-searches the base stat array of pStatList for a packed stat key (wStatIndex:wSubIndex = nParam). If found and the ItemStatCost entry has FMIN flag set, the stat list is owned by a player/monster unit, and the raw value is below the minaccr threshold, returns minaccr left-shifted by valshift instead. Otherwise returns the raw stat value, or 0 if not found. Uses a custom calling convention (pStatList in EBX, nParam in EDI).
@@ -2260,7 +2261,8 @@ void __stdcall STATLIST_MarkUnitStatsChanged(D2UnitStrc * pUnit) {
       }
     }
 
-    pStatsExRoot->sStatList.nFlags &= -3;
+    int* pnRootFlags = &pStatsExRoot->sStatList.nFlags;
+    *pnRootFlags &= -3;
 }
 
 // Iteratively removes all stats from pStatList whose value is non-zero (treating them as child-list references). For each iteration, binary-searches the base stat array for the first stat entry, removes it via STATLIST_RemoveStatFromArray, propagates the negated value through STATLIST_PropagateStatChange, and if the owner is a player notifies the stat tracking system. Loops until no stats remain. No-op on NULL input.
@@ -2327,7 +2329,8 @@ void __stdcall STATLIST_FreeUnitChildStatLists(D2UnitStrc * pUnit) {
       return;
     }
 
-    pUnit->pStatsEx->sStatList.nFlags &= -257;
+    int* pnUnitStatsFlags = &pUnit->pStatsEx->sStatList.nFlags;
+    *pnUnitStatsFlags &= -257;
     pStatsEx = pUnit->pStatsEx;
     if (!(pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U)) {
       return;

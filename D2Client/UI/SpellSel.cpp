@@ -1295,7 +1295,7 @@ static int32_t SPELLSEL_GetSkillTreeColumnOffset(char cParam) {
     return ScreenSizeX - gnPanelOffsetX - 0xa7;
 }
 
-static void SPELLSEL_DrawTabHeader(void * pThis, int32_t nYOffset) {
+static void __stdcall SPELLSEL_DrawTabHeader(void * pThis, int32_t nYOffset) {
     ui::UI_DrawTextCentered(WindowSizeX - gnPanelOffsetX - 0x5a, gnPanelOffsetY + ScreenSizeY - 0x1e0 + nYOffset, WindowSizeX - gnPanelOffsetX, (uint16_t*)pThis, 0);
 }
 

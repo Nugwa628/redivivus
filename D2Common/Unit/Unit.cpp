@@ -74,10 +74,10 @@ static BOOL __stdcall DRLGROOM_ValidateUnitPosition(int32_t nParam, D2RoomStrc *
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnitY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nUnitY = PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nUnitY = 0;
+    } else {
+      nUnitY = PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
     }
     if (!pRoom || (nRoomXStart = pRoom->sCoords.dwXStart , nUnitX < nRoomXStart) || pRoom->sCoords.dwXSize + nRoomXStart <= nUnitX || (nUnitX = pRoom->sCoords.dwYStart , nUnitY < nUnitX || pRoom->sCoords.dwYSize + nUnitX <= nUnitY)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e);
