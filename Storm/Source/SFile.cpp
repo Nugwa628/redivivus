@@ -133,8 +133,8 @@ int32_t __stdcall SFILE_DecompressLzw(int32_t pSrcData, int32_t pDstData, int32_
       gpSFileExplodeWorkBuffer = SMem::SMemAlloc(0x3134, ".\\SOURCE\\SFILE.CPP", 0x2c9, 0);
     }
 
-    bufState[2] = pSrcData;
     bufState[0] = pDstData;
+    bufState[2] = pSrcData;
     bufState[1] = 0;
     bufState[3] = 0;
     bufState[4] = nDstSize;

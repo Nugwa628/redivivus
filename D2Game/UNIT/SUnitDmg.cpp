@@ -122,7 +122,7 @@ uint32_t __fastcall DAMAGE_CheckMonsterTypeVsMonsterType(uint32_t nMonTypeA, int
       return 0;
     }
 
-    return *(uint32_t*)(sgptDataTable->pTxtMonTypeUnknown + (sgptDataTable->nMonTypeEquivRowDwords * nMonTypeB + ((int)nMonTypeA >> 5)) * 4) & gadwBitMasks[nMonTypeA & 0x1f];
+    return *(uint32_t*)((uint8_t*)sgptDataTable->pTxtMonTypeUnknown + (sgptDataTable->nMonTypeEquivRowDwords * nMonTypeB + ((int)nMonTypeA >> 5)) * 4) & gadwBitMasks[nMonTypeA & 0x1f];
 }
 
 uint32_t __stdcall DAMAGE_RollPhysicalDamageRange(int32_t nDamageRange, int32_t nMinPctBonus, D2UnitStrc * pUnit, int32_t nDamageMin, int32_t nRangePctBonus, uint32_t nDamageAccum) {

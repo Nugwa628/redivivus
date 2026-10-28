@@ -109,15 +109,11 @@ BOOL __fastcall Skills_CltDoFunc_Bar_DoubleSwing_Sound(D2UnitStrc * pUnit, eD2Sk
       nTargetY = 0;
       nTargetX = 0;
       nHitSound = 4;
-
-
       Sound::SOUND_PlaySound(UNIT::UnitSnd::UNITSND_GetSkillCastSound(pUnit, D2Common::Units::GetHitClassForPlayerOrMonster(pUnit)), pUnit, nHitSound, nTargetX, nTargetY);
       pConfirmedTarget = UNIT::CUnit::GetConfirmedTargetUnit(pUnit);
       if (pConfirmedTarget && pUnit->pPath.pStaticPath) {
         nTargetY = 0;
-        nHitSound = Units::GetYPosFromDynamicPathUnit(pConfirmedTarget);
-
-        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pConfirmedTarget), nHitSound, nTargetY);
+        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pConfirmedTarget), Units::GetYPosFromDynamicPathUnit(pConfirmedTarget), nTargetY);
         return 1;
       }
     } else {
@@ -130,9 +126,7 @@ BOOL __fastcall Skills_CltDoFunc_Bar_DoubleSwing_Sound(D2UnitStrc * pUnit, eD2Sk
       pConfirmedTarget = Skills::SKILL_FindClosestTargetWithStats(pUnit, 0, 0, 3, 0, uVar2, nullptr);
       if (pConfirmedTarget && pUnit->pPath.pStaticPath) {
         nTargetY = 0;
-        nHitSound = Units::GetYPosFromDynamicPathUnit(pConfirmedTarget);
-
-        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pConfirmedTarget), nHitSound, nTargetY);
+        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pConfirmedTarget), Units::GetYPosFromDynamicPathUnit(pConfirmedTarget), nTargetY);
       }
     }
 
