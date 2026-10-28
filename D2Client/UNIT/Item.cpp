@@ -2825,10 +2825,10 @@ void __fastcall HandleItemPutInBelt(uint8_t * pbParam) {
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nIndex = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nIndex = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nIndex = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nIndex = 0;
       }
       UI::Panel::PANEL_SetBeltSlotHoverFlag(nIndex, 1);
       UI::ui::UI_SendMouseMoveMessage();
