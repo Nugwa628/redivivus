@@ -116,7 +116,7 @@ int __fastcall MISSILETBLS_ValidateCalcCode(char * szText, int * pOutHasResolved
       } else if (nKeywordNumber == 4) {
         if (sgtDataTable.pTxtMissilesLink) {
           nLinkIdx = Fog::Src::Excel::GetLinkNodeIndex(sgtDataTable.pTxtMissilesLink, szText, 0);
-          if (-1 < nLinkIdx) {
+          if (0 <= nLinkIdx) {
             *pOutHasResolvedToConstant = 1;
             return nLinkIdx;
           }

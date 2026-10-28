@@ -5580,7 +5580,7 @@ void __fastcall TXT_AllocTxt_MonEquip(D2PoolManagerStrc * pMemory) {
 
     do {
       pMonStatEntry = &sgtDataTable.pTxtMonEquip[nEquipRow].monster;
-      if (-1 < *pMonStatEntry) {
+      if (0 <= *pMonStatEntry) {
         nMonStatCount = (int)*pMonStatEntry;
         if (nMonStatCount < sgptDataTable->nTxtMonStatsSize) {
           if (sgtDataTable.pTxtMonStats[nMonStatCount].nMonEquipId < 0) {
