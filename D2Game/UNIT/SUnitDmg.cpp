@@ -1137,7 +1137,7 @@ static int32_t DAMAGE_AbsorbDamageByPercent(D2DamageContext * pCtx, D2ResistTabl
 
 static int32_t __stdcall DAMAGE_ApplyElementalDamageWithResist(D2DamageContext * pCtx, int32_t bBypass, D2ResistTableEntry * pEntry) {
     int nReducedDmg;
-    uint8_t* pDmgField = pCtx->pDamage->nReserved66 + pEntry->nDamageFieldOffset - 0x66;
+    uint8_t* pDmgField = ((uint8_t*)&pCtx->pDamage->nReserved66) + pEntry->nDamageFieldOffset - 0x66;
     int nIncomingDmg = *(int*)pDmgField;
     if (nIncomingDmg <= 0) {
       *(int*)pDmgField = 0;
@@ -1501,9 +1501,9 @@ void __fastcall DAMAGE_ApplyDefensiveReduction(::SGAMEDATA * pGame, D2UnitStrc *
       do {
         if (pResistTableIter[8]) {
           nMercType = *pResistTableIter;
-          if (0 < *(int32_t*)(pDmg->nReserved66 + (nMercType - 0x66))) {
-            nResistScaled = D2Client::Stats::D2ApplyPercent(*(int32_t*)(pDmg->nReserved66 + (nMercType - 0x66)), nXpMultiplier, 100);
-            *(int32_t*)(pDmg->nReserved66 + (nMercType - 0x66)) = nResistScaled;
+          if (0 < *(int32_t*)(((uint8_t*)&pDmg->nReserved66) + (nMercType - 0x66))) {
+            nResistScaled = D2Client::Stats::D2ApplyPercent(*(int32_t*)(((uint8_t*)&pDmg->nReserved66) + (nMercType - 0x66)), nXpMultiplier, 100);
+            *(int32_t*)(((uint8_t*)&pDmg->nReserved66) + (nMercType - 0x66)) = nResistScaled;
           }
         }
 
@@ -1972,7 +1972,7 @@ BOOL __stdcall DAMAGE_CheckKnockbackThreshold(D2UnitStrc * pUnit, D2DamageStrc *
     return 0;
 }
 
-void __stdcall DAMAGE_RemoveObjectAtSameCoords(int32_t nClassId, D2UnitStrc * pUnit) {
+static void __stdcall DAMAGE_RemoveObjectAtSameCoords(int32_t nClassId, D2UnitStrc * pUnit) {
     POINT ptObjPos;
     POINT ptUnitPos;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);

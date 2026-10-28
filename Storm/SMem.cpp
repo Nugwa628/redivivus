@@ -74,7 +74,7 @@ static D2FogHeapDescStrc * __stdcall SMEM_LockHeapByBlockPtr(uint32_t * pnOutBuc
 }
 
 // @blizzard Warning (SMEM.CPP)
-void __stdcall SMEM_Warning(uint32_t * pnName, int32_t nSourceLine, DWORD dwErrorCode) {
+static void __stdcall SMEM_Warning(uint32_t * pnName, int32_t nSourceLine, DWORD dwErrorCode) {
     Source::SErr::SErrSetLastError(dwErrorCode);
     if (!g_SMemUnknownFlag) {
       return;
