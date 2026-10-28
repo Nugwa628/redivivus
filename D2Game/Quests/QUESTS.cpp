@@ -961,7 +961,7 @@ uint32_t __stdcall CheckIntroductionFlagByInternalQuestId(::SGAMEDATA * pGame, e
         pQuestData = pQuestData->pPrev;
       }
 
-      return (uint32_t)pQuestData->bIsNotIntroduction;
+      return pQuestData->bIsNotIntroduction == 1;
     }
 }
 
