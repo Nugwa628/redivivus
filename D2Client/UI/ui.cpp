@@ -2232,14 +2232,7 @@ void __fastcall DRAW_UnitUnderMouse(D2UnitStrc * pUnit) {
       }
     }
     nResult = D2gfx::D2GFX::D2GFX_IsPerspectiveActive();
-    if (!nResult) {
-      nX = D2Common::Units::GetTargetX(pUnit);
-      nY = Path::DRAW_GetWorldOffsetX();
-      nHealthBarScreenX = nX - nY;
-      nX = D2Common::Units::GetTargetY(pUnit);
-      nY = Path::DRAW_GetWorldOffsetY();
-      gnMercenaryHealthBarScreenY = nX - nY;
-    } else {
+    if (nResult) {
       nX = D2Common::Units::GetPrecisionX(pUnit);
       nY = D2Common::Units::GetPrecisionY(pUnit);
       nResult = D2gfx::D2GFX::D2GFX_IsInPerspectiveBounds(nX, nY);
@@ -2262,6 +2255,13 @@ void __fastcall DRAW_UnitUnderMouse(D2UnitStrc * pUnit) {
       }
       gnMercenaryHealthBarScreenY = (int)__frame0.pLevelTxtResult->MonLvl;
       nHealthBarScreenX = __frame0.nScreenX;
+    } else {
+      nX = D2Common::Units::GetTargetX(pUnit);
+      nY = Path::DRAW_GetWorldOffsetX();
+      nHealthBarScreenX = nX - nY;
+      nX = D2Common::Units::GetTargetY(pUnit);
+      nY = Path::DRAW_GetWorldOffsetY();
+      gnMercenaryHealthBarScreenY = nX - nY;
     }
     switch (pUnit->eUnitType) {
       case UNIT_PLAYER:
