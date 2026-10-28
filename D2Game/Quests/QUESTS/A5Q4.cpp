@@ -65,21 +65,22 @@ typedef bool (__fastcall *QUESTSEQ)(D2QuestDataStrc * pQuestData);
 namespace D2Game::Quests::QUESTS::A5Q4 {
 
 // Q34_NotifyQuestState (Betrayal of Harrogath / kill Nihlathak). Quest-update callback passed to QUEST_SetStateAndBroadcast. Sends quest-log update (msg 0x22) to the player only when the quest is in a finished/just-completed/cannot-complete terminal state (Completed | FinishedInPreviousGame), but NOT yet acknowledged via JustCompleted/CannotComplete. Gates client log refresh on real completion.
-void __fastcall Q34_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+int __fastcall Q34_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_BetrayalOfHaggorath, QUESTSTATE_Completed);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_BetrayalOfHaggorath, QUESTSTATE_FinishedInPreviousGame) , bQuestState != 0)) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_BetrayalOfHaggorath, QUESTSTATE_JustCompleted);
       if (!bQuestState) {
         bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_BetrayalOfHaggorath, QUESTSTATE_CannotCompleteQuestInGame);
         if (!bQuestState) {
-          return;
+          return 0;
         }
       }
     }
 
     QUEST_SendQuestUpdateToPlayer(pGame, pUnit, 0x22);
+    return 0;
 }
 
 // Q34_StatusFilter (Betrayal of Harrogath). Computes the quest-log icon/state byte (*nUnknown) shown to the client from the QuestRecord bits: 0=not-yet (intro), 0x0c=CannotComplete-in-this-game, else maps Step0x04 bit (+4) or the in-memory nStateFlagPrev. Read-only on quest state.
@@ -221,8 +222,8 @@ void __fastcall Q34_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 
 // A5Q4 (Betrayal of Harrogath) per-player iterator callback. Requires Prison of Ice completed or reward-pending as a prerequisite. If Betrayal is not yet completed/rewarded, mirrors the shared in-memory nStateFlag (2→Step0x02, 3→Step0x03) into each player's QuestRecord so their quest log tracks the current step.
 BOOL __fastcall Q34_UpdateQuestStep(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_PrisonOfIce, QUESTSTATE_Completed);
     if (!bQuestState) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_PrisonOfIce, QUESTSTATE_RewardAwaits);
@@ -345,8 +346,8 @@ void __fastcall Q34_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int nTargetClassId;
     uint32_t nMessageIndex;
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bPrisonComplete = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_JustCompleted);
     if (!pQuestArgs->pTarget) {
@@ -488,14 +489,14 @@ BOOL __fastcall Q34_CheckNearNihlathak(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
 
 // Q34_PropagateCompleteToParty (Betrayal of Harrogath). Per-player: if this player has the Betrayal JustCompleted bit, propagates completion to every party member via Q34_SetCompleteForPartyMember. Shares the Nihlathak kill credit with the party.
 BOOL __fastcall Q34_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_BetrayalOfHaggorath, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_BetrayalOfHaggorath, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
 
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -505,8 +506,8 @@ BOOL __fastcall Q34_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * p
 
 // Q34_SetCannotComplete (Betrayal of Harrogath). Per-player: for players NOT near Nihlathak at kill time (not Completed/RewardAwaits/JustCompleted), sets the CannotCompleteQuestInGame bit and notifies (msg 0x22). They must be present for the kill or forfeit completion this game.
 BOOL __fastcall Q34_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_BetrayalOfHaggorath, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -530,8 +531,8 @@ BOOL __fastcall Q34_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, v
 
 // Q34_PlayCompletionSound (Betrayal of Harrogath). Per-player: if player has Betrayal JustCompleted bit, attaches the quest-complete sound/event (id 0x52) to that player unit.
 BOOL __fastcall Q34_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_BetrayalOfHaggorath, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_BetrayalOfHaggorath, QUESTSTATE_JustCompleted);
     if (!bQuestState) {
       return 0;
     }
@@ -779,8 +780,8 @@ void __fastcall Q34_InitData(D2QuestDataStrc * pQuestData) {
 
 // Q34_ClaimReward (Betrayal of Harrogath). Finalizes reward: sets the player's Completed bit and clears RewardAwaits for QUEST_BetrayalOfHaggorath (transition RewardAwaits -> Completed). Called when Anya's reward is collected.
 void __fastcall Q34_ClaimReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     /* SetQuestState(Betrayal q0x26, Completed=0): mark quest finished on reward
                          claim */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_BetrayalOfHaggorath, QUESTSTATE_Completed);
     /* UnsetQuestState(Betrayal q0x26, RewardAwaits=1): clear pending-reward now
