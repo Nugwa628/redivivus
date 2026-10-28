@@ -255,11 +255,10 @@ void __fastcall Q32_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
           }
 
           QUESTGUID_AddPlayerToList(&pQuestData->sQuestGUID, nErrorLine);
-          pBitBuffer2.nExtra = 0;
+          memset(&pBitBuffer2, 0, sizeof(pBitBuffer2));
           pBitBuffer2.nPacketId = ']';
           pBitBuffer2.nQuestId = ' ';
           pBitBuffer2.nAlertFlags = '\x02';
-          pBitBuffer2.nFilterStatus = '\0';
           pClient = UNIT::SUnit::SUNIT_GetClient(pQuestArgs->pPlayer, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q2.cpp", 0x14e);
           GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &pBitBuffer2);
         }

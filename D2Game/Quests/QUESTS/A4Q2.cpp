@@ -468,11 +468,10 @@ BOOL __fastcall Q27_PlayerCheckCompletionSendState(::SGAMEDATA * pGame, D2UnitSt
     }
 
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x1a4);
-    aQuestStatePacket.nExtra = 0;
+    memset(&aQuestStatePacket, 0, sizeof(aQuestStatePacket));
     aQuestStatePacket.nPacketId = ']';
     aQuestStatePacket.nQuestId = '\x17';
     aQuestStatePacket.nAlertFlags = '\x02';
-    aQuestStatePacket.nFilterStatus = '\0';
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &aQuestStatePacket);
     UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pUnit, 0x4b, pUnit);
     return 0;
@@ -484,11 +483,10 @@ void __fastcall Q27_InitPandemoniumAndSendState(::SGAMEDATA * pGame, D2UnitStrc 
     D2GSPacketSrv0x5D aQuestStatePacket;
     GAME::Level::InitLevel(pGame, pUnit, LEVEL_ThePandemoniumFortress, 0);
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x1b8);
-    aQuestStatePacket.nExtra = 0;
+    memset(&aQuestStatePacket, 0, sizeof(aQuestStatePacket));
     aQuestStatePacket.nPacketId = ']';
     aQuestStatePacket.nQuestId = '\x17';
     aQuestStatePacket.nAlertFlags = '\x01';
-    aQuestStatePacket.nFilterStatus = '\0';
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &aQuestStatePacket);
 }
 
@@ -508,11 +506,10 @@ BOOL __fastcall Q27_PlayerEnterGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
       D2GSPacketSrv0x5D sPacket5D;
       GAME::Level::InitLevel(pGame, pUnit, LEVEL_ThePandemoniumFortress, 0);
       pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x1b8);
-      sPacket5D.nExtra = 0;
+      memset(&sPacket5D, 0, sizeof(sPacket5D));
       sPacket5D.nPacketId = ']';
       sPacket5D.nQuestId = '\x17';
       sPacket5D.nAlertFlags = '\x01';
-      sPacket5D.nFilterStatus = '\0';
       GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &sPacket5D);
       return 0;
     }
