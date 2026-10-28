@@ -528,7 +528,7 @@ void __stdcall NPCMENU_HireMerc() {
     POINT ptDialogPos;
     GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT(0x36, gnNpcMenuMercHireCost2, (uint32_t)(uint16_t)D2Client::Merc::D2MercForHire[gnNpcMenuMercHireCost1].nNameStringId);
     if (Dialog::gpNpcMercListDialog) {
-      Dialog::FreeDialogStrc(nullptr);
+      Dialog::FreeDialogStrc(Dialog::gpNpcMercListDialog);
       if (gpNpcMenuMercListBox) {
         gpNpcMenuMercListBox->pVtable->ScalarDeletingDestructor(gpNpcMenuMercListBox, 1);
       }
@@ -3242,7 +3242,7 @@ int __stdcall NPCMENU_MercDrawCallback1() {
       return 1;
     }
 
-    Dialog::FreeDialogStrc(nullptr);
+    Dialog::FreeDialogStrc(Dialog::gpNpcGossipDialog);
     Sound::SOUND_PlaySound(SOUND_CURSOR_PASS, nullptr, 0, 0, 0);
     Dialog::gpNpcGossipDialog = 0;
     NPCMENU_OpenInteractionDialog();
@@ -3259,7 +3259,7 @@ int __stdcall NPCMENU_ConfirmDialogCancelCallback() {
       return 1;
     }
 
-    Dialog::FreeDialogStrc(nullptr);
+    Dialog::FreeDialogStrc(Dialog::gpNpcActionConfirmDialog);
     Sound::SOUND_PlaySound(SOUND_CURSOR_PASS, nullptr, 0, 0, 0);
     Dialog::gpNpcActionConfirmDialog = 0;
     NPCMENU_OpenInteractionDialog();
@@ -3438,7 +3438,7 @@ int __stdcall NPCMENU_ShowAkaraRespecConfirm_Unused() {
 
 int __stdcall NPCMENU_MercListDrawCallback() {
     if (Dialog::gpNpcMercListDialog) {
-      Dialog::FreeDialogStrc(nullptr);
+      Dialog::FreeDialogStrc(Dialog::gpNpcMercListDialog);
       if (gpNpcMenuMercListBox) {
         gpNpcMenuMercListBox->pVtable->ScalarDeletingDestructor(gpNpcMenuMercListBox, 1);
       }
@@ -3493,7 +3493,7 @@ int __stdcall NPCMENU_BuildMercHireMenu() {
       Dialog::gpNpcInteractionDialog = 0;
     }
     if (Dialog::gpNpcMercListDialog) {
-      Dialog::FreeDialogStrc(nullptr);
+      Dialog::FreeDialogStrc(Dialog::gpNpcMercListDialog);
       if (gpNpcMenuMercListBox) {
         gpNpcMenuMercListBox->pVtable->ScalarDeletingDestructor(gpNpcMenuMercListBox, 1);
       }
@@ -4135,7 +4135,7 @@ void __stdcall NPCMENU_RefreshMenuDialog() {
       return;
     }
     if (Dialog::gpNpcMercListDialog) {
-      Dialog::FreeDialogStrc(nullptr);
+      Dialog::FreeDialogStrc(Dialog::gpNpcMercListDialog);
       if (gpNpcMenuMercListBox) {
         gpNpcMenuMercListBox->pVtable->ScalarDeletingDestructor(gpNpcMenuMercListBox, 1);
       }
