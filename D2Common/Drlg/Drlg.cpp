@@ -3875,7 +3875,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
         }
       } else {
         nDstY = (uint16_t)(0 <= nDeltaX) * 2 - 1;
-        *(uint16_t*)(char*)&nPackedSrc = (uint16_t)(-1 < nDeltaY) * 2 - 1;
+        *(uint16_t*)(char*)&nPackedSrc = (uint16_t)(0 <= nDeltaY) * 2 - 1;
         nDeltaX = nStepsY;
         if (nCurX != sDst.nX) {
           do {
@@ -3928,7 +3928,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
         if (nCurX != sDst.nX) {
           while (true) {
             nPackedPrev = nPackedCur;
-            nCurX = nCurX + (uint16_t)(-1 < nDeltaX) * 2 - 1;
+            nCurX = nCurX + (uint16_t)(0 <= nDeltaX) * 2 - 1;
             nPackedCur = (uint32_t)((uint32_t)(uint16_t)*(uint16_t*)((char*)&nPackedCur + 2) << 16 | (uint32_t)(uint16_t)nCurX);
             iVar1 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)nCurX, (uint32_t)nCurY, nUnitWidth, eCollisionFlag_00);
             if (iVar1) {
@@ -3944,7 +3944,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
       } else {
         bNotAtDst = nCurY != nDstY;
         nDstY = (uint16_t)(0 <= nDeltaX) * 2 - 1;
-        *(uint16_t*)(char*)&nPackedSrc = (uint16_t)(-1 < nDeltaY) * 2 - 1;
+        *(uint16_t*)(char*)&nPackedSrc = (uint16_t)(0 <= nDeltaY) * 2 - 1;
         nDeltaX = nStepsX;
         if (bNotAtDst) {
           while (true) {

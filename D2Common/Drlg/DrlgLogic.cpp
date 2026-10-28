@@ -57,7 +57,7 @@ static void DRLGLOGIC_PopulateGridCoordIndices(int * pnParam) {
     do {
       int nGridX;
       nGridX = 0;
-      if (-1 < nWidth) {
+      if (0 <= nWidth) {
         do {
           nCellFlags = GetGridFlags((D2DrlgGridStrc*)pnParam[1], nGridX, nGridY);
           if (!(nCellFlags & 0x10000000)) {

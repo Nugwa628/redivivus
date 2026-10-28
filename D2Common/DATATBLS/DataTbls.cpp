@@ -3534,10 +3534,10 @@ static void __stdcall TXT_AllocTxt_skill_skilldesc(D2PoolManagerStrc * pMemory) 
         do {
           pDVar1 = sgtDataTable.pTxtSkills;
           nPetType = sgtDataTable.pTxtSkills[nCounter].charclass;
-          if (-1 < nPetType && nPetType < 7) {
+          if (0 <= nPetType && nPetType < 7) {
             (&sgtDataTable.pSkillsPerClassCounter->Amazon)[nPetType]++;
           }
-          if (-1 < pDVar1[nCounter].passivestate) {
+          if (0 <= pDVar1[nCounter].passivestate) {
             sgtDataTable.nPassiveSkillsCount++;
           }
 
@@ -3585,11 +3585,11 @@ static void __stdcall TXT_AllocTxt_skill_skilldesc(D2PoolManagerStrc * pMemory) 
         do {
           pSrvPrgFunc = sgtDataTable.pTxtSkills->srvprgfunc;
           nPetType = *(char*)((uintptr_t)&((D2PoolManagerStrc*)pMemory2)->pPools[0].pSync.DebugInfo + (int)(pSrvPrgFunc - 0x22));
-          if (-1 < nPetType && nPetType < '\a') {
+          if (0 <= nPetType && nPetType < '\a') {
             sgtDataTable.pSkillsPerClassStrc[nPetType * sgtDataTable.nSkillCountMaxPerClass + (&sgtDataTable.pSkillsPerClassCounter->Amazon)[nPetType]] = (int16_t)nCounter;
             (&sgtDataTable.pSkillsPerClassCounter->Amazon)[*(char*)((uintptr_t)&((D2PoolManagerStrc*)pMemory2)->pPools[0].pSync.DebugInfo + (int)(pSrvPrgFunc - 0x22))]++;
           }
-          if (-1 < *(short int*)((uintptr_t)&((D2PoolManagerStrc*)pMemory2)->pPools[0].pSync.DebugInfo + (int)(pSrvPrgFunc + 0x22))) {
+          if (0 <= *(short int*)((uintptr_t)&((D2PoolManagerStrc*)pMemory2)->pPools[0].pSync.DebugInfo + (int)(pSrvPrgFunc + 0x22))) {
             sgtDataTable.pPassiveSkillsPerClassStrc[sgtDataTable.nPassiveSkillsCount].nSkillId = (int16_t)nCounter;
             sgtDataTable.nPassiveSkillsCount++;
           }
@@ -3605,7 +3605,7 @@ static void __stdcall TXT_AllocTxt_skill_skilldesc(D2PoolManagerStrc * pMemory) 
       do {
         pSkillTxt = sgtDataTable.pTxtPetType;
         nPetType = sgtDataTable.pTxtSkills[nCounter].pettype;
-        if (-1 < nPetType) {
+        if (0 <= nPetType) {
           iVar2 = (int)nPetType;
           if (iVar2 < sgtDataTable.nTxtPetTypeSize && sgtDataTable.pTxtPetType[iVar2].nSkillIndexCounter < 0xf) {
             sgtDataTable.pTxtPetType[iVar2].nSkillId[sgtDataTable.pTxtPetType[iVar2].nSkillIndexCounter] = (short int)nCounter;

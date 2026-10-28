@@ -848,7 +848,7 @@ static uint32_t __stdcall INVENTORY_FindBestPlacementWithScore(int * * ppnOutX, 
         }
 
         nCurRow--;
-      } while (-1 < nCurRow);
+      } while (0 <= nCurRow);
     } while (true);
 }
 

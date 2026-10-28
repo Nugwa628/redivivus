@@ -1232,7 +1232,7 @@ void __fastcall ITEMTBLS_ParseSkillMonTypeOrStateId(char * szValue, char * pReco
         }
         if (sgtDataTable.pTxtStatesLink) {
           nId = Fog::Src::Excel::GetLinkNodeIndex(sgtDataTable.pTxtStatesLink, szValue, 0);
-          if (-1 < nId) {
+          if (0 <= nId) {
             *(int32_t*)(pRecord + nOffset) = nId;
             return;
           }

@@ -949,7 +949,7 @@ void __fastcall DRLGROOMTILE_CountWallTilesFromGrid(D2RoomExStrc * pRoomEx, D2Dr
             (*pnTileCounter)++;
           } else if (nTileType - 10U <= 1) {
             nTileType = DrlgGrid::GetGridFlags(pFloorGrid, nColIdx, nY);
-            if (-1 < nTileType) {
+            if (0 <= nTileType) {
               pnTileCounter = &pTileGrid->sRoomTiles.nWallTilesCount;
               (*pnTileCounter)++;
             } else {
@@ -1048,7 +1048,7 @@ void __fastcall DRLGROOMTILE_GrowTileDataArray(D2PoolManagerStrc * pMemory, D2Dr
     D2DrlgTileDataStrc* pReallocated = (D2DrlgTileDataStrc*)D2_REALLOC_POOL(pMemory, pTileGrid->sRoomTiles.pRoofTiles, (pTileGrid->sRoomTiles.nRoofTilesCount + nAdditionalTiles) * 0x30);
     pTileGrid->sRoomTiles.pRoofTiles = pReallocated;
     int nIndex = 0;
-    if (pTileGrid->nShadows != 1 && -1 < pTileGrid->nShadows - 1) {
+    if (pTileGrid->nShadows != 1 && 0 <= pTileGrid->nShadows - 1) {
       int nByteOffset;
       nByteOffset = 0;
       do {

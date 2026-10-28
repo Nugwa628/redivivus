@@ -1723,7 +1723,7 @@ void __fastcall STATLIST_PropagateStatChange(D2StatListExStrc * pStatsEx, int32_
     if (eStatIdx & 0x2000) {
       return;
     }
-    if (-1 < (int)eStatIdx) {
+    if (0 <= (int)eStatIdx) {
       pStatsEx = pStatsEx->sStatList.pParent;
     }
 
