@@ -2971,10 +2971,10 @@ void __fastcall LoadAreaOrSpawnPortal(::SGAMEDATA * pGame, D2UnitStrc * pUnit, e
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nUnitPosY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nUnitPosY = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nUnitPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nUnitPosY = 0;
       }
 
       SKILLS::SkillsServer::SERVER_SpawnPortal(pGame, pUnit, pRoom, nUnitPosX - 5, nUnitPosY, eLevel, nullptr, 0x3b, 0);

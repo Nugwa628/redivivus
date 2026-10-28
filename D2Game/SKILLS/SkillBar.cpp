@@ -1698,10 +1698,10 @@ static BOOL __stdcall SKILLBAR_ArriveAtChargeTarget(::SGAMEDATA * pGame, D2Skill
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnitX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nUnitX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nUnitX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nUnitX = 0;
     }
     if (nUnitX == nX) {
       eD2CollisionShapeType eVar1;

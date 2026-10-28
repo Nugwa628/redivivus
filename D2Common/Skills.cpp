@@ -2195,10 +2195,10 @@ uint32_t __stdcall SKILL_FindTeleportPosition(D2UnitStrc * pUnit, D2UnitStrc * p
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       pUnit = (D2UnitStrc*)pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      pUnit = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       pUnit = (D2UnitStrc*)PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      pUnit = 0;
     }
 
     eD2UnitType eUnitTypeTmp = pCaster->eUnitType;
@@ -2273,10 +2273,10 @@ uint32_t __stdcall SKILL_FindTeleportPosition(D2UnitStrc * pUnit, D2UnitStrc * p
     eUnitTypeTmp = pCaster->eUnitType;
     if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
       nCasterX = pCaster->pPath.pDynamicPath->ScreenPos.y;
-    } else if (!pCaster->pPath.pDynamicPath) {
-      nCasterX = 0;
-    } else {
+    } else if (pCaster->pPath.pDynamicPath) {
       nCasterX = PATH::DynamicPath::GetXPos(pCaster->pPath.pDynamicPath);
+    } else {
+      nCasterX = 0;
     }
 
     uint32_t nLosResult = SKILLS_HasLineOfSight(nCasterX, nUnit2, nX, nDestY, (D2RoomStrc*)pUnit, 0x804);

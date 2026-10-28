@@ -457,10 +457,10 @@ void __fastcall SKILLS_ApplyAreaEffect(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
               eUnitType = pTarget->eUnitType;
               if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
                 nTargetX = pTarget->pPath.pStaticPath->nPosX;
-              } else if (!pTarget->pPath.pDynamicPath) {
-                nTargetX = 0;
-              } else {
+              } else if (pTarget->pPath.pDynamicPath) {
                 nTargetX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
+              } else {
+                nTargetX = 0;
               }
 
               nDistanceSq = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(nX, nY, nTargetX, nTargetY);
@@ -1586,10 +1586,10 @@ BOOL __fastcall SKILLS_GetTargetOrCursorPos(::SGAMEDATA * pGame, D2UnitStrc * pU
       eTargetUnitType = pTargetUnit->eUnitType;
       if (eTargetUnitType == UNIT_OBJECT || 3 < (int)eTargetUnitType && (int)eTargetUnitType <= 5) {
         nPosX = pTargetUnit->pPath.pStaticPath->nPosX;
-      } else if (!pTargetUnit->pPath.pDynamicPath) {
-        nPosX = 0;
-      } else {
+      } else if (pTargetUnit->pPath.pDynamicPath) {
         nPosX = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
+      } else {
+        nPosX = 0;
       }
 
       *pnOutX = nPosX;
@@ -3161,10 +3161,10 @@ uint32_t __fastcall SKILLS_ApplyEffectToUnitsInRange(::SGAMEDATA * pGame, uint32
             eType = pCurUnit->eUnitType;
             if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType <= 5) {
               nCurUnitX = pCurUnit->pPath.pStaticPath->nPosX;
-            } else if (!pCurUnit->pPath.pDynamicPath) {
-              nCurUnitX = 0;
-            } else {
+            } else if (pCurUnit->pPath.pDynamicPath) {
               nCurUnitX = D2Common::PATH::DynamicPath::GetXPos(pCurUnit->pPath.pDynamicPath);
+            } else {
+              nCurUnitX = 0;
             }
 
             nDistanceSq = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(nTargetX, nTargetY, nCurUnitX, y2);
@@ -3411,20 +3411,20 @@ D2UnitStrc * __fastcall CreatingAMissile(::SGAMEDATA * pGame, eMissilesId nSrvMi
     sSkillArg.pOwner = pUnit;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nOwnerCoord = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nOwnerCoord = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nOwnerCoord = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nOwnerCoord = 0;
     }
 
     sSkillArg.nX = nOwnerCoord + nParam1;
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nOwnerCoord = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nOwnerCoord = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nOwnerCoord = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nOwnerCoord = 0;
     }
 
     sSkillArg.nY = nOwnerCoord + nParam2;
@@ -3505,20 +3505,20 @@ D2UnitStrc * __fastcall SKILLS_CreateMissileFromUnit(::SGAMEDATA * pGame, eMissi
     sSkillArg.nSkillLevel = nParam1;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       sSkillArg.nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      sSkillArg.nX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       sSkillArg.nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      sSkillArg.nX = 0;
     }
 
     sSkillArg.nX += nParam2;
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       sSkillArg.nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      sSkillArg.nY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       sSkillArg.nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      sSkillArg.nY = 0;
     }
 
     sSkillArg.nY += nParam3;
