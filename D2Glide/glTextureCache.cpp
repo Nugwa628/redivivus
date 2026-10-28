@@ -220,10 +220,10 @@ void __fastcall GLTEXCACHE_EvictLRU(GlTextureCacheStrc * pCache) {
       uint8_t* pNextNode;
       pNextNode = *(uint8_t**)(pEvictNode + 0x14);
       pCache->pActiveHead = pNextNode;
-      if (!pNextNode) {
-        pCache->pActiveTail = 0;
-      } else {
+      if (pNextNode) {
         *(uint32_t*)(pNextNode + 0x18) = 0;
+      } else {
+        pCache->pActiveTail = 0;
       }
 
       *(uint32_t*)(pEvictNode + 0x14) = 0;
