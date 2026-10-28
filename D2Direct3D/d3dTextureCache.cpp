@@ -101,10 +101,10 @@ static int __stdcall D3DTEXCACHE_AllocateNodeFromFreeList(D3DTextureCacheStrc * 
       D3DTextureCacheNodeStrc* pNewFreeHead;
       pNewFreeHead = pDVar1->pNext;
       pCache->pFreeHead = pNewFreeHead;
-      if (!pNewFreeHead) {
-        pCache->pFreeTail = 0;
-      } else {
+      if (pNewFreeHead) {
         pNewFreeHead->pPrev = 0;
+      } else {
+        pCache->pFreeTail = 0;
       }
 
       pDVar1->pNext = 0;
