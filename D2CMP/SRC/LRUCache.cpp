@@ -151,10 +151,10 @@ static D2LRUCacheNodeStrc * LRUCACHE_AllocEntry(D2LRUCacheStrc * pCache, int32_t
       D2LRUCacheNodeStrc* pDVar1;
       pDVar1 = pEntry->pNext;
       pCache->pFreeHead = pDVar1;
-      if (!pDVar1) {
-        pCache->pFreeTail = 0;
-      } else {
+      if (pDVar1) {
         pDVar1->pPrev = 0;
+      } else {
+        pCache->pFreeTail = 0;
       }
 
       pEntry->pNext = 0;
