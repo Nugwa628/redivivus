@@ -270,10 +270,10 @@ namespace D2Client::UI::ui {
 void __stdcall UI_CloseHoradricCubeWindow() {
     gnPlayerCashDisplay = 0;
     D2UnitStrc* pCursorItem_lcl = UNIT::Player::GetPlayerUnit_UI();
-    if (!pCursorItem_lcl) {
-      pCursorItem_lcl = 0;
-    } else {
+    if (pCursorItem_lcl) {
       pCursorItem_lcl = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pCursorItem_lcl->pInventory);
+    } else {
+      pCursorItem_lcl = 0;
     }
     ITEM_ToggleHandState(pCursorItem_lcl);
     int32_t nHandlerCount = 8;
