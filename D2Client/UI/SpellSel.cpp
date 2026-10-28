@@ -765,7 +765,7 @@ void __stdcall SPELLSEL_ClearChargedSkillBindings() {
 
     do {
       pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill);
-      if (pSkillsTxt->scroll) {
+      if ((*((uint8_t*)pSkillsTxt + 0x8) & gadwBitMasks[4])) {
         nLine = D2Common::Skills::SKILL_GetQuantity(pSkill);
         SPELLSEL_ClearSkillBinding(&pSkillsTxt->skill, nLine);
       }
