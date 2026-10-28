@@ -399,6 +399,7 @@ void __stdcall CHAT_ShutdownIME() {
 
 static int32_t __stdcall CHAT_CompareCaseInsensitive(char * szText1, char * szText2) {
     int nUpper1;
+    int nUpper2;
     char cCur;
     char* pScan1 = szText1;
     pScan1 = pScan1 + strlen(pScan1) + 1;
@@ -417,8 +418,9 @@ static int32_t __stdcall CHAT_CompareCaseInsensitive(char * szText1, char * szTe
       }
 
       nRemaining--;
-      nUpper1 = toupper((int)*szText1) - toupper((int)*szText2);
-      if (nUpper1) {
+      nUpper1 = toupper((int)*szText1);
+      nUpper2 = toupper((int)*szText2);
+      if (nUpper1 != nUpper2) {
         break;
       }
 
@@ -426,7 +428,7 @@ static int32_t __stdcall CHAT_CompareCaseInsensitive(char * szText1, char * szTe
       szText2++;
     }
 
-    return nUpper1 > 0 ? 1 : -1;
+    return (uint32_t)(nUpper1 != nUpper2 && -1 < nUpper1 - nUpper2) * 2 - 1;
 }
 
 static void CHAT_DrawCursor(int32_t nPosY, int32_t nPosX, int32_t nColor) {

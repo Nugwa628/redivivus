@@ -106,13 +106,14 @@ void __fastcall InitializeDrlgFile(D2PoolManagerStrc * pMemory, D2LvlSubTxt * pL
 void __fastcall AddSecondaryBorder(D2UnkOutdoorStrc * pUnkOutdoor) {
     D2LvlSubTxt* pDVar1;
     D2LvlSubTxt* pLvlSubTxtRecord = DATATBLS::LvlTbls::TXT_LvlSub_GetLineFromSubType(pUnkOutdoor->nLvlSubId);
+    D2PoolManagerStrc* pMemory = pUnkOutdoor->pLevel->pDrlg->pDS1MemPool;
     if (pLvlSubTxtRecord->Type != pUnkOutdoor->nLvlSubId) {
       return;
     }
 
     do {
-      D2PoolManagerStrc* pMemory = pUnkOutdoor->pLevel->pDrlg->pDS1MemPool;
-      InitializeDrlgFile(pMemory, pLvlSubTxtRecord);
+      InitializeDrlgFile
+(pMemory, pLvlSubTxtRecord);
       DRLGOUTDOOR_ApplySubstitutionGroup(pUnkOutdoor, pLvlSubTxtRecord);
       pDVar1 = pLvlSubTxtRecord + 1;
       pLvlSubTxtRecord++;
