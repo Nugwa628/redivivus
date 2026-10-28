@@ -11705,10 +11705,10 @@ void __fastcall AITHINK_Fn1_TrappedSoul(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     POINT ptUnitPos;
     D2UnitStrc* pUnit_00;
     pUnit_00 = pAiParam->pTarget;
-    int bInCombat;
-    bInCombat = pAiParam->bEngagedInCombat;
     int nDistToTarget;
     nDistToTarget = pAiParam->nDistanceToTarget;
+    int bInCombat;
+    bInCombat = pAiParam->bEngagedInCombat;
     D2AiGeneralStrc* pAiGeneral;
     pAiGeneral = pAiParam->pMonsterAiGeneral;
     if (pUnit) {
