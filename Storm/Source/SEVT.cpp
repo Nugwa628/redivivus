@@ -64,10 +64,10 @@ void __stdcall SEVT_CopyIdHashTable(uint32_t * * pDstTable, int * pSrcTable) {
 
 // @sourcefile .\SOURCE\SEVT.CPP
 // @blizzard DeleteIdHashTable (SEVT.CPP)
-void SEVT_DeleteIdHashTable(void * * pTable) {
+static void SEVT_DeleteIdHashTable(void * * pTable) {
     void* pObject;
     uint32_t nBucket = 0;
-    if (pTable[1]) {
+    if ((uint32_t)pTable[1] > 0) {
       void* pBuckets;
       pBuckets = *pTable;
       do {
@@ -88,7 +88,7 @@ void SEVT_DeleteIdHashTable(void * * pTable) {
 }
 
 // @blizzard FindTypeHashEntry (SEVT.CPP)
-uint32_t * SEVT_FindTypeHashEntry(uint32_t dwUnused, uint32_t nSubId, uint32_t nEventId) {
+static uint32_t * SEVT_FindTypeHashEntry(uint32_t dwUnused, uint32_t nSubId, uint32_t nEventId) {
     uint32_t* pEvent;
     if (!gpEventHashBuckets || !gaEventRegistryHead) {
       pEvent = 0;
@@ -117,7 +117,7 @@ uint32_t SEvtDestroy() {
     EnterCriticalSection(&lpCriticalSection_0077930c);
     void* pvVar1 = 0;
     void* pObject_00 = gpEventHashBuckets;
-    if (gaEventRegistryHead) {
+    if ((uint32_t)gaEventRegistryHead > 0) {
       void* pObject;
       do {
         pObject = *(void**)((int)pObject_00 + (int)pvVar1 * 4);
@@ -210,7 +210,7 @@ void __stdcall SEvtRegisterHandler(uint32_t dwEventId, uint32_t dwSubId, uint32_
     if (!pEvent) {
       pNewBuckets = gpEventHashBuckets;
       pvVar1 = gaEventRegistryHead;
-      if ((uint32_t)gaEventRegistryHead >> 1 <= gnSevtRegisteredEventCount) {
+      if (gnSevtRegisteredEventCount >= (uint32_t)gaEventRegistryHead >> 1) {
         nBucketIndex = 1;
         dwReserved = 1;
         if (gnSevtRegisteredEventCount * 2 != -2) {
@@ -267,7 +267,7 @@ void __stdcall SEvtRegisterHandler(uint32_t dwEventId, uint32_t dwSubId, uint32_
     }
 
     nBucketIndex = *(uint32_t*)(pEvent[3] + 4);
-    if (nBucketIndex >> 1 <= *(uint32_t*)(pEvent[3] + 8)) {
+    if (*(uint32_t*)(pEvent[3] + 8) >= nBucketIndex >> 1) {
       int* ppNewHandlerTails;
       nNewHandlerCapacity = 1;
       dwEventId = 1;
@@ -280,7 +280,7 @@ void __stdcall SEvtRegisterHandler(uint32_t dwEventId, uint32_t dwSubId, uint32_
 
       pNewBuckets = SMem::SMemAlloc(dwEventId * 4, ".\\SOURCE\\SEVT.CPP", 0x16e, 8);
       ppNewHandlerTails = (int*)SMem::SMemAlloc(dwEventId * 4, ".\\SOURCE\\SEVT.CPP", 0x16f, 8);
-      if (dwEventId) {
+      if ((uint32_t)dwEventId > 0) {
         pTailSlot = ppNewHandlerTails;
         dwSubId = dwEventId;
         do {
@@ -491,13 +491,13 @@ int __stdcall SEvtBreakHandlerChain(void * pUnderMouse) {
     uint32_t uPrevLink;
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_0077930c);
     StormBreakCmdStrc* pNode = (StormBreakCmdStrc*)SMem::SMemAlloc(0xc, s___AUBREAKCMD___007088d8, -2, 8);
-    if (!pNode) {
-      pNewNode = 0;
-      pNode = (StormBreakCmdStrc*)&gpSevtBreakCmdListHead.pPrevLink;
-    } else {
+    if (pNode) {
       pNode->link.pPrevLink = 0;
       pNode->link.pNext = 0;
       pNewNode = pNode;
+    } else {
+      pNewNode = 0;
+      pNode = (StormBreakCmdStrc*)&gpSevtBreakCmdListHead.pPrevLink;
     }
 
     StormLinkStrc* nNextNode = pNode->link.pPrevLink;
@@ -549,7 +549,7 @@ BOOL __stdcall SEvtDispatch(uint32_t dwEventId, uint32_t dwSubId, uint32_t dwKey
     uLastPriority = -1;
     do {
       /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_0077930c);
-      pBreakCmd = (int*)(gpSevtBreakCmdListHead.pNext < 1 ? 0 : gpSevtBreakCmdListHead.pNext);
+      pBreakCmd = (int*)(gpSevtBreakCmdListHead.pNext <= 0 ? 0 : gpSevtBreakCmdListHead.pNext);
       if (0 < (int)pBreakCmd) {
         do {
           if ((void*)pBreakCmd[2] == pData) {
@@ -587,7 +587,7 @@ BOOL __stdcall SEvtDispatch(uint32_t dwEventId, uint32_t dwSubId, uint32_t dwKey
         if (pEventEntry) {
           pBreakCmd = (int*)pEventEntry[3];
           if (*pBreakCmd && pBreakCmd[1]) {
-            for (pHandlerNode = *(D2SevtHandlerNodeStrc**)(*pBreakCmd + (pBreakCmd[1] - 1U & dwKey) * 4); pHandlerNode && (pHandlerNode->dwKey != dwKey || uLastPriority <= pHandlerNode->nPriority); pHandlerNode = pHandlerNode->pNext) {}
+            for (pHandlerNode = *(D2SevtHandlerNodeStrc**)(*pBreakCmd + (pBreakCmd[1] - 1U & dwKey) * 4); pHandlerNode && (pHandlerNode->dwKey != dwKey || pHandlerNode->nPriority >= uLastPriority); pHandlerNode = pHandlerNode->pNext) {}
 
             if (lpAddend_007792fc == (LONG*)0x1) {
               gnSevtSnapshotActive = 0;

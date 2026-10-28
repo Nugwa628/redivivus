@@ -64,7 +64,7 @@ namespace D2Game::Quests::QUESTS::A1Q2 {
 // status flag has advanced past the "boss killed" stage (nStateFlag > 3, i.e.
 // the reward/turn-in stages 4/5). Used to gate whether the quest is finalizable.
 bool __fastcall QuestDataBool(D2QuestDataStrc * pQuestData) {
-    if (!(pQuestData->bIsNotIntroduction && 3 < pQuestData->nStateFlag)) {
+    if (!(pQuestData->bIsNotIntroduction && 4 <= pQuestData->nStateFlag)) {
       return false;
     }
 
@@ -633,7 +633,7 @@ void __fastcall Q02_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->pNpcMessages = &A1Q2::aNpcGossipData;
     pQuestData->nQuestIdReal = QUEST_SistersBurialGrounds;
     pQuestData->bIsActive = true;
-    D2QuestDataA1Q2Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA1Q2Strc);
+    D2QuestDataA1Q2Strc* pQuestSpecificData = ((D2QuestDataA1Q2Strc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2QuestDataA1Q2Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q2.cpp", 0x27f, 0));
     pQuestData->fpStatusFilter = 0;
     pQuestData->pQuestSpecificData.pA1Q2 = pQuestSpecificData;
     pQuestData->fpActiveFilter = Q02_ActiveFilter;

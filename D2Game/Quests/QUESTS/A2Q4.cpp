@@ -237,7 +237,7 @@ BOOL __fastcall Q12_CheckJournalState(::SGAMEDATA * pGame) {
 }
 
 // A2Q4 - OnJournalActivate. Marks the quest journal entry as active (field_0xe=1) and sets the portal-placement substate to 2, then iterates players running UpdateQuestRecord to persist. If a tracked object exists, refreshes its update flag and removes its collision (opens the way). Called when the Cellar/staff path activates the Sanctuary entrance. Parameter 0 is the A2Q4 record and parameter 1 is the D2QuestDataStrc; they were recorded the wrong way round until 2026.08.30.
-void __stdcall Q12_OnJournalActivate(D2QuestDataA2Q4Strc * pQuestData, D2QuestDataStrc * pQuestContext) {
+static void __stdcall Q12_OnJournalActivate(D2QuestDataA2Q4Strc * pQuestData, D2QuestDataStrc * pQuestContext) {
     short int sVar1;
     *(uint8_t*)(char*)&sVar1 = pQuestData->nPortalPlacedStateLo;
     *(uint8_t*)((char*)&sVar1 + 1) = pQuestData->nPortalPlacedStateHi;
@@ -284,7 +284,7 @@ void __fastcall Q12_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         /* SetQuestState Step0x07 - Drognan first hint about Summoner (msg 0xba) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Step0x07);
         return;
       }
-      if ((nMessageIndex & 0xffff) - 0xbb < 3) {
+      if ((nMessageIndex & 0xffff) - 0xbb <= 2) {
         /* SetQuestState Step0x08 - Drognan tells Summoner location (msg 0xbb-0xbd) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Step0x08);
         return;
       }
@@ -384,7 +384,9 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_RewardAwaits);
-    if (!bQuestState) {
+    if (bQuestState) {
+      nGossipLineIndex = 4;
+    } else {
       if (!pQuestArgs->pPlayer) {
         nPlayerGUID = -1;
       } else {
@@ -407,7 +409,7 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (bQuestState == 1) {
         return;
       }
-      if (4 < pQuestData->nStateFlag) {
+      if (5 <= pQuestData->nStateFlag) {
         bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_JustCompleted);
         if (!bQuestState) {
           return;
@@ -418,11 +420,9 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nGossipLineIndex == -1) {
         return;
       }
-      if (0xb < nGossipLineIndex) {
+      if (0xc <= nGossipLineIndex) {
         return;
       }
-    } else {
-      nGossipLineIndex = 4;
     }
 
     AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, nGossipLineIndex);
@@ -605,9 +605,7 @@ void __fastcall Q12_OnHoradricStaffAssembled(::SGAMEDATA * pGame) {
     if (!pQuestContext) {
       return;
     }
-    if (!pQuestContext->bIsNotIntroduction) {
-      Q12_OnJournalActivate(pQuestContext->pQuestSpecificData.pA2Q4, pQuestContext);
-    } else {
+    if (pQuestContext->bIsNotIntroduction) {
       if (!pQuestContext->nStateFlag) {
         QUEST_SetStateFlag(pQuestContext, 1, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q4.cpp", 0x3bf);
       }
@@ -616,6 +614,8 @@ void __fastcall Q12_OnHoradricStaffAssembled(::SGAMEDATA * pGame) {
         QUEST_SetStateAndBroadcast(pQuestContext, 1, nullptr, (::fpExecuteOnUnitFunction)Q12_NotifyArcaneComplete, true);
         return;
       }
+    } else {
+      Q12_OnJournalActivate(pQuestContext->pQuestSpecificData.pA2Q4, pQuestContext);
     }
 }
 
@@ -661,15 +661,15 @@ void __fastcall BlockHaremRoomForPlayerAccess(int32_t nParam, D2UnitStrc * pUnit
     pA2Q4Specific->field_0x20 = ptPlayerPos.x - 2;
     uint8_t bForcedSpawn = 1;
     pA2Q4Specific->nHaremBlockerY = ptPlayerPos.y - 1;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    D2UnitStrc* pBlockerUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x13e, pA2Q4Specific->field_0x20, pA2Q4Specific->nHaremBlockerY, *(::SGAMEDATA**)(nParam + 4), pRoom, bForcedSpawn, iVar1, pNullArg);
+    D2RoomStrc* pRoom;
+    D2UnitStrc* pBlockerUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x13e, pA2Q4Specific->field_0x20, pA2Q4Specific->nHaremBlockerY, *(::SGAMEDATA**)(nParam + 4), D2Common::Units::UNITS_GetRoom(pUnit), bForcedSpawn, iVar1, pNullArg);
     if (!pBlockerUnit) {
       pNullArg = 0;
       iVar1 = 0;
       bForcedSpawn = 1;
       pA2Q4Specific->nHaremBlockerY = ptPlayerPos.y;
-      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-      pBlockerUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x13e, pA2Q4Specific->field_0x20, pA2Q4Specific->nHaremBlockerY, *(::SGAMEDATA**)(nParam + 4), pRoom, bForcedSpawn, iVar1, pNullArg);
+
+      pBlockerUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x13e, pA2Q4Specific->field_0x20, pA2Q4Specific->nHaremBlockerY, *(::SGAMEDATA**)(nParam + 4), D2Common::Units::UNITS_GetRoom(pUnit), bForcedSpawn, iVar1, pNullArg);
       if (!pBlockerUnit) {
         return;
       }
@@ -727,7 +727,7 @@ BOOL __fastcall Q14_CheckDurielProximity(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheArcaneSanctuary);
     D2QuestDataA2Q4Strc* pA2Q4Data = pQuestData->pQuestSpecificData.pA2Q4;
     uint32_t nDist = Monster::AI::MONSTERAI_GetDistanceToCoords(pUnit, pA2Q4Data->field_0x20, pA2Q4Data->nHaremBlockerY);
-    if (nDist >= 0x1f) {
+    if (nDist > 0x1e) {
       return 0;
     }
 
@@ -931,11 +931,11 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
           }
 
           bQuestDone = Monster::MonsterAI::HasAiSub(pMonsterAi);
-          if (!bQuestDone) {
+          if (bQuestDone) {
+            Monster::MonsterAI::ClearAISub(pQuestData->pGame, pPlayerData, nullptr, true);
+          } else {
             GAME::Server::RemoveObjects(pPlayerData, pQuestData->pGame);
             *(bool*)(ptPos.y + 0xc) = false;
-          } else {
-            Monster::MonsterAI::ClearAISub(pQuestData->pGame, pPlayerData, nullptr, true);
           }
         }
       }
@@ -943,8 +943,8 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
         pPlayerData = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_OBJECT, *(int32_t*)(ptPos.y + 0x38));
         if (pPlayerData) {
           D2Common::Units::GetCoords(pPlayerData, &ptPos);
-          pRoom = D2Common::Units::UNITS_GetRoom(pPlayerData);
-          ReplaceJerhyn(pRoom, pQuestData, &ptPos);
+
+          ReplaceJerhyn(D2Common::Units::UNITS_GetRoom(pPlayerData), pQuestData, &ptPos);
         }
       }
 
@@ -995,7 +995,7 @@ void __fastcall Q12_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->sStateFunctions.fpQuestStateHandler[0xd] = Q12_Callback13_PlayerStartedGame;
     pQuestData->bIsActive = true;
     pQuestData->nStateFlag = 0;
-    D2QuestDataA2Q4Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA2Q4Strc);
+    D2QuestDataA2Q4Strc* pQuestSpecificData = ((D2QuestDataA2Q4Strc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2QuestDataA2Q4Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q4.cpp", 0x3dd, 0));
     pQuestData->pQuestSpecificData.pA2Q4 = pQuestSpecificData;
     pQuestData->nQuestIdReal = QUEST_TheArcaneSanctuary;
     pQuestData->fpStatusFilter = 0;

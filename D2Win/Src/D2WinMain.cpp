@@ -176,7 +176,7 @@ void __stdcall D2WINMAIN_FreeLeadingFormControls() {
 
     while (!(D2Client::Forms::pFormUnknown->dwState & 1U)) {
       pDVar1 = D2Client::Forms::pFormUnknown->pNext;
-      D2_FREE(D2Client::Forms::pFormUnknown);
+      Fog::Memory::FreeClientMemory(D2Client::Forms::pFormUnknown, ".\\Src\\D2WinMain.cpp", 0x25a, 0);
       D2Client::Forms::pFormUnknown = pDVar1;
       if (!pDVar1) {
         return;
@@ -189,7 +189,7 @@ void __stdcall D2WINMAIN_FreeLeadingFormControls() {
       }
 
       pDVar1 = D2Client::Forms::pFormUnknown->pNext;
-      D2_FREE(D2Client::Forms::pFormUnknown);
+      Fog::Memory::FreeClientMemory(D2Client::Forms::pFormUnknown, ".\\Src\\D2WinMain.cpp", 0x263, 0);
       D2Client::Forms::pFormUnknown = pDVar1;
     } while (pDVar1);
 }
@@ -256,6 +256,9 @@ D2ControlStrc * __stdcall FORMS_CreateAnyForm(FORMS_PredefinedFormStrc * pForm) 
     void* pAccountList;
     DC6* pBackgroundDC6 = !pForm->pDC6 ? 0 : *pForm->pDC6;
     switch (pForm->neD2FormType) {
+      case FORM_TextBox:
+        pTextBox = D2WinTextBox::D2WinTextBox(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nExtraParam, pForm->nLabelAsLocaleStringId, pBackgroundDC6, pForm->fpOnPressCallback, pForm->nFlagsOrType, (int*)pForm->pTypeArg2, (int*)pForm->pTypeArg1);
+      return (D2ControlStrc*)pTextBox;
       case FORM_EditBox:
         pEditBox = D2WinEditBox::D2WinEditBox(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nExtraParam, pForm->nLabelAsLocaleStringId, pBackgroundDC6, (fpD2WinEditBoxSubmit)pForm->pTypeArg1, pForm->fpOnPressCallback, pForm->nFlagsOrType, (uint32_t*)pForm->pTypeArg2);
       return (D2ControlStrc*)pEditBox;
@@ -265,9 +268,9 @@ D2ControlStrc * __stdcall FORMS_CreateAnyForm(FORMS_PredefinedFormStrc * pForm) 
       case FORM_AnimImage:
         pAnimImage = D2WinAnimImage(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pBackgroundDC6, pForm->nExtraParam, pForm->fpOnPressCallback, (FORMS_AnimFrameStrc*)pForm->pTypeArg1, pForm->nLabelAsLocaleStringId, (fpD2WinAnimImageNotify)pForm->pTypeArg2);
       return (D2ControlStrc*)pAnimImage;
-      case FORM_TextBox:
-        pTextBox = D2WinTextBox::D2WinTextBox(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nExtraParam, pForm->nLabelAsLocaleStringId, pBackgroundDC6, pForm->fpOnPressCallback, pForm->nFlagsOrType, (int*)pForm->pTypeArg2, (int*)pForm->pTypeArg1);
-      return (D2ControlStrc*)pTextBox;
+      case FORM_ImageEx:
+        pImageEx = Forms::D2WinImageEx(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pBackgroundDC6, pForm->nExtraParam, pForm->nLabelAsLocaleStringId);
+      return (D2ControlStrc*)pImageEx;
       case FORM_Scrollbar:
         pScrollbar = D2WinScrollbar::D2WinScrollbar(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pBackgroundDC6, pForm->fpOnPressCallback);
       return (D2ControlStrc*)pScrollbar;
@@ -289,9 +292,6 @@ D2ControlStrc * __stdcall FORMS_CreateAnyForm(FORMS_PredefinedFormStrc * pForm) 
       case FORM_AccountList:
         pAccountList = D2WinAccountList::D2WinAccountList(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nFlagsOrType, (uint32_t*)pForm->pTypeArg2);
       return (D2ControlStrc*)pAccountList;
-      case FORM_ImageEx:
-        pImageEx = Forms::D2WinImageEx(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pBackgroundDC6, pForm->nExtraParam, pForm->nLabelAsLocaleStringId);
-      return (D2ControlStrc*)pImageEx;
     }
 
     return nullptr;
@@ -309,6 +309,10 @@ void __stdcall FORMS_DestroyAnyForm(D2ControlStrc * * pForm) {
     }
 
     switch (pWinEditBox_00->sControl.neD2FormType) {
+      case FORM_TextBox:
+        D2WinTextBox::FORMS_DestroyD2WinTextBox((::D2WinTextBox*)pWinEditBox_00);
+      *pForm = 0;
+      return;
       case FORM_EditBox:
         D2WinEditBox::FORMS_DestroyD2WinEditBox(pWinEditBox_00);
       *pForm = 0;
@@ -317,12 +321,12 @@ void __stdcall FORMS_DestroyAnyForm(D2ControlStrc * * pForm) {
         D2WinImage::FORMS_DestroyD2WinImage((::D2WinImage*)pWinEditBox_00);
       *pForm = 0;
       return;
-      case FORM_AnimImage:
-        FORMS_DestroyD2WinAnimImage((::D2WinAnimImage*)pWinEditBox_00);
+      case FORM_ImageEx:
+        D2WinImage::FORMS_DestroyD2WinImageEx((::D2WinImageEx*)pWinEditBox_00);
       *pForm = 0;
       return;
-      case FORM_TextBox:
-        D2WinTextBox::FORMS_DestroyD2WinTextBox((::D2WinTextBox*)pWinEditBox_00);
+      case FORM_AnimImage:
+        FORMS_DestroyD2WinAnimImage((::D2WinAnimImage*)pWinEditBox_00);
       *pForm = 0;
       return;
       case FORM_Scrollbar:
@@ -353,10 +357,6 @@ void __stdcall FORMS_DestroyAnyForm(D2ControlStrc * * pForm) {
         D2WinAccountList::FORMS_DestroyD2WinAccountList((::D2WinAccountList*)pWinEditBox_00);
       *pForm = 0;
       return;
-      case FORM_ImageEx:
-        D2WinImage::FORMS_DestroyD2WinImageEx((::D2WinImageEx*)pWinEditBox_00);
-      *pForm = 0;
-      return;
     }
 
     *pForm = 0;
@@ -377,12 +377,12 @@ void __fastcall D2WINMAIN_SetControlVisible(D2ControlStrc * pControl, BOOL bVisi
 
 // Returns bit 0 of control flags (offset +8), checking visibility/enabled state. Halts on null pointer.
 BOOL __fastcall D2WINMAIN_GetControlVisible(D2ControlStrc * pControl) {
-    if (pControl) {
-      return pControl->dwState & 1;
+    if (!pControl) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x33f);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x33f);
-    exit(-1);
+    return pControl->dwState & 1;
     return pControl->dwState & 1;
 }
 
@@ -405,12 +405,12 @@ void __fastcall D2WINMAIN_SetControlActive(D2ControlStrc * pControl, BOOL bActiv
 // Returns pControl->dwState & gadwBitMasks[2], the active bit D2WINMAIN_SetControlActive sets; halts (line 858) on NULL.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 BOOL __fastcall D2WINMAIN_IsControlActive(D2ControlStrc * pControl) {
-    if (pControl) {
-      return pControl->dwState & 4;
+    if (!pControl) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x35a);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x35a);
-    exit(-1);
+    return pControl->dwState & 4;
     return pControl->dwState & 4;
 }
 
@@ -442,7 +442,7 @@ void __stdcall DrawCursorOOG() {
     sGfxData.nFrameNumber = gnCursorDC6FrameNumber;
     sGfxData.pDC6 = pDVar1;
     sGfxData.nDirection = 0;
-    D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nMouseX < 1 ? 0 : nMouseX, (nMouseY < 1 ? 0 : nMouseY) - 1, -1, DRAW_SOLID, nullptr);
+    D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nMouseX <= 0 ? 0 : nMouseX, (nMouseY <= 0 ? 0 : nMouseY) - 1, -1, DRAW_SOLID, nullptr);
 }
 
 void __stdcall DRAW_UI_Sprites() {
@@ -748,7 +748,7 @@ void __stdcall D2WIN_HandleSystemCommand(int32_t nParam) {
         pRcDesktop = &rcDesktop;
         /* LPRECT lpRect for GetClientRect */ hDesktopWnd = GetDesktopWindow();
         /* HWND hWnd for GetClientRect */ GetClientRect(hDesktopWnd, pRcDesktop);
-        if (nClientWidth == nTargetWidth && nClientHeight == nTargetHeight && nTargetWidth < rcDesktop.right - rcDesktop.left && nTargetHeight < rcDesktop.bottom - rcDesktop.top) {
+        if (nClientWidth == nTargetWidth && nClientHeight == nTargetHeight && rcDesktop.right - rcDesktop.left > nTargetWidth && rcDesktop.bottom - rcDesktop.top > nTargetHeight) {
           nWndPosX = nMonWorkLeft;
           nWndPosY = nMonWorkTop;
           bFixAspect = D2gfx::D2GFX::D2GFX_GetFixAspect();
@@ -850,7 +850,7 @@ void __stdcall D2WIN_HandleActivation(int32_t nParam) {
 // of that struct are modelled - the 19948-byte tail is left as an explicit unmodelled blob.
 // @wasnamed parameter 1 was pQServerClientPacket typed D2QServerClientPacketStrc *. It is assigned
 // straight into JPEG_CORE_PROPERTIES.DIBBytes, so it is the pixel buffer; retyped uint8_t *.
-void __stdcall D2WIN_SaveScreenshotToFile(uint8_t * pDibBytes, LPCSTR szFileName, int32_t nWidth, int32_t nHeight) {
+static void __stdcall D2WIN_SaveScreenshotToFile(uint8_t * pDibBytes, LPCSTR szFileName, int32_t nWidth, int32_t nHeight) {
     // Static local variables (originally global data)
     static uint32_t gnScreenshotSequenceIndex = 0x1; D2_STATIC_GUARD(gnScreenshotSequenceIndex, "D2Win::Src::D2WinMain::D2WIN_SaveScreenshotToFile::gnScreenshotSequenceIndex");
 
@@ -908,21 +908,21 @@ void __fastcall D2WIN_TakeThrottledScreenshot(LPCSTR szFileName) {
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 8, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     DWORD dwTickCount = GetTickCount();
-    if (!(999 < dwTickCount - gdwLastScreenshotTick || szFileName)) {
+    if (!(1000 <= dwTickCount - gdwLastScreenshotTick || szFileName)) {
       return;
     }
 
     __frame0.nScreenWidth = 0;
     __frame0.nScreenHeight = 0;
     D2gfx::D2GFX::D2GFX_GetScreenSize(&__frame0.nScreenWidth, &__frame0.nScreenHeight);
-    uint8_t* pBuffer = (uint8_t*)D2_ALLOC(__frame0.nScreenHeight * __frame0.nScreenWidth * 3);
+    uint8_t* pBuffer = (uint8_t*)Fog::Memory::AllocClientMemory(__frame0.nScreenHeight * __frame0.nScreenWidth * 3, ".\\Src\\D2WinMain.cpp", 0x6a7, 0);
     BOOL bGotBackBuffer = D2gfx::D2GFX::D2GFX_GetBackBuffer(pBuffer);
     if (bGotBackBuffer) {
       D2WIN_SaveScreenshotToFile(pBuffer, szFileName, __frame0.nScreenWidth, __frame0.nScreenHeight);
     }
 
     gdwLastScreenshotTick = dwTickCount;
-    D2_FREE(pBuffer);
+    Fog::Memory::FreeClientMemory(pBuffer, ".\\Src\\D2WinMain.cpp", 0x6b4, 0);
 }
 
 void __stdcall D2WIN_ToggleMusicOptions(int32_t nParam) {
@@ -936,10 +936,10 @@ void __stdcall D2WIN_ToggleMusicOptions(int32_t nParam) {
     }
 
     bMusicEnabled = D2Sound::Src::D2SoundFast::SOUND_GetOptionsMusic();
-    if (!bMusicEnabled) {
-      D2Sound::Src::D2SoundFast::SOUND_SetMusicEnabled(1);
-    } else {
+    if (bMusicEnabled) {
       D2Sound::Src::D2SoundFast::SOUND_FadeOutMusic();
+    } else {
+      D2Sound::Src::D2SoundFast::SOUND_SetMusicEnabled(1);
     }
 
     D2Sound::Src::D2SoundFast::SOUND_SetOptionsMusic((uint32_t)!bMusicEnabled);
@@ -962,7 +962,7 @@ int32_t __stdcall D2WIN_FindClosestControlToMouse(D2ControlStrc * pControl1, D2C
     int nDistX1 = pControl1->dwPosX;
     if (D2Client::Mouse::nPosX < nDistX1) {
       nDistX1 = D2Client::Mouse::nPosX - nDistX1;
-    } else if (pControl1->dwSizeX + nDistX1 < D2Client::Mouse::nPosX) {
+    } else if (D2Client::Mouse::nPosX > pControl1->dwSizeX + nDistX1) {
       nDistX1 = D2Client::Mouse::nPosX - pControl1->dwSizeX - nDistX1;
     } else {
       nDistX1 = 0;
@@ -971,7 +971,7 @@ int32_t __stdcall D2WIN_FindClosestControlToMouse(D2ControlStrc * pControl1, D2C
     int nDistY1 = pControl1->dwPosY;
     if (D2Client::Mouse::nPosY < nDistY1 - pControl1->dwSizeY) {
       nDistY1 = pControl1->dwSizeY - nDistY1 + D2Client::Mouse::nPosY;
-    } else if (nDistY1 < D2Client::Mouse::nPosY) {
+    } else if (D2Client::Mouse::nPosY > nDistY1) {
       nDistY1 = D2Client::Mouse::nPosY - nDistY1;
     } else {
       nDistY1 = 0;
@@ -989,7 +989,7 @@ int32_t __stdcall D2WIN_FindClosestControlToMouse(D2ControlStrc * pControl1, D2C
     int nDistY2 = pControl2->dwPosY;
     if (D2Client::Mouse::nPosY < nDistY2 - pControl2->dwSizeY) {
       nDistY2 = pControl2->dwSizeY - nDistY2 + D2Client::Mouse::nPosY;
-    } else if (nDistY2 < D2Client::Mouse::nPosY) {
+    } else if (D2Client::Mouse::nPosY > nDistY2) {
       nDistY2 = D2Client::Mouse::nPosY - nDistY2;
     } else {
       nDistY2 = 0;
@@ -999,7 +999,7 @@ int32_t __stdcall D2WIN_FindClosestControlToMouse(D2ControlStrc * pControl1, D2C
     } else {
       bControl1Inside = false;
     }
-    if (!nDistY2 && nDistX2 < 1) {
+    if (!nDistY2 && nDistX2 <= 0) {
       bVar1 = true;
     } else {
       bVar1 = false;
@@ -1166,7 +1166,15 @@ void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
       BOOL hasMessage;
       D2CONTROL_Pump(); D2LOUD_GuardPump();   // in-process test channel: applies queued input on THIS thread; loud build: walks the guard zones
       /* UINT wRemoveMsg for PeekMessageA */ /* UINT wMsgFilterMax for PeekMessageA */ /* UINT wMsgFilterMin for PeekMessageA */ /* HWND hWnd for PeekMessageA */ /* LPMSG lpMsg for PeekMessageA */ hasMessage = PeekMessageA(&windowMsg, (HWND)0x0, 0, 0, 0);
-      if (!hasMessage) {
+      if (hasMessage) {
+        /* UINT wMsgFilterMax for GetMessageA */ /* UINT wMsgFilterMin for GetMessageA */ /* HWND hWnd for GetMessageA */ /* LPMSG lpMsg for GetMessageA */ gbMessageLoopActive = GetMessageA(&windowMsg, (HWND)0x0, 0, 0);
+        if (!gbMessageLoopActive && gpfnExitCallback) {
+          (*gpfnExitCallback)();
+        }
+
+        /* MSG * lpMsg for TranslateMessage */ TranslateMessage(&windowMsg);
+        /* MSG * lpMsg for DispatchMessageA */ DispatchMessageA(&windowMsg);
+      } else {
         TickCountA = GetTickCount();
         dwSleepMs = TickCountA - TickCountB;
         TickCountB = GetTickCount();
@@ -1176,7 +1184,7 @@ void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
         }
 
         nBudgetAccum -= dwSleepMs;
-        if ((int)nBudgetAccum < 1) {
+        if ((int)nBudgetAccum <= 0) {
           nBudgetAccum += 0x28;
           if ((int)nBudgetAccum < -1000) {
             nBudgetAccum = 0;
@@ -1199,14 +1207,6 @@ void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
         }
 
         /* DWORD dwMilliseconds for Sleep */ Sleep(dwSleepMs);
-      } else {
-        /* UINT wMsgFilterMax for GetMessageA */ /* UINT wMsgFilterMin for GetMessageA */ /* HWND hWnd for GetMessageA */ /* LPMSG lpMsg for GetMessageA */ gbMessageLoopActive = GetMessageA(&windowMsg, (HWND)0x0, 0, 0);
-        if (!gbMessageLoopActive && gpfnExitCallback) {
-          (*gpfnExitCallback)();
-        }
-
-        /* MSG * lpMsg for TranslateMessage */ TranslateMessage(&windowMsg);
-        /* MSG * lpMsg for DispatchMessageA */ DispatchMessageA(&windowMsg);
       }
     }
 
@@ -1244,7 +1244,7 @@ void __stdcall MOUSE_CaptureMousePosition(HWND * phWnd) {
     if (bWindowActive) {
       int nClampedX;
       nClampedX = nRawX;
-      if ((int)phWnd < nRawX) {
+      if (nRawX > (int)phWnd) {
         nClampedX = (int)phWnd;
       }
 
@@ -1295,21 +1295,21 @@ void __stdcall TakeScreenshot() {
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 8, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     DWORD dwTickCount = GetTickCount();
-    if (999 >= dwTickCount - gdwLastScreenshotTick) {
+    if (1000 > dwTickCount - gdwLastScreenshotTick) {
       return;
     }
 
     __frame0.nScreenWidth = 0;
     __frame0.nScreenHeight = 0;
     D2gfx::D2GFX::D2GFX_GetScreenSize(&__frame0.nScreenWidth, &__frame0.nScreenHeight);
-    uint8_t* pBuffer = (uint8_t*)D2_ALLOC(__frame0.nScreenHeight * __frame0.nScreenWidth * 3);
+    uint8_t* pBuffer = (uint8_t*)Fog::Memory::AllocClientMemory(__frame0.nScreenHeight * __frame0.nScreenWidth * 3, ".\\Src\\D2WinMain.cpp", 0x6a7, 0);
     BOOL bGotBackBuffer = D2gfx::D2GFX::D2GFX_GetBackBuffer(pBuffer);
     if (bGotBackBuffer) {
       D2WIN_SaveScreenshotToFile(pBuffer, (LPCSTR)0x0, __frame0.nScreenWidth, __frame0.nScreenHeight);
     }
 
     gdwLastScreenshotTick = dwTickCount;
-    D2_FREE(pBuffer);
+    Fog::Memory::FreeClientMemory(pBuffer, ".\\Src\\D2WinMain.cpp", 0x6b4, 0);
 }
 
 void __stdcall D2WIN_Unused_Placeholder_5(int32_t nParam) {
@@ -1345,11 +1345,7 @@ void __stdcall INPUT_FormMouseHandler(D2UIMouseMsgStrc * pMsg) {
       iVar1 = D2Client::Mouse::nPosX;
       if (pControl) {
         do {
-          if (!pControl->fpDrawAnim) {
-            if (pControl->dwPosX <= iVar1 && pControl->dwPosY - pControl->dwSizeY <= D2Client::Mouse::nPosY && iVar1 < pControl->dwSizeX + pControl->dwPosX && D2Client::Mouse::nPosY < pControl->dwPosY) {
-              goto push_hit_control;
-            }
-          } else {
+          if (pControl->fpDrawAnim) {
             bHandled = pControl->fpDrawAnim(pControl);
             iVar1 = D2Client::Mouse::nPosX;
             if (bHandled) {
@@ -1365,6 +1361,10 @@ void __stdcall INPUT_FormMouseHandler(D2UIMouseMsgStrc * pMsg) {
                   break;
                 }
               }
+            }
+          } else {
+            if (pControl->dwPosX <= iVar1 && pControl->dwPosY - pControl->dwSizeY <= D2Client::Mouse::nPosY && iVar1 < pControl->dwSizeX + pControl->dwPosX && D2Client::Mouse::nPosY < pControl->dwPosY) {
+              goto push_hit_control;
             }
           }
 

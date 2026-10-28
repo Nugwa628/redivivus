@@ -51,7 +51,7 @@ namespace D2Game::UNIT {
 
 // Server-side item-action dispatcher: given an item and the player that just acted on it, determines the pending item command (via ITEM_CheckItemData_eD2ItemCmd) and sends the matching 0x9C/0x9D item-state network packet to the client. Handles the full item-interaction matrix: shop buy/sell trade-screen open (0x9C with '8'/'9' when the targeted NPC matches the interacted NPC), ground pickup, copy-to-cursor, put/take in inventory container, equip/unequip/swap body-loc items, stack quantity, swap-in-container, belt put/take/swap, set-to-cursor, weapon switch, auto-unequip, and move-to-bodyloc. For broken/restored/reload item flags it instead sends a 0x7D set-item-flags or generic update-item packet, gated on the item's anim mode (Neutral/Walk/Death) and whether pUnit is the acting player. Most actions require pUnit==pPlayer. Returns 1 when a packet was sent/handled, 0 otherwise. __fastcall-style register params (pClient EBX, pUnit EDI, pItem ESI).
 // @sourcefile .\INVENTORY\InvMode.cpp
-void Pre0x9DAnd0x9CPacket(D2ClientStrc * pClient, D2UnitStrc * pUnit, D2UnitStrc * pItem) {
+static void Pre0x9DAnd0x9CPacket(D2ClientStrc * pClient, D2UnitStrc * pUnit, D2UnitStrc * pItem) {
     BOOL bItemFlag;
     D2UnitStrc* pPlayer = GAME::Clients::CLIENTS_GetControlUnit(pClient, 0);
     ::SGAMEDATA* pGame = GAME::Clients::CLIENT_GetGame(pClient);
@@ -312,7 +312,7 @@ void __fastcall ITEM_ClearFlagsAndCommands(::SGAMEDATA * pGameStrc, D2UnitStrc *
     }
 
     uint32_t nIdx = 0;
-    if (gnItemClearCommandCount) {
+    if ((uint32_t)gnItemClearCommandCount > 0) {
       do {
         D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pUnit, gaItemClearCommandTable[nIdx], 0);
         nIdx++;
@@ -320,7 +320,7 @@ void __fastcall ITEM_ClearFlagsAndCommands(::SGAMEDATA * pGameStrc, D2UnitStrc *
     }
 
     nIdx = 0;
-    if (!gnItemClearFlagCount) {
+    if ((uint32_t)gnItemClearFlagCount <= 0) {
       return;
     }
 
@@ -421,7 +421,7 @@ void __fastcall ITEM_ProcessInventoryUpdates(::SGAMEDATA * pGame, D2UnitStrc * p
     D2Common::INVENTORY::Inventory::FreeUpdatesFromInventory(pInventory);
 }
 
-void __stdcall MONSTER_SendNpcEnchantsToClient(D2ClientStrc * pClient, D2UnitStrc * pUnit) {
+static void __stdcall MONSTER_SendNpcEnchantsToClient(D2ClientStrc * pClient, D2UnitStrc * pUnit) {
     uint32_t nUnitGUID;
     uint32_t nMonFlags = D2Game::Monster::GetMonsterFlags(pUnit, 1);
     if (!nMonFlags) {
@@ -446,7 +446,7 @@ void __stdcall MONSTER_SendNpcEnchantsToClient(D2ClientStrc * pClient, D2UnitStr
     GAME::SCmd::NET_D2GS_SERVER_Send_0x57_CHANGEMONSTERUNIT(pClient, nUnitGUID, '\x01', wNameSeed, wEnchant1, (uint16_t)(uint8_t)wEnchant2, (uint16_t)nMonFlags);
 }
 
-void __stdcall MONSTER_SendNpcHealthUpdate(D2ClientStrc * pClient, D2UnitStrc * pUnit) {
+static void __stdcall MONSTER_SendNpcHealthUpdate(D2ClientStrc * pClient, D2UnitStrc * pUnit) {
     uint32_t uVar1 = pUnit->dwLastHitClass;
     uint8_t byHpPct = Monsters::MONSTER_GetHpPercent128(pUnit);
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_last_sent_hp_pct, (uint32_t)byHpPct, 0);
@@ -669,12 +669,26 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
       }
     } else {
       switch (eAnimMode) {
+        case eD2MonsterAnimMode_ns::Block:
+          if (!pTargetUnit) {
+            wTargetX = 0;
+            nTargetY = -1;
+          }
+        break;
+        default:
+          goto default_case;
         case Death:
           byMoveParam1 = D2Common::PATH::DynamicPath::GetDirection(pDynamicPath);
         byLastHitClass = (uint8_t)pUnit->dwLastHitClass;
         break;
-        default:
-          goto default_case;
+        case eD2MonsterAnimMode_ns::Dead:
+          byMoveParam1 = D2Common::PATH::DynamicPath::GetDirection(pDynamicPath);
+        break;
+        case Knockback:
+          byDistance = D2Common::PATH::DynamicPath::GetDistance(pDynamicPath);
+        uVar1 = Monsters::MONSTER_GetHpPercent128(pUnit);
+        byExtraParam = (uint8_t)pUnit->dwLastHitClass;
+        goto send_path_ex_packet;
         case eD2MonsterAnimMode_ns::GetHit:
           byMoveParam1 = Monsters::MONSTER_GetHpPercent128(pUnit);
         if (1 < byMoveParam1) {
@@ -688,20 +702,6 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
         byLastHitClass = (uint8_t)pUnit->dwLastHitClass;
         break;
-        case eD2MonsterAnimMode_ns::Block:
-          if (!pTargetUnit) {
-            wTargetX = 0;
-            nTargetY = -1;
-          }
-        break;
-        case eD2MonsterAnimMode_ns::Dead:
-          byMoveParam1 = D2Common::PATH::DynamicPath::GetDirection(pDynamicPath);
-        break;
-        case Knockback:
-          byDistance = D2Common::PATH::DynamicPath::GetDistance(pDynamicPath);
-        uVar1 = Monsters::MONSTER_GetHpPercent128(pUnit);
-        byExtraParam = (uint8_t)pUnit->dwLastHitClass;
-        goto send_path_ex_packet;
       }
     }
 
@@ -766,7 +766,7 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
         }
 
         eType = pUnit->eUnitType;
-        if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType < 6) {
+        if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType <= 5) {
           wPosX = (uint16_t)pUnit->pPath.pStaticPath->nPosX;
         } else if (!pUnit->pPath.pDynamicPath) {
           wPosX = 0;

@@ -60,7 +60,7 @@ void __stdcall AllocPalShift_GreenBlood() {
       return;
     }
 
-    D2GamePalShiftGreenBloodStrc* pGreenBlood = D2_NEW(D2GamePalShiftGreenBloodStrc);
+    D2GamePalShiftGreenBloodStrc* pGreenBlood = ((D2GamePalShiftGreenBloodStrc*)Fog::Memory::AllocClientMemory(sizeof(D2GamePalShiftGreenBloodStrc), ".\\GAME\\PalShift.cpp", 0x52, 0));
     PalShift_GreenBlood = pGreenBlood;
     memset(pGreenBlood, 0, 0x100);
     D2FILE_ReadFile(nullptr, pFileHandle, pGreenBlood, 0x100);
@@ -72,17 +72,17 @@ void __stdcall InitPal() {
     D2MPQFileStrc* pGreenBloodFile;
     D2MPQFileStrc* pRandTransformFile;
     size_t nAllocSize = sgptDataTable->nTxtMonStatsSize * 8;
-    void* pPalShiftList = D2_ALLOC(nAllocSize);
+    void* pPalShiftList = Fog::Memory::AllocClientMemory(nAllocSize, ".\\GAME\\PalShift.cpp", 0x63, 0);
     gpMonsterPalShiftList = pPalShiftList;
     memset(pPalShiftList, 0, nAllocSize);
     int nMonStatsCount = sgptDataTable->nTxtMonStatsSize;
-    if (0 < nMonStatsCount) {
-      int i = 0;
-      do {
+    for (int i = 0; i < nMonStatsCount; i++) {
+
+
         *(int*)((int)pPalShiftList + i * 8) = i;
-        i++;
-      } while (i < nMonStatsCount);
+
     }
+
 
     gpPalShiftEntryListHead = 0;
     BOOL bFileExists = D2Common::DATATBLS::DataTbls::CheckIfFileExists(nullptr, "Data\\Global\\Monsters\\RandTransforms.dat", &pRandTransformFile, 1);
@@ -97,7 +97,7 @@ void __stdcall InitPal() {
       return;
     }
 
-    D2GamePalShiftGreenBloodStrc* pGreenBlood = D2_NEW(D2GamePalShiftGreenBloodStrc);
+    D2GamePalShiftGreenBloodStrc* pGreenBlood = ((D2GamePalShiftGreenBloodStrc*)Fog::Memory::AllocClientMemory(sizeof(D2GamePalShiftGreenBloodStrc), ".\\GAME\\PalShift.cpp", 0x52, 0));
     PalShift_GreenBlood = pGreenBlood;
     memset(pGreenBlood, 0, 0x100);
     D2FILE_ReadFile(nullptr, pGreenBloodFile, pGreenBlood, 0x100);
@@ -110,21 +110,21 @@ void __stdcall FreeGamePalShift() {
       void* pNextEntry;
       do {
         pNextEntry = *(void**)((int)gpPalShiftEntryListHead + 0x1004);
-        D2_FREE(gpPalShiftEntryListHead);
+        Fog::Memory::FreeClientMemory(gpPalShiftEntryListHead, ".\\GAME\\PalShift.cpp", 0x84, 0);
         gpPalShiftEntryListHead = pNextEntry;
       } while (pNextEntry);
 
       gpPalShiftEntryListHead = 0;
     }
     if (gpMonsterPalShiftList) {
-      D2_FREE(gpMonsterPalShiftList);
+      Fog::Memory::FreeClientMemory(gpMonsterPalShiftList, ".\\GAME\\PalShift.cpp", 0x8a, 0);
       gpMonsterPalShiftList = 0;
     }
     if (!PalShift_GreenBlood) {
       return;
     }
 
-    D2_FREE(PalShift_GreenBlood);
+    Fog::Memory::FreeClientMemory(PalShift_GreenBlood, ".\\GAME\\PalShift.cpp", 0x90, 0);
     PalShift_GreenBlood = 0;
 }
 
@@ -145,14 +145,14 @@ int * __fastcall PALSHIFT_FindPalShiftByToken(int32_t nToken) {
 }
 
 // Remaps the blood-color entries in a monster's palette table to green if the monster uses local blood (MonStats2.byLocalBlood == 2). Copies the base 512-byte palette block to an offset within pPaletteData, then applies the PalShift_GreenBlood lookup table across 8 rows of 256 entries, replacing non-zero mapped indices. No-ops for monsters outside the valid MonStats/MonStatsEx range or without local blood.
-void PALSHIFT_ApplyGreenBloodPalette(uint8_t * pPaletteData, int32_t nMonsterId) {
+static void PALSHIFT_ApplyGreenBloodPalette(uint8_t * pPaletteData, int32_t nMonsterId) {
     D2GamePalShiftGreenBloodStrc* pGreenBlood;
-    if (!(-1 < nMonsterId && nMonsterId < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nMonsterId && nMonsterId < sgptDataTable->nTxtMonStatsSize)) {
       return;
     }
 
     int nMonStatsExId = (int)sgptDataTable->pTxtMonStats[nMonsterId].MonStatsEx;
-    if (!(-1 < nMonStatsExId && nMonStatsExId < sgptDataTable->nTxtMonStatsExSize && sgptDataTable->pTxtMonStatsEx + nMonStatsExId && sgptDataTable->pTxtMonStatsEx[nMonStatsExId].byLocalBlood == 2)) {
+    if (!(0 <= nMonStatsExId && nMonStatsExId < sgptDataTable->nTxtMonStatsExSize && sgptDataTable->pTxtMonStatsEx + nMonStatsExId && sgptDataTable->pTxtMonStatsEx[nMonStatsExId].byLocalBlood == 2)) {
       return;
     }
 
@@ -264,24 +264,24 @@ void __stdcall PALSHIFT_InitPalShiftTable() {
     void* pPalShiftList;
     while (gpPalShiftEntryListHead) {
       pPalShiftList = *(void**)((int)gpPalShiftEntryListHead + 0x1004);
-      D2_FREE(gpPalShiftEntryListHead);
+      Fog::Memory::FreeClientMemory(gpPalShiftEntryListHead, ".\\GAME\\PalShift.cpp", 0x117, 0);
       gpPalShiftEntryListHead = pPalShiftList;
     }
 
     int nTxtMonStatsCount = sgptDataTable->nTxtMonStatsSize;
     if (!gpMonsterPalShiftList) {
-      gpMonsterPalShiftList = D2_ALLOC(nTxtMonStatsCount * 8);
+      gpMonsterPalShiftList = Fog::Memory::AllocClientMemory(nTxtMonStatsCount * 8, ".\\GAME\\PalShift.cpp", 0x11f, 0);
     }
 
     pPalShiftList = gpMonsterPalShiftList;
     memset(gpMonsterPalShiftList, 0, nTxtMonStatsCount * 8);
-    if (0 < nTxtMonStatsCount) {
-      int i = 0;
-      do {
+    for (int i = 0; i < nTxtMonStatsCount; i++) {
+
+
         *(int*)((int)pPalShiftList + i * 8) = i;
-        i++;
-      } while (i < nTxtMonStatsCount);
+
     }
+
 
     PALSHIFT_LoadMonsterPalShift(0x16b);
     PALSHIFT_LoadMonsterPalShift(0x16c);

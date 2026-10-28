@@ -40,9 +40,6 @@ void __fastcall Q36_Callback00_NpcActivate(struct D2QuestDataStrc * pQuestData, 
 void __fastcall Q36_SetCompleteForPartyMember(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A5Q6 Eve of Destruction (state-fn slot 0xa). Player-leaves cleanup: remove the player's GUID from both the quest's and the A5Q6-specific participant GUID lists (uses -1 if no player). Keeps the Baal-fight participant tracking consistent on disconnect/leave.
 void __fastcall Q36_Callback10_PlayerLeavesGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
-// A5Q6 Eve of Destruction. Marks one player's quest fully complete: set record JustCompleted(0xd) + Completed(0), push client status 5 (act-V complete), and bump a counter on the quest-specific data. Called from Q36_CheckWorldstoneChamber when a player is present in the Worldstone Chamber as Baal dies.
-// @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q6.cpp
-void __stdcall Q36_CompleteQuestAndSetStatus(struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, ::SGAMEDATA * pGame);
 // A5Q6 Eve of Destruction. Per-player iterate callback: if this player's quest is JustCompleted(0xd), look up their party and propagate Baal-kill credit to every party member via ExecuteFunctionForEveryPartyMember(Q36_SetCompleteForPartyMember).
 BOOL __fastcall Q36_PropagateCompleteToParty(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A5Q6 Eve of Destruction. Per-player iterate callback: for any player whose quest is not RewardAwaits(1), set record CannotCompleteQuestInGame(0xe) and send the quest-state packet (quest 0x24). Marks players who were not present for the Baal kill so they can't re-complete it in this game instance.

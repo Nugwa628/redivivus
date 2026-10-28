@@ -53,7 +53,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2RosterPetStrc) == 0x34, "D2_NEW(D
 namespace D2Client::GAME::RosterPets {
 
 D2PetTypeTxt * __fastcall GetPetTypeTxtById(int32_t nPetId) {
-    if (!(-1 < nPetId && nPetId < sgptDataTable->nTxtPetTypeSize)) {
+    if (!(0 <= nPetId && nPetId < sgptDataTable->nTxtPetTypeSize)) {
       return nullptr;
     }
 
@@ -66,7 +66,7 @@ void __stdcall FreeRosterPet() {
     while (pMemoryToFree) {
       D2RosterPetStrc* pNextPet;
       pNextPet = pMemoryToFree->pNext;
-      D2_FREE(pMemoryToFree);
+      Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\GAME\\RosterPets.cpp", 0x2f, 0);
       pMemoryToFree = pNextPet;
     }
 
@@ -112,7 +112,7 @@ void __fastcall AddRosterPet(int32_t nRosterGUID, int32_t nOwnerGUID, int32_t nS
 
     while (true) {
       if (!pExisting) {
-        pRosterPet = D2_NEW(D2RosterPetStrc);
+        pRosterPet = ((D2RosterPetStrc*)Fog::Memory::AllocClientMemory(sizeof(D2RosterPetStrc), ".\\GAME\\RosterPets.cpp", 0x7a, 0));
         memset(pRosterPet, 0, 0x34);
         pRosterPet->nRosterGUID = nRosterGUID;
         pRosterPet->nOwnerGUID = nOwnerGUID;
@@ -222,13 +222,13 @@ void __fastcall RemoveRosterPet(int32_t nRosterGUID) {
         return;
       }
     }
-    if (!pPrev) {
-      pRosterPet = pMemoryToFree->pNext;
-    } else {
+    if (pPrev) {
       pPrev->pNext = pMemoryToFree->pNext;
+    } else {
+      pRosterPet = pMemoryToFree->pNext;
     }
 
-    D2_FREE(pMemoryToFree);
+    Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\GAME\\RosterPets.cpp", 0xd1, 0);
 }
 
 // Returns the ownership relation of a roster pet to the local player: 0=not found or different party, 1=owned by local player, 2=owned by same-party member, 3=pet type lacks the party-share flag (nFlags&0x10==0) or skill out of range. Looks up the pet by nRosterGUID, checks PetType txt flags, then compares party IDs.
@@ -246,7 +246,7 @@ int __fastcall ROSTER_GetPetOwnershipRelation(int32_t nRosterGUID) {
     }
 
     int nPlayerGUID = pPet->nSkillID;
-    if (nPlayerGUID < 0 || sgptDataTable->nTxtPetTypeSize <= nPlayerGUID || !(sgptDataTable->pTxtPetType + nPlayerGUID) || !sgptDataTable->pTxtPetType[nPlayerGUID].automap) {
+    if (nPlayerGUID < 0 || nPlayerGUID >= sgptDataTable->nTxtPetTypeSize || !(sgptDataTable->pTxtPetType + nPlayerGUID) || !sgptDataTable->pTxtPetType[nPlayerGUID].automap) {
       return 3;
     }
 
@@ -557,18 +557,18 @@ uint32_t __fastcall ROSTER_IsUnitHostileToPlayer(D2UnitStrc * pUnit) {
     } while (true);
 
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
-    if (pPlayer && pPlayer->nUnitGUID != -1) {
-      uint32_t bHostile;
-      if (nGUID == -1) {
-        return 1;
-      }
-
-      bHostile = UNIT::PlayerList::GetFlag(nGUID, pPlayer->nUnitGUID, 8);
-      return bHostile;
+    if (!(pPlayer && pPlayer->nUnitGUID != -1)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x225);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x225);
-    exit(-1);
+    uint32_t bHostile;
+    if (nGUID == -1) {
+      return 1;
+    }
+
+    bHostile = UNIT::PlayerList::GetFlag(nGUID, pPlayer->nUnitGUID, 8);
+    return bHostile;
 }
 
 void __fastcall ROSTER_UpdateMercHostileColors(int32_t nOwnerGUID) {
@@ -578,7 +578,7 @@ void __fastcall ROSTER_UpdateMercHostileColors(int32_t nOwnerGUID) {
     int32_t nGfxSeq;
     D2RosterPetStrc* pRosterIter;
     for (pRosterIter = pRosterPet; pRosterIter; pRosterIter = pRosterIter->pNext) {
-      if (pRosterIter->nOwnerGUID == nOwnerGUID && pRosterIter->nRosterClass - 0x16bU < 2) {
+      if (pRosterIter->nOwnerGUID == nOwnerGUID && pRosterIter->nRosterClass - 0x16bU <= 1) {
         pRosterUnit = UNIT::Player::UNITS_FindClientSideUnit(pRosterIter->nRosterGUID, UNIT_MONSTER);
         if (pRosterUnit) {
           nPalShift = UNIT::CUnit::GetPalShiftIndex(pRosterUnit);

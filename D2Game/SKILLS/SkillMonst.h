@@ -52,8 +52,6 @@ BOOL __fastcall SKILLMONST_SrvStFn51_Submerge(::SGAMEDATA * pGame, struct D2Unit
 BOOL __fastcall Skills_SrvDoFunc_094_ResetAnimFrame(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
 BOOL __fastcall SKILLMONST_SrvStFn52_Emerge(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
 BOOL __fastcall SKILLMONST_SrvStFn53_MonInferno(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
-void __stdcall SKILLASSN_GetTrapHealthBonus(uint32_t dwUnused, eD2Skills eSkill, struct D2UnitStrc * pUnit, int32_t nSkillLvl, struct D2UnitStrc * pMissileUnit);
-void SKILLMONST_TriggerModeChange(struct D2UnitStrc * pUnit, ::SGAMEDATA * pGame);
 void __fastcall SKILLASSN_GetShadowHealthBonus(struct D2SkillsTxt * pSkillsTxt, struct D2UnitStrc * pUnit);
 // SrvDoFunc #95: server-side trap/sentry skill handler that spawns one missile from the caster unit toward the target cursor. Looks up srvmissilea from the skill's txt row, computes velocity from VelLev×level/8+Vel, builds a D2SkillArgStrc, and calls CreatingMissile. On success, applies trap health bonuses, checks the inferno state to optionally reschedule the next fire frame via SetEvent, otherwise triggers a mode-change. Returns 0 if the skill, missile id, or target position is invalid.
 BOOL __fastcall Skills_SrvDoFunc_095_SpawnTrapMissile(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);

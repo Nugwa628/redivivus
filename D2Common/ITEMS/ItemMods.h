@@ -44,8 +44,6 @@ struct D2MagixAffixModStrc * TXT_magixaffixes_GetModEntry(struct D2MagicAffixTxt
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 void * __stdcall TXT_UniqueItems_GetModEntry(void * pTxtLine, uint32_t nMod);
 int32_t ITEMMOD_GetMaxLevelAtIndex(struct D2GemsTxt * pMagixAffixLine, uint32_t nIndex, uint32_t nParam);
-// Retrieves a specific property modifier from an affix line. Rolls property values based on min/max ranges and returns property code, parameter, and calculated value.
-int32_t ITEMMOD_GetPropertyFromAffix(struct D2MagicAffixTxt * pMagicAffixLine, uint32_t nParam, uint32_t nNumber, uint32_t nSelector);
 void __stdcall ITEMMODS_GetQualityMinMax(uint32_t nPackedQuality, uint32_t * pnParam1, uint32_t * pnParam2);
 void __stdcall ITEMMODS_GetQualityAllFields(uint32_t nPackedQuality, uint32_t * pnParam1, uint32_t * pnParam2, uint32_t * pnParam3, uint32_t * pnParam4);
 // Searches an item unit's stat lists (flag 0x40) for a charged-skill stat matching nParam1 (skill ID) and nParam2 (charge slot). Recurses into socketed/carried items via inventory. On match, writes current charge count (low byte) to *pnParam and the stat list pointer to *ppStatList. Returns 1 if found, 0 otherwise.
@@ -58,34 +56,14 @@ void __stdcall ITEMMODS_GetQualityFields2_3_4(uint32_t nPackedQuality, uint32_t 
 int32_t __stdcall ITEMMODS_GetQualityField2(int32_t nParam1, int32_t nParam2, int32_t nParam3);
 void __stdcall ITEMMODS_GetQualityFields1_2_3(uint32_t nPackedQuality, uint32_t * pnParam1, uint32_t * pnParam2, uint32_t * pnParam3);
 int32_t __stdcall ITEMMODS_GetQualityField3(int32_t nParam1, int32_t nParam2, int32_t nParam3);
-// Returns an existing stat list on pUnit (or pUnitUnknown if non-null) matching nState+nFlags, creating and attaching one if absent. Allocates via AllocStatList using the unit's memory pool and GUID, sets the state, then halts unrecoverably if allocation fails.
-struct D2StatListExStrc * __stdcall ITEMMOD_GetOrCreateStatList(struct D2UnitStrc * pUnit, int32_t nState, uint32_t nFlags, struct D2UnitStrc * pUnitUnknown);
 // For an enhanced-defense or enhanced-damage property, raises the item's armor class above its Items.txt maxac, or sets max/min (one-hand, two-hand, throw) damage to the Items.txt maximums, so an enhanced item rolls at least its base maximum.
 void __stdcall ITEMMOD_MaximizeStatForEnhanced(eD2UnitStat eEnhancedProp, struct D2UnitStrc * pUnit);
-// Scales stat values by shifting left 8 bits for specific stat types (life, mana, stamina, resistances). Twenty-eight bytes: an ADD, a jump table and a shift through ECX, touching EDX not at all. PropertyFunc_MinMaxDamagePair loads the max-stat code into EDX before calling this and reads it back afterwards, so declaring EDX killed lost the code and every elemental and poison MAX damage value was scaled with garbage.
-void ITEMMOD_ScaleValueForStatType(int * pnParam, eD2UnitStat eStatType);
 // Rolls random value from [fmin, fmax] and applies to stat. Classic: exclusive upper bound. Expansion: inclusive upper bound (can hit max!). Uses item seed for deterministic RNG. Scales damage/poison values (shift left 8 bits).
 int32_t __stdcall ITEMMOD_ApplyRandomStatValue(struct D2UnitStrc * pUnit, int32_t nParam1, struct D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, int32_t nParam2, int32_t nParam3, int32_t nParam4, uint32_t nParam, struct D2SetsTxtFStrc * pProperty);
 // Core property-to-stat conversion. Applies stat value to unit, optionally maximizing enhanced stats and handling value removal.
 int32_t __stdcall PropertyFunc_SimpleStat(int32_t nParam1, struct D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3, int32_t nParam4, int32_t nParam5, struct D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, uint32_t nParam);
 // Property-to-stat conversion with additional context parameter for situational stat application. Reads scaled value from pPropData+4, optionally maximizes enhanced-damage stats, gets or creates the stat list (using pUnit as context for ITEMMOD_GetOrCreateStatList), then adds or negates the stat value. Halts on stat list failure.
 int32_t __fastcall PropertyFunc_SimpleStatWithContext(int32_t nType, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItemUnit, struct D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext);
-// Property function wrapper - delegates to ITEMMOD_ApplyRandomStatValue (normal mode).
-// Property→Stat Conversion:
-// - Used by 30+ property types in the dispatch table
-// - Target stat: eStatCode (varies by property)
-// - Formula: property.min/max → RNG roll → stat value
-// - Passes 0 as ITEMMOD_ApplyRandomStatValue's sixth argument: normal mode (no maximization)
-// This is the most common property function. It handles:
-// - +Strength, +Dex, +Vit, +Energy
-// - +Life, +Mana, +Stamina
-// - +Attack Rating, +Defense
-// - All resistances (individual)
-// - +Magic Find, +Gold Find
-// - Crushing Blow, Deadly Strike, Open Wounds, Knockback
-// - Many other single-stat bonuses
-// The actual stat ID is determined by the dispatch table parameter.
-int32_t __fastcall ITEMMODS_PropFunc_ApplyRolledStat(int32_t nType, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItemUnit, struct D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext);
 // Wrapper for simple stat application via PropertyFunc_SimpleStat.
 void __stdcall PropertyFunc_SimpleStatThunk1(int32_t param_1, int32_t param_2, int32_t nParam1, struct D2UnitStrc * pUnit, int32_t nParam2, eD2UnitStat eUnitStat, struct D2UnitStrc * pUnit2, uint32_t nParam);
 // Property function for Socket Count (adds sockets to an item).

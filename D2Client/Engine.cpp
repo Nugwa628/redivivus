@@ -72,10 +72,10 @@ BOOL __stdcall UI_IsMouseInRect(int32_t nRectLeftX, int32_t nRectBottomY, int32_
 void __stdcall DrawPopupOk(int32_t nParam) {
     D2GfxDataStrc sGfxData;
     memset(&sGfxData, 0, 0x48);
-    if (!nParam) {
-      sGfxData.pDC6 = (DC6*)IMG_popupok_ConnLost;
-    } else {
+    if (nParam) {
       sGfxData.pDC6 = (DC6*)IMG_popupok_DiscPrompt;
+    } else {
+      sGfxData.pDC6 = (DC6*)IMG_popupok_ConnLost;
     }
 
     sGfxData.nDirection = 0;
@@ -114,8 +114,8 @@ void __stdcall DrawOkCancel(int32_t nParam) {
 void __stdcall LOADER_DrawInsertDiscMessage() {
     int32_t nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(1);
     int32_t nColor_lcl = 0;
-    uint16_t* wszMessage = D2Lang::StrTable::strtable::GetLocaleString(0x13ee);
-    UI::ui::UI_DrawTextCentered(gnPanelOffsetX + 0x110, 0x136 - gnPanelOffsetY, gnPanelOffsetX + 0x170, wszMessage, nColor_lcl);
+
+    UI::ui::UI_DrawTextCentered(gnPanelOffsetX + 0x110, 0x136 - gnPanelOffsetY, gnPanelOffsetX + 0x170, D2Lang::StrTable::strtable::GetLocaleString(0x13ee), nColor_lcl);
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nPrevFont);
 }
 
@@ -207,16 +207,16 @@ void __stdcall INPUT_CharScreenOkCancel(D2UIMouseMsgStrc * pMsg) {
 void __stdcall LOADER_DrawConnectionLostMessage() {
     int32_t nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(1);
     int32_t nColor_lcl = 0;
-    uint16_t* wszMessage = D2Lang::StrTable::strtable::GetLocaleString(0x1430);
-    UI::ui::UI_DrawTextCentered(ScreenSizeX / 2 - 0x84, 0xbe - gnPanelOffsetY, gnPanelOffsetX + 0x1c4, wszMessage, nColor_lcl);
+    uint16_t* wszMessage;
+    UI::ui::UI_DrawTextCentered(ScreenSizeX / 2 - 0x84, 0xbe - gnPanelOffsetY, gnPanelOffsetX + 0x1c4, D2Lang::StrTable::strtable::GetLocaleString(0x1430), nColor_lcl);
     uint16_t wStrTableId = 0x1432;
     if (gbConnectionLost) {
       wStrTableId = 0x5578;
     }
 
     nColor_lcl = 0;
-    wszMessage = D2Lang::StrTable::strtable::GetLocaleString(wStrTableId);
-    UI::ui::UI_DrawTextCentered(ScreenSizeX / 2 - 0x84, 0xcd - gnPanelOffsetY, gnPanelOffsetX + 0x1c4, wszMessage, nColor_lcl);
+
+    UI::ui::UI_DrawTextCentered(ScreenSizeX / 2 - 0x84, 0xcd - gnPanelOffsetY, gnPanelOffsetX + 0x1c4, D2Lang::StrTable::strtable::GetLocaleString(wStrTableId), nColor_lcl);
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nPrevFont);
 }
 
@@ -234,11 +234,11 @@ void __stdcall LOADER_DrawOkCancelButtons(int32_t nOkFrame, int32_t nCancelFrame
 void __stdcall DRAW_UI_OkCancel() {
     int32_t nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(1);
     int32_t nColor_lcl = 0;
-    uint16_t* wszMessage = D2Lang::StrTable::strtable::GetLocaleString(0x13ee);
-    UI::ui::UI_DrawTextCentered(gnPanelOffsetX + 0xce, 0x136 - gnPanelOffsetY, gnPanelOffsetX + 0x12e, wszMessage, nColor_lcl);
+    uint16_t* wszMessage;
+    UI::ui::UI_DrawTextCentered(gnPanelOffsetX + 0xce, 0x136 - gnPanelOffsetY, gnPanelOffsetX + 0x12e, D2Lang::StrTable::strtable::GetLocaleString(0x13ee), nColor_lcl);
     nColor_lcl = 0;
-    wszMessage = D2Lang::StrTable::strtable::GetLocaleString(0x13ef);
-    UI::ui::UI_DrawTextCentered(gnPanelOffsetX + 0x152, 0x136 - gnPanelOffsetY, gnPanelOffsetX + 0x1b2, wszMessage, nColor_lcl);
+
+    UI::ui::UI_DrawTextCentered(gnPanelOffsetX + 0x152, 0x136 - gnPanelOffsetY, gnPanelOffsetX + 0x1b2, D2Lang::StrTable::strtable::GetLocaleString(0x13ef), nColor_lcl);
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nPrevFont);
 }
 
@@ -496,16 +496,16 @@ void __stdcall CLIENT_SetAnimModeAndMoveToCurrentPos(eD2PlayerAnimMode nAnimMode
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY = pUnit->pPath.pStaticPath->nPosY;
     } else if (!pUnit->pPath.pDynamicPath) {
       nY = 0;
@@ -586,7 +586,7 @@ void __fastcall CLIENT_UpdateUnitLightRadius(D2UnitStrc * pUnit, int32_t nRadius
     }
 
     nLightRadius += nRadiusBonus;
-    Draw::LightMap::LIGHTMAP_SetRadius(pLightMap, (int)nLightRadius < 1 ? 0 : nLightRadius);
+    Draw::LightMap::LIGHTMAP_SetRadius(pLightMap, (int)nLightRadius <= 0 ? 0 : nLightRadius);
 }
 
 void __fastcall CLIENT_SetUnitLightColor(D2UnitStrc * pUnit, int32_t dwRGB) {

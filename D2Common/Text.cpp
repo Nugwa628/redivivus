@@ -49,18 +49,18 @@ void __stdcall STRUCT_FreeTxtMessageForPacket0x27(D2GSPacketSrv0x27_TextStrc * p
     while (pMemoryToFree) {
       D2GSPacketSrv0x27_EntryStrc* pPrev;
       pPrev = pMemoryToFree->pPrev;
-      D2_FREE_POOL(pGSPacketSrv0x27_Text->pMemory, pMemoryToFree);
+      Fog::Memory::FreeServerMemory(pGSPacketSrv0x27_Text->pMemory, pMemoryToFree, ".\\Text\\Text.cpp", 0x3c, 0);
       pMemoryToFree = pPrev;
     }
 
     pGSPacketSrv0x27_Text->nCount = 0;
-    D2_FREE_POOL(pGSPacketSrv0x27_Text->pMemory, pGSPacketSrv0x27_Text);
+    Fog::Memory::FreeServerMemory(pGSPacketSrv0x27_Text->pMemory, pGSPacketSrv0x27_Text, ".\\Text\\Text.cpp", 0x4c, 0);
 }
 
 // @sourcefile .\Text\Text.cpp
 void __stdcall AddNewGossipText(D2GSPacketSrv0x27_TextStrc * pGossipText, int32_t nStringIndex, int32_t bMenu) {
     D2GSPacketSrv0x27_EntryStrc* pOldHead = pGossipText->pMessage;
-    D2GSPacketSrv0x27_EntryStrc* psVar2 = D2_NEW_POOL(pGossipText->pMemory, D2GSPacketSrv0x27_EntryStrc);
+    D2GSPacketSrv0x27_EntryStrc* psVar2 = ((D2GSPacketSrv0x27_EntryStrc*)Fog::Memory::AllocServerMemory(pGossipText->pMemory, sizeof(D2GSPacketSrv0x27_EntryStrc), ".\\Text\\Text.cpp", 0x5a, 0));
     psVar2->pPrev = pOldHead;
     psVar2->nMessage = (short int)nStringIndex;
     psVar2->nType = bMenu;
@@ -86,13 +86,13 @@ void __stdcall TEXT_RemoveMessageById(D2GSPacketSrv0x27_TextStrc * ppPoolManager
       }
     }
 
-    if (!pDVar2) {
-      ppPoolManager->pMessage = pMemoryToFree->pPrev;
-    } else {
+    if (pDVar2) {
       pDVar2->pPrev = pMemoryToFree->pPrev;
+    } else {
+      ppPoolManager->pMessage = pMemoryToFree->pPrev;
     }
 
-    D2_FREE_POOL(ppPoolManager->pMemory, pMemoryToFree);
+    Fog::Memory::FreeServerMemory(ppPoolManager->pMemory, pMemoryToFree, ".\\Text\\Text.cpp", 0x7b, 0);
     ppPoolManager->nCount--;
 }
 

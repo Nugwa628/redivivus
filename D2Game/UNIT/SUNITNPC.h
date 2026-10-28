@@ -60,9 +60,6 @@ void __fastcall SUNITNPC_FillNpcInventory(struct D2UnitStrc * pUnit, struct D2Un
 void __fastcall SendMercForHireList(::SGAMEDATA * pGame, struct D2ClientStrc * pClient, struct D2UnitStrc * pNpcUnit, BOOL bFirstInteraction);
 // In Normal difficulty returns min(nLevel, {12,20,28,36,45}[npc act]); otherwise nLevel unchanged.
 int32_t __fastcall SUNITNPC_GetActCappedLevel(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nLevel);
-// Rolls the quality of a store item: advances pSeed, takes roll = seed % 100, and returns QUALITY_LOW (1) for item level < 5 and roll > 90, QUALITY_SUPERIOR (3) for level 5..9 and roll > 85 or level >= 10 and roll > 74, else QUALITY_NORMAL (2).
-// U2 2026-10-21: asm 00576900; was SUNITNPC_CalculateRepairCost (kept as label), its one caller FillNpcStore passes the result to GenerateNpcItems as the quality.
-eD2ItemQuality SUNITNPC_RollStoreItemQuality(struct D2SeedStrc * pSeed, int32_t nItemLevel);
 // Server-side NPC trade-item restock/generation. Given a vendor NPC unit and its trade state (pTradeState, D2NpcTradeStateStrc), rolls and generates the NPC's purchasable inventory: walks tradeList1 entries, for each in-range item rolls a count via the NPC's seeded RNG (SUNITNPC_GetActCappedLevel caps player level+5 by act in Normal) and spawns items through SUNITNPC_GenerateNpcItems; also restocks stackable ammo/scrolls and tradeList2 entries, setting quantity on gold-priced ('qcv'/'acv') items. Aborts a batch after 0x20 consecutive spawn failures. Side effect: stamps the refresh tick (dwLastTradeTick). Halts on missing GameNpc.
 void __fastcall SUNITNPC_FillNpcStore(::SGAMEDATA * pGame, struct D2UnitStrc * pPlayer, struct D2UnitStrc * pNpcUnit, struct D2NpcTradeStateStrc * pTradeState);
 // @sourcefile .\UNIT\SUNITNPC.CPP
@@ -106,11 +103,8 @@ void __fastcall SUNITNPC_ProcessGamble(::SGAMEDATA * pGame, struct D2UnitStrc * 
 // Server-side NPC identify-all handler (Deckard Cain). Validates the player is interacting with the given NPC GUID (Cain/act-equivalents) and that unidentified items exist; if the Search-for-Cain quest is incomplete it charges 100 gold per unidentified item. Walks the player inventory (INVENTORY/CUBE pages) and calls ITEMMODE_ProcessItemSell to identify each unidentified item, then sends NET_D2GS_SERVER_Send_0x2A NpcTransaction result (code 9=no items/not-found, 3=success, 0xC=cannot afford) with the player gold to the client.
 // @sourcefile .\UNIT\SUNITNPC.CPP
 void __fastcall SUNITNPC_HandleIdentify(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nNpcGUID);
-BOOL __stdcall UnitHasItemInInventory(int32_t guid, struct D2UnitStrc * pUnit);
 // @sourcefile .\UNIT\SUNITNPC.CPP
 void __fastcall SUNITNPC_CheckCanIdentify(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nItemGUID);
-// Expansion-only: given a base item class ID and player level, randomly upgrades it to its uber or ultra variant using the NPC's RNG seed. Upgrade chance = (playerLevel - upgradeLevel) * chanceMult + 1, rolled against 10000. Returns the upgraded class ID if rolled, otherwise the original nItemClassId. Used when populating NPC shop inventory.
-uint32_t __stdcall SUNITNPC_RepairAndRecharge(::SGAMEDATA * pGame, uint32_t nItemClassId, int32_t nUberChanceMult, int32_t nUltraChanceMult, int32_t nPlayerLevel);
 // Server-side: builds the randomized gamble-screen inventory offered by a gambling NPC to a player. Allocates a gamble record (new player inventory + player GUID) onto the NPC game-data list. Using the NPC's RNG seed and difficulty GambleRare/Set/Unique/Uber/Ultra weights, rolls up to 14 items from the per-level gamble table, repairs/recharges item codes, picks a quality tier, creates each item (ITEM_CreateFromTemplate), marks it identified and on the inventory page, places it into the gamble inventory via SERVER_ItemToInventory, and frees the item if placement fails.
 // @sourcefile .\UNIT\SUNITNPC.CPP
 void __fastcall GAMBLE_GenerateGambleInventory(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pPlayerUnit, int32_t nNpcGameData);

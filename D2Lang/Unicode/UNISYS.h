@@ -38,7 +38,6 @@ void UNICODE_FreeBuffer(void * pParam);
 void UNICODE_AllocBuffer(uint32_t nSize);
 void UNICODE_ReadByteRange(void * pThis, uint8_t * pByteRange);
 uint32_t UNICODE_CheckByteInRange(void * pThis, uint8_t byValue);
-int32_t UNICODE_IsControlChar(uint8_t byChar);
 void __stdcall UNICODE_FreeKamapTables();
 // @sourcefile .\Unicode\UNISYS.CPP
 void __fastcall UNICODE_LoadKamapFile(struct D2PoolManagerStrc * pMemory, char * szFilename);

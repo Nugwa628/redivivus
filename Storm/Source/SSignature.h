@@ -47,7 +47,6 @@ namespace Storm::Source::SSignature {
 // Function declarations
 struct BigData * * __fastcall SSIG_InitBigNum(struct BigData * * pBigNum);
 void __fastcall SSIG_FreeBigNum(void * * pBigNum);
-BOOL SSIG_FindSignatureMarker(int32_t nOffset, uint32_t nTotalSize, int32_t pBuffer, int * pnFoundOffset);
 void __stdcall SSIG_HashData(uint32_t nDataLen, uint8_t * pData, int32_t pDigestOut);
 // @sourcefile .\SOURCE\SSignature.cpp
 // @oracle 2026-08-28 pass 5. Oracle: Mac PPC 1.10b Storm.

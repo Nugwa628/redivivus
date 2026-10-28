@@ -83,7 +83,7 @@ typedef void (__fastcall *fpStatListExChangeCb)(::SGAMEDATA * pGame, D2UnitStrc 
 
 namespace D2Common::Stats::StatsEx {
 
-int32_t STATLIST_BinarySearchInsertPos(int32_t nParam, int * pnParam) {
+static int32_t STATLIST_BinarySearchInsertPos(int32_t nParam, int * pnParam) {
     int nMid;
     int nCount = (int)(short int)pnParam[1];
     int nLo = 0;
@@ -95,7 +95,7 @@ int32_t STATLIST_BinarySearchInsertPos(int32_t nParam, int * pnParam) {
       int nEntryKey;
       nMid = (nCount - nLo) / 2 + nLo;
       nEntryKey = *(int*)(*pnParam + nMid * 8);
-      if (nEntryKey < nParam) {
+      if (nParam > nEntryKey) {
         nLo = nMid + 1;
         nMid = nCount;
       } else if (nEntryKey <= nParam) {
@@ -108,7 +108,7 @@ int32_t STATLIST_BinarySearchInsertPos(int32_t nParam, int * pnParam) {
     return nLo;
 }
 
-int32_t __stdcall STATLIST_BinarySearchStatInfoArray(int32_t nParam, D2StatInfoStrc * pStatInfo) {
+static int32_t __stdcall STATLIST_BinarySearchStatInfoArray(int32_t nParam, D2StatInfoStrc * pStatInfo) {
     int nPackedStatKey;
     int nCount = (int)pStatInfo->wStatCount;
     int nLo = 0;
@@ -119,7 +119,7 @@ int32_t __stdcall STATLIST_BinarySearchStatInfoArray(int32_t nParam, D2StatInfoS
         nMid = (nHi - nLo) / 2 + nLo;
         *(uint16_t*)(char*)&nPackedStatKey = pStatInfo->pStatInfo[nMid].wSubIndex;
         *(uint16_t*)((char*)&nPackedStatKey + 2) = pStatInfo->pStatInfo[nMid].wStatIndex;
-        if (nPackedStatKey < nParam) {
+        if (nParam > nPackedStatKey) {
           nLo = nMid + 1;
           nMid = nHi;
         } else if (nPackedStatKey <= nParam) {
@@ -136,13 +136,13 @@ int32_t __stdcall STATLIST_BinarySearchStatInfoArray(int32_t nParam, D2StatInfoS
     return nLo;
 }
 
-D2StatStrc * __stdcall STATLIST_InsertStatIntoArray(D2StatInfoStrc * pParam, int32_t nParam, D2PoolManagerStrc * pStatList) {
+static D2StatStrc * __stdcall STATLIST_InsertStatIntoArray(D2StatInfoStrc * pParam, int32_t nParam, D2PoolManagerStrc * pStatList) {
     D2StatStrc* pReallocBuf;
     int32_t nInsertPos = STATLIST_BinarySearchInsertPos(nParam, (int*)pParam);
     if (nInsertPos < 0) {
       return nullptr;
     }
-    if (pParam->wStatCapacity <= pParam->wStatCount) {
+    if (pParam->wStatCount >= pParam->wStatCapacity) {
       short int nNewCapacity;
       nNewCapacity = pParam->wStatCapacity + 4;
       pParam->wStatCapacity = nNewCapacity;
@@ -161,7 +161,7 @@ D2StatStrc * __stdcall STATLIST_InsertStatIntoArray(D2StatInfoStrc * pParam, int
     return pReallocBuf;
 }
 
-void __stdcall STATLIST_RemoveStatFromArray(D2PoolManagerStrc * pPoolManager1, D2StatStrc * pStat, D2PoolManagerStrc * pPoolManager2, void * * pParam) {
+static void __stdcall STATLIST_RemoveStatFromArray(D2PoolManagerStrc * pPoolManager1, D2StatStrc * pStat, D2PoolManagerStrc * pPoolManager2, void * * pParam) {
     int nCount = (int)*(short int*)(pParam + 1);
     int nRemoveIdx = (int)pStat - (int)*pParam >> 3;
     if (nRemoveIdx >= nCount) {
@@ -182,7 +182,7 @@ void __stdcall STATLIST_RemoveStatFromArray(D2PoolManagerStrc * pPoolManager1, D
     *pParam = pReallocBuf;
 }
 
-int32_t STATLIST_BinarySearchChangedInsertPos(D2ChangedStatArrayStrc * pStatInfo, int32_t nParam) {
+static int32_t STATLIST_BinarySearchChangedInsertPos(D2ChangedStatArrayStrc * pStatInfo, int32_t nParam) {
     int nMid;
     int nCount = (int)pStatInfo->wCount;
     int nLo = 0;
@@ -192,7 +192,7 @@ int32_t STATLIST_BinarySearchChangedInsertPos(D2ChangedStatArrayStrc * pStatInfo
 
     do {
       nMid = (nCount - nLo) / 2 + nLo;
-      if (pStatInfo->pChangedStatIds[nMid] < nParam) {
+      if (nParam > pStatInfo->pChangedStatIds[nMid]) {
         nLo = nMid + 1;
         nMid = nCount;
       } else if (pStatInfo->pChangedStatIds[nMid] <= nParam) {
@@ -206,7 +206,7 @@ int32_t STATLIST_BinarySearchChangedInsertPos(D2ChangedStatArrayStrc * pStatInfo
 }
 
 // Records a changed stat into the D2StatListExStrc dirty-tracking array so it can be saved later. Guards: only runs if the stat-list has the dirty-tracking flag (bit 31), skips volatile stats (hp/mana/stamina/exp/gold), skips stats not in ItemStatCost or lacking the SAVED flag. Finds the sorted insertion position via binary search; if the changed-stat array is full, reallocates it (+4 slots via Fog ReAllocServerMemory). Shifts existing entries and inserts the shifted-stat id, then increments wCount.
-void __stdcall STATLIST_TrackChangedStat(int32_t nShiftedStat, D2StatListExStrc * pStatEx) {
+static void __stdcall STATLIST_TrackChangedStat(int32_t nShiftedStat, D2StatListExStrc * pStatEx) {
     D2PoolManagerStrc* pMemory;
     if (!(pStatEx->sStatList.nFlags & 0x80000000U)) {
       return;
@@ -226,7 +226,7 @@ void __stdcall STATLIST_TrackChangedStat(int32_t nShiftedStat, D2StatListExStrc 
         return;
     }
 
-    if (sgptDataTable->nTxtItemStatCostSize <= (int)nUnitStatId) {
+    if ((int)nUnitStatId >= sgptDataTable->nTxtItemStatCostSize) {
       return;
     }
     if (!(sgptDataTable->pTxtItemStatCost + nUnitStatId)) {
@@ -243,7 +243,7 @@ void __stdcall STATLIST_TrackChangedStat(int32_t nShiftedStat, D2StatListExStrc 
     }
 
     short int nNewCapacity = pStatEx->sChangedStats.wCapacity;
-    if (nNewCapacity <= pStatEx->sChangedStats.wCount) {
+    if (pStatEx->sChangedStats.wCount >= nNewCapacity) {
       int* pReallocBuf;
       pMemory = pStatEx->sStatList.pMemory;
       nNewCapacity += 4;
@@ -289,7 +289,7 @@ int32_t __stdcall STATLIST_LookupBaseStatWithMinAccr(D2ItemStatCostTxt * pItemSt
     return nLo;
 }
 
-void * STATLIST_GetEffectiveStatsArray(D2StatListExStrc * pStatList) {
+static void * STATLIST_GetEffectiveStatsArray(D2StatListExStrc * pStatList) {
     if (!(pStatList->sStatList.nFlags & 0x80000000U)) {
       return &pStatList->sStatList.sBaseStats;
     }
@@ -298,7 +298,7 @@ void * STATLIST_GetEffectiveStatsArray(D2StatListExStrc * pStatList) {
 }
 
 // Binary-searches pStatEx's stat array for the packed stat key (wStatIndex:wSubIndex == nParam), returns its nStatValue. If the ItemStatCost record has ITEMSTATCOSTFLAG_FMIN set and the owning unit is a player or monster and the found value is below minaccr, returns minaccr left-shifted by valshift instead. Returns 0 if stat not found.
-int32_t __stdcall TXT_ItemStatCost_GetMinimumStatValueShifted(D2ItemStatCostTxt * pItemStatCostLine, D2StatListExStrc * pStatEx, int32_t nParam) {
+static int32_t __stdcall TXT_ItemStatCost_GetMinimumStatValueShifted(D2ItemStatCostTxt * pItemStatCostLine, D2StatListExStrc * pStatEx, int32_t nParam) {
     uint32_t bIsFullList = pStatEx->sStatList.nFlags & 0x80000000;
     D2StatInfoStrc* pStatInfoArray = &pStatEx->sFullStats;
     if (!bIsFullList) {
@@ -306,7 +306,7 @@ int32_t __stdcall TXT_ItemStatCost_GetMinimumStatValueShifted(D2ItemStatCostTxt 
     }
 
     long int lVar1 = Logging::STATLIST_BinarySearchStatById(nParam, (int*)pStatInfoArray);
-    if (!(-1 < lVar1 && pStatInfoArray->pStatInfo + lVar1)) {
+    if (!(0 <= lVar1 && pStatInfoArray->pStatInfo + lVar1)) {
       return 0;
     }
 
@@ -325,7 +325,7 @@ int32_t __stdcall TXT_ItemStatCost_GetMinimumStatValueShifted(D2ItemStatCostTxt 
 }
 
 // Computes the aggregate value of one stat (packed key = wStatIndex<<16 | wSubIndex == nStatId) for a stat-list. Binary-searches the list's own base stats for the value, then if the list is a full/aggregating list (flags bit 0x80000000) walks its active child stat-lists and binary-searches each (its full stats, or base stats if the child isn't aggregating), summing their values. Damage-related stats (ItemStatCost flag) skip children flagged 0x40000000. Returns the summed total. STATLIST_BinarySearchStatById is inlined here.
-int32_t __stdcall STATLIST_CalcFullStatFromChildren(int32_t nStatId, D2ItemStatCostTxt * pTxtItemStatCostLine, D2StatListExStrc * pStatListEx) {
+static int32_t __stdcall STATLIST_CalcFullStatFromChildren(int32_t nStatId, D2ItemStatCostTxt * pTxtItemStatCostLine, D2StatListExStrc * pStatListEx) {
     D2StatStrc* pDVar1;
     int iVar2;
     int nPackedStatKey;
@@ -337,10 +337,10 @@ int32_t __stdcall STATLIST_CalcFullStatFromChildren(int32_t nStatId, D2ItemStatC
     pChildStatArray = &pStatListEx->sStatList.sBaseStats;
     long int lVar3;
     lVar3 = Logging::STATLIST_BinarySearchStatById(nStatId, (int*)pChildStatArray);
-    if (lVar3 < 0 || (pDVar1 = pChildStatArray->pStatInfo + lVar3 , !pDVar1)) {
-      nTotalValue = 0;
-    } else {
+    if (!(lVar3 < 0 || (pDVar1 = pChildStatArray->pStatInfo + lVar3 , !pDVar1))) {
       nTotalValue = pDVar1->nStatValue;
+    } else {
+      nTotalValue = 0;
     }
     if (!(pStatListEx->sStatList.nFlags & 0x80000000U)) {
       return nTotalValue;
@@ -391,7 +391,7 @@ int32_t __stdcall STATLIST_CalcFullStatFromChildren(int32_t nStatId, D2ItemStatC
 }
 
 // Applies an additive delta (nParam2) to a packed stat entry identified by a combined stat+subindex key (nParam1) within a stat array (pStatArray inferred from pSkillsTxt). Uses an inlined binary search (STATLIST_BinarySearchStatById) to find the entry; inserts a new entry via STATLIST_InsertStatIntoArray if not found. After updating nStatValue, sets a dirty flag (bit 0x20000000) if the result is positive and a condition at nParam3+0x53 is set. Removes the entry if the new value is zero and nParam3+0x50 permits. Fires a registered change-callback (pSkillsTxt->aurastat+4) if present and the stat flags at nParam3+5 have bit 8 set. Returns the new stat value.
-int32_t __stdcall STATLIST_PropagateStatDelta(int32_t nParam1, int32_t nParam2, D2ItemStatCostTxt * nParam3, int32_t nCallbackArg, D2StatListExStrc * pSkillsTxt) {
+static int32_t __stdcall STATLIST_PropagateStatDelta(int32_t nParam1, int32_t nParam2, D2ItemStatCostTxt * nParam3, int32_t nCallbackArg, D2StatListExStrc * pSkillsTxt) {
     D2PoolManagerStrc* pPoolManager1;
     D2StatStrc* pStatEntry;
     D2StatInfoStrc* pStatArray;
@@ -457,7 +457,7 @@ void __stdcall STATLIST_SetFullStatValue(int32_t nParam1, int32_t nParam2, D2Ite
 
 // Allocates a simple D2StatListStrc (60 bytes). Used for child stat lists (item bonuses, buff overlays, aura effects). Does NOT allocate the extended fields (full stats, state flags).
 D2StatListStrc * __stdcall AllocStatList(D2PoolManagerStrc * pMemory, int32_t nFlags, int32_t nFrame, eD2UnitType eUnitType, int32_t dwUnitGUID) {
-    D2StatListStrc* pNewStatList = D2_NEW_POOL(pMemory, D2StatListStrc);
+    D2StatListStrc* pNewStatList = ((D2StatListStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2StatListStrc), ".\\Stats\\StatsEx.cpp", 0x56a, 0));
     memset(pNewStatList, 0, 0x3c);
     pNewStatList->eOwnerType = eUnitType;
     pNewStatList->pMemory = pMemory;
@@ -540,7 +540,7 @@ int32_t __stdcall STATLIST_GetStatFromBaseArray(D2StatListExStrc * pStatList, eD
     if (!pStatList) {
       return 0;
     }
-    if (!(-1 < (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
+    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
       return 0;
     }
 
@@ -552,7 +552,7 @@ int32_t __stdcall SERVER_GetUnitStat(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, 
     if (!pUnit) {
       return 0;
     }
-    if (!(-1 < (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
+    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
       return 0;
     }
     if (!pUnit->pStatsEx) {
@@ -567,7 +567,7 @@ int32_t __stdcall STATLIST_GetMinimalStatValueShifted(D2StatListExStrc * pStatsE
     if (!pStatsEx) {
       return 0;
     }
-    if (!(-1 < (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
+    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
       return 0;
     }
 
@@ -584,7 +584,7 @@ int __stdcall STATSEX_GetCurrentStat(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, 
     if (!pUnit->pStatsEx) {
       return 0;
     }
-    if (!(-1 < (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
+    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize && sgptDataTable->pTxtItemStatCost + eUnitStat)) {
       return 0;
     }
 
@@ -701,10 +701,10 @@ D2StatListExStrc * __stdcall GetStatListByFlags(D2StatListExStrc * pStatsEx, uin
       return nullptr;
     }
     if (pStatsEx->sStatList.nFlags & 0x80000000U) {
-      if (!(nStatListFlags & 0x2000)) {
-        pStatsEx = pStatsEx->pActiveHead;
-      } else {
+      if (nStatListFlags & 0x2000) {
         pStatsEx = pStatsEx->pInactiveHead;
+      } else {
+        pStatsEx = pStatsEx->pActiveHead;
       }
     }
 
@@ -825,7 +825,7 @@ void __stdcall STATLIST_DispatchUnchangedStatToCallback(D2UnitStrc * pUnit, D2Un
 
     D2StatInfoStrc* pBaseStats = &pDVar2->sStatList.sBaseStats;
     long int lVar3 = Logging::STATLIST_BinarySearchStatById(eUnitStat << 0x10, (int*)pBaseStats);
-    if (-1 >= lVar3) {
+    if (0 > lVar3) {
       return;
     }
 
@@ -861,12 +861,12 @@ void __stdcall STATLIST_IterateChangedStats(D2UnitStrc * pUnit, D2UnitStrc * pUn
       D2StatStrc* pDVar1;
       nParam = pDVar2->sChangedStats.pChangedStatIds[nChangedIdx];
       lVar3 = Logging::STATLIST_BinarySearchStatById(nParam, (int*)&pDVar2->sStatList.sBaseStats);
-      if (lVar3 < 0 || (pDVar1 = pDVar2->sStatList.sBaseStats.pStatInfo + lVar3 , !pDVar1)) {
-        nSearchLo = 0;
-        nStatId = (uint16_t)((uint32_t)nParam >> 0x10);
-      } else {
+      if (!(lVar3 < 0 || (pDVar1 = pDVar2->sStatList.sBaseStats.pStatInfo + lVar3 , !pDVar1))) {
         nSearchLo = pDVar1->nStatValue;
         nStatId = pDVar1->wStatIndex;
+      } else {
+        nSearchLo = 0;
+        nStatId = (uint16_t)((uint32_t)nParam >> 0x10);
       }
 
       (*pfnCallback)(pUnit, nStatId, nSearchLo, pUnit2);
@@ -886,7 +886,7 @@ void __stdcall STATLIST_ClearChangedStatFlags(D2UnitStrc * pUnit) {
 
     int* pChangedStatIds = pStatsEx->sChangedStats.pChangedStatIds;
     if (pChangedStatIds) {
-      D2_FREE_POOL(pStatsEx->sStatList.pMemory, pChangedStatIds);
+      Fog::Memory::FreeServerMemory(pStatsEx->sStatList.pMemory, pChangedStatIds, ".\\Stats\\StatsEx.cpp", 0xa1e, 0);
       pStatsEx->sChangedStats.pChangedStatIds = 0;
     }
 
@@ -1034,7 +1034,7 @@ int32_t __stdcall STATLIST_CopyStatsToBuffer(D2UnitStrc * pUnit, D2StatStrc * pS
     }
 
     int nCopyCount = (int)pStatsEx->sFullStats.wStatCount;
-    if (nParam <= nCopyCount) {
+    if (nCopyCount >= nParam) {
       nCopyCount = nParam;
     }
 
@@ -1058,7 +1058,7 @@ int32_t __stdcall CopyStatsToBuffer(D2StatListExStrc * pStatListEx, D2StatStrc *
     }
 
     int nStatsCount = (int)pStatListEx->sStatList.sBaseStats.wStatCount;
-    if (nOutputSize <= nStatsCount) {
+    if (nStatsCount >= nOutputSize) {
       nStatsCount = nOutputSize;
     }
 
@@ -1261,7 +1261,7 @@ int __stdcall GetSkillLevel(D2StatListExStrc * pStatListEx) {
     return pStatListEx->sStatList.nSkillLevel;
 }
 
-int __stdcall STATLIST_CopyStatPairsByStatIndex(D2StatStrc * pOutStatPairs, uint32_t nParam, int32_t nParam2, D2StatListExStrc * pStatList) {
+static int __stdcall STATLIST_CopyStatPairsByStatIndex(D2StatStrc * pOutStatPairs, uint32_t nParam, int32_t nParam2, D2StatListExStrc * pStatList) {
     if (!pStatList) {
       return 0;
     }
@@ -1285,7 +1285,7 @@ int __stdcall STATLIST_CopyStatPairsByStatIndex(D2StatStrc * pOutStatPairs, uint
       if ((iVar1 >> 0x10 & 0xffffU) != nParam) {
         return nWritten;
       }
-      if (nParam2 <= nWritten) {
+      if (nWritten >= nParam2) {
         return nWritten;
       }
 
@@ -1867,7 +1867,7 @@ void __fastcall FreeAnyStatList(D2StatListExStrc * pPlayerStatsEx) {
     STATLIST_DetachAndRecalc(pPlayerStatsEx);
     D2StatStrc* pStatInfoToFree = pPlayerStatsEx->sStatList.sBaseStats.pStatInfo;
     if (pStatInfoToFree) {
-      D2_FREE_POOL(pPlayerStatsEx->sStatList.pMemory, pStatInfoToFree);
+      Fog::Memory::FreeServerMemory(pPlayerStatsEx->sStatList.pMemory, pStatInfoToFree, ".\\Stats\\StatsEx.cpp", 0x4d8, 0);
     }
     if (pPlayerStatsEx->sStatList.nFlags & 0x80000000U) {
       int* pChangedStatIdsToFree;
@@ -1893,18 +1893,18 @@ void __fastcall FreeAnyStatList(D2StatListExStrc * pPlayerStatsEx) {
 
       pStatInfoToFree = pPlayerStatsEx->sFullStats.pStatInfo;
       if (pStatInfoToFree) {
-        D2_FREE_POOL(pPlayerStatsEx->sStatList.pMemory, pStatInfoToFree);
+        Fog::Memory::FreeServerMemory(pPlayerStatsEx->sStatList.pMemory, pStatInfoToFree, ".\\Stats\\StatsEx.cpp", 0x4f3, 0);
       }
 
       pChangedStatIdsToFree = pPlayerStatsEx->sChangedStats.pChangedStatIds;
       if (pChangedStatIdsToFree) {
-        D2_FREE_POOL(pPlayerStatsEx->sStatList.pMemory, pChangedStatIdsToFree);
+        Fog::Memory::FreeServerMemory(pPlayerStatsEx->sStatList.pMemory, pChangedStatIdsToFree, ".\\Stats\\StatsEx.cpp", 0x4f7, 0);
       }
 
-      D2_FREE_POOL(pPlayerStatsEx->sStatList.pMemory, pPlayerStatsEx->pStateFlags);
+      Fog::Memory::FreeServerMemory(pPlayerStatsEx->sStatList.pMemory, pPlayerStatsEx->pStateFlags, ".\\Stats\\StatsEx.cpp", 0x4fa, 0);
     }
 
-    D2_FREE_POOL(pPlayerStatsEx->sStatList.pMemory, pPlayerStatsEx);
+    Fog::Memory::FreeServerMemory(pPlayerStatsEx->sStatList.pMemory, pPlayerStatsEx, ".\\Stats\\StatsEx.cpp", 0x502, 0);
 }
 
 void __stdcall FreeStatList(D2StatListStrc * pStatList) {
@@ -1937,7 +1937,7 @@ D2StatListExStrc * __stdcall AllocStatListEx(D2UnitStrc * pUnit, uint32_t dwFlag
       pUnit->pStatsEx = 0;
     }
 
-    D2StatListExStrc* pStatsEx = D2_NEW_POOL(pUnit->pMemory, D2StatListExStrc);
+    D2StatListExStrc* pStatsEx = ((D2StatListExStrc*)Fog::Memory::AllocServerMemory(pUnit->pMemory, sizeof(D2StatListExStrc), ".\\Stats\\StatsEx.cpp", 0x586, 0));
     memset(pStatsEx, 0, 100);
     pStatsEx->sStatList.pMemory = pUnit->pMemory;
     pStatsEx->sStatList.eOwnerType = pUnit->eUnitType;
@@ -1948,7 +1948,7 @@ D2StatListExStrc * __stdcall AllocStatListEx(D2UnitStrc * pUnit, uint32_t dwFlag
     pStatsEx->pOwner = pUnit;
     int nStatesSizePadded = sgptDataTable->nTxtStatesSize + 0x1f;
     size_t nStateFlagsAllocSize = ((int)(nStatesSizePadded + (nStatesSizePadded >> 0x1f & 0x1fU)) >> 5) * 8;
-    int* pStateFlags = (int*)D2_ALLOC_POOL(pUnit->pMemory, nStateFlagsAllocSize);
+    int* pStateFlags = (int*)Fog::Memory::AllocServerMemory(pUnit->pMemory, nStateFlagsAllocSize, ".\\Stats\\StatsEx.cpp", 0x593, 0);
     pStatsEx->pStateFlags = pStateFlags;
     pStatsExAlloc = (D2StatListExStrc*)memset(pStateFlags, 0, nStateFlagsAllocSize);
     pUnit->pStatsEx = pStatsEx;
@@ -2293,11 +2293,11 @@ void __stdcall STATLIST_FreeChildStatLists(D2StatListExStrc * pStatList) {
           pStatCur = pStatArray + nMid;
           *(uint16_t*)(char*)&nCmpShiftedStat = pStatCur->wSubIndex;
           *(uint16_t*)((char*)&nCmpShiftedStat + 2) = pStatCur->wStatIndex;
-          if (nCmpShiftedStat < nShiftedStat) {
+          if (nShiftedStat > nCmpShiftedStat) {
             nSearchIdx = nMid + 1;
             nMid = nStatCount;
           } else if (nCmpShiftedStat <= nShiftedStat) {
-            if (-1 < nMid) {
+            if (0 <= nMid) {
               pStatArray += nMid;
               if (pStatArray) {
                 nSearchIdx = pStatArray->nStatValue;
@@ -2456,42 +2456,42 @@ void __stdcall UpdateResourceStats(D2UnitStrc * pUnit) {
     if (!pStatsEx) {
       return;
     }
-    if (sgptDataTable->nTxtItemStatCostSize < 0xb || !(sgptDataTable->pTxtItemStatCost + 10)) {
+    if (sgptDataTable->nTxtItemStatCostSize <= 0xa || !(sgptDataTable->pTxtItemStatCost + 10)) {
       nMinShiftedStatVal = 0;
     } else {
       /* ID 10 = stamina */ nMinShiftedStatVal = TXT_ItemStatCost_GetMinimumStatValueShifted(sgptDataTable->pTxtItemStatCost + 10, pStatsEx, 0xa0000);
     }
 
     int32_t nTxtMaxResource = GetTxtMaxStamina(pUnit);
-    if (nTxtMaxResource < nMinShiftedStatVal && nTxtMaxResource - nMinShiftedStatVal) {
+    if (nMinShiftedStatVal > nTxtMaxResource && nTxtMaxResource - nMinShiftedStatVal) {
       STATLIST_AddStatValue(pStatsEx, UNITSTAT_stamina, nTxtMaxResource - nMinShiftedStatVal, 0);
     }
 
     pStatsEx = pUnit->pStatsEx;
     if (!pStatsEx) {
       nMinShiftedStatVal = 0;
-    } else if (sgptDataTable->nTxtItemStatCostSize < 9 || !(sgptDataTable->pTxtItemStatCost + 8)) {
+    } else if (sgptDataTable->nTxtItemStatCostSize <= 8 || !(sgptDataTable->pTxtItemStatCost + 8)) {
       nMinShiftedStatVal = 0;
     } else {
       /* ID 8 = mana */ nMinShiftedStatVal = TXT_ItemStatCost_GetMinimumStatValueShifted(sgptDataTable->pTxtItemStatCost + 8, pStatsEx, 0x80000);
     }
 
     nTxtMaxResource = GetTxtMaxMana(pUnit);
-    if (nTxtMaxResource < nMinShiftedStatVal && nTxtMaxResource - nMinShiftedStatVal) {
+    if (nMinShiftedStatVal > nTxtMaxResource && nTxtMaxResource - nMinShiftedStatVal) {
       STATLIST_AddStatValue(pStatsEx, UNITSTAT_mana, nTxtMaxResource - nMinShiftedStatVal, 0);
     }
 
     pStatsEx = pUnit->pStatsEx;
     if (!pStatsEx) {
       nMinShiftedStatVal = 0;
-    } else if (sgptDataTable->nTxtItemStatCostSize < 7 || !(sgptDataTable->pTxtItemStatCost + 6)) {
+    } else if (sgptDataTable->nTxtItemStatCostSize <= 6 || !(sgptDataTable->pTxtItemStatCost + 6)) {
       nMinShiftedStatVal = 0;
     } else {
       /* ID 6 = hitpoints */ nMinShiftedStatVal = TXT_ItemStatCost_GetMinimumStatValueShifted(sgptDataTable->pTxtItemStatCost + 6, pStatsEx, 0x60000);
     }
 
     nTxtMaxResource = GetTxtMaxHp(pUnit);
-    if (!(nTxtMaxResource < nMinShiftedStatVal && nTxtMaxResource - nMinShiftedStatVal)) {
+    if (!(nMinShiftedStatVal > nTxtMaxResource && nTxtMaxResource - nMinShiftedStatVal)) {
       return;
     }
 
@@ -2518,7 +2518,7 @@ void __stdcall ItemUpdateStatsAfterSocketing(D2UnitStrc * pUnit, D2UnitStrc * pU
     D2DataTableTxtStrc* pDataTable = sgptDataTable;
     for (; pStatCur < pStatEnd; pStatCur++) {
       D2ItemStatCostTxt* pStatCostTxt = false || pDataTable->nTxtItemStatCostSize <= (int)(uint32_t)(uint16_t)pStatCur->wStatIndex ? 0 : pDataTable->pTxtItemStatCost + (uint16_t)pStatCur->wStatIndex;
-      if ((uint8_t)(pStatCostTxt->op - 6) < 2) {
+      if ((uint8_t)(pStatCostTxt->op - 6) <= 1) {
         pUnit = (D2UnitStrc*)&pStatCostTxt->opStat1;
         pUnit2 = 0;
         do {
@@ -2585,7 +2585,9 @@ void __stdcall STATLIST_ActivateItemStats(D2UnitStrc * pUnit, D2UnitStrc * pItem
     if (!pItemStatsEx) {
       return;
     }
-    if (pItemStatsEx->sStatList.pUnitAttached == pUnit) {
+    if (pItemStatsEx->sStatList.pUnitAttached != pUnit) {
+      STATLIST_SetItemStatActive(pUnit, pItem, 1);
+    } else {
       int nShiftedStat;
       pStatsEx = pUnit->pStatsEx;
       if (pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U) {
@@ -2606,8 +2608,6 @@ void __stdcall STATLIST_ActivateItemStats(D2UnitStrc * pUnit, D2UnitStrc * pItem
           return;
         }
       }
-    } else {
-      STATLIST_SetItemStatActive(pUnit, pItem, 1);
     }
 }
 
@@ -2691,7 +2691,9 @@ void __stdcall STATLIST_DeactivateItemStats(D2UnitStrc * pUnit, D2UnitStrc * pIt
     if (!pItemStatsEx) {
       return;
     }
-    if (pItemStatsEx->sStatList.pUnitAttached == pUnit) {
+    if (pItemStatsEx->sStatList.pUnitAttached != pUnit) {
+      STATLIST_SetItemStatActive(pUnit, pItem, 0);
+    } else {
       int nShiftedStat;
       pStatsEx = pUnit->pStatsEx;
       if (pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U) {
@@ -2712,8 +2714,6 @@ void __stdcall STATLIST_DeactivateItemStats(D2UnitStrc * pUnit, D2UnitStrc * pIt
           return;
         }
       }
-    } else {
-      STATLIST_SetItemStatActive(pUnit, pItem, 0);
     }
 }
 

@@ -69,10 +69,10 @@ int64_t __stdcall SBIG_Accumulator_ComputeOffset(uint32_t nMultiplicand, uint32_
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method PLAUSIBLE, and the strongest of the plausibles. It is byte-for-byte the loop the oracle inlines in .FromStream__FR9BigBufferPCvUiPUi @1009b620, and it is the exact inverse of BigBuffer_EncodeDataBytes 00421bd0, which pass 5 confirmed against .EncodeDataBytes__FR29TSGrowableArray<Uc,8TSCD<Uc>>Ui @1009b8a0. The oracle has no separate DecodeDataBytes symbol, so the name is the inferred counterpart of a confirmed one rather than a read export.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void BigBuffer_DecodeDataBytes(uint32_t * pnReadPos, uint8_t * pBuffer, uint32_t * pnValue, uint32_t nBufferLen) {
+static void BigBuffer_DecodeDataBytes(uint32_t * pnReadPos, uint8_t * pBuffer, uint32_t * pnValue, uint32_t nBufferLen) {
     *pnValue = 0;
     *pnReadPos = 0;
-    if (nBufferLen) {
+    if ((uint32_t)nBufferLen > 0) {
       uint32_t byByte;
       do {
         byByte = (uint32_t)pBuffer[*pnReadPos];
@@ -263,10 +263,10 @@ void TSFixedArray_Uc_ReallocData(TSGrowableArray_Uc * pBuffer, uint32_t nNewSize
     if (!pOldBuffer) {
       return;
     }
-    if (pBuffer->nLen <= nNewSize) {
+    if (nNewSize >= pBuffer->nLen) {
       nNewSize = pBuffer->nLen;
     }
-    if (nNewSize) {
+    if ((uint32_t)nNewSize > 0) {
       uint32_t uCopyIdx = 0;
       do {
         if (pBuffer->pData + uCopyIdx) {
@@ -355,7 +355,7 @@ int32_t __stdcall BigBuffer_Compare(BigBuffer * pBitSetA, BigBuffer * pBitSetB) 
       if (nIndexA < pBitSetA->nCount) {
         nWordA = *(int*)(nByteOffsetA + (int)pBitSetA->pData);
       } else {
-        if (nCountB <= nIndexB) {
+        if (nIndexB >= nCountB) {
           return nResult;
         }
 
@@ -494,7 +494,7 @@ int32_t __stdcall SBIG_BigBuffer_FindLowestBit(BigBuffer * pBitSet) {
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method NOUN CORRECTION ONLY. Tail unchanged and unverified.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void SBIG_BigBuffer_GetFirstWord(uint32_t dwUnused, uint32_t * pOutWord, BigBuffer * pBitSet) {
+static void SBIG_BigBuffer_GetFirstWord(uint32_t dwUnused, uint32_t * pOutWord, BigBuffer * pBitSet) {
     *pOutWord = 0;
     if (pBitSet->nStartWord < pBitSet->nCount) {
       *pOutWord = pBitSet->pData[pBitSet->nStartWord];
@@ -543,7 +543,7 @@ void TSBaseArray_Ui_Copy(uint32_t * pArray, uint32_t nCount, uint32_t * pSrc) {
     }
 
     uint32_t nIndex = 0;
-    if (nCount) {
+    if ((uint32_t)nCount > 0) {
       uint32_t* puVar1;
       do {
         puVar1 = (uint32_t*)(pArray[2] + nIndex * 4);
@@ -565,7 +565,7 @@ void TSBaseArray_Ui_Copy(uint32_t * pArray, uint32_t nCount, uint32_t * pSrc) {
 // @struct The container header is +0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk. BigBuffer extends it with +0x10 m_offset, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
 void TSGrowableArray_Uc_Reserve(uint32_t * pArray, int32_t nAdditional, int32_t bAlignToGranularity) {
     uint32_t nNewSize = nAdditional + pArray[1];
-    if (*pArray >= nNewSize) {
+    if (nNewSize <= *pArray) {
       return;
     }
     if (bAlignToGranularity) {
@@ -626,10 +626,10 @@ void TSFixedArray_Ui_ReallocData(uint32_t * pArray, uint32_t nCapacity) {
     if (!pOldBuffer) {
       return;
     }
-    if (pArray[1] <= nCapacity) {
+    if (nCapacity >= pArray[1]) {
       nCapacity = pArray[1];
     }
-    if (nCapacity) {
+    if ((uint32_t)nCapacity > 0) {
       uint32_t nIndex = 0;
       do {
         pNewBuffer = (uint32_t*)(pArray[2] + nIndex * 4);
@@ -662,10 +662,10 @@ void TSFixedArray_UcAlt_ReallocData(uint32_t * pArray, uint32_t nCapacity) {
     if (!pOldBuffer) {
       return;
     }
-    if (pArray[1] <= nCapacity) {
+    if (nCapacity >= pArray[1]) {
       nCapacity = pArray[1];
     }
-    if (nCapacity) {
+    if ((uint32_t)nCapacity > 0) {
       uint32_t nIndex = 0;
       do {
         if ((uint8_t*)(pArray[2] + nIndex)) {
@@ -710,7 +710,7 @@ void * TSFixedArray_Ui_Assign(uint32_t * pArray, void * pSrcArray) {
 int32_t __fastcall SBIG_ArrayByteAppendData(uint32_t nCount, uint8_t * pSrc, uint32_t * pArray) {
     uint32_t nGranularity;
     uint32_t nNewSize = pArray[1] + nCount;
-    if (*pArray < nNewSize) {
+    if (nNewSize > *pArray) {
       nGranularity = pArray[3];
       if (!nGranularity) {
         nGranularity = TSGrowableArray_Uc_CalcChunkSize((BigBuffer*)pArray, nNewSize);
@@ -723,7 +723,7 @@ int32_t __fastcall SBIG_ArrayByteAppendData(uint32_t nCount, uint8_t * pSrc, uin
     }
 
     nGranularity = 0;
-    if (nCount) {
+    if ((uint32_t)nCount > 0) {
       uint8_t* pSlot;
       do {
         pSlot = (uint8_t*)(pArray[2] + nGranularity + pArray[1]);
@@ -747,7 +747,7 @@ int32_t __fastcall SBIG_ArrayByteAppendData(uint32_t nCount, uint8_t * pSrc, uin
 int32_t __fastcall TSGrowableArray_Uc_New(uint32_t * pArray) {
     uint32_t nGranularity;
     uint32_t nNewSize = pArray[1] + 1;
-    if (*pArray < nNewSize) {
+    if (nNewSize > *pArray) {
       nGranularity = pArray[3];
       if (!nGranularity) {
         nGranularity = TSGrowableArray_Uc_CalcChunkSize((BigBuffer*)pArray, nNewSize);
@@ -770,7 +770,7 @@ int32_t __fastcall TSGrowableArray_Uc_New(uint32_t * pArray) {
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
 void TSGrowableArray_Uc_SetCount(uint32_t * pArray, uint32_t nNewCount) {
     uint32_t nNewSize;
-    if (pArray[1] < nNewCount && *pArray < nNewCount) {
+    if (nNewCount > pArray[1] && nNewCount > *pArray) {
       uint32_t nGranularity;
       nGranularity = pArray[3];
       if (!nGranularity) {
@@ -855,7 +855,7 @@ void TSBaseArray_UcAlt_Copy(uint32_t * pArray, uint32_t nCount, uint8_t * pSrc) 
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
 void TSGrowableArray_Ui_Reserve(uint32_t * pArray, int32_t nAdditional, int32_t bAlignToGranularity) {
     uint32_t nNewSize = nAdditional + pArray[1];
-    if (*pArray >= nNewSize) {
+    if (nNewSize <= *pArray) {
       return;
     }
     if (bAlignToGranularity) {
@@ -878,7 +878,7 @@ void TSGrowableArray_Ui_Reserve(uint32_t * pArray, int32_t nAdditional, int32_t 
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
 void TSGrowableArray_UcAlt_Reserve(uint32_t * pArray, int32_t nAdditional, int32_t bAlignToGranularity) {
     uint32_t nNewSize = nAdditional + pArray[1];
-    if (*pArray >= nNewSize) {
+    if (nNewSize <= *pArray) {
       return;
     }
     if (bAlignToGranularity) {
@@ -947,7 +947,7 @@ void BigBuffer_EncodeDataBytes(uint32_t nValue, TSGrowableArray_Uc * pByteBuffer
     }
 
     nRequiredLen = pByteBuffer->nLen + 1;
-    if (pByteBuffer->nCapacity < nRequiredLen) {
+    if (nRequiredLen > pByteBuffer->nCapacity) {
       nGranularity = pByteBuffer->nGrowStep;
       if (!nGranularity) {
         nGranularity = TSGrowableArray_Uc_CalcChunkSize((BigBuffer*)pByteBuffer, nRequiredLen);
@@ -988,7 +988,7 @@ void __stdcall BigBuffer_ToBinaryAppend(TSGrowableArray_Uc * pByteBuffer, BigBuf
       nWordValue >>= ((uint8_t)nByteIndex & 3) * '\b';
       if (nWordValue || (nByteIndex >> 2) + 1 < nWordCount) {
         nOffsetWords = pByteBuffer->nLen + 1;
-        if (pByteBuffer->nCapacity < nOffsetWords) {
+        if (nOffsetWords > pByteBuffer->nCapacity) {
           nWordCount = pByteBuffer->nGrowStep;
           if (!nWordCount) {
             nWordCount = TSGrowableArray_Uc_CalcChunkSize((BigBuffer*)pByteBuffer, nOffsetWords);
@@ -1057,12 +1057,12 @@ BigData * __fastcall SBIG_Constructor(BigData * pBigData) {
 
 void __fastcall SBIG_EnsureCapacity(uint32_t nIndex, int32_t bZeroFill, BigBuffer * pDwordArray) {
     uint32_t nNewCapacity;
-    if (pDwordArray->nCount > nIndex) {
+    if (nIndex < pDwordArray->nCount) {
       return;
     }
 
     uint32_t nValue = nIndex + 1;
-    if (pDwordArray->nCapacity < nValue) {
+    if (nValue > pDwordArray->nCapacity) {
       uint32_t nGranularity;
       nGranularity = pDwordArray->nGrowStep;
       if (!nGranularity) {
@@ -1089,7 +1089,7 @@ void __fastcall SBIG_EnsureCapacity(uint32_t nIndex, int32_t bZeroFill, BigBuffe
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}. Chunk cap = 256/sizeof(element).
 void TSGrowableArray_Ui_SetCount(BigBuffer * pDwordArray, uint32_t nNewLen) {
     uint32_t nNewCapacity;
-    if (pDwordArray->nCount < nNewLen && pDwordArray->nCapacity < nNewLen) {
+    if (nNewLen > pDwordArray->nCount && nNewLen > pDwordArray->nCapacity) {
       uint32_t nGranularity;
       nGranularity = pDwordArray->nGrowStep;
       if (!nGranularity) {
@@ -1110,7 +1110,7 @@ void TSGrowableArray_Ui_SetCount(BigBuffer * pDwordArray, uint32_t nNewLen) {
 int32_t __fastcall SBIG_AppendBytes(uint32_t nByteCount, uint8_t * pSrcBytes, uint32_t * pByteArray) {
     uint32_t i;
     uint32_t nNewLen = pByteArray[1] + nByteCount;
-    if (*pByteArray < nNewLen) {
+    if (nNewLen > *pByteArray) {
       i = pByteArray[3];
       if (!i) {
         i = TSGrowableArray_UcAlt_CalcChunkSize((BigBuffer*)pByteArray, nNewLen);
@@ -1123,7 +1123,7 @@ int32_t __fastcall SBIG_AppendBytes(uint32_t nByteCount, uint8_t * pSrcBytes, ui
     }
 
     i = 0;
-    if (nByteCount) {
+    if ((uint32_t)nByteCount > 0) {
       uint8_t* pDst;
       do {
         pDst = (uint8_t*)(pByteArray[2] + i + pByteArray[1]);
@@ -1143,12 +1143,12 @@ int32_t __fastcall SBIG_AppendBytes(uint32_t nByteCount, uint8_t * pSrcBytes, ui
 void __fastcall SBIG_GrowToIndex(int32_t nIndex, BigBuffer * pDwordArray) {
     uint32_t nNewCapacity;
     uint32_t nTargetIndex = pDwordArray->nStartWord + nIndex;
-    if (pDwordArray->nCount > nTargetIndex) {
+    if (nTargetIndex < pDwordArray->nCount) {
       return;
     }
 
     uint32_t nNewLen = nTargetIndex + 1;
-    if (pDwordArray->nCapacity < nNewLen) {
+    if (nNewLen > pDwordArray->nCapacity) {
       uint32_t nGranularity;
       nGranularity = pDwordArray->nGrowStep;
       if (!nGranularity) {
@@ -1175,7 +1175,7 @@ int32_t __fastcall SBIG_GetPtrAtOffset(int32_t nIndex, BigBuffer * pBigNum) {
 void __fastcall SBIG_TrimToOffset(BigBuffer * pDwordArray) {
     uint32_t nNewCapacity;
     uint32_t nNewLen = pDwordArray->nStartWord;
-    if (pDwordArray->nCount < nNewLen && pDwordArray->nCapacity < nNewLen) {
+    if (nNewLen > pDwordArray->nCount && nNewLen > pDwordArray->nCapacity) {
       uint32_t nGranularity;
       nGranularity = pDwordArray->nGrowStep;
       if (!nGranularity) {
@@ -1196,7 +1196,7 @@ void __fastcall SBIG_TrimToOffset(BigBuffer * pDwordArray) {
 void __fastcall SBIG_GrowToIndexNoZero(int32_t nIndex, BigBuffer * pDwordArray) {
     uint32_t nNewCapacity;
     uint32_t nNewLen = pDwordArray->nStartWord + nIndex;
-    if (pDwordArray->nCount < nNewLen && pDwordArray->nCapacity < nNewLen) {
+    if (nNewLen > pDwordArray->nCount && nNewLen > pDwordArray->nCapacity) {
       uint32_t nGranularity;
       nGranularity = pDwordArray->nGrowStep;
       if (!nGranularity) {
@@ -1239,7 +1239,7 @@ void __fastcall SBIG_TrimLeadingZeros(BigBuffer * pDwordArray) {
       }
 
       nNewLen = pDwordArray->nCount - 1;
-      if (pDwordArray->nCount < nNewLen && pDwordArray->nCapacity < nNewLen) {
+      if (nNewLen > pDwordArray->nCount && nNewLen > pDwordArray->nCapacity) {
         nGranularity = pDwordArray->nGrowStep;
         if (!nGranularity) {
           nGranularity = TSGrowableArray_Ui_CalcChunkSize(pDwordArray, nNewLen);
@@ -1270,7 +1270,7 @@ void * __fastcall SBIG_CopyAssign(void * pSource, uint32_t * pDest) {
 // @renamed-from SBIG_AddValueWithCarry (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Add__FR9BigBufferRC9BigBufferUi @100a0300 -- the scalar overload: sole target of SBigInc, and .FindPrime / .FromStr call it exactly where 1.14d FindPrime / FromStr call this. Was SBIG_AddValueWithCarry.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Add_Ui(uint32_t nCarry, BigBuffer * pSource, BigBuffer * pDest) {
+static void __stdcall BigBuffer_Add_Ui(uint32_t nCarry, BigBuffer * pSource, BigBuffer * pDest) {
     int i;
     uint32_t nGranularity;
     uint32_t nNewLen;
@@ -1288,9 +1288,9 @@ void __stdcall BigBuffer_Add_Ui(uint32_t nCarry, BigBuffer * pSource, BigBuffer 
       nSum = nCarry + nDestIndex;
       nCarry = (uint32_t)((uint32_t)((uint32_t)nCarry + (uint32_t)nDestIndex) < (uint32_t)nCarry);
       nDestIndex = pDest->nStartWord + i;
-      if (pDest->nCount <= nDestIndex) {
+      if (nDestIndex >= pDest->nCount) {
         nNewLen = nDestIndex + 1;
-        if (pDest->nCapacity < nNewLen) {
+        if (nNewLen > pDest->nCapacity) {
           nGranularity = pDest->nGrowStep;
           if (!nGranularity) {
             nGranularity = TSGrowableArray_Ui_CalcChunkSize(pDest, nNewLen);
@@ -1312,7 +1312,7 @@ void __stdcall BigBuffer_Add_Ui(uint32_t nCarry, BigBuffer * pSource, BigBuffer 
     }
 
     nDestIndex = pDest->nStartWord + i;
-    if (pDest->nCount < nDestIndex && pDest->nCapacity < nDestIndex) {
+    if (nDestIndex > pDest->nCount && nDestIndex > pDest->nCapacity) {
       nNewLen = pDest->nGrowStep;
       if (!nNewLen) {
         nNewLen = TSGrowableArray_Ui_CalcChunkSize(pDest, nDestIndex);
@@ -1332,7 +1332,7 @@ void __stdcall BigBuffer_Add_Ui(uint32_t nCarry, BigBuffer * pSource, BigBuffer 
 // @renamed-from SBIG_Add (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Add__FR9BigBufferRC9BigBufferRC9BigBuffer @100a01a0 -- sole target of SBigAdd's forwarder in both builds; 3 buffer args.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Add(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuffer * pDest) {
+static void __stdcall BigBuffer_Add(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuffer * pDest) {
     uint32_t nWordB;
     uint32_t nGranularity;
     int i;
@@ -1358,9 +1358,9 @@ void __stdcall BigBuffer_Add(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuff
       nSum = nCarry + nWordB + nDestIndex;
       nCarry = (uint32_t)((uint32_t)((uint32_t)nWordB + (uint32_t)nDestIndex) < (uint32_t)nWordB) + (uint32_t)((uint32_t)((uint32_t)nCarry + (uint32_t)(nWordB + nDestIndex)) < (uint32_t)nCarry);
       nDestIndex = pDest->nStartWord + i;
-      if (pDest->nCount <= nDestIndex) {
+      if (nDestIndex >= pDest->nCount) {
         nWordB = nDestIndex + 1;
-        if (pDest->nCapacity < nWordB) {
+        if (nWordB > pDest->nCapacity) {
           nGranularity = pDest->nGrowStep;
           if (!nGranularity) {
             nGranularity = TSGrowableArray_Ui_CalcChunkSize(pDest, nWordB);
@@ -1382,7 +1382,7 @@ void __stdcall BigBuffer_Add(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuff
     }
 
     nDestIndex = pDest->nStartWord + i;
-    if (pDest->nCount < nDestIndex && pDest->nCapacity < nDestIndex) {
+    if (nDestIndex > pDest->nCount && nDestIndex > pDest->nCapacity) {
       nWordB = pDest->nGrowStep;
       if (!nWordB) {
         nWordB = TSGrowableArray_Ui_CalcChunkSize(pDest, nDestIndex);
@@ -1402,7 +1402,7 @@ void __stdcall BigBuffer_Add(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuff
 // @renamed-from SBIG_BitwiseAnd (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .And__FR9BigBufferRC9BigBufferRC9BigBuffer @100a0070 -- sole target of SBigAnd's forwarder.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_And(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuffer * pDest) {
+static void __stdcall BigBuffer_And(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuffer * pDest) {
     uint32_t nGranularity;
     uint32_t nNewLen;
     uint32_t nWordIndex;
@@ -1417,9 +1417,9 @@ void __stdcall BigBuffer_And(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuff
         read_lhs_word:
         nWordA = pSourceA->pData[nWordIndex];
       } else {
-        if (pSourceB->nCount <= pSourceB->nStartWord + i) {
+        if (pSourceB->nStartWord + i >= pSourceB->nCount) {
           nWordIndex = pDest->nStartWord + i;
-          if (pDest->nCount < nWordIndex && pDest->nCapacity < nWordIndex) {
+          if (nWordIndex > pDest->nCount && nWordIndex > pDest->nCapacity) {
             nNewLen = pDest->nGrowStep;
             if (!nNewLen) {
               nNewLen = TSGrowableArray_Ui_CalcChunkSize(pDest, nWordIndex);
@@ -1451,9 +1451,9 @@ void __stdcall BigBuffer_And(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuff
       }
 
       nWordIndex = pDest->nStartWord + i;
-      if (pDest->nCount <= nWordIndex) {
+      if (nWordIndex >= pDest->nCount) {
         nNewLen = nWordIndex + 1;
-        if (pDest->nCapacity < nNewLen) {
+        if (nNewLen > pDest->nCapacity) {
           nGranularity = pDest->nGrowStep;
           if (!nGranularity) {
             nGranularity = TSGrowableArray_Ui_CalcChunkSize(pDest, nNewLen);
@@ -1480,7 +1480,7 @@ void __stdcall BigBuffer_And(BigBuffer * pSourceA, BigBuffer * pSourceB, BigBuff
 // @renamed-from SBIG_CompareValue (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Compare__FRC9BigBufferUi @1009ff50 -- the only other callee of .ToStr besides .Div_Ux, and 1.14d ToStr calls exactly this pair. Compares a BigBuffer against a scalar. Was SBIG_CompareValue.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-int32_t __stdcall BigBuffer_Compare_Ui(uint32_t nValue, BigBuffer * pBigIntArray) {
+static int32_t __stdcall BigBuffer_Compare_Ui(uint32_t nValue, BigBuffer * pBigIntArray) {
     SBIG_TrimLeadingZeros(pBigIntArray);
     uint32_t uVar1 = pBigIntArray->nStartWord;
     if (1 < pBigIntArray->nCount - uVar1) {
@@ -1503,7 +1503,7 @@ void __stdcall BigBuffer_Div_Ux(uint32_t * pRemainderOut, BigBuffer * pDividend,
     LLDVRM_RESULT LVar1;
     uint32_t nWordValue;
     uint32_t nRemainder = pQuotient->nStartWord - pDividend->nStartWord + pDividend->nCount;
-    if (pQuotient->nCount < nRemainder && pQuotient->nCapacity < nRemainder) {
+    if (nRemainder > pQuotient->nCount && nRemainder > pQuotient->nCapacity) {
       nGranOrHi = pQuotient->nGrowStep;
       if (!nGranOrHi) {
         nGranOrHi = TSGrowableArray_Ui_CalcChunkSize(pQuotient, nRemainder);
@@ -1533,9 +1533,9 @@ void __stdcall BigBuffer_Div_Ux(uint32_t * pRemainderOut, BigBuffer * pDividend,
 
       nScaledRem = __allmul(nRemainder, nParam12, 0, 1);
       nRemainder = pQuotient->nStartWord + nWordIndex;
-      if (pQuotient->nCount <= nRemainder) {
+      if (nRemainder >= pQuotient->nCount) {
         nGranOrHi = nRemainder + 1;
-        if (pQuotient->nCapacity < nGranOrHi) {
+        if (nGranOrHi > pQuotient->nCapacity) {
           nGranularity = pQuotient->nGrowStep;
           if (!nGranularity) {
             nGranularity = TSGrowableArray_Ui_CalcChunkSize(pQuotient, nGranOrHi);
@@ -1566,7 +1566,7 @@ void __stdcall BigBuffer_Div_Ux(uint32_t * pRemainderOut, BigBuffer * pDividend,
 // @renamed-from SBIG_IsOdd (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .IsOdd__FRC9BigBuffer @1009e4d0 -- sole target of SBigIsOdd's forwarder.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void BigBuffer_IsOdd(BigBuffer * pBignum) {
+static void BigBuffer_IsOdd(BigBuffer * pBignum) {
     SBIG_TrimLeadingZeros(pBignum);
     uint32_t nLowWord = pBignum->nStartWord;
     if (pBignum->nCount == nLowWord) {
@@ -1585,7 +1585,7 @@ void BigBuffer_IsOdd(BigBuffer * pBignum) {
 // @renamed-from SBIG_IsOne (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .IsOne__FRC9BigBuffer @1009e3f0 -- sole target of SBigIsOne's forwarder; also called by .IsPrime and .FindPrime where 1.14d does the same.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-BOOL BigBuffer_IsOne(BigBuffer * pBignum) {
+static BOOL BigBuffer_IsOne(BigBuffer * pBignum) {
     SBIG_TrimLeadingZeros(pBignum);
     uint32_t uVar1 = pBignum->nStartWord;
     if (!(pBignum->nCount - uVar1 == 1 && uVar1 < pBignum->nCount && pBignum->pData[uVar1] == 1)) {
@@ -1598,7 +1598,7 @@ BOOL BigBuffer_IsOne(BigBuffer * pBignum) {
 // @renamed-from SBIG_IsZero (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .IsZero__FRC9BigBuffer @1009db10 -- sole target of SBigIsZero's forwarder; also called by .Gcd, .InvMod and .IsPrime where 1.14d does the same.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-uint32_t BigBuffer_IsZero(BigBuffer * pBignum) {
+static uint32_t BigBuffer_IsZero(BigBuffer * pBignum) {
     SBIG_TrimLeadingZeros(pBignum);
     return (uint32_t)(pBignum->nCount == pBignum->nStartWord);
 }
@@ -1606,7 +1606,7 @@ uint32_t BigBuffer_IsZero(BigBuffer * pBignum) {
 // @renamed-from SBIG_MulValue64 (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Mul__FR9BigBufferRC9BigBufferUx @1009d9f0 -- scalar overload with a 64-bit multiplier; called by .FromStr and .Div where 1.14d calls this. Was SBIG_MulValue64.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Mul_Ux(BigBuffer * pSource, uint32_t nMultiplierLo, uint32_t nMultiplierHi, BigBuffer * pDest) {
+static void __stdcall BigBuffer_Mul_Ux(BigBuffer * pSource, uint32_t nMultiplierLo, uint32_t nMultiplierHi, BigBuffer * pDest) {
     uint32_t nGranularity;
     uint32_t nNewCapacity;
     uint32_t nNeededLen;
@@ -1626,9 +1626,9 @@ void __stdcall BigBuffer_Mul_Ux(BigBuffer * pSource, uint32_t nMultiplierLo, uin
       nProduct = __allmul(nCarry, 0, nMultiplierLo, nMultiplierHi);
       nCarry = (uint32_t)(nProduct + nCarryExtended >> 0x20);
       nAbsIndex = pDest->nStartWord + i;
-      if (pDest->nCount <= nAbsIndex) {
+      if (nAbsIndex >= pDest->nCount) {
         nNeededLen = nAbsIndex + 1;
-        if (pDest->nCapacity < nNeededLen) {
+        if (nNeededLen > pDest->nCapacity) {
           nGranularity = pDest->nGrowStep;
           if (!nGranularity) {
             nGranularity = TSGrowableArray_Ui_CalcChunkSize(pDest, nNeededLen);
@@ -1650,7 +1650,7 @@ void __stdcall BigBuffer_Mul_Ux(BigBuffer * pSource, uint32_t nMultiplierLo, uin
     }
 
     nCarry = pDest->nStartWord + i;
-    if (pDest->nCount < nCarry && pDest->nCapacity < nCarry) {
+    if (nCarry > pDest->nCount && nCarry > pDest->nCapacity) {
       nAbsIndex = pDest->nGrowStep;
       if (!nAbsIndex) {
         nAbsIndex = TSGrowableArray_Ui_CalcChunkSize(pDest, nCarry);
@@ -1670,7 +1670,7 @@ void __stdcall BigBuffer_Mul_Ux(BigBuffer * pSource, uint32_t nMultiplierLo, uin
 // @renamed-from SBIG_BitwiseNot (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Not__FR9BigBufferRC9BigBuffer @1009d620 -- sole target of SBigNot's forwarder; 2 args.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Not(BigBuffer * pSource, BigBuffer * pDest) {
+static void __stdcall BigBuffer_Not(BigBuffer * pSource, BigBuffer * pDest) {
     uint32_t nGranularity;
     uint32_t nWordValue;
     uint32_t nAbsIndex = pSource->nStartWord;
@@ -1687,9 +1687,9 @@ void __stdcall BigBuffer_Not(BigBuffer * pSource, BigBuffer * pDest) {
         }
 
         nAbsIndex = pDest->nStartWord + i;
-        if (pDest->nCount <= nAbsIndex) {
+        if (nAbsIndex >= pDest->nCount) {
           nNewLen = nAbsIndex + 1;
-          if (pDest->nCapacity < nNewLen) {
+          if (nNewLen > pDest->nCapacity) {
             nGranularity = pDest->nGrowStep;
             if (!nGranularity) {
               nGranularity = TSGrowableArray_Ui_CalcChunkSize(pDest, nNewLen);
@@ -1716,7 +1716,7 @@ void __stdcall BigBuffer_Not(BigBuffer * pSource, BigBuffer * pDest) {
     }
 
     nAbsIndex = pDest->nStartWord + nWordCount;
-    if (pDest->nCount < nAbsIndex && pDest->nCapacity < nAbsIndex) {
+    if (nAbsIndex > pDest->nCount && nAbsIndex > pDest->nCapacity) {
       nNewLen = pDest->nGrowStep;
       if (!nNewLen) {
         nNewLen = TSGrowableArray_Ui_CalcChunkSize(pDest, nAbsIndex);
@@ -1736,7 +1736,7 @@ void __stdcall BigBuffer_Not(BigBuffer * pSource, BigBuffer * pDest) {
 // @renamed-from SBIG_BitwiseOr (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Or__FR9BigBufferRC9BigBufferRC9BigBuffer @1009d4f0 -- sole target of SBigOr's forwarder.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Or(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pResult) {
+static void __stdcall BigBuffer_Or(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pResult) {
     uint32_t nAlignedCount;
     uint32_t nChunkSize;
     uint32_t nIndex;
@@ -1751,9 +1751,9 @@ void __stdcall BigBuffer_Or(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pRes
         read_lhs_word:
         dwLhsWord = pLhs->pData[nIndex];
       } else {
-        if (pRhs->nCount <= pRhs->nStartWord + i) {
+        if (pRhs->nStartWord + i >= pRhs->nCount) {
           nIndex = pResult->nStartWord + i;
-          if (pResult->nCount < nIndex && pResult->nCapacity < nIndex) {
+          if (nIndex > pResult->nCount && nIndex > pResult->nCapacity) {
             nChunkSize = pResult->nGrowStep;
             if (!nChunkSize) {
               nChunkSize = TSGrowableArray_Ui_CalcChunkSize(pResult, nIndex);
@@ -1785,9 +1785,9 @@ void __stdcall BigBuffer_Or(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pRes
       }
 
       nIndex = pResult->nStartWord + i;
-      if (pResult->nCount <= nIndex) {
+      if (nIndex >= pResult->nCount) {
         nChunkSize = nIndex + 1;
-        if (pResult->nCapacity < nChunkSize) {
+        if (nChunkSize > pResult->nCapacity) {
           nAlignedCount = pResult->nGrowStep;
           if (!nAlignedCount) {
             nAlignedCount = TSGrowableArray_Ui_CalcChunkSize(pResult, nChunkSize);
@@ -1813,7 +1813,7 @@ void __stdcall BigBuffer_Or(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pRes
 // @renamed-from SBIG_SetBit (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Set2Exp__FR9BigBufferUi @1009c730 -- sole target of SBigSet2Exp's forwarder; also called by .FindPrime where 1.14d FindPrime calls this. Sets the value to 2^n. Was SBIG_SetBit.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Set2Exp(uint32_t nBitPos, BigBuffer * pResult) {
+static void __stdcall BigBuffer_Set2Exp(uint32_t nBitPos, BigBuffer * pResult) {
     uint32_t nChunkSize;
     uint32_t nNeededCount;
     uint32_t nAlignedCount;
@@ -1822,9 +1822,9 @@ void __stdcall BigBuffer_Set2Exp(uint32_t nBitPos, BigBuffer * pResult) {
     if (nBitPos >> 5) {
       do {
         nIndex = pResult->nStartWord + i;
-        if (pResult->nCount <= nIndex) {
+        if (nIndex >= pResult->nCount) {
           nNeededCount = nIndex + 1;
-          if (pResult->nCapacity < nNeededCount) {
+          if (nNeededCount > pResult->nCapacity) {
             nChunkSize = pResult->nGrowStep;
             if (!nChunkSize) {
               nChunkSize = TSGrowableArray_Ui_CalcChunkSize(pResult, nNeededCount);
@@ -1849,10 +1849,10 @@ void __stdcall BigBuffer_Set2Exp(uint32_t nBitPos, BigBuffer * pResult) {
     }
 
     nNeededCount = pResult->nStartWord + nIndex;
-    if (pResult->nCount <= nNeededCount) {
+    if (nNeededCount >= pResult->nCount) {
       uint32_t nChunkSize2;
       nChunkSize = nNeededCount + 1;
-      if (pResult->nCapacity < nChunkSize) {
+      if (nChunkSize > pResult->nCapacity) {
         nChunkSize2 = pResult->nGrowStep;
         if (!nChunkSize2) {
           nChunkSize2 = TSGrowableArray_Ui_CalcChunkSize(pResult, nChunkSize);
@@ -1872,7 +1872,7 @@ void __stdcall BigBuffer_Set2Exp(uint32_t nBitPos, BigBuffer * pResult) {
 
     pResult->pData[pResult->nStartWord + nIndex] = 1 << ((uint8_t)nBitPos & 0x1f);
     nIndex = pResult->nStartWord + 1 + nIndex;
-    if (pResult->nCount < nIndex && pResult->nCapacity < nIndex) {
+    if (nIndex > pResult->nCount && nIndex > pResult->nCapacity) {
       nNeededCount = pResult->nGrowStep;
       if (!nNeededCount) {
         nNeededCount = TSGrowableArray_Ui_CalcChunkSize(pResult, nIndex);
@@ -1895,7 +1895,7 @@ void __stdcall BigBuffer_Set2Exp(uint32_t nBitPos, BigBuffer * pResult) {
 void BigBuffer_SetOne(BigBuffer * pResult) {
     uint32_t nAlignedCount;
     uint32_t nNeededCount = pResult->nStartWord + 1;
-    if (pResult->nCount < nNeededCount && pResult->nCapacity < nNeededCount) {
+    if (nNeededCount > pResult->nCount && nNeededCount > pResult->nCapacity) {
       uint32_t nChunkSize;
       nChunkSize = pResult->nGrowStep;
       if (!nChunkSize) {
@@ -1921,7 +1921,7 @@ void BigBuffer_SetOne(BigBuffer * pResult) {
 void BigBuffer_SetZero(BigBuffer * pResult) {
     uint32_t nAlignedCount;
     uint32_t nValue = pResult->nStartWord;
-    if (pResult->nCount < nValue && pResult->nCapacity < nValue) {
+    if (nValue > pResult->nCount && nValue > pResult->nCapacity) {
       uint32_t nChunkSize;
       nChunkSize = pResult->nGrowStep;
       if (!nChunkSize) {
@@ -1942,7 +1942,7 @@ void BigBuffer_SetZero(BigBuffer * pResult) {
 // @renamed-from SBIG_ShiftLeft (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Shl__FR9BigBufferRC9BigBufferUi @1009c3f0 -- sole target of SBigShl's forwarder; also called by .Rand and .Div.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Shl(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nShiftBits) {
+static void __stdcall BigBuffer_Shl(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nShiftBits) {
     int nSrcIndex;
     uint32_t nIndex;
     uint32_t nChunkSize;
@@ -1961,7 +1961,7 @@ void __stdcall BigBuffer_Shl(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nSh
         i--;
         nSrcIndex = nSrcWordCount - 1;
         dwWord = 0;
-        if (nWordShift <= i) {
+        if (i >= nWordShift) {
           nIndex = nSrcIndex + pSrc->nStartWord;
           if (nIndex < pSrc->nCount) {
             dwWord = pSrc->pData[nIndex];
@@ -1983,9 +1983,9 @@ void __stdcall BigBuffer_Shl(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nSh
         }
 
         nIndex = pResult->nStartWord + i;
-        if (pResult->nCount <= nIndex) {
+        if (nIndex >= pResult->nCount) {
           nNeededLen = nIndex + 1;
-          if (pResult->nCapacity < nNeededLen) {
+          if (nNeededLen > pResult->nCapacity) {
             nChunkSize = pResult->nGrowStep;
             if (!nChunkSize) {
               nChunkSize = TSGrowableArray_Ui_CalcChunkSize(pResult, nNeededLen);
@@ -2009,7 +2009,7 @@ void __stdcall BigBuffer_Shl(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nSh
     }
 
     nResultCount = pResult->nStartWord + nResultCount;
-    if (pResult->nCount < nResultCount && pResult->nCapacity < nResultCount) {
+    if (nResultCount > pResult->nCount && nResultCount > pResult->nCapacity) {
       nWordShift = pResult->nGrowStep;
       if (!nWordShift) {
         nWordShift = TSGrowableArray_Ui_CalcChunkSize(pResult, nResultCount);
@@ -2062,9 +2062,9 @@ void __stdcall BigBuffer_Shr(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nSh
         }
 
         nSrcCount = pResult->nStartWord + i;
-        if (pResult->nCount <= nSrcCount) {
+        if (nSrcCount >= pResult->nCount) {
           nIndex = nSrcCount + 1;
-          if (pResult->nCapacity < nIndex) {
+          if (nIndex > pResult->nCapacity) {
             nChunkSize = pResult->nGrowStep;
             if (!nChunkSize) {
               nChunkSize = TSGrowableArray_Ui_CalcChunkSize(pResult, nIndex);
@@ -2090,7 +2090,7 @@ void __stdcall BigBuffer_Shr(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nSh
     }
 
     nSrcCount = pResult->nStartWord + i;
-    if (pResult->nCount < nSrcCount && pResult->nCapacity < nSrcCount) {
+    if (nSrcCount > pResult->nCount && nSrcCount > pResult->nCapacity) {
       nWordShift = pResult->nGrowStep;
       if (!nWordShift) {
         nWordShift = TSGrowableArray_Ui_CalcChunkSize(pResult, nSrcCount);
@@ -2110,7 +2110,7 @@ void __stdcall BigBuffer_Shr(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nSh
 // @renamed-from SBIG_Negate (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Sub__FR9BigBufferRC9BigBufferUi @1009bed0 -- the scalar overload: sole target of SBigDec, and .IsPrime / .FindPrime call it exactly where 1.14d calls this (the n-1 step). It does not negate. Was SBIG_Negate.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Sub_Ui(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nSubtrahend) {
+static void __stdcall BigBuffer_Sub_Ui(BigBuffer * pSrc, BigBuffer * pResult, uint32_t nSubtrahend) {
     uint32_t nAlignedCount;
     uint32_t uVar1;
     uint32_t nAccumLo = ~nSubtrahend + 1;
@@ -2138,7 +2138,7 @@ void __stdcall BigBuffer_Sub_Ui(BigBuffer * pSrc, BigBuffer * pResult, uint32_t 
         nSrcCount = pResult->nStartWord + i;
         if (pResult->nCount <= nSrcCount) {
           nSrcOffset = nSrcCount + 1;
-          if (pResult->nCapacity < nSrcOffset) {
+          if (nSrcOffset > pResult->nCapacity) {
             nChunkSize = pResult->nGrowStep;
             if (!nChunkSize) {
               nChunkSize = TSGrowableArray_Ui_CalcChunkSize(pResult, nSrcOffset);
@@ -2165,7 +2165,7 @@ void __stdcall BigBuffer_Sub_Ui(BigBuffer * pSrc, BigBuffer * pResult, uint32_t 
     }
 
     nSrcCount = pResult->nStartWord + dwResultWord;
-    if (pResult->nCount < nSrcCount && pResult->nCapacity < nSrcCount) {
+    if (nSrcCount > pResult->nCount && nSrcCount > pResult->nCapacity) {
       nSrcOffset = pResult->nGrowStep;
       if (!nSrcOffset) {
         nSrcOffset = TSGrowableArray_Ui_CalcChunkSize(pResult, nSrcCount);
@@ -2185,7 +2185,7 @@ void __stdcall BigBuffer_Sub_Ui(BigBuffer * pSrc, BigBuffer * pResult, uint32_t 
 // @renamed-from SBIG_Sub (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Sub__FR9BigBufferRC9BigBufferRC9BigBuffer @1009bd70 -- sole target of SBigSub's forwarder; also called by .Div, .InvMod and .FindPrime.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Sub(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pResult) {
+static void __stdcall BigBuffer_Sub(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pResult) {
     uint32_t dwLhsWord;
     uint32_t nChunkSize;
     uint32_t nAlignedCount;
@@ -2203,9 +2203,9 @@ void __stdcall BigBuffer_Sub(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pRe
         read_lhs_word:
         dwLhsWord = pLhs->pData[dwLhsWord];
       } else {
-        if (pRhs->nCount <= pRhs->nStartWord + i) {
+        if (pRhs->nStartWord + i >= pRhs->nCount) {
           dwLhsWord = pResult->nStartWord + i;
-          if (pResult->nCount < dwLhsWord && pResult->nCapacity < dwLhsWord) {
+          if (dwLhsWord > pResult->nCount && dwLhsWord > pResult->nCapacity) {
             dwRhsWord = pResult->nGrowStep;
             if (!dwRhsWord) {
               dwRhsWord = TSGrowableArray_Ui_CalcChunkSize(pResult, dwLhsWord);
@@ -2244,9 +2244,9 @@ void __stdcall BigBuffer_Sub(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pRe
       }
 
       dwLhsWord = pResult->nStartWord + i;
-      if (pResult->nCount <= dwLhsWord) {
+      if (dwLhsWord >= pResult->nCount) {
         dwRhsWord = dwLhsWord + 1;
-        if (pResult->nCapacity < dwRhsWord) {
+        if (dwRhsWord > pResult->nCapacity) {
           nChunkSize = pResult->nGrowStep;
           if (!nChunkSize) {
             nChunkSize = TSGrowableArray_Ui_CalcChunkSize(pResult, dwRhsWord);
@@ -2272,7 +2272,7 @@ void __stdcall BigBuffer_Sub(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pRe
 // @renamed-from SBIG_BitwiseXor (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Xor__FR9BigBufferRC9BigBufferRC9BigBuffer @1009bc40 -- sole target of SBigXor's forwarder.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Xor(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pResult) {
+static void __stdcall BigBuffer_Xor(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pResult) {
     uint32_t nAlignedCount;
     uint32_t nChunkSize;
     uint32_t nIndex;
@@ -2287,9 +2287,9 @@ void __stdcall BigBuffer_Xor(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pRe
         read_lhs_word:
         dwLhsWord = pLhs->pData[nIndex];
       } else {
-        if (pRhs->nCount <= pRhs->nStartWord + i) {
+        if (pRhs->nStartWord + i >= pRhs->nCount) {
           nIndex = pResult->nStartWord + i;
-          if (pResult->nCount < nIndex && pResult->nCapacity < nIndex) {
+          if (nIndex > pResult->nCount && nIndex > pResult->nCapacity) {
             nChunkSize = pResult->nGrowStep;
             if (!nChunkSize) {
               nChunkSize = TSGrowableArray_Ui_CalcChunkSize(pResult, nIndex);
@@ -2321,9 +2321,9 @@ void __stdcall BigBuffer_Xor(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pRe
       }
 
       nIndex = pResult->nStartWord + i;
-      if (pResult->nCount <= nIndex) {
+      if (nIndex >= pResult->nCount) {
         nChunkSize = nIndex + 1;
-        if (pResult->nCapacity < nChunkSize) {
+        if (nChunkSize > pResult->nCapacity) {
           nAlignedCount = pResult->nGrowStep;
           if (!nAlignedCount) {
             nAlignedCount = TSGrowableArray_Ui_CalcChunkSize(pResult, nChunkSize);
@@ -2349,7 +2349,7 @@ void __stdcall BigBuffer_Xor(BigBuffer * pLhs, BigBuffer * pRhs, BigBuffer * pRe
 // @renamed-from SBIG_ImportBytes (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .FromBinary__FR9BigBufferPCvUi @1009b7b0 -- sole target of SBigFromBinary's forwarder; also the sole bignum callee of .FromStream, matching 1.14d FromStream. Was SBIG_ImportBytes.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_FromBinary(void * pSrcBytes, uint32_t nByteCount, BigBuffer * pResult) {
+static void __stdcall BigBuffer_FromBinary(void * pSrcBytes, uint32_t nByteCount, BigBuffer * pResult) {
     uint32_t nWordIndex;
     uint32_t nChunkSize;
     uint32_t nAlignedCount;
@@ -2357,7 +2357,7 @@ void __stdcall BigBuffer_FromBinary(void * pSrcBytes, uint32_t nByteCount, BigBu
     uint8_t byValue;
     uint32_t nNeededCount;
     uint32_t nByteInWord = pResult->nStartWord;
-    if (pResult->nCount < nByteInWord && pResult->nCapacity < nByteInWord) {
+    if (nByteInWord > pResult->nCount && nByteInWord > pResult->nCapacity) {
       nWordIndex = pResult->nGrowStep;
       if (!nWordIndex) {
         nWordIndex = TSGrowableArray_Ui_CalcChunkSize(pResult, nByteInWord);
@@ -2373,7 +2373,7 @@ void __stdcall BigBuffer_FromBinary(void * pSrcBytes, uint32_t nByteCount, BigBu
 
     pResult->nCount = nByteInWord;
     uint32_t i = 0;
-    if (!nByteCount) {
+    if ((uint32_t)nByteCount <= 0) {
       return;
     }
 
@@ -2390,9 +2390,9 @@ void __stdcall BigBuffer_FromBinary(void * pSrcBytes, uint32_t nByteCount, BigBu
       }
 
       nAlignedCount = pResult->nStartWord + nWordIndex;
-      if (pResult->nCount <= nAlignedCount) {
+      if (nAlignedCount >= pResult->nCount) {
         nNeededCount = nAlignedCount + 1;
-        if (pResult->nCapacity < nNeededCount) {
+        if (nNeededCount > pResult->nCapacity) {
           nChunkSize = pResult->nGrowStep;
           if (!nChunkSize) {
             nChunkSize = TSGrowableArray_Ui_CalcChunkSize(pResult, nNeededCount);
@@ -2432,7 +2432,7 @@ void BigBuffer_FromStr(BigBuffer * pResult, char * szText) {
 // @renamed-from SBIG_ImportVarint (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .FromStream__FR9BigBufferPCvUiPUi @1009b620 -- 4 args with a bytes-consumed out-param; decodes the length prefix then calls FromBinary, exactly as .FromStream does. Was SBIG_ImportVarint.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_FromStream(BigBuffer * pResult, int * pnBytesRead, uint8_t * pSrc, uint32_t nMaxLen) {
+static void __stdcall BigBuffer_FromStream(BigBuffer * pResult, int * pnBytesRead, uint8_t * pSrc, uint32_t nMaxLen) {
     uint32_t nPayloadLen;
     uint32_t nHeaderLen;
     BigBuffer_DecodeDataBytes(&nHeaderLen, pSrc, &nPayloadLen, nMaxLen);
@@ -2447,14 +2447,14 @@ void __stdcall BigBuffer_FromStream(BigBuffer * pResult, int * pnBytesRead, uint
 // @renamed-from SBIG_SetValue (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .FromUnsigned__FR9BigBufferUi @1009b080 -- sole target of SBigFromUnsigned's forwarder; also called by .IsPrime where 1.14d IsPrime calls this. Was SBIG_SetValue.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_FromUnsigned(uint32_t dwValue, BigBuffer * pResult) {
+static void __stdcall BigBuffer_FromUnsigned(uint32_t dwValue, BigBuffer * pResult) {
     uint32_t nChunkSize;
     uint32_t nNeededCount;
     uint32_t nIndex = pResult->nStartWord;
-    if (pResult->nCount <= nIndex) {
+    if (nIndex >= pResult->nCount) {
       uint32_t nAlignedCount;
       nNeededCount = nIndex + 1;
-      if (pResult->nCapacity < nNeededCount) {
+      if (nNeededCount > pResult->nCapacity) {
         nChunkSize = pResult->nGrowStep;
         if (!nChunkSize) {
           nChunkSize = TSGrowableArray_Ui_CalcChunkSize(pResult, nNeededCount);
@@ -2474,7 +2474,7 @@ void __stdcall BigBuffer_FromUnsigned(uint32_t dwValue, BigBuffer * pResult) {
 
     pResult->pData[pResult->nStartWord] = dwValue;
     nIndex = pResult->nStartWord + 1;
-    if (pResult->nCount < nIndex && pResult->nCapacity < nIndex) {
+    if (nIndex > pResult->nCount && nIndex > pResult->nCapacity) {
       nNeededCount = pResult->nGrowStep;
       if (!nNeededCount) {
         nNeededCount = TSGrowableArray_Ui_CalcChunkSize(pResult, nIndex);
@@ -2494,7 +2494,7 @@ void __stdcall BigBuffer_FromUnsigned(uint32_t dwValue, BigBuffer * pResult) {
 // @renamed-from SBIG_ExportBytes (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .ToBinary__FR29TSGrowableArray<Uc,8TSCD<Uc>>RC9BigBuffer @1009ae00 -- the target of all three SBigToBinary* forms; like .ToBinary its only callee is ToBinaryAppend. Was SBIG_ExportBytes.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void BigBuffer_ToBinary(BigBuffer * pBigNum, TSGrowableArray_Uc * pOutBuffer) {
+static void BigBuffer_ToBinary(BigBuffer * pBigNum, TSGrowableArray_Uc * pOutBuffer) {
     pOutBuffer->nLen = 0;
     BigBuffer_ToBinaryAppend(pOutBuffer, pBigNum);
 }
@@ -2502,7 +2502,7 @@ void BigBuffer_ToBinary(BigBuffer * pBigNum, TSGrowableArray_Uc * pOutBuffer) {
 // @renamed-from SBIG_ExportDecimalString (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .ToStr__FR29TSGrowableArray<Uc,8TSCD<Uc>>RC9BigBufferR8BigStack @1009a330 -- the target of all three SBigToStr* forms; callee set {Div_Ux, Compare_Ui} matches .ToStr exactly. Was SBIG_ExportDecimalString.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_ToStr(BigStack * pStack, BigBuffer * pValue, TSGrowableArray_Uc * pOutBuffer) {
+static void __stdcall BigBuffer_ToStr(BigStack * pStack, BigBuffer * pValue, TSGrowableArray_Uc * pOutBuffer) {
     int iVar2;
     int32_t bNonZero;
     uint32_t uBitIter;
@@ -2524,7 +2524,7 @@ void __stdcall BigBuffer_ToStr(BigStack * pStack, BigBuffer * pValue, TSGrowable
       BigBuffer_Div_Ux(&nDigit, pDividend, 10, 0, pDividend);
       cDigitChar = (char)nDigit + '0';
       nNeededLen = pOutBuffer->nLen + 1;
-      if (pOutBuffer->nCapacity < nNeededLen) {
+      if (nNeededLen > pOutBuffer->nCapacity) {
         nChunkSize = pOutBuffer->nGrowStep;
         if (!nChunkSize) {
           if (nNeededLen < 0x100) {
@@ -2571,7 +2571,7 @@ void __stdcall BigBuffer_ToStr(BigStack * pStack, BigBuffer * pValue, TSGrowable
     }
 
     nNeededLen = pOutBuffer->nLen + 1;
-    if (pOutBuffer->nCapacity < nNeededLen) {
+    if (nNeededLen > pOutBuffer->nCapacity) {
       nChunkSize = pOutBuffer->nGrowStep;
       if (!nChunkSize) {
         nChunkSize = TSGrowableArray_Uc_CalcChunkSize((BigBuffer*)pOutBuffer, nNeededLen);
@@ -2592,7 +2592,7 @@ void __stdcall BigBuffer_ToStr(BigStack * pStack, BigBuffer * pValue, TSGrowable
 // @renamed-from SBIG_ExportVarint (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .ToStream__FR29TSGrowableArray<Uc,8TSCD<Uc>>RC9BigBuffer @1009a290 -- the target of all three SBigToStream* forms; callee set {ToBinary, EncodeDataBytes, ToBinaryAppend} matches .ToStream exactly. Was SBIG_ExportVarint.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void BigBuffer_ToStream(TSGrowableArray_Uc * pOutBuffer, BigBuffer * pSrcBignum) {
+static void BigBuffer_ToStream(TSGrowableArray_Uc * pOutBuffer, BigBuffer * pSrcBignum) {
     BigBuffer_ToBinary(pSrcBignum, pOutBuffer);
     BigBuffer_EncodeDataBytes(pOutBuffer->nLen, pOutBuffer);
     BigBuffer_ToBinaryAppend(pOutBuffer, pSrcBignum);
@@ -2912,7 +2912,7 @@ void __fastcall SBIG_CopyBigNumToTemp(BigStack * pStack, BigBuffer * pDest, BigB
 // @renamed-from SBIG_DivMod (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Div__FR9BigBufferR9BigBufferRC9BigBufferRC9BigBufferR8BigStack @1009f6a0 -- 5 args (quot, rem, a, b, stack); callee set {SetZero, Div_Ux, Shl, 64-bit divide, Mul_Ux, Sub, Shr} matches .Div one for one. Was SBIG_DivMod.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Div(BigBuffer * pQuotient, BigBuffer * pRemainder, BigBuffer * pDivisor, BigStack * pStack, BigBuffer * pDividend) {
+static void __stdcall BigBuffer_Div(BigBuffer * pQuotient, BigBuffer * pRemainder, BigBuffer * pDivisor, BigStack * pStack, BigBuffer * pDividend) {
     uint32_t uVar2;
     uint32_t nNormShift;
     int nTopIndex;
@@ -2937,7 +2937,7 @@ void __stdcall BigBuffer_Div(BigBuffer * pQuotient, BigBuffer * pRemainder, BigB
     nDividendLen = pDividend->nCount - pDividend->nStartWord;
     uint32_t nDivisorLen;
     nDivisorLen = pDivisor->nCount - uVar1;
-    if (nDividendLen < nDivisorLen) {
+    if (nDivisorLen > nDividendLen) {
       if (pRemainder != pDividend) {
         TSBaseArray_Ui_Copy(&pRemainder->nCapacity, pDividend->nCount, pDividend->pData);
       }
@@ -2989,7 +2989,7 @@ void __stdcall BigBuffer_Div(BigBuffer * pQuotient, BigBuffer * pRemainder, BigB
           nDividend64 = __allmul(pDividendData[nAlignChunk + nDivisorLen], 0, 0, 1);
           nDividend64 += (uint64_t)pTopWordData[uBitIter + nTopIndex];
           SBIG_GrowToIndex(0, pQuotient);
-          uAligned = __aulldiv((uint32_t)nDividend64, (uint32_t)((uint64_t)nDividend64 >> 0x20), nDivisorHigh, 0);
+          uAligned = (uint64_t)nDividend64 / (uint64_t)(uint32_t)nDivisorHigh;
           nAlignChunk = (uint32_t)uAligned;
         }
 
@@ -3006,9 +3006,9 @@ void __stdcall BigBuffer_Div(BigBuffer * pQuotient, BigBuffer * pRemainder, BigB
           BigBuffer_Sub(pResult, pSubOperand, pResult);
           correct_quotient_digit:
           nDividendLen = pResult->nStartWord + nDivisorLen;
-          if (pResult->nCount <= nDividendLen) {
+          if (nDividendLen >= pResult->nCount) {
             uNeeded = nDividendLen + 1;
-            if (pResult->nCapacity < uNeeded) {
+            if (uNeeded > pResult->nCapacity) {
               nAlignChunk = pResult->nGrowStep;
               if (!nAlignChunk) {
                 if (uNeeded < 0x40) {
@@ -3178,7 +3178,7 @@ void __stdcall BigBuffer_Mul(BigBuffer * pnResult, BigBuffer * pnA, BigBuffer * 
     }
 
     uLen = pnAcc->nStartWord;
-    if (pnAcc->nCount < uLen && pnAcc->nCapacity < uLen) {
+    if (uLen > pnAcc->nCount && uLen > pnAcc->nCapacity) {
       uGrowStep = pnAcc->nGrowStep;
       if (!uGrowStep) {
         uGrowStep = TSGrowableArray_Ui_CalcChunkSize(pnAcc, uLen);
@@ -3213,9 +3213,9 @@ void __stdcall BigBuffer_Mul(BigBuffer * pnResult, BigBuffer * pnA, BigBuffer * 
             }
 
             uLen = pnAcc->nStartWord + iAccPos;
-            if (pnAcc->nCount <= uLen) {
+            if (uLen >= pnAcc->nCount) {
               uGrowStep = uLen + 1;
-              if (pnAcc->nCapacity < uGrowStep) {
+              if (uGrowStep > pnAcc->nCapacity) {
                 uAlignedCap = pnAcc->nGrowStep;
                 if (!uAlignedCap) {
                   if (uGrowStep < 0x40) {
@@ -3249,9 +3249,9 @@ void __stdcall BigBuffer_Mul(BigBuffer * pnResult, BigBuffer * pnA, BigBuffer * 
             uNewCapacity = SBIG_BigBuffer_GetWord(pnA, iOuter);
             llProduct = (uint64_t)uNewCapacity * (uint64_t)dwWordB + (uint64_t)pnAcc->pData[uLen] + (uint64_t)dwCarry;
             dwCarry = (uint32_t)((uint64_t)llProduct >> 0x20);
-            if (pnAcc->nCount <= uLen) {
+            if (uLen >= pnAcc->nCount) {
               uGrowStep = uLen + 1;
-              if (pnAcc->nCapacity < uGrowStep) {
+              if (uGrowStep > pnAcc->nCapacity) {
                 uAlignedCap = pnAcc->nGrowStep;
                 if (!uAlignedCap) {
                   if (uGrowStep < 0x40) {
@@ -3428,7 +3428,7 @@ void __stdcall BigBuffer_Rand(BigBuffer * pnResult, BigBuffer * pnModulus, BigBu
     uNeededCount = pnWork->nCount;
     uint32_t uGrowStep = pnWork->nStartWord;
     uint32_t uNewLen = uGrowStep + 2;
-    if (uNeededCount < uNewLen && pnWork->nCapacity < uNewLen) {
+    if (uNewLen > uNeededCount && uNewLen > pnWork->nCapacity) {
       uBitIter = pnWork->nGrowStep;
       if (!uBitIter) {
         uBitIter = TSGrowableArray_Ui_CalcChunkSize(pnWork, uNewLen);
@@ -3512,7 +3512,7 @@ void __stdcall BigBuffer_Rand(BigBuffer * pnResult, BigBuffer * pnModulus, BigBu
 
     SBIG_TrimLeadingZeros(pnModulus);
     uNeededCount = pnQuotient->nStartWord;
-    if (pnQuotient->nCount < uNeededCount && pnQuotient->nCapacity < uNeededCount) {
+    if (uNeededCount > pnQuotient->nCount && uNeededCount > pnQuotient->nCapacity) {
       uNewLen = pnQuotient->nGrowStep;
       if (!uNewLen) {
         if (uNeededCount < 0x40) {
@@ -3546,7 +3546,7 @@ void __stdcall BigBuffer_Rand(BigBuffer * pnResult, BigBuffer * pnModulus, BigBu
         BigBuffer_Shr(pnWork, pnShiftTmp, 0x10);
         BigBuffer_Add(pnShiftTmp, pnWork, pnWork);
         uNeededCount = pnWork->nStartWord + 2;
-        if (pnWork->nCount < uNeededCount && pnWork->nCapacity < uNeededCount) {
+        if (uNeededCount > pnWork->nCount && uNeededCount > pnWork->nCapacity) {
           uNewLen = pnWork->nGrowStep;
           if (!uNewLen) {
             if (uNeededCount < 0x40) {
@@ -3622,7 +3622,7 @@ void __stdcall BigBuffer_Square(BigBuffer * pnResult, BigBuffer * pnInput, BigSt
     }
 
     uNewCapacity = pnAcc->nStartWord;
-    if (pnAcc->nCount < uNewCapacity && pnAcc->nCapacity < uNewCapacity) {
+    if (uNewCapacity > pnAcc->nCount && uNewCapacity > pnAcc->nCapacity) {
       uGrowStep = pnAcc->nGrowStep;
       if (!uGrowStep) {
         uGrowStep = TSGrowableArray_Ui_CalcChunkSize(pnAcc, uNewCapacity);
@@ -3657,9 +3657,9 @@ void __stdcall BigBuffer_Square(BigBuffer * pnResult, BigBuffer * pnInput, BigSt
           uProduct64 = (uint64_t)dwWordB;
           dwWordB = iInner + uNewCapacity;
           uNewCapacity = pnAcc->nStartWord + dwWordB;
-          if (pnAcc->nCount <= uNewCapacity) {
+          if (uNewCapacity >= pnAcc->nCount) {
             uGrowStep = uNewCapacity + 1;
-            if (pnAcc->nCapacity < uGrowStep) {
+            if (uGrowStep > pnAcc->nCapacity) {
               uGrowStep2 = pnAcc->nGrowStep;
               if (!uGrowStep2) {
                 if (uGrowStep < 0x40) {
@@ -3869,7 +3869,7 @@ void __stdcall SBigSquare(BigData * pResult, BigData * pBigSrc) {
 // @renamed-from SBIG_ModInverse (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .InvMod__FR9BigBufferRC9BigBufferRC9BigBufferR8BigStack @1009e5b0 -- 4 args; callee set {SetOne, SetZero, Div, Mul, Add, IsZero, Sub} matches .InvMod exactly. Was SBIG_ModInverse.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_InvMod(BigBuffer * pnResult, BigBuffer * pnModulus, BigStack * pStack, BigBuffer * pnInput) {
+static void __stdcall BigBuffer_InvMod(BigBuffer * pnResult, BigBuffer * pnModulus, BigStack * pStack, BigBuffer * pnInput) {
     uint32_t uVar1 = pStack->nUsed;
     BigBuffer* pResult = pStack->aBuffers + uVar1;
     BigBuffer* pDividend = pStack->aBuffers + uVar1 + 1;
@@ -4251,7 +4251,7 @@ int32_t __stdcall BigBuffer_IsPrime(BigStack * pStack, BigBuffer * pnCandidate) 
       nPrimeIdx = 0;
       do {
         pBVar1 = pnWitness;
-        if (0x2ab < nPrimeIdx) {
+        if (0x2ac <= nPrimeIdx) {
           break;
         }
         if (false || false) {
@@ -4295,13 +4295,13 @@ int32_t __stdcall BigBuffer_IsPrime(BigStack * pStack, BigBuffer * pnCandidate) 
       nPrimeIdx = 0;
       do {
         pBVar1 = pnWitness;
-        if (0x17 < nPrimeIdx) {
+        if (0x18 <= nPrimeIdx) {
           break;
         }
 
         BigBuffer_FromUnsigned(*(uint32_t*)((int)gaSBigSmallPrimesTable + nPrimeIdx), pnWitness);
         nCmpResult = BigBuffer_Compare(pBVar1, pnCandidate);
-        if (-1 < nCmpResult) {
+        if (0 <= nCmpResult) {
           break;
         }
 
@@ -4340,7 +4340,7 @@ int32_t __stdcall BigBuffer_IsPrime(BigStack * pStack, BigBuffer * pnCandidate) 
     pnOddPart = 0;
     do {
       pBVar1 = pnWitness;
-      if (3 < (uintptr_t)pnOddPart) {
+      if (4 <= (uintptr_t)pnOddPart) {
         break;
       }
 

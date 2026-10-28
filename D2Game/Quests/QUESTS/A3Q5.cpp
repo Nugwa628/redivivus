@@ -100,9 +100,7 @@ void __fastcall Q21_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
 
     pQuestArgs->pTarget->dwDropItemCode = 0x2034336a;
     D2UnitStrc* pPlayerData = ITEMS::Items::Drop::ITEM_RewardItemToDrop(pQuestData->pGame, pQuestArgs->pTarget, ITEMTYPE_Shield, &nDroppedItemGUID, nullptr, -1, 0);
-    if (!pPlayerData) {
-      pQuestSpecificDataA3Q5->bCanDropBird = true;
-    } else {
+    if (pPlayerData) {
       pQuestData->sStateFunctions.fpQuestStateHandler[8] = (QUESTCALLBACKFN)0x0;
       pQuestSpecificDataA3Q5->nBirdItemCount++;
       pQuestSpecificDataA3Q5->bBirdDropEnabled = false;
@@ -115,6 +113,8 @@ void __fastcall Q21_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
         pQuestSpecificDataA3Q5->bBossKillTracking = false;
         return;
       }
+    } else {
+      pQuestSpecificDataA3Q5->bCanDropBird = true;
     }
 
     pQuestSpecificDataA3Q5->bBossKillTracking = false;
@@ -227,7 +227,7 @@ BOOL __fastcall Q22_PlayerUpdateBlackenedTempleState(::SGAMEDATA * pGame, D2Unit
     if (!pQuestData) {
       return 0;
     }
-    if ((uint8_t)(pQuestData->nStateFlag - 2) < 2) {
+    if ((uint8_t)(pQuestData->nStateFlag - 2) <= 1) {
       /* SetQuestState(Blackened Temple=0x15, Step0x02=2): log entry "started" when
                          live stateFlag is 2/3 */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Step0x02);
     }
@@ -392,7 +392,7 @@ void __fastcall Q22_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
           return;
         }
       }
-      if (5 < pQuestData->nStateFlag) {
+      if (6 <= pQuestData->nStateFlag) {
         if (bQuestCompleted != 1) {
           return;
         }
@@ -456,7 +456,7 @@ void __fastcall Q22_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     }
 
     QUESTGUID_RemovePlayerFromQuest(pQuestData, pQuestArgs);
-    if (!(1 < pQuestData->nStateFlag && pQuestData->nStateFlag < 4)) {
+    if (!(1 < pQuestData->nStateFlag && pQuestData->nStateFlag <= 3)) {
       return;
     }
 
@@ -514,12 +514,12 @@ void __fastcall Q22_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 
       /* GetQuestRecordState(Lam Esen's Tome=0x11, JustCompleted=0xd): selects Ormus
                          dialog string + nStateFlag 2 vs 3 */ _bLamEsenDone = QUEST_GetQuestRecordState(pQuestArgs->pGame, QUEST_LamEsensTome, 0xd);
-      if (_bLamEsenDone == 1) {
-        dwSrcLine = 0x1b0;
-        nSetStateFlag = 2;
-      } else {
+      if (_bLamEsenDone != 1) {
         dwSrcLine = 0x1b4;
         nSetStateFlag = 3;
+      } else {
+        dwSrcLine = 0x1b0;
+        nSetStateFlag = 2;
       }
 
       QUEST_SetStateFlag(pQuestData, nSetStateFlag, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q5.cpp", dwSrcLine);
@@ -687,7 +687,7 @@ void __fastcall Q22_TrackCouncilKill(::SGAMEDATA * pGame, D2UnitStrc * pKillerUn
     int nKillerGUID;
     nKillerGUID = pQuestSpecificData->nCouncilKillCount;
     pQuestSpecificData->bCouncilTrackingActive = true;
-    if (5 < nKillerGUID) {
+    if (6 <= nKillerGUID) {
       return;
     }
     if (!pKillerUnit) {
@@ -714,7 +714,7 @@ void __fastcall Q22_TrackCouncilKill(::SGAMEDATA * pGame, D2UnitStrc * pKillerUn
     pQuestSpecificData->anCouncilKillerGUIDs[nKillerGUID] = nLoopIdx;
     pQuestSpecificData->nCouncilKillCount++;
     pQuestSpecificData->nCouncilKillsRemaining = pQuestSpecificData->nCouncilKillCount;
-    if (pQuestData->nStateFlag < 2) {
+    if (pQuestData->nStateFlag <= 1) {
       if (pQuestData->nStateFlagPrev == 1) {
         goto set_state_by_lam_esen;
       }
@@ -924,19 +924,19 @@ BOOL __fastcall OBJOP_A3Q5_NihlathakAltarLaunchOrb(D2ObjectOperateFnArg * pOpera
         pQuestSpecificData->bJerhynAiActive = true;
         NotifyPlayersAboutEvent(pQuestData->pGame, 10);
         /* FARPROC lpfn for IsBadCodePtr */ _bQuestState = IsBadCodePtr((FARPROC)pQuestData->fpSequenceFilter);
-        if (!_bQuestState) {
-          pQuestData->fpSequenceFilter(pQuestData);
-          nAttackerPartyId = UNIT::SUnit::GetPartyId(pOperation->pAttacker);
-          if (nAttackerPartyId == -1) {
-            return 0;
-          }
+        if (_bQuestState) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x353);
+          exit(-1);
+        }
 
-          UNIT::Party::ExecuteFunctionForEveryPartyMember(pOperation->sArg.pGame, nAttackerPartyId, (::fpExecuteOnUnitFunction)Q22_PlayerCompleteKhalimsWill, 0);
+        pQuestData->fpSequenceFilter(pQuestData);
+        nAttackerPartyId = UNIT::SUnit::GetPartyId(pOperation->pAttacker);
+        if (nAttackerPartyId == -1) {
           return 0;
         }
 
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x353);
-        exit(-1);
+        UNIT::Party::ExecuteFunctionForEveryPartyMember(pOperation->sArg.pGame, nAttackerPartyId, (::fpExecuteOnUnitFunction)Q22_PlayerCompleteKhalimsWill, 0);
+        return 0;
       }
     }
 

@@ -54,7 +54,6 @@ char __fastcall D2FILE_VerifyFileSignature(LPCSTR szText) {
       cVar2 = '\0';
     }
 
-    Fog::Debug::GuardStack();
     return cVar2;
 }
 
@@ -103,25 +102,23 @@ int32_t __fastcall D2FILE_VerifySignatureWinTrust(LPCSTR szText) {
         nTrustResult = WinVerifyTrust((HWND)0x0, &sActionGuid, &sWvtData);
         if (nTrustResult == -0x7ff6dfda || nTrustResult == -0x7ff4fffc) {
           nVerifyResult = 3;
-        } else if (nTrustResult == -0x7ff4ff00) {
-          dwLastError = GetLastError();
-          nVerifyResult = (dwLastError != 0x800b0100) + 1;
-        } else {
+        } else if (nTrustResult != -0x7ff4ff00) {
           if (nTrustResult == -0x7ff4feef) {
             nVerifyResult = 3;
           } else {
             nVerifyResult = nTrustResult ? 4 : 0;
           }
+        } else {
+          dwLastError = GetLastError();
+          nVerifyResult = (dwLastError != 0x800b0100) + 1;
         }
 
         Fog::Engine::Application::MISC_OperatorDeleteShim(pWideStr);
-        Fog::Debug::GuardStack();
         return nVerifyResult;
       }
     }
 
     nVerifyResult = 4;
-    Fog::Debug::GuardStack();
     return nVerifyResult;
 }
 
@@ -482,7 +479,6 @@ void __stdcall CACHE_DeleteFile() {
     szFilePath[0] = '\0';
     CACHE_BuildFilePath(szFilePath);
     /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(szFilePath);
-    Fog::Debug::GuardStack();
 }
 
 // @sourcefile .\BnSend.cpp
@@ -518,13 +514,11 @@ void __fastcall NET_SID_CLIENT_SetupIDEAKey(int32_t nKeyScheduleIdx, int32_t bEn
     *(uint32_t*)((char*)&aUserKey + 12) = pdwKeyMaterial[3];
     if (bEncryptMode) {
       _net_sid::NET_SID_CLIENT_IDEAExpandKey(aUserKey, (uint16_t*)(g_IDEAKeySchedules + nKeyScheduleIdx * 0x68));
-      Fog::Debug::GuardStack();
       return;
     }
 
     _net_sid::NET_SID_CLIENT_IDEAExpandKey(aUserKey, aKeyScheduleBuf);
     _net_sid::NET_SID_CLIENT_IDEAInvertKey(aKeyScheduleBuf, (uint16_t*)(g_IDEAKeySchedules + nKeyScheduleIdx * 0x68));
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall SRP_DestroyContext(D2Srp * * ppContext) {

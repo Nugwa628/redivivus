@@ -56,7 +56,7 @@ namespace D2Game::Ai::AiGeneral {
 
 // @sourcefile .\Ai\AiGeneral.cpp
 D2AiGeneralStrc * __fastcall AllocAiGeneral(::SGAMEDATA * pGame) {
-    D2AiGeneralStrc* pAiGeneral = D2_NEW_POOL(pGame->pMemoryPool, D2AiGeneralStrc);
+    D2AiGeneralStrc* pAiGeneral = ((D2AiGeneralStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2AiGeneralStrc), ".\\Ai\\AiGeneral.cpp", 0x1b, 0));
     memset(pAiGeneral, 0, 0x40);
     pAiGeneral->eOwnerTypeEx = UNIT_MONSTER;
     pAiGeneral->eOwnerType = UNIT_MONSTER;
@@ -97,11 +97,13 @@ int __fastcall GetAiArgument(D2UnitStrc * pMonster, int32_t nArgNumber) {
     if (!pAiGeneral) {
       return 0;
     }
-    if (nArgNumber == 1) {
+    switch (nArgNumber) {
+    case 1: {
       return pAiGeneral->dwArg0;
     }
-    if (nArgNumber == 2) {
+    case 2: {
       return pAiGeneral->dwArg1;
+    }
     }
     if (nArgNumber != 3) {
       return 0;
@@ -121,7 +123,7 @@ D2MonsterAiCmdStrc * __fastcall CreateAiCmdStrc(::SGAMEDATA * pGame, D2UnitStrc 
       return nullptr;
     }
 
-    D2MonsterAiCmdStrc* pAiCmd = D2_NEW_POOL(pGame->pMemoryPool, D2MonsterAiCmdStrc);
+    D2MonsterAiCmdStrc* pAiCmd = ((D2MonsterAiCmdStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2MonsterAiCmdStrc), ".\\Ai\\AiGeneral.cpp", 0x65, 0));
     pAiCmd->pNext = 0;
     pAiCmd->pPrev = 0;
     memset(pAiCmd->nCmdArg, 0, 5 * sizeof(pAiCmd->nCmdArg[0]));
@@ -158,10 +160,7 @@ void __fastcall FreeAi(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     if (!pMemoryToFree) {
       return;
     }
-    if (pMemoryToFree == pMemoryToFree->pNext) {
-      pAiGeneral->pCmdLast = 0;
-      pAiGeneral->pCmdCurrent = 0;
-    } else {
+    if (pMemoryToFree != pMemoryToFree->pNext) {
       if (pAiGeneral->pCmdLast == pMemoryToFree) {
         pAiGeneral->pCmdLast = pMemoryToFree->pNext;
       }
@@ -169,13 +168,16 @@ void __fastcall FreeAi(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       pAiGeneral->pCmdCurrent = pMemoryToFree->pNext;
       pMemoryToFree->pPrev->pNext = pMemoryToFree->pNext;
       pMemoryToFree->pNext->pPrev = pMemoryToFree->pPrev;
+    } else {
+      pAiGeneral->pCmdLast = 0;
+      pAiGeneral->pCmdCurrent = 0;
     }
 
-    D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+    Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\Ai\\AiGeneral.cpp", 0xa1, 0);
 }
 
 // @sourcefile .\Ai\AiGeneral.cpp
-void FreeAiCmds(D2AiGeneralStrc * pAiGeneral, ::SGAMEDATA * pGame) {
+static void FreeAiCmds(D2AiGeneralStrc * pAiGeneral, ::SGAMEDATA * pGame) {
     D2MonsterAiCmdStrc* pCmd = pAiGeneral->pCmdLast;
     while (true) {
       if (!pCmd) {
@@ -186,10 +188,7 @@ void FreeAiCmds(D2AiGeneralStrc * pAiGeneral, ::SGAMEDATA * pGame) {
       if (!pCmd) {
         break;
       }
-      if (pCmd == pCmd->pNext) {
-        pAiGeneral->pCmdLast = 0;
-        pAiGeneral->pCmdCurrent = 0;
-      } else {
+      if (pCmd != pCmd->pNext) {
         if (pAiGeneral->pCmdLast == pCmd) {
           pAiGeneral->pCmdLast = pCmd->pNext;
         }
@@ -197,9 +196,12 @@ void FreeAiCmds(D2AiGeneralStrc * pAiGeneral, ::SGAMEDATA * pGame) {
         pAiGeneral->pCmdCurrent = pCmd->pNext;
         pCmd->pPrev->pNext = pCmd->pNext;
         pCmd->pNext->pPrev = pCmd->pPrev;
+      } else {
+        pAiGeneral->pCmdLast = 0;
+        pAiGeneral->pCmdCurrent = 0;
       }
 
-      D2_FREE_POOL(pGame->pMemoryPool, pCmd);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pCmd, ".\\Ai\\AiGeneral.cpp", 0xc4, 0);
       pCmd = pAiGeneral->pCmdLast;
     }
 }
@@ -224,10 +226,7 @@ void __fastcall ResetAiGeneralStrc(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
         if (pMonAi2) {
           pCmd = pMonAi2->pCmdCurrent;
           if (pCmd) {
-            if (pCmd == pCmd->pNext) {
-              pMonAi2->pCmdLast = 0;
-              pMonAi2->pCmdCurrent = 0;
-            } else {
+            if (pCmd != pCmd->pNext) {
               if (pMonAi2->pCmdLast == pCmd) {
                 pMonAi2->pCmdLast = pCmd->pNext;
               }
@@ -235,9 +234,12 @@ void __fastcall ResetAiGeneralStrc(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
               pMonAi2->pCmdCurrent = pCmd->pNext;
               pCmd->pPrev->pNext = pCmd->pNext;
               pCmd->pNext->pPrev = pCmd->pPrev;
+            } else {
+              pMonAi2->pCmdLast = 0;
+              pMonAi2->pCmdCurrent = 0;
             }
 
-            D2_FREE_POOL(pGame->pMemoryPool, pCmd);
+            Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pCmd, ".\\Ai\\AiGeneral.cpp", 0xa1, 0);
           }
         }
       }
@@ -443,7 +445,7 @@ void __fastcall AddMinionToList(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitS
       pAiGeneral = pUnit->pUnitData.pUnitDataMonster->pAiGeneral;
     }
 
-    D2MonsterDataMinionList* pNewNode = D2_NEW_POOL(pGame->pMemoryPool, D2MonsterDataMinionList);
+    D2MonsterDataMinionList* pNewNode = ((D2MonsterDataMinionList*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2MonsterDataMinionList), ".\\Ai\\AiGeneral.cpp", 0x1f3, 0));
     pNewNode->nMinionGUID = 0;
     pNewNode->pNext = 0;
     if (!pMinion) {
@@ -513,7 +515,7 @@ void __fastcall FreeAiOfMinions(D2UnitStrc * pUnit) {
       pPrevNode->pNext = pMemoryToFree->pNext;
     }
 
-    D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+    Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\Ai\\AiGeneral.cpp", 0x217, 0);
 }
 
 // Bulk-clears all entries from pUnit's own pMinionList (treating pUnit as the owner rather than a minion). For each minion node, resets that minion's AiGeneral owner fields and frees the list node. Less safe than FreeAiOfMinions: only fires when the looked-up owner unit equals pUnit itself, no per-entry abort on missing minion.
@@ -571,7 +573,7 @@ void __fastcall ClearMinionList(::SGAMEDATA * pGame, D2MonsterDataMinionList * p
     while (pMinionList) {
       D2MonsterDataMinionList* pNextMinion;
       pNextMinion = pMinionList->pNext;
-      D2_FREE_POOL(pGame->pMemoryPool, pMinionList);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMinionList, ".\\Ai\\AiGeneral.cpp", 0x246, 0);
       pMinionList = pNextMinion;
     }
 }
@@ -585,43 +587,43 @@ void __fastcall CallForEachMinion(D2UnitStrc * pUnit, void * pContext, void * pA
     D2MonsterDataMinionList* pMinionListHead;
     D2MonsterDataMinionList* pMinionNode;
     BOOL bBadCodePtr = IsBadCodePtr((FARPROC)pfnProc);
-    if (!bBadCodePtr) {
-      D2UnitStrc* pOwnerUnit;
-      if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
-        return;
-      }
+    if (bBadCodePtr) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x24e);
+      exit(-1);
+    }
 
-      pAi = pUnit->pUnitData.pUnitDataMonster->pAiGeneral;
-      if (!(pAi && pAi->pGame)) {
-        return;
-      }
-
-      pOwnerUnit = UNIT::SUnit::FindUnitFromTable(pAi->pGame, pAi->eOwnerTypeEx, pAi->nOwnerGUIDEx);
-      if (!(pOwnerUnit && pOwnerUnit->eUnitType == UNIT_MONSTER)) {
-        return;
-      }
-      if (!pOwnerUnit->pUnitData.pUnitDataMonster) {
-        pOwnerAi = 0;
-      } else {
-        pOwnerAi = pOwnerUnit->pUnitData.pUnitDataMonster->pAiGeneral;
-      }
-
-      pGame = pOwnerAi->pGame;
-      pMinionNode = pOwnerAi->pMinionList;
-      while (pMinionNode) {
-        pMinionListHead = pMinionNode->pNext;
-        pMinion = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, pMinionNode->nMinionGUID);
-        pMinionNode = pMinionListHead;
-        if (pMinion) {
-          (*pfnProc)(pMinion, pContext, pArgument);
-        }
-      }
-
+    D2UnitStrc* pOwnerUnit;
+    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
       return;
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x24e);
-    exit(-1);
+    pAi = pUnit->pUnitData.pUnitDataMonster->pAiGeneral;
+    if (!(pAi && pAi->pGame)) {
+      return;
+    }
+
+    pOwnerUnit = UNIT::SUnit::FindUnitFromTable(pAi->pGame, pAi->eOwnerTypeEx, pAi->nOwnerGUIDEx);
+    if (!(pOwnerUnit && pOwnerUnit->eUnitType == UNIT_MONSTER)) {
+      return;
+    }
+    if (!pOwnerUnit->pUnitData.pUnitDataMonster) {
+      pOwnerAi = 0;
+    } else {
+      pOwnerAi = pOwnerUnit->pUnitData.pUnitDataMonster->pAiGeneral;
+    }
+
+    pGame = pOwnerAi->pGame;
+    pMinionNode = pOwnerAi->pMinionList;
+    while (pMinionNode) {
+      pMinionListHead = pMinionNode->pNext;
+      pMinion = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, pMinionNode->nMinionGUID);
+      pMinionNode = pMinionListHead;
+      if (pMinion) {
+        (*pfnProc)(pMinion, pContext, pArgument);
+      }
+    }
+
+    return;
 }
 
 void __fastcall GetAndRemoveMinionList(D2UnitStrc * pUnit, int * pOwnerId, eD2UnitType * pType, uint32_t * nFlagBit1, uint32_t * nFlagBit2, D2MonsterDataMinionList * * pMinionList) {
@@ -668,7 +670,7 @@ void __fastcall ReplaceMinionList(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32
 }
 
 // Wires a newly joined monster into an existing AI minion group. Scans pTargetAi's minionList for the first live monster, promotes it to group leader (sets AI flags 1+2, eOwnerTypeEx/nOwnerGUIDEx), updates pOwner's AI back-link to point at the leader, calls AddMinionToList for the leader+owner pair, then iterates all remaining minion-list entries and chains each live non-leader monster to the leader via AddMinionToList.
-void __stdcall AddMinionToAi(D2UnitStrc * pOwner, D2AiGeneralStrc * pTargetAi) {
+static void __stdcall AddMinionToAi(D2UnitStrc * pOwner, D2AiGeneralStrc * pTargetAi) {
     D2UnitStrc* pNewOwnerUnit;
     D2UnitStrc* pMinion;
     D2AiGeneralStrc* pMinionAi;
@@ -844,12 +846,12 @@ void __fastcall FreeMonsterAi(::SGAMEDATA * pGame, D2AiGeneralStrc * pAiGeneral)
     while (pMemoryToFree) {
       D2MonsterDataMinionList* pNext;
       pNext = pMemoryToFree->pNext;
-      D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\Ai\\AiGeneral.cpp", 0x246, 0);
       pMemoryToFree = pNext;
     }
 
     FreeAiCmds(pAiGeneral, pGame);
-    D2_FREE_POOL(pGame->pMemoryPool, pAiGeneral);
+    Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pAiGeneral, ".\\Ai\\AiGeneral.cpp", 0x19d, 0);
 }
 
 } // namespace D2Game::Ai::AiGeneral

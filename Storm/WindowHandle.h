@@ -29,7 +29,7 @@ namespace Storm::WindowHandle {
 WPARAM __stdcall SMsgDoMessageLoop(pfnStormMsgIdleCallback pfnIdleCallback, uint32_t dwUnused);
 HWND __stdcall WND_GetActiveWindow();
 // @blizzard SMsgPopRegisterState (SMSG.CPP)
-void __stdcall SMsgPopRegisterState(char * szText);
+int __stdcall SMsgPopRegisterState(char * szText);
 // @blizzard SMsgPushRegisterState (SMSG.CPP)
 uint32_t __stdcall SMsgPushRegisterState(uint32_t nParam);
 uint32_t __stdcall WND_SetActiveWindow(uint32_t dwParam);
@@ -48,12 +48,6 @@ void __stdcall SMSG_AddWindow(uint32_t hWnd);
 uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, struct StormWndRecStrc * pRecord);
 // @blizzard FindWindow (SMSG.CPP)
 uint32_t __fastcall SMSG_FindWindow(int32_t nHandle);
-// @blizzard DeleteWindow (SMSG.CPP)
-void SMSG_DeleteWindow(uint32_t hWnd);
-// @blizzard InternalRegister (SMSG.CPP)
-void __stdcall SMSG_InternalRegister(uint32_t hWnd, int32_t pCallback, uint32_t dwEventTag, uint32_t dwContext);
-// @blizzard InternalUnregister (SMSG.CPP)
-void __stdcall SMSG_InternalUnregister(uint32_t nEventId, char * szText1, char * szText2, HWND hWnd);
 // @blizzard SMsgDispatchMessage (SMSG.CPP)
 BOOL __stdcall SMsgDispatchMessage(HWND handle, UINT uMsg, WPARAM nWParam, LPARAM dwLParam, BOOL * pbHandled, LRESULT * plResult);
 // @blizzard SMsgRegisterCommand (SMSG.CPP)

@@ -100,7 +100,7 @@ void __fastcall MONSTER_SetClearPartyFlags(int32_t nParam, int * pnParam, uint32
     pPartySlot[1] = (int*)((uint32_t)pPartySlot[1] & ~dwFlagMask);
 }
 
-void __fastcall MONSTER_EquipFromClassTable(D2UnitStrc * pUnit) {
+static void __fastcall MONSTER_EquipFromClassTable(D2UnitStrc * pUnit) {
     int nClassId;
     D2MonEquipEntryStrc sEquipEntry;
     int bNormalCode;
@@ -122,10 +122,15 @@ void __fastcall MONSTER_EquipFromClassTable(D2UnitStrc * pUnit) {
       sEquipEntry.dwItemCode = *pEquipTableEntry;
       *(uint32_t*)((char*)&sEquipEntry + 4) = pEquipTableEntry[1];
       pItemsTxt = D2Common::DATATBLS::ItemTbls::ConvertItemCodeToClassIdAndGetItemsTxtLine(sEquipEntry.dwItemCode, &bNormalCode);
-      if (pGame->nDifficulty == 1) {
+      switch (pGame->nDifficulty) {
+      case 1: {
         sEquipEntry.dwItemCode = pItemsTxt->dwUberCode;
-      } else if (pGame->nDifficulty == 2) {
+        break;
+      }
+      case 2: {
         sEquipEntry.dwItemCode = pItemsTxt->dwUltraCode;
+        break;
+      }
       }
 
       MONSTER_CreateAndEquipItem(pGame, pUnit, &sEquipEntry, nMonsterLevel, QUALITY_MAGIC);
@@ -135,7 +140,7 @@ void __fastcall MONSTER_EquipFromClassTable(D2UnitStrc * pUnit) {
 }
 
 // Called when a server monster is created (from CreateMonster) to wire up quest behavior based on the monster's base class id (resolved through MonStats BaseId). Dispatches per boss/quest-monster: attaches the relevant quest record to the unit (QUEST_AttachToUnitByQuestId, e.g. Andariel->SistersToTheSlaughter, Radament->RadamentsLair, Summoner->TheSummoner, Diablo->TerrorsEnd, Baal->EveOfDestruction, Izual->TheFallenAngel, Hephasto->HellsForge, Nihlathak->BetrayalOfHaggorath, Anya-on-mount->RescueOnMountArreat) and/or applies fixed monster umods via InitUmods, sets unit flags (SUMMONER, NOTC), or special-cases (NM/Hell clone ids 0x2c0-0x2c5 get extra umods; act bosses get equip/umods; Q12 death dispatch by position). No-op for ordinary monsters.
-void __fastcall MONSTER_OnCreateAttachQuests(D2UnknownCreateMonsterStrc * pQuestEventArg, D2UnitStrc * pMonster) {
+static void __fastcall MONSTER_OnCreateAttachQuests(D2UnknownCreateMonsterStrc * pQuestEventArg, D2UnitStrc * pMonster) {
     int32_t nMonsterClassId;
     eD2QuestsInternal nQuestNoInternal;
     int32_t nRawClassId;
@@ -145,11 +150,11 @@ void __fastcall MONSTER_OnCreateAttachQuests(D2UnknownCreateMonsterStrc * pQuest
     pGame = pQuestEventArg->pGame;
     int nBaseId;
     nBaseId = nUmodId;
-    if (-1 < nUmodId && nUmodId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nUmodId) {
+    if (0 <= nUmodId && nUmodId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nUmodId) {
       nBaseId = (int)sgptDataTable->pTxtMonStats[nUmodId].BaseId;
     }
-    if (-1 < nBaseId && nBaseId < sgptDataTable->nTxtMonStatsSize) {
-      if (nBaseId < 0x1b3) {
+    if (0 <= nBaseId && nBaseId < sgptDataTable->nTxtMonStatsSize) {
+      if (nBaseId <= 0x1b2) {
         if (nBaseId == 0x1b2) {
           Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pMonster, QUESTINT_RescueOnMountArreat);
           return;
@@ -299,7 +304,7 @@ void __fastcall MONSTER_OnCreateAttachQuests(D2UnknownCreateMonsterStrc * pQuest
 }
 
 // Applies hardcoded unique-modifier sets (umods) to specific monster class IDs at spawn time. Resolves the monster's BaseId first, then dispatches to InitUmods with a hardcoded umod index for a fixed set of class IDs (e.g. 0x18, 0x5b, 0x60, 0xd3, 0x146-0x14a, 0x162, 0x1b4, 0x1cd, 0x1f5, 0x21c-0x21e). Called via EDI/EAX custom calling convention (pUnit@EDI, pCreateData@EAX).
-void MONSTER_ApplySpecialUmods(D2UnitStrc * pUnit, D2UnknownCreateMonsterStrc * pCreateData) {
+static void MONSTER_ApplySpecialUmods(D2UnitStrc * pUnit, D2UnknownCreateMonsterStrc * pCreateData) {
     int32_t nClassId;
     nClassId = pCreateData->nClassId;
     ::SGAMEDATA* pGame;
@@ -346,11 +351,11 @@ void MONSTER_ApplySpecialUmods(D2UnitStrc * pUnit, D2UnknownCreateMonsterStrc * 
         return;
         default:
           break;
-        case 0x1b4:
-          Monsters::InitUmods(pGame, pUnit, 0x22, 0);
-        return;
         case 0x1cd:
           Monsters::InitUmods(pGame, pUnit, 0x21, 0);
+        return;
+        case 0x1b4:
+          Monsters::InitUmods(pGame, pUnit, 0x22, 0);
         return;
         case 0x1f5:
           Monsters::InitUmods(pGame, pUnit, 0x23, 0);
@@ -378,16 +383,16 @@ D2UnitStrc * __fastcall SpawnMonsterAtUnit(::SGAMEDATA * pGame, D2UnitStrc * pUn
     sCreateParams.nSpawnRadius = nParam;
     sCreateParams.pCoordList = 0;
     sCreateParams.pGame = pGame;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       sCreateParams.nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      sCreateParams.nX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       sCreateParams.nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      sCreateParams.nX = 0;
     }
 
     eD2UnitType eUnitTypeCheck = pUnit->eUnitType;
-    if (eUnitTypeCheck != UNIT_OBJECT && ((int)eUnitTypeCheck < 4 || 5 < (int)eUnitTypeCheck)) {
+    if (eUnitTypeCheck != UNIT_OBJECT && ((int)eUnitTypeCheck <= 3 || 5 < (int)eUnitTypeCheck)) {
       D2UnitStrc* pSpawned;
       if (pUnit->pPath.pDynamicPath) {
         sCreateParams.nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
@@ -510,26 +515,26 @@ BOOL __fastcall SpawnMinions_ByPattern(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     int nSpawnerGUID = pUnit->nUnitGUID;
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nSpawnX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nSpawnX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nSpawnX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nSpawnX = 0;
     }
 
     eD2UnitType eUnitTypeY = pUnit->eUnitType;
-    if (eUnitTypeY == UNIT_OBJECT || 3 < (int)eUnitTypeY && (int)eUnitTypeY < 6) {
+    if (eUnitTypeY == UNIT_OBJECT || 3 < (int)eUnitTypeY && (int)eUnitTypeY <= 5) {
       nSpawnY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nSpawnY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nSpawnY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nSpawnY = 0;
     }
 
     D2SeedStrc sNextSeed = D2_SEED_NEXT(pUnit->sSeed);
     pUnit->sSeed = sNextSeed;
-    int nRandSlot = sNextSeed.nSeedLow + (int)(((uint64_t)d2_bits_of(sNextSeed) & 0xffffffff) / 6) * -6;
+    int nRandSlot = sNextSeed.nSeedLow % 6;
     if (0 >= nMinionCount) {
       return bSpawnedAny;
     }
@@ -598,10 +603,10 @@ BOOL __stdcall FindDiagonalNonCollisionCoords(D2RoomStrc * pRoom, int * pX, int 
     if (!pFloorTiles || !nFloorTileCount) {
       return 0;
     }
-    if (!pRoom) {
-      pSeed = 0;
-    } else {
+    if (pRoom) {
       pSeed = &pRoom->sSeed;
+    } else {
+      pSeed = 0;
     }
 
     uint32_t nSearchTileIdx = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nFloorTileCount);
@@ -653,13 +658,13 @@ BOOL __stdcall FindDiagonalNonCollisionCoords(D2RoomStrc * pRoom, int * pX, int 
 }
 
 // Spawns the initial minion pack for a monster whose MonStats entry defines minion1/minion2. Special-cases class 0x105 (uses AssignMinionOwner + SpawnMinions directly). For SetBoss monsters, assigns owner and interleaves spawns between minion1/minion2 type slots for a count drawn from PartyMin/PartyMax; registers each spawned minion via AssignMinionOwner + AddMinionToList. No-ops if the class id is out of range or MonStats is null.
-void MONSTER_SpawnMinionGroup(D2UnknownCreateMonsterStrc * pGame, D2UnitStrc * pUnit) {
+static void MONSTER_SpawnMinionGroup(D2UnknownCreateMonsterStrc * pGame, D2UnitStrc * pUnit) {
     eD2Skills eUpgradeSkill;
     eD2UnitType eUnitType;
     BOOL bMinionIsLeader;
     int32_t nTmp;
     int32_t nPartySize = pGame->nClassId;
-    if (!(-1 < nPartySize && nPartySize < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nPartySize && nPartySize < sgptDataTable->nTxtMonStatsSize)) {
       return;
     }
 
@@ -671,12 +676,12 @@ void MONSTER_SpawnMinionGroup(D2UnknownCreateMonsterStrc * pGame, D2UnitStrc * p
     D2Common::DATATBLS::MonsterTbls::MONSTERTBLS_GetUpgradeDataByMonStatsId(nPartySize, nullptr, &eUpgradeSkill);
     ::SGAMEDATA* pGameInst = pGame->pGame;
     uint16_t wMinionType = pGame->nFlags;
-    if (!(-1 < pMonStats->minion1 && (int)pMonStats->minion1 < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= pMonStats->minion1 && (int)pMonStats->minion1 < sgptDataTable->nTxtMonStatsSize)) {
       return;
     }
 
     int32_t nMinionClassId = D2Client::UNIT::Player::TXT_MonStats_GetBaseId_NoChecks(nPartySize);
-    if (-1 < nMinionClassId && nMinionClassId < sgptDataTable->nTxtMonStatsSize && nMinionClassId == 0x105) {
+    if (0 <= nMinionClassId && nMinionClassId < sgptDataTable->nTxtMonStatsSize && nMinionClassId == 0x105) {
       if (!pUnit) {
         nMinionClassId = -1;
       } else {
@@ -722,7 +727,7 @@ void MONSTER_SpawnMinionGroup(D2UnknownCreateMonsterStrc * pGame, D2UnitStrc * p
       }
 
       nMinionTypeSlot++;
-      if (bHasSecondMinionType < nMinionTypeSlot) {
+      if (nMinionTypeSlot > bHasSecondMinionType) {
         nMinionTypeSlot = 0;
       }
 
@@ -766,7 +771,7 @@ D2UnitStrc * __fastcall CreateMonster(D2UnknownCreateMonsterStrc * pMonsterSpawn
     if (nClassId < 0) {
       return nullptr;
     }
-    if (sgptDataTable->nTxtMonStatsSize <= nClassId) {
+    if (nClassId >= sgptDataTable->nTxtMonStatsSize) {
       return nullptr;
     }
 
@@ -786,7 +791,7 @@ D2UnitStrc * __fastcall CreateMonster(D2UnknownCreateMonsterStrc * pMonsterSpawn
     if (nClassId < 0) {
       return nullptr;
     }
-    if (sgptDataTable->nTxtMonStatsExSize <= nClassId) {
+    if (nClassId >= sgptDataTable->nTxtMonStatsExSize) {
       return nullptr;
     }
 
@@ -855,7 +860,7 @@ D2UnitStrc * __fastcall CreateMonster(D2UnknownCreateMonsterStrc * pMonsterSpawn
       pRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pWorkingRoom, nSpawnX, nSpawnY);
     } else {
       POINT pt;
-      if ((int)nMaxWalkRadius < nClassId) {
+      if (nClassId > (int)nMaxWalkRadius) {
         return nullptr;
       }
 
@@ -1045,16 +1050,16 @@ D2UnitStrc * __fastcall SpawnMonsterAtCoordList(::SGAMEDATA * pGame, D2RoomCoord
     sSpawnParams.nSpawnRadius = nParam;
     sSpawnParams.pGame = pGame;
     sSpawnParams.pCoordList = pCoordList;
-    if (eUnitTypeX == UNIT_OBJECT || 3 < (int)eUnitTypeX && (int)eUnitTypeX < 6) {
+    if (eUnitTypeX == UNIT_OBJECT || 3 < (int)eUnitTypeX && (int)eUnitTypeX <= 5) {
       sSpawnParams.nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      sSpawnParams.nX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       sSpawnParams.nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      sSpawnParams.nX = 0;
     }
 
     eD2UnitType eUnitTypeY = pUnit->eUnitType;
-    if (eUnitTypeY != UNIT_OBJECT && ((int)eUnitTypeY < 4 || 5 < (int)eUnitTypeY)) {
+    if (eUnitTypeY != UNIT_OBJECT && ((int)eUnitTypeY <= 3 || 5 < (int)eUnitTypeY)) {
       if (pUnit->pPath.pDynamicPath) {
         sSpawnParams.nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
         pMonster = CreateMonster(&sSpawnParams);
@@ -1160,8 +1165,8 @@ BOOL __fastcall SpawnMinions_AtXY(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32
       D2UnitStrc* pSpawnedMinion;
       local_38.nClassId = nClassId;
       local_38.nSpawnRadius = nSpawnRadius;
-      local_38.eMode = eMode;
       local_38.pRoom = pRoom;
+      local_38.eMode = eMode;
       local_38.nY = nX;
       local_38.nGUID = 0;
       local_38.pCoordList = 0;
@@ -1441,21 +1446,21 @@ BOOL __fastcall MONSTER_SpawnPredefinedAtUnit(::SGAMEDATA * pGame, D2RoomStrc * 
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     nResult = SpawnMonsterAtUnitOffset(pGame, pRoom, nPosX, nPosY, nullptr, 0x154, eD2MonsterAnimMode_ns::Skill1, (int*)sPredefinedDataUnknown, nParam2);
@@ -1475,10 +1480,10 @@ BOOL __fastcall SpawnRandomMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int3
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4f0);
       exit(-1);
     }
-    if (!pRoom) {
-      pSeed = 0;
-    } else {
+    if (pRoom) {
       pSeed = &pRoom->sSeed;
+    } else {
+      pSeed = 0;
     }
 
     uint32_t nMonTypeIdx = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, (uint32_t)(uint8_t)pLevelTxt->nValidMonCount);
@@ -1490,7 +1495,7 @@ BOOL __fastcall SpawnRandomMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int3
 
     do {
       nMonTypeIdx++;
-      if ((int)nLevelMonCount <= (int)nMonTypeIdx) {
+      if ((int)nMonTypeIdx >= (int)nLevelMonCount) {
         nMonTypeIdx = 0;
       }
 
@@ -1505,23 +1510,23 @@ BOOL __fastcall SpawnRandomMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int3
     if (sCreateParams.nClassId == -1) {
       return 0;
     }
-    if (nMonSearchAttempts < (int)nLevelMonCount) {
-      D2UnitStrc* pSpawnedUnit;
-      sCreateParams.pRoom = pRoomSaved;
-      sCreateParams.nGUID = 0;
-      sCreateParams.pCoordList = 0;
-      sCreateParams.nFlags = 0;
-      sCreateParams.nY = nY;
-      sCreateParams.eMode = eD2MonsterAnimMode_ns::Neutral;
-      sCreateParams.nSpawnRadius = 5;
-      sCreateParams.pGame = pGameSaved;
-      sCreateParams.nX = nX;
-      pSpawnedUnit = CreateMonster(&sCreateParams);
-      return (uint32_t)(pSpawnedUnit != 0);
+    if (!(nMonSearchAttempts < (int)nLevelMonCount)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x507);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x507);
-    exit(-1);
+    D2UnitStrc* pSpawnedUnit;
+    sCreateParams.pRoom = pRoomSaved;
+    sCreateParams.nGUID = 0;
+    sCreateParams.pCoordList = 0;
+    sCreateParams.nFlags = 0;
+    sCreateParams.nY = nY;
+    sCreateParams.eMode = eD2MonsterAnimMode_ns::Neutral;
+    sCreateParams.nSpawnRadius = 5;
+    sCreateParams.pGame = pGameSaved;
+    sCreateParams.nX = nX;
+    pSpawnedUnit = CreateMonster(&sCreateParams);
+    return (uint32_t)(pSpawnedUnit != 0);
     return 0;
 }
 

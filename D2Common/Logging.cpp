@@ -53,7 +53,6 @@ void __fastcall StoreLogging(char * szFormat, va_list pArgs, FILE * pFile, uint3
       fflush(pFileToFlush);
     }
 
-    Fog::Debug::GuardStack();
 }
 
 void LOGGING_FilePrintf(FILE * pFile, uint32_t dwGame, uint32_t dwFrame, uint32_t dwClient, uint32_t dwLogType, char * szFilename, uint32_t nLine, char * szFormatString, ...) {
@@ -124,7 +123,6 @@ void StoreGameLogging(int32_t nGame, int32_t nFrame, void * pClient, int32_t nPa
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_0096ca30);
     }
 
-    Fog::Debug::GuardStack();
 }
 
 bool __fastcall LOGGING_OpenLogFile(char * szLogFileName) {
@@ -165,7 +163,7 @@ long STATLIST_BinarySearchStatById(int32_t nParam, int * pnParam) {
       int nEntryKey;
       nMid = (nCount - nLo) / 2 + nLo;
       nEntryKey = *(int*)(*pnParam + nMid * 8);
-      if (nEntryKey < nParam) {
+      if (nParam > nEntryKey) {
         nLo = nMid + 1;
         nMid = nCount;
       } else if (nEntryKey <= nParam) {

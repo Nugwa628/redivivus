@@ -38,7 +38,7 @@ namespace D2Common::Environment {
 static char s_ENVIRONMENT_Env_cpp = '.'; D2_STATIC_GUARD(s_ENVIRONMENT_Env_cpp, "D2Common::Environment::s_ENVIRONMENT_Env_cpp");
 
 // Per-tick update of the environment's global light intensity (nGlobalLightIntensity). Act 3 (Hell): clamps intensity toward a level-specific cap (Pandemonium=0x80, Outer Steppes=0x40, etc.) by ±1 per tick, resets to cap if it reaches 0. Other acts: during eclipse, ramps down toward 0x20 by 8 per tick; otherwise computes a day/night cosine curve and scales between day and night light values from the environment txt, capped at 0xFF (0xAA in Act 4). Special case: Arreat Summit is fixed at 200.
-void DRLGENV_UpdateLightIntensity(eD2LevelId eLevel, D2DrlgEnvironmentStrc * pDrlgEnvironment, int32_t nActNo) {
+static void DRLGENV_UpdateLightIntensity(eD2LevelId eLevel, D2DrlgEnvironmentStrc * pDrlgEnvironment, int32_t nActNo) {
     int32_t nLightDay;
     int32_t nLightNight;
     int32_t nLightSelected;
@@ -65,7 +65,7 @@ void DRLGENV_UpdateLightIntensity(eD2LevelId eLevel, D2DrlgEnvironmentStrc * pDr
       if (pDrlgEnvironment->nGlobalLightIntensity < nIntensityCap) {
         pDrlgEnvironment->nGlobalLightIntensity++;
       }
-      if (nIntensityCap < pDrlgEnvironment->nGlobalLightIntensity) {
+      if (pDrlgEnvironment->nGlobalLightIntensity > nIntensityCap) {
         pDrlgEnvironment->nGlobalLightIntensity--;
       }
       if (!pDrlgEnvironment->nGlobalLightIntensity) {
@@ -100,7 +100,7 @@ void DRLGENV_UpdateLightIntensity(eD2LevelId eLevel, D2DrlgEnvironmentStrc * pDr
         if (nActNo == 4) {
           nIntensityCap = 0xaa;
         }
-        if ((int)((int)nComputedIntensity < 1 ? 0 : nComputedIntensity) < nIntensityCap) {
+        if ((int)((int)nComputedIntensity <= 0 ? 0 : nComputedIntensity) < nIntensityCap) {
           pDrlgEnvironment->nGlobalLightIntensity = (int)nComputedIntensity < 1 ? 0 : nComputedIntensity;
           return;
         }
@@ -118,7 +118,7 @@ void DRLGENV_UpdateLightIntensity(eD2LevelId eLevel, D2DrlgEnvironmentStrc * pDr
     }
 }
 
-void __stdcall DRLGENV_UpdateLightColor(int32_t nActNo, D2DrlgEnvironmentStrc * pDrlgEnvironment) {
+static void __stdcall DRLGENV_UpdateLightColor(int32_t nActNo, D2DrlgEnvironmentStrc * pDrlgEnvironment) {
     D2DrlgActEnvironmentData* pDataCurrent;
     D2DrlgActEnvironmentData* pDataNext;
     long double fST0Tmp;
@@ -155,7 +155,7 @@ void __stdcall DRLGENV_UpdateLightColor(int32_t nActNo, D2DrlgEnvironmentStrc * 
 }
 
 // Initializes a DRLG environment cycle from the current time index. Sets the environment data type and tick count from lookup tables, using eclipse-specific tables when pEclipse is active.
-void DRLGENV_InitEnvironmentCycle(D2DrlgEnvironmentStrc * pDrlgEnvironment) {
+static void DRLGENV_InitEnvironmentCycle(D2DrlgEnvironmentStrc * pDrlgEnvironment) {
     int iVar1 = pDrlgEnvironment->nTimeIndex;
     if (!pDrlgEnvironment->bEclipse) {
       pDrlgEnvironment->nEnvironmentData = aENVIRONMENTDATA1[iVar1 * 3 + 1];
@@ -168,7 +168,7 @@ void DRLGENV_InitEnvironmentCycle(D2DrlgEnvironmentStrc * pDrlgEnvironment) {
 }
 
 D2DrlgEnvironmentStrc * __fastcall DRLGENV_AllocEnvironment(D2PoolManagerStrc * pMemory) {
-    D2DrlgEnvironmentStrc* pEnv = D2_NEW_POOL(pMemory, D2DrlgEnvironmentStrc);
+    D2DrlgEnvironmentStrc* pEnv = ((D2DrlgEnvironmentStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2DrlgEnvironmentStrc), ".\\ENVIRONMENT\\Env.cpp", 0x12a, 0));
     memset(pEnv, 0, 0x38);
     pEnv->nTimeIndex = 2;
     uint32_t nTimeRate = gnTimeRates[pEnv->nTimeRateIndex];
@@ -190,7 +190,7 @@ D2DrlgEnvironmentStrc * __fastcall DRLGENV_AllocEnvironment(D2PoolManagerStrc * 
 }
 
 void __fastcall DRLGENV_FreeEnvironment(D2PoolManagerStrc * pMemory, D2DrlgEnvironmentStrc * pDrlgEnvironment) {
-    D2_FREE_POOL(pMemory, pDrlgEnvironment);
+    Fog::Memory::FreeServerMemory(pMemory, pDrlgEnvironment, ".\\ENVIRONMENT\\Env.cpp", 0x13f, 0);
 }
 
 // Advances the day/night environment cycle by one tick. Act 2 and 3 have accelerated cycle rates. Updates phase index and intensity when thresholds are crossed.
@@ -217,13 +217,13 @@ D2DrlgEnvironmentStrc * DRLGENV_UpdateEnvironmentCycle(D2DrlgEnvironmentStrc * p
 
     advance_time_period:
     nTicks = pEnvironment->nTimeRate;
-    if (nTicks * 0x168 <= pEnvironment->nTicks) {
+    if (pEnvironment->nTicks >= nTicks * 0x168) {
       pEnvironment->nTicks = 0;
     }
 
     int nTimeIndexPlus1 = pEnvironment->nTimeIndex + 1;
     int nNextTimeIndex = nTimeIndexPlus1;
-    if (5 < nTimeIndexPlus1) {
+    if (6 <= nTimeIndexPlus1) {
       nNextTimeIndex = 0;
     }
     if (!bEclipse) {
@@ -233,12 +233,12 @@ D2DrlgEnvironmentStrc * DRLGENV_UpdateEnvironmentCycle(D2DrlgEnvironmentStrc * p
     } else {
       pNextData = aENVIRONMENTDATA2 + nNextTimeIndex;
     }
-    if (pNextData->nLenght * nTicks >= pEnvironment->nTicks) {
+    if (pEnvironment->nTicks <= pNextData->nLenght * nTicks) {
       return pEnvironment;
     }
 
     pEnvironment->nTimeIndex = nTimeIndexPlus1;
-    if (5 < nTimeIndexPlus1) {
+    if (6 <= nTimeIndexPlus1) {
       pEnvironment->nTimeIndex = 0;
     }
 
@@ -476,7 +476,7 @@ void __stdcall DRLGENV_NextEnvCycle(D2DrlgActStrc * pDrlgAct, D2RoomStrc * pRoom
     D2DrlgActEnvironmentData* pDVar1;
     D2DrlgEnvironmentStrc* pEnv = DUNGEON::Dungeon::DRLGENV_GetEnvironmentFromAct(pDrlgAct);
     pEnv->nTimeIndex++;
-    if (5 < pEnv->nTimeIndex) {
+    if (6 <= pEnv->nTimeIndex) {
       pEnv->nTimeIndex = 0;
     }
     if (!pEnv->bEclipse) {
@@ -519,50 +519,50 @@ void __stdcall DRLGENV_InitializeEnvironment(D2DrlgActStrc * pDrlgAct, D2RoomStr
     if (nIndex < 0) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x210);
       exit(-1);
-    } else if (nIndex < 6) {
-      if (-1 < nAngle) {
-        if (pEnv->nTimeRate * 0x168 < nAngle) {
-          nAngle = 0;
-        }
+    } else if (!(nIndex < 6)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x211);
+      exit(-1);
+    } else {
+      if (!(0 <= nAngle)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x212);
+        exit(-1);
+      }
 
-        pEnv->nTimeIndex = nIndex;
-        pEnv->nTicks = nAngle;
-        if (!bEclipse) {
-          pDVar1 = (D2DrlgActEnvironmentData*)(aENVIRONMENTDATA1 + nIndex * 3);
-        } else {
-          pDVar1 = aENVIRONMENTDATA2 + nIndex;
-        }
+      if (nAngle > pEnv->nTimeRate * 0x168) {
+        nAngle = 0;
+      }
 
-        pEnv->nEnvironmentData = pDVar1->nEnvData;
-        nDrlgAct = (eD2LevelId)0x0;
-        if (pRoom) {
-          nDrlgAct = DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-        }
+      pEnv->nTimeIndex = nIndex;
+      pEnv->nTicks = nAngle;
+      if (!bEclipse) {
+        pDVar1 = (D2DrlgActEnvironmentData*)(aENVIRONMENTDATA1 + nIndex * 3);
+      } else {
+        pDVar1 = aENVIRONMENTDATA2 + nIndex;
+      }
 
-        eActNo = Drlg::GetActNoFromLevelNumber(nDrlgAct);
-        nActNo = (uint32_t)eActNo;
+      pEnv->nEnvironmentData = pDVar1->nEnvData;
+      nDrlgAct = (eD2LevelId)0x0;
+      if (pRoom) {
+        nDrlgAct = DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+      }
+
+      eActNo = Drlg::GetActNoFromLevelNumber(nDrlgAct);
+      nActNo = (uint32_t)eActNo;
+      DRLGENV_UpdateLightIntensity(nDrlgAct, pEnv, nActNo);
+      pEnv->bEclipse = bEclipse;
+      if (bEclipse) {
+        DRLGENV_InitEnvironmentCycle(pEnv);
         DRLGENV_UpdateLightIntensity(nDrlgAct, pEnv, nActNo);
-        pEnv->bEclipse = bEclipse;
-        if (bEclipse) {
-          DRLGENV_InitEnvironmentCycle(pEnv);
-          DRLGENV_UpdateLightIntensity(nDrlgAct, pEnv, nActNo);
-          DRLGENV_UpdateLightColor(nActNo, pEnv);
-        }
-        if ((D2DrlgActStrc*)nDrlgAct != (D2DrlgActStrc*)LEVEL_ArreatSummit) {
-          return;
-        }
-
-        pEnv->nGlobalLightRed = 0xf5;
-        pEnv->nGlobalLightGreen = 0xf0;
-        pEnv->nGlobalLightBlue = 0xff;
+        DRLGENV_UpdateLightColor(nActNo, pEnv);
+      }
+      if ((D2DrlgActStrc*)nDrlgAct != (D2DrlgActStrc*)LEVEL_ArreatSummit) {
         return;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x212);
-      exit(-1);
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x211);
-      exit(-1);
+      pEnv->nGlobalLightRed = 0xf5;
+      pEnv->nGlobalLightGreen = 0xf0;
+      pEnv->nGlobalLightBlue = 0xff;
+      return;
     }
 }
 
@@ -590,7 +590,7 @@ void __stdcall DRLGENV_SetNextTimeRate(D2DrlgActStrc * pDrlgAct, D2RoomStrc * pR
     D2DrlgActEnvironmentData* pDVar1;
     D2DrlgEnvironmentStrc* pEnv = DUNGEON::Dungeon::DRLGENV_GetEnvironmentFromAct(pDrlgAct);
     pEnv->nTimeRateIndex++;
-    if (2 < pEnv->nTimeRateIndex) {
+    if (3 <= pEnv->nTimeRateIndex) {
       pEnv->nTimeRateIndex = 0;
     }
 

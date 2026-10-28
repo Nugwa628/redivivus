@@ -126,12 +126,16 @@ void __stdcall DRAW_AltItems() {
                 D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(nColorOrCoord, __frame0.nPrecisionX, 0, &__frame0.nItemPosX, &__frame0.nPerspY);
                 uBorderType = Path::DRAW_GetTypeOfBorder();
                 nColorIdx = __frame0.nPerspY;
-                if (uBorderType == 1) {
+                switch (uBorderType) {
+                case 1: {
                   __frame0.nItemPosX -= (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
-                } else if (uBorderType == 2) {
+                  break;
+                }
+                case 2: {
                   __frame0.nItemPosX += (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
                   __frame0.nItemX = __frame0.nItemPosX;
                   goto layout_label;
+                }
                 }
 
                 __frame0.nItemX = __frame0.nItemPosX;
@@ -142,10 +146,15 @@ void __stdcall DRAW_AltItems() {
               __frame0.nItemVisY = nColorIdx;
               __frame0.nMaxX = ScreenSizeX;
               uBorderType = Path::DRAW_GetTypeOfBorder();
-              if (uBorderType == 1) {
+              switch (uBorderType) {
+              case 1: {
                 __frame0.nMaxX = ScreenSizeX / 2 - 0x20;
-              } else if (uBorderType == 2) {
+                break;
+              }
+              case 2: {
                 __frame0.nItemPosY = ScreenSizeX / 2;
+                break;
+              }
               }
 
               nDrawCount = gItemDrawFlags;
@@ -208,20 +217,20 @@ void __stdcall DRAW_AltItems() {
                       case 4:
                         nColorIdx = 3;
                       break;
-                      case 5:
-                        nColorIdx = 2;
-                      break;
                       case 6:
                         nColorIdx = 9;
-                      break;
-                      case 7:
-                        nColorIdx = 4;
                       break;
                       case 8:
                         nColorIdx = 8;
                       break;
                       case 9:
                         nColorIdx = 10;
+                      break;
+                      case 7:
+                        nColorIdx = 4;
+                      break;
+                      case 5:
+                        nColorIdx = 2;
                       break;
                       default:
                         bSocketedFlag = D2Common::ITEMS::Items::CheckItemFlag(pItem, ITEMFLAG_SOCKETED, 0x106, ".\\UI\\showitems.cpp");

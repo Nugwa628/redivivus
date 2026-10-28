@@ -123,8 +123,6 @@ int __stdcall JoinOrCreateGame(DWORD dwParam);
 uint32_t __stdcall OOGMENU_RestoreMCPConnection();
 int __fastcall CHATDLG_RunChatLobbyScreen(struct D2IniConfigStrc * pD2IniConfig);
 int32_t __fastcall fAPPMODE_multiplayer_ReturnAppMode_Caller(struct D2IniConfigStrc * pD2IniConfig);
-// Handles the /reply command for out-of-game chat. Parses the reply target from gszOogReplyCommandBuffer, validates token count is exactly 2 (command + message), and formats a whisper message ("/w *target message") to send via the network interface. Shows error messages if no reply target exists or if command syntax is incorrect.
-uint32_t OOGUTIL_HandleReplyCommand(char * szText1, char * szText2);
 void __fastcall OOGUTIL_HandleChatCommands(char * szText);
 int __stdcall CHAT_SendOutOfGameMessage();
 // OnPress of the OK button (form 0x27, record 0070d5a0, string 0x13ee) of the chat password/CD-key warning popup that OOGUTIL_SendChatMessage opens: calls CHAT_SendOutOfGameMessage (the caller already emptied gszOogChatInputBuffer) and closes the popup (FORMS_DestroyListEx); returns 1.
@@ -142,7 +140,6 @@ void __fastcall OOGMENU_AddGameToCache(int32_t pGameInfo);
 void __stdcall OOGMENU_RefreshGameListDisplay();
 void __fastcall OOGUTIL_Unused1(char * szText, uint16_t nParam);
 void __stdcall OOGMENU_RequestGameInfo();
-void OOGUTIL_Unused2(int32_t nEntryIndex);
 // Displays game details in the lobby textbox. Shows game description, elapsed time (HH:MM:SS), level restrictions (single level or range), max players, and iterates through all players to display their names and levels with class-specific formatting (Amazon/Sorceress/Necromancer/Paladin/Barbarian/Druid/Assassin). All formatted strings are written to a 256-byte buffer before being added to the display.
 void __fastcall OOGMENU_DisplayGameDetails(int32_t pGameInfo);
 void __stdcall UIMENU_DestroyLobbyAndJoinGameForms();
@@ -189,10 +186,6 @@ BOOL __stdcall OOGUTIL_OnPressDifficultyNightmare(struct D2ControlMsg * pControl
 // OnPress handler of the create-game Hell difficulty button gUIGameListDifficultyHellButton (FORM_Button, toggle flag 0x2): presses it and releases the Normal and Nightmare buttons with D2WINBUTTON_SetPressed, then sets CreateGameDifflevel and D2IniData_multiplayer->nDifficulty (+0x210) to 2; returns 1.
 // Provenance: asm 00443cc0..00443d05 (RET 4); fpOnPressCallback of form record 0070ddb0, which had no function.
 BOOL __stdcall OOGUTIL_OnPressDifficultyHell(struct D2ControlMsg * pControlMsg);
-// Copies szCharacterName (the clicked chat user's character name) into gszProfileCharacterName and stores nHardcoreFlag / nExpansionFlag (the clicked
-// D2ChannelUserStrc nHardcoreFlag +0xa0 / nExpansionFlag +0xa8, via COMCALLBACK_HandleUserListClick) into
-// gnProfileUserHardcoreFlag / gnProfileUserExpansionFlag, which OOGUTIL_OnPressProfileLadder (00443ef0) reads to open the matching ladder and request that character's rank.
-void __stdcall OOGUTIL_SetProfileUser(int nHardcoreFlag, int nExpansionFlag, char * szCharacterName);
 void __stdcall UIMENU_PlayerProfileLabels();
 // Destroys the profile dialog: the view forms (gnProfileDialogMode 1) or the edit forms (mode 2), then the shared labels and the OK and ladder buttons; resets the mode to 0 and restores the lobby panel and focus. Does nothing but the restore when no dialog is open.
 // Provenance: asm 00443e10..00443ea0; the forms are the ones OOGUTIL_CreateViewProfileDialog / OOGUTIL_CreateEditProfileDialog create.

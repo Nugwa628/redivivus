@@ -30,7 +30,7 @@ void __fastcall Free(D2QSQueueStrc * pPoolManager) {
     D2QSQueueEntryStrc* pDVar1 = pPoolManager->pHead;
     while (pDVar1) {
       pDVar1 = pDVar1->pNext;
-      D2_FREE(pPoolManager->pHead);
+      Fog::Memory::FreeClientMemory(pPoolManager->pHead, ".\\Src\\D2QSQueue.cpp", 0x27, 0);
       pPoolManager->pHead = pDVar1;
     }
 
@@ -47,13 +47,13 @@ uint32_t __fastcall GetAddress(uint32_t * pdwParam) {
 }
 
 void __fastcall FOG_EnqueueMessage(D2QSQueueStrc * pClientSideData, void * pParam, uint16_t wMsgSize) {
-    if (!wMsgSize) {
+    if ((uint32_t)wMsgSize <= 0) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x4a);
       exit(-1);
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pClientSideData->csLock);
-    D2QSQueueEntryStrc* puMsgEntry = (D2QSQueueEntryStrc*)D2_ALLOC(wMsgSize + 8);
+    D2QSQueueEntryStrc* puMsgEntry = (D2QSQueueEntryStrc*)Fog::Memory::AllocClientMemory(wMsgSize + 8, ".\\Src\\D2QSQueue.cpp", 0x4e, 0);
     puMsgEntry->wMsgSize = wMsgSize;
     puMsgEntry->pNext = 0;
     memcpy(puMsgEntry + 1, pParam, (uint32_t)wMsgSize);
@@ -71,10 +71,8 @@ uint32_t __fastcall D2QSQUEUE_Dequeue(D2QSQueueStrc * pdwParam, void * pParam, i
     uint32_t uBytesRead;
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pdwParam->csLock);
     D2QSQueueEntryStrc* iNextEntry = pdwParam->pHead;
-    if (!iNextEntry) {
-      uBytesRead = 0;
-    } else {
-      if ((uint16_t)nMaxSize < iNextEntry->wMsgSize) {
+    if (iNextEntry) {
+      if (iNextEntry->wMsgSize > (uint16_t)nMaxSize) {
         pdwParam->bOverflow = 1;
         uBytesRead = 0;
       } else {
@@ -83,11 +81,13 @@ uint32_t __fastcall D2QSQUEUE_Dequeue(D2QSQueueStrc * pdwParam, void * pParam, i
       }
 
       iNextEntry = iNextEntry->pNext;
-      D2_FREE(pdwParam->pHead);
+      Fog::Memory::FreeClientMemory(pdwParam->pHead, ".\\Src\\D2QSQueue.cpp", 0x78, 0);
       pdwParam->pHead = iNextEntry;
       if (!iNextEntry) {
         pdwParam->pTail = 0;
       }
+    } else {
+      uBytesRead = 0;
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&pdwParam->csLock);

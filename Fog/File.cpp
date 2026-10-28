@@ -27,6 +27,7 @@ typedef int (__fastcall *pfnFogExceptionFilter)(D2CrashReportStrc * pExceptionRe
 #endif
 
 namespace Fog::File {
+static char * STRING_CopyStringBounded(int32_t nDestSize, char * szDest, char * szSrc);
 
 void __stdcall CONTAINER_InitializeBuffer(void * pBuffer, int32_t nTypeSize, int32_t nBufferSize, CONTAINER_TypeInitialValue fpInitValueCallback) {
     while (true) {
@@ -51,7 +52,7 @@ void __fastcall CRASH_DumpThreadContext(DWORD dwThreadId, void * pContext, fnCra
       *pFrameBufCursor = 0;
       pFrameBufCursor[1] = 0;
       *(uint8_t*)(pFrameBufCursor + 2) = '\0';
-      memset(pFrameBufCursor + 3, 0, 4 * sizeof(pFrameBufCursor[0]));
+      for (int i = 3; i < 7; i++) pFrameBufCursor[i] = 0;
       pFrameBufCursor += 9;
       nFrameCountClamped--;
     } while (-1 < nFrameCountClamped);
@@ -118,19 +119,18 @@ void __fastcall CRASH_FormatStackTrace(DWORD dwThreadId, D2CrashFrameStrc * aFra
       pszScan = __frame0.szLineBuffer;
       pszScan = pszScan + strlen(pszScan) + 1;
       nLineLen = (int)pszScan - (int)(__frame0.szLineBuffer + 1);
-      if (nLineLen < 0x3ff) {
-        __frame0.szLineBuffer[nLineLen] = '\n';
-        __frame0.szLineBuffer[nLineLen + 1] = '\0';
-      } else {
+      if (!(nLineLen < 0x3ff)) {
         __frame0.szLineBuffer[0x3fe] = '\n';
         __frame0.szLineBuffer[0x3ff] = '\0';
+      } else {
+        __frame0.szLineBuffer[nLineLen] = '\n';
+        __frame0.szLineBuffer[nLineLen + 1] = '\0';
       }
 
       (*pOutputCallback)(pReport, __frame0.szLineBuffer);
       aFrameAddrs++;
     }
 
-    Debug::GuardStack();
 }
 
 void __fastcall CRASH_DumpRegisters(DWORD dwThreadId, fnCrashOutputLine pOutputCallback, ::Report * pReport) {
@@ -236,7 +236,6 @@ void __fastcall CRASH_DumpRegisters(DWORD dwThreadId, fnCrashOutputLine pOutputC
       }
     }
 
-    Debug::GuardStack();
 }
 
 void __fastcall CRASH_EnumerateThreads(fnCrashOutputLine pOutputCallback, ::Report * pReport, DWORD dwSkipThreadId) {
@@ -268,7 +267,7 @@ void __fastcall CRASH_EnumerateThreads(fnCrashOutputLine pOutputCallback, ::Repo
     /* HANDLE hObject for CloseHandle */ CloseHandle(hObject);
 }
 
-void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
+static void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
     DWORD nMsgLen;
     if (dwExceptionCode < 0xc0000006) {
       if (dwExceptionCode == 0xc0000005) {
@@ -277,9 +276,6 @@ void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
       }
 
       switch (dwExceptionCode) {
-        case 0x80000001:
-          _strncpy_s(szText, 0x100, "GUARD_PAGE", -1);
-        return;
         case 0x80000002:
           _strncpy_s(szText, 0x100, "DATATYPE_MISALIGNMENT", -1);
         return;
@@ -289,24 +285,12 @@ void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
         case 0x80000004:
           _strncpy_s(szText, 0x100, "SINGLE_STEP", -1);
         return;
+        case 0x80000001:
+          _strncpy_s(szText, 0x100, "GUARD_PAGE", -1);
+        return;
       }
     } else {
       switch (dwExceptionCode) {
-        case 0xc0000006:
-          _strncpy_s(szText, 0x100, "IN_PAGE_ERROR", -1);
-        return;
-        case 0xc0000008:
-          _strncpy_s(szText, 0x100, "INVALID_HANDLE", -1);
-        return;
-        case 0xc000001d:
-          _strncpy_s(szText, 0x100, "ILLEGAL_INSTRUCTION", -1);
-        return;
-        case 0xc0000025:
-          _strncpy_s(szText, 0x100, "NONCONTINUABLE_EXCEPTION", -1);
-        return;
-        case 0xc0000026:
-          _strncpy_s(szText, 0x100, "INVALID_DISPOSITION", -1);
-        return;
         case 0xc000008c:
           _strncpy_s(szText, 0x100, "ARRAY_BOUNDS_EXCEEDED", -1);
         return;
@@ -340,8 +324,23 @@ void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
         case 0xc0000096:
           _strncpy_s(szText, 0x100, "PRIV_INSTRUCTION", -1);
         return;
+        case 0xc0000006:
+          _strncpy_s(szText, 0x100, "IN_PAGE_ERROR", -1);
+        return;
+        case 0xc000001d:
+          _strncpy_s(szText, 0x100, "ILLEGAL_INSTRUCTION", -1);
+        return;
+        case 0xc0000025:
+          _strncpy_s(szText, 0x100, "NONCONTINUABLE_EXCEPTION", -1);
+        return;
         case 0xc00000fd:
           _strncpy_s(szText, 0x100, "STACK_OVERFLOW", -1);
+        return;
+        case 0xc0000026:
+          _strncpy_s(szText, 0x100, "INVALID_DISPOSITION", -1);
+        return;
+        case 0xc0000008:
+          _strncpy_s(szText, 0x100, "INVALID_HANDLE", -1);
         return;
       }
     }
@@ -386,12 +385,10 @@ LONG __stdcall ERRORMANAGER_UnhandledExceptionFilter(_EXCEPTION_POINTERS * pExce
       sCrashReport.nSkipFrames = 0;
       nFilterResult = (*gpCurrentExceptionFilter)(&sCrashReport, gpCurrentExceptionContext);
       if (nFilterResult) {
-        Debug::GuardStack();
         return (uint32_t)(nFilterResult != 1) * 2 - 1;
       }
     }
 
-    Debug::GuardStack();
     return 0;
 }
 
@@ -417,17 +414,17 @@ void __fastcall CRASH_SetExceptionHandler(pfnFogExceptionFilter pfnFilter, void 
 uint32_t __stdcall FILETOOLS_ExtractDirectory(char * szDest, char * nDestSize, char * szSrcPath) {
     char* pSep = strrchr(szSrcPath, 0x2f);
     char* pLastSep = 0;
-    if (pSep) {
+    if ((uint32_t)pSep > 0) {
       pLastSep = pSep;
     }
 
     pSep = strrchr(szSrcPath, 0x5c);
-    if (pSep && pLastSep < pSep) {
+    if (pSep && pSep > pLastSep) {
       pLastSep = pSep;
     }
 
     pSep = strrchr(szSrcPath, 0x3a);
-    if (pSep && pLastSep < pSep) {
+    if (pSep && pSep > pLastSep) {
       pLastSep = pSep;
     }
     if (!pLastSep) {
@@ -447,17 +444,17 @@ uint32_t __stdcall FILETOOLS_ExtractFilename(char * szDest, char * szSrcPath, ch
     pSep = strrchr(szSrcPath, 0x2f);
     char* pLastSep;
     pLastSep = 0;
-    if (pSep) {
+    if ((uint32_t)pSep > 0) {
       pLastSep = pSep;
     }
 
     pSep = strrchr(szSrcPath, 0x5c);
-    if (pSep && pLastSep < pSep) {
+    if (pSep && pSep > pLastSep) {
       pLastSep = pSep;
     }
 
     pSep = strrchr(szSrcPath, 0x3a);
-    if (pSep && pLastSep < pSep) {
+    if (pSep && pSep > pLastSep) {
       pLastSep = pSep;
     }
     if (pLastSep) {
@@ -507,7 +504,7 @@ bool __fastcall STRING_AppendBlizzardErrorSubfolderToPath(char * szPath) {
     return pEnd < (char*)0x400;
 }
 
-char * STRING_CopyStringBounded(int32_t nDestSize, char * szDest, char * szSrc) {
+static char * STRING_CopyStringBounded(int32_t nDestSize, char * szDest, char * szSrc) {
     char* pSrcScan;
     pSrcScan = szSrc;
     if (nDestSize) {
@@ -588,14 +585,12 @@ bool __fastcall FILETOOLS_StartApplicationWithCommandLine_UTF8(LPCSTR lpApplicat
     if (szCommandLine) {
       /* int cchWideChar for MultiByteToWideChar */ /* LPWSTR lpWideCharStr for MultiByteToWideChar */ /* int cbMultiByte for MultiByteToWideChar */ /* LPCSTR lpMultiByteStr for MultiByteToWideChar */ /* DWORD dwFlags for MultiByteToWideChar */ /* UINT CodePage for MultiByteToWideChar */ nConverted = MultiByteToWideChar(0xfde9, 0, szCommandLine, -1, (LPWSTR)wszCommandLine, 0x8000);
       if (!nConverted) {
-        Debug::GuardStack();
         return false;
       }
     }
     if (lpApplicationName) {
       /* int cchWideChar for MultiByteToWideChar */ /* LPWSTR lpWideCharStr for MultiByteToWideChar */ /* int cbMultiByte for MultiByteToWideChar */ /* LPCSTR lpMultiByteStr for MultiByteToWideChar */ /* DWORD dwFlags for MultiByteToWideChar */ /* UINT CodePage for MultiByteToWideChar */ nConverted = MultiByteToWideChar(0xfde9, 0, lpApplicationName, -1, (LPWSTR)wszAppName, 0x400);
       if (!nConverted) {
-        Debug::GuardStack();
         return false;
       }
     }
@@ -610,11 +605,9 @@ bool __fastcall FILETOOLS_StartApplicationWithCommandLine_UTF8(LPCSTR lpApplicat
     if (bCreated) {
       /* HANDLE hObject for CloseHandle */ CloseHandle(processInfo.hProcess);
       /* HANDLE hObject for CloseHandle */ CloseHandle(processInfo.hThread);
-      Debug::GuardStack();
       return true;
     }
 
-    Debug::GuardStack();
     return false;
 }
 
@@ -628,12 +621,10 @@ bool __stdcall FILETOOLS_CheckIfFileExists_UTF8(LPCSTR lpMultiByteStr) {
       /* LPWIN32_FIND_DATAW lpFindFileData for FindFirstFileW */ /* LPCWSTR lpFileName for FindFirstFileW */ hFindFile = FindFirstFileW((LPCWSTR)wszPath, &findData);
       if (hFindFile != (HANDLE)-1) {
         /* HANDLE hFindFile for FindClose */ FindClose(hFindFile);
-        Debug::GuardStack();
         return true;
       }
     }
 
-    Debug::GuardStack();
     return false;
 }
 
@@ -647,12 +638,10 @@ FILE * __stdcall FILETOOLS_OpenFile_WriteMode_UTF8(LPCSTR lpMultiByteStr) {
       /* int cchWideChar for MultiByteToWideChar */ /* LPWSTR lpWideCharStr for MultiByteToWideChar */ /* int cbMultiByte for MultiByteToWideChar */ /* LPCSTR lpMultiByteStr for MultiByteToWideChar */ /* DWORD dwFlags for MultiByteToWideChar */ /* UINT CodePage for MultiByteToWideChar */ nConverted = MultiByteToWideChar(0xfde9, 0, "w", -1, (LPWSTR)wszMode, 0x20);
       if (nConverted) {
         pFVar1 = __wfopen(wszPath, wszMode);
-        Debug::GuardStack();
         return pFVar1;
       }
     }
 
-    Debug::GuardStack();
     return nullptr;
 }
 
@@ -665,12 +654,10 @@ void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPath) {
       /* int cchWideChar for MultiByteToWideChar */ /* LPWSTR lpWideCharStr for MultiByteToWideChar */ /* int cbMultiByte for MultiByteToWideChar */ /* LPCSTR lpMultiByteStr for MultiByteToWideChar */ /* DWORD dwFlags for MultiByteToWideChar */ /* UINT CodePage for MultiByteToWideChar */ nConverted = MultiByteToWideChar(0xfde9, 0, szDestPath, -1, (LPWSTR)wszDest, 0x104);
       if (nConverted) {
         /* BOOL bFailIfExists for CopyFileW */ /* LPCWSTR lpNewFileName for CopyFileW */ /* LPCWSTR lpExistingFileName for CopyFileW */ CopyFileW((LPCWSTR)wszSrc, (LPCWSTR)wszDest, 1);
-        Debug::GuardStack();
         return;
       }
     }
 
-    Debug::GuardStack();
 }
 
 // Writes the process temp path into the caller's buffer and reports success. The result is a single byte in AL (XOR AL,AL / the sole caller does TEST AL,AL); EDX is never written, so declaring an 8-byte return invented a high dword out of nothing.
@@ -679,12 +666,10 @@ bool FILETOOLS_GetTempPath_UTF8(LPSTR szDest) {
     uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     DWORD nPathLen = GetTempPathW(0x104, (LPWSTR)wszTempPath);
     if (!nPathLen) {
-      Debug::GuardStack();
       return false;
     }
 
     int iVar1 = WideCharToMultiByte(0xfde9, 0, (LPCWSTR)wszTempPath, nPathLen + 1, szDest, 0x400, (LPCSTR)0x0, (LPBOOL)0x0);
-    Debug::GuardStack();
     return iVar1 != 0;
 }
 
@@ -710,7 +695,7 @@ uint32_t __fastcall FILETOOLS_CreateDirectoryW(LPWSTR lpPathName) {
 
     LPWSTR pLastSep = wcsrchr(lpPathName, L'\\');
     LPWSTR pSep = wcsrchr(lpPathName, L'/');
-    if (pLastSep < pSep) {
+    if (pSep > pLastSep) {
       pSep = wcsrchr(lpPathName, L'/');
       pLastSep = pSep;
     }
@@ -734,12 +719,10 @@ BOOL __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName) {
     uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int nConverted = MultiByteToWideChar(0xfde9, 0, szPathName, -1, (LPWSTR)wszPath, 0x104);
     if (!nConverted) {
-      Debug::GuardStack();
       return 0;
     }
 
     uint32_t uVar1 = FILETOOLS_CreateDirectoryW((LPWSTR)wszPath);
-    Debug::GuardStack();
     return uVar1;
 }
 

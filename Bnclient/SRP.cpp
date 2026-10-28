@@ -59,7 +59,7 @@ void __fastcall SRP_InitializeRandomState(D2Srp * pThis, uint32_t dwSeed) {
     Fog::Debug::GuardStack();
 }
 
-void SRP_ExtractSessionKeyBytes(void * pThis, void * pDst, uint32_t nBytes) {
+static void SRP_ExtractSessionKeyBytes(void * pThis, void * pDst, uint32_t nBytes) {
     uint32_t nAvail;
     int iVar1;
     uint32_t aShaCtx[23];
@@ -67,7 +67,7 @@ void SRP_ExtractSessionKeyBytes(void * pThis, void * pDst, uint32_t nBytes) {
     if (nBytes) {
       iVar1 = *(int*)pThis;
       nAvail = *(uint32_t*)(iVar1 + 0x48);
-      while (nAvail < nBytes) {
+      while (nBytes > nAvail) {
         memcpy(pDst, (void*)(iVar1 - nAvail + 0x48), nAvail);
         pDst = (void*)((int)pDst + *(int*)(*(int*)pThis + 0x48));
         nBytes -= *(int*)(*(int*)pThis + 0x48);
@@ -81,13 +81,12 @@ void SRP_ExtractSessionKeyBytes(void * pThis, void * pDst, uint32_t nBytes) {
         nAvail = *(uint32_t*)(iVar1 + 0x48);
       }
 
-      if (nBytes) {
+      if ((uint32_t)nBytes > 0) {
         memcpy(pDst, (void*)(*(int*)pThis - *(int*)(*(int*)pThis + 0x48) + 0x48), nBytes);
         *(int*)(*(int*)pThis + 0x48) -= nBytes;
       }
     }
 
-    Fog::Debug::GuardStack();
 }
 
 void __stdcall SRP_ComputePasswordHash(void * pParam, char * szText1, char * szText2, int * pnParam) {
@@ -111,7 +110,6 @@ void __stdcall SRP_ComputePasswordHash(void * pParam, char * szText1, char * szT
     SHA::SHA1_Final(hashBuf, sha1Ctx);
     BigData* nHashResult = SHA::SHA1_FromBigIntBytes(hashBuf, 0x14);
     *pnParam = (int)nHashResult;
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall SRP_ComputeScramblingParam(int32_t pThis, BigData * * ppBase, BigData * * pnParam) {
@@ -127,7 +125,6 @@ void __stdcall SRP_HashBigNumToU32(BigData * * ppBigNum, uint32_t * pdwOut) {
     SHA::SHA1_Update(sha1Ctx, bigIntBytes, nByteLen);
     SHA::SHA1_Final(aHash, sha1Ctx);
     *pdwOut = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)aHash[0] << 8 | (uint16_t)(uint8_t)aHash[1]) << 8 | (uint32_t)(uint8_t)aHash[2]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)aHash[3]);
-    Fog::Debug::GuardStack();
 }
 
 int __fastcall SRP_ClientComputeSharedSecret(int32_t pSrp, BigData * * pPrivateKey, BigData * * pnParam1, BigData * * pnParam2, BigData * * pnParam3) {
@@ -250,7 +247,6 @@ void __fastcall SRP_ComputeClientProof(int32_t pThis, char * szUsername, void * 
     SHA::SHA1_Update(sha1Ctx, pParam3, 0x20);
     SHA::SHA1_Update(sha1Ctx, pParam4, 0x28);
     SHA::SHA1_Final((uint8_t*)nParam, sha1Ctx);
-    Fog::Debug::GuardStack();
 }
 
 void __stdcall SRP_ComputeServerProof(void * pParam1, void * pParam2, void * pParam3, int32_t nParam) {
@@ -264,7 +260,7 @@ void __stdcall SRP_ComputeServerProof(void * pParam1, void * pParam2, void * pPa
     Fog::Debug::GuardStack();
 }
 
-BOOL SRP_IsContextInitialized(D2Srp * pSrp) {
+static BOOL __fastcall SRP_IsContextInitialized(D2Srp * pSrp) {
     return (uint32_t)(pSrp->bInitialized != 0);
 }
 
@@ -384,13 +380,11 @@ BOOL SRP_ClientKeyExchange(void * pThis, D2SrpCredentialsStrc * pContext, void *
         SHA::SHA1_HashWideString(pContext->aSessionKey_K, sessionKeyBytes, uVar3);
         SHA::SHA1_BigIntFree(pSharedSecretOut);
         SRP_ComputeClientProof(*(int32_t*)pThis, pContext->szUsername, pSalt, pContext->aClientPublicKey_A, pParam2, pContext->aSessionKey_K, (int32_t)pContext->aClientProof_M1);
-        Fog::Debug::GuardStack();
         return 1;
       }
     }
 
     SHA::SHA1_BigIntFree(pSharedSecret);
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -413,7 +407,7 @@ BOOL __stdcall SRP_ClientVerifyServerProof(void * pSrpContext, int * pServerProo
       nRemaining -= 4;
       pServerProof = (int*)((int)pServerProof + 4);
       pComputedProof += 4;
-    } while (3 < nRemaining);
+    } while (4 <= nRemaining);
 
     if (!nRemaining) {
       proofs_equal:
@@ -445,7 +439,6 @@ BOOL __stdcall SRP_ClientVerifyServerProof(void * pSrpContext, int * pServerProo
       }
     }
 
-    Fog::Debug::GuardStack();
     return (uint32_t)!nCmpSign;
 }
 
@@ -453,26 +446,26 @@ uint32_t __stdcall SRP_ParseChallenge(uint32_t * pContext, char * szText, uint32
     int i;
     Storm::Source::SSTR::SStrCopy((char*)(pContext + 0x10), szText, 0x7fffffff);
     uint32_t* pDst = pContext;
-    for (i = 8; i; i--) {
-      *pDst = *pModulusN;
-      pModulusN++;
-      pDst++;
-    }
+    memcpy(pDst, pModulusN, 8 * sizeof(*pDst));
+
+
+
+
 
     pDst = pContext + 8;
-    for (i = 8; i; i--) {
-      *pDst = *pGenerator;
-      pGenerator++;
-      pDst++;
-    }
+    memcpy(pDst, pGenerator, 8 * sizeof(*pDst));
+
+
+
+
 
     pDst = pServerPublicBBytes;
     uint32_t* pDst2 = pContext + 0x18;
-    for (i = 8; i; i--) {
-      *pDst2 = *pDst;
-      pDst++;
-      pDst2++;
-    }
+    memcpy(pDst2, pDst, 8 * sizeof(*pDst2));
+
+
+
+
 
     BigData* pServerPublicB = SHA::SHA1_FromBigIntBytes(pServerPublicBBytes, 0x20);
     int32_t nCompareResult = SHA::SHA1_BigIntCompareValue(pServerPublicB, 0);
@@ -538,9 +531,8 @@ void SRP_ClientVerifyAndComputeKey(void * pThis, void * pContext, uint32_t * pSe
       nRemaining -= 4;
       pServerProof++;
       pSharedSecret = (BigData*)&pSharedSecret->sPrimary.nCount;
-    } while (3 < nRemaining);
+    } while (4 <= nRemaining);
 
-    Fog::Debug::GuardStack();
 }
 
 void __stdcall SRP_ComputeFinalProof(int32_t nContextBase) {
