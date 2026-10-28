@@ -757,7 +757,7 @@ BOOL __fastcall Skills_SrvDoFunc_132_FireClassUpgradedMissile(::SGAMEDATA * pGam
       return 0;
     }
 
-    int nBaseMissileId = (int)sgptDataTable->pTxtSkills[eSkill].srvmissile[1];
+    int nBaseMissileId = (int)pSkillsRecord->srvmissile[1];
     if (!(0 < nBaseMissileId && nBaseMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
@@ -1130,7 +1130,7 @@ BOOL __fastcall Skills_SrvDoFunc_139_FireOrthogonalMissile(::SGAMEDATA * pGame, 
       return 0;
     }
 
-    eMissilesId eMissileId = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].srvmissile[1];
+    eMissilesId eMissileId = (eMissilesId)pSkillsRecord->srvmissile[1];
     if (!(0 < (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
@@ -1166,7 +1166,7 @@ BOOL __fastcall SKILLEMONST_SrvStFn63_CorpseCycler(::SGAMEDATA * pGame, D2UnitSt
       return 0;
     }
 
-    eMissilesId eMissileTxtNo = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].srvmissile[1];
+    eMissilesId eMissileTxtNo = (eMissilesId)pSkillsRecord->srvmissile[1];
     if (!(0 < (int)eMissileTxtNo && (int)eMissileTxtNo < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }

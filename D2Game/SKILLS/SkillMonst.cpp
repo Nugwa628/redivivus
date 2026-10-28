@@ -203,7 +203,7 @@ BOOL __fastcall Skills_SrvDoFunc_085_FireUpgradedMissile(::SGAMEDATA * pGame, D2
       return 0;
     }
 
-    int nMissileBase = (int)sgptDataTable->pTxtSkills[eSkill].srvmissile[1];
+    int nMissileBase = (int)pSkillsRecord->srvmissile[1];
     if (!(0 <= nMissileBase && nMissileBase < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
@@ -447,7 +447,7 @@ BOOL __fastcall Skills_SrvDoFunc_088_FireMissileFromBodyPart(::SGAMEDATA * pGame
       return 0;
     }
 
-    eMissilesId eVar2 = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].srvmissile[1];
+    eMissilesId eVar2 = (eMissilesId)pSkillsRecord->srvmissile[1];
     if ((int)eVar2 < 0 || (int)eVar2 >= sgptDataTable->nTxtMissilesSize) {
       return 0;
     }
@@ -2071,7 +2071,7 @@ BOOL __fastcall Skills_SrvDoFunc_106_FireMissileRingOnTarget(::SGAMEDATA * pGame
       return 0;
     }
 
-    eMissilesId eMissileId = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].srvmissile[1];
+    eMissilesId eMissileId = (eMissilesId)pSkillsRecord->srvmissile[1];
     if (!(0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }

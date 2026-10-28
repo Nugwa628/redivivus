@@ -431,7 +431,7 @@ int32_t __fastcall DAMAGE_GetMonsterDelayByDifficulty(D2UnitStrc * pUnit, D2Unit
       return -0x32;
     }
 
-    return (int)sgptDataTable->pTxtMonStats[nVictimClassId].aColdEffect[*(uint8_t*)((uintptr_t)&pUnit->uSideData + 9)];
+    return (int)pMonStatsRecord->aColdEffect[*(uint8_t*)((uintptr_t)&pUnit->uSideData + 9)];
 }
 
 // Applies cold slow to pUnit2 for nParam frames, sourced from attacker pUnit. Looks up MonStats ColdEffect per difficulty; divides duration for cold-immune monsters. Creates or extends STATE_cold stat list (velocity/attack/anim rate penalties), schedules expiry event, and probabilistically sets STATE_shatter on eligible monsters.
@@ -754,7 +754,7 @@ static void __stdcall DAMAGE_ApplyMonsterTypeBonusDamage(D2UnitStrc * pUnit, D2D
       return;
     }
 
-    short int nMonTypeCountShort = sgptDataTable->pTxtMonStats[nMonTypeCount].MonType;
+    short int nMonTypeCountShort = pMonStatsRecord->MonType;
     if (0 >= nMonTypeCountShort) {
       return;
     }

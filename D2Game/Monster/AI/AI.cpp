@@ -2212,7 +2212,7 @@ uint32_t __fastcall MONSTERAI_GetThreatLevel(D2UnitStrc * pUnit) {
       return 0;
     }
 
-    return (uint32_t)(uint8_t)sgptDataTable->pTxtMonStats[pAiGeneral].threat;
+    return (uint32_t)(uint8_t)pMonStatsRecord->threat;
 }
 
 // Validates that a monster (pUnit) may legally target pTarget. Checks: both are monsters/players, neither is dead, target's room is not a town room, target has UNITFLAG_CANBEATTACKED, and if target is invisible: player invis targets succeed only on melee range or a 50% seed roll; monster invis targets are blocked unless in melee range. Falls through to UNITS_CheckIfCanAttackTarget.
@@ -2843,7 +2843,7 @@ BOOL __fastcall MONSTERAI_HasSkillInSlots(D2UnitStrc * pUnit, int32_t nSkillId) 
     }
 
     int nSlotIndex = 0;
-    short int* pSkillSlot = sgptDataTable->pTxtMonStats[nClassId].aSkill;
+    short int* pSkillSlot = pMonStatsRecord->aSkill;
     do {
       if (*pSkillSlot == nSkillId) {
         return 1;
@@ -5090,7 +5090,7 @@ static void __fastcall AI_Fn0_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       return;
     }
 
-    pAiParam->pMonsterAiGeneral->dwArg0 = pGame->dwGameFrame + sgptDataTable->pTxtSkills[nSkillId].Param[1];
+    pAiParam->pMonsterAiGeneral->dwArg0 = pGame->dwGameFrame + pSkillsRecord->Param[1];
 }
 
 static void __fastcall AI_Fn1_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
@@ -20095,7 +20095,7 @@ void __fastcall AITHINK_Fn1_Mephisto(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2
       WalkRandomOffset(pGame, pUnit, 6);
     } else {
       BOOL bCollideWithWall;
-      bCmdResult = (int)(100 / (int64_t)nSeedHighPart);
+      bCmdResult = (100 / nSeedHighPart);
       sNewSeed = D2_SEED_NEXT(*pSeed);
       *pSeed = sNewSeed;
       nSeedLowResult = sNewSeed.nSeedLow % 100;

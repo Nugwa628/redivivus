@@ -721,7 +721,7 @@ static int32_t MONSTER_GetMinion1MonstatId(D2UnitDataMonsterStrc * pMonData) {
       return nClassId;
     }
 
-    short int nMinion1Id = sgptDataTable->pTxtMonStats[nClassId].minion1;
+    short int nMinion1Id = pMonStatsRecord->minion1;
     if (!(0 <= nMinion1Id && (int)nMinion1Id < sgptDataTable->nTxtMonStatsSize)) {
       return nClassId;
     }

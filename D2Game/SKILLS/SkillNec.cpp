@@ -372,7 +372,7 @@ void __fastcall SKILLNEC_AssignCurseAiBehavior(::SGAMEDATA * pGame, D2UnitStrc *
       return;
     }
 
-    short int sAuraTargetState = sgptDataTable->pTxtSkills[nParam].auratargetstate;
+    short int sAuraTargetState = pSkillsRecord->auratargetstate;
     if (sAuraTargetState == 0x17) {
       nFunctionId = 10;
     } else if (sAuraTargetState != 0x1b) {

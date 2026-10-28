@@ -88,7 +88,7 @@ D2MonPropTxt * __fastcall MONSTER_GetMonPropTxtRecord(int32_t nParam) {
       return nullptr;
     }
 
-    short int nMonPropIndex = sgptDataTable->pTxtMonStats[nParam].MonProp;
+    short int nMonPropIndex = pMonStatsRecord->MonProp;
     if (!(0 <= nMonPropIndex && (int)nMonPropIndex < sgptDataTable->nTxtMonPropSize)) {
       return nullptr;
     }

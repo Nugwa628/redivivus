@@ -1166,7 +1166,7 @@ BOOL __fastcall Missiles_SrvHitFunc_AreaSplashDamage(::SGAMEDATA * pGame, D2Unit
         return 1;
       }
 
-      nRadius = D2Common::Skills::D2GetSkillCalc(pOwner, sgptDataTable->pTxtSkills[eSkill].aurarangecalc, eSkill, nSkillLevel);
+      nRadius = D2Common::Skills::D2GetSkillCalc(pOwner, pSkillsRecord->aurarangecalc, eSkill, nSkillLevel);
       if (nRadius < 1) {
         nRadius = 1;
       }
@@ -4505,7 +4505,7 @@ void __fastcall Missiles_SrvDmgFunc_PhysToElementalByCalc1(::SGAMEDATA * pGame, 
       return;
     }
 
-    uint32_t nCalcExpr = sgptDataTable->pTxtMissiles[nClassId].DmgCalc1;
+    uint32_t nCalcExpr = pMissilesRecord->DmgCalc1;
     int32_t nElemDamage = -1;
     int32_t nMaxDamage = -1;
     uint32_t uConversionPct = D2Common::Units::Missile::MISSILE_EvalMissileCalc(pUnit, UNIT::SUnit::GetOwnerUnit(pGame, pUnit), nCalcExpr, nMaxDamage, nElemDamage);
@@ -4537,7 +4537,7 @@ void __fastcall Missiles_SrvDmgFunc_RecalcElementalWithClear(::SGAMEDATA * pGame
       return;
     }
 
-    uint32_t nCalcExpression = sgptDataTable->pTxtMissiles[nClassId].DmgCalc1;
+    uint32_t nCalcExpression = pMissilesRecord->DmgCalc1;
     int32_t nElemDamage = -1;
     int32_t nScaledDamage = -1;
     uint32_t nCalcResult = D2Common::Units::Missile::MISSILE_EvalMissileCalc(pUnit, UNIT::SUnit::GetOwnerUnit(pGame, pUnit), nCalcExpression, nScaledDamage, nElemDamage);
@@ -4709,11 +4709,12 @@ void __fastcall Missiles_SrvDmgFunc_ApplyProgOverlayToTarget(::SGAMEDATA * pGame
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId && pTarget)) {
+    D2MissilesTxt* pMissilesRecord = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : 0;
+    if (!pMissilesRecord || !pTarget) {
       return;
     }
 
-    short int nProgOverlay = sgptDataTable->pTxtMissiles[nClassId].ProgOverlay;
+    short int nProgOverlay = pMissilesRecord->ProgOverlay;
     if (0 >= nProgOverlay) {
       return;
     }
@@ -4747,7 +4748,7 @@ void __fastcall Missiles_SrvDmgFunc_SetStunLengthFromSkillParam(::SGAMEDATA * pG
         return;
       }
 
-      nClassId = sgptDataTable->pTxtSkills[eSkillId].Param[1];
+      nClassId = pSkillsRecord->Param[1];
     }
 
     pDamage->dwStunLen = nClassId;

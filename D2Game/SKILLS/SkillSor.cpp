@@ -87,7 +87,7 @@ int32_t __fastcall GetTxtTableParam6(int32_t nParam) {
       return 0;
     }
 
-    return sgptDataTable->pTxtSkills[nParam].Param[6];
+    return pSkillsRecord->Param[6];
 }
 
 void SKILLSOR_OnInfernoExpire(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
@@ -187,7 +187,7 @@ BOOL __fastcall INFERNO_BeginOrContinueChannel(::SGAMEDATA * pGame, D2UnitStrc *
       return 0;
     }
     if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
-      nCalcDuration = D2Common::Skills::D2GetSkillCalc(pUnit, sgptDataTable->pTxtSkills[eSkill].calc[1], eSkill, nSkillLvl2);
+      nCalcDuration = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsRecord->calc[1], eSkill, nSkillLvl2);
       if (nCalcDuration < 1) {
         nCalcDuration = 1;
       }
@@ -533,7 +533,7 @@ BOOL __fastcall Skills_SrvDoFunc_019_Inferno(::SGAMEDATA * pGame, D2UnitStrc * p
       return 0;
     }
 
-    eMissilesId eMissileId = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].srvmissile[1];
+    eMissilesId eMissileId = (eMissilesId)pSkillsRecord->srvmissile[1];
     if (!(0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
@@ -1149,7 +1149,7 @@ BOOL __fastcall Skills_SrvDoFunc_028_Meteor_Blizzard(::SGAMEDATA * pGame, D2Unit
       return 0;
     }
 
-    eMissilesId eMissileId = (eMissilesId)sgptDataTable->pTxtSkills[eSkill].srvmissile[1];
+    eMissilesId eMissileId = (eMissilesId)pSkillsRecord->srvmissile[1];
     if (!(0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }

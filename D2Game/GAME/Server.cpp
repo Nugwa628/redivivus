@@ -1764,7 +1764,7 @@ void __stdcall LeaveCriticalSectionLastGameServer() {
 
 void __stdcall GAME_SetFrameRate(int32_t nFrameRate) {
     Frames_PerSecond = nFrameRate;
-    Frames_TimeBetweenFrames = (int)(1000 / (int64_t)nFrameRate);
+    Frames_TimeBetweenFrames = (1000 / nFrameRate);
 }
 
 void __stdcall SetupStartingAct(int nAct) {
