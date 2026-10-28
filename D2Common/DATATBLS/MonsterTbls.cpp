@@ -5396,7 +5396,7 @@ void __stdcall TXT_FreeTxt_sounds() {
 // Loads and compiles the MonSeq.txt data table into sgtDataTable. Defines the six binary field descriptors (sequence, mode, frame, dir, event, end), compiles the TXT via CompileTxt, then builds the pMonSeqMonsterTbls lookup array indexed by sequence ID, setting each entry's pMonSeqTxt pointer and counting rows per sequence. Called once at startup during data-table initialization.
 void __fastcall TXT_AllocTxt_monseq(D2PoolManagerStrc * pMemory) {
     D2BinFieldInputStrc monseq[6];
-    short int nSeqId;
+    int nSeqId;
     monseq[0].szName = "sequence";
     monseq[0].eType = FIELDTYPE_NAME_I_WORD;
     monseq[0].nSize = 0;
