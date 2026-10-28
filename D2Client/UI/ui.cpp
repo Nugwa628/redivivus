@@ -1921,15 +1921,17 @@ void __stdcall UI_DrawDialogBackground() {
 void __fastcall UI_RegisterAutoMapEventHandlers(int32_t bRegister) {
     HWND hWnd;
     int32_t nHandlerCount;
-    if (!bRegister) {
+    if (bRegister) {
+      if (GFX_bShowUIFlag.Automap) {
+        nHandlerCount = 5;
+        _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gaUIFlagInitTable, nHandlerCount);
+        return;
+      }
+    } else {
       if (GFX_bShowUIFlag.Automap) {
         nHandlerCount = 5;
         _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gaUIFlagInitTable, nHandlerCount);
       }
-    } else if (GFX_bShowUIFlag.Automap) {
-      nHandlerCount = 5;
-      _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gaUIFlagInitTable, nHandlerCount);
-      return;
     }
 }
 

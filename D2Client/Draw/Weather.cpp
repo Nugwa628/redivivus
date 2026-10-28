@@ -846,7 +846,19 @@ void __stdcall WEATHER_DrawParticles() {
     do {
       int nMaxY = ScreenSizeY - 0x2f;
       if (pParticleData->nFlags) {
-        if (!nWeatherParticleCountAct5) {
+        if (nWeatherParticleCountAct5) {
+          if (nClipLeft <= pParticleData->nPosX && pParticleData->nPosX < nClipRight && -1 < pParticleData->nPosY && pParticleData->nPosY < nMaxY && (nEndX = pParticleData->nLineIndex , nEndX < 8) && -1 < nEndX) {
+            D2gfx::D2GFX::D2GFX_DrawLine(gaWeatherLineOffsets[nEndX].nStartX + pParticleData->nPosX, gaWeatherLineOffsets[nEndX].nStartY + pParticleData->nPosY, gaWeatherLineOffsets[nEndX].nEndX + pParticleData->nPosX, gaWeatherLineOffsets[nEndX].nEndY + pParticleData->nPosY, (uint32_t)pParticleData->nColor, (uint32_t)pParticleData->nAlpha);
+            byAlpha = pParticleData->nAlpha;
+            nCurX = pParticleData->nLineIndex;
+            byColor = pParticleData->nColor;
+            nYStart = gaWeatherLineOffsets[nCurX + 1].nStartY + pParticleData->nPosY;
+            nStartX = gaWeatherLineOffsets[nCurX + 1].nStartX + pParticleData->nPosX;
+            nEndX = gaWeatherLineOffsets[nCurX + 1].nEndX + pParticleData->nPosX;
+            nCurX = gaWeatherLineOffsets[nCurX + 1].nEndY + pParticleData->nPosY;
+            D2gfx::D2GFX::D2GFX_DrawLine(nStartX, nYStart, nEndX, nCurX, (uint32_t)byColor, (uint32_t)byAlpha);
+          }
+        } else {
           if (!pParticleData->nDying) {
             fVar1 = Fog::MATH_sinTable_f32_LookupOffset(gnWeatherParticleOffsetYModulo);
             nEndX = (int)(fVar1 * (float)pParticleData->nLineIndex);
@@ -876,16 +888,6 @@ void __stdcall WEATHER_DrawParticles() {
             nCurX = nYStart;
             D2gfx::D2GFX::D2GFX_DrawLine(nStartX, nYStart, nEndX, nCurX, (uint32_t)byColor, (uint32_t)byAlpha);
           }
-        } else if (nClipLeft <= pParticleData->nPosX && pParticleData->nPosX < nClipRight && -1 < pParticleData->nPosY && pParticleData->nPosY < nMaxY && (nEndX = pParticleData->nLineIndex , nEndX < 8) && -1 < nEndX) {
-          D2gfx::D2GFX::D2GFX_DrawLine(gaWeatherLineOffsets[nEndX].nStartX + pParticleData->nPosX, gaWeatherLineOffsets[nEndX].nStartY + pParticleData->nPosY, gaWeatherLineOffsets[nEndX].nEndX + pParticleData->nPosX, gaWeatherLineOffsets[nEndX].nEndY + pParticleData->nPosY, (uint32_t)pParticleData->nColor, (uint32_t)pParticleData->nAlpha);
-          byAlpha = pParticleData->nAlpha;
-          nCurX = pParticleData->nLineIndex;
-          byColor = pParticleData->nColor;
-          nYStart = gaWeatherLineOffsets[nCurX + 1].nStartY + pParticleData->nPosY;
-          nStartX = gaWeatherLineOffsets[nCurX + 1].nStartX + pParticleData->nPosX;
-          nEndX = gaWeatherLineOffsets[nCurX + 1].nEndX + pParticleData->nPosX;
-          nCurX = gaWeatherLineOffsets[nCurX + 1].nEndY + pParticleData->nPosY;
-          D2gfx::D2GFX::D2GFX_DrawLine(nStartX, nYStart, nEndX, nCurX, (uint32_t)byColor, (uint32_t)byAlpha);
         }
       }
 

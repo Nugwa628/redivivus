@@ -421,13 +421,15 @@ int32_t __stdcall GetLinkNodeIndex(D2TxtLinkStrc * pLink, char * szItemCode, uin
     Storm::Source::SSTR::SStrCopy((char*)szUpperItemCode, szItemCode, 0x20);
     SMem::SMemStringToUppercase((char*)szUpperItemCode, 0x20);
     D2TxtLinkNodeStrc* pCurNode = pLink->pTxtLinkNode;
-    if (!pLink->nRecords) {
+    if (pLink->nRecords) {
+      if (!pCurNode) {
+        ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x475);
+        exit(-1);
+      }
+    } else {
       if (!pCurNode) {
         return -1;
       }
-    } else if (!pCurNode) {
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x475);
-      exit(-1);
     }
 
     do {

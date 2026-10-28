@@ -5637,12 +5637,14 @@ void __stdcall INV_HandleStashLeftClick(D2UIMouseMsgStrc * pMsg) {
     gnInvInventoryGold = 0;
     if (gShopTradeUIState) {
       gShopTradeUIState = 0;
-      if (!gbInventoryDragInProgress) {
+      if (gbInventoryDragInProgress) {
+        if (gbTradeConfirmationPending == 1) {
+          gbTradeConfirmationPending = 0;
+        }
+      } else {
         if (gbInvStashDepositClicked && gbInvStashPageOpen) {
           gbInvStashPageOpen = 0;
         }
-      } else if (gbTradeConfirmationPending == 1) {
-        gbTradeConfirmationPending = 0;
       }
 
       gbInventoryDragInProgress = 0;
@@ -5929,7 +5931,11 @@ void __stdcall INV_HandleCubeLeftClick(D2UIMouseMsgStrc * pMsg) {
         gbTradeConfirmationPending = 0;
         return;
       }
-      if (!gbInventoryDragInProgress) {
+      if (gbInventoryDragInProgress) {
+        if (gbTradeConfirmationPending) {
+          gbTradeConfirmationPending = 0;
+        }
+      } else {
         if (!gbInvCubeTransmuteClicked) {
           if (gbInvCubeWithdrawClicked && gbInvCubePageOpen2) {
             gbInvCubePageOpen2 = 0;
@@ -5937,8 +5943,6 @@ void __stdcall INV_HandleCubeLeftClick(D2UIMouseMsgStrc * pMsg) {
         } else if (gbInvCubePageOpen) {
           gbInvCubePageOpen = 0;
         }
-      } else if (gbTradeConfirmationPending) {
-        gbTradeConfirmationPending = 0;
       }
 
       gbInventoryDragInProgress = 0;

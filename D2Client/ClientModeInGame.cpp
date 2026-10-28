@@ -651,14 +651,16 @@ void __fastcall CLIENT_SetScreenResolution(DWORD RequestedScreenModeMaybe) {
     if (RequestedScreenModeMaybe == dwScreenSize) {
       return;
     }
-    if (!RequestedScreenModeMaybe) {
+    if (RequestedScreenModeMaybe) {
+      if (RequestedScreenModeMaybe == 2) {
+        ScreenSizeX = 800;
+        ScreenSizeY = 600;
+        nScreenMode = 1;
+      }
+    } else {
       ScreenSizeX = 0x280;
       ScreenSizeY = 0x1e0;
       nScreenMode = 0;
-    } else if (RequestedScreenModeMaybe == 2) {
-      ScreenSizeX = 800;
-      ScreenSizeY = 600;
-      nScreenMode = 1;
     }
 
     WindowSizeY = ScreenSizeY - 0x28;

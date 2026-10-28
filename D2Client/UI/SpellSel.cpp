@@ -475,10 +475,12 @@ void __fastcall SPELLSEL_DrawSkillIconWithQuantity(DC6 * pDC6, short * pSkillId,
     nMouseXCheck = ui::GetMouseX();
     int nMouseX = ui::GetMouseY();
     if (nSkillIdSlot <= nMouseXCheck && nMouseXCheck <= nSkillIdSlot + 0x30 && nIconX - 0x30 <= nMouseX && nMouseX <= nIconX) {
-      if (!nGlobalPaletteShift) {
+      if (nGlobalPaletteShift) {
+        if (nGlobalPaletteShift != PALETTE_RED) {
+          nGlobalPaletteShift = (nGlobalPaletteShift != PALETTE_GOLD ? -3 : 0) + PALETTE_GOLD;
+        }
+      } else {
         nGlobalPaletteShift = 0;
-      } else if (nGlobalPaletteShift != PALETTE_RED) {
-        nGlobalPaletteShift = (nGlobalPaletteShift != PALETTE_GOLD ? -3 : 0) + PALETTE_GOLD;
       }
     }
 
@@ -567,10 +569,12 @@ void __fastcall SPELLSEL_DrawSkillIcon(short * pSkillId, int32_t nSlotIndex, int
     nMouseX = ui::GetMouseX();
     int nMouseY = ui::GetMouseY();
     if (nIconX <= nMouseX && nMouseX <= nIconX + 0x30 && nIconY - 0x30 <= nMouseY && nMouseY <= nIconY) {
-      if (!nGlobalPaletteShift) {
+      if (nGlobalPaletteShift) {
+        if (nGlobalPaletteShift != PALETTE_RED) {
+          nGlobalPaletteShift = (nGlobalPaletteShift != PALETTE_GOLD ? -3 : 0) + PALETTE_GOLD;
+        }
+      } else {
         nGlobalPaletteShift = 0;
-      } else if (nGlobalPaletteShift != PALETTE_RED) {
-        nGlobalPaletteShift = (nGlobalPaletteShift != PALETTE_GOLD ? -3 : 0) + PALETTE_GOLD;
       }
     }
 

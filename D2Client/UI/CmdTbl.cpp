@@ -1351,7 +1351,20 @@ void __fastcall CMD_ToggleKeyConfigMode(int32_t nEnable, int32_t bUpdateUIHandle
     HWND hWnd;
     int32_t nHandlerCount;
     gbKeyBindingsEnabled = nEnable;
-    if (!nEnable) {
+    if (nEnable) {
+      if (!gbKeyConfigModeActive) {
+        gbKeyConfigModeActive = 1;
+        if (bUpdateUIHandlers && gbNormalUIHandlersRegistered) {
+          nHandlerCount = 2;
+          _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagCmdTableInit, nHandlerCount);
+          gbNormalUIHandlersRegistered = 0;
+        }
+
+        nHandlerCount = 4;
+        _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
+        return;
+      }
+    } else {
       if (gbKeyConfigModeActive == 1) {
         nHandlerCount = 4;
         gbKeyConfigModeActive = 0;
@@ -1362,17 +1375,6 @@ void __fastcall CMD_ToggleKeyConfigMode(int32_t nEnable, int32_t bUpdateUIHandle
           gbNormalUIHandlersRegistered = 1;
         }
       }
-    } else if (!gbKeyConfigModeActive) {
-      gbKeyConfigModeActive = 1;
-      if (bUpdateUIHandlers && gbNormalUIHandlersRegistered) {
-        nHandlerCount = 2;
-        _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagCmdTableInit, nHandlerCount);
-        gbNormalUIHandlersRegistered = 0;
-      }
-
-      nHandlerCount = 4;
-      _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
-      return;
     }
 }
 

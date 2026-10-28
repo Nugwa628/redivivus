@@ -2011,7 +2011,12 @@ uint32_t AUTOMAP_GetUnitColor(D2UnitStrc * pUnit, uint8_t * pbColorOut) {
           }
 
           bIsNPC = DataTbls::MonsterTbls::TXT_MonStats_GetFlagsByBitOffset(eOwnership, interact);
-          if (!bIsNPC) {
+          if (bIsNPC) {
+            if (!pUnit || (eOwnership = pUnit->nClassId , eOwnership != 0x219 && eOwnership != 0x21a) && eOwnership != 0x21b) {
+              *pbColorOut = nAutoMapColorNPC;
+              return 1;
+            }
+          } else {
             eTransformType = UNIT_COUNT;
             if (!pUnit) {
               nTransformClassId = -1;
@@ -2070,9 +2075,6 @@ uint32_t AUTOMAP_GetUnitColor(D2UnitStrc * pUnit, uint8_t * pbColorOut) {
               default:
                 return 1;
             }
-          } else if (!pUnit || (eOwnership = pUnit->nClassId , eOwnership != 0x219 && eOwnership != 0x21a) && eOwnership != 0x21b) {
-            *pbColorOut = nAutoMapColorNPC;
-            return 1;
           }
 
           break;
