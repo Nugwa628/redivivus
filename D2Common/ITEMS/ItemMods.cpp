@@ -1650,14 +1650,7 @@ BOOL __stdcall ITEMMOD_CanApplyAffix(D2UnitStrc * pUnit, int32_t nParam) {
     uint32_t bTypeMatch;
     uint16_t wVersion = Items::ITEM_GetItemData_wItemVersion(pUnit);
     if (wVersion < 100) {
-      uint32_t fStackableCheck;
-      fStackableCheck = Items::IsStackable(pUnit);
-      if (fStackableCheck) {
-        return 0;
-      }
-
-      iVar1 = Items::ITEM_GetTxtItemTypes_throwable(pUnit);
-      if (iVar1) {
+      if (Items::IsStackable(pUnit) || Items::ITEM_GetTxtItemTypes_throwable(pUnit)) {
         return 0;
       }
     }
