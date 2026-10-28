@@ -132,7 +132,7 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
       pMonStats2 = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetMonStats2((int)(short int)pMonData->nClassId);
       if (pMonStats2) {
         nBytesToCompare = (uint32_t)pMonData->pad;
-        nFreeSlots = (1 << (pMonStats2->byTotalFrames & 0x1f)) - nBytesToCompare;
+        nFreeSlots = (1 << (pMonStats2->byTotalFrames)) - nBytesToCompare;
         if (nNumChampions > nFreeSlots) {
           nNumChampions = nFreeSlots;
         }
@@ -683,7 +683,7 @@ BOOL __fastcall ITEM_ApplyConsumableEffects(::SGAMEDATA * pGame, D2UnitStrc * pU
         }
 
         apply_stat_value:
-        nStatScaled = nStatValue << (pStatCost->valshift & 0x1fU);
+        nStatScaled = nStatValue << (pStatCost->valshift);
         if (0 < nStatScaled) {
           if (eUnitStat == UNITSTAT_hitpoints) {
             bHpModified = true;
@@ -820,7 +820,7 @@ BOOL __fastcall ITEM_ApplyConsumableEffectsSimple(::SGAMEDATA * pGame, D2UnitStr
           nStatValue <<= 8;
         }
 
-        nStatScaled = nStatValue << (pStatCost->valshift & 0x1fU);
+        nStatScaled = nStatValue << (pStatCost->valshift);
         if (0 < nStatScaled) {
           if (eUnitStat == UNITSTAT_hitpoints) {
             bHpModified = true;
