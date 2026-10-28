@@ -1277,7 +1277,7 @@ BOOL __fastcall SKILLS_SrvStFn02_Kick(::SGAMEDATA * pGame, D2UnitStrc * pUnit, e
     memset(&sDamage, 0, 0x70);
     sDamage.wResultFlags = 9;
     sDamage.dwHitFlags = 2;
-    sDamage.dwPhysDamage = pSkillTxt->MinDam << (pSkillTxt->HitShift & 0x1fU);
+    sDamage.dwPhysDamage = pSkillTxt->MinDam << pSkillTxt->HitShift;
     sDamage.dwHitClass = 1;
     UNIT::SUnitDmg::DAMAGE_CalculateAndApplyDamage(pGame, pUnit, pTarget, &sDamage, 0x80);
     return 1;
