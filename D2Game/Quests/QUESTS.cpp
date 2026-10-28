@@ -931,11 +931,11 @@ int32_t __stdcall QUEST_GetQuestSpecificDataPtr(::SGAMEDATA * pGame) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x7b3);
       exit(-1);
     }
-    if (pGame->pQuestControl) {
-      return pGame->pQuestControl->bPickedSet;
+    if (!pGame->pQuestControl) {
+      return 0;
     }
 
-    return 0;
+    return pGame->pQuestControl->bPickedSet;
 }
 
 uint32_t __stdcall CheckIntroductionFlagByInternalQuestId(::SGAMEDATA * pGame, eD2QuestsInternal nQuestNoInternal) {

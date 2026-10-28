@@ -927,7 +927,7 @@ void __fastcall SetFlagIf(D2ClientStrc * pClient, uint16_t nFlag, BOOL nSet) {
 }
 
 uint32_t __fastcall CLIENT_TestFileFlags(D2ClientStrc * pClient, uint16_t fFileFlag) {
-    return (uint32_t)(pClient->nCharacterStatus & fFileFlag);
+    return (uint32_t)((uint16_t)pClient->nCharacterStatus & fFileFlag);
 }
 
 void __fastcall SetClientStatus(D2ClientStrc * pClient, int32_t nQuestProgress, int32_t nDifficulty) {
