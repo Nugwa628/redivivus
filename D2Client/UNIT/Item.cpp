@@ -347,7 +347,11 @@ static void ITEM_RestoreSkillSelections(int * pSkillSaveState, D2UnitStrc * pUni
         pCurrentSkill = D2Common::Units::GetLeftSkill(pUnit);
         if (pSkillLeft != pCurrentSkill) {
           nCanUseResult = PlrSkills::PLRSKILLS_CanUseSkillCheck(pUnit, pSkillLeft);
-          if (nCanUseResult != 2 && nCanUseResult != 7) {
+          switch (nCanUseResult) {
+          case 2:
+          case 7:
+            break;
+          default:
             D2Common::Skills::SelectSkillLeft(pUnit, pSkillSaveState[4], pSkillSaveState[6]);
           }
         }
@@ -368,7 +372,9 @@ static void ITEM_RestoreSkillSelections(int * pSkillSaveState, D2UnitStrc * pUni
     }
 
     nCanUseResult = PlrSkills::PLRSKILLS_CanUseSkillCheck(pUnit, pSkillLeft);
-    if (!(nCanUseResult != 2 && nCanUseResult != 7)) {
+    switch (nCanUseResult) {
+    case 2:
+    case 7:
       return;
     }
 
@@ -832,7 +838,10 @@ void __fastcall ITEM_UpdateItemAnimation(D2UnitStrc * pUnit) {
 }
 
 void __fastcall ItemMessage(int32_t eMessageType, D2UnitStrc * pUnit, D2ServerMessageHandleStrc * pMessage, int32_t nUpdateFlag) {
-    if (eMessageType != 2) {
+    switch (eMessageType) {
+    case 2:
+      break;
+    default:
       return;
     }
 
