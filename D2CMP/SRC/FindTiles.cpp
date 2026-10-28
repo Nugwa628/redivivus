@@ -33,7 +33,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2TileLibraryHashNodeStrc) == 0x14,
 namespace D2CMP::SRC::FindTiles {
 
 // Computes a 0-127 hash byte in AL/EAX (masked and range-checked before the halt-on-overflow guard); the caller reads it as a hash-table index (nHashIdx).
-int __fastcall FINDTILE_ComputeHash(char cParam1, char cParam2, char cTileSubType) {
+int __fastcall FINDTILE_ComputeHash(int32_t cParam1, int32_t cParam2, char cTileSubType) {
     uint32_t uVar1 = (uint8_t)(cParam1 * '\x02' - cTileSubType + cParam2) & 0x8000007f;
     if (!(0x80 > (uint8_t)uVar1)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1e);

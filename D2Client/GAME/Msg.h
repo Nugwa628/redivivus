@@ -136,7 +136,7 @@ void __stdcall NET_D2GS_CLIENT_Send_0x6D_PING();
 // Takes no parameter. Sends one byte, the constant 0x69 (00477eec MOV byte ptr [EBP-1],0x69).
 // The prologue's PUSH ECX only reserves the 4-byte frame slot; ECX is not an argument.
 void __stdcall NET_D2GS_CLIENT_Send_0x69();
-void __fastcall NET_D2GS_CLIENT_Send_0x68(int16_t nGameToken, int32_t nGameHash);
+void __fastcall NET_D2GS_CLIENT_Send_0x68(int32_t nGameToken, int32_t nGameHash);
 void NET_D2GS_CLIENT_Send_0x6A();
 void __fastcall LOADING_SetProgressRatio(int32_t nParam1, int32_t nParam2);
 int __stdcall LOADING_GetProgressRatio();

@@ -198,7 +198,7 @@ void __stdcall NET_D2GS_CLIENT_Send_0x69() {
     pCallbacks->pfnSendKeepAlive();
 }
 
-void __fastcall NET_D2GS_CLIENT_Send_0x68(int16_t nGameToken, int32_t nGameHash) {
+void __fastcall NET_D2GS_CLIENT_Send_0x68(int32_t nGameToken, int32_t nGameHash) {
     D2GSPacketClt0x68 packet;
     packet.nId = 0x68;
     packet.nGameHash = nGameHash;

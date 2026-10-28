@@ -1080,7 +1080,7 @@ void __fastcall SERVER_UnitQueuePacket0xA4(D2UnitStrc * pUnit, int16_t nClassId)
 }
 
 // @sourcefile .\UNIT\SUnitMsg.cpp
-void __fastcall SERVER_SendPacket0x23(D2UnitStrc * pMemory, uint8_t byTypeId, uint16_t wCoords, uint32_t dwData) {
+void __fastcall SERVER_SendPacket0x23(D2UnitStrc * pMemory, int32_t byTypeId, uint16_t wCoords, uint32_t dwData) {
     D2PoolManagerStrc* pAllocPool = 0;
     if (pMemory) {
       pAllocPool = pMemory->pMemory;

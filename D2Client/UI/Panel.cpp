@@ -1717,7 +1717,7 @@ void __stdcall CMD_UseBeltSlot4() {
     ClickBeltRight(3, pUnit, pUnit->pInventory, wShiftKeyState & 0x8000);
 }
 
-void __fastcall PANEL_SetBeltSlotHoverFlag(uint32_t nIndex, uint8_t byValue) {
+void __fastcall PANEL_SetBeltSlotHoverFlag(uint32_t nIndex, int32_t byValue) {
     if (nIndex >= 4) {
       return;
     }
