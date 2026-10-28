@@ -209,19 +209,18 @@ int32_t __fastcall SKILLS_GetUnitStatValue(eD2UnitStat eUnitStat, int32_t nShift
         nResult = Units::GetAttackRate(pUnit);
         return nResult;
       }
-      if (nShiftCount != 1) {
-        int nStatValue;
-        if (nShiftCount != 2) {
-          nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eUnitStat, 0);
+      switch (nShiftCount) {
+        case 1:
+          nResult = Stats::StatsEx::SERVER_GetUnitStat(pUnit, eUnitStat, 0);
+          return nResult;
+        case 2:
+          nResult = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pUnit, eUnitStat, 0);
+          return nResult;
+        default: {
+          int nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eUnitStat, 0);
           return nStatValue;
         }
-
-        nResult = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pUnit, eUnitStat, 0);
-        return nResult;
       }
-
-      nResult = Stats::StatsEx::SERVER_GetUnitStat(pUnit, eUnitStat, 0);
-      return nResult;
     } else {
       return 0;
     }
