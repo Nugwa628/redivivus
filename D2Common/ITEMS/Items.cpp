@@ -639,10 +639,10 @@ int32_t __stdcall ITEM_GetItemsTxt_dwAlternateGfxIfExists(D2UnitStrc * pUnit) {
         exit(-1);
       }
 
-      if (!pItemsTxt->dwAlternateGfx) {
-        return pItemsTxt->dwCode;
+      if (pItemsTxt->dwAlternateGfx) {
+        return pItemsTxt->dwAlternateGfx;
       }
-      return pItemsTxt->dwAlternateGfx;
+      return pItemsTxt->dwCode;
     }
 }
 

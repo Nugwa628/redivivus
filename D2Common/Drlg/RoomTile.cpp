@@ -304,7 +304,7 @@ static void __stdcall DRLGROOMTILE_SetWarpTileDirection(D2DrlgTileLinkStrc * pTi
         return;
       }
 
-      nDirection = dwParam2 != 0xb ? 0x6c : 0x72;
+      nDirection = dwParam2 == 0xb ? 0x72 : 0x6c;
       if (nCurrentDir == nDirection) {
         return;
       }
