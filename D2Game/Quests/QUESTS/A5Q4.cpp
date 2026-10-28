@@ -152,6 +152,7 @@ void __stdcall Q34_SpawnNihlathakPortal(D2QuestDataStrc * pQuestData, D2UnitStrc
     eD2LevelId eLevel = LEVEL_NihlathaksTemple;
     nPosY += 5;
     nPosX += 10;
+
     BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
     if (!BVar1) {
       return;
@@ -210,6 +211,7 @@ void __fastcall Q34_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     eD2LevelId eLevel = LEVEL_NihlathaksTemple;
     nPosY += 5;
     nPosX += 10;
+
     BVar2 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eLevel, ppPortal, nClassId, BVar2);
     if (!BVar2) {
       return;
@@ -672,6 +674,7 @@ void __fastcall Q34_SpawnNihlathakPortalTimer(::SGAMEDATA * pGame, D2UnitStrc * 
     eD2LevelId eLevel = LEVEL_NihlathaksTemple;
     nPosY += 5;
     nPosX += 10;
+
     BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
     if (!BVar1) {
       return;

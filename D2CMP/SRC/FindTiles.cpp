@@ -172,12 +172,14 @@ void __fastcall FINDTILE_Register(D2TileLibraryHashStrc * pHashTable, D2TileLibr
             pHashEntry = pHashEntry->pNext;
           }
         } while (pHashEntry);
+
         if (!bFound) {
           add_to_existing_entry:
           FINDTILE_AddTileToChain(pHashEntry, pTileData);
           return;
         }
       }
+
       FINDTILE_AllocHashEntry(pTileData, pHashSlot);
       return;
     }

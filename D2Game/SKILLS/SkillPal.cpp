@@ -611,6 +611,10 @@ uint32_t __fastcall SKILLPAL_HandleFistOfHeavensLightningBolt(D2SkillCallbackCon
     uint32_t* pCopyDst = (uint32_t*)&uScratch;
     memcpy(pCopyDst, pCopySrc, 0x1c * sizeof(*pCopyDst));
 
+
+
+
+
     UNIT::SUnitDmg::DAMAGE_ApplyDamageToUnit(pGame, pCaster, pUnit, 1, &uScratch.sDamage);
     UNIT::SUnitDmg::SERVER_GetHitCalculation(pGame, pCaster, pUnit, &uScratch.sDamage);
     return 1;
@@ -1037,6 +1041,7 @@ static int32_t SKILLPAL_RollRandomDamage(D2UnitStrc * pUnit) {
       if (nMinDmg <= 0) {
         nMinDmg = 1;
       }
+
       nMaxDmg = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxdamage, 0);
       if (nMaxDmg <= 1) {
         nMaxDmg = 2;
@@ -1555,6 +1560,10 @@ uint32_t __fastcall SKILL_HitTargetApplyDamageAndShatter(D2SkillCallbackContextS
       pCopySrc = (uint32_t*)pAuraArgs[0x13];
       pCopyDst = (uint32_t*)&uScratch;
       memcpy(pCopyDst, pCopySrc, 0x1c * sizeof(*pCopyDst));
+
+
+
+
 
       UNIT::SUnitDmg::DAMAGE_ApplyDamageToUnit(pGame, pCaster, pUnit, 1, &uScratch.sDamage);
       UNIT::SUnitDmg::SERVER_GetHitCalculation(pGame, pCaster, pUnit, &uScratch.sDamage);

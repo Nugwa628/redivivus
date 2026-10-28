@@ -369,6 +369,7 @@ static BOOL __stdcall SKILL_ValidateTeleportDestination(D2UnitStrc * pUnit, int3
       nCandidateX = ptCandidatePos.x;
       if (pRoom) {
         nRangeCalc = 0x1c09;
+
         nCollisionHigh = D2Common::Collision::CheckCollision_BlockPlayer_Type(pRoom, nCandidateX, nCandidateY, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), nRangeCalc);
         if (!nCollisionHigh) {
           bHasLOS = D2Common::Skills::SKILLS_HasLineOfSight(nUnitY, nUnitX, nCandidateX, nCandidateY, pRoom, 0x804);
@@ -898,6 +899,7 @@ void __fastcall SKILL_HandleTeleportLanding(D2UnitStrc * pUnit) {
     eD2CollisionShapeType nType = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);
     iVar1 = nDestX;
     int32_t nY = nDestY;
+
     D2Common::Collision::RemoveCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), iVar1, nY, nType, nExpectedCollisionType);
     UNIT::CUnit::CLIENT_TeleportUnitToPosition(pUnit, nDestX, nDestY, 0);
     PATH_ResetCollisionOnLanding(nDestY, nDestX, pUnit);
@@ -1155,6 +1157,7 @@ void __fastcall SKILL_DrawUnitAtRotatedAngle(D2UnitStrc * pUnit, uint32_t nParam
       pXpos = &nScreenX;
       nAngle = 0x60;
       nWorldOffset = D2Common::Units::GetPrecisionY(pUnit);
+
       D2gfx::D2GFX::D2GFX_PerspecitveScalePosition(D2Common::Units::GetPrecisionX(pUnit), nWorldOffset, nAngle, (int*)pXpos, (int*)pYpos, bOrder);
       nWorldOffset = UI::Path::DRAW_GetWorldOffsetX();
       nScreenX += nWorldOffset;
@@ -1263,6 +1266,7 @@ BOOL __fastcall Skills_CltStFunc_CalcLeapDestViaPathfind(D2UnitStrc * pUnit, eD2
         nType = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);
         nSkillFlags = nSrcX;
         nDestY = nSrcY;
+
         D2Common::Collision::AddCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nSkillFlags, nDestY, nType, eCollisionFlag);
         D2Common::Skills::SKILL_SetFlags(pSkill, 1);
         D2Common::Skills::SKILL_SetParam1(pSkill, nSrcX);

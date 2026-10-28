@@ -324,6 +324,7 @@ void __stdcall CHAT_InitIME() {
           hWnd = D2gfx::D2GFX::GetHwnd();
           /* HWND param_1 for ImmSimulateHotKey */ ImmSimulateHotKey(hWnd, dwHotKeyId);
         }
+
         /* BOOL param_2 for ImmSetOpenStatus */ /* HIMC param_1 for ImmSetOpenStatus */ ImmSetOpenStatus(hIMC, 1);
         gnIMEInputMode = 4;
         break;
@@ -373,6 +374,7 @@ void __stdcall CHAT_ShutdownIME() {
     }
 
     nEventCount = 7;
+
     _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitChatPanel, nEventCount);
     hWnd = D2gfx::D2GFX::GetHwnd();
     HIMC hIMC = ImmGetContext(hWnd);
@@ -441,6 +443,7 @@ static void CHAT_DrawCursor(int32_t nPosY, int32_t nPosX, int32_t nColor) {
     if (gnIMECursorVisible == 1) {
       uint16_t* wszCursor;
       bMultiLineCenter = 0;
+
       D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0xd4c), nPosX + 0x83, nPosY, nColor, bMultiLineCenter);
     }
 

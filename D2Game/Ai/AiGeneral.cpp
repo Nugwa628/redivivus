@@ -601,6 +601,7 @@ void __fastcall CallForEachMinion(D2UnitStrc * pUnit, void * pContext, void * pA
     if (!(pAi && pAi->pGame)) {
       return;
     }
+
     pOwnerUnit = UNIT::SUnit::FindUnitFromTable(pAi->pGame, pAi->eOwnerTypeEx, pAi->nOwnerGUIDEx);
     if (!(pOwnerUnit && pOwnerUnit->eUnitType == UNIT_MONSTER)) {
       return;
@@ -610,6 +611,7 @@ void __fastcall CallForEachMinion(D2UnitStrc * pUnit, void * pContext, void * pA
     } else {
       pOwnerAi = pOwnerUnit->pUnitData.pUnitDataMonster->pAiGeneral;
     }
+
     pGame = pOwnerAi->pGame;
     pMinionNode = pOwnerAi->pMinionList;
     while (pMinionNode) {
@@ -620,6 +622,7 @@ void __fastcall CallForEachMinion(D2UnitStrc * pUnit, void * pContext, void * pA
         (*pfnProc)(pMinion, pContext, pArgument);
       }
     }
+
     return;
 }
 

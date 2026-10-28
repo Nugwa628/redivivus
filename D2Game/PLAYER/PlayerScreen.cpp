@@ -129,6 +129,7 @@ void __fastcall PARTYSCREEN_TogglePlayerSquelch(::SGAMEDATA * pGame, D2UnitStrc 
       bIsConnected = pUnit->nUnitGUID;
     }
 
+
     SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pTarget, ".\\PLAYER\\PartyScreen.cpp", 0x65), bIsConnected, bParam);
 }
 
@@ -209,6 +210,7 @@ void __fastcall AssignPlayerToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uin
         }
 
         bEventType = '\a';
+
         SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0xb7), pUnitGid, bEventType);
       }
     }
@@ -258,6 +260,7 @@ void __fastcall PARTYSCREEN_AcceptPartyInvite(::SGAMEDATA * pGame, D2UnitStrc * 
     }
 
     uint8_t bParam = '\b';
+
     SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0xe9), nPartyId, bParam);
     __frame0.nInviteeGUID = (uint32_t)(uint16_t)(uintptr_t)pInvitee;
     __frame0.pIterArg0 = pInviteeCopy;
@@ -291,6 +294,7 @@ void __fastcall PARTYSCREEN_SetMutualPlayerRelationship(int32_t nParam, D2UnitSt
       }
 
       bEventType = '\x06';
+
       SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pInvitee, ".\\PLAYER\\PartyScreen.cpp", 0x112), nInviterGUID, bEventType);
     }
 
@@ -315,6 +319,7 @@ void __fastcall PARTYSCREEN_SendPartyInvite(int32_t nParam, D2UnitStrc * pUnit, 
       }
 
       bEventType = '\x05';
+
       SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pTarget, ".\\PLAYER\\PartyScreen.cpp", 0x132), nInviterGUID, bEventType);
     }
 
@@ -335,6 +340,7 @@ void __fastcall PARTY_SendPlayerLeftEvent(uint32_t dwUnused, D2UnitStrc * pUnit,
     }
 
     uint8_t bEventType = '\t';
+
     SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x143), nOtherGUID, bEventType);
 }
 
@@ -379,6 +385,7 @@ void __fastcall PARTYSCREEN_SetHostileForPlayer(::SGAMEDATA * pGame, D2UnitStrc 
     }
 
     uint8_t bEventType = '\x03';
+
     SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x187), nTargetGUID, bEventType);
 }
 
@@ -398,6 +405,7 @@ void __stdcall PARTYSCREEN_SetHostileWithParty(::SGAMEDATA * pGame, D2UnitStrc *
       }
 
       bEventType = '\x03';
+
       SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x19c), nUnitGUID, bEventType);
       return;
     }

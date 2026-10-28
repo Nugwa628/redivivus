@@ -395,6 +395,7 @@ void __stdcall SKILLS_FreeSkillList(D2UnitStrc * pUnit) {
       nFlags = 0;
       nLine = 0x505;
       szFile = ".\\SKILLS\\Skills.cpp";
+
       Fog::Memory::FreeServerMemory(D2Client::UNIT::CUnitEvent::GetMemPool(pUnit), pMemoryToFree_00, szFile, nLine, nFlags);
       pMemoryToFree_00 = pNextSkill;
     }
@@ -1396,7 +1397,7 @@ static int32_t __stdcall SKILLS_CalculateBaseDamageFromStats(int32_t nType, D2Un
 }
 
 // Applies an Sorceress elemental mastery passive bonus to a base damage value. Given an element type (fire/lightning/cold/freeze/poison), reads the corresponding passive mastery stat from pUnit and scales nBaseDamage by that percentage via D2ApplyPercent. Returns the adjusted damage, or 0 if no mastery bonus or unrecognized element type.
-static int32_t SKILLS_ApplyElementalMasteryBonus(eD2ElementalDamageTypeDWORD eElementType, int32_t nBaseDamage, D2UnitStrc * pUnit) {
+int32_t SKILLS_ApplyElementalMasteryBonus(eD2ElementalDamageTypeDWORD eElementType, int32_t nBaseDamage, D2UnitStrc * pUnit) {
     int nMasteryBonus;
     int32_t nAdjustedDamage;
     switch (eElementType) {
@@ -1637,7 +1638,9 @@ int __stdcall SKILLS_ValidateAnimModeForMonster(int32_t eAnimMode, int32_t nMonI
         case 0xf:
           uAnimFlag = 2; break;
         case 9:
+
         case 10:
+
         case 0xb:
           uAnimFlag = 8;
         break;
@@ -1962,12 +1965,16 @@ int32_t __stdcall SKILL_GetThrownWeaponBonus(D2UnitStrc * pUnit, D2UnitStrc * pU
     _bIsThrowable = Stats::StatsEx::STATLIST_GetItemStatBonusValues(pUnit, uStatOrResult, aBonusEntries, 0x20);
     int nBestThrowBonus = 0;
     for (int nIdx = 0; nIdx < _bIsThrowable; nIdx++) {
+
+
         uStatOrResult = ITEMS::Items::ITEMS_IsA(pUnit1, (eD2ItemTypes)(uint16_t)aBonusEntries[nIdx].wSubIndex);
         if (uStatOrResult && aBonusEntries[nIdx].nStatValue > nBestThrowBonus) {
           nBestThrowBonus = aBonusEntries[nIdx].nStatValue;
         }
 
+
     }
+
     if (!pUnit2) {
       return nBestThrowBonus;
     }
@@ -2248,12 +2255,14 @@ uint32_t __stdcall SKILL_FindTeleportPosition(D2UnitStrc * pUnit, D2UnitStrc * p
       exit(-1);
     }
 
+
     int32_t iVar1 = Collision::CheckCollision_BlockPlayer_Type((D2RoomStrc*)pUnit, nX, nDestY, PATH::DynamicPath::GetUnitWidth(pCaster), 0x1c09);
     if (iVar1) {
       _bInMeleeRange = 0;
       eCollisionFlag = 0x1c09;
       ptFreeCoord.x = ptFreeCoord.y;
       ptFreeCoord.y = nRawTargetY;
+
       pUnit = (D2UnitStrc*)Collision::GetFreeCoordinates_WithNeighboorRooms((D2RoomStrc*)pUnit, &ptFreeCoord, Units::GetUnitSizeX(pCaster), eCollisionFlag, _bInMeleeRange);
       nDestY = ptFreeCoord.y;
       nX = ptFreeCoord.x;
@@ -2526,12 +2535,14 @@ void __stdcall SKILL_CalcKickDamage(D2UnitStrc * pUnit, int * pnParam1, int * pn
         nStrBonus = ITEMS::Items::ITEM_GetItemsTxt_wStrBonus(pOffHandWeapon);
         if (nStrBonus) {
           bIsWeaponType = 100;
+
           nTotalDamageBonus = D2Client::Stats::D2ApplyPercent(Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_strength, 0), (int)nStrBonus, bIsWeaponType);
         }
 
         nDexBonus = ITEMS::Items::ITEM_GetItemsTxt_wDexBonus(pOffHandWeapon);
         if (nDexBonus) {
           bIsWeaponType = 100;
+
           nDexDamBonus = D2Client::Stats::D2ApplyPercent(Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_dexterity, 0), (int)nDexBonus, bIsWeaponType);
           nTotalDamageBonus += nDexDamBonus;
         }

@@ -97,6 +97,7 @@ static void InitFontCache(int32_t nFontIndex) {
     int32_t nAllocLine = 0xb5;
     char* szAllocFile = ".\\Src\\D2WinFont.cpp";
     uint32_t* pOutFileSize = 0;
+
     D2FontTableHeaderStrc* pFontTable = (D2FontTableHeaderStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szFontTablePath, pOutFileSize, szAllocFile, nAllocLine);
     gaFontCache[nFontIndex].pFontTable = pFontTable;
     gaFontCache[nFontIndex].pFontTableHeader = pFontTable;
@@ -660,6 +661,7 @@ void * __fastcall D2WINFONT_DrawWideStringRightToLeft(uint16_t * wszText, int32_
         if (nPositionX > nXStart) {
           D2gfx::D2GFX::D2GFX_DrawShiftedImage(&sGfxData, nPositionX, nY, -1, DRAW_SOLID, eGlobalPalette);
         }
+
         nPositionX += (uint32_t)*(uint8_t*)((uintptr_t)&pGlyphEntry->nVersion + 3);
         nCharIdx++;
       } else {

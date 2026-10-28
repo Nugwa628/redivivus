@@ -1649,6 +1649,7 @@ void __stdcall AllocPlayerData(D2UnitStrc * pUnit) {
         *(D2WaypointStrc**)(pUnit->pUnitData.pUnitDataPlayer->szCharName + iActIdx) = (D2WaypointStrc*)pWaypoint;
         iActIdx += 4;
       } while (iActIdx < 0x28);
+
       nLine = DUNGEON::Dungeon::GetPortalFlagFromLevelId(LEVEL_RogueEncampment);
       pUnit->pUnitData.pUnitDataPlayer->nPortalFlags = nLine;
       pUnit->pUnitData.pUnitDataPlayer->dwTradeTick = 0;
@@ -1675,6 +1676,7 @@ void __stdcall FreePlayerData(D2PoolManagerStrc * pMemory, D2UnitStrc * pUnit) {
         Waypoints::Free(pMemory, *(D2WaypointStrc**)(pUnit->pUnitData.pUnitDataPlayer->szCharName + iActIdx));
         iActIdx += 4;
       } while (iActIdx < 0x28);
+
       Txt::Cube::FIELDTBLS_FreePlayerData_STUB();
       Fog::Memory::FreeServerMemory(pMemory, pUnit->pUnitData.pUnitDataPlayer, ".\\UNITS\\Units.cpp", 0xf76, 0);
       pUnit->pUnitData.pUnitDataPlayer = 0;
@@ -2185,6 +2187,7 @@ BOOL __stdcall TestCollisionWithUnit(D2UnitStrc * pUnit, D2UnitStrc * pUnit2, in
       if (!pRoom) {
         return 0;
       }
+
       nX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
       nY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
       nSize2 = GetUnitSizeX(pUnit);
@@ -2226,6 +2229,7 @@ BOOL __stdcall TestCollisionBetweenInteractingUnits(D2UnitStrc * pUnit, D2UnitSt
     }
 
     int32_t nSize1 = GetUnitSizeX(pUnitA);
+
     BOOL bCollides = D2Common::Units::TestCollision(nX1, nSize1, nX2, nY, GetUnitSizeX(pUnitB), nY2, pRoom, eCollisionFlag);
     if ((D2UnitStrc*)nUnit) {
       PATH::DynamicPath::PATH_AddUnitCollision(pUnitB);
@@ -2908,6 +2912,7 @@ int32_t __stdcall PATH_GetCurrentDirection(D2UnitStrc * pUnit) {
     }
 
     nCurPos = PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
+
     int nDirection = GetDirectionToCoords(pUnit, PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), nCurPos);
     return nDirection;
 }
@@ -3624,6 +3629,7 @@ void __stdcall InitAnimMode(D2UnitStrc * pUnitArg) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x951);
       exit(-1);
     }
+
     short int wAnimSpeed;
     pUnitArg->nActionFrame = 0;
     nWeaponAnimClass = GetWeaponAnimClass(pUnitArg);
@@ -3644,6 +3650,7 @@ void __stdcall InitAnimMode(D2UnitStrc * pUnitArg) {
         pUnit_00->nFrameCount = pUnit_00->pAnimData->nFrames << 8;
         return;
       }
+
       InitializeSequence(pUnit_00);
       UpdateAnimSpeed(pUnit_00, ".\\UNITS\\Units.cpp", 0x967);
       return;
@@ -3657,6 +3664,7 @@ void __stdcall InitAnimMode(D2UnitStrc * pUnitArg) {
         pUnit_00->nFrameCount = pUnit_00->pAnimData->nFrames << 8;
         return;
       }
+
       InitializeSequence(pUnit_00);
       UpdateAnimSpeed(pUnit_00, ".\\UNITS\\Units.cpp", 0x97e);
       return;
@@ -3673,9 +3681,11 @@ void __stdcall InitAnimMode(D2UnitStrc * pUnitArg) {
             if (0x7fff <= (int)nRandomSpeed) {
               nRandomSpeed = 0x7fff;
             }
+
             pUnit_00->nAnimSpeed = (short int)nRandomSpeed;
             return;
           }
+
           pUnit_00->nAnimSpeed = wFrameDelta;
           return;
         }
@@ -3709,6 +3719,7 @@ void __stdcall InitAnimMode(D2UnitStrc * pUnitArg) {
       } else {
         wAnimSpeed = (short int)((int)(nAnimRate + ((int)nAnimRate >> 0x1f & 0x3ffU)) >> 10 << 8);
       }
+
       pUnit_00->nAnimSpeed = wAnimSpeed;
       pUnit_00->nFrameCount = (uint32_t)(uint8_t)pMissileTxt->AnimLen << 8;
       break;

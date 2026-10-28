@@ -754,6 +754,7 @@ static void __stdcall MINIPANEL_ShowTooltip(int32_t nX, int32_t nY, int32_t nBut
       pLocaleStr += 2;
     }
 
+
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszTooltip, D2Lang::StrTable::strtable::GetLocaleString(nStringIndex));
     if (bHasCommand && nCommandId != 0x39) {
       uint16_t* pFormatStr;
@@ -762,6 +763,7 @@ static void __stdcall MINIPANEL_ShowTooltip(int32_t nX, int32_t nY, int32_t nBut
       if (nStringIndex != 0xffff) {
         memset(wszKeyText, 0, 0x3c);
         pLocaleStr = CmdTbl::CMD_GetKeyNameForCommand(nCommandId, 1);
+
         D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyText, D2Lang::StrTable::strtable::GetLocaleString(0x1052), (uint16_t*)pLocaleStr);
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, wszKeyText);
       }
@@ -770,6 +772,7 @@ static void __stdcall MINIPANEL_ShowTooltip(int32_t nX, int32_t nY, int32_t nBut
       if (nStringIndex != 0xffff) {
         memset(wszKeyText, 0, 0x3c);
         pLocaleStr = CmdTbl::CMD_GetKeyNameForCommand(nCommandId, 0);
+
         D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyText, D2Lang::StrTable::strtable::GetLocaleString(0x1052), (uint16_t*)pLocaleStr);
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, wszKeyText);
       }

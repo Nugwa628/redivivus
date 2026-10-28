@@ -350,6 +350,7 @@ BOOL __fastcall Skills_CltStFunc_SpawnCltMissileAtSelf(D2UnitStrc * pUnit, eD2Sk
     }
 
     int32_t nY = Units::GetYPosFromDynamicPathUnit(pUnit);
+
     UNIT::Missile::CastAttack(pUnit, nMissileId, Units::GetXPosFromDynamicPathUnit(pUnit), nY, eSkill, nSkillLvl);
     return 1;
 }
@@ -366,6 +367,7 @@ BOOL __fastcall Skills_CltDoFunc_EMon_CastAttackMissileB(D2UnitStrc * pUnit, eD2
 
     int32_t nForcedLvl1 = 1;
     int32_t nY = Units::GetYPosFromDynamicPathUnit(pUnit);
+
     D2UnitStrc* pMissileUnit = UNIT::Missile::CastAttack(pUnit, nMissileId, Units::GetXPosFromDynamicPathUnit(pUnit), nY, eSkill, nForcedLvl1);
     return (uint32_t)(pMissileUnit != 0);
 }
@@ -492,6 +494,7 @@ BOOL __fastcall Skills_CltStFunc_SetSrvDoFlagAndReviveGfx(D2UnitStrc * pUnit, eD
     if (!(0 <= (int)eMissileBId && (int)eMissileBId < sgptDataTable->nTxtMissilesSize)) {
       return 1;
     }
+
 
     SKILLSEMON_CltSetReviveGfx(eMissileBId, eSkill, nSkillLvl, pUnit, D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxt->cltcalc[0], eSkill, nSkillLvl));
     return 1;
@@ -910,11 +913,13 @@ BOOL __fastcall Skills_CltDoFunc_EMon_VineAttack(D2UnitStrc * pUnit, eD2Skills e
         fpSkillValidCheck = (fpMissileSrvDoFuncData)SKILLSCLT_CheckSkillIsValid;
         nHitCount = Units::GetYPosFromDynamicPathUnit(pUnit);
         nTargetX = Units::GetXPosFromDynamicPathUnit(pUnit);
+
         pHitUnit = D2Common::Collision::CallCollisionFunction(D2Common::Units::UNITS_GetRoom(pUnit), nTargetX, nHitCount, fpSkillValidCheck, pNullGameArg, nTargetY);
         if (pHitUnit) {
           UNIT::Missile::MISSILE_ClientHitExplode(pHitUnit, nullptr, 0);
         }
       }
+
       nMissileId = (eMissilesId)pSkillTxt->cltmissiled;
     }
     if (!(bVineFireCondition && 0 < (int)nMissileId)) {
@@ -922,7 +927,9 @@ BOOL __fastcall Skills_CltDoFunc_EMon_VineAttack(D2UnitStrc * pUnit, eD2Skills e
     }
 
     D2Common::Skills::SKILL_SetParam1(pVineSkill, 0);
+
     D2Common::Skills::SKILL_SetParam2(pVineSkill, Units::GetXPosFromDynamicPathUnit(pUnit));
+
     D2Common::Skills::SKILL_SetParam3(pVineSkill, Units::GetYPosFromDynamicPathUnit(pUnit));
     SKILLSEMON_CltCreateMissileAtUnit(nMissileId, eVineSkillId, nVineSkillLvl, 1, pUnit);
     return 1;

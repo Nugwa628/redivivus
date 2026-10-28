@@ -275,6 +275,7 @@ BOOL __fastcall SKILLMONST_SrvStFn44_MaggotUp(::SGAMEDATA * pGame, D2UnitStrc * 
 
     eCollisionFlag = 0x1000;
     nType = COLLISION_PATTERN_SMALL_UNIT_PRESENCE;
+
     D2Common::Collision::AddCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nNewPosX, nNewPosY, nType, eCollisionFlag);
     return 1;
 }
@@ -307,6 +308,7 @@ BOOL __fastcall SKILLMONST_SrvStFn45_MaggotDown(::SGAMEDATA * pGame, D2UnitStrc 
 
     int32_t eCollisionFlag = 0x1000;
     eD2CollisionShapeType nCollisionSize = COLLISION_PATTERN_SMALL_NO_PRESENCE;
+
     D2Common::Collision::RemoveCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nX, nY, nCollisionSize, eCollisionFlag);
     return 1;
 }
@@ -572,6 +574,7 @@ BOOL __fastcall SKILLMONST_SrvStFn47_Jump(::SGAMEDATA * pGame, D2UnitStrc * pUni
 
     D2Common::Skills::SKILL_SetParam4(pSkill, nParam4);
     nCalcTmp = 0x100;
+
     D2Common::Collision::AddCollision_Type(pRoom, nLeapX, nLeapY, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), nCalcTmp);
     UNIT::SUnit::SetUninterruptableState(pUnit, 1);
     D2Common::Skills::SKILL_SetParam1(pSkill, nLeapX);
@@ -607,6 +610,7 @@ BOOL __fastcall Skills_SrvDoFunc_089_ChargeLeapAttack(::SGAMEDATA * pGame, D2Uni
     if (pUnit->nActionFrame == 2) {
       pUnit->nActionFrame = 0;
       nTargetGuid = D2Common::Skills::SKILL_GetParam4(pSkill);
+
       pTargetUnit = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Skills::SKILL_GetParam3(pSkill), nTargetGuid);
       if (pTargetUnit) {
         UNIT::SUnitDmg::DAMAGE_ProcessCombatQueueEntry(pGame, pUnit, pTargetUnit, 0);
@@ -638,6 +642,7 @@ BOOL __fastcall Skills_SrvDoFunc_089_ChargeLeapAttack(::SGAMEDATA * pGame, D2Uni
         UNIT::SUnit::SetUninterruptableState(pUnit, 0);
         nLandY = 0x100;
         nType = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);
+
         D2Common::Collision::RemoveCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nMonBaseId, nLandX, nType, nLandY);
         D2Common::PATH::DynamicPath::PATH_ChangeCollisionType(pDynamicPath, 0x100);
         D2Common::PATH::DynamicPath::PATH_SetCollisionPattern(pDynamicPath, 0x3c01);
@@ -649,6 +654,7 @@ BOOL __fastcall Skills_SrvDoFunc_089_ChargeLeapAttack(::SGAMEDATA * pGame, D2Uni
         }
 
         nTargetGuid = D2Common::Skills::SKILL_GetParam4(pSkill);
+
         pTargetUnit = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Skills::SKILL_GetParam3(pSkill), nTargetGuid);
         if (!pTargetUnit) {
           return 1;
@@ -677,6 +683,7 @@ BOOL __fastcall Skills_SrvDoFunc_089_ChargeLeapAttack(::SGAMEDATA * pGame, D2Uni
         D2Common::PATH::DynamicPath::PATH_SetPathType(pDynamicPath, 9);
         nLandX = 0x282;
         pVelTable = ".\\SKILLS\\SkillMonst.cpp";
+
         D2Common::PATH::DynamicPath::SetVelocities(pDynamicPath, SkillsServer::SKILLS_GetUnitWalkVelocity(pUnit), pVelTable, nLandX);
         D2Common::PATH::DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
         return 1;
@@ -1333,6 +1340,7 @@ void __fastcall SKILLMONST_ResurrectUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit
         }
 
         iVar1 = 0x100;
+
         D2Common::Collision::AddCollision_Type(pRoom, nMaxHp, nPosY, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), iVar1);
         return;
       }
@@ -1359,6 +1367,7 @@ void __fastcall SKILLMONST_ResurrectUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     }
 
     iVar1 = 0x80;
+
     D2Common::Collision::AddCollision_Type(pRoom, nX, nMaxHp, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), iVar1);
 }
 
@@ -1641,6 +1650,7 @@ BOOL __fastcall Skills_SrvDoFunc_101_FireDirectionalMissile(::SGAMEDATA * pGame,
       int32_t nTargetX;
       nFaceDir = 0;
       nSrcOrDelta = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00);
+
       D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), nSrcOrDelta, nFaceDir);
       nSrcOrDelta = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00);
       nTargetX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
@@ -1918,6 +1928,7 @@ BOOL __fastcall Skills_SrvDoFunc_104_SpawnPredefinedAtTarget(::SGAMEDATA * pGame
         return 0;
       }
 
+
       pUnit_00 = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_OBJECT, D2Common::PATH::DynamicPath::GetXSP1(pDynamicPath));
       if (!pUnit_00) {
         return 0;
@@ -1936,6 +1947,7 @@ BOOL __fastcall Skills_SrvDoFunc_104_SpawnPredefinedAtTarget(::SGAMEDATA * pGame
 
     int32_t dwSpawnY = 0;
     int32_t dwSpawnX = 0;
+
     Monster::Create::MONSTER_SpawnPredefinedAtUnit(pGame, D2Common::Units::UNITS_GetRoom(pUnit_00), dwSpawnX, dwSpawnY, pUnit_00, nMonClassId, (uint16_t)bIsTown);
     return 1;
 }
@@ -2149,6 +2161,7 @@ BOOL __fastcall Skills_SrvDoFunc_107_LeechMeleeMultiHit(::SGAMEDATA * pGame, D2U
     }
 
     uint32_t dwFindGUID = D2Common::Skills::SKILL_GetParam2(pSkill);
+
     D2UnitStrc* pTarget = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Skills::SKILL_GetParam3(pSkill), dwFindGUID);
     if (!pTarget) {
       return 0;
@@ -2234,6 +2247,7 @@ BOOL __fastcall Skills_SrvDoFunc_108_DevourMinionForHP(::SGAMEDATA * pGame, D2Un
     int32_t nTargetMaxHp = D2Common::Stats::StatsEx::GetTxtMaxHp(pTarget);
     int nMaxHp = pTarget->nUnitGUID;
     eD2UnitType eUnitType = UNIT_MONSTER;
+
     D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pTarget), eUnitType, nMaxHp);
     UNIT::SUnit::FreeServerUnit(pGame, pTarget);
     int nCurHp = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hitpoints, 0);
@@ -2243,6 +2257,7 @@ BOOL __fastcall Skills_SrvDoFunc_108_DevourMinionForHP(::SGAMEDATA * pGame, D2Un
     }
 
     nMercOrPct = 100;
+
     nTargetMaxHp = D2Client::Stats::D2ApplyPercent(nTargetMaxHp, D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxt[eSkill].calc[0], eSkill, nSkillLvl), nMercOrPct);
     nCurHp += nTargetMaxHp;
     nNewHpClamped = nCurHp;
@@ -2281,6 +2296,7 @@ uint32_t __fastcall SKILLPAL_GetHolyBoltTargetCount(D2UnitStrc * pUnit) {
           if (nEventFrame) {
             return nEventFrame;
           }
+
           nFrameIdx++;
         } while (nFrameIdx < nTotalSeqFrames >> 8);
       }
@@ -2644,6 +2660,7 @@ void __fastcall SKILLMONST_SpiderLayTrail(::SGAMEDATA * pGame, D2UnitStrc * pUni
         abyDirLookup[4] = abyDirLookup[nPathFlags & 0xff];
         D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(abyDirLookup[nPathFlags & 0xff], &nOffsetX, &nOffsetY);
         bApplyBonus = 1;
+
         *(uint32_t*)((char*)&abyDirLookup + 4) = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_SpiderLay, pUnit), bApplyBonus);
         eUnitType = pUnit->eUnitType;
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
@@ -2665,6 +2682,7 @@ void __fastcall SKILLMONST_SpiderLayTrail(::SGAMEDATA * pGame, D2UnitStrc * pUni
 
         nPosX += nOffsetX;
         nPosY += nOffsetY;
+
         D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY);
         memset(&sSkillArg, 0, 0x5c);
         sSkillArg.nUnitX = nPosX + nOffsetX * 2;

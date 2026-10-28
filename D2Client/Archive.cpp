@@ -311,6 +311,7 @@ void ARCHIVE_WriteMemoryCheckReport() {
             break;
           }
         } while (sHeapDetails.dwUnknown124 < (uintptr_t)ppWalk[0x4b]);
+
         ARCHIVE_LinkNode((int**)pNewRec, 1, (int**)ppInsertAfter, &__frame0.pListTail);
       } else {
         pNextNode = *pNewRec;

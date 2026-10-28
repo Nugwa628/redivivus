@@ -185,6 +185,7 @@ int __stdcall NPCMENU_ShowMercResurrectDialog() {
         return 0;
       }
 
+
       nRosterPetGUID = GAME::RosterPets::CountRostersForUnitFilterBySkill(UNIT::Player::GetPlayerUnit_UI(), 7);
       if (!nRosterPetGUID && nMercNameId == -1) {
         NPCMENU_HireMerc();

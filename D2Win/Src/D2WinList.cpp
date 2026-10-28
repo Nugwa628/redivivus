@@ -252,9 +252,11 @@ BOOL __fastcall Draw(::D2WinList * pList) {
         if (pCurrentEntry) {
           pCurrentEntry = pCurrentEntry->pNext;
         }
+
         nTextWidth--;
       } while (nTextWidth);
     }
+
     memset(&sGfxData, 0, 0x48);
     sGfxData.nFrameNumber = pList->sEntriesControl.nCursorFrame;
     sGfxData.nDirection = 0;
@@ -268,6 +270,7 @@ BOOL __fastcall Draw(::D2WinList * pList) {
         if (pList->sEntriesControl.nFontId == 2) {
           pYBase = pY + 9;
         }
+
         nSkipCount = pList->sControl.dwPosX;
         nScrollOffset = nTextWidth - pList->sEntriesControl.nMaxTextWidth >> 2;
         D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, pList->sControl.dwPosX - 0x19 + nScrollOffset, pYBase, -1, DRAW_SOLID, nullptr);
@@ -288,6 +291,7 @@ BOOL __fastcall Draw(::D2WinList * pList) {
     if (8 <= pList->sEntriesControl.nCursorFrame) {
       pList->sEntriesControl.nCursorFrame = 0;
     }
+
     D2WinFont::SetAndReturnLastFont(1);
     return 1;
 }

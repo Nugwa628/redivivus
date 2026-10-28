@@ -649,6 +649,7 @@ static void __stdcall GFX_FreeAllGfxInfoEntries(int32_t nComponentCount, D2UnitS
         Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\ENGINE\\Gfx.cpp", 0x66d, 0);
         pMemoryToFree = pNext;
       }
+
       pGfxInfo->pGfxInfoUnk = 0;
       return;
     } else {
@@ -744,6 +745,7 @@ void __fastcall GFX_FreeNonBaseGfxInfoEntries(D2UnitStrc * pUnit) {
       if (!pMemoryToFree) {
         break;
       }
+
       pNext = pMemoryToFree->pNext;
       if (pMemoryToFree->nAnimMode && pMemoryToFree->nAnimMode != 0x11) {
         Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\ENGINE\\Gfx.cpp", 0x847, 0);

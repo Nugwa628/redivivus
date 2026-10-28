@@ -694,6 +694,7 @@ void * __stdcall CompileTxt(D2PoolManagerStrc * pMemory, char * szTableName, D2B
     if (nTxtTableSize) {
       *nTxtTableSize = (int)pArchiveTxt;
     }
+
     return pParsedData;
 }
 
@@ -734,6 +735,11 @@ void __fastcall TXT_CharStats_DefineWideStringClass(D2CharStatsTxt * pTxtCharSta
 
 
     for (int i = 0; i < 0x200; i++) wszTmpBuf[i] = 0;
+
+
+
+
+
     for (int i = 16; i < 32; i++) wszShortBuf[i] = 0;
     for (int i = 0; i < 16; i++) wszShortBuf[i] = 0;
     D2Lang::UTF8_ConvertToWideChar(wszShortBuf + 0x10, "<", 0x10);
@@ -763,7 +769,7 @@ void __fastcall TXT_CharStats_DefineWideStringClass(D2CharStatsTxt * pTxtCharSta
 
 // One-time startup loader for the many small single-column code/name lookup tables in DataTbls. Always compiles compcode. If sgtDataTable.bUseTxt is set, also creates a TxtLink struct and compiles each of: playerclass, bodylocs, storepage, elemtypes, hitclass, colors, hiredesc, monmode, plrmode, monai, monplace, skillcalc, misscalc, skills, events. Each is a CODE4 or NAME_I_WORD keyed table whose compiled pointer + link are stored into the corresponding sgtDataTable.pTxt*/pTxt*Link/nTxt*Size globals. Allocates from pMemory. Pure init side-effects, no return.
 // @sourcefile .\DATATBLS\DataTbls.cpp
-static void TXT_AllocTxt_VariousSmallTables(D2PoolManagerStrc * pMemory) {
+void TXT_AllocTxt_VariousSmallTables(D2PoolManagerStrc * pMemory) {
     D2BinFieldInputStrc events[2];
     D2BinFieldInputStrc colors[2];
     D2BinFieldInputStrc skills[2];
@@ -3565,6 +3571,7 @@ void __stdcall TXT_AllocTxt_skill_skilldesc(D2PoolManagerStrc * pMemory) {
       if (sgtDataTable.nSkillCountMaxPerClass < sgtDataTable.pSkillsPerClassCounter->Assassin) {
         sgtDataTable.nSkillCountMaxPerClass = sgtDataTable.pSkillsPerClassCounter->Assassin;
       }
+
       sgtDataTable.pSkillsPerClassStrc = (int16_t*)D2_ALLOC_POOL(nullptr, sgtDataTable.nSkillCountMaxPerClass * 0xe);
       memset(sgtDataTable.pSkillsPerClassStrc, 0, sgtDataTable.nSkillCountMaxPerClass * 0xe);
       sgtDataTable.pSkillsPerClassCounter->Amazon = 0;
@@ -3591,10 +3598,12 @@ void __stdcall TXT_AllocTxt_skill_skilldesc(D2PoolManagerStrc * pMemory) {
             sgtDataTable.pPassiveSkillsPerClassStrc[sgtDataTable.nPassiveSkillsCount].nSkillId = (int16_t)nCounter;
             sgtDataTable.nPassiveSkillsCount++;
           }
+
           pMemory2 = &((D2PoolManagerStrc*)pMemory2)->pPools[0xb].pSync.OwningThread;
           nCounter++;
         } while (nCounter < sgtDataTable.nTxtSkillsCount);
       }
+
       nCounter = 0;
       if (0 >= sgtDataTable.nTxtSkillsCount) {
         return;
@@ -3610,8 +3619,10 @@ void __stdcall TXT_AllocTxt_skill_skilldesc(D2PoolManagerStrc * pMemory) {
             pSkillTxt[iVar2].nSkillIndexCounter++;
           }
         }
+
         nCounter++;
       } while (nCounter < sgtDataTable.nTxtSkillsCount);
+
       return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x53e);

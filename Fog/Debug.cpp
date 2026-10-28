@@ -838,6 +838,7 @@ uint32_t __stdcall DEBUG_GetDbgHelpModuleRange(LPVOID * ppBaseOfDll, DWORD * pdw
     DWORD cb = 0xc;
     _MODULEINFO* pModuleInfo = &moduleInfo;
     HMODULE hModule = hDbgHelpDll;
+
     BOOL bGotInfo = GetModuleInformation(GetCurrentProcess(), hModule, pModuleInfo, cb);
     if (!bGotInfo) {
       return 0;
@@ -1707,8 +1708,11 @@ static int BuildSymbolSearchPath(char * szSearchPath) {
     char cCurChar = *szSearchPath;
     return cCurChar != '\0' ? (uint32_t)szSearchPath : 0;
 }
+
 } // namespace Fog::Debug
+
 namespace Fog::Source::SSComp {
+
 static void __stdcall COMPRESS_Implode(void * pAddress, char * szModulePath, int * pnSectionIndex, void * * ppSectionOffset, int nBufferSize) {
     _MEMORY_BASIC_INFORMATION _Stack_20;
     uint32_t nSectionEnd;
@@ -1722,6 +1726,7 @@ static void __stdcall COMPRESS_Implode(void * pAddress, char * szModulePath, int
     if (!_Stack_20.AllocationBase) {
       /* LPCSTR lpModuleName for GetModuleHandleA */ _Stack_20.AllocationBase = GetModuleHandleA((LPCSTR)0x0);
     }
+
     DWORD nModuleNameLen = GetModuleFileNameA((HMODULE)_Stack_20.AllocationBase, szModulePath, nBufferSize);
     if (!nModuleNameLen) {
       Storm::Source::SSTR::SStrCopy(szModulePath, "unknown", nBufferSize);
@@ -1730,16 +1735,19 @@ static void __stdcall COMPRESS_Implode(void * pAddress, char * szModulePath, int
     if (!(_Stack_20.AllocationBase && (short int)((HMODULE)_Stack_20.AllocationBase)->unused == 0x5a4d && ((HMODULE)((int)_Stack_20.AllocationBase + 0x3c))->unused)) {
       return;
     }
+
     int* pNtHeader = (int*)((uintptr_t)&((HMODULE)_Stack_20.AllocationBase)->unused + ((HMODULE)((int)_Stack_20.AllocationBase + 0x3c))->unused);
     if (*pNtHeader != 0x4550) {
       return;
     }
+
     uint32_t nSectionVSize = (int)pAddress - (int)_Stack_20.AllocationBase;
     uint32_t* pSectionHeader = (uint32_t*)((uint32_t)*(uint16_t*)(pNtHeader + 5) + (int)pNtHeader);
     uint32_t nSectionIdx = 0;
     if ((uint32_t)(*(uint16_t*)((int)pNtHeader + 6)) <= 0) {
       return;
     }
+
     while (true) {
       uint32_t nSectionRawSize;
       nSectionRawSize = pSectionHeader[10];
@@ -1750,16 +1758,20 @@ static void __stdcall COMPRESS_Implode(void * pAddress, char * szModulePath, int
       if (nSectionEnd <= nSectionVSize && nSectionVSize <= nSectionRawSize + nSectionEnd) {
         break;
       }
+
       nSectionIdx++;
       pSectionHeader += 10;
       if (nSectionIdx >= *(uint16_t*)((int)pNtHeader + 6)) {
         return;
       }
     }
+
     *pnSectionIndex = nSectionIdx + 1;
     *ppSectionOffset = (void*)(nSectionVSize - nSectionEnd);
 }
+
 } // namespace Fog::Source::SSComp
+
 namespace Fog::Debug {
 
 // @sourcefile .\Src\Exceptions.cpp
@@ -6178,6 +6190,7 @@ void __fastcall FullStackWalkWithAnnotations(HANDLE hThread, CONTEXT * pContext)
     char* pszText = (char*)BuildSymbolSearchPath(szSearchPath);
     bWalkOk = (*pSymInitialize)(hDupProcess, pszText, 0);
     if (!bWalkOk) {
+
       Src::LogManager::LOGMANAGER_TraceToModuleLog("", "SymInitialize(): gle = %lu", GetLastError());
       (*pSymCleanup)(hDupProcess);
       /* HANDLE hObject for CloseHandle */ CloseHandle(hDupProcess);
@@ -6186,6 +6199,7 @@ void __fastcall FullStackWalkWithAnnotations(HANDLE hThread, CONTEXT * pContext)
 
     dwSymOptions = (*pSymGetOptions)();
     (*pSymSetOptions)(dwSymOptions | 0x10);
+
     D2FogModuleNodeStrc* pModuleList = LoadSymbolsForAllModules(hDupProcess, GetCurrentProcessId());
     CONTEXT* pContextBase = __frame0.pContextLocal;
     DumpAnnotatedStackMemory(hDupProcess, __frame0.pContextLocal, pModuleList);

@@ -119,6 +119,7 @@ void __fastcall D2WIN_RegisterWindowHandlerArray(int32_t hHandle, void * pHandle
       pHandlerEntry += 3;
       nHandlerCount--;
     } while (nHandlerCount);
+
     return;
 }
 
@@ -140,6 +141,7 @@ void __fastcall D2WIN_UnregisterWindowHandlerArray(int32_t hHandle, void * pHand
       pHandlerEntry += 3;
       nHandlerCount--;
     } while (nHandlerCount);
+
     return;
 }
 

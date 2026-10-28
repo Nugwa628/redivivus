@@ -2895,6 +2895,7 @@ void __stdcall TXT_AllocTxt_setitems() {
         if (!(uint16_t)nStringId) {
           pCurSetItem->stringId = 0x1507;
         }
+
         pTxtSetsCached = sgtDataTable.pTxtSets;
         if (-1 < pCurSetItem->set) {
           nSetIdx = (int)pCurSetItem->set;
@@ -2906,9 +2907,11 @@ void __stdcall TXT_AllocTxt_setitems() {
             pTxtSetsCached[nSetIdx].nTxtSetItemsCount++;
           }
         }
+
         __frame0.nByteOffset += 0x1b8;
         __frame0.nIdx++;
       } while (__frame0.nIdx < sgtDataTable.nTxtSetItemsSize);
+
       return;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3f4);
@@ -5111,6 +5114,7 @@ void __fastcall TXT_AllocTxt_runes(D2PoolManagerStrc * pMemory) {
           *(short int*)(nTxtRunesSize.pTable[nRuneIdx].rune_name + 0x42) = (short int)nStringId;
           nRuneIdx++;
         } while (nRuneIdx < nTxtRunesSize.nSize);
+
         return;
       } else {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x908);

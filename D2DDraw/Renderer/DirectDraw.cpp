@@ -957,6 +957,7 @@ static BOOL InternalOpenWindow(int32_t nResolutionMode) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1da);
         exit(-1);
       }
+
       nLine = pWindowHandleBuffer->lpVtbl->SetDisplayMode(pWindowHandleBuffer, gnDDrawDisplayModeIndex, gnDDrawSurfaceWidth, 8);
       if (nLine) {
         szErrorMsg = "SetDisplayMode failed!";
@@ -1016,6 +1017,7 @@ static BOOL InternalOpenWindow(int32_t nResolutionMode) {
               gbDDrawPaletteSet = 0;
               return 1;
             }
+
             szErrorMsg = "SetPalette failed!";
           }
         }

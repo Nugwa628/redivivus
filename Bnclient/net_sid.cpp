@@ -878,6 +878,7 @@ BOOL __fastcall NET_SID_CLIENT_Incoming_AuthAccountLogonProof(char * pPacketData
         g_nRealmLogonResult = 2;
         return 1;
       }
+
       szFailureMessage = "Logon Proof failed: Unknown result";
     } else {
       int32_t bProofValid;
@@ -957,6 +958,7 @@ BOOL __fastcall NET_SID_CLIENT_Incoming_AuthAccountChangeProof(char * pPacketDat
         BNMESSQUEUE_SetStateIfZero(0xe);
         return 1;
       }
+
       szFailureMessage = "Change Proof failed: Unknown result";
     } else {
       int32_t bProofValid;
@@ -2192,10 +2194,12 @@ int32_t __fastcall NET_SID_CLIENT_DecodeCDKeyHash(int * pnParam, uint32_t nParam
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x92);
         exit(-1);
       }
+
       NET_SID_CLIENT_EncodeCDKeyHash(szCDKey, 0);
       if (nParam < 9 || (nAlignedLen = nParam - 8 , (nAlignedLen & 0x3f) != 0)) {
         return 0;
       }
+
       nBlockCounter = 0;
       while (nAlignedLen) {
         pSrcCopyPtr = (uint32_t*)pnParam;
@@ -2234,6 +2238,7 @@ int32_t __fastcall NET_SID_CLIENT_DecodeCDKeyHash(int * pnParam, uint32_t nParam
           abEncBlock[nLoopIdx + 3] = abDecBlock[nLoopIdx + 3] - *(char*)((int)shaState + nRoundKeyIdx % 0x14);
           nLoopIdx += 4;
         } while (-2 < nKeyByteIdx);
+
         if (!(nBlockCounter & 0xf)) {
           NET_SID_CLIENT_SHA1Compress(0, (uint32_t*)abEncBlock, nullptr);
         }
@@ -2259,6 +2264,7 @@ int32_t __fastcall NET_SID_CLIENT_DecodeCDKeyHash(int * pnParam, uint32_t nParam
           return nParam - 0x48 + (uint32_t)byDataByte;
         }
       }
+
       NET_SID_CLIENT_ClearIDEAContexts();
       NET_SID_CLIENT_ClearSHAContexts();
       return 0;
@@ -2324,6 +2330,7 @@ void __fastcall NET_SID_CLIENT_EncodeBuffer(uint32_t * pdwParam, uint32_t nParam
         if (!(nBlockCounter & 0xf)) {
           NET_SID_CLIENT_SHA1Compress(0, (uint32_t*)abPlainBlock, nullptr);
         }
+
         nCopyCount = 0;
         do {
           abEncBlock[nCopyCount] = *(char*)((int)shaState + (0x3fU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount];
@@ -2333,6 +2340,7 @@ void __fastcall NET_SID_CLIENT_EncodeBuffer(uint32_t * pdwParam, uint32_t nParam
           abEncBlock[nCopyCount + 3] = *(char*)((int)shaState + (0x3cU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount + 3];
           nCopyCount = nKeyByteIdx;
         } while (nKeyByteIdx < 0x40);
+
         if (!(nBlockCounter & 7)) {
           nCopyCount = 0;
           do {

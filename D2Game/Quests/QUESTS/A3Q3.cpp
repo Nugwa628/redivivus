@@ -209,6 +209,7 @@ bool __fastcall Q20_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
       if (!bQuestState) {
         *nUnknown = '\x06';
       }
+
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_BladeOfTheOldReligion, QUESTSTATE_Step0x07);
       if (!bQuestState) {
         *nUnknown = '\x05';

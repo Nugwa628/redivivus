@@ -758,6 +758,7 @@ static void __stdcall MONSTER_SpawnMinionsForBoss(D2RoomCoordListStrc * pCoordLi
         bSetOwner = 0;
         bAddToList = 0;
         eUnitType = UNIT_MONSTER;
+
         Ai::AiGeneral::AssignMinionOwner(pGame, pMinion, D2Client::UNIT::GetGUID(pUnit), eUnitType, bAddToList, bSetOwner);
         Ai::AiGeneral::AddMinionToList(pGame, pUnit, pMinion);
         Monster::AI::MONSTERAI_SetTargetUnit(pMinion, pUnit);
@@ -1823,6 +1824,7 @@ void __fastcall MONSTER_MissileSplitOnHit(::SGAMEDATA * pGame, D2UnitStrc * pUni
     nActivateFrame = 0;
     nVelocityOverride = 0;
     nMissileLevel = D2Common::Units::Missile::GetLevel(pMissileUnit);
+
     SKILLS::SkillsServer::CreatingAMissile(pGameLocal, eMissileId, pOwnerUnit, D2Common::Units::Missile::GetSkillId(pTarget), nMissileLevel, nVelocityOverride, nActivateFrame, nDirSignX, nOwnerDirSignX, nParam5);
     if (!(pOwnerUnit->eUnitType == UNIT_MONSTER && pOwnerUnit->pUnitData.pUnitDataMonster)) {
       return;
@@ -2009,11 +2011,13 @@ void __fastcall UMOD_SetLevelAndAttackRating(int32_t pUModEntry, D2UnitStrc * pU
       D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_firemaxdam, nMonLevel * 3 >> 1, 0);
       return;
       case 0x147:
+
       case 0x148:
         nElMinDmg = nToHitRating + 1;
       if (nMonLevel < nToHitRating + 1) {
         nElMinDmg = nMonLevel;
       }
+
       D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_mindamage, nElMinDmg, 0);
       D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_maxdamage, nMonLevel, 0);
       return;
@@ -2025,12 +2029,14 @@ void __fastcall UMOD_SetLevelAndAttackRating(int32_t pUModEntry, D2UnitStrc * pU
       D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_poisonlength, nMonLevel * 2, 0);
       return;
       case 0x14a:
+
       case 0x171:
         D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_mindamage, 0, 0);
       D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_maxdamage, 0, 0);
       D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_lightmindam, nToHitRating, 0);
       D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_lightmaxdam, nMonLevel * 3 >> 1, 0);
     }
+
     return;
 }
 
@@ -2222,6 +2228,7 @@ void __fastcall MONSTER_SuicideExplosion(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       } else {
         nMissileSpawnY = 0;
       }
+
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nMissileSpawnX = pUnit->pPath.pStaticPath->nPosX;
@@ -2442,7 +2449,9 @@ D2UnitStrc * __fastcall SERVER_SpawnMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
         Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, QUESTINT_RiteOfPassage);
       return pUnit;
       case SUPERUNIQUE_ISMAIL_VILEHAND:
+
       case SUPERUNIQUE_GELEB_FLAMEFINGER:
+
       case SUPERUNIQUE_TOORC_ICEFIST:
         Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, QUESTINT_TheBlackenedTemple);
       return pUnit;
@@ -2450,7 +2459,9 @@ D2UnitStrc * __fastcall SERVER_SpawnMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
         Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, QUESTINT_TheSearchForCain);
       return pUnit;
       case SUPERUNIQUE_INFECTOR_OF_SOULS:
+
       case SUPERUNIQUE_LORD_DE_SEIS:
+
       case SUPERUNIQUE_GRAND_VIZIER_OF_CHAOS:
         Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, QUESTINT_TerrorsEnd);
       break;
@@ -2781,6 +2792,7 @@ D2UnitStrc * __fastcall SPAWN_UniqueMonster(::SGAMEDATA * pGame, D2RoomStrc * pR
       case 0x3c:
         Ai::AiGeneral::AssignMinionOwner(pGame, pUnit, pUnit->nUnitGUID, UNIT_MONSTER, 1, 0);
       nUModCount = 0x1c5;
+
       nUModCount = D2Common::Monsters::MONSTERS::GetMonsterBaseId(D2Common::Units::UNITS_GetRoom(pUnit), nUModCount);
       Monster::Create::SpawnMinions_BySlot(pGame, pUnit, nUModCount, eD2MonsterAnimMode_ns::Neutral, 10, 0x14, 0x40);
       Quests::QUESTS::QUEST_AttachToUnitByQuestId(pGame, pUnit, QUESTINT_BetrayalOfHaggorath);

@@ -211,6 +211,7 @@ void __fastcall DropItemForVictim_Unused(::SGAMEDATA * pGame, D2ObjectOperateFnA
         eCollisionFlag = COLLISION_ITEMS;
         nY = D2Client::Units::GetYPosFromDynamicPathUnit(pVictim);
         nX = D2Client::Units::GetXPosFromDynamicPathUnit(pVictim);
+
         eCollision = D2Common::Collision::CheckCollision_BlockPlayerMissile(D2Common::Units::UNITS_GetRoom(pVictim), nX, nY, eCollisionFlag);
         if (eCollision != COLBIT_NONE) {
           return;
@@ -487,6 +488,7 @@ void __stdcall MONMODE_OwnerCastOrDie(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     int32_t nOwnerAlignment = 0x3c01;
     int32_t nOwnerSizeX = D2Common::Units::GetUnitSizeX(pOwner);
     POINT* pSpawnPoint = &ptSpawn;
+
     D2RoomStrc* pFreeRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(D2Common::Units::UNITS_GetRoom(pOwner), pSpawnPoint, nOwnerSizeX, nOwnerAlignment, bAllowNeighboorRooms);
     nOwnerAlignment = D2Common::Stats::StatsEx::STATSEX_GetAlignment(pUnit);
     if (!nOwnerAlignment && pFreeRoom) {

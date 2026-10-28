@@ -248,6 +248,7 @@ D2UnitStrc * __fastcall CastAttackWithDistanceCheck(D2UnitStrc * pUnit, eMissile
     int nTargetX = nX;
     int nTargetY = nY;
     int32_t nDistOrCasterY = Units::GetYPosFromDynamicPathUnit(pUnit);
+
     nDistOrCasterY = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(Units::GetXPosFromDynamicPathUnit(pUnit), nDistOrCasterY, nTargetX, nTargetY);
     /* Distance <= 100 */ if (nDistOrCasterY > 10000) {
       return nullptr;
@@ -283,6 +284,7 @@ BOOL __fastcall SKILLS_CltCheckThrowableAmmo(D2UnitStrc * pUnit) {
       nShoots = 0xb6;
       szName = ".\\SKILLS\\Skills.cpp";
       bVar1 = false;
+
       eSkillId = D2Common::Skills::GetSkillId(D2Common::Units::GetCurrentSkill(pUnit), szName, nShoots);
       if (eSkillId == SKILL_Attack) {
         nShoots = D2Common::Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pWeapon, UNITSTAT_item_magicarrow, 0);
@@ -2208,6 +2210,7 @@ void __fastcall SKILLS_CltAdjustSkillTabBonuses(D2UnitStrc * pUnit, int32_t nBon
         if (!pSkill) {
           break;
         }
+
         pSkillAfter = D2Common::Skills::GetNext(pSkill);
         eSkill = D2Common::Skills::GetSkillId(pSkill, ".\\SKILLS\\Skills.cpp", 0x974);
         pSkillNext = pSkillCur;

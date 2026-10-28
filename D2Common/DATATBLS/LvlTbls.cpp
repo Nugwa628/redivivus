@@ -812,6 +812,7 @@ void __fastcall TXT_AllocTxt_levels(D2PoolManagerStrc * pMemory) {
       memset(pWVar2, 0, 0x50);
       memset((void*)&pDVar1[i].wszLevelWarp[0], 0, 0x50);
       nWideCharBufLen = 0x28;
+
       D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(pWVar2, D2Lang::StrTable::strtable::STRTABLE_GetStringByKey((uint8_t*)(pDVar1->LevelName + nByteOffset)), nWideCharBufLen);
       nWideCharBufLen = 0x28;
       pDVar1[i].wszLevelName[39] = 0;

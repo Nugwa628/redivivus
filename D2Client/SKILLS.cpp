@@ -1825,6 +1825,7 @@ BOOL __fastcall Skills_CltDoFunc_AuraLevel_MissilesOnTargetVelocity(D2UnitStrc *
       return 0;
     }
 
+
     Skills::SKILL_SpawnMissilesAtTarget(pUnit, pTargetUnit, eMissileId, ~MISSILE_Arrow, eSkill, nSkillLvl, D2Common::DATATBLS::MissileTbls::MISSILETBLS_CalculateVelocity(eMissileId, nSkillLvl));
     return 1;
 }

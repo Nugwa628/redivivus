@@ -17,7 +17,9 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
+
 namespace D2Common::Drlg {
+
 static void __stdcall DRLGOUTDOOR_ApplySubstitutionGroup(D2UnkOutdoorStrc * pUnkOutdoor, D2LvlSubTxt * pLvlSub) {
     D2DrlgFileStrc* pFile = pLvlSub->pDrlgFile;
     uint32_t nModulo = pFile->nSubstGroups;
@@ -35,15 +37,18 @@ static void __stdcall DRLGOUTDOOR_ApplySubstitutionGroup(D2UnkOutdoorStrc * pUnk
     if (0 >= (int)nModulo) {
       return;
     }
+
     do {
       BOOL bPlaced;
       bPlaced = DRLGOUTDOOR_PlaceRandomBorderSubTiles(pUnkOutdoor, (int32_t)pLvlSub, (int*)(pFile->pSubstGroups + (int)(nRandStartGroup + nGroupIter) % (int)nModulo));
       if (bPlaced && !pLvlSub->BordType) {
         return;
       }
+
       nGroupIter++;
     } while (nGroupIter < (int)nModulo);
 }
+
 } // namespace D2Common::Drlg
 
 namespace D2Common::Drlg::TileSub {

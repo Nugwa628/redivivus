@@ -580,6 +580,7 @@ int16_t __fastcall GetPartyIdFromUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
           }
         }
       }
+
       return -1;
     }
 }

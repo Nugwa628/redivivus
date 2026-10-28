@@ -447,12 +447,24 @@ uint32_t __stdcall SRP_ParseChallenge(uint32_t * pContext, char * szText, uint32
     uint32_t* pDst = pContext;
     memcpy(pDst, pModulusN, 8 * sizeof(*pDst));
 
+
+
+
+
     pDst = pContext + 8;
     memcpy(pDst, pGenerator, 8 * sizeof(*pDst));
+
+
+
+
 
     pDst = pServerPublicBBytes;
     uint32_t* pDst2 = pContext + 0x18;
     memcpy(pDst2, pDst, 8 * sizeof(*pDst2));
+
+
+
+
 
     BigData* pServerPublicB = SHA::SHA1_FromBigIntBytes(pServerPublicBBytes, 0x20);
     int32_t nCompareResult = SHA::SHA1_BigIntCompareValue(pServerPublicB, 0);

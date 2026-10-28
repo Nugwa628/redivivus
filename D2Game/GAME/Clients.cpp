@@ -598,9 +598,11 @@ void __fastcall GAME_CollectNearbyUnitPositions(D2ClientStrc * pClient, uint32_t
           for (pPlayerUnit_lcl = ppAdjacentRooms[nRoomIdx]->pUnitList; pPlayerUnit_lcl; pPlayerUnit_lcl = pPlayerUnit_lcl->pRoomNext) {
             CLIENT_AddUnitToProximitySortedList(nX, pPlayerUnit_lcl, nY, &pnMaxDist, pClient, nMaxUnits, aProximityNodes);
           }
+
           nRoomIdx++;
         } while (nRoomIdx < nAdjacentRoomCount);
       }
+
       CLIENT_PopulateVisibilityPacketBuffer(aProximityNodes, pClient);
       return;
     }
@@ -1771,22 +1773,27 @@ int32_t __fastcall CLIENT_LoadCharacterAndSendGameData(D2ClientStrc * pClient, :
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x242);
         exit(-1);
       }
+
       pClient->fClientFlags |= 1;
       if (!pGame->bExpansion && 5 <= pClient->nClass) {
         szErrorName = "nError";
         nErrorCode = 0x18;
+
         Fog::Src::LogManager::LOGMANAGER_TraceToModuleLog("", "[PLAYER CREATE]  ClientAddPlayerToGame()  Error Creating:%s  Error:%d=%s", GetCharName(pClient), nErrorCode, szErrorName);
         pClient->pPlayer = 0;
         return 0x18;
       }
+
       bLoadError = PLAYER::PlayerSave::CLIENT_LoadOrCreatePlayerUnit(pGame, pClient, (D2ClientStrc*)pClient->szCharName, bLoadFromSave, &pPlayerUnitOut, (uint32_t)pRoom, nX, nY);
       if (bLoadError) {
         szErrorName = "nError";
         bLoadErrorSave = bLoadError;
+
         Fog::Src::LogManager::LOGMANAGER_TraceToModuleLog("", "[PLAYER LOAD]  ClientAddPlayerToGame()  Error Loading:%s  Error:%d=%s", GetCharName(pClient), bLoadErrorSave, szErrorName);
         pClient->pPlayer = 0;
         return bLoadError;
       }
+
       wCharFlags = pClient->nCharacterStatus;
       if (!(wCharFlags & 0x20)) {
         if (pGame->bExpansion) {
@@ -1815,7 +1822,9 @@ int32_t __fastcall CLIENT_LoadCharacterAndSendGameData(D2ClientStrc * pClient, :
           return 0x13;
         }
       }
+
       CLIENT_SendHandshakePacket0x0B(pClient, pPlayerUnitOut);
+
       SCmd::NET_D2GS_SERVER_Send_0x5F_PortalFlags(pClient, '_', D2Common::Units::GetPlayerPortalFlags(pPlayerUnitOut));
       D2Common::Stats::StatsEx::STATLIST_IterateChangedStats(pPlayerUnitOut, pPlayerUnitOut, PLAYER::PlayerMsg::SendAttributeUpdate);
       pPlayerUnit_lcl = pPlayerUnitOut;
@@ -1826,6 +1835,7 @@ int32_t __fastcall CLIENT_LoadCharacterAndSendGameData(D2ClientStrc * pClient, :
           pPlayerUnitOut->eUnitFlagsEx |= 0x200000;
         }
       }
+
       nHotkeyIdx = 0;
       pHotKey = pClient->pHotKeys;
       do {
@@ -1837,6 +1847,7 @@ int32_t __fastcall CLIENT_LoadCharacterAndSendGameData(D2ClientStrc * pClient, :
         nHotkeyIdx++;
         pHotKey++;
       } while (nHotkeyIdx < 0x10);
+
       pPlayerData = D2Common::Units::GetPlayerData(pPlayerUnitOut);
       if (pPlayerData) {
         if (!pPlayerUnitOut) {
@@ -2315,6 +2326,7 @@ void __fastcall UnusedClientJoinGame(D2ClientStrc * pClient, uint8_t bParam) {
     } else {
       nSpawnX = 0;
     }
+
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nSpawnY = pUnit->pPath.pStaticPath->nPosY;
@@ -2323,9 +2335,11 @@ void __fastcall UnusedClientJoinGame(D2ClientStrc * pClient, uint8_t bParam) {
     } else {
       nSpawnY = 0;
     }
+
     nOldUnitGUID = pUnit->nUnitGUID;
     eUnitType = pUnit->eUnitType;
     pGame = pClient->pGame;
+
     D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pUnit), eUnitType, nOldUnitGUID);
     UNIT::SUnit::FreeServerUnit(pGame, pUnit);
     CLIENT_LoadCharacterAndSendGameData(pClient, pGame, 0, pRoom, nSpawnX, nSpawnY);
@@ -2334,6 +2348,7 @@ void __fastcall UnusedClientJoinGame(D2ClientStrc * pClient, uint8_t bParam) {
     if (pRoom != pClient->pRoom) {
       GAME_OnClientRoomChange(pRoom, pClient);
     }
+
     pClient->pRoom = pRoom;
     return;
 }
@@ -2361,6 +2376,7 @@ void __fastcall UnusedClientJoinGame2(::SGAMEDATA * pGame, D2ClientStrc * pClien
 
     int nOldUnitGUID = pUnit->nUnitGUID;
     eUnitType = pUnit->eUnitType;
+
     D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pUnit), eUnitType, nOldUnitGUID);
     UNIT::SUnit::FreeServerUnit(pGame, pUnit);
     CLIENT_LoadCharacterAndSendGameData(pClient, pGame, 0, pRoom, (uint32_t)*(uint32_t*)&bActNo, nSpawnY);
@@ -2520,8 +2536,10 @@ void __fastcall GAME_SendRemoveObjectsForAdjacentRooms(D2RoomStrc * pRoom, D2Cli
             SCmd::NET_D2GS_SERVER_Send_0x0A_REMOVEUNIT(pClient, 10, (eD2UnitType)(uint8_t)(char)pDrlgDelete->eUnitType, pDrlgDelete->nUnitGUID);
           }
         }
+
         nRoomIdx++;
       } while (nRoomIdx < nRoomCount);
+
       return;
     }
 }
@@ -2557,6 +2575,7 @@ void __fastcall CLIENT_RevealRoomAndSendUnits(::SGAMEDATA * pGame, D2RoomStrc * 
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcf);
       exit(-1);
     }
+
     eD2LevelId eLevelId;
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &sRoomCoords);
     eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
@@ -2579,6 +2598,7 @@ void __fastcall CLIENT_RevealRoomAndSendUnits(::SGAMEDATA * pGame, D2RoomStrc * 
         UNIT::SUnitMsg::SERVER_SendInitUnitPacket(pGameSave, pRoomUnit, pClient);
       }
     }
+
     return;
 }
 
@@ -2597,6 +2617,7 @@ void __fastcall RoomClearForClientAndHideMap(::SGAMEDATA * pGame, D2RoomStrc * p
     for (pRoomUnit = pRoom->pUnitList; pRoomUnit; pRoomUnit = pRoomUnit->pRoomNext) {
       UNIT::SUnitMsg::SendRemoveObject(pRoomUnit, pClient);
     }
+
     D2Common::DUNGEON::Dungeon::DRLGROOM_RemoveClientFromRoom(pRoom, (int32_t)pClient);
     if (!pRoom->nClientsCount) {
       pRoomUnit = pRoom->pUnitList;
@@ -2604,14 +2625,17 @@ void __fastcall RoomClearForClientAndHideMap(::SGAMEDATA * pGame, D2RoomStrc * p
         if (!pRoomUnit) {
           break;
         }
+
         eUnitType = UNIT_COUNT;
         eUnitType = pRoomUnit->eUnitType;
         if (eUnitType == UNIT_MONSTER) {
           Monster::MONSTER_StartAiAndRegenTimers(pGameSave, pRoomUnit);
         }
+
         pRoomUnit = pRoomUnit->pRoomNext;
       }
     }
+
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &sRoomCoords);
     eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     SCmd::NET_D2GS_SERVER_Send_0x08_REMOVEROOM(pClient, (uint8_t)eLevelId, (uint16_t)sRoomCoords.sTileRect.left, (uint16_t)sRoomCoords.sTileRect.top);
@@ -2656,6 +2680,7 @@ void __fastcall CLIENT_BroadcastMovementToAdjacentRooms(::SGAMEDATA * pGame, D2R
       MovementUpdateForClient(pGame, (D2RoomStrc**)ppAdjacentRooms[nRoomIdx], pUnit);
       nRoomIdx++;
     } while (nRoomIdx < nRoomCount);
+
     return;
 }
 

@@ -839,24 +839,31 @@ void __fastcall Q11_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
       }
     }
 }
+
 } // namespace D2Game::Quests::QUESTS::A2Q3
+
 namespace D2Game {
+
 uint8_t __fastcall Q11_TimerCheckDarkness(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     D2QuestDataA2Q3Strc* pA2Q3Data = pQuestData->pQuestSpecificData.pA2Q3;
     pA2Q3Data->field_0x01 = 0;
     if (pA2Q3Data->bSunDarkened) {
       return '\x01';
     }
+
     bool nResult = (bool)Quests::QUESTS::A2Q3::Q11_BeginTaintedSun(pQuestData);
     if (!nResult) {
       pA2Q3Data->bViperAmuletInitPending = true;
       return '\x01';
     }
+
     pA2Q3Data->bSunDarkened = true;
     UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Quests::QUESTS::A2Q3::Q11_UpdateQuestRecord);
     return '\x01';
 }
+
 } // namespace D2Game
+
 namespace D2Game::Quests::QUESTS::A2Q3 {
 
 // A2Q3 - Q11_StartDarknessTimer (custom register calling convention): if darkness not yet started, rolls a

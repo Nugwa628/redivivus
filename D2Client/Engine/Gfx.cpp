@@ -223,6 +223,7 @@ void * __stdcall GFX_LoadCofFile(void * pTextureCache, char * szPath) {
     nSrcLine = 0xe0;
     pcSrcFile = ".\\ENGINE\\Gfx.cpp";
     pSize = pEntry + 2;
+
     nAddress = Fog::Archive::D2FILE_AllocAndLoadD2File(D2Win::Src::D2WinArchive::ReturnZero(), szPath, pSize, pcSrcFile, nSrcLine);
     pEntry[5] = (uint32_t)(uintptr_t)nAddress;
     if (!nAddress) {
@@ -252,6 +253,7 @@ static void __stdcall GFX_LoadAndHashCofArchive(char * szPath, int * pCache) {
     int32_t nSrcLine = 0x10b;
     char* pcSrcFile = ".\\ENGINE\\Gfx.cpp";
     uint32_t* pSize = (uint32_t*)(pCache + 2);
+
     int* pEntry = (int*)Fog::Archive::D2FILE_AllocAndLoadD2File(D2Win::Src::D2WinArchive::ReturnZero(), szPath, pSize, pcSrcFile, nSrcLine);
     pCache[1] = (int)pEntry;
     if (!pEntry) {
@@ -394,7 +396,9 @@ static void __stdcall GFX_RemoveStateOverlayAndReprioritize(D2UnitStrc * pUnit, 
 }
 
 } // namespace D2Client::Engine::Gfx
+
 namespace D2Client::Engine::GfxInfo {
+
 // @sourcefile .\ENGINE\Gfx.cpp
 void __stdcall GFX_RemoveOverlayFromUnit(D2UnitStrc * pUnit, int * pOverlay) {
     int* pMemoryToFree;
@@ -403,22 +407,26 @@ void __stdcall GFX_RemoveOverlayFromUnit(D2UnitStrc * pUnit, int * pOverlay) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1bf);
       exit(-1);
     }
+
     int* pPrev = 0;
     int* pCur = (int*)pGfxInfo->pOverlayList;
     if (!pGfxInfo->pOverlayList) {
       return;
     }
+
     while (true) {
       pMemoryToFree = pCur;
       if (pMemoryToFree == pOverlay) {
         break;
       }
+
       pCur = (int*)pMemoryToFree[0x29];
       pPrev = pMemoryToFree;
       if (!(int*)pMemoryToFree[0x29]) {
         return;
       }
     }
+
     if (!pMemoryToFree) {
       return;
     }
@@ -434,20 +442,28 @@ void __stdcall GFX_RemoveOverlayFromUnit(D2UnitStrc * pUnit, int * pOverlay) {
     if (*pMemoryToFree == 8) {
       Gfx::GFX_RemoveStateOverlayAndReprioritize(pUnit, (int32_t)pGfxInfo, (int32_t)pMemoryToFree);
     }
+
     Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\ENGINE\\Gfx.cpp", 0x1e1, 0);
 }
+
 } // namespace D2Client::Engine::GfxInfo
+
 namespace D2Client::SRC::CelCmp {
+
 // Builds the COF archive path for a monster COF name index and loads it. The index is a single byte: the prologue does MOVZX EAX, CL before indexing the name table at 0x6d6c30, so the upper 24 bits of ECX are dead.
 void __fastcall GFX_LoadMonsterCofArchive(uint8_t nCofNameIndex) {
     // Static local variables (originally global data)
     static char * gpszMonsterCofNameTable[5] = { s_cmncof_a1_d2_006d6c44, s_cmncof_a2_d2_006d6c54, s_cmncof_a3_d2_006d6c64, s_cmncof_a4_d2_006d6c74, s_cmncof_a6_d2_006d6c84 }; D2_STATIC_GUARD(gpszMonsterCofNameTable, "D2Client::SRC::CelCmp::GFX_LoadMonsterCofArchive::gpszMonsterCofNameTable");
+
     char szCofPath[260];
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szCofPath, "%s\\%s", "DATA\\GLOBAL", gpszMonsterCofNameTable[nCofNameIndex]);
     Engine::Gfx::GFX_LoadAndHashCofArchive(szCofPath, &gMonsterCofCache.nFrameCount);
 }
+
 } // namespace D2Client::SRC::CelCmp
+
 namespace D2Client::Engine::Gfx {
+
 // @sourcefile .\ENGINE\Gfx.cpp
 static int32_t GFX_FreeUnusedCofEntries(void * pCacheTable) {
     uint32_t* pMemoryToFree;
@@ -1324,18 +1340,20 @@ void __fastcall GFX_AddOverlayToUnit(D2UnitStrc * pUnit, eOverlayId eOverlay, in
         nRandomValue = Archive::RANDOM_RandomNumberSelector(&pPlayer->sSeed, nColorScale << 8);
         pOverlay->nRandomOffset = nRandomValue;
       }
+
       pOverlay->nAnimRate = pOverlayTxt->AnimRate << 4;
       if (nRandomMod) {
         nRandomValue = Archive::RANDOM_RandomNumberSelector(&pPlayer->sSeed, nRandomMod << 4);
         pOverlay->nAnimRate += nRandomValue;
       }
+
       pOverlay->nLoopWaitTime = pOverlayTxt->LoopWaitTime;
       return;
     }
 }
 
 // @sourcefile .\ENGINE\Gfx.cpp
-void __fastcall GFX_LoadUnitModeCof(D2UnitStrc * pUnit, int32_t nUnused) {
+void __fastcall GFX_LoadUnitModeCof(D2UnitStrc * pUnit) {
     // Frame slots -20..-12 are ONE object: &nCompositResult is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -1752,7 +1770,9 @@ void __fastcall GFX_UpdateOverlayAnimations(D2UnitStrc * pUnit) {
             }
           } break;
           case 1:
+
           case 3:
+
           case 8:
             pOverlayCur[6] = pEffectiveAnimMode - nOverlayAnimRate;
           break;
@@ -1975,6 +1995,7 @@ static D2GfxInfoUnkStrc * __stdcall GFX_DrawUnitComponents(int32_t nWorldX, uint
                             eDrawModeCalc = GfxUtil::GFXUTIL_GetCofDrawOrder(pCofDataBase, nLayerComponentU);
                           }
                         }
+
                         eDrawMode = eDrawModeCalc;
                         if (!bPerspective || !bOrderedDraw) {
                           D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nDrawX, nDrawY, nLightColor, eDrawMode, pPalette);

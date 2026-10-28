@@ -131,6 +131,7 @@ static BOOL __stdcall BeginAsyncReadForClient(D2QServerStrc * pQServer, D2QServe
         ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3f8);
         exit(-1);
       }
+
       if (pClient->socket == -1) {
         nBytesRead = pClient->nClientToken;
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);
@@ -138,6 +139,7 @@ static BOOL __stdcall BeginAsyncReadForClient(D2QServerStrc * pQServer, D2QServe
         RemoveClientAndClearLog(pQServer, pClient);
         return 0;
       }
+
       IncrementClientRefCount(pQServer, pClient);
       /* LPOVERLAPPED lpOverlapped for ReadFile */ /* LPDWORD lpNumberOfBytesRead for ReadFile */ /* DWORD nNumberOfBytesToRead for ReadFile */ /* LPVOID lpBuffer for ReadFile */ /* HANDLE hFile for ReadFile */ fReadResult = ReadFile((HANDLE)pClient->socket, pClient->aRecvBuffer + nBytesRead, DVar2, (LPDWORD)&pClient->dwReadTransferSize, &pClient->ovRead);
       if (!fReadResult) {
@@ -648,6 +650,7 @@ DWORD __stdcall IoWorkerThreadMain(void * lpThreadParam) {
       PumpIoCompletionQueueForWorker(pQServer, nWorkerIndex, 0x32);
       iVar1 = pQServer->aIoWorkerStopFlags[nWorkerIndex];
     }
+
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pQServer->csClientLifecycle);
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ pQServer->aIoWorkerStopFlags[nWorkerIndex] = 0;
     LeaveCriticalSection(&pQServer->csClientLifecycle);

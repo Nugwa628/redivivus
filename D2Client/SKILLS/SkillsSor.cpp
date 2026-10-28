@@ -791,6 +791,7 @@ BOOL __fastcall Skills_CltDoFunc_Sor_RandomRadiusMissile(D2UnitStrc * pUnit, eD2
     nFireInterval = Units::GetXPosFromDynamicPathUnit(pUnit);
     nRandOffsetY = Archive::UNIT_GetModuloFromSeed(&pUnit->sSeed, nRandOffsetY);
     nCasterX = Units::GetYPosFromDynamicPathUnit(pUnit);
+
     UNIT::Missile::MISSILE_CreateFromUnitWithOffset(pUnit, eMissileId, 0, 0, nRandOffsetX - nRadius + nFireInterval, nRandOffsetY - nRadius + nCasterX, eSkill, nSkillLvl, Archive::UNIT_GetModuloFromSeed(&pUnit->sSeed, nDuration));
     return 1;
 }

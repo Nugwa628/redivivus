@@ -354,6 +354,7 @@ static D2RoomExStrc * DRLGSPAWN_GetRandomRoomFromLevel(D2DrlgLevelStrc * pLevel)
       for (; nRandomIndex; nRandomIndex--) {
         pDVar1 = pDVar1->pRoomExNext;
       }
+
       return pDVar1;
     }
 }
@@ -1473,7 +1474,9 @@ void __fastcall DRLGROOMEX_FreeDrlgRoomEx(D2RoomExStrc * pRoomEx) {
 }
 
 } // namespace D2Common::Drlg::DrlgRoom
+
 namespace D2Common::Drlg {
+
 // Links a RoomEx across levels using the vis arrays. For srcVisSlot (0..7), computes dst level id and ensures dst level is initialized. If a warp destination exists, align by matching the Nth occurrence of dst in src vis array with the Nth occurrence of src in dst vis array, then link via DRLGROOMEX_LinkNearRoomByDirection. Fallback: scan dst vis array for src and link first match.
 void __stdcall DRLGROOMEX_LinkNearRoomsByVis(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx, uint8_t srcVisSlot) {
     bool _bLinkResult;
@@ -1486,6 +1489,7 @@ void __stdcall DRLGROOMEX_LinkNearRoomsByVis(D2PoolManagerStrc * pMemory, D2Room
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x350);
       exit(-1);
     }
+
     D2DrlgLevelStrc* pSrcLevel = pRoomEx->pLevel;
     eD2LevelId srcLevelId = pSrcLevel->eD2LevelId;
     eD2LevelId* pSrcVisArray = (eD2LevelId*)DrlgRoom::DRLGWARP_GetVisArrayFromLevelId(pSrcLevel->pDrlg, srcLevelId);
@@ -1506,11 +1510,13 @@ void __stdcall DRLGROOMEX_LinkNearRoomsByVis(D2PoolManagerStrc * pMemory, D2Room
           if (*pSrcVisArray == dstLevelId) {
             nSrcOccurrenceIndex++;
           }
+
           pSrcVisArray++;
           nSlotIndex--;
           nSrcOccurCountBeforeSlot = nSrcOccurrenceIndex;
         } while (nSlotIndex);
       }
+
       nSlotIndex = 0;
       do {
         if (pDstVisArray[nSlotIndex] == srcLevelId) {
@@ -1519,14 +1525,18 @@ void __stdcall DRLGROOMEX_LinkNearRoomsByVis(D2PoolManagerStrc * pMemory, D2Room
             if (_bLinkResult) {
               return;
             }
+
             break;
           }
+
           nDstOccurrenceIndex++;
         }
+
         nNextSlot = (uint8_t)nSlotIndex + 1;
         nSlotIndex = (uint32_t)nNextSlot;
       } while (nNextSlot < 8);
     }
+
     nSlotIndex = 0;
     while (pDstVisArray[nSlotIndex] != srcLevelId || (_bLinkResult = DrlgRoom::DRLGROOMEX_LinkNearRoomByDirection((uint8_t)nSlotIndex, pRoomEx, pMemory, srcVisSlot, warpDestLevel, pDstLevel->pRoomExFirst) , !_bLinkResult)) {
       nNextSlot = (uint8_t)nSlotIndex + 1;
@@ -1536,6 +1546,7 @@ void __stdcall DRLGROOMEX_LinkNearRoomsByVis(D2PoolManagerStrc * pMemory, D2Room
       }
     }
 }
+
 // Defines near rooms, then for each vis flag bit (0x10..0x800) links rooms across levels via DRLGROOMEX_LinkNearRoomsByVis unless in level 0x85. Finally sets town-related flag based on near rooms.
 void __fastcall DRLGROOMEX_InitNearRoomsAndVisTiles(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx) {
     uint8_t visSlot;
@@ -1548,10 +1559,13 @@ void __fastcall DRLGROOMEX_InitNearRoomsAndVisTiles(D2PoolManagerStrc * pMemory,
         if (pRoomEx->eRoomExFlags & dwVisFlagMask && pRoomEx->pLevel->eD2LevelId != 0x85) {
           DRLGROOMEX_LinkNearRoomsByVis(pMemory, pRoomEx, visSlot);
         }
+
         visSlot++;
         dwVisFlagMask *= 2;
       } while (dwVisFlagMask & 0xff0);
     }
+
     DrlgRoom::DRLGROOM_FlagRoomExBorderingTown(pRoomEx);
 }
+
 } // namespace D2Common::Drlg

@@ -768,6 +768,7 @@ static void __stdcall QUEST_RemoveItemFromInventory(D2InventoryStrc * pInventory
       }
     } else {
       eInventoryPage eContainerPage;
+
       D2Common::ITEMS::Items::ITEM_SetItemData_ePreviousPage(pItem, D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pItem));
       GAME::SCmd::Send0x9DRemoveItemFromContainer(pClient, pUnit, pItem, eItemFlags);
       ITEMS::ItemMode::ITEMMODE_DeleteItemFromInventory(pGame, pUnit, pItem, 0);
@@ -1842,6 +1843,7 @@ void __fastcall QUEST_SendQuestInfoToUnit(::SGAMEDATA * pGame, D2UnitStrc * pUni
     uint8_t nActionType = 0;
     uint32_t nUnitGUID = 0;
     uint32_t uiUpdateType = 6;
+
     GAME::SCmd::NET_D2GS_SERVER_Send_0x28_PlayerQuestInfo(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xca7), 0x28, uiUpdateType, nUnitGUID, pBitBuffer, nActionType);
 }
 
@@ -2415,6 +2417,7 @@ void __fastcall RefreshQuestDataForUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
       /* Retrieve latest quest (in sequence) */ for (; pGameQuestData; pGameQuestData = pGameQuestData->pPrev) {
         if (0x29 <= (int)pGameQuestData->nQuestNoInternal) {
           /* End of quest array - matching quest not found - error */ dwErrorLine = 0x4b3;
+
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), dwErrorLine);
           exit(-1);
         }
@@ -2425,6 +2428,7 @@ void __fastcall RefreshQuestDataForUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
             /* FARPROC lpfn for IsBadCodePtr */ bTmpBool = IsBadCodePtr((FARPROC)pGameQuestData->fpStatusFilter);
             if (bTmpBool) {
               /* Invalid address: error */ dwErrorLine = 0x4cb;
+
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), dwErrorLine);
               exit(-1);
             }
@@ -2789,6 +2793,7 @@ D2UnitStrc * __fastcall ITEM_RewardItemInInventory(::SGAMEDATA * pGame, D2UnitSt
       pRoomsNear = (D2RoomStrc**)&nRewardLevel;
       nMaxDurability = 0x3e01;
       nScanRadius = 1;
+
       FindSpawnableLocation(D2Common::Units::UNITS_GetRoom(pUnit), &sDropCoords, nScanRadius, nMaxDurability, pRoomsNear, nFindRadius, nSearchIterations);
       ITEMS::Items::Drop::DropItem(pGame, 0, pRewardItem, (D2RoomStrc*)nRewardLevel, sDropCoords.x, sDropCoords.y);
       return pRewardItem;
@@ -2980,6 +2985,7 @@ void __fastcall QUEST_HandleKhalimsWillCompletion(::SGAMEDATA * pGame, D2UnitStr
         byActionType = 0;
         nUnitGUID = 0;
         uiUpdateType = 6;
+
         GAME::SCmd::NET_D2GS_SERVER_Send_0x28_PlayerQuestInfo(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xca7), 0x28, uiUpdateType, nUnitGUID, pBitBuffer, byActionType);
         pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xb56);
         if (pPlayerData->dwTradeTick != 1) {
@@ -3099,7 +3105,9 @@ static void __stdcall ReplaceJerhyn(D2RoomStrc * pRoom, D2QuestDataStrc * pQuest
 }
 
 } // namespace D2Game::Quests::QUESTS
+
 namespace D2Game::Quests::QUESTS::A2Q4 {
+
 // A2Q4 - Callback_03 (quest state 3 handler). Index 0x4a: advance stateFlag to 4 (if <4) and broadcast state 4 via QUEST_SetStateAndBroadcast, then persist via UpdateQuestRecord. Index 0x32: directly set record Step0x08+Step0x07. For the Jerhyn (0x28) path: tear down/respawn Jerhyn's monster AI, optionally ReplaceJerhyn at his location, remove player from the participation list, and if not Completed(0)/RewardAwaits(1) and stateFlag==3 advance to 4 + persist.
 void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     D2UnitDataPlayerStrc* pJerhynUnit;
@@ -3124,6 +3132,7 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
       if ((D2GSPacketSrv0x27_TextStrc*)ptPos.y != (D2GSPacketSrv0x27_TextStrc*)0x28) {
         return;
       }
+
       ptPos.y = (LONG)pQuestData->pQuestSpecificData.pA2Q4;
       if (((D2QuestDataA2Q4Strc*)ptPos.y)->bJerhynAiActive) {
         pPlayerData = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_MONSTER, ((D2QuestDataA2Q4Strc*)ptPos.y)->nJerhynMonsterGUID);
@@ -3135,6 +3144,7 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
           } else {
             pMonsterAi = 0;
           }
+
           bQuestDone = Monster::MonsterAI::HasAiSub(pMonsterAi);
           if (bQuestDone) {
             Monster::MonsterAI::ClearAISub(pQuestData->pGame, pPlayerData, nullptr, true);
@@ -3148,9 +3158,11 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
         pPlayerData = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_OBJECT, *(int32_t*)(ptPos.y + 0x38));
         if (pPlayerData) {
           D2Common::Units::GetCoords(pPlayerData, &ptPos);
+
           ReplaceJerhyn(D2Common::Units::UNITS_GetRoom(pPlayerData), pQuestData, &ptPos);
         }
       }
+
       QUESTGUID_RemovePlayerFromQuest(pQuestData, pQuestArgs);
       pGame = pQuestArgs->pGame;
       pJerhynUnit = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
@@ -3160,14 +3172,17 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
                          stateFlag 3->4 */ if (bQuestDone == 1) {
         return;
       }
+
       bQuestDone = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_RewardAwaits);
       if (!(bQuestDone != 1 && pQuestData->nStateFlag == 3)) {
         return;
       }
+
       QUEST_SetStateFlag(pQuestData, 4, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q4.cpp", 0x2de);
       UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Q12_UpdateQuestRecord);
       return;
     }
+
     bool bFlagOver3 = 3 < pQuestData->nStateFlag;
     if (!bFlagOver3) {
       QUEST_SetStateFlag(pQuestData, 4, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q4.cpp", 0x297);
@@ -3178,10 +3193,14 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     } else if (bFlagOver3) {
       return;
     }
+
     UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Q12_UpdateQuestRecord);
 }
+
 } // namespace D2Game::Quests::QUESTS::A2Q4
+
 namespace D2Game::Quests::QUESTS {
+
 void __fastcall PlaceJerhyn(D2QuestDataStrc * pQuestData, D2ObjectInitFnArg * pObjectInitArg) {
     POINT nSpawnX;
     D2QuestDataA2Q4Strc* pA2Q4Data = pQuestData->pQuestSpecificData.pA2Q4;

@@ -176,6 +176,7 @@ BOOL __fastcall D2WINBUTTON_HandleMouseWheel(::D2WinButton * pButton, int32_t nW
     if (!pButton->sControl.fpOnPress) {
       return 0;
     }
+
     gnFormControlCount++;
     sMsg.pControl = &pButton->sControl;
     pButton->sControl.fpOnPress(&sMsg);
@@ -240,6 +241,7 @@ static void __stdcall D2WINBUTTON_DrawText(::D2WinButton * pButton, int nOffsetY
       nSizeY = pButton->sControl.dwSizeY;
       nPosY = pButton->sControl.dwPosY;
       nPrimaryXCenter = pButton->sControl.dwPosX + nSecondLabelY;
+
       nDrawY = D2WinFont::DRAW_text0(D2Lang::StrTable::strtable::GetLocaleString(pButton->nHotkeyStringId));
       nSecondaryXCenter = (pButton->sControl.dwSizeX - nDrawY) / 2;
       if (nSecondaryXCenter < 0) {
@@ -259,6 +261,7 @@ static void __stdcall D2WINBUTTON_DrawText(::D2WinButton * pButton, int nOffsetY
       eGlobalPalette = pButton->nTextColor;
       eDrawMode = DRAW_DARKTRANSPARENT;
       bDrawBackground = 0;
+
       D2WinFont::D2WINFONT_DrawTextWithOptionalBackground(D2Lang::StrTable::strtable::GetLocaleString(pButton->nHotkeyStringId), nSecondaryXCenter, nSecondLabelY, eGlobalPalette, bDrawBackground, eDrawMode);
     }
 

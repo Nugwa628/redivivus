@@ -639,6 +639,7 @@ int32_t __stdcall ITEM_GetItemsTxt_dwAlternateGfxIfExists(D2UnitStrc * pUnit) {
       if (!pItemsTxt->dwAlternateGfx) {
         return pItemsTxt->dwCode;
       }
+
       return pItemsTxt->dwAlternateGfx;
     }
 }
@@ -734,6 +735,7 @@ int32_t __stdcall IITEM_GetItemsTxt_dwNormCode(D2UnitStrc * pUnit) {
       if (!pItemsTxt->dwNormCode) {
         return pItemsTxt->dwCode;
       }
+
       return pItemsTxt->dwNormCode;
     }
 }
@@ -941,10 +943,12 @@ BOOL __stdcall INVENTORY_CheckIfItemCanBeAutoBelted(D2InventoryStrc * pInventory
       if (pItemsTxt->bAutoBelt != '\0') {
         return 1;
       }
+
       BVar1 = INVENTORY::Inventory::INVENTORY_CanAutoBeltItem(pInventory, pUnit);
       if (BVar1 != -1) {
         return 1;
       }
+
       return 0;
     }
 }
@@ -1946,6 +1950,7 @@ int32_t __stdcall BARBARIAN_CheckItemData_b1or2Handed_isTrue(D2UnitStrc * pUnit,
       if (!(pUnit->eUnitType == UNIT_PLAYER && pUnit->nClassId == 4)) {
         return 0;
       }
+
       pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(pItem->nClassId);
       if (!pItemsTxt) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11a5);
@@ -1954,6 +1959,7 @@ int32_t __stdcall BARBARIAN_CheckItemData_b1or2Handed_isTrue(D2UnitStrc * pUnit,
       if (!pItemsTxt->b1or2Handed) {
         return 0;
       }
+
       return 1;
     }
 }
@@ -2180,7 +2186,9 @@ int32_t __stdcall ITEMS_ModifyPotionSellValueByDifficulty(D2UnitStrc * pNpc, int
 
     switch (pNpc->nClassId) {
       case 1:
+
       case 2:
+
       case 5:
         return nValue * 2;
       case 0:
@@ -2577,6 +2585,7 @@ static void __stdcall ITEMS_DeserializeSingleStat(uint32_t nFileVersion, eD2Unit
         }
       break;
       case UNITSTAT_item_levelreq:
+
       case UNITSTAT_item_levelreqpct:
         if (nFileVersion < 0x5d) {
           eUnitStat = UNITSTAT_item_fasterattackrate;
@@ -3343,6 +3352,7 @@ int __stdcall ITEM_GetSpellIcon(D2UnitStrc * pUnit) {
           if (pItemsTxt) {
             return (uint32_t)(uint8_t)pItemsTxt->bSpellIcon;
           }
+
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdb8);
           exit(-1);
         }
@@ -3352,10 +3362,12 @@ int __stdcall ITEM_GetSpellIcon(D2UnitStrc * pUnit) {
       } else {
         nBookTxtIdx = 0;
       }
+
       nBooksTxtLine = DATATBLS::ItemTbls::TXT_Books_GetLine(nBookTxtIdx);
       if (nBooksTxtLine) {
         return (uint32_t)*(uint8_t*)((int)nBooksTxtLine + 2);
       }
+
       return -1;
     }
 }
@@ -3844,6 +3856,7 @@ uint8_t * __stdcall GetItemColor(D2UnitStrc * pUnit, D2UnitStrc * pItem, char * 
       if (!pItemsTxt) {
         return nullptr;
       }
+
       nStateOrAffixIdx = ITEM_GetItemData_nFileIndex(pItem);
       pSetItemTxt = D2Client::DataTbls::GetSetItemsLine(nStateOrAffixIdx);
       if (!pSetItemTxt) {
@@ -3853,6 +3866,7 @@ uint8_t * __stdcall GetItemColor(D2UnitStrc * pUnit, D2UnitStrc * pItem, char * 
         if (pSetItemTxt->chrtransform < '\0') {
           return nullptr;
         }
+
         bValidColor = ITEMS_ValidateItemQualityCode((int)pSetItemTxt->chrtransform, (uint32_t)(uint8_t)pItemsTxt->bTransform);
         *pColor = bValidColor;
         pPaletteResult = D2CMP::Pallete::PALETTE_GetItemPalette((uint32_t)(uint8_t)pItemsTxt->bTransform, (int)pSetItemTxt->chrtransform);
@@ -3861,6 +3875,7 @@ uint8_t * __stdcall GetItemColor(D2UnitStrc * pUnit, D2UnitStrc * pItem, char * 
       if (pSetItemTxt->invtransform < '\0') {
         return nullptr;
       }
+
       bValidColor = ITEMS_ValidateItemQualityCode((int)pSetItemTxt->chrtransform, (uint32_t)(uint8_t)pItemsTxt->bTransform);
       *pColor = bValidColor;
       pPaletteResult = D2CMP::Pallete::PALETTE_GetItemPalette((uint32_t)(uint8_t)pItemsTxt->bInvTrans, (int)pSetItemTxt->invtransform);
@@ -7687,6 +7702,7 @@ void __fastcall SerializeItemToBitBuffer(D2UnitStrc * pUnit, D2BitBufferStrc * p
         nValue &= -2049;
       }
     }
+
     Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, nValue, 0x20);
     if ((nValue & ITEMFLAG_COMPACT) != UNIT_PLAYER) {
       SerializeSimpleItem(pUnit, pBitBuffer, pStatListEx);
@@ -7700,6 +7716,7 @@ void __fastcall SerializeItemToBitBuffer(D2UnitStrc * pUnit, D2BitBufferStrc * p
         SerializeItemToBitBuffer(pUnit_01, pBitBuffer, pStatListEx, bAllItems, 0);
       }
     }
+
     Fog::BitBuffer::GetNextPositon(pBitBuffer);
     return;
 }

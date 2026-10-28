@@ -320,6 +320,7 @@ void __fastcall SKILLNEC_OnCurseExpire(D2UnitStrc * pUnit, eD2States eState, int
     if (pUnit->eUnitType == UNIT_MONSTER) {
       D2AiGeneralStrc* pMonsterAiGeneral = !pUnit->pUnitData.pUnitDataMonster ? 0 : pUnit->pUnitData.pUnitDataMonster->pAiGeneral;
       bReattach = 0;
+
       Monster::AI::AttachCorrectAiFunctionToMonster(UNIT::SUnit::GetGamePointer(pUnit), pUnit, pMonsterAiGeneral, bReattach);
     }
 
@@ -1164,6 +1165,7 @@ uint32_t __fastcall SKILLNEC_ApplySummonBuffs(::SGAMEDATA * pGame, D2UnitStrc * 
             if (nStatCalc) {
               if (!pSummonStatList) {
                 nSummonGUID = D2Client::UNIT::GetGUID(pSummon);
+
                 pSummonStatList = (D2UnitStrc*)D2Common::Stats::StatsEx::AllocStatList(pGame->pMemoryPool, 0, 0, D2Client::Units::GetType(pSummon), nSummonGUID);
                 if (!pSummonStatList) {
                   return 0;
@@ -1404,6 +1406,7 @@ BOOL __fastcall Skills_SrvDoFunc_031_RaiseSkeletonFromCorpse(::SGAMEDATA * pGame
     sPet.pSkillTxt = (D2SkillsTxt*)D2Client::Units::GetYPosFromDynamicPathUnit(pCorpse);
     eD2UnitType eUnitType = pCorpse->eUnitType;
     int nUnitGUID = pCorpse->nUnitGUID;
+
     D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pCorpse), eUnitType, nUnitGUID);
     UNIT::SUnit::FreeServerUnit(pGame, pCorpse);
     sPet.nSkillCalc = 0;
@@ -1459,6 +1462,10 @@ uint32_t __fastcall SKILLNEC_ApplyCorpseExplosionToUnit(D2SkillCallbackContextSt
     uint32_t* pDmgDataSrc = (uint32_t*)pExplosionArgs->pDamage;
     uint32_t* pDmgDataDst = (uint32_t*)&sDamage;
     memcpy(pDmgDataDst, pDmgDataSrc, 0x1c * sizeof(*pDmgDataDst));
+
+
+
+
 
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
@@ -1712,6 +1719,7 @@ BOOL __fastcall Skills_SrvDoFunc_057_IronGolem(::SGAMEDATA * pGame, D2UnitStrc *
       D2RoomStrc* pRoom;
       nUnitGUID = pTargetItem->nUnitGUID;
       eUnitType = pTargetItem->eUnitType;
+
       D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pTargetItem), eUnitType, nUnitGUID);
       D2Common::Units::RemoveCollision_Vector(pTargetItem);
       D2Common::Unit::RemoveUnitFromRoom(pTargetItem);
@@ -1722,6 +1730,7 @@ BOOL __fastcall Skills_SrvDoFunc_057_IronGolem(::SGAMEDATA * pGame, D2UnitStrc *
     }
 
     SKILLNEC_InitializeSummon(pGamePostCreate, pUnit, pGolem, eSkill, nSkillLvl);
+
     GAME::SCmd::NET_D2GS_SERVER_Send_0x7F_AllyPartyInfo_0x90_PartyAutoMapInfo(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\SkillNec.cpp", 0x74f), pGolem);
     GAME::Targets::CreateUnitNode(pGamePostCreate, pGolem, nullptr, pUnit->nNodeTableIndex);
     return 1;
@@ -1892,6 +1901,7 @@ BOOL __fastcall Skills_SrvDoFunc_060_SummonBoneWall(::SGAMEDATA * pGame, D2UnitS
     }
 
     uint32_t nTargetY = nCursorYRaw;
+
     D2RoomStrc* pTargetRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(D2Common::Units::UNITS_GetRoom(pUnit), nTargetX, nTargetY);
     if (!pTargetRoom) {
       return 0;
@@ -2247,6 +2257,7 @@ BOOL __fastcall ITEMEVENT_AuraThornsWithLifeSteal(::SGAMEDATA * pGame, uint32_t 
     }
 
     uint32_t nMercTypeId = D2Common::Stats::StatsEx::GetOwnerGUID(pStatList);
+
     D2UnitStrc* pOwnerUnit = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Stats::StatsEx::GetOwnerType(pStatList), nMercTypeId);
     if (pUnit->eUnitType == UNIT_PLAYER || (nMercTypeId = D2Common::Monsters::MONSTERS::MONSTER_GetMercType(pUnit) , nMercTypeId != 0)) {
       if (pTarget->eUnitType == UNIT_PLAYER) {
@@ -2363,6 +2374,7 @@ BOOL __fastcall ITEMEVENT_AuraHealTarget(::SGAMEDATA * pGame, uint32_t nUnitEven
     }
 
     uint32_t nOwnerGUID = D2Common::Stats::StatsEx::GetOwnerGUID(pStatList);
+
     D2UnitStrc* pAuraCaster = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Stats::StatsEx::GetOwnerType(pStatList), nOwnerGUID);
     int32_t nHealCalc = D2Common::Skills::D2GetSkillCalc(pAuraCaster, pSkillTxt->calc[0], eSkill, nSkillLvlCast);
     nHealCalc = D2Client::Stats::D2ApplyPercent(pDamage->dwPhysDamage, nHealCalc, 100);

@@ -1276,10 +1276,12 @@ void __stdcall CELCMP_FixupOffsetsAndSerialize(int * pnParam, uint32_t * pdwPara
           } else {
             *(uint32_t*)(pFrameEntry + 0x20) = 0;
           }
+
           iFrame++;
           pFrameOffsets++;
         } while (iFrame < (uint32_t)(pnParam[4] * pnParam[5]));
       }
+
       nTotalFrames = pnParam[4] * pnParam[5];
       pFrameOffsets = (int*)(nTotalFrames * 4 + 0x18);
       pSerializedEnd = pFrameOffsets;
@@ -1294,6 +1296,7 @@ void __stdcall CELCMP_FixupOffsetsAndSerialize(int * pnParam, uint32_t * pdwPara
           pSerializedEnd = pnParam;
         } while (pFrameEntry);
       }
+
       pnParam = pSerializedEnd;
       pSerializedBlock = (uint32_t*)Fog::Memory::AllocClientMemory((size_t)pnParam, ".\\SRC\\CelCmp.cpp", 0x2e3, 0);
       *pSerializedBlock = 6;
@@ -1326,12 +1329,14 @@ void __stdcall CELCMP_FixupOffsetsAndSerialize(int * pnParam, uint32_t * pdwPara
             pDstFrame[6] = (int)pColorShiftDst - (int)pSerializedBlock;
             pColorShiftDst = (uint32_t*)((int)pColorShiftDst + *(int*)(*pSrcParam + 0x1c));
           }
+
           pDstFrameOffset++;
           pSrcParam++;
           nTotalFrames--;
           pDstFrame = pColorShiftDst;
         } while (nTotalFrames);
       }
+
       *pdwParam = (uint32_t)(uintptr_t)pSerializedBlock;
       *pnSize = (size_t)pnParam;
       return;
@@ -1363,8 +1368,10 @@ void __stdcall CELCMP_ApplyPaletteToAllFrames(DC6 * pDCC, uint8_t * pPalette) {
           nFrameIndex++;
         } while (nFrameIndex < nNumFrames);
       }
+
       nDirIndex++;
     } while (nDirIndex < (uint32_t)pDCC->nDirections);
+
     return;
 }
 
@@ -1506,6 +1513,7 @@ void __stdcall CELCMP_InvokeFormatSpecificCleanup(int32_t nParam, BYTE * dwParam
       iFrame++;
       puVar1++;
     } while (iFrame < (uint32_t)(*(int*)(nParam + 0x10) * *(int*)(nParam + 0x14)));
+
     return;
 }
 
@@ -1653,6 +1661,7 @@ void __stdcall CELCMP_DrawCelFrameCentered(D2GfxDataStrc * pGfxData, int32_t nDr
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x514);
         exit(-1);
       }
+
       nCenteredY = pFrameBlock->nOffsetY / 2;
       nDrawYCentered = nDrawY + nCenteredY;
       nRowsToRender = (uint32_t)pFrameBlock->nHeight >> 1;

@@ -1270,6 +1270,7 @@ static void __stdcall DRLGPRESET_UpdatePopTiles(int nTickCount, D2RoomExStrc * p
     if (0 >= nTileCount) {
       return;
     }
+
     pTileFlags = &pRoomEx->pRoomTiles->sRoomTiles.pWallTiles->nFlags;
     do {
       if (!(*pTileFlags & 0x200U) || (_bInside = DrlgRoom::AreXYInsideCoordinates(&searchBox, pTileFlags[-3] + pRoomEx->sCoords.WorldPosition.x, pTileFlags[-2] + pRoomEx->sCoords.WorldPosition.y) , !_bInside)) {
@@ -1539,6 +1540,7 @@ void __fastcall DRLGPRESET_AddPresetUnitToDrlgMap(D2PoolManagerStrc * pMemory, D
         if (pPresetUnit->eType != UNIT_OBJECT) {
           goto add_preset_copy;
         }
+
         nTableSize = pPresetUnit->nClassId;
         if (nTableSize != 0xc4 && nTableSize != 0x105) {
           if (nTableSize == 0x245) {
@@ -1551,8 +1553,10 @@ void __fastcall DRLGPRESET_AddPresetUnitToDrlgMap(D2PoolManagerStrc * pMemory, D
               continue;
             }
           }
+
           goto add_preset_copy;
         }
+
         newSeed = D2_SEED_NEXT(*pSeed);
         *pSeed = newSeed;
         if (!(newSeed.nSeedLow & 1)) {
@@ -1794,6 +1798,7 @@ static void __stdcall DRLGPRESET_BuildPresetArea(D2DrlgMapStrc * pDrlgMap, D2Drl
                             pMemoryOrXIndex = nXIndex;
                             break;
                           }
+
                           nVisIndex++;
                           pIndexIter++;
                         } while (nVisIndex < nPopCount);
@@ -1865,10 +1870,12 @@ static void __stdcall DRLGPRESET_BuildPresetArea(D2DrlgMapStrc * pDrlgMap, D2Drl
               nObjCellX = (int)(nVisIndex + (nVisIndex >> 0x1f & 7U)) >> 3;
               nErrLine = (int)(nWarpDestLevel + (nWarpDestLevel >> 0x1f & 7U)) >> 3;
             }
+
             DrlgGrid::AlterGridFlag(pDrlgGrid, nObjCellX, nErrLine, 0x30000, 0);
           }
         }
       }
+
       return;
     }
 }

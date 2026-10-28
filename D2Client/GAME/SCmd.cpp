@@ -535,6 +535,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x0A_RemoveObject(char * pBytes) {
     if (pBytes[1] == '\x01') {
       D2UnitStrc* pUnit;
       nPetIndex = 1;
+
       nPetGUID = RosterPets::GetRosterPetGUID(UNIT::Player::GetPlayerUnit_UI(), 7, nPetIndex);
       if (nUnitGUID == nPetGUID) {
         return;
@@ -855,9 +856,11 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x16_UPDATE(char * pBytes) {
       if (pUnit) {
         UNIT::Path::PATH_MoveUnitToPoint(pUnit, nX, (uint32_t)nY, 0, 0, 0);
       }
+
       i++;
       pUnitEntry += 9;
     } while (i < (int)(uint32_t)(uint8_t)pBytes[3]);
+
     return;
 }
 
@@ -2056,6 +2059,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x9C_ITEMEX(uint8_t * pBytes) {
         UNIT::HandleItemToCursor(pBytesCopy);
       return;
       case 0xb:
+
       case 0xc:
         UNIT::HandleItemInShop(pBytesCopy);
       break;

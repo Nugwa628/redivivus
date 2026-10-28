@@ -1210,6 +1210,7 @@ void __fastcall SERVER_UnitQueuePacketFree(D2UnitStrc * pUnit) {
       nLine = 0x3ce;
       pMsgNext = pMemoryToFree->pNext;
       szFile = ".\\UNIT\\SUnitMsg.cpp";
+
       Fog::Memory::FreeServerMemory(D2Client::UNIT::CUnitEvent::GetMemPool(pUnit), pMemoryToFree, szFile, nLine, nNull);
       pMemoryToFree = pMsgNext;
     } while (pMsgNext);

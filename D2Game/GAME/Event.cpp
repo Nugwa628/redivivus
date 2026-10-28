@@ -110,7 +110,9 @@ static D2TimerStrc * __stdcall EVENT_GetTimerOrAllocNew(::SGAMEDATA * pGame, D2T
 }
 
 } // namespace D2Game::GAME::Event
+
 namespace D2Game::GAME::Event::Dispatch {
+
 // Recycles a timer back to the free pool. Unlinks the timer from three data structures: unit timer list (pNextTimerOnUnit chain), dispatch bucket (pActiveTimersByType[nFrame & 0x3F]), and immediate list (pTimerListByType). Sets flag 0x8 if timer is currently executing (defer removal), otherwise immediately returns to pFirstList free pool.
 static void EVENT_RemoveAndRecycleTimer(D2TimerStrc * pTimer, ::SGAMEDATA * pGame) {
     D2TimerStrc** ppBucket;
@@ -135,8 +137,10 @@ static void EVENT_RemoveAndRecycleTimer(D2TimerStrc * pTimer, ::SGAMEDATA * pGam
         if ((int)nFrameBucket < 0) {
           nFrameBucket = (nFrameBucket - 1 | -64) + 1;
         }
+
         ppBucket = pGame->pTimerQueue->pActiveTimersByType[aTimerIndexUnitTypeLookupTable[pTimer->eUnitType]] + nFrameBucket;
       }
+
       *ppBucket = pTimer->pNextTimerList;
     }
     if (pTimer->pNextTimerList) {
@@ -147,6 +151,7 @@ static void EVENT_RemoveAndRecycleTimer(D2TimerStrc * pTimer, ::SGAMEDATA * pGam
         if ((int)nFrame < 0) {
           nFrame = (nFrame - 1 | -64) + 1;
         }
+
         ppBucket = pGame->pTimerQueue->pDispatchedTimersByType[aTimerIndexUnitTypeLookupTable[pTimer->eUnitType]] + nFrame;
         if (ppBucket && *ppBucket == pTimer) {
           *ppBucket = pTimer->pPrevTimerList;
@@ -163,14 +168,18 @@ static void EVENT_RemoveAndRecycleTimer(D2TimerStrc * pTimer, ::SGAMEDATA * pGam
         UNIT::SUnit::SetTimerListIfUnitExists(pTimer->pUnit, pTimer->pNextTimerOnUnit);
       }
     }
+
     D2TimerListStrc* pDVar1 = pEventControl->pTimerList;
     pTimer->pNextTimerList = pDVar1->pFirstList;
     pTimer->pPrevTimerList = 0;
     pDVar1->pFirstList = pTimer;
     pTimer->nFlags = 2;
 }
+
 } // namespace D2Game::GAME::Event::Dispatch
+
 namespace D2Game::GAME::Event {
+
 // Allocates a timer and attaches it to a unit's timer linked list. Calls EVENT_GetTimerOrAllocNew to obtain a recycled timer, links it via pNextTimerOnUnit (head insertion), and copies the unit's GUID and type to the timer structure. Returns the allocated D2TimerStrc ready for configuration.
 static D2TimerStrc * EVENT_AllocTimerToUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2TimerStrc* pTimer = EVENT_GetTimerOrAllocNew(pGame, pGame->pTimerQueue);
@@ -264,7 +273,9 @@ void __fastcall EVENT_ClearTimerList(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
 }
 
 } // namespace D2Game::GAME::Event
+
 namespace D2Game::GAME::Event::Dispatch {
+
 // Dispatches player timers, immediate or frame-matched.
 // The per-timer callback (D2TimerStrc+0x2C) is fpTimerFunctionUnit, NOT fpTimerFunction:
 // both indirect call sites here push three dwords before CALL EAX with pGame in ECX and
@@ -288,10 +299,12 @@ static void __stdcall EVENT_DispatchPlayerTimers(D2TimerQueueStrc * pTimerQueue,
         } else {
           pTimer->nfpTimerFunction(pGame, pTimer->pUnit, (eD2TimerTypeDWORD)pTimer->nTimerType, pTimer->nArg1, pTimer->nArg2);
         }
+
         pTimer->nFlags &= 0xfffe;
         if (pTimer->nFlags & 8U) {
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       }
     } else if (pTimer) {
@@ -305,14 +318,18 @@ static void __stdcall EVENT_DispatchPlayerTimers(D2TimerQueueStrc * pTimerQueue,
           } else {
             (*nfpTimerFunction)(pGame, pTimer->pUnit, (eD2TimerTypeDWORD)pTimer->nTimerType, pTimer->nArg1, pTimer->nArg2);
           }
+
           pTimer->nFlags &= 0xfffe;
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       } while (pTimer);
+
       return;
     }
 }
+
 // Dispatches monster timers using the same two-mode mechanism as player dispatch (immediate vs frame-matched bucket hash). Calls MONSTEREVENT_DefaultCallback or custom fpTimerFunction for each timer. Drives monster AI state machine, skill casting, regeneration, and death timers.
 static void __stdcall EVENT_DispatchMonsterTimers(D2TimerQueueStrc * pTimerQueue, ::SGAMEDATA * pGame, D2TimerStrc * pTimer, BOOL bImmediate) {
     pTimerQueue->pTimerTemp = 0;
@@ -325,10 +342,12 @@ static void __stdcall EVENT_DispatchMonsterTimers(D2TimerQueueStrc * pTimerQueue
         } else {
           pTimer->nfpTimerFunction(pGame, pTimer->pUnit, (eD2TimerTypeDWORD)pTimer->nTimerType, pTimer->nArg1, pTimer->nArg2);
         }
+
         pTimer->nFlags &= 0xfffe;
         if (pTimer->nFlags & 8U) {
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       }
     } else if (pTimer) {
@@ -341,14 +360,18 @@ static void __stdcall EVENT_DispatchMonsterTimers(D2TimerQueueStrc * pTimerQueue
           } else {
             pTimer->nfpTimerFunction(pGame, pTimer->pUnit, (eD2TimerTypeDWORD)pTimer->nTimerType, pTimer->nArg1, pTimer->nArg2);
           }
+
           pTimer->nFlags &= 0xfffe;
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       } while (pTimer);
+
       return;
     }
 }
+
 // Dispatches object timers (shrines, chests, doors, portals) with the dual immediate/frame-scheduled mode. Calls OBJECTEVENT_DefaultCallback or custom function. Objects use fewer timer types than players/monsters (mainly animation state and interaction cooldowns).
 static void __stdcall EVENT_DispatchObjectTimers(D2TimerQueueStrc * pTimerQueue, ::SGAMEDATA * pGame, D2TimerStrc * pTimer, BOOL bImmediate) {
     pTimerQueue->pTimerTemp = 0;
@@ -361,10 +384,12 @@ static void __stdcall EVENT_DispatchObjectTimers(D2TimerQueueStrc * pTimerQueue,
         } else {
           Objects::ObjectsMode::OBJECTEVENT_DefaultCallback(pGame, pTimer->pUnit, (eD2TimerTypeDWORD)pTimer->nTimerType);
         }
+
         pTimer->nFlags &= 0xfffe;
         if (pTimer->nFlags & 8U) {
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       }
     } else if (pTimer) {
@@ -377,14 +402,18 @@ static void __stdcall EVENT_DispatchObjectTimers(D2TimerQueueStrc * pTimerQueue,
           } else {
             Objects::ObjectsMode::OBJECTEVENT_DefaultCallback(pGame, pTimer->pUnit, (eD2TimerTypeDWORD)pTimer->nTimerType);
           }
+
           pTimer->nFlags &= 0xfffe;
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       } while (pTimer);
+
       return;
     }
 }
+
 // Dispatches missile timers which drive projectile physics every frame. Calls MISSILEEVENT_DefaultCallback (→MissileSrvDo mode dispatcher → velocity, collision, hit functions). This is the combat system's firing mechanism. Missiles nearly always use immediate dispatch mode.
 static void __stdcall EVENT_DispatchMissileTimers(D2TimerQueueStrc * pTimerQueue, ::SGAMEDATA * pGame, D2TimerStrc * pTimer, BOOL bImmediate) {
     pTimerQueue->pTimerTemp = 0;
@@ -397,10 +426,12 @@ static void __stdcall EVENT_DispatchMissileTimers(D2TimerQueueStrc * pTimerQueue
         } else {
           MISSILES::MissilesMode::MISSILEEVENT_DefaultCallback(pGame, pTimer->pUnit, (uint32_t)pTimer->nTimerType);
         }
+
         /* Sets nFlags 1st byte to 0 */ pTimer->nFlags &= 0xfffe;
         if (pTimer->nFlags & 8U) {
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       }
     } else if (pTimer) {
@@ -413,14 +444,18 @@ static void __stdcall EVENT_DispatchMissileTimers(D2TimerQueueStrc * pTimerQueue
           } else {
             MISSILES::MissilesMode::MISSILEEVENT_DefaultCallback(pGame, pTimer->pUnit, (uint32_t)pTimer->nTimerType);
           }
+
           pTimer->nFlags &= 0xfffe;
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       } while (pTimer);
+
       return;
     }
 }
+
 // Dispatches item timers for ground items and equipped items. Calls ITEMEVENT_DefaultCallback or custom handler. Item timers handle durability refresh, quantity refresh (arrows/bolts), and item destruction countdowns.
 static void __stdcall EVENT_DispatchItemTimers(D2TimerQueueStrc * pTimerQueue, ::SGAMEDATA * pGame, D2TimerStrc * pTimer, BOOL bImmediate) {
     pTimerQueue->pTimerTemp = 0;
@@ -433,10 +468,12 @@ static void __stdcall EVENT_DispatchItemTimers(D2TimerQueueStrc * pTimerQueue, :
         } else {
           ITEMS::ItemMode::ITEMEVENT_DefaultCallback(pGame, pTimer->pUnit, (eD2TimerTypeDWORD)pTimer->nTimerType);
         }
+
         pTimer->nFlags &= 0xfffe;
         if (pTimer->nFlags & 8U) {
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       }
     } else if (pTimer) {
@@ -449,16 +486,22 @@ static void __stdcall EVENT_DispatchItemTimers(D2TimerQueueStrc * pTimerQueue, :
           } else {
             ITEMS::ItemMode::ITEMEVENT_DefaultCallback(pGame, pTimer->pUnit, (eD2TimerTypeDWORD)pTimer->nTimerType);
           }
+
           pTimer->nFlags &= 0xfffe;
           EVENT_RemoveAndRecycleTimer(pTimer, pGame);
         }
+
         pTimer = pTimerQueue->pTimerTemp;
       } while (pTimer);
+
       return;
     }
 }
+
 } // namespace D2Game::GAME::Event::Dispatch
+
 namespace D2Game::GAME::Event {
+
 // Frees the entire timer queue infrastructure on game shutdown. Walks pTimerList chain to free all timer pools (each 0x7088 bytes), then frees the D2TimerQueueStrc itself (0xA20 bytes) and sets pGame->pTimerQueue to NULL. Called by GAME_DestroyGame.
 // @sourcefile .\GAME\Event.cpp
 void __fastcall EVENT_FreeTimerQueue(::SGAMEDATA * pGame) {

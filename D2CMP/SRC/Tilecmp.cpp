@@ -733,9 +733,11 @@ int32_t __fastcall TILECMP_CalculateCacheSize(int32_t nUnused, int32_t pTileCmpH
           nNodeCount--;
         } while (nNodeCount);
       }
+
       pTileSetEntry += 0x18;
       nTotalSize--;
     } while (nTotalSize);
+
     return nTotalBytes;
 }
 
@@ -822,6 +824,7 @@ void __fastcall TILECMP_DeserializeAndFixup(int32_t pThis, void * pTileSetData, 
             pDstTileSetEntry += 0x18;
           } while (nSizeOut < *(int*)((int)pTileSetData + 0x10c));
         }
+
         *(uint32_t*)((int)pTileSetData + 4) |= 2;
         *(uint32_t*)((int)nErrAddress + 4) |= 6;
         return;
@@ -962,6 +965,7 @@ D2TileLibraryHashStrc * __fastcall TILECMP_RegisterTilesForLookup(D2TileLibraryH
         FindTiles::FINDTILE_Register(pHashTable, &pTileCmpHdr->pTiles[iTileIdx]);
         iTileIdx++;
       } while (iTileIdx < pTileCmpHdr->nTiles);
+
       return pHashTable;
     }
 }
@@ -990,6 +994,7 @@ void __stdcall TILECMP_RelocateSubTilePixelData(D2TileLibraryEntryStrc * pTile) 
       *pPixelDataSlot = (uintptr_t)&pSubTileBase->nOffsetX + *pPixelDataSlot;
       iSubTile++;
     } while (iSubTile < pTile->nSubTiles);
+
     return;
 }
 

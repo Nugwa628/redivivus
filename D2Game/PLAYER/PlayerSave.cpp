@@ -1086,6 +1086,7 @@ void __stdcall SaveToBuffer(::SGAMEDATA * pGame, int32_t nSaveParam, D2UnitStrc 
       exit(-1);
     }
 
+
     GAME::Clients::CLIENT_AccumulateSaveData(GAME::Clients::GetClientNo(pClient), charSaveBuffer, nSizeSave, nSizeSave, 0, 0, 0);
     GAME::Clients::CLIENTS_ResetSaveTransferState(pClient);
 }
@@ -1334,6 +1335,7 @@ int __fastcall _oldSaveGameLoadingPart(::SGAMEDATA * pGame, D2ClientStrc * pClie
       *ppUnitOut = pUnit;
       SERVER_InitPlayer(pGameCopy, pUnit, pClient);
       pClient_00 = pClient;
+
       UNIT::SUnitMsg::SERVER_SendInitUnitPacket(GAME::Clients::CLIENT_GetGame(pClient), *ppUnitOut, pClient_00);
       *pnParam2 = 0x10;
       *pnParam3 = sgptDataTable->nTxtSkillsCount;
@@ -2302,6 +2304,7 @@ int32_t __stdcall _oldSaveGameLoadingPart8(D2UnitStrc * pUnit, uint32_t * pnPara
             ITEMS::ItemMode::ITEMS_RecalcAndRefreshInventory(pGame, pMercUnit, 0, 0);
             ITEMS::ItemMode::ITEMMODE_ReturnZero3(0);
             nLayer = 0;
+
             D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMercUnit, UNITSTAT_hitpoints, D2Common::Stats::StatsEx::GetTxtMaxHp(pMercUnit), nLayer);
             Monster::MonsterAI::SendMercPackets(pGame, pUnit, 1);
             *pnParam2 = (uint32_t*)((int)pnParam - (int)puVar2 + (int)puVar1);

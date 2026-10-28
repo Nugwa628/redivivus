@@ -540,6 +540,7 @@ void __fastcall CLIENT_SpawnTowerMistEffect(D2UnitStrc * pUnit) {
     D2SkillArgStrc sSkillArg;
     int32_t nTargetClassId = 0x173;
     eD2UnitType eFindType = UNIT_OBJECT;
+
     D2UnitStrc* pTarget = D2Common::Units::UnitFinds::FindUnitInNeighboredRooms(D2Common::Units::UNITS_GetRoom(pUnit), eFindType, nTargetClassId);
     if (pTarget) {
       eFindType = pTarget->eUnitType;
@@ -568,6 +569,7 @@ void __fastcall CLIENT_SpawnTowerMistEffect(D2UnitStrc * pUnit) {
       } else {
         nX = 0;
       }
+
       nX += -0xf;
       eFindType = pUnit->eUnitType;
       if (eFindType == UNIT_OBJECT || 3 < (int)eFindType && (int)eFindType <= 5) {
@@ -577,6 +579,7 @@ void __fastcall CLIENT_SpawnTowerMistEffect(D2UnitStrc * pUnit) {
       } else {
         nY = 0;
       }
+
       nY += -0xf;
     }
 
@@ -602,6 +605,7 @@ void __fastcall CLIENT_SpawnOrbMistEffect(D2UnitStrc * pUnit) {
     int nX;
     int32_t nClassId = 0x182;
     eD2UnitType eFindType = UNIT_OBJECT;
+
     D2UnitStrc* pTarget = D2Common::Units::UnitFinds::FindUnitInNeighboredRooms(D2Common::Units::UNITS_GetRoom(pUnit), eFindType, nClassId);
     if (pTarget) {
       GAME::Wall2::WALL2_ScheduleSoundSequence(0x124f, 0, 0x15e, 0, 0, 0, 0);
@@ -613,6 +617,7 @@ void __fastcall CLIENT_SpawnOrbMistEffect(D2UnitStrc * pUnit) {
       } else {
         nX = 0;
       }
+
       eFindType = pTarget->eUnitType;
       if (eFindType == UNIT_OBJECT || 3 < (int)eFindType && (int)eFindType <= 5) {
         sSkillArg.nUnitY = pTarget->pPath.pStaticPath->nPosY;
@@ -798,6 +803,7 @@ void __stdcall CLIENT_BossDeath_Baal() {
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
     int32_t nSearchRange = 0x220;
     eD2UnitType eSearchType = UNIT_MONSTER;
+
     D2UnitStrc* pBaalUnit = D2Common::Units::UnitFinds::FindUnitInNeighboredRooms(D2Common::Units::UNITS_GetRoom(pPlayerUnit_lcl), eSearchType, nSearchRange);
     if (!pBaalUnit) {
       return;
@@ -968,6 +974,7 @@ void __fastcall CLIENT_SpawnWorldstoneShakeParticle(D2UnitStrc * pUnit) {
     Engine::Particle::PARTICLE_SetBoundsOffset(pUnit, 0, 0, 5, 0);
     Engine::Particle::PARTICLE_SetReverseDirection(pUnit, 0);
     D2Common::Units::Missile::SetTargetY(pMissileUnit, 1);
+
     CLIENT_CheckWorldstoneShake(UNIT::CUnit::GetCurrentRoom());
 }
 
@@ -1399,6 +1406,7 @@ static uint32_t __stdcall MONSTER_TryMoveTowardTarget(D2UnitStrc * pUnit, uint8_
     eD2CollisionUnitSize nWidth = COLLISION_UNIT_SIZE_POINT;
     int nY = nStepY + local_c;
     int nX = nStepX + nMonsterY;
+
     eCollisionFlags eVar2 = D2Common::Collision::CheckCollision_BlockAll_Width(D2Common::Units::UNITS_GetRoom(pUnit), nX, nY, nWidth, eCollisionFlag);
     if (eVar2 != COLLIDE_NONE) {
       return 0;
@@ -1942,6 +1950,7 @@ static void CLIENT_MonsterSeekCorpse(D2UnitStrc * pUnit) {
     }
 
     eCollisionFlags eCollision = COLLISION_LOS_THREAT | COLLIDE_MISSILE;
+
     eCollision = D2Common::Collision::CheckCollision_BlockPlayerMissile(D2Common::Units::UNITS_GetRoom(pUnit), nX, nY, eCollision);
     if (eCollision != COLLIDE_NONE) {
       CLIENT_SendMonsterAttackMessage(pUnit);

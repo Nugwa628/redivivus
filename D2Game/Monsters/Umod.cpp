@@ -322,6 +322,7 @@ void __fastcall MONUMOD_ApplyFanatic(D2UnitStrc * pUnit, int32_t nIndex, BOOL bU
     if (pDiffLevels) {
       int32_t nValidatedId;
       nValue = pDiffLevels->ChampionDamageBonus * 300 / 100;
+
       nValidatedId = D2Client::UNIT::Player::ValidateClassId(D2Client::UNIT::Player::TXT_MonStats_GetBaseId(pUnit));
       nBaseClassId = nValue;
       if (nValidatedId == 0x76) {
@@ -458,6 +459,7 @@ void __fastcall TeleHeal(D2UnitStrc * pUnit, int32_t nIndex, BOOL bUnknown) {
 
     SKILLS::SkillsServer::SetSkill(pUnit, SKILL_MonTeleport, 1, 1);
     uint32_t nMode = 4;
+
     D2Common::Skills::SetSkillMode(D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_MonTeleport, pUnit), nMode);
     Monster::AI::SetUnsetAiFlags0x20(pUnit, 1);
 }

@@ -232,6 +232,7 @@ void __fastcall GAME_ReplayRecordedWindowMessage(D2GameRecordEntryStrc * pIndex)
     uint32_t wParam = pIndex->wParam;
     BOOL* pOutResult1 = &__frame0.nOutResult1;
     uint32_t uMsg = pIndex->uMsg;
+
     Storm::WindowHandle::SMsgDispatchMessage(D2gfx::D2GFX::GetHwnd(), uMsg, wParam, dwLParam, pOutResult1, (LRESULT*)pOutResult2);
 }
 

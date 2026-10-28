@@ -545,6 +545,7 @@ void __stdcall DRLGENV_InitializeEnvironment(D2DrlgActStrc * pDrlgAct, D2RoomStr
       if (pRoom) {
         nDrlgAct = DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       }
+
       eActNo = Drlg::GetActNoFromLevelNumber(nDrlgAct);
       nActNo = (uint32_t)eActNo;
       DRLGENV_UpdateLightIntensity(nDrlgAct, pEnv, nActNo);

@@ -301,8 +301,11 @@ void __fastcall CMD_InvokeCallbackByParam(int32_t nParam) {
       return;
     }
 }
+
 } // namespace D2Client::UI::CmdTbl
+
 namespace D2Client {
+
 // Validates whether a command can be bound to mouse buttons (0x103-0x104). Returns false if command handler exists and button is left/right click, true otherwise. Used during key binding setup to prevent invalid mouse button assignments.
 static BOOL CMD_ValidateMouseButtonBinding(int32_t nCmdIndex, uint16_t * pErrorCode, uint32_t nMouseButton) {
     if (!((nMouseButton & 0xffff) - 0x103 <= 1 && gaCmdBindings[nCmdIndex].pfnAltHandler)) {
@@ -311,11 +314,15 @@ static BOOL CMD_ValidateMouseButtonBinding(int32_t nCmdIndex, uint16_t * pErrorC
     if (!pErrorCode) {
       return 0;
     }
+
     *pErrorCode = 0xf8a;
     return 0;
 }
+
 } // namespace D2Client
+
 namespace D2Client::Save {
+
 // Opens (or creates) the per-character .key save file used for realm character locking. If a realm name is set, first tries the realm subdirectory path (&lt;savepath&gt;\&lt;realm&gt;\&lt;char&gt;.key); on failure falls back to the base save path (&lt;savepath&gt;\&lt;char&gt;.key). Calls Storm CreateFileA with caller-supplied dwDesiredAccess and dwCreationDisposition. Returns the file HANDLE, or INVALID_HANDLE_VALUE if both paths fail.
 static HANDLE GetKeyFileHandle(DWORD dwCreationDisposition, DWORD dwDesiredAccess) {
     HANDLE hFile;
@@ -338,10 +345,12 @@ static HANDLE GetKeyFileHandle(DWORD dwCreationDisposition, DWORD dwDesiredAcces
         return hFile;
       }
     }
+
     Storm::Source::SSTR::SStrPrintf(szKeyFilePath, 0x104, "%s%s.key", szPath, D2Game::Save::szSaveCharacterName);
     hFile = Fog::Source::SFile::thunk_CreateFileA(szKeyFilePath, dwDesiredAccess, 0, (LPSECURITY_ATTRIBUTES)0x0, dwCreationDisposition, 0x80, (HANDLE)0x0);
     return hFile;
 }
+
 // Serializes the global key-bindings table (g_KeyBindingsTable, 0x474 bytes, 0x11d entries) to two files: the user's active key file (via GetKeyFileHandle) and the install-directory "default.key" fallback. Writes a header with signature 0x5357 and version 0x25 before the binding data.
 void __stdcall CMD_WriteKeyFile() {
     char* pEnd;
@@ -353,6 +362,7 @@ void __stdcall CMD_WriteKeyFile() {
     if (hFile == (HANDLE)-1) {
       return;
     }
+
     for (int i = 0x2; i < 0x476; i++) szBuffer[i] = 0;
     DWORD nWritten = 0;
     szBuffer[0] = '%';
@@ -365,6 +375,7 @@ void __stdcall CMD_WriteKeyFile() {
       pDst += 10;
       nCount--;
     } while (nCount);
+
     D2KeyBindStrc* pSrc = g_KeyBindingsTable;
     int32_t* puVar5 = (int32_t*)(szBuffer + 2);
     for (nCount = 0x11d; nCount; nCount--) {
@@ -372,6 +383,7 @@ void __stdcall CMD_WriteKeyFile() {
       pSrc = (D2KeyBindStrc*)&pSrc->wKeyCode;
       puVar5++;
     }
+
     Fog::Source::SFile::thunk_WriteFile(hFile, (LPCVOID)szBuffer, 0x476, &nWritten, (LPOVERLAPPED)0x0);
     Fog::Source::SFile::SFILE_Win32CloseHandle(hFile);
     Fog::Source::SFile::SFILE_GetInstallPath(szInstallPath, 0xdc);
@@ -380,11 +392,13 @@ void __stdcall CMD_WriteKeyFile() {
       pEnd = pDst;
       pDst = pEnd + 1;
     } while (pEnd[1] != '\0');
+
     memcpy(pEnd + 1, "default.key", 0xc);
     hFile = Fog::Source::SFile::thunk_CreateFileA(szInstallPath, 0x40000000, 0, (LPSECURITY_ATTRIBUTES)0x0, 2, 0x80, (HANDLE)0x0);
     if (hFile == (HANDLE)-1) {
       return;
     }
+
     sKeyFileHeader.wSignature = 0x5357;
     sKeyFileHeader.wVersion = 0x25;
     sKeyFileHeader.wDataSize = 0x47a;
@@ -392,7 +406,9 @@ void __stdcall CMD_WriteKeyFile() {
     Fog::Source::SFile::thunk_WriteFile(hFile, (LPCVOID)g_KeyBindingsTable, 0x474, &nWritten, (LPOVERLAPPED)0x0);
     Fog::Source::SFile::SFILE_Win32CloseHandle(hFile);
 }
+
 } // namespace D2Client::Save
+
 namespace D2Client::UI::CmdTbl {
 
 // @sourcefile .\UI\CmdTbl.cpp
@@ -1355,9 +1371,11 @@ void __fastcall CMD_ToggleKeyConfigMode(int32_t nEnable, int32_t bUpdateUIHandle
       if (gbKeyConfigModeActive == 1) {
         nHandlerCount = 4;
         gbKeyConfigModeActive = 0;
+
         _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
         if (bUpdateUIHandlers && !gbNormalUIHandlersRegistered) {
           nHandlerCount = 2;
+
           _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagCmdTableInit, nHandlerCount);
           gbNormalUIHandlersRegistered = 1;
         }
@@ -1366,11 +1384,13 @@ void __fastcall CMD_ToggleKeyConfigMode(int32_t nEnable, int32_t bUpdateUIHandle
       gbKeyConfigModeActive = 1;
       if (bUpdateUIHandlers && gbNormalUIHandlersRegistered) {
         nHandlerCount = 2;
+
         _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagCmdTableInit, nHandlerCount);
         gbNormalUIHandlersRegistered = 0;
       }
 
       nHandlerCount = 4;
+
       _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
       return;
     }
@@ -1488,6 +1508,7 @@ void __stdcall CMD_InitKeyBindings() {
 
     int32_t nHandlerCount = 4;
     gbKeyConfigModeActive = 1;
+
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
 }
 
@@ -1499,6 +1520,7 @@ void __stdcall CMD_ExitKeyConfigMode() {
 
     int32_t nHandlerCount = 4;
     gbKeyConfigModeActive = 0;
+
     _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
 }
 

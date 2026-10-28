@@ -72,6 +72,7 @@ int __fastcall BNMESSQUEUE_EnqueueBytes(int32_t nEventType, char * pBytes, size_
       nLobbyChatQueueMessages->pNext = pNewMessage;
       pFirstMessage = nLobbyChatCurrentMessage;
     }
+
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nLobbyChatCurrentMessage = pFirstMessage;
     nLobbyChatQueueMessages = pNewMessage;
     LeaveCriticalSection(&lpCriticalSection_00882004);
@@ -99,6 +100,7 @@ uint32_t __fastcall BNMESSQUEUE_EnqueueString(int32_t nEventType, char * szMessa
       nLobbyChatQueueMessages->pNext = pNewMessage;
       pFirstMessage = nLobbyChatCurrentMessage;
     }
+
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nLobbyChatCurrentMessage = pFirstMessage;
     nLobbyChatQueueMessages = pNewMessage;
     LeaveCriticalSection(&lpCriticalSection_00882004);

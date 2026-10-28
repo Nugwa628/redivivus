@@ -217,6 +217,7 @@ void __fastcall Q09_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10d);
               exit(-1);
             }
+
             pSeqQuestData->fpSequenceFilter(pSeqQuestData);
           }
         }

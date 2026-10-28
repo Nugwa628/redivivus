@@ -176,6 +176,7 @@ BOOL __fastcall Skills_CltStFunc_ClearTargetableAndCollision(D2UnitStrc * pUnit,
 
     int32_t eCollisionFlag = 0x1000;
     eD2CollisionShapeType nCollSubType = COLLISION_PATTERN_SMALL_NO_PRESENCE;
+
     D2Common::Collision::RemoveCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nX, nY, nCollSubType, eCollisionFlag);
     return 1;
 }
@@ -1097,6 +1098,7 @@ BOOL __fastcall Skills_CltDoFunc_Mon_DirectionalBeam(D2UnitStrc * pUnit, eD2Skil
       int32_t nTargetX;
       bFaceTarget = 0;
       nSrcY = Units::GetYPosFromDynamicPathUnit(pTarget);
+
       D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pTarget), nSrcY, bFaceTarget);
       nSrcY = Units::GetXPosFromDynamicPathUnit(pTarget);
       nTargetX = Units::GetXPosFromDynamicPathUnit(pUnit);
@@ -1265,6 +1267,7 @@ BOOL __fastcall Skills_CltDoFunc_Mon_ChargeAnim(D2UnitStrc * pUnit, eD2Skills eS
         nPercent = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_velocitypercent, 0);
         nLine = 0x466;
         szFile = ".\\SKILLS\\SkillsMon.cpp";
+
         D2Common::PATH::DynamicPath::SetVelocities(pDynamicPath, Stats::D2ApplyPercent(nDist, nPercent, 100), szFile, nLine);
         D2Common::PATH::DynamicPath::PATH_SetPathType(pDynamicPath, 1);
         D2Common::PATH::DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
@@ -2448,6 +2451,7 @@ D2UnitStrc * __fastcall SKILLSMON_CltCreateSpiderLay(D2UnitStrc * pUnit) {
     }
 
     BOOL bHasRoom = 1;
+
     int nSkillLevel = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_SpiderLay, pUnit), bHasRoom);
     D2RoomStrc* pStartRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     eD2UnitType eUnitType = pUnit->eUnitType;
@@ -2482,6 +2486,7 @@ D2UnitStrc * __fastcall SKILLSMON_CltCreateSpiderLay(D2UnitStrc * pUnit) {
     D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(nDirOffset[nDirRaw & 0xff], &nOffsetX, &nOffsetY);
     nUnitX += nOffsetX;
     nUnitY += nOffsetY;
+
     bHasRoom = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pStartRoom, nUnitX, nUnitY));
     if (bHasRoom) {
       return nullptr;

@@ -221,6 +221,7 @@ template<> ::MappingEntryNode * TSHashTable<MappingEntryNode, HASHKEY_STRI>::Ptr
     ::HASHKEY_STRI* ppszSearchKey = (::HASHKEY_STRI*)&szKey;
     nExState = 0;
     szKey = pszDupKey;
+
     uint32_t* pFoundEntry = (uint32_t*)this->Ptr(Storm::Source::SSTR::SStrHash(pszText, 0, 0), ppszSearchKey);
     if (pszDupKey) {
       Storm::SMem::SMemFree(pszDupKey, "d:\\diablo2\\Diablo2\\3rdparty\\storm\\h\\stpl.h", 0x5e4, 0);
@@ -913,6 +914,7 @@ template<> ::MappingEntryNode * TSHashTable<MappingEntryNode, HASHKEY_STRI>::New
     szKey = (char*)pObject;
     uint32_t dwExtraData1 = nExtraBytes;
     uint32_t dwExtraData2 = dwFlags;
+
     ::MappingEntryNode* pszDup = this->New(Storm::Source::SSTR::SStrHash(pszText, 0, 0), pKey, dwExtraData1, dwExtraData2);
     if (pObject) {
       Storm::SMem::SMemFree(pObject, "d:\\diablo2\\Diablo2\\3rdparty\\storm\\h\\stpl.h", 0x5e4, 0);

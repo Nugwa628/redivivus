@@ -999,6 +999,7 @@ static D2NpcGreetingSoundsStrc gaNpcGreetingSounds[29] = {
         case 0xff:
           return gaNpcGreetingSounds + 0x15;
         case 0x9b:
+
         case 0xaf:
           return gaNpcGreetingSounds + 0x17;
         case 0x92:

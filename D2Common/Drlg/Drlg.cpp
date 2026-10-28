@@ -498,6 +498,7 @@ void __fastcall DRLGLEVEL_AdjustRoomCoordinates(D2DrlgLevelStrc * pLevel) {
             *pWorldY += pLevel->sCoordinatesAndSize.WorldPosition.y - nMinY;
             pRoomEx = pRoomEx->pRoomExNext;
           } while (pRoomEx);
+
           return;
         }
       }
@@ -522,8 +523,10 @@ D2RoomExStrc * __fastcall GetRoomOfCoord(D2DrlgLevelStrc * pLevel, int32_t nX, i
         if (bIsInside) {
           return pRoom;
         }
+
         pRoom = pRoom->pRoomExNext;
       } while (pRoom);
+
       return nullptr;
     }
 }
@@ -1655,7 +1658,9 @@ BOOL __stdcall DRLGOUTDOOR_PlaceRandomBorderSubTiles(D2UnkOutdoorStrc * pOutdoor
 }
 
 } // namespace D2Common::Drlg
+
 namespace D2Common::Drlg::Outdoors {
+
 // Paste preset units from a LvlSub definition into the active outdoor room. Converts bounds to world coordinates, then for each preset check if it falls inside the sub-rect and spawn a new preset unit offset into the room’s local space.
 static void __stdcall DRLGOUTDOOR_CopyPresetUnitsFromSubTxt(int32_t roomX, int32_t roomY, D2DrlgWallLayerGridsStrc * pRoomCtx, D2PoolManagerStrc * pMemory, D2LvlSubTxt * pLvlSub, int * pRect) {
     uint32_t* pCurrentPreset;
@@ -1789,7 +1794,9 @@ void __stdcall DRLGOUTDOOR_ApplyLvlSubTileData(D2PoolManagerStrc * pMemory, int3
 }
 
 } // namespace D2Common::Drlg
+
 namespace D2Common::Drlg::Outdoors {
+
 // Checks that applying the LvlSub patch doesn’t conflict with existing floor/wall/shadow cells; returns false if any flagged tiles overlap and existing grids already set the same flags.
 static BOOL __stdcall DRLGOUTDOOR_CheckSubTileOverlap(int32_t nParam1, int32_t nParam2, D2DrlgWallLayerGridsStrc * pDrlgUnkn, int * pnParam, D2LvlSubTxt * pLvlSubTxt) {
     uint32_t uFlags;
@@ -1800,6 +1807,7 @@ static BOOL __stdcall DRLGOUTDOOR_CheckSubTileOverlap(int32_t nParam1, int32_t n
     if (0 >= pnParam[3]) {
       return 1;
     }
+
     do {
       int dx;
       dx = 0;
@@ -1811,6 +1819,7 @@ static BOOL __stdcall DRLGOUTDOOR_CheckSubTileOverlap(int32_t nParam1, int32_t n
             if (uFlags & 0x3f0ff00 || !(uFlags & 2)) {
               return 0;
             }
+
             nWallLayerIter = 0;
             if (0 < nWallLayerCount) {
               ppWallGrid = pDrlgUnkn->apWallGrids;
@@ -1821,20 +1830,27 @@ static BOOL __stdcall DRLGOUTDOOR_CheckSubTileOverlap(int32_t nParam1, int32_t n
                     return 0;
                   }
                 }
+
                 ppWallGrid++;
                 nWallLayerIter++;
               } while (nWallLayerIter < nWallLayerCount);
             }
           }
+
           dx++;
         } while (dx < pnParam[2]);
       }
+
       dy++;
     } while (dy < pnParam[3]);
+
     return 1;
 }
+
 } // namespace D2Common::Drlg::Outdoors
+
 namespace D2Common::Drlg {
+
 // Iterates all substitution groups in a DRLG level-sub file and attempts to place each group's tile pattern on the outdoor room grid. Act 1: sweeps interior grid positions, applies overlap-checked tiles directly. Act 2: matches tile types and applies a randomly selected variant (using pSubTxt probability and the room seed) at each matching grid cell. Writes tile data via DRLGOUTDOOR_ApplyLvlSubTileData.
 void __stdcall CheckAll(D2DrlgWallLayerGridsStrc * pUnknown, D2LvlSubTxt * pSubTxt) {
     D2SeedStrc DVar2;
@@ -3825,7 +3841,9 @@ void __fastcall DRLGACTMISC_AllocDrlgLevelForAct(D2DrlgStrc * pDrlg, eAct nActNo
 }
 
 } // namespace D2Common::Drlg
+
 namespace D2Common::Drlg::Path {
+
 // Performs a Bresenham line raycast between two packed positions, checking collision at each step. Handles all octant cases (X-major, Y-major, diagonal). Returns 0 if blocked, 1 if path is clear.
 static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_t * pnParam, D2DynamicPathStrc * pPathArg) {
     int32_t iVar1;
@@ -3844,11 +3862,13 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
     if (nDeltaX < 0) {
       nStepsX = -nDeltaX;
     }
+
     nStepsX++;
     int nStepsY = nDeltaY;
     if (nDeltaY < 0) {
       nStepsY = -nDeltaY;
     }
+
     nStepsY++;
     uint16_t nCurY = (uint16_t)(nPackedSrc >> 0x10);
     uint16_t nCurX = (uint16_t)nPackedSrc;
@@ -3870,6 +3890,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
               return 1;
             }
           }
+
           *pnParam = nPackedPrev;
           return 0;
         }
@@ -3887,6 +3908,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
               *pnParam = nPackedPrev;
               return 0;
             }
+
             nDeltaX += nStepsY;
             if (nDeltaX >= nStepsX) {
               nCurY += (short int)nPackedSrc;
@@ -3915,12 +3937,14 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
           if (nCurX == sDst.nX) {
             return 1;
           }
+
           nIterCoord = (short int)(nPackedPrev >> 0x10) + (short int)nPackedSrc;
           nCurX = (short int)nPackedPrev + (uint16_t)(0 <= nDeltaX) * 2 - 1;
           nPackedCur = (uint32_t)((uint32_t)(uint16_t)nIterCoord << 16 | (uint32_t)(uint16_t)nCurX);
           iVar1 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)nCurX, (uint32_t)nIterCoord, nUnitWidth, eCollisionFlag_00);
           nPackedPrevDiag = nPackedCur;
         } while (!iVar1);
+
         *pnParam = nPackedPrev;
         return 0;
       }
@@ -3938,6 +3962,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
               return 1;
             }
           }
+
           *pnParam = nPackedPrev;
           return 0;
         }
@@ -3955,6 +3980,7 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
             if (iVar1) {
               break;
             }
+
             nDeltaX += nStepsX;
             if (nDeltaX >= nStepsY) {
               nCurX += nDstY;
@@ -3972,13 +3998,16 @@ static BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_
               return 1;
             }
           }
+
           *pnParam = nPackedPrev;
           return 0;
         }
       }
     }
+
     return 1;
 }
+
 // Checks if a target position is reachable from a unit's current dynamic path position. Validates unit type (player/monster), handles zero-velocity case, and performs a Bresenham line collision check.
 static BOOL DRLGPATH_CheckTargetReachable(uint32_t * pnParam, D2DynamicPathStrc * pDynamicPath) {
     BOOL nReachResult;
@@ -3998,24 +4027,30 @@ static BOOL DRLGPATH_CheckTargetReachable(uint32_t * pnParam, D2DynamicPathStrc 
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x147);
         exit(-1);
       }
+
       if (!pDynamicPath->dwVelocity) {
         *(short int*)pnParam = pDynamicPath->Coords.tSubtile.nPosX;
         *(short int*)((int)pnParam + 2) = pDynamicPath->Coords.tSubtile.nPosY;
         return 0;
       }
+
       DRLGPATH_AdvanceAlongPathPoints(pDynamicPath, 1, 1);
       if (!pDynamicPath->dwVelocity) {
         *(short int*)pnParam = pDynamicPath->Coords.tSubtile.nPosX;
         *(short int*)((int)pnParam + 2) = pDynamicPath->Coords.tSubtile.nPosY;
         return 0;
       }
+
       nPackedPos = (uint32_t)((uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosY << 16 | (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosX);
       nReachResult = DRLGPATH_RaycastBresenhamLine(nPackedPos, pnParam, pDynamicPath);
       return nReachResult;
     }
 }
+
 } // namespace D2Common::Drlg::Path
+
 namespace D2Common::Drlg {
+
 // Builds a coarse dynamic path from the unit's current position toward the target stored in pPathTypeArg, writing waypoints into pDynamicPath->PathPoints and returning the count. If a direction offset is already set, delegates to DRLGPATH_SmoothPathPoints. Otherwise: if the target is directly reachable (CheckTargetReachable) or within the IDA* distance threshold, emits a single waypoint; else walks step-by-step toward the target via DRLGPATH_GetPathDirectionTripletPacked + FindNonBlockedDirectionFromTriplet (using gPathDirectionOffsetsX/Y), recording a waypoint each time the chosen direction changes, bounded by nDistMax iterations and anti-backtracking.
 int32_t __fastcall PATH_FindPathToward(D2PathTypeArg * pPathTypeArg) {
     int32_t nSmoothResult;
@@ -4543,7 +4578,9 @@ int32_t __fastcall PATH_FindPathAStar(D2PathTypeArg * pPathTypeArg) {
 }
 
 } // namespace D2Common::Drlg
+
 namespace D2Common::Drlg::Path {
+
 // Builds a list of coordinate points along a Bresenham line from source to destination. Stores packed (X,Y) coordinates in the output buffer and returns the point count. Sets the initial direction in *pnInitDir. Used by PathTypeFunc_15.
 static int32_t __stdcall DRLGPATH_BuildBresenhamPointList(uint32_t nSrcPacked, uint32_t nDstPacked, int32_t nMaxSteps, uint32_t * pnInitDir, D2PathPointStrc * pwPointsBuf) {
     int32_t nStepY;
@@ -4571,6 +4608,7 @@ static int32_t __stdcall DRLGPATH_BuildBresenhamPointList(uint32_t nSrcPacked, u
         pwPointsBuf[nPointCount].nX = 0;
         return nPointCount;
       }
+
       *pnInitDir = nStepY <= 0 ? 0 : 0x2;
       if ((int)nDeltaY <= nMaxStepsM1) {
         do {
@@ -4580,6 +4618,7 @@ static int32_t __stdcall DRLGPATH_BuildBresenhamPointList(uint32_t nSrcPacked, u
           nPointCount++;
           nDeltaY--;
         } while (nDeltaY);
+
         pwPointsBuf[nPointCount].nX = 0;
         return nPointCount;
       }
@@ -4597,6 +4636,7 @@ static int32_t __stdcall DRLGPATH_BuildBresenhamPointList(uint32_t nSrcPacked, u
             nPointCount++;
             nDeltaX--;
           } while (nDeltaX);
+
           pwPointsBuf[nPointCount].nX = 0;
           return nPointCount;
         }
@@ -4612,11 +4652,13 @@ static int32_t __stdcall DRLGPATH_BuildBresenhamPointList(uint32_t nSrcPacked, u
               nMaxSteps -= nDeltaY;
               nCurX += nDstPacked;
             }
+
             pwPointsBuf[nPointCount].nX = (uint16_t)nCurX;
             pwPointsBuf[nPointCount].nY = (uint16_t)nCurY;
             nPointCount++;
             nSrcPacked--;
           } while (nSrcPacked);
+
           pwPointsBuf[nPointCount].nX = 0;
           return nPointCount;
         }
@@ -4632,11 +4674,13 @@ static int32_t __stdcall DRLGPATH_BuildBresenhamPointList(uint32_t nSrcPacked, u
               nSrcPacked -= nDeltaX;
               nCurY += nStepY;
             }
+
             pwPointsBuf[nPointCount].nX = (uint16_t)nCurX;
             pwPointsBuf[nPointCount].nY = (uint16_t)nCurY;
             nPointCount++;
             nMaxSteps--;
           } while (nMaxSteps);
+
           pwPointsBuf[nPointCount].nX = 0;
           return nPointCount;
         }
@@ -5576,7 +5620,9 @@ void __stdcall DRLGOUTROOM_FillBorderCornersAndPresets(D2DrlgLevelStrc * pLevel)
 }
 
 } // namespace D2Common::Drlg
+
 namespace D2Common::Drlg::OutWild {
+
 // Spawns outdoor level border presets (town transitions, caves, vertical dividers) for pLevel based on wilderness flags. Handles the central column divider (dwFlags bit 4), the four cardinal border exits (bits 7-10), and the mandatory town wayback preset (0x33/preset 15). Aborts with an unrecoverable error if the wayback preset fails to place. Skips level 0x27 (Harrogath interior).
 static void SpawnTownTransitionsAndCaves(D2DrlgLevelStrc * pLevel) {
     D2DrlgLevelStrc* pLinkedLevel;
@@ -5584,6 +5630,7 @@ static void SpawnTownTransitionsAndCaves(D2DrlgLevelStrc * pLevel) {
     if (pLevel->eD2LevelId == 0x27) {
       return;
     }
+
     D2DrlgLevelDataWildernessLevel* pWildData2 = pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData;
     if (pWildData2->dwFlags & 0x10) {
       BOOL bColumnEmpty;
@@ -5618,10 +5665,14 @@ static void SpawnTownTransitionsAndCaves(D2DrlgLevelStrc * pLevel) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1e5);
       exit(-1);
     }
+
     pWildData2->dwFlags |= 0x40;
 }
+
 } // namespace D2Common::Drlg::OutWild
+
 namespace D2Common::Drlg {
+
 // NOTE: Callee-saved register params inferred (medium confidence): pDrlgLevelStrc (ESI): D2DrlgLevelStrc*
 static BOOL __stdcall DRLGOUTROOM_SpawnRandomOutdoorDecorations(int32_t nPresetType, D2DrlgLevelStrc * pDrlgLevelStrc, int bAllowDouble) {
     uint32_t uVar1;
@@ -5704,13 +5755,17 @@ static void DRLGOUTROOM_SpawnAct1LevelPresets(D2DrlgLevelStrc * pLevel) {
     Outdoors::SpawnOutdoorLevelPreset(pLevel, 0x1d, -1, 0, '\x0f');
     Outdoors::SpawnOutdoorLevelPreset(pLevel, 0x1e, -1, 0, '\x0f');
 }
+
 } // namespace D2Common::Drlg
+
 namespace D2Common::Drlg::OutWild {
+
 void __fastcall InitAct1OutdoorLevel(D2DrlgLevelStrc * pLevel) {
     int eLevelId = pLevel->eD2LevelId;
     if (eLevelId != 2 && eLevelId != 3 && eLevelId != 0x11) {
       DRLGOUTROOM_MarkBorderJunctions(pLevel);
     }
+
     OutPlace::SetOutGridLinkFlags(pLevel);
     OutPlace::PlaceAct1245OutdoorBorders(pLevel);
     if (2 <= pLevel->eD2LevelId && pLevel->eD2LevelId <= 7) {
@@ -5734,9 +5789,12 @@ void __fastcall InitAct1OutdoorLevel(D2DrlgLevelStrc * pLevel) {
     if (2 <= pLevel->eD2LevelId && pLevel->eD2LevelId <= 7) {
       Outdoors::SpawnAct12Shrines(pLevel, 5);
     }
+
     DRLGOUTROOM_SpawnAct1LevelPresets(pLevel);
 }
+
 } // namespace D2Common::Drlg::OutWild
+
 namespace D2Common::Drlg {
 
 // Shifts 3x3 neighbor buffer up one row and reads new values.

@@ -334,6 +334,7 @@ BOOL __fastcall Draw(::D2WinScrollbar * pScrollbar) {
         pScrollbarArg.pControl = &pScrollbar->sControl;
         D2WinScrollbar::Push(&pScrollbarArg);
       }
+
       memset(&sGfxData, 0, 0x48);
       sGfxData.pDC6 = local_8;
       sGfxData.nFrameNumber = (uint32_t)(pScrollbar->bDownArrowPressed != 0) * 2 + 1;
@@ -348,6 +349,7 @@ BOOL __fastcall Draw(::D2WinScrollbar * pScrollbar) {
           D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nLine, nDrawY, -1, DRAW_SOLID, nullptr);
         } while ((int)local_8 < pScrollbar->sControl.dwSizeY - 10);
       }
+
       sGfxData.nFrameNumber = pScrollbar->bUpArrowPressed ? 2 : 0;
       D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nLine, pScrollbar->sControl.dwPosY - pScrollbar->sControl.dwSizeY + 9, -1, DRAW_SOLID, nullptr);
       nDrawY = pScrollbar->sControl.dwSizeY;

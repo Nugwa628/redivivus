@@ -340,7 +340,7 @@ static D2StatListExStrc * __stdcall ITEMMOD_GetOrCreateStatList(D2UnitStrc * pUn
 }
 
 // For an enhanced-defense or enhanced-damage property, raises the item's armor class above its Items.txt maxac, or sets max/min (one-hand, two-hand, throw) damage to the Items.txt maximums, so an enhanced item rolls at least its base maximum.
-static void __stdcall ITEMMOD_MaximizeStatForEnhanced(eD2UnitStat eEnhancedProp, D2UnitStrc * pUnit) {
+void __stdcall ITEMMOD_MaximizeStatForEnhanced(eD2UnitStat eEnhancedProp, D2UnitStrc * pUnit) {
     int32_t nCurrentAC;
     int nNewAC;
     int nItemClassId;
@@ -727,6 +727,7 @@ int32_t __fastcall PropertyFunc_AllResistances(int32_t nType, D2UnitStrc * pUnit
       if (sVar1) {
         nRandom++;
       }
+
       pSeed = Items::GetItemSeed(pItemUnit);
       nRandom = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nRandom);
       pProperty = (D2SetsTxtFStrc*)((uintptr_t)&nRangeLow->fcode + nRandom);
@@ -773,6 +774,7 @@ int32_t __fastcall PropertyFunc_AllMaxResistances(int32_t nType, D2UnitStrc * pU
       if (sVar1) {
         nRandom++;
       }
+
       pSeed = Items::GetItemSeed(pItemUnit);
       nRandom = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nRandom);
       pProperty = (D2SetsTxtFStrc*)((uintptr_t)&nRangeLow->fcode + nRandom);
@@ -837,10 +839,12 @@ int32_t __fastcall PropertyFunc_MinDamage(int32_t nType, D2UnitStrc * pUnit, D2U
     if (!nRolled || pDVar4->nMinDam != '\0' || pDVar4->n2HandMinDam == '\0') {
       PropertyFunc_SimpleStat(nType, pUnit, nProperty, nParam2, 0, nParam3, pItemUnit, UNITSTAT_mindamage, nParam);
     }
+
     nRolled = Items::ITEMS_IsA(pItemUnit, ITEMTYPE_Weapon);
     if (!nRolled || pDVar4->n2HandMinDam != '\0' || pDVar4->nMinDam == '\0') {
       PropertyFunc_SimpleStat(nType, pUnit, nProperty, nParam2, 0, nParam3, pItemUnit, UNITSTAT_secondary_mindamage, nParam);
     }
+
     nRolled = Items::ITEMS_IsA(pItemUnit, ITEMTYPE_Weapon);
     if (!(!nRolled || (nErrLine = Items::ITEM_GetTxtItemTypes_throwable(pItemUnit) , nErrLine != 0))) {
       return 1;
@@ -919,10 +923,12 @@ int32_t __fastcall PropertyFunc_MaxDamage(int32_t nType, D2UnitStrc * pUnit, D2U
     if (!nRolled || pDVar4->nMaxDam != '\0' || pDVar4->n2HandMaxDam == '\0') {
       PropertyFunc_SimpleStat(nType, pUnit, nProperty, nParam2, 0, nParam3, pItemUnit, UNITSTAT_maxdamage, nParam);
     }
+
     nRolled = Items::ITEMS_IsA(pItemUnit, ITEMTYPE_Weapon);
     if (!nRolled || pDVar4->n2HandMaxDam != '\0' || pDVar4->nMinDam == '\0') {
       PropertyFunc_SimpleStat(nType, pUnit, nProperty, nParam2, 0, nParam3, pItemUnit, UNITSTAT_secondary_maxdamage, nParam);
     }
+
     nRolled = Items::ITEMS_IsA(pItemUnit, ITEMTYPE_Weapon);
     if (!(!nRolled || (nErrLine = Items::ITEM_GetTxtItemTypes_throwable(pItemUnit) , nErrLine != 0))) {
       return 1;
@@ -987,6 +993,7 @@ int32_t __fastcall PropertyFunc_EnhancedDamage(int32_t nType, D2UnitStrc * pUnit
         if (wItemVersion) {
           nRolled++;
         }
+
 
         nRolled = D2Client::Archive::RANDOM_RandomNumberSelector(Items::GetItemSeed(pItemUnit), nRolled);
         pProperty = (D2SetsTxtFStrc*)((uintptr_t)&nRangeLow->fcode + nRolled);
@@ -1861,6 +1868,7 @@ uint32_t __fastcall ITEMPROP_AddStat_EnhancedIfItem(int32_t nParam1, D2UnitStrc 
     if (pUnit2 && pUnit2->eUnitType == UNIT_ITEM && nParam1 == 1) {
       ITEMMOD_MaximizeStatForEnhanced((int)(short int)nParam3, pUnit2);
     }
+
 
     uint32_t nResult = ITEMMOD_AddStatToItem(pUnit, nParam12, nParam2, (short int)nParam3, 0, ITEMMOD_RollRandomValue(pUnit2, *(int32_t*)(nParam12 + 8), *(int32_t*)(nParam12 + 0xc)), nParam4, pUnit2, nParam22);
     return nResult;

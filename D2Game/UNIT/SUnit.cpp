@@ -397,6 +397,7 @@ void __fastcall UNITS_ResetUnitForReuse(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x518);
       exit(-1);
     }
+
     uint32_t bHasChangedStats;
     D2Common::Stats::StatsEx::STATLIST_ClearChangedStatFlags(pUnit);
     SUnitMsg::SERVER_UnitQueuePacketFree(pUnit);
@@ -410,10 +411,12 @@ void __fastcall UNITS_ResetUnitForReuse(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
     if (bHasChangedStats) {
       D2Common::Stats::StatsEx::STATLIST_FreeUnitChildStatLists(pUnit);
     }
+
     uVar1 = D2Common::Stats::StatsEx::STATLIST_HasChangedStats(pUnit);
     if (uVar1) {
       D2Common::Stats::StatsEx::STATLIST_FreeUnitChildStatLists(pUnit);
     }
+
     switch (pUnit->eUnitType) {
       case UNIT_PLAYER:
         D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_lastexp, -1, 0);
@@ -525,6 +528,7 @@ void __fastcall GetTarget(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       if (!(pFreshLookup && pFreshLookup->eUnitType == UNIT_ITEM && (pFreshLookup->eAnimMode.ePlayerMode == Walk || pFreshLookup->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Neutral))) {
         return;
       }
+
       D2Common::PATH::DynamicPath::SetTarget(pDynamicPath_00, nullptr);
       return;
     }
@@ -648,6 +652,7 @@ D2UnitStrc * __fastcall UNITS_FindPortalOwnerUnit(::SGAMEDATA * pGame, D2UnitStr
         GAME::Server::SetSomeRoomFlags(pGame, pFoundRoom);
       }
     }
+
     pOwnerUnit = FindUnitFromTable(pGame, pUnit->eOwnerType, pUnit->nOwnerGUID);
     return pOwnerUnit;
 }
@@ -1013,6 +1018,7 @@ void __fastcall GetTypeAndMode(D2UnitStrc * pUnit, D2QServerUnitRecordStrc * pOu
       } else {
         pOutRecord->szCharName[0] = '\0';
       }
+
       pOutRecord->eUnitType = pUnit->eUnitType;
       pOutRecord->nClassId = pUnit->nClassId;
       pOutRecord->nUnitGUID = pUnit->nUnitGUID;
@@ -1025,6 +1031,7 @@ void __fastcall GetTypeAndMode(D2UnitStrc * pUnit, D2QServerUnitRecordStrc * pOu
       } else {
         nPosCoord = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
       }
+
       pOutRecord->nPosX = nPosCoord;
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
@@ -1034,6 +1041,7 @@ void __fastcall GetTypeAndMode(D2UnitStrc * pUnit, D2QServerUnitRecordStrc * pOu
       } else {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
       }
+
       pOutRecord->nPosY = nPosY;
       pOutRecord->eOwnerType = pUnit->eOwnerType;
       pOutRecord->nOwnerGUID = pUnit->nOwnerGUID;
@@ -1850,6 +1858,7 @@ BOOL __fastcall SUNIT_RelocateUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ro
         if (!bFindFreeSpace) {
           nCollisionMask = 0;
           eCollisionFlag_00 = 0x1c09;
+
           pRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pRoom, &ptTarget, D2Common::Units::GetUnitSizeX(pUnit), eCollisionFlag_00, nCollisionMask);
         }
         if (!pRoom) {
@@ -1957,23 +1966,28 @@ void __fastcall TakeStairs(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc *
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15c);
       exit(-1);
     }
+
     bAllowNeighboorRooms = 1;
     eCollisionFlag_00 = 0x1c09;
+
     pFreeRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pDestRoom, (POINT*)&sD2SUnitStairs, D2Common::Units::GetUnitSizeX(pUnit), eCollisionFlag_00, bAllowNeighboorRooms);
     if (!pFreeRoom) {
       return;
     }
+
     eSourceLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     eDestLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pFreeRoom);
     if (!(eDestLevelId != LEVEL_DurielsLair && eDestLevelId != LEVEL_TheWorldstoneKeepLevel1 && eDestLevelId != LEVEL_TheWorldstoneChamber && eDestLevelId != LEVEL_AncientsWay && eDestLevelId != LEVEL_DuranceOfHateLevel1 || (bRelocated = Quests::QUESTS::QUEST_CheckSpecialLevelCondition(sD2SUnitStairs.pGame, pUnit, eSourceLevelId, eDestLevelId) , !bRelocated))) {
       return;
     }
+
     bQuestCondMet = sD2SUnitStairs.nY;
     bRelocated = sD2SUnitStairs.nX;
     bAllowNeighboorRooms = SUNIT_RelocateUnit(sD2SUnitStairs.pGame, pUnit, sD2SUnitStairs.pRoom, sD2SUnitStairs.nX, sD2SUnitStairs.nY, 0, 0);
     if (!bAllowNeighboorRooms) {
       return;
     }
+
     sD2SUnitStairs.pRoom = (D2RoomStrc*)SUNIT_GetClient(pUnit, ".\\UNIT\\SUnit.cpp", 0x178);
     nFinalX = sD2SUnitStairs.pRoomEx->sSeed.nSeedLow + bRelocated;
     bRelocOk = sD2SUnitStairs.pRoomEx->sSeed.nSeedHigh + bQuestCondMet;
@@ -2200,12 +2214,14 @@ void __fastcall FreeServerUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x61);
         exit(-1);
       }
+
       UNITS_UnlinkUnitFromRoom(pUnit, pGame, 0);
       pQuestDataList = pUnit->uSideData.pServerSide.pQuestEventList;
       if (pQuestDataList) {
         Quests::QUESTS::FreeQuestDataList(pGame, pQuestDataList);
         pUnit->uSideData.pClientSide.nSfxMode = 0;
       }
+
       switch (pUnit->eUnitType) {
         case UNIT_PLAYER:
           GAME::Targets::UNIT_FreeUnitNodes(pGame, pUnit);
@@ -2224,6 +2240,7 @@ void __fastcall FreeServerUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
           D2Common::PATH::Path::STRUCT_FreePath(pGame->pMemoryPool, pUnit->pPath.pStaticPath);
           pUnit->pPath.pStaticPath = 0;
         }
+
         D2Game::Monster::MONSTER_FreeAllResources(pGame, pUnit);
         break;
         case UNIT_OBJECT:
@@ -2267,6 +2284,7 @@ void __fastcall FreeWarpUnits(::SGAMEDATA * pGame) {
       FreeServerUnit(pGame, pUnit);
       pUnit = pNextUnit;
     }
+
     pGame->pWarpTileList = 0;
     return;
 }

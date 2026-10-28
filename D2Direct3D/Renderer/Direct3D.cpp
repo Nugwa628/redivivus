@@ -3272,6 +3272,7 @@ static void __stdcall RENDERER_DIRECT3D_DrawPalettedQuad(D2D3DSpriteInfoStrc * p
 uint8_t __stdcall SetDrawModeAndGetAlpha(int nDrawMode) {
     switch (nDrawMode) {
       case 5:
+
       case 7:
         SetBlendMode(1);
       return 0xff;
@@ -4168,6 +4169,7 @@ void __fastcall DrawRect(RECT * pRect, DWORD nPaletteIndex) {
       if (!(0 <= nXEnd_00 && nXEnd <= RENDERER_nWindowWidth && 0 <= nYEnd && nYStart <= RENDERER_nWindowHeight)) {
         return;
       }
+
       Renderer::DrawLine(nXStart, nYStart, nXEnd_00, nYEnd_00, nPaletteIndex, 0xff);
       Renderer::DrawLine(nXEnd_00, nYEnd_00, nXStart, nYEnd, nPaletteIndex, 0xff);
       Renderer::DrawLine(nXStart, nYEnd, nXEnd, nYEnd_00, nPaletteIndex, 0xff);
@@ -4221,6 +4223,7 @@ void __fastcall DrawRectEx(RECT * pRect, DWORD nPaletteIndex) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfc);
         exit(-1);
       }
+
       Renderer::DrawLine(nXStart, nClampedLeft, nXEnd, nClampedLeft, nPaletteIndex, 0xff);
       Renderer::DrawLine(nXEnd, nClampedLeft, nXEnd, nClampedBottom, nPaletteIndex, 0xff);
       Renderer::DrawLine(nXEnd, nClampedBottom, nXStart, nClampedBottom, nPaletteIndex, 0xff);

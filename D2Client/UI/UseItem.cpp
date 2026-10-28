@@ -43,7 +43,9 @@
 #define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
 #endif
 
+
 namespace D2Client {
+
 static void ITEM_ToggleHandState(D2UnitStrc * pUnit) {
     int32_t nSoundArg1;
     int32_t nSoundArg2;
@@ -57,6 +59,7 @@ static void ITEM_ToggleHandState(D2UnitStrc * pUnit) {
         nSoundArg3 = 0;
         nSoundArg2 = 0;
         nSoundArg1 = 0;
+
         Sound::SOUND_PlaySound(UNIT::SOUND_GetIdFromUnit(pUnit), nullptr, nSoundArg1, nSoundArg2, nSoundArg3);
         return;
       }
@@ -66,9 +69,11 @@ static void ITEM_ToggleHandState(D2UnitStrc * pUnit) {
       if (pUnit) {
         UI::ui::ITEM_SetItemOnHand(pUnit);
       }
+
       Sound::SOUND_PlaySound(SOUND_CURSOR_PASS, nullptr, 0, 0, 0);
     }
 }
+
 } // namespace D2Client
 
 namespace D2Client::UI::UseItem {
@@ -266,7 +271,9 @@ void __stdcall TEXT_DrawCashDisplay() {
 }
 
 } // namespace D2Client::UI::UseItem
+
 namespace D2Client::UI::ui {
+
 void __stdcall UI_CloseHoradricCubeWindow() {
     gnPlayerCashDisplay = 0;
     D2UnitStrc* pCursorItem_lcl = UNIT::Player::GetPlayerUnit_UI();
@@ -275,14 +282,18 @@ void __stdcall UI_CloseHoradricCubeWindow() {
     } else {
       pCursorItem_lcl = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pCursorItem_lcl->pInventory);
     }
+
     ITEM_ToggleHandState(pCursorItem_lcl);
     int32_t nHandlerCount = 8;
+
     _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagMapInit, nHandlerCount);
     if (Dialog::gpHoradricCubeDialog) {
       Dialog::FreeDialogStrc();
       Dialog::gpHoradricCubeDialog = 0;
     }
+
     Draw::SetUIFlag(UI_ANVIL, UI_RESET, 0);
     GAME::Select::SELECT_SetExclusionRect(nullptr);
 }
+
 } // namespace D2Client::UI::ui

@@ -105,6 +105,7 @@ static void __stdcall SUNITINACTIVE_FindAndRemoveInactiveUnitsByRoom(int * pnPar
     D2DrlgRoomCoordsStrc sRoomCoords;
     *pnParam1 = 0;
     *pnParam2 = 0;
+
     eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom));
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &sRoomCoords);
     int* pMemoryToFree = *(int**)(nParam + 0xd8 + (uint32_t)neAct * 4);
@@ -792,6 +793,7 @@ static void __stdcall SUNITINACTIVE_RoomInitMonsters(::SGAMEDATA * pGame, D2Room
           if (pSpawnedMonster) {
             SUnit::UNITS_RelocateUnitToRoom(pGame, pSpawnedMonster, pRoom, (int32_t)pbyPosX, nAlignmentVal);
           }
+
           Ai::AiGeneral::ClearMinionList(pGame, pInactiveMonRec->pMinionList);
         } else {
           nSpawnFlags = 0x62;
@@ -953,6 +955,7 @@ BOOL __fastcall SUNITINACTIVE_CheckDeadMonsterAtCoords(::SGAMEDATA * pGame, D2Ro
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6dc);
         exit(-1);
       }
+
       pFoundRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nPosX, nPosY);
       eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       eActNo = D2Common::Drlg::GetActNoFromLevelNumber(eLevelId);
@@ -977,6 +980,7 @@ BOOL __fastcall SUNITINACTIVE_CheckDeadMonsterAtCoords(::SGAMEDATA * pGame, D2Ro
           return 1;
         }
       }
+
       return 0;
     }
 }
@@ -1536,6 +1540,7 @@ void __fastcall SERVER_GAME_UNIT_method(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
           D2Common::Unit::DRLGROOM_ClearUnitRoomLink(pUnit);
           return;
         }
+
         break;
         case UNIT_ITEM:
 

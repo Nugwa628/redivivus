@@ -338,7 +338,9 @@ uint32_t __fastcall AI_BAAL_IsUnitInRange(D2UnitStrc * pUnit, int * pnParam) {
       if (pUnit->nAct != *(eAct*)(pnParam + 6)) {
         return 0;
       }
+
       nLine = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
+
       nDist = GetCollisionDistanceFromXY((D2UnitStrc*)pnParam, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nLine);
       return (uint32_t)(nDist < 0x3fc);
     }
@@ -805,6 +807,7 @@ static int32_t __stdcall AI_BaalEvaluateCombatAction(D2UnitStrc * pUnit, ::SGAME
 
       eCollisionFlag = 0x40;
       nCollisionWidth = COLLISION_PATTERN_BIG_UNIT_PRESENCE;
+
       nAction = D2Common::Collision::CheckCollision_BlockPlayer_Type(D2Common::Units::UNITS_GetRoom(pUnit), nDistToAnchorPt, nAction, nCollisionWidth, eCollisionFlag);
       if (nAction) {
         return 4;
@@ -820,8 +823,10 @@ static int32_t __stdcall AI_BaalEvaluateCombatAction(D2UnitStrc * pUnit, ::SGAME
 
     _bInThroneRoom = 0;
     if (pUnit2->eUnitType == UNIT_PLAYER) {
+
       pFoundUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_OBJECT, PLAYER::Player::GetPlayerUniqueId(pUnit2));
       if (pFoundUnit) {
+
         eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(D2Common::Units::UNITS_GetRoom(pFoundUnit));
         if (eLevelId == LEVEL_TheWorldstoneChamber && (!nParam4 || (nDistToAnchor = D2Common::Collision::GetDistanceToXY(pFoundUnit, *(int32_t*)(nParam4 + 0xc), *(int32_t*)(nParam4 + 0x10)) , nDistToAnchor < 0x4b))) {
           _bInThroneRoom = 1;
@@ -916,6 +921,7 @@ static bool __stdcall AI_Baal_SpawnClone(::SGAMEDATA * pGame, int32_t nParam, D2
         __frame1.nTargetX = pTargetUnit->pPath.pStaticPath->nPosX;
         goto spawn_near_center;
       }
+
       pDynamicPath = pTargetUnit->pPath.pDynamicPath;
     } else {
       eOwnerType = pUnit->eUnitType;
@@ -1140,6 +1146,7 @@ void __fastcall AI_Baal_ExecuteAction(::SGAMEDATA * pGame, D2UnitStrc * pUnit, i
           pnY = &__frame0.nUnitY;
           pnX = &__frame0.nUnitX;
           pRoomCoordList = 0;
+
           BVar1 = Monsters::Spawn::SPAWN_FindRandomPositionForMonster(pGame, D2Common::Units::UNITS_GetRoom(pUnit), pRoomCoordList, nClassId, pnX, pnY, nTeleportParam);
           if (BVar1) {
             SERVER_UNIT_CastSkill(pGame, pUnit, pMonStats->aSkMode[4], (int)pMonStats->aSkill[4], nullptr, __frame0.nUnitX, __frame0.nUnitY);
