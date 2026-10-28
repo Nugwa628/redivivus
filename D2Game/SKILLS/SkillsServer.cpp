@@ -898,11 +898,11 @@ int32_t __fastcall BowDecreaseQuantity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
     }
 
     PLAYER::PlayerModes::PLRMODES_CheckWeaponQuantityAndDurability(pGame, pUnit);
-    if (bWasZero) {
-      return 0;
+    if (!bWasZero) {
+      return nValue + 1;
     }
 
-    return nValue + 1;
+    return 0;
 }
 
 // Finds the active stackable/throwable weapon in the player's right or left arm slot and decrements its quantity via BowDecreaseQuantity. Skips non-player units. Prefers the right arm; falls back to the left arm if the right slot item is not the active weapon or is not stackable/throwable. Returns the remaining quantity from BowDecreaseQuantity, or 0 if no suitable ammo item is found.
@@ -2873,12 +2873,11 @@ BOOL __fastcall D2CheckCorpseConsumed(D2UnitStrc * pUnit, int32_t nParam) {
 
 int32_t __fastcall SKILLS_UnitFindTestCallback(D2UnitStrc * pUnit, D2UnitFindArgStrc * pSkillParam) {
     int nIsSelectableCorpse = D2Common::Skills::SKILLS_IsSelectableCorpse2(pUnit);
-    if (!nIsSelectableCorpse) {
-      return 0;
+    if (nIsSelectableCorpse) {
+      return D2Common::Units::UnitFinds::TestUnit(pUnit, pSkillParam);
     }
 
-    int32_t nTestResult = D2Common::Units::UnitFinds::TestUnit(pUnit, pSkillParam);
-    return nTestResult;
+    return 0;
 }
 
 D2UnitStrc * __fastcall SKILLS_FindNearbyCorpse(D2UnitStrc * pUnit, D2UnitStrc * pUnit2, int32_t nUnused, int32_t nMaxCorpses) {

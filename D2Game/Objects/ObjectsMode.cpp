@@ -4130,12 +4130,11 @@ D2UnitStrc ** __fastcall OBJMODE_RollChestDrops(D2ObjectOperateFnArg * pOperateA
     D2SeedStrc* pSeedPtr = pOperateArg->pSeed;
     D2SeedStrc seedNext = D2_SEED_NEXT(*pSeedPtr);
     *pSeedPtr = seedNext;
-    if (seedNext.nSeedLow % 100 >= 0x15) {
-      return nullptr;
+    if (!(seedNext.nSeedLow % 100 >= 0x15)) {
+      return RollChestDrops(pOperateArg, ITEMTYPE_None1);
     }
 
-    D2UnitStrc** ppItems = RollChestDrops(pOperateArg, ITEMTYPE_None1);
-    return ppItems;
+    return nullptr;
 }
 
 BOOL __fastcall OBJOP_OpenChestNoMonster(D2ObjectOperateFnArg * pOperation) {

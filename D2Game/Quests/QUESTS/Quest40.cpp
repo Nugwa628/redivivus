@@ -41,11 +41,11 @@
 namespace D2Game::Quests::QUESTS::Quest40 {
 
 uint32_t __fastcall TXT_SuperUniquesHardcoded_GetSuperUniqueIndex(uint32_t nHardcodedIndex) {
-    if (nHardcodedIndex >= 0x42) {
-      return -1;
+    if (nHardcodedIndex < 0x42) {
+      return (uint32_t)(uint16_t)sgptDataTable->aTxtSuperUniquesHardcoded[nHardcodedIndex];
     }
 
-    return (uint32_t)(uint16_t)sgptDataTable->aTxtSuperUniquesHardcoded[nHardcodedIndex];
+    return -1;
 }
 
 // Quest 40 (Act V Nihlathak/Anya rescue) gossip handler [0]. Dispatches NPC gossip lines for Drehya, Malah, Nihlathak Town NPC, and Qualkehk based on the NPC's monster class ID. Checks whether the player has already spoken with each NPC via PLAYER_CheckIfSpokenWithNPC and selects the appropriate gossip variant (0=default, 1=alt, 2=idx) via AddGossipMessageOnMonster. Silent for unrecognised NPCs.

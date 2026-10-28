@@ -59,11 +59,11 @@ static int32_t __stdcall SKILLITEMS_SetDispatchTableEntry(int32_t pCandidatePair
 }
 
 int32_t __stdcall SKILLITEMS_GetDispatchTableRange(int32_t pDispatchTable, int32_t nParam1, int32_t nParam2) {
-    if (nParam1 > nParam2) {
-      return pDispatchTable + nParam2 * 8;
+    if (nParam1 <= nParam2) {
+      return 0;
     }
 
-    return 0;
+    return pDispatchTable + nParam2 * 8;
 }
 
 // Returns max(nValue * nPercent / 100, nMinimum): nValue in EAX, nMinimum in ESI, nPercent on the stack (RET 4); the throw-damage scaling of the crude-quality item mods. Was named SKILLITEMS_NoOp.

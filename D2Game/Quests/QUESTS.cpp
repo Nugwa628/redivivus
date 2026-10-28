@@ -2149,12 +2149,11 @@ D2UnitStrc * __fastcall QUEST_SpawnSuperUniqueAtPoint(::SGAMEDATA * pGame, D2Uni
     LONG nY = pPoint->y;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     pRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, pPoint->x, nY);
-    if (!pRoom) {
-      return nullptr;
+    if (pRoom) {
+      return Monsters::Spawn::SpawnMonster(pGame, pRoom, nMonstatClassId, pPoint->x, pPoint->y, 1);
     }
 
-    D2UnitStrc* pSpawnedMonster = Monsters::Spawn::SpawnMonster(pGame, pRoom, nMonstatClassId, pPoint->x, pPoint->y, 1);
-    return pSpawnedMonster;
+    return nullptr;
 }
 
 void __fastcall QUEST_DispatchPresetObjectLoad(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2MapAIStrc * pMapAI) {

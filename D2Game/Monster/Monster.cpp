@@ -277,19 +277,19 @@ void __fastcall MONSTER_StartAiAndRegenTimers(::SGAMEDATA * pGame, D2UnitStrc * 
 }
 
 int32_t __fastcall PlayerMultiplyer(int32_t nPlayers) {
-    if (nPlayers >= 9) {
-      return (nPlayers - 2) * 0x32;
+    if (nPlayers < 9) {
+      return ::PlayerMultiplyer[nPlayers];
     }
 
-    return ::PlayerMultiplyer[nPlayers];
+    return (nPlayers - 2) * 0x32;
 }
 
 int32_t __fastcall PlayerMultiplyer2(int32_t nParam) {
-    if (nParam >= 9) {
-      return (nParam * 5 + 0x82) * 2;
+    if (nParam < 9) {
+      return ::PlayerMultiplyer2[nParam];
     }
 
-    return ::PlayerMultiplyer2[nParam];
+    return (nParam * 5 + 0x82) * 2;
 }
 
 // Initialises a D2MonsterLevelDataStrc with player-count and difficulty multipliers for a monster. Queries the current player count (SERVER_GAME_CountPlayers), computes PlayerMultiplyer/2/3, and reads MonsterSkillBonus from the DifficultyLevels txt. Skips scaling for boss/special-aligned monsters (Align != 0) and sets nPlayerMultiplyer3=1 for them instead.

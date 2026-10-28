@@ -187,11 +187,11 @@ static int32_t __stdcall DAMAGE_ApplyHealingToUnit(int32_t nParam, D2UnitStrc * 
     }
 
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hitpoints, nValue, 0);
-    if (nValue == nMaxHp) {
-      return nMaxHp - nCurHp;
+    if (nValue != nMaxHp) {
+      return nParam;
     }
 
-    return nParam;
+    return nMaxHp - nCurHp;
 }
 
 static int32_t __stdcall DAMAGE_ApplyManaToUnit(int32_t nParam, D2UnitStrc * pUnit) {
@@ -207,11 +207,11 @@ static int32_t __stdcall DAMAGE_ApplyManaToUnit(int32_t nParam, D2UnitStrc * pUn
     }
 
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_mana, nValue, 0);
-    if (nValue == nMaxMana) {
-      return nMaxMana - nCurMana;
+    if (nValue != nMaxMana) {
+      return nParam;
     }
 
-    return nParam;
+    return nMaxMana - nCurMana;
 }
 
 static uint32_t DAMAGE_DrainManaFromUnit(uint32_t nParam, D2UnitStrc * pUnit) {

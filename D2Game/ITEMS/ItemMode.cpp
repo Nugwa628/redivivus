@@ -466,11 +466,11 @@ static eD2Skills ITEMMODE_GetItemSkillId(D2UnitStrc * pUnit) {
     }
 
     _bIsScrollOrBookType = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Book);
-    if (!_bIsScrollOrBookType) {
-      return ~SKILL_Attack;
+    if (_bIsScrollOrBookType) {
+      return *(eD2Skills*)((int)pBookLine + 0xc);
     }
 
-    return *(eD2Skills*)((int)pBookLine + 0xc);
+    return ~SKILL_Attack;
 }
 
 // Adjusts the quantity of the skill associated with a scroll/book item (pUnit2) on the caster unit (pUnit) by nParam (positive=add, negative=subtract). After updating the skill quantity via SKILL_SetQuantity, sends 0x22 UpdateItemSkill packet to the client. Halts if either unit pointer is null.
@@ -3874,12 +3874,11 @@ static BOOL ITEMMODE_CheckInventorySpace(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     }
 
     bMatchesType = D2Common::ITEMS::Items::ITEM_GetTxtItemTypes_autostack(pUnit2);
-    if (!bMatchesType) {
-      return 0;
+    if (bMatchesType) {
+      return ITEMMODE_AutoStackItem(pGame, pUnit, pUnit2);
     }
 
-    BOOL nAutoStackItemResult = ITEMMODE_AutoStackItem(pGame, pUnit, pUnit2);
-    return nAutoStackItemResult;
+    return 0;
 }
 
 // Places an item into a unit's inventory grid at the given page, applies it to the owner, sets its page, fires QUEST_OnItemPickedUp and refreshes inventory.

@@ -75,11 +75,11 @@ namespace D2Game::Quests::QUESTS::A3Q6 {
 // AI not yet active for the prior quest chain (predicate used to gate Mephisto-quest progression).
 uint32_t __fastcall Q23_IsBlackenedTempleNotDone(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheBlackenedTemple);
-    if (!pQuestData) {
-      return 1;
+    if (pQuestData) {
+      return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)((uint32_t)pQuestData->pQuestSpecificData.pA3Q6 >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)!pQuestData->pQuestSpecificData.pA3Q5->bJerhynAiActive);
     }
 
-    return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)((uint32_t)pQuestData->pQuestSpecificData.pA3Q6 >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)!pQuestData->pQuestSpecificData.pA3Q5->bJerhynAiActive);
+    return 1;
 }
 
 // [The Guardian (Q23)] Predicate: returns 0 if the unit is in Durance of Hate Level 2, OR if the prior

@@ -1755,11 +1755,11 @@ int32_t __fastcall SKILLITEM_CalculateStaminaPotionValue(int32_t nParam, int * p
     if (0x1e < nParam) {
       return (nParam - 0x1e) * pnParam[2] + pnParam[1] * 0xf + *pnParam * 0xe;
     }
-    if (0xf >= nParam) {
-      return (nParam - 1) * *pnParam;
+    if (0xf < nParam) {
+      return (nParam - 0xf) * pnParam[1] + *pnParam * 0xe;
     }
 
-    return (nParam - 0xf) * pnParam[1] + *pnParam * 0xe;
+    return (nParam - 1) * *pnParam;
 }
 
 // Item-event handler that applies the Open Wounds on-hit effect. Reads the proc chance from ITEM_GetMinimalStatValueShifted, rolls the unit's seed against it, then computes a level-scaled HP-regen-drain magnitude (via SKILLITEM_CalculateStaminaPotionValue with a 5-tier table). Halves damage for players (non-attack hit) or undead monsters. Applies STATE_openwounds via SetStateWithExpiryTime with UNITSTAT_hpregen as the drain stat for 200 frames.
