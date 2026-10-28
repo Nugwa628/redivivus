@@ -1124,7 +1124,6 @@ static int32_t __stdcall RENDERER_GLIDE_UploadTextureToCache(GlideTexInfoStrc * 
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1ae);
           exit(-1);
         }
-
         memset(gpGlideSpritePixelBuffer, 0, pTexInfo->nTexArea);
         nNewCacheNode = pTexInfo->nTexWidth;
         pSrcPixelRow = (char*)(nNewCacheNode + (int)gpGlideSpriteBuffer);
@@ -1140,12 +1139,10 @@ static int32_t __stdcall RENDERER_GLIDE_UploadTextureToCache(GlideTexInfoStrc * 
               *(uint8_t*)(nSpriteBufferPtr + 1) = nOutlineColor;
               *(uint8_t*)(nSpriteBufferPtr + pTexInfo->nTexWidth) = nOutlineColor;
             }
-
             nSpriteBufferPtr++;
             nMode--;
           } while (nMode);
         }
-
         grTexInfo.data = nErrorAddress;
       }
 
@@ -1302,7 +1299,6 @@ static void RENDERER_GLIDE_SetDrawMode(int32_t nParam) {
 
     switch (nParam) {
       case 5:
-
       case 7:
         RENDERER_GLIDE_SetAlphaBlendMode(1);
       return;
@@ -1778,10 +1774,6 @@ int32_t __fastcall RENDERER_GLIDE_InitDebugFont(FxU32 nParam2, int32_t nParam) {
       pSrcTexel = (uint32_t*)(nGlyphOffset + (int)nGlyphTexBase);
       pDstTexel = pTexBuf;
       memcpy(pDstTexel, pSrcTexel, 0x20 * sizeof(*pDstTexel));
-
-
-
-
 
       (*GLIDEDLL_grTexDownloadMipMap_16)(tmu, *pTexStartAddr, 3, &gTexInfoDebugFontGlide);
       nTexAddress += nTexStride;
@@ -2280,7 +2272,6 @@ void __fastcall DrawRect(RECT * pRect, DWORD nPaletteIndex) {
       if (!(0 <= nXEnd && nRectLeft <= RENDERER_nWindowWidth && 0 <= nYEnd && nRectTop <= RENDERER_nWindowHeight)) {
         return;
       }
-
       Glide::DrawLine(nXStart, nRectTop, nXEnd, nYEnd_00, nPaletteIndex, 0xff);
       Glide::DrawLine(nXEnd, nYEnd_00, nXStart, nYEnd, nPaletteIndex, 0xff);
       Glide::DrawLine(nXStart, nYEnd, nRectLeft, nYEnd_00, nPaletteIndex, 0xff);
@@ -2334,7 +2325,6 @@ void __fastcall DrawRectEx(RECT * pRect, DWORD nPaletteIndex) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf0);
         exit(-1);
       }
-
       Glide::DrawLine(nXStart, nClampedXStart, nXEnd, nClampedXStart, nPaletteIndex, 0xff);
       Glide::DrawLine(nXEnd, nClampedXStart, nXEnd, nClampedYEndTmp, nPaletteIndex, 0xff);
       Glide::DrawLine(nXEnd, nClampedYEndTmp, nXStart, nClampedYEndTmp, nPaletteIndex, 0xff);

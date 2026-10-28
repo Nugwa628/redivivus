@@ -11,9 +11,7 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-
 namespace Bnclient {
-
 static void CACHE_DecryptBlock(uint32_t dwKey, uint32_t * pdwData, uint32_t nByteLen) {
     uint32_t nLoopCount;
     int nSeed = -0x11111112;
@@ -27,7 +25,6 @@ static void CACHE_DecryptBlock(uint32_t dwKey, uint32_t * pdwData, uint32_t nByt
       nSeed = nSeed * 0x21 + 3 + dwPlain;
     }
 }
-
 static uint32_t __stdcall CACHE_HashString(int32_t nParam, char * szText) {
     uint32_t dwHash = 0x7fed7fed;
     int nHashSeed = -0x11111112;
@@ -37,10 +34,8 @@ static uint32_t __stdcall CACHE_HashString(int32_t nParam, char * szText) {
       dwHash = dwHash + nHashSeed ^ *(uint32_t*)((int)g_pCacheCryptTable + (nParam * 0x100 + (int)(char)nUpperChar) * 4);
       nHashSeed = nHashSeed * 0x21 + (int)(char)nUpperChar + 3 + dwHash;
     }
-
     return dwHash;
 }
-
 static uint32_t __stdcall CACHE_FindHashEntry(uint32_t nParam, char * szText) {
     uint32_t nHash0 = CACHE_HashString(0, szText);
     uint32_t nHash1 = CACHE_HashString(1, szText);
@@ -56,7 +51,6 @@ static uint32_t __stdcall CACHE_FindHashEntry(uint32_t nParam, char * szText) {
       if (nBlockIdx == -1) {
         return nFoundHashSlot;
       }
-
       pdwHashEntry = (uint32_t*)(gpCacheBufferPoolFirst + nHashSlotOffset);
       if (*pdwHashEntry == nHash1 && pdwHashEntry[1] == nHash2 && nBlockIdx != -2) {
         if (pdwHashEntry[2] == nParam) {
@@ -66,19 +60,15 @@ static uint32_t __stdcall CACHE_FindHashEntry(uint32_t nParam, char * szText) {
           nFoundHashSlot = nHash0;
         }
       }
-
       nHash0 = nHash0 + 1 & nHashTableMask;
       if (nHash0 == nStartHashSlot) {
         break;
       }
-
       nHashSlotOffset = nHash0 * 0x10;
       nBlockIdx = *(int*)(gpCacheBufferPoolFirst + nHashSlotOffset + 0xc);
     }
-
     return nFoundHashSlot;
 }
-
 static void CACHE_RemoveEntry(char * szText) {
     uint32_t* pBlockIdxField;
     uint32_t nHashSlot = CACHE_FindHashEntry(0, szText);
@@ -92,15 +82,12 @@ static void CACHE_RemoveEntry(char * szText) {
         *(uint32_t*)((int)pCacheBlockTable + uVar1 * 0x10 + 8) = 0;
         *(uint32_t*)((int)pCacheBlockTable + uVar1 * 0x10 + 0xc) = 0;
       }
-
       *pBlockIdxField = -2;
       nHashSlot = CACHE_FindHashEntry(0, szText);
       pCacheBlockTable = gpCacheBlockTable;
     }
-
     gpCacheBlockTable = pCacheBlockTable;
 }
-
 } // namespace Bnclient
 
 namespace Bnclient::Cache {

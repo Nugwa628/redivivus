@@ -76,7 +76,6 @@ int __stdcall DrawAgreeToTrade() {
     nStringIdx = 0;
     nColorOrFont = 0;
     nColor_lcl = 0xf;
-
     Dialog::AddStringData(Dialog::gpTradeAgreeDialog, D2Lang::StrTable::strtable::GetLocaleString(0xd49), nColor_lcl, nColorOrFont, nStringIdx, nClickable, pcVar1, nLineNum);
     nLineNum = 1;
     fpDialogFunc nParam2 = TRADE_GetPlayerGoldAmount;
@@ -84,7 +83,6 @@ int __stdcall DrawAgreeToTrade() {
     nStringIdx = 0;
     nColorOrFont = 0;
     nColor_lcl = 0xf;
-
     Dialog::AddStringData(Dialog::gpTradeAgreeDialog, D2Lang::StrTable::strtable::GetLocaleString(0xd48), nColor_lcl, nColorOrFont, nStringIdx, nClickable, nParam2, nLineNum);
     Dialog::DIALOG_SetSelectedLine(Dialog::gpTradeAgreeDialog, -1);
     return 1;
@@ -123,7 +121,6 @@ void __stdcall TRADE_HandleTradeCancel() {
     nLineNum = 0;
     nColorOrFont = 0;
     nColor_lcl = 0xf;
-
     Dialog::AddStringData(Dialog::gpTradeCancelDialog, D2Lang::StrTable::strtable::GetLocaleString(0xd48), nColor_lcl, nColorOrFont, nLineNum, nClickable, fpCancelCallback, iVar1);
     Dialog::DIALOG_SetSelectedLine(Dialog::gpTradeCancelDialog, -1);
 }

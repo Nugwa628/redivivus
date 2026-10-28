@@ -614,7 +614,6 @@ BOOL __fastcall CheckErrorDuringError(char * szText, int32_t nLine, char * szRea
       return 0;
     }
 
-
     LogManager::LOGMANAGER_TraceToModuleLog("", "\n***** ENCOUNTERED ERROR DURING ERROR HANDLING!!!\n%s,%d\n%s\n*****", StripPathPrefixToRelative(szText), nLine, szReason);
     return 1;
 }

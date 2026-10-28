@@ -2007,7 +2007,6 @@ BOOL __fastcall QUESTLOG_IsQuestAvailableForInteraction(int32_t nQuestIconIndex)
 
     eD2QuestState eQuestStateArg = QUESTSTATE_JustCompleted;
     eD2Quests eQuestIdArg = eQuestIdFromIcon;
-
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(npcmenu::Merc::NPCMENU_GetMercHireCost(), eQuestIdArg, eQuestStateArg);
     if (bQuestState) {
       return 0;
@@ -2020,14 +2019,12 @@ BOOL __fastcall QUESTLOG_IsQuestAvailableForInteraction(int32_t nQuestIconIndex)
 
     eD2QuestState eQueryState = QUESTSTATE_RewardAwaits;
     eD2Quests eQuestIdCheckArg = eQuestIdFromIcon;
-
     eQueryState = D2Common::QuestRecord::GetQuestState(npcmenu::GetQuestInfo(), eQuestIdCheckArg, eQueryState);
     if (eQueryState != QUESTSTATE_Completed) {
       return 0;
     }
 
     eQuestIdCheckArg = eQuestIdFromIcon;
-
     bQuestState = D2Common::QuestRecord::GetQuestState(npcmenu::GetQuestInfo(), eQuestIdCheckArg, eQueryState);
     if (bQuestState) {
       return 0;
@@ -2035,7 +2032,6 @@ BOOL __fastcall QUESTLOG_IsQuestAvailableForInteraction(int32_t nQuestIconIndex)
 
     eQueryState = QUESTSTATE_CannotCompleteQuestInGame;
     eQuestIdCheckArg = eQuestIdFromIcon;
-
     bQuestState = D2Common::QuestRecord::GetQuestState(npcmenu::GetQuestInfo(), eQuestIdCheckArg, eQueryState);
     if (bQuestState) {
       return 0;

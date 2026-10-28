@@ -1099,7 +1099,6 @@ char * __fastcall GetPlayerRosterName(D2UnitStrc * pUnit) {
       } else {
         pPlayerData = (D2UnitDataPlayerStrc*)pRoster->pRosterName;
       }
-
       return pPlayerData->szCharName;
     }
 }

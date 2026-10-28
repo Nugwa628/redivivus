@@ -566,7 +566,6 @@ uint32_t __fastcall ROSTER_IsUnitHostileToPlayer(D2UnitStrc * pUnit) {
     if (nGUID == -1) {
       return 1;
     }
-
     bHostile = UNIT::PlayerList::GetFlag(nGUID, pPlayer->nUnitGUID, 8);
     return bHostile;
 }

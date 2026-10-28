@@ -673,7 +673,6 @@ void __stdcall MONSTER_ApplyDifficultyScaling(D2UnitStrc * pUnit, int32_t nParam
       }
 
       nStatLayer = 0;
-
       Stats::StatsEx::STATLIST_SetUnitStat(pUnit, (*(int (*)[5])(pScalingEntry - 2))[0], D2Client::Stats::D2ApplyPercent(nCurrentStatVal, nPercent, nDivisor), nStatLayer);
       pScalingEntry += 5;
       nEntriesLeft--;

@@ -358,12 +358,10 @@ void __fastcall Q36_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
           AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 2);
           return;
         }
-
         _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
         if (!_bQuestState) {
           return;
         }
-
         AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 3);
         return;
         case MonsterUnitDrehya1:
@@ -373,11 +371,9 @@ void __fastcall Q36_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
           if (!_bQuestState) {
             return;
           }
-
           AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 3);
           return;
         }
-
         nGossipMenuIndex = 2;
         break;
       }
@@ -385,7 +381,6 @@ void __fastcall Q36_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (4 <= pQuestData->nStateFlag) {
         return;
       }
-
       nGossipMenuIndex = gdwQuestCallbackAddressQ36[pQuestData->nStateFlag];
       if (nGossipMenuIndex == -1) {
         return;
@@ -455,7 +450,6 @@ static void __stdcall Q36_CompleteQuestAndSetStatus(D2UnitStrc * pUnit, D2BitBuf
     /* SetQuestState(QUEST_EveOfDestruction, 0=Completed) — mark Baal quest
                          permanently complete */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Completed);
     uint32_t nDifficulty = (uint32_t)pGame->nDifficulty;
-
     GAME::Clients::SetClientStatus(UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q6.cpp", 0x1a2), 5, nDifficulty);
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_EveOfDestruction);
     if (!pQuestData) {
@@ -1015,7 +1009,6 @@ void __fastcall Objects_InitFn79(D2ObjectInitFnArg * pInitArg) {
       }
 
       nMax = nMonStatsSize;
-
       nRolledMonId = D2Client::SEED_RollRange(GetQuestControlSeed(pQuestData->pGame), 1, nMax);
       nAttempt++;
       pQuestSpecificA1Q4->nQuestFlags = nRolledMonId;

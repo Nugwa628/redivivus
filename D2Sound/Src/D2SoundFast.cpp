@@ -24,9 +24,7 @@
 #define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
 #endif
 
-
 namespace D2Sound::Sound {
-
 static int * SOUND_GetAmbientSoundEntry(int32_t nIndex) {
     if (!gbAmbientSoundLangInitialized) {
       gbAmbientSoundLangInitialized = 1;
@@ -41,17 +39,14 @@ static int * SOUND_GetAmbientSoundEntry(int32_t nIndex) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x53);
         exit(-1);
       }
-
       pAmbientEntry = gaAmbientSoundEntryTable + nIndex * 2;
       if (gnAmbientSoundLanguageCode) {
         return pAmbientEntry;
       }
-
       pAmbientEntry = gAmbientSoundTable + nIndex * 2;
       return pAmbientEntry;
     }
 }
-
 } // namespace D2Sound::Sound
 
 namespace D2Sound::Src::D2SoundFast {

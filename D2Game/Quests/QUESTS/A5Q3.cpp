@@ -372,7 +372,6 @@ static void Q33_CleanupQuestMonsters(D2QuestDataStrc * pQuestData) {
         GAME::Event::Dispatch::Monster::MONSTERAI_ExecuteLifecycleTransition(pQuestData->pGame, &sMonsterKill, 1);
         nAnyaGUID = pSpecificData->nFrozenAnyaGUID;
         eUnitType = pAnyaUnit->eUnitType;
-
         D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pAnyaUnit), eUnitType, nAnyaGUID);
         D2Common::Units::RemoveCollision_Vector(pAnyaUnit);
         D2Common::Unit::RemoveUnitFromRoom(pAnyaUnit);
@@ -700,12 +699,10 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         nPlayerClassId = pQuestArgs->pPlayer->nClassId;
       }
 
-
       nRandIndex = D2Client::Archive::UNIT_GetModuloFromSeed(GetQuestControlSeed(pQuestArgs->pGame), pRewardList->sQuestGUID.aPlayerGUID[nPlayerClassId * 2 + 1]);
       memcpy(nRewardClassId, (const void*)(pRewardList->sQuestGUID.aPlayerGUID[nPlayerClassId * 2] + nRandIndex * 4), sizeof(nRewardClassId));
       bQuestStateResult = 1;
       eRewardQuality = QUALITY_RARE;
-
       pQuestSpecificData = ITEM_RewardItemInInventory(pQuestArgs->pGame, pQuestArgs->pPlayer, (int32_t)nRewardClassId, ITEMS::Items::Drop::GetLevel(pQuestArgs->pPlayer, LEVEL_None), eRewardQuality, bQuestStateResult);
       if (!pQuestSpecificData) {
         return;
@@ -720,7 +717,6 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
       if (pItemTxt && 0 < pItemTxt->wDropSound) {
         nNpcNo.nExtra = pItemTxt->wDropSound;
       }
-
 
       GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(UNIT::SUnit::SUNIT_GetClient(pQuestArgs->pPlayer, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q3.cpp", 0x375), &nNpcNo);
       /* SetQuestState(Step0x09): Anya(0x200) class-specific weapon reward (dlg
@@ -896,7 +892,6 @@ void __fastcall Q33_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (!pQuestData->bIsNotIntroduction) {
         return;
       }
-
       nGossipIndex = gdwQuestCallbackAddressQ33[pQuestData->nStateFlag];
       if (nGossipIndex == -1) {
         return;
@@ -1734,12 +1729,10 @@ uint8_t __fastcall Q33_TransformFrozenAnya(::SGAMEDATA * pGame, D2QuestDataStrc 
       pA1Q4Specific->nTransformStep = 1;
     } else if (nFrozenAnyaGUID == 1 && (pA1Q4Specific->nTransformStep = 2 , pFrozenAnyaObj != 0)) {
       nAnyaRescuedClassId = 0x20f;
-
       pAnyaMonster = QUEST_SpawnMonsterNearCoords(pGame, pA1Q4Specific->nTransformX, pA1Q4Specific->nTransformY, D2Common::Units::UNITS_GetRoom(pFrozenAnyaObj), nFrozenAnyaGUID, nAnyaRescuedClassId);
       if (pAnyaMonster) {
         nFrozenAnyaGUID = pFrozenAnyaObj->nUnitGUID;
         eUnitType = pFrozenAnyaObj->eUnitType;
-
         D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pFrozenAnyaObj), eUnitType, nFrozenAnyaGUID);
         D2Common::Unit::RemoveUnitFromRoom(pFrozenAnyaObj);
         ppMapAi = Ai::AiGeneral::GetMonsterMapAi(pAnyaMonster);
@@ -1817,7 +1810,6 @@ BOOL __fastcall OBJOP_A5Q3_RescueAnyaFromPortal(D2ObjectOperateFnArg * pOperatio
               pA5Q3Data->nTransformY = nTransformCoord;
               AddQuestTimer(pPrisonQuest, Q33_TransformFrozenAnya, 1);
               bQuestStateResult = 0;
-
               D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(D2Common::Units::UNITS_GetRoom(pOperation->sArg.pVictim), bQuestStateResult);
             }
           }

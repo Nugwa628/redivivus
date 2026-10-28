@@ -452,15 +452,12 @@ static void DRLGOUTPLACE_PlaceAct5BloodyFoothillsRandomPresets(D2DrlgLevelStrc *
 }
 
 } // namespace D2Common::Drlg::OutPlace::Act5
-
 namespace D2Common::Drlg::OutSiege {
-
 void __fastcall InitAct5OutdoorLevel(D2DrlgLevelStrc * pLevel) {
     if (pLevel->eD2LevelId == 0x6e) {
       OutPlace::Act5::BloodyFoothills::DRLGOUTPLACE_PlaceAct5WallPresets(pLevel);
       return;
     }
-
     OutPlace::SetOutGridLinkFlags(pLevel);
     OutPlace::Act5::DRLGOUTROOM_PlaceAct5RoadPath(pLevel);
     OutPlace::Act5::DRLGOUTROOM_PlaceAct5OuterWalls(pLevel);
@@ -469,10 +466,8 @@ void __fastcall InitAct5OutdoorLevel(D2DrlgLevelStrc * pLevel) {
     if (pLevel->eD2LevelId == 0x6f) {
       OutPlace::Act5::BloodyFoothills::DRLGOUTPLACE_PlaceAct5SiegePresets(pLevel);
     }
-
     OutPlace::Act5::DRLGOUTROOM_PlaceAct5SecondaryBorder(pLevel);
     OutPlace::Act5::DRLGOUTPLACE_PlaceAct5BloodyFoothillsRandomPresets(pLevel);
     OutPlace::Act5::DRLGOUTROOM_PlaceAct5SceneryPresets(pLevel);
 }
-
 } // namespace D2Common::Drlg::OutSiege

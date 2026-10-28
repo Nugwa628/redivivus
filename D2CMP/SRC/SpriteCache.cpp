@@ -390,9 +390,7 @@ BOOL SPRITECACHE_FindOrLoad(char * szText, D2GfxDataStrc * pGfxData) {
                   return 1;
                 } break;
               case 0xf2:
-
               case 0xfb:
-
               case 0x16f:
                 return 1;
             }
@@ -17451,7 +17449,6 @@ D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_AddToLRU(uint32_t dwParam, D2Gfx
           nLruHead->pPrev = 0;
           return nLruHead;
         }
-
         goto done;
       }
     }
@@ -17980,14 +17977,12 @@ static uint32_t __stdcall SPRITECACHE_LoadFromArchive(D2GfxDataStrc * pGfxData, 
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3c1);
             exit(-1);
           }
-
           nRawOffset = *pOffsetIter;
           *pEntryOffsetSlot = nRawOffset - hArchiveHandle;
           if ((int)(nRawOffset - hArchiveHandle) < 0) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3c3);
             exit(-1);
           }
-
           pOffsetIter++;
           pEntryOffsetSlot++;
           nStartFrame++;
@@ -18010,13 +18005,11 @@ static uint32_t __stdcall SPRITECACHE_LoadFromArchive(D2GfxDataStrc * pGfxData, 
         tDecodeRequest.pfnComplete = SPRITECACHE_DecodeFrameByIndex;
         tDecodeRequest.nFrameCount = nFrameStep;
       }
-
       pAsyncData = Fog::Src::AsyncData::STRUCT_AllocAsyncData_Line0x128(D2GfxMemoryStrc_0089db60.pMemory, szFileName, 1, hArchiveHandle, nDataSize2, nullptr, (D2AsyncDataCallbackStrc*)pDecodeRequest, -2, ".\\SRC\\SpriteCache.cpp", nLine);
       pCacheEntry->tDecode.pAsyncData = pAsyncData;
       if (pAsyncData) {
         return nDataSize2;
       }
-
       return -1;
     }
 }
@@ -18280,7 +18273,6 @@ static void __stdcall SPRITECACHE_LoadSpriteWithConversion(D2CelFileCacheEntrySt
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x687);
         exit(-1);
       }
-
       if (*szText == '\0') {
         nConvertResult = SPRITECACHE_FindOrLoad(szText, pGfxData);
         if (!nConvertResult) {
@@ -18403,7 +18395,6 @@ int __stdcall SPRITECACHE_GetOrLoadSprite(D2GfxDataStrc * pGfxData, int32_t bChe
       if (bCheckOnly || szSpritePath[0] == '\0' && (BVar1 = SPRITECACHE_LoadDC6(local_210, pGfxData, szSpritePath) , !BVar1)) {
         return 0;
       }
-
       bLoadSuccess = SPRITECACHE_LoadDCCAndCache(pCodecHeader, nDirections, nFrames, szSpritePath, pGfxData);
       if (!bLoadSuccess) {
         return bLoadSuccess;
