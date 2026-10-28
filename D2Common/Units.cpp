@@ -2781,7 +2781,10 @@ BOOL __stdcall IsObjectInInteractRange(D2UnitStrc * pUnit, D2UnitStrc * pObject)
     int nUnitY;
     int nUnitX;
     int nObjY = 0;
-    if (!pObject || pObject->eUnitType != UNIT_OBJECT) {
+    if (!pObject) {
+      return 0;
+    }
+    if (pObject->eUnitType != UNIT_OBJECT) {
       return 0;
     }
 

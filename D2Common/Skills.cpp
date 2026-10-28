@@ -1811,7 +1811,10 @@ void __stdcall SKILLS_InitSkillSequence(int * pnParam, int32_t bIsPlayerUnit, in
 }
 
 int32_t __stdcall SKILLS_GetSkillWeaponClass(D2UnitStrc * pUnit, D2SkillStrc * pSkill) {
-    if (!pSkill || !pSkill->pRecord) {
+    if (!pSkill) {
+      return 0;
+    }
+    if (!pSkill->pRecord) {
       return 0;
     }
 

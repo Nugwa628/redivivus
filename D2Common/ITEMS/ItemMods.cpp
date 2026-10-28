@@ -1916,7 +1916,10 @@ uint32_t __fastcall ITEMPROP_AddMinDamage(uint32_t dwParam1, D2UnitStrc * pUnit,
     if (!nParam1) {
       return 0;
     }
-    if (!pUnit2 || pUnit2->eUnitType != UNIT_ITEM) {
+    if (!pUnit2) {
+      return 0;
+    }
+    if (pUnit2->eUnitType != UNIT_ITEM) {
       return 0;
     }
     if (!pUnit || pUnit->eUnitType != UNIT_ITEM) {
@@ -1986,7 +1989,10 @@ uint32_t __fastcall ITEMPROP_AddMaxDamage(uint32_t dwParam1, D2UnitStrc * pUnit,
     if (!nParam1) {
       return 0;
     }
-    if (!pUnit2 || pUnit2->eUnitType != UNIT_ITEM) {
+    if (!pUnit2) {
+      return 0;
+    }
+    if (pUnit2->eUnitType != UNIT_ITEM) {
       return 0;
     }
     if (!pUnit || pUnit->eUnitType != UNIT_ITEM) {
