@@ -4736,7 +4736,7 @@ void __fastcall MONSTERAI_CalculateCounterAttackDamage(::SGAMEDATA * pGame, D2Un
 }
 
 // Schedules a convert event (event type 7, UNITMOD 0x15) for all neutral monsters within radius 0x583 of pUnit. Filters by nUnitType; if bUndeadOnly is set, skips non-undead monsters. Skips class 0x14d. For each eligible monster picks a random game-frame delay in [nMinDelay, nMaxDelay) from pUnit's seed via RANDOM_RandomNumberSelector, then calls SetEvent. Asserts nMinDelay &lt; nMaxDelay != 0; halts on assertion failure. Used by Decrepify/Conversion-style AI effects.
-static void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32_t nMinDelay, int32_t nMaxDelay, int32_t bUndeadOnly, D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32_t nMinDelay, int32_t nMaxDelay, int32_t bUndeadOnly, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     uint32_t nRandDelay;
     bool bIsNeutral;
     D2UnitFindArgStrc sUnitFindArg;
@@ -4808,7 +4808,7 @@ static void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32
 }
 
 void __fastcall MONSTERAI_ThinkRangedSpecial(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    MONSTERAI_ConvertMonstersInRadius(0x23, 0x19, 0x7d, 1, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x23, 0x19, 0x7d, 1, pGame, pUnit);
 }
 
 void __fastcall AI_Mephisto_SpawnDeathMissile(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -4824,7 +4824,7 @@ void __fastcall AI_Mephisto_SpawnDeathMissile(::SGAMEDATA * pGame, D2UnitStrc * 
 }
 
 void __fastcall MONSTERAI_ThinkRangedShort(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    MONSTERAI_ConvertMonstersInRadius(0x23, 1, 0x33, 0, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x23, 1, 0x33, 0, pGame, pUnit);
 }
 
 void __fastcall AI_Diablo_SpawnRingAttack(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -4842,7 +4842,7 @@ void __fastcall AI_Diablo_SpawnRingAttack(::SGAMEDATA * pGame, D2UnitStrc * pUni
       nMissileRange = 100;
     }
 
-    MONSTERAI_ConvertMonstersInRadius(0x23, 0x28, nMissileRange, 0, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x23, 0x28, nMissileRange, 0, pGame, pUnit);
     eD2UnitType eVar1 = pUnit->eUnitType;
     if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
@@ -4916,11 +4916,11 @@ void __fastcall AI_Boss_LaunchOrbAtObject(::SGAMEDATA * pGame, D2UnitStrc * pUni
 }
 
 void __fastcall MONSTERAI_ThinkMeleeSkill(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    MONSTERAI_ConvertMonstersInRadius(0x69, 1, 2, 0, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x69, 1, 2, 0, pGame, pUnit);
 }
 
 void __fastcall MONSTERAI_ThinkRangedNormal(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    MONSTERAI_ConvertMonstersInRadius(0x23, 0x19, 0x7d, 0, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x23, 0x19, 0x7d, 0, pGame, pUnit);
 }
 
 void __stdcall MONSTERAI_Noop() {
