@@ -3786,10 +3786,10 @@ void __fastcall SKILLDESC_CalcCompareAttackRate(D2UnitStrc * pUnit, D2SkillStrc 
       D2Common::Stats::StatsEx::STATLIST_SetItemStatActive(pUnit, pEquippedWeapon, 0);
       nAttackRate = D2Common::Units::GetAttackRate(pUnit);
       *pnMinDamage = nAttackRate;
-      if (!pOwner) {
-        D2Common::Stats::StatsEx::STATLIST_RemoveFromOwnerAndRecalc(pUnit, pEquippedWeapon);
-      } else {
+      if (pOwner) {
         D2Common::Stats::StatsEx::STATLIST_SetItemStatActive(pUnit, pEquippedWeapon, (int32_t)pOwnerSaved);
+      } else {
+        D2Common::Stats::StatsEx::STATLIST_RemoveFromOwnerAndRecalc(pUnit, pEquippedWeapon);
       }
     } else {
       nAttackRate = D2Common::Units::GetAttackRate(pUnit);
