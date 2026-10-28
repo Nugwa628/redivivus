@@ -1047,7 +1047,7 @@ static int32_t __stdcall SKILLAMZ_CreatePlagueJavelinClouds(int32_t nParam, D2Sk
       } else if (nAttackFrames < 0x17) {
         nAttackFrames = 0xc;
       } else {
-        nAttackFrames = (uint32_t)(0x1a <= nAttackFrames) * 2 + 0xe;
+        nAttackFrames = (0x1a <= nAttackFrames ? 0x10 : 0xe);
       }
     }
 

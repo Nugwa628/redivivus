@@ -530,13 +530,13 @@ BOOL __fastcall SaveStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * pStar
                   nClampedValue = nRawStatValue;
                   if (byCsvBitWidth < 0x20) {
                     if (pStatCostTxt->dwItemStatFlags & ITEMSTATCOSTFLAG_CSVSIGNED) {
-                      nClampMask = -1 << (byCsvBitWidth - 1 & 0x1f);
+                      nClampMask = -1 << (byCsvBitWidth - 1);
                       nClamped = nRawStatValue;
                       if ((int)nRawStatValue <= (int)nClampMask) {
                         nClamped = nClampMask;
                       }
 
-                      nClampedValue = (1 << (byCsvBitWidth - 1 & 0x1f)) - 1;
+                      nClampedValue = (1 << (byCsvBitWidth - 1)) - 1;
                       if ((int)nClamped < (int)nClampedValue) {
                         nClampedValue = nRawStatValue;
                         if ((int)nRawStatValue <= (int)nClampMask) {
@@ -544,7 +544,7 @@ BOOL __fastcall SaveStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * pStar
                         }
                       }
                     } else {
-                      nClampMask = (1 << (byCsvBitWidth & 0x1f)) - 1;
+                      nClampMask = (1 << (byCsvBitWidth)) - 1;
                       nClampedValue = (int)nRawStatValue < 1 ? 0 : nRawStatValue;
                       if ((int)nClampMask <= (int)nClampedValue) {
                         nClampedValue = nClampMask;

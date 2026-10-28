@@ -1675,7 +1675,7 @@ void __stdcall FreePlayerData(D2PoolManagerStrc * pMemory, D2UnitStrc * pUnit) {
         Waypoints::Free(pMemory, *(D2WaypointStrc**)(pUnit->pUnitData.pUnitDataPlayer->szCharName + iActIdx));
         iActIdx += 4;
       } while (iActIdx < 0x28);
-      Txt::Cube::FIELDTBLS_FreePlayerData_STUB();
+      Txt::Cube::FIELDTBLS_FreePlayerData_STUB(pUnit);
       Fog::Memory::FreeServerMemory(pMemory, pUnit->pUnitData.pUnitDataPlayer, ".\\UNITS\\Units.cpp", 0xf76, 0);
       pUnit->pUnitData.pUnitDataPlayer = 0;
       return;
@@ -2065,7 +2065,7 @@ int32_t __stdcall GetMeleeRange(D2UnitStrc * pUnit) {
 }
 
 // Tests whether the line segment from unit (x,y) with radius size to target (x2,y2) with radius size2 is blocked by room collision. Clamps both radii to 2, computes Manhattan-distance proximity rejection, then adjusts endpoints by the respective radii along the dominant axis before delegating to Collision::TestCollision with the supplied eCollisionFlag. Returns TRUE if a collision is detected.
-BOOL __stdcall TestCollision(int32_t x, int32_t size, int32_t x2, int32_t y, int32_t size2, int32_t y2, D2RoomStrc * pRoom, int32_t eCollisionFlag) {
+BOOL __fastcall TestCollision(int32_t x, int32_t size, int32_t x2, int32_t y, int32_t size2, int32_t y2, D2RoomStrc * pRoom, int32_t eCollisionFlag) {
     POINT ptTarget;
     POINT ptUnit;
     int nOffsetY2;

@@ -287,7 +287,7 @@ bool __fastcall Q21_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
     if (BVar1) {
       /* GetQuestState JustCompleted(0xd) -> out = 0xb + 2*set (0xd if just-completed
                          cinematic) */ BVar1 = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_TheGoldenBird, QUESTSTATE_JustCompleted);
-      *nUnknown = (BVar1 != 0) * '\x02' + '\v';
+      *nUnknown = BVar1 ? 0xd : 0xb;
       return true;
     }
 
