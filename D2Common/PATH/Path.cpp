@@ -387,21 +387,24 @@ uint32_t __stdcall PATH_RecalculatePath(D2UnitStrc * pUnit, int32_t nParam) {
     }
 
     int nPathType = pDynamicPath->ePathType;
-    if (nPathType == 2 || nPathType == 0xd || nPathType == 0xf) {
-      if (nParam) {
-        pDynamicPath->ePathType = 0xd;
-      } else {
-        pDynamicPath->ePathType = 2;
-        pDynamicPath->nTargetX = pDynamicPath->nSavedTargetX;
-        pDynamicPath->nTargetY = pDynamicPath->nSavedTargetY;
-      }
+    switch (nPathType) {
+      case 2:
+      case 0xd:
+      case 0xf:
+        if (nParam) {
+          pDynamicPath->ePathType = 0xd;
+        } else {
+          pDynamicPath->ePathType = 2;
+          pDynamicPath->nTargetX = pDynamicPath->nSavedTargetX;
+          pDynamicPath->nTargetY = pDynamicPath->nSavedTargetY;
+        }
 
-      bPathCalcOk = DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
-      if (bPathCalcOk) {
-        return bPathCalcOk;
-      }
+        bPathCalcOk = DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
+        if (bPathCalcOk) {
+          return bPathCalcOk;
+        }
 
-      pDynamicPath->ePathType = 0xf;
+        pDynamicPath->ePathType = 0xf;
     }
 
     bPathCalcOk = DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);

@@ -1394,47 +1394,51 @@ static int32_t __fastcall STATLIST_CalcCombinedStatValue(D2StatListExStrc * pSta
         break;
         case 2:
           eOwnerType = pStatList->sStatList.eOwnerType;
-        if (eOwnerType == UNIT_PLAYER || eOwnerType == UNIT_MONSTER) {
-          wBaseStat = ((D2ItemStatCostOpRelationStrc*)(pOpRelation - 1))->nOpBaseStat;
-          if (wBaseStat != 0xffff) {
-            pItemStatCostLine = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine((eD2UnitStat)wBaseStat);
-            if (pItemStatCostLine) {
-              nApplyResult3 = TXT_ItemStatCost_GetMinimumStatValueShifted(nullptr, pStatList, (uint32_t)wBaseStat << 0x10);
-              byValShift = pItemStatCostLine->valshift;
-              add_opbase_scaled:
-              nApplyResult3 >>= byValShift & 0x1f;
-              if (0 < nApplyResult3) {
-                nRelatedStatVal = STATLIST_CalcCombinedStatValue(pStatList, (uint32_t)(uint16_t)*pOpRelation << 0x10);
-                if (nRelatedStatVal) {
-                  nApplyResult2 = nRelatedStatVal * nApplyResult3 >> (*(uint8_t*)((int)pOpRelation + 3) & 0x1f);
-                  goto add_to_total;
+        switch (eOwnerType) {
+          case UNIT_PLAYER:
+          case UNIT_MONSTER:
+            wBaseStat = ((D2ItemStatCostOpRelationStrc*)(pOpRelation - 1))->nOpBaseStat;
+            if (wBaseStat != 0xffff) {
+              pItemStatCostLine = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine((eD2UnitStat)wBaseStat);
+              if (pItemStatCostLine) {
+                nApplyResult3 = TXT_ItemStatCost_GetMinimumStatValueShifted(nullptr, pStatList, (uint32_t)wBaseStat << 0x10);
+                byValShift = pItemStatCostLine->valshift;
+                add_opbase_scaled:
+                nApplyResult3 >>= byValShift & 0x1f;
+                if (0 < nApplyResult3) {
+                  nRelatedStatVal = STATLIST_CalcCombinedStatValue(pStatList, (uint32_t)(uint16_t)*pOpRelation << 0x10);
+                  if (nRelatedStatVal) {
+                    nApplyResult2 = nRelatedStatVal * nApplyResult3 >> (*(uint8_t*)((int)pOpRelation + 3) & 0x1f);
+                    goto add_to_total;
+                  }
                 }
               }
             }
-          }
         }
 
         break;
         case 3:
           eOwnerType = pStatList->sStatList.eOwnerType;
-        if (eOwnerType == UNIT_PLAYER || eOwnerType == UNIT_MONSTER) {
-          wBaseStat = ((D2ItemStatCostOpRelationStrc*)(pOpRelation - 1))->nOpBaseStat;
-          if (wBaseStat != 0xffff) {
-            pItemStatCostLine = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine((eD2UnitStat)wBaseStat);
-            if (pItemStatCostLine) {
-              nApplyResult3 = TXT_ItemStatCost_GetMinimumStatValueShifted(nullptr, pStatList, (uint32_t)wBaseStat << 0x10);
-              byValShift = pItemStatCostLine->valshift;
-              add_opbase_scaled_percent:
-              nApplyResult3 >>= byValShift & 0x1f;
-              if (0 < nApplyResult3) {
-                nRelatedStatVal = STATLIST_CalcCombinedStatValue(pStatList, (uint32_t)(uint16_t)*pOpRelation << 0x10);
-                if (nRelatedStatVal) {
-                  nApplyResult = nRelatedStatVal * nApplyResult3 >> (*(uint8_t*)((int)pOpRelation + 3) & 0x1f);
-                  goto add_percent;
+        switch (eOwnerType) {
+          case UNIT_PLAYER:
+          case UNIT_MONSTER:
+            wBaseStat = ((D2ItemStatCostOpRelationStrc*)(pOpRelation - 1))->nOpBaseStat;
+            if (wBaseStat != 0xffff) {
+              pItemStatCostLine = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine((eD2UnitStat)wBaseStat);
+              if (pItemStatCostLine) {
+                nApplyResult3 = TXT_ItemStatCost_GetMinimumStatValueShifted(nullptr, pStatList, (uint32_t)wBaseStat << 0x10);
+                byValShift = pItemStatCostLine->valshift;
+                add_opbase_scaled_percent:
+                nApplyResult3 >>= byValShift & 0x1f;
+                if (0 < nApplyResult3) {
+                  nRelatedStatVal = STATLIST_CalcCombinedStatValue(pStatList, (uint32_t)(uint16_t)*pOpRelation << 0x10);
+                  if (nRelatedStatVal) {
+                    nApplyResult = nRelatedStatVal * nApplyResult3 >> (*(uint8_t*)((int)pOpRelation + 3) & 0x1f);
+                    goto add_percent;
+                  }
                 }
               }
             }
-          }
         }
 
         break;
@@ -1442,16 +1446,18 @@ static int32_t __fastcall STATLIST_CalcCombinedStatValue(D2StatListExStrc * pSta
           pOwner = pStatList->sStatList.pUnitAttached;
         if (pOwner) {
           eOwnerType = pOwner->eUnitType;
-          if (eOwnerType == UNIT_PLAYER || eOwnerType == UNIT_MONSTER) {
-            wBaseStat = ((D2ItemStatCostOpRelationStrc*)(pOpRelation - 1))->nOpBaseStat;
-            if (wBaseStat != 0xffff) {
-              pItemStatCostLine = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine((eD2UnitStat)wBaseStat);
-              if (pItemStatCostLine) {
-                nApplyResult3 = STATSEX_GetCurrentStat(pStatList->sStatList.pUnitAttached, (eD2UnitStat)wBaseStat, 0);
-                byValShift = pItemStatCostLine->valshift;
-                goto add_opbase_scaled;
+          switch (eOwnerType) {
+            case UNIT_PLAYER:
+            case UNIT_MONSTER:
+              wBaseStat = ((D2ItemStatCostOpRelationStrc*)(pOpRelation - 1))->nOpBaseStat;
+              if (wBaseStat != 0xffff) {
+                pItemStatCostLine = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine((eD2UnitStat)wBaseStat);
+                if (pItemStatCostLine) {
+                  nApplyResult3 = STATSEX_GetCurrentStat(pStatList->sStatList.pUnitAttached, (eD2UnitStat)wBaseStat, 0);
+                  byValShift = pItemStatCostLine->valshift;
+                  goto add_opbase_scaled;
+                }
               }
-            }
           }
         }
 
@@ -1460,16 +1466,18 @@ static int32_t __fastcall STATLIST_CalcCombinedStatValue(D2StatListExStrc * pSta
           pOwner = pStatList->sStatList.pUnitAttached;
         if (pOwner) {
           eOwnerType = pOwner->eUnitType;
-          if (eOwnerType == UNIT_PLAYER || eOwnerType == UNIT_MONSTER) {
-            wBaseStat = ((D2ItemStatCostOpRelationStrc*)(pOpRelation - 1))->nOpBaseStat;
-            if (wBaseStat != 0xffff) {
-              pItemStatCostLine = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine((eD2UnitStat)wBaseStat);
-              if (pItemStatCostLine) {
-                nApplyResult3 = STATSEX_GetCurrentStat(pStatList->sStatList.pUnitAttached, (eD2UnitStat)wBaseStat, 0);
-                byValShift = pItemStatCostLine->valshift;
-                goto add_opbase_scaled_percent;
+          switch (eOwnerType) {
+            case UNIT_PLAYER:
+            case UNIT_MONSTER:
+              wBaseStat = ((D2ItemStatCostOpRelationStrc*)(pOpRelation - 1))->nOpBaseStat;
+              if (wBaseStat != 0xffff) {
+                pItemStatCostLine = D2Client::GAME::SCmd::TXT_ItemStatCost_GetLine((eD2UnitStat)wBaseStat);
+                if (pItemStatCostLine) {
+                  nApplyResult3 = STATSEX_GetCurrentStat(pStatList->sStatList.pUnitAttached, (eD2UnitStat)wBaseStat, 0);
+                  byValShift = pItemStatCostLine->valshift;
+                  goto add_opbase_scaled_percent;
+                }
               }
-            }
           }
         }
 
