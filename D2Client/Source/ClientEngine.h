@@ -22,10 +22,8 @@ namespace D2Client::Source::ClientEngine {
 
 // Function declarations
 void __stdcall CLIENT_QuestEvent_CairnStonesPortal();
-void __stdcall DenOfEvilSpecific(struct D2RoomStrc * pRoom);
 void __stdcall CLIENT_QuestEvent_DenOfEvilLightReset();
 // Iterate act rooms and apply DenOfEvil-specific lighting to matching rooms.
-void __stdcall ClientLight_ApplyDenOfEvilLighting();
 void __stdcall CLIENT_QuestEvent_PlaceHoradricStaff();
 void __stdcall CLIENT_QuestEvent_RestoreTaintedSun();
 void __stdcall CLIENT_QuestEvent_DiabloSpawnInChaosSanctuary();
@@ -48,7 +46,6 @@ void __fastcall CLIENT_BossDeath_Duriel(struct D2UnitStrc * pBossUnit);
 void __fastcall CLIENT_BossDeath_Izual(struct D2UnitStrc * pUnit);
 void __fastcall CLIENT_StoreUnitGuidForQuestTracking(int32_t pUnit);
 void __stdcall CLIENT_BossDeath_Baal();
-int __stdcall CLIENT_GetDenOfEvilLightIntensity(uint8_t * pRed, uint8_t * pGreen, uint8_t * pBlue);
 int __fastcall ROOM_GetLevelLightColor(struct D2RoomStrc * pRoom, char * pRed, char * pGreen, char * pBlue);
 void __fastcall DenOfEvilLight(struct D2RoomStrc * pRoom);
 // Ticks special light timers; triggers DenOfEvil lighting and clears related state when timers expire.
@@ -57,7 +54,6 @@ void __fastcall CLIENT_CheckWorldstoneShake(struct D2RoomStrc * pRoom);
 void __stdcall CLIENT_InitializeQuestStateGlobals();
 void __fastcall CLIENT_SetQuestGameEndTimer(int32_t nSeconds);
 void __fastcall CLIENT_SpawnWorldstoneShakeParticle(struct D2UnitStrc * pUnit);
-void DRAW_Overlay_SecondsLeftToGame(struct D2QServerClientConnectionStrc * pQServerClientConnection);
 // @wasnamed DRAW_Overlay_SecondsLeftToGame - one name on two different functions.
 // @evidence Body is one instruction: JMP 0x0046c060. The apparent 'duplicate body' was Ghidra following the jump.
 void thunk_DRAW_Overlay_SecondsLeftToGame(struct D2QServerClientConnectionStrc * pQServerClientConnection);

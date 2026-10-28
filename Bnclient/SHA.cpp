@@ -15,7 +15,7 @@
 namespace Bnclient::SHA {
 
 // SHA-1 compression round over one 512-bit block. blockWords points to 16 32-bit words, stateWords points to 5-word hash state.
-void SHA1_Transform(uint32_t * blockWords, uint32_t * stateWords) {
+static void SHA1_Transform(uint32_t * blockWords, uint32_t * stateWords) {
     uint32_t stateE = stateWords[1];
     uint32_t stateD = *blockWords;
     uint32_t schedule0 = stateD << 0x18 | stateD >> 8 & -16711936 | (stateD & 0xff00) << 8 | stateD >> 0x18;

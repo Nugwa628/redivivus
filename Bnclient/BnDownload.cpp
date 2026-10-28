@@ -108,7 +108,7 @@ uint32_t __stdcall BNDOWNLOAD_HasActiveDownloads() {
     return (uint32_t)(0 < (int)lpAddend_00881d5c);
 }
 
-BOOL __stdcall NET_RecvExact(SOCKET hSocket, int32_t pBuffer, uint32_t nLen) {
+static BOOL __stdcall NET_RecvExact(SOCKET hSocket, int32_t pBuffer, uint32_t nLen) {
     uint32_t nBytesReceived = 0;
     if (!nLen) {
       return 1;
@@ -262,7 +262,7 @@ int32_t __fastcall BNDOWNLOAD_PerformCheckRevision(uint32_t * pdwVersionOut, uin
     return 1;
 }
 
-void __fastcall BNDOWNLOAD_ExtractFileFromArchive(char * szFileName, D2ArchiveStrc * pArchive, LPCSTR szFilePath) {
+static void __fastcall BNDOWNLOAD_ExtractFileFromArchive(char * szFileName, D2ArchiveStrc * pArchive, LPCSTR szFilePath) {
     D2MPQFileStrc* pMpqFile = (D2MPQFileStrc*)szFileName;
     int bOpened = Storm::Source::SFile::SFileOpenFileEx(pArchive, szFileName, 0, (void**)&pMpqFile);
     if (!bOpened) {
@@ -429,7 +429,7 @@ static int32_t __stdcall BNDOWNLOAD_RecvFileFromSocket(LPCSTR pThis, SOCKET hSoc
 }
 
 // Processes BNet prepatch.lst from downloaded MPQ archive - executes patches, extracts files, launches updates
-void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut) {
+static void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut) {
     // Frame slots -4020..-3996 are ONE object: &dwAuthResult is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {

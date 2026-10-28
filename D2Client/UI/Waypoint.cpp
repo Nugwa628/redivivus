@@ -49,7 +49,7 @@
 
 namespace D2Client::UI::Waypoint {
 
-int32_t WAYPOINT_GetActIndexFromMouse(int32_t nMouseX, int32_t nMouseY) {
+static int32_t WAYPOINT_GetActIndexFromMouse(int32_t nMouseX, int32_t nMouseY) {
     BOOL bIsExpansion = Fog::D2CheckExpansionGame();
     if (!bIsExpansion || (bIsExpansion = GAME::Game::CLIENT_CheckExpansion() , !bIsExpansion)) {
       if (0x1e < nMouseY || 0x140 < nMouseX) {
@@ -83,7 +83,7 @@ int32_t WAYPOINT_GetActIndexFromMouse(int32_t nMouseX, int32_t nMouseY) {
     return (0xff < nMouseX) + 3;
 }
 
-int32_t WAYPOINT_GetWaypointIndexFromMouse(int32_t nMouseX, int32_t nMouseY) {
+static int32_t WAYPOINT_GetWaypointIndexFromMouse(int32_t nMouseX, int32_t nMouseY) {
     uint32_t* pHitTestData;
     int nIndex = 0;
     int* piVar1 = gaWaypointRowLayout;
@@ -98,7 +98,7 @@ int32_t WAYPOINT_GetWaypointIndexFromMouse(int32_t nMouseX, int32_t nMouseY) {
     return nIndex;
 }
 
-void __stdcall DRAW_UI_WaypointGFXLoad() {
+static void __stdcall DRAW_UI_WaypointGFXLoad() {
     char szPath[260];
     char* pszFormat;
     if (!WaypointWayGateBackGround) {
@@ -125,7 +125,7 @@ void __stdcall DRAW_UI_WaypointGFXLoad() {
     WaypointWaygateIcons = Core::Archive::IMAGE_LoadDC6Ex(szPath, 0);
 }
 
-void __stdcall FreeUiImages() {
+static void __stdcall FreeUiImages() {
     if (WaypointWayGateBackGround) {
       Core::Archive::DC6_FreeAndDelete(WaypointWayGateBackGround);
       WaypointWayGateBackGround = 0;
@@ -147,7 +147,7 @@ void __stdcall InitializeWaypoints() {
     D2Client::Waypoint::bNeedAllocation = false;
 }
 
-void __stdcall WAYPOINT_SendClosePacket() {
+static void __stdcall WAYPOINT_SendClosePacket() {
     if (D2Client::Waypoint::bNeedAllocation) {
       return;
     }

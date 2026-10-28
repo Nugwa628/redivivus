@@ -736,7 +736,7 @@ void __stdcall INPUT_SpellSelectClick(D2UIMouseMsgStrc * pMsg) {
     Storm::SMsgBreakHandlerChain(pMsg);
 }
 
-void __stdcall SPELLSEL_ClearSkillBinding(short * pSkillId, int32_t nChargesLeft) {
+static void __stdcall SPELLSEL_ClearSkillBinding(short * pSkillId, int32_t nChargesLeft) {
     int nByteOffset;
     int nSlotMsgKey;
     int* pSlotSkillId = gSpellSelGridRegion.aLeftHandSlots;
@@ -1234,7 +1234,7 @@ void __stdcall SPELLSEL_ClearWaitingForSkillFlag() {
     BooleanWaitingForSkillingMaybe = 0;
 }
 
-int __stdcall SPELLSEL_IsWaitingForSkill() {
+static int __stdcall SPELLSEL_IsWaitingForSkill() {
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
     if (!pUnit) {
       return BooleanWaitingForSkillingMaybe;
@@ -1309,7 +1309,7 @@ static void __stdcall SPELLSEL_DrawTabHeader(void * pThis, int32_t nYOffset) {
     ui::UI_DrawTextCentered(WindowSizeX - gnPanelOffsetX - 0x5a, gnPanelOffsetY + ScreenSizeY - 0x1e0 + nYOffset, WindowSizeX - gnPanelOffsetX, (uint16_t*)pThis, 0);
 }
 
-void __stdcall SPELLSEL_DrawSkilltreeBackground(DC6 * pDC6, int32_t nParam) {
+static void __stdcall SPELLSEL_DrawSkilltreeBackground(DC6 * pDC6, int32_t nParam) {
     D2GfxDataStrc sGfxData;
     memset(&sGfxData, 0, 0x48);
     sGfxData.pDC6 = pDC6;
@@ -1333,7 +1333,7 @@ void __stdcall SPELLSEL_DrawSkilltreeBackground(DC6 * pDC6, int32_t nParam) {
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, ScreenSizeX - gnPanelOffsetX - 0x40, gnPanelOffsetY - 0x30 + ScreenSizeY, -1, DRAW_SOLID, nullptr);
 }
 
-void __stdcall DRAW_UI_SkillsWindow_II() {
+static void __stdcall DRAW_UI_SkillsWindow_II() {
     int32_t nTabYOffset;
     uint16_t* pwszTabLabel = D2Lang::StrTable::strtable::GetLocaleString(0x1083);
     ui::UI_DrawTextCentered(WindowSizeX - gnPanelOffsetX - 0x5a, gnPanelOffsetY - 0x1c7 + ScreenSizeY, WindowSizeX - gnPanelOffsetX, pwszTabLabel, 0);
@@ -1478,7 +1478,7 @@ void __stdcall thunk_D2GFX_GetColorFromPalette_C() {
     gnSpellSelTabHighlightColor = (char)nPaletteColor;
 }
 
-void __stdcall SPELLSEL_DrawTabHighlight(int32_t nParam) {
+static void __stdcall SPELLSEL_DrawTabHighlight(int32_t nParam) {
     uint16_t* pwszLabel;
     int nCurMouseX;
     nCurMouseX = ui::GetMouseX();
@@ -1640,7 +1640,7 @@ static BOOL __stdcall SKILLTREE_IsMouseOnSkillNode(int32_t nHitWidth, int32_t nH
     return 1;
 }
 
-void __stdcall SKILLTREE_RenderSkillTree() {
+static void __stdcall SKILLTREE_RenderSkillTree() {
     int nMouseX;
     int nMouseY;
     BOOL nScreenY;
@@ -2029,7 +2029,7 @@ void __stdcall SKILLTREE_FreeResources() {
     } while (nSkillIdx < nSkillCount);
 }
 
-void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, D2SkillsTxt * pSkillTxt, int32_t nDisplayLevel, int32_t nSkillIconState, GLOBALPALLETE nGlobalPaletteShift) {
+static void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, D2SkillsTxt * pSkillTxt, int32_t nDisplayLevel, int32_t nSkillIconState, GLOBALPALLETE nGlobalPaletteShift) {
     int32_t nTooltipParam;
     D2GfxDataStrc sGfxData;
     uint16_t wszLevelBuf[10];
@@ -2143,7 +2143,7 @@ void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, D2SkillsTxt * pSkillTxt
     D2Win::Src::D2WinFont::DRAW_text(wszLevelBuf, nColumnX + 0x30, nRowY + 0xc, nSkillBonus, 0);
 }
 
-void __stdcall DRAW_UI_SkillSkillsWithAvailableSkills() {
+static void __stdcall DRAW_UI_SkillSkillsWithAvailableSkills() {
     eD2States eState;
     BOOL BVar1;
     D2SkillStrc* pSkill;
@@ -2254,7 +2254,7 @@ void __stdcall DRAW_UI_SkillSkillsWithAvailableSkills() {
     } while (nSkillDescIdx < nNewSkills);
 }
 
-void __stdcall SKILLTREE_DrawAllSkillNodes() {
+static void __stdcall SKILLTREE_DrawAllSkillNodes() {
     int nSkillDescIdx;
     D2SkillStrc* pSkill;
     int nSkillLevel;
