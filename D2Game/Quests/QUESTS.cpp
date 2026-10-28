@@ -1943,12 +1943,11 @@ void __fastcall QUEST_SendNpcGossipPacket(::SGAMEDATA * pGame, D2UnitStrc * pUni
 }
 
 BOOL __fastcall IsPortalFromDuriel(::SGAMEDATA * pGame, POINT * pPoint, eD2LevelId eLevelId, D2RoomStrc * * ppRoom) {
-    if (eLevelId != LEVEL_DurielsLair) {
-      return 0;
+    if (eLevelId == LEVEL_DurielsLair) {
+      return A2Q7::Q14_GetTyraelSpawnCoords(pGame, pPoint, ppRoom);
     }
 
-    BOOL nResult = A2Q7::Q14_GetTyraelSpawnCoords(pGame, pPoint, ppRoom);
-    return nResult;
+    return 0;
 }
 
 BOOL __fastcall PORTAL_ActivateOrDeactivatePortalObject(::SGAMEDATA * * ppGame) {

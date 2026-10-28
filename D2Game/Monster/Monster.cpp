@@ -105,11 +105,12 @@ void __fastcall SetAiState(D2UnitStrc * pMonster, D2UnitStrc * nAiState) {
 }
 
 int __fastcall GetAiState(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
+    D2UnitDataMonsterStrc* pMonsterData = !pUnit || pUnit->eUnitType != UNIT_MONSTER ? 0 : pUnit->pUnitData.pUnitDataMonster;
+    if (!pMonsterData) {
       return 1;
     }
 
-    return pUnit->pUnitData.pUnitDataMonster->nAiState;
+    return pMonsterData->nAiState;
 }
 
 void __fastcall SetLevelId(D2UnitStrc * pUnit, eD2LevelId eLevel) {
@@ -129,11 +130,12 @@ eD2LevelId __fastcall GetMonsterArea(D2UnitStrc * pUnit) {
 }
 
 uint32_t __fastcall GetMonsterFlags(D2UnitStrc * pUnit, uint16_t eFlag) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
+    D2UnitDataMonsterStrc* pMonsterData = !pUnit || pUnit->eUnitType != UNIT_MONSTER ? 0 : pUnit->pUnitData.pUnitDataMonster;
+    if (!pMonsterData) {
       return 0;
     }
 
-    return (uint32_t)((pUnit->pUnitData.pUnitDataMonster->nSummonerFlags & eFlag) != 0);
+    return (uint32_t)((pMonsterData->nSummonerFlags & eFlag) != 0);
 }
 
 void __fastcall SetUnsetSummonerFlags(D2UnitStrc * pUnit, uint16_t nSummonerFlag, BOOL bSetUnset) {

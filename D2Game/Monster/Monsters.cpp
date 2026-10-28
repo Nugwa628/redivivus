@@ -146,20 +146,22 @@ uint8_t * __fastcall GetMonUModList(D2UnitStrc * pUnit) {
 
 // 2022.01.09 - dzik
 uint16_t __fastcall GetNameSeed(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
+    D2UnitDataMonsterStrc* pMonsterData = !pUnit || pUnit->eUnitType != UNIT_MONSTER ? 0 : pUnit->pUnitData.pUnitDataMonster;
+    if (!pMonsterData) {
       return 0x1506;
     }
 
-    return pUnit->pUnitData.pUnitDataMonster->nNameSeed;
+    return pMonsterData->nNameSeed;
 }
 
 // 2022.01.09 - dzik
 uint32_t __fastcall CheckMonsterType(D2UnitStrc * pUnit, uint16_t eMonsterType) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
+    D2UnitDataMonsterStrc* pMonsterData = !pUnit || pUnit->eUnitType != UNIT_MONSTER ? 0 : pUnit->pUnitData.pUnitDataMonster;
+    if (!pMonsterData) {
       return 0;
     }
 
-    return (uint32_t)((pUnit->pUnitData.pUnitDataMonster->eMonsterType & eMonsterType) != 0);
+    return (uint32_t)((pMonsterData->eMonsterType & eMonsterType) != 0);
 }
 
 void __fastcall MONSTER_SetMonsterDataFlags(int * pUnit, uint16_t nFlagMask, int32_t nFlagValue) {
@@ -181,11 +183,12 @@ void __fastcall MONSTER_SetMonsterDataFlags(int * pUnit, uint16_t nFlagMask, int
 
 // 2022.01.09 - dzik
 int16_t __fastcall GetBossNo(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
+    D2UnitDataMonsterStrc* pMonsterData = !pUnit || pUnit->eUnitType != UNIT_MONSTER ? 0 : pUnit->pUnitData.pUnitDataMonster;
+    if (!pMonsterData) {
       return -1;
     }
 
-    return pUnit->pUnitData.pUnitDataMonster->nBossNo;
+    return pMonsterData->nBossNo;
 }
 
 void __fastcall MONSTER_SetMonsterDataField0x26(D2UnitStrc * pUnit, int16_t wParam) {
@@ -255,11 +258,12 @@ static void __stdcall SetUniqueMonsterType(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
 // 2022.01.09 - dzik
 uint32_t __fastcall CheckMonUModList(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
+    D2UnitDataMonsterStrc* pMonsterData = !pUnit || pUnit->eUnitType != UNIT_MONSTER ? 0 : pUnit->pUnitData.pUnitDataMonster;
+    if (!pMonsterData) {
       return 0;
     }
 
-    return (uint32_t)(pUnit->pUnitData.pUnitDataMonster->MonUModList[0] != 0);
+    return (uint32_t)(pMonsterData->MonUModList[0] != 0);
 }
 
 int32_t __fastcall MONSTER_GetBossNo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {

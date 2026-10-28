@@ -494,11 +494,11 @@ static uint32_t ITEM_CheckUniqueBitmask(uint32_t nUniqueFileIndex, ::SGAMEDATA *
     if (!pGame) {
       return 0;
     }
-    if (nUniqueFileIndex >= 0x1001) {
-      return 1;
+    if (nUniqueFileIndex <= 0x1000) {
+      return pGame->fUniqueSpawn[(int)nUniqueFileIndex >> 5] & gadwBitMasks[nUniqueFileIndex & 0x1f];
     }
 
-    return pGame->fUniqueSpawn[(int)nUniqueFileIndex >> 5] & gadwBitMasks[nUniqueFileIndex & 0x1f];
+    return 1;
 }
 
 uint32_t __fastcall ITEM_IsUniqueAlreadyDropped(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
