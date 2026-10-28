@@ -1114,10 +1114,7 @@ void __fastcall SpawnAct12Shrines(D2DrlgLevelStrc * pLevel, int32_t nShrines) {
       if (!(nRandIdxA & 0x1b81)) {
         DrlgGrid::AlterGridFlag(&pLevelData->sGridLink, nGridX, nGridY, gnOutdoorsGridWidthByLevel[nShrineStyleIdx], 0);
         DrlgGrid::AlterGridFlag(&pLevelData->sGridOutdoor, nGridX, nGridY, 0x1000, 0);
-        nShrineStyleIdx = nShrineStyleIdx + 1 & 0x80000003;
-        if ((int)nShrineStyleIdx < 0) {
-          nShrineStyleIdx = (nShrineStyleIdx - 1 | -4) + 1;
-        }
+        nShrineStyleIdx = (int)(nShrineStyleIdx + 1) % 4;
 
         nShrinesLeft--;
       }

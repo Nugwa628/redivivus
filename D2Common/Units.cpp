@@ -2952,10 +2952,7 @@ D2UnitStrc * __stdcall GetWeaponBySkill(D2UnitStrc * pUnit, int32_t nParam) {
         dwSkillFlags = (int)pUnit->nSeqFrame >> 8;
       bIsWeaponType = D2Client::UNIT::Player::CheckFlagWithMask(pUnit, 0x4000000);
       if (bIsWeaponType) {
-        nWeaponSlot = dwSkillFlags & 0x80000001;
-        if ((int)nWeaponSlot < 0) {
-          nWeaponSlot = (nWeaponSlot - 1 | -2) + 1;
-        }
+        nWeaponSlot = (int)(dwSkillFlags) % 2;
       } else {
         nWeaponSlot = (uint32_t)(5 < (int)dwSkillFlags);
       }

@@ -79,10 +79,7 @@ void __fastcall RollArcaneTypePath(D2DrlgLevelStrc * pLevel) {
       }
 
       ppRoomPtrs[1] = pAllocRoom;
-      nDirWrapped = nArmIndex + 3 & 0x80000003;
-      if ((int)nDirWrapped < 0) {
-        nDirWrapped = (nDirWrapped - 1 | -4) + 1;
-      }
+      nDirWrapped = (int)(nArmIndex + 3) % 4;
 
       pNewRoom = ppRoomPtrs[1];
       pAllocRoom = DrlgRoom::DRLGROOMEX_AllocRoomEx(pNewRoom->pLevel, 2);
@@ -174,10 +171,7 @@ void __fastcall RollArcaneTypePath(D2DrlgLevelStrc * pLevel) {
       }
 
       ppRoomPtrs[6] = pAllocRoom;
-      nDirection_00 = nArmIndex + 1 & 0x80000003;
-      if ((int)nDirection_00 < 0) {
-        nDirection_00 = (nDirection_00 - 1 | -4) + 1;
-      }
+      nDirection_00 = (int)(nArmIndex + 1) % 4;
 
       pNewRoom = ppRoomPtrs[6];
       pAllocRoom = DrlgRoom::DRLGROOMEX_AllocRoomEx(pNewRoom->pLevel, 2);
@@ -231,10 +225,7 @@ void __fastcall RollArcaneTypePath(D2DrlgLevelStrc * pLevel) {
       }
 
       ppRoomPtrs[9] = pAllocRoom;
-      nDirection = nArmIndex + 2 & 0x80000003;
-      if ((int)nDirection < 0) {
-        nDirection = (nDirection - 1 | -4) + 1;
-      }
+      nDirection = (int)(nArmIndex + 2) % 4;
 
       pNewRoom = ppRoomPtrs[9];
       pAllocRoom = DrlgRoom::DRLGROOMEX_AllocRoomEx(pNewRoom->pLevel, 2);

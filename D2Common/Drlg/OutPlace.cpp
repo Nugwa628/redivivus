@@ -681,10 +681,7 @@ D2DrlgLevelStrc * DRLGLEVEL_FixDrlgLevelForSpiderForest(D2DrlgLevelStrc * pLevel
                 nConnFlags = sNewSeed.nSeedLow & 1;
                 pDrlg->nSeed = sNewSeed;
               } else {
-                nConnFlags = aSubLevelRecords[nSubIdx].nDirection & 0x80000001;
-                if ((int)nConnFlags < 0) {
-                  nConnFlags = (nConnFlags - 1 | -2) + 1;
-                }
+                nConnFlags = (int)(aSubLevelRecords[nSubIdx].nDirection) % 2;
 
                 nConnFlags = (uint32_t)(nConnFlags == 1);
               }
@@ -995,10 +992,7 @@ D2DrlgLevelStrc * DRLGLEVEL_FixDrlgLevelForSpiderForest(D2DrlgLevelStrc * pLevel
                         break;
                       }
 
-                      uVar6 = nSubIdx + uVar4 & 0x80000003;
-                      if ((int)uVar6 < 0) {
-                        uVar6 = (uVar6 - 1 | -4) + 1;
-                      }
+                      uVar6 = (int)(nSubIdx + uVar4) % 4;
 
                       switch (uVar6) {
                         case 0:
@@ -1045,10 +1039,7 @@ D2DrlgLevelStrc * DRLGLEVEL_FixDrlgLevelForSpiderForest(D2DrlgLevelStrc * pLevel
                           break;
                         }
 
-                        uVar6 = nSubIdx + uVar4 & 0x80000003;
-                        if ((int)uVar6 < 0) {
-                          uVar6 = (uVar6 - 1 | -4) + 1;
-                        }
+                        uVar6 = (int)(nSubIdx + uVar4) % 4;
 
                         switch (uVar6) {
                           case 0:
@@ -1098,10 +1089,7 @@ D2DrlgLevelStrc * DRLGLEVEL_FixDrlgLevelForSpiderForest(D2DrlgLevelStrc * pLevel
                           break;
                         }
 
-                        uVar4 = (sNewSeed.nSeedLow & 3) + nSubIdx & 0x80000003;
-                        if ((int)uVar4 < 0) {
-                          uVar4 = (uVar4 - 1 | -4) + 1;
-                        }
+                        uVar4 = (int)((sNewSeed.nSeedLow & 3) + nSubIdx) % 4;
 
                         switch (uVar4) {
                           case 0:
@@ -1165,10 +1153,7 @@ D2DrlgLevelStrc * DRLGLEVEL_FixDrlgLevelForSpiderForest(D2DrlgLevelStrc * pLevel
                 if (0 < iVar5) {
                   do {
                     nConnFlags = *pRowPtr;
-                    uVar4 = nConnFlags & 0x8000000f;
-                    if ((int)uVar4 < 0) {
-                      uVar4 = (uVar4 - 1 | -16) + 1;
-                    }
+                    uVar4 = (int)(nConnFlags) % 16;
                     if (!uVar4) {
                       if (0xf < (int)nConnFlags) {
                         uVar4 = gaWildernessLevelSeedOffsets[((int)nConnFlags >> 4) + 0x59];
