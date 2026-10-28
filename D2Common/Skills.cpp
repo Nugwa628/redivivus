@@ -1367,11 +1367,11 @@ int32_t __fastcall SKILLS_GetValueByLevelBreakpoints(int32_t nLevel, int * pLeve
     if (0x10 < nLevel) {
       return (nLevel - 0x10) * pLevelArray[2] + pLevelArray[1] * 8 + *pLevelArray * 7;
     }
-    if (8 >= nLevel) {
-      return (nLevel - 1) * *pLevelArray;
+    if (8 < nLevel) {
+      return (nLevel - 8) * pLevelArray[1] + *pLevelArray * 7;
     }
 
-    return (nLevel - 8) * pLevelArray[1] + *pLevelArray * 7;
+    return (nLevel - 1) * *pLevelArray;
 }
 
 static int32_t __stdcall SKILLS_CalculateBaseDamageFromStats(int32_t nType, D2UnitStrc * pUnit) {
