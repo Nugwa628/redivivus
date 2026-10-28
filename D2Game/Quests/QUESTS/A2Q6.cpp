@@ -419,8 +419,8 @@ BOOL __fastcall Q14_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUn
       return 0;
     }
 
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -754,8 +754,8 @@ BOOL __fastcall Q14_CheckTombEntryAndPropagate(::SGAMEDATA * pGame, D2UnitStrc *
 
     /* SetQuestState(TheSevenTombs, 5=Step0x05) — entered Duriel's Lair (level
                          0x49): mark tomb-entered, then propagate to party */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Step0x05);
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -792,7 +792,7 @@ void __fastcall Q14_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
                 /* SetQuestState(TheSevenTombs, 5=Step0x05) — player entered Duriel's chamber:
                          mark tomb-entered, then propagate to party */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Step0x05);
                 nPartyId = UNIT::SUnit::GetPartyId(pQuestArgs->pPlayer);
-                if (nPartyId != 0xffff) {
+                if (nPartyId != -1) {
                   UNIT::Party::ExecuteFunctionForEveryPartyMember(pQuestArgs->pGame, nPartyId, (::fpExecuteOnUnitFunction)Q14_SetTombEntryOnPartyMember, 0);
                 }
 

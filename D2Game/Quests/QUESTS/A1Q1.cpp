@@ -359,8 +359,8 @@ BOOL __fastcall Q01_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUn
       return 0;
     }
 
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 

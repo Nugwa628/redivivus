@@ -1076,8 +1076,8 @@ BOOL __fastcall Q04_CompleteOnEnterTristram(::SGAMEDATA * pGame, D2UnitStrc * pU
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_JustCompleted);
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_RewardAwaits);
     QUEST_SendQuestInfoToUnit(pGame, pUnit);
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -1257,7 +1257,7 @@ BOOL __fastcall OBJOP_A1Q4_ActivateInifussTree(D2ObjectOperateFnArg * pOperation
         D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_RewardAwaits);
         QUEST_SendQuestInfoToUnit(pOperation->sArg.pGame, pOperation->pAttacker);
         nPartyId = UNIT::SUnit::GetPartyId(pOperation->pAttacker);
-        if (nPartyId != 0xffff) {
+        if (nPartyId != -1) {
           UNIT::Party::ExecuteFunctionForEveryPartyMember(pOperation->sArg.pGame, nPartyId, (::fpExecuteOnUnitFunction)Q04_AutoCompleteForActIPlayer, 0);
           return 0;
         }
@@ -1574,7 +1574,7 @@ BOOL __fastcall OBJOP_A1Q4_ActivateHoradricMalusSmith(D2ObjectOperateFnArg * pOp
       __frame0.pQuestData->nQuestPacketFlags = '\0';
       QUEST_SetStateAndBroadcast(__frame0.pQuestData, 4, pOperation->pAttacker, (::fpExecuteOnUnitFunction)Q04_NotifyQuestStateToPlayer, true);
       nPartyId = UNIT::SUnit::GetPartyId(pOperation->pAttacker);
-      if (nPartyId != 0xffff) {
+      if (nPartyId != -1) {
         UNIT::Party::ExecuteFunctionForEveryPartyMember(pOperation->sArg.pGame, nPartyId, (::fpExecuteOnUnitFunction)Q04_HandleNpcInteraction, 0);
       }
 
@@ -2623,11 +2623,7 @@ void __fastcall Q04_InitData(D2QuestDataStrc * pQuestData) {
     pQuestSpecificData->sSub.nStonesUnitGUID = 0;
     pQuestSpecificData->sSub.nCairnAnimState = 0;
     pQuestSpecificData->sSub.bQuestObjectsActivated = false;
-    pQuestSpecificData->sSub.bPortalSpawnPending[0] = 0;
-    pQuestSpecificData->sSub.bPortalSpawnPending[1] = 0;
-    pQuestSpecificData->sSub.bPortalSpawnPending[2] = 0;
-    pQuestSpecificData->sSub.bPortalSpawnPending[3] = 0;
-    pQuestSpecificData->sSub.bPortalSpawnPending[4] = 0;
+    memset(pQuestSpecificData->sSub.bPortalSpawnPending, 0, 5 * sizeof(pQuestSpecificData->sSub.bPortalSpawnPending[0]));
     pQuestSpecificData->sSub.bCairnMonsterSaved = false;
     pQuestSpecificData->sSub.bPendingCairnActivation = false;
     pQuestSpecificData->sSub.bPortalArmed = false;
