@@ -3621,7 +3621,7 @@ void __stdcall SKILLDESC_CalcElemDamageRange(D2UnitStrc * pUnit, int * pnParam1,
     if (pSkill) {
       D2SkillsTxt* pSkillsTxt;
       pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill);
-      if (pSkillsTxt && pSkillsTxt->finishing) {
+      if (pSkillsTxt && (*((uint8_t*)pSkillsTxt + 0x4) & gadwBitMasks[3])) {
         SKILLDESC_AccumulateAuraBonusDmg(pUnit, pnParam1, pnParam2, pdwParam);
       }
     }
