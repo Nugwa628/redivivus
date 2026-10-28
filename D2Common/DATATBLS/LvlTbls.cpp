@@ -1717,20 +1717,11 @@ D2LvlPrestTxt * __stdcall TXT_LvlPrest_GetLine(int32_t nLvlPrestId) {
 }
 
 D2LvlPrestTxt * __fastcall TXT_LvlPrest_FindLineByLevelId(eD2LevelId eLevel) {
-    int i = 0;
-    if (0 >= sgptDataTable->nTxtLvlPrestSize) {
-      return nullptr;
-    }
-
-    eD2LevelId* pLevelIdField = &sgtDataTable.pTxtLvlPrest->LevelId;
-    do {
-      if (*pLevelIdField == eLevel) {
-        return sgtDataTable.pTxtLvlPrest + i;
+    for (int i = 0; i < sgptDataTable->nTxtLvlPrestSize; i++) {
+      if (sgtDataTable.pTxtLvlPrest[i].LevelId == eLevel) {
+        return &sgtDataTable.pTxtLvlPrest[i];
       }
-
-      i++;
-      pLevelIdField += 0x6c;
-    } while (i < sgptDataTable->nTxtLvlPrestSize);
+    }
 
     return nullptr;
 }

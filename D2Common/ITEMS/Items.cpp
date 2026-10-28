@@ -1662,7 +1662,7 @@ uint32_t __stdcall TXT_Items_IsNotQuestOrHammerType(uint32_t nItemClassId) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x105e);
       exit(-1);
     }
-    if (!(!pItemsTxt->bQuest && pItemsTxt->wType != 0x27)) {
+    if ((uint8_t)pItemsTxt->bQuest >= 1 || pItemsTxt->wType == 0x27) {
       return 0;
     }
 
