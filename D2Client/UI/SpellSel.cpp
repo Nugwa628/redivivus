@@ -1645,13 +1645,13 @@ void __stdcall SKILLTREE_RenderSkillTree() {
       if (nMouseX < nScreenX - 0x95) {
         return;
       }
-      if (nScreenX - 0x73 < nMouseX) {
+      if (nMouseX > nScreenX - 0x73) {
         return;
       }
       if (nMouseY < iVar1 - 0x22) {
         return;
       }
-      if (iVar1 < nMouseY) {
+      if (nMouseY > iVar1) {
         return;
       }
 

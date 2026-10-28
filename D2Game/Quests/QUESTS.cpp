@@ -705,7 +705,7 @@ void __fastcall QUEST_GetQuestLogDisplayState(D2QuestDataStrc * pQuestData, uint
       BOOL bJustCompleted;
       bJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_JustCompleted);
       if (bJustCompleted == 1) {
-        if (0x28 < (int)pQuestData->nQuestIdReal) {
+        if (0x29 <= (int)pQuestData->nQuestIdReal) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x455);
           exit(-1);
         }

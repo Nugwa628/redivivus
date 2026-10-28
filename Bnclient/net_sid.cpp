@@ -1910,7 +1910,7 @@ static void __fastcall NET_SID_CLIENT_PermuteBitsLFSR(uint32_t nBitCount, int32_
       srcBitShift = (uint8_t)srcBitIdx & 0x1f;
       nextSrcBitIdx = srcBitIdx + 0xb;
       *(uint32_t*)(pToken + dstWordIdx * 4) = ((srcTokenCopy[3 - (srcBitIdx >> 5)] & 1 << srcBitShift) >> srcBitShift & 1) << dstBitShift | ~(1 << dstBitShift) & *(uint32_t*)(pToken + dstWordIdx * 4);
-      if (0x77 < nextSrcBitIdx) {
+      if (0x78 <= nextSrcBitIdx) {
         nextSrcBitIdx = srcBitIdx - 0x6d;
         if ((int)nextSrcBitIdx < 0) {
           nextSrcBitIdx = srcBitIdx - 0x62;
@@ -1934,7 +1934,7 @@ static void __fastcall NET_SID_CLIENT_PermuteBitsLFSR(uint32_t nBitCount, int32_
       srcBitShift = (uint8_t)srcBitIdx & 0x1f;
       nextSrcBitIdx = srcBitIdx + 0xb;
       *(uint32_t*)(pToken + dstWordIdx * 4) = ((srcTokenCopy[3 - (srcBitIdx >> 5)] & 1 << srcBitShift) >> srcBitShift & 1) << dstBitShift | ~(1 << dstBitShift) & *(uint32_t*)(pToken + dstWordIdx * 4);
-      if (0x77 < nextSrcBitIdx) {
+      if (0x78 <= nextSrcBitIdx) {
         nextSrcBitIdx = srcBitIdx - 0x6d;
         if ((int)nextSrcBitIdx < 0) {
           nextSrcBitIdx = srcBitIdx - 0x62;

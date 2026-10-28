@@ -253,7 +253,7 @@ static BOOL __stdcall PATH_ComputeDirectMovementVector(int * pVelOut, int * pDyn
     if (nAbsVelYCopy < 0) {
       nAbsVelY = -nAbsVelYCopy;
     }
-    if (nAbsVelY < nAbsVelX) {
+    if (nAbsVelX > nAbsVelY) {
       if (nMaxVelComponent < 0) {
         nMaxVelComponent = -nMaxVelComponent;
       }

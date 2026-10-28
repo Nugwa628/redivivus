@@ -3405,7 +3405,7 @@ static BOOL __stdcall OBJMODE_ApplyWellHealing(::SGAMEDATA * pGame, D2ObjectsTxt
     dwWellFlags = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_stamina, 0);
     if (dwWellFlags < nCurStat) {
       dwWellFlags = (pTxtObjects->Parm[1] * nCurStat >> 8) + dwWellFlags;
-      if (nCurStat < dwWellFlags) {
+      if (dwWellFlags > nCurStat) {
         dwWellFlags = nCurStat;
       }
 

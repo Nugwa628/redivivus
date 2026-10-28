@@ -269,7 +269,7 @@ BOOL __fastcall Skills_CltDoFunc_Mon_CompositeDirMissile(D2UnitStrc * pUnit, eD2
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
     if (!(sgptDataTable->pTxtSkills + eSkill)) {
@@ -508,7 +508,7 @@ BOOL __fastcall Skills_CltDoFunc_Mon_JumpMissileTowardTarget(D2UnitStrc * pUnit,
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
     if (!(sgptDataTable->pTxtSkills + eSkill)) {
@@ -1216,7 +1216,7 @@ BOOL __fastcall Skills_CltDoFunc_Mon_ChargeAnim(D2UnitStrc * pUnit, eD2Skills eS
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -1300,7 +1300,7 @@ BOOL __fastcall Skills_CltDoFunc_Mon_LineMissileSpread(D2UnitStrc * pUnit, eD2Sk
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -2304,7 +2304,7 @@ BOOL __fastcall Skills_CltDoFunc_Mon_ComponentOffset_Missile_A(D2UnitStrc * pUni
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -2350,7 +2350,7 @@ BOOL __fastcall Skills_CltDoFunc_Mon_ComponentOffset_Missile_B(D2UnitStrc * pUni
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 

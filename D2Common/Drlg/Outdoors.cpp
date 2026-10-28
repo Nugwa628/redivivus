@@ -547,7 +547,7 @@ BOOL __fastcall SpawnPresetFarAway(D2DrlgLevelStrc * pLevel, D2DrlgCoordStrc * p
         nRandOffsetY = newSeed.nSeedLow % nRangeX;
       }
     }
-    if ((int)nRangeY < 1) {
+    if ((int)nRangeY <= 0) {
       nRandOffsetX = 0;
     } else {
       nSeedLow = pLevel->sSeed.nSeedLow;

@@ -279,7 +279,7 @@ BOOL __fastcall SKILLSOR_SrvStFn12_TargetInAuraRange(::SGAMEDATA * pGame, D2Unit
     }
 
     eUnitType = pTarget->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nSkillLvl = pTarget->pPath.pStaticPath->nPosX;
     } else if (!pTarget->pPath.pDynamicPath) {
       nSkillLvl = 0;
@@ -964,7 +964,7 @@ BOOL __fastcall Skills_SrvDoFunc_025_Enchant(::SGAMEDATA * pGame, D2UnitStrc * p
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 

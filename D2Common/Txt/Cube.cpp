@@ -458,7 +458,7 @@ static void __stdcall CUBE_ParseOutputItem(D2CubeOutputStrc * pOutput, char * ps
                 }
 
                 nLinkIndex = Fog::Src::Excel::GetLinkNodeIndex(sgtDataTable.pTxtSetItemsLink, pszItemCodeField, 0);
-                if (-1 >= nLinkIndex) {
+                if (0 > nLinkIndex) {
                   return;
                 }
 

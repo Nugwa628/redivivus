@@ -4130,7 +4130,7 @@ uint32_t __fastcall WARDEN_DecryptModule(uint32_t * * ppInput, uint32_t nInputSi
           __frame0.nRelocationCount = 0;
           while (true) {
             __frame0.pModuleBase = *ppuVar1;
-            if (__frame0.nRelocationCount >= __frame0.pModuleBase[3]) {
+            if (__frame0.pModuleBase[3] <= __frame0.nRelocationCount) {
               break;
             }
 

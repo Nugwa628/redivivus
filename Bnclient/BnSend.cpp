@@ -729,7 +729,7 @@ uint32_t __fastcall NET_SID_CLIENT_Send_0x27_WriteUserData(char * szAccount, uin
     _net_sid::NET_SID_CLIENT_ResetRequireResponse(0x27);
     int32_t nSendResult = NET_SID_CLIENT_Send(0x27, pPacketBuf, (int)szBufferOutput - (int)pPacketBuf);
     Fog::Memory::FreeClientMemory(pPacketBuf, ".\\BnSend.cpp", 0x4e0, 0);
-    return (uint32_t)(-1 < nSendResult);
+    return (uint32_t)(0 <= nSendResult);
 }
 
 // @sourcefile .\BnSend.cpp

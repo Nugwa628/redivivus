@@ -348,7 +348,7 @@ BOOL __fastcall Skills_CltDoFunc_Sor_FrostNova(D2UnitStrc * pUnit, eD2Skills eSk
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 

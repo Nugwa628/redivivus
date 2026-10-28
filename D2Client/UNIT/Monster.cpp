@@ -1624,7 +1624,7 @@ static void MONSTER_ProcessSkillAnimation(D2UnitStrc * pUnit) {
         pMonStats2 = DataTbls::MonsterTbls::TXT_MonStats_GetMonStats2(pUnit->nClassId);
         if (pMonStats2) {
           SKILLS::Skills::SKILLS_CltSetSkillFromCurrent(pUnit);
-          if ((int)(uint32_t)(uint8_t)pMonStats2->byInfernoAnim < pUnit->nGfxCurrentFrame >> 8) {
+          if (pUnit->nGfxCurrentFrame >> 8 > (int)(uint32_t)(uint8_t)pMonStats2->byInfernoAnim) {
             pUnit->nGfxCurrentFrame = (uint32_t)(uint8_t)pMonStats2->byInfernoRollback << 8;
             return;
           }

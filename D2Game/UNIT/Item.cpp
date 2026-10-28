@@ -805,7 +805,7 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
       uint16_t wPosY;
       if (pUnit->eUnitFlagsEx & UNITFLAGEX_TELEPORTED) {
         eType = pUnit->eUnitType;
-        if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType < 6) {
+        if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType <= 5) {
           wPosY = (uint16_t)pUnit->pPath.pStaticPath->nPosY;
         } else if (!pUnit->pPath.pDynamicPath) {
           wPosY = 0;

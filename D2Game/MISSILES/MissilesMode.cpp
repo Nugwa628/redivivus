@@ -1988,7 +1988,7 @@ BOOL __fastcall Missiles_SrvHitFunc_ApplyTerrorToMonster(::SGAMEDATA * pGame, D2
     if ((int)eSkill < 0) {
       return 1;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 1;
     }
 
@@ -5903,7 +5903,7 @@ int __fastcall MISSMODE_SrvDoFn09_BatLightningBolt(::SGAMEDATA * pGame, D2UnitSt
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnitPosY = pUnit->pPath.pStaticPath->nPosY;
     } else if (pUnit->pPath.pDynamicPath) {
       nUnitPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
@@ -7785,7 +7785,7 @@ int __fastcall MISSILESMODE_SrvDoFn35_RoyalStrikeChaosIce(::SGAMEDATA * pGame, D
     if (nMissileId < 0) {
       return 2;
     }
-    if (sgptDataTable->nTxtMissilesSize <= nMissileId) {
+    if (nMissileId >= sgptDataTable->nTxtMissilesSize) {
       return 2;
     }
     if (!(sgptDataTable->pTxtMissiles + nMissileId)) {

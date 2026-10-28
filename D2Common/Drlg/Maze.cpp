@@ -1079,7 +1079,7 @@ static int __stdcall DRLGMAZE_SelectRandomPresetFile(int nPresetFile, D2DrlgLeve
         return nResult;
     }
 
-    if ((int)nResult >= nFirstFile) {
+    if (nFirstFile <= (int)nResult) {
       return nResult;
     }
 

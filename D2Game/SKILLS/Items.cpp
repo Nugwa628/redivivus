@@ -1003,7 +1003,7 @@ static BOOL __stdcall ITEMMOD_GenerateRareAffixes(D2ItemGenContextStrc * pItemGe
         }
 
         roll_suffix:
-        if (2 < nSuffixCount) {
+        if (3 <= nSuffixCount) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x32e);
           exit(-1);
         }
@@ -1015,7 +1015,7 @@ static BOOL __stdcall ITEMMOD_GenerateRareAffixes(D2ItemGenContextStrc * pItemGe
           D2Common::ITEMS::Items::SetMagicSuffix(pUnit, (short int)pRolledAffixIdx, nSuffixCount);
           pSuffixTablePtr++;
           nSuffixCount++;
-          if (2 < nSuffixCount) {
+          if (3 <= nSuffixCount) {
             bSuffixExhausted = true;
           }
         }

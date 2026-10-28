@@ -464,7 +464,7 @@ void __fastcall Sha1_Append(uint8_t * pData, uint32_t nLen, D2Sha1ContextStrc * 
       pCursor += 0x40;
       nBufIndex = 0;
     }
-    if (0x3f < nLen) {
+    if (0x40 <= nLen) {
       pData = (uint8_t*)(nLen >> 6);
       do {
         Sha1_Pump(pCtx->aState, pCursor);

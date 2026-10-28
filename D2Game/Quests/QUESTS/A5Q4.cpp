@@ -101,7 +101,7 @@ static bool __fastcall Q34_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc
 
         BVar1 = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_BetrayalOfHaggorath, QUESTSTATE_CannotCompleteQuestInGame);
         if (!BVar1) {
-          if (3 < pQuestData->nStateFlag) {
+          if (4 <= pQuestData->nStateFlag) {
             return true;
           }
 

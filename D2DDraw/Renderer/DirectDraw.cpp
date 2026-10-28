@@ -1868,11 +1868,11 @@ void __fastcall DrawSolidRectEx(int32_t nXStart, int32_t nYStart, int32_t nXEnd,
 
     uint32_t nClipBottom = RENDERER_nWindowHeight - 1;
     nClipRightEnd = nYStart < 1 ? 0 : nYStart;
-    if ((int)nClipBottom <= (int)nClipRightEnd) {
+    if ((int)nClipRightEnd >= (int)nClipBottom) {
       nClipRightEnd = nClipBottom;
     }
 
-    uint32_t nClipTop = nYEnd < 1 ? 0 : nYEnd;
+    uint32_t nClipTop = nYEnd <= 0 ? 0 : nYEnd;
     if ((int)nClipBottom <= (int)nClipTop) {
       nClipTop = nClipBottom;
     }

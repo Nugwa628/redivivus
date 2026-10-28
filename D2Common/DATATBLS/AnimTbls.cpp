@@ -211,9 +211,9 @@ BOOL __stdcall ANIMDATA_GetFramesSpeedAndTrigger(int * pszName, uint32_t * pnFra
     *pnFrameCount = pRecord[2];
     *pnAnimSpeed = pRecord[3];
     uint32_t nFrameIndex = 0;
-    if (pRecord[2]) {
+    if ((uint32_t)pRecord[2] > 0) {
       do {
-        if (0x8f < nFrameIndex || *(char*)(nFrameIndex + 0x10 + (int)pRecord) != '\0') {
+        if (0x90 <= nFrameIndex || *(char*)(nFrameIndex + 0x10 + (int)pRecord) != '\0') {
           break;
         }
 

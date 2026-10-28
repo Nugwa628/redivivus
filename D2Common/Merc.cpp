@@ -736,7 +736,7 @@ BOOL __fastcall RollMercStats(int32_t nVersion, D2UnitStrc * pUnit, int32_t nMer
     int nDefense = pSelectedHireling->defPerlvl * nLevelDiff + pSelectedHireling->defense;
     pHireData->nDefense = nDefense <= 0 ? 0 : nDefense;
     int nMinDamage = (pSelectedHireling->dmgPerlvl * nLevelDiff >> 3) + pSelectedHireling->dmgMin;
-    pHireData->nMinDamage = nMinDamage < 1 ? 0 : nMinDamage;
+    pHireData->nMinDamage = nMinDamage <= 0 ? 0 : nMinDamage;
     int nMaxDamage = (pSelectedHireling->dmgPerlvl * nLevelDiff >> 3) + pSelectedHireling->dmgMax;
     pHireData->nMaxDamage = nMaxDamage;
     if (nMaxDamage <= 1) {
