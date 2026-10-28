@@ -62,8 +62,8 @@ namespace D2Game::Quests::QUESTS::A2Q1 {
 
 // A2Q1: send the act-2 "quest update" UI/log notification (event 8) to a player, but only when the quest is in a finished-ish state that hasn't yet been surfaced. Fires only if (Completed OR FinishedInPreviousGame) AND NOT JustCompleted AND NOT CannotCompleteQuestInGame. Otherwise returns without notifying. Used as the broadcast callback when transitioning to Completed/RewardAwaits.
 BOOL __fastcall Q09_NotifyRadamentComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RadamentsLair, QUESTSTATE_Completed);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RadamentsLair, QUESTSTATE_FinishedInPreviousGame) , bQuestState != 0)) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RadamentsLair, QUESTSTATE_JustCompleted);
@@ -128,8 +128,8 @@ void __fastcall Q09_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 
 // A2Q1: mirror the internal quest progress (nStateFlag) into the per-player quest record bits. Run per-player via IteratePlayerOrMonsterUnits. No-op once the quest is Completed or RewardAwaits. Otherwise maps nStateFlag -> record state: 2 => Step0x02 (talked to Atma, quest introduced); 3 with nStateFlagPrev==1 => Step0x03 (entered sewers), else => Step0x04 (deeper progress). Keeps the persisted quest log in sync with the live quest-engine state machine.
 BOOL __fastcall Q09_UpdateQuestRecord(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RadamentsLair, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -167,8 +167,8 @@ void __fastcall Q09_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     short int nMessageIndex = pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex;
     short int nNPCClassId = pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if (nNPCClassId != 0xb0) {
       return;
     }
@@ -244,8 +244,8 @@ void __fastcall Q09_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t nPlayerGUID;
     int32_t nTargetClassIdLocal = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_JustCompleted);
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     BOOL bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_RewardAwaits);
@@ -283,8 +283,8 @@ void __fastcall Q09_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
 // A2Q1: party-share variant of the Radament reward. Called via ExecuteFunctionForEveryPartyMember from Q09_CheckRadamentKillAndReward. Grants the reward only to members who are not already Completed/RewardAwaits AND are physically in an Act II level (room->levelId->act == ACT_II), i.e. nearby party members in act 2. Transition: SetQuestState JustCompleted (0xd) -> RewardAwaits (1) -> Step0x05, then sends quest info to the unit.
 void __fastcall Q09_SetRadamentRewardOnPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RadamentsLair, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -318,8 +318,8 @@ void __fastcall Q09_SetRadamentRewardOnPartyMember(::SGAMEDATA * pGame, D2UnitSt
 
 // A2Q1: mark the quest as CannotCompleteQuestInGame for players who were NOT eligible for the kill reward. Run per-player right after Radament dies (after Q09_CheckRadamentKillAndReward). If the player has neither Completed nor RewardAwaits, sets QUESTSTATE_CannotCompleteQuestInGame and sends quest-state packet (event 8). This locks out players who missed the kill / weren't present from grabbing the book this game.
 BOOL __fastcall Q09_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RadamentsLair, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -339,7 +339,6 @@ BOOL __fastcall Q09_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, v
 BOOL __fastcall Q09_CheckRadamentKillAndReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2RoomStrc** pAdjacentRooms;
     uint32_t nAdjacentRoomCount;
-    int32_t nErrorLine = 0x598e36;
     D2UnitStrc* pPlayerUnit_lcl = pUnit;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (!pRoom) {
@@ -348,7 +347,7 @@ BOOL __fastcall Q09_CheckRadamentKillAndReward(::SGAMEDATA * pGame, D2UnitStrc *
 
     D2QuestDataStrc* pRadamentRoom = GetQuestDataByQuestNoInternal(pGame, QUESTINT_RadamentsLair);
     if (!pRadamentRoom) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), nErrorLine);
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x186);
       exit(-1);
     }
 
@@ -378,8 +377,8 @@ BOOL __fastcall Q09_CheckRadamentKillAndReward(::SGAMEDATA * pGame, D2UnitStrc *
       }
     }
 
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pPlayerUnit_lcl);
-    D2BitBufferStrc* pBitBuffer = pQuestData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pPlayerUnit_lcl)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, pRadamentRoom->nQuestIdReal, QUESTSTATE_Completed);
     /* GetQuestState RewardAwaits: skip if book already owed/awaiting collection */ if (BVar1) {
       return 0;
@@ -396,8 +395,8 @@ BOOL __fastcall Q09_CheckRadamentKillAndReward(::SGAMEDATA * pGame, D2UnitStrc *
                          marker */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_RadamentsLair, QUESTSTATE_Step0x05);
     D2UnitStrc* pPartyUnit = pPlayerUnit_lcl;
     QUEST_SendQuestInfoToUnit(pRadamentRoom->pGame, pPlayerUnit_lcl);
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pPartyUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pPartyUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 

@@ -216,8 +216,8 @@ bool __fastcall Q22_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 // Q22_PlayerUpdateBlackenedTempleState (BLACKENED TEMPLE) — per-player quest-log resync, called via IteratePlayerOrMonsterUnits after key transitions. If the player has not yet Completed the quest: when the live quest data's internal nStateFlag is 2 or 3, advance the player's record to Step0x02; if the Viper/Compelling-Orb amulet has been initialized (byte[5] at quest data 0x18), advance to Step0x03. Drives the on-screen quest log toward the council-kill stage.
 // State transitions (player record): Completed gate -> set Step0x02, set Step0x03.
 BOOL __fastcall Q22_PlayerUpdateBlackenedTempleState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Completed);
     if (bCompleted == 1) {
       return 0;
@@ -339,8 +339,8 @@ BOOL __fastcall Q22_PlayerCheckNearTravincal(::SGAMEDATA * pGame, D2UnitStrc * p
 
 // Q22_PlayerNotifyCompleted (BLACKENED TEMPLE) — completion-notify callback passed to QUEST_SetStateAndBroadcast. Sends quest-update packet 0x13 to the player only when the quest record shows it is (Completed OR FinishedInPreviousGame) AND has a pending JustCompleted or CannotCompleteQuestInGame flag set; otherwise returns without notifying. Read-only quest-record probe.
 BOOL __fastcall Q22_PlayerNotifyCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Completed);
     /* GetQuestState(Blackened Temple=0x15, FinishedInPreviousGame=0xf): treat as
                          done if either Completed or finished previously */ /* GetQuestState(Blackened Temple=0x15, JustCompleted=0xd): only notify if a
@@ -367,8 +367,8 @@ void __fastcall Q22_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t nNPCClassId;
     uint32_t nGossipLineIdx;
     ::SGAMEDATA* pGameInner = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGameInner->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGameInner->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bAtStep04 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Completed);
     BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_JustCompleted);
     if (!pQuestArgs->pTarget) {
@@ -461,8 +461,8 @@ void __fastcall Q22_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     }
 
     ::SGAMEDATA* pSVar2 = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pDVar3 = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pDVar3->pQuestRecord[pSVar2->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pSVar2->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar4 = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     /* GetQuestState(nQuestIdReal=Blackened Temple, Step0x04=4): bail if already at
                          step 4 */ if (BVar4 == 1) {
@@ -501,8 +501,8 @@ void __fastcall Q22_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     short int nNPCNo = pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     short int nMessageIndex = pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex;
-    D2UnitDataPlayerStrc* pKillerPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pKillerPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -611,8 +611,8 @@ void __fastcall Q22_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D
     int iVar1;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     D2QuestDataA3Q5Strc* pLamEsenResult = pQuestData->pQuestSpecificData.pA3Q5;
-    D2UnitDataPlayerStrc* pA3Q5Data = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pA3Q5Data->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_KhalimsWill, QUESTSTATE_Completed);
     if (bQuestState) {
       pLamEsenResult->bJerhynAiActive = true;
@@ -768,8 +768,8 @@ BOOL __fastcall Q22_PlayerCheckKhalimsWillItems(::SGAMEDATA * pGame, D2UnitStrc 
     }
 
     D2QuestDataA3Q5Strc* pA4Q2QuestData = pFlailItem->pQuestSpecificData.pA3Q5;
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestData->pQuestRecord[pGame->nDifficulty], QUEST_KhalimsWill, QUESTSTATE_Completed);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_KhalimsWill, QUESTSTATE_Completed);
     if (!bQuestCompleted) {
       pPlayerData = ITEMS::Items::Drop::HasQuestItem(pGame, pUnit, 0x20316671);
       if (!pPlayerData) {
@@ -792,8 +792,8 @@ BOOL __fastcall Q22_PlayerCheckKhalimsWillItems(::SGAMEDATA * pGame, D2UnitStrc 
 // Q22_PlayerCompleteKhalimsWill (BLACKENED TEMPLE / Khalim's Will sub-quest) — party callback run when the Compelling Orb is shattered. If Khalim's Will already Completed for the player, just strips the 5 quest items. Otherwise, for an Act III player: sets Khalim's Will record Completed + JustCompleted, removes the 5 items (unless mid-trade), and if the Blackened Temple record is at Step0x04 but not yet Completed, promotes it straight to Completed.
 // State flow: set Khalim's Will Completed + JustCompleted; if Blackened Temple at Step0x04 -> set Completed.
 void __fastcall Q22_PlayerCompleteKhalimsWill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bIsTrading = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_KhalimsWill, QUESTSTATE_Completed);
     if (bIsTrading == 1) {
       QUEST_RemoveQuestItemFromPlayer(pGame, pUnit, 0x20796571);

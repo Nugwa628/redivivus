@@ -4736,7 +4736,7 @@ void __fastcall MONSTERAI_CalculateCounterAttackDamage(::SGAMEDATA * pGame, D2Un
 }
 
 // Schedules a convert event (event type 7, UNITMOD 0x15) for all neutral monsters within radius 0x583 of pUnit. Filters by nUnitType; if bUndeadOnly is set, skips non-undead monsters. Skips class 0x14d. For each eligible monster picks a random game-frame delay in [nMinDelay, nMaxDelay) from pUnit's seed via RANDOM_RandomNumberSelector, then calls SetEvent. Asserts nMinDelay &lt; nMaxDelay != 0; halts on assertion failure. Used by Decrepify/Conversion-style AI effects.
-static void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32_t nMinDelay, int32_t nMaxDelay, int32_t bUndeadOnly, D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32_t nMinDelay, int32_t nMaxDelay, int32_t bUndeadOnly, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     uint32_t nRandDelay;
     bool bIsNeutral;
     D2UnitFindArgStrc sUnitFindArg;
@@ -4808,7 +4808,7 @@ static void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32
 }
 
 void __fastcall MONSTERAI_ThinkRangedSpecial(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    MONSTERAI_ConvertMonstersInRadius(0x23, 0x19, 0x7d, 1, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x23, 0x19, 0x7d, 1, pGame, pUnit);
 }
 
 void __fastcall AI_Mephisto_SpawnDeathMissile(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -4824,7 +4824,7 @@ void __fastcall AI_Mephisto_SpawnDeathMissile(::SGAMEDATA * pGame, D2UnitStrc * 
 }
 
 void __fastcall MONSTERAI_ThinkRangedShort(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    MONSTERAI_ConvertMonstersInRadius(0x23, 1, 0x33, 0, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x23, 1, 0x33, 0, pGame, pUnit);
 }
 
 void __fastcall AI_Diablo_SpawnRingAttack(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -4842,7 +4842,7 @@ void __fastcall AI_Diablo_SpawnRingAttack(::SGAMEDATA * pGame, D2UnitStrc * pUni
       nMissileRange = 100;
     }
 
-    MONSTERAI_ConvertMonstersInRadius(0x23, 0x28, nMissileRange, 0, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x23, 0x28, nMissileRange, 0, pGame, pUnit);
     eD2UnitType eVar1 = pUnit->eUnitType;
     if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
@@ -4916,11 +4916,11 @@ void __fastcall AI_Boss_LaunchOrbAtObject(::SGAMEDATA * pGame, D2UnitStrc * pUni
 }
 
 void __fastcall MONSTERAI_ThinkMeleeSkill(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    MONSTERAI_ConvertMonstersInRadius(0x69, 1, 2, 0, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x69, 1, 2, 0, pGame, pUnit);
 }
 
 void __fastcall MONSTERAI_ThinkRangedNormal(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    MONSTERAI_ConvertMonstersInRadius(0x23, 0x19, 0x7d, 0, pUnit, pGame);
+    MONSTERAI_ConvertMonstersInRadius(0x23, 0x19, 0x7d, 0, pGame, pUnit);
 }
 
 void __stdcall MONSTERAI_Noop() {
@@ -10857,7 +10857,7 @@ int32_t __fastcall AI_Diablo_DecideAction(D2AiGeneralStrc * pDiabloAiCtx, D2Unit
     return 0xb;
 }
 
-bool __fastcall AI_IsTargetWithinBossRange(D2UnitStrc * pSource, D2UnitStrc * pTarget) {
+BOOL __fastcall AI_IsTargetWithinBossRange(D2UnitStrc * pSource, D2UnitStrc * pTarget) {
     int32_t nY;
     uint32_t nRange;
     if (!pSource) {
@@ -11705,10 +11705,10 @@ void __fastcall AITHINK_Fn1_TrappedSoul(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     POINT ptUnitPos;
     D2UnitStrc* pUnit_00;
     pUnit_00 = pAiParam->pTarget;
-    int bInCombat;
-    bInCombat = pAiParam->bEngagedInCombat;
     int nDistToTarget;
     nDistToTarget = pAiParam->nDistanceToTarget;
+    int bInCombat;
+    bInCombat = pAiParam->bEngagedInCombat;
     D2AiGeneralStrc* pAiGeneral;
     pAiGeneral = pAiParam->pMonsterAiGeneral;
     if (pUnit) {
@@ -14426,7 +14426,7 @@ void __fastcall AITHINK_Fn1_NpcBarb(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
     newSeed = D2_SEED_NEXT_VAL(uSeedCalc1);
     uint32_t nSeedLow3 = newSeed.nSeedLow;
     pUnit->sSeed = newSeed;
-    bWalkResult = MONSTERAI_CommandWalkToCoords(pGame, pUnit, (int)uSeedCalc1 + (int)((uSeedCalc1 & 0xffffffff) / 0x14) * -0x14 - 10 + nPosX, ((uint32_t)((nSeedCalc4 & 1) != 0) * 2 - 1) * -0x1e + nSeedLow3 / 0x14 * -0x14 + nSeedLow3 - 10 + nAiParam);
+    bWalkResult = MONSTERAI_CommandWalkToCoords(pGame, pUnit, (int)uSeedCalc1 + (int)((uSeedCalc1 & 0xffffffff) / 0x14) * -0x14 - 10 + nPosX, (((nSeedCalc4 & 1) != 0 ? 0x1 : -1)) * -0x1e + nSeedLow3 / 0x14 * -0x14 + nSeedLow3 - 10 + nAiParam);
     if (bWalkResult) {
       return;
     }
@@ -17703,9 +17703,9 @@ void __fastcall AITHINK_Fn1_Vulture(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
 
 // Combat AI tick for the Mosquito-type monster (Act 3 swamp). Uses a 3-state machine in dwArg0/dwArg1: state 0=walk toward target; state 1=random wander with step counter; state 2=approach-offset walk that transitions back to state 1. When engaged in combat, rolls against Skill1 chance: on success casts Skill1 on target; otherwise calls CalledOnEndAiFunction1. Resets state machine if a 20% idle-retreat roll fires.
 void __fastcall AITHINK_Fn1_Mosquito(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
-    D2MonStatsTxt* pMonStats = pAiParam->pMonStats;
-    D2UnitStrc* pAttacker = pAiParam->pTarget;
     D2AiGeneralStrc* pMonsterAiGeneral = pAiParam->pMonsterAiGeneral;
+    D2UnitStrc* pAttacker = pAiParam->pTarget;
+    D2MonStatsTxt* pMonStats = pAiParam->pMonStats;
     if (pAiParam->bEngagedInCombat) {
       D2SeedStrc DVar1;
       DVar1 = D2_SEED_NEXT(pUnit->sSeed);
