@@ -349,8 +349,8 @@ void __fastcall Q21_PlayerSetGoldenBirdQuestState(::SGAMEDATA * pGame, D2UnitStr
 // every party member. Gets the player's party id (SUnit::GetPartyId); if in a party, runs
 // Q21_PlayerSetGoldenBirdQuestState over all members (ExecuteFunctionForEveryPartyMember). No-op solo.
 int Q21_PartySetGoldenBirdState(void * pThis, ::SGAMEDATA * pGame) {
-    int16_t nPartyId = UNIT::SUnit::GetPartyId((D2UnitStrc*)pThis);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId((D2UnitStrc*)pThis);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -399,7 +399,7 @@ void __fastcall Q21_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         pA3Q4Data->nGoldenBirdState = 2;
         pGame = pQuestArgs->pGame;
         nPartyId = UNIT::SUnit::GetPartyId(pQuestArgs->pPlayer);
-        if (nPartyId != -1) {
+        if (nPartyId != 0xffff) {
           UNIT::Party::ExecuteFunctionForEveryPartyMember(pGame, nPartyId, (::fpExecuteOnUnitFunction)Q21_PlayerSetGoldenBirdQuestState, 0);
           return;
         }
