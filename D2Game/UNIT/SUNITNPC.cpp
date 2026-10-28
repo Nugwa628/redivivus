@@ -2259,10 +2259,10 @@ void __fastcall GAMBLE_GenerateGambleInventory(::SGAMEDATA * pGame, D2UnitStrc *
           eUnitTypeTmp = pCreatedItem->eUnitType;
           if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
             nRarityRoll = pCreatedItem->pPath.pStaticPath->nPosX;
-          } else if (!pCreatedItem->pPath.pDynamicPath) {
-            nRarityRoll = 0;
-          } else {
+          } else if (pCreatedItem->pPath.pDynamicPath) {
             nRarityRoll = D2Common::PATH::DynamicPath::GetXPos(pCreatedItem->pPath.pDynamicPath);
+          } else {
+            nRarityRoll = 0;
           }
 
           pNpcSeed = ITEMS::ItemMode::SERVER_ItemToInventory(".\\UNIT\\SUNITNPC.CPP", 0xde4, pGame, pUnit, pCreatedItem->nUnitGUID, nRarityRoll, (int32_t)pPlayerUnit, 1, 0, (D2InventoryStrc*)*pGambleEntry);

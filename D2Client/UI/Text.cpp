@@ -4338,7 +4338,7 @@ void __stdcall TEXT_OpenMessageLogDialog() {
 
 void __stdcall TEXT_DestroyMessageLogDialog() {
     if (Dialog::DialogHandle) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::DialogHandle);
+      Dialog::FreeDialogStrc();
       Dialog::DialogHandle = 0;
     }
     if (!gpTextMessageLogHead) {
@@ -5174,7 +5174,7 @@ void __stdcall TEXT_FreeEverything() {
       gpStaticTextPopup = 0;
     }
     if (Dialog::DialogHandle) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::DialogHandle);
+      Dialog::FreeDialogStrc();
       Dialog::DialogHandle = 0;
     }
     if (gpTextMessageLogHead) {

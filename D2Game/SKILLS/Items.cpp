@@ -1239,7 +1239,7 @@ BOOL __fastcall RollingItem(D2UnitStrc * pUnit, D2ItemGenContextStrc * pItemGenC
     }
 
     int16_t wItemVersion = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-    if (wItemVersion) {
+    if ((uint16_t)wItemVersion >= 1) {
       BVar1 = ITEMMOD_GenerateRareAffixes(pItemGenContext, pUnit);
       return BVar1;
     }
