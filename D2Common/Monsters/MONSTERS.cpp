@@ -345,7 +345,8 @@ BOOL __stdcall MONSTER_IsMonsterUndead(D2UnitStrc * pUnit) {
     }
 
     int pMonStatsTxt = pUnit->nClassId;
-    if (!(0 <= pMonStatsTxt && pMonStatsTxt < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + pMonStatsTxt && (sgptDataTable->pTxtMonStats[pMonStatsTxt].lUndead || sgptDataTable->pTxtMonStats[pMonStatsTxt].hUndead))) {
+    D2MonStatsTxt * pTxt = (0 <= pMonStatsTxt && pMonStatsTxt < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[pMonStatsTxt] : NULL;
+    if (!(pTxt && (pTxt->lUndead || pTxt->hUndead))) {
       return 0;
     }
 
@@ -566,7 +567,8 @@ uint32_t __stdcall MONSTERS_CheckMonStatFlag0xc_Bit7(D2UnitStrc * pnParam) {
     }
 
     int pMonStatsTxt = pnParam->nClassId;
-    if (!(0 <= pMonStatsTxt && pMonStatsTxt < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + pMonStatsTxt)) {
+    D2MonStatsTxt * pTxt = (0 <= pMonStatsTxt && pMonStatsTxt < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[pMonStatsTxt] : NULL;
+    if (!(pTxt)) {
       return 0;
     }
 
@@ -706,8 +708,9 @@ void __stdcall MONSTER_GetSpawnParameters(D2UnitStrc * pUnit, int * pnMonId, uin
       D2SeedStrc* pSeed;
       nMonStatsId = pUnit->nClassId;
       nBaseId = nMonStatsId;
-      if (-1 < (int)nMonStatsId && (int)nMonStatsId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonStatsId) {
-        nBaseId = (int)sgptDataTable->pTxtMonStats[nMonStatsId].BaseId;
+      D2MonStatsTxt * pTxt = (0 <= (int)nMonStatsId && (int)nMonStatsId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nMonStatsId] : NULL;
+      if (pTxt) {
+        nBaseId = (int)pTxt->BaseId;
       }
       if ((int)nBaseId < 0 || (nMonStatsTblSize = sgptDataTable->nTxtMonStatsSize , nMonStatsTblSize <= (int)nBaseId)) {
         nBaseId = ~MonsterUnitSkeleton1;
