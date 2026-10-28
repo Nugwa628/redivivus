@@ -476,7 +476,7 @@ static int32_t SKILL_CanTargetDeadMonster(D2UnitStrc * pUnit, eD2Skills eSkills)
     if (!pSkillTxt) {
       return 0;
     }
-    if (!(pSkillTxt->SearchEnemyXY && pTarget->eUnitType == UNIT_MONSTER && pTarget->eAnimMode.ePlayerMode == Kick)) {
+    if (!((*((uint8_t*)pSkillTxt + 0x6) & gadwBitMasks[5]) && pTarget->eUnitType == UNIT_MONSTER && pTarget->eAnimMode.ePlayerMode == Kick)) {
       return 1;
     }
 
