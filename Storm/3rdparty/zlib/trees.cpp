@@ -15,7 +15,7 @@ void tr_static_init() {
 
 }
 
-static void __fastcall init_block(deflate_state * pDeflateState) {
+void __fastcall init_block(deflate_state * pDeflateState) {
     ct_data* pwFreqEntry = pDeflateState->dyn_ltree;
     int nZeroCount = 0x11e;
     do {

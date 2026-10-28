@@ -29,7 +29,7 @@ typedef int (__fastcall *CalcGetFunctionParameterCount_t)(int nFunctionIndex);
 
 namespace Fog::Skills {
 
-static void __fastcall SKILLS_PushValue(int * pStack, int value) {
+void __fastcall SKILLS_PushValue(int * pStack, int value) {
     if (pStack[0x40] >= 0x40) {
       return;
     }
