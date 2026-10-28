@@ -1774,7 +1774,7 @@ uint16_t * __fastcall MONSTER_GetRandomUniqueAppelation(D2UnitStrc * pUnit) {
 D2ParsedTreasureClassStrc * __fastcall TC_ExtendTreasureClassSize(char * szText) {
     Fog::Src::Excel::FOG_ParseStringField(sgtDataTable.pTxtMonsterTblsLink, szText);
     uint32_t nAllocMask = sgtDataTable.nParsedTreasureClassSize & 0x8000000f;
-    if ((int)nAllocMask < 0) {
+    if ((nAllocMask & 0x80000000)) {
       nAllocMask = (nAllocMask - 1 | -16) + 1;
     }
     if (!nAllocMask) {

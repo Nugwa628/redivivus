@@ -1405,7 +1405,7 @@ D2DrlgTileDataStrc * __fastcall DRLGROOMTILE_CreateShadowTileData(D2RoomExStrc *
     if (nGridFlags & 8) {
       pTileData->nFlags |= 4;
     }
-    if ((int)nGridFlags < 0) {
+    if ((nGridFlags & 0x80000000)) {
       pTileData->nFlags |= 8;
     } else {
       pTileData->nFlags &= -9;
