@@ -163,10 +163,10 @@ static int GLTEXCACHE_AllocateNode(GlTextureCacheStrc * pCache) {
     uint8_t* pNewFreeHead;
     pNewFreeHead = (uint8_t*)pAllocNode[5];
     pCache->pFreeHead = pNewFreeHead;
-    if (!pNewFreeHead) {
-      pCache->pFreeTail = 0;
-    } else {
+    if (pNewFreeHead) {
       for (int i = 24; i < 28; i++) pNewFreeHead[i] = 0;
+    } else {
+      pCache->pFreeTail = 0;
     }
 
     pAllocNode[5] = 0;
