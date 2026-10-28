@@ -1643,7 +1643,7 @@ void __stdcall MAINMENU_SyncCreditsColumns() {
 }
 
 // @sourcefile .\Src\MainMenus.cpp
-int __stdcall MAINMENU_DisplayCredits() {
+int __fastcall MAINMENU_DisplayCredits(int nUnused) {
     int i;
     ::D2WinTextBox* pTargetBox;
     uint32_t nRemaining;
@@ -1778,7 +1778,7 @@ BOOL __stdcall MAINMENU_InitCreditsScreen(D2ControlMsg * pControlMsg) {
     gpMainMenuCreditTimerControl = FORMS_CreateAnyFormFromListExEx(0x2e);
     D2Win::Src::D2WinTimer::D2WINTIMER_Start((int*)gpMainMenuCreditTimerControl);
     D2Win::Src::D2WinEditBox::D2WINEDITBOX_Destroy((int*)gpMainMenuCreditTimerControl);
-    MAINMENU_DisplayCredits();
+    MAINMENU_DisplayCredits(0);
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ScrollToLine(gpMainMenuCreditsLineTextBox, 0x14);
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ScrollToLine(gpMainMenuCreditsPairLeftTextBox, 0x14);
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ScrollToLine(gpMainMenuCreditsPairRightTextBox, 0x14);
