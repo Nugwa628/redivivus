@@ -78,8 +78,8 @@ void __fastcall Q13_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     uint32_t nMessageIndexMaybe;
     int32_t nTargetClassId;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if (!pQuestArgs->pTarget) {
       nTargetClassId = -1;
     } else {
@@ -127,8 +127,8 @@ void __fastcall Q13_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
 // A2Q5 "The Summoner" - completion notifier. If the quest is in a "done"-ish state (Completed OR FinishedInPreviousGame) but NOT (JustCompleted OR CannotCompleteQuestInGame), it does nothing (return 0). Otherwise it sends quest-update packet 0xc to the player (QUEST_SendQuestUpdateToPlayer), pushing the current quest status/log to the client. Used as the post-state callback when the quest transitions to JustCompleted (0xd) / Cain step (4).
 BOOL __fastcall Q13_NotifySummonerComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSummoner, QUESTSTATE_Completed);
     /* GetQuestState(TheSummoner, FinishedInPreviousGame=0xf):
                          Completed||FinishedPrevGame qualifies as "done" */ /* GetQuestState(TheSummoner, JustCompleted=0xd): if set, do NOT suppress the
@@ -149,8 +149,8 @@ BOOL __fastcall Q13_NotifySummonerComplete(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
 // A2Q5 "The Summoner" - quest-record sync on load/init. If neither Completed nor RewardAwaits is set for this player, and the live server quest data exists with nStateFlag != 0 (quest has been started/introduced), it sets QuestRecord Step0x02 (state 2) - marking the "quest in progress" bit in the player's saved record. Brings a freshly-loaded player's quest log in line with the active game state.
 BOOL __fastcall Q13_UpdateQuestRecord(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSummoner, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -212,8 +212,8 @@ void __fastcall Q13_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 BOOL __fastcall Q13_CheckSummonerKillAndReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2RoomStrc** ppAdjacentRooms;
     uint32_t nAdjacentRoomCount;
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2RoomStrc* pDVar3 = D2Common::Units::UNITS_GetRoom(pUnit);
     if (!pDVar3) {
       return 0;
@@ -275,8 +275,8 @@ void __fastcall Q13_Callback10_PlayerLeavesGame(D2QuestDataStrc * pQuestData, D2
 
 // A2Q5 "The Summoner" - per-player completion-sound trigger. If this player's record has JustCompleted (0xd) set and the player is currently in the Arcane Sanctuary (level 0x4a), it attaches the quest-complete "Moo" update event/sound (event 0x33) to the player. Cosmetic feedback on Summoner kill. nParam is the quest data ptr; [nParam+0x6d] is the difficulty index into pQuestRecordPool.
 BOOL __fastcall Q13_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TheSummoner, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheSummoner, QUESTSTATE_JustCompleted);
     if (!bIsJustCompleted) {
       return 0;
     }
@@ -317,8 +317,8 @@ void __fastcall Q13_SetSummonerRewardOnPartyMember(::SGAMEDATA * pGame, D2UnitSt
       return;
     }
 
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pQuestData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSummoner, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -352,14 +352,14 @@ void __fastcall Q13_SetSummonerRewardOnPartyMember(::SGAMEDATA * pGame, D2UnitSt
 
 // A2Q5 "The Summoner" - per-player party fan-out (iterated over players when Summoner dies). If this player's record has JustCompleted (0xd) set (i.e. they got kill credit) and they belong to a party (partyId != -1), run Q13_SetSummonerRewardOnPartyMember over every party member to share the completion.
 BOOL __fastcall Q13_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheSummoner, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheSummoner, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
 
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -369,8 +369,8 @@ BOOL __fastcall Q13_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
 // A2Q5 "The Summoner" - "cannot complete in this game" marker (iterated over players when Summoner dies). For any player who did NOT earn the kill (record not Completed and not RewardAwaits), it sets CannotCompleteQuestInGame (0xe) and sends quest-state packet 0xc to that player. Tells absent players the Summoner is already dead so they can't complete the quest this session. nParam=quest data ptr; [nParam+0x6d]=difficulty index.
 BOOL __fastcall Q13_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSummoner, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -424,8 +424,8 @@ void __fastcall Q13_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
 // A2Q5 "The Summoner" - state-0xd handler (sStateFunctions[0xd]), quest-log/progress sync on entering region. If the player's record (queried via pQuestData->nQuestIdReal) is neither Completed nor FinishedInPreviousGame, but the per-player TheSummoner record has Step0x02 (state 2, "in progress") set, it bumps the live quest data to nStateFlag=1 / nStateFlagPrev=2, advancing the in-game quest stage to match the saved progress. Read-only on the bit record (no Set/Unset).
 void __fastcall Q13_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (BVar1) {
       return;
