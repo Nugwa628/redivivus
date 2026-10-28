@@ -745,10 +745,10 @@ int32_t __fastcall PLRSAVE_SerializeCorpseData(::SGAMEDATA * pGame, D2UnitStrc *
     eCorpseUnitType = pCorpseUnit->eUnitType;
     if (eCorpseUnitType == UNIT_OBJECT || 3 < (int)eCorpseUnitType && (int)eCorpseUnitType <= 5) {
       nCorpsePosY = pCorpseUnit->pPath.pStaticPath->nPosY;
-    } else if (pCorpseUnit->pPath.pDynamicPath) {
-      nCorpsePosY = D2Common::PATH::DynamicPath::GetYPos(pCorpseUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pCorpseUnit->pPath.pDynamicPath) {
       nCorpsePosY = 0;
+    } else {
+      nCorpsePosY = D2Common::PATH::DynamicPath::GetYPos(pCorpseUnit->pPath.pDynamicPath);
     }
     if (nBufferSize - 4U < 0xc) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x97a);

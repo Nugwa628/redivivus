@@ -368,19 +368,19 @@ void __stdcall MISSILE_SpawnFromMaggot(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       eTargetUnitType = pTarget->eUnitType;
       if (eTargetUnitType == UNIT_OBJECT || 3 < (int)eTargetUnitType && (int)eTargetUnitType < 6) {
         nTargetX = pTarget->pPath.pStaticPath->nPosX;
-      } else if (pTarget->pPath.pDynamicPath) {
-        nTargetX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
-      } else {
+      } else if (!pTarget->pPath.pDynamicPath) {
         nTargetX = 0;
+      } else {
+        nTargetX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
       }
 
       eTargetUnitType2 = pTarget->eUnitType;
       if (eTargetUnitType2 == UNIT_OBJECT || 3 < (int)eTargetUnitType2 && (int)eTargetUnitType2 < 6) {
         nTargetY = pTarget->pPath.pStaticPath->nPosY;
-      } else if (pTarget->pPath.pDynamicPath) {
-        nTargetY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
-      } else {
+      } else if (!pTarget->pPath.pDynamicPath) {
         nTargetY = 0;
+      } else {
+        nTargetY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
       }
     }
 

@@ -542,7 +542,7 @@ static void __stdcall PETS_TeleportToRoom(D2UnitStrc * pUnit, ::SGAMEDATA * pGam
 
     pPrevRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pPrevRoom);
-    uint8_t eNewAct = (uint8_t)D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
+    bool eNewAct = (bool)D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
     pUnit->nAct = eNewAct;
     pUnit->pDrlgAct = pGame->pAct[eNewAct];
     D2Common::Unit::ROOM_LinkUnitToUpdateList(pUnit);
@@ -921,10 +921,10 @@ static void __stdcall PETS_RemoveDistantPets(::SGAMEDATA * pGame, D2UnitStrc * p
           eVar1 = pUnit->eUnitType;
           if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
             nOwnerX = pUnit->pPath.pStaticPath->nPosX;
-          } else if (pUnit->pPath.pDynamicPath) {
-            nOwnerX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-          } else {
+          } else if (!pUnit->pPath.pDynamicPath) {
             nOwnerX = 0;
+          } else {
+            nOwnerX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
           }
 
           nCalcDist = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(nOwnerX, nDist, nPetPosX, nPetPosY);

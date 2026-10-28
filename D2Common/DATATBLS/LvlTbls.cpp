@@ -874,12 +874,12 @@ D2LevelsTxt * __stdcall TXT_Levels_GetLine(eD2LevelId eLevel) {
     return sgptDataTable->pTxtLevels + eLevel;
 }
 
-uint8_t __stdcall LEVEL_CanHaveRain(eD2LevelId eLevel) {
+bool __stdcall LEVEL_CanHaveRain(eD2LevelId eLevel) {
     if (!(0 < (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize)) {
       return false;
     }
 
-    return sgptDataTable->pTxtLevels[eLevel].Rain;
+    return (bool)sgptDataTable->pTxtLevels[eLevel].Rain;
 }
 
 uint32_t __stdcall LVLTBLS_GetNoPer(uint32_t nParam) {
@@ -890,12 +890,12 @@ uint32_t __stdcall LVLTBLS_GetNoPer(uint32_t nParam) {
     return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)(nParam * 0x220 >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)sgptDataTable->pTxtLevels[nParam].NoPer);
 }
 
-uint8_t __stdcall LEVEL_CanHaveMud(eD2LevelId eLevel) {
+bool __stdcall LEVEL_CanHaveMud(eD2LevelId eLevel) {
     if (!(0 < (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize)) {
       return false;
     }
 
-    return sgptDataTable->pTxtLevels[eLevel].Mud;
+    return (bool)sgptDataTable->pTxtLevels[eLevel].Mud;
 }
 
 void __stdcall LVLTBLS_FreeLevelsTxt() {
