@@ -320,7 +320,7 @@ static void __stdcall QUEST_DispatchBroadcast(bool bFlag1, bool bFlag2, D2QuestA
 
     eAct ePlayerAct = ACT_NONE;
     D2QuestDataStrc* pQuestData = pQuestControl->pQuestData;
-    if (bFlag2) {
+    if (bFlag2 == 1) {
       D2RoomStrc* pPlayerRoom;
       pPlayerRoom = D2Common::Units::UNITS_GetRoom(pQuestArg->pPlayer);
       if (pPlayerRoom) {
@@ -3251,12 +3251,12 @@ void __fastcall PlaceGuardInFrontOfJerhyn(D2QuestDataStrc * pQuestData, D2Object
 
 bool __fastcall QUEST_CheckJerhynShouldBlock(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pArcaneSanctuaryQuest = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheArcaneSanctuary);
-    if (!(pArcaneSanctuaryQuest && pArcaneSanctuaryQuest->pQuestSpecificData.pA2Q4->bShouldSpawnJerhyn == 1)) {
+    if (!(pArcaneSanctuaryQuest && pArcaneSanctuaryQuest->pQuestSpecificData.pA2Q4->bShouldSpawnJerhyn)) {
       return true;
     }
 
     D2QuestDataStrc* pRadamentsLairQuest = GetQuestDataByQuestNoInternal(pArcaneSanctuaryQuest->pGame, QUESTINT_RadamentsLair);
-    if (!(pRadamentsLairQuest && pRadamentsLairQuest->bIsNotIntroduction == 1 && pRadamentsLairQuest->nStateFlag != 5)) {
+    if (!(pRadamentsLairQuest && pRadamentsLairQuest->bIsNotIntroduction && pRadamentsLairQuest->nStateFlag != 5)) {
       return true;
     }
 

@@ -1188,8 +1188,8 @@ void __fastcall SendPongByClientId(uint32_t nClientId, int32_t dwSendTick, int32
 }
 
 BOOL __fastcall NET_D2GS_SERVER_GetPlayerNameByClientId(int32_t nClientId, char * szPlayerName) {
-    bool _bNotFound;
-    bool bNotFound;
+    BOOL _bNotFound;
+    BOOL bNotFound;
     if (!gQServerClientTablesInitialized) {
       return 1;
     }
