@@ -129,7 +129,7 @@ int32_t __stdcall GetBlockRate(struct D2UnitStrc * pUnit, BOOL bExpansion);
 struct D2UnitStrc * __stdcall GetEquippedWeapon(struct D2UnitStrc * pUnit);
 int32_t __stdcall GetMeleeRange(struct D2UnitStrc * pUnit);
 // Tests whether the line segment from unit (x,y) with radius size to target (x2,y2) with radius size2 is blocked by room collision. Clamps both radii to 2, computes Manhattan-distance proximity rejection, then adjusts endpoints by the respective radii along the dominant axis before delegating to Collision::TestCollision with the supplied eCollisionFlag. Returns TRUE if a collision is detected.
-BOOL __fastcall TestCollision(int32_t x, int32_t size, int32_t x2, int32_t y, int32_t size2, int32_t y2, struct D2RoomStrc * pRoom, int32_t eCollisionFlag);
+BOOL __stdcall TestCollision(int32_t x, int32_t size, int32_t x2, int32_t y, int32_t size2, int32_t y2, struct D2RoomStrc * pRoom, int32_t eCollisionFlag);
 BOOL __stdcall TestCollisionByCoordinates(struct D2UnitStrc * pUnit, int32_t nX, int32_t nY, int32_t eCollisionFlag);
 BOOL __stdcall TestCollisionWithUnit(struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2, int32_t eCollisionFlag);
 // Tests whether two units collide, temporarily suppressing each unit's own collision contribution if its collision type matches the provided eCollisionFlag. Fetches dynamic-path positions for both units, calls PATH_RemoveUnitCollision on each flagged unit, invokes TestCollision with their sizes, then restores collision via PATH_AddUnitCollision. Returns FALSE if either unit is null or has no room.
