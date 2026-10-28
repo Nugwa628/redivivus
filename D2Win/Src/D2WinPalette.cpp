@@ -70,7 +70,7 @@ void __stdcall DRAW_SetOrReloadPalleteMain() {
 
       gdwPaletteShiftStartTick = GetTickCount();
       gnPaletteGammaShiftState--;
-      if (0 < gnPaletteGammaShiftState) {
+      if (0 < (int)gnPaletteGammaShiftState) {
         goto apply_palette;
       }
 

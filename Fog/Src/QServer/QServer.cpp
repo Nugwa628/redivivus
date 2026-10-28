@@ -1566,7 +1566,7 @@ int __stdcall Shutdown(D2QServerStrc * pQServer, char * pBytes, int nSize) {
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&pQServer->csTokenHash);
     Fog::Memory::FreeClientMemory(pQServer->pQServerClientList, ".\\Src\\QServer\\QServer.cpp", 0x198, 0);
     iVar1 = 0;
-    if (0 < TokenHashMapBucketSize) {
+    if (0 < (int)TokenHashMapBucketSize) {
       int nLockByteOffset;
       nLockByteOffset = 0;
       do {
