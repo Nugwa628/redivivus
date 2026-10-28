@@ -218,7 +218,7 @@ template<> ::StringEntryNode * TSHashTable<StringEntryNode, HASHKEY_STRI>::Ptr(u
     uint32_t uFirstEntry = this->tSlotListArray.m_data[dwHashVal & this->nSlotMask].m_terminator.m_next;
     ::StringEntryNode* pEntry = (::StringEntryNode*)((int)uFirstEntry <= 0 ? 0 : uFirstEntry);
     while (true) {
-      if ((int)pEntry < 1) {
+      if ((int)pEntry <= 0) {
         return nullptr;
       }
       if (pEntry->m_hashval == dwHashVal) {
@@ -721,7 +721,7 @@ template<> int32_t TSHashTable<StringEntryNode, HASHKEY_STRI>::MonitorFullness(u
     if (0x3ff <= this->nSlotMask) {
       return 0;
     }
-    if (this->nFullnessIndicator < 4) {
+    if (this->nFullnessIndicator <= 3) {
       this->nFullnessIndicator = 0;
     } else {
       this->nFullnessIndicator -= 3;

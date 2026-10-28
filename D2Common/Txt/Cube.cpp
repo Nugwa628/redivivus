@@ -429,7 +429,7 @@ static void __stdcall CUBE_ParseOutputItem(D2CubeOutputStrc * pOutput, char * ps
             } else {
               pszCursor = pszItemCodeField;
               pszCursor = pszCursor + strlen(pszCursor) + 1;
-              if ((uint32_t)((int)pszCursor - (int)(pszItemCodeField + 1)) < 5) {
+              if ((uint32_t)((int)pszCursor - (int)(pszItemCodeField + 1)) <= 4) {
                 CUBE_PadItemCodeString(pszItemCodeField, (char*)&pszPadded);
                 pItemsTxt = DATATBLS::ItemTbls::ConvertItemCodeToClassIdAndGetItemsTxtLine((uint32_t)pszPadded, (int*)&pszPadded);
                 if (pItemsTxt) {

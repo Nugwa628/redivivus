@@ -185,7 +185,7 @@ void __fastcall ITEM_ManageSetBonusStatList(D2UnitStrc * pUnit, D2UnitStrc * pUn
     D2StatListExStrc* pStatList;
     int nExistingSetId;
     eD2States eState;
-    if (!(nMode < 2 && pUnit && pUnit2 && pUnit2->eUnitType == UNIT_ITEM)) {
+    if (!(nMode <= 1 && pUnit && pUnit2 && pUnit2->eUnitType == UNIT_ITEM)) {
       return;
     }
 
@@ -237,7 +237,7 @@ void __fastcall ITEM_ManageSetBonusStatList(D2UnitStrc * pUnit, D2UnitStrc * pUn
       }
 
       nBonusSlotIdx++;
-    } while (nBonusSlotIdx < 6);
+    } while (nBonusSlotIdx <= 5);
 
     if (nMode == 1 || nFreeSlot < 0) {
       return;

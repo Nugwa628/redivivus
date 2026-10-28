@@ -1134,10 +1134,10 @@ void __stdcall PATH_AddUnitCollision(D2UnitStrc * pUnit) {
       uint32_t nVectorY;
       eUnitType = pUnit->eUnitType;
       if (0 <= (int)eUnitType) {
-        if ((int)eUnitType < 2) {
+        if ((int)eUnitType <= 1) {
           pDynamicPath = pUnit->pPath.pDynamicPath;
           nUnitWidth = pDynamicPath->nUnitWidth;
-          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
             *(uint16_t*)(char*)&iVar1 = pDynamicPath->nTargetX;
             *(uint16_t*)((char*)&iVar1 + 2) = pDynamicPath->nTargetY;
           } else if (pDynamicPath) {
@@ -1259,7 +1259,7 @@ BOOL __stdcall PATH_RemoveUnitCollision(D2UnitStrc * pUnit, int32_t nParam) {
         }
 
         eUnitType = pUnit->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
           nPosX = pUnit->pPath.pStaticPath->nPosX;
         } else if (pUnit->pPath.pDynamicPath) {
           nPosX = GetXPos(pUnit->pPath.pDynamicPath);
@@ -1297,7 +1297,7 @@ BOOL __stdcall PATH_RemoveUnitCollision(D2UnitStrc * pUnit, int32_t nParam) {
     pDynamicPath = pUnit->pPath.pDynamicPath;
     int32_t nUnitWidth = pDynamicPath->nUnitWidth;
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       *(uint16_t*)(char*)&nPosY = pDynamicPath->nTargetX;
       *(uint16_t*)((char*)&nPosY + 2) = pDynamicPath->nTargetY;
     } else if (pDynamicPath) {

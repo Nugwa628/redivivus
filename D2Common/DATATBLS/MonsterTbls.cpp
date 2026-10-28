@@ -1907,7 +1907,7 @@ void __stdcall TC_GenerateAutoItemTypeTreasureClasses() {
                       if (bTypeMatch && (nItemTypeStride == 0x21d8 || (bIsMissilePotion = ITEMS::Items::TXT_ItemTypes_CheckEquivalence(nItemClassIdx, ITEMTYPE_MissilePotion) , !bIsMissilePotion)) && nLevelStep - 3 < (int)(uint32_t)(uint8_t)pItemsTxt->nLevel && (int)(uint32_t)(uint8_t)pItemsTxt->nLevel <= nLevelStep) {
                         pItemTypesTxt = D2Game::ITEMS::Items::Drop::ItemTypes_GetLine((int)pItemsTxt->wType);
                         if (pItemTypesTxt) {
-                          if ((uint8_t)pItemTypesTxt->rarity < 2) {
+                          if ((uint8_t)pItemTypesTxt->rarity <= 1) {
                             nRarity = 1;
                           } else {
                             nRarity = (uint32_t)(uint8_t)pItemTypesTxt->rarity;

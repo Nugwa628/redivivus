@@ -423,7 +423,7 @@ int32_t __stdcall ITEM_GetItemData_nItemLevel(D2UnitStrc * pUnit) {
     if (!temp_5f060235c5) {
       return 1;
     }
-    if (temp_5f060235c5->nItemLevel >= 1) {
+    if (temp_5f060235c5->nItemLevel > 0) {
       return temp_5f060235c5->nItemLevel;
     }
 
@@ -6171,7 +6171,7 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
             __frame0.nBuyPrice = iVar1;
             if (bIsStackable) {
               iVar6 = ITEM_GetMaxStack(pItem);
-              if (iVar6 < 2) {
+              if (iVar6 <= 1) {
                 nMaxStack = 1;
               } else {
                 nMaxStack = ITEM_GetMaxStack(pItem);
@@ -6241,7 +6241,7 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
       pMagicAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)uVar4);
       uVar4 = iVar1 >> 0x1f;
       if (pMagicAffixTxt) {
-        if (iVar1 < 0x10000 || !pMagicAffixTxt->multiply) {
+        if (iVar1 <= 0xffff || !pMagicAffixTxt->multiply) {
           __frame0.nQualityMod = pMagicAffixTxt->add;
           nAffixRepairDelta = pMagicAffixTxt->multiply;
           iVar7 = ((int)(nAffixRepairDelta * iVar1) / 1024) + __frame0.nQualityMod;
@@ -6316,7 +6316,7 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
             wMagicSuffixId = GetMagicSuffix(pItem, nAffixIter);
             pMagicAffixTxt = DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)wMagicSuffixId);
             if (pMagicAffixTxt) {
-              if (iVar1 < 0x10000 || !pMagicAffixTxt->multiply) {
+              if (iVar1 <= 0xffff || !pMagicAffixTxt->multiply) {
                 iVar5 = pMagicAffixTxt->multiply;
                 nAffixRepairDelta = pMagicAffixTxt->add;
                 nAffixSellDelta = ((int)(iVar5 * iVar1) / 1024) + nAffixRepairDelta;
@@ -6336,7 +6336,7 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
             }
 
             nAffixIter++;
-          } while (nAffixIter < 3);
+          } while (nAffixIter <= 2);
 
           goto add_stat_costs_args_pushed;
           case QUALITY_UNIQUE:
@@ -6572,7 +6572,7 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
           iVar3 = D2Client::Stats::D2ApplyPercent(__frame0.nSellPrice, nReducedPrices, 100);
           __frame0.nSellPrice = iVar6 - iVar3;
         }
-        if (__frame0.nSellPrice < 1) {
+        if (__frame0.nSellPrice <= 0) {
           return 1;
         }
         break;
@@ -6776,7 +6776,7 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
     Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, eAnimModeClamp, 3);
     if (pItemUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Run || pItemUnit->eAnimMode.ePlayerMode == TownNeutral) {
       eUnitType = pItemUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nBitValue = pItemUnit->pPath.pStaticPath->nPosX;
       } else if (!pItemUnit->pPath.pDynamicPath) {
         nBitValue = 0;
@@ -6820,10 +6820,10 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
 
       Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, nBitValue, 4);
       eUnitType = pItemUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nStatValue = pItemUnit->pPath.pStaticPath->nPosX;
         clamp_grid_x:
-        if (!nStatValue || (nBitValue = D2Client::Units::GetXPosFromDynamicPathUnit(pItemUnit) , nBitValue < 0xf)) {
+        if (!nStatValue || (nBitValue = D2Client::Units::GetXPosFromDynamicPathUnit(pItemUnit) , nBitValue <= 0xe)) {
           goto read_grid_x;
         }
         nBitValue = 0xf;
@@ -6852,7 +6852,7 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nStatValue = pItemUnit->pPath.pStaticPath->nPosY;
         clamp_grid_y:
-        if ((uint32_t)nStatValue <= 0 || (nBitValue = D2Client::Units::GetYPosFromDynamicPathUnit(pItemUnit) , nBitValue < 0xf)) {
+        if ((uint32_t)nStatValue <= 0 || (nBitValue = D2Client::Units::GetYPosFromDynamicPathUnit(pItemUnit) , nBitValue <= 0xe)) {
           goto read_grid_y;
         }
         nBitValue = 0xf;
@@ -6922,16 +6922,16 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
         if (pItemUnit->eUnitType != UNIT_ITEM || (pUnitDataPlayer = pItemUnit->pUnitData.pUnitDataPlayer , !pUnitDataPlayer)) {
           goto default_item_level;
         }
-        if (pUnitDataPlayer->nPortalFlags < 1) {
+        if (pUnitDataPlayer->nPortalFlags <= 0) {
           pUnitDataPlayer->nPortalFlags = 1;
         }
 
         nBitValue = pUnitDataPlayer->nPortalFlags;
       } else {
-        if (pUnitDataPlayer->nPortalFlags < 1) {
+        if (pUnitDataPlayer->nPortalFlags <= 0) {
           pUnitDataPlayer->nPortalFlags = 1;
         }
-        if (pUnitDataPlayer->nPortalFlags < 99) {
+        if (pUnitDataPlayer->nPortalFlags <= 98) {
           goto use_item_level;
         }
 
@@ -7086,7 +7086,7 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
       case 3:
         nBitValue = ITEM_GetItemData_nFileIndex(pItemUnit);
       nBitValue = nBitValue ? nBitValue : 0;
-      if (nBitValue < 7) {
+      if (nBitValue <= 6) {
         goto write_3bit_quality_data;
       }
 
@@ -7196,7 +7196,7 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
 
         Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, nBitValue, nErrLine);
         nStatValue += 2;
-      } while (nStatValue < 0x44);
+      } while (nStatValue <= 0x43);
 
       break;
       case 9:
@@ -7329,7 +7329,7 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
 
     uTmpBits = ITEMS_IsA(pItemUnit, ITEMTYPE_AnyArmor);
     if (uTmpBits) {
-      if (sgptDataTable->nTxtItemStatCostSize < 0x20) {
+      if (sgptDataTable->nTxtItemStatCostSize <= 0x1f) {
         pItemStatCostLine = 0;
       } else {
         pItemStatCostLine = sgptDataTable->pTxtItemStatCost + 0x1f;
@@ -7388,7 +7388,7 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
     } else {
       uTmpBits = ITEMS_IsA(pItemUnit, ITEMTYPE_Weapon);
       if (uTmpBits) {
-        if (sgptDataTable->nTxtItemStatCostSize < 0x4a) {
+        if (sgptDataTable->nTxtItemStatCostSize <= 0x49) {
           pItemStatCostLine = 0;
         } else {
           pItemStatCostLine = sgptDataTable->pTxtItemStatCost + 0x49;
@@ -7409,7 +7409,7 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
         if (!nErrLine) {
           goto write_quantity_and_stats;
         }
-        if (sgptDataTable->nTxtItemStatCostSize < 0x49) {
+        if (sgptDataTable->nTxtItemStatCostSize <= 0x48) {
           pItemStatCostLine = 0;
         } else {
           pItemStatCostLine = sgptDataTable->pTxtItemStatCost + 0x48;
@@ -7490,9 +7490,9 @@ void __stdcall SerializeComplexItem(D2UnitStrc * pItemUnit, D2BitBufferStrc * pB
         }
 
         nStatValue++;
-      } while (nStatValue < 5);
+      } while (nStatValue <= 4);
 
-      if ((nBitValue ? nBitValue : 0) < 0x1f) {
+      if ((nBitValue ? nBitValue : 0) <= 0x1e) {
         nBitValue = nBitValue ? nBitValue : 0;
       } else {
         nBitValue = 0x1f;

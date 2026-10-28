@@ -168,7 +168,7 @@ template<> ::MappingEntryNode * TSHashTable<MappingEntryNode, HASHKEY_STRI>::Ptr
     uint32_t uFirstEntry = this->tSlotListArray.m_data[dwHashVal & this->nSlotMask].m_terminator.m_next;
     ::MappingEntryNode* pEntry = (::MappingEntryNode*)((int)uFirstEntry <= 0 ? 0 : uFirstEntry);
     while (true) {
-      if ((int)pEntry < 1) {
+      if ((int)pEntry <= 0) {
         return nullptr;
       }
       if (pEntry->m_hashval == dwHashVal) {
@@ -820,7 +820,7 @@ template<> int32_t TSHashTable<MappingEntryNode, HASHKEY_STRI>::MonitorFullness(
     if (0x3ff <= this->nSlotMask) {
       return 0;
     }
-    if (this->nFullnessIndicator < 4) {
+    if (this->nFullnessIndicator <= 3) {
       this->nFullnessIndicator = 0;
     } else {
       this->nFullnessIndicator -= 3;

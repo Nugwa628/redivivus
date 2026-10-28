@@ -1117,7 +1117,7 @@ static void __stdcall InitAllRoomsEx(D2RoomExStrc * pRoomEx, D2DrlgLevelStrc * p
     D2DrlgPresetRoomStrc* pDVar1 = pRoomEx->pRoomExData.pRoomExDataPreset;
     D2DrlgMapStrc* pDrlgLevelSub1B0 = Preset::DRLGPRESET_AllocDrlgMap(pLevel, pDVar1->nLevelPrest, (D2DrlgCoordStrc*)&pRoomEx->sCoords, &pLevel->sSeed);
     DRLGMAZE_SelectRandomPresetFile(pDVar1->nPickedFile, pLevel, &pDrlgLevelSub1B0->nNumber);
-    if (pRoomEx->sCoords.WorldSize.x < 0xd && pRoomEx->sCoords.WorldSize.y < 0xd) {
+    if (pRoomEx->sCoords.WorldSize.x <= 0xc && pRoomEx->sCoords.WorldSize.y <= 0xc) {
       bSingleRoom = 1;
     } else {
       bSingleRoom = 0;

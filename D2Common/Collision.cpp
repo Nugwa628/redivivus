@@ -632,7 +632,7 @@ D2UnitStrc * __stdcall CallCollisionFunction(D2RoomStrc * pRoom, int32_t nX, int
               case UNIT_MISSILE:
                 case_UNIT_MISSILE:
                 nUnitSizeX = Units::GetUnitSizeX(pUnit);
-              if (!(nUnitSizeX < 3)) {
+              if (!(nUnitSizeX <= 2)) {
                 nUnitSizeX = 3;
               } else {
                 if (nUnitSizeX <= 0) {
@@ -724,7 +724,7 @@ D2UnitStrc * __stdcall CallCollisionFunction(D2RoomStrc * pRoom, int32_t nX, int
                 if (iVar2 < 0) {
                   iVar2 = -iVar2;
                 }
-                if (iVar1 < 3 && iVar2 < 2) {
+                if (iVar1 <= 2 && iVar2 <= 1) {
                   goto try_candidate;
                 }
                 if (iVar2 <= 2) {

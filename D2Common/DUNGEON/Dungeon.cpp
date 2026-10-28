@@ -2052,7 +2052,7 @@ void __stdcall DRLGROOMEX_UpdateClientRoomExActivation(D2DrlgStrc * pDrlg) {
       sgtDataTable.nRoomDataGenerationA = pDrlg->nRoomDataGeneration;
       sgtDataTable.nRoomDataFreeGenerationA = pDrlg->nRoomDataFreeGeneration;
     }
-    if (pDrlg->nRoomInitBatchCount < 2) {
+    if (pDrlg->nRoomInitBatchCount <= 1) {
       D2RoomExStrc* pRoomEx;
       pCountdown = &pDrlg->nActivationCountdown;
       (*pCountdown)--;
@@ -2122,7 +2122,7 @@ BOOL __fastcall RoomEx_method_0(D2RoomExStrc * pRoomEx) {
     }
 
     for (pRoomExIter = pRoomEx->pLevel->pRoomExFirst; pRoomExIter; pRoomExIter = pRoomExIter->pRoomExNext) {
-      if (pRoomExIter->fRoomStatus < 2) {
+      if (pRoomExIter->fRoomStatus <= 1) {
         return 0;
       }
     }
