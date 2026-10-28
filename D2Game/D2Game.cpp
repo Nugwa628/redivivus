@@ -320,10 +320,10 @@ uint32_t __fastcall SKILLS_AreaEffect_FindNearestUnit(D2SkillCallbackContextStrc
     eTargetType = pTargetUnit->eUnitType;
     if (eTargetType == UNIT_OBJECT || 3 < (int)eTargetType && (int)eTargetType < 6) {
       nUnitY = pTargetUnit->pPath.pStaticPath->nPosY;
-    } else if (!pTargetUnit->pPath.pDynamicPath) {
-      nUnitY = 0;
-    } else {
+    } else if (pTargetUnit->pPath.pDynamicPath) {
       nUnitY = D2Common::PATH::DynamicPath::GetYPos(pTargetUnit->pPath.pDynamicPath);
+    } else {
+      nUnitY = 0;
     }
 
     nUnitY -= pSearchContext->nY;

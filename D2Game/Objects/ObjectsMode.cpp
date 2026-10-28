@@ -1430,20 +1430,20 @@ void __fastcall Shrines_StormShrineFunction(D2ObjectOperateFnArg * pArguments, D
     eD2UnitType eUnitType = pTargetUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nUnitIdx = pTargetUnit->pPath.pStaticPath->nPosX;
-    } else if (!pTargetUnit->pPath.pDynamicPath) {
-      nUnitIdx = 0;
-    } else {
+    } else if (pTargetUnit->pPath.pDynamicPath) {
       nUnitIdx = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
+    } else {
+      nUnitIdx = 0;
     }
 
     pTargetUnit = pArguments->sArg.pVictim;
     eUnitType = pTargetUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       sUnitFindArg.nY = pTargetUnit->pPath.pStaticPath->nPosY;
-    } else if (!pTargetUnit->pPath.pDynamicPath) {
-      sUnitFindArg.nY = 0;
-    } else {
+    } else if (pTargetUnit->pPath.pDynamicPath) {
       sUnitFindArg.nY = D2Common::PATH::DynamicPath::GetYPos(pTargetUnit->pPath.pDynamicPath);
+    } else {
+      sUnitFindArg.nY = 0;
     }
 
     memset(&sUnitFindArg, 0, 0x38);
@@ -1486,20 +1486,20 @@ void __fastcall Shrines_StormShrineFunction(D2ObjectOperateFnArg * pArguments, D
         eUnitType = pTargetUnit->eUnitType;
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
           sSkillArg.nX = pTargetUnit->pPath.pStaticPath->nPosX;
-        } else if (!pTargetUnit->pPath.pDynamicPath) {
-          sSkillArg.nX = 0;
-        } else {
+        } else if (pTargetUnit->pPath.pDynamicPath) {
           sSkillArg.nX = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
+        } else {
+          sSkillArg.nX = 0;
         }
 
         pTargetUnit = pArguments->sArg.pVictim;
         eUnitType = pTargetUnit->eUnitType;
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
           sSkillArg.nY = pTargetUnit->pPath.pStaticPath->nPosY;
-        } else if (!pTargetUnit->pPath.pDynamicPath) {
-          sSkillArg.nY = 0;
-        } else {
+        } else if (pTargetUnit->pPath.pDynamicPath) {
           sSkillArg.nY = D2Common::PATH::DynamicPath::GetYPos(pTargetUnit->pPath.pDynamicPath);
+        } else {
+          sSkillArg.nY = 0;
         }
         if (!nRowParity) {
           sSkillArg.nUnitX = (int)pTxtShrinesLocal;
@@ -1663,10 +1663,10 @@ void __fastcall Shrines_ExplodingShrineFunction(D2ObjectOperateFnArg * pArgument
       eUnitType = pCreatedItem->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         sItemGenCtx.maxDurability = pCreatedItem->pPath.pStaticPath->nPosX;
-      } else if (!pCreatedItem->pPath.pDynamicPath) {
-        sItemGenCtx.maxDurability = 0;
-      } else {
+      } else if (pCreatedItem->pPath.pDynamicPath) {
         sItemGenCtx.maxDurability = D2Common::PATH::DynamicPath::GetXPos(pCreatedItem->pPath.pDynamicPath);
+      } else {
+        sItemGenCtx.maxDurability = 0;
       }
 
       pCreatedItem = pArguments->sArg.pVictim;
@@ -1797,10 +1797,10 @@ void __fastcall Shrines_PoisonShrineFunction(D2ObjectOperateFnArg * pArguments, 
       eUnitType = pCreatedItem->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         sItemGenCtx.maxDurability = pCreatedItem->pPath.pStaticPath->nPosX;
-      } else if (!pCreatedItem->pPath.pDynamicPath) {
-        sItemGenCtx.maxDurability = 0;
-      } else {
+      } else if (pCreatedItem->pPath.pDynamicPath) {
         sItemGenCtx.maxDurability = D2Common::PATH::DynamicPath::GetXPos(pCreatedItem->pPath.pDynamicPath);
+      } else {
+        sItemGenCtx.maxDurability = 0;
       }
 
       pCreatedItem = pArguments->sArg.pVictim;

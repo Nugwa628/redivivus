@@ -245,19 +245,19 @@ int32_t __stdcall GetCollisionDistance(D2UnitStrc * pUnit, D2UnitStrc * pTarget)
     eD2UnitType eUnitType = pTarget->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nDx = pTarget->pPath.pStaticPath->nPosX;
-    } else if (!pTarget->pPath.pDynamicPath) {
-      nDx = 0;
-    } else {
+    } else if (pTarget->pPath.pDynamicPath) {
       nDx = PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
+    } else {
+      nDx = 0;
     }
 
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDy = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nDy = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nDy = PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nDy = 0;
     }
 
     nDx -= nDy;
@@ -268,19 +268,19 @@ int32_t __stdcall GetCollisionDistance(D2UnitStrc * pUnit, D2UnitStrc * pTarget)
     eUnitType = pTarget->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nDy = pTarget->pPath.pStaticPath->nPosY;
-    } else if (!pTarget->pPath.pDynamicPath) {
-      nDy = 0;
-    } else {
+    } else if (pTarget->pPath.pDynamicPath) {
       nDy = PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
+    } else {
+      nDy = 0;
     }
 
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nSizeAdj = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nSizeAdj = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nSizeAdj = PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nSizeAdj = 0;
     }
 
     nDy -= nSizeAdj;
@@ -316,10 +316,10 @@ int32_t __stdcall GetDistanceToXY(D2UnitStrc * pUnit, int32_t nX, int32_t nY) {
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosX = PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
     nPosX = nX - nPosX;
@@ -330,10 +330,10 @@ int32_t __stdcall GetDistanceToXY(D2UnitStrc * pUnit, int32_t nX, int32_t nY) {
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     nPosY = nY - nPosY;
@@ -360,10 +360,10 @@ uint32_t __stdcall COLLISION_IsUnitInRange(D2UnitStrc * pUnit, int * pnParam, in
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDx = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nDx = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nDx = PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nDx = 0;
     }
 
     int nAbsDx = *pnParam - nDx;
@@ -475,19 +475,19 @@ D2UnitStrc * __stdcall _unused(D2UnitStrc * pUnit, pfnUnitProximityTest pfnCallb
               eUnitType = pCandidate->eUnitType;
               if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
                 nRoomIdx = pCandidate->pPath.pStaticPath->nPosX;
-              } else if (!pCandidate->pPath.pDynamicPath) {
-                nRoomIdx = 0;
-              } else {
+              } else if (pCandidate->pPath.pDynamicPath) {
                 nRoomIdx = PATH::DynamicPath::GetXPos(pCandidate->pPath.pDynamicPath);
+              } else {
+                nRoomIdx = 0;
               }
 
               eUnitType = pCandidate->eUnitType;
               if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
                 nCandidatePosY = pCandidate->pPath.pStaticPath->nPosY;
-              } else if (!pCandidate->pPath.pDynamicPath) {
-                nCandidatePosY = 0;
-              } else {
+              } else if (pCandidate->pPath.pDynamicPath) {
                 nCandidatePosY = PATH::DynamicPath::GetYPos(pCandidate->pPath.pDynamicPath);
+              } else {
+                nCandidatePosY = 0;
               }
 
               switch (nCandidateSizeX + nUnitSizeX * 3 - 4) {
@@ -649,10 +649,10 @@ D2UnitStrc * __stdcall CallCollisionFunction(D2RoomStrc * pRoom, int32_t nX, int
               eUnitType = pUnit->eUnitType;
               if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
                 nCandidatePosY = pUnit->pPath.pStaticPath->nPosY;
-              } else if (!pUnit->pPath.pDynamicPath) {
-                nCandidatePosY = 0;
-              } else {
+              } else if (pUnit->pPath.pDynamicPath) {
                 nCandidatePosY = PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+              } else {
+                nCandidatePosY = 0;
               }
 
               switch (nUnitSizeX - 1 + nWidth) {

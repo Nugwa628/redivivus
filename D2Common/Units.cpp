@@ -398,10 +398,10 @@ int32_t __stdcall GetAbsoluteXDistance(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) 
     eUnitType = pUnit2->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX2 = pUnit2->pPath.pStaticPath->nPosX;
-    } else if (!pUnit2->pPath.pDynamicPath) {
-      nX2 = 0;
-    } else {
+    } else if (pUnit2->pPath.pDynamicPath) {
       nX2 = PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
+    } else {
+      nX2 = 0;
     }
 
     int32_t nAbsDiff = nX1 - nX2;
@@ -428,10 +428,10 @@ int32_t __stdcall GetAbsoluteYDistance(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) 
     eUnitType = pUnit2->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY2 = pUnit2->pPath.pStaticPath->nPosY;
-    } else if (!pUnit2->pPath.pDynamicPath) {
-      nY2 = 0;
-    } else {
+    } else if (pUnit2->pPath.pDynamicPath) {
       nY2 = PATH::DynamicPath::GetYPos(pUnit2->pPath.pDynamicPath);
+    } else {
+      nY2 = 0;
     }
 
     int32_t nAbsDiff = nY1 - nY2;
@@ -2772,10 +2772,10 @@ BOOL __stdcall IsObjectInInteractRange(D2UnitStrc * pUnit, D2UnitStrc * pObject)
     eUnitType = pObject->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nObjX = pObject->pPath.pStaticPath->nPosX;
-    } else if (!pObject->pPath.pDynamicPath) {
-      nObjX = 0;
-    } else {
+    } else if (pObject->pPath.pDynamicPath) {
       nObjX = PATH::DynamicPath::GetXPos(pObject->pPath.pDynamicPath);
+    } else {
+      nObjX = 0;
     }
 
     eUnitType = pObject->eUnitType;
