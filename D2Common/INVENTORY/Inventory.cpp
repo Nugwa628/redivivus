@@ -1419,7 +1419,10 @@ D2UnitStrc * __stdcall GetEquipedWeapon(D2InventoryStrc * pInventory) {
     uint32_t bIsWeaponType;
     D2InventoryGridInfoStrc* pGridInfo;
     D2UnitStrc* pUnit;
-    if (!pInventory || pInventory->nSignatureMagic != 0x1020304) {
+    if (!pInventory) {
+      return nullptr;
+    }
+    if (pInventory->nSignatureMagic != 0x1020304) {
       return nullptr;
     }
     if (pInventory->dwPrimaryWeaponGUID == -1) {
@@ -1436,7 +1439,10 @@ D2UnitStrc * __stdcall GetPrimaryWeapon(D2InventoryStrc * pInventory) {
     uint32_t bIsWeaponType;
     D2UnitStrc* pItem;
     D2UnitStrc* pUnit_00;
-    if (!pInventory || pInventory->nSignatureMagic != 0x1020304) {
+    if (!pInventory) {
+      return nullptr;
+    }
+    if (pInventory->nSignatureMagic != 0x1020304) {
       return nullptr;
     }
     if (pInventory->dwPrimaryWeaponGUID == -1) {
@@ -4735,7 +4741,10 @@ void __stdcall FreeRecursiveInventorysWithChilds(D2InventoryStrc * pInventory) {
 // Copies the backpack grid (grid index 2) cell array from pUnit's inventory into pInventory. Looks up the inventory page dimensions via GetInventoryPage + GetGridDimensions, ensures both grids exist and have matching Width x Height, then memcpys the source cell pointer array. Returns 1 on success, 0 if either inventory is invalid, grids are missing, or dimensions mismatch.
 BOOL CopyInventory(D2InventoryStrc * pInventory, D2UnitStrc * pUnit) {
     D2GridScreenCoordinates local_1c;
-    if (!pInventory || pInventory->nSignatureMagic != 0x1020304) {
+    if (!pInventory) {
+      return 0;
+    }
+    if (pInventory->nSignatureMagic != 0x1020304) {
       return 0;
     }
 
@@ -4776,7 +4785,10 @@ static BOOL __stdcall INVENTORY_ReserveGridCells(D2InventoryStrc * pInventory, D
     D2GridScreenCoordinates gridDims;
     int* pnColStart;
     uint8_t byItemHeight;
-    if (!pInventory || pInventory->nSignatureMagic != 0x1020304) {
+    if (!pInventory) {
+      return 0;
+    }
+    if (pInventory->nSignatureMagic != 0x1020304) {
       return 0;
     }
 

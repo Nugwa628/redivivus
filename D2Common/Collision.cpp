@@ -596,7 +596,10 @@ D2UnitStrc * __stdcall CallCollisionFunction(D2RoomStrc * pRoom, int32_t nX, int
     int32_t nAdjacentRoomCount;
     eD2UnitType eUnitType;
     D2UnitStrc* pUnit;
-    if (!pRoom || 2 < nWidth - 1U) {
+    if (!pRoom) {
+      return nullptr;
+    }
+    if (2 < nWidth - 1U) {
       return nullptr;
     }
 
