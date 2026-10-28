@@ -870,11 +870,10 @@ int32_t __stdcall GetLastInitCoordX(D2DynamicPathStrc * pDynamicPath) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x902);
       exit(-1);
     }
-    if (!pDynamicPath->nSaveCoordsSize) {
-      return 0;
+    if (pDynamicPath->nSaveCoordsSize) {
+      return (uint32_t)pDynamicPath->SaveCoords[pDynamicPath->nSaveCoordsSize - 1].nX;
     }
-
-    return (uint32_t)pDynamicPath->SaveCoords[pDynamicPath->nSaveCoordsSize - 1].nX;
+    return 0;
 }
 
 int32_t __stdcall GetLastInitCoordY(D2DynamicPathStrc * pDynamicPath) {
@@ -882,11 +881,10 @@ int32_t __stdcall GetLastInitCoordY(D2DynamicPathStrc * pDynamicPath) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x911);
       exit(-1);
     }
-    if (!pDynamicPath->nSaveCoordsSize) {
-      return 0;
+    if (pDynamicPath->nSaveCoordsSize) {
+      return (uint32_t)pDynamicPath->SaveCoords[pDynamicPath->nSaveCoordsSize - 1].nY;
     }
-
-    return (uint32_t)pDynamicPath->SaveCoords[pDynamicPath->nSaveCoordsSize - 1].nY;
+    return 0;
 }
 
 void __stdcall SetUnsetFlags0x40(D2DynamicPathStrc * pDynamicPath, int32_t bSet) {

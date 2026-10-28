@@ -1993,12 +1993,11 @@ D2RoomStrc * __fastcall InitRoomEx(D2RoomExStrc * pRoomEx) {
 // Finds a RoomEx by world coordinates in the Drlg and initializes it into a D2RoomStrc via InitRoomEx. Returns the allocated room or NULL if no RoomEx found at those coordinates.
 D2RoomStrc * __fastcall DRLGROOMEX_GetRoomByCoords(D2DrlgStrc * pDrlg, int32_t nX, int32_t nY) {
     D2RoomExStrc* pRoomEx = Drlg::GetRoomOfCoords(nX, nY, pDrlg, nullptr, nullptr);
-    if (!pRoomEx) {
-      return nullptr;
+    if (pRoomEx) {
+      D2RoomStrc* pRoom = InitRoomEx(pRoomEx);
+      return pRoom;
     }
-
-    D2RoomStrc* pRoom = InitRoomEx(pRoomEx);
-    return pRoom;
+    return nullptr;
 }
 
 // Initialize the 4-entry RoomEx activation priority queues (aSubA0). Each queue is a self-linked empty list with its priority set to its index.
