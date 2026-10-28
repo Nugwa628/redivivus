@@ -426,8 +426,8 @@ uint32_t __fastcall UNIT_IsAlive(D2UnitStrc * pUnit, D2UnitFindArgStrc * pUnitFi
 }
 
 void __fastcall Q33_SetCompleteForPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar3 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_PrisonOfIce, QUESTSTATE_Completed);
     if (BVar3 == 1) {
       return;
@@ -459,8 +459,8 @@ void __fastcall Q33_SetCompleteForPartyMember(::SGAMEDATA * pGame, D2UnitStrc * 
 
 // Q34_SetCompleteForPartyMember (Betrayal of Harrogath). Party-propagation worker (called by Q34_PropagateCompleteToParty for each member). Grants the kill to a party member who is in Act V and whose Betrayal isn't already Completed/CannotComplete/RewardAwaits/JustCompleted, provided Prison of Ice is done: sets their RewardAwaits + JustCompleted bits. Mirrors Q34_CheckNearNihlathak but keyed on party membership rather than room proximity.
 void __fastcall Q34_SetCompleteForPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestStateResult = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_BetrayalOfHaggorath, QUESTSTATE_Completed);
     if (bQuestStateResult == 1) {
       return;
@@ -527,8 +527,8 @@ uint8_t __fastcall Q02_TimerNotifyCompletion(::SGAMEDATA * pGame, D2QuestDataStr
 }
 
 void __fastcall fpExecuteOnUnitFunction(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersBurialGrounds, QUESTSTATE_Completed);
     if (bIsCompleted == 1) {
       return;
@@ -559,8 +559,8 @@ void __fastcall fpExecuteOnUnitFunction(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 }
 
 void __fastcall Q03_AutoCompleteIfHighLevel(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return;
@@ -581,8 +581,8 @@ void __fastcall Q03_AutoCompleteIfHighLevel(::SGAMEDATA * pGame, D2UnitStrc * pU
 }
 
 void __fastcall Q05_SetPartyMemberRewardStates(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar3 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ForgottenTower, QUESTSTATE_Completed);
     if (BVar3 == 1) {
       return;
@@ -648,8 +648,8 @@ uint8_t __fastcall Q09_OnEndCallback(::SGAMEDATA * pGame, D2QuestDataStrc * pQue
 // For each in-game party member not already Completed/RewardAwaits, mark their record JustCompleted + RewardAwaits
 // so partymates near the destroyed altar also get the Tainted-Sun reward credit.
 void __fastcall Q11_SetTaintedSunRewardOnPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar3 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheTaintedSun, QUESTSTATE_Completed);
     if (BVar3 == 1) {
       return;
@@ -693,8 +693,8 @@ uint8_t __fastcall Q11_OnEndCallback(::SGAMEDATA * pGame, D2QuestDataStrc * pQue
 }
 
 void __fastcall Q12_SetArcaneCompleteOnPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar3 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Completed);
     if (BVar3 == 1) {
       return;
@@ -741,8 +741,8 @@ void __fastcall MISSILESMODE_StatExpireCallback_ClearState(D2UnitStrc * pUnit, e
 }
 
 BOOL __fastcall Q26_PartyMember_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheFallenAngel, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -759,8 +759,8 @@ BOOL __fastcall Q26_PartyMember_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStr
 }
 
 BOOL __fastcall Q26_PartyMember_PlayCompleteSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheFallenAngel, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheFallenAngel, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
@@ -770,8 +770,8 @@ BOOL __fastcall Q26_PartyMember_PlayCompleteSound(::SGAMEDATA * pGame, D2UnitStr
 }
 
 void __fastcall Q26_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar3 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheFallenAngel, QUESTSTATE_Completed);
     if (BVar3 == 1) {
       return;
@@ -803,8 +803,8 @@ void __fastcall Q26_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * p
 }
 
 BOOL __fastcall Q26_PropagateCompletionToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheFallenAngel, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheFallenAngel, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
@@ -823,8 +823,8 @@ void __fastcall Objects_InitFn56(D2ObjectInitFnArg * pInitArg) {
 }
 
 BOOL __fastcall Q28_PartyMember_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_HellsForge, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -871,8 +871,8 @@ void __fastcall QUEST_StateHandler_PlayTomeHandInSound(D2QuestDataStrc * pQuestD
 
 void __fastcall Q22_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     eD2QuestState eQuestState;
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar3 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Completed);
     if (BVar3 == 1) {
       return;
@@ -910,8 +910,8 @@ void __fastcall Q22_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * p
 }
 
 BOOL __fastcall Q22_PropagateCompletionToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheBlackenedTemple, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheBlackenedTemple, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
@@ -926,8 +926,8 @@ BOOL __fastcall Q22_PropagateCompletionToParty(::SGAMEDATA * pGame, D2UnitStrc *
 }
 
 BOOL __fastcall Q22_PartyMember_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheBlackenedTemple, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -944,8 +944,8 @@ BOOL __fastcall Q22_PartyMember_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStr
 }
 
 BOOL __fastcall Q22_PartyMember_PlayCompleteSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheBlackenedTemple, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheBlackenedTemple, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
@@ -955,8 +955,8 @@ BOOL __fastcall Q22_PartyMember_PlayCompleteSound(::SGAMEDATA * pGame, D2UnitStr
 }
 
 BOOL __fastcall Q24_PartyMember_SetAbleGoToAct4(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar3 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_UnknownDuplicate1, QUESTSTATE_Completed);
     if (BVar3) {
       return 0;

@@ -124,8 +124,8 @@ void __fastcall Objects_InitFn47(D2ObjectInitFnArg * pInitArg) {
 
 // A1Q6 per-player notifier (IteratePlayerOrMonsterUnits callback). Reads the player's quest record: if quest is Completed-or-FinishedInPreviousGame AND not JustCompleted AND not CannotComplete, sends quest-update packet (quest idx 6) to that player; otherwise no-op. Pure read of quest-state flags to gate the client update.
 BOOL __fastcall Q06_NotifyQuestStateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_FinishedInPreviousGame) , bQuestState != 0)) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
@@ -160,8 +160,8 @@ void __fastcall Q06_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 
 // A1Q6 per-player record-sync (IteratePlayerOrMonsterUnits callback). Mirrors the server quest stateFlag into each player's persisted quest record. If not already Completed/RewardAwaits: stateFlag 2 -> Step0x02; stateFlag 3 -> Step0x03 (if prev set) else Step0x04. Keeps client save bits in step with server progress.
 BOOL __fastcall Q06_SyncQuestStepToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -277,8 +277,8 @@ void __fastcall Q06_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     uint8_t nStateFlag;
     uint32_t nGossipLineIdx;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
     BOOL bParticipated = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
     BOOL bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_RewardAwaits);
@@ -415,8 +415,8 @@ void __fastcall Q06_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
 
 // A1Q6 completion-sound callback (IteratePlayerOrMonsterUnits). If player record has both RewardAwaits and JustCompleted set, plays the quest-complete sound/event (event sound 0x21) on that player. Read-only on quest state.
 BOOL __fastcall Q06_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_RewardAwaits);
     if (!bQuestState) {
       return 0;
@@ -446,8 +446,8 @@ void __stdcall Q06_SetQuestCompletedAndReward(::SGAMEDATA * pQuestControl, D2Uni
 // A1Q6 per-player callback: if player record not Completed/FinishedInPreviousGame and player is in Catacombs Level 4, register them on all three NPC GUID lists (Cain/Akara/Kashya) and call Q06_SetQuestCompletedAndReward. Credits players present in the boss room when Andariel dies.
 BOOL __fastcall Q06_OnPlayerEnterCatacombsL4(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     int32_t nUnitGUID;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
     if (bQuestState == 1) {
@@ -482,8 +482,8 @@ BOOL __fastcall Q06_OnPlayerEnterCatacombsL4(::SGAMEDATA * pGame, D2UnitStrc * p
 // A1Q6 per-party-member callback: if record not Completed/RewardAwaits and member is anywhere in Act I, register them on all three NPC GUID lists and Q06_SetQuestCompletedAndReward. Spreads quest credit/reward to party members in Act I (invoked via Q06_PropagateRewardToParty).
 void __fastcall Q06_RegisterActIPlayerForCompletion(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     int nPlayerGUID;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -525,8 +525,8 @@ void __fastcall Q06_RegisterActIPlayerForCompletion(::SGAMEDATA * pGame, D2UnitS
 
 // A1Q6 per-player callback: for players who did NOT get credit (record not Completed/RewardAwaits) when Andariel died, set CannotCompleteQuestInGame in their record and send quest-state packet (idx 6). Locks the quest as un-completable in this game for absent players.
 BOOL __fastcall Q06_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -544,8 +544,8 @@ BOOL __fastcall Q06_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pU
 
 // A1Q6 per-player callback: if this player's record has JustCompleted set and they are in a party, runs Q06_RegisterActIPlayerForCompletion over every party member to propagate quest credit/reward across the party. Read-only on quest state (gate); writes happen in the per-member callback.
 BOOL __fastcall Q06_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }
@@ -750,8 +750,8 @@ void __fastcall Q06_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // A1Q6 load/restore callback (state slot 0xd) — reconstructs server stateFlag/stateFlagPrev from the persisted player quest record on game (re)load. If not Completed/FinishedInPreviousGame: Step0x04 -> flag 3/prev 2; Step0x03 -> flag 3/prev 1; Step0x02 -> flag 2/prev 1. Pure read of record bits to rebuild in-memory progress.
 void __fastcall Q06_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (BVar1) {
       return;

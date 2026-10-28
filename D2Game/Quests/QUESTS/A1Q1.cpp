@@ -60,8 +60,8 @@ namespace D2Game::Quests::QUESTS::A1Q1 {
 // A1Q1 (Den of Evil) -- "should I push the quest log/journal update to this player?" predicate, run via QUEST_SetStateAndBroadcast.
 // Reads the player's QUEST_DenOfEvil record. Returns 0 (suppress the per-player journal/state broadcast) when the quest is already fully resolved for that player: i.e. when (Completed OR FinishedInPreviousGame) AND NOT JustCompleted AND NOT CannotCompleteQuestInGame. Otherwise it calls QUEST_SendQuestUpdateToPlayer to refresh that client's quest log. This is the broadcast-filter handed to every QUEST_SetStateAndBroadcast call in this file.
 BOOL __fastcall MarkCompleteQuest(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_DenOfEvil, QUESTSTATE_Completed);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_DenOfEvil, QUESTSTATE_FinishedInPreviousGame) , bQuestState != 0)) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_DenOfEvil, QUESTSTATE_JustCompleted);
@@ -96,8 +96,8 @@ void __fastcall Q01_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 
 // A1Q1 (Den of Evil) -- per-player quest-step sync (Q01_SyncQuestStepToPlayer), an IteratePlayerOrMonsterUnits callback. For each player, mirrors the server-side quest progress flag (nStateFlag) into that player's QUEST_DenOfEvil record as the journal "step" sub-states, so every client's quest log shows the right progress text. Does nothing once the quest is Completed or RewardAwaits. Mapping: nStateFlag==2 -> Step0x02 ("talked to Akara, go to the Den"); nStateFlag==3 with nStateFlagPrev==1 -> Step0x03 ("entered the Den"); nStateFlag==3 otherwise -> Step0x04 ("den cleared, return to Akara").
 BOOL __fastcall Q01_SyncQuestStepToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_DenOfEvil, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -133,8 +133,8 @@ BOOL __fastcall Q01_SyncQuestStepToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUni
 
 // Sub-quest helper: grants the Den-of-Evil free-respec reward record (QUEST_Respec). Sets QUESTSTATE_JustCompleted and QUESTSTATE_RewardAwaits on the player's Respec quest record so Akara will offer the "reset stats/skills" dialog. The Respec quest is the nSubQuestId of Den of Evil (set in Q01_InitData) and rides along with quest completion.
 void __fastcall RESPEC_GrantRespecReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     /* SetQuestState Respec(0x29), JustCompleted(0xd) -- grant free-respec reward
                          record */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_Respec, QUESTSTATE_JustCompleted);
     /* SetQuestState Respec(0x29), RewardAwaits(0x1) -- Akara will offer the
@@ -144,8 +144,8 @@ void __fastcall RESPEC_GrantRespecReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit
 // Sub-quest helper: closes out the Den-of-Evil free-respec (QUEST_Respec) after Akara grants it. Sets QUESTSTATE_Completed and clears QUESTSTATE_RewardAwaits on the player's Respec record. If the respec was not already finished in a previous game, it also marks the in-memory Respec quest record inactive (bIsActive=false) so it stops being offered, and logs "deactivated respec quest".
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q1.cpp
 void __fastcall DeactivateRespecQuest(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_Respec, QUESTSTATE_Completed);
     D2Common::QuestRecord::UnsetQuestState(pBitBuffer, QUEST_Respec, QUESTSTATE_RewardAwaits);
     BOOL bFinishedInPrev = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_Respec, QUESTSTATE_FinishedInPreviousGame);
@@ -176,8 +176,8 @@ void __fastcall Q01_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     }
 
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if (nMessageIndex == 0x40) {
       pQuestDataA1Q1->bAcceptedQuest = true;
       QUEST_SetStateFlag(pQuestData, 2, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q1.cpp", 0xfd);
@@ -243,8 +243,8 @@ void __fastcall Q01_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t iTargetClassId;
     uint32_t nMessageIndex;
     ::SGAMEDATA* pGameData = pQuestData->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGameData->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGameData->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     BOOL bQuestJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_JustCompleted);
     if (!pQuestArgs->pTarget) {
@@ -287,8 +287,8 @@ void __fastcall Q01_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
 // A1Q1 (Den of Evil) -- per-player "you missed the completion" marker (Q01_SetCannotCompleteInGame), an IteratePlayerOrMonsterUnits callback run when the Den is cleared. For each player whose QUEST_DenOfEvil record is neither Completed nor RewardAwaits (i.e. they were not present/credited for the kill), it sets QUESTSTATE_CannotCompleteQuestInGame so this player can no longer get the reward in this game, then pushes the updated quest state/info to that client.
 BOOL __fastcall Q01_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_DenOfEvil, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -308,8 +308,8 @@ BOOL __fastcall Q01_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pU
 
 // A1Q1 (Den of Evil) -- completion-sound callback (Q01_PlayCompletionSound), an IteratePlayerOrMonsterUnits callback run when the Den is cleared. If this player's QUEST_DenOfEvil record has QUESTSTATE_JustCompleted, plays the quest-complete sound/event (event sound 0x23) on that player.
 BOOL __fastcall Q01_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_DenOfEvil, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_DenOfEvil, QUESTSTATE_JustCompleted);
     if (!bIsJustCompleted) {
       return 0;
     }
@@ -353,8 +353,8 @@ void __fastcall Q01_SetPartyMemberRewardStates(int32_t nParam, D2UnitStrc * pUni
 
 // A1Q1 (Den of Evil) -- reward propagation (Q01_PropagateRewardToParty), an IteratePlayerOrMonsterUnits callback run when the Den is cleared. For each player whose QUEST_DenOfEvil record has QUESTSTATE_JustCompleted, fans the reward out to that player's whole party via ExecuteFunctionForEveryPartyMember(Q01_SetPartyMemberRewardStates), so all party members in Act I get JustCompleted+RewardAwaits.
 BOOL __fastcall Q01_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_DenOfEvil, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_DenOfEvil, QUESTSTATE_JustCompleted);
     if (!bIsJustCompleted) {
       return 0;
     }
@@ -564,8 +564,8 @@ void __fastcall Q01_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // A1Q1 (Den of Evil) state-0x0d callback (Q01_Callback_13) -- reconstructs the server-side progress flags (nStateFlag / nStateFlagPrev) from a player's saved quest record on (re)load, so a returning player resumes at the right step. If the player's QUEST_DenOfEvil record is not Completed and not FinishedInPreviousGame, it reads the journal step sub-states: Step0x04 -> flag 3, prev 2 (den cleared, return to Akara); Step0x03 -> flag 3, prev 1 (entered the Den); Step0x02 -> flag 2, prev 1 (talked to Akara). The inverse of Q01_SyncQuestStepToPlayer.
 void __fastcall Q01_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestState) {
       return;
