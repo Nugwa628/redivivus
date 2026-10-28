@@ -3096,13 +3096,9 @@ BOOL __fastcall ITEMMODE_CheckEquipRestrictions(::SGAMEDATA * pGame, D2UnitStrc 
         pCurItem = D2Common::INVENTORY::Inventory::INVENTORY_GetNextItem(pCurItem);
       }
       nKeyQty = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pKey, UNITSTAT_quantity, 0);
-      if (nKeyQty != 1 && -1 < nKeyQty - 1) {
+      if (nKeyQty - 1 > 0) {
         D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pKey, UNITSTAT_quantity, -1, 0);
-        wStatLayer = 0;
-        bIsKey = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pKey, UNITSTAT_quantity, 0);
-        nErrorLine = 0x46;
-        bSendStatUpdate = '\x01';
-        GAME::SCmd::NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\ITEMS\\ItemMode.cpp", 0x1605), pKey, bSendStatUpdate, nErrorLine, bIsKey, wStatLayer);
+        GAME::SCmd::NET_D2GS_SERVER_Send_0x3E_UpdateItemStats(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\ITEMS\\ItemMode.cpp", 0x1605), pKey, 1, 0x46, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pKey, UNITSTAT_quantity, 0), 0);
         return 1;
       }
 
