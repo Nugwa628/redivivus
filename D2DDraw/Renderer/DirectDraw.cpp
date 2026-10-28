@@ -1051,7 +1051,9 @@ BOOL __stdcall InternalCutsceneWindow() {
     }
 
     nLine = pWindowHandleBuffer->lpVtbl->SetDisplayMode(pWindowHandleBuffer, 0x280, 0x1e0, nBitDepth);
-    if (!nLine) {
+    if (nLine) {
+      szErrorMsg = "SetDisplayMode failed!";
+    } else {
       ddSurfDesc.dwSize = 0x6c;
       memset(&ddSurfDesc.dwFlags, 0, 0x68);
       ddSurfDesc.dwFlags = 1;
@@ -1064,8 +1066,6 @@ BOOL __stdcall InternalCutsceneWindow() {
       }
 
       szErrorMsg = "Failed to create primary surface for cutscenes";
-    } else {
-      szErrorMsg = "SetDisplayMode failed!";
     }
 
     DirectDrawErrorHandler(szErrorMsg, nLine);
