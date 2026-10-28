@@ -180,7 +180,7 @@ BOOL __fastcall Q04_SyncQuestStepToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUni
 // NOTE: A1Q4Strc reused as A5Q3Strc by decompiler; sQuestGUID.aPlayerGUID[] indices
 // are sub-struct byte flags, not real GUIDs.
 void __fastcall Q04_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    short int nTargetClassId = !pQuestArgs->pTarget ? -1 : (short int)pQuestArgs->pTarget->nClassId;
+    int32_t nTargetClassId = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA1Q4Strc* pA5Q3Data = pQuestData->pQuestSpecificData.pA1Q4;
     if (nTargetClassId == 0x94) {
       if (pA5Q3Data->sSub.bNpcDialogState2 == 1) {

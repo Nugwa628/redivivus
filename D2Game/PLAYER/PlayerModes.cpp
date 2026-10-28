@@ -2012,7 +2012,7 @@ void __fastcall PLRMODES_ProcessPlayerMode(::SGAMEDATA * pGame, D2UnitStrc * pUn
 }
 
 void __fastcall PLAYEREVENT_DefaultCallback(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2TimerTypeDWORD eTimerType, int32_t nArg1, int32_t nArg2) {
-    if (!(eTimerType < UNITEVENTCALLBACK_COUNT && GAME::Event::Dispatch::Player::pTimerMethods.fpFunctionExByType[eTimerType])) {
+    if ((uint32_t)UNITEVENTCALLBACK_REMOVESKILLCOOLDOWN < (uint32_t)eTimerType || !GAME::Event::Dispatch::Player::pTimerMethods.fpFunctionExByType[eTimerType]) {
       return;
     }
 

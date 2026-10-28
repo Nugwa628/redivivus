@@ -114,8 +114,7 @@ void __fastcall AllocPartyControl(::SGAMEDATA * pGame) {
         exit(-1);
       }
 
-      *(uint32_t*)pPartyControl = 0;
-      pPartyControl->pSub = 0;
+      memset(pPartyControl, 0, 8);
       pPartyControl->nPartyId = 3;
       pGame->pPartyControl = pPartyControl;
       return;

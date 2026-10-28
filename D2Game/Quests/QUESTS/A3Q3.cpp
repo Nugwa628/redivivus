@@ -152,7 +152,7 @@ BOOL __fastcall Q20_PlayerNotifyCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUni
 // (Q20_PlayerUpdateBladeState).
 // target 0xff (Khalim/orb NPC path): consumes the field_0x07 trigger, sets field_0x06 (orb ready).
 void __fastcall Q20_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    short int nTargetClassId = !pQuestArgs->pTarget ? -1 : (short int)pQuestArgs->pTarget->nClassId;
+    int32_t nTargetClassId = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA2Q3Strc* pA3Q3Data = pQuestData->pQuestSpecificData.pA2Q3;
     if (nTargetClassId == 0xfd) {
       if (pA3Q3Data->field_0x01 == 1) {

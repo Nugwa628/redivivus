@@ -835,6 +835,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xA3_PROGRESSIVE_SKILL(D2ClientStrc * pClie
 // Server-to-client NPC heal message. Opcode 0xAB.
 void __fastcall NET_D2GS_SERVER_Send_0xAB_HEALTH_UPDATE(D2ClientStrc * pClient, uint8_t bParam, uint32_t nHeal, uint8_t nType) {
     struct { uint8_t e0, e1, e2, e3, e4, e5, e6; } aPacket;
+    memset(&aPacket, 0, sizeof(aPacket));
     ((uint8_t*)&aPacket)[0] = 0xab;
     ((uint8_t*)&aPacket)[1] = bParam;
     *(uint32_t*)((char*)&aPacket + 2) = nHeal;
@@ -845,6 +846,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xAB_HEALTH_UPDATE(D2ClientStrc * pClient, 
 // Server-to-client state skill move. Opcode 0xA5.
 void __fastcall NET_D2GS_SERVER_Send_0xA5_FORCESTOPSKILL(D2ClientStrc * pClient, uint8_t bParam, uint32_t dwSkill, uint16_t nX) {
     struct { uint8_t e0, e1, e2, e3, e4, e5, e6, e7; } aPacket;
+    memset(&aPacket, 0, sizeof(aPacket));
     ((uint8_t*)&aPacket)[0] = 0xa5;
     ((uint8_t*)&aPacket)[1] = bParam;
     *(uint32_t*)((char*)&aPacket + 2) = dwSkill;
