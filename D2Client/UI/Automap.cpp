@@ -2396,7 +2396,6 @@ void __stdcall AUTOMAP_Init() {
 }; D2_STATIC_GUARD(gnAutoMapInitialZoomLevel, "D2Client::UI::Automap::AUTOMAP_Init::gnAutoMapInitialZoomLevel");
 
     int nCellId;
-    uint32_t* pPriorityValue;
     int32_t nRegValue = 0;
     AUTOMAP_LoadDC6Sprites();
     uint32_t* pPriorityTable = gnAutoMapCellPriority;
@@ -2409,9 +2408,8 @@ void __stdcall AUTOMAP_Init() {
     do {
       uint32_t nCellIndex;
       nCellIndex = *pCellEntry;
-      pPriorityValue = pCellEntry + 1;
+      gnAutoMapCellPriority[nCellIndex] = pCellEntry[1];
       pCellEntry += 2;
-      gnAutoMapCellPriority[nCellIndex] = *pPriorityValue;
     } while ((int)pCellEntry < (int)(gnAutoMapInitialZoomLevel + 98));
     // The original's bound is `pCellEntry < 0x7113e0`, and 0x7113e0 is where nAutoMapCenters
     // happens to sit immediately after this 49-pair table - so the compiler spelled "the end of
