@@ -423,7 +423,7 @@ static D2UnitStrc * __stdcall SKILL_FindTargetInRange(D2SkillStrc * pSkill, D2Un
     int32_t nRadius;
     D2UnitStrc* pFoundUnit;
     if (pUnit) {
-      if (pSkillsTxt->TargetCorpse) {
+      if ((*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[0])) {
         nFindFlags = UNIT::CUnit::IsActive(pUnit);
         if (nFindFlags) {
           return pUnit;
