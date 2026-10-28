@@ -166,7 +166,7 @@ D2SoundEnvironTxt * __fastcall GetSoundEnvironLine(int32_t nSoundEnviron) {
 }
 
 // @sourcefile .\Sound\SoundHdr.cpp
-void __stdcall TXT_AllocTxt_sounds_soundenviron() {
+static void __stdcall TXT_AllocTxt_sounds_soundenviron() {
     D2PoolManagerStrc* pMpq;
     D2ArchiveStrc* pD2File;
     D2BinFieldExcelStrc* pBinExcel;

@@ -50,7 +50,7 @@ int __stdcall CreateThreadClientSocketOrSingleplayer() {
     return 2;
 }
 
-int32_t __fastcall HandleIncomingPacketBuffer(D2QServerStrc * pQServer, char * pBytes, size_t nSize) {
+static int32_t __fastcall HandleIncomingPacketBuffer(D2QServerStrc * pQServer, char * pBytes, size_t nSize) {
     SRC::Client::NET_D2GS_CLIENT_HandleIncomingBufferAndCreatePacket(pBytes, nSize);
     return 1;
 }
@@ -286,7 +286,7 @@ void __stdcall _NullSubRet8(uint32_t dwParam) {
     Fog::Src::_NullSubRet8(pQServer, dwParam);
 }
 
-int32_t __fastcall NET_D2GS_SERVER_Send_0xAF01(D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine) {
+static int32_t __fastcall NET_D2GS_SERVER_Send_0xAF01(D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine) {
     uint8_t aPacketFrame[4];
     *(uint16_t*)((char*)&aPacketFrame + 2) = (uint16_t)((uint32_t)pQServer >> 0x10);
     aPacketFrame[0] = 0xaf;
@@ -295,7 +295,7 @@ int32_t __fastcall NET_D2GS_SERVER_Send_0xAF01(D2QServerStrc * pQServer, uint32_
     return 1;
 }
 
-int32_t __fastcall NET_D2GS_CLIENT_Send_0x70(D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine) {
+static int32_t __fastcall NET_D2GS_CLIENT_Send_0x70(D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine) {
     uint8_t aPacketFrame[4];
     d2_store24((char*)&aPacketFrame, (uint32_t)((uint32_t)(uintptr_t)pQServer & 0xffffffu));
     aPacketFrame[3] = 0x70;

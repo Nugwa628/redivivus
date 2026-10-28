@@ -4201,7 +4201,7 @@ BOOL __stdcall IsItemSocketable(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
 }
 
 // Item-load helper called by ITEM_DeserializeFromBitBuffer: given an eD2UnitStat percent-stat selector (item_armor_percent 0x10/0x1f, item_maxdamage_percent 0x11/0x16, item_mindamage_percent 0x12/0x15), resolves the corresponding absolute base value from the item's D2ItemsTxt caps (dwMaxAc, nMaxDam/n2HandMaxDam/nMaxMisDam, nMinDam/n2HandMinDam/nMinMisDam) and writes it onto pUnit via STATLIST_SetUnitStat (UNITSTAT_armorclass / max/mindamage, secondary, and throw variants). Not a cube recipe transform.
-void __stdcall ITEM_ResolvePercentStatToBaseValue(eD2UnitStat nRecipeType, D2UnitStrc * pUnit) {
+static void __stdcall ITEM_ResolvePercentStatToBaseValue(eD2UnitStat nRecipeType, D2UnitStrc * pUnit) {
     int32_t nCurStat;
     int nValue;
     int32_t iVar1;

@@ -70,7 +70,6 @@ void __fastcall ITEMS_RecalcAndRefreshInventory(::SGAMEDATA * pGame, struct D2Un
 // Removes an item from a player's inventory and destroys it. Clears UNITFLAG_TARGETABLE, verifies the item belongs to the unit's inventory, clears its inventory page, optionally sends a RemoveObject packet to the client (bSendRemovePacket), then calls ITEM_DeleteItemAndFreeUnit. Halts on null game/unit or if item is not found in inventory.
 // @sourcefile .\ITEMS\ItemMode.cpp
 void __fastcall ITEMMODE_DeleteItemFromInventory(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, int32_t bSendRemovePacket);
-eD2Skills ITEMMODE_GetItemCastSkill(struct D2UnitStrc * pUnit);
 // Server-side handler for using a special/quest consumable item (right-click use). Resolves the item by GUID, requires no cursor item and the item be useable; for books validates quantity>0 and that the player isn't trading. Calls SKILLITEM_DispatchItemSpell; if that returns 0 (no skill), branches on the item's 4-char code to apply quest rewards: 'ass ' (Radament -> +1 skill point), 'xyz ' (Golden Bird -> +20 max HP), 'tr2 ' (Prison of Ice -> Anya resist bonus), 'toa ' (Token of Absolution -> reset skills/stats), each consuming the item and sending quest state. Otherwise (charges/tomes) decrements quantity or skill charges, sends 0x3E/0x22/0x7C update packets, casts the item skill and consumes. Writes BOOL *bResult; returns 1 on a handled use, 0 otherwise.
 // @sourcefile .\ITEMS\ItemMode.cpp
 BOOL __fastcall SpecialItemsBonuses(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nUnitGUID, int32_t nX, int32_t nY, BOOL * bResult);
@@ -104,7 +103,6 @@ uint32_t __fastcall ITEMMODE_ResolveEquipConflict(struct D2UnitStrc * pUnit, str
 void __stdcall ITEMMODE_ReturnZero3(uint32_t dwParam);
 void __fastcall ITEMMODE_RecalcAllEquippedStats(::SGAMEDATA * pGameStrc, struct D2UnitStrc * pUnit);
 BOOL __fastcall ITEMMODE_HasSocketedItems(struct D2UnitStrc * pUnit, char * szFile, int32_t nLine);
-uint32_t __stdcall ITEMMODE_GetSocketCount(struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2);
 // For a scroll unit, searches the owner unit's inventory for a matching book. The second parameter is the OWNER UNIT, a whole pointer in EDX - typed from DL alone it was a truncated byte the body then used as an address, reaching for the inventory at +0x60 of a one-byte value.
 struct D2UnitStrc * __fastcall ITEMMODE_ValidateSocketedItems(::SGAMEDATA * pGameStrc, struct D2UnitStrc * pOwnerUnit, struct D2UnitStrc * pUnit, int * pnBrokenCount);
 // NOTE: Register param types inferred (medium confidence): pGameStrc (ECX): SGAMEDATA *, pUnit (EDX): D2UnitStrc *

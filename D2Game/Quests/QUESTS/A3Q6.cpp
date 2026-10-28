@@ -521,7 +521,7 @@ void __fastcall Q23_Callback10_PlayerLeavesGame(D2QuestDataStrc * pQuestData, D2
 // [The Guardian (Q23)] Quest timer callback (armed by Callback_08 after Mephisto dies). Broadcasts
 // quest state 4 if not already at stateFlagPrev 4, and clears the bBloodRavenKilled/scratch flag in the
 // A3Q6 quest-specific struct. Used to drive the post-kill cinematic/state settle.
-uint8_t __fastcall Q23_QuestUpdate(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q23_QuestUpdate(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     D2QuestDataA3Q6Strc* pQuestSpecificData = pQuestData->pQuestSpecificData.pA3Q6;
     if (pQuestData->nStateFlagPrev != 4) {
       pQuestData->nQuestPacketFlags = '\0';

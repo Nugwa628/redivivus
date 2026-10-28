@@ -2171,7 +2171,7 @@ int __fastcall BNNEWS_GetNewsEntryByIndex(int * pNewsTable, int nIndex) {
     return nIndex * 0x408 + pNewsTable[2];
 }
 
-uint32_t __fastcall BNNEWS_RoundToPowerOfTwo(D2BnNewsTableStrc * pNewsTable, uint32_t dwSize) {
+static uint32_t __fastcall BNNEWS_RoundToPowerOfTwo(D2BnNewsTableStrc * pNewsTable, uint32_t dwSize) {
     uint32_t uStripped;
     if (dwSize < 8) {
       uint32_t uHighBit;
@@ -2319,7 +2319,7 @@ void * __fastcall BNNEWS_DestroyNewsTable(void * pNewsTable, uint8_t bFreeMemory
     return pNewsTable;
 }
 
-void __fastcall BNNEWS_ReallocateNewsTable(D2BnNewsTableStrc * pNewsTable, uint32_t dwNewCapacity) {
+static void __fastcall BNNEWS_ReallocateNewsTable(D2BnNewsTableStrc * pNewsTable, uint32_t dwNewCapacity) {
     int nByteOffset;
     int* pSrc;
     int* pDst;

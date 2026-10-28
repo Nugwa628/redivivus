@@ -22,8 +22,6 @@ namespace D2Game::Quests::QUESTS::A5Q1 {
 // Function declarations
 // A5Q1 (Siege on Harrogath) NPC-gossip refresh hook. Iterated per player after a state change; if the quest is Completed/FinishedInPreviousGame but NOT JustCompleted and NOT CannotComplete, pushes a fresh quest log update (id 0x1f=31) to that player so the journal/Larzuk dialog state stays in sync. Returns 0 to continue iteration.
 BOOL __fastcall Q31_NpcGossipHandler(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// A5Q1 status-icon filter: decides the quest-log icon/flag (*nUnknown) for Siege on Harrogath. If RewardAwaits(1) or JustCompleted(0xd): icon 3 (reward pending) unless Step0x05(5) reward-given -> icon 4. Else if intro shown and not Completed(0): CannotComplete(0xe) -> icon 0xc; otherwise default to nStateFlagPrev icon.
-bool __fastcall Q31_StatusFilter(struct D2QuestDataStrc * pQuestData, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2BitBufferStrc * pBitBufferEx, BYTE * pbyIconFlag);
 // A5Q1 state-2 handler variant: when talking to Larzuk (class 0x1ff), flush deferred flags - if bLarzukTalked broadcast state 1 (intro/quest-given), if bRewardAccepted broadcast state 4 (reward-claimed). Clears each flag after.
 void __fastcall Q31_Callback02_NpcDeactivate(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // A5Q1: overlapping/mid-instruction entry of the state handler at 0x586d80 (Larzuk class 0x1ff): broadcasts state 1 if bLarzukTalked, state 4 if bRewardAccepted, then clears the flags. Same logic as Q31_Callback_02.

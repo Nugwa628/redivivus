@@ -74,7 +74,6 @@ void __stdcall PANEL_DrawLife();
 void __stdcall DRAW_UI_BorderLeft();
 void __stdcall DRAW_UI_BorderRight();
 void __stdcall ClickBelt(struct D2InventoryStrc * pInventory, int32_t nMouseY, int32_t nMouseX);
-BOOL __fastcall PANEL_CheckEquipmentClickable(struct D2ItemsTxt * pItemTxt, struct D2UnitStrc * pUnit, int32_t nItemSlot);
 void __stdcall ClickBeltRight(uint32_t nBeltSlot, struct D2UnitStrc * pUnit, struct D2InventoryStrc * pInventory, int32_t bToMercenary);
 // Key-command handler for belt slot 1. If not exiting and the player is alive and
 // gbPanelStatStrengthColor is set, calls ClickBeltRight(0, pUnit, pUnit->pInventory, SHIFT-held).

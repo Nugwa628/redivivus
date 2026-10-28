@@ -71,13 +71,8 @@ int32_t __fastcall CountActiveUMods(uint8_t * pUModList);
 // 2022.01.09 - dzik
 uint32_t __fastcall CheckMonUModList(struct D2UnitStrc * pUnit);
 int32_t __fastcall MONSTER_GetBossNo(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-// Checks whether a MonUMod.txt unique modifier entry is eligible to be applied to pUnit. Rejects if disabled or version &gt; 99 in non-expansion mode. Rejects if the monster has any excluded monster type (exclude1/exclude2). Respects the fpick field: 1=boss-only, 2=excludes melee/no-multishot monsters, 3=requires a different boss flag. Returns 1 if eligible, 0 otherwise.
-BOOL __stdcall MONSTER_CanApplyUniqueModifier(struct D2MonUModTxt * pD2MonUModTxt, int32_t nParam, struct D2UnitStrc * pUnit);
 // Randomly selects one unique/champion modifier index from pTxtMonUmod for pUnit. Filters candidates by difficulty-tier cpick weight, champion flag, MONSTER_CanApplyUniqueModifier eligibility, and whether the slot in pD2MonUModTxt is already occupied. Performs a weighted random draw using the unit's seed; returns the selected modifier index (0-based) or 0 on failure.
 int32_t __stdcall MONUMOD_RollRandomModifier(struct D2UnitStrc * pUnit, uint8_t * pUsedUModFlags, ::SGAMEDATA * pGame);
-void __fastcall UMOD_DispatchInitFunction(struct D2UnitStrc * pUnit, int32_t nParam, BOOL bApply);
-// Applies the Amplify Damage curse (skill 0x42) from pUnit onto pAttacker. Validates attack eligibility and skill table bounds, then builds a D2StateExArgStrc with duration and stat values derived from skills.txt aura columns, calls SetStateWithExpiryTime to attach the state, and iterates remaining aura stats to add them to the resulting stat list.
-void __fastcall MONSTER_ApplyAmplifyDamageCurse(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pAttacker, int32_t nDuration);
 void __fastcall MONSTER_OnDeathAmplifyDamageAura(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint32_t dwUnused1, int32_t bShouldTrigger);
 void __fastcall MONSTER_OnDeathScheduleDelayed(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint32_t dwUnused1, int32_t bShouldTrigger);
 // Server-side handler for a monster corpse explosion (Necromancer Corpse Explosion skill or similar). Spawns a MISSILE_Monstercorpseexplode at the corpse's position, scales damage from MonStats using difficulty-dependent CEDamagePercent (Normal -25%, Nightmare -33%, Hell -87.5% reduction), then applies AoE physical damage around the origin via DAMAGE_ApplyAreaOfEffectDamage.

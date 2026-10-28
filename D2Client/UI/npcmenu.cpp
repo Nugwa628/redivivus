@@ -272,7 +272,7 @@ uint32_t __fastcall NPCMENU_FindNextUnhandledMessage(int16_t nMsgTypeToFind) {
     } while (true);
 }
 
-int __fastcall NPCMENU_ScrollCompleteShowNextMessage(void * pUserParam, uint32_t nReason, void * pDismissCallback) {
+static int __fastcall NPCMENU_ScrollCompleteShowNextMessage(void * pUserParam, uint32_t nReason, void * pDismissCallback) {
     D2UnitStrc* pDVar2;
     uint16_t nParam;
     if (gnNpcMenuActiveMode == '\x01') {

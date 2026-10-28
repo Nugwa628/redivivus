@@ -169,7 +169,7 @@ int __fastcall SRP_ClientComputeSharedSecret(int32_t pSrp, BigData * * pPrivateK
     return 1;
 }
 
-int __fastcall SRP_ServerComputeSharedSecret(D2Srp * pThis, BigData * * ppClientPublic, int * pnParam, BigData * * pnParam1, BigData * * pnParam2, BigData * * pnParam3) {
+static int __fastcall SRP_ServerComputeSharedSecret(D2Srp * pThis, BigData * * ppClientPublic, int * pnParam, BigData * * pnParam1, BigData * * pnParam2, BigData * * pnParam3) {
     SRP_HashBigNumToU32((BigData**)pnParam, (uint32_t*)&pnParam);
     int* pScramblingHash = pnParam;
     if (!pnParam) {

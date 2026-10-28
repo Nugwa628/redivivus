@@ -1895,7 +1895,7 @@ void __fastcall NET_SID_CLIENT_ExpandCdKeyToBase5(int32_t pCdKeyString, int32_t 
     } while (nextInIdx < 0x1a);
 }
 
-void __fastcall NET_SID_CLIENT_PermuteBitsLFSR(uint32_t nBitCount, int32_t pToken) {
+static void __fastcall NET_SID_CLIENT_PermuteBitsLFSR(uint32_t nBitCount, int32_t pToken) {
     uint32_t nextSrcBitIdx;
     uint8_t srcBitShift;
     int dstWordIdx;
@@ -2085,7 +2085,7 @@ void __fastcall NET_SID_CLIENT_GenerateRandomString(int32_t szOutBuf, int32_t nL
     *(uint8_t*)(szOutBuf - 1 + nLength) = 0;
 }
 
-void __fastcall NET_SID_CLIENT_EncodeCDKeyHash(int32_t pThis, int32_t nSeed) {
+static void __fastcall NET_SID_CLIENT_EncodeCDKeyHash(int32_t pThis, int32_t nSeed) {
     int nRandByte;
     int nKeyCharIdx;
     int nKeyCharIdx2;

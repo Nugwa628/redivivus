@@ -39,8 +39,6 @@ void __fastcall Q06_Callback00_NpcActivate(struct D2QuestDataStrc * pQuestData, 
 void __fastcall Q06_Callback03_ChangedLevel(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // A1Q6 completion-sound callback (IteratePlayerOrMonsterUnits). If player record has both RewardAwaits and JustCompleted set, plays the quest-complete sound/event (event sound 0x21) on that player. Read-only on quest state.
 BOOL __fastcall Q06_PlayCompletionSound(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// A1Q6 helper: mark Sisters-to-the-Slaughter complete + grant reward for one player. Sets JustCompleted and RewardAwaits in the player's quest record, then SetClientStatus(1, difficulty) to flag the act-progress/Act2-unlock client state. Called from Andariel-death and L4-entry paths.
-// @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
 // A1Q6 per-player callback: if player record not Completed/FinishedInPreviousGame and player is in Catacombs Level 4, register them on all three NPC GUID lists (Cain/Akara/Kashya) and call Q06_SetQuestCompletedAndReward. Credits players present in the boss room when Andariel dies.
 BOOL __fastcall Q06_OnPlayerEnterCatacombsL4(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A1Q6 per-party-member callback: if record not Completed/RewardAwaits and member is anywhere in Act I, register them on all three NPC GUID lists and Q06_SetQuestCompletedAndReward. Spreads quest credit/reward to party members in Act I (invoked via Q06_PropagateRewardToParty).
@@ -53,9 +51,6 @@ BOOL __fastcall Q06_PropagateRewardToParty(::SGAMEDATA * pGame, struct D2UnitStr
 BOOL __fastcall Q06_SpawnReturnPortal(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A1Q6 post-Andariel-death quest timer. Increments nDeathEventCounter each tick: at 10, spawns return portals for all players in L4 (Q06_SpawnReturnPortal); at 12, if stateFlag not already 3/0xd, broadcasts state 3 (final) via QUEST_SetStateAndBroadcast(Q06_NotifyQuestStateToPlayer) and ends the timer. Drives the celebratory portal + completion broadcast.
 uint8_t __fastcall Q06_TimerSpawnPortalAndNotify(::SGAMEDATA * pGame, struct D2QuestDataStrc * pQuestData);
-// A1Q6 deferred quest-update (scheduled by Q06_SequenceFilter timer): if stateFlag is still 0, bump to 1 (quest now introduced/visible in log). One-shot init nudge.
-// @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
-uint8_t __fastcall Q06_QuestUpdate(::SGAMEDATA * pGame, struct D2QuestDataStrc * pQuestData);
 // Already documented.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
 void __fastcall Q06_Callback08_MonsterKilled(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);

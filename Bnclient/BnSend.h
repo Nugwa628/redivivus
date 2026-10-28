@@ -231,13 +231,11 @@ int __stdcall BattleConnectFastest();
 HANDLE ConnectingToBattleNet();
 void __fastcall BNNEWS_SetNewsChannel(int bIsClassic);
 int __fastcall BNNEWS_GetNewsEntryByIndex(int * pNewsTable, int nIndex);
-uint32_t __fastcall BNNEWS_RoundToPowerOfTwo(struct D2BnNewsTableStrc * pNewsTable, uint32_t dwSize);
 DWORD __stdcall BNNEWS_RoundUpToMultiple(DWORD dwValue, DWORD dwMultiple);
 // @sourcefile .\BNNews.cpp
 void __stdcall BNNEWS_SaveToCache();
 void __stdcall BNNEWS_InvokeCallbacks();
 void * __fastcall BNNEWS_DestroyNewsTable(void * pNewsTable, uint8_t bFreeMemory);
-void __fastcall BNNEWS_ReallocateNewsTable(struct D2BnNewsTableStrc * pNewsTable, uint32_t dwNewCapacity);
 void __fastcall BNNEWS_ClearNewsTable(uint32_t * pNewsTable);
 void __fastcall BNNEWS_EnsureCapacityWithGrowth(uint32_t * pNewsTable, int dwAdditionalCount, int bGrow);
 BOOL __stdcall BNNEWS_Shutdown();

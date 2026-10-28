@@ -141,7 +141,6 @@ namespace D2Game::UNIT::SUnitMsg {
 void __stdcall PLAYER_SetStartingLevelForAct(uint8_t nAct, ::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 // Sets all base stats for a newly created player unit from CharStats.txt (str, dex, vit, energy, HP, mana, stamina at fixed-point *256, level=1, nextexp for level 1, attack/velocity/animrate=100). If nAct != 0, also raises the unit to gaStartingLevelByAct[nAct] via DAMAGE_SetUnitToLevel. The third argument is the act (both call sites pass D2Game::Game::Clients::GetAct(pClient)), not a character class.
 void __fastcall PLAYER_InitBaseStats(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint8_t nAct);
-void __fastcall thunk_NET_D2GS_SERVER_Send_0x75_PlayerPartyInfo(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pOtherUnit);
 // Server-side level-up handler: recomputes pUnit's level from accumulated experience, updates UNITSTAT_level and UNITSTAT_nextexp, then — if the unit gained one or more levels — scales up max HP/mana/stamina (and restores them to max), awards stat points and skill points, refreshes NPC gamble inventories, broadcasts party info (0x75) to all players, recalculates equipped item stats, and calls the BattleNet UpdateGameInformation callback. Called from the SUnitMsg message-processing layer.
 void __fastcall UpdateGameInfo(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 void __fastcall ClearStats(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);

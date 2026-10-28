@@ -3505,7 +3505,7 @@ D2MPQFileStrc * * __fastcall SFILE_AllocFileRecord3(int * * ppArchive, int32_t n
     return pFileRecord;
 }
 
-uint32_t __fastcall SFILE_RemoveAsyncRequestFromQueue(void * pListContext, int * pNode) {
+static uint32_t __fastcall SFILE_RemoveAsyncRequestFromQueue(void * pListContext, int * pNode) {
     int* pPrevSlot = pNode;
     if (!pNode) {
       pPrevSlot = (int*)((int)pListContext + 4);

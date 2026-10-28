@@ -811,7 +811,7 @@ void __fastcall SUNITPROXY_QueueTradeAction(D2UnitStrc * pNpcUnit, ::SGAMEDATA *
 // (DRLGROOM_GetLevelIdFromRoom) equals pArgs->eLevelId (+0), increments pArgs->nCount (+4).
 // IterateAllUnits only walks pGame->pUnitList[0] (players, skipping state 7), so in practice it counts players.
 // Callers IterateNpcIntroUnits and SERVER_InitClassicTowns pass an {eLevelId, nCount} pair from their stack.
-void __fastcall SUNITPROXY_CountPlayerInLevel(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2LevelPlayerCountArgStrc * pArgs) {
+static void __fastcall SUNITPROXY_CountPlayerInLevel(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2LevelPlayerCountArgStrc * pArgs) {
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (!pRoom) {
       return;

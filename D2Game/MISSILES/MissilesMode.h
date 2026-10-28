@@ -170,8 +170,6 @@ void __fastcall Missiles_SrvDmgFunc_ScaleByDamagePctThenElemBonus(::SGAMEDATA * 
 void __fastcall Missiles_SrvDmgFunc_RollMonsterSizeKnockbackChance(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget, struct D2DamageStrc * pDamage);
 // Applies missile hit result flags and damage to the target. Sets wResultFlags bit 0 (hit occurred). If target is not in STATE_uninterruptable, applies stun (flag 0x40->bit2) or knock-back (flag 0x80->bit14) from MissilesTxt flags, and rolls KnockBack chance. Calls DAMAGE_CheckBlockAndEvasion to determine block/evade/deflect and folds those into wResultFlags. Copies the missile's hit-class into pEvent->dwHitClass. Applies critical damage, pierce percent (from UNITSTAT_damage_framerate), and finally calls DAMAGE_ApplyDamageToUnit and SERVER_GetHitCalculation.
 void __fastcall MISSMODE_ApplyMissileHitDamage(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget, struct D2DamageStrc * pEvent);
-BOOL __fastcall MISSMODE_RedemptionHitNoMana(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget, int nEvent, uint32_t dwReserved);
-BOOL __fastcall MISSMODE_RedemptionHitWithMana(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget, int nEvent, uint32_t dwReserved);
 void __fastcall MISSMODE_PortalArrival(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 BOOL __fastcall Missiles_SrvHitFunc_SpawnTyraelAndOpenPortal(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
 void __fastcall MISSMODE_ExpireAndFree(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t bOnExpire);

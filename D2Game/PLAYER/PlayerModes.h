@@ -28,8 +28,6 @@ BOOL PLRMODES_CanInterruptCurrentMode(struct D2UnitStrc * pUnit, ::SGAMEDATA * p
 // @sourcefile .\PLAYER\PlrModes.cpp
 int __fastcall PLRMODES_TryCancelModeAndMoveToLocation(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int nX, int nY, struct D2SkillStrc * pSkill);
 void __fastcall PLRMODES_SetIdleMode(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nMode, int32_t nX, int32_t nY);
-int32_t __fastcall PLRMODES_ModeCallback_DeathDead(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2);
-int32_t __fastcall PLRMODES_ModeCallback_Neutral(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2);
 void __fastcall PLRMODES_SetTargetAndStartPath(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nModeIndex, struct D2UnitStrc * pTargetUnit);
 void __fastcall PLRMODES_SetMoveTargetPosition(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nLevel, int32_t nPosX, int32_t nPosY);
 void __fastcall SERVERUNIT_GoldAmmountForDeadBody(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pDeadBody, uint32_t nGoldAmmount, uint32_t nGoldPileCount);
@@ -39,7 +37,6 @@ void __fastcall PLRMODES_PickupCorpse(::SGAMEDATA * pGame, struct D2UnitStrc * p
 // @sourcefile .\PLAYER\PlrModes.cpp
 void __fastcall PLRMODES_HandlePlayerDeath(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nModeIndex, int32_t dwParam2, int32_t dwParam3);
 void __fastcall PLRMODES_StartModeWithTarget(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nAnimMode, int32_t dwParam1, int32_t dwParam2);
-int32_t __fastcall PLRMODES_ModeCallback_GetHitCast(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2);
 void __fastcall PLRMODES_ChangeAnimModeAndResetSkill(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nAnimMode, int32_t dwParam1, int32_t dwParam2);
 void __fastcall PLRMODES_StartCastAtPosition(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nAnimMode, int32_t nPosX, int32_t nPosY);
 void __fastcall PLRMODES_StartCastAtEntity(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nAnimMode, struct D2UnitStrc * pTargetUnit);

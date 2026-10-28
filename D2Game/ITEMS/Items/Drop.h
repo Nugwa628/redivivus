@@ -123,10 +123,6 @@ void ITEM_RollVariantGraphic(struct D2UnitStrc * pUnit);
 // Returns a BOOL: the epilogue loads EAX explicitly and two of the three callers branch on it, so every server-side item creation decided whether to keep or immediately free the item from whatever was in EAX. Parameter 2 is a D2UnitStrc** - the body dereferences it immediately and every call site passes the address of a local unit pointer; typed one level short it only worked because eUnitType sits at offset 0 and is 4 bytes wide.
 int __fastcall ITEM_InitItemBaseStats(::SGAMEDATA * pGame, struct D2UnitStrc * * ppItem, struct D2ItemGenContextStrc * pItemGenCtx, int32_t bApplyQuality);
 void __fastcall ITEM_FreeItemInventoryAndTimers(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-// IterateAllUnits per-unit callback: removes pItem from this unit's inventory.
-// Matches fpSUnitIterateCallback (ECX=pGame, EDX=pUnit, Stack[0x4]=pArgs); pGame is unused by the
-// body, which is why the register is never read. Confirmed by RET 0x4 and the CALL EBX at 00553914.
-void __fastcall ITEM_RemoveFromOwnerInventory(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem);
 void thunk_IterateAllUnits(::SGAMEDATA * pGame, uint32_t * dwParam);
 void __fastcall ITEM_DeleteItemAndFreeUnit(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 BOOL __fastcall AlreadyHoldingItem(struct D2UnitStrc * punit, struct D2UnitStrc * pItem, struct D2InventoryStrc * pInventory);

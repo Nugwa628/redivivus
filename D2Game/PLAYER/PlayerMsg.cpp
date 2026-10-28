@@ -4199,7 +4199,7 @@ static eD2ServerIncomingStatus __stdcall EquipOrUnequipMercItem(D2UnitStrc * pUn
 
 // Server check (PlrMsg) for whether a mercenary can take/use the item the player is offering, and performs the resulting action. Expansion-only (returns 3 in classic). Rejects unidentified or broken items. Potions (healing/thawing/antidote) are cast on the merc via SKILLITEM_DispatchItemSpell then moved to cursor (return 1). Otherwise checks the item type against the merc's class id: armor/helm allowed for all; Rogue(0x167) sword(1H)/shield; Desert(0x152) spear/polearm; Iron Wolf(0x10f) bow; Barbarian(0x230) 1H axe/helm; (0x231) 1H sword. If type allowed and ITEM_CheckEquipRequirements passes, swaps it onto the merc (MERC_SwapEquippedItem) firing sound event 0x57 (return 1) or 0x56 on swap failure (return 0); disallowed type fires sound 0x55 (return 0).
 // @sourcefile .\PLAYER\PlrMsg.cpp
-void __stdcall MERC_CanEquipItem(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit1, D2UnitStrc * pUnit2) {
+static void __stdcall MERC_CanEquipItem(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit1, D2UnitStrc * pUnit2) {
     bool bTwoHandedAllowed;
     uint32_t nMercClassId;
     eD2ItemTypes eItemType;

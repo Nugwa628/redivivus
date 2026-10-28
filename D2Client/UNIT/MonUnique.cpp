@@ -338,7 +338,7 @@ void __fastcall DefineSuperMonster(D2UnitStrc * pUnit, int32_t eModifier, int32_
 }
 
 // Applies the Bish/Bosh unique-monster modifier: frees any existing light map on pUnit, then allocates a new colored light (radius 7, alpha 0xFF). If the monster has the spectral-hit quest flag set (byte6 bit 2 of quest record), derives RGB from the unit seed; otherwise reads RGB from MonStats2 txt. Stores the new light map and updates the unit's light radius. No-op if bApply == 0.
-void __fastcall MONUNIQUE_ApplyModifierBishbosh(D2UnitStrc * pUnit, int32_t eModifier, int32_t bApply) {
+static void __fastcall MONUNIQUE_ApplyModifierBishbosh(D2UnitStrc * pUnit, int32_t eModifier, int32_t bApply) {
     D2LightMapStrc* pLightMap;
     int nClassId;
     uint64_t uSeedStep1;
@@ -377,7 +377,7 @@ void __fastcall MONUNIQUE_ApplyModifierBishbosh(D2UnitStrc * pUnit, int32_t eMod
     CUnit::SetLightRadius(pUnit, nLightRadiusX);
 }
 
-void __fastcall MONUNIQUE_ApplyModifierBloodRaven(D2UnitStrc * pUnit, int32_t eModifier, int32_t bApply) {
+static void __fastcall MONUNIQUE_ApplyModifierBloodRaven(D2UnitStrc * pUnit, int32_t eModifier, int32_t bApply) {
     if (!bApply) {
       return;
     }

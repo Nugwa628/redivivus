@@ -1317,7 +1317,7 @@ int32_t __stdcall STATLIST_GetItemStatBonusValues(D2UnitStrc * pItem, uint32_t n
 }
 
 // Calculates the combined value of a stat for a D2StatListExStrc, including all ItemStatCost formula operations (op types 1-13). Reads base value from CalcFullStatFromChildren, then applies complex stat formulas involving other stats, character class bonuses, and time-of-day modifiers.
-int32_t __fastcall STATLIST_CalcCombinedStatValue(D2StatListExStrc * pStatList, int32_t nStatShifted) {
+static int32_t __fastcall STATLIST_CalcCombinedStatValue(D2StatListExStrc * pStatList, int32_t nStatShifted) {
     D2StatInfoStrc* pnParam;
     D2StatStrc* pDVar1;
     int32_t nBaseValue;

@@ -1233,7 +1233,7 @@ static int32_t __stdcall BoundnigBox_AdaptBoundingBoxToGrid(D2RoomStrc * pRoom, 
 }
 
 // The two stack locals at -0x38 and -0x28 are ONE D2BoundingBoxStrc[3]. BoundnigBox_AdaptBoundingBoxToGrid (0064cdf0) writes up to 3 sub-boxes through the pointer it is handed and the loop here walks elements 1..n-1 from it; naming only the first two elements made the callee's third write land on whatever local the compiler put next, which smashed pCollisionGrid with a tile coordinate.
-int16_t __fastcall CheckCollision_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag) {
+static int16_t __fastcall CheckCollision_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag) {
     D2BoundingBoxStrc aBboxSplit[3];
     D2RoomStrc* pRoom_00 = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, pBoundingBox->nLeft, pBoundingBox->nBottom);
     if (!pRoom_00) {
@@ -1270,7 +1270,7 @@ int16_t __fastcall CheckCollision_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxS
 
 // Tests whether any cell within pBoundingBox has eCollisionFlag set in the nearby room's collision grid. Resolves the best containing room, splits the box with BoundnigBox_AdaptBoundingBoxToGrid, and recurses for overflow sub-boxes. Returns COLLIDE_NONE if all cells pass, COLLIDE_BLOCK_PLAYER if any cell is blocked or no grid is found.
 // The stack locals at -0x38 and -0x28 are ONE D2BoundingBoxStrc[3], the same frame group as CheckCollision_BoundingBox (0064ceb0). BoundnigBox_AdaptBoundingBoxToGrid writes up to 3 sub-boxes through the pointer it is handed; naming them separately lets a write land on an unrelated local.
-int32_t __fastcall CheckCollision_BlockPlayer_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag) {
+static int32_t __fastcall CheckCollision_BlockPlayer_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag) {
     D2BoundingBoxStrc aBboxSplit[3];
     D2RoomStrc* pBetterRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, pBoundingBox->nLeft, pBoundingBox->nBottom);
     if (!pBetterRoom) {
@@ -1312,7 +1312,7 @@ int32_t __fastcall CheckCollision_BlockPlayer_BoundingBox(D2RoomStrc * pRoom, D2
     return 0;
 }
 
-void __fastcall RemoveCollision_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag) {
+static void __fastcall RemoveCollision_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag) {
     D2BoundingBoxStrc aBboxSplit[3];
     D2RoomCollisionGridStrc* pCollisionMap;
     D2RoomStrc* pNewRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, pBoundingBox->nLeft, pBoundingBox->nBottom);
@@ -1344,7 +1344,7 @@ void __fastcall RemoveCollision_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxStr
     } while (iBboxRemaining);
 }
 
-void __fastcall AddCollision_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag) {
+static void __fastcall AddCollision_BoundingBox(D2RoomStrc * pRoom, D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag) {
     D2BoundingBoxStrc aBboxSplit[3];
     D2RoomStrc* pBetterRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, pBoundingBox->nLeft, pBoundingBox->nBottom);
     if (!pBetterRoom) {
@@ -1484,7 +1484,7 @@ eCollisionFlags __stdcall CheckCollision_BoundingBox1(D2RoomStrc * pRoom, int32_
 }
 
 // Tests player collision in a plus/cross pattern (center + 4 orthogonal neighbors) at tile (nX,nY) against eCollisionFlag in the room's collision grid. Resolves the owning room via DRLGROOM_FindBetterNearbyRoom and the grid via DRLGROOM_GetCollisionGridFromRoom; returns COLLIDE_BLOCK_PLAYER if the room/grid is missing. Builds an edge-case mask (cEdgeCase bits) for cells that fall outside the current room's bounds and recurses into the neighbor room via CheckCollision_BlockPlayerMissile_Internal1 for those. Returns COLLIDE_NONE only if all sampled cells are clear, else COLLIDE_BLOCK_PLAYER. Uses custom register args (eCollisionFlag in SI).
-int32_t __stdcall CheckCollision_BlockPlayer_Cross(D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t eCollisionFlag) {
+static int32_t __stdcall CheckCollision_BlockPlayer_Cross(D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t eCollisionFlag) {
     eCollisionFlags eNeighborCollision;
     eCollisionFlags eAdjacentResult;
     D2RoomStrc* pRoom_00;

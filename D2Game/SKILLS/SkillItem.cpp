@@ -2184,7 +2184,7 @@ BOOL __fastcall ITEMEVENT_SetRestInPeace(::SGAMEDATA * pGame, uint32_t nUnitEven
 }
 
 // Server-side Necromancer Revive handler: validates the corpse (consumable check, MonStats bounds), removes its collision, spawns a monster of class eSkill in a nearby room, sets ISREVIVE flags and STATE_revive, attaches minion AI, assigns the owner (GUID in nSkillLvl) and schedules AI-think and expiry events. Returns 1 on success, 0 on any validation failure.
-BOOL __fastcall SKILL_ReviveMonsterFromCorpse(::SGAMEDATA * pGame, uint32_t nUnitEvent, D2UnitStrc * pAttacker, D2UnitStrc * pTarget, D2DamageStrc * pDamage, eD2Skills eSkill, int32_t nSkillLvl) {
+static BOOL __fastcall SKILL_ReviveMonsterFromCorpse(::SGAMEDATA * pGame, uint32_t nUnitEvent, D2UnitStrc * pAttacker, D2UnitStrc * pTarget, D2DamageStrc * pDamage, eD2Skills eSkill, int32_t nSkillLvl) {
     D2AiGeneralStrc* pReviveAiGeneral;
     uint32_t dwAlignPad = nUnitEvent;
     D2MonsterKillStrc sKillStrc;

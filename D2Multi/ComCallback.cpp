@@ -1078,7 +1078,7 @@ BOOL __stdcall COMCALLBACK_ValidateGameJoinability() {
     return 1;
 }
 
-int __fastcall PrintChannelText(uint32_t dwParam, char * szText, int32_t nColor) {
+static int __fastcall PrintChannelText(uint32_t dwParam, char * szText, int32_t nColor) {
     int i;
     uint16_t wszText[576];
     uint16_t* pStr;

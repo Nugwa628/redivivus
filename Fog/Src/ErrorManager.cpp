@@ -329,7 +329,7 @@ __attribute__((noinline)) void * __stdcall GetInstructionPointer() {
 }
 
 // Formats debug output with optional timestamp and outputs to debugger/log. Supports flags: 0x04=prepend timestamp (HH:MM:SS.mmm format via GetLocalTime), 0x02=skip OutputDebugStringA, 0x01=write to LOG category via LogManager, 0x18=check CapsLock state. Uses a 4096-byte buffer for vsnprintf formatting with varargs, appending formatted text after timestamp if present.
-void __stdcall FormatDebugOutput(uint8_t bFlags, va_list vaArgs, char * szText) {
+static void __stdcall FormatDebugOutput(uint8_t bFlags, va_list vaArgs, char * szText) {
     char szOutputBuffer[4096];
     char cCurrent;
     szOutputBuffer[0] = '\0';
@@ -521,7 +521,7 @@ int __fastcall DumpLog(D2CrashReportStrc * pCrashInfo, void * pUserContext) {
 // @gap The pfnBlizzardError funcdef calls the EDX slot szTitle; this body never reads it, and the
 // caller puts the reason there, so the local name follows the caller. Return type is void because
 // the slot is void - EAX at the epilogue is left over from FILETOOLS_SafeCloseFile.
-void __fastcall CRASH_FillupCrashTxt(char * szSummary, char * szReason, char * * ppszAttachPaths, uint32_t nAttachPathCount, uint32_t nLineNumber, bool bSilentFlag) {
+static void __fastcall CRASH_FillupCrashTxt(char * szSummary, char * szReason, char * * ppszAttachPaths, uint32_t nAttachPathCount, uint32_t nLineNumber, bool bSilentFlag) {
     // Static local variables (originally global data)
     static int32_t lpAddend_007076bc = -0x1; D2_STATIC_GUARD(lpAddend_007076bc, "Fog::Src::ErrorManager::CRASH_FillupCrashTxt::lpAddend_007076bc");
 
