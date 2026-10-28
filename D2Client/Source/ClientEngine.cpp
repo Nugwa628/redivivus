@@ -341,10 +341,10 @@ void __fastcall CLIENT_SpawnOverseerControlMissile(D2UnitStrc * pUnit) {
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     D2UnitStrc* pMissile = UNIT::Missile::CastAttack(pUnit, MISSILE_Overseercontrol, nX, nY, SKILL_Attack, 1);
