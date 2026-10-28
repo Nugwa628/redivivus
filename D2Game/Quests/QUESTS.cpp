@@ -155,8 +155,8 @@ typedef uint8_t (__fastcall *QUESTUPDATE)(::SGAMEDATA * pGame, D2QuestDataStrc *
 namespace D2Game::Quests::QUESTS {
 
 D2BitBufferStrc * __fastcall GetQuestBitBuffer(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    D2UnitDataPlayerStrc* pBitBuffer = D2Common::Units::GetPlayerData(pUnit);
-    return pBitBuffer->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    return pQuestRecord;
 }
 
 // @sourcefile .\QUESTS\QUESTS.CPP
@@ -828,8 +828,8 @@ void __fastcall QUEST_SendQuestUpdateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * 
     sPacket.nPacketId = ']';
     sPacket.nAlertFlags = pQuestData->nQuestPacketFlags;
     sPacket.nFilterStatus = '\0';
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBufferEx = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBufferEx = pQuestRecord;
     if (!pQuestData->fpStatusFilter) {
       QUEST_GetQuestLogDisplayState(pQuestData, &sPacket.nFilterStatus, pBitBufferEx);
     } else {
@@ -861,7 +861,7 @@ void __stdcall QUEST_SendQuestUpdateToPlayer_HaltTail(int nLine) {
     exit(-1);
 }
 
-void __fastcall QUEST_SetStateAndBroadcast(D2QuestDataStrc * pQuestData, uint8_t nPrevStateFlag, D2UnitStrc * pUnit, ::fpExecuteOnUnitFunction fpFunction, bool bExecute) {
+void __fastcall QUEST_SetStateAndBroadcast(D2QuestDataStrc * pQuestData, int32_t nPrevStateFlag, D2UnitStrc * pUnit, ::fpExecuteOnUnitFunction fpFunction, bool bExecute) {
     pQuestData->nStateFlagPrev = nPrevStateFlag;
     if (!bExecute) {
       return;
@@ -1815,8 +1815,8 @@ void __fastcall FindSpawnableLocation(D2RoomStrc * pRoom, POINT * pPoint, uint32
 
 void __fastcall SetRewardAndFinishFlags(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_RewardAwaits);
     if (bRewardAwaits != 1) {
       return;
@@ -1837,8 +1837,8 @@ void __fastcall SetRewardAndFinishFlags(D2QuestDataStrc * pQuestData, D2QuestArg
 // Sends quest state information to a specific unit (player). Retrieves quest control by difficulty, constructs a quest info packet, and sends to the player client.
 // @sourcefile .\QUESTS\QUESTS.CPP
 void __fastcall QUEST_SendQuestInfoToUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     uint8_t nActionType = 0;
     uint32_t nUnitGUID = 0;
     uint32_t uiUpdateType = 6;
@@ -1899,8 +1899,8 @@ void __fastcall QUEST_SendNpcInfoPacket(D2UnitStrc * pUnit, D2UnitStrc * pNpcUni
 BOOL __fastcall QUESTS_SendQuestInfoAndEventTrigger(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     uint16_t wGameIdHigh = (uint16_t)((uint32_t)pGame >> 0x10);
     D2GSPacketClt0x89 DStack_8 = (D2GSPacketClt0x89)(uint16_t)((uint16_t)(uint8_t)pGame->pQuestControl->nEventId << 8 | (uint16_t)(uint8_t)0x89);
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     uint8_t nActionType = 0;
     uint32_t nUnitGUID = 0;
     uint32_t uiUpdateType = 6;
@@ -1991,7 +1991,7 @@ void __fastcall SendQuestState(D2UnitStrc * pUnit, int32_t nQuestId) {
 }
 
 // @sourcefile .\QUESTS\QUESTS.CPP
-void __fastcall QUEST_SendQuestStatePacket(D2UnitStrc * pUnit, uint8_t bQuestId, uint8_t bReasoned) {
+void __fastcall QUEST_SendQuestStatePacket(D2UnitStrc * pUnit, int32_t bQuestId, uint8_t bReasoned) {
     eD2LevelId eLevel;
     struct { uint8_t e0, e1, e2, e3, e4, e5; } aPacketBuf;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
@@ -2814,8 +2814,8 @@ void __fastcall QUEST_ProcessActTransition(::SGAMEDATA * pGame, D2UnitStrc * pUn
     D2ClientStrc* pClient;
     D2QuestDataStrc* pQuestDataIter;
     D2QuestArgStrc pQuestCallback;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if (!(pMonster && pMonster->eUnitType == UNIT_MONSTER)) {
       return;
     }
