@@ -316,10 +316,10 @@ int32_t __fastcall MONREGION_RollRandomMonsterType(::SGAMEDATA * pGame, D2Monste
     int nMonEntryIdx;
     D2SeedStrc* pSeed;
     uint16_t nClassId;
-    if (!pRoom) {
-      pSeed = 0;
-    } else {
+    if (pRoom) {
       pSeed = &pRoom->sSeed;
+    } else {
+      pSeed = 0;
     }
     if (!nParam || pGame->nDifficulty) {
       D2SeedStrc DVar1;
@@ -398,10 +398,10 @@ int32_t __fastcall MONSTERREGION_CheckSpawnDensity(D2MonsterRegionStrc * pMonter
       nTotalLevelRooms = pMonterRegion->nLevelRoomsCount;
       if (nTotalLevelRooms) {
         nSpawnedRooms = pMonterRegion->nRoomsCount;
-        if (!pRoom) {
-          pSeed = 0;
-        } else {
+        if (pRoom) {
           pSeed = &pRoom->sSeed;
+        } else {
+          pSeed = 0;
         }
 
         sNextSeed = D2_SEED_NEXT(*pSeed);

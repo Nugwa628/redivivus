@@ -1136,10 +1136,10 @@ void __stdcall PATH_AddUnitCollision(D2UnitStrc * pUnit) {
           if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
             *(uint16_t*)(char*)&iVar1 = pDynamicPath->nTargetX;
             *(uint16_t*)((char*)&iVar1 + 2) = pDynamicPath->nTargetY;
-          } else if (!pDynamicPath) {
-            iVar1 = 0;
-          } else {
+          } else if (pDynamicPath) {
             iVar1 = GetYPos(pDynamicPath);
+          } else {
+            iVar1 = 0;
           }
 
           eUnitType = pUnit->eUnitType;
@@ -1296,10 +1296,10 @@ BOOL __stdcall PATH_RemoveUnitCollision(D2UnitStrc * pUnit, int32_t nParam) {
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       *(uint16_t*)(char*)&nPosY = pDynamicPath->nTargetX;
       *(uint16_t*)((char*)&nPosY + 2) = pDynamicPath->nTargetY;
-    } else if (!pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pDynamicPath) {
       nPosY = GetYPos(pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     eUnitType = pUnit->eUnitType;

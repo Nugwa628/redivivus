@@ -1940,10 +1940,10 @@ D2RoomExStrc * __fastcall BuildArea(D2DrlgLevelStrc * pLevel, D2DrlgMapStrc * pD
 
               sTileCoord.nPosX = x;
               nCellFlags = DrlgGrid::GetGridFlags(&tmpGrid, nFlags, nGridRow);
-              if (!pDrlgMap->pVertices) {
-                nMapGridFlags = 0;
-              } else {
+              if (pDrlgMap->pVertices) {
                 nMapGridFlags = DrlgGrid::GetGridFlags(&pDrlgMap->pMapGrid, nFlags, nGridRow);
+              } else {
+                nMapGridFlags = 0;
               }
               if (sTileCoord.nWidth && sTileCoord.nHeight) {
                 pLastRoomEx = DRLGROOMEX_AllocRoomExTypePreset(pLevel, pDrlgMap, &sTileCoord, dt1Mask, nCellFlags, 0, (D2DrlgMapStrc*)nMapGridFlags);

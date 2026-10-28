@@ -2802,10 +2802,10 @@ void __fastcall Objects_PopulateFn2(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
     eLevelId = D2Common::DUNGEON::Dungeon::GetLevelIdFromPopulatedRoom(pRoom);
     ::SGAMEDATA* pGameLocal;
     pGameLocal = pGameSave;
-    if (!pRoom) {
-      pRoomSeed = 0;
-    } else {
+    if (pRoom) {
       pRoomSeed = &pRoom->sSeed;
+    } else {
+      pRoomSeed = 0;
     }
 
     D2SeedStrc sNewSeed;

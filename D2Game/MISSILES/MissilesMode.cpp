@@ -5390,10 +5390,10 @@ int __fastcall Hits(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarge
       }
 
       D2Common::Units::Missile::SetOwner(pUnit, pTarget);
-      if (!pUnit) {
-        eCurrMode = 0;
-      } else {
+      if (pUnit) {
         eCurrMode = pUnit->eAnimMode.ePlayerMode;
+      } else {
+        eCurrMode = 0;
       }
 
       bIsOwner = MISSMODE_CheckCollisionMode(eCurrMode, (int*)pTarget);
