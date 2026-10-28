@@ -1,0 +1,16 @@
+{
+  "$schema": "https://recomp.fyi/schema/v1.json",
+  "game": "Diablo II",
+  "wikidata": "Q244033",
+  "system": "PC (Windows)",
+  "type": "decomp",
+  "original": { "revision": "1.14d", "sha1": "af0ea93d2a652ceb11ac01ee2e4ae1ef613444c2" },
+  "project": "Redivivus",
+  "status": "in-progress",
+  "targets": ["Windows"],
+  "toolchain": "Ghidra",
+  "approach": "Ghidra decompilation of the 1.14d Game.exe, turned into C++ that builds by a generator; fixes go into Ghidra or the generator, not the output",
+  "maintainers": [{ "name": "jaenster", "link": "https://github.com/jaenster" }],
+  "help": ["Typing in Ghidra", "Byte matching against MSVC 2005", "Testing in game"],
+  "notes": "The game runs and plays. Progress is the share of the original's code that rebuilds byte for byte with MSVC 2005, measured by asm_matching/."
+}
