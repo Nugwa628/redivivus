@@ -1124,11 +1124,17 @@ BOOL __fastcall D2UpdateState(D2UnitStrc * pUnit, eD2States eState, int32_t bRem
 
 // Sets skill data by entry type. The second parameter is a whole 32-bit value in EDX; typed from DL alone it was truncated to a byte.
 void __fastcall SKILLS_SetSkillDataByEType(D2UnitStrc * pUnitStrc, uint32_t nUnitLow, uint32_t dwValue, uint32_t nSkillId) {
-    if (!(0 <= (int)nSkillId && (int)nSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nSkillId && true)) {
+    D2SkillsTxt* pSkillsTxt;
+    if (0 <= (int)nSkillId && (int)nSkillId < sgptDataTable->nTxtSkillsCount) {
+      pSkillsTxt = &sgptDataTable->pTxtSkills[nSkillId];
+    } else {
+      pSkillsTxt = 0;
+    }
+    if (!pSkillsTxt) {
       return;
     }
 
-    switch (sgptDataTable->pTxtSkills[nSkillId].EType) {
+    switch (pSkillsTxt->EType) {
       case ELEMENTAL_COLD:
         *(uint32_t*)(nUnitLow + 0x30) = dwValue;
       return;

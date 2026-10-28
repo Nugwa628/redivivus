@@ -94,12 +94,12 @@ static bool __fastcall Q31_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_SiegeOnHaggorath, QUESTSTATE_RewardAwaits);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_SiegeOnHaggorath, QUESTSTATE_JustCompleted) , bQuestState != 0)) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, pQuestData->nQuestIdReal, QUESTSTATE_Step0x05);
-      if (!bQuestState) {
-        *pbyIconFlag = '\x03';
+      if (bQuestState) {
+        *pbyIconFlag = '\x04';
         return true;
       }
 
-      *pbyIconFlag = '\x04';
+      *pbyIconFlag = '\x03';
       return true;
     }
     if (!pQuestData->bIsNotIntroduction) {
