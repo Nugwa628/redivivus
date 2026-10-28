@@ -285,10 +285,10 @@ int __fastcall GLTEXCACHE_EnsureCapacity(GlTextureCacheStrc * pCache) {
         if (pEvictNode) {
           pNextNode = *(uint8_t**)(pEvictNode + 0x14);
           pCache->pActiveHead = pNextNode;
-          if (!pNextNode) {
-            pCache->pActiveTail = 0;
-          } else {
+          if (pNextNode) {
             for (int i = 24; i < 28; i++) pNextNode[i] = 0;
+          } else {
+            pCache->pActiveTail = 0;
           }
 
           for (int i = 20; i < 28; i++) pEvictNode[i] = 0;
