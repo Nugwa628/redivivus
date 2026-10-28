@@ -2087,10 +2087,10 @@ void __fastcall MISSILE_CreatePatternAtUnitPos(D2UnitStrc * pUnit, int32_t nRadi
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
     MISSILE_SpawnMissilesInArea(pUnit, nPosX, nPosY, nRadius, nMissileId, eSkill, nSkillLevel, nChance, nStep);
