@@ -5873,11 +5873,11 @@ static void __stdcall SKILLDESC_DescLine45_DecimalLabel(uint16_t nParam1, int32_
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, pLocalStr);
 }
 
-static void __stdcall SKILLDESC_DescLine42_CalcByIndex(int32_t nCalcResult, uint16_t nParam, short * pSkillDescShort, uint16_t * wszText) {
+static int __stdcall SKILLDESC_DescLine42_CalcByIndex(int32_t nCalcResult, uint16_t nParam, short * pSkillDescShort, uint16_t * wszText) {
     int nInitLoop;
     uint16_t wszFormattedW[256];
     if (nParam == 0x1506) {
-      return;
+      return 0;
     }
 
     uint16_t* pLocalStr;
@@ -5886,6 +5886,7 @@ static void __stdcall SKILLDESC_DescLine42_CalcByIndex(int32_t nCalcResult, uint
     D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, wszFormattedW, D2Lang::StrTable::strtable::GetLocaleString(nParam), (uint16_t*)pSkillDescShort);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszFormattedW);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, D2Lang::StrTable::strtable::GetLocaleString(0xf9e));
+    return 1;
 }
 
 static void __stdcall SKILLDESC_DescLine27_SkillElemCalc(D2UnitStrc * pUnit, uint16_t * pOutText, eD2Skills eSkill, int32_t nCalcInputA, D2SkillsTxt * pSkillsTxt) {
