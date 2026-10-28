@@ -2732,7 +2732,7 @@ int __stdcall MAINMENU_PollMCPCreateGamePump(int nFrameIndex) {
     return 1;
 }
 
-int __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextBox * pTextBox, int32_t nColor, uint8_t bCentered) {
+static int __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextBox * pTextBox, int32_t nColor, uint8_t bCentered) {
     int nClearCount;
     uint16_t wszBuffer[1024];
     uint16_t* pwszLineStart;
