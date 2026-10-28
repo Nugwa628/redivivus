@@ -300,7 +300,7 @@ void __fastcall UNITS_InsertUnitIntoHashTable(D2UnitStrc * pUnit, ::SGAMEDATA * 
 }
 
 // Removes pUnit from the game's per-type unit hash table (same slot logic as InsertUnitIntoHashTable). Walks the singly-linked bucket list to find the unit and unlinks it; no-ops silently if the unit is not found. Despite the name, contains no client-notification logic — it is purely a hash-table unlink.
-void UNITS_NotifyClientsUnitRemoved(D2UnitStrc * pGameUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void UNITS_NotifyClientsUnitRemoved(D2UnitStrc * pGameUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2UnitStrc* pCurUnit;
     D2UnitStrc** ppHashSlot;
     eD2UnitType eUnitType;
@@ -343,7 +343,7 @@ void UNITS_NotifyClientsUnitRemoved(D2UnitStrc * pGameUnit, ::SGAMEDATA * pGame,
     pPrevUnit->pListNext = pCurUnit->pListNext;
 }
 
-int32_t IsRoomOccupied(D2UnitStrc * pUnit) {
+static int32_t IsRoomOccupied(D2UnitStrc * pUnit) {
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (pRoom) {
       return (uint32_t)(pRoom->nClientsCount != 0);
@@ -639,12 +639,7 @@ D2UnitStrc * __fastcall UNITS_FindPortalOwnerUnit(::SGAMEDATA * pGame, D2UnitStr
     D2RoomStrc* pFoundRoom;
     D2UnitStrc* pOwnerUnit;
     int32_t nErrorLine;
-    if (!pUnit) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78a);
-      exit(-1);
-    }
-
-    {
+    if (pUnit) {
       int32_t nX;
       eActNo = D2Common::Drlg::GetActNoFromLevelNumber((eD2LevelId)pUnit->pUnitData.pUnitDataMonster->Components[0]);
       nErrorLine = pUnit->pUnitData.pUnitDataObject->nY;
@@ -660,6 +655,9 @@ D2UnitStrc * __fastcall UNITS_FindPortalOwnerUnit(::SGAMEDATA * pGame, D2UnitStr
       pOwnerUnit = FindUnitFromTable(pGame, pUnit->eOwnerType, pUnit->nOwnerGUID);
       return pOwnerUnit;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78a);
+    exit(-1);
 }
 
 // Walks the game's player (eUnitType=0) or monster (eUnitType=1) hash table (128 slots), skipping dead/body units (STATE_playerbody check), and calls pfnCallback(pCallbackArg) for each live unit. Returns the first unit for which the callback returns 1, or NULL if none found or the unit type is unsupported. Validates pfnCallback with IsBadCodePtr before iterating.
@@ -1229,7 +1227,7 @@ BOOL __fastcall UNITS_CheckSkillTargetAlignment(::SGAMEDATA * pGameStrc, int * p
     return 1;
 }
 
-void __stdcall UNITS_OnAlignmentChanged(int32_t nParam, int32_t pStatEx, D2UnitStrc * pUnit, int32_t nStatValue) {
+static void __stdcall UNITS_OnAlignmentChanged(int32_t nParam, int32_t pStatEx, D2UnitStrc * pUnit, int32_t nStatValue) {
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
       return;
     }
@@ -2137,7 +2135,7 @@ D2UnitStrc * __fastcall CreateUnit(eD2UnitType eUnitType, int32_t nClassId, int3
     return pAllocUnit;
 }
 
-void ClearInteractOnFreePlayer(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void ClearInteractOnFreePlayer(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     if (!pUnit->uSideData.pServerSide.bInteracting) {
       return;
     }

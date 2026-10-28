@@ -283,7 +283,7 @@ void __fastcall FreeMonsterAi(::SGAMEDATA * pGame, D2MonsterAiStrc * pMonster) {
 
 // Initiates a player-NPC interaction on the server. Guards against double-interaction (checks existing pAiSub list and GetInteractedNpc), verifies the NPC is interactable (MonStats interact flag) and not in Death/Kick mode, and that the player is not already trading. Allocates a D2MonsterAiSubStrc to track the interaction participant, sends the mercenary hire list (SendMercForHireList, first-time flag), sets the interact info on the player unit, then sends 0x27 NPC-info and 0x28 player-quest-info packets. Also triggers QUEST_OnNpcInteraction for quest dialogue and 0x29 quest-log prep.
 // @sourcefile .\MONSTER\MonsterAI.cpp
-uint32_t __stdcall NPC_BeginInteraction(::SGAMEDATA * pGame, D2MonsterAiStrc * pAi, uint8_t questActionType, D2UnitStrc * pPlayer, D2UnitStrc * pNpcUnit) {
+static uint32_t __stdcall NPC_BeginInteraction(::SGAMEDATA * pGame, D2MonsterAiStrc * pAi, uint8_t questActionType, D2UnitStrc * pPlayer, D2UnitStrc * pNpcUnit) {
     bool _bFirstInteraction;
     bool bIsTrading;
     uint32_t dwTmp;
@@ -552,7 +552,7 @@ void __fastcall NPC_BeginInteractionFromUnit(::SGAMEDATA * pGame, D2UnitStrc * p
     NPC_BeginInteraction(pGame, pMonsterAi, bUnknown, pUnit, pMonster);
 }
 
-BOOL UnitHasSwitchAiSet(D2UnitStrc * pMonster) {
+static BOOL UnitHasSwitchAiSet(D2UnitStrc * pMonster) {
     if (!(pMonster && pMonster->eUnitType == UNIT_MONSTER)) {
       return 0;
     }

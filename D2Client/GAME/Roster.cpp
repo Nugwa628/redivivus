@@ -57,7 +57,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2RosterStrc) == 0x84, "D2_NEW_AT(D
 
 namespace D2Client::GAME::Roster {
 
-D2RosterStrc * GetRosterPlayerByGUID(int32_t nRosterGUID) {
+static D2RosterStrc * GetRosterPlayerByGUID(int32_t nRosterGUID) {
     D2RosterLinkListStrc* pRosterLink;
     D2RosterStrc* pRosterIter = gpRosterPlayers;
     if (nRosterGUID == -1) {
@@ -99,7 +99,7 @@ D2RosterStrc * __stdcall GetPlayerRoster() {
 }
 
 // Searches the global gpRosterPlayers linked list for a roster entry matching either nRosterGUID or szPlayerName. For each node, first checks the GUID (fast path); if it differs, performs a two-bytes-at-a-time strcmp on szRosterName. Returns the matching D2RosterStrc* on success, or null if the list is exhausted.
-D2RosterStrc * GetRosterByGuidOrName(char * szPlayerName, int32_t nRosterGUID) {
+static D2RosterStrc * GetRosterByGuidOrName(char * szPlayerName, int32_t nRosterGUID) {
     int nCmp;
     uint8_t* pInputCursor;
     D2RosterStrc* pRoster = gpRosterPlayers;
@@ -125,7 +125,7 @@ D2RosterStrc * GetRosterByGuidOrName(char * szPlayerName, int32_t nRosterGUID) {
 }
 
 // Writes identity/party/guild fields into a D2RosterStrc. 004793c4..004793c6 read EAX, EDI and EBX without ever loading them: the roster, the player name and the clan tag all arrive in registers. Modelled as locals, the reconstruction wrote the roster through an uninitialised pointer.
-void __stdcall ROSTER_InitializeFields(D2RosterStrc * pRoster, char * szPlayerName, char * szClanTag, int32_t nRosterGUID, int32_t nCharType, int16_t nUnitLevel, int16_t nPartyId, int32_t bInParty, int16_t nGuildFlags, char * szGuildTag) {
+static void __stdcall ROSTER_InitializeFields(D2RosterStrc * pRoster, char * szPlayerName, char * szClanTag, int32_t nRosterGUID, int32_t nCharType, int16_t nUnitLevel, int16_t nPartyId, int32_t bInParty, int16_t nGuildFlags, char * szGuildTag) {
     char cChar;
     char* pSrcCursor = szPlayerName;
     do {
@@ -289,7 +289,7 @@ D2RosterStrc * __stdcall ROSTER_SortByName(D2RosterStrc * pRoster) {
 }
 
 // Insertion-sorts a D2RosterStrc singly-linked list descending by nArenaScore (used as level proxy). Takes the head of an unsorted list via EAX, returns the head of the sorted list. Operates in-place by relinking pNext pointers; does not allocate.
-D2RosterStrc * ROSTER_SortByLevel(D2RosterStrc * pRoster) {
+static D2RosterStrc * ROSTER_SortByLevel(D2RosterStrc * pRoster) {
     D2RosterStrc* pCur;
     D2RosterStrc* pPrev;
     D2RosterStrc* pScan;
@@ -365,7 +365,7 @@ void __stdcall FreeRosterPartyList() {
     pRosterPartyList = 0;
 }
 
-D2RosterStrc * ROSTER_CollectPartiesIntoPartyList(D2RosterPartyListStrc * pRosterPartyList) {
+static D2RosterStrc * ROSTER_CollectPartiesIntoPartyList(D2RosterPartyListStrc * pRosterPartyList) {
     D2RosterStrc** ppNextLink;
     D2RosterStrc* ppRosterNext;
     D2RosterStrc* pNextRoster = 0;
@@ -436,7 +436,7 @@ void __stdcall ROSTER_SortPartyListsByPartyId() {
 }
 
 // Promotes the party entry matching nPartyId to the front of pRosterPartyList, then within that party's pOwner chain promotes the roster node matching nRosterGUID to the front. Used to prioritize a specific player in the party display order. No-ops if nPartyId is -1 or the entries are not found.
-void __stdcall ROSTER_MoveRosterPlayerToFrontOfParty(int16_t nPartyId, int32_t nRosterGUID) {
+static void __stdcall ROSTER_MoveRosterPlayerToFrontOfParty(int16_t nPartyId, int32_t nRosterGUID) {
     D2RosterStrc* pCurrent;
     D2RosterStrc* pPrevious;
     D2RosterStrc* pNext;
@@ -566,7 +566,7 @@ void __stdcall ROSTER_FlattenPartyListsIntoSingleRosterChain() {
     }
 }
 
-void ROSTER_MoveRosterPlayerToFront(int32_t nRosterGUID) {
+static void ROSTER_MoveRosterPlayerToFront(int32_t nRosterGUID) {
     D2RosterStrc* pCur;
     D2RosterStrc* pPrev = 0;
     for (pCur = gpRosterPlayers; pCur; pCur = pCur->pNext) {
@@ -769,7 +769,7 @@ BOOL __fastcall GetRosterInPartyBool(D2RosterStrc * pRoster) {
     return pRoster->nPartyState;
 }
 
-void ROSTER_TogglePlayerFlag(D2RosterStrc * pRoster, int16_t nFlags) {
+static void ROSTER_TogglePlayerFlag(D2RosterStrc * pRoster, int16_t nFlags) {
     int nPlayerGUID;
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
     if (!pPlayer) {

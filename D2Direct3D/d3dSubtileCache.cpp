@@ -114,7 +114,7 @@ void __fastcall D3DSUBTILE_SetPalette(D3DSubtileCacheStrc * pCache, void * pPale
     Renderer::DIRECTD3D_LogError("SetPalette (subtile surface)", nResult);
 }
 
-void __fastcall D3DSUBTILE_InsertNodeAtTail(D3DSubtileCacheNodeStrc * pNode, D3DSubtileCacheStrc * pCache) {
+static void __fastcall D3DSUBTILE_InsertNodeAtTail(D3DSubtileCacheNodeStrc * pNode, D3DSubtileCacheStrc * pCache) {
     if (!pCache->pUsedHead) {
       pCache->pUsedHead = pNode;
       pCache->pUsedTail = pNode;
@@ -165,7 +165,7 @@ D3DSubtileCacheNodeStrc * __fastcall D3DSUBTILE_RemoveNodeByIndex(D3DSubtileCach
     return (D3DSubtileCacheNodeStrc*)pTargetNode;
 }
 
-int __stdcall D3DSUBTILE_AllocateNodeFromFreeList(D3DSubtileCacheStrc * pCache) {
+static int __stdcall D3DSUBTILE_AllocateNodeFromFreeList(D3DSubtileCacheStrc * pCache) {
     if (pCache->nUsedCount == pCache->nMaxNodes) {
       return 0;
     }

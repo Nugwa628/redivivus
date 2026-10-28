@@ -147,7 +147,7 @@ void __fastcall SUNITPROXY_AddItemToNpcProxy(D2UnitStrc * pNpcUnit, ::SGAMEDATA 
 }
 
 // @sourcefile .\UNIT\sunitproxy.cpp
-void SUNITPROXY_InitNpcTradeItems(int32_t nParam1, ::SGAMEDATA * pGame, void * * pParam) {
+static void SUNITPROXY_InitNpcTradeItems(int32_t nParam1, ::SGAMEDATA * pGame, void * * pParam) {
     void* nNpcTradeIdx;
     if (0x10 < nParam1) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa4);
@@ -663,7 +663,7 @@ void __fastcall SUNITPROXY_AllocNpcControl(::SGAMEDATA * pGame) {
     pGame->pNpcControl = pNpcControl;
 }
 
-void __stdcall SUNITPROXY_FreeInventoryItems(::SGAMEDATA * pGame, D2InventoryStrc * pInventory) {
+static void __stdcall SUNITPROXY_FreeInventoryItems(::SGAMEDATA * pGame, D2InventoryStrc * pInventory) {
     D2UnitStrc* pNextItem;
     if (!pInventory) {
       return;
@@ -687,7 +687,7 @@ void __stdcall SUNITPROXY_FreeInventoryItems(::SGAMEDATA * pGame, D2InventoryStr
 
 // Frees all server-side proxy data for a single NPC entry (pNpcEntry) within pGame. Walks and frees the trade inventory linked list (unk0x08), calling SUNITPROXY_FreeInventoryItems + STRUCT_FreeInventory on each node, then frees the NPC's own inventory. Also walks a second linked list (unk0x14) deleting any owned items via ITEM_DeleteItemAndFreeUnit. All nodes freed from pGame->pMemoryPool.
 // @sourcefile .\UNIT\sunitproxy.cpp
-void __stdcall SUNITPROXY_FreeNpcProxyData(D2GameNpcStrc * pNpcEntry, ::SGAMEDATA * pGame) {
+static void __stdcall SUNITPROXY_FreeNpcProxyData(D2GameNpcStrc * pNpcEntry, ::SGAMEDATA * pGame) {
     D2NpcProxyInventoryStrc* pMemoryToFree;
     D2NpcProxyInventoryStrc* pNextTradeEntry;
     if (pNpcEntry->flags0x0C) {
@@ -778,7 +778,7 @@ void __fastcall FreeNpcControl(::SGAMEDATA * pGame) {
 }
 
 // @sourcefile .\UNIT\sunitproxy.cpp
-void __stdcall SUNITPROXY_AddTradeQueueEntry(D2UnitStrc * pUnit, uint32_t dwTradeParam, int32_t nAction, ::SGAMEDATA * pGame, D2GameNpcStrc * pNpc) {
+static void __stdcall SUNITPROXY_AddTradeQueueEntry(D2UnitStrc * pUnit, uint32_t dwTradeParam, int32_t nAction, ::SGAMEDATA * pGame, D2GameNpcStrc * pNpc) {
     D2SUnitProxyStrc_Line0x85* pQueueEntry = D2_NEW_POOL_AT(pGame->pMemoryPool, D2SUnitProxyStrc_Line0x85, ".\\UNIT\\sunitproxy.cpp", 0x263);
     pQueueEntry->pNext = pNpc->pProxyQueue;
     pQueueEntry->pUnit = pUnit;

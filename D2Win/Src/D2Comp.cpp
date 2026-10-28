@@ -64,7 +64,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2CharSelCompStrc) == 0x234, "D2_NE
 
 namespace D2Win::Src::D2Comp {
 
-void * D2COMP_AssertNotNull(void * pValue) {
+static void * D2COMP_AssertNotNull(void * pValue) {
     if (!pValue) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3dd);
       exit(-1);
@@ -74,7 +74,7 @@ void * D2COMP_AssertNotNull(void * pValue) {
     return pValue;
 }
 
-void * __stdcall D2COMP_LoadAndValidateCOFFile(char * szCOFFilePath, uint32_t * pnSize) {
+static void * __stdcall D2COMP_LoadAndValidateCOFFile(char * szCOFFilePath, uint32_t * pnSize) {
     int32_t nLineNum = 0x3eb;
     char* pszSourceFile = ".\\Src\\D2Comp.cpp";
     D2PoolManagerStrc* pMPQPool = D2WinArchive::ReturnZero();
@@ -92,7 +92,7 @@ void * __stdcall D2COMP_LoadAndValidateCOFFile(char * szCOFFilePath, uint32_t * 
     }
 }
 
-void * __stdcall D2COMP_ValidateCOFLayerData(int32_t nLayerIndex, int32_t nFrameIndex, uint8_t * pbParam) {
+static void * __stdcall D2COMP_ValidateCOFLayerData(int32_t nLayerIndex, int32_t nFrameIndex, uint8_t * pbParam) {
     if (!pbParam) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x400);
       exit(-1);
@@ -106,7 +106,7 @@ void * __stdcall D2COMP_ValidateCOFLayerData(int32_t nLayerIndex, int32_t nFrame
     }
 }
 
-int __stdcall D2COMP_FindOrAllocCOFCacheEntry(int32_t nPlayerClassId, char * szText, uint32_t dwWeaponClassToken, int32_t nAnimMode) {
+static int __stdcall D2COMP_FindOrAllocCOFCacheEntry(int32_t nPlayerClassId, char * szText, uint32_t dwWeaponClassToken, int32_t nAnimMode) {
     int* piVar1;
     for (piVar1 = (int*)gpCOFCacheHead; piVar1; piVar1 = (int*)piVar1[6]) {
       if (piVar1[1] == nAnimMode && piVar1[2] == nPlayerClassId && piVar1[3] == dwWeaponClassToken) {
@@ -140,7 +140,7 @@ int __stdcall D2COMP_FindOrAllocCOFCacheEntry(int32_t nPlayerClassId, char * szT
     return (int)pCacheNode;
 }
 
-void __stdcall D2COMP_ReleaseCOFCacheEntry(int32_t nParam, int * pnParam) {
+static void __stdcall D2COMP_ReleaseCOFCacheEntry(int32_t nParam, int * pnParam) {
     void* nErrAddr;
     if (!pnParam) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x455);
@@ -176,7 +176,7 @@ void __stdcall D2COMP_ReleaseCOFCacheEntry(int32_t nParam, int * pnParam) {
     D2_FREE_AT(pnParam, ".\\Src\\D2Comp.cpp", 0x47a);
 }
 
-void __stdcall D2COMP_BuildCOFFilePath(int32_t nAnimMode, uint32_t dwWeaponClassToken, char * pszDestPath, int32_t nPlayerClassId) {
+static void __stdcall D2COMP_BuildCOFFilePath(int32_t nAnimMode, uint32_t dwWeaponClassToken, char * pszDestPath, int32_t nPlayerClassId) {
     uint8_t bMaskedTokenByte;
     char* pszCOFPathBase;
     int nOpenResult;
@@ -230,7 +230,7 @@ void __stdcall D2COMP_BuildCOFFilePath(int32_t nAnimMode, uint32_t dwWeaponClass
     }
 }
 
-int * D2COMP_FindCOFEntryByModeAndWeapon(int * * ppCOFList, int32_t nAnimMode, uint32_t dwWeaponClassToken) {
+static int * D2COMP_FindCOFEntryByModeAndWeapon(int * * ppCOFList, int32_t nAnimMode, uint32_t dwWeaponClassToken) {
     if (!ppCOFList) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4b0);
       exit(-1);
@@ -251,7 +251,7 @@ int * D2COMP_FindCOFEntryByModeAndWeapon(int * * ppCOFList, int32_t nAnimMode, u
     return pCOFEntry;
 }
 
-int32_t __stdcall D2COMP_GetOrLoadCOF(int * * ppCOFList, int32_t nPlayerClassId, int32_t nAnimMode, uint32_t dwWeaponClassToken) {
+static int32_t __stdcall D2COMP_GetOrLoadCOF(int * * ppCOFList, int32_t nPlayerClassId, int32_t nAnimMode, uint32_t dwWeaponClassToken) {
     char szCOFFilePath[260];
     if (!ppCOFList) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4ca);
@@ -383,7 +383,7 @@ void __fastcall D2COMP_PopulateComponentFromCOF(int32_t pCOFData, D2GfxDataStrc 
     exit(-1);
 }
 
-void __stdcall D2COMP_InitComponentEntry(int32_t nAnimMode, int32_t nWeaponClass, int32_t nCOFContext, uint8_t bComponentType, int32_t nCOFData, D2GfxDataStrc * pGfxData) {
+static void __stdcall D2COMP_InitComponentEntry(int32_t nAnimMode, int32_t nWeaponClass, int32_t nCOFContext, uint8_t bComponentType, int32_t nCOFData, D2GfxDataStrc * pGfxData) {
     pGfxData->pDC6 = (DC6*)nCOFData;
     pGfxData->nDirection = nAnimMode;
     pGfxData->nFrameNumber = nWeaponClass;
@@ -408,7 +408,7 @@ uint8_t * __fastcall D2COMP_GetPaletteTransformTable(uint32_t nPaletteShift) {
     return gaItemPaletteTransformData + (nTransformGroup * 0x69 + nColorIndex) * 0x100;
 }
 
-uint32_t __stdcall D2COMP_ValidateComponentType(uint32_t dwComponentMask, uint8_t bComponentType) {
+static uint32_t __stdcall D2COMP_ValidateComponentType(uint32_t dwComponentMask, uint8_t bComponentType) {
     // Static local variables (originally global data)
     static uint8_t gaComponentValidationData[448] = {
     0x0,
@@ -876,7 +876,7 @@ uint32_t __stdcall D2COMP_ValidateComponentType(uint32_t dwComponentMask, uint8_
     }
 }
 
-int32_t __stdcall D2COMP_LoadLayerSpritesAndCalcHeight(uint8_t * pbLayerCount, int32_t nLayerTypeArray, int * pnMaxHeight, uint8_t bPaletteShift, uint32_t nFrameNumber, int32_t nCOFContext) {
+static int32_t __stdcall D2COMP_LoadLayerSpritesAndCalcHeight(uint8_t * pbLayerCount, int32_t nLayerTypeArray, int * pnMaxHeight, uint8_t bPaletteShift, uint32_t nFrameNumber, int32_t nCOFContext) {
     int32_t nOffsetY;
     D2GfxDataStrc sGfxData;
     uint8_t byComponentType;
@@ -1207,7 +1207,7 @@ void __fastcall D2COMP_ZeroBuffer512(void * pBuffer) {
     }
 }
 
-BOOL D2COMP_ValidateAndLoadCOFForUnit(D2CharSelCompStrc * pCompUnit) {
+static BOOL D2COMP_ValidateAndLoadCOFForUnit(D2CharSelCompStrc * pCompUnit) {
     // Static local variables (originally global data)
     static uint32_t gnD2CompLoadedSize0 = 0x19; D2_STATIC_GUARD(gnD2CompLoadedSize0, "D2Win::Src::D2Comp::D2COMP_ValidateAndLoadCOFForUnit::gnD2CompLoadedSize0");
     static uint32_t gnD2CompCOFBuffer0 = 0xf; D2_STATIC_GUARD(gnD2CompCOFBuffer0, "D2Win::Src::D2Comp::D2COMP_ValidateAndLoadCOFForUnit::gnD2CompCOFBuffer0");
@@ -1421,27 +1421,28 @@ void * __stdcall LoadTxt(D2PoolManagerStrc * pMemory, char * szTxtName, D2BinFie
       /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\%s%s", "DATA\\GLOBAL\\EXCEL", szTxtName, ".bin");
       pArchive = (D2ArchiveStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(pMemory, szFilePath, &nFileSize, ".\\Src\\D2Comp.cpp", 0x958);
     }
-    if (!pArchive) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9e3);
-      exit(-1);
-    }
-    if (!gbLoadBinFiles) {
-      pBinFieldExcel = Fog::Src::Excel::STRUCT_CreateBinFieldExcelAndFillData(pArchive, nFileSize);
-      pRowCountOrData = (D2ArchiveStrc*)Fog::Src::Excel::TXT_GetLinesCountFromBinFieldExcel(pBinFieldExcel);
-      pRecord = (D2ArchiveStrc**)D2_ALLOC_POOL_AT(nullptr, (int)pRowCountOrData * nLineLength, ".\\Src\\D2Comp.cpp", 0x9fa);
-      memset(pRecord, 0, (int)pRowCountOrData * nLineLength);
-      Fog::Src::Excel::TXT_ParseDataAndPutIntoStructure(pBinFieldExcel, pBinFields, (char*)pRecord, (size_t)pRowCountOrData, nLineLength);
-      Fog::Src::Excel::TXT_FreeBinFieldExcel(pBinFieldExcel);
-    } else {
-      pRowCountOrData = pArchive->pPrevLink;
-      pRecord = &pArchive->pNext;
-    }
-    if (!pSize) {
+    if (pArchive) {
+      if (!gbLoadBinFiles) {
+        pBinFieldExcel = Fog::Src::Excel::STRUCT_CreateBinFieldExcelAndFillData(pArchive, nFileSize);
+        pRowCountOrData = (D2ArchiveStrc*)Fog::Src::Excel::TXT_GetLinesCountFromBinFieldExcel(pBinFieldExcel);
+        pRecord = (D2ArchiveStrc**)D2_ALLOC_POOL_AT(nullptr, (int)pRowCountOrData * nLineLength, ".\\Src\\D2Comp.cpp", 0x9fa);
+        memset(pRecord, 0, (int)pRowCountOrData * nLineLength);
+        Fog::Src::Excel::TXT_ParseDataAndPutIntoStructure(pBinFieldExcel, pBinFields, (char*)pRecord, (size_t)pRowCountOrData, nLineLength);
+        Fog::Src::Excel::TXT_FreeBinFieldExcel(pBinFieldExcel);
+      } else {
+        pRowCountOrData = pArchive->pPrevLink;
+        pRecord = &pArchive->pNext;
+      }
+      if (!pSize) {
+        return pRecord;
+      }
+
+      *pSize = (size_t)pRowCountOrData;
       return pRecord;
     }
 
-    *pSize = (size_t)pRowCountOrData;
-    return pRecord;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9e3);
+    exit(-1);
 }
 
 void __fastcall D2COMP_AllocTxt_Items(D2PoolManagerStrc * pMemory) {
@@ -1637,7 +1638,7 @@ int32_t __stdcall D2COMP_IsItemTypeDescendant(int32_t nItemType, int32_t nAncest
     exit(-1);
 }
 
-int32_t __stdcall D2COMP_ResolveWeaponClass(int32_t nPlayerClassId, uint8_t * pEquipData) {
+static int32_t __stdcall D2COMP_ResolveWeaponClass(int32_t nPlayerClassId, uint8_t * pEquipData) {
     int32_t bIsDescendant;
     bool bBothHandsEquipped;
     uint8_t bVar1;
@@ -1771,7 +1772,7 @@ void __stdcall D2COMP_SetSelectionAndAuraImages(DC6 * pDC6, DC6 * pDC62) {
     gnPentaSpinCursorMaxFrames = D2CMP::SRC::CelCmp::IMAGE_GetFramesCount(pDC62);
 }
 
-void D2COMP_ValidateEquippedItemForClass(int32_t nEquipSlot, uint8_t * pbyItemIndex) {
+static void D2COMP_ValidateEquippedItemForClass(int32_t nEquipSlot, uint8_t * pbyItemIndex) {
     int32_t bIsDescendant;
     int nSearchIdx;
     int nMaxCharsLocal;
@@ -2139,7 +2140,7 @@ void __stdcall D2COMP_LoadGuildEmblemIcon(int32_t pCompUnit, uint8_t byEmblemIco
     *(uint8_t*)(pCompUnit + 0xc1) = 0;
 }
 
-void D2COMP_LoadItemPaletteFile(int32_t nPaletteSlot, char * szPaletteFilename) {
+static void D2COMP_LoadItemPaletteFile(int32_t nPaletteSlot, char * szPaletteFilename) {
     uint32_t* pDstScan;
     int nCopyIter;
     uint32_t nCopyDwords;

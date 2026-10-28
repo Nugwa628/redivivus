@@ -557,12 +557,7 @@ uint32_t __fastcall ROSTER_IsUnitHostileToPlayer(D2UnitStrc * pUnit) {
     } while (true);
 
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
-    if (!(pPlayer && pPlayer->nUnitGUID != -1)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x225);
-      exit(-1);
-    }
-
-    {
+    if (pPlayer && pPlayer->nUnitGUID != -1) {
       uint32_t bHostile;
       if (nGUID == -1) {
         return 1;
@@ -571,6 +566,9 @@ uint32_t __fastcall ROSTER_IsUnitHostileToPlayer(D2UnitStrc * pUnit) {
       bHostile = UNIT::PlayerList::GetFlag(nGUID, pPlayer->nUnitGUID, 8);
       return bHostile;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x225);
+    exit(-1);
 }
 
 void __fastcall ROSTER_UpdateMercHostileColors(int32_t nOwnerGUID) {

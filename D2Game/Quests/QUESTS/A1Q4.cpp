@@ -544,7 +544,7 @@ void __fastcall Q04_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 // A1Q4 — QuestStartDebugNotify: debug-only QUEST_DebugPrint("Started quest") helper
 // called at the points where the quest first transitions out of the not-started state.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q4.cpp
-void __stdcall QuestStartDebugNotify(D2QuestDataStrc * pQuestData) {
+static void __stdcall QuestStartDebugNotify(D2QuestDataStrc * pQuestData) {
     QUEST_DebugPrint(pQuestData->pGame, "Started quest", "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q4.cpp", 599);
 }
 
@@ -601,7 +601,7 @@ BOOL __fastcall Q04_DespawnRogueGuards(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
 // is inside the room, then retries FindSpawnableLocation + SpawnMonster up to ~0x14
 // nearby rooms until placement succeeds. On success flags Cain init/resurrect, records
 // his unit GUID into the quest sub-struct, and sets the "Cain spawned" flag (0x51).
-void __stdcall Q04_SpawnDeckardCainNpc(D2RoomStrc * pRoom, ::SGAMEDATA * pGame, int32_t nX, int32_t nY) {
+static void __stdcall Q04_SpawnDeckardCainNpc(D2RoomStrc * pRoom, ::SGAMEDATA * pGame, int32_t nX, int32_t nY) {
     D2DrlgRoomCoordsStrc sRoomCoords;
     POINT ptCainSpawnPos;
     D2QuestDataStrc* pQuestData;
@@ -735,7 +735,7 @@ void __fastcall Q04_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2
 // broadcasts step 1 (Q04_NotifyQuestStateToPlayer), sets step flag 3, clears sub-flag
 // 0x58, and re-syncs all players. Called from Callback_06/Callback_09 on completion.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q4.cpp
-void __stdcall Q04_DeactivateCairnStones(D2QuestDataStrc * pQuestData) {
+static void __stdcall Q04_DeactivateCairnStones(D2QuestDataStrc * pQuestData) {
     D2QuestDataA1Q4Strc* pQuestSpecific = pQuestData->pQuestSpecificData.pA1Q4;
     if (pQuestSpecific->sSub.bTreeObjectSaved) {
       D2UnitStrc* pUnit;
@@ -1157,12 +1157,7 @@ void __fastcall MakeTownPortalFromScroolTree(::SGAMEDATA * pGame, D2UnitStrc * p
     D2QuestDataA1Q4Strc* pQuestSpecificData;
     D2UnitStrc* pTriggerUnit = pUnit;
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
-    if (!pQuestData) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x68e);
-      exit(-1);
-    }
-
-    {
+    if (pQuestData) {
       bool bPortalSpawned;
       pQuestSpecificData = pQuestData->pQuestSpecificData.pA1Q4;
       if (!(pQuestData->bIsNotIntroduction && !pQuestSpecificData->sSub.bQuestObjectsActivated)) {
@@ -1206,6 +1201,9 @@ void __fastcall MakeTownPortalFromScroolTree(::SGAMEDATA * pGame, D2UnitStrc * p
       QUEST_SetStateAndBroadcast(pQuestData, 6, nullptr, (::fpExecuteOnUnitFunction)Q04_NotifyQuestStateToPlayer, true);
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x68e);
+    exit(-1);
 }
 
 // A1Q4 — OBJOP_A1Q4_ActivateInifussTree (object OperateFn): player clicks the Tree
@@ -1846,12 +1844,12 @@ void __fastcall Q04_SetScrollActivatedFlag(::SGAMEDATA * pGame) {
 // (portal-created). Halts via ErrorManager if quest data is missing. Getter only.
 uint8_t __fastcall Q04_GetPortalCreatedFlag(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
-    if (!pQuestData) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x99d);
-      exit(-1);
+    if (pQuestData) {
+      return pQuestData->pQuestSpecificData.pA1Q4->sSub.bStonesRolled;
     }
 
-    return pQuestData->pQuestSpecificData.pA1Q4->sSub.bStonesRolled;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x99d);
+    exit(-1);
 }
 
 // A1Q4 — Objects_InitFn09: init callback for a quest object (the Cairn-stones /
@@ -2321,7 +2319,7 @@ void __thiscall Q04_SetCainUnitGUID(void * pThis, int32_t nCainGUID) {
 // schedules the Rogue-guard despawn timer (Q04_TimerDespawnRogueGuards) or immediately
 // despawns guards (Q04_DespawnRogueGuards), and removes the inactive Cain placeholder.
 // Called from the force-start / debug-progress paths and Callback_03. No quest record bits.
-void __stdcall Q04_ActivateCairnStonesAndTree(char cParam1, char cParam2, D2QuestDataStrc * pQuestData) {
+static void __stdcall Q04_ActivateCairnStonesAndTree(char cParam1, char cParam2, D2QuestDataStrc * pQuestData) {
     D2UnitStrc* pTreeUnit;
     D2QuestDataA1Q4Strc* pA1Q4Sub = pQuestData->pQuestSpecificData.pA1Q4;
     if (pA1Q4Sub->sSub.bCairnStonesObjectSaved && (pTreeUnit = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_OBJECT, pA1Q4Sub->sSub.nCairnStonesObjectGUID) , pTreeUnit != 0) && pTreeUnit->nClassId == 0x1a) {
@@ -2372,12 +2370,7 @@ void __stdcall Q04_ActivateCairnStonesAndTree(char cParam1, char cParam2, D2Ques
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q4.cpp
 void __fastcall Q04_ForceStartQuestProgression(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
-    if (!pQuestData) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x357);
-      exit(-1);
-    }
-
-    {
+    if (pQuestData) {
       D2QuestDataA1Q4Strc* pDVar1;
       pDVar1 = pQuestData->pQuestSpecificData.pA1Q4;
       if (pDVar1->sSub.field_0x4D) {
@@ -2389,6 +2382,9 @@ void __fastcall Q04_ForceStartQuestProgression(::SGAMEDATA * pGame) {
       pDVar1->sSub.field_0x4D = 1;
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x357);
+    exit(-1);
 }
 
 // A1Q4 — Q04_Callback_03 (quest event handler, slot 3): gossip/dialogue progression.

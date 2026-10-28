@@ -237,7 +237,7 @@ void __fastcall LIGHTMAP_ValidateAndReset(D2LightMapStrc * pLightMap) {
     }
 }
 
-void __stdcall LIGHTMAP_FillGridRect(int nYStart, uint32_t nColorARGB, int nXStart, int nYEnd, int nXEnd) {
+static void __stdcall LIGHTMAP_FillGridRect(int nYStart, uint32_t nColorARGB, int nXStart, int nYEnd, int nXEnd) {
     uint32_t* pCell;
     int nColCount;
     uint8_t byBlue;
@@ -373,7 +373,7 @@ void __stdcall LIGHTMAP_ClearToBlack() {
     LIGHTMAP_FillGridRect(0, 0, 0, 0x2f, 0x2f);
 }
 
-void __stdcall LIGHTMAP_AddLightToCell(int nX, int nIntensity, uint8_t nRed, uint8_t nGreen, uint8_t nBlue, int nY) {
+static void __stdcall LIGHTMAP_AddLightToCell(int nX, int nIntensity, uint8_t nRed, uint8_t nGreen, uint8_t nBlue, int nY) {
     uint32_t nNewGreen;
     uint32_t nFalloff;
     uint32_t nCellY = (nY >> 3) - gnLightmapWorldRefreshFlag;
@@ -423,7 +423,7 @@ void __stdcall LIGHTMAP_AddLightToCell(int nX, int nIntensity, uint8_t nRed, uin
     gaLightMapCells[nCellOffset].nCellIntensity = (uint8_t)nCellY;
 }
 
-void __stdcall LIGHTMAP_ApplyPointLight(int nQuality, D2LightMapStrc * pLightMap) {
+static void __stdcall LIGHTMAP_ApplyPointLight(int nQuality, D2LightMapStrc * pLightMap) {
     DWORD nPlayerGUID;
     uint32_t nDistY;
     uint32_t nApproxDist;
@@ -559,7 +559,7 @@ void __fastcall LIGHTMAP_SampleGridToBuffer(int unused, D2LightMapStrc * pLightM
     } while (nYRowsLeft);
 }
 
-void __stdcall LIGHTMAP_ComputeInterpolationDir(int nSrcX, int nSrcY, D2LightMapStrc * pLightMap) {
+static void __stdcall LIGHTMAP_ComputeInterpolationDir(int nSrcX, int nSrcY, D2LightMapStrc * pLightMap) {
     int nDeltaX;
     nDeltaX = pLightMap->nGridX - nSrcX;
     uint32_t nDeltaY;
@@ -601,7 +601,7 @@ void __stdcall LIGHTMAP_ComputeInterpolationDir(int nSrcX, int nSrcY, D2LightMap
     gnLightmapInterpSubdivRatio = (nDeltaX << 8) / (int)nDeltaY;
 }
 
-void LIGHTMAP_InterpolateCell(int nBufferX, int nBufferY) {
+static void LIGHTMAP_InterpolateCell(int nBufferX, int nBufferY) {
     int nRowOffset;
     int nNeighborIdx;
     uint32_t nSample2;
@@ -664,7 +664,7 @@ void LIGHTMAP_InterpolateCell(int nBufferX, int nBufferY) {
     gLightMapBuffer[nBufferY * 0x40 + nBufferX] = nSample1;
 }
 
-void LIGHTMAP_ApplyStaticLightWithShadow(D2LightMapStrc * pLightMap) {
+static void LIGHTMAP_ApplyStaticLightWithShadow(D2LightMapStrc * pLightMap) {
     uint32_t nDistX;
     int nUnusedScratch;
     int nCellRight;
@@ -808,7 +808,7 @@ void LIGHTMAP_ApplyStaticLightWithShadow(D2LightMapStrc * pLightMap) {
     } while (nRowCounter);
 }
 
-void LIGHTMAP_ApplyCollisionOccludedLight(D2LightMapStrc * pLightMap) {
+static void LIGHTMAP_ApplyCollisionOccludedLight(D2LightMapStrc * pLightMap) {
     D2UnitStrc* pUnit;
     int32_t nUnitY;
     uint32_t* pSrcCell;
@@ -962,7 +962,7 @@ void LIGHTMAP_ApplyCollisionOccludedLight(D2LightMapStrc * pLightMap) {
     exit(-1);
 }
 
-void LIGHTMAP_ApplyLightWithPixelMap(D2LightMapStrc * pLightMap) {
+static void LIGHTMAP_ApplyLightWithPixelMap(D2LightMapStrc * pLightMap) {
     uint32_t nDistX;
     int nIntensity;
     int nCurX;
@@ -1035,7 +1035,7 @@ void LIGHTMAP_ApplyLightWithPixelMap(D2LightMapStrc * pLightMap) {
     }
 }
 
-void __stdcall LIGHTMAP_UpdateSingleLight(int nQuality, D2LightMapStrc * pLightMap) {
+static void __stdcall LIGHTMAP_UpdateSingleLight(int nQuality, D2LightMapStrc * pLightMap) {
     int32_t nPrecisionX;
     int32_t nPrecisionY;
     int nRadius;

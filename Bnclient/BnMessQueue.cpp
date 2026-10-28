@@ -60,12 +60,7 @@ void __fastcall BNMESSQUEUE_EnqueueBytes(int32_t nEventType, char * pBytes, size
     pNewMessage->nDataSize = nSize;
     pNewMessage->nZero = nEventType;
     pNewMessage->pNext = 0;
-    if (!(nSize < 0x121)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x44);
-      exit(-1);
-    }
-
-    {
+    if (nSize < 0x121) {
       ::BnMessQueue* pFirstMessage;
       /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
       pFirstMessage = pNewMessage;
@@ -79,6 +74,9 @@ void __fastcall BNMESSQUEUE_EnqueueBytes(int32_t nEventType, char * pBytes, size
       LeaveCriticalSection(&lpCriticalSection_00882004);
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x44);
+    exit(-1);
 }
 
 uint32_t __fastcall BNMESSQUEUE_EnqueueString(int32_t nEventType, char * szMessage) {
@@ -90,12 +88,7 @@ uint32_t __fastcall BNMESSQUEUE_EnqueueString(int32_t nEventType, char * szMessa
     pNewMessage->nDataSize = (size_t)(pDestBuffer + (1 - (int)(pNewMessage->bBuffer + 1)));
     pNewMessage->nZero = nEventType;
     pNewMessage->pNext = 0;
-    if (!(pDestBuffer + (1 - (int)(pNewMessage->bBuffer + 1)) < (char*)0x121)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x62);
-      exit(-1);
-    }
-
-    {
+    if (pDestBuffer + (1 - (int)(pNewMessage->bBuffer + 1)) < (char*)0x121) {
       ::BnMessQueue* pFirstMessage;
       /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
       pFirstMessage = pNewMessage;
@@ -109,6 +102,9 @@ uint32_t __fastcall BNMESSQUEUE_EnqueueString(int32_t nEventType, char * szMessa
       LeaveCriticalSection(&lpCriticalSection_00882004);
       return 1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x62);
+    exit(-1);
 }
 
 // Dequeues next Battle.net lobby chat message. Thread-safe dequeue from global linked list (nLobbyChatCurrentMessage). Copies message buffer to output, returns data size. Returns 0 if queue empty.

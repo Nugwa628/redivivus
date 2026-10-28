@@ -313,8 +313,6 @@ void __fastcall NET_SID_CLIENT_EncodeCDKeyHash(int32_t pThis, int32_t nSeed);
 int32_t __fastcall NET_SID_CLIENT_DecodeCDKeyHash(int * pnParam, uint32_t nParam, int32_t szCDKey);
 int32_t __fastcall NET_SID_CLIENT_CalculateAlignedBufferSize(uint32_t nParam);
 void __fastcall NET_SID_CLIENT_EncodeBuffer(uint32_t * pdwParam, uint32_t nParam, int32_t nBufferAlignment, int32_t szCDKey);
-int32_t NET_SID_CLIENT_DecodeAndValidateBuffer(int * pnParam, uint32_t nParam);
-uint32_t * NET_SID_CLIENT_LoadAndDecodeCDKeyFile(uint32_t * pnParam, DWORD * dwParam);
 void __stdcall DecodeAndLoadKeys();
 void __stdcall FreeKeys();
 uint32_t __stdcall NET_SID_CLIENT_GetProductId();
@@ -329,5 +327,6 @@ void __fastcall NET_SID_CLIENT_IDEAExpandKey(uint16_t * pUserKey, uint16_t * pEx
 void __fastcall NET_SID_CLIENT_IDEAInvertKey(uint16_t * pEncryptKey, uint16_t * pDecryptKey);
 void __fastcall NET_SID_CLIENT_IDEACrypt(uint16_t * pPlaintext, short * pCiphertext, uint16_t * pSubkeys);
 void __stdcall NET_SID_CLIENT_ClearIDEAContexts();
+// 2 internal functions (defined in .cpp)
 
 } // namespace Bnclient::_net_sid

@@ -569,7 +569,7 @@ void __stdcall CreatePresetObject_Unused(int32_t nParam1, int32_t nParam2, D2Poo
 }
 
 // Spawns repeated object presets (class 0x41) along a vertical line in world coords from start to end, spaced by 0x28. Prepends each to pMap->pPresetUnit and marks flag bit 0x1.
-void CreateObjectPresets(int nWorldX, int nWorldY, D2DrlgMapStrc * pMap, D2PoolManagerStrc * pMemory) {
+static void CreateObjectPresets(int nWorldX, int nWorldY, D2DrlgMapStrc * pMap, D2PoolManagerStrc * pMemory) {
     int32_t worldYStart = 0;
     int worldYEnd = pMap->pDrlgFile->nHeight + nWorldY;
     int worldX = nWorldX;
@@ -587,7 +587,7 @@ void CreateObjectPresets(int nWorldX, int nWorldY, D2DrlgMapStrc * pMap, D2PoolM
 }
 
 // Populates a vertical strip of the preset map with a row of five object presets per Y tile (IDs 0x28, 0x29, 0x29, 0x29, 0x2A at X offsets 0/+5/+10/+15/+20). Skips ahead by +3 rows when the grid cell has specific floor-type flags (type 4, certain subtypes), all linked into pMapStrc->pPresetUnit.
-void __stdcall CreateObjectPresets2(uint32_t xOffset, D2DrlgGridStrc * pGrid, D2PoolManagerStrc * pMemory, D2DrlgMapStrc * pMapStrc) {
+static void __stdcall CreateObjectPresets2(uint32_t xOffset, D2DrlgGridStrc * pGrid, D2PoolManagerStrc * pMemory, D2DrlgMapStrc * pMapStrc) {
     uint32_t cellFlags;
     int32_t worldY;
     int worldX;
@@ -645,7 +645,7 @@ void __stdcall CreateObjectPresets2(uint32_t xOffset, D2DrlgGridStrc * pGrid, D2
 }
 
 // Scans floor layer flags to decide object preset placement. Builds a sub-grid view, checks for a specific cell flag pattern (type 2, subtype 0x18), and invokes CreateObjectPresets/CreateObjectPresets2. Special-cases Def==0x1b to place globally.
-void CreateObjectPresetsForMap(D2DrlgMapStrc * pMapStrc, D2PoolManagerStrc * pMemory) {
+static void CreateObjectPresetsForMap(D2DrlgMapStrc * pMapStrc, D2PoolManagerStrc * pMemory) {
     int floorFlagsBuf[256];
     D2DrlgGridStrc floorGrid;
     D2DrlgCoordStrc mapCoords;
@@ -681,7 +681,7 @@ void CreateObjectPresetsForMap(D2DrlgMapStrc * pMapStrc, D2PoolManagerStrc * pMe
     DrlgGrid::ResetGrid(&floorGrid);
 }
 
-void __stdcall CreateMonsterPreset(D2PoolManagerStrc * pMemory, D2DrlgMapStrc * pDrlgMap) {
+static void __stdcall CreateMonsterPreset(D2PoolManagerStrc * pMemory, D2DrlgMapStrc * pDrlgMap) {
     int32_t nX = pDrlgMap->nSizeX / 2 + pDrlgMap->nRealOffsetX;
     int32_t nY = pDrlgMap->nSizeY / 2 + pDrlgMap->nRealOffsetY;
     Transform::CoordsRoomToWorld(&nX, &nY);
@@ -691,7 +691,7 @@ void __stdcall CreateMonsterPreset(D2PoolManagerStrc * pMemory, D2DrlgMapStrc * 
 }
 
 // Frees all tile grids associated with a preset room's D2DrlgPresetRoomStrc. The room data arrives in EAX and the pool manager in EDI; EAX was modelled as a local, so the reconstruction freed grids off an uninitialised pointer.
-void DRLGPRESET_FreePresetRoomGrids(void * pRoomExData, D2PoolManagerStrc * pPoolManagerStrc) {
+static void DRLGPRESET_FreePresetRoomGrids(void * pRoomExData, D2PoolManagerStrc * pPoolManagerStrc) {
     D2DrlgGridStrc* pGrid;
     int pPresetRoomDataRaw = *(int*)((int)pRoomExData + 0x20);
     if (!(pPresetRoomDataRaw && *(int*)(pPresetRoomDataRaw + 8))) {
@@ -788,7 +788,7 @@ D2RoomExStrc * __fastcall DRLGROOMEX_AllocRoomExTypePreset(D2DrlgLevelStrc * pLe
 }
 
 // Moves preset units from the level's preset list into this room by checking coordinate bounds, adjusting positions to room-local, and linking them into pRoomEx->pPresetUnits.
-void DRLGPRESET_AddAndSetPresetUnits(D2RoomExStrc * pRoomEx) {
+static void DRLGPRESET_AddAndSetPresetUnits(D2RoomExStrc * pRoomEx) {
     bool _bInside;
     bool bInside;
     D2DrlgCoordsStrc roomCoords;
@@ -913,7 +913,7 @@ void __fastcall DRLGPRESET_InitGridsFromDS1File(D2RoomExStrc * pRoom) {
 
 // Allocates up to 6 navigation waypoints (POINT array, 0x30 bytes) for a preset room, scanning the wall grid for tiles with type==10 and subtype 0x17..0x1B (burial-ground passage markers). Converts matching grid coordinates to world space (+2 offset) and stores them in pRoomExData->pNavigationPoints; only runs if the array is not yet allocated.
 // @sourcefile .\DRLG\Preset.cpp
-void DRLGROOMEX_AllocRoomExData_WorldPointsBurialGrounds(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx) {
+static void DRLGROOMEX_AllocRoomExData_WorldPointsBurialGrounds(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx) {
     int nOffsetX;
     int nX;
     int nY;
@@ -1117,7 +1117,7 @@ void __fastcall DRLGROOMEX_InitializePresetRoom(D2RoomExStrc * pRoomEx) {
 // Called by BuildPresetArea after pop tile scanning. Converts pop location boxes
 // from min/max coordinate format to position/size format, adjusts coordinates
 // relative to the DrlgMap origin, and normalizes pop orientation values (divide by 4, subtract 1).
-void __stdcall DRLGPRESET_InitDrlgMapPopLocations(int32_t nPopCount, D2DrlgMapStrc * pDrlgMap) {
+static void __stdcall DRLGPRESET_InitDrlgMapPopLocations(int32_t nPopCount, D2DrlgMapStrc * pDrlgMap) {
     int nY0;
     int nX0;
     int nMinY;
@@ -1249,7 +1249,7 @@ void __fastcall DRLGPRESET_GetDrlgFileSize(D2RoomExStrc * pDrlgMap, int32_t * pn
 }
 
 // Already documented — existing description is accurate and meaningful.
-void __stdcall DRLGPRESET_UpdatePopTiles(int nTickCount, D2RoomExStrc * pRoomEx, D2DrlgCoordsStrc * pPopLocation, uint32_t dwParam3, uint32_t dwParam4) {
+static void __stdcall DRLGPRESET_UpdatePopTiles(int nTickCount, D2RoomExStrc * pRoomEx, D2DrlgCoordsStrc * pPopLocation, uint32_t dwParam3, uint32_t dwParam4) {
     bool _bInside;
     bool bInside;
     int* pTileFlags;
@@ -1661,7 +1661,7 @@ void __fastcall DRLGPRESET_CreateMonsterPresets(D2RoomExStrc * pRoomEx) {
 
 // Builds preset-area grid flags from DS1 data. Sets vis/warp flag bits, loads DS1 file if needed, allocates pops arrays, scans wall layers to mark vis flags and pop locations, records spawn points, and marks grid flags for special objects. Uses LvlPrest Scan/Pops settings to control scanning.
 // @sourcefile .\DRLG\Preset.cpp
-void __stdcall DRLGPRESET_BuildPresetArea(D2DrlgMapStrc * pDrlgMap, D2DrlgLevelStrc * pLevel, D2DrlgGridStrc * pDrlgGrid, int32_t nFlags, BOOL bSingleRoom) {
+static void __stdcall DRLGPRESET_BuildPresetArea(D2DrlgMapStrc * pDrlgMap, D2DrlgLevelStrc * pLevel, D2DrlgGridStrc * pDrlgGrid, int32_t nFlags, BOOL bSingleRoom) {
     int nWarpDestLevel;
     D2DrlgCoordStrc* pPosLocationArray;
     D2ObjectsTxt* pObjectsTxt;

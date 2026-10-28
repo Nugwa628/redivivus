@@ -378,7 +378,7 @@ void __fastcall SKILLS_InvokeCallbackNoTarget(::SGAMEDATA * pGame, D2UnitStrc * 
     (*pfnCallback)(&sContext, pUnit);
 }
 
-BOOL SKILLS_IsRoomInRange(D2RoomStrc * pRoom, int32_t nX, int32_t nRadius, int32_t nY) {
+static BOOL SKILLS_IsRoomInRange(D2RoomStrc * pRoom, int32_t nX, int32_t nRadius, int32_t nY) {
     D2DrlgRoomCoordsStrc roomCoords;
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &roomCoords);
     if (nX + nRadius < roomCoords.dwXStart) {
@@ -681,7 +681,7 @@ void __fastcall SKILLS_UpdatePetMax(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int
 
 // Consumes one charge from a charged-skill item when cast. Looks up the weapon item by nWeaponUnitId, finds the matching charged-skill stat via ITEMMOD_FindChargedSkill, decrements the remaining charge count (floor 0), writes the updated stat back via STATLIST_SetStatValueInBaseArraySafe, and sends a 0x3E UpdateItemStats packet to the client to sync the new charge count.
 // @sourcefile .\SKILLS\Skills.cpp
-void __stdcall SKILLS_UseChargedSkillCharge(::SGAMEDATA * pGame, D2SkillStrc * pSkill, D2UnitStrc * pUnit, uint32_t nWeaponUnitId) {
+static void __stdcall SKILLS_UseChargedSkillCharge(::SGAMEDATA * pGame, D2SkillStrc * pSkill, D2UnitStrc * pUnit, uint32_t nWeaponUnitId) {
     // Frame slots -12..-4 are ONE object: &pChargedStatList is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -1334,7 +1334,7 @@ BOOL __fastcall Skills_SrvDoFunc_004_RemovePetBySkillParam(::SGAMEDATA * pGame, 
     return 1;
 }
 
-BOOL __stdcall SKILLS_ValidateSkillTarget(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill) {
+static BOOL __stdcall SKILLS_ValidateSkillTarget(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill) {
     uint32_t bCanAttack;
     BOOL nAlignmentCheck;
     D2UnitStrc* pTarget = UNIT::SUnit::GetTargetEx(pGame, pUnit);
@@ -2381,7 +2381,7 @@ void __fastcall SKILLS_DispatchSrvDoFunc(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     (*SKILLSRVDOFUNCS[nSrvDoFuncIdx])(pGame, pUnit, eSkill, nParam2);
 }
 
-void ClearNecroPet(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void ClearNecroPet(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     if (!pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfa8);
       exit(-1);
@@ -2403,7 +2403,7 @@ void ClearNecroPet(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     UNIT::SUnit::SetNecroPet(pUnit, -1);
 }
 
-void __stdcall SKILLS_InitSummonedPet(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2MonsterCastPetStrc * pMonsterCastPet) {
+static void __stdcall SKILLS_InitSummonedPet(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2MonsterCastPetStrc * pMonsterCastPet) {
     if (!(*(uint8_t*)&pMonsterCastPet->nFlags & 8) && pUnit) {
       pUnit->eUnitFlags |= UNITFLAG_ISREVIVE;
     }
@@ -2762,7 +2762,7 @@ void __fastcall SKILLS_ApplyAllPassiveStates(D2UnitStrc * pUnit) {
     }
 }
 
-void __stdcall SKILLS_CalcSkillMinMaxToHit(int * pnParam, eD2Skills eSkill, D2UnitStrc * pUnit) {
+static void __stdcall SKILLS_CalcSkillMinMaxToHit(int * pnParam, eD2Skills eSkill, D2UnitStrc * pUnit) {
     int32_t nTotalLevel = D2Common::Skills::SKILLS_GetTotalSkillLevel(pUnit, eSkill);
     int32_t nDamage = D2Common::Skills::SKILL_CalcMinDamage(pUnit, eSkill, nTotalLevel, 1);
     *pnParam = nDamage >> 8;
@@ -3564,7 +3564,7 @@ D2UnitStrc * __fastcall SKILLS_CreateMissileFromUnit(::SGAMEDATA * pGame, eMissi
     return pMissile;
 }
 
-void __stdcall SetTimeoutEffect(::SGAMEDATA * pGame, int32_t timeoutFrame, D2UnitStrc * pUnit) {
+static void __stdcall SetTimeoutEffect(::SGAMEDATA * pGame, int32_t timeoutFrame, D2UnitStrc * pUnit) {
     int nFrame = pGame->dwGameFrame + timeoutFrame;
     if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER && timeoutFrame)) {
       return;
@@ -4302,7 +4302,7 @@ void __fastcall SKILLS_PeriodicStatsCallback(::SGAMEDATA * pGame, D2UnitStrc * p
 }
 
 // Server-side initialiser for a passive aura skill on pUnit. Validates the skill record has the aura flag and a valid aurastate, checks the unit has the skill at level >= 1, then either attaches a new stat-list carrying the aura state/level modifiers (normal auras) or spawns the aura's missile function (skills with flags2 bit 0x80). Finishes by setting the periodic skill timer.
-void __stdcall SKILLS_InitAuraSkill(::SGAMEDATA * pGame, eD2Skills eSkill, D2UnitStrc * pUnit) {
+static void __stdcall SKILLS_InitAuraSkill(::SGAMEDATA * pGame, eD2Skills eSkill, D2UnitStrc * pUnit) {
     D2PoolManagerStrc* pMemory;
     eD2UnitType eOwnerUnitType;
     int32_t dwOwnerGUID;

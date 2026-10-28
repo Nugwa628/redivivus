@@ -66,7 +66,7 @@ int __stdcall DetectCpuVendor() {
     return !bMatch ? 0 : 0x3;
 }
 
-void __stdcall DecodeCpuModelName(uint32_t nModel, int32_t nBrandId, char * pOutName, int32_t nVendor, int32_t nFamily, int32_t nType) {
+static void __stdcall DecodeCpuModelName(uint32_t nModel, int32_t nBrandId, char * pOutName, int32_t nVendor, int32_t nFamily, int32_t nType) {
     int nCopyCount;
     char* pSrcName;
     memcpy(pOutName, "{Unknown}", 10);
@@ -1813,18 +1813,16 @@ void InitHighResTimer() {
     *(uint32_t*)((char*)&qwResult + 4) = -1;
     Atomic64Store(&qwTestTarget, &qwTestValue);
     Atomic64Load(&qwResult, &qwTestTarget);
-    if (!((int)qwResult == 0x29a && !*(uint32_t*)((char*)&qwResult + 4))) {
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3c);
-      exit(-1);
-    }
-
-    {
+    if ((int)qwResult == 0x29a && !*(uint32_t*)((char*)&qwResult + 4)) {
       D2HighResTimestampStrc tInitTimestamp;
       tInitTimestamp.nSeconds = _time32(nullptr);
       tInitTimestamp.dwTick = GetTickCount();
       Atomic64Store((int64_t*)&gHighResTimerInitTimestamp, (int64_t*)&tInitTimestamp);
       return;
     }
+
+    ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3c);
+    exit(-1);
 }
 
 // Returns the current wall-clock second count in EAX (base seconds + elapsed ticks/1000). Takes no arguments: the former EBX parameter was a phantom propagated from AtomicExchange64's don't-care comparand.

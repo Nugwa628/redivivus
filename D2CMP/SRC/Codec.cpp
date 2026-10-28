@@ -30,7 +30,7 @@
 
 namespace D2CMP::SRC::Codec {
 
-uint32_t CODEC_ReadBits(D2CodecBitStateStrc * pBitState, int nNumBits) {
+static uint32_t CODEC_ReadBits(D2CodecBitStateStrc * pBitState, int nNumBits) {
     uint32_t nResult;
     uint32_t nWordVal;
     if (!nNumBits) {
@@ -74,7 +74,7 @@ uint32_t __stdcall CODEC_ReadBitsWithTransparency(uint32_t pCharSelComp, D2Codec
     return nBitsRead;
 }
 
-BOOL CODEC_AdvanceFrameIterator(int * pnParam, int32_t nParam) {
+static BOOL CODEC_AdvanceFrameIterator(int * pnParam, int32_t nParam) {
     int nFrameEntry;
     int nFrameWidth;
     uint32_t nXRemainder;
@@ -177,7 +177,7 @@ BOOL CODEC_AdvanceFrameIterator(int * pnParam, int32_t nParam) {
     return 1;
 }
 
-void CODEC_InitializeFrameIterator(int32_t nParam) {
+static void CODEC_InitializeFrameIterator(int32_t nParam) {
     int iterState[15];
     int nStride = *(int*)(nParam + 0x10) + 3;
     int nHeightAligned = *(int*)(nParam + 0x14) + 3;
@@ -198,7 +198,7 @@ void CODEC_InitializeFrameIterator(int32_t nParam) {
     }
 }
 
-void __stdcall CODEC_CalculateFrameBounds(int32_t pFrameData, int32_t nMaxXAccum, int * pOutBounds, void * pFrameArray) {
+static void __stdcall CODEC_CalculateFrameBounds(int32_t pFrameData, int32_t nMaxXAccum, int * pOutBounds, void * pFrameArray) {
     int nFramesLeft;
     *pOutBounds = pFrameData;
     pOutBounds[1] = (int)pFrameArray;
@@ -306,7 +306,7 @@ void __fastcall CODEC_BuildInversePaletteFromBitmask(uint8_t * pInversePalette, 
     Fog::Debug::GuardStack();
 }
 
-void __stdcall CODEC_DecodeFramePixels(uint8_t * * pbParam, int32_t nParam, int32_t nBitStream2, int * pPrevIterState, int * pnParam) {
+static void __stdcall CODEC_DecodeFramePixels(uint8_t * * pbParam, int32_t nParam, int32_t nBitStream2, int * pPrevIterState, int * pnParam) {
     uint32_t nSkipBit;
     void* pDstRow;
     int iRow;

@@ -61,7 +61,7 @@ BOOL __stdcall ARCHIVE_LoadMPQFiles() {
     return 0;
 }
 
-uint16_t * __stdcall STRTABLE_GetStringByIndex(D2StringTableTblFileStrc * pStrTable, uint16_t * * ppEntryTable, uint16_t wRawIndex, DWORD dwErrorCode) {
+static uint16_t * __stdcall STRTABLE_GetStringByIndex(D2StringTableTblFileStrc * pStrTable, uint16_t * * ppEntryTable, uint16_t wRawIndex, DWORD dwErrorCode) {
     uint16_t _wRawIndex;
     uint16_t wBoundedIndex = wRawIndex;
     _wRawIndex = (uint32_t)wRawIndex;
@@ -135,13 +135,13 @@ uint16_t * __fastcall GetLocaleString(uint16_t nParam) {
         return pResult;
       }
     }
-    if (!gpStringTableBase) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x246);
-      exit(-1);
+    if (gpStringTableBase) {
+      pResult = STRTABLE_GetStringByIndex(gpStringTableBase, gpStringIndexBase, wClampedIndex, dwRawIndex);
+      return pResult;
     }
 
-    pResult = STRTABLE_GetStringByIndex(gpStringTableBase, gpStringIndexBase, wClampedIndex, dwRawIndex);
-    return pResult;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x246);
+    exit(-1);
 }
 
 // @sourcefile .\StrTable\strtable.cpp
@@ -229,7 +229,7 @@ uint16_t * __fastcall STRTABLE_GetTranslatedString(uint8_t * pbParam) {
     } while (true);
 }
 
-uint16_t __stdcall STRTABLE_FindStringByKey(uint16_t * * ppHashTable, uint8_t * pbParam, int * pnParam, D2StringTableTblFileStrc * pStrTable) {
+static uint16_t __stdcall STRTABLE_FindStringByKey(uint16_t * * ppHashTable, uint8_t * pbParam, int * pnParam, D2StringTableTblFileStrc * pStrTable) {
     int nCmp;
     int iVar1 = (uint32_t)pStrTable->wIndexCount * 2;
     uint32_t nProbeCount = 0;
@@ -797,7 +797,7 @@ void __stdcall STRTABLE_FormatUInt64WithAbbrev(uint16_t * wszText, uint32_t dwPa
     Fog::Debug::GuardStack();
 }
 
-void STRTABLE_LoadAbbreviationSymbols(DWORD dwParam) {
+static void STRTABLE_LoadAbbreviationSymbols(DWORD dwParam) {
     uint16_t* pwsAbbrevStr;
     char* pszScanPtr;
     char szAbbrevBuf[8];

@@ -42,7 +42,7 @@ typedef int (__stdcall *pfnCheckRevision)(LPCSTR szFile1, LPCSTR szFile2, LPCSTR
 
 namespace Bnclient::BnDownload {
 
-void __stdcall BNDOWNLOAD_WriteFileWithTimestamp(LPCSTR pThis, LPCVOID param_1, DWORD dwParam, FILETIME * pFileTime) {
+static void __stdcall BNDOWNLOAD_WriteFileWithTimestamp(LPCSTR pThis, LPCVOID param_1, DWORD dwParam, FILETIME * pFileTime) {
     LPCSTR szFilePathCopy = pThis;
     HANDLE hFile = Fog::Source::SFile::thunk_CreateFileA(pThis, 0x40000000, 0, (LPSECURITY_ATTRIBUTES)0x0, 2, 0x80, (HANDLE)0x0);
     if (hFile == (HANDLE)-1) {
@@ -54,7 +54,7 @@ void __stdcall BNDOWNLOAD_WriteFileWithTimestamp(LPCSTR pThis, LPCVOID param_1, 
     Fog::Source::SFile::SFILE_Win32CloseHandle(hFile);
 }
 
-BOOL __stdcall NET_CopyDllFromArchive(D2ArchiveStrc * pArchive, char * pszSrcFileName, LPSTR szText) {
+static BOOL __stdcall NET_CopyDllFromArchive(D2ArchiveStrc * pArchive, char * pszSrcFileName, LPSTR szText) {
     void* lpBuffer;
     HANDLE hFile;
     char cTmp2;
@@ -107,7 +107,7 @@ uint32_t __stdcall BNDOWNLOAD_HasActiveDownloads() {
     return (uint32_t)(0 < (int)lpAddend_00881d5c);
 }
 
-BOOL __stdcall NET_RecvExact(SOCKET hSocket, int32_t pBuffer, uint32_t nLen) {
+static BOOL __stdcall NET_RecvExact(SOCKET hSocket, int32_t pBuffer, uint32_t nLen) {
     uint32_t nBytesReceived = 0;
     if (!nLen) {
       return 1;
@@ -128,7 +128,7 @@ BOOL __stdcall NET_RecvExact(SOCKET hSocket, int32_t pBuffer, uint32_t nLen) {
 
 // Opens szText; when its last-write FILETIME is within 0x2625a00 (40,000,000 x 100 ns = 4 s) of *pftCompare in either direction, returns its size, else 0.
 // Provenance: 1.14d asm 0051e677-0051e69d (SUB/SBB against [EDI]/[EDI+4], 64-bit NEG/ADC/NEG abs, CMP 0x2625a00).
-DWORD BNDOWNLOAD_GetCachedFileSize(LPCSTR szText, FILETIME * pftCompare) {
+static DWORD BNDOWNLOAD_GetCachedFileSize(LPCSTR szText, FILETIME * pftCompare) {
     bool bBorrow;
     _FILETIME ftLastWrite;
     HANDLE hFile = Fog::Source::SFile::thunk_CreateFileA(szText, 0x80000000, 3, (LPSECURITY_ATTRIBUTES)0x0, 3, 0x8000000, (HANDLE)0x0);
@@ -287,7 +287,7 @@ void __fastcall BNDOWNLOAD_ExtractFileFromArchive(char * szFileName, D2ArchiveSt
     Storm::Source::SFile::SFileCloseFile(pMpqFile);
 }
 
-BOOL BNDOWNLOAD_LaunchVerifiedExecutables(LPCSTR szText1, LPCSTR szText2) {
+static BOOL BNDOWNLOAD_LaunchVerifiedExecutables(LPCSTR szText1, LPCSTR szText2) {
     uint32_t pcFileEnd;
     char cFirstChar = (char)*szText2;
     while (true) {
@@ -338,7 +338,7 @@ uint32_t __stdcall BNDOWNLOAD_HasPatchFilename() {
     return (uint32_t)(lpFileName_00881c58[0] != '\0');
 }
 
-BOOL __stdcall BnetDownloadFile(SOCKET hSocket, char * szText, FILETIME * pTimestamp, int32_t nProgressMode, uint8_t bWriteFlags, uint8_t * * ppOutBuffer, uint32_t nFileSize) {
+static BOOL __stdcall BnetDownloadFile(SOCKET hSocket, char * szText, FILETIME * pTimestamp, int32_t nProgressMode, uint8_t bWriteFlags, uint8_t * * ppOutBuffer, uint32_t nFileSize) {
     int nRecvResult;
     uint8_t* pRecvBuf = (uint8_t*)Storm::SMem::SMemAlloc(nFileSize, ".\\BnDownload.cpp", 0x385, 8);
     uint32_t nBytesReceived = 0;
@@ -376,7 +376,7 @@ BOOL __stdcall BnetDownloadFile(SOCKET hSocket, char * szText, FILETIME * pTimes
     return 1;
 }
 
-int32_t __stdcall BNDOWNLOAD_RecvFileFromSocket(LPCSTR pThis, SOCKET hSocket, uint32_t nOffset, uint32_t nTotalSize, int32_t nProgressMode, FILETIME * pFileTime) {
+static int32_t __stdcall BNDOWNLOAD_RecvFileFromSocket(LPCSTR pThis, SOCKET hSocket, uint32_t nOffset, uint32_t nTotalSize, int32_t nProgressMode, FILETIME * pFileTime) {
     // Frame slots -1472..-4 are ONE object: &nBytesWritten is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {

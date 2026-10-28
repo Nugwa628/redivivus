@@ -101,7 +101,7 @@ char __stdcall DRLGROOMTILE_GetWarpDirectionByte(int nTileType) {
 }
 
 // Sets the warp tile direction by looking up the correct LvlWarp entry based on the destination direction, updating the tile link's warp data pointer.
-void __stdcall DRLGROOMTILE_SetWarpTileDirection(D2DrlgTileLinkStrc * pTileLink, int dwParam2) {
+static void __stdcall DRLGROOMTILE_SetWarpTileDirection(D2DrlgTileLinkStrc * pTileLink, int dwParam2) {
     uint8_t nDirection;
     uint8_t nCurrentDir;
     if (!pTileLink) {
@@ -131,7 +131,7 @@ void __stdcall DRLGROOMTILE_SetWarpTileDirection(D2DrlgTileLinkStrc * pTileLink,
     }
 }
 
-BOOL __stdcall DRLGROOMTILE_CreateExitWarp(uint32_t nTileFlags, int32_t nXTileId, int32_t nX, int32_t nYTileId, D2RoomExStrc * pRoomEx) {
+static BOOL __stdcall DRLGROOMTILE_CreateExitWarp(uint32_t nTileFlags, int32_t nXTileId, int32_t nX, int32_t nYTileId, D2RoomExStrc * pRoomEx) {
     D2LvlWarpTxt* pWarpInfo = DrlgRoom::DRLGLEVEL_GetWarpsIdIfExistsAndSetup(pRoomEx->pLevel, (uint8_t)(nTileFlags >> 0x14) & 0x3f, nX != 0xb ? 0x6c : 0x72);
     if (!pWarpInfo) {
       return 0;
@@ -151,7 +151,7 @@ BOOL __stdcall DRLGROOMTILE_CreateExitWarp(uint32_t nTileFlags, int32_t nXTileId
 }
 
 // NOTE: Callee-saved register params inferred (medium confidence): pRoomExStrc (EDI): D2RoomExStrc*
-void __stdcall DRLGROOMTILE_SetupWarpTile(D2RoomExStrc * pRoomExStrc, D2DrlgTileDataStrc * pTileData, uint32_t nGridInfo, int nTileType) {
+static void __stdcall DRLGROOMTILE_SetupWarpTile(D2RoomExStrc * pRoomExStrc, D2DrlgTileDataStrc * pTileData, uint32_t nGridInfo, int nTileType) {
     D2LvlWarpTxt* pDVar1;
     BOOL BVar2;
     D2DrlgTileDataStrc* pWallTile;
@@ -197,7 +197,7 @@ void __stdcall DRLGROOMTILE_SetupWarpTile(D2RoomExStrc * pRoomExStrc, D2DrlgTile
 }
 
 // Initializes the warp-tile cache entries for a room tile. Extracts the warp destination index from the packed tile flags, locates the matching warp-cache entry via the tile data list, sets the warp direction, then appends up to 4 floor tile entries (one per warp sub-position using gaWarpTileOffsetX/Y) into the room's tile grid and links them into the warp cache. Sets the 0x800000 room flag to mark warp cache as initialized.
-void __stdcall DRLGROOMTILE_InitWarpCacheTiles(uint32_t nPackedTileFlags, D2RoomExStrc * dwParam2, int32_t dwParam3, int32_t dwParam4, int32_t dwParam5) {
+static void __stdcall DRLGROOMTILE_InitWarpCacheTiles(uint32_t nPackedTileFlags, D2RoomExStrc * dwParam2, int32_t dwParam3, int32_t dwParam4, int32_t dwParam5) {
     // Static local variables (originally global data)
     static int gaWarpTileOffsetY[8] = { 0x0, 0x0, 0x1, 0x0, 0x0, 0x1, 0x1, 0x1 }; D2_STATIC_GUARD(gaWarpTileOffsetY, "D2Common::Drlg::RoomTile::DRLGROOMTILE_InitWarpCacheTiles::gaWarpTileOffsetY");
 
@@ -274,7 +274,7 @@ void __stdcall DRLGROOMTILE_InitWarpCacheTiles(uint32_t nPackedTileFlags, D2Room
 }
 
 // Searches a room's tile links for a tile at the given X/Y position matching the specified floor/wall type and orientation flags.
-D2DrlgTileDataStrc * __stdcall DRLGROOMTILE_FindTileAtPosition(int nFlags, int dwParam2, int dwParam3, int32_t dwParam4, int dwParam5) {
+static D2DrlgTileDataStrc * __stdcall DRLGROOMTILE_FindTileAtPosition(int nFlags, int dwParam2, int dwParam3, int32_t dwParam4, int dwParam5) {
     D2DrlgTileDataStrc* pTileData;
     if (!*(int*)(dwParam2 + 0x54)) {
       return nullptr;
@@ -319,7 +319,7 @@ D2DrlgTileDataStrc * __stdcall DRLGROOMTILE_FindTileAtPosition(int nFlags, int d
 }
 
 // Searches the given room and all its near rooms for a tile at the specified position matching the given flags. Returns the tile data and sets the output room pointer.
-D2DrlgTileDataStrc * __stdcall DRLGROOMTILE_FindTileInNearRooms(int nFlags, D2RoomExStrc * pRoomEx, int32_t dwParam3, int32_t dwParam4, int32_t dwParam5, D2RoomExStrc * * dwParam6) {
+static D2DrlgTileDataStrc * __stdcall DRLGROOMTILE_FindTileInNearRooms(int nFlags, D2RoomExStrc * pRoomEx, int32_t dwParam3, int32_t dwParam4, int32_t dwParam5, D2RoomExStrc * * dwParam6) {
     int nIndex;
     if (0 < pRoomEx->nDrlgRoomsExNearCount) {
       D2DrlgTileDataStrc* pFoundTile;
@@ -354,7 +354,7 @@ D2DrlgTileLinkStrc * __stdcall DRLGROOMTILE_AllocTileLink(D2PoolManagerStrc * pP
 
 // Adds a tile data entry of the given type (0=floor, 0xd=shadow, other=wall) to the room, allocating a tile link if needed. For warp types (0xa/0xb), validates coordinates first.
 // @sourcefile .\DRLG\RoomTile.cpp
-D2DrlgTileDataStrc * __stdcall DRLGROOMTILE_AddTileData(D2RoomExStrc * pRoomEx, int nTileType, D2PoolManagerStrc * pPoolManager, uint32_t nGridInfo, int32_t nX, int32_t nY) {
+static D2DrlgTileDataStrc * __stdcall DRLGROOMTILE_AddTileData(D2RoomExStrc * pRoomEx, int nTileType, D2PoolManagerStrc * pPoolManager, uint32_t nGridInfo, int32_t nX, int32_t nY) {
     D2DrlgTileLinkStrc* pTileLink;
     int nTileLibEntry;
     D2DrlgTileDataStrc* pTileData;
@@ -406,7 +406,7 @@ D2DrlgTileDataStrc * __stdcall DRLGROOMTILE_AddTileData(D2RoomExStrc * pRoomEx, 
 
 // Resolves and applies the final tile 'type' for one DRLG room tile when stitching a room against its neighbors. Maps the incoming layer to a tile type (via gnRoomTileMappingByTypeAndLayer / transition table), with special handling for wall types 8/9 at room edges and roof-edge cases. Allocates/links extra map-link tile data for type-3 (roof) tiles, updates collision via TileLibrary_UpdateCollision when the library entry changes, swaps in the new tile library entry, and finally calls DRLGROOMTILE_SetWallTileFlags. Side effects: mutates pTileData->nTileType/flags/pTileLibraryEntry, allocates from the server pool, updates room collision. Register/stack params (note: callee-saved ESI param inferred). Server-side D2Common DRLG room-tile generation.
 // @sourcefile .\DRLG\RoomTile.cpp
-void __stdcall DRLGROOMTILE_UpdateTileType(D2DrlgTileDataStrc * pTileData, D2RoomExStrc * pRoomExStrc, D2PoolManagerStrc * pPoolManager, D2RoomExStrc * pNeighborRoom, int nTileLayer, uint32_t nGridFlags, int nPosX, int32_t nPosY) {
+static void __stdcall DRLGROOMTILE_UpdateTileType(D2DrlgTileDataStrc * pTileData, D2RoomExStrc * pRoomExStrc, D2PoolManagerStrc * pPoolManager, D2RoomExStrc * pNeighborRoom, int nTileLayer, uint32_t nGridFlags, int nPosX, int32_t nPosY) {
     // Static local variables (originally global data)
     static int gnRoomTileMappingTransitionByType[43] = {
     0x0,
@@ -558,7 +558,7 @@ void __stdcall DRLGROOMTILE_UpdateTileType(D2DrlgTileDataStrc * pTileData, D2Roo
 }
 
 // Searches near rooms for an existing tile at position nX. If found, updates the tile type via DRLGROOMTILE_UpdateTileType. If not found, creates a new tile via DRLGROOMTILE_AddTileData.
-void __stdcall DRLGROOMTILE_UpdateOrAddTile(int32_t nX, int32_t nY, D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx, int nTileType, uint32_t nGridInfo) {
+static void __stdcall DRLGROOMTILE_UpdateOrAddTile(int32_t nX, int32_t nY, D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx, int nTileType, uint32_t nGridInfo) {
     D2RoomExStrc* local_8 = 0;
     D2DrlgTileDataStrc* pTileData = DRLGROOMTILE_FindTileInNearRooms(nGridInfo, pRoomEx, (uint32_t)!nTileType, nX, nY, &local_8);
     if (pTileData) {
@@ -570,7 +570,7 @@ void __stdcall DRLGROOMTILE_UpdateOrAddTile(int32_t nX, int32_t nY, D2PoolManage
 }
 
 // DRLG room-tile generation dispatcher. Given a packed cell-flags dword (nFlags, holding a 6-bit main tile index and orientation byte) plus a cell-type flag set (nOtherFlags), decides what tile data to create for cell (nX, nSizeMaybe) in pRoom. For special/warp cells (CELLFLAGS_0x80000000) it either builds presets (CreatesPresets) or exit warps (DRLGROOMTILE_CreateExitWarp + InitWarpCacheTiles). For collision/update cells (CELLFLAGS_0x04) it defers to DRLGROOMTILE_UpdateOrAddTile. Otherwise it allocates a new floor tile in pRoom->pRoomTiles (selecting a tile-library entry, with a special blank-floor index for level 0x4a), then optionally adds wall (DRLGROOMTILE_CreateWallTileData, plus warp-tile setup) and shadow (DRLGROOMTILE_CreateShadowTileData) tiles. Side-effect: appends entries to the room's tile grid. No return.
-void __stdcall DRLGROOMTILE_ProcessTile(eD2GridCellFlags nFlags, D2RoomExStrc * pRoom, D2PoolManagerStrc * pMemory, int32_t nX, int32_t nSizeMaybe, int32_t nParam, eD2GridCellFlags nOtherFlags) {
+static void __stdcall DRLGROOMTILE_ProcessTile(eD2GridCellFlags nFlags, D2RoomExStrc * pRoom, D2PoolManagerStrc * pMemory, int32_t nX, int32_t nSizeMaybe, int32_t nParam, eD2GridCellFlags nOtherFlags) {
     int nTileLibEntry;
     eD2GridCellFlags nGridFlags;
     uint32_t nBlankTileFlags;
@@ -881,7 +881,7 @@ void __fastcall DRLGROOMTILE_GrowTileDataArray(D2PoolManagerStrc * pMemory, D2Dr
 
 // NOTE: Callee-saved register params inferred (medium confidence): pPoolManagerStrc (EDI): D2PoolManagerStrc*
 // @sourcefile .\DRLG\RoomTile.cpp
-void DRLGROOMTILE_FreeTileArrays(D2RoomExStrc * pLevelCtx, D2PoolManagerStrc * pPoolManagerStrc) {
+static void DRLGROOMTILE_FreeTileArrays(D2RoomExStrc * pLevelCtx, D2PoolManagerStrc * pPoolManagerStrc) {
     D2DrlgTileGridStrc* pTileGrid = pLevelCtx->pRoomTiles;
     if (!(pTileGrid && &pTileGrid->sRoomTiles)) {
       return;

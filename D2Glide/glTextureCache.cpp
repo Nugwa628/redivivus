@@ -96,7 +96,7 @@ int __fastcall GLTEXCACHE_Initialize(GlTextureCacheStrc * pCache, int nVramStart
 }
 
 // Appends texture cache node to tail of active LRU list (most-recently-used position). Creates list if empty, otherwise links to existing tail.
-void GLTEXCACHE_AppendNodeToTail(GlTextureCacheStrc * pCache, GlTextureCacheNodeStrc * pNode) {
+static void GLTEXCACHE_AppendNodeToTail(GlTextureCacheStrc * pCache, GlTextureCacheNodeStrc * pNode) {
     if (!pCache->pActiveHead) {
       pCache->pActiveHead = (uint8_t*)pNode;
       pCache->pActiveTail = (uint8_t*)pNode;
@@ -149,18 +149,13 @@ GlTextureCacheNodeStrc * __fastcall GLTEXCACHE_RemoveNodeByIndex(GlTextureCacheS
 }
 
 // Allocates node from free list and moves to active list tail (MRU position). Returns 1-based node index on success, 0 if cache full. Halts with error 0xc1 if free list unexpectedly empty.
-int GLTEXCACHE_AllocateNode(GlTextureCacheStrc * pCache) {
+static int GLTEXCACHE_AllocateNode(GlTextureCacheStrc * pCache) {
     if (pCache->nUsedCount == pCache->nMaxEntries) {
       return 0;
     }
 
     int* pAllocNode = (int*)pCache->pFreeHead;
-    if (!pAllocNode) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc1);
-      exit(-1);
-    }
-
-    {
+    if (pAllocNode) {
       uint8_t* pNewFreeHead;
       pNewFreeHead = (uint8_t*)pAllocNode[5];
       pCache->pFreeHead = pNewFreeHead;
@@ -185,6 +180,9 @@ int GLTEXCACHE_AllocateNode(GlTextureCacheStrc * pCache) {
       pCache->pActiveTail = (uint8_t*)pAllocNode;
       return *pAllocNode + 1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc1);
+    exit(-1);
 }
 
 // Promotes a texture cache node to most-recently-used position (active list tail). Validates index range and ensures cache has multiple entries before relinking.

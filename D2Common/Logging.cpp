@@ -19,7 +19,7 @@ void __stdcall MISC_SafeStrncpy(char * szText, size_t nSize) {
 }
 
 // NOTE: Callee-saved register params inferred (medium confidence): pchar (EBX): char*
-void __fastcall StoreLogging(char * szFormat, va_list pArgs, FILE * pFile, uint32_t nThreadId, uint32_t nLogLevel, uint32_t nComponent, uint32_t nSubsystem, uint32_t nSequence, char * szContext) {
+static void __fastcall StoreLogging(char * szFormat, va_list pArgs, FILE * pFile, uint32_t nThreadId, uint32_t nLogLevel, uint32_t nComponent, uint32_t nSubsystem, uint32_t nSequence, char * szContext) {
     size_t nHeaderLen;
     int nMessageLen;
     char* szOutput;

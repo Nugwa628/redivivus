@@ -114,7 +114,7 @@ bool __fastcall Q10_IsRadamentCompleted(::SGAMEDATA * pGame) {
 // Returns 1 (quest "live"/should be shown) when NOT yet Completed and NOT
 // FinishedInPreviousGame, OR when JustCompleted/CannotCompleteQuestInGame is set;
 // returns 0 once fully closed out. Drives whether to push a quest-log update to client.
-BOOL __stdcall Q10_CheckHoradricStaffState(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static BOOL __stdcall Q10_CheckHoradricStaffState(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
     D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
@@ -141,7 +141,7 @@ BOOL __stdcall Q10_CheckHoradricStaffState(D2UnitStrc * pUnit, ::SGAMEDATA * pGa
 // Q10_NotifyHoradricStaffActive. If Q10_CheckHoradricStaffState says the quest is
 // live, send quest-log update (msg 9 = The Horadric Staff) to the player. Pure
 // notification wrapper; no state changes.
-void __stdcall Q10_NotifyHoradricStaffActive(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void __stdcall Q10_NotifyHoradricStaffActive(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     BOOL bIsQuestLive = Q10_CheckHoradricStaffState(pUnit, pGame);
     if (!bIsQuestLive) {
       return;
@@ -157,7 +157,7 @@ void __stdcall Q10_NotifyHoradricStaffActive(D2UnitStrc * pUnit, ::SGAMEDATA * p
 // For each held item it reads the matching QuestRecord step bit (Step0x03/04/05/06/10)
 // and emits the not-yet-told message (low index) or the already-told message
 // (high index). Returns nonzero if a relevant item is held. Read-only on quest state.
-uint8_t __stdcall Q10_CheckQuestItemsForDialog(D2UnitStrc * pUnit, D2QuestDataStrc * pQuestData, uint8_t * pOutput) {
+static uint8_t __stdcall Q10_CheckQuestItemsForDialog(D2UnitStrc * pUnit, D2QuestDataStrc * pQuestData, uint8_t * pOutput) {
     BOOL bQuestStepSet;
     *pOutput = 0xff;
     ::SGAMEDATA* pGame = pQuestData->pGame;

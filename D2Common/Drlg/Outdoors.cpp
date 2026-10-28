@@ -525,7 +525,7 @@ BOOL __fastcall TestOutdoorLevelPreset(D2DrlgLevelStrc * pLevel, int32_t nX, int
 
 // Creates/finds level preset tracker cycling through files.
 // @sourcefile .\DRLG\Outdoors.cpp
-int32_t DRLGOUTDOOR_AllocPresetFileTracker(int32_t nLevelPrestId, D2DrlgLevelStrc * pLevel) {
+static int32_t DRLGOUTDOOR_AllocPresetFileTracker(int32_t nLevelPrestId, D2DrlgLevelStrc * pLevel) {
     D2DrlgLevelLinkNodeStrc* pNode;
     int iVar1;
     D2PoolManagerStrc* pMemory;
@@ -1211,7 +1211,7 @@ void __fastcall SpawnAct12Shrines(D2DrlgLevelStrc * pLevel, int32_t nShrines) {
 
 // Snap each outdoor vertex to 8-tile grid (divide by 8) and merge duplicate vertices by latching next pointer, OR-ing flags, and freeing redundant entries.
 // @sourcefile .\DRLG\Outdoors.cpp
-void DRLGOUTDOOR_SimplifyOutdoorPoints(D2PoolManagerStrc * pMemory, int * * ppnParam) {
+static void DRLGOUTDOOR_SimplifyOutdoorPoints(D2PoolManagerStrc * pMemory, int * * ppnParam) {
     int* pPoint = *ppnParam;
     do {
       *pPoint = (int)(*pPoint + (*pPoint >> 0x1f & 7U)) >> 3;
@@ -1238,7 +1238,7 @@ void DRLGOUTDOOR_SimplifyOutdoorPoints(D2PoolManagerStrc * pMemory, int * * ppnP
 }
 
 // Iterate grid of outdoor chunks (8×8 tiles). For open tiles (no wall/roof flags) spawn standard outdoor rooms, otherwise build preset map from DS1 data and call `BuildArea`. Picks `outdoorRoomStyle` based on level-type heuristics.
-void DRLGOUTDOOR_CreateOutdoorRoomExGrid(D2DrlgLevelStrc * pLevel) {
+static void DRLGOUTDOOR_CreateOutdoorRoomExGrid(D2DrlgLevelStrc * pLevel) {
     uint32_t dwOutdoorFlags;
     int tileTypeFlags;
     D2DrlgCoordStrc mapCoords;
@@ -1432,7 +1432,7 @@ void __fastcall DRLGOUTDOOR_FreeOutdoorLevelData(D2DrlgLevelStrc * pLevel, BOOL 
 }
 
 // Places river of flame presets in Act 4 outdoor levels. Checks level data flags (0x400000 and 0x800000) to conditionally spawn LvlPrest 0x31E at two different Y positions (1 and 4).
-void DRLGOUTPLACE_PlaceAct4SpecialPresets(D2DrlgLevelStrc * pLevel) {
+static void DRLGOUTPLACE_PlaceAct4SpecialPresets(D2DrlgLevelStrc * pLevel) {
     D2DrlgLevelDataWildernessLevel* pDVar1 = pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData;
     if (pDVar1->dwFlags & 0x400000) {
       SpawnOutdoorLevelPresetEx(pLevel, 0, 1, 0x31e, -1, 0);
@@ -1444,7 +1444,7 @@ void DRLGOUTPLACE_PlaceAct4SpecialPresets(D2DrlgLevelStrc * pLevel) {
     SpawnOutdoorLevelPresetEx(pLevel, 0, 4, 0x31e, -1, 0);
 }
 
-void BuildChaosSanctuary(D2DrlgLevelStrc * pLevel) {
+static void BuildChaosSanctuary(D2DrlgLevelStrc * pLevel) {
     // Static local variables (originally global data)
     static int aChaosSanctuaryPresets[25] = {
     0x344,

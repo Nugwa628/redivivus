@@ -69,7 +69,7 @@ void __fastcall LRUCACHE_Init(D2LRUCacheStrc * pCache, D2PoolManagerStrc * pMemo
     pCache->pFreeTail = pCache->pNodeBuffer + pCache->nMaxCount - 1;
 }
 
-D2LRUCacheNodeStrc * LRUCACHE_PopOldest(D2LRUCacheStrc * pCache) {
+static D2LRUCacheNodeStrc * LRUCACHE_PopOldest(D2LRUCacheStrc * pCache) {
     D2LRUCacheNodeStrc* pOldestEntry = pCache->pLRUHead;
     if (!pOldestEntry) {
       return nullptr;
@@ -139,7 +139,7 @@ void __fastcall LRUCACHE_ForEach(D2LRUCacheStrc * pCache, fpLRUCacheForEachFn pf
     } while (bContinue);
 }
 
-D2LRUCacheNodeStrc * LRUCACHE_AllocEntry(D2LRUCacheStrc * pCache, int32_t nEntrySize) {
+static D2LRUCacheNodeStrc * LRUCACHE_AllocEntry(D2LRUCacheStrc * pCache, int32_t nEntrySize) {
     if (pCache->nCount == pCache->nMaxCount || pCache->dwBufSize < (uint32_t)(pCache->nBytesUsed + nEntrySize)) {
       return nullptr;
     }

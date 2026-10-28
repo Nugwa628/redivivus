@@ -1141,7 +1141,7 @@ void __fastcall AUTOMAP_UpdatePartyNamesCallback(D2EscMenuItemStrc * pItem, D2UI
     UI::Automap::AUTOMAP_SetPartyNames(pItem->nImageIndex);
 }
 
-BOOL __stdcall UNITMODE_TryInteractWithObject(D2UnitStrc * pUnit, D2PathPointStrc pathPoint, int32_t nActionType, D2UnitStrc * pTargetUnit, int32_t nTargetGUID) {
+static BOOL __stdcall UNITMODE_TryInteractWithObject(D2UnitStrc * pUnit, D2PathPointStrc pathPoint, int32_t nActionType, D2UnitStrc * pTargetUnit, int32_t nTargetGUID) {
     if (pTargetUnit && pTargetUnit->eUnitFlags >> 1 & 1) {
       BOOL BVar1;
       BVar1 = UNIT::UnitMode::UNITMODE_IsTargetInActionRange(pTargetUnit, pUnit, nActionType);
@@ -2003,7 +2003,7 @@ int32_t __fastcall DC6_AssignParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit
     return nResult;
 }
 
-BOOL __stdcall GFXUTIL_BuildMonsterCofParams(void * pCofFile, int32_t nAnimMode, short * pComponentTable, void * pMonStatsTxt, int32_t nComponentRow, int32_t nWeaponClass, D2GfxDataStrc * pGfxData) {
+static BOOL __stdcall GFXUTIL_BuildMonsterCofParams(void * pCofFile, int32_t nAnimMode, short * pComponentTable, void * pMonStatsTxt, int32_t nComponentRow, int32_t nWeaponClass, D2GfxDataStrc * pGfxData) {
     bool _bCompositeDeath;
     bool bCompositeDeath;
     int nOverlay;

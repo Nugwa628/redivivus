@@ -93,7 +93,7 @@ void __stdcall UI_DrawPartyPanelBackground() {
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, gnPanelOffsetX + 0x100, gnPanelOffsetY - 0x30 + ScreenSizeY, -1, DRAW_SOLID, nullptr);
 }
 
-void UI_DrawPartyMemberSeparatorBar(int32_t nBaseY) {
+static void UI_DrawPartyMemberSeparatorBar(int32_t nBaseY) {
     D2GfxDataStrc sGfxData;
     memset(&sGfxData, 0, 0x48);
     sGfxData.pDC6 = pMenu_partybar;
@@ -104,7 +104,7 @@ void UI_DrawPartyMemberSeparatorBar(int32_t nBaseY) {
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, gnPanelOffsetX + 0x10b, nBaseY - gnPanelOffsetY, -1, DRAW_SOLID, nullptr);
 }
 
-void __stdcall UI_DrawPartyButtonFrame(DC6 * pDC6, int32_t nParam1, int32_t nParam2, int32_t nParam3) {
+static void __stdcall UI_DrawPartyButtonFrame(DC6 * pDC6, int32_t nParam1, int32_t nParam2, int32_t nParam3) {
     D2GfxDataStrc sGfxData;
     memset(&sGfxData, 0, 0x48);
     sGfxData.pDC6 = pDC6;
@@ -135,7 +135,7 @@ void __stdcall UI_InitializePartyButtonStruct(uint32_t nX, uint32_t nY, uint32_t
     pdwParam[6] = nData2;
 }
 
-void SetupPartyButtons(D2RosterStrc * pRoster, D2UiPartyStrc * pUiParty, int32_t nPositionY) {
+static void SetupPartyButtons(D2RosterStrc * pRoster, D2UiPartyStrc * pUiParty, int32_t nPositionY) {
     pUiParty->nScreenY = nPositionY + 0xd;
     BOOL bInParty = GAME::Roster::GetRosterInPartyBool(pRoster);
     pUiParty->pPartyButtons[0].pDC6 = pMenu_partybuttons;
@@ -181,7 +181,7 @@ void SetupPartyButtons(D2RosterStrc * pRoster, D2UiPartyStrc * pUiParty, int32_t
     pUiParty->nRosterGUID = nRosterGUID;
 }
 
-void AllocUiPartyFromRoster(D2RosterStrc * pRoster, int32_t nPositionY) {
+static void AllocUiPartyFromRoster(D2RosterStrc * pRoster, int32_t nPositionY) {
     D2UiPartyStrc* pUiParty;
     char cChar;
     D2UiPartyStrc* pUiPartyGlobal = Party::pUiParty;
@@ -268,7 +268,7 @@ void __fastcall UI_DrawPartyMemberName(char * pszName, D2UiPartyStrc * pUiParty,
     D2Win::Src::D2WinFont::DRAW_text(wszName, gnPanelOffsetX + 0x24, nScreenY - gnPanelOffsetY - 2, nColor, 0);
 }
 
-void __stdcall UI_DrawPartyMemberClass(int32_t nScreenY, int32_t nCharType, int32_t nColor) {
+static void __stdcall UI_DrawPartyMemberClass(int32_t nScreenY, int32_t nCharType, int32_t nColor) {
     uint16_t nLocaleId;
     /* Player Classes */ switch (nCharType) {
       case 0:
@@ -491,7 +491,7 @@ void __stdcall UI_DrawPartyButtons(D2UiPartyStrc * pUiParty) {
     } while (true);
 }
 
-void __stdcall UI_DrawPartyMemberLevelName(D2UiPartyStrc * pUiParty, int32_t nColor, int32_t nScreenY) {
+static void __stdcall UI_DrawPartyMemberLevelName(D2UiPartyStrc * pUiParty, int32_t nColor, int32_t nScreenY) {
     int iVar3;
     uint16_t wszLevelName[255];
     uint16_t wszEllipsis[5];
@@ -602,7 +602,7 @@ int32_t __fastcall UI_CalculateCenteredTextXPosition(uint16_t nLocaleId, int32_t
     return nCenterX - nTextWidth / 2;
 }
 
-void __stdcall ShowToolTipOnPartyButtons(int16_t nLocaleIdLine1, int16_t nLocaleIdLine2, int32_t nOffsetX, int32_t bIsTwoLiner) {
+static void __stdcall ShowToolTipOnPartyButtons(int16_t nLocaleIdLine1, int16_t nLocaleIdLine2, int32_t nOffsetX, int32_t bIsTwoLiner) {
     int nBoxY;
     uint16_t wszLine1[100];
     uint16_t* puVar5 = wszLine1;
@@ -777,7 +777,7 @@ void __stdcall DRAW_UI_PartyWindow_II() {
     }
 }
 
-void __stdcall UI_DrawPartyButtonTextWithTooltip(uint16_t nLocaleId1, uint16_t nLocaleId2, uint32_t dwUnused, int32_t nLine2Y, int32_t nColor, int32_t nOffsetX, int32_t nLine1Y) {
+static void __stdcall UI_DrawPartyButtonTextWithTooltip(uint16_t nLocaleId1, uint16_t nLocaleId2, uint32_t dwUnused, int32_t nLine2Y, int32_t nColor, int32_t nOffsetX, int32_t nLine1Y) {
     int32_t nCenterX;
     uint16_t* pText;
     int nX2;
@@ -810,7 +810,7 @@ void __stdcall UI_DrawPartyButtonTextWithTooltip(uint16_t nLocaleId1, uint16_t n
     D2Win::Src::D2WinFont::DRAW_text(pText, nX, nX2, nColor, bCenter);
 }
 
-void ROSTER_DrawPlayerTooltip(D2RosterStrc * pRoster) {
+static void ROSTER_DrawPlayerTooltip(D2RosterStrc * pRoster) {
     // Static local variables (originally global data)
     static short gawRosterTooltipOffsetX[4] = { 0x2783, 0x277f, 0x2781, 0x277e }; D2_STATIC_GUARD(gawRosterTooltipOffsetX, "D2Client::UI::Party::ROSTER_DrawPlayerTooltip::gawRosterTooltipOffsetX");
     static short gawRosterTooltipOffsetY[4] = { 0x2783, 0x2780, 0x2782, 0x277e }; D2_STATIC_GUARD(gawRosterTooltipOffsetY, "D2Client::UI::Party::ROSTER_DrawPlayerTooltip::gawRosterTooltipOffsetY");
@@ -1266,7 +1266,7 @@ uint32_t ClickParty_II(int32_t eButtonType, D2RosterStrc * pRoster) {
     return nResultFlag;
 }
 
-void UI_HandlePartyButtonClick(D2UiPartyStrc * pUiParty, D2RosterStrc * pRoster, int32_t nButtonIdx) {
+static void UI_HandlePartyButtonClick(D2UiPartyStrc * pUiParty, D2RosterStrc * pRoster, int32_t nButtonIdx) {
     if (pUiParty->pPartyButtons[nButtonIdx].bIsActive == 1) {
       return;
     }
@@ -1539,7 +1539,7 @@ void __stdcall FreePartyDC6() {
 
 // Draws the party-panel level line for one member: string 0xd28 plus separators 0xf9d/0xf9b, then nCharLevel as %2u, at gnPanelOffsetX+0x10a, row nY.
 // Provenance: the only caller (UI_DrawPartyMembers 0049c354) pushes pUiParty->nCharLevel.
-void __stdcall UI_DrawPartyMemberLevel(uint32_t nCharLevel, int32_t dwColor, int32_t nY) {
+static void __stdcall UI_DrawPartyMemberLevel(uint32_t nCharLevel, int32_t dwColor, int32_t nY) {
     int i;
     char szLevel[100];
     uint16_t wszLine[100];

@@ -112,7 +112,7 @@ void __fastcall PLAYER_AllocPlayerInteractedArray(::SGAMEDATA * pGame, D2UnitStr
 }
 
 // @sourcefile .\PLAYER\Player.cpp
-void FreePartyData(::SGAMEDATA * pGame, D2UnitDataPlayerStrc * pPlayerData) {
+static void FreePartyData(::SGAMEDATA * pGame, D2UnitDataPlayerStrc * pPlayerData) {
     D2PartyDataStrc* pMemoryToFree = pPlayerData->pPartyData;
     while (pMemoryToFree) {
       D2PartyDataStrc* pPrevPartyData;
@@ -252,7 +252,7 @@ void __fastcall PLAYER_MoveToLocationWithTimeout(::SGAMEDATA * pGame, D2UnitStrc
 }
 
 // @sourcefile .\PLAYER\Player.cpp
-uint32_t __stdcall PLAYER_PlaceItemInInventory(::SGAMEDATA * pGame, int32_t nParam, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static uint32_t __stdcall PLAYER_PlaceItemInInventory(::SGAMEDATA * pGame, int32_t nParam, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     int32_t nItemX;
     int bItemPlaced;
     int32_t bPlaced;
@@ -279,7 +279,7 @@ uint32_t __stdcall PLAYER_PlaceItemInInventory(::SGAMEDATA * pGame, int32_t nPar
     }
 }
 
-BOOL __stdcall PLAYER_EquipItemToBodyLoc(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static BOOL __stdcall PLAYER_EquipItemToBodyLoc(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     eD2BodyLoc eBodyLoc;
     BOOL bEquipResult;
     uint32_t dwEquipResultOut;
@@ -328,7 +328,7 @@ uint32_t __stdcall PLAYER_PlaceItemInBelt(::SGAMEDATA * pGame, int32_t nParam, D
     }
 }
 
-D2UnitStrc * __stdcall PLAYER_CreateRewardItemFromTemplate(int32_t nGamePtr, int32_t bNoSkill, int32_t nItemClassId, int32_t pTemplateTxt, D2UnitStrc * pUnit) {
+static D2UnitStrc * __stdcall PLAYER_CreateRewardItemFromTemplate(int32_t nGamePtr, int32_t bNoSkill, int32_t nItemClassId, int32_t pTemplateTxt, D2UnitStrc * pUnit) {
     if (!pUnit) {
       return nullptr;
     }
@@ -916,7 +916,7 @@ int32_t __fastcall SERVER_GAME_CountPlayers(::SGAMEDATA * pGame) {
 }
 
 // Applies the on-death gold penalty to the dying player pUnit2 (killer = pUnit). Penalty = min(level,20)% of (inventory gold + stash/bank gold). In single-player it is further capped so the player keeps at least level*500. If killed by another player (or a player-owned monster), the lost gold is moved into the bank (clamped to stash limit); otherwise it is dropped on the ground via GOLD_DropGoldFromInventory and inventory gold zeroed. Records the amount in UNITSTAT_goldlost. Note: uses a custom calling convention (pUnit2 in ESI, pGame/pUnit on stack).
-void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     uint32_t nStashLimit;
     int nLevel;
     nLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_level, 0);
@@ -1032,7 +1032,7 @@ void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2UnitStrc * 
 
 // Computes and applies the experience penalty on player death. Reads the difficulty-scaled penalty percentage, calculates the XP range between the player's current and previous level, subtracts the penalty (clamped so XP cannot drop below level floor +1), and calls SetExperience to broadcast the delta to the client.
 // @sourcefile .\PLAYER\Player.cpp
-void __stdcall EXP_ApplyDeathExpPenalty(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall EXP_ApplyDeathExpPenalty(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     int32_t eClassId;
     uint32_t nExpForLevel;
     DWORD* pDiffLevelTxt = (DWORD*)D2Common::DATATBLS::DataTbls::GetDifficultyLevels((uint32_t)pGame->nDifficulty);

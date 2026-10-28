@@ -70,7 +70,7 @@ typedef BOOL (__fastcall *fpExecuteOnUnitFunction)(::SGAMEDATA * pGame, D2UnitSt
 namespace D2Game::Quests::QUESTS::A1Q5 {
 
 // A1Q5 "Forgotten Tower" — removes a player from one of two in-quest GUID tracking lists (selected by nListSelector 0/1). Searches the list in nListBase for nPlayerGUID; if found, swaps it with the tail entry and decrements the count. Returns 1 if found+removed, 0 if not present. Used to deregister players who leave or are re-synced.
-BOOL __stdcall Q05_RemovePlayerFromTrackingList(int32_t nListSelector, int32_t nListBase, int32_t nPlayerGUID) {
+static BOOL __stdcall Q05_RemovePlayerFromTrackingList(int32_t nListSelector, int32_t nListBase, int32_t nPlayerGUID) {
     uint32_t nListCount;
     int i = 0;
     if (!nListSelector) {

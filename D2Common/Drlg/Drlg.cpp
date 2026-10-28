@@ -150,7 +150,7 @@ void __fastcall DRLGACTMISC_LoadTileProjects(D2DrlgStrc * pDrlg) {
 }
 
 // Tears down or resets the per-level sub-structures of a D2DrlgLevelStrc. When bFreeSubStructs==0 frees the RoomEx state-flags buffer, automap buffer, and level-link-node list; when non-zero allocates/zeroes the state-flags buffer to save room flags before the rooms are freed. Always frees all RoomEx entries, the DrlgMap list, and dispatches to the appropriate DRLGMAZE/PRESET/OUTDOOR free function based on eDrlgType. Clears spawn points and warp coordinates.
-void __stdcall DRLGLEVEL_FreeLevelSubStructs(D2PoolManagerStrc * pMemory, BOOL bFreeSubStructs, D2DrlgLevelStrc * pLevel) {
+static void __stdcall DRLGLEVEL_FreeLevelSubStructs(D2PoolManagerStrc * pMemory, BOOL bFreeSubStructs, D2DrlgLevelStrc * pLevel) {
     int* pStateFlags;
     D2DrlgLevelLinkNodeStrc* pNextLinkNode;
     int nStateOffset = 0;
@@ -333,7 +333,7 @@ D2DrlgLevelWarpCoordinatesStrc * __fastcall DRLGWARP_GetWarpCoordinatesFromRoomE
 }
 
 // If room-ex state flags exist, propagate them into each RoomEx->dwOtherFlags bit 0 based on the per-room flag array.
-void DRLG_ApplyRoomExStateFlags(D2DrlgLevelStrc * pLevel) {
+static void DRLG_ApplyRoomExStateFlags(D2DrlgLevelStrc * pLevel) {
     if (!(pLevel->nRoomExCount && pLevel->pRoomExStateFlags)) {
       return;
     }
@@ -357,7 +357,7 @@ void DRLG_ApplyRoomExStateFlags(D2DrlgLevelStrc * pLevel) {
 }
 
 // Iterates all RoomEx entries in pDrlgLevelStrc to compute and store warp entry-point world coordinates. For each room bearing a warp flag, calls DRLGWARP_GetWarpDestinationFromArray to resolve destination, then records the room center (transformed to world space via CoordsRoomToWorld) into sWarpCoordinates.anX/anY. Returns the last resolved destination level ID.
-void DRLGWARP_InitLevelWarpCoordinates(D2DrlgLevelStrc * pDrlgLevelStrc) {
+static void DRLGWARP_InitLevelWarpCoordinates(D2DrlgLevelStrc * pDrlgLevelStrc) {
     int32_t* pY;
     int destLevelId;
     uint32_t roomFlagMask;
@@ -3514,7 +3514,7 @@ void __fastcall ACT1_fpLevelDataFn2_A(D2DrlgLevelStrc * pLevel, int nNodeOffset,
 }
 
 // Lays out a connected group of DRLG levels from a level-data list. Seeds a temporary placement struct from the DRLG seed, fills each node's world size from LevelDefs (per difficulty), then drives a placement callback per node with backtracking (failed placement rewinds to the previous node). Second pass allocates each level (GetLevelAndAlloc), copies computed world position/size, sets the preset file for Rogue Encampment (1) / Lut Gholein (0x28) from the placement direction, and for Black Marsh (6) picks the Outer Cloister (0x1b) layout file via seed advance, invokes the optional per-level callback, and wires prev/next warp connections (skipped for act 4). Inputs: level-data list, two optional callbacks, target DRLG.
-void __stdcall DRLGLEVEL_ParseLevelData(D2DrlgLevelDataList * pLevelData, fpLevelDataFn1 fnPlacementValidator, fpLevelDataFn2 fnLevelDataCallback, D2DrlgStrc * pDrlg) {
+static void __stdcall DRLGLEVEL_ParseLevelData(D2DrlgLevelDataList * pLevelData, fpLevelDataFn1 fnPlacementValidator, fpLevelDataFn2 fnLevelDataCallback, D2DrlgStrc * pDrlg) {
     uint64_t uVar1;
     BOOL bPlacementResult;
     int nCoordsOffset;
@@ -5156,7 +5156,7 @@ void DRLGOUTPLACE_PlaceAct2DesertVariants(D2DrlgLevelStrc * pLevel) {
 }
 
 // Searches column nX for a warp exit by iterating rows, returns TRUE if found.
-int __stdcall DRLGOUTROOM_FindWarpExitInColumn(D2DrlgLevelStrc * pLevel, int nX, int * pFoundX, int * pFoundY) {
+static int __stdcall DRLGOUTROOM_FindWarpExitInColumn(D2DrlgLevelStrc * pLevel, int nX, int * pFoundX, int * pFoundY) {
     uint32_t nGridFlags2;
     D2DrlgLevelDataWildernessLevel* pWildData = pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData;
     int nY = 1;
@@ -5232,7 +5232,7 @@ int __stdcall DRLGOUTROOM_GetPresetVariantFromGridCell(uint32_t nGridFlags, int 
 }
 
 // Finds and places a river crossing preset pair in an outdoor wilderness level. Uses the level seed to pick a random starting row among usable grid rows (excluding top/bottom edge), then iterates rows looking for two horizontally adjacent cells whose grid flags both have bits 0x30000 set (river tile markers). On match, spawns preset 0x1c at both X positions; the second spawn variant depends on whether the road flag (dwFlags&4) is set.
-void __stdcall DRLGOUTROOM_PlaceRiverCrossingPreset(D2DrlgLevelStrc * pDrlgLevelStrc, int dwParam2) {
+static void __stdcall DRLGOUTROOM_PlaceRiverCrossingPreset(D2DrlgLevelStrc * pDrlgLevelStrc, int dwParam2) {
     BOOL bCellEmpty;
     uint32_t nGridFlags;
     int nCandidateX;
@@ -5399,7 +5399,7 @@ void DRLGOUTROOM_MarkBorderJunctions(D2DrlgLevelStrc * pLevel) {
 }
 
 // Spawns a corner fill preset at grid coordinates (nX, nY) to fill gaps in outdoor room layouts.
-BOOL __stdcall DRLGOUTROOM_SpawnCornerFillPreset(int nY, int nX, D2DrlgLevelStrc * dwParam3) {
+static BOOL __stdcall DRLGOUTROOM_SpawnCornerFillPreset(int nY, int nX, D2DrlgLevelStrc * dwParam3) {
     D2DrlgLevelDataWildernessLevel* pWildData = dwParam3->pDrlgLevelData.pDrlgLevelOutdoorsData;
     int nGridFlags = DrlgGrid::GetGridFlags(&pWildData->sGridPreset, nX, nY);
     if (nGridFlags == 0x10) {
@@ -5526,7 +5526,7 @@ void __stdcall DRLGOUTROOM_FillBorderCornersAndPresets(D2DrlgLevelStrc * pLevel)
 }
 
 // NOTE: Callee-saved register params inferred (medium confidence): pDrlgLevelStrc (ESI): D2DrlgLevelStrc*
-BOOL __stdcall DRLGOUTROOM_SpawnRandomOutdoorDecorations(int32_t nPresetType, D2DrlgLevelStrc * pDrlgLevelStrc, int bAllowDouble) {
+static BOOL __stdcall DRLGOUTROOM_SpawnRandomOutdoorDecorations(int32_t nPresetType, D2DrlgLevelStrc * pDrlgLevelStrc, int bAllowDouble) {
     uint32_t uVar1;
     D2SeedStrc newSeed = D2_SEED_NEXT(pDrlgLevelStrc->sSeed);
     pDrlgLevelStrc->sSeed = newSeed;
@@ -5631,7 +5631,7 @@ void __stdcall DRLGOUTROOM_SlideGridNeighborBuffer(D2DrlgGridStrc * pGrid, int32
 }
 
 // NOTE: Callee-saved register params inferred (medium confidence): peD2GridCellFlags (ESI): eD2GridCellFlags*, pDrlgGridStrc (EDI): D2DrlgGridStrc*
-void __stdcall DRLGOUTROOM_InitGridNeighborBuffer(int32_t nRow, eD2GridCellFlags * peD2GridCellFlags, D2DrlgGridStrc * pDrlgGridStrc, int32_t nX) {
+static void __stdcall DRLGOUTROOM_InitGridNeighborBuffer(int32_t nRow, eD2GridCellFlags * peD2GridCellFlags, D2DrlgGridStrc * pDrlgGridStrc, int32_t nX) {
     eD2GridCellFlags nCellFlags = DrlgGrid::GetGridFlags(pDrlgGridStrc, nX - 1, nRow - 1);
     peD2GridCellFlags[2] = nCellFlags;
     nCellFlags = DrlgGrid::GetGridFlags(pDrlgGridStrc, nX - 1, nRow);
@@ -5654,7 +5654,7 @@ void __stdcall DRLGOUTROOM_InitGridNeighborBuffer(int32_t nRow, eD2GridCellFlags
 }
 
 // Iterates outdoor vertex lists, calls SetLineFlagsWithWidth for room edges.
-void DRLGGRID_SetOutRoomEdgeFlags(int pDrlgLevelData, D2RoomExStrc * pRoomEx) {
+static void DRLGGRID_SetOutRoomEdgeFlags(int pDrlgLevelData, D2RoomExStrc * pRoomEx) {
     D2DrlgCoordsStrc sCoords;
     D2DrlgVertexStrc* pVertex;
     int nDrlgLevelBase = *(int*)(pDrlgLevelData + 0x14);
@@ -5770,7 +5770,7 @@ void __fastcall DRLGOUTROOM_InitAct1RoomGridCells(D2DrlgLevelStrc * pLevel, D2Dr
 
 // NOTE: Callee-saved register params inferred (medium confidence): pint (ESI): int*
 // Takes THREE arguments, two of them in registers: pLevel in ESI, the destination coord pair in ECX and the source vertex in EDX. The body opens MOV EAX,[EDX] / SUB EAX,[ESI+0x1c] / MOV [ECX],EAX, and the caller at 00681210 loads LEA EDI,[EBX+0x1e8] (pVertex = &aExitPoints4[i]) and LEA ECX,[EDI-0x78] (pOutCoords = &aExitPoints3[i]) - the two arrays are 0x78 apart and six entries each. Declaring only pLevel left the other two as uninitialised locals, so the first outdoor level generated wrote through null.
-int DRLGOUTROOM_SnapVertexToGrid(D2DrlgLevelStrc * pLevel, int * pOutCoords, int * pVertex) {
+static int DRLGOUTROOM_SnapVertexToGrid(D2DrlgLevelStrc * pLevel, int * pOutCoords, int * pVertex) {
     *pOutCoords = *pVertex - pLevel->sCoordinatesAndSize.WorldPosition.x;
     int nRelativeY = pVertex[1] - pLevel->sCoordinatesAndSize.WorldPosition.y;
     pOutCoords[1] = nRelativeY;
@@ -6081,7 +6081,7 @@ void __stdcall DRLGOUTROOM_ComputeExitTargetPositions(D2DrlgLevelStrc * pLevel) 
 }
 
 // Finalises one outdoor exit path (selected by nPathIdx) in pDrlgLevelData: prepends a head vertex at the near exit endpoint, converts each interior vertex from grid to world coords (x8 + level offset + 3) with seed-driven jitter from dx/dy tables scaled by (seed&1)+2, and appends a tail vertex at the far exit endpoint. Mutates the level's RNG seed.
-void __stdcall DRLGOUTROOM_BuildVertexPathsWithJitter(D2DrlgLevelStrc * param_eax, int nPathIdx) {
+static void __stdcall DRLGOUTROOM_BuildVertexPathsWithJitter(D2DrlgLevelStrc * param_eax, int nPathIdx) {
     // Static local variables (originally global data)
     static int gaDrlgPathJitterDX[4] = { 0x1, 0x0, -0x1, 0x0 }; D2_STATIC_GUARD(gaDrlgPathJitterDX, "D2Common::Drlg::DRLGOUTROOM_BuildVertexPathsWithJitter::gaDrlgPathJitterDX");
     static int gnDrlgLevelVersion[4] = { 0x0, 0x1, 0x0, -0x1 }; D2_STATIC_GUARD(gnDrlgLevelVersion, "D2Common::Drlg::DRLGOUTROOM_BuildVertexPathsWithJitter::gnDrlgLevelVersion");
@@ -6211,7 +6211,7 @@ uint8_t * __stdcall DRLGOUTROOM_GetDirectionDeltaLookup(char cParam1, char cPara
 }
 
 // Advances pathfinding node direction counter and propagates.
-int32_t __stdcall DRLGOUTROOM_AdvancePathDirection(int * pnNodeListHead, int32_t pNode) {
+static int32_t __stdcall DRLGOUTROOM_AdvancePathDirection(int * pnNodeListHead, int32_t pNode) {
     if (*(int*)(pNode + 0x14) < 4) {
       (*(int*)(pNode + 0x18))++;
       *(uint8_t*)(pNode + 0x1c) = **(char**)(pNode + 0x18) + *(char*)(pNode + 0x1c) & 3;
@@ -6240,7 +6240,7 @@ int32_t __stdcall DRLGOUTROOM_AdvancePathDirection(int * pnNodeListHead, int32_t
 }
 
 // Validates a single path step at coordinates (nX, nY), checking grid bounds and collision flags.
-BOOL __stdcall DRLGOUTROOM_ValidatePathStep(int * pTargetCoords, int nX, int nY, int * pLevelCtx, int * pVisitedList) {
+static BOOL __stdcall DRLGOUTROOM_ValidatePathStep(int * pTargetCoords, int nX, int nY, int * pLevelCtx, int * pVisitedList) {
     if (nX == *pTargetCoords && nY == pTargetCoords[1]) {
       return 1;
     }

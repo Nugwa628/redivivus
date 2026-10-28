@@ -64,7 +64,7 @@ void __stdcall SEVT_CopyIdHashTable(uint32_t * * pDstTable, int * pSrcTable) {
 
 // @sourcefile .\SOURCE\SEVT.CPP
 // @blizzard DeleteIdHashTable (SEVT.CPP)
-void SEVT_DeleteIdHashTable(void * * pTable) {
+static void SEVT_DeleteIdHashTable(void * * pTable) {
     void* pObject;
     uint32_t nBucket = 0;
     if (pTable[1]) {
@@ -88,7 +88,7 @@ void SEVT_DeleteIdHashTable(void * * pTable) {
 }
 
 // @blizzard FindTypeHashEntry (SEVT.CPP)
-uint32_t * SEVT_FindTypeHashEntry(uint32_t dwUnused, uint32_t nSubId, uint32_t nEventId) {
+static uint32_t * SEVT_FindTypeHashEntry(uint32_t dwUnused, uint32_t nSubId, uint32_t nEventId) {
     uint32_t* pEvent;
     if (!gpEventHashBuckets || !gaEventRegistryHead) {
       pEvent = 0;

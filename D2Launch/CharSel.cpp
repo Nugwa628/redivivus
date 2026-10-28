@@ -173,7 +173,7 @@ char * __stdcall GetPreferedRealm() {
     return PreferredClosedRealm;
 }
 
-uint32_t CHARSEL_IsBetaRealm(uint16_t * wszText) {
+static uint32_t CHARSEL_IsBetaRealm(uint16_t * wszText) {
     // Static local variables (originally global data)
     static uint8_t gbBetaRealmNamesInitialized; D2_STATIC_GUARD_BSS(gbBetaRealmNamesInitialized, "D2Launch::CharSel::CHARSEL_IsBetaRealm::gbBetaRealmNamesInitialized");
 
@@ -214,7 +214,7 @@ uint32_t CHARSEL_IsBetaRealm(uint16_t * wszText) {
     return 0;
 }
 
-void CHARSEL_GetClassNameString(int nClassId, uint16_t * wszText) {
+static void CHARSEL_GetClassNameString(int nClassId, uint16_t * wszText) {
     uint16_t* pwszName;
     switch (nClassId) {
       case 0:
@@ -252,7 +252,7 @@ void CHARSEL_GetClassNameString(int nClassId, uint16_t * wszText) {
     }
 }
 
-BOOL CHARSEL_ClassHasAlternateDeath(int nPlayerClass) {
+static BOOL CHARSEL_ClassHasAlternateDeath(int nPlayerClass) {
     switch (nPlayerClass) {
       case 0:
 
@@ -280,7 +280,7 @@ void __stdcall CHARSEL_DestroySelectedChar() {
     gpCharSelPendingEntry = 0;
 }
 
-uint32_t CHARSEL_GetDaysUntilExpiry(uint32_t nExpiryTime) {
+static uint32_t CHARSEL_GetDaysUntilExpiry(uint32_t nExpiryTime) {
     __time32_t nTimeBuf;
     uint32_t uVar1 = _time32(&nTimeBuf);
     if (nExpiryTime > uVar1) {

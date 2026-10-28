@@ -148,7 +148,7 @@ BOOL __fastcall Objects_OperateFn32_OpenStash(D2ObjectOperateFnArg * pOperation)
 }
 
 // Server-side handler for player stash gold transactions. Validates the target unit (nUnitGUID) is a stash object (classId 0x10b) and both player and stash are in town. Dispatches on nParam: 0x12 = close stash interaction (clears interact info, calls ITEMMODE_CheckItemLevel); 0x13 = withdraw nGoldAmount from stash (UNITSTAT_goldbank) to inventory (UNITSTAT_gold), capped by inventory gold limit; 0x14 = deposit nGoldAmount from inventory to stash, capped by stash gold limit (partial deposit fills remaining space). Sends sound event 0x13 on inventory-full condition.
-void __stdcall GOLD_HandleStashGoldTransaction(int32_t nGoldAmount, ::SGAMEDATA * pGame, int16_t nParam, D2UnitStrc * pUnit, uint32_t nUnitGUID) {
+static void __stdcall GOLD_HandleStashGoldTransaction(int32_t nGoldAmount, ::SGAMEDATA * pGame, int16_t nParam, D2UnitStrc * pUnit, uint32_t nUnitGUID) {
     int nCurrentGold;
     uint32_t nGoldLimit;
     uint32_t nBankGold;
@@ -229,7 +229,7 @@ uint32_t PLAYERTRADE_CompareUint32(uint32_t * pnParam1, uint32_t * pnParam2) {
 }
 
 // Removes all items from the cube before transmutation. Iterates through the player's inventory, extracts items from INVPAGE_CUBE, sets their page to None, and frees them from the server unit system. Returns the inventory pointer.
-int32_t __stdcall CUBE_RemoveAllCubeItems(::SGAMEDATA * pGame, D2ClientStrc * pClient, D2UnitStrc * pUnit) {
+static int32_t __stdcall CUBE_RemoveAllCubeItems(::SGAMEDATA * pGame, D2ClientStrc * pClient, D2UnitStrc * pUnit) {
     eInventoryPage invPage;
     eD2ItemFlag itemFlagMask;
     if (!pUnit->pInventory) {
@@ -259,7 +259,7 @@ int32_t __stdcall CUBE_RemoveAllCubeItems(::SGAMEDATA * pGame, D2ClientStrc * pC
 }
 
 // Counts the number of items currently in the Horadric Cube (INVPAGE_CUBE). Iterates through the player's inventory and counts items whose containing page is INVPAGE_CUBE. Returns the total count.
-int32_t CUBE_CountCubeItems(D2InventoryStrc * pInventory) {
+static int32_t CUBE_CountCubeItems(D2InventoryStrc * pInventory) {
     D2UnitStrc* pItem;
     int nItemCount = 0;
     D2UnitStrc* pInventoryNode = D2Common::INVENTORY::Inventory::INVENTORY_GetFirstItem(pInventory);
@@ -730,7 +730,7 @@ uint32_t __fastcall CUBE_MatchInputDescriptorToCubeItems(::SGAMEDATA * pGame, D2
 }
 
 // Validates that cube items match a recipe's input requirements. Zeroes a 192-byte usage tracking array (48 ints for up to 48 cube items), then calls CheckIfCubeInputIsValidDetails for each of the 7 possible input slots. Returns 1 if all required inputs are satisfied, 0 otherwise. The usage array prevents an item from matching multiple input slots.
-BOOL __stdcall CUBE_ValidateRecipeInputs(::SGAMEDATA * pGame, D2CubeSetupStrc * pMatchedItems, D2CubeMainTxt * pRecipe, D2InventoryStrc * pInventory) {
+static BOOL __stdcall CUBE_ValidateRecipeInputs(::SGAMEDATA * pGame, D2CubeSetupStrc * pMatchedItems, D2CubeMainTxt * pRecipe, D2InventoryStrc * pInventory) {
     bool _bInputMatched;
     bool bInputMatched;
     uint8_t aItemUsedFlags[192];
@@ -1323,7 +1323,7 @@ void __stdcall GetDateUnused(int * pnParam) {
 }
 
 // Server-side Horadric Cube recipe engine. Counts items currently in the player's cube, then scans every CubMain.txt recipe checking gating conditions: enabled (or debug-allow-disabled), expansion/version, ladder-only vs SP, min difficulty, required class, exact input count. Recipes with nOp 1-2 add calendar gates (day-of-month range, day-of-week); nOp 3-14 add a player-stat threshold compared (</>/==) against nValue right-shifted by the stat's valshift, where the stat is read three different ways (3-6 GetStatUnsignedValue, 7-10 SERVER_GetUnitStat, 11-14 STATLIST_GetStatBonusFromLists). On the first recipe whose gates pass AND whose item inputs validate (CUBE_ValidateRecipeInputs), calls CUBE_GenerateOutput to consume inputs and produce the result, then returns. No-op if player null or cube empty.
-void __stdcall CUBE_MatchAndExecuteRecipe(::SGAMEDATA * pGame, D2UnitStrc * pPlayer) {
+static void __stdcall CUBE_MatchAndExecuteRecipe(::SGAMEDATA * pGame, D2UnitStrc * pPlayer) {
     // Static local variables (originally global data)
     static bool gbCubeAllowDisabledRecipes; D2_STATIC_GUARD_BSS(gbCubeAllowDisabledRecipes, "D2Game::PLAYER::PlayerTrade::CUBE_MatchAndExecuteRecipe::gbCubeAllowDisabledRecipes");
 
@@ -1600,7 +1600,7 @@ void __stdcall CUBE_MatchAndExecuteRecipe(::SGAMEDATA * pGame, D2UnitStrc * pPla
 }
 
 // Handles cube transmute button clicks from the client UI. Button 0x17 clears the interact item and checks item levels. Button 0x18 triggers cube transmutation via ItemCubingSetup. This is the entry point for all cube recipe processing.
-void CUBE_HandleTransmuteButtonClick(D2UnitStrc * pPlayer, int16_t nButtonId, ::SGAMEDATA * pGame) {
+static void CUBE_HandleTransmuteButtonClick(D2UnitStrc * pPlayer, int16_t nButtonId, ::SGAMEDATA * pGame) {
     bool _bHasInteract;
     bool bHasInteract;
     eD2UnitType eInteractType;
@@ -1619,7 +1619,7 @@ void CUBE_HandleTransmuteButtonClick(D2UnitStrc * pPlayer, int16_t nButtonId, ::
 }
 
 // @sourcefile .\PLAYER\PlrTrade.cpp
-bool InitCopyInventoryForTrade(::SGAMEDATA * pGame, D2UnitStrc * pUnitStrc) {
+static bool InitCopyInventoryForTrade(::SGAMEDATA * pGame, D2UnitStrc * pUnitStrc) {
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnitStrc);
     if (pPlayerData->pTradeCopyInventory) {
       return false;
@@ -1743,7 +1743,7 @@ void __fastcall SendEventMsg(D2UnitStrc * pUnit, uint8_t nMessageType, char * sz
 }
 
 // Checks if player has any items in the cube. Returns 1 if at least one item is in INVPAGE_CUBE, 0 otherwise. Used by trade validation to prevent trading while items are in the cube.
-BOOL CUBE_HasAnyItemsInCube(D2UnitStrc * pPlayer) {
+static BOOL CUBE_HasAnyItemsInCube(D2UnitStrc * pPlayer) {
     eInventoryPage eInvPage;
     D2UnitStrc* pItemNode = D2Common::INVENTORY::Inventory::INVENTORY_GetFirstItem(pPlayer->pInventory);
     do {
@@ -1856,7 +1856,7 @@ void __thiscall TRADE_SendTradeCompleteToPlayers(void * pThis, D2UnitStrc * pUni
 }
 
 // @sourcefile .\PLAYER\PlrTrade.cpp
-void __stdcall SetStatsOnEar(BOOL bHardcore, D2UnitStrc * pUnit, D2UnitStrc * pOther) {
+static void __stdcall SetStatsOnEar(BOOL bHardcore, D2UnitStrc * pUnit, D2UnitStrc * pOther) {
     char* szPlayerName;
     eD2ItemTypes eItemType = D2Common::ITEMS::Items::ITEM_GetItemData_wType(pOther);
     if (eItemType == ITEMTYPE_PlayerBodyPart) {
@@ -1880,7 +1880,7 @@ void __stdcall SetStatsOnEar(BOOL bHardcore, D2UnitStrc * pUnit, D2UnitStrc * pO
 
 // Trade/corpse-recovery helper: iterates all items in pUnit's inventory, clones each INVPAGE_MERC item via ITEM_CloneFromSerializedData, sets ear stats if applicable, marks it for update, moves it to INVPAGE_INVENTORY, and places it into pUnit2's inventory via SERVER_ItemToInventory. Also iterates INVPAGE_CORPSE items: strips them from pUnit's inventory (sends 0x9D remove packet) and deletes them. Sends trade-action packet 0x77 opcode 10 (fail) to both parties and returns 0 on any placement failure; returns 1 on full success.
 // @sourcefile .\PLAYER\PlrTrade.cpp
-uint8_t __stdcall LoopsOverAllItemsAndPutInInventory(D2UnitStrc * pUnit, D2UnitStrc * pUnit2, ::SGAMEDATA * pGame) {
+static uint8_t __stdcall LoopsOverAllItemsAndPutInInventory(D2UnitStrc * pUnit, D2UnitStrc * pUnit2, ::SGAMEDATA * pGame) {
     bool bItemPlaced;
     bool bHardcore;
     eInventoryPage eInvPage;
@@ -1970,7 +1970,7 @@ uint8_t __stdcall LoopsOverAllItemsAndPutInInventory(D2UnitStrc * pUnit, D2UnitS
     goto next_item_to_remove;
 }
 
-BOOL __stdcall HasMercItems(::SGAMEDATA * pGame, D2UnitStrc * pUnit2, D2UnitStrc * pUnit) {
+static BOOL __stdcall HasMercItems(::SGAMEDATA * pGame, D2UnitStrc * pUnit2, D2UnitStrc * pUnit) {
     eInventoryPage eInvPage;
     bool bPickable;
     D2UnitStrc* pItem;
@@ -1996,7 +1996,7 @@ void __fastcall CUBE_OnCubeInteractionEnd(::SGAMEDATA * pGame, D2UnitStrc * pPla
 }
 
 // @sourcefile .\PLAYER\PlrTrade.cpp
-void __stdcall CreateStructure0xc(::SGAMEDATA * pGame, int nUID, uint32_t nUIDOther, D2UnitStrc * pUnit) {
+static void __stdcall CreateStructure0xc(::SGAMEDATA * pGame, int nUID, uint32_t nUIDOther, D2UnitStrc * pUnit) {
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
     if (!pPlayerData) {
       return;
@@ -2014,7 +2014,7 @@ void __stdcall CreateStructure0xc(::SGAMEDATA * pGame, int nUID, uint32_t nUIDOt
     pTradeCopyInv->pUnknownStruct = pUnknown;
 }
 
-bool __stdcall SetUidOther(int * pnParam, char * szText, D2UnitStrc * pUnit) {
+static bool __stdcall SetUidOther(int * pnParam, char * szText, D2UnitStrc * pUnit) {
     D2UnknownStructure0xc* pDVar2;
     D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
     if (!(pDVar1 && pDVar1->pTradeCopyInventory)) {
@@ -2319,7 +2319,7 @@ void __fastcall PLRTRADE_CancelTradeAndCleanup(::SGAMEDATA * pGame, D2UnitStrc *
 
 // Cancels/resets an active trade between two players: refreshes both inventories, checks item levels, clears trade status to 0 on both sides, calls RemoveTradeItemMaybe for each, sends gold-in-trade packets zeroing both sides (side 0 and 1) for both clients, sends trade-action 6 (cancel) to both clients, sets dwTradeState=5 on both, and schedules an update event for the next game frame.
 // @sourcefile .\PLAYER\PlrTrade.cpp
-void __stdcall PLRTRADE_ResetTradeState(D2UnitDataPlayerStrc * pPlayerData1, D2UnitDataPlayerStrc * pPlayerData2, D2UnitStrc * pUnit, D2UnitStrc * pUnit2, ::SGAMEDATA * pGame) {
+static void __stdcall PLRTRADE_ResetTradeState(D2UnitDataPlayerStrc * pPlayerData1, D2UnitDataPlayerStrc * pPlayerData2, D2UnitStrc * pUnit, D2UnitStrc * pUnit2, ::SGAMEDATA * pGame) {
     ITEMS::ItemMode::ITEMMODE_CheckItemLevel(pGame, pUnit2);
     ITEMS::ItemMode::ITEMMODE_CheckItemLevel(pGame, pUnit);
     D2Common::Units::RefreshInventory(pUnit2, 1);
@@ -2361,7 +2361,7 @@ void __stdcall PLRTRADE_ResetTradeState(D2UnitDataPlayerStrc * pPlayerData1, D2U
 
 // Server-side commit of a two-player item/gold trade (pUnit and pUnit2, with their player-data trade-copy inventories). First validates each side's offered gold against the other's available gold and inventory gold limit, aborting (PLRTRADE_ResetTradeState + 0x77 trade-action packets) if either can't afford or overflow the gold cap. Builds copy-of-inventory placement to confirm everything fits; if not, cancels. Requires both sides' merc-item check (HasMercItems) to pass, then performs the swap: sets the 0x800000 trading flag, marks both dwTradeState=9, schedules event 0xd, moves all items via LoopsOverAllItemsAndPutInInventory both directions, transfers gold (ChangeGoldForPlayer / ITEM_GiveGoldOrDrop), clears interact info, frees the trade-copy inventories, and sends success (0xd) trade-action packets. Any failure path resets the trade. No return. Custom convention (pUnit2 in EAX).
 // @sourcefile .\PLAYER\PlrTrade.cpp
-void __stdcall PLRTRADE_ExecuteTrade(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitDataPlayerStrc * pPlayerData1, D2UnitDataPlayerStrc * pPlayerData2, D2UnitStrc * pUnit2) {
+static void __stdcall PLRTRADE_ExecuteTrade(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitDataPlayerStrc * pPlayerData1, D2UnitDataPlayerStrc * pPlayerData2, D2UnitStrc * pUnit2) {
     int nGold;
     uint32_t nGoldLimit;
     D2ClientStrc* pClient;

@@ -258,13 +258,9 @@ __time32_t __stdcall BNSEND_GetTime32(__time32_t * pTime);
 // Hashes CD key data using Storm SBig (SHA-1-like) algorithm. Used for both 16-char and 26-char CD keys. Produces 20-byte hash output.
 void __fastcall BNSEND_HashCDKeyData(void * pOutHash, void * pTokenData, uint32_t nDataLength);
 void __stdcall BNNEWS_TransformCDKeyCharacter(uint8_t bKeyChar, uint32_t * pValue, uint8_t * pOutChar);
-// Calculates checksum byte for CD key validation. Uses lookup table at 0x006df238. Iterates through 8 pairs of hex characters, accumulating checksum as bit flags.
-void BNSEND_CalculateCDKeyChecksum(uint32_t unused, char * szCDKey, uint32_t * pOutChecksum);
 // Decodes 16-character CD key string into three components (Product: 3 hex digits, Public: 7 hex digits, Private: 9 hex digits). Validates checksum and performs character shuffling/XOR transformations. Returns 1 on success, 0 on failure.
 int __fastcall BNSEND_DecodeCDKeyString(uint32_t * pOutProduct, uint32_t * pOutPublic, char * szCDKey, uint32_t * pOutPrivate);
 BOOL __fastcall BNNEWS_DecodeCDKey26Char(char * szCDKey, uint32_t * pOutValue1, uint32_t * pOutValue2, uint16_t * pOutValue3);
-// Prepares CD key hash structure for authentication. Supports both 16-char (classic) and 26-char (expansion) CD keys. Output structure contains: key length, public value, product value, and 20-byte SHA-1 hash.
-int32_t __stdcall BNSEND_PrepareCDKeyHash(uint32_t nToken, uint32_t nServerToken, char * szCDKey, struct D2CDKeyHashStrc * pOutHash);
 void __stdcall NET_SID_CLIENT_Send_0x42_CDKey3();
 void __stdcall BNNEWS_DecodeCDKeys();
 // High-level CD key hash helper. Gets server token, retrieves CD key by type (0=classic, 1=expansion), and prepares hash structure for SID_AUTH_CHECK.
@@ -273,5 +269,6 @@ void __fastcall BNSEND_SendRawBytes(void * pBytes, size_t nSize);
 void __fastcall BNSEND_SendString(char * szString);
 void __fastcall NET_SID_CLIENT_Send_0x33_GetFileTime(char * szText, uint32_t dwRequestId);
 void StaticFini_gpBNetNewsCache();
+// 2 internal functions (defined in .cpp)
 
 } // namespace Bnclient::BnSend

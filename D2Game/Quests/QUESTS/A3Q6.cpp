@@ -182,7 +182,7 @@ BOOL __fastcall Q23_PlayerUpdateGuardianSteps(::SGAMEDATA * pGame, D2UnitStrc * 
 // JustCompleted(0xd) + Completed(0) + Step0x11(0x0b, "Act4 unlocked / quest finalized"), then calls
 // SetClientStatus(3) to flag the client as able-to-progress (the gate that opens travel to Pandemonium/Act4).
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a3q6.cpp
-void __stdcall Q23_SetGuardianQuestComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
+static void __stdcall Q23_SetGuardianQuestComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_JustCompleted);
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Completed);
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Step0x11);

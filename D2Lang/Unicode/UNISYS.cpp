@@ -739,7 +739,7 @@ bool __fastcall UNICODE_CheckTrailingPunctuation(char * szSourceFile, uint16_t *
     return false;
 }
 
-bool UNICODE_CheckLeadingPunctuation(char * pszTable, uint16_t * wszText) {
+static bool UNICODE_CheckLeadingPunctuation(char * pszTable, uint16_t * wszText) {
     uint16_t wszTable[21];
     int i = 0;
     memset(wszTable + 1, 0, 20 * sizeof(wszTable[0]));
@@ -1005,7 +1005,7 @@ uint32_t __thiscall UNICODE_CheckByteInRange(void * pThis, uint8_t byValue) {
     return 1;
 }
 
-int32_t UNICODE_IsControlChar(uint8_t byChar) {
+static int32_t UNICODE_IsControlChar(uint8_t byChar) {
     int32_t i = 0;
     if (0x1f >= byChar) {
       return i;

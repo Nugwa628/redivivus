@@ -90,7 +90,7 @@ void GFXUTIL_PadTokenString(char * szText1, char * szText2) {
     szText2[3] = ' ';
 }
 
-uint8_t GFXUTIL_GetCompositePaletteIndex(D2UnitStrc * pUnit, uint8_t byComponent) {
+static uint8_t GFXUTIL_GetCompositePaletteIndex(D2UnitStrc * pUnit, uint8_t byComponent) {
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && byComponent < 0x10 && pUnit->pUnitData.pUnitDataMonster)) {
       return 0;
     }
@@ -177,7 +177,7 @@ void __stdcall InitializeModeTokens() {
     exit(-1);
 }
 
-void __stdcall GFXUTIL_SetMissileCelFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pMissile) {
+static void __stdcall GFXUTIL_SetMissileCelFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pMissile) {
     if (!pMissile) {
       return;
     }
@@ -341,7 +341,7 @@ uint32_t __fastcall GFXUTIL_IsDC6BlockOnScreen(DC6Block * pDC6Block, int32_t nPa
 }
 
 // @sourcefile .\ENGINE\GfxUtil.cpp
-void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
+static void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
     bool bIsIdentified;
     int iVar6;
     D2SetItemsTxt* pSetItemsTxt;
@@ -433,7 +433,7 @@ void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
     pGfxData->szFilename = pacInvGfx;
 }
 
-int32_t GFXUTIL_GetOverlayNumDirections(int32_t nParam) {
+static int32_t GFXUTIL_GetOverlayNumDirections(int32_t nParam) {
     if (!(-1 < nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
       return 1;
     }
@@ -441,7 +441,7 @@ int32_t GFXUTIL_GetOverlayNumDirections(int32_t nParam) {
     return (uint32_t)(uint8_t)sgptDataTable->pTxtOverlay[nParam].NumDirections;
 }
 
-int32_t GFXUTIL_GetBodyLocWeaponToken(int32_t nBodyLoc, D2UnitStrc * pUnit) {
+static int32_t GFXUTIL_GetBodyLocWeaponToken(int32_t nBodyLoc, D2UnitStrc * pUnit) {
     D2UnitStrc* pWeaponUnit;
     D2UnitStrc* pQuiverItem;
     D2ItemsTxt* pItemsTxt;
@@ -504,7 +504,7 @@ int32_t GFXUTIL_GetBodyLocWeaponToken(int32_t nBodyLoc, D2UnitStrc * pUnit) {
     return 0x2074696c;
 }
 
-int32_t __stdcall GFXUTIL_GetNumDirectionsForUnit(D2UnitStrc * pUnit, eD2UnitType eUnitType, int32_t nMode, int32_t nClassId) {
+static int32_t __stdcall GFXUTIL_GetNumDirectionsForUnit(D2UnitStrc * pUnit, eD2UnitType eUnitType, int32_t nMode, int32_t nClassId) {
     uint8_t cNumDirs;
     D2UnitStrc* pPlayerUnit_lcl;
     D2MonStats2Txt* pMonStats2;
@@ -682,7 +682,7 @@ void __fastcall GFXUTIL_SetGfxInfoComponent(D2UnitStrc * pUnit, int32_t nParam, 
 }
 
 // @sourcefile .\ENGINE\GfxUtil.cpp
-void __stdcall GFXUTIL_UpdateDirectionForMode(uint8_t bParam, int32_t nAnimMode, int32_t nPrevDirection, D2UnitStrc * pUnit, int32_t nNewDirection) {
+static void __stdcall GFXUTIL_UpdateDirectionForMode(uint8_t bParam, int32_t nAnimMode, int32_t nPrevDirection, D2UnitStrc * pUnit, int32_t nNewDirection) {
     int nClassId;
     if (!nAnimMode) {
       return;
@@ -708,7 +708,7 @@ void __stdcall GFXUTIL_UpdateDirectionForMode(uint8_t bParam, int32_t nAnimMode,
     }
 }
 
-void GFXUTIL_ConvertDirectionBits(int32_t nFromDirs, int32_t nToDirs, uint32_t * pnParam) {
+static void GFXUTIL_ConvertDirectionBits(int32_t nFromDirs, int32_t nToDirs, uint32_t * pnParam) {
     uint32_t uVar1;
     if (nToDirs == 8) {
       uint32_t nShiftedDir;

@@ -129,7 +129,7 @@ void __fastcall InitializeDrlgCoordList(D2RoomExStrc * pRoomEx, int nMatchIndex,
 }
 
 // Sets grid flag 8 (door) for tiles with flag 4 and no orientation.
-void __stdcall DRLGLOGIC_SetGridDoorFlags(D2DrlgGridStrc * pGrid, D2RoomExStrc * pRoomEx) {
+static void __stdcall DRLGLOGIC_SetGridDoorFlags(D2DrlgGridStrc * pGrid, D2RoomExStrc * pRoomEx) {
     D2DrlgTileDataStrc* pTileData;
     D2DrlgTileGridStrc* pRoomTiles = pRoomEx->pRoomTiles;
     uint32_t nTileIndex = 0;
@@ -469,7 +469,7 @@ D2RoomCoordListStrc * __fastcall GetCoordList(D2RoomExStrc * pRoomEx) {
 }
 
 // Links the DRLG coordinate-list grids of two adjacent rooms at border point (nX,nY). Looks up each room's coord-list grid index at the border point, validates that both grids exist, are different, belong to the same level, and share the same node flag, then calls InitializeDrlgCoordList to merge them. Halts fatally if pSrcRoom has no coord list.
-void __stdcall DRLGLOGIC_LinkCoordListEntry(int32_t nY, int32_t nX, D2RoomExStrc * pNeighborRoom, D2RoomExStrc * pSrcRoom) {
+static void __stdcall DRLGLOGIC_LinkCoordListEntry(int32_t nY, int32_t nX, D2RoomExStrc * pNeighborRoom, D2RoomExStrc * pSrcRoom) {
     int32_t nNeighborCoordIndex;
     int nDestIndex;
     int nSrcIndex;
@@ -524,7 +524,7 @@ void __stdcall DRLGLOGIC_LinkCoordListEntry(int32_t nY, int32_t nX, D2RoomExStrc
 }
 
 // Links coord lists at boundaries between this room and its near rooms.
-void DRLGLOGIC_LinkBorderCoordLists(D2RoomExStrc * pRoomEx) {
+static void DRLGLOGIC_LinkBorderCoordLists(D2RoomExStrc * pRoomEx) {
     int nCoordValue;
     int nNearIndex = 0;
     if (0 >= pRoomEx->nDrlgRoomsExNearCount) {

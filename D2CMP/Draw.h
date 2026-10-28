@@ -47,7 +47,6 @@ namespace D2CMP::Draw {
 void __fastcall DRAW_ConvertPaletteRGBtoHSL(struct D2HSLColorStrc * pHSLOut, uint8_t * pRGBIn);
 // No register arguments: EAX is first written by FNSTSW AX at 00604fee and only carries the x87 status word (1.14d asm).
 double DRAW_GetHueSector(double m1, double m2, double dHue);
-void DRAW_ConvertPaletteHSLtoRGB(struct D2HSLColorStrc * pHSLIn, uint8_t * pRGBOut);
 void __stdcall thunk_D2MEM_VirtualFree(LPVOID pParam);
 uint32_t __stdcall D2GFX_GetColorWithAlphaFromPallete(LPPALETTEENTRY pPallete, uint32_t nAlpha, int32_t nRed, int32_t Green, int32_t nBlue);
 uint8_t __stdcall DRAW_FindFarthestPaletteColor(uint8_t * pPalette, int nPaletteSize, int nRed, int nGreen, int nBlue);
@@ -68,8 +67,8 @@ void __stdcall DRAW_BuildColorTintTable(LPPALETTEENTRY pPalette);
 void __stdcall DRAW_BuildDarkenTable(LPPALETTEENTRY pPalette);
 void __stdcall DRAW_BuildBrightenTable(LPPALETTEENTRY pPalette);
 void __stdcall DRAW_BuildHSLTransformTables(LPPALETTEENTRY pPalette, LPPALETTEENTRY pHSLPalette);
-void DRAW_BuildBrightenLightnessTable(struct D2HSLColorStrc * pHSLPalette, LPPALETTEENTRY pPalette);
 LPPALETTEENTRY __stdcall DRAW_BuildAllPaletteTables(tagPALETTEENTRY * pPaletteEntry);
 void __stdcall DRAW_BuildPaletteTablesWrapper(tagPALETTEENTRY * pPaletteEntry, uint32_t * pdwParam);
+// 2 internal functions (defined in .cpp)
 
 } // namespace D2CMP::Draw

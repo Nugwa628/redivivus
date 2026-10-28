@@ -146,7 +146,7 @@ D2UnitStrc * __stdcall FindUnitInNeighboredRooms(D2RoomStrc * pRoom, eD2UnitType
     return nullptr;
 }
 
-BOOL CheckRoomIfNotInRange(D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nDistance) {
+static BOOL CheckRoomIfNotInRange(D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nDistance) {
     D2DrlgRoomCoordsStrc pCoords;
     DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &pCoords);
     if (!(pCoords.dwXStart < nX - nDistance && pCoords.dwYStart < nY - nDistance && nX + nDistance < pCoords.dwXSize + pCoords.dwXStart && nY + nDistance < pCoords.dwYSize + pCoords.dwYStart)) {
@@ -156,7 +156,7 @@ BOOL CheckRoomIfNotInRange(D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t n
     return 0;
 }
 
-BOOL CheckRoomIfInRange(D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nDistance) {
+static BOOL CheckRoomIfInRange(D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t nDistance) {
     D2DrlgRoomCoordsStrc pRoomCoords;
     DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &pRoomCoords);
     if (nX + nDistance < pRoomCoords.dwXStart) {
@@ -258,7 +258,7 @@ D2UnitStrc * __stdcall GetNearestTestedUnit(D2UnitStrc * pUnit, int32_t nX, int3
 }
 
 // @sourcefile .\UNITS\UnitFinds.cpp
-void ExpandUnitFinds(D2UnitFindDataStrc * pUnitFindData, D2UnitStrc * pUnit) {
+static void ExpandUnitFinds(D2UnitFindDataStrc * pUnitFindData, D2UnitStrc * pUnit) {
     if (!pUnitFindData) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc0);
       exit(-1);

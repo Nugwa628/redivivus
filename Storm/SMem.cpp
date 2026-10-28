@@ -22,13 +22,13 @@ typedef void (__stdcall *pfnSMemDumpCallback)(uint32_t dwUserArg, char * szLine)
 namespace Storm::SMem {
 
 // @blizzard FatalError (SMEM.CPP)
-void SMEM_FatalError(uint32_t * pnName, uint32_t nErrorCode, int32_t nSourceLine) {
+static void SMEM_FatalError(uint32_t * pnName, uint32_t nErrorCode, int32_t nSourceLine) {
     Source::SErr::SErrDisplayError(nErrorCode, pnName, nSourceLine, nullptr, 0, 1);
     /* UINT uExitCode for ExitProcess */ ExitProcess(1);
 }
 
 // @blizzard GetHandleByCaller (SMEM.CPP)
-uint32_t SMEM_GetHandleByCaller(int * pnName, uint32_t nNameLen) {
+static uint32_t SMEM_GetHandleByCaller(int * pnName, uint32_t nNameLen) {
     // Static local variables (originally global data)
     static uint32_t gdwSMemLastHashedHeapKey = 0x1; D2_STATIC_GUARD(gdwSMemLastHashedHeapKey, "Storm::SMem::SMEM_GetHandleByCaller::gdwSMemLastHashedHeapKey");
     static uint32_t g_SMemCachedHeapNameHash; D2_STATIC_GUARD_BSS(g_SMemCachedHeapNameHash, "Storm::SMem::SMEM_GetHandleByCaller::g_SMemCachedHeapNameHash");
@@ -66,7 +66,7 @@ uint32_t SMEM_GetHandleByCaller(int * pnName, uint32_t nNameLen) {
 }
 
 // @blizzard LockHeapByBlockPtr (SMEM.CPP)
-D2FogHeapDescStrc * __stdcall SMEM_LockHeapByBlockPtr(uint32_t * pnOutBucket, D2FogHeapBlockHdrStrc * pBlockHdr) {
+static D2FogHeapDescStrc * __stdcall SMEM_LockHeapByBlockPtr(uint32_t * pnOutBucket, D2FogHeapBlockHdrStrc * pBlockHdr) {
     D2FogHeapDescStrc* nHeapDescOffset = (D2FogHeapDescStrc*)((uint32_t)(uint16_t)pBlockHdr->dwHeapSignature * 0x10000);
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(DebugMemoryCriticalSection + nHeapDescOffset->nBucketIndex);
     *pnOutBucket = nHeapDescOffset->nBucketIndex;
@@ -74,7 +74,7 @@ D2FogHeapDescStrc * __stdcall SMEM_LockHeapByBlockPtr(uint32_t * pnOutBucket, D2
 }
 
 // @blizzard Warning (SMEM.CPP)
-void __stdcall SMEM_Warning(uint32_t * pnName, int32_t nSourceLine, DWORD dwErrorCode) {
+static void __stdcall SMEM_Warning(uint32_t * pnName, int32_t nSourceLine, DWORD dwErrorCode) {
     Source::SErr::SErrSetLastError(dwErrorCode);
     if (!g_SMemUnknownFlag) {
       return;
@@ -84,7 +84,7 @@ void __stdcall SMEM_Warning(uint32_t * pnName, int32_t nSourceLine, DWORD dwErro
 }
 
 // @blizzard UnlockHeap (SMEM.CPP)
-void SMEM_UnlockHeap(int * pnBucketIndex) {
+static void SMEM_UnlockHeap(int * pnBucketIndex) {
     if (*pnBucketIndex == -1) {
       return;
     }
@@ -94,7 +94,7 @@ void SMEM_UnlockHeap(int * pnBucketIndex) {
 }
 
 // @blizzard AllocateHeap (SMEM.CPP)
-D2FogHeapDescStrc * __stdcall SMEM_AllocateHeap(int32_t nSourceLine, uint32_t dwHash, int32_t nBucketIndex, uint32_t dwPageAlignMask, SIZE_T nCommitSize, SIZE_T nReserveSize, uint32_t * pnName) {
+static D2FogHeapDescStrc * __stdcall SMEM_AllocateHeap(int32_t nSourceLine, uint32_t dwHash, int32_t nBucketIndex, uint32_t dwPageAlignMask, SIZE_T nCommitSize, SIZE_T nReserveSize, uint32_t * pnName) {
     int nNameLenBytes;
     D2FogHeapDescStrc* pHeapBlock = (D2FogHeapDescStrc*)VirtualAlloc((LPVOID)0x0, nReserveSize, 0x2000, 1);
     if (!pHeapBlock) {
@@ -142,7 +142,7 @@ D2FogHeapDescStrc * __stdcall SMEM_AllocateHeap(int32_t nSourceLine, uint32_t dw
 }
 
 // @blizzard CheckValidBlock (SMEM.CPP)
-BOOL SMEM_CheckValidBlock(int32_t nSourceLine, int32_t bReportError, uint32_t * pnName, D2FogHeapBlockHdrStrc * pBlock) {
+static BOOL SMEM_CheckValidBlock(int32_t nSourceLine, int32_t bReportError, uint32_t * pnName, D2FogHeapBlockHdrStrc * pBlock) {
     if (!pBlock) {
       if (!bReportError) {
         return 0;
@@ -175,7 +175,7 @@ BOOL SMEM_CheckValidBlock(int32_t nSourceLine, int32_t bReportError, uint32_t * 
     return 1;
 }
 
-void __stdcall SMemCalculateAllocationLayout(uint32_t nSize, int * pnOutProtected, int * pnOutTotalSize, int * pnOutPadding, int * pnOutDebug) {
+static void __stdcall SMemCalculateAllocationLayout(uint32_t nSize, int * pnOutProtected, int * pnOutTotalSize, int * pnOutPadding, int * pnOutDebug) {
     int nHeaderSize = !ProtectMemory && nSize < 0xfe88 ? 0 : 1;
     *pnOutProtected = nHeaderSize;
     if (!DebugMemory || nHeaderSize) {
@@ -211,7 +211,7 @@ void __stdcall SMEM_ComputePageSize() {
     } while (uPageSize < sysInfo.dwPageSize);
 }
 
-void __stdcall SMemWriteBlockHeader(uint8_t byFlags, int32_t nExtraBytes, D2FogHeapDescStrc * nHeap, int32_t nBlockSize, D2FogHeapBlockHdrStrc * pwHeader) {
+static void __stdcall SMemWriteBlockHeader(uint8_t byFlags, int32_t nExtraBytes, D2FogHeapDescStrc * nHeap, int32_t nBlockSize, D2FogHeapBlockHdrStrc * pwHeader) {
     pwHeader->wBlockSize = (uint16_t)nBlockSize;
     pwHeader->byPadding = (uint8_t)nExtraBytes;
     pwHeader->byFlags = byFlags;
@@ -231,7 +231,7 @@ void __fastcall SMEM_FreeHeap(LPVOID * ppListHead) {
 }
 
 // @blizzard FreeHeapBlock (SMEM.CPP)
-void SMEM_FreeHeapBlock(D2FogHeapBlockHdrStrc * pwBlock, D2FogHeapDescStrc * nHeap) {
+static void SMEM_FreeHeapBlock(D2FogHeapBlockHdrStrc * pwBlock, D2FogHeapDescStrc * nHeap) {
     void* pBlockEnd;
     int nDataSize;
     int nAllocDataPtr;
@@ -289,7 +289,7 @@ void SMEM_FreeHeapBlock(D2FogHeapBlockHdrStrc * pwBlock, D2FogHeapDescStrc * nHe
     g_SMemPendingCleanupHeap = nHeap;
 }
 
-void SMemGetBlockDataAndSize(int * pnOutHeaderSize, int32_t nBlockAddr, int * pnOutDataSize, D2FogHeapBlockHdrStrc * pwBlockHdr) {
+static void SMemGetBlockDataAndSize(int * pnOutHeaderSize, int32_t nBlockAddr, int * pnOutDataSize, D2FogHeapBlockHdrStrc * pwBlockHdr) {
     if (pwBlockHdr->byFlags & 4) {
       *pnOutDataSize = *(int*)(nBlockAddr - 0x10);
       *pnOutHeaderSize = pwBlockHdr->byPadding + 0x1c;
@@ -305,7 +305,7 @@ void SMemGetBlockDataAndSize(int * pnOutHeaderSize, int32_t nBlockAddr, int * pn
     *pnOutDataSize = (uint32_t)pwBlockHdr->wBlockSize - *pnOutHeaderSize;
 }
 
-BOOL SMemCommitMorePages(int32_t nTargetOffset, D2FogHeapDescStrc * pHeap) {
+static BOOL SMemCommitMorePages(int32_t nTargetOffset, D2FogHeapDescStrc * pHeap) {
     uint32_t nCommitted = pHeap->nCommitted;
     SIZE_T dwSize = nTargetOffset - nCommitted;
     uint32_t nAlignRemainder = pHeap->nPageAlignMask - 1 & dwSize;
@@ -326,7 +326,7 @@ BOOL SMemCommitMorePages(int32_t nTargetOffset, D2FogHeapDescStrc * pHeap) {
 }
 
 // @blizzard SatisfyFreeRequest (SMEM.CPP)
-void __stdcall SMEM_SatisfyFreeRequest(void * pParam, D2FogHeapDescStrc * pHeap, D2FogHeapBlockHdrStrc * pnParam) {
+static void __stdcall SMEM_SatisfyFreeRequest(void * pParam, D2FogHeapDescStrc * pHeap, D2FogHeapBlockHdrStrc * pnParam) {
     if (g_SMemDebugFillEnabled && !(pnParam->byFlags & 4)) {
       Source::SSystem::SMemFill(pParam, (uint32_t)pnParam->wBlockSize + (pnParam->byFlags & 1) * -2 - (uint32_t)pnParam->byPadding - 8, 0xdd);
     }
@@ -334,7 +334,7 @@ void __stdcall SMEM_SatisfyFreeRequest(void * pParam, D2FogHeapDescStrc * pHeap,
     SMEM_FreeHeapBlock(pnParam, pHeap);
 }
 
-void __stdcall SMemCoalesceFreeBlocks(int * pnFreeTotal, D2FogHeapBlockHdrStrc * pBlock, int * pnUsedSize, D2FogHeapDescStrc * pHeap) {
+static void __stdcall SMemCoalesceFreeBlocks(int * pnFreeTotal, D2FogHeapBlockHdrStrc * pBlock, int * pnUsedSize, D2FogHeapDescStrc * pHeap) {
     int nUsedSizeSnap = *pnUsedSize;
     void* nBlockEnd = (void*)((uintptr_t)&pBlock->wBlockSize + (uint32_t)pBlock->wBlockSize);
     uint32_t nFreeSize = (uint32_t)pBlock->wBlockSize - nUsedSizeSnap;
@@ -399,7 +399,7 @@ void __stdcall SMemSetDebugFlags(uint32_t nParam, uint8_t bParam) {
 }
 
 // @blizzard CombineFreeBlocks (SMEM.CPP)
-void SMEM_CombineFreeBlocks(D2FogHeapDescStrc * pHeap) {
+static void SMEM_CombineFreeBlocks(D2FogHeapDescStrc * pHeap) {
     uint16_t* pCurFree;
     uint32_t nBinIndex;
     void** ppBinTails[9];
@@ -546,7 +546,7 @@ void __stdcall SMEM_FreeEmptyHeaps() {
 }
 
 // Grow, shrink or merge a heap block in place. The heap descriptor arrives in EAX.
-int32_t __stdcall SMemReallocInPlace(D2FogHeapBlockHdrStrc * pBlock, int32_t nOldSize, uint32_t nNewSize, D2FogHeapDescStrc * pHeap) {
+static int32_t __stdcall SMemReallocInPlace(D2FogHeapBlockHdrStrc * pBlock, int32_t nOldSize, uint32_t nNewSize, D2FogHeapDescStrc * pHeap) {
     D2FogHeapDescStrc* pHeapSplitVarnode = pHeap;
     BOOL BVar1;
     uint16_t* pNextBlock;
@@ -635,7 +635,7 @@ int32_t __stdcall SMemReallocInPlace(D2FogHeapBlockHdrStrc * pBlock, int32_t nOl
     return 1;
 }
 
-void __stdcall SMemShrinkBlock(void * pBlock, int32_t nOldSize, uint32_t nNewSize, int32_t pHeap) {
+static void __stdcall SMemShrinkBlock(void * pBlock, int32_t nOldSize, uint32_t nNewSize, int32_t pHeap) {
     int nLayoutHigh;
     int nLayoutFlag;
     int32_t nTotalSize;
@@ -1132,7 +1132,7 @@ int32_t __stdcall SMemHeapSize(int32_t nHeapId, uint32_t dwFlags, int32_t pObjec
 }
 
 // @blizzard AllocateHeapBlock (SMEM.CPP)
-uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFlags, D2FogHeapDescStrc * pHeap) {
+static uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFlags, D2FogHeapDescStrc * pHeap) {
     BOOL nBlockResult;
     LPVOID pDebugPage;
     uint32_t* pDebugHeader;
@@ -1285,7 +1285,7 @@ uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFlags, D2F
 }
 
 // @blizzard SatisfyAllocRequest (SMEM.CPP)
-uint32_t * __stdcall SMEM_SatisfyAllocRequest(D2FogHeapDescStrc * pHeap, uint32_t nFlags, uint32_t nSize, int * pnLockIndex) {
+static uint32_t * __stdcall SMEM_SatisfyAllocRequest(D2FogHeapDescStrc * pHeap, uint32_t nFlags, uint32_t nSize, int * pnLockIndex) {
     uint8_t byFlags;
     if (0x7fffffff < nSize) {
       if (*pnLockIndex != -1) {
@@ -1331,7 +1331,7 @@ uint32_t * __stdcall SMEM_SatisfyAllocRequest(D2FogHeapDescStrc * pHeap, uint32_
     SMEM_FatalError((uint32_t*)pHeap->szName, 8, pHeap->nSourceLine);
 }
 
-uint32_t * __stdcall SMemReallocCore(int * pnLockIndex, uint32_t * pHeap, uint32_t * pOldObject, uint16_t * pBlock, uint8_t byFlags, uint32_t nNewSize) {
+static uint32_t * __stdcall SMemReallocCore(int * pnLockIndex, uint32_t * pHeap, uint32_t * pOldObject, uint16_t * pBlock, uint8_t byFlags, uint32_t nNewSize) {
     uint32_t* pNewObject;
     int nHeaderOffset;
     uint32_t nOldSize;

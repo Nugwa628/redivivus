@@ -170,7 +170,7 @@ void __stdcall TASK_LeaveQueueCriticalSection(D2TaskQueueSlotStrc * pSlot) {
 
 // Inserts pTaskNode into pSlot->sTaskList in timestamp order. Register call: pSlot@ECX, pTaskNode@EDX, nDelay@EAX. Adds nDelay to the node's timestamp (+0), walks sTaskList along its +0 links past entries whose timestamp is later (signed difference > 0), and links the node's list link (pTaskNode+0xc) in before the first entry that is not later. Halts at line 0x6c if the walk ends on NULL, 0x6d if the node link is NULL.
 // Provenance: asm 00564400..00564459.
-void TASK_InsertTaskAtTimestamp(D2TaskQueueSlotStrc * pSlot, D2TaskNodeStrc * pTaskNode, int32_t nDelay) {
+static void TASK_InsertTaskAtTimestamp(D2TaskQueueSlotStrc * pSlot, D2TaskNodeStrc * pTaskNode, int32_t nDelay) {
     D2LinkNodeStrc* pDVar1;
     D2LinkNodeStrc* pInsertPos;
     pTaskNode->dwTimestamp += nDelay;
@@ -288,16 +288,16 @@ void __stdcall TASK_MoveTasksToSlotAndLinkSlot(D2TaskQueueSlotStrc * pSlot) {
     }
 
     pSlotNode = &pSlot->sSlotLink;
-    if (!pSlotNode) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78);
-      exit(-1);
+    if (pSlotNode) {
+      pSlotNode->pNext = &gsTaskQueueListHead;
+      pSlot->sSlotLink.pPrev = gsTaskQueueListHead.pPrev;
+      gsTaskQueueListHead.pPrev->pNext = pSlotNode;
+      gsTaskQueueListHead.pPrev = pSlotNode;
+      return;
     }
 
-    pSlotNode->pNext = &gsTaskQueueListHead;
-    pSlot->sSlotLink.pPrev = gsTaskQueueListHead.pPrev;
-    gsTaskQueueListHead.pPrev->pNext = pSlotNode;
-    gsTaskQueueListHead.pPrev = pSlotNode;
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x78);
+    exit(-1);
 }
 
 // Scheduled-task callback that drives one game's server tick. Looks up+locks the game by token (pTaskNode->dwUserData), runs ServerGameLoop and FlushAllClientPackets, then either reschedules itself in the per-bucket task queue (nParam&0x1f) for the next tick, or — if the game is empty/expired (idle >300s or frame in the shutdown window) — disconnects all clients (0xB0 ConnectionTerminated + cleanup), destroys the game by token, and unlinks/frees its task node. Uses the task-queue critical sections; halts via Fog ErrorManager on queue-invariant violations.

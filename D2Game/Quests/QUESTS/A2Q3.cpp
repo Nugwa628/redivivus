@@ -410,7 +410,7 @@ BOOL __fastcall Q11_UpdateQuestRecord(::SGAMEDATA * pGame, D2UnitStrc * pUnit, v
 // A2Q3 - Q11_OnPlayerInteract: player triggers the Tainted-Sun start (e.g. via the altar/NPC). Calls
 // Q11_BeginTaintedSun; if it deferred (act not loaded, returns 0) sets the pending flag and sends a 0x5D
 // quest-state packet (quest 10, flag 1) to the interacting client; otherwise sets the darkened flag.
-void __stdcall Q11_OnPlayerInteract(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit) {
+static void __stdcall Q11_OnPlayerInteract(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit) {
     D2GSPacketSrv0x5D abyQuestStatePacket;
     D2QuestDataA2Q3Strc* pA2Q3Data = pQuestData->pQuestSpecificData.pA2Q3;
     bool bTaintedSunStarted = (bool)Q11_BeginTaintedSun(pQuestData);
@@ -840,7 +840,7 @@ void __fastcall Q11_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 // A2Q3 - Q11_StartDarknessTimer (custom register calling convention): if darkness not yet started, rolls a
 // random 15-17 tick delay (SEED_RollRange) and arms Q11_TimerCheckDarkness via AddQuestTimer, setting the
 // 'timer armed' flag. Schedules the delayed onset of the Tainted-Sun darkening. No quest-record access.
-void __stdcall Q11_StartDarknessTimer(uint8_t * pQuestData) {
+static void __stdcall Q11_StartDarknessTimer(uint8_t * pQuestData) {
     int pQuestSpecificData = *(int*)(pQuestData + 0x18);
     if (!(pQuestData[0xc] == '\0' && *(char*)(pQuestSpecificData + 1) == '\0')) {
       return;

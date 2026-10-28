@@ -518,7 +518,7 @@ void __fastcall OBJECT_InitializeObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 }
 
 // Selects a random shrine type ID for a given shrine category (1–4; 0 or >4 clamped to 2) that satisfies the level's minimum level requirement. Draws from the pre-built shrine RNG pool (GetShrinesRng), retrying up to 8 times to find a shrine whose dwLevelMin <= nLevelId. Returns the chosen shrine type ID (never 0; remapped to 1). Halts if the shrine pool for the category is empty.
-int32_t __stdcall OBJECT_SelectRandomShrineType(::SGAMEDATA * pGame, uint32_t nLevelId, uint8_t byShrineCategory, D2RoomStrc * pRoom) {
+static int32_t __stdcall OBJECT_SelectRandomShrineType(::SGAMEDATA * pGame, uint32_t nLevelId, uint8_t byShrineCategory, D2RoomStrc * pRoom) {
     D2SeedStrc DVar1;
     D2ShrinesTxt* pShrineLine;
     uint32_t nRandIdx;
@@ -957,7 +957,7 @@ BOOL __stdcall ROOM_CheckSpawnCollision(D2RoomStrc * pRoom, uint32_t nParam1, in
     return 1;
 }
 
-BOOL __stdcall ROOM_CheckSpawnCollisionSimple(D2RoomStrc * pRoom, int32_t nParam1, int32_t nParam2, int * pnParam1, int * pnParam2) {
+static BOOL __stdcall ROOM_CheckSpawnCollisionSimple(D2RoomStrc * pRoom, int32_t nParam1, int32_t nParam2, int * pnParam1, int * pnParam2) {
     if (!(1 < pnParam2[2] && 1 < pnParam2[3])) {
       return 0;
     }
@@ -1037,16 +1037,14 @@ D2UnitStrc * __stdcall OBJECT_PlaceAtRandomPosition(::SGAMEDATA * pGame, int32_t
     if (4 < nSpawnRetries) {
       return nullptr;
     }
-    if (!pRoom) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x54e);
-      exit(-1);
-    }
-
-    {
+    if (pRoom) {
       D2UnitStrc* pSpawnedUnit;
       pSpawnedUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, nObjClassId, dwTmp, nY, pGame, pRoom, 1, 0, nullptr);
       return pSpawnedUnit;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x54e);
+    exit(-1);
 }
 
 // Places a new object unit (UNIT_OBJECT) at a randomly chosen collision-free position within pRoom, subject to a caller-supplied acceptance callback. Reads room coordinates, retries up to 5 times picking random (X,Y) offsets inside the room boundary (excluding the 1-tile border), checks collision via CheckCollision_Vector, and calls pfnProc(X,Y) — only spawning if pfnProc returns non-zero and no collision. Returns the spawned D2UnitStrc* or null if all retries fail or the room is too small for nSizeX×nSizeY.
@@ -2354,7 +2352,7 @@ int32_t __fastcall OBJECT_PopulateGridItems(::SGAMEDATA * pGame, D2RoomStrc * pR
 }
 
 // Decides whether and which object-populate sub-function to run for a room. Returns 0 immediately if the room area fails a minimum-density threshold (objRng[2] < objRng[3]*10). Rolls the object-control seed to get a base chance, adjusts a density bonus (+5/+10) based on room fill ratio, and skips if the roll exceeds the density+12 threshold. Collects enabled populate-type indices from dwPopulateMask bits, randomly picks one, then dispatches to the corresponding function pointer from the global populate-function table at 0x731e68, passing &sRoomCoords.
-int32_t __stdcall OBJECT_RollAndDispatchPopulateFn(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32_t dwPopulateMask, int32_t pObjRng) {
+static int32_t __stdcall OBJECT_RollAndDispatchPopulateFn(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32_t dwPopulateMask, int32_t pObjRng) {
     D2DrlgRoomCoordsStrc sRoomCoords;
     int nEnabledPopTypes[8];
     if (*(int*)(pObjRng + 8) < *(int*)(pObjRng + 0xc) * 10) {
@@ -2417,7 +2415,7 @@ int32_t __stdcall OBJECT_RollAndDispatchPopulateFn(::SGAMEDATA * pGame, D2RoomSt
 }
 
 // Populates special objects for one room during level generation. Skips rooms that already have a waypoint, are outdoors-bordered, or are in town. Lazily initialises the per-level object RNG's room count on first call. Increments the room counter (pad_0x4) and, if the room's populate-fn pointer is set, calls OBJECT_RollAndDispatchPopulateFn; returns 1 on success, 0 otherwise.
-BOOL __stdcall OBJECT_PopulateRoomSpecialObjects(::SGAMEDATA * pGame, int32_t nParam, D2RoomStrc * pRoom) {
+static BOOL __stdcall OBJECT_PopulateRoomSpecialObjects(::SGAMEDATA * pGame, int32_t nParam, D2RoomStrc * pRoom) {
     int32_t nPopResult;
     BOOL bResult = D2Common::DUNGEON::Dungeon::HasWaypoint(pRoom);
     if (bResult) {
@@ -2683,7 +2681,7 @@ uint8_t __stdcall OBJECT_GetDefaultSize() {
     return '\x02';
 }
 
-void OBJECT_RemapClassIdFromParm(int32_t nParam) {
+static void OBJECT_RemapClassIdFromParm(int32_t nParam) {
     int32_t nClassId = !nParam ? -1 : *(int32_t*)(nParam + 4);
     D2ObjectsTxt* pObjectsTxt = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(nClassId);
     int nParmClassId = pObjectsTxt->Parm[1];

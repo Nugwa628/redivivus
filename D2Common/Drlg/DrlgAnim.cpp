@@ -114,7 +114,7 @@ void __fastcall DRLGROOMTILE_CountAnimTilesFromGrid(D2RoomExStrc * pRoomEx, D2Dr
     } while (nKillEdgeY < nCellY);
 }
 
-void AnimateTile(D2RoomExStrc * pRoomEx) {
+static void AnimateTile(D2RoomExStrc * pRoomEx) {
     D2DrlgAnimTileGridStrc* pAnimTile;
     int* dwTmp;
     if (!(pRoomEx->eRoomExFlags & 0x8000000U && pRoomEx->pRoomTiles)) {

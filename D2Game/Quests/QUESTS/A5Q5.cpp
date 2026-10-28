@@ -161,7 +161,7 @@ void __fastcall Q35_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 }
 
 // [A5Q5 = Rite of Passage] Q35_KillAndRemoveAncient: kills one Ancient super-unique (Talic/Korlic/Madawc) by GUID, runs its Dead lifecycle transition, and removes it from the room. Used by the arena reset path. No quest-state writes.
-bool Q35_KillAndRemoveAncient(::SGAMEDATA * pGame, DWORD dwParam) {
+static bool Q35_KillAndRemoveAncient(::SGAMEDATA * pGame, DWORD dwParam) {
     bool dwKillSuccess;
     bool bKillResult;
     D2MonsterKillStrc sMonsterKill;
@@ -230,7 +230,7 @@ BOOL __stdcall Q35_PrepareAncientsForBattle(D2QuestDataStrc * pQuestData, D2Ques
 }
 
 // A5Q5 (Rite of Passage) full arena reset, called on player death or leaving during the fight. Iterates all three Ancient slots: kills and removes each spawned Ancient via Q35_KillAndRemoveAncient (or removes inactive unit if already dead), decrements alive/spawned counters, and restores all three altar statues to anim mode 0. Clears fight-active flags. No quest-state writes.
-void __stdcall Q35_ResetAncientsArena(::SGAMEDATA * pGame, int32_t nParam1, int32_t nParam2) {
+static void __stdcall Q35_ResetAncientsArena(::SGAMEDATA * pGame, int32_t nParam1, int32_t nParam2) {
     bool bKillSuccess;
     D2UnitStrc* pStatue;
     DWORD* pAncientGUID = (DWORD*)(nParam2 + 0x20);
@@ -558,7 +558,7 @@ void __fastcall Q35_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 }
 
 // A5Q5 (Rite of Passage) XP reward function. Grants 1,400,000 / 20,000,000 / 40,000,000 XP for Normal/Nightmare/Hell respectively, capped to one level's worth of experience. Loops awarding XP until the cap is exhausted or the level table is exceeded. Caller is responsible for setting Completed/JustCompleted quest states.
-uint32_t __stdcall RewardExperienceFromAncients(::SGAMEDATA * pQuestData, D2UnitStrc * pUnit) {
+static uint32_t __stdcall RewardExperienceFromAncients(::SGAMEDATA * pQuestData, D2UnitStrc * pUnit) {
     int32_t nExpNeeded;
     uint32_t nValue;
     int32_t ePlayerClassId;
@@ -728,7 +728,7 @@ BOOL __fastcall Q35_OnAncientsDefeated(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
 }
 
 // [A5Q5 = Rite of Passage] Q35_FireAncientDeathMissile: cosmetic — fires the MISSILE_AncientDeathCenter effect at a slain Ancient's position. No quest-state writes.
-void __stdcall Q35_FireAncientDeathMissile(D2QuestArgStrc * pQuestArg, D2QuestDataStrc * pQuestData, DWORD dwParam) {
+static void __stdcall Q35_FireAncientDeathMissile(D2QuestArgStrc * pQuestArg, D2QuestDataStrc * pQuestData, DWORD dwParam) {
     D2SkillArgStrc sSkillArg;
     D2UnitStrc* pAncientUnit = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_OBJECT, dwParam);
     if (!pAncientUnit) {
@@ -1124,7 +1124,7 @@ BOOL __fastcall Q35_CheckQuestNotStarted(::SGAMEDATA * pGame, D2UnitStrc * pUnit
 }
 
 // [A5Q5 = Rite of Passage] Q35_SetStatueAnimMode: sets one altar statue's display/anim mode from the saved per-statue mode. classId 0x1da->slot[0x34], 0x1db->slot[0x30], 0x1dc->slot[0x38]. No quest-state writes.
-void Q35_SetStatueAnimMode(uint32_t dwParam, D2QuestDataA5Q5Strc * pQuestData, D2ObjectInitFnArg * pInitArg) {
+static void Q35_SetStatueAnimMode(uint32_t dwParam, D2QuestDataA5Q5Strc * pQuestData, D2ObjectInitFnArg * pInitArg) {
     int nClassId;
     D2UnitStrc* pUnit = pInitArg->pObject;
     if (!pUnit) {

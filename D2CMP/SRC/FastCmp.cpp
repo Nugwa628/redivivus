@@ -27,7 +27,7 @@ typedef uint8_t (__stdcall *pfnRGBToPaletteIndex)(uint8_t nRed, uint8_t nGreen, 
 
 namespace D2CMP::SRC::FastCmp {
 
-void __stdcall FASTCMP_CompressToRLE(uint8_t * pSrcData, uint32_t nLineCount, uint8_t * pDirectionOrder, uint8_t * * ppRLEBuffer, uint8_t * * ppRLEEnd, uint8_t * pBaseData) {
+static void __stdcall FASTCMP_CompressToRLE(uint8_t * pSrcData, uint32_t nLineCount, uint8_t * pDirectionOrder, uint8_t * * ppRLEBuffer, uint8_t * * ppRLEEnd, uint8_t * pBaseData) {
     int nColorRunLen;
     uint32_t nColorTailFlag;
     int nZeroTailFlag;

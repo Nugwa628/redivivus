@@ -253,7 +253,7 @@ char * __stdcall SUBTILE_ConvertRGBToIndexed(char * pSrcRGBData, uint32_t nRGBDa
     return (char*)pIndexedBuf;
 }
 
-BOOL SUBTILE_CheckIfIsometricEmpty(int32_t pSubTileData) {
+static BOOL SUBTILE_CheckIfIsometricEmpty(int32_t pSubTileData) {
     int iRow = 0;
     int nXOff = 0xe;
     int nRowWidth = 4;
@@ -285,7 +285,7 @@ BOOL SUBTILE_CheckIfIsometricEmpty(int32_t pSubTileData) {
     return 0;
 }
 
-void __stdcall SUBTILE_CompressIsometricShape(int32_t pSubTileEntry, char * pPixelData) {
+static void __stdcall SUBTILE_CompressIsometricShape(int32_t pSubTileEntry, char * pPixelData) {
     void* nErrorAddr;
     int nNonZeroLen;
     char* pSrc;

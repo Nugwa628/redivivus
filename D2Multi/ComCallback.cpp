@@ -58,7 +58,7 @@ int __stdcall EDITBOX_Cb_COMCALLBACK_ClearChannelUserList(void * pUnknown) {
     return 1;
 }
 
-void COMCALLBACK_HandleBannerAdFile(uint32_t * pBannerAdData) {
+static void COMCALLBACK_HandleBannerAdFile(uint32_t * pBannerAdData) {
     // Static local variables (originally global data)
     static char lpFileName_00798e30[260] = {}; D2_STATIC_GUARD(lpFileName_00798e30, "D2Multi::ComCallback::COMCALLBACK_HandleBannerAdFile::lpFileName_00798e30");
 
@@ -112,7 +112,7 @@ BOOL __fastcall COMCALLBACK_ReturnTrue(uint32_t dwParam1, uint32_t dwParam2, cha
 }
 
 // Parses BNet channel user data blob into D2ChannelUserStrc. Reads product tag (D2DV/D2XP/STAR/etc.) from pbRawData, extracts char class, experience, quest flags, merc data. Returns nCharClassId for the character portrait.
-uint8_t COMCALLBACK_CreateChannelUser(uint8_t * pbRawData, uint32_t nStatusFlags, D2ChannelUserStrc * pUser) {
+static uint8_t COMCALLBACK_CreateChannelUser(uint8_t * pbRawData, uint32_t nStatusFlags, D2ChannelUserStrc * pUser) {
     bool bIsD2Product;
     char* pszDst;
     int iCharDataIdx;
@@ -384,7 +384,7 @@ uint8_t COMCALLBACK_CreateChannelUser(uint8_t * pbRawData, uint32_t nStatusFlags
 }
 
 // Formats D2ChannelUserStrc data for display: splits clan*charname, converts to wide strings, extracts realm name, calls D2COMP_SetUnitDisplayStrings with portrait/name/realm/clan strings.
-void COMCALLBACK_FormatChannelUserData(D2ChannelUserStrc * pChannelUser) {
+static void COMCALLBACK_FormatChannelUserData(D2ChannelUserStrc * pChannelUser) {
     char* pCharName;
     int nProductTag;
     uint16_t wszRealmName[52];
@@ -613,7 +613,7 @@ BOOL __fastcall COMCALLBACK_ReturnFalse(uint32_t dwParam1, uint32_t dwParam2, ch
     return 0;
 }
 
-int32_t COMCALLBACK_CheckUserListFlags(uint32_t * pnParam) {
+static int32_t COMCALLBACK_CheckUserListFlags(uint32_t * pnParam) {
     uint32_t nChar;
     uint32_t* szText1 = pnParam + 6;
     uint32_t* pszScan = szText1;
@@ -790,7 +790,7 @@ void __fastcall PrintChannelText(uint32_t dwParam, char * szText, int32_t nColor
     ChatDlg::CHATDLG_AppendTextToTextBox_ForComCallback(wszText, nColor);
 }
 
-void __stdcall COMCALLBACK_AppendChatWithUser(uint32_t dwParam, char * szUsername, char * szMessage, char * dwToTarget, int32_t nColor) {
+static void __stdcall COMCALLBACK_AppendChatWithUser(uint32_t dwParam, char * szUsername, char * szMessage, char * dwToTarget, int32_t nColor) {
     int i;
     uint16_t wszMessage[576];
     uint16_t wszMain[576];
@@ -1079,7 +1079,7 @@ void __stdcall COMCALLBACK_UpdateChannelUserList() {
 }
 
 // Adds channel user to the visual list: stores status flags, parses raw data via CreateChannelUser, copies username, creates D2COMP composite, formats display data, updates channel user list UI.
-void __stdcall COMCALLBACK_AddUserToChannelList(D2ChannelUserStrc * pChannelUser, uint32_t nStatusFlags, char * szUsername, uint8_t * pbRawData) {
+static void __stdcall COMCALLBACK_AddUserToChannelList(D2ChannelUserStrc * pChannelUser, uint32_t nStatusFlags, char * szUsername, uint8_t * pbRawData) {
     pChannelUser->nStatusFlags = nStatusFlags;
     uint8_t bVar1 = COMCALLBACK_CreateChannelUser(pbRawData, nStatusFlags, pChannelUser);
     Storm::Source::SSTR::SStrCopy(pChannelUser->szUsername, szUsername, 0x7fffffff);
@@ -1155,7 +1155,7 @@ uint32_t __stdcall COMCALLBACK_AppendServerMessage(uint32_t dwParam, char * szTe
 }
 
 // Formats and displays a Battle.net channel chat message with the username prefix in angle brackets, then forwards to the chat text display function.
-int __stdcall COMCALLBACK_AppendChatWithColor(char * szUsername, int nColor, char * szMessage, int nParam) {
+static int __stdcall COMCALLBACK_AppendChatWithColor(char * szUsername, int nColor, char * szMessage, int nParam) {
     int nResult;
     uint32_t dwUnused;
     char szPrefixed[256];
@@ -1364,7 +1364,7 @@ BOOL __fastcall COMCALLBACK_HandleInfoRequest2(uint32_t dwCbArg1, uint32_t dwCbA
     return 1;
 }
 
-void __fastcall COMCALLBACK_ValidateWhisperTarget(char * szUsername, char * szMessage) {
+static void __fastcall COMCALLBACK_ValidateWhisperTarget(char * szUsername, char * szMessage) {
     int i;
     uint16_t wszText[576];
     char szFormatted[500];
@@ -1426,7 +1426,7 @@ BOOL __fastcall COMCALLBACK_ProcessWhisperCommand(uint32_t dwCbArg1, uint32_t dw
     return 1;
 }
 
-void __stdcall COMCALLBACK_FormatWhisperReply(uint8_t * pbReplyText, uint8_t * pbSenderName, char * szReplyArg) {
+static void __stdcall COMCALLBACK_FormatWhisperReply(uint8_t * pbReplyText, uint8_t * pbSenderName, char * szReplyArg) {
     uint8_t* pbScanReply;
     int nCmp;
     uint16_t wszUnicode[576];
@@ -1532,7 +1532,7 @@ BOOL __fastcall COMCALLBACK_HandleWhisperReply(uint32_t dwParam1, uint32_t dwPar
     return 1;
 }
 
-void __fastcall COMCALLBACK_ValidateEmoteTarget(char * szPlayerName, char * szEmoteText) {
+static void __fastcall COMCALLBACK_ValidateEmoteTarget(char * szPlayerName, char * szEmoteText) {
     int i;
     uint16_t aWStack_678[576];
     char szFormatted[500];
@@ -1938,7 +1938,7 @@ BOOL __fastcall COMCALLBACK_Unused1(uint32_t dwStatusFlags, uint32_t dwParam2, u
     return 1;
 }
 
-void COMCALLBACK_Unused2(uint32_t * pCharData, uint32_t dwStatusFlags, uint32_t * pszUsername) {
+static void COMCALLBACK_Unused2(uint32_t * pCharData, uint32_t dwStatusFlags, uint32_t * pszUsername) {
     uint32_t dwUnused;
     char szNotifyMsg[504];
     char cVar1;

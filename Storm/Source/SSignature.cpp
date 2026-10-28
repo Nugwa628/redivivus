@@ -29,7 +29,7 @@ void __fastcall SSIG_FreeBigNum(void * * pBigNum) {
     SBig::SBigDel((BigData*)*pBigNum);
 }
 
-BOOL SSIG_FindSignatureMarker(int32_t nOffset, uint32_t nTotalSize, int32_t pBuffer, int * pnFoundOffset) {
+static BOOL SSIG_FindSignatureMarker(int32_t nOffset, uint32_t nTotalSize, int32_t pBuffer, int * pnFoundOffset) {
     int nMarkerOffset = nTotalSize - nOffset - 4;
     *pnFoundOffset = nMarkerOffset;
     if (!(nOffset + 4U <= nTotalSize && *(int*)(nMarkerOffset + pBuffer) == 0x5349474e)) {
@@ -39,7 +39,7 @@ BOOL SSIG_FindSignatureMarker(int32_t nOffset, uint32_t nTotalSize, int32_t pBuf
     return 1;
 }
 
-void __stdcall SSIG_HashData(uint32_t nDataLen, uint8_t * pData, int32_t pDigestOut) {
+static void __stdcall SSIG_HashData(uint32_t nDataLen, uint8_t * pData, int32_t pDigestOut) {
     D2Sha1ContextStrc shaContext;
     uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Fog::Source::SSignature::Sha1_Initialize(&shaContext);

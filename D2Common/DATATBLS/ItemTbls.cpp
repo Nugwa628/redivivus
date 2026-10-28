@@ -4737,7 +4737,7 @@ void __stdcall ITEMTBLS_FreeItemTypes() {
     Fog::Src::Excel::STRUCT_FreeTxtLink(sgtDataTable.pTxtItemTypesLink);
 }
 
-BOOL __stdcall ITEMTBLS_CheckIfDataFileExists(char * szFileExt, D2PoolManagerStrc * pPoolManagerStrc, char * szFileName) {
+static BOOL __stdcall ITEMTBLS_CheckIfDataFileExists(char * szFileExt, D2PoolManagerStrc * pPoolManagerStrc, char * szFileName) {
     D2MPQFileStrc* pFile;
     char szFilePath[260];
     uint32_t nStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
@@ -5075,12 +5075,12 @@ void __stdcall ITEMTBLS_CopyRunewordRecord(int32_t nRunewordId, char * pSourceRe
 }
 
 int32_t __stdcall ITEMTBLS_GetRunewordTxtRecord(int32_t nRunewordId) {
-    if (!(0 < nRunewordId && nRunewordId < nTxtRunesSize.nSize)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x972);
-      exit(-1);
+    if (0 < nRunewordId && nRunewordId < nTxtRunesSize.nSize) {
+      return (int32_t)(nTxtRunesSize.pTable + nRunewordId);
     }
 
-    return (int32_t)(nTxtRunesSize.pTable + nRunewordId);
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x972);
+    exit(-1);
 }
 
 } // namespace D2Common::DATATBLS::ItemTbls

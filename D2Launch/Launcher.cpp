@@ -331,7 +331,7 @@ BOOL __stdcall CHARSEL_OnPressPumpRealmCharListLoad(D2ControlMsg * pControlMsg) 
     return 1;
 }
 
-void CHARSEL_RequestRealmCharList(char * szRealmName) {
+static void CHARSEL_RequestRealmCharList(char * szRealmName) {
     CharSel::CHARSEL_DestroyAllCharEntries();
     gbCharSelArrowsHidden = 0;
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpControlCharSelArrows, 1);
@@ -1109,7 +1109,7 @@ int __fastcall ShowOogErrorDialog(D2OogErrorDataStrc * pErrorData) {
     return 0;
 }
 
-void __fastcall LAUNCHER_ShowOogErrorDialog_ForEnterEmail(eOogErrorCode eErrorCode, void * pCustomData) {
+static void __fastcall LAUNCHER_ShowOogErrorDialog_ForEnterEmail(eOogErrorCode eErrorCode, void * pCustomData) {
     D2OogErrorDataStrc sErrorData;
     sErrorData.eErrorCode = eErrorCode;
     sErrorData.pCustomData = pCustomData;

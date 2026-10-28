@@ -608,7 +608,7 @@ void __stdcall DRAW_Overlay_ArcaneStars() {
 }
 
 // Draws Ancients arena background with parallax scrolling summit (summit01.dc6, 4-tile wrap) and animated clouds (cloud01.dc6, 10 instances with RNG positions/velocities). Cloud positions stored in gAncientsBackgroundCellPtrs array. Scroll offset calculated from player X position delta divided by 8. Supports 800x600 and higher resolutions.
-void DRAW_Background_Ancients(D2UnitStrc * pPlayerUnit) {
+static void DRAW_Background_Ancients(D2UnitStrc * pPlayerUnit) {
     // Static local variables (originally global data)
     static D2SeedStrc * gpAncientsCloudSeed = (D2SeedStrc *)&gAncientsCloudSeed; D2_STATIC_GUARD(gpAncientsCloudSeed, "D2Client::GAME::View::DRAW_Background_Ancients::gpAncientsCloudSeed");
     static int gaAncientsCloudYPos[10] = {}; D2_STATIC_GUARD(gaAncientsCloudYPos, "D2Client::GAME::View::DRAW_Background_Ancients::gaAncientsCloudYPos");
@@ -803,7 +803,7 @@ void DRAW_Background_Ancients(D2UnitStrc * pPlayerUnit) {
 }
 
 // Adjusts the looping screen-shake rumble sound (SOUND_BABOONDEMON_HIT_4) to match the current shake intensity. Converts nShakeIntensity (0–20) to a 0–255 target volume, starts the channel if not already playing, stops it if volume reaches 0, otherwise ramps the current volume toward the target by ±6 per call via SOUND_SetChannelPriority.
-void SHAKE_UpdateShakeSoundVolume(int32_t nShakeIntensity) {
+static void SHAKE_UpdateShakeSoundVolume(int32_t nShakeIntensity) {
     uint32_t nNewVolume;
     uint32_t nTargetVolume;
     nTargetVolume = nShakeIntensity * 0xff / 0x14;

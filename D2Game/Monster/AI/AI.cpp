@@ -2196,7 +2196,7 @@ uint32_t __fastcall MONSTERAI_GetThreatLevel(D2UnitStrc * pUnit) {
 }
 
 // Validates that a monster (pUnit) may legally target pTarget. Checks: both are monsters/players, neither is dead, target's room is not a town room, target has UNITFLAG_CANBEATTACKED, and if target is invisible: player invis targets succeed only on melee range or a 50% seed roll; monster invis targets are blocked unless in melee range. Falls through to UNITS_CheckIfCanAttackTarget.
-uint32_t __stdcall MONSTERAI_CanTargetUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
+static uint32_t __stdcall MONSTERAI_CanTargetUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
     bool _bAttackable;
     bool bAttackable;
     if (!(pUnit && -1 < (int)pUnit->eUnitType && (int)pUnit->eUnitType < 2 && pTarget && -1 < (int)pTarget->eUnitType && (int)pTarget->eUnitType < 2)) {
@@ -2488,7 +2488,7 @@ uint32_t __fastcall AI_ForEachFn12_CountClassInRange(uint32_t dwParam, D2UnitStr
     return 0;
 }
 
-uint32_t __stdcall ForEachCallOther(::SGAMEDATA * pGame, D2MonsterAiParameterStruct * pParams, fpMonsterAiForEach pFunc, D2UnitStrc * pUnit) {
+static uint32_t __stdcall ForEachCallOther(::SGAMEDATA * pGame, D2MonsterAiParameterStruct * pParams, fpMonsterAiForEach pFunc, D2UnitStrc * pUnit) {
     uint32_t nCallbackResult;
     D2RoomStrc** ppRoomList;
     uint32_t nRoomCount;
@@ -2564,7 +2564,7 @@ uint32_t __stdcall ForEachCallType1(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2M
 }
 
 // Iterates every unit in rooms adjacent to pUnit (skipping town rooms and rooms without clients) and calls pFunc(pGame, pUnit, pOther, pParams) for each. Returns the first non-zero result from pFunc, or 0 if all return 0. Used as the type-2 ForEach dispatch in monster AI scanning loops.
-uint32_t __stdcall ForEachCallType2(::SGAMEDATA * pGame, D2MonsterAiParameterStruct * pParams, fpMonsterAiForEach pFunc, D2UnitStrc * pUnit) {
+static uint32_t __stdcall ForEachCallType2(::SGAMEDATA * pGame, D2MonsterAiParameterStruct * pParams, fpMonsterAiForEach pFunc, D2UnitStrc * pUnit) {
     uint32_t nCallbackResult;
     uint32_t nRoomCount;
     D2RoomStrc** ppRoomList;
@@ -2619,7 +2619,7 @@ void __fastcall ForEachMinion(D2UnitStrc * nUnitParam, D2MinionForEachCtx * ppCa
     *pResult = nCallbackResult;
 }
 
-uint32_t __stdcall ForEachCallType3(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2MonsterAiParameterStruct * pParam, fpMonsterAiForEach pFunc) {
+static uint32_t __stdcall ForEachCallType3(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2MonsterAiParameterStruct * pParam, fpMonsterAiForEach pFunc) {
     D2MinionForEachCtx aForEachCtx;
     D2UnitStrc* pOwnerUnit = Ai::AiGeneral::GetOwnerUnit(pUnit);
     if (!(pOwnerUnit && pOwnerUnit->eUnitType == UNIT_MONSTER)) {
@@ -2951,7 +2951,7 @@ BOOL __fastcall MONSTERAI_CanApplyDebuffState(D2UnitStrc * pUnit, eD2States eSta
 }
 
 // Validates and optionally replaces a candidate switch-target (*ppUnit). Returns 0 (keep candidate) if pUnit is a player or nParam1==0. If nParam2 &lt; 6, probes a path to the candidate; if unreachable (zero path points), runs a ForEach scan for an alternative unit within distance 0x13 and updates *ppUnit and *pDistance accordingly. Returns 1 to signal the caller should use the secondary (LOS) target instead.
-BOOL __stdcall MONSTERAI_ValidateSwitchTarget(D2UnitStrc * * ppUnit, int * pDistance, int32_t nParam1, int32_t nParam2, D2UnitStrc * pUnit) {
+static BOOL __stdcall MONSTERAI_ValidateSwitchTarget(D2UnitStrc * * ppUnit, int * pDistance, int32_t nParam1, int32_t nParam2, D2UnitStrc * pUnit) {
     D2MonsterAiParameterStruct sAiParams;
     if (pUnit && pUnit->eUnitType == UNIT_PLAYER || !nParam1) {
       return 0;
@@ -3001,7 +3001,7 @@ BOOL __stdcall MONSTERAI_ValidateSwitchTarget(D2UnitStrc * * ppUnit, int * pDist
 }
 
 // Resolves the current target for a monster's "switch AI" (the secondary AI targeting mode, e.g. for converted/charmed or special monsters). Only operates on UNIT_MONSTER units that have a switch-AI param. Param1 selects target domain: 1=player by GUID, 2=monster by GUID, 4=missile by GUID (looked up via FindUnitFromTable), 3=proximity scan (toggles alignment, runs AI ForEach over nearby units to pick the best by distance). For the resolved candidate, optionally requires line of sight (bRequireLOS) and that it is alive/valid; on success writes the unit to *ppOutUnit and distance to *pOutDistance and returns 1, else clears the switch-AI target params and returns 0. Custom register calling convention (pGame in EAX, pUnit in ESI).
-BOOL __stdcall MONSTERAI_FindSwitchAiTarget(D2UnitStrc * pSwitchParam, int32_t bRequireLOS, D2UnitStrc * * ppOutUnit, int * pOutDistance, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static BOOL __stdcall MONSTERAI_FindSwitchAiTarget(D2UnitStrc * pSwitchParam, int32_t bRequireLOS, D2UnitStrc * * ppOutUnit, int * pOutDistance, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2UnitStrc* pSwitchTarget;
     uint32_t nTargetGUID;
     int32_t nAlignment;
@@ -4631,7 +4631,7 @@ void __fastcall MONSTERAI_CastSkillAtRandomOffset(D2UnitStrc * pUnit, int32_t nR
     SERVER_UNIT_CastSkill(pGame, pUnit, nSkillMode, eSkill, nTargetGUID, nTargetX, nPos);
 }
 
-uint32_t MONSTERAI_CalculateTrapDamage(uint32_t dwParam, uint32_t nParam1, uint32_t nParam2, DWORD dwParam2, int32_t nParam) {
+static uint32_t MONSTERAI_CalculateTrapDamage(uint32_t dwParam, uint32_t nParam1, uint32_t nParam2, DWORD dwParam2, int32_t nParam) {
     D2ObjectsTxt* pObjTxt;
     int32_t nClassId;
     if (nParam2 <= nParam1) {
@@ -4739,7 +4739,7 @@ void __fastcall MONSTERAI_CalculateCounterAttackDamage(::SGAMEDATA * pGame, D2Un
 }
 
 // Schedules a convert event (event type 7, UNITMOD 0x15) for all neutral monsters within radius 0x583 of pUnit. Filters by nUnitType; if bUndeadOnly is set, skips non-undead monsters. Skips class 0x14d. For each eligible monster picks a random game-frame delay in [nMinDelay, nMaxDelay) from pUnit's seed via RANDOM_RandomNumberSelector, then calls SetEvent. Asserts nMinDelay &lt; nMaxDelay != 0; halts on assertion failure. Used by Decrepify/Conversion-style AI effects.
-void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32_t nMinDelay, int32_t nMaxDelay, int32_t bUndeadOnly, D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32_t nMinDelay, int32_t nMaxDelay, int32_t bUndeadOnly, D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     uint32_t nRandDelay;
     bool bIsNeutral;
     D2UnitFindArgStrc sUnitFindArg;
@@ -8322,12 +8322,7 @@ void __fastcall AI_Function0_AttachedCasterInit(::SGAMEDATA * pGame, D2UnitStrc 
     eD2UnitType eUnitType;
     D2AiGeneralStrc* pAiGeneral;
     D2UnitStrc* pOwnerUnit = Ai::AiGeneral::GetOwnerUnit(pUnit);
-    if (!pOwnerUnit) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe17);
-      exit(-1);
-    }
-
-    {
+    if (pOwnerUnit) {
       D2SeedStrc DVar1;
       eUnitType = pOwnerUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
@@ -8377,6 +8372,9 @@ void __fastcall AI_Function0_AttachedCasterInit(::SGAMEDATA * pGame, D2UnitStrc 
       pAiGeneral->dwArg2 = DVar1.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) / 100) * -100;
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe17);
+    exit(-1);
 }
 
 // Monster AI tick for a summoner/master archetype. Reads its current AI command (GetAiCmd); if a command of type 8 is pending it skips the active logic. Otherwise flags whether any minion is dead/missing (CallForEachMinion + MONSTERAI_FlagIfDeadOrNull) and checks if it is currently attacking. If neither attacking nor needing minions: when the master is owned by another unit it walks toward the saved command offset (or PlanNextAiMove), else it performs a circular patrol around itself — phase counter dwArg2 (0..99) drives offset direction/sign via RNG, then MONSTERAI_CommandWalkToCoords; on success advances the phase, on failure creates a walk minion command and resets. If attacking/minions-needed it issues a CreateMinion cmd-8, frees minion AIs and reattaches the correct AI. Always ends scheduling the next move.

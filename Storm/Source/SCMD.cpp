@@ -51,7 +51,7 @@ static char gszSCMD_Delim_1[9] = {
 
 // Parses command-line boolean argument with optional +/- prefix. Updates bitmask in cmdDef based on flags (sets bits on +/true, clears bits on -/false). Also updates external bitmask pointer if provided.
 // @blizzard ConvertBool (SCMD.CPP)
-void __fastcall SCMD_ConvertBool(D2GameNpcStrc * cmdDef, char * str, uint32_t * outConsumed) {
+static void __fastcall SCMD_ConvertBool(D2GameNpcStrc * cmdDef, char * str, uint32_t * outConsumed) {
     bool bSetFlags;
     uint32_t* pTradeBitmask;
     if (*str == '-') {
@@ -95,7 +95,7 @@ void __fastcall SCMD_ConvertBool(D2GameNpcStrc * cmdDef, char * str, uint32_t * 
 
 // Parses command-line integer argument using strtol (signed) or strtoul (unsigned) based on command definition flags. Stores parsed value and reports consumed character count. Copies result to external buffer if provided.
 // @blizzard ConvertNumber (SCMD.CPP)
-void __stdcall SCMD_ConvertNumber(D2UnitDataMonsterStrc * cmdDef, char * str, int * outConsumed) {
+static void __stdcall SCMD_ConvertNumber(D2UnitDataMonsterStrc * cmdDef, char * str, int * outConsumed) {
     uint32_t uParsedValue;
     char* pcParseEnd = 0;
     if (!(cmdDef->Components[4] & 1)) {
@@ -126,7 +126,7 @@ void __stdcall SCMD_ConvertNumber(D2UnitDataMonsterStrc * cmdDef, char * str, in
 
 // @sourcefile .\SOURCE\SCMD.CPP
 // @blizzard ConvertString (SCMD.CPP)
-void __stdcall SCMD_ConvertString(char * str, D2UnitDataMonsterStrc * cmdDef, uint32_t * outConsumed) {
+static void __stdcall SCMD_ConvertString(char * str, D2UnitDataMonsterStrc * cmdDef, uint32_t * outConsumed) {
     uint32_t uVar1 = SSTR::SStrLen(str);
     *outConsumed = uVar1;
     if ((void*)cmdDef->nOwnerGUID) {
@@ -148,7 +148,7 @@ void __stdcall SCMD_ConvertString(char * str, D2UnitDataMonsterStrc * cmdDef, ui
 }
 
 // @blizzard GenerateError (SCMD.CPP)
-void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCallback, char * szItem) {
+static void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCallback, char * szItem) {
     UINT uID;
     int nMsgIdx;
     uint32_t sCallbackArgs[3];
@@ -199,7 +199,7 @@ void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCa
 }
 
 // @blizzard ProcessFile (SCMD.CPP)
-BOOL __stdcall SCMD_ProcessFile(char * filename, int * pnParam, uint32_t dwParam, pfnSCmdUnknownArgCallback pfnCallback, pfnSCmdErrorCallback pfnErrorCallback) {
+static BOOL __stdcall SCMD_ProcessFile(char * filename, int * pnParam, uint32_t dwParam, pfnSCmdUnknownArgCallback pfnCallback, pfnSCmdErrorCallback pfnErrorCallback) {
     DWORD dwBytesRead;
     HANDLE hFile = CreateFileA(filename, 0x80000000, 1, (LPSECURITY_ATTRIBUTES)0x0, 3, 0x8000000, (HANDLE)0x0);
     if (hFile == (HANDLE)-1) {
@@ -329,7 +329,7 @@ void __thiscall SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode) {
 }
 
 // @blizzard FindFlagDef (SCMD.CPP)
-StormCmdArgDefStrc * __stdcall SCMD_FindFlagDef(StormCmdArgDefStrc * cmdList, char * str, int minLen) {
+static StormCmdArgDefStrc * __stdcall SCMD_FindFlagDef(StormCmdArgDefStrc * cmdList, char * str, int minLen) {
     int nCmpResult;
     uint32_t pcStrEnd = SSTR::SStrLen(str);
     int uBestLen = minLen - 1;
@@ -648,7 +648,7 @@ uint32_t __thiscall SCMD_RemoveNode(::SCMD * pThis, ::SCMD * pNode) {
 }
 
 // @blizzard PerformConversion (SCMD.CPP)
-BOOL __fastcall SCMD_PerformConversion(char * str, StormCmdArgDefStrc * cmdDef, int * outConsumed) {
+static BOOL __fastcall SCMD_PerformConversion(char * str, StormCmdArgDefStrc * cmdDef, int * outConsumed) {
     D2StormListHead* pListHead;
     uint32_t szNewBuf;
     uint32_t nLine;
@@ -724,7 +724,7 @@ BOOL __fastcall SCMD_PerformConversion(char * str, StormCmdArgDefStrc * cmdDef, 
 }
 
 // @blizzard ProcessCurrentFlag (SCMD.CPP)
-BOOL __thiscall SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed) {
+static BOOL __thiscall SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed) {
     int iVar1;
     int nArgConsumed;
     *outConsumed = 0;
@@ -841,7 +841,7 @@ BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * 
 }
 
 // @blizzard ProcessToken (SCMD.CPP)
-BOOL __fastcall SCMD_ProcessToken(uint32_t * cmdDefPtr, char * str, int * outPtr, int noFileExpand, pfnSCmdUnknownArgCallback unknownCb, pfnSCmdErrorCallback errorCb) {
+static BOOL __fastcall SCMD_ProcessToken(uint32_t * cmdDefPtr, char * str, int * outPtr, int noFileExpand, pfnSCmdUnknownArgCallback unknownCb, pfnSCmdErrorCallback errorCb) {
     BOOL bParseResult;
     if (*str == '@' && !noFileExpand) {
       bParseResult = SCMD_ProcessFile(str + 1, outPtr, (uint32_t)cmdDefPtr, unknownCb, errorCb);

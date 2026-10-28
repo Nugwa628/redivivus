@@ -425,7 +425,7 @@ void __fastcall SendAttributeUpdate(D2UnitStrc * pUnit, uint16_t nStatId, uint32
     GAME::SCmd::NET_D2GS_SERVER_Send_0x20_STATCHANGE_PLAYER(pClient, ' ', pUnit->nUnitGUID, nStatId, dwStatValue);
 }
 
-uint8_t GetHPRegen(D2UnitStrc * pUnit) {
+static uint8_t GetHPRegen(D2UnitStrc * pUnit) {
     int nHP = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hitpoints, 0);
     int32_t nMaxHp = D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit);
     D2StatListExStrc* pHpPotStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit, STATE_healthpot);
@@ -446,7 +446,7 @@ uint8_t GetHPRegen(D2UnitStrc * pUnit) {
 }
 
 // Computes projected mana percentage after applying active mana-pot regen. Factors in the CharStats base ManaRegen rate (scaled by 25), UNITSTAT_manarecovery, UNITSTAT_manarecoverybonus, elapsed game frames since the mana pot was applied (from StatList pointer arithmetic), and current/max mana. Returns 0–100 (clamped), or 0 if no mana-pot state active, zero max mana, or invalid class ID.
-uint8_t GetMPRegen(D2UnitStrc * pUnit) {
+static uint8_t GetMPRegen(D2UnitStrc * pUnit) {
     int nMana = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_mana, 0);
     int32_t nMaxMana = D2Common::Stats::StatsEx::GetTxtMaxMana(pUnit);
     D2StatListExStrc* pStatListMana = D2Common::Stats::StatsEx::GetStatsByState(pUnit, STATE_manapot);
@@ -649,14 +649,14 @@ void __fastcall SendInitUpdateAttributes(D2UnitStrc * pUnit, D2ClientStrc * pCli
     }
 }
 
-void __stdcall StartModeID(eD2Skills eSkillId, ::SGAMEDATA * pGame, eD2UnitType eUnitType, D2UnitStrc * pUnit, DWORD nUid) {
+static void __stdcall StartModeID(eD2Skills eSkillId, ::SGAMEDATA * pGame, eD2UnitType eUnitType, D2UnitStrc * pUnit, DWORD nUid) {
     PlayerModes::PLRMODES_StartModeID(pGame, pUnit, nullptr, 3, eUnitType, nUid, 0);
     D2Common::Drlg::PLAYER_SetSkillHitFlagAndStoreTarget(pUnit, eSkillId, eUnitType, nUid);
 }
 
 // Returns SERVERSTATUS_OK (0) when both units are in the same act, or 2 when they differ - the act check every cross-act packet handler gates on.
 // Returns a FULL 32-bit value. The single return path is SBB EBX,EBX / AND EBX,0x2 / MOV EAX,EBX at 00548ab1-00548ab6, which writes the whole of EAX.
-int32_t __stdcall IsOtherAct(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static int32_t __stdcall IsOtherAct(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit2);
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     eAct eActThis = D2Common::Drlg::GetActNoFromLevelNumber(eLevelId);
@@ -839,7 +839,7 @@ int32_t __stdcall PLAYERMSG_GetMessagePriority(uint32_t nParam) {
 }
 
 // Validates that tile coordinates (nX, nY) are within a Chebyshev (max-norm) distance of nRange from the unit's current position. Returns a non-zero eD2ServerIncomingStatus if both axis deltas are within range. Used by movement packet handlers to guard against teleport/warp exploits.
-eD2ServerIncomingStatus __stdcall CheckIfCoordsAreInRange(D2UnitStrc * pUnit, int32_t nRange, uint16_t nX, uint16_t nY) {
+static eD2ServerIncomingStatus __stdcall CheckIfCoordsAreInRange(D2UnitStrc * pUnit, int32_t nRange, uint16_t nX, uint16_t nY) {
     int nUnitX;
     int nUnitY;
     eD2UnitType eUnitType = pUnit->eUnitType;
@@ -880,7 +880,7 @@ eD2ServerIncomingStatus __stdcall CheckIfCoordsAreInRange(D2UnitStrc * pUnit, in
 }
 
 // Checks whether pUnit is within nRange tiles (Chebyshev) of a target unit identified by (eUnitType, nUid). Also validates same-act placement and, for item targets, that the player is not already holding the item. Returns a non-zero status if in range, 0 (via CheckIfCoordsAreInRange) otherwise. Used to gate walk-to-entity and interact packet processing.
-eD2ServerIncomingStatus __stdcall CloseEnoughToInteract(::SGAMEDATA * pGame, eD2UnitType eUnitType, D2UnitStrc * pUnit, uint32_t nUid, int32_t nRange) {
+static eD2ServerIncomingStatus __stdcall CloseEnoughToInteract(::SGAMEDATA * pGame, eD2UnitType eUnitType, D2UnitStrc * pUnit, uint32_t nUid, int32_t nRange) {
     uint16_t wTargetX;
     eD2ServerIncomingStatus eVar1;
     int32_t nCoordPos;
@@ -985,7 +985,7 @@ eD2ServerIncomingStatus __thiscall ItemBelongsToUnit(void * pThis, D2UnitStrc * 
     return (uint32_t)!bBelongs;
 }
 
-eD2ServerIncomingStatus __stdcall ItemIsOfPlayerAndNotOnCursor(uint32_t nItemGid, D2UnitStrc * pPlayer, ::SGAMEDATA * pGame) {
+static eD2ServerIncomingStatus __stdcall ItemIsOfPlayerAndNotOnCursor(uint32_t nItemGid, D2UnitStrc * pPlayer, ::SGAMEDATA * pGame) {
     if (!pGame) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4a8);
       exit(-1);
@@ -1030,7 +1030,7 @@ eD2ServerIncomingStatus __thiscall ItemBelongsToInventoryOf(void * pThis, D2Unit
 }
 
 // Validates that an item (by GID) is accessible to the acting player for an interaction. Looks up the item unit; for ground/dropped states (Death/Neutral/Walk/GetHit modes) delegates to ItemIsOfPlayerAndNotOnCursor. For the Run mode (item on ground in another act area) calls IsOtherAct and CheckIfCoordsAreInRange (range 10). Returns 0 on success or a non-zero eD2ServerIncomingStatus error code (SERVERSTATUS_BAD_TARGET if item not found).
-uint32_t __stdcall IsAccessableCheck(DWORD nItemGid, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static uint32_t __stdcall IsAccessableCheck(DWORD nItemGid, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     int32_t iVar1;
     eD2ServerIncomingStatus nResult;
     int32_t nErrOrCoordY;
@@ -1112,7 +1112,7 @@ int32_t __stdcall MONSTER_FindNearbyAllyUnit(::SGAMEDATA * pGame, int32_t bCheck
 
 // Validates that a unit may cast a given skill id: rejects a negative id or one past the SkillsTxt row count with 2, an unbound skill with 3, and otherwise returns 0 when the unit has the skill points for it.
 // Returns a FULL 32-bit value. All three return paths write the whole of EAX - MOV EAX,0x3 at 005494ae, MOV EAX,0x2 at 005494d1, and the SBB EAX,EAX / AND EAX,0xfffffffd / ADD EAX,0x3 sequence at 005494c8.
-int32_t CheckIfCanBeSkilled(D2UnitStrc * pUnit, eD2Skills eSkill) {
+static int32_t CheckIfCanBeSkilled(D2UnitStrc * pUnit, eD2Skills eSkill) {
     bool _bSkillBound;
     bool _bCanSkill;
     bool bSkillBound;
@@ -1135,7 +1135,7 @@ int32_t CheckIfCanBeSkilled(D2UnitStrc * pUnit, eD2Skills eSkill) {
     return (_bSkillBound ? -3 : 0) + 3;
 }
 
-eD2ServerIncomingStatus __stdcall OrficeStaffCheck(uint32_t pUid, int16_t nParam, D2UnitStrc * pUnit, uint32_t dwParam, ::SGAMEDATA * pGame) {
+static eD2ServerIncomingStatus __stdcall OrficeStaffCheck(uint32_t pUid, int16_t nParam, D2UnitStrc * pUnit, uint32_t dwParam, ::SGAMEDATA * pGame) {
     uint32_t nItemCheck;
     eD2ServerIncomingStatus nRangeStatus = CloseEnoughToInteract(pGame, UNIT_OBJECT, pUnit, dwParam, 0x32);
     if (nRangeStatus != SERVERSTATUS_OK) {
@@ -1155,7 +1155,7 @@ eD2ServerIncomingStatus __stdcall OrficeStaffCheck(uint32_t pUid, int16_t nParam
 }
 
 // Validates whether a player can interact with a waypoint object. Returns 1 if waypoint GID not found, 2 if waypoint is in a different act, nonzero range error if player is too far (range 10, or 22 for Sorceress). If in range and nAreaId is provided, looks up the waypoint ID for that level and checks whether the player already has it unlocked; returns 0 if activating new waypoint, 2 if already owned, 3 if level has no waypoint entry.
-int32_t __stdcall PlayerCanInteractWithWaypoint(::SGAMEDATA * pGame, uint16_t nAreaId, DWORD nGid, D2UnitStrc * pUnit) {
+static int32_t __stdcall PlayerCanInteractWithWaypoint(::SGAMEDATA * pGame, uint16_t nAreaId, DWORD nGid, D2UnitStrc * pUnit) {
     bool bHasWaypoint;
     uint16_t nWpY;
     BOOL bFound;
@@ -1232,7 +1232,7 @@ int32_t __stdcall PlayerCanInteractWithWaypoint(::SGAMEDATA * pGame, uint16_t nA
 
 // Movement-packet range validator with anti-cheat reassign. Reads target (nX, nY) from raw packet bytes, calls CheckIfCoordsAreInRange(range=0x32). If out of range and more than 25 frames have elapsed since last frame-stamp, sends packet 0x15 (ReassignPlayer) to snap the client back to the server-authoritative position. If in range, stamps nGameFrame and writes nX/nY to outNx/outNy for further processing. Returns SERVERSTATUS_OK on success.
 // Returns a FULL 32-bit value, not a one-byte enum. All four return paths write the whole of EAX - MOV EAX,0x3 at 0054970f, MOV EAX,0x2 at 00549728, XOR EAX,EAX at 005497d3 and MOV EAX,EBX at 005497b3, where EBX can be OR EBX,0xffffffff (-1) from 00549789.
-int32_t __stdcall CheckIfInrangeAndReassign(::SGAMEDATA * pGame, D2UnitStrc * pUnit2, uint16_t * outNx, uint16_t * outNy, D2UnitStrc * pUnit, uint8_t * pPacket) {
+static int32_t __stdcall CheckIfInrangeAndReassign(::SGAMEDATA * pGame, D2UnitStrc * pUnit2, uint16_t * outNx, uint16_t * outNy, D2UnitStrc * pUnit, uint8_t * pPacket) {
     uint32_t pUnitId;
     bool bReassign;
     int32_t nServerX;
@@ -1294,7 +1294,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x01_WalkToLocation(::SGAMEDATA * pGame,
     return (eD2ServerIncomingStatus)nStatus;
 }
 
-eD2ServerIncomingStatus __stdcall AnyPacketClickOnMap(::SGAMEDATA * pGame, size_t nSize, eD2UnitType * peUnitTypeOut, size_t * nSizeEx, D2UnitStrc * pUnit, uint8_t * pPacket) {
+static eD2ServerIncomingStatus __stdcall AnyPacketClickOnMap(::SGAMEDATA * pGame, size_t nSize, eD2UnitType * peUnitTypeOut, size_t * nSizeEx, D2UnitStrc * pUnit, uint8_t * pPacket) {
     *peUnitTypeOut = UNIT_PLAYER;
     *nSizeEx = 0;
     if (nSize != 9) {
@@ -1360,7 +1360,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x04_RunToEntity(::SGAMEDATA * pGame, D2
 
 // For dual-wielding players using SKILL_Attack, checks both weapon slots are valid non-broken non-missile weapons. If so, swaps to SKILL_LeftHandSwing on odd strikes (param4 cycles 0→5→0) to alternate hands. Returns pSkill unchanged for all other skills or single-weapon setups. Halts on missing LeftHandSwing skill data.
 // @sourcefile .\PLAYER\PlrMsg.cpp
-D2SkillStrc * __stdcall GetDualSwingSkill(D2SkillStrc * pSkill, D2UnitStrc * pPlayer) {
+static D2SkillStrc * __stdcall GetDualSwingSkill(D2SkillStrc * pSkill, D2UnitStrc * pPlayer) {
     BOOL BVar1;
     eD2ItemTypes eWeaponType;
     eD2Skills eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\PLAYER\\PlrMsg.cpp", 0x70c);
@@ -1470,7 +1470,7 @@ eD2ServerIncomingStatus __stdcall CastSkillOnLocation(D2UnitStrc * pUnit, ::SGAM
 
 // Server-side skill dispatch for player targeting an entity. Resolves dual-swing substitution, checks skill usability (SKILLS_CanUseSkill), and if a skill is blocked by a flags4 condition falls back to SKILL_Attack. On usability==0 with a valid mode, looks up the target unit, follows attached-unit ownership, validates melee/range weapon class against target proximity, then routes to StartModeID or PLRMODES_StartModeID. Returns 0 on success, 2 on failure.
 // @sourcefile .\PLAYER\PlrMsg.cpp
-void __stdcall PLAYER_ProcessSkillOnEntity(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, eD2UnitType eUnitType, DWORD dwParam, int32_t nParam, D2SkillStrc * pSkill) {
+static void __stdcall PLAYER_ProcessSkillOnEntity(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, eD2UnitType eUnitType, DWORD dwParam, int32_t nParam, D2SkillStrc * pSkill) {
     D2UnitStrc* pOwnerUnit;
     int32_t nSkillWeaponClass;
     eD2Skills eSkillId;
@@ -1891,7 +1891,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x14_OverheadMessage(::SGAMEDATA * pGame
 }
 
 // Checks if a unit's current interact target is a different player than the given one. Used by chat broadcast to suppress messages when sender or recipient is in a private interaction (trade, NPC dialog with another player).
-BOOL __stdcall CHAT_IsInteractingWithOtherPlayer(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pOtherUnit) {
+static BOOL __stdcall CHAT_IsInteractingWithOtherPlayer(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pOtherUnit) {
     uint32_t nInteractTargetGUID;
     eD2UnitType eInteractTargetType;
     BOOL bHasInteractTarget = UNIT::SUnit::GetInteractInfo(pUnit, &eInteractTargetType, &nInteractTargetGUID);
@@ -3561,7 +3561,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x45_Unused(::SGAMEDATA * pGame, D2UnitS
     return SERVERSTATUS_BAD_PARAMS;
 }
 
-eD2ServerIncomingStatus __stdcall CanInteractWithMerc(int32_t nCmdArg1, int32_t nCmdArg2, int32_t nCmdId, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, uint32_t nMercGUID) {
+static eD2ServerIncomingStatus __stdcall CanInteractWithMerc(int32_t nCmdArg1, int32_t nCmdArg2, int32_t nCmdId, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, uint32_t nMercGUID) {
     D2AiCmdArgumentsStrc local_20;
     D2UnitStrc* pMercUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, nMercGUID);
     if (!pMercUnit) {
@@ -3879,7 +3879,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x59_CommandNPC(::SGAMEDATA * pGame, D2U
 }
 
 // Checks if target position is reachable by temporarily overriding path settings (collision=0x409, pathType=0xf, maxDist=77), calculating a path, then restoring originals. Returns 1 only if final path point exactly matches destination (fully walkable, no obstacles).
-uint32_t __stdcall ValidateSyncWarpPath(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t nX, uint32_t nY) {
+static uint32_t __stdcall ValidateSyncWarpPath(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t nX, uint32_t nY) {
     D2RoomStrc* pRoom;
     pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     pRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nY, nX);
@@ -3947,7 +3947,7 @@ uint32_t __stdcall ValidateSyncWarpPath(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 }
 
 // Relocates player to target position and applies STATE_sync_warped for a random duration. Records warp timestamp; if 5+ warps within 90 seconds on BNet, rolls penalty delay from weighted table: 50% chance 1500 frames (60s), 25% chance 3000 frames (2min), 25% chance 4500 frames (3min). Default delay 125 frames (5s) for non-BNet or under rate limit.
-BOOL __stdcall RelocateAndApplySyncWarp(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t nX, uint32_t nY) {
+static BOOL __stdcall RelocateAndApplySyncWarp(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t nX, uint32_t nY) {
     // Static local variables (originally global data)
     static D2WarpChanceStrc gaWarpOffsetTable[3] = {
     {
@@ -4029,12 +4029,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x5F_SyncPosition(::SGAMEDATA * pGame, D
     uint32_t nX = (uint32_t)*(uint16_t*)(pPacket + 1);
     uint32_t nY = (uint32_t)*(uint16_t*)(pPacket + 3);
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x1616);
-    if (!pClient) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1617);
-      exit(-1);
-    }
-
-    {
+    if (pClient) {
       D2SkillStrc* pCurrentSkill;
       pCurrentSkill = D2Common::Units::GetCurrentSkill(pUnit);
       if (pCurrentSkill) {
@@ -4078,6 +4073,9 @@ eD2ServerIncomingStatus __fastcall SCMD_0x5F_SyncPosition(::SGAMEDATA * pGame, D
       PlayerModes::PLRMODES_MoveToLocation(pGame, pUnit, nullptr, (eAnimMode == eD2PlayerAnimMode_ns::Run) + 2, nX, nY, 0);
       return SERVERSTATUS_OK;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1617);
+    exit(-1);
 }
 
 eD2ServerIncomingStatus __fastcall SCMD_0x60_WeaponSwap(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x60_WeaponSwap * pPacket, uint32_t nSize) {
@@ -4104,7 +4102,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x60_WeaponSwap(::SGAMEDATA * pGame, D2U
 }
 
 // Server-side: equips an item onto a hireling/mercenary, swapping out whatever it currently has in the matching body location(s). Expansion-only (returns 3 in classic). pUnit=owning player, pUnit1=item to equip, pUnit2=merc, pGame=game. Resolves the item's BodyLoc1/BodyLoc2; for Iron Wolf mercs (classId 0x167) a shield routes to the secondary slot. If a slot is occupied, validates the new item's equip requirements (ITEM_CheckEquipRequirements): on success it removes the old item to the player's cursor and unequips it; on failure it returns the old item to the merc's inventory and aborts. Then clones the new item onto the merc, equips it via SERVER_EquipItemToBodyLoc, refreshes stats, fires PERIODICSTATS/STATREGEN timer triggers, and schedules a follow-up event. Returns 1 on a completed swap, 0 on no-op/abort, 3 in classic. Side effects: item clone/free, inventory mutation, stat recalc, event scheduling.
-BOOL __stdcall MERC_SwapEquippedItem(D2UnitStrc * pUnit, D2UnitStrc * pUnit1, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2) {
+static BOOL __stdcall MERC_SwapEquippedItem(D2UnitStrc * pUnit, D2UnitStrc * pUnit1, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2) {
     DWORD dwOldItemGUID;
     uint32_t bEquipOk;
     D2UnitStrc* pClonedNewItemLocal;
@@ -4205,7 +4203,7 @@ BOOL __stdcall MERC_SwapEquippedItem(D2UnitStrc * pUnit, D2UnitStrc * pUnit1, ::
     return 0;
 }
 
-eD2ServerIncomingStatus __stdcall EquipOrUnequipMercItem(D2UnitStrc * pUnit, int32_t eBodyLoc, D2UnitStrc * pUnit2, ::SGAMEDATA * pGame) {
+static eD2ServerIncomingStatus __stdcall EquipOrUnequipMercItem(D2UnitStrc * pUnit, int32_t eBodyLoc, D2UnitStrc * pUnit2, ::SGAMEDATA * pGame) {
     D2InventoryStrc* pPlayerInv = pUnit->pInventory;
     if (!(pGame->bExpansion && pUnit2->pInventory && eBodyLoc - 1U < 10)) {
       return SERVERSTATUS_BAD_PARAMS;
@@ -4238,7 +4236,7 @@ eD2ServerIncomingStatus __stdcall EquipOrUnequipMercItem(D2UnitStrc * pUnit, int
 
 // Server check (PlrMsg) for whether a mercenary can take/use the item the player is offering, and performs the resulting action. Expansion-only (returns 3 in classic). Rejects unidentified or broken items. Potions (healing/thawing/antidote) are cast on the merc via SKILLITEM_DispatchItemSpell then moved to cursor (return 1). Otherwise checks the item type against the merc's class id: armor/helm allowed for all; Rogue(0x167) sword(1H)/shield; Desert(0x152) spear/polearm; Iron Wolf(0x10f) bow; Barbarian(0x230) 1H axe/helm; (0x231) 1H sword. If type allowed and ITEM_CheckEquipRequirements passes, swaps it onto the merc (MERC_SwapEquippedItem) firing sound event 0x57 (return 1) or 0x56 on swap failure (return 0); disallowed type fires sound 0x55 (return 0).
 // @sourcefile .\PLAYER\PlrMsg.cpp
-void __stdcall MERC_CanEquipItem(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit1, D2UnitStrc * pUnit2) {
+static void __stdcall MERC_CanEquipItem(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit1, D2UnitStrc * pUnit2) {
     bool bTwoHandedAllowed;
     uint32_t nMercClassId;
     eD2ItemTypes eItemType;
@@ -4608,68 +4606,69 @@ void __fastcall PLAYERMSG_BroadcastPlayerSlain(::SGAMEDATA * pGame, D2UnitStrc *
     char szKillerNameTmp[16];
     int32_t nLine;
     uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
-    if (!(pVictim && pVictim->eUnitType == UNIT_PLAYER)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x19b4);
-      exit(-1);
-    }
-    if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
-      pOwnerUnit = Ai::AiGeneral::GetOwnerUnit(pUnit);
-      if (pOwnerUnit && pOwnerUnit->eUnitType == UNIT_PLAYER) {
-        pUnit = pOwnerUnit;
+    if (pVictim && pVictim->eUnitType == UNIT_PLAYER) {
+      if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
+        pOwnerUnit = Ai::AiGeneral::GetOwnerUnit(pUnit);
+        if (pOwnerUnit && pOwnerUnit->eUnitType == UNIT_PLAYER) {
+          pUnit = pOwnerUnit;
+        }
       }
-    }
 
-    memset(packet0x5a.szName1, 0, 16 * sizeof(packet0x5a.szName1[0]));
-    memset(packet0x5a.szName2 + 4, 0, 12 * sizeof(packet0x5a.szName2[0]));
-    packet0x5a.nPacketId = 'Z';
-    packet0x5a.nMessageType = '\x06';
-    packet0x5a.nColor = '\x04';
-    if (!pUnit) {
-      packet0x5a.nArg = -1;
-    } else {
-      packet0x5a.nArg = pUnit->nClassId;
-    }
+      memset(packet0x5a.szName1, 0, 16 * sizeof(packet0x5a.szName1[0]));
+      memset(packet0x5a.szName2 + 4, 0, 12 * sizeof(packet0x5a.szName2[0]));
+      packet0x5a.nPacketId = 'Z';
+      packet0x5a.nMessageType = '\x06';
+      packet0x5a.nColor = '\x04';
+      if (!pUnit) {
+        packet0x5a.nArg = -1;
+      } else {
+        packet0x5a.nArg = pUnit->nClassId;
+      }
 
-    packet0x5a.nArgTypes = '\x06';
-    if (pUnit) {
-      packet0x5a.nArgTypes = (uint8_t)pUnit->eUnitType;
-    }
+      packet0x5a.nArgTypes = '\x06';
+      if (pUnit) {
+        packet0x5a.nArgTypes = (uint8_t)pUnit->eUnitType;
+      }
 
-    memset(packet0x5a.szName2, 0, 4 * sizeof(packet0x5a.szName2[0]));
-    pClient = UNIT::SUnit::SUNIT_GetClient(pVictim, ".\\PLAYER\\PlrMsg.cpp", 0x19c9);
-    szCharName = GAME::Clients::GetCharName(pClient);
-    pVictimNameEnd = Storm::Source::SSTR::SStrLen(szCharName);
-    if (!pVictimNameEnd) {
-      *(uint32_t*)(char*)&packet0x5a.szName1 &= -256;
-    } else {
-      Storm::Source::SSTR::SStrCopy(packet0x5a.szName1, szCharName, 0x10);
-    }
-
-    eKillerType = UNIT_COUNT;
-    if (pUnit) {
-      eKillerType = pUnit->eUnitType;
-    }
-    if (eKillerType == UNIT_PLAYER) {
-      nLine = 0x10;
-      pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x19db);
+      memset(packet0x5a.szName2, 0, 4 * sizeof(packet0x5a.szName2[0]));
+      pClient = UNIT::SUnit::SUNIT_GetClient(pVictim, ".\\PLAYER\\PlrMsg.cpp", 0x19c9);
       szCharName = GAME::Clients::GetCharName(pClient);
-      Storm::Source::SSTR::SStrCopy(szKillerNameTmp, szCharName, nLine);
-      pVictimNameEnd = Storm::Source::SSTR::SStrLen(szKillerNameTmp);
-      if (pVictimNameEnd) {
-        Storm::Source::SSTR::SStrCopy(packet0x5a.szName2, szKillerNameTmp, 0x10);
+      pVictimNameEnd = Storm::Source::SSTR::SStrLen(szCharName);
+      if (!pVictimNameEnd) {
+        *(uint32_t*)(char*)&packet0x5a.szName1 &= -256;
+      } else {
+        Storm::Source::SSTR::SStrCopy(packet0x5a.szName1, szCharName, 0x10);
       }
-    } else if (eKillerType == UNIT_MONSTER) {
-      pVictimNameEnd = Monsters::CheckMonsterType(pUnit, 2);
-      if (pVictimNameEnd) {
-        nBossNo = Monsters::GetBossNo(pUnit);
-        packet0x5a.szName2[0] = (char)nBossNo;
-        packet0x5a.szName2[1] = (char)((uint16_t)nBossNo >> 8);
+
+      eKillerType = UNIT_COUNT;
+      if (pUnit) {
+        eKillerType = pUnit->eUnitType;
       }
+      if (eKillerType == UNIT_PLAYER) {
+        nLine = 0x10;
+        pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x19db);
+        szCharName = GAME::Clients::GetCharName(pClient);
+        Storm::Source::SSTR::SStrCopy(szKillerNameTmp, szCharName, nLine);
+        pVictimNameEnd = Storm::Source::SSTR::SStrLen(szKillerNameTmp);
+        if (pVictimNameEnd) {
+          Storm::Source::SSTR::SStrCopy(packet0x5a.szName2, szKillerNameTmp, 0x10);
+        }
+      } else if (eKillerType == UNIT_MONSTER) {
+        pVictimNameEnd = Monsters::CheckMonsterType(pUnit, 2);
+        if (pVictimNameEnd) {
+          nBossNo = Monsters::GetBossNo(pUnit);
+          packet0x5a.szName2[0] = (char)nBossNo;
+          packet0x5a.szName2[1] = (char)((uint16_t)nBossNo >> 8);
+        }
+      }
+
+      BroadcastEventMessage(pGame, &packet0x5a);
+      Fog::Debug::GuardStack();
+      return;
     }
 
-    BroadcastEventMessage(pGame, &packet0x5a);
-    Fog::Debug::GuardStack();
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x19b4);
+    exit(-1);
 }
 
 void __fastcall SendPlayerStopAndAtributeUpdate(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2ClientStrc * pClient, int32_t nStopReason) {

@@ -739,7 +739,7 @@ int32_t __stdcall IITEM_GetItemsTxt_dwNormCode(D2UnitStrc * pUnit) {
     }
 }
 
-int __stdcall ITEMS_nullsub(int nMaxLvlReq, D2MagicAffixTxt * pAffixTxt, D2UnitStrc * pPlayer) {
+static int __stdcall ITEMS_nullsub(int nMaxLvlReq, D2MagicAffixTxt * pAffixTxt, D2UnitStrc * pPlayer) {
     uint8_t bVar1;
     if (!pAffixTxt) {
       return nMaxLvlReq;
@@ -1203,7 +1203,7 @@ void __fastcall ITEM_AddStatCostsToPrices(D2UnitStrc * pItem, int * pnSellPrice,
     *pnRepairPrice += nRepairCostSum / nDivisor;
 }
 
-void __stdcall ITEMS_AddInventoryValueToTotal(int * pTotal1, int * pTotal2, int * pTotal3, D2UnitStrc * pOwnerUnit) {
+static void __stdcall ITEMS_AddInventoryValueToTotal(int * pTotal1, int * pTotal2, int * pTotal3, D2UnitStrc * pOwnerUnit) {
     D2ItemsTxt* pItemsTxt;
     int nHalfCost;
     int nCostSum1 = 0;
@@ -1233,7 +1233,7 @@ void __stdcall ITEMS_AddInventoryValueToTotal(int * pTotal1, int * pTotal2, int 
 }
 
 // Computes the gold cost to gamble an item at a vendor. Resolves the item's normal-quality base via normcode, then looks up uber and ultra upgrade tiers. Weights each tier by how many levels above its minimum level requirement the player is (clamped to 0). Combines a level-scaled base formula with a weighted average of base/uber/ultra costs and stack size. Ring and amulet items ("rin " / "amu " codes) bypass the calculation and return the fixed GambleCost field directly.
-int32_t __stdcall ITEMS_CalculateGamblePrice(int32_t nLevel, D2UnitStrc * pItem) {
+static int32_t __stdcall ITEMS_CalculateGamblePrice(int32_t nLevel, D2UnitStrc * pItem) {
     D2ItemsTxt* pUberItemsTxt;
     uint32_t nItemClassId = IITEM_GetItemsTxt_dwNormCode(pItem);
     nItemClassId = DATATBLS::ItemTbls::TXT_Items_ConvertItemCodeToItemClassId(nItemClassId);
@@ -1961,7 +1961,7 @@ int32_t __stdcall BARBARIAN_CheckItemData_b1or2Handed_isTrue(D2UnitStrc * pUnit,
     }
 }
 
-char ITEMS_ValidateItemQualityCode(uint32_t nQuality, int32_t nCode) {
+static char ITEMS_ValidateItemQualityCode(uint32_t nQuality, int32_t nCode) {
     if (!(nCode - 1U < 8 && nQuality < 0x15)) {
       return '\0';
     }
@@ -1969,7 +1969,7 @@ char ITEMS_ValidateItemQualityCode(uint32_t nQuality, int32_t nCode) {
     return (char)nCode * ' ' + ((uint8_t)nQuality & 0x1f);
 }
 
-BOOL ITEMS_HasSocketedItems(D2UnitStrc * pItem) {
+static BOOL ITEMS_HasSocketedItems(D2UnitStrc * pItem) {
     D2UnitStrc* pCurItem = INVENTORY::Inventory::INVENTORY_GetFirstItem(pItem->pInventory);
     while (true) {
       D2UnitStrc* pSocketedItem;
@@ -1988,7 +1988,7 @@ BOOL ITEMS_HasSocketedItems(D2UnitStrc * pItem) {
     return 1;
 }
 
-BOOL ITEMS_GetCompactSaveFlag(D2UnitStrc * pItem) {
+static BOOL ITEMS_GetCompactSaveFlag(D2UnitStrc * pItem) {
     uint32_t nItemClassId = !pItem ? -1 : pItem->nClassId;
     D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::TXT_Items_GetLine(nItemClassId);
     if (!pItemsTxt) {
@@ -2000,7 +2000,7 @@ BOOL ITEMS_GetCompactSaveFlag(D2UnitStrc * pItem) {
     return (uint32_t)(uint8_t)pItemsTxt->bCompactSave;
 }
 
-BOOL QualityCanHaveSockets(eD2ItemQuality eQuality) {
+static BOOL QualityCanHaveSockets(eD2ItemQuality eQuality) {
     if (!(eQuality != QUALITY_INVALID && ((int)eQuality < 4 || 9 < (int)eQuality))) {
       return 0;
     }
@@ -2346,7 +2346,7 @@ uint32_t ITEM_GetItemData_eD2ItemFlag_IsEthereal(D2UnitStrc * pUnit) {
     return pUnit->pUnitData.pUnitDataItem->dwItemFlags & ITEMFLAG_ETHEREAL;
 }
 
-int32_t ITEMS_CountContainerItems(D2UnitStrc * pItem) {
+static int32_t ITEMS_CountContainerItems(D2UnitStrc * pItem) {
     int nCount = 0;
     if (!(pItem && pItem->eUnitType == UNIT_ITEM)) {
       return 0;
@@ -2371,7 +2371,7 @@ int32_t ITEMS_CountContainerItems(D2UnitStrc * pItem) {
 }
 
 // Deserializes an item's header from a bit-buffer (save/network item blob) into pItem. Reads the 10-bit item version, a 3-bit location code (3/5 = absolute X/Y world coords for ground/static placement, else body-loc + grid X/Y + inventory page), and the owner/flags. For normal items reads a 4-char item code (resolving nClassId), special-cases gold (12- or 32-bit amount stat) and identified scrolls; for ear/personalized items reads the inscribed player name. For file versions > 0x5c attaches a quest-item-difficulty stat when the item is a quest item with diff-check. Optionally reads ground-placement seeds (ver > 0x56/0x5d). Resets seed/init-seed state. Returns 1 on success, -1 if the item code can't be resolved (uses custom register args: pItem in EAX, pBitBuffer in EDI).
-int __stdcall ITEMS_DeserializeItemHeader(int32_t bIsOnGround, uint32_t nFileVersion, D2UnitStrc * pItem, D2BitBufferStrc * pBitBuffer) {
+static int __stdcall ITEMS_DeserializeItemHeader(int32_t bIsOnGround, uint32_t nFileVersion, D2UnitStrc * pItem, D2BitBufferStrc * pBitBuffer) {
     // Frame slots -12..-4 are ONE object: &nSaveAdd is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -2535,7 +2535,7 @@ int __stdcall ITEMS_DeserializeItemHeader(int32_t bIsOnGround, uint32_t nFileVer
 }
 
 // Reads one item stat from a bit-buffer during .d2s / stash deserialization. Applies legacy file-version fixups (versions below 0x58/0x5a/0x5d remap specific stats and narrow their bit-widths), reads the param-lo nibble if the stat has a size field, then calls D2AddStatToStatsListEx to append the decoded stat to pStatList.
-void __stdcall ITEMS_DeserializeSingleStat(uint32_t nFileVersion, eD2UnitStat eUnitStat, D2BitBufferStrc * pBitBuffer, D2StatListExStrc * pStatList, int32_t pItemStatCost, int32_t nStatIndex) {
+static void __stdcall ITEMS_DeserializeSingleStat(uint32_t nFileVersion, eD2UnitStat eUnitStat, D2BitBufferStrc * pBitBuffer, D2StatListExStrc * pStatList, int32_t pItemStatCost, int32_t nStatIndex) {
     uint32_t uVar1;
     int nSize = *(int*)(pItemStatCost + 0x24 + nStatIndex * 4);
     uint32_t nSaveBits = (uint32_t)*(uint8_t*)(pItemStatCost + 0x19 + nStatIndex);
@@ -2695,7 +2695,7 @@ void __fastcall ITEMS_WriteClampedValueToBitBuffer(int32_t nBits, uint32_t nValu
 }
 
 // Serializes the "simple"/header portion of an item unit into a D2BitBuffer for the item save/network format. The item arrives in EAX (0062af85 MOV ESI,EAX) and the bit buffer in EBX; both were modelled as locals, so the reconstruction serialised items through uninitialised pointers. Writes item version (10 bits, clamped 0x3ff), anim mode (3 bits), and position - full 16-bit world X/Y for dropped items, otherwise 4-bit grid X/Y plus a 3-bit body-loc/inv-page. Then for non-player-owned items the 32-bit type code, and for gold a 1-bit large flag plus a clamped amount; for ear items the file index (3 bits), ear level (7 bits) and 7-bit-per-char name.
-void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * pBitBuffer, D2StatListExStrc * pStatListEx) {
+static void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * pBitBuffer, D2StatListExStrc * pStatListEx) {
     uint32_t nClassId;
     int nQuestDifficulty;
     eD2ItemAnimMode eAnimModeClamp;
@@ -2950,7 +2950,7 @@ eD2ItemTypes __stdcall ITEM_GetItemData_wType(D2UnitStrc * pUnit) {
     return eItemType;
 }
 
-void __stdcall ITEMS_SumSocketedItemStats(eD2UnitStat eUnitStat, int * pOutTotal, D2UnitStrc * pItem) {
+static void __stdcall ITEMS_SumSocketedItemStats(eD2UnitStat eUnitStat, int * pOutTotal, D2UnitStrc * pItem) {
     D2UnitStrc* pUnit_00;
     eD2PlayerAnimMode eAnimMode;
     int nStatVal;
@@ -4215,7 +4215,7 @@ BOOL __stdcall IsItemSocketable(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
 }
 
 // Item-load helper called by ITEM_DeserializeFromBitBuffer: given an eD2UnitStat percent-stat selector (item_armor_percent 0x10/0x1f, item_maxdamage_percent 0x11/0x16, item_mindamage_percent 0x12/0x15), resolves the corresponding absolute base value from the item's D2ItemsTxt caps (dwMaxAc, nMaxDam/n2HandMaxDam/nMaxMisDam, nMinDam/n2HandMinDam/nMinMisDam) and writes it onto pUnit via STATLIST_SetUnitStat (UNITSTAT_armorclass / max/mindamage, secondary, and throw variants). Not a cube recipe transform.
-void __stdcall ITEM_ResolvePercentStatToBaseValue(eD2UnitStat nRecipeType, D2UnitStrc * pUnit) {
+static void __stdcall ITEM_ResolvePercentStatToBaseValue(eD2UnitStat nRecipeType, D2UnitStrc * pUnit) {
     int32_t nCurStat;
     int nValue;
     int32_t iVar1;
@@ -5571,7 +5571,7 @@ int32_t __stdcall ITEM_LoadFromSaveData(D2UnitStrc * pUnit, uint8_t * pbParam, s
 }
 
 // Returns 1 if pUnit (item) is replenishable (throwable, stackable, non-ethereal, and its ItemTypesTxt entry has the repair flag set). Returns 0 for non-item units or items that fail any condition. Halts on null pUnit.
-BOOL ITEM_IsReplenishable(D2UnitStrc * pUnit) {
+static BOOL ITEM_IsReplenishable(D2UnitStrc * pUnit) {
     eD2ItemTypes eItemType;
     int32_t nErrLine;
     if (!pUnit) {
@@ -5985,7 +5985,7 @@ int32_t __stdcall ITEMS_CheckBodyLocationFit(D2UnitStrc * pItem, uint32_t eBodyL
 }
 
 // Adjusts buy/sell/repair prices in-place for items whose type has a staffmods class restriction. Iterates the item's skill-bonus stat list (stat 0x6b), and for each qualifying skill entry scales the price deltas using the skill's costmult/costadd fields and the skill level (2*lvl-1). The accumulated deltas are divided by nDivisor before being added to *pBuy, *pSell, and *pRepair. No-ops if pItem is null, not an item unit, or the item type has no staffmods class.
-void __stdcall ITEMS_CalcStaffModsPriceModifier(int * pBuy, int * pSell, int * pRepair, uint32_t nDivisor, D2UnitStrc * pItem) {
+static void __stdcall ITEMS_CalcStaffModsPriceModifier(int * pBuy, int * pSell, int * pRepair, uint32_t nDivisor, D2UnitStrc * pItem) {
     int nCostMult;
     D2StatStrc aSkillBonusBuf[64];
     int nCostAdd;

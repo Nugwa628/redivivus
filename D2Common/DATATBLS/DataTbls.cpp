@@ -113,7 +113,7 @@ BOOL __fastcall CheckIfFileExists(D2PoolManagerStrc * pMemory, char * szFilename
     return bFileExists;
 }
 
-void DATATBLS_NormalizeCodeTo4Chars(char * szText1, char * szText2) {
+static void DATATBLS_NormalizeCodeTo4Chars(char * szText1, char * szText2) {
     char cChar;
     if (*szText1 == '\0') {
       cChar = ' ';
@@ -444,7 +444,7 @@ void __fastcall TXT_States_AllocItemTypesStateDataTable(D2AllStatesDataTbl * * p
     } while (nStateIdx < sgtDataTable.nTxtStatesSize);
 }
 
-void GetPlayerClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
+static void GetPlayerClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
     if (0 >= (int)nSize) {
       return;
     }
@@ -462,7 +462,7 @@ void GetPlayerClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
     szResult[nSize - 1] = '\0';
 }
 
-void GetMonsterClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
+static void GetMonsterClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
     uint16_t wNameStr;
     if (0 >= (int)nSize) {
       return;
@@ -481,7 +481,7 @@ void GetMonsterClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
     szResult[nSize - 1] = '\0';
 }
 
-void GetObjectClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
+static void GetObjectClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
     if (0 >= (int)nSize) {
       return;
     }
@@ -497,7 +497,7 @@ void GetObjectClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
     szResult[nSize - 1] = '\0';
 }
 
-void GetItemClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
+static void GetItemClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
     D2ItemsTxt* pTxtItem = ItemTbls::TXT_Items_GetLine(nClassId);
     if (pTxtItem && pTxtItem->wNameStr != 0x1506) {
       uint16_t* pwszLocaleName;
@@ -513,7 +513,7 @@ void GetItemClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
     szResult[nSize - 1] = '\0';
 }
 
-void GetMissileClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
+static void GetMissileClassIdToName(int32_t nClassId, char * szResult, size_t nSize) {
     if (0 >= (int)nSize) {
       return;
     }
@@ -772,7 +772,7 @@ void __fastcall TXT_CharStats_DefineWideStringClass(D2CharStatsTxt * pTxtCharSta
 
 // One-time startup loader for the many small single-column code/name lookup tables in DataTbls. Always compiles compcode. If sgtDataTable.bUseTxt is set, also creates a TxtLink struct and compiles each of: playerclass, bodylocs, storepage, elemtypes, hitclass, colors, hiredesc, monmode, plrmode, monai, monplace, skillcalc, misscalc, skills, events. Each is a CODE4 or NAME_I_WORD keyed table whose compiled pointer + link are stored into the corresponding sgtDataTable.pTxt*/pTxt*Link/nTxt*Size globals. Allocates from pMemory. Pure init side-effects, no return.
 // @sourcefile .\DATATBLS\DataTbls.cpp
-void TXT_AllocTxt_VariousSmallTables(D2PoolManagerStrc * pMemory) {
+static void TXT_AllocTxt_VariousSmallTables(D2PoolManagerStrc * pMemory) {
     D2BinFieldInputStrc events[2];
     D2BinFieldInputStrc colors[2];
     D2BinFieldInputStrc skills[2];
@@ -3818,12 +3818,12 @@ void __stdcall TXT_AllocTxt_difficultylevels(D2PoolManagerStrc * pMemory) {
     difficultylevels[0x15].nOffset = 0x54;
     difficultylevels[0x16].szName = "end";
     sgtDataTable.pTxtDifficultyLevels = (D2DifficultyLevelsTxt*)CompileTxt(pMemory, "difficultylevels", difficultylevels, &sgtDataTable.nTxtDifficultyLevelsSize, 0x58);
-    if (sgtDataTable.nTxtDifficultyLevelsSize != 3) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x61f);
-      exit(-1);
+    if (sgtDataTable.nTxtDifficultyLevelsSize == 3) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x61f);
+    exit(-1);
 }
 
 // Loads and compiles states.txt into sgtDataTable.pTxtStates (record stride 0x3C). Builds the column-binding descriptor: state name (linked to the States txt-link), group, a large block of behavior bit-flags (nosend/hide/transform/aura/active/curse/curable/staydeath variants/bossinv/shatter/etc.), per-state overlays (overlay1-4/pgsv/cast/rem), linked stat/missile/skill/sounds/itemtype/itemtrans, gfx fields, and client/server event+func indices. Creates the txt-link, calls CompileTxt, and error-halts if more than 255 states. Then allocates and zero-fills the per-state bitmask data tables (pStatesDataTbls, one 32-bit-rounded bitmask block per state, 0x28 entries) via DATATBLS_BuildStatesDataBitMask, and builds the grouped state lists for flag classes 0x04/0x0B/0x10/0x05 and the item-types state-data table. __fastcall(pMemory). Side effect: populates global state data tables.

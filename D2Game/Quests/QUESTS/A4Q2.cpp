@@ -234,7 +234,7 @@ BOOL __fastcall Q27_PlayerUpdateTerrorsEndState(::SGAMEDATA * pGame, D2UnitStrc 
 }
 
 // [A4Q3 Terror's End — expansion] Spawn the red Pandemonium town portal (object class 0x236) next to Diablo's corpse / Tyrael: find a spawnable tile +5x from target, CreateUnit the portal, clear bExpansionPortalCheck and set bPortalSpawned. This is the portal back to the Pandemonium Fortress shown after Diablo dies in LoD.
-void __stdcall Q27_SpawnDiabloPortal(D2QuestArgStrc * pQuestArgs, D2QuestDataA4Q2Strc * pQuestSpecificData) {
+static void __stdcall Q27_SpawnDiabloPortal(D2QuestArgStrc * pQuestArgs, D2QuestDataA4Q2Strc * pQuestSpecificData) {
     D2RoomStrc* pRoom;
     D2UnitStrc* pPortalUnit;
     uint32_t nScanRadius;
@@ -614,7 +614,7 @@ uint8_t __fastcall QuitGameAfterDia(::SGAMEDATA * pGame, D2QuestDataStrc * pQues
 
 // [A4Q3 Terror's End] Mark QUEST_TerrorsEnd done for one player's record: set JustCompleted + Completed, clear step states. Classic (non-expansion): also set steps 0x06/0x07 and bump client status to 4 (act complete / go-to-credits). Increments a counter in the A4Q2 quest struct.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a4q2.cpp
-void __stdcall Q27_SetTerrorsEndCompleted(D2BitBufferStrc * pBitBuffer, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall Q27_SetTerrorsEndCompleted(D2BitBufferStrc * pBitBuffer, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2ClientStrc* pClient;
     /* SetQuestState(TerrorsEnd, JustCompleted=0xd) — Diablo just died self game
                           */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TerrorsEnd, QUESTSTATE_JustCompleted);
@@ -910,7 +910,7 @@ BOOL __fastcall Q27_GetAllSealsActivated(::SGAMEDATA * pGame) {
 }
 
 // [A4Q3 Terror's End] All-seals-activated trigger. Sets the seals-done flag, notifies players (event 0xc), then walks every room of Act IV's Chaos Sanctuary and force-kills all neutral living monsters (except Diablo 0xf3) — i.e. clears the seal bosses' minions when the final seal is hit, summoning Diablo.
-void __stdcall Q27_ActivateAllSealsKillChaos(int * pQuestSpecificData, ::SGAMEDATA * pGame) {
+static void __stdcall Q27_ActivateAllSealsKillChaos(int * pQuestSpecificData, ::SGAMEDATA * pGame) {
     D2UnitStrc* pUnit;
     D2RoomStrc* pRoom;
     BOOL bMonDead;

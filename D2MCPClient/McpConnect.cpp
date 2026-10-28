@@ -410,7 +410,7 @@ void __stdcall MCPCONNECT_CreateThread(uint32_t * pSrcState) {
     MCPThread = CreateThread((LPSECURITY_ATTRIBUTES)0x0, 0, (LPTHREAD_START_ROUTINE)ThreadHandler, (LPVOID)0x0, 0, (LPDWORD)&pSrcState);
 }
 
-char * __stdcall STRING_GetStringLength(char * szText, char * * ppszText, char * pszBufferEnd, int32_t nParam) {
+static char * __stdcall STRING_GetStringLength(char * szText, char * * ppszText, char * pszBufferEnd, int32_t nParam) {
     int nCopyDelta;
     char byChar;
     char* pcVar1 = szText + 1;

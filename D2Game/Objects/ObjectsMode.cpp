@@ -308,7 +308,7 @@ void __fastcall OBJMODE_UpdateHoverTextExpiry(::SGAMEDATA * pGame, D2UnitStrc * 
     GAME::Event::SetEvent(pGame, pUnit, 6, nExpireFrame, 0, 0);
 }
 
-void __stdcall OBJMODE_TriggerProximityEffect(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall OBJMODE_TriggerProximityEffect(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     int32_t nClassIdOrDist;
     POINT ptUnitCoords;
     D2UnitStrc* pTarget;
@@ -545,7 +545,7 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
 }
 
 // @sourcefile .\OBJECTS\ObjMode.cpp
-void AUTOMAP_RevealAfterTeleport(D2UnitStrc * pUnit, D2UnitStrc * pUnit2, D2RoomStrc * pRoom) {
+static void AUTOMAP_RevealAfterTeleport(D2UnitStrc * pUnit, D2UnitStrc * pUnit2, D2RoomStrc * pRoom) {
     D2DrlgRoomCoordsStrc roomCoords;
     POINT ptCoords;
     D2Common::Units::GetCoords(pUnit, &ptCoords);
@@ -894,7 +894,7 @@ BOOL __fastcall OBJOP_OpenBreakableContainer(D2ObjectOperateFnArg * pOperation) 
     return 1;
 }
 
-BOOL __stdcall OBJMODE_CheckSpawnMonsterFromSkeletonActRestriction(int32_t nParam, D2RoomStrc * pRoom) {
+static BOOL __stdcall OBJMODE_CheckSpawnMonsterFromSkeletonActRestriction(int32_t nParam, D2RoomStrc * pRoom) {
     if (!(nParam == 0xea && pRoom)) {
       return 1;
     }
@@ -908,7 +908,7 @@ BOOL __stdcall OBJMODE_CheckSpawnMonsterFromSkeletonActRestriction(int32_t nPara
     return 0;
 }
 
-void OBJMODE_SpawnMonsterFromObject(eD2MonsterAnimMode eMonsterAnimMode, int32_t nParam, D2ObjectModeArg * pObjectModeArg) {
+static void OBJMODE_SpawnMonsterFromObject(eD2MonsterAnimMode eMonsterAnimMode, int32_t nParam, D2ObjectModeArg * pObjectModeArg) {
     eD2LevelId eLevel;
     if (!(-1 < nParam && nParam < sgptDataTable->nTxtMonStatsSize)) {
       return;
@@ -980,7 +980,7 @@ void __fastcall OBJMODE_SpawnCompanionChests(::SGAMEDATA * pGame, D2UnitStrc * p
     UNIT::SUnit::SetSparklyChestFlag(pNewChest, true);
 }
 
-void OBJMODE_SpawnMonsterAtObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t dwParam) {
+static void OBJMODE_SpawnMonsterAtObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t dwParam) {
     POINT ptCoords;
     D2RoomStrc* pFreeRoom;
     D2Common::Units::GetCoords(pUnit, &ptCoords);
@@ -1023,7 +1023,7 @@ void __fastcall OBJMODE_SpawnSiegeMonsterD(::SGAMEDATA * pGame, D2UnitStrc * pUn
     OBJMODE_SpawnMonsterAtObject(pGame, pUnit, 0x171);
 }
 
-void __stdcall OBJMODE_DispatchOperateCallback(D2ObjectOperateFnArg * pOperation, uint8_t nFunctionId) {
+static void __stdcall OBJMODE_DispatchOperateCallback(D2ObjectOperateFnArg * pOperation, uint8_t nFunctionId) {
     bool _bBadCallback;
     bool bBadCallback;
     bool bActAllowed;
@@ -1053,7 +1053,7 @@ void __stdcall OBJMODE_DispatchOperateCallback(D2ObjectOperateFnArg * pOperation
     UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pOperation->sArg.pVictim, UNITEVENTCALLBACK_REFRESHVENDOR, nullptr);
 }
 
-BOOL OBJMODE_CheckInventoryHasItemType(eD2ItemTypes eItemType, D2UnitStrc * pUnit) {
+static BOOL OBJMODE_CheckInventoryHasItemType(eD2ItemTypes eItemType, D2UnitStrc * pUnit) {
     D2UnitStrc* pCarriedItem;
     uint32_t bMatchesType;
     if (!pUnit->pInventory) {
@@ -1283,7 +1283,7 @@ void __fastcall Shrines_PortalShrineFunction(D2ObjectOperateFnArg * pArguments, 
 }
 
 // Two GuardStack tails: GuardStack(1) after successful spawn/removal, GuardStack(nReturnValue) where nReturnValue is explicitly set to 0 (no spawn spot) or 1 (spawned) elsewhere.
-BOOL __stdcall Shrines_GemShrine_SpawnGem(int32_t nItemClassId, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2) {
+static BOOL __stdcall Shrines_GemShrine_SpawnGem(int32_t nItemClassId, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2) {
     BOOL BVar1;
     D2ClientStrc* pClient;
     POINT ptUnitCoords;
@@ -1840,7 +1840,7 @@ void __fastcall Shrines_PoisonShrineFunction(D2ObjectOperateFnArg * pArguments, 
 }
 
 // Computes the effective to-hit (attack rate) for a skill+weapon pair and writes it into *pnParam. Starts from the unit's base attack rate; if no explicit weapon is provided (pUnit2==null), falls back to the equipped weapon. Missile-potion weapons force *pnParam=0. Final value combines skill's LevToHit/ToHit columns, item bonus damage, UNITSTAT_item_tohit_percent, and the character class's ToHitFactor from CharStats.txt. Halts if pSkill is null.
-void __stdcall SKILL_GetAttackRateForWeapon(D2SkillStrc * pSkill, D2UnitStrc * pUnit, int * pnParam, int32_t nParam, D2UnitStrc * pUnit2) {
+static void __stdcall SKILL_GetAttackRateForWeapon(D2SkillStrc * pSkill, D2UnitStrc * pUnit, int * pnParam, int32_t nParam, D2UnitStrc * pUnit2) {
     int32_t nAttackRate;
     nAttackRate = D2Common::Units::GetAttackRate(pUnit);
     *pnParam = nAttackRate;
@@ -1880,7 +1880,7 @@ void __stdcall SKILL_GetAttackRateForWeapon(D2SkillStrc * pSkill, D2UnitStrc * p
 }
 
 // Returns a shrine's effective stat bonus for the given unit stat. For most stats (resistances, stamina, experience, etc.) returns nParam unchanged. For UNITSTAT_tohit, computes the attack rate via SKILL_GetAttackRateForWeapon. For UNITSTAT_mindamage, resolves whether to use primary or secondary min-damage stat based on dual-wield handedness, then fetches the raw stat value and scales it as (statValue * nParam) / 100.
-int32_t __stdcall OBJMODE_GetModifiedStatValueFromShrine(eD2UnitStat eUnitStat, int32_t nParam, D2UnitStrc * pUnit) {
+static int32_t __stdcall OBJMODE_GetModifiedStatValueFromShrine(eD2UnitStat eUnitStat, int32_t nParam, D2UnitStrc * pUnit) {
     D2SkillStrc* pSkill;
     D2UnitStrc* pWeaponBySkill;
     int nHandedness;
@@ -2262,7 +2262,7 @@ BOOL __fastcall OBJOP_SpawnNormalItemDrop(D2ObjectOperateFnArg * pOperation) {
 }
 
 // Iterator callback (EDI = SGAMEDATA**) that applies counter-attack damage from a source object to all nearby units in its room. For each unit in the room: players not in Dead mode within range 3 take MONSTERAI_CalculateCounterAttackDamage; monsters not in Kick mode within range 3 take the same; explosive-barrel objects (pHashLink1==0xb, Death mode) within collision distance 3 are detonated via OBJOP_DetonateExplosiveBarrel. Passes the constructed sOperation for barrel detonation.
-void OBJMODE_ApplyCounterAttackToNearbyUnits(::SGAMEDATA * * ppGame) {
+static void OBJMODE_ApplyCounterAttackToNearbyUnits(::SGAMEDATA * * ppGame) {
     bool _bInRange;
     bool bInRange;
     int32_t nCollisionDist;
@@ -3053,7 +3053,7 @@ uint32_t __fastcall OBJMODE_ShrineSkillPointBoost(::SGAMEDATA * pGame, D2UnitStr
 }
 
 // Probabilistic dispatcher for an object's per-mode operate handler. Indexes gaObjectsModeFuncTable by bParam (mode index, bounds-checked against gnObjectsModeFunctionDispatchTableCount), advances the object's RNG seed at nParam+0x20 (LCG *0x6ac690c5) and rolls 0..99; only if the roll is below that mode's nSpriteThreshold does it invoke the table's pfnHandler (validated via IsBadCodePtr, halting on a bad pointer) with the mode's nModeFlags, returning the handler's result. Returns 0 if out of range or the probability gate fails. Custom convention (nParam in EDI).
-uint32_t __stdcall OBJMODE_DispatchOperateFunction(::SGAMEDATA * pGame, uint8_t bParam, int32_t nParam) {
+static uint32_t __stdcall OBJMODE_DispatchOperateFunction(::SGAMEDATA * pGame, uint8_t bParam, int32_t nParam) {
     // Static local variables (originally global data)
     static D2ObjModeFuncEntryStrc gaObjectsModeFuncTable[21] = {
     {
@@ -3385,7 +3385,7 @@ void __stdcall OBJECT_HandleUnitRevival(D2UnitStrc * pUnit, bool * pbRevived) {
 }
 
 // Object-mode handler that applies well/shrine healing to a player unit. Reads D2ObjectsTxt Parm flags (bit 1=HP, bit 0=mana) and a percentage scalar, then restores HP, mana, and stamina up to their maximums and sends attribute-update packets for each. Also removes poison and freeze state lists. Revives any dead hireable mercenary via SUNITNPC_HandleHireableAction, then iterates pets via PetsForEach/OBJECT_HandleUnitRevival. Returns UNIT_MONSTER (1) if anything was healed/cured, UNIT_PLAYER (0) if nothing changed.
-BOOL __stdcall OBJMODE_ApplyWellHealing(::SGAMEDATA * pGame, D2ObjectsTxt * pTxtObjects, D2UnitStrc * pUnit) {
+static BOOL __stdcall OBJMODE_ApplyWellHealing(::SGAMEDATA * pGame, D2ObjectsTxt * pTxtObjects, D2UnitStrc * pUnit) {
     BOOL eHealed = 0;
     uint32_t nMaxStat = D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit);
     uint32_t nCurStat = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hitpoints, 0);

@@ -28,6 +28,8 @@ typedef int (__fastcall *pfnFogExceptionFilter)(D2CrashReportStrc * pExceptionRe
 
 namespace Fog::File {
 
+static char * STRING_CopyStringBounded(int32_t nDestSize, char * szDest, char * szSrc);
+
 void __stdcall CONTAINER_InitializeBuffer(void * pBuffer, int32_t nTypeSize, int32_t nBufferSize, CONTAINER_TypeInitialValue fpInitValueCallback) {
     while (true) {
       nBufferSize--;
@@ -268,7 +270,7 @@ void __fastcall CRASH_EnumerateThreads(fnCrashOutputLine pOutputCallback, ::Repo
     /* HANDLE hObject for CloseHandle */ CloseHandle(hObject);
 }
 
-void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
+static void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
     DWORD nMsgLen;
     if (dwExceptionCode < 0xc0000006) {
       if (dwExceptionCode == 0xc0000005) {
@@ -507,7 +509,7 @@ bool __fastcall STRING_AppendBlizzardErrorSubfolderToPath(char * szPath) {
     return pEnd < (char*)0x400;
 }
 
-char * STRING_CopyStringBounded(int32_t nDestSize, char * szDest, char * szSrc) {
+static char * STRING_CopyStringBounded(int32_t nDestSize, char * szDest, char * szSrc) {
     char* pSrcScan;
     pSrcScan = szSrc;
     if (nDestSize) {

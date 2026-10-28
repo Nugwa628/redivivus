@@ -263,7 +263,7 @@ BOOL __stdcall GetUseDirectCommand() {
     return D2Ini_bUseDirect;
 }
 
-bool SFILE_GetSaveGamePath(LPSTR szOutPath, uint32_t nMaxLen) {
+static bool SFILE_GetSaveGamePath(LPSTR szOutPath, uint32_t nMaxLen) {
     int iVar1;
     char szAppDataPath[260];
     char* pszSubPath;

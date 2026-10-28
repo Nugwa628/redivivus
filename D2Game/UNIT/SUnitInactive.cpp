@@ -101,7 +101,7 @@ void SUNITINACTIVE_FreeInactiveMonster(::SGAMEDATA * pGame, D2InventoryToBeUpdat
 }
 
 // @sourcefile .\UNIT\SUnitInactive.cpp
-void __stdcall SUNITINACTIVE_FindAndRemoveInactiveUnitsByRoom(int * pnParam1, int * pnParam2, D2RoomStrc * pRoom, int32_t nParam) {
+static void __stdcall SUNITINACTIVE_FindAndRemoveInactiveUnitsByRoom(int * pnParam1, int * pnParam2, D2RoomStrc * pRoom, int32_t nParam) {
     D2DrlgRoomCoordsStrc sRoomCoords;
     *pnParam1 = 0;
     *pnParam2 = 0;
@@ -139,7 +139,7 @@ void __stdcall SUNITINACTIVE_FindAndRemoveInactiveUnitsByRoom(int * pnParam1, in
 }
 
 // Deserialises a ground item from its inactive (saved-room) binary record and re-creates it as a live D2UnitStrc in pRoom. Extracts item details, calls ITEM_CreateFromSaveData, clamps the despawn frame to at most 15000 frames from now, then iterates any socketed items in the serialised stream — deserialising each and inserting into the item's inventory via PutItemInInventory and ITEMMODE_IsItemOnCursor.
-D2UnitStrc * __stdcall SUNITINACTIVE_RestoreInactiveItem(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int * pInactiveData) {
+static D2UnitStrc * __stdcall SUNITINACTIVE_RestoreInactiveItem(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int * pInactiveData) {
     int nNewDespawnFrame;
     size_t nBytesRemaining;
     D2UnitDataItemDetailsStrc local_2c;
@@ -198,7 +198,7 @@ D2UnitStrc * __stdcall SUNITINACTIVE_RestoreInactiveItem(::SGAMEDATA * pGame, D2
 }
 
 // @sourcefile .\UNIT\SUnitInactive.cpp
-void __stdcall SUNITINACTIVE_RestoreInactiveItemList(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int * pnParam) {
+static void __stdcall SUNITINACTIVE_RestoreInactiveItemList(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int * pnParam) {
     while (pnParam) {
       int* piVar1;
       piVar1 = (int*)*pnParam;
@@ -213,7 +213,7 @@ void __stdcall SUNITINACTIVE_RestoreInactiveItemList(::SGAMEDATA * pGame, D2Room
 
 // Serializes a ground/dropped item into a bitstream (up to 1024 bytes), allocates an inactive record (serialized bytes + 0xF header) in the game memory pool, calculates a despawn timer, then frees the unit and any socketed items via FreeServerUnit. Appends the record to pInactiveList->next chain, or if pOutInactiveRecord is non-null writes the pointer there instead.
 // @sourcefile .\UNIT\SUnitInactive.cpp
-void __stdcall SUNITINACTIVE_SerializeAndDeactivateItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t pInactiveList, int * pOutInactiveRecord) {
+static void __stdcall SUNITINACTIVE_SerializeAndDeactivateItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t pInactiveList, int * pOutInactiveRecord) {
     D2UnitStrc* pNextSocketedItem;
     D2InactiveItemRecordBufferStrc sRecord;
     D2InventoryStrc* pInventory;
@@ -255,7 +255,7 @@ void __stdcall SUNITINACTIVE_SerializeAndDeactivateItem(::SGAMEDATA * pGame, D2U
 
 // Locates and removes an inactive monster record matching nClassId (record +8, stored from pUnit->nClassId by SUNITINACTIVE_DeactivateMonster at 005422b1) from the bucket list indexed by byActNo in the game's inactive monster table. On match: unlinks the node, clears its minion list via ClearMinionList, frees its AI/spawn-point list, and frees the record. Searches all D2InactiveUnitListStrc chained entries in the bucket.
 // @sourcefile .\UNIT\SUnitInactive.cpp
-void SUNITINACTIVE_RemoveInactiveMonsterByClassId(uint8_t byActNo, ::SGAMEDATA * pGame, uint16_t nClassId) {
+static void SUNITINACTIVE_RemoveInactiveMonsterByClassId(uint8_t byActNo, ::SGAMEDATA * pGame, uint16_t nClassId) {
     D2InactiveMonsterRecordStrc* pCurMonster;
     D2InactiveMonsterRecordStrc** pNextLink;
     D2InactiveUnitListStrc* pInactiveList = pGame->pInactiveUnitList[byActNo];
@@ -296,7 +296,7 @@ void SUNITINACTIVE_RemoveInactiveMonsterByClassId(uint8_t byActNo, ::SGAMEDATA *
 }
 
 // @sourcefile .\UNIT\SUnitInactive.cpp
-void SUNITINACTIVE_FreeInactiveMonsterList(::SGAMEDATA * pGame, D2InactiveUnitListStrc * pInactiveUnitList) {
+static void SUNITINACTIVE_FreeInactiveMonsterList(::SGAMEDATA * pGame, D2InactiveUnitListStrc * pInactiveUnitList) {
     D2InactiveMonsterRecordStrc* pCurMonster = pInactiveUnitList->pInactiveMonsters;
     while (pCurMonster) {
       D2InactiveMonsterRecordStrc* pNextMonster;
@@ -313,7 +313,7 @@ void SUNITINACTIVE_FreeInactiveMonsterList(::SGAMEDATA * pGame, D2InactiveUnitLi
 
 // Looks up or allocates a D2InactiveUnitListStrc for the given act and room coordinate (x, pDrlgRoomCoords) in the game's per-act inactive-unit list, which is kept sorted by nX. If nParam==0 returns the found entry or NULL without allocating; if nParam!=0 inserts a fresh node (with empty item/monster/unit sub-lists) into the sorted list and returns it.
 // @sourcefile .\UNIT\SUnitInactive.cpp
-D2InactiveUnitListStrc * __stdcall SUNITINACTIVE_AllocOrFindInactiveList(::SGAMEDATA * pGame, int32_t nAct, int32_t nY, int32_t nParam, int32_t x) {
+static D2InactiveUnitListStrc * __stdcall SUNITINACTIVE_AllocOrFindInactiveList(::SGAMEDATA * pGame, int32_t nAct, int32_t nY, int32_t nParam, int32_t x) {
     D2InactiveUnitListStrc* pNextList;
     pNextList = pGame->pInactiveUnitList[nAct];
     bool bFoundExact;
@@ -370,7 +370,7 @@ void __stdcall SUNITINACTIVE_AllocInactiveListForRoom(::SGAMEDATA * pGame, int32
 }
 
 // Restores a monster's AI/quest state when re-activating it from an inactive (saved/persisted) record. Reads the MonStats line by pnParam[1]; for NPC/interact/inTown monsters (re)creates AI command 10 and seeds its args from the inactive record's nAiArgument/nAiArgument2, and transfers the saved map-AI file via DRLGPRESET_TakeFileFromDrlgMap. Special-cases certain class ids (0x10b/0xf3, super-unique boss flag, plus BaseId 0x44/0x21f via SetAiArgument, and 0x137/0x138 byte fields) to re-apply per-monster AI arguments, and patches monster state flags when the AI-argument pointer equals the DEADEAD sentinel. pnParam is the monster D2UnitStrc.
-void __stdcall SUNITINACTIVE_RestoreMonsterStateFromInactive(::SGAMEDATA * pGame, D2InactiveMonsterRecordStrc * pInactiveMonRec, int * pnParam) {
+static void __stdcall SUNITINACTIVE_RestoreMonsterStateFromInactive(::SGAMEDATA * pGame, D2InactiveMonsterRecordStrc * pInactiveMonRec, int * pnParam) {
     D2MonStatsTxt* pAiCmd;
     D2MonsterAiCmdStrc* pAiCmdNpc;
     int nBaseId;
@@ -457,7 +457,7 @@ void __stdcall SUNITINACTIVE_RestoreMonsterStateFromInactive(::SGAMEDATA * pGame
 }
 
 // Serializes a monster's transient state into an inactive-unit save record (nParam1 = destination record, pnParam = the D2UnitStrc). Writes a DEADEAD death marker + state flag masks when the corresponding mode flags are set, persists NPC/interact AI command args and any preset map-AI file reference, and stores special-case AI arguments for certain monster base ids (0x44, 0x21f) and class ids (0x10b, 0xf3). For super-unique boss types (0x137/0x138) saves a byte from the monster's extra data, else zeroes the saved arg field. Uses register-passed params (EDI/EBX/EAX).
-void SUNITINACTIVE_SaveMonsterStateToInactive(D2InactiveMonsterRecordStrc * pInactiveMonsterRecord, ::SGAMEDATA * pGame, int * pnParam) {
+static void SUNITINACTIVE_SaveMonsterStateToInactive(D2InactiveMonsterRecordStrc * pInactiveMonsterRecord, ::SGAMEDATA * pGame, int * pnParam) {
     D2MonStatsTxt* pAiCmd;
     D2MonsterAiCmdStrc* pAiCmdNpc;
     uint32_t dwSavedAiArg;
@@ -547,7 +547,7 @@ void SUNITINACTIVE_SaveMonsterStateToInactive(D2InactiveMonsterRecordStrc * pIna
 
 // Deactivates a monster when its area is unloaded/idled, serializing its full state into an InactiveMonsterRecord so it can be restored later. Strips all active states (removing/freeing their stat lists), fires the AITHINK timer trigger, then allocates a 0x5c record from the game memory pool and fills it: position (from static/dynamic path), classId, game frame, AI command type, name seed, saved monster state, type-flag bitmask (champion/unique/boss/minion/possessed/aligned/dead etc. via CheckMonsterType + alignment + anim mode), experience, max/current HP, level/area id, the 9-byte UMod list, owner/minion-list linkage, GUID and unit flags. Links the record into the per-act inactive list (SUNITINACTIVE_AllocOrFindInactiveList) keyed by room coords. No-op if unit or its room is null. Uses custom register args (pUnit in EAX).
 // @sourcefile .\UNIT\SUnitInactive.cpp
-void __stdcall SUNITINACTIVE_DeactivateMonster(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall SUNITINACTIVE_DeactivateMonster(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     eD2States nAiCmdType;
     int16_t nBossNo;
     D2AiGeneralStrc* pAiGeneral;
@@ -723,7 +723,7 @@ void __stdcall SUNITINACTIVE_DeactivateMonster(::SGAMEDATA * pGame, D2UnitStrc *
 
 // Server-side re-activation of stored ("inactive") monsters when a room is loaded/entered. Finds the inactive-unit list for the room's act and DRLG coordinates, then iterates each saved D2InactiveMonsterRecordStrc and respawns the monster: chooses spawn flags (flying/initial), picks the right spawn path (plain SpawnMonster with fallback to random/spiral free positions, SERVER_SpawnMonster for boss/superunique, or MONSTER_SpawnWithUniqueModifiers), then restores its alignment, minion list, experience/maxhp/hitpoints stats (decayed if offline > ~0x1d4c frames), AI function, saved state, unique mods, and unit flags. Handles Chaos Sanctuary seal-Diablo special case (corpse/skip), relocation of already-existing units, node-table registration, and monster-region update. Frees each record after processing. Pure side-effects on game world; no return.
 // @sourcefile .\UNIT\SUnitInactive.cpp
-void __stdcall SUNITINACTIVE_RoomInitMonsters(::SGAMEDATA * pGame, D2RoomStrc * pRoom) {
+static void __stdcall SUNITINACTIVE_RoomInitMonsters(::SGAMEDATA * pGame, D2RoomStrc * pRoom) {
     bool _bDiabloSealsAllActive;
     bool bFreePosFound;
     BOOL nHitpoints;
@@ -1169,7 +1169,7 @@ void __fastcall SUNITINACTIVE_RoomInit(::SGAMEDATA * pGame, D2RoomStrc * pRoom) 
 // Retired notes from 'SUNITINACTIVE_DeactivateUnit':
 // Server-side: snapshots a unit into the game's per-act inactive-unit list before it is removed from an active room (e.g. when a room/level is unloaded). Finds (or allocates+inserts, sorted by room X/Y coords) the D2InactiveUnitListStrc bucket for the unit's room, then serializes the unit. Items are delegated to SUNITINACTIVE_SerializeAndDeactivateItem; all other unit types get a freshly allocated D2InactiveUnitRecordStrc recording position, type, classId, anim mode, GUID, flags and game frame. Objects (type 2) additionally capture shrine timer state, chest spark/drop data, and a name-byte. Register args: pUnit@EAX, pGame@Stack[0x4] (see signature). No return.
 // @sourcefile .\UNIT\SUnitInactive.cpp
-void __stdcall SUNITINACTIVE_SaveInactiveUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall SUNITINACTIVE_SaveInactiveUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2InactiveUnitListStrc* pDVar2;
     int iVar6;
     D2ObjectsTxt* pDVar7;
@@ -1384,7 +1384,7 @@ void __stdcall SUNITINACTIVE_RemoveInactiveUnitByTypeAndId(::SGAMEDATA * pGame, 
 }
 
 // Decides the fate of a dead or inactivating monster and either saves it as an inactive unit or frees it. Determines bShouldSave from many gates: whether the unit is truly dead (CheckForModeZeroDeath), the level's saveMonsters flag, the resurrect flag, a Kick-mode seeded RNG roll (advances and writes the room seed), passive-state presence, alignment==2, low node-table index (frees AI nodes and saves when alive), special class ids 0x16b/0x16c, monster-type bit 0x18, minion ownership (delegates dead pets to PETS_HandleDeadPet), an eUnitFlags bit, and the monstats2 byRestore field (0 => don't save, 2 => force save). If a pet record resulted, marks UNITFLAGEX_HASBEENDELETED and conditionally saves then clears the room link and returns; otherwise conditionally saves and then frees the server unit. Server-side unit cleanup; custom register args (pUnit@ESI, pGame on stack).
-void __stdcall UNITS_ProcessDeadOrInactiveMonster(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall UNITS_ProcessDeadOrInactiveMonster(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     int nMonStatsExIdx;
     uint32_t dwMonTypeFlags;
     D2UnitStrc* pOwnerUnit;

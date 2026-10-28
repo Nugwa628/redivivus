@@ -109,7 +109,7 @@ void __fastcall AwaitAndClose(D2QServerStrc * pQserver) {
     } while (nThreadSlotCount);
 }
 
-BOOL __stdcall BeginAsyncReadForClient(D2QServerStrc * pQServer, D2QServerClientConnectionStrc * pClient) {
+static BOOL __stdcall BeginAsyncReadForClient(D2QServerStrc * pQServer, D2QServerClientConnectionStrc * pClient) {
     BOOL fReadResult;
     CRITICAL_SECTION* lpCriticalSection = &pClient->clientLock;
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(lpCriticalSection);
@@ -157,7 +157,7 @@ BOOL __stdcall BeginAsyncReadForClient(D2QServerStrc * pQServer, D2QServerClient
     }
 }
 
-D2QServerClientPacketStrc * __stdcall NET_QServerClientPacket_CreateStructAndCopyBytesThere(D2QServerClientConnectionStrc * pQServerClient, size_t nSize, char * pBytes) {
+static D2QServerClientPacketStrc * __stdcall NET_QServerClientPacket_CreateStructAndCopyBytesThere(D2QServerClientConnectionStrc * pQServerClient, size_t nSize, char * pBytes) {
     D2QServerClientPacketStrc* pNewPacket = (D2QServerClientPacketStrc*)D2_ALLOC_AT(nSize + 8, ".\\Src\\QServer\\QServerNT.cpp", 0x440);
     memcpy(pNewPacket + 1, pBytes, nSize);
     pNewPacket->nPacketSize = nSize;
@@ -178,7 +178,7 @@ D2QServerClientPacketStrc * __stdcall NET_QServerClientPacket_CreateStructAndCop
     return pTailPacket;
 }
 
-int32_t __stdcall AcceptConnection(D2QServerStrc * pQServer, sockaddr * pSockAddr, int nWorkerIndex, int * pSockAddrLen) {
+static int32_t __stdcall AcceptConnection(D2QServerStrc * pQServer, sockaddr * pSockAddr, int nWorkerIndex, int * pSockAddrLen) {
     char* szClientIpStr;
     BOOL bBeginReadOk2;
     memset(&pQServer->aWorkerTelemetry[nWorkerIndex].qpcStampStart, 0, 0x48);
@@ -296,7 +296,7 @@ int32_t __stdcall AcceptConnection(D2QServerStrc * pQServer, sockaddr * pSockAdd
     return (int32_t)FileHandle;
 }
 
-int __stdcall BeginAsyncWriteForClient(D2QServerStrc * pQServer, D2QServerClientConnectionStrc * pClient) {
+static int __stdcall BeginAsyncWriteForClient(D2QServerStrc * pQServer, D2QServerClientConnectionStrc * pClient) {
     DWORD dwBytesWritten;
     if (!pClient->pSendQueueHead) {
       return 1;

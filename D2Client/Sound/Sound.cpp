@@ -167,15 +167,15 @@ void __stdcall SOUNDINST_StopChannel(int * pSoundInst) {
     if (pSoundInst[0xc] == 1) {
       GAME::Sound::SOUND_StopAndDetach((D2ClientSoundChannelStrc*)pSoundInst[0xb]);
     }
-    if (pSoundInst[0xb]) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x93);
-      exit(-1);
+    if (!pSoundInst[0xb]) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x93);
+    exit(-1);
 }
 
-void SOUND_ReleaseChannel(D2SoundChannelStrc * pdwParam) {
+static void SOUND_ReleaseChannel(D2SoundChannelStrc * pdwParam) {
     D2SoundChannelStrc* pChanNode;
     if (!pdwParam) {
       return;
@@ -296,7 +296,7 @@ int32_t __stdcall SOUND_SetChannelProperties(int32_t nSoundGroup, int32_t pListK
 
 // Returns the first active sound channel other than pExcludeChannel that is in streaming play mode (nPlayMode 1), has nSoundId in 0xb76..0x1230 and, when nListKey is non-zero, holds nListKey in its list; NULL if there is none.
 // @provenance 1.14d asm 004b9700 (RET 4, key in EBX); formerly misnamed SOUND_SetChannelVolume.
-D2SoundChannelStrc * __stdcall SOUND_FindActiveStreamChannel(D2SoundChannelStrc * pExcludeChannel, int32_t nListKey) {
+static D2SoundChannelStrc * __stdcall SOUND_FindActiveStreamChannel(D2SoundChannelStrc * pExcludeChannel, int32_t nListKey) {
     D2SoundChannelStrc* nChannelData;
     D2SoundChannelNodeStrc* pDVar1 = gpActiveSoundChannelsHead;
     while (true) {
@@ -338,7 +338,7 @@ int32_t __fastcall SOUND_CalculateDistance(int32_t pThis, int32_t nExcludeChanne
     return (int32_t)nChannelData;
 }
 
-void __stdcall SOUND_CalculateUnitDirection(D2UnitStrc * pUnit, int32_t nSoundId, float * pfDirection) {
+static void __stdcall SOUND_CalculateUnitDirection(D2UnitStrc * pUnit, int32_t nSoundId, float * pfDirection) {
     int32_t nOverrideX;
     int32_t nOverrideY;
     POINT ptPlayer;
@@ -393,14 +393,9 @@ float __fastcall SOUND_CalculateUnitDistance(int32_t pThis, D2UnitStrc * pUnit) 
     return 0.0;
 }
 
-void SOUND_Calculate3DPosition(float * pfPosition, D2SoundChannelStrc * pChannel) {
+static void SOUND_Calculate3DPosition(float * pfPosition, D2SoundChannelStrc * pChannel) {
     float fY;
-    if (!(pChannel && pfPosition)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1a6);
-      exit(-1);
-    }
-
-    {
+    if (pChannel && pfPosition) {
       float fVar1;
       pChannel->fPosX = *pfPosition;
       pChannel->fPosY = pfPosition[1];
@@ -411,6 +406,9 @@ void SOUND_Calculate3DPosition(float * pfPosition, D2SoundChannelStrc * pChannel
       pChannel->fPanResult = fVar1;
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1a6);
+    exit(-1);
 }
 
 void __fastcall SOUND_PlayEnvironmentSound(int32_t nSoundId, int32_t nPosX, int32_t nPosY, int32_t nPosZ) {
@@ -1193,7 +1191,7 @@ void __fastcall SOUND_UpdateAllChannels(uint32_t nFrameTime) {
     exit(-1);
 }
 
-void SOUND_StopUnitSound(int32_t nParam) {
+static void SOUND_StopUnitSound(int32_t nParam) {
     D2SoundsTxt* pSoundsTxt = DataTbls::TXT_sounds_GetLineBySoundId(*(int32_t*)(nParam + 4));
     *(uint32_t*)(nParam + 0x3d) = 1;
     if (!(pSoundsTxt->Fade_Out && *(int*)(nParam + 0x30) == 1)) {
@@ -1570,7 +1568,7 @@ int32_t __fastcall SOUND_PlayFootstepSound(uint32_t nParam1, uint32_t nParam2, u
     return nWrapDist;
 }
 
-void SOUND_SetVolumeForChannel(int32_t nChannelIndex) {
+static void SOUND_SetVolumeForChannel(int32_t nChannelIndex) {
     int nSoundHdrOffset = nChannelIndex * 4 + 0xa9c;
     int nCount = 3;
     do {

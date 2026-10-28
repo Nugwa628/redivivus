@@ -204,7 +204,7 @@ uint32_t __stdcall DRAW_IsDialogActive() {
     return (uint32_t)(Dialog::gpDialog != 0);
 }
 
-void __stdcall DRAW_CenteredText(int32_t nFontId, int32_t nY, DWORD dwColor, uint16_t * wszText) {
+static void __stdcall DRAW_CenteredText(int32_t nFontId, int32_t nY, DWORD dwColor, uint16_t * wszText) {
     int i;
     uint16_t wszBuf[256];
     int anBounds[4];

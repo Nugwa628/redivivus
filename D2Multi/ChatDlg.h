@@ -46,13 +46,9 @@ BOOL __stdcall CHATDLG_OnPressUserListPrevLine(struct D2ControlMsg * pControlMsg
 // Provenance: asm 0043da30 (RET 4); fpOnPressCallback of form record 0070d0f0 (FORM_Button), created in CHATDLG_CreateAllForms at 0043fd15.
 BOOL __stdcall CHATDLG_OnPressUserListNextLine(struct D2ControlMsg * pControlMsg);
 // @sourcefile .\Src\ChatDlg.cpp
-struct D2ChatDlgUnknown_0x10 * __stdcall StoreChatMsg(LPRECT pRect, int32_t nParam, char * pString);
-// @sourcefile .\Src\ChatDlg.cpp
 void CHATDLG_FreeChatMsgNode(void * * pParam);
-void StoreData(LPRECT pRect, int32_t nParam, char * szText);
 // @sourcefile .\Src\ChatDlg.cpp
 void __stdcall CHATDLG_ProcessPendingMessages();
-void __stdcall CHATDLG_FormatFileTimeToDate(FILETIME * pFileTime, int32_t nBufSize, char * szText);
 void __fastcall CHATDLG_DisplayTimestampedMessage(uint32_t nUnixTime, int32_t pszMessage);
 // @sourcefile .\Src\ChatDlg.cpp
 void __stdcall CHATDLG_EnqueueClearMessage();
@@ -66,7 +62,6 @@ int32_t __stdcall someStrCompare(char * szText1, char * szText2);
 BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput);
 BOOL __stdcall CHATDLG_FindSubstringMatch(int32_t nTargetHash, int32_t nWordLen, char * szText);
 BOOL __stdcall CHATDLG_DetectCDKeyInString(char * szText);
-struct D2ControlStrc * FORMS_CreateAnyFormFromListEx(int32_t nFormIndex);
 void __stdcall FORMS_DestroyListEx();
 void __fastcall UIMENU_DrawTitleAndSubtitleOnCenterScreen(uint16_t * wszTitle, uint16_t * wszSubTitle);
 int __stdcall CHATDLG_DestroyListCallback(uint32_t dwParam);
@@ -88,9 +83,6 @@ BOOL __stdcall CHATDLG_OnPressLadderPageDown(struct D2ControlMsg * pControlMsg);
 void __stdcall UIMENU_LadderBoard_PrintClassButtonLabels();
 void __stdcall CHATDLG_DisableAllLadderButtons();
 void __stdcall CHATDLG_ClearLadderBoard();
-// Returns the ladder filter id for class tab nLadderTab (0 Overall .. 7 Assassin) in the same group as nCurrentFilterMode: groups start at 0, 9, 0x13 and 0x1b and hold 8 ids each; any other nCurrentFilterMode halts at line 0x1a23. The eight CHATDLG_OnPressLadder* tab handlers pass their tab and g_nLadderFilterMode and store the result back into it.
-// Provenance: asm 0043f150..0043f1c3 (tab on the stack, filter in EAX).
-int32_t __stdcall CHATDLG_GetLadderFilterForTab(int32_t nLadderTab, uint32_t nCurrentFilterMode);
 // OnPress handler of the ladder board's overall (all classes) tab: disables the ladder buttons, highlights gpCtlLadderBtnOverall, and unless the filter byte 0070cd62 already shows tab 0 (value 0 or 9), sets gnLadderListRowCount to 1000 (0x3e8), clears the board, recomputes the filter via CHATDLG_GetLadderFilterForTab(0, g_nLadderFilterMode), resets the selected rank (0070cd7c) and flags a reload; returns 1.
 // Provenance: asm 0043f1d0 (RET 4), OnPress field of form record #110 (0070e310); UIMENU_LadderBoard_PrintClassButtonLabels (0043ed60) labels button form 0x6e string 0x14ce.
 BOOL __stdcall CHATDLG_OnPressLadderOverall(struct D2ControlMsg * pControlMsg);
@@ -191,5 +183,6 @@ void __fastcall CHATDLG_StorePlayerName(uint32_t nPlayerId, uint32_t nDataLength
 // OnPress handler of a ladder-board button: destroys the chat forms (CHATDLG_DestroyAllForms), opens the ladder with CHATDLG_OpenLadderClassicHardcore, sets the ladder type byte g_nLadderFilterMode (0070cd62) = 0 and gnLadderBoardSelectedRank = 0; returns 1.
 // Unreferenced by code; its address is the OnPress field (+0x20) of the button form at 0070e020 (string 0x14c6) in the FORMS_PredefinedFormStrc table.
 BOOL __stdcall CHATDLG_OnPressLadderClassicHardcore(struct D2ControlMsg * pControlMsg);
+// 5 internal functions (defined in .cpp)
 
 } // namespace D2Multi::ChatDlg

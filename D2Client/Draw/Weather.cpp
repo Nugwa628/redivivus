@@ -135,15 +135,15 @@ void __stdcall LoadCustomSettingsPerAreaAct5() {
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 void __stdcall WEATHER_ResetEnvironmentParticles() {
     Fog::Src::DataArrays::FOG_InitDataArray(pEnvironmentParticles);
-    if (pEnvironmentParticles->nUsedCount) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15b);
-      exit(-1);
+    if (!pEnvironmentParticles->nUsedCount) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15b);
+    exit(-1);
 }
 
-void __stdcall WEATHER_SetEnabledState(int bForceReset, int bNewState) {
+static void __stdcall WEATHER_SetEnabledState(int bForceReset, int bNewState) {
     if (gnWeatherTransitionProgress && bNewState) {
       gnWeatherTransitionProgress = 0;
     }
@@ -570,7 +570,7 @@ void __fastcall WEATHER_SpawnBubble(int nScreenX, int nScreenY, int nWorldX, int
     *(uint32_t*)((int)nRoll + nBubbleIndex * 0x18 + 0x14) = 2;
 }
 
-void __stdcall WEATHER_GetLightingTint(uint8_t * pOutAlpha, int nIntensity, uint8_t * pOutTint) {
+static void __stdcall WEATHER_GetLightingTint(uint8_t * pOutAlpha, int nIntensity, uint8_t * pOutTint) {
     // Static local variables (originally global data)
     static uint8_t gaWeatherLightTintData[7] = { 0xc8, 0x40, 0xa0, 0x20, 0x50, 0x40, 0xa0 }; D2_STATIC_GUARD(gaWeatherLightTintData, "D2Client::Draw::Weather::WEATHER_GetLightingTint::gaWeatherLightTintData");
 
@@ -619,7 +619,7 @@ void __stdcall WEATHER_GetLightingTint(uint8_t * pOutAlpha, int nIntensity, uint
     *pOutAlpha = gWeatherPaletteLightingNightColors[nIndex];
 }
 
-void WEATHER_SpawnParticle(D2SeedStrc * pSeed) {
+static void WEATHER_SpawnParticle(D2SeedStrc * pSeed) {
     bool bIsBlizzard;
     D2WeatherParticleStrc* pParticleSlot;
     uint32_t nSlot = Fog::Src::DataArrays::FOG_GetMissileField((D2MissilesTxt*)pEnvironmentParticles);
@@ -906,7 +906,7 @@ uint32_t __stdcall WEATHER_GetCurrentLevelWeatherFlags() {
     return (uint32_t)bCanHaveMud;
 }
 
-int WEATHER_UpdateParticleCount(D2SeedStrc * pSeed) {
+static int WEATHER_UpdateParticleCount(D2SeedStrc * pSeed) {
     uint64_t seed64;
     while (pEnvironmentParticles->nUsedCount < gnWeatherParticleState) {
       WEATHER_SpawnParticle(pSeed);

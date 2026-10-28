@@ -298,14 +298,14 @@ void __stdcall SetupAsBnetServer(D2BattleNetEventCallbackTable * pBnetCallbacks)
 
 void __stdcall QSERVER_PutNewGameOnTokenList(::SGAMEDATA * dwGameServerAddr, uint16_t nToken) {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gQServerGameListCs);
-    if (gaQServerGameByToken[nToken] != (::SGAMEDATA*)-1) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x18a);
-      exit(-1);
+    if (gaQServerGameByToken[nToken] == (::SGAMEDATA*)-1) {
+      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ gaQServerGameByToken[nToken] = dwGameServerAddr;
+      LeaveCriticalSection(&gQServerGameListCs);
+      return;
     }
 
-    /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ gaQServerGameByToken[nToken] = dwGameServerAddr;
-    LeaveCriticalSection(&gQServerGameListCs);
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x18a);
+    exit(-1);
 }
 
 // Allocates a 16-bit server token from the global 1024-slot token array. Locks csTokenHash critical section, increments QServerNextToken_Maybe (wraps at 0x400), scans for first unused slot (value == 0), marks it as allocated (0xffffffff), and returns the token. If all slots occupied, returns without allocating (upper 16 bits zero).
@@ -357,7 +357,7 @@ void __fastcall CLIENT_LoadActAndSetState2(::SGAMEDATA * pGame, D2ClientStrc * p
     Clients::CLIENT_SetConnectionState(pClient, 2);
 }
 
-void CLIENT_SendGameFlagsAndSetState1(::SGAMEDATA * pGame, D2ClientStrc * pClient) {
+static void CLIENT_SendGameFlagsAndSetState1(::SGAMEDATA * pGame, D2ClientStrc * pClient) {
     SCmd::NET_D2GS_SERVER_Send_0x01_NEWGAME(pClient, 1, pGame);
     SCmd::NET_D2GS_SERVER_SendStateCommand(pClient, 0);
     Clients::CLIENT_SetConnectionState(pClient, 1);
@@ -511,7 +511,7 @@ void __fastcall LeaveHackPlayer(::SGAMEDATA * pGame, uint32_t nClientID, char * 
 }
 
 // Validates a character/player name against the legal-name charset (custom regs: EDX=szText, EDI=nMaxLen). Walks up to nMaxLen chars; permits A-Z, a-z and the separators apostrophe/hyphen/underscore. Rejects (returns 0) any other character, an empty name, a separator that is the first char, two consecutive separators, a trailing separator, or a name reaching nMaxLen with no NUL. Returns 1 only when a non-empty all-valid name terminates with NUL. Used server-side to gate player names.
-uint32_t STRING_CheckIfPlayerNameDoNotContainForbidenChars(char * szText, int32_t nMaxLen) {
+static uint32_t STRING_CheckIfPlayerNameDoNotContainForbidenChars(char * szText, int32_t nMaxLen) {
     char cCurrentChar;
     bool bPrevWasSeparator;
     bPrevWasSeparator = false;
@@ -1104,7 +1104,7 @@ void __fastcall SetSomeRoomFlags(::SGAMEDATA * pGame, D2RoomStrc * pRoom) {
 }
 
 // Initializes newly activated rooms across all 5 acts. For each act with dirty rooms (bRoomDirty flag), iterates all active rooms and populates uninitialized rooms (eFlags & 1 == 0) with wandering monsters, preset units, inactive units, objects, and room monsters. Also reinitializes inactive units for already-initialized rooms if not yet processed. Clears bRoomDirty flag after processing each act. Critical for dynamic content spawning as players explore.
-void InitNewRooms(::SGAMEDATA * pGame) {
+static void InitNewRooms(::SGAMEDATA * pGame) {
     D2RoomStrc* pRoomLoop;
     int32_t nErrorLine;
     D2DrlgActStrc* pAct;
@@ -1248,7 +1248,7 @@ void __stdcall CheckClientTimeouts(::SGAMEDATA * pGame, int * pnParam) {
 }
 
 // Processes all clients and sends state updates. Checks timeouts, saves all players every 8192 frames. For clients in state 3 (WAITING_ROOMS), waits for all nearby rooms to activate, then transitions to state 4 (FULLY_PLAYING), recalcs inventory, broadcasts 0x5a player join event with char/account names. For state 4, runs GAME_UpdateSingleClient which builds visibility lists and generates compressed update packets (0x6D positions, 0x51 vitals, 0x95 skills, 0xAC spawns). For state 5 (CHANGING_ACT), waits for rooms then transitions back to state 4. Calls BNet EnterGame callback on join completion.
-void UpdateClients(::SGAMEDATA * pGame) {
+static void UpdateClients(::SGAMEDATA * pGame) {
     int iVar1;
     BOOL bAllRoomsActive;
     D2UnitStrc* pPlayerUnit_lcl;
@@ -1374,7 +1374,7 @@ void UpdateClients(::SGAMEDATA * pGame) {
 }
 
 // Tracks game performance metrics and memory usage. Every 1000+ milliseconds, calculates cycles per second (FPS metric) as (cycle_count * 1000) / elapsed_ticks, resets cycle counter and updates dwTickCount. Samples memory pool usage and updates global peak memory tracker. Resets peak memory tracking every 10 seconds (0x2711 ticks). Increments dwCycleCount every call. Used for server monitoring and diagnostics.
-void UpdatePerformanceMetrics(::SGAMEDATA * pGame) {
+static void UpdatePerformanceMetrics(::SGAMEDATA * pGame) {
     // Static local variables (originally global data)
     static uint32_t maxMemoryUsageTick; D2_STATIC_GUARD_BSS(maxMemoryUsageTick, "D2Game::GAME::Server::UpdatePerformanceMetrics::maxMemoryUsageTick");
 
@@ -1501,7 +1501,7 @@ void __fastcall ServerGameLoop(::SGAMEDATA * pGame) {
 }
 
 // Sends player vital stats (life/mana/stamina/position). The client arrives in ESI - 0052d982 MOV ECX,ESI reads it on entry. Modelled as a local, the reconstruction read it uninitialised and faulted on the server thread before the packet flush, so no 0x04 SCMD_STARTACT ever reached the client.
-void __stdcall GAME_SendPlayerVitalStats(D2ClientStrc * pClient) {
+static void __stdcall GAME_SendPlayerVitalStats(D2ClientStrc * pClient) {
     D2PacketListStrc* pPacketList = Clients::CLIENT_GetDispatchList(pClient);
     int32_t bForceUpdate = 0;
     D2UnitStrc* pPlayerUnit_lcl = Clients::CLIENTS_GetControlUnit(pClient, 0);
@@ -1528,7 +1528,7 @@ void __stdcall GAME_SendPlayerVitalStats(D2ClientStrc * pClient) {
 }
 
 // Sends nearby unit position updates (0x6D packet). The client arrives in EDI - note this differs from GAME_SendPlayerVitalStats, which takes it in ESI. Modelled as a local, the reconstruction read it uninitialised.
-void GAME_SendNearbyUnitPositions(D2ClientStrc * pClient) {
+static void GAME_SendNearbyUnitPositions(D2ClientStrc * pClient) {
     D2ClientStrc* pClientLocalTmp = pClient;
     D2PacketListStrc* pPacketList = Clients::CLIENT_GetDispatchList(pClient);
     if (!pPacketList) {
@@ -1603,7 +1603,7 @@ void __stdcall QSERVER_GetMemoryUsage(uint32_t * pOutCurrent, uint32_t * pOutMax
     *pOutMax = maxMemoryUsage;
 }
 
-int32_t GetUnitCount(D2UnitStrc * * ppUnitBuckets) {
+static int32_t GetUnitCount(D2UnitStrc * * ppUnitBuckets) {
     D2UnitStrc* pCurUnit;
     int nCount = 0;
     int nBucketIdx = 0;
@@ -1635,7 +1635,7 @@ uint32_t __stdcall GAME_GetUnusedServerConstant() {
 
 // GAME_TrackGameStatistics - Tracks per-game statistics (win/loss counters per game ID). Called periodically from game loop.
 // @sourcefile .\GAME\Game.cpp
-void __stdcall GAME_TrackGameStatistics(D2Game_Line0x13af * pStatRoot, int32_t nGameToken, int32_t nNodeValue) {
+static void __stdcall GAME_TrackGameStatistics(D2Game_Line0x13af * pStatRoot, int32_t nGameToken, int32_t nNodeValue) {
     D2Game_Line0x13af* pStatNode = pStatRoot;
     if (!pStatRoot) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x139e);
@@ -1863,7 +1863,7 @@ void * __fastcall QSERVER_GetTaskQueuePointer(int32_t pQServer) {
 
 // GAME_SendSaveFileChunk - Sends save file to client in 255-byte chunks via 0xB3 packet. Iterates save buffer with offset tracking.
 // @sourcefile .\GAME\Game.cpp
-void __stdcall NET_D2GS_SERVER_Send_0xB3_SendSaveFile(::SGAMEDATA * pGame, D2ClientStrc * pClient) {
+static void __stdcall NET_D2GS_SERVER_Send_0xB3_SendSaveFile(::SGAMEDATA * pGame, D2ClientStrc * pClient) {
     BOOL nChunkSize = Clients::CLIENT_HasSaveData(pClient);
     if (!nChunkSize) {
       return;
@@ -1956,7 +1956,7 @@ void __fastcall SendSaveFileToClient(::SGAMEDATA * pGame) {
 }
 
 // Flushes the server-side outbound packet queue for one client. If nParam != 0 and the client is connected (state 4), optionally sends nearby unit positions and player vital stats first. For OBNet/LAN games also sends the save-file packet (0xB3). Then drains the client's dispatch list by calling NET_D2GS_SERVER_SendPacketToClient in a loop; on send failure increments a retry counter and requeues the list, disconnecting the client after 3 consecutive failures. Halts with an internal error if pGame or pClient is NULL.
-void __stdcall FlushClientPackets(::SGAMEDATA * pGame, int32_t nParam, D2ClientStrc * pClient) {
+static void __stdcall FlushClientPackets(::SGAMEDATA * pGame, int32_t nParam, D2ClientStrc * pClient) {
     bool bSendFailed;
     int32_t nErrorLine;
     if (!pGame) {

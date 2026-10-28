@@ -79,7 +79,7 @@ namespace D2Client::UNIT {
 
 // Applies a socketed item's (pUnit2) stat mods to its host item (pUnit) and toggles whether those stats are active. If pUnit2 is a gem/rune, looks up its D2ItemsTxt + gem definition (TXT_Gems_GetLine via dwGemOffset) and applies the rune/gem stats via ApplyRuneAndGemStats (mode 2 gem, 5 rune); otherwise treats it as a set/equip item via ITEM_ProcessSetItemEquip. Then, unless the item is DISABLED, marks the stats active with STATLIST_SetItemStatActive: for players it accounts for dual-wield (a second equipped weapon stays inactive), and respects the BROKEN flag unless bForceActive is set. Halts via Fog::ErrorManager when a gem/rune host is not a UNIT_ITEM or txt lookups fail.
 // @sourcefile .\UNIT\Item.cpp
-void __stdcall ITEM_ApplySocketableAndEquipStats(int32_t bForceActive, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static void __stdcall ITEM_ApplySocketableAndEquipStats(int32_t bForceActive, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     D2ItemsTxt* pItemsTxt;
     D2GemsTxt* pGemsTxt;
     int32_t bDualWieldActive;
@@ -205,7 +205,7 @@ void __fastcall ITEM_RemoveItemStatsFromOwner(D2UnitStrc * pUnit, D2UnitStrc * p
 
 // Creates a client-side item unit from a ground-drop network packet (pbParam). Extracts item details from the packet payload, creates the unit via UNIT_CreateWarp, loads save data via ITEM_LoadFromSaveData. On load failure, removes the item from the server object table and returns null. If the item has ITEMFLAG_BOUGHT and bSendIdentRequest is set, sends a 0x37 ident-request packet for unidentified items.
 // @sourcefile .\UNIT\Item.cpp
-D2UnitStrc * __stdcall ITEM_CreateItemFromGroundPacket(uint16_t nItemX, uint32_t nItemY, int32_t bSendIdentRequest, uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
+static D2UnitStrc * __stdcall ITEM_CreateItemFromGroundPacket(uint16_t nItemX, uint32_t nItemY, int32_t bSendIdentRequest, uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
     int32_t bLoadFailed;
     uint8_t bVar1 = pPacketData[2];
     if (!pUnitDataItemDetails) {
@@ -241,7 +241,7 @@ D2UnitStrc * __stdcall ITEM_CreateItemFromGroundPacket(uint16_t nItemX, uint32_t
 }
 
 // @sourcefile .\UNIT\Item.cpp
-D2UnitStrc * __stdcall ITEM_CreateItemFromBodyPacket(uint16_t nItemX, uint32_t nItemY, int32_t bSendIdentRequest, uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
+static D2UnitStrc * __stdcall ITEM_CreateItemFromBodyPacket(uint16_t nItemX, uint32_t nItemY, int32_t bSendIdentRequest, uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
     int32_t bLoadFailed;
     uint8_t bVar1 = pPacketData[2];
     if (!pUnitDataItemDetails) {
@@ -306,7 +306,7 @@ int32_t __fastcall ITEM_CheckItemEquipRequirements(D2UnitStrc * pUnit, D2UnitStr
 }
 
 // @sourcefile .\UNIT\Item.cpp
-void ITEM_SaveSkillSelections(int * pnParam, D2UnitStrc * pUnit) {
+static void ITEM_SaveSkillSelections(int * pnParam, D2UnitStrc * pUnit) {
     int32_t nSkillOwnerGUID;
     eD2Skills eSkillId;
     int nStatValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hitpoints, 0);
@@ -340,7 +340,7 @@ void ITEM_SaveSkillSelections(int * pnParam, D2UnitStrc * pUnit) {
 }
 
 // Restores a player's left- and right-skill selections from a saved skill state (pSkillSaveState). For each hand: if the saved skill is not SKILL_Attack and the skill exists and differs from the current selection, calls PLRSKILLS_CanUseSkillCheck and, if usable (not error codes 2 or 7), re-selects it via SelectSkillLeft/SelectSkillRight. Typically called after an item swap.
-void ITEM_RestoreSkillSelections(int * pSkillSaveState, D2UnitStrc * pUnit) {
+static void ITEM_RestoreSkillSelections(int * pSkillSaveState, D2UnitStrc * pUnit) {
     D2SkillStrc* pSkillLeft;
     D2SkillStrc* pCurrentSkill;
     int32_t nCanUseResult;
@@ -379,7 +379,7 @@ void ITEM_RestoreSkillSelections(int * pSkillSaveState, D2UnitStrc * pUnit) {
 }
 
 // @sourcefile .\UNIT\Item.cpp
-void __stdcall ITEM_RemoveItemFromBodyAndRecalc(int32_t nGfxComponent, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static void __stdcall ITEM_RemoveItemFromBodyAndRecalc(int32_t nGfxComponent, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     if (!(pUnit2 && pUnit && pUnit2->pInventory)) {
       return;
     }
@@ -394,7 +394,7 @@ void __stdcall ITEM_RemoveItemFromBodyAndRecalc(int32_t nGfxComponent, D2UnitStr
     SRC::CelCmp::GFX_ClearAllModeFlags(pUnit2, nGfxComponent);
 }
 
-void __stdcall ITEM_ReequipItemOnBody(D2UnitStrc * pUnit, int32_t bApplyEquipStats, int32_t nGfxComponent, D2UnitStrc * pUnit2) {
+static void __stdcall ITEM_ReequipItemOnBody(D2UnitStrc * pUnit, int32_t bApplyEquipStats, int32_t nGfxComponent, D2UnitStrc * pUnit2) {
     if (!(pUnit && pUnit2)) {
       return;
     }
@@ -424,7 +424,7 @@ void __stdcall ITEM_ReequipItemOnBody(D2UnitStrc * pUnit, int32_t bApplyEquipSta
 
 // Re-evaluates and reapplies every equipped/carried item on a player (or merc-flagged unit) after a stat-affecting change. Saves the unit's skill selections, first (re)enables qualifying active charms applying their stats, then in three passes over the 11 body-location slots: disables items whose equip requirements are no longer met (removing their stats and flagging a gfx reload), iteratively re-enables items that now qualify (up to 100 passes, reapplying socketable/equip stats and updating the primary weapon/swap state), and recalculates set-quality items (quality 5). Restores skill selections, and if anything changed triggers a gfx/COF reload for players or a MonsterMessage(7) for mercs. Pure side effects on pUnit's inventory/stats; no return.
 // @sourcefile .\UNIT\Item.cpp
-void ITEM_RecalcAllEquippedItems_EBX(D2UnitStrc * pUnit) {
+static void ITEM_RecalcAllEquippedItems_EBX(D2UnitStrc * pUnit) {
     bool _bNeedsGfxReload;
     bool _bReequippedThisPass;
     uint8_t bVar1;
@@ -591,7 +591,7 @@ void ITEM_RecalcAllEquippedItems_EBX(D2UnitStrc * pUnit) {
 }
 
 // Returns the sound ID to play when an item is dropped on the ground. Looks up the base drop sound from D2ItemsTxt; overrides with quality-specific sounds for unique items (quality==7, from D2UniqueItemsTxt) and set items (quality==5, from D2SetItemsTxt) when those tables have a non-zero dropsound. Also writes the SFX frame offset to *pnParam (default 0xC) if the relevant txt row specifies one. Returns 0 if pUnit is null or no sound is found.
-int32_t ITEM_GetItemDropSound(uint32_t * pnParam, D2UnitStrc * pUnit) {
+static int32_t ITEM_GetItemDropSound(uint32_t * pnParam, D2UnitStrc * pUnit) {
     uint32_t nItemClassId;
     D2SetItemsTxt* pSetItemsTxt;
     int32_t nDropSound = 0;
@@ -652,7 +652,7 @@ int32_t ITEM_GetItemDropSound(uint32_t * pnParam, D2UnitStrc * pUnit) {
 }
 
 // Returns the sound ID to play when a player uses/consumes an item. Starts with the base item's wUseSound from ItemsTxt (if wDropSound > 0). For unique quality items (eQuality==7) checks UniqueItemsTxt.usesound; for set quality (eQuality==5) checks SetItemsTxt.usesound, overriding the base value if available. Returns 0 if no sound is defined.
-int32_t ITEM_GetItemUseSound(D2UnitStrc * pUnit) {
+static int32_t ITEM_GetItemUseSound(D2UnitStrc * pUnit) {
     uint32_t nItemClassId;
     D2SetItemsTxt* pSetItemsTxt;
     int32_t nSoundId = 0;
@@ -693,7 +693,7 @@ int32_t ITEM_GetItemUseSound(D2UnitStrc * pUnit) {
     return nSoundId;
 }
 
-void ITEM_PlayItemDropSound(D2UnitStrc * pUnit) {
+static void ITEM_PlayItemDropSound(D2UnitStrc * pUnit) {
     uint32_t nSoundVolume = 0xc;
     eD2Sounds nSoundId = ITEM_GetItemDropSound(&nSoundVolume, pUnit);
     Sound::SOUND_PlaySound(SOUND_ITEM_JAVELINS, pUnit, 0, 0, 0);
@@ -882,7 +882,7 @@ void __fastcall ITEM_RecalcAllEquippedItems_ECX(D2UnitStrc * pUnit) {
     ITEM_RecalcAllEquippedItems_EBX(pUnit);
 }
 
-void ITEM_SaveWeaponHandClassId(char eBodyLoc, D2UnitStrc * pUnit) {
+static void ITEM_SaveWeaponHandClassId(char eBodyLoc, D2UnitStrc * pUnit) {
     int16_t nWeaponAnimClass = D2Common::ITEMS::Items::ITEM_GetWeaponAnimClass(pUnit);
     if (eBodyLoc == '\x04') {
       gnWeaponHandClassId_Right = nWeaponAnimClass;
@@ -910,7 +910,7 @@ uint32_t __fastcall ITEM_SetItemInBodyLocation(D2InventoryStrc * pInventory, D2U
 }
 
 // @sourcefile .\UNIT\Item.cpp
-void __stdcall ITEM_RemoveEquippedItemForSwap(D2UnitStrc * pItem, D2UnitStrc * pOwner) {
+static void __stdcall ITEM_RemoveEquippedItemForSwap(D2UnitStrc * pItem, D2UnitStrc * pOwner) {
     BOOL bIsBroken;
     D2InventoryStrc* pInventory = pOwner->pInventory;
     eD2BodyLoc eBodyLoc = D2Common::ITEMS::Items::GetBodyLocation(pItem);
@@ -1364,7 +1364,7 @@ void __fastcall ITEM_HandleUnsocketItems(D2UnitStrc * pUnit) {
     }
 }
 
-void __stdcall ITEM_DropItemToGroundWithMode(int32_t nParam1, int32_t nParam2, eInventoryPage eInvPage, uint16_t nParam12, D2UnitStrc * pUnit, uint16_t nParam22) {
+static void __stdcall ITEM_DropItemToGroundWithMode(int32_t nParam1, int32_t nParam2, eInventoryPage eInvPage, uint16_t nParam12, D2UnitStrc * pUnit, uint16_t nParam22) {
     if (!pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xac);
       exit(-1);
@@ -1554,7 +1554,7 @@ void __fastcall HandleItemOnGround(uint8_t * pBuffer) {
 }
 
 // Places pUnit (an item) into pUnit2's inventory at the given grid coords (nItemX, nYPos), then calls INVENTORY_PlaceItemAtCoords for the resolved inventory page. If the item belongs to the local player: plays a pickup sound (nParam==1) or refreshes cursor item (otherwise). Handles Horadric Cube quest trigger for scroll/tome items (nParam==3). Client-side only (calls D2Client functions).
-void __stdcall ITEM_PlaceItemInContainer(D2UnitStrc * pUnit, uint32_t nYPos, int32_t nParam, D2UnitStrc * pUnit2, uint32_t nItemX) {
+static void __stdcall ITEM_PlaceItemInContainer(D2UnitStrc * pUnit, uint32_t nYPos, int32_t nParam, D2UnitStrc * pUnit2, uint32_t nItemX) {
     bool _bIsExpansion;
     bool bIsExpansion;
     eD2Sounds eSoundId;
@@ -2275,7 +2275,7 @@ void __stdcall ITEM_HandleSwapBodyEquipItem(int32_t nParam1, D2UnitDataItemDetai
 
 // Client-side handler called when a body-location item is unequipped via a swap packet. Looks up the owner unit, swaps weapon hand if needed, clears GFX mode flags, removes the item's stat contribution, and processes set-item unequip. If the RELOAD flag is clear, drops the item to the ground; otherwise recreates it from the body packet. For the local player, resets inventory UI and places the item on the cursor.
 // @sourcefile .\UNIT\Item.cpp
-void __stdcall ITEM_HandleSwapBodyUnequipItem(uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
+static void __stdcall ITEM_HandleSwapBodyUnequipItem(uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
     BOOL bIsBroken;
     uint32_t nFlagResult;
     D2UnitStrc* pBodyItem;
@@ -2369,7 +2369,7 @@ void __fastcall HandleItemSwapBodyItem(uint8_t * pBytes) {
 }
 
 // Client-side handler that equips an item into a weapon-switch (swapped arm) body slot from a packet (RELOAD flag required). Resolves the owner player and its inventory, removes any currently equipped item conflicting with the swap slot (both the packet's item id and the existing item at the target body loc), creates the new item from the body packet, sets its body location, and places it in the inventory (slot 3, or 4 for body-loc 0xb/0xc). For primary-weapon slots (body-loc 4/5) it updates the primary weapon, applies equip stats and recalcs. For other slots it runs the full equip-requirement recalc loop over the 11 body slots (disable failing items, re-equip qualifying up to 100 passes, re-apply set bonuses) and reloads the unit mode COF. Halts via Fog ErrorManager on missing inventory/item or non-reload packet. Register arguments: pnParam on the stack, nParam in EAX.
-void __stdcall ITEM_HandleWeaponSwitchItems(D2UnitDataItemDetailsStrc * pUnitDataItemDetails, uint8_t * pPacketData) {
+static void __stdcall ITEM_HandleWeaponSwitchItems(D2UnitDataItemDetailsStrc * pUnitDataItemDetails, uint8_t * pPacketData) {
     D2UnitStrc* pNewItem;
     int iBodyLocSaved;
     BOOL nEquipReqCheck;
@@ -2619,7 +2619,7 @@ void __fastcall HandleItemInShop(uint8_t * pbParam) {
 }
 
 // Client-side handler that places a newly received item into the player's inventory after a container swap. If ITEMFLAG_RELOAD is set, removes the old client unit and re-creates it from the ground packet; otherwise updates the existing item's anim mode and inv-page. Positions the item at the server-supplied (x, y) coordinates, calls PutItemInInventory, then INVENTORY_PlaceItemAtCoords to finalize grid placement. Applies charm stats if active and sends a mouse-move UI refresh.
-void ITEM_HandleSwapContainerNewItem(uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
+static void ITEM_HandleSwapContainerNewItem(uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
     D2UnitStrc* pItem;
     uint32_t bIsReload;
     BOOL bIsLoD;
@@ -2702,7 +2702,7 @@ void ITEM_HandleSwapContainerNewItem(uint8_t * pPacketData, D2UnitDataItemDetail
 
 // Client-side handler called when a swap-container packet arrives for an old (displaced) item. Looks up the player unit and the swapped item, removes its stats from the owner if not broken, validates inventory membership, then either drops the item to ground (mode-based) or recreates it from a ground packet (RELOAD flag path). Calls ResetThings to refresh UI; halts fatally if any unit/inventory pointer is null.
 // @sourcefile .\UNIT\Item.cpp
-void __stdcall ITEM_HandleSwapContainerOldItem(uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
+static void __stdcall ITEM_HandleSwapContainerOldItem(uint8_t * pPacketData, D2UnitDataItemDetailsStrc * pUnitDataItemDetails) {
     D2UnitStrc* pItem;
     BOOL bIsBroken;
     D2UnitStrc* pBelongsResult;
@@ -2920,7 +2920,7 @@ void __fastcall HandleItemRemoveFromBelt(uint8_t * pbParam) {
 }
 
 // Client handler for the incoming belt-swap packet's new item (the item being placed into the belt slot). Locates the item by GUID, sets its anim mode/page/position from packet details, re-applies charm stats if it is a charm, places it in the player inventory, and verifies it can fit in the target belt slot. Clears the cursor and removes the uninterruptable state. Halts if player/inventory is null or belt placement fails.
-void __stdcall ITEM_HandleSwapBeltNewItem(int32_t pPacket, D2UnitDataItemDetailsStrc * pItemDetails) {
+static void __stdcall ITEM_HandleSwapBeltNewItem(int32_t pPacket, D2UnitDataItemDetailsStrc * pItemDetails) {
     D2UnitStrc* pUnit = Player::GetPlayerUnit_UI();
     if (!pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x957);

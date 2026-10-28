@@ -191,7 +191,7 @@ void __fastcall D2WINEDITBOX_ValidateInput(char * szText) {
 // nSelAnchor != nSelCursor (+0x58). HandleKeyPress uses it to decide whether typing replaces a selection
 // and whether Ctrl+C / Ctrl+X have anything to copy. Halts on NULL or a non-edit-box control.
 // Evidence: 1.14d asm 004fdc9f (CMP [EAX+0x54],-1, then compare with [EAX+0x58]).
-BOOL D2WINEDITBOX_HasSelection(::D2WinEditBox * pEditBox) {
+static BOOL D2WINEDITBOX_HasSelection(::D2WinEditBox * pEditBox) {
     if (!pEditBox) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x198);
       exit(-1);
@@ -303,7 +303,7 @@ void __fastcall D2WINEDITBOX_LinkTabOrder(::D2WinEditBox * pEditBox, ::D2WinEdit
 }
 
 // Handles mouse click in D2 edit box. Converts wide text to multi-byte, wraps lines to fit box width, calculates cursor position relative to click point.
-int32_t __stdcall D2WINEDITBOX_HandleMouseClick(int * pEditBox, short * pszWideText) {
+static int32_t __stdcall D2WINEDITBOX_HandleMouseClick(int * pEditBox, short * pszWideText) {
     uint32_t nFontH;
     short int* psVar2;
     int32_t nCharPixelWidth;
@@ -408,7 +408,7 @@ int32_t __stdcall D2WINEDITBOX_HandleMouseClick(int * pEditBox, short * pszWideT
 }
 
 // Calculate text cursor position from edit box state. Iterates text lines and calculates pixel X,Y position of cursor based on character index. Outputs screen coordinates via pX and pY.
-void __stdcall D2WINEDITBOX_HandleTextSelection(int * pEditBox, int * pX, int * pY) {
+static void __stdcall D2WINEDITBOX_HandleTextSelection(int * pEditBox, int * pX, int * pY) {
     bool bVar2;
     uint32_t nFontHeight;
     int32_t nCharPixelWidth;
@@ -829,7 +829,7 @@ uint32_t __stdcall D2WINEDITBOX_Unused_Placeholder_8(uint32_t dwUnused1, uint32_
     return 0;
 }
 
-void D2WINEDITBOX_UpdateCursorPosition(::D2WinEditBox * pEditBox) {
+static void D2WINEDITBOX_UpdateCursorPosition(::D2WinEditBox * pEditBox) {
     int nScrollStart;
     int nLoopCount;
     uint32_t nCursorPos;
@@ -985,7 +985,7 @@ void D2WINEDITBOX_UpdateCursorPosition(::D2WinEditBox * pEditBox) {
 // rebuilds wszText as text[0..nDelStart) + text[nDelEnd..], sets nCursorIndex (+0x25c) to nDelStart
 // (clamped to the new length) and clears the selection. Halts on NULL or a non-edit-box control.
 // Evidence: 1.14d asm 004fea46..004fea58 (CMP/JL/JG min-max into EBX/EDI).
-void D2WINEDITBOX_HandleDelete(::D2WinEditBox * pEditBox) {
+static void D2WINEDITBOX_HandleDelete(::D2WinEditBox * pEditBox) {
     int32_t nDelStart;
     uint16_t* pWideZeroIter;
     int32_t nDelEnd;

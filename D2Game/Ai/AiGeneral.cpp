@@ -175,7 +175,7 @@ void __fastcall FreeAi(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
 }
 
 // @sourcefile .\Ai\AiGeneral.cpp
-void FreeAiCmds(D2AiGeneralStrc * pAiGeneral, ::SGAMEDATA * pGame) {
+static void FreeAiCmds(D2AiGeneralStrc * pAiGeneral, ::SGAMEDATA * pGame) {
     D2MonsterAiCmdStrc* pCmd = pAiGeneral->pCmdLast;
     while (true) {
       if (!pCmd) {
@@ -670,7 +670,7 @@ void __fastcall ReplaceMinionList(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32
 }
 
 // Wires a newly joined monster into an existing AI minion group. Scans pTargetAi's minionList for the first live monster, promotes it to group leader (sets AI flags 1+2, eOwnerTypeEx/nOwnerGUIDEx), updates pOwner's AI back-link to point at the leader, calls AddMinionToList for the leader+owner pair, then iterates all remaining minion-list entries and chains each live non-leader monster to the leader via AddMinionToList.
-void __stdcall AddMinionToAi(D2UnitStrc * pOwner, D2AiGeneralStrc * pTargetAi) {
+static void __stdcall AddMinionToAi(D2UnitStrc * pOwner, D2AiGeneralStrc * pTargetAi) {
     D2UnitStrc* pNewOwnerUnit;
     D2UnitStrc* pMinion;
     D2AiGeneralStrc* pMinionAi;

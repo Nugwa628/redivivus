@@ -48,12 +48,6 @@ void __stdcall SMSG_AddWindow(uint32_t hWnd);
 uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, struct StormWndRecStrc * pRecord);
 // @blizzard FindWindow (SMSG.CPP)
 uint32_t __fastcall SMSG_FindWindow(int32_t nHandle);
-// @blizzard DeleteWindow (SMSG.CPP)
-void SMSG_DeleteWindow(uint32_t hWnd);
-// @blizzard InternalRegister (SMSG.CPP)
-void __stdcall SMSG_InternalRegister(uint32_t hWnd, int32_t pCallback, uint32_t dwEventTag, uint32_t dwContext);
-// @blizzard InternalUnregister (SMSG.CPP)
-void __stdcall SMSG_InternalUnregister(uint32_t nEventId, char * szText1, char * szText2, HWND hWnd);
 // @blizzard SMsgDispatchMessage (SMSG.CPP)
 BOOL __stdcall SMsgDispatchMessage(HWND handle, UINT uMsg, WPARAM nWParam, LPARAM dwLParam, BOOL * pbHandled, LRESULT * plResult);
 // @blizzard SMsgRegisterCommand (SMSG.CPP)
@@ -80,5 +74,6 @@ void __fastcall WND_EntryArray_FreeEntries(int32_t pThis, int32_t nFreeCount);
 int32_t __fastcall WND_EntryArray_AllocOrReuse(int32_t pThis, int32_t pReuseEntry, int32_t bAllocNew);
 // Runs at exit: removes every element from the tracked window list, then unlinks the list head itself.
 void StaticFini_gWndTrackingList();
+// 3 internal functions (defined in .cpp)
 
 } // namespace Storm::WindowHandle

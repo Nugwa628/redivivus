@@ -448,7 +448,7 @@ void __fastcall Q36_Callback10_PlayerLeavesGame(D2QuestDataStrc * pQuestData, D2
 
 // A5Q6 Eve of Destruction. Marks one player's quest fully complete: set record JustCompleted(0xd) + Completed(0), push client status 5 (act-V complete), and bump a counter on the quest-specific data. Called from Q36_CheckWorldstoneChamber when a player is present in the Worldstone Chamber as Baal dies.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q6.cpp
-void __stdcall Q36_CompleteQuestAndSetStatus(D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, ::SGAMEDATA * pGame) {
+static void __stdcall Q36_CompleteQuestAndSetStatus(D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, ::SGAMEDATA * pGame) {
     /* SetQuestState(QUEST_EveOfDestruction, 0xd=JustCompleted) — fire self-session Baal-kill completion */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
     /* SetQuestState(QUEST_EveOfDestruction, 0=Completed) — mark Baal quest
                          permanently complete */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Completed);
@@ -661,7 +661,7 @@ void __fastcall Q36_Callback_08_CompleteQuest(D2QuestDataStrc * pQuestData, D2Qu
 
 // A5Q6 Eve of Destruction. Sends the 0x50 "quest special" packet (quest 0x24) to a player's client, carrying the A5Q6-specific field (the randomly-rolled monster id from Objects_InitFn79). Used to sync the quest's special data to the client.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q6.cpp
-void Q36_SendQuestSpecialPacket(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void Q36_SendQuestSpecialPacket(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     int nSendResult;
     D2GSPacketSrv0x50 sPacket;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q6.cpp", 0x243);

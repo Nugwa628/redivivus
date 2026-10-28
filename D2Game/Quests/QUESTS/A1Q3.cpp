@@ -320,7 +320,7 @@ void __fastcall Q03_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
 
 // MallusHandler (A1Q3) — invoked when the Malus item count drops to 0 (see Q03_Callback_06). If the Malus had been taken: advance nStateFlag to 3, set eFlags, broadcast state 1 (RewardAwaits/intro), clear bMalusTaken-area flag, then locate the dropped Malus unit (FindUnitFromTable, classId 0x6c = the Malus object) and flag it for update; if not found, clear bMalusTaken. No quest-record bit writes (state via broadcast).
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q3.cpp
-bool __stdcall MallusHandler(D2QuestDataStrc * pQuestData) {
+static bool __stdcall MallusHandler(D2QuestDataStrc * pQuestData) {
     if (!pQuestData->bIsNotIntroduction) {
       return false;
     }
@@ -549,7 +549,7 @@ void __fastcall Q03_CheckPlayerHasMalus(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 }
 
 // Q03_CheckPartyHasMalus (A1Q3) — returns whether the player (or anyone in their party) holds the Horadric Malus. Fast path: true if the player carries it. Else if not partied, false. Otherwise clears field_0xA0 and runs Q03_CheckPlayerHasMalus over all party members, returning field_0xA0. Read-only on record.
-BOOL Q03_CheckPartyHasMalus(D2UnitStrc * pUnitStrc, D2QuestDataStrc * pQuestData) {
+static BOOL Q03_CheckPartyHasMalus(D2UnitStrc * pUnitStrc, D2QuestDataStrc * pQuestData) {
     uint32_t dwItemCode = 0x206d6468;
     ::SGAMEDATA* pGame = UNIT::SUnit::GetGamePointer(pUnitStrc);
     D2UnitStrc* pMalusItem = ITEMS::Items::Drop::HasQuestItem(pGame, pUnitStrc, dwItemCode);

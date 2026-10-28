@@ -1864,7 +1864,7 @@ BOOL __fastcall Initialize(HINSTANCE hInstance) {
     return 0;
 }
 
-BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWnd) {
+static BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWnd) {
     // Static local variables (originally global data)
     static uint8_t gszRendererD3DDeviceInitializationCode[272] = {
     0x3e,
@@ -2626,7 +2626,7 @@ void __fastcall D3D_PixelDataFreeCallback_ClearCacheNodes(int * pCacheIndices) {
     gD3DGenericTextureCache.aCaches[pCacheIndices[8] - 1].pNodeBuffer[pCacheIndices[9] - 1].pAssociatedTilePtr = 0;
 }
 
-BOOL __stdcall RENDERER_D3D_ExtractSpriteInfo(D2GfxDataStrc * pSprite, D2D3DSpriteInfoStrc * pOutput) {
+static BOOL __stdcall RENDERER_D3D_ExtractSpriteInfo(D2GfxDataStrc * pSprite, D2D3DSpriteInfoStrc * pOutput) {
     int bSpriteLoaded = D2CMP::SRC::SpriteCache::SPRITECACHE_GetOrLoadSprite(pSprite, 0, 1);
     if (!bSpriteLoaded) {
       return 0;
@@ -2649,7 +2649,7 @@ BOOL __stdcall RENDERER_D3D_ExtractSpriteInfo(D2GfxDataStrc * pSprite, D2D3DSpri
     return 0;
 }
 
-void __stdcall RENDERER_D3D_CalculateTextureSize(D2D3DSpriteInfoStrc * pStruct) {
+static void __stdcall RENDERER_D3D_CalculateTextureSize(D2D3DSpriteInfoStrc * pStruct) {
     int nWidth = pStruct->nWidth;
     int nTexDim = 0x20;
     if (nWidth < 0x21 && pStruct->nHeight < 0x21 || (nTexDim = 0x80 , nWidth < 0x81 && pStruct->nHeight < 0x81) || (nTexDim = 0x100 , nWidth < 0x101 && pStruct->nHeight < 0x101)) {
@@ -2665,7 +2665,7 @@ void __stdcall RENDERER_D3D_CalculateTextureSize(D2D3DSpriteInfoStrc * pStruct) 
 }
 
 // Direct3D texture cache: uploads a DC6 frame to video memory. Determines mipmap level based on size, allocates cache slot, renders frame to memory surface, copies to texture via LockRect/memcpy, and sets as active texture.
-int32_t __thiscall RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfoStrc * pTexInfo, BYTE * pPalette, uint8_t nOutlineColor, int32_t nMode) {
+static int32_t __thiscall RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfoStrc * pTexInfo, BYTE * pPalette, uint8_t nOutlineColor, int32_t nMode) {
     uint8_t* pBVar3;
     DWORD dwHResult;
     int iCacheNodeIdx;
@@ -2855,7 +2855,7 @@ int32_t __thiscall RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfoStrc * 
     }
 }
 
-void __stdcall RENDERER_D3D_DrawShadowQuad(int * pTextureInfo, int nPosX, int nPosY, uint8_t nAlpha) {
+static void __stdcall RENDERER_D3D_DrawShadowQuad(int * pTextureInfo, int nPosX, int nPosY, uint8_t nAlpha) {
     int nQuadWidth;
     HRESULT nLockResult;
     int nTopYOffset;
@@ -2929,7 +2929,7 @@ void __stdcall RENDERER_D3D_DrawShadowQuad(int * pTextureInfo, int nPosX, int nP
 }
 
 // Direct3D renderer: draws a textured quad with palette or solid color fill. Looks up RGB color from gpPaletteTable+0x114 palette based on nParam4 index.
-void __stdcall RENDERER_DIRECT3D_DrawPalettedQuad(D2D3DSpriteInfoStrc * pTextureInfo, int nPosX, int nPosY, uint32_t nColor, int nParam4, uint8_t nAlpha, int nParam6) {
+static void __stdcall RENDERER_DIRECT3D_DrawPalettedQuad(D2D3DSpriteInfoStrc * pTextureInfo, int nPosX, int nPosY, uint32_t nColor, int nParam4, uint8_t nAlpha, int nParam6) {
     float* pVertexData;
     RENDERER_D3D_SetBlendMode(1);
     RENDERER_D3D_SetTextureFilterMode(1);
@@ -3005,7 +3005,7 @@ void __stdcall RENDERER_DIRECT3D_DrawPalettedQuad(D2D3DSpriteInfoStrc * pTexture
 }
 
 // Sets blend mode based on draw mode enum (0-7) and returns the appropriate alpha value. Mode 0=25%, 1=50%, 2=75%, 3=additive, 4=modulate, 5/7=opaque, default=100% alpha.
-uint8_t __stdcall SetDrawModeAndGetAlpha(int nDrawMode) {
+static uint8_t __stdcall SetDrawModeAndGetAlpha(int nDrawMode) {
     switch (nDrawMode) {
       case 3:
         SetBlendMode(2);
@@ -3222,7 +3222,7 @@ void __fastcall DrawVerticalCropImage(D2GfxDataStrc * pData, int nPosX, int nPos
     RENDERER_DIRECT3D_DrawPalettedQuad(&spriteInfo, nPosX, nPosY, -1, 0, nAlpha, 0);
 }
 
-BOOL __fastcall RENDERER_D3D_ClipSpriteToRect(D2RenderClipOutStrc * pClipResult, int * pSpriteInfo, int nPosX, int nPosY, uint32_t * pClipRect) {
+static BOOL __fastcall RENDERER_D3D_ClipSpriteToRect(D2RenderClipOutStrc * pClipResult, int * pSpriteInfo, int nPosX, int nPosY, uint32_t * pClipRect) {
     int nSpriteLeft = nPosX + pSpriteInfo[3];
     int nSpriteW = pSpriteInfo[1];
     int nSpriteTop = nPosY + pSpriteInfo[4];
@@ -3548,7 +3548,7 @@ void __stdcall RENDERER_D3D_CreateFontTextures() {
     exit(-1);
 }
 
-int __stdcall RENDERER_D3D_DrawGlyph(char cGlyph, int nPosX, int nPosY) {
+static int __stdcall RENDERER_D3D_DrawGlyph(char cGlyph, int nPosX, int nPosY) {
     if (0x280 < nPosX) {
       return 0;
     }
@@ -4004,7 +4004,7 @@ void __fastcall ClearScreen(BOOL bPartial) {
 }
 
 // Calculates viewport rectangle based on screen panel layout. nScreenPanels=0: full screen. nScreenPanels=1: left half. nScreenPanels=2: right half. When nParam1=0, adds 32-pixel border and adjusts for status bar (47 pixels). When nParam1=1, applies quarter-width offset for panel centering (stored in pOffset).
-void __thiscall RENDERER_D3D_CalculateViewportRect(RECT * pRect, int nScreenPanels, int * pOffset, int nParam1) {
+static void __thiscall RENDERER_D3D_CalculateViewportRect(RECT * pRect, int nScreenPanels, int * pOffset, int nParam1) {
     if (!pRect) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x53);
       exit(-1);
@@ -4332,7 +4332,7 @@ BOOL __thiscall RENDERER_D3D_BuildWallTileVerticesNoPerspective(void * pThis, D2
 }
 
 // Renders wall/ground tiles with full perspective transformation and vertex lighting. Builds 15-vertex triangle fan (4 corners + center + 10 edge midpoints) by transforming isometric coords (X,Y,Z) to screen space via AdjustPerspectivePosition. Applies per-vertex colors from pLightColors array (4 corner colors, center interpolated). Uses ground tile index table at 0x0074c100 to map tile type (0-9) and subtile (0-4) to 3D vertex offsets. Renders via DrawIndexedPrimitive with gaD3DPerspectiveStripIndices index buffer.
-BOOL __stdcall RENDERER_D3D_RenderWallTileWithPerspective(int nScreenPanels, D2TileLibraryEntryStrc * pTile, int nPosX, int nPosY, int pLightColors, uint8_t nAlpha) {
+static BOOL __stdcall RENDERER_D3D_RenderWallTileWithPerspective(int nScreenPanels, D2TileLibraryEntryStrc * pTile, int nPosX, int nPosY, int pLightColors, uint8_t nAlpha) {
     short int* psVar1;
     int nTileTableIdx;
     D2D3DVertexStrc* pfVertexOuter;
@@ -4451,7 +4451,7 @@ BOOL __stdcall RENDERER_D3D_RenderWallTileWithPerspective(int nScreenPanels, D2T
     return nMidZ;
 }
 
-BOOL __stdcall RENDERER_D3D_DrawTransparentWallTile(D2TileLibraryEntryStrc * pTile, uint8_t nAlpha, int * pLight, int nPosX, int nPosY, int nParam3) {
+static BOOL __stdcall RENDERER_D3D_DrawTransparentWallTile(D2TileLibraryEntryStrc * pTile, uint8_t nAlpha, int * pLight, int nPosX, int nPosY, int nParam3) {
     BOOL nBlendMode = D2CMP::SRC::SpriteCache::SPRITECACHE_AllocEntry(pTile, 1, 0);
     if (!nBlendMode) {
       return 0;
@@ -4983,7 +4983,7 @@ void __stdcall RENDERER_D3D_ResetSmackerSurfaces() {
 }
 
 // Blits decoded Smacker video frame to screen. Renders two textured quads: top 256x256 section uses first texture pair (gpD3DSmackerVideoTexture0), bottom section (256 to nHeight) uses second pair (gpD3DSmackerVideoTexture1). Texture V coordinate for bottom quad calculated as (nHeight-256)/256 for proper scaling. Sets blend mode 1, enables lighting and texture stage 0 before rendering.
-void __thiscall RENDERER_D3D_BlitSmackerFrame(int nHeight, D2SmackerContextStrc * pSurface, int nOffset) {
+static void __thiscall RENDERER_D3D_BlitSmackerFrame(int nHeight, D2SmackerContextStrc * pSurface, int nOffset) {
     // Static local variables (originally global data)
     static int gaD3DSmackerVertices; D2_STATIC_GUARD_BSS(gaD3DSmackerVertices, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gaD3DSmackerVertices");
     static float gfD3DSmackerVertex0Y; D2_STATIC_GUARD_BSS(gfD3DSmackerVertex0Y, "D2Direct3D::Renderer::RENDERER_D3D_BlitSmackerFrame::gfD3DSmackerVertex0Y");
@@ -5071,7 +5071,7 @@ void __thiscall RENDERER_D3D_BlitSmackerFrame(int nHeight, D2SmackerContextStrc 
     g_pD3DDevice->lpVtbl->DrawPrimitive(g_pD3DDevice, 6, 0x1c4, &gaD3DSmackerVertices, 4, 0x1c);
 }
 
-void __thiscall RENDERER_D3D_CopySmackerRowWithAlpha(void * pDest, void * pSrc, int nPitch) {
+static void __thiscall RENDERER_D3D_CopySmackerRowWithAlpha(void * pDest, void * pSrc, int nPitch) {
     int nPixelsRemaining;
     int nRowsRemaining = 0x40;
     do {

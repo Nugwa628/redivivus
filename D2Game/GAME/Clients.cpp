@@ -208,7 +208,7 @@ void __fastcall SERVER_LinkServerPlayerUnitToClient(D2ClientStrc * pClient, D2Un
     pClient->pPlayer = 0;
 }
 
-void __stdcall CLIENT_SendHandshakePacket0x0B(D2ClientStrc * pClient, D2UnitStrc * pUnit) {
+static void __stdcall CLIENT_SendHandshakePacket0x0B(D2ClientStrc * pClient, D2UnitStrc * pUnit) {
     if (!pUnit) {
       SCmd::NET_D2GS_SERVER_Send_CMD_BYTE_INT(pClient, 0xb, 6, -1);
       return;
@@ -240,35 +240,35 @@ void __fastcall SetGameDataHook(::SGAMEDATA * pGame) {
 void __fastcall AppearenceItems(D2ClientStrc * pClient, D2UnitStrc * pUnit, uint32_t * pAppearanceBuf, uint32_t nBufSize) {
     char szAppearanceTmp[16];
     uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
-    if (!(0xf < nBufSize && pUnit)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3d4);
-      exit(-1);
+    if (0xf < nBufSize && pUnit) {
+      *pAppearanceBuf = -1;
+      pAppearanceBuf[1] = -1;
+      pAppearanceBuf[2] = -1;
+      pAppearanceBuf[3] = -1;
+      D2Common::INVENTORY::Inventory::SaveCharAppearance(pUnit, (char*)pAppearanceBuf, szAppearanceTmp);
+      Fog::Debug::GuardStack();
+      return;
     }
 
-    *pAppearanceBuf = -1;
-    pAppearanceBuf[1] = -1;
-    pAppearanceBuf[2] = -1;
-    pAppearanceBuf[3] = -1;
-    D2Common::INVENTORY::Inventory::SaveCharAppearance(pUnit, (char*)pAppearanceBuf, szAppearanceTmp);
-    Fog::Debug::GuardStack();
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3d4);
+    exit(-1);
 }
 
 void __fastcall AppearenceItems2(uint32_t pClient, D2UnitStrc * pUnit, uint32_t * pAppearanceBuf, uint32_t nBufSize) {
     char szAppearanceTmp[16];
     uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
-    if (!(0xf < nBufSize && pUnit)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3df);
-      exit(-1);
+    if (0xf < nBufSize && pUnit) {
+      *pAppearanceBuf = -1;
+      pAppearanceBuf[1] = -1;
+      pAppearanceBuf[2] = -1;
+      pAppearanceBuf[3] = -1;
+      D2Common::INVENTORY::Inventory::SaveCharAppearance(pUnit, szAppearanceTmp, (char*)pAppearanceBuf);
+      Fog::Debug::GuardStack();
+      return;
     }
 
-    *pAppearanceBuf = -1;
-    pAppearanceBuf[1] = -1;
-    pAppearanceBuf[2] = -1;
-    pAppearanceBuf[3] = -1;
-    D2Common::INVENTORY::Inventory::SaveCharAppearance(pUnit, szAppearanceTmp, (char*)pAppearanceBuf);
-    Fog::Debug::GuardStack();
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3df);
+    exit(-1);
 }
 
 // @sourcefile .\GAME\Clients.cpp
@@ -283,7 +283,7 @@ void __fastcall FreeClientList(::SGAMEDATA * pGame) {
 }
 
 // Server-side handler invoked when a client's active room changes (pRoom = new room). If different from the client's current room, swaps room data/active-room-ex between the old and new levels, then diffs the adjacency lists: reveals and streams units for newly-adjacent rooms (CLIENT_RevealRoomAndSendUnits) and clears/hides map for rooms no longer adjacent (RoomClearForClientAndHideMap), re-resolving the client's player unit and issuing a movement/position packet update when the client's own room is cleared. Updates pClient->pRoom and OR-merges the new level's portal flag into the player's explored-portal flags. Custom calling convention: pClient in ESI, pRoom on stack.
-void __stdcall GAME_OnClientRoomChange(D2RoomStrc * pRoom, D2ClientStrc * pClient) {
+static void __stdcall GAME_OnClientRoomChange(D2RoomStrc * pRoom, D2ClientStrc * pClient) {
     int nOldRoomIdx;
     if (!(pClient && pClient->pGame)) {
       return;
@@ -397,7 +397,7 @@ void __stdcall GAME_OnClientRoomChange(D2RoomStrc * pRoom, D2ClientStrc * pClien
 }
 
 // Inserts a player unit into a client's bounded nearest-units list kept sorted by Manhattan distance. Computes |nX-unitX|+|nY-unitY| using the unit's static (objects) or dynamic path position, then maintains an intrusive singly-linked sorted list of up to nMaxSlots entries (each entry = {pUnit, dist, nextLink}, head link at pSortList[2]; current count at pClient->nPacketBuffer+500). If full and the new unit is nearer than the farthest, evicts the tail; otherwise allocates the next free slot. Splices the entry into distance order and updates *ppnMaxDist (the running worst kept distance). Only acts on UNIT_PLAYER units. Custom calling convention: nX in EAX, pSortList in ESI, rest on stack.
-void __stdcall CLIENT_AddUnitToProximitySortedList(int32_t nX, D2UnitStrc * pUnit, int32_t nY, int32_t * ppnMaxDist, D2ClientStrc * pClient, uint32_t nMaxSlots, D2UnitProximityNodeStrc * pNodes) {
+static void __stdcall CLIENT_AddUnitToProximitySortedList(int32_t nX, D2UnitStrc * pUnit, int32_t nY, int32_t * ppnMaxDist, D2ClientStrc * pClient, uint32_t nMaxSlots, D2UnitProximityNodeStrc * pNodes) {
     int nDeltaX;
     int nDeltaY;
     uint32_t nSlotIdx;
@@ -507,7 +507,7 @@ void __stdcall CLIENT_AddUnitToProximitySortedList(int32_t nX, D2UnitStrc * pUni
 }
 
 // Serialises a proximity-sorted unit list into the client's nPacketBuffer for the visibility update packet. Iterates slots in the sort list writing 9-byte records: unit type (byte), GUID (dword), X position (word), Y position (word). Increments the buffer count per slot and follows the linked sort-list until a null slot is encountered. Called by GAME_CollectNearbyUnitPositions after building the sorted list.
-void __stdcall CLIENT_PopulateVisibilityPacketBuffer(D2UnitProximityNodeStrc * pNodes, D2ClientStrc * pClient) {
+static void __stdcall CLIENT_PopulateVisibilityPacketBuffer(D2UnitProximityNodeStrc * pNodes, D2ClientStrc * pClient) {
     D2UnitStrc* pDVar2;
     eD2UnitType eVar3;
     short int wCoord;
@@ -2312,12 +2312,7 @@ void __fastcall UnusedClientJoinGame(D2ClientStrc * pClient, uint8_t bParam) {
     eD2UnitType eUnitType;
     int nOldUnitGUID;
     ::SGAMEDATA* pGame;
-    if (!pClient) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x952);
-      exit(-1);
-    }
-
-    {
+    if (pClient) {
       D2UnitStrc* pUnit;
       pClient->nClass = bParam;
       pUnit = CLIENTS_GetControlUnit(pClient, 0);
@@ -2357,6 +2352,9 @@ void __fastcall UnusedClientJoinGame(D2ClientStrc * pClient, uint8_t bParam) {
       pClient->pRoom = pRoom;
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x952);
+    exit(-1);
 }
 
 void __fastcall UnusedClientJoinGame2(::SGAMEDATA * pGame, D2ClientStrc * pClient, uint8_t bActNo) {
@@ -2390,7 +2388,7 @@ void __fastcall UnusedClientJoinGame2(::SGAMEDATA * pGame, D2ClientStrc * pClien
 }
 
 // Routes a per-frame unit visibility update to the appropriate type-specific packet handler. If the unit's "new" flag is set and it is not the client's own player, sends an init-unit packet first (skipping missiles). Then dispatches by eUnitType: UNIT_PLAYER to PlayerModes::PacketUpdateForClient, UNIT_MONSTER to Item::PacketUpdateForClient, UNIT_OBJECT to ObjectsMode::PacketUpdateForClient, UNIT_ITEM to ItemMode::PacketUpdateForClient. Halts fatally if pUnit is null.
-void __stdcall DispatchUnitUpdate(::SGAMEDATA * pGame, D2ClientStrc * pClient, D2UnitStrc * pUnit) {
+static void __stdcall DispatchUnitUpdate(::SGAMEDATA * pGame, D2ClientStrc * pClient, D2UnitStrc * pUnit) {
     D2UnitStrc* pPlayerUnit_lcl;
     if (!pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15);
@@ -2426,7 +2424,7 @@ void __stdcall DispatchUnitUpdate(::SGAMEDATA * pGame, D2ClientStrc * pClient, D
     }
 }
 
-void __stdcall SendRoomUnitUpdates(::SGAMEDATA * pGame, int32_t pRoomNode, D2ClientStrc * pClient) {
+static void __stdcall SendRoomUnitUpdates(::SGAMEDATA * pGame, int32_t pRoomNode, D2ClientStrc * pClient) {
     D2UnitStrc* pNextUnit;
     if (!pRoomNode) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x44);

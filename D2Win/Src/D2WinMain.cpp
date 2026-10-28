@@ -850,7 +850,7 @@ void __stdcall D2WIN_HandleActivation(int32_t nParam) {
 // of that struct are modelled - the 19948-byte tail is left as an explicit unmodelled blob.
 // @wasnamed parameter 1 was pQServerClientPacket typed D2QServerClientPacketStrc *. It is assigned
 // straight into JPEG_CORE_PROPERTIES.DIBBytes, so it is the pixel buffer; retyped uint8_t *.
-void __stdcall D2WIN_SaveScreenshotToFile(uint8_t * pDibBytes, LPCSTR szFileName, int32_t nWidth, int32_t nHeight) {
+static void __stdcall D2WIN_SaveScreenshotToFile(uint8_t * pDibBytes, LPCSTR szFileName, int32_t nWidth, int32_t nHeight) {
     // Static local variables (originally global data)
     static uint32_t gnScreenshotSequenceIndex = 0x1; D2_STATIC_GUARD(gnScreenshotSequenceIndex, "D2Win::Src::D2WinMain::D2WIN_SaveScreenshotToFile::gnScreenshotSequenceIndex");
 

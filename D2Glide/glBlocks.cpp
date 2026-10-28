@@ -58,7 +58,7 @@ void __stdcall GLBLOCKS_FreeBlockBuffers() {
     gpGlBlocksFloorBuffer = 0;
 }
 
-void GLBLOCKS_DecodeRLEBlock(uint8_t * pbSrc, uint8_t * pbDstRow) {
+static void GLBLOCKS_DecodeRLEBlock(uint8_t * pbSrc, uint8_t * pbDstRow) {
     uint8_t bySkip;
     int nRowsLeft = 0x20;
     memset(pbDstRow, 0, 0x400);

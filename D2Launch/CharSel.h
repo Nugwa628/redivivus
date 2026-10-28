@@ -95,12 +95,8 @@ void __stdcall CHARSEL_FreeCachedRealmData();
 void __stdcall UIMENU_ItsLikeRealmSelectionMenuButOffsetToRightSide();
 void CHARSEL_SelectRealmInDropdown(char * szText);
 char * __stdcall GetPreferedRealm();
-uint32_t CHARSEL_IsBetaRealm(uint16_t * wszText);
-void CHARSEL_GetClassNameString(int nClassId, uint16_t * wszText);
-BOOL CHARSEL_ClassHasAlternateDeath(int nPlayerClass);
 // @sourcefile .\Src\CharSel.cpp
 void __stdcall CHARSEL_DestroySelectedChar();
-uint32_t CHARSEL_GetDaysUntilExpiry(uint32_t nExpiryTime);
 // Draws local character slots in selection screen. Iterates gaCharSelScreenSlotControls[0-7] to render each slot's character name, level, class, and hardcore/expansion flags. Highlights selected slot, draws character preview sprite, and handles expired characters.
 void __stdcall DRAW_LocalCharsInSelectionScreen();
 void __stdcall DRAW_LocalCharsInSelectionScreen0();
@@ -135,5 +131,6 @@ void __stdcall CHARSEL_AddCreateNewEntry();
 void __stdcall CHARSEL_AddRetrievingEntry();
 // @sourcefile .\Src\CharSel.cpp
 void __stdcall CHARSEL_ClearCharDetailUI();
+// 4 internal functions (defined in .cpp)
 
 } // namespace D2Launch::CharSel

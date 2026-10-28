@@ -54,7 +54,7 @@ typedef void (__fastcall *fpSUnitIterateCallback)(::SGAMEDATA * pGame, D2UnitStr
 
 namespace D2Game::UNIT::PlayerList {
 
-DWORD * PLAYERLIST_FindEntry(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static DWORD * PLAYERLIST_FindEntry(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     D2UnitPlayerListStrc* pDVar1;
     int nTargetGUID;
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);

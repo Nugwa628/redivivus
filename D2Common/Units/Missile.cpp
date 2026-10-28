@@ -448,7 +448,7 @@ void __stdcall GetHomeType(D2UnitStrc * pUnit, int * nHomeType, int * nHomeGUID)
     *nHomeGUID = -1;
 }
 
-BOOL __stdcall HasBonusStats(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
+static BOOL __stdcall HasBonusStats(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
     D2SeedStrc DVar1;
     int nCritChance = Stats::StatsEx::STATSEX_GetCurrentStat(pItem, UNITSTAT_passive_critical_strike, 0);
     D2SeedStrc seedRng = D2_SEED_NEXT(pItem->sSeed);
@@ -484,7 +484,7 @@ BOOL __stdcall HasBonusStats(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
 }
 
 // Accumulates all elemental damage stats from pUnit into pMissileDamageData, left-shifted by nShift. Reads fire/lightning/magic/cold/poison/life-drain/mana-drain/burning min+max stats and their durations from pUnit via GetStatUnsignedValue, then adds each (shifted) value to the corresponding field of D2MissileDamageDataStrc. Poison length uses skill_poison_override_length if present, otherwise poisonlength+poison_count. Custom register calling convention: pMissileDamageData=ESI, pUnit=EDI, nShift=BL.
-void AddStatsToDamage(D2MissileDamageDataStrc * pMissileDamageData, D2UnitStrc * pUnit, BYTE nShift) {
+static void AddStatsToDamage(D2MissileDamageDataStrc * pMissileDamageData, D2UnitStrc * pUnit, BYTE nShift) {
     int nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_firemindam, 0);
     pMissileDamageData->nFireMinDamage += nStatValue << (nShift & 0x1f);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_firemaxdam, 0);
@@ -530,7 +530,7 @@ void AddStatsToDamage(D2MissileDamageDataStrc * pMissileDamageData, D2UnitStrc *
 }
 
 // Scales all elemental damage fields in pMissileDamageData by nSrcDamage/128 (arithmetic right-shift by 7 with rounding correction). If nSrcDamage == 0x80 (i.e. factor is exactly 1.0), the function is a no-op. Mutates fire/lightning/magic/cold/poison/life-drain/mana-drain/burning min+max values and their durations in-place. Custom register calling convention: pMissileDamageData=ECX, nSrcDamage=ESI.
-void CalculateFinalDamage(D2MissileDamageDataStrc * pMissileDamageData, int32_t nSrcDamage) {
+static void CalculateFinalDamage(D2MissileDamageDataStrc * pMissileDamageData, int32_t nSrcDamage) {
     if (nSrcDamage == 0x80) {
       return;
     }
@@ -572,7 +572,7 @@ void CalculateFinalDamage(D2MissileDamageDataStrc * pMissileDamageData, int32_t 
 }
 
 // Returns nSrcDamage scaled by the owner unit's elemental mastery passive stat for nElemType (fire/lightning/cold+freeze/poison). Reads UNITSTAT_passive_*_mastery via GetStatUnsignedValue and applies the percentage via D2ApplyPercent. Returns 0 if no mastery or unknown element.
-int32_t CalculateMasteryBonus(D2UnitStrc * pUnit, eD2ElementalDamageTypeDWORD nElemType, int32_t nSrcDamage) {
+static int32_t CalculateMasteryBonus(D2UnitStrc * pUnit, eD2ElementalDamageTypeDWORD nElemType, int32_t nSrcDamage) {
     int nMasteryPercent;
     int32_t nScaledDamage;
     switch (nElemType) {

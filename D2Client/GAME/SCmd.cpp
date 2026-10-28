@@ -222,7 +222,7 @@ void __stdcall SaveCharacter() {
 
 // Processes one chunk of an in-flight character save upload from the client (SCmd handler). Allocates or reuses D2Game::Save::pRawSaveBuffer on the first chunk (pBytes[2]==0 skips realloc). Appends pBytes[1] bytes from the packet payload into the buffer, advancing nRawSaveBufferSize. When nRawSaveBufferSize reaches the declared total length (pBytes+3), calls SaveCharacter() and frees the buffer.
 // @sourcefile .\GAME\SCmd.cpp
-void DownloadSave(char * pBytes) {
+static void DownloadSave(char * pBytes) {
     uint8_t* pDst;
     if (D2Game::Save::pRawSaveBuffer) {
       if (pBytes[2] == '\0') {
@@ -391,17 +391,15 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x02_LoadSuccess(char * pBytes) {
 int __stdcall CLIENT_GetCurrentRoomAct() {
     eD2LevelId eLevel;
     D2RoomStrc* pRoom = UNIT::CUnit::GetCurrentRoom();
-    if (!pRoom) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x527);
-      exit(-1);
-    }
-
-    {
+    if (pRoom) {
       eAct eVar1;
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       eVar1 = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
       return (uint32_t)eVar1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x527);
+    exit(-1);
 }
 
 // Returns the act of the level containing pUnit's room; halts (line 1336) when the unit has no room.
@@ -409,17 +407,15 @@ int __stdcall CLIENT_GetCurrentRoomAct() {
 int __fastcall CLIENT_GetUnitAct(D2UnitStrc * pUnit) {
     eD2LevelId eLevel;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    if (!pRoom) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x538);
-      exit(-1);
-    }
-
-    {
+    if (pRoom) {
       eAct eVar1;
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       eVar1 = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
       return (uint32_t)eVar1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x538);
+    exit(-1);
 }
 
 // 0x04 sets ServerLoadingComplete=1 / _gLevelLoadInProgress=0, calls
@@ -431,12 +427,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x04_STARTACT(char * pBytes) {
     ServerLoadingComplete = 1;
     gLevelLoadInProgress = 0;
     D2RoomStrc* pRoom = UNIT::CUnit::GetCurrentRoom();
-    if (!pRoom) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x527);
-      exit(-1);
-    }
-
-    {
+    if (pRoom) {
       eD2LevelId eLevel;
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
@@ -452,6 +443,9 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x04_STARTACT(char * pBytes) {
       pUnit->pUnitData.pUnitDataPlayer->nTargetUnitGUID = 0;
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x527);
+    exit(-1);
 }
 
 // The teardown that undoes 0x04 (0045c9a0).
@@ -885,7 +879,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x29_GAMEQUESTRECORD(char * pBytes) {
 }
 
 // Constructs a fake S2C 0x47 packet from a unit's type/GUID and feeds it directly to ITEM_CltRecalcAllEquippedItems. Used client-side when stat changes are detected locally (e.g., level-up via SCMD_HandleStatChangeEffect) without waiting for the server packet.
-void ITEM_CltRecalcEquippedFromUnit(D2UnitStrc * pUnit) {
+static void ITEM_CltRecalcEquippedFromUnit(D2UnitStrc * pUnit) {
     D2GSPacketSrv0x47 sFakePacket;
     if (!pUnit) {
       return;
@@ -941,7 +935,7 @@ void __fastcall SCMD_RecalcInventoryItemStats(D2UnitStrc * pUnit) {
     D2Common::Skills::SelectSkillRight(pUnit, nRightSkill, -1);
 }
 
-void __stdcall SCMD_HandleStatChangeEffect(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, int32_t nValue) {
+static void __stdcall SCMD_HandleStatChangeEffect(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, int32_t nValue) {
     D2UnitStrc* pPlayerUnit_lcl;
     if (!(pUnit && true)) {
       return;
@@ -1144,7 +1138,7 @@ void __stdcall SCMD_DecodeRelativeCoordinates(uint16_t nByteY, int16_t nBaseX, i
     *pOutY = nDeltaY + nBaseY;
 }
 
-void __stdcall DecodeIncoming0x18(D2GSPacket0x18Decoded * pDest, char * pBytes) {
+static void __stdcall DecodeIncoming0x18(D2GSPacket0x18Decoded * pDest, char * pBytes) {
     D2BitBufferStrc sBitBuf;
     Fog::BitBuffer::InitBitBuffer(&sBitBuf, (uint8_t*)pBytes, 0xf);
     uint32_t nField = Fog::BitBuffer::ReadUnsigned(&sBitBuf, 8);
@@ -1201,7 +1195,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x18_PLAYERCOMMONSTATCHANGE_BIG(char * p
     UNIT::CUnit::IsAttackable(pUnit);
 }
 
-void __stdcall DecodeIncoming0x95(D2GSPacket0x95Decoded * pDest, char * pBytes) {
+static void __stdcall DecodeIncoming0x95(D2GSPacket0x95Decoded * pDest, char * pBytes) {
     D2BitBufferStrc sBitBuf;
     Fog::BitBuffer::InitBitBuffer(&sBitBuf, (uint8_t*)pBytes, 0xd);
     uint32_t nField = Fog::BitBuffer::ReadUnsigned(&sBitBuf, 8);
@@ -1252,7 +1246,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x95_PLAYERCOMMONSTATCHANGE_MEDIUM(char 
     UNIT::CUnit::IsAttackable(pUnit);
 }
 
-void __stdcall DecodeIncoming0x96(D2GSPacket0x96Decoded * pDest, char * pBytes) {
+static void __stdcall DecodeIncoming0x96(D2GSPacket0x96Decoded * pDest, char * pBytes) {
     D2BitBufferStrc sBitBuf;
     Fog::BitBuffer::InitBitBuffer(&sBitBuf, (uint8_t*)pBytes, 9);
     uint32_t nField = Fog::BitBuffer::ReadUnsigned(&sBitBuf, 8);
@@ -2563,7 +2557,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0xAE_WARDENDATA(char * pBytes) {
 
 // Allocates or grows the D2ServerCmdStrc packet buffer array for pUnit. On first call, scans NET_D2GS_CLIENT_INCOMING to find the largest packet size and caches it in nD2PacketsClientBufferSize (+5 bytes overhead). If pUnit has no D2ServerCmdStrc yet, allocates one. Grows the buffer array by 5 slots (alloc + memcpy old data + free old), updates nBufferArraySize, and returns the D2ServerCmdStrc pointer.
 // @sourcefile .\GAME\SCmd.cpp
-D2ServerCmdStrc * STRUCT_CreateAndPreprareServerCmd(D2UnitStrc * pUnit) {
+static D2ServerCmdStrc * STRUCT_CreateAndPreprareServerCmd(D2UnitStrc * pUnit) {
     int nMaxPacketSize;
     if (!nD2PacketsClientBufferSize) {
       int32_t* pTableEntry;
@@ -2615,7 +2609,7 @@ D2ServerCmdStrc * STRUCT_CreateAndPreprareServerCmd(D2UnitStrc * pUnit) {
     return pServerCmd;
 }
 
-void __stdcall NET_D2GS_CLIENT_PutIncomingBytesIntoServerCmdStructure(size_t nExpectedSize, D2UnitStrc * pUnit, char * pBytes) {
+static void __stdcall NET_D2GS_CLIENT_PutIncomingBytesIntoServerCmdStructure(size_t nExpectedSize, D2UnitStrc * pUnit, char * pBytes) {
     D2ServerCmdStrc* pServerCmd = UNIT::CUnit::GetServerCmd(pUnit);
     if (!pServerCmd || pServerCmd->nUsedBuffersCount + 1 == pServerCmd->nBufferArraySize) {
       pServerCmd = STRUCT_CreateAndPreprareServerCmd(pUnit);

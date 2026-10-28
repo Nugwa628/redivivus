@@ -63,16 +63,17 @@ namespace D2Game::Quests::QUESTS::A1Q6 {
 // A1Q6 (Sisters to the Slaughter) object init-fn 04. Marks the quest object (Andariel-related) as updatable while the Forgotten Tower quest is still in its intro phase (!bIsNotIntroduction). Halts if quest data missing. No quest-state transitions.
 void __fastcall Objects_InitFn04(D2ObjectInitFnArg * pInitArg) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pInitArg->pGame, QUESTINT_ForgottenTower);
-    if (!pQuestData) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x423);
-      exit(-1);
-    }
-    if (pQuestData->bIsNotIntroduction) {
+    if (pQuestData) {
+      if (pQuestData->bIsNotIntroduction) {
+        return;
+      }
+
+      D2Common::Units::SetupUpdateFlag(pInitArg->pObject, 3);
       return;
     }
 
-    D2Common::Units::SetupUpdateFlag(pInitArg->pObject, 3);
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x423);
+    exit(-1);
 }
 
 // A1Q6 object init-fn 47. Registers this object's GUID into the A1Q6 quest-specific GUID list (dedup, max 8 entries), bumps the count, runs A1Q5 Countess death-effect, then fires game event 7 (delayed +10 frames) if the recorded flags warrant it. List/event bookkeeping; no GetQuestState/SetQuestState.
@@ -428,7 +429,7 @@ BOOL __fastcall Q06_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 
 // A1Q6 helper: mark Sisters-to-the-Slaughter complete + grant reward for one player. Sets JustCompleted and RewardAwaits in the player's quest record, then SetClientStatus(1, difficulty) to flag the act-progress/Act2-unlock client state. Called from Andariel-death and L4-entry paths.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
-void __stdcall Q06_SetQuestCompletedAndReward(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
+static void __stdcall Q06_SetQuestCompletedAndReward(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
     /* SetQuestState(JustCompleted): mark quest just-completed for self player
                          (drives completion sound + UI) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
     /* SetQuestState(RewardAwaits): flag reward pending so Warriv offers Act2

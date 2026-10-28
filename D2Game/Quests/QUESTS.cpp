@@ -170,7 +170,7 @@ void __fastcall FreeQuestDataList(::SGAMEDATA * pGame, D2UnitQuestDataListStrc *
 }
 
 // @sourcefile .\QUESTS\QUESTS.CPP
-BOOL __stdcall QUEST_AttachToUnit(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit) {
+static BOOL __stdcall QUEST_AttachToUnit(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit) {
     D2UnitQuestDataListStrc* pExistingNode = pUnit->uSideData.pServerSide.pQuestEventList;
     if (!pQuestData) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5d);
@@ -302,15 +302,15 @@ void __fastcall FreeQuestControl(::SGAMEDATA * pGame) {
 }
 
 D2SeedStrc * __fastcall GetQuestControlSeed(::SGAMEDATA * pGame) {
-    if (!pGame->pQuestControl) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1fb);
-      exit(-1);
+    if (pGame->pQuestControl) {
+      return &pGame->pQuestControl->sSeed;
     }
 
-    return &pGame->pQuestControl->sSeed;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1fb);
+    exit(-1);
 }
 
-void __stdcall QUEST_DispatchBroadcast(bool bFlag1, bool bFlag2, D2QuestArgStrc * pQuestArg) {
+static void __stdcall QUEST_DispatchBroadcast(bool bFlag1, bool bFlag2, D2QuestArgStrc * pQuestArg) {
     eD2LevelId eLevelId;
     BOOL bIsBadPtr;
     D2QuestControlStrc* pQuestControl = pQuestArg->pGame->pQuestControl;
@@ -342,7 +342,7 @@ void __stdcall QUEST_DispatchBroadcast(bool bFlag1, bool bFlag2, D2QuestArgStrc 
     }
 }
 
-void __stdcall QUEST_DispatchToUnit(D2UnitStrc * pUnit, D2QuestArgStrc * pCall) {
+static void __stdcall QUEST_DispatchToUnit(D2UnitStrc * pUnit, D2QuestArgStrc * pCall) {
     BOOL bIsBadPtr;
     D2UnitQuestDataListStrc* pList = pCall->pTarget->uSideData.pServerSide.pQuestEventList;
     do {
@@ -742,7 +742,7 @@ void __fastcall QUEST_DebugPrint(::SGAMEDATA * pGame, char * szMessage, char * s
 }
 
 // @sourcefile .\QUESTS\QUESTS.CPP
-void __stdcall QUEST_RemoveItemFromInventory(D2InventoryStrc * pInventory, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pItem) {
+static void __stdcall QUEST_RemoveItemFromInventory(D2InventoryStrc * pInventory, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pItem) {
     eD2ItemAnimMode eItemMode;
     int32_t dwXPos;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0x534);
@@ -905,7 +905,7 @@ void __fastcall QUEST_OnNpcGossip(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, uin
     QUEST_DispatchBroadcast(true, true, &questArg);
 }
 
-void QUEST_ResetQuestDataForReconnect(eD2QuestsInternal nQuestNoInternal, ::SGAMEDATA * pGame) {
+static void QUEST_ResetQuestDataForReconnect(eD2QuestsInternal nQuestNoInternal, ::SGAMEDATA * pGame) {
     if ((int)nQuestNoInternal < 0) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x77);
       exit(-1);
@@ -1498,7 +1498,7 @@ void __stdcall QUEST_MarkNPCsAsIntroduced(::SGAMEDATA * pGame, int32_t pNpcIdArr
 }
 
 // Marks all NPCs in the destination act as already-introduced (spoken-with) for pUnit when an act transition occurs. Switches on eActNo (ACT_I through ACT_V; ACT_IV is a no-op) and iterates the corresponding NPCINTRO_ListActN table, calling INTRONPC_SetSpokenWithNPC_Intro2 for each entry. Ensures the player does not see first-meeting NPC intros upon entering the new act.
-void QUEST_GrantActTransitionReward(eAct eActNo, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void QUEST_GrantActTransitionReward(eAct eActNo, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2UnitDataPlayerStrc* pPlayerData;
     int* pNpcListIter;
     D2UnitDataPlayerInteractedNPCStrc* pInteractedNPCs;
@@ -1550,7 +1550,7 @@ void QUEST_GrantActTransitionReward(eAct eActNo, ::SGAMEDATA * pGame, D2UnitStrc
     }
 }
 
-BOOL __stdcall INTRONPC_FillInPacketWithIntroNpcIds(D2UnitDataPlayerInteractedNPCStrc * pInteractedNPCs, int * aNpcList, int32_t nListSize, D2GSPacketSrv0x91 * pD2GSPacketSrv0x91) {
+static BOOL __stdcall INTRONPC_FillInPacketWithIntroNpcIds(D2UnitDataPlayerInteractedNPCStrc * pInteractedNPCs, int * aNpcList, int32_t nListSize, D2GSPacketSrv0x91 * pD2GSPacketSrv0x91) {
     short int* pNpcIdSlot = (short int*)pD2GSPacketSrv0x91->nNpcID;
     pNpcIdSlot[0] = 0xffff;
     pNpcIdSlot[1] = 0xffff;
@@ -3304,7 +3304,7 @@ void __fastcall QUEST_JerhynNpcAILogic(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
     *pdwParam2 = 0;
 }
 
-void CreateSealGlow(D2ObjectOperateFnArg * pOperateArg, POINT * pPoint, int32_t nParam) {
+static void CreateSealGlow(D2ObjectOperateFnArg * pOperateArg, POINT * pPoint, int32_t nParam) {
     int32_t nCollisionMask;
     LONG nY = pPoint->y;
     D2RoomStrc* pVictimRoom = D2Common::Units::UNITS_GetRoom(pOperateArg->sArg.pVictim);

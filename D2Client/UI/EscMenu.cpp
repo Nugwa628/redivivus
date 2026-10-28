@@ -250,7 +250,7 @@ void __fastcall UI_SLIDER_InitAutomapParty(D2EscMenuItemStrc * pItem, D2UIMouseM
 }
 
 // Converts mouse Y coordinate to menu item index. Iterates visible items to find which contains the Y position, checking enable callbacks. Returns -1 if no valid item hit or if item is disabled.
-int32_t ESCMENU_GetItemIndexFromMouseY(int32_t nParam) {
+static int32_t ESCMENU_GetItemIndexFromMouseY(int32_t nParam) {
     BOOL nItemCount;
     int iVar1 = gpEscMenuItemCount->nItemCount;
     int nMenuCenterY = (ScreenSizeY - 0x50) / 2;
@@ -295,7 +295,7 @@ int32_t ESCMENU_GetItemIndexFromMouseY(int32_t nParam) {
     return nFoundIndex;
 }
 
-void __stdcall ESCMENU_ClickMenuItem(D2UIMouseMsgStrc * pMsg) {
+static void __stdcall ESCMENU_ClickMenuItem(D2UIMouseMsgStrc * pMsg) {
     BOOL bIsEnabled;
     if (!(!gpEscMenuCurrentTable[gnEscMenuSelectedIndex].fpVisibilityCheck || (bIsEnabled = gpEscMenuCurrentTable[gnEscMenuSelectedIndex].fpVisibilityCheck() , bIsEnabled != 0))) {
       return;
@@ -321,7 +321,7 @@ void __stdcall ESCMENU_ClickMenuItem(D2UIMouseMsgStrc * pMsg) {
     }
 }
 
-void ESCMENU_HandleSliderDrag(int32_t nParam1, int32_t nParam2) {
+static void ESCMENU_HandleSliderDrag(int32_t nParam1, int32_t nParam2) {
     int32_t nHoveredIndex;
     BOOL nSliderLeftX;
     int nScreenCenterX;

@@ -88,7 +88,7 @@ void __stdcall SYSTEM_GetCurrentProcessThreadCount() {
     Debug::GuardStack();
 }
 
-uint32_t __stdcall SYSTEM_GetStackRegion(LPCVOID * ppStackBase, LPCVOID pAddress, LPCVOID * ppStackTop) {
+static uint32_t __stdcall SYSTEM_GetStackRegion(LPCVOID * ppStackBase, LPCVOID pAddress, LPCVOID * ppStackTop) {
     _MEMORY_BASIC_INFORMATION mbi;
     LPCVOID pVqResult = (LPCVOID)VirtualQuery(pAddress, &mbi, 0x1c);
     if (!(pVqResult && mbi.State == 0x1000 && mbi.Type == 0x20000 && mbi.Protect == 4)) {

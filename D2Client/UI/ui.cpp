@@ -2042,7 +2042,7 @@ bool __stdcall UI_ShowPopupDialog() {
     return bNotCancelled;
 }
 
-int UI_GetCursorFrameOffset(int32_t nCursorIndex) {
+static int UI_GetCursorFrameOffset(int32_t nCursorIndex) {
     if (gnCursorDataCount == 7) {
       if (!(nCursorIndex < 7)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x90);
@@ -2056,7 +2056,7 @@ int UI_GetCursorFrameOffset(int32_t nCursorIndex) {
     }
 }
 
-int32_t UI_GetCursorMaxFrames(int32_t nCursorIndex) {
+static int32_t UI_GetCursorMaxFrames(int32_t nCursorIndex) {
     if (gnCursorDataCount == 7) {
       if (!(nCursorIndex < 7)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9b);
@@ -3223,7 +3223,7 @@ BOOL UI_IsMouseOverControlConfigTab(int32_t nMouseX, int32_t nMouseY) {
     return (uint32_t)(iVar1 != 3);
 }
 
-uint32_t UI_IsControlConfigCellClickable(int32_t nMousePosY, int32_t nMousePosX) {
+static uint32_t UI_IsControlConfigCellClickable(int32_t nMousePosY, int32_t nMousePosX) {
     int bInArea = UI_IsMouseInControlConfigArea(nMousePosX, nMousePosY);
     if (!bInArea) {
       return 0;
@@ -3458,7 +3458,7 @@ void __stdcall UI_ConfigKeyBindModeCancelAndRevert() {
 
 // Control config click handler. Reads mouse button from params, updates g_nControlConfigMouseButtonState[0] to track primary button state. Entry point for config UI mouse interaction.
 // ECX is not an argument: first written at 004a5e6e (MOV ECX,EBX) before any read.
-void UI_ConfigHandleMouseClick(int32_t nMouseX, int32_t nMouseY) {
+static void UI_ConfigHandleMouseClick(int32_t nMouseX, int32_t nMouseY) {
     int32_t nTabIndex;
     if (gaControlConfigRegionMouseState[0]) {
       uint32_t bCellClickable;
@@ -4145,7 +4145,7 @@ void __stdcall DRAW_UI_NewStatPoints_II() {
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nBaseX + 3, ScreenSizeY - 0x6d, -1, DRAW_SOLID, nullptr);
 }
 
-uint32_t __stdcall UI_GetNewSkillPointsForClass(int32_t nCharClass, uint32_t bResult) {
+static uint32_t __stdcall UI_GetNewSkillPointsForClass(int32_t nCharClass, uint32_t bResult) {
     if (nCharClass == 3) {
       return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)(bResult >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)1);
     }
@@ -4308,7 +4308,7 @@ void __fastcall UI_DrawTextCentered(int32_t nPositionXStart, int32_t nParam1, in
     D2Win::Src::D2WinFont::DRAW_text(wszMessage, nPositionXStart, nParam1, nParam2, 0);
 }
 
-int32_t UI_GetStatDescriptionStringId(int32_t nUnit) {
+static int32_t UI_GetStatDescriptionStringId(int32_t nUnit) {
     eD2ItemTypes eItemType;
     D2StatStrc aBonusStringIds[32];
     int nCandidateStringId;
@@ -4345,7 +4345,7 @@ int32_t UI_GetStatDescriptionStringId(int32_t nUnit) {
     return nBestStringId;
 }
 
-void __fastcall DRAW_UI_StatWindow_III(int32_t nX, int32_t nY, int32_t nValue) {
+static void __fastcall DRAW_UI_StatWindow_III(int32_t nX, int32_t nY, int32_t nValue) {
     uint16_t* wszFmt;
     int iClearIdx;
     uint16_t wszMessage[128];
@@ -4401,7 +4401,7 @@ void __fastcall DRAW_UI_StatWindow_III(int32_t nX, int32_t nY, int32_t nValue) {
     D2Win::Src::D2WinFont::D2WINFONT_DrawTextWithBackgroundRect(wszMessage, gnPanelOffsetX + 0x8b, gnPanelOffsetY - 0x13b + ScreenSizeY, (uint32_t)(uint8_t)gbUIStatWindowDrawFlag, DRAW_LESSTRANSPARENT, 0);
 }
 
-int32_t __stdcall CHAR_AddClassToHitFactor(D2UnitStrc * pUnit, int32_t nValue) {
+static int32_t __stdcall CHAR_AddClassToHitFactor(D2UnitStrc * pUnit, int32_t nValue) {
     if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
       return nValue;
     }
@@ -4630,7 +4630,7 @@ int __fastcall UI_AppendColorCodeToString(void * pWszString, void * pNextLineOut
     return 1;
 }
 
-int INPUT_HighResLeftPanelClick(D2UIMouseMsgStrc * pMsg) {
+static int INPUT_HighResLeftPanelClick(D2UIMouseMsgStrc * pMsg) {
     DWORD dwResMode = D2gfx::D2GFX::D2GFX_GetResolutionMode();
     if (dwResMode != 2) {
       return 0;
@@ -4797,7 +4797,7 @@ void __stdcall CHAR_FreePanelAssets_NoOp() {
 
 }
 
-void __stdcall DRAW_UI_StatWindow_II(int32_t bUpperEnabled, int32_t bLowerEnabled, int32_t nMouseX, int32_t nMouseY) {
+static void __stdcall DRAW_UI_StatWindow_II(int32_t bUpperEnabled, int32_t bLowerEnabled, int32_t nMouseX, int32_t nMouseY) {
     // Static local variables (originally global data)
     static int gaStatWindowRowLayout[12] = {
     0x9a,
@@ -4868,12 +4868,7 @@ void __stdcall DRAW_UI_StatWindow_II(int32_t bUpperEnabled, int32_t bLowerEnable
     pClearPtr = D2Lang::StrTable::strtable::GetLocaleString(0x103f);
     D2Win::Src::D2WinFont::DRAW_text(pClearPtr, nX, nMonsterIdx, dwColor, bMultiLineCenter);
     nMonsterIdx = GAME::Select::SELECT_GetConstant13_X();
-    if (!(-1 < nMonsterIdx && nMonsterIdx < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonsterIdx)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xec);
-      exit(-1);
-    }
-
-    {
+    if (-1 < nMonsterIdx && nMonsterIdx < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonsterIdx) {
       uint16_t* wszFmt;
       pClearPtr = D2Lang::StrTable::strtable::GetLocaleString(sgptDataTable->pTxtMonStats[nMonsterIdx].NameStr);
       wszFmt = D2Lang::StrTable::strtable::GetLocaleString(0x2777);
@@ -4881,6 +4876,9 @@ void __stdcall DRAW_UI_StatWindow_II(int32_t bUpperEnabled, int32_t bLowerEnable
       D2Win::Src::D2WinFont::DRAW_text(wszMonNameTooltip, gaStatWindowRowLayout[nBtnIndex * 6 + 4] + gnPanelOffsetX, gaStatWindowRowLayout[nBtnIndex * 6 + 5] + gnPanelOffsetY - 0x1e0 + ScreenSizeY, 0, 0);
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xec);
+    exit(-1);
 }
 
 void __stdcall DRAW_UI_StatWindow_I() {
@@ -6060,7 +6058,7 @@ BOOL __stdcall thunk_NPCSHOP_IsRepairTabActive() {
     return ::D2Client::UI::ui::NPCSHOP_IsRepairTabActive();
 }
 
-BOOL NPCSHOP_GetActiveTabIndex(int32_t nMouseY, int32_t nMouseX) {
+static BOOL NPCSHOP_GetActiveTabIndex(int32_t nMouseY, int32_t nMouseX) {
     BOOL bHandled = 0;
     int nTabIdx = 0;
     if (0 < nCashDisplayItemCount) {

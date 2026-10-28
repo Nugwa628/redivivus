@@ -123,7 +123,7 @@ BOOL __fastcall DrawAnim(::D2WinAnimImage * pAnimImage) {
 }
 
 // Per-frame animation update. Advances frame counter, handles state transitions (looping vs one-shot), invokes frame change callbacks. Returns 1 on success.
-BOOL D2WINANIMIMAGE_UpdateFrame(::D2WinAnimImage * pAnimImage) {
+static BOOL D2WINANIMIMAGE_UpdateFrame(::D2WinAnimImage * pAnimImage) {
     BOOL bHitTest;
     D2WinAnimImageNotifyStrc sNotifyArgs;
     uint32_t nFrameCount;

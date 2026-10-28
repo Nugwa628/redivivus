@@ -915,7 +915,7 @@ int32_t __fastcall fAPPMODE_multiplayer_ReturnAppMode_Caller(D2IniConfigStrc * p
 }
 
 // Handles the /reply command for out-of-game chat. Parses the reply target from gszOogReplyCommandBuffer, validates token count is exactly 2 (command + message), and formats a whisper message ("/w *target message") to send via the network interface. Shows error messages if no reply target exists or if command syntax is incorrect.
-uint32_t OOGUTIL_HandleReplyCommand(char * szText1, char * szText2) {
+static uint32_t OOGUTIL_HandleReplyCommand(char * szText1, char * szText2) {
     int nTokenCount;
     uint16_t* pwszErrorMsg;
     char szCommandBuffer[256];
@@ -1424,7 +1424,7 @@ void __stdcall OOGMENU_RequestGameInfo() {
     gnPendingGameInfoCharIndex = -1;
 }
 
-void OOGUTIL_Unused2(int32_t nEntryIndex) {
+static void OOGUTIL_Unused2(int32_t nEntryIndex) {
     char byChar;
     if (!gpOogGameListDetailsPanelControl) {
       return;
@@ -2067,7 +2067,7 @@ BOOL __stdcall OOGUTIL_OnPressDifficultyHell(D2ControlMsg * pControlMsg) {
 // Copies szCharacterName (the clicked chat user's character name) into gszProfileCharacterName and stores nHardcoreFlag / nExpansionFlag (the clicked
 // D2ChannelUserStrc nHardcoreFlag +0xa0 / nExpansionFlag +0xa8, via COMCALLBACK_HandleUserListClick) into
 // gnProfileUserHardcoreFlag / gnProfileUserExpansionFlag, which OOGUTIL_OnPressProfileLadder (00443ef0) reads to open the matching ladder and request that character's rank.
-void __stdcall OOGUTIL_SetProfileUser(int nHardcoreFlag, int nExpansionFlag, char * szCharacterName) {
+static void __stdcall OOGUTIL_SetProfileUser(int nHardcoreFlag, int nExpansionFlag, char * szCharacterName) {
     char cChar;
     int nDestOffset = (int)gszProfileCharacterName - (int)szCharacterName;
     do {

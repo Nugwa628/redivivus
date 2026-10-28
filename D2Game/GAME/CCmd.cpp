@@ -34,7 +34,7 @@
 namespace D2Game::GAME::CCmd {
 
 // Checks if the given server token represents the first game in a session. Returns status code (0=success, 6=error).
-int __stdcall IsTokenFirstGame(int nMode, int nParam, char * szCharName) {
+static int __stdcall IsTokenFirstGame(int nMode, int nParam, char * szCharName) {
     D2ClientStrc* pClient;
     int32_t nStrCmpResult;
     char* pGameNameCursor;

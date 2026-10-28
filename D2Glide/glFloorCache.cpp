@@ -100,7 +100,7 @@ int __fastcall GLFLOOR_Initialize(GlFloorCacheStrc * pCache, int nVramStart, int
 }
 
 // Appends floor cache node to tail of active LRU list (most-recently-used position). Creates list if empty, otherwise links to existing tail.
-void GLFLOOR_AppendNodeToTail(GlFloorCacheStrc * pCache, GlFloorCacheNodeStrc * pNode) {
+static void GLFLOOR_AppendNodeToTail(GlFloorCacheStrc * pCache, GlFloorCacheNodeStrc * pNode) {
     if (!pCache->pActiveHead) {
       pCache->pActiveHead = pNode;
       pCache->pActiveTail = pNode;
@@ -152,18 +152,13 @@ GlFloorCacheNodeStrc * __fastcall GLFLOOR_RemoveNodeByIndex(GlFloorCacheStrc * p
 }
 
 // Allocates node from free list and moves to active list tail. Returns 1-based node index on success, 0 if cache full.
-int GLFLOOR_AllocateNode(GlFloorCacheStrc * pCache) {
+static int GLFLOOR_AllocateNode(GlFloorCacheStrc * pCache) {
     if (pCache->nUsedCount == pCache->nMaxEntries) {
       return 0;
     }
 
     GlFloorCacheNodeStrc* pGVar1 = pCache->pFreeHead;
-    if (!pGVar1) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9f);
-      exit(-1);
-    }
-
-    {
+    if (pGVar1) {
       GlFloorCacheNodeStrc* pNextFree;
       pNextFree = pGVar1->pNext;
       pCache->pFreeHead = pNextFree;
@@ -188,6 +183,9 @@ int GLFLOOR_AllocateNode(GlFloorCacheStrc * pCache) {
       pCache->pActiveTail = pGVar1;
       return pGVar1->nIndex + 1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9f);
+    exit(-1);
 }
 
 // Promotes a floor cache node to most-recently-used position (active list tail).

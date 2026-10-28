@@ -144,7 +144,7 @@ int32_t __stdcall SFILE_DecompressLzw(int32_t pSrcData, int32_t pDstData, int32_
 }
 
 // @blizzard Decrypt (SFILE.CPP)
-void SFILE_Decrypt(uint32_t nSeed, uint32_t * pData, uint32_t nByteLen) {
+static void SFILE_Decrypt(uint32_t nSeed, uint32_t * pData, uint32_t nByteLen) {
     uint32_t nDwordsRem;
     int nKey = -0x11111112;
     for (nDwordsRem = nByteLen >> 2; nDwordsRem; nDwordsRem--) {
@@ -159,7 +159,7 @@ void SFILE_Decrypt(uint32_t nSeed, uint32_t * pData, uint32_t nByteLen) {
 }
 
 // @blizzard Hash (SFILE.CPP)
-uint32_t __stdcall SFILE_Hash(int32_t nHashKind, char * szText) {
+static uint32_t __stdcall SFILE_Hash(int32_t nHashKind, char * szText) {
     uint32_t nHash = 0x7fed7fed;
     int nSeed = -0x11111112;
     for (; szText && *szText != '\0'; szText++) {
@@ -174,7 +174,7 @@ uint32_t __stdcall SFILE_Hash(int32_t nHashKind, char * szText) {
 
 // @sourcefile .\SOURCE\SFILE.CPP
 // @blizzard InitializeHashSource (SFILE.CPP)
-void SFILE_InitializeHashSource(uint32_t nSeed) {
+static void SFILE_InitializeHashSource(uint32_t nSeed) {
     uint32_t nLo;
     if (!g_pStormMpqCryptTable) {
       g_pStormMpqCryptTable = SMem::SMemAlloc(0x1400, ".\\SOURCE\\SFILE.CPP", 0x340, 0);
@@ -205,7 +205,7 @@ void SFILE_InitializeHashSource(uint32_t nSeed) {
 }
 
 // @blizzard ReadFileChecked (SFILE.CPP)
-int __stdcall SFILE_ReadFileChecked(int32_t * pMPQFile, void * pOutputBuf, uint32_t nBytesToRead, uint32_t * pnBytesRead, HANDLE hFile, LPDWORD pdwBytesRead, int32_t nFileOffset) {
+static int __stdcall SFILE_ReadFileChecked(int32_t * pMPQFile, void * pOutputBuf, uint32_t nBytesToRead, uint32_t * pnBytesRead, HANDLE hFile, LPDWORD pdwBytesRead, int32_t nFileOffset) {
     BOOL bReadSuccess;
     DWORD dwLastError;
     int bShouldRetry;
@@ -250,7 +250,7 @@ int __stdcall SFILE_ReadFileChecked(int32_t * pMPQFile, void * pOutputBuf, uint3
     return 0;
 }
 
-int __stdcall SFILE_SyncReadFile(void * pOutputBuf, uint32_t nBytesToRead, uint32_t * pnBytesRead, int32_t nFileOffset, D2MPQFileStrc * pFileHandle) {
+static int __stdcall SFILE_SyncReadFile(void * pOutputBuf, uint32_t nBytesToRead, uint32_t * pnBytesRead, int32_t nFileOffset, D2MPQFileStrc * pFileHandle) {
     DWORD nBytesRead = 0;
     SFILE_ReadFileChecked((int32_t*)&pOutputBuf, pOutputBuf, nBytesToRead, (uint32_t*)pFileHandle->szFileName, pFileHandle->hFile, &nBytesRead, nFileOffset);
     if (!pnBytesRead) {
@@ -261,12 +261,12 @@ int __stdcall SFILE_SyncReadFile(void * pOutputBuf, uint32_t nBytesToRead, uint3
     return (uint32_t)(nBytesRead == nBytesToRead);
 }
 
-D2MPQBlockEntryStrc * SFILE_GetBlockTableEntry(D2ArchiveStrc * pArchive, int32_t nHashIndex) {
+static D2MPQBlockEntryStrc * SFILE_GetBlockTableEntry(D2ArchiveStrc * pArchive, int32_t nHashIndex) {
     return pArchive->pBlockTable + pArchive->pHashTable[nHashIndex].dwBlockIndex;
 }
 
 // @blizzard SearchHashTable (SFILE.CPP)
-uint32_t __stdcall SFILE_SearchHashTable(D2ArchiveStrc * pArchive, int16_t nLocale, char cPlatform, char * szFileName) {
+static uint32_t __stdcall SFILE_SearchHashTable(D2ArchiveStrc * pArchive, int16_t nLocale, char cPlatform, char * szFileName) {
     char cVar1;
     uint16_t nEntryLocale;
     uint32_t nHashIndex = SFILE_Hash(0, szFileName);
@@ -341,7 +341,7 @@ void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCou
     *(uint32_t*)((int)pDst + 0x28) = 0;
 }
 
-int32_t SFILE_GetStreamPosition(D2StormAudioStreamRec * pStream) {
+static int32_t SFILE_GetStreamPosition(D2StormAudioStreamRec * pStream) {
     // Frame slots -12..-4 are ONE object: &nPosHigh is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -371,7 +371,7 @@ int32_t SFILE_GetStreamPosition(D2StormAudioStreamRec * pStream) {
     return __frame0.nPosition;
 }
 
-void SFILE_HandleAsyncReadError(D2StormAsyncOpStrc * pAsyncOp) {
+static void SFILE_HandleAsyncReadError(D2StormAsyncOpStrc * pAsyncOp) {
     uint32_t nCopyBytes;
     uint32_t nBytesRead;
     D2StormAudioStreamRec* pParentStream;
@@ -432,18 +432,18 @@ void __stdcall SFILE_BuildDefaultBasePath() {
 }
 
 // @blizzard CheckArchiveHandle (SFILE.CPP)
-int SFILE_CheckArchiveHandle(D2ArchiveStrc * pArchive, D2ArchiveStrc * * ppArchive) {
+static int SFILE_CheckArchiveHandle(D2ArchiveStrc * pArchive, D2ArchiveStrc * * ppArchive) {
     *ppArchive = pArchive;
     return 1;
 }
 
-uint32_t SFILE_FileExistsOnDisk(LPCSTR szText) {
+static uint32_t SFILE_FileExistsOnDisk(LPCSTR szText) {
     DWORD dwFileAttributes = GetFileAttributesA(szText);
     return ~(dwFileAttributes >> 4) & 1;
 }
 
 // @blizzard CheckFileHandle (SFILE.CPP)
-int SFILE_CheckFileHandle(D2MPQFileStrc * pMPQFile, D2MPQFileStrc * * ppMPQFile) {
+static int SFILE_CheckFileHandle(D2MPQFileStrc * pMPQFile, D2MPQFileStrc * * ppMPQFile) {
     *ppMPQFile = pMPQFile;
     return 1;
 }
@@ -493,7 +493,7 @@ BOOL __stdcall SFILE_CheckForCdRom(char * szText) {
 }
 
 // @blizzard ConvertRelativePathName (SFILE.CPP)
-void __stdcall SFILE_ConvertRelativePathName(int32_t bStripDir, char * szFileName, char * szOutPath) {
+static void __stdcall SFILE_ConvertRelativePathName(int32_t bStripDir, char * szFileName, char * szOutPath) {
     char* pLastSlash;
     char szTmpPath[260];
     uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
@@ -512,7 +512,7 @@ void __stdcall SFILE_ConvertRelativePathName(int32_t bStripDir, char * szFileNam
     Fog::Debug::GuardStack();
 }
 
-uint32_t __stdcall SFILE_FindFileOnDisk(uint8_t bSearchFlags, LPCSTR szOutPath, char * szFileName) {
+static uint32_t __stdcall SFILE_FindFileOnDisk(uint8_t bSearchFlags, LPCSTR szOutPath, char * szFileName) {
     uint32_t dwFileAttributes = 0;
     if (!(bSearchFlags & 3)) {
       return dwFileAttributes;
@@ -1720,7 +1720,7 @@ uint32_t __stdcall SFILE_InternalReadAligned(D2MPQFileStrc * pArchive, uint32_t 
 // the run is clipped to the file size at [pHashEntry+8] unless [pHashEntry+0xc] has bits 0xff00 set. Inputs are EDX and ESI only;
 // ECX is scratch (first written at 00416fcd).
 // @blizzard InternalReadAlignedSector (SFILE.CPP)
-uint32_t SFILE_InternalReadAlignedSector(uint32_t nAlignedOffset, D2MPQFileStrc * pMPQFile) {
+static uint32_t SFILE_InternalReadAlignedSector(uint32_t nAlignedOffset, D2MPQFileStrc * pMPQFile) {
     D2ArchiveStrc* pArchive = pMPQFile->pArchive;
     if (pArchive->pLastReadFile == pMPQFile && pArchive->nLastReadOffset == nAlignedOffset) {
       return pArchive->nLastReadResult;
@@ -1740,7 +1740,7 @@ uint32_t SFILE_InternalReadAlignedSector(uint32_t nAlignedOffset, D2MPQFileStrc 
 }
 
 // @blizzard InternalReadUnaligned (SFILE.CPP)
-uint32_t __stdcall SFILE_InternalReadUnaligned(D2MPQFileStrc * pMPQFile, uint32_t * pOutputBuf, uint32_t nBytesToRead, uint32_t nFileOffset) {
+static uint32_t __stdcall SFILE_InternalReadUnaligned(D2MPQFileStrc * pMPQFile, uint32_t * pOutputBuf, uint32_t nBytesToRead, uint32_t nFileOffset) {
     uint32_t* pSectorSizePtr;
     uint32_t uVar2;
     uint32_t nFirstChunk;
@@ -3556,7 +3556,7 @@ D2MPQFileStrc * * __fastcall SFILE_AllocFileRecord4(int * * ppArchive, int32_t n
 }
 
 // @blizzard IssueRequest (SFILE.CPP)
-D2StormAsyncOpStrc * __stdcall SFILE_IssueRequest(uint32_t nFileOffset, uint32_t pChunkWritePtr, uint32_t pReadBufferBase, IDirectSoundBuffer * pStream, uint32_t pUserCtx2, D2StormAudioStreamRec * pParentStream, uint32_t nChunkSize, int32_t nTimeoutMs, uint32_t bUrgent, HANDLE hCompletionEvent, uint32_t bQueueImmediately, int32_t bIsLastChunk, D2StormAsyncCompletionStrc * pCompletion, D2MPQFileStrc * pMPQFile) {
+static D2StormAsyncOpStrc * __stdcall SFILE_IssueRequest(uint32_t nFileOffset, uint32_t pChunkWritePtr, uint32_t pReadBufferBase, IDirectSoundBuffer * pStream, uint32_t pUserCtx2, D2StormAudioStreamRec * pParentStream, uint32_t nChunkSize, int32_t nTimeoutMs, uint32_t bUrgent, HANDLE hCompletionEvent, uint32_t bQueueImmediately, int32_t bIsLastChunk, D2StormAsyncCompletionStrc * pCompletion, D2MPQFileStrc * pMPQFile) {
     int bArgsValid;
     D2StormAsyncOpStrc* pPrevBack;
     D2StormAsyncOpStrc* pRequest = 0;
@@ -4482,7 +4482,7 @@ void __stdcall SFILE_CreateCdThread() {
 }
 
 // Under the SFile lock, sets the urgent flag (+0x1c) of every queued Storm read request whose buffer base (+0x24, SFILE_IssueRequest) is pReadBuffer. No-op if pReadBuffer is NULL. SFILE_SelectAsyncRequest caps an urgent request's deadline at 1000 ms (0041a51a).
-void SFILE_SetRequestUrgentByBuffer(void * pReadBuffer, BOOL bUrgent) {
+static void SFILE_SetRequestUrgentByBuffer(void * pReadBuffer, BOOL bUrgent) {
     uint32_t pAsyncRequest;
     if (!pReadBuffer) {
       return;
@@ -4947,7 +4947,7 @@ int __thiscall SFILE_LoadAttributes(D2ArchiveStrc * pArchive, int pAttributesBuf
 }
 
 // @blizzard FindChunk (SFILE.CPP)
-uint32_t SFILE_FindChunk(int32_t nChunkId, D2MPQFileStrc * pMPQFile, int * pnChunkSize) {
+static uint32_t SFILE_FindChunk(int32_t nChunkId, D2MPQFileStrc * pMPQFile, int * pnChunkSize) {
     DWORD nSeekPos;
     D2FileChunkHeaderStrc sChunkHeader;
     int bReadOk = SFileReadFile(pMPQFile, &sChunkHeader, 8, nullptr, 0);

@@ -127,7 +127,7 @@ int32_t __stdcall UTF8_DecodeNextChar(uint8_t * pUtf8, uint16_t * pwCharOut, int
 }
 
 // Encodes a single UTF-16 code point to UTF-8 bytes. Returns number of bytes written (1-4). Uses lookup table at 0x007309b8.
-int32_t __stdcall EncodeUTF8CodePoint(uint16_t nParam, uint8_t * pbParam) {
+static int32_t __stdcall EncodeUTF8CodePoint(uint16_t nParam, uint8_t * pbParam) {
     uint32_t uCodePt = (uint32_t)nParam;
     int nByteWidth = 0;
     uint16_t wTableMask = gaUtf8DecodeTable[0].wMask;
@@ -160,7 +160,7 @@ int32_t __stdcall EncodeUTF8CodePoint(uint16_t nParam, uint8_t * pbParam) {
 }
 
 // Returns byte width of next UTF-8 character without decoding. Uses same validation table as DecodeNextChar. Returns -1 on error.
-int32_t __stdcall UTF8_GetNextCharWidth(uint8_t * pUtf8, int32_t nMaxBytes) {
+static int32_t __stdcall UTF8_GetNextCharWidth(uint8_t * pUtf8, int32_t nMaxBytes) {
     int nByteWidth = 0;
     if (nMaxBytes < 1) {
       return -1;

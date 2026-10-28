@@ -234,7 +234,7 @@ void NET_D2GS_CLIENT_Send_0x6A() {
 
 // Reads a character save file (.d2s) from disk into a memory buffer. Constructs the full file path from the save directory and character name, opens the file in binary read mode, seeks to end to get file size, allocates a client memory buffer of that size, rewinds to start, reads the entire file contents into the buffer, and returns the buffer pointer with size written to the output parameter.
 // @sourcefile .\GAME\Msg.cpp
-uint8_t * MSG_ReadSaveFileToBuffer(size_t * pnFileSize) {
+static uint8_t * MSG_ReadSaveFileToBuffer(size_t * pnFileSize) {
     size_t nFileSize;
     D2CharSelCompStrc* pBuffer;
     char szFilePath[1024];

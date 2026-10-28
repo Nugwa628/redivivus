@@ -62,7 +62,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2MonsterRegionStrc) == 0x2e4, "D2_
 namespace D2Game::Monster::MonsterRegion {
 
 // Picks the per-region monster type roster for a level. Copies the level's normal (mon) or nightmare/hell (nmon) candidate class-id pool into a stack buffer, then draws up to NumMon (capped 13) distinct entries using the seed RNG, removing each picked id from the pool. For the first pick on a rangedspawn level it retries (up to ~4 attempts) until it lands a ranged (rangedtype) monster. Each accepted spawnable (isSpawn) MonStats id is written into pMonsterRegion->pMonData with its Rarity, accumulating nTotalRarity/nSpawnCount/nCounter. Server-side seed-deterministic so all clients agree on the region's monster set.
-void __stdcall MONREGION_PopulateMonsterTypes(BOOL bIsNotNormalDifficulty, D2MonsterRegionStrc * pMonsterRegion, D2LevelsTxt * pTxtLevels, D2SeedStrc * pSeed) {
+static void __stdcall MONREGION_PopulateMonsterTypes(BOOL bIsNotNormalDifficulty, D2MonsterRegionStrc * pMonsterRegion, D2LevelsTxt * pTxtLevels, D2SeedStrc * pSeed) {
     short int* pMonList;
     D2MonStatsTxt* pMonStats;
     uint32_t nCopyWords;

@@ -432,7 +432,7 @@ void __fastcall ARENA_ClearUpdateFlag(::SGAMEDATA * pGame) {
     *peVar1 &= ~ARENAFLAG_ScoresDirty;
 }
 
-int ARENA_IsScoreDirty(D2UnitStrc * pUnit) {
+static int ARENA_IsScoreDirty(D2UnitStrc * pUnit) {
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
     if (!pPlayerData->pArena) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdb);
@@ -443,7 +443,7 @@ int ARENA_IsScoreDirty(D2UnitStrc * pUnit) {
     return pPlayerData->pArena->bScoreDirty;
 }
 
-void __stdcall UpdatePlayerKillCount(D2ClientStrc * pClient, D2UnitStrc * pUnit) {
+static void __stdcall UpdatePlayerKillCount(D2ClientStrc * pClient, D2UnitStrc * pUnit) {
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
     D2UnitDataPlayerArenaStrc* pArenaData = pPlayerData->pArena;
     if (!pArenaData) {
@@ -458,7 +458,7 @@ void __stdcall UpdatePlayerKillCount(D2ClientStrc * pClient, D2UnitStrc * pUnit)
     SCmd::NET_D2GS_SERVER_Send_0x65_SCORE_UPDATE(pClient, pUnit->nUnitGUID, (uint16_t)pArenaData->nScore);
 }
 
-void __stdcall ARENA_BroadcastKillToPlayers(::SGAMEDATA * pGame, int32_t nBroadcastMode, D2ClientStrc * pClient) {
+static void __stdcall ARENA_BroadcastKillToPlayers(::SGAMEDATA * pGame, int32_t nBroadcastMode, D2ClientStrc * pClient) {
     D2UnitDataPlayerStrc* pPlayerData;
     D2UnitStrc* pKillerUnit = Clients::CLIENTS_GetControlUnit(pClient, 0);
     D2ClientStrc* pClientIter = pGame->pClient;

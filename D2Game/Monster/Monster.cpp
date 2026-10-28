@@ -507,7 +507,7 @@ void __fastcall MONSTER_KillAllInLevel(::SGAMEDATA * pGame, int32_t nAltMonClass
 }
 
 // Server-side: fully initializes a spawned monster's stats/skills/inventory. Bails unless pUnit is a valid UNIT_MONSTER with MonStats/MonStatsEx records. Rolls component appearance, applies act-boss name bytes (classId 0x137/0x138), computes level/difficulty scaling (player-count multipliers), then SETs resistances, block, attack/velocity/animrate, HP (rolled min..max + player% bonus, capped 0x7FFFFF, x256), armorclass, experience and HP-regen via STATLIST_SetUnitStat. Applies difficulty scaling, attaches a second stat list, creates player or NPC inventory, builds the skills list (8 skills from MonStatsEx with level bonus + mode), sets CANBEATTACKED/PETIGNORE flags, rolls up-to-6 random monster properties (MonProp txt, per-difficulty chance), and equips summon items. Halts on bad HP-regen value.
-void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32_t nParam, D2UnitStrc * pUnit) {
+static void __stdcall MONSTER_InitStats(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uint32_t nParam, D2UnitStrc * pUnit) {
     uint32_t dwTmpStat;
     uint32_t nTmpVal;
     eD2LevelId eRoomLevelId;

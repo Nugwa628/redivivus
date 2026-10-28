@@ -104,13 +104,13 @@ void __stdcall _unused_SetupDefaultValues(int * pnParam) {
 }
 
 void __stdcall StartListening(D2QServerStrc * pQServer, uint32_t nToken) {
-    if (!pQServer->bUseNtLocalMode) {
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x129);
-      exit(-1);
+    if (pQServer->bUseNtLocalMode) {
+      QServer::QServerNT::StartListening(pQServer, nToken);
+      return;
     }
 
-    QServer::QServerNT::StartListening(pQServer, nToken);
-    return;
+    ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x129);
+    exit(-1);
 }
 
 int __stdcall SwapWorkerSlotValue(D2QServerStrc * pQServer, int nWorkerIndex, int nNewSlotValueOrZero) {
@@ -245,7 +245,7 @@ void __fastcall IncrementClientRefCount(D2QServerStrc * pQServer, D2QServerClien
 }
 
 // @sourcefile .\Src\QServer\QServer.cpp
-void __stdcall NET_QServerClientPacket_FreeAllPackets(D2QServerClientConnectionStrc * pQServerClient) {
+static void __stdcall NET_QServerClientPacket_FreeAllPackets(D2QServerClientConnectionStrc * pQServerClient) {
     if (pQServerClient->pNextByToken) {
       QSERVER_LOG("QSRV", "  ptClient->ptNextClient =  %08X", pQServerClient->pNextByToken);
     }
@@ -770,7 +770,7 @@ uint32_t __stdcall GetClientServerTokenByClientId(D2QServerStrc * pQServer, uint
 }
 
 // @sourcefile .\Src\QServer\QServer.cpp
-void FreeHacklistBuckets(D2QServerStrc * pQServer) {
+static void FreeHacklistBuckets(D2QServerStrc * pQServer) {
     D2QServerHacklistEntryStrc* pNext;
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pQServer->csHacklist);
     uint32_t nBucketIndex = 0;
@@ -795,7 +795,7 @@ void FreeHacklistBuckets(D2QServerStrc * pQServer) {
 
 // Increments active-connection counter for a client IP in QServer's per-IP hash table.
 // @sourcefile .\Src\QServer\QServer.cpp
-int IncrementPerIpConnCount(D2QServerStrc * pQServer, in_addr * pClientIp) {
+static int IncrementPerIpConnCount(D2QServerStrc * pQServer, in_addr * pClientIp) {
     D2QServerIpConnCountEntryStrc* pNewEntry;
     uint32_t nIpAddress = pClientIp->S_un.S_addr;
     uint32_t nBucketIndex = nIpAddress % pQServer->nIpConnCountModulo;
@@ -822,7 +822,7 @@ int IncrementPerIpConnCount(D2QServerStrc * pQServer, in_addr * pClientIp) {
 
 // Decrements active-connection counter for a client IP and removes hash entry when count reaches zero.
 // @sourcefile .\Src\QServer\QServer.cpp
-int NET_QServer_DecrementPerIpConnectionCount(in_addr * pClientIp, D2QServerStrc * pQServer) {
+static int NET_QServer_DecrementPerIpConnectionCount(in_addr * pClientIp, D2QServerStrc * pQServer) {
     uint32_t uVar2 = pClientIp->S_un.S_addr % pQServer->nIpConnCountModulo;
     D2QServerIpConnCountEntryStrc* pDVar1 = 0;
     D2QServerIpConnCountEntryStrc* pMemoryToFree = pQServer->ppIpConnCountBuckets[uVar2];
@@ -853,7 +853,7 @@ int NET_QServer_DecrementPerIpConnectionCount(in_addr * pClientIp, D2QServerStrc
 }
 
 // @sourcefile .\Src\QServer\QServer.cpp
-void PruneIpRateList(D2QServerStrc * pQServer) {
+static void PruneIpRateList(D2QServerStrc * pQServer) {
     DWORD dwNow = GetTickCount();
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pQServer->csClientLifecycle);
     D2QServerIpRateEntryStrc* pEntry = pQServer->pIpRateListHead;
@@ -892,7 +892,7 @@ void PruneIpRateList(D2QServerStrc * pQServer) {
 }
 
 // @sourcefile .\Src\QServer\QServer.cpp
-void FreeIpRateList(D2QServerStrc * pQServer) {
+static void FreeIpRateList(D2QServerStrc * pQServer) {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pQServer->csClientLifecycle);
     D2QServerIpRateEntryStrc* pMemoryToFree = pQServer->pIpRateListHead;
     while (pMemoryToFree) {
@@ -1318,7 +1318,7 @@ D2QServerClientContainerStrc * __fastcall AddClient(D2QServerStrc * pQServer, SO
 }
 
 // Removes a client from the QServer by token ID. Finds the client in the token hash bucket, unlinks it from the chain, decrements the connection count, and frees the client structure.
-void __stdcall RemoveClient(D2QServerStrc * pQServer, uint32_t nClientToken) {
+static void __stdcall RemoveClient(D2QServerStrc * pQServer, uint32_t nClientToken) {
     char* pcVar1;
     uint32_t nClientTokenCopy;
     D2QServerClientConnectionStrc* pClient;
@@ -1486,7 +1486,7 @@ int __fastcall CheckIpConnectionRate(D2QServerStrc * pQServer, in_addr * pIpAddr
 }
 
 // NOTE: Register param types inferred (medium confidence): pQServerClientConnectionStrc (ESI): D2QServerClientConnectionStrc *
-BOOL __stdcall QSSpamCheck(D2QServerClientConnectionStrc * pQServerClientConnectionStrc, D2QServerStrc * pQServer, int nBytes) {
+static BOOL __stdcall QSSpamCheck(D2QServerClientConnectionStrc * pQServerClientConnectionStrc, D2QServerStrc * pQServer, int nBytes) {
     DWORD DVar1 = GetTickCount();
     CRITICAL_SECTION* lpCriticalSection = &pQServerClientConnectionStrc->clientLock;
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(lpCriticalSection);
@@ -1745,7 +1745,7 @@ void __stdcall QSDisconnectIP(D2QServerStrc * pQServer, in_addr addr, char * szT
 }
 
 // pQServerStrc arrives in EDI; the other three arguments are on the stack (RET 0xc).
-void __stdcall HACKL_DisconnectAndBanClient(int nClientToken, char * pReason, int nParam, D2QServerStrc * pQServerStrc) {
+static void __stdcall HACKL_DisconnectAndBanClient(int nClientToken, char * pReason, int nParam, D2QServerStrc * pQServerStrc) {
     if (!pQServerStrc->bUseQServerHack) {
       return;
     }

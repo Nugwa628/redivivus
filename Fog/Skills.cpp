@@ -29,7 +29,7 @@ typedef int (__fastcall *CalcGetFunctionParameterCount_t)(int nFunctionIndex);
 
 namespace Fog::Skills {
 
-void __fastcall SKILLS_PushValue(int * pStack, int value) {
+static void __fastcall SKILLS_PushValue(int * pStack, int value) {
     if (pStack[0x40] >= 0x40) {
       return;
     }
@@ -38,7 +38,7 @@ void __fastcall SKILLS_PushValue(int * pStack, int value) {
     pStack[0x40]++;
 }
 
-int SKILLS_PopValue(int * pValueStack) {
+static int SKILLS_PopValue(int * pValueStack) {
     if (pValueStack[0x40] < 1) {
       return 0;
     }
@@ -753,7 +753,7 @@ char * __fastcall SKILLS_ParseSkillDescription(CalcGetKeyWordToNumber_t pFuncLoo
 }
 
 // Returns the operator precedence level for a skill formula opcode used by the calc compiler. Switches on the opcode byte (in AL): opcode 1 invokes a callback via pFunctionTable; opcodes 10-20 (0xa-0x14) return precedence 2; 0x15 returns 1; 0x16 returns 3; others return 0. Part of the skill formula expression evaluator (SKILLS_CompileSkillFormula).
-int __fastcall SKILLS_GetOpcodePrecedence(uint8_t opcode, CalcGetFunctionParameterCount_t pFunctionTable, uint32_t nFunctionArg) {
+static int __fastcall SKILLS_GetOpcodePrecedence(uint8_t opcode, CalcGetFunctionParameterCount_t pFunctionTable, uint32_t nFunctionArg) {
     int iVar1;
     switch (opcode) {
       case '\x01':
@@ -793,7 +793,7 @@ int __fastcall SKILLS_GetOpcodePrecedence(uint8_t opcode, CalcGetFunctionParamet
 }
 
 // Shunting-yard step for compiling a skill calc (skills.txt formula) into RPN bytecode. Given the current output write pointer, an operator-stack/parser-state struct (count at +0x140, accumulated precedence at +0x144, op array at base, arg array at +0x40), the output buffer/size, and an incoming token (bToken) with its function/arg payload: pops higher-or-equal precedence operators from the stack into the output (respecting the INT_ARRAY_006fc874 precedence table and SKILLS_GetOpcodePrecedence) until a lower-precedence/paren/end is hit, then either pushes the new operator/operand or, for end-of-expression (token 0), terminates the output with a 0 byte. Returns the advanced write pointer, or NULL on buffer overflow / stack overflow (writing a 0 to the buffer start to mark failure).
-uint8_t * __stdcall SKILLS_EmitFormulaBytecode(uint8_t * pWritePtr, uint8_t * pOperatorStack, uint8_t * pBuffer, int nBufferSize, uint8_t bToken, CalcGetFunctionParameterCount_t pFunction, uint32_t nFunctionArg) {
+static uint8_t * __stdcall SKILLS_EmitFormulaBytecode(uint8_t * pWritePtr, uint8_t * pOperatorStack, uint8_t * pBuffer, int nBufferSize, uint8_t bToken, CalcGetFunctionParameterCount_t pFunction, uint32_t nFunctionArg) {
     // Static local variables (originally global data)
     static uint8_t BYTE_ARRAY_006fc874[24] = {
     0x17,
@@ -879,7 +879,7 @@ uint8_t * __stdcall SKILLS_EmitFormulaBytecode(uint8_t * pWritePtr, uint8_t * pO
     return nullptr;
 }
 
-uint8_t * __fastcall SKILLS_WriteValueToBuffer(uint8_t * pBase, int nValue, int nBufferSize, D2QuestDataA5Q2Strc * pStruct, uint8_t * pWritePtr) {
+static uint8_t * __fastcall SKILLS_WriteValueToBuffer(uint8_t * pBase, int nValue, int nBufferSize, D2QuestDataA5Q2Strc * pStruct, uint8_t * pWritePtr) {
     if (nValue + 0x80U < 0x100) {
       if ((int)pWritePtr - (int)pBase < nBufferSize) {
         *pWritePtr = 7;
@@ -905,7 +905,7 @@ uint8_t * __fastcall SKILLS_WriteValueToBuffer(uint8_t * pBase, int nValue, int 
     return nullptr;
 }
 
-uint8_t * __fastcall SKILLS_WriteValueToBuffer2(uint8_t * pBase, int nValue, int nBufferSize, D2QuestDataA5Q2Strc * pStruct, uint8_t * pWritePtr) {
+static uint8_t * __fastcall SKILLS_WriteValueToBuffer2(uint8_t * pBase, int nValue, int nBufferSize, D2QuestDataA5Q2Strc * pStruct, uint8_t * pWritePtr) {
     if (nValue + 0x80U < 0x100) {
       if ((int)pWritePtr - (int)pBase < nBufferSize) {
         *pWritePtr = '\x04';

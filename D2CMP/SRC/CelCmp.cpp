@@ -1214,12 +1214,12 @@ uint32_t __stdcall CELCMP_GetFrameDecodeHandlerReverse(uint32_t nParam1, uint32_
 }
 
 void __stdcall CELCMP_ValidateCelFilePointer(int32_t nParam, uint32_t dwParam) {
-    if (!nParam) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x29c);
-      exit(-1);
+    if (nParam) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x29c);
+    exit(-1);
 }
 
 uint32_t __stdcall CELCMP_AllocateDecodedCelFile(int32_t nParam, uint32_t * pdwParam, uint32_t dwParam1, uint32_t dwParam2) {

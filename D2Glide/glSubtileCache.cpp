@@ -98,7 +98,7 @@ int __fastcall GLSUBTILE_Initialize(GlSubtileCacheStrc * pCache, int nVramStart,
 }
 
 // Appends subtile cache node to tail of active LRU list (most-recently-used position).
-void GLSUBTILE_AppendNodeToTail(GlSubtileCacheStrc * pCache, GlSubtileCacheNodeStrc * pNode) {
+static void GLSUBTILE_AppendNodeToTail(GlSubtileCacheStrc * pCache, GlSubtileCacheNodeStrc * pNode) {
     if (!pCache->pActiveHead) {
       pCache->pActiveHead = pNode;
       pCache->pActiveTail = pNode;
@@ -133,7 +133,7 @@ GlSubtileCacheNodeStrc * __fastcall GLSUBTILE_RemoveNodeFromHead(uint32_t dwPara
 }
 
 // Removes a subtile cache node from the active LRU list by index. Returns pointer to removed node.
-GlSubtileCacheNodeStrc * GLSUBTILE_RemoveNodeByIndex(GlSubtileCacheStrc * pCache, int nNodeIndex) {
+static GlSubtileCacheNodeStrc * GLSUBTILE_RemoveNodeByIndex(GlSubtileCacheStrc * pCache, int nNodeIndex) {
     uint8_t* pPrevTail;
     GlSubtileCacheNodeStrc* pHeadNode = pCache->pActiveHead;
     if (!pHeadNode) {
@@ -166,18 +166,13 @@ GlSubtileCacheNodeStrc * GLSUBTILE_RemoveNodeByIndex(GlSubtileCacheStrc * pCache
 }
 
 // Allocates node from free list and moves to active list tail. Returns 1-based node index on success, 0 if cache full.
-int GLSUBTILE_AllocateNode(GlSubtileCacheStrc * pCache) {
+static int GLSUBTILE_AllocateNode(GlSubtileCacheStrc * pCache) {
     if (pCache->nUsedCount == pCache->nMaxEntries) {
       return 0;
     }
 
     GlSubtileCacheNodeStrc* pGVar1 = pCache->pFreeHead;
-    if (!pGVar1) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9d);
-      exit(-1);
-    }
-
-    {
+    if (pGVar1) {
       uint8_t* pNewFreeHead;
       pNewFreeHead = (uint8_t*)pGVar1->pNext;
       pCache->pFreeHead = (GlSubtileCacheNodeStrc*)pNewFreeHead;
@@ -202,6 +197,9 @@ int GLSUBTILE_AllocateNode(GlSubtileCacheStrc * pCache) {
       pCache->pActiveTail = pGVar1;
       return pGVar1->nIndex + 1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9d);
+    exit(-1);
 }
 
 // Promotes a subtile cache node to most-recently-used position (active list tail).

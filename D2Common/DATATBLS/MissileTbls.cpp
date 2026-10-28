@@ -35,7 +35,7 @@ typedef int (__fastcall *CalcGetKeyWordToNumber_t)(char * szKey);
 
 namespace D2Common::DATATBLS::MissileTbls {
 
-void MISSILETBLS_PadCodeTo4Chars(char * szText1, char * szText2) {
+static void MISSILETBLS_PadCodeTo4Chars(char * szText1, char * szText2) {
     char cLastChar;
     if (*szText1 == '\0') {
       cLastChar = ' ';

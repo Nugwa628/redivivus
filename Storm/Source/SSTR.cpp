@@ -427,7 +427,7 @@ uint32_t __stdcall SStrPack(LPSTR szText, char * szSource, uint32_t nBufferLengt
     return 0;
 }
 
-uint32_t D2vsprintf(char * szFormat, size_t nSize, char * pBuffer, va_list pArgs) {
+static uint32_t D2vsprintf(char * szFormat, size_t nSize, char * pBuffer, va_list pArgs) {
     uint32_t nWritten;
     if (!nSize) {
       nWritten = 0;
@@ -2099,7 +2099,7 @@ void __stdcall UTF8_EncodeChar(uint32_t uCodepoint, uint8_t * pbOut) {
     *pbOut = 0;
 }
 
-void __fastcall UTF8_AdvanceToCharBoundary(uint32_t pThis, int pszBase, int nPosition, int nDirection) {
+static void __fastcall UTF8_AdvanceToCharBoundary(uint32_t pThis, int pszBase, int nPosition, int nDirection) {
     for (; 0 < nPosition && *(uint8_t*)(pszBase + nPosition) && (*(uint8_t*)(pszBase + nPosition) & 0xc0) == 0x80; nPosition += nDirection) {}
 }
 
@@ -2111,7 +2111,7 @@ void __stdcall UTF8_StepForwardOneChar(int str_base, int position, uint32_t ecx_
     UTF8_AdvanceToCharBoundary(ecx_passthru, str_base, position + 1, 1);
 }
 
-int __thiscall TRANSTBL_UnicodeToSingleByte(void * pThis, uint16_t * pXlatTbl, uint8_t * pbOut, int nCount) {
+static int __thiscall TRANSTBL_UnicodeToSingleByte(void * pThis, uint16_t * pXlatTbl, uint8_t * pbOut, int nCount) {
     uint8_t byMapped;
     uint16_t* pSearchEntry;
     int iSearchIdx;
@@ -2179,7 +2179,7 @@ int __thiscall TRANSTBL_UnicodeToSingleByte(void * pThis, uint16_t * pXlatTbl, u
     return (int)pOutCur - (int)pbOut;
 }
 
-int __fastcall TRANSTBL_SingleByteToUnicode(uint32_t pThis, uint8_t * pbSrc, int nCount, uint16_t * pDest, uint16_t * pXlatTbl) {
+static int __fastcall TRANSTBL_SingleByteToUnicode(uint32_t pThis, uint8_t * pbSrc, int nCount, uint16_t * pDest, uint16_t * pXlatTbl) {
     if (!nCount) {
       return 0;
     }

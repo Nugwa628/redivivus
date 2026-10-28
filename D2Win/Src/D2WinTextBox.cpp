@@ -62,7 +62,7 @@ int __stdcall EDITBOX_Cb_D2WINTEXTBOX_SetSelectedLine(::D2WinEditBox * pEditBox,
     return 1;
 }
 
-void D2WINTEXTBOX_ComputeLineSpacingForLanguage(int32_t nFontIndex) {
+static void D2WINTEXTBOX_ComputeLineSpacingForLanguage(int32_t nFontIndex) {
     int32_t nPrevFont;
     uint32_t nLangCode = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
     if (nLangCode == 7) {
@@ -660,7 +660,7 @@ uint32_t __fastcall D2WINTEXTBOX_SetLineColor(::D2WinTextBox * pnParam, int32_t 
     }
 }
 
-int32_t D2WINTEXTBOX_GetVisibleLinesFromScroll(::D2WinTextBox * pnParam) {
+static int32_t D2WINTEXTBOX_GetVisibleLinesFromScroll(::D2WinTextBox * pnParam) {
     int pCurLineNode;
     if (!pnParam) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x393);
@@ -681,7 +681,7 @@ int32_t D2WINTEXTBOX_GetVisibleLinesFromScroll(::D2WinTextBox * pnParam) {
     }
 }
 
-int32_t __stdcall D2WINTEXTBOX_TruncateStringToFitWidth(int32_t nParam, uint16_t * wszText) {
+static int32_t __stdcall D2WINTEXTBOX_TruncateStringToFitWidth(int32_t nParam, uint16_t * wszText) {
     int nSize;
     int nCharsKept = 0;
     int32_t nStrLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszText);

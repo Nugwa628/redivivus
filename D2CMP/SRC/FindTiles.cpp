@@ -90,7 +90,7 @@ void __fastcall FINDTILE_FreeHashTable(D2TileLibraryHashStrc * pHashTable) {
 
 // Adds pTileData to the hash node's tile-ref chain unless it is already there: walks pHashNode->pRef by pNext, otherwise allocates an 8-byte D2TileLibraryHashRefStrc (FindTiles.cpp line 0x6e, halts on line 0x6f if the allocation fails) and links it in front of the old head.
 // Provenance: 1.14d asm 0060cea0..0060cef5.
-void FINDTILE_AddTileToChain(D2TileLibraryHashNodeStrc * pHashNode, D2TileLibraryEntryStrc * pTileData) {
+static void FINDTILE_AddTileToChain(D2TileLibraryHashNodeStrc * pHashNode, D2TileLibraryEntryStrc * pTileData) {
     D2TileLibraryHashRefStrc* pDVar1;
     for (pDVar1 = pHashNode->pRef; pDVar1; pDVar1 = pDVar1->pNext) {
       if (pDVar1->pTile == pTileData) {
@@ -99,21 +99,21 @@ void FINDTILE_AddTileToChain(D2TileLibraryHashNodeStrc * pHashNode, D2TileLibrar
     }
 
     D2TileLibraryHashRefStrc* pNewEntry = D2_NEW_AT(D2TileLibraryHashRefStrc, ".\\SRC\\FindTiles.cpp", 0x6e);
-    if (!pNewEntry) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6f);
-      exit(-1);
+    if (pNewEntry) {
+      pNewEntry->pNext = 0;
+      pNewEntry->pTile = pTileData;
+      pNewEntry->pNext = pHashNode->pRef;
+      pHashNode->pRef = pNewEntry;
+      return;
     }
 
-    pNewEntry->pNext = 0;
-    pNewEntry->pTile = pTileData;
-    pNewEntry->pNext = pHashNode->pRef;
-    pHashNode->pRef = pNewEntry;
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6f);
+    exit(-1);
 }
 
 // Allocates a 0x14-byte D2TileLibraryHashNodeStrc for pTileData's (nIndex, nSubIndex, nOrientation) key, links it in front of the bucket head *ppHashSlot, and gives it a one-entry tile-ref chain holding pTileData. Halts on line 0x83 or 0x8f if an allocation fails.
 // Provenance: 1.14d asm 0060cf00..0060cf90 (FindTiles.cpp lines 0x82..0x8f).
-void FINDTILE_AllocHashEntry(D2TileLibraryEntryStrc * pTileData, D2TileLibraryHashNodeStrc * * ppHashSlot) {
+static void FINDTILE_AllocHashEntry(D2TileLibraryEntryStrc * pTileData, D2TileLibraryHashNodeStrc * * ppHashSlot) {
     D2TileLibraryHashNodeStrc* pHashEntry = D2_NEW_AT(D2TileLibraryHashNodeStrc, ".\\SRC\\FindTiles.cpp", 0x82);
     if (!pHashEntry) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x83);

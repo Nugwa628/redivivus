@@ -391,7 +391,7 @@ void __fastcall NET_CLIENT_SendPacketToServer(void * pUnused, uint16_t nPacketSi
     ::D2Net::Game::Server::NET_SendPacketToClient(pPacket, nPacketSize);
 }
 
-int32_t NET_SendPacketToD2GSOnline(char * pBytes, size_t * nSize) {
+static int32_t NET_SendPacketToD2GSOnline(char * pBytes, size_t * nSize) {
     int32_t nSendResult = send(CLIENT_SocketToServer, pBytes, (int)nSize, 0);
     if (nSendResult != -1) {
       return nSendResult;

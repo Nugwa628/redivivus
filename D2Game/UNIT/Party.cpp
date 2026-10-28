@@ -150,7 +150,7 @@ void __fastcall FreePartyControl(::SGAMEDATA * pGame) {
     pGame->pPartyControl = 0;
 }
 
-uint16_t PARTY_UpdateNextPartyId(::SGAMEDATA * pGame) {
+static uint16_t PARTY_UpdateNextPartyId(::SGAMEDATA * pGame) {
     D2UnitPartyControlSub** ppPrevSub;
     D2UnitPartyControl* pDVar1 = pGame->pPartyControl;
     uint16_t uVar2 = pDVar1->nPartyId;
@@ -211,7 +211,7 @@ int16_t __fastcall AllocPartyControlSub0x4(::SGAMEDATA * pGame) {
 }
 
 // @sourcefile .\UNIT\Party.cpp
-void __stdcall PARTY_FreePartyMembers(D2UnitPartyControlSub * pPartyControlSub, ::SGAMEDATA * pGame) {
+static void __stdcall PARTY_FreePartyMembers(D2UnitPartyControlSub * pPartyControlSub, ::SGAMEDATA * pGame) {
     int32_t nLine;
     D2UnitPartyControlSubSub* pNextSubSub;
     D2UnitPartyControlSubSub* pSub;
@@ -281,7 +281,7 @@ void __fastcall PARTY_DisbandParty(::SGAMEDATA * pGame, int16_t nPartyId) {
     PARTY_FreePartyMembers(pFoundSub, pGame);
 }
 
-D2UnitPartyControlSub * FindPartyControlSub(::SGAMEDATA * pGame, int16_t nPartyId) {
+static D2UnitPartyControlSub * FindPartyControlSub(::SGAMEDATA * pGame, int16_t nPartyId) {
     short int* pnPartyId;
     if (!pGame->pPartyControl) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd2);
@@ -303,7 +303,7 @@ D2UnitPartyControlSub * FindPartyControlSub(::SGAMEDATA * pGame, int16_t nPartyI
     return pSub;
 }
 
-BOOL CheckUnitGUIDInAllPartyControlSubs(int32_t nUnitGUID, D2UnitPartyControlSub * ppPartyControlSub) {
+static BOOL CheckUnitGUIDInAllPartyControlSubs(int32_t nUnitGUID, D2UnitPartyControlSub * ppPartyControlSub) {
     if (!ppPartyControlSub) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe5);
       exit(-1);
@@ -505,7 +505,7 @@ void __fastcall FindUnitWithFilter(::SGAMEDATA * pGame, D2UnitStrc * pUnit, pfnP
     }
 }
 
-void __stdcall GoldCalculations(D2UnitStrc * pUnit, int * pnParam1, int * pnParam2, int32_t nParam) {
+static void __stdcall GoldCalculations(D2UnitStrc * pUnit, int * pnParam1, int * pnParam2, int32_t nParam) {
     uint32_t nGoldLimit = D2Common::Units::GetInventoryGoldLimit(pUnit);
     int nCurrentGold = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
     *pnParam2 = 0;

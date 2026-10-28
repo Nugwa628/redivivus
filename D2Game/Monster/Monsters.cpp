@@ -210,7 +210,7 @@ int32_t __fastcall CountActiveUMods(uint8_t * pUModList) {
     return 9;
 }
 
-void __stdcall MONSTER_AddEnchantmentToList(uint8_t byEnchantId, D2UnitStrc * pUnit) {
+static void __stdcall MONSTER_AddEnchantmentToList(uint8_t byEnchantId, D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
       return;
     }
@@ -235,7 +235,7 @@ void __stdcall MONSTER_AddEnchantmentToList(uint8_t byEnchantId, D2UnitStrc * pU
     pMonData->MonUModList[nSlot] = byEnchantId;
 }
 
-void __stdcall SetUniqueMonsterType(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall SetUniqueMonsterType(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
       return;
     }
@@ -279,7 +279,7 @@ int32_t __fastcall MONSTER_GetBossNo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
 }
 
 // Checks whether a MonUMod.txt unique modifier entry is eligible to be applied to pUnit. Rejects if disabled or version &gt; 99 in non-expansion mode. Rejects if the monster has any excluded monster type (exclude1/exclude2). Respects the fpick field: 1=boss-only, 2=excludes melee/no-multishot monsters, 3=requires a different boss flag. Returns 1 if eligible, 0 otherwise.
-BOOL __stdcall MONSTER_CanApplyUniqueModifier(D2MonUModTxt * pD2MonUModTxt, int32_t nParam, D2UnitStrc * pUnit) {
+static BOOL __stdcall MONSTER_CanApplyUniqueModifier(D2MonUModTxt * pD2MonUModTxt, int32_t nParam, D2UnitStrc * pUnit) {
     bool _bHasFlag;
     bool bHasFlag;
     int32_t nClassId;
@@ -357,7 +357,7 @@ BOOL __stdcall MONSTER_CanApplyUniqueModifier(D2MonUModTxt * pD2MonUModTxt, int3
 }
 
 // Selects a champion unique-modifier (UMod) index for a monster using weighted random selection. Iterates the MonUMod txt table, filters entries by applicability to this unit and difficulty, accumulates weights into a candidate list (max 256), then rolls via UNIT_GetModuloFromSeed. Returns the chosen UMod index, or 0 if none qualify.
-int32_t MONSTER_SelectChampionMod(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static int32_t MONSTER_SelectChampionMod(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     bool _nExpansion;
     bool _bCanApply;
     bool bCanApply;
@@ -426,7 +426,7 @@ int32_t MONSTER_SelectChampionMod(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
 }
 
 // Randomly selects one unique/champion modifier index from pTxtMonUmod for pUnit. Filters candidates by difficulty-tier cpick weight, champion flag, MONSTER_CanApplyUniqueModifier eligibility, and whether the slot in pD2MonUModTxt is already occupied. Performs a weighted random draw using the unit's seed; returns the selected modifier index (0-based) or 0 on failure.
-int32_t __stdcall MONUMOD_RollRandomModifier(D2UnitStrc * pUnit, uint8_t * pUsedUModFlags, ::SGAMEDATA * pGame) {
+static int32_t __stdcall MONUMOD_RollRandomModifier(D2UnitStrc * pUnit, uint8_t * pUsedUModFlags, ::SGAMEDATA * pGame) {
     bool _nExpansion;
     bool _bCanApply;
     bool bCanApply;
@@ -598,7 +598,7 @@ void __thiscall MONSTER_RollAndAssignUMods(void * pThis, ::SGAMEDATA * pGame, BO
 }
 
 // Copies transferable MonUMod enchantments from pSrcUnit to pDstUnit's MonUModList. If bAppend is false, finds the first empty slot in the destination list; if true, starts at slot 0. Only copies entries where the MonUModTxt xfer flag is set. Silently exits if either unit is not a valid monster with unit data. Used when spawning minions to inherit boss enchantments.
-void __stdcall MONSTER_TransferEnchantments(D2UnitStrc * pDstUnit, BOOL bAppend, D2UnitStrc * pSrcUnit) {
+static void __stdcall MONSTER_TransferEnchantments(D2UnitStrc * pDstUnit, BOOL bAppend, D2UnitStrc * pSrcUnit) {
     uint8_t* pSrcEnchants;
     D2WaypointStrc** nDstOffset;
     uint8_t* pDstSlot;
@@ -647,7 +647,7 @@ void __stdcall MONSTER_TransferEnchantments(D2UnitStrc * pDstUnit, BOOL bAppend,
 }
 
 // Server-side core monster-spawn helper. Spawns a monster of nClassId in pRoom for pGame at (nX,nY); if both coords are 0 it first calls SPAWN_FindRandomPositionForMonster to pick a spot. If pCoordList is given, spawns using the coord-list overload; otherwise spawns at the point. nGUID==-1 means a fresh GUID (tries flags 0x40 in pBestRoom then pRoom); a specific GUID retries (flags 0x62) across the best room, the room, a re-rolled random position, and finally a spiral free-coord search before giving up. On success: assigns the unique-monster type, sets a monster-data type flag (bit 0) when the unit is a token-1 monster, runs the golden-bird quest drop check, and assigns minion ownership. Returns the spawned D2UnitStrc* or NULL on failure. Uses custom register args (nClassId@EBX, pGame@EDI, rest on stack).
-D2UnitStrc * __stdcall SERVER_SpawnMonsterInternal(int32_t nClassId, ::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2RoomCoordListStrc * pCoordList, int32_t nX, int32_t nY, int32_t nGUID, BOOL bSetOrNotUnknown) {
+static D2UnitStrc * __stdcall SERVER_SpawnMonsterInternal(int32_t nClassId, ::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2RoomCoordListStrc * pCoordList, int32_t nX, int32_t nY, int32_t nGUID, BOOL bSetOrNotUnknown) {
     BOOL bFoundPos;
     D2UnitStrc* pSpawnedUnitCoord;
     D2UnitStrc* pSpawnedUnit3;
@@ -712,7 +712,7 @@ D2UnitStrc * __stdcall SERVER_SpawnMonsterInternal(int32_t nClassId, ::SGAMEDATA
     return pSpawnedUnitCoord;
 }
 
-int32_t MONSTER_GetMinion1MonstatId(D2UnitDataMonsterStrc * pMonData) {
+static int32_t MONSTER_GetMinion1MonstatId(D2UnitDataMonsterStrc * pMonData) {
     if (!pMonData) {
       return -1;
     }
@@ -732,7 +732,7 @@ int32_t MONSTER_GetMinion1MonstatId(D2UnitDataMonsterStrc * pMonData) {
 }
 
 // Spawns a random number of minions (in range [nMinionCountMin, nMinionCountMax]) for a boss monster. Picks the minion class from MONSTER_GetMinion1MonstatId. For each minion: calls SpawnMonster (at a coord or near the boss), transfers enchantments via MONSTER_TransferEnchantments, sets the boss as owner via AssignMinionOwner/AddMinionToList, targets the boss, and marks the minion with MONTYPE_MINION. Skips spawning if the boss already has its minion list populated.
-void __stdcall MONSTER_SpawnMinionsForBoss(D2RoomCoordListStrc * pCoordList, int32_t nMinionCountMin, int32_t nMinionCountMax, D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void __stdcall MONSTER_SpawnMinionsForBoss(D2RoomCoordListStrc * pCoordList, int32_t nMinionCountMin, int32_t nMinionCountMax, D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     int32_t nUnitGUID;
     int32_t bAddToList;
     BOOL bSetOwner;
@@ -783,7 +783,7 @@ void __fastcall UMOD_DispatchInitFunction(D2UnitStrc * pUnit, int32_t nParam, BO
 }
 
 // Applies all active MonUMod enchantment init functions to a monster unit. First, if nParam2 is nonzero, spawns minions via MONSTER_SpawnMinionsForBoss. Then iterates the global gnEnchantmentEffectOffset table, calling each non-null aUmodInitTable entry and dispatching to minions via UMOD_DispatchInitFunction. Finally, iterates the unit's own MonUModList (up to 9 slots) repeating the same init + dispatch for each assigned enchantment ID.
-void __stdcall UMOD_ApplyEnchantmentsToMonster(int32_t nParam1, D2RoomCoordListStrc * pCoordList, ::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3) {
+static void __stdcall UMOD_ApplyEnchantmentsToMonster(int32_t nParam1, D2RoomCoordListStrc * pCoordList, ::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3) {
     // Static local variables (originally global data)
     static int gnEnchantmentEffectOffset_Lightning[4] = { 0x1, 0x2, 0x3, 0x4 }; D2_STATIC_GUARD(gnEnchantmentEffectOffset_Lightning, "D2Game::Monsters::UMOD_ApplyEnchantmentsToMonster::gnEnchantmentEffectOffset_Lightning");
 
@@ -829,7 +829,7 @@ void __stdcall UMOD_ApplyEnchantmentsToMonster(int32_t nParam1, D2RoomCoordListS
 }
 
 // Computes a unit's elemental min/max damage from its level and writes it into the given stats. nParam points to a game/context struct supplying difficulty (offset 0x6d) and a hardcore/multiplayer flag (0x6a/0x74) used to index the MonLvl.DM damage column. Looks up the level-clamped MonLvl row, reads its base damage, scales min by MonUMod[0x1c].constants/100 and max by MonUMod[0x1f].constants/100, then stores them into stats eUnitStat (min) and eStat1 (max) — via STATLIST_SetUnitStat for non-monsters or D2AddStatToStatsListEx (base stats list) for monsters. If eStat2 is valid, adds the unit's current eStat2 value +0x28 the same way. Skips missiles whose missiles.txt flags2 bit 0x20 is set.
-void __stdcall MONSTER_SetElementalDamageFromLevel(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, eD2UnitStat eStat1, eD2UnitStat eStat2, int32_t nParam) {
+static void __stdcall MONSTER_SetElementalDamageFromLevel(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, eD2UnitStat eStat1, eD2UnitStat eStat2, int32_t nParam) {
     int nLvlDamage;
     uint32_t bIsMultiplayer;
     if (pUnit && pUnit->eUnitType == UNIT_MISSILE) {
@@ -2296,7 +2296,7 @@ void __fastcall FUN_005a4230(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t d
 }
 
 // Dispatches an event to all of a unique/champion monster's unique-modifier (MonUMod) handlers. Reads the monster's MonUModList (up to 9 mod slots) and, for each active mod, looks up g_MonsterUModHandlerTable[modId] and calls the handler for the requested event: nParam==5 invokes the per-mod init handler (pfnHandlerInit), otherwise invokes pfnHandlerN indexed by nParam (the event/phase). Passes the mod id and a champion flag (derived from the monster's quest-record byte) to each handler. No-op for non-monster units or units with no mod list. Drives unique-monster modifier behavior (e.g. extra-strong, fire-enchanted) at various lifecycle points.
-void __stdcall MONSTER_DispatchUniqueModifiers(::SGAMEDATA * pGame, D2UnitStrc * dwParam, int32_t nParam, D2UnitStrc * pUnit) {
+static void __stdcall MONSTER_DispatchUniqueModifiers(::SGAMEDATA * pGame, D2UnitStrc * dwParam, int32_t nParam, D2UnitStrc * pUnit) {
     uint32_t nSecurityCookie;
     int nUModSlot = 0;
     if (!pUnit || pUnit->eUnitType != UNIT_MONSTER || !pUnit->pUnitData.pUnitDataPlayer) {

@@ -38,7 +38,7 @@
 namespace D2Common::Drlg::Path {
 
 // DRLGPATH_UpdateUnitRoom - Checks if a unit's current position is still within its room's bounds. If not, finds the correct room via DRLGROOM_FindBetterNearbyRoom and transfers the unit to the new room.
-void __stdcall DRLGPATH_UpdateUnitRoom(D2RoomStrc * pRoom, D2DynamicPathStrc * pDynamicPath) {
+static void __stdcall DRLGPATH_UpdateUnitRoom(D2RoomStrc * pRoom, D2DynamicPathStrc * pDynamicPath) {
     D2RoomStrc* pBetterRoom = pDynamicPath->pRoom;
     uint16_t nPosX = pDynamicPath->Coords.tSubtile.nPosX;
     uint16_t nPosY = pDynamicPath->Coords.tSubtile.nPosY;
@@ -948,7 +948,7 @@ int32_t __stdcall DRLGPATH_GetApproxDistancePacked(uint32_t nPackedCoord1, uint3
 // The index is used to look up direction bytes and path vectors from static tables
 // at 0x6f1648 (3-byte direction entries) and 0x6f1518 (12-byte path vector entries).
 // Takes params via fastcall: ECX=y2, EDX=x1, stack=y1, stack=x2.
-int32_t __stdcall DRLGPATH_GetDirectionIndex(int32_t nY2, int32_t nY1, int32_t nX2, int32_t nX1) {
+static int32_t __stdcall DRLGPATH_GetDirectionIndex(int32_t nY2, int32_t nY1, int32_t nX2, int32_t nX1) {
     uint32_t nDx;
     nDx = nX1 - nY1;
     uint32_t nDy;
@@ -1555,7 +1555,7 @@ BOOL __stdcall DRLGPATH_FindNonBlockedDirectionFromTriplet(uint32_t nPackedPos, 
 
 // Raycasts a straight line from a packed source coord (nParam, hi/lo = x/y) toward a packed destination coord (*pnParam) in fixed-point 16.16, stepping by the normalized velocity vector (pVelocity[0]/[1]) along the major axis. At each cell transition it calls Collision::CheckCollision_BlockPlayer_Type with the path's unit width and collision pattern. Returns 1 if the line is clear; on a blocked cell returns 0 and writes the last free position back into *pnParam. Degenerate inputs trigger ERROR_UnrecoverableInternalError_Halt.
 // Stack-slot reuse: the nParam slot holds the packed current cell (Y << 16 | X) passed to CheckCollision_BlockPlayer_Type.
-BOOL __stdcall DRLGPATH_RaycastCollisionLine(int * pVelocity, uint32_t nParam, uint32_t * pnParam, D2DynamicPathStrc * pPathArg) {
+static BOOL __stdcall DRLGPATH_RaycastCollisionLine(int * pVelocity, uint32_t nParam, uint32_t * pnParam, D2DynamicPathStrc * pPathArg) {
     short int nCurX;
     int32_t nUnitWidth;
     int32_t iVar1;
@@ -2058,16 +2058,16 @@ void __fastcall DRLGPATH_ScaleVelocityVector(int32_t nVelocityScale, POINT * pPo
     } else if (nVelY < 0) {
       nVelY = -nVelY;
     }
-    if (!(nVelY < 0x200000)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x331);
-      exit(-1);
+    if (nVelY < 0x200000) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x331);
+    exit(-1);
 }
 
 // Checks if a ray from source to target position is collision-free. Normalizes the direction vector and delegates to DRLGPATH_RaycastCollisionLine. Used when waypoints are more than 1 tile apart.
-BOOL __stdcall DRLGPATH_CheckRayCollisionToTarget(uint32_t nPackedSrc, uint32_t nPackedDst, D2DynamicPathStrc * pDynamicPath) {
+static BOOL __stdcall DRLGPATH_CheckRayCollisionToTarget(uint32_t nPackedSrc, uint32_t nPackedDst, D2DynamicPathStrc * pDynamicPath) {
     POINT ptVelocity;
     if (!pDynamicPath->dwVelocity) {
       return 0;
@@ -2190,7 +2190,7 @@ uint32_t __fastcall DRLGPATH_IsPositionInBounds(int32_t pThis, uint32_t nPackedP
 }
 
 // Advances a path node's direction by stepping through its direction delta table. Optionally applies a random perturbation from the seed. Used during A* node expansion.
-void DRLGPATH_AdvanceNodeDirection(D2DrlgRoomAStarNodeStrc * pNode, D2DrlgAStarContextStrc * pAStarCtx) {
+static void DRLGPATH_AdvanceNodeDirection(D2DrlgRoomAStarNodeStrc * pNode, D2DrlgAStarContextStrc * pAStarCtx) {
     D2SeedStrc lSeedNext;
     if (pAStarCtx->bRandomizeDirection) {
       D2SeedStrc* pDVar1;
@@ -2242,7 +2242,7 @@ D2DrlgRoomAStarNodeStrc * __stdcall DRLGPATH_AdvancePathNodeChain(D2DrlgAStarCon
 }
 
 // Extracts a path from an A* search result by walking parent pointers from the destination node back to the source. Stores the packed coordinates as waypoints (up to 77). Returns the number of waypoints.
-int32_t DRLGPATH_ExtractPathFromResult(int32_t nPathCtx, int32_t nCurNode) {
+static int32_t DRLGPATH_ExtractPathFromResult(int32_t nPathCtx, int32_t nCurNode) {
     int nDX;
     int nDY;
     uint32_t aWaypointStack[78];
@@ -2496,7 +2496,7 @@ int32_t * DRLGPATH_PopBestNodeFromOpenList(int32_t nOpenListBase) {
 }
 
 // Propagates improved path costs through the A* node graph. When a shorter path is found to a node, updates its g-cost and recursively updates all 8 directional neighbors that could benefit from the shorter path.
-void DRLGPATH_PropagateNodeCosts(uint32_t nNewGCost, D2DrlgPathNodeStrc * pStartNode, int32_t nParam) {
+static void DRLGPATH_PropagateNodeCosts(uint32_t nNewGCost, D2DrlgPathNodeStrc * pStartNode, int32_t nParam) {
     short int nEdgeCost;
     int nChildIdx;
     D2DrlgPathNodeStrc* pNeighborNode;
@@ -2607,7 +2607,7 @@ void * __fastcall DRLGPATH_AllocPathNode(int32_t nPathCtx) {
 }
 
 // Attempts to expand a neighbor node in the A* search. Checks if the node exists in open or closed lists, creates new nodes as needed, and updates costs if a better path is found. Links the node as a child of the parent (up to 8 children).
-BOOL __stdcall DRLGPATH_TryExpandNeighborNode(int32_t nOpenList, uint32_t nPackedNeighbor, uint32_t nPackedTarget, D2DrlgPathNodeStrc * pParentNode) {
+static BOOL __stdcall DRLGPATH_TryExpandNeighborNode(int32_t nOpenList, uint32_t nPackedNeighbor, uint32_t nPackedTarget, D2DrlgPathNodeStrc * pParentNode) {
     short int nEdgeCost;
     D2DrlgPathNodeStrc* pNewNode;
     int32_t nHCost;
@@ -3025,7 +3025,7 @@ uint32_t __stdcall DRLGPATH_GetDirectionLookupFromPacked(uint32_t nSrcPacked, ui
 }
 
 // Attempts to step in a preferred direction, falling back to alternate directions on collision. Uses direction lookup tables at 0x6F1D98 to compute the target position. Tries up to 4 directions before marking the step as failed. Used by the dual-scan pathfinder (PathTypeFunc_15).
-BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg, int * pScannerState) {
+static BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg, int * pScannerState) {
     // Static local variables (originally global data)
     static int gnPathDirectionTripletXOffsets[32] = {
     0x0,
@@ -3071,12 +3071,7 @@ BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg, int * 
     int32_t nType = pPathTypeArg->nUnitWidth;
     D2RoomStrc* pRoom = pPathTypeArg->pRoom;
     int32_t nFallbackDirIdx = (int32_t)pPathTypeArg->pDynamicPath->pOwner;
-    if (!(nFallbackDirIdx && (!*(int*)nFallbackDirIdx || nFallbackDirIdx && *(int*)nFallbackDirIdx == 1))) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x122);
-      exit(-1);
-    }
-
-    {
+    if (nFallbackDirIdx && (!*(int*)nFallbackDirIdx || nFallbackDirIdx && *(int*)nFallbackDirIdx == 1)) {
       int iVar1;
       pScannerState[4] = 0;
       *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[*pScannerState * 2] + (short int)pScannerState[2];
@@ -3116,10 +3111,13 @@ BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg, int * 
       iVar3 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
       return (uint32_t)!iVar3;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x122);
+    exit(-1);
 }
 
 // Inserts a set of waypoints from a path node into the main waypoint buffer at a given index. Uses memmove to shift existing data and memcpy to copy the new points. Updates the insertion index and total count.
-void __stdcall DRLGPATH_InsertWaypointsIntoBuffer(int32_t pScanNode, int32_t nWaypointBuf, int32_t nInsertIdx, int * pnParam1, int * pnParam2) {
+static void __stdcall DRLGPATH_InsertWaypointsIntoBuffer(int32_t pScanNode, int32_t nWaypointBuf, int32_t nInsertIdx, int * pnParam1, int * pnParam2) {
     int nInsertCount = *pnParam1 - nInsertIdx - 1 + *(int*)(pScanNode + 4);
     int nEndIdx = nInsertCount + nInsertIdx;
     memmove((void*)(nWaypointBuf + 4 + nEndIdx * 4), (void*)(nWaypointBuf + 4 + nInsertIdx * 4), (*pnParam2 - nInsertIdx) * 4 - 4);

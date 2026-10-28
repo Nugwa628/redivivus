@@ -32,13 +32,11 @@ void __fastcall STRING_ConvertCharToWchar(uint16_t * pwszBuffer, char * pszBuffe
 uint16_t * __fastcall STRING_CopyCharToWCharWithSetMaxSize(uint16_t * pDestination, char * szSource, int32_t nSize);
 char * __fastcall UNICODE_WideToMultiByte(char * pszDst, uint16_t * pwszSrc, int32_t nSize);
 bool __fastcall UNICODE_CheckTrailingPunctuation(char * szSourceFile, uint16_t * pwChar);
-bool UNICODE_CheckLeadingPunctuation(char * pszTable, uint16_t * wszText);
 void __fastcall UNICODE_FormatPossessiveName(uint16_t * wszText1, uint16_t * wszText2, uint16_t * wszSuffix, int32_t nMaxChars, int32_t nLang);
 void UNICODE_FreeBuffer(void * pParam);
 void UNICODE_AllocBuffer(uint32_t nSize);
 void __thiscall UNICODE_ReadByteRange(void * pThis, uint8_t * pByteRange);
 uint32_t __thiscall UNICODE_CheckByteInRange(void * pThis, uint8_t byValue);
-int32_t UNICODE_IsControlChar(uint8_t byChar);
 void __stdcall UNICODE_FreeKamapTables();
 // @sourcefile .\Unicode\UNISYS.CPP
 void __fastcall UNICODE_LoadKamapFile(struct D2PoolManagerStrc * pMemory, char * szFilename);
@@ -51,5 +49,6 @@ uint16_t * __fastcall UNICODE_ConvertMultiByteToWide(uint16_t * wszText, uint8_t
 uint8_t * __fastcall UNICODE_ConvertWideToMultiByte(uint8_t * pParam, uint16_t * nParam, int32_t nSize);
 int32_t __fastcall UNICODE_GetMultiByteLength(uint16_t * wszText, int32_t nParam);
 int32_t __fastcall UNICODE_GetWideCharCount(char * szText, int32_t szSourceFile);
+// 2 internal functions (defined in .cpp)
 
 } // namespace D2Lang::Unicode::UNISYS

@@ -42,7 +42,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2TextLineStrc) == 0x8, "D2_NEW_AT(
 namespace D2Win::Src::D2WinFont {
 
 // Constructs full font file path: DATA\LOCAL\Font\{language}\{fontname}. Special case for Korean chat font (index 13). Uses global language code and font name table.
-void __stdcall D2WINFONT_BuildFontPath(char * szPathOut, int32_t nFontIndex, int32_t nBufferSize) {
+static void __stdcall D2WINFONT_BuildFontPath(char * szPathOut, int32_t nFontIndex, int32_t nBufferSize) {
     char szBasePath[260];
     char cCurChar;
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szBasePath, "%s\\%s\\", "DATA\\LOCAL", "Font");
@@ -64,7 +64,7 @@ void __stdcall D2WINFONT_BuildFontPath(char * szPathOut, int32_t nFontIndex, int
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szPathOut, "%s%s%s", szBasePath, _FONT::sLanguageCode, _FONT::aFontNames[nFontIndex]);
 }
 
-void __stdcall GetFontTablePath(int32_t nBufSize, int32_t nFontIndex, LPSTR szFontTablePath) {
+static void __stdcall GetFontTablePath(int32_t nBufSize, int32_t nFontIndex, LPSTR szFontTablePath) {
     char szBasePath[260];
     char cCurChar;
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szBasePath, "%s\\%s\\", "DATA\\LOCAL", "Font");
@@ -87,7 +87,7 @@ void __stdcall GetFontTablePath(int32_t nBufSize, int32_t nFontIndex, LPSTR szFo
 }
 
 // @sourcefile .\Src\D2WinFont.cpp
-void InitFontCache(int32_t nFontIndex) {
+static void InitFontCache(int32_t nFontIndex) {
     char szFontTablePath[80];
     GetFontTablePath(0x4f, nFontIndex, szFontTablePath);
     if (gaFontCache[nFontIndex].pFontTable) {
@@ -224,7 +224,7 @@ int32_t __fastcall DRAW_text0(uint16_t * wszText) {
     return nResult;
 }
 
-int32_t TEXT_CalculateTextWidth(uint16_t * szBuffer) {
+static int32_t TEXT_CalculateTextWidth(uint16_t * szBuffer) {
     uint32_t nColorCmpResult;
     D2FontGlyphStrc* pGlyphEntry;
     int32_t nStrLen;
@@ -282,7 +282,7 @@ int32_t TEXT_CalculateTextWidth(uint16_t * szBuffer) {
     return nStrLen;
 }
 
-int32_t D2WINFONT_GetFirstLinePixelWidth(uint16_t * pwszString) {
+static int32_t D2WINFONT_GetFirstLinePixelWidth(uint16_t * pwszString) {
     uint32_t nColorCmpResult;
     D2FontGlyphStrc* pGlyphEntry;
     int32_t nLineWidth;
@@ -325,7 +325,7 @@ int32_t D2WINFONT_GetFirstLinePixelWidth(uint16_t * pwszString) {
     return iVar1;
 }
 
-int32_t TEXT_CalculateTextHeight(uint16_t * szBuffer) {
+static int32_t TEXT_CalculateTextHeight(uint16_t * szBuffer) {
     if (!szBuffer) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x25e);
       exit(-1);
@@ -359,7 +359,7 @@ void __stdcall D2WINFONT_DrawSolidRectFromBottomLeft(int32_t nX, DRAWMODE eDrawM
 }
 
 // Core wide string renderer. Processes color codes (0xFF prefix), newlines (0x0A), glyph lookup via gpfnFontGetCharWidth callback, horizontal centering if enabled. Draws each character glyph from font DC6.
-void __stdcall D2WINFONT_DrawWideString(uint16_t * wszText, int32_t nX, int32_t nY, int32_t nWidth, GLOBALPALLETE eGlobalPalette, int32_t bCenterHorizontally) {
+static void __stdcall D2WINFONT_DrawWideString(uint16_t * wszText, int32_t nX, int32_t nY, int32_t nWidth, GLOBALPALLETE eGlobalPalette, int32_t bCenterHorizontally) {
     int32_t nLineWidth;
     D2FontGlyphStrc* nLinePixelWidth2;
     int nStrLen;
@@ -432,7 +432,7 @@ void __stdcall D2WINFONT_DrawWideString(uint16_t * wszText, int32_t nX, int32_t 
 }
 
 // Wide string renderer with custom draw mode (transparency, blending). Processes color codes, newlines, horizontal centering, glyph rendering. Returns pointer to last processed glyph data.
-void * __stdcall D2WINFONT_DrawWideStringWithDrawMode(int32_t nX, uint16_t * wszText, GLOBALPALLETE eGlobalPalette, int32_t nY, int32_t nWidth, int32_t bCenterHorizontally, DRAWMODE eDrawMode) {
+static void * __stdcall D2WINFONT_DrawWideStringWithDrawMode(int32_t nX, uint16_t * wszText, GLOBALPALLETE eGlobalPalette, int32_t nY, int32_t nWidth, int32_t bCenterHorizontally, DRAWMODE eDrawMode) {
     int32_t nLineWidth;
     uint32_t nFontHeight;
     D2FontGlyphStrc* pNextChar;
@@ -679,7 +679,7 @@ void * __fastcall D2WINFONT_DrawWideStringRightToLeft(uint16_t * wszText, int32_
 }
 
 // Simplified wide string renderer without color code processing. Skips color code sequences (0xFF + 3 chars), handles newlines, draws glyphs. Uses DRAW_SOLID mode with no palette shift.
-void D2WINFONT_DrawWideStringSimple(uint16_t * wszText, int32_t nX, int32_t nY) {
+static void D2WINFONT_DrawWideStringSimple(uint16_t * wszText, int32_t nX, int32_t nY) {
     uint16_t wCharCode;
     D2FontGlyphStrc* pGlyphEntry;
     D2GfxDataStrc sGfxData;

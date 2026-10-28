@@ -60,7 +60,7 @@ namespace D2Common::DATATBLS::MonsterTbls {
 static unsigned int gDelim_A_Act = 0x4341; D2_STATIC_GUARD(gDelim_A_Act, "D2Common::DATATBLS::MonsterTbls::gDelim_A_Act");
 static char gDelim_n_NpcClass[4] = { 'n', 'p', 'c', '\x00' }; D2_STATIC_GUARD(gDelim_n_NpcClass, "D2Common::DATATBLS::MonsterTbls::gDelim_n_NpcClass");
 
-void FilterNameString(char * szText1, char * szText2) {
+static void FilterNameString(char * szText1, char * szText2) {
     char cChar;
     if (*szText1 == '\0') {
       cChar = ' ';
@@ -1958,7 +1958,7 @@ void __stdcall TC_GenerateAutoItemTypeTreasureClasses() {
     Fog::Debug::GuardStack();
 }
 
-int32_t TC_ExtractNextIntModifier(char cParam, uint32_t * * pnParam) {
+static int32_t TC_ExtractNextIntModifier(char cParam, uint32_t * * pnParam) {
     uint32_t* pCurrent = *pnParam;
     char* pSeparator = CRT_Strchr((char*)pCurrent, cParam);
     *pnParam = (uint32_t*)pSeparator;
@@ -1972,7 +1972,7 @@ int32_t TC_ExtractNextIntModifier(char cParam, uint32_t * * pnParam) {
 }
 
 // Parses one TreasureClasses.txt drop entry (item code + probability) into a parsed-TC node and appends it to pParsedTC. Strips quotes, splits the field on ',', and resolves the code: a <5-char item code becomes an item-class entry (tagging TC_Expansion by items.txt version); otherwise it tries the monster-TC, unique-items, then set-items link tables (tagging TC_Monster/TC_Unique/TC_Set and the link node id). Calls AddOneParsedTCEntry then AdjustRarities with the probability and expansion flag. After the base entry it parses optional trailing modifiers ("mul","cu","cs","cr","cm","ce","cg","ma","mg") via _atol / TC_ExtractNextIntModifier, storing them into the entry's nUniqueMod/nSetMod/nRareMod/nMagicMod/etc fields. Returns 1 on success, 0 if prob<1 or no code resolves. Custom convention: szItemCode in EAX, pParsedTC/nProb on stack.
-void __stdcall TC_ParseTreasureClassEntry(D2ParsedTreasureClassStrc * pParsedTC, int32_t nProb, char * szItemCode) {
+static void __stdcall TC_ParseTreasureClassEntry(D2ParsedTreasureClassStrc * pParsedTC, int32_t nProb, char * szItemCode) {
     int16_t nModValue;
     D2ParsedTreasureClassEntriesStrc* pTCEntry;
     uint32_t bIsExpansionItem;
@@ -5718,12 +5718,12 @@ void __stdcall TXT_AllocItemDropData(D2PoolManagerStrc * pMemory) {
     TC_GenerateAutoItemTypeTreasureClasses();
     TXT_AllocTxt_TreasureClassEx(pMemory);
     TXT_AllocParsedTreasureClassDiffActChestABC();
-    if (!(0xfffe >= sgtDataTable.nParsedTreasureClassSize)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x616);
-      exit(-1);
+    if (0xfffe >= sgtDataTable.nParsedTreasureClassSize) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x616);
+    exit(-1);
 }
 
 // Allocates and compiles all monster-related TXT data tables into the given memory pool. Loads uniquetitle/uniqueprefix/uniquesuffix/uniqueappellation (each keyed on the 'Name' column via DATATBLS_LookupStringId), then delegates to per-table alloc helpers for monlvl, monstats/monstats2, monprop, monsounds, monseq, monumod, superuniques, monpreset, hireling, npc, and MonEquip. Called once at startup during data-table initialization.

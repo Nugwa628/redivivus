@@ -36,11 +36,6 @@ uint32_t __fastcall SEVT_NextPowerOf2(int nValue);
 // @sourcefile .\SOURCE\SEVT.CPP
 // @blizzard CopyIdHashTable (SEVT.CPP)
 void __stdcall SEVT_CopyIdHashTable(uint32_t * * pDstTable, int * pSrcTable);
-// @sourcefile .\SOURCE\SEVT.CPP
-// @blizzard DeleteIdHashTable (SEVT.CPP)
-void SEVT_DeleteIdHashTable(void * * pTable);
-// @blizzard FindTypeHashEntry (SEVT.CPP)
-uint32_t * SEVT_FindTypeHashEntry(uint32_t dwUnused, uint32_t nSubId, uint32_t nEventId);
 // Destroys all registered event handlers and cleans up the global event hash table. Iterates through all hash buckets, frees handler tables for each event, deallocates event structures, and resets global state. Thread-safe via critical section.
 // @oracle SEvtDestroy
 // @oracle-source Storm export name list, and the PEF traceback-named body .SEvtDestroy @10018210 in Mac PPC 1.10b Storm
@@ -93,5 +88,6 @@ BOOL __stdcall SEvtDispatch(uint32_t dwEventId, uint32_t dwSubId, uint32_t dwKey
 void StaticFini_CriticalSection_0077930c();
 // Runs at exit: removes every element from the SEvt break command list, then unlinks the list head itself.
 void StaticFini_gSevtBreakCmdList();
+// 2 internal functions (defined in .cpp)
 
 } // namespace Storm::Source::SEVT

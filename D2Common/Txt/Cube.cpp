@@ -49,7 +49,7 @@ static char gaCubeRecipeItemTypeFlags_9[3] = { '=', ',', '\x00' }; D2_STATIC_GUA
 static char gaCubeRecipeItemTypeFlags_7[2] = { ',', '\x00' }; D2_STATIC_GUARD(gaCubeRecipeItemTypeFlags_7, "D2Common::Txt::Cube::gaCubeRecipeItemTypeFlags_7");
 
 // Pads item code strings with spaces to 4 characters. Copies input string to output buffer and fills remaining characters with spaces (0x20). Used when parsing cube recipe item codes from CubMain.txt to normalize them for comparison.
-void CUBE_PadItemCodeString(char * szText1, char * szText2) {
+static void CUBE_PadItemCodeString(char * szText1, char * szText2) {
     char cLast;
     if (*szText1 == '\0') {
       cLast = ' ';
@@ -84,7 +84,7 @@ void CUBE_PadItemCodeString(char * szText1, char * szText2) {
 }
 
 // Tokenizes a comma-delimited string and parses the first token as an integer. Updates the input pointer to point past the parsed token. Used for parsing multi-value cube output fields.
-int32_t CUBE_TokenizeAndParseInt(char * szText, char * * ppszText) {
+static int32_t CUBE_TokenizeAndParseInt(char * szText, char * * ppszText) {
     long int nParsedValue;
     char* _Str = *ppszText;
     size_t nSpanLen = strcspn(_Str, szText);
@@ -102,7 +102,7 @@ int32_t CUBE_TokenizeAndParseInt(char * szText, char * * ppszText) {
 }
 
 // Parses one cube-recipe input-item token from cubemain.txt into a D2CubeInputStrc. Strips quotes, splits the leading code on the type-flag delimiters, and resolves it in order: "any" (wildcard, classid 0xffff), an item-type via GetClassIdFromName, an item code via ConvertItemCodeToClassIdAndGetItemsTxtLine, else a unique/set item by link-table lookup (sets quality 7/5 and nUniqueItemId). Then iterates the remaining comma/flag-separated tokens setting nQuality (low/nor/hiq/mag/set/rar/uni/crf/tmp = 1..9), quantity ("qty"=N), and the wFlagsAndUpgrade bitmask (nos/sock/noe/eth/upg/bas/exc/eli/nru). Returns 1 on success, 0 if the code cannot be resolved. Custom convention: pszField in EAX, pInput on stack.
-void __stdcall CUBE_ParseInputItem(char * pszField, D2CubeInputStrc * pInput) {
+static void __stdcall CUBE_ParseInputItem(char * pszField, D2CubeInputStrc * pInput) {
     // Static local variables (originally global data)
     static int gaCubeRecipeItemTypeFlags_8 = 0x796e61; D2_STATIC_GUARD(gaCubeRecipeItemTypeFlags_8, "D2Common::Txt::Cube::CUBE_ParseInputItem::gaCubeRecipeItemTypeFlags_8");
 
@@ -363,7 +363,7 @@ void __stdcall CUBE_ParseInputItem(char * pszField, D2CubeInputStrc * pInput) {
 
 // CUBE_ParseOutputItem
 // Parses cubeserver output token into D2CubeOutputStrc (portals/useitem/usetype/item code, qty, pre/suf, quality, flags: eth/sock/mod/uns/rem/reg/exc/eli/rep/rch).
-void __stdcall CUBE_ParseOutputItem(D2CubeOutputStrc * pOutput, char * pszField) {
+static void __stdcall CUBE_ParseOutputItem(D2CubeOutputStrc * pOutput, char * pszField) {
     D2CubeOutputStrc* pDVar1;
     int32_t nItemTypeClassId;
     int32_t nLinkIndex;

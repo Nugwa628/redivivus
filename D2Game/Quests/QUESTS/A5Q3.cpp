@@ -247,7 +247,7 @@ bool __fastcall Q33_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // Q33_SpawnAnyaAndPortal (PrisonOfIce): when the frozen-Anya OBJECT exists, spawns the rescued-Anya MONSTER (0x200)
 // at its coords, hands over the preset/DRLG map AI, then creates a town portal OBJECT (classId 0xbd) in a nearby room.
 // Records GUIDs in pA5Q3. Re-runs Q33_SequenceFilter afterward. Drives the post-rescue Anya escort/portal sequence.
-void __stdcall Q33_SpawnAnyaAndPortal(D2QuestDataStrc * pQuestData, D2QuestDataA5Q3Strc * pA5Q3) {
+static void __stdcall Q33_SpawnAnyaAndPortal(D2QuestDataStrc * pQuestData, D2QuestDataA5Q3Strc * pA5Q3) {
     int nPosX;
     int nPosY;
     POINT sAnyaCoords;
@@ -314,7 +314,7 @@ void __stdcall Q33_SpawnAnyaAndPortal(D2QuestDataStrc * pQuestData, D2QuestDataA
 // Q33_KillMonsterHelper (PrisonOfIce): generic helper to instantly kill a monster — clears AI sub, zeroes path,
 // fires AITHINK timer, sets hitpoints=0, applies Dead skill + lifecycle transition, relinks to update list.
 // Used to despawn quest monsters (frozen/rescued Anya placeholders).
-void __fastcall A5Q3_KillMonsterInstantly(D2UnitStrc * pUnitStrc, ::SGAMEDATA * * pGameStrc) {
+static void __fastcall A5Q3_KillMonsterInstantly(D2UnitStrc * pUnitStrc, ::SGAMEDATA * * pGameStrc) {
     D2MonsterAiStrc* pMonsterAi;
     D2MonsterKillStrc sKillInfo;
     if (!pUnitStrc || pUnitStrc->eUnitType != UNIT_MONSTER || !pUnitStrc->pUnitData.pUnitDataMonster) {
@@ -342,7 +342,7 @@ void __fastcall A5Q3_KillMonsterInstantly(D2UnitStrc * pUnitStrc, ::SGAMEDATA * 
 // Q33_CleanupQuestMonsters (PrisonOfIce): tears down the spawned Anya quest units. For the rescued-Anya monster (0x200)
 // and the second Anya unit (0x202): finds it (or removes the inactive record), clears AI sub, applies Dead + lifecycle
 // transition, frees DRLG/collision and removes from room. Clears the spawned/active flags in pA5Q3.
-void Q33_CleanupQuestMonsters(D2QuestDataStrc * pQuestData) {
+static void Q33_CleanupQuestMonsters(D2QuestDataStrc * pQuestData) {
     D2UnitStrc* pAnyaUnit;
     BOOL bHasAiSubsystem;
     D2RoomStrc* pUnitRoom;
@@ -1252,7 +1252,7 @@ void __fastcall Q33_CheckPlayerHasScrollOfResistance(::SGAMEDATA * pGame, D2Unit
 
 // Q33_CheckPartyHasScrollOfResistance (PrisonOfIce): returns 1 if this player holds the "ice " scroll, else scans the
 // whole party via Q33_CheckPlayerHasScrollOfResistance and returns whether anyone holds it (field_0xE2).
-uint32_t Q33_CheckPartyHasScrollOfResistance(int32_t nParam, D2UnitStrc * pUnit) {
+static uint32_t Q33_CheckPartyHasScrollOfResistance(int32_t nParam, D2UnitStrc * pUnit) {
     D2UnitStrc* pScrollItem = ITEMS::Items::Drop::HasQuestItem(*(::SGAMEDATA**)(nParam + 4), pUnit, 0x20656369);
     if (pScrollItem) {
       return 1;

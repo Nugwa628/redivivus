@@ -1030,7 +1030,7 @@ BOOL __fastcall SKILLMONST_SrvStFn53_MonInferno(::SGAMEDATA * pGame, D2UnitStrc 
     return 1;
 }
 
-void __stdcall SKILLASSN_GetTrapHealthBonus(uint32_t dwUnused, eD2Skills eSkill, D2UnitStrc * pUnit, int32_t nSkillLvl, D2UnitStrc * pMissileUnit) {
+static void __stdcall SKILLASSN_GetTrapHealthBonus(uint32_t dwUnused, eD2Skills eSkill, D2UnitStrc * pUnit, int32_t nSkillLvl, D2UnitStrc * pMissileUnit) {
     if ((int)eSkill < 0 || sgptDataTable->nTxtSkillsCount <= (int)eSkill || !(sgptDataTable->pTxtSkills + eSkill)) {
       return;
     }
@@ -1064,7 +1064,7 @@ void __stdcall SKILLASSN_GetTrapHealthBonus(uint32_t dwUnused, eD2Skills eSkill,
     D2Common::Units::Missile::SetCurrentFrame(pMissileUnit, nLifetime);
 }
 
-void SKILLMONST_TriggerModeChange(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static void SKILLMONST_TriggerModeChange(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     uint32_t nEventDelay = 0xb;
     if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
       int nMonStatsExIdx;

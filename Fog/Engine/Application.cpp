@@ -59,6 +59,9 @@ typedef HRESULT (__stdcall *pfnSHGetKnownFolderPath)(GUID * rfid, DWORD dwFlags,
 
 namespace Fog::Engine::Application {
 
+static uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo);
+static uint32_t DEBUG_ParseRSDSDebugInfo(void * pDebugRecord, int32_t pModuleInfo);
+
 bool DEBUG_CaptureThreadContext(uint32_t dwThreadId, LPCONTEXT pContext) {
     pContext->ContextFlags = 0x1003f;
     DWORD dwCurrentTid = GetCurrentThreadId();
@@ -85,7 +88,7 @@ bool DEBUG_CaptureThreadContext(uint32_t dwThreadId, LPCONTEXT pContext) {
     return false;
 }
 
-uint32_t DEBUG_GetPEImageType(short * nMagic) {
+static uint32_t DEBUG_GetPEImageType(short * nMagic) {
     if (*nMagic != 0x10b) {
       return *nMagic != 0x20b ? 0 : 0x2;
     }
@@ -93,7 +96,7 @@ uint32_t DEBUG_GetPEImageType(short * nMagic) {
     return 1;
 }
 
-uint32_t DEBUG_ParsePEDebugDirectory(short * * pOutput, uint32_t * pnSize, int * pnRVA, short * pOptHeader) {
+static uint32_t DEBUG_ParsePEDebugDirectory(short * * pOutput, uint32_t * pnSize, int * pnRVA, short * pOptHeader) {
     uint32_t nDirSize;
     int nDirRVA;
     if (*pOptHeader == 0x10b) {
@@ -165,7 +168,7 @@ uint32_t __fastcall DEBUG_ParseDebugInfoFromMemory(uint32_t nDataSize, uint32_t 
     return nParseResult;
 }
 
-uint32_t __stdcall DEBUG_ParseDebugDataDirectory(uint32_t nCount, int32_t nBaseAddress, int32_t pDirEntries, int32_t pOutput) {
+static uint32_t __stdcall DEBUG_ParseDebugDataDirectory(uint32_t nCount, int32_t nBaseAddress, int32_t pDirEntries, int32_t pOutput) {
     BOOL bIsBadPtr;
     uint32_t nParseResult;
     int* pDebugData;
@@ -208,7 +211,7 @@ uint32_t __stdcall DEBUG_ParseDebugDataDirectory(uint32_t nCount, int32_t nBaseA
     return nDirIter & -256;
 }
 
-uint32_t __stdcall DEBUG_ParseModuleHeaders(short * * ppModuleBase, short * pModuleBase) {
+static uint32_t __stdcall DEBUG_ParseModuleHeaders(short * * ppModuleBase, short * pModuleBase) {
     /* UINT_PTR ucb for IsBadReadPtr */ /* void * lp for IsBadReadPtr */ *ppModuleBase = pModuleBase;
     uint32_t bIsBadPtr = IsBadReadPtr(pModuleBase, 0x40);
     if (!(!bIsBadPtr && *pModuleBase == 0x5a4d)) {
@@ -272,7 +275,7 @@ uint32_t __stdcall DEBUG_ParseModuleHeaders(short * * ppModuleBase, short * pMod
 }
 
 // Adds a loaded module to the crash dump module list by parsing PE headers
-bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, int32_t nPathLength, short * pModuleBase) {
+static bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, int32_t nPathLength, short * pModuleBase) {
     int nCopyCount;
     D2DebugModuleInfo aModuleInfo;
     /* LPBOOL lpUsedDefaultChar for WideCharToMultiByte */ /* LPCSTR lpDefaultChar for WideCharToMultiByte */ /* int cbMultiByte for WideCharToMultiByte */ /* LPSTR lpMultiByteStr for WideCharToMultiByte */ /* int cchWideChar for WideCharToMultiByte */ /* LPCWSTR lpWideCharStr for WideCharToMultiByte */ /* DWORD dwFlags for WideCharToMultiByte */ /* UINT CodePage for WideCharToMultiByte */ aModuleInfo.pBase = 0;
@@ -524,7 +527,7 @@ void __stdcall DEBUG_ExtractDebugDirectory32(uint32_t dwParam, uint32_t * pnRVA,
     *pnSize = nSize;
 }
 
-uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
+static uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
     uint32_t bIsBadPtr = IsBadReadPtr(pDebugRecord, 0x14);
     if (bIsBadPtr) {
       return bIsBadPtr & -256;
@@ -545,7 +548,7 @@ uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
     return 1;
 }
 
-uint32_t DEBUG_ParseRSDSDebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
+static uint32_t DEBUG_ParseRSDSDebugInfo(void * pDebugRecord, int32_t pModuleInfo) {
     uint32_t bIsBadPtr = IsBadReadPtr(pDebugRecord, 0x1c);
     if (bIsBadPtr) {
       return bIsBadPtr & -256;
@@ -860,7 +863,7 @@ uint32_t __fastcall INI_IsDelimiterChar(char cChar) {
     return 0;
 }
 
-void INI_StripDelimiters(char * szText) {
+static void INI_StripDelimiters(char * szText) {
     int nWriteIdx;
     int nDelimIdx;
     char aWorkBuf[260];
@@ -1251,7 +1254,7 @@ uint32_t __stdcall ERRORMANAGER_TryGetProcAddress(HMODULE hModule, FARPROC * ppf
 }
 
 // @sourcefile .\Main.cpp
-void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD2ApplicationMode * eAppMode, char * szText) {
+static void __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument(eD2ApplicationMode * eAppMode, char * szText) {
     // Static local variables (originally global data)
     static char * gApplicationModeCommandLineArgumentArray[6] = { s_modstate0_006cc928, s_client_006cc920, s_server_006cc918, s_multiplayer_006cc90c, s_launcher_006cc900, s_expand_006cc8f8 }; D2_STATIC_GUARD(gApplicationModeCommandLineArgumentArray, "Fog::Engine::Application::CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgument::gApplicationModeCommandLineArgumentArray");
 

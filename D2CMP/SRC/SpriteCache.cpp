@@ -276,7 +276,7 @@ void __stdcall SetCompressedDataGlobalAndSaveItToRegistry(BOOL bUseCompressedDat
     bUseCompressedData = 0;
 }
 
-BOOL SPRITECACHE_FindOrLoad(char * szText, D2GfxDataStrc * pGfxData) {
+static BOOL SPRITECACHE_FindOrLoad(char * szText, D2GfxDataStrc * pGfxData) {
     char* pWriteCursor2;
     char cCurrent;
     char* pWriteCursor;
@@ -481,7 +481,7 @@ BOOL SPRITECACHE_FindOrLoad(char * szText, D2GfxDataStrc * pGfxData) {
     return 0;
 }
 
-BOOL __stdcall SPRITECACHE_LoadDC6(char * szText, D2GfxDataStrc * pGfxData, LPSTR szText2) {
+static BOOL __stdcall SPRITECACHE_LoadDC6(char * szText, D2GfxDataStrc * pGfxData, LPSTR szText2) {
     int iVar2;
     int32_t nStrCmpResult;
     char* szBasePath;
@@ -646,7 +646,7 @@ BOOL __stdcall SPRITECACHE_LoadDC6(char * szText, D2GfxDataStrc * pGfxData, LPST
     return 1;
 }
 
-D2CelFileCacheEntryStrc * __stdcall SPRITECACHE_LoadDCC(char * szText, char * szCelName, D2GfxDataStrc * pGfxData) {
+static D2CelFileCacheEntryStrc * __stdcall SPRITECACHE_LoadDCC(char * szText, char * szCelName, D2GfxDataStrc * pGfxData) {
     // Static local variables (originally global data)
     static uint32_t gdwSpriteCacheThreshold[16384] = {}; D2_STATIC_GUARD(gdwSpriteCacheThreshold, "D2CMP::SRC::SpriteCache::SPRITECACHE_LoadDCC::gdwSpriteCacheThreshold");
 
@@ -770,7 +770,7 @@ D2CelFileCacheEntryStrc * __stdcall SPRITECACHE_LoadDCC(char * szText, char * sz
 // Returns the DC6Block of frame pGfxData->nFrameNumber in the decoded buffer pFrameData: picks the direction slot
 // from pDecodeState->aDirOffsets, then walks the frame blocks (each 0x23 + [+0x14] + [+0x1c] bytes) validating
 // width/height <= 0x100; NULL on any bad header.
-DC6Block * __stdcall SPRITECACHE_FindFrameBlock(D2GfxDataStrc * pGfxData, uint8_t * pFrameData, D2CelDecodeStateStrc * pDecodeState) {
+static DC6Block * __stdcall SPRITECACHE_FindFrameBlock(D2GfxDataStrc * pGfxData, uint8_t * pFrameData, D2CelDecodeStateStrc * pDecodeState) {
     uint32_t nDirIdx;
     int nFrameOffset;
     uint8_t bVar1;
@@ -833,7 +833,7 @@ DC6Block * __stdcall SPRITECACHE_FindFrameBlock(D2GfxDataStrc * pGfxData, uint8_
 
 // Waits for the cache block's async load, copies nFramesPerDir into pGfxData->nFrameCount and returns
 // SPRITECACHE_FindFrameBlock over the loaded buffer. No hash is involved.
-DC6Block * SPRITECACHE_GetFrameBlock(D2CelCacheBlockStrc * pCacheBlock, D2GfxDataStrc * pGfxData) {
+static DC6Block * SPRITECACHE_GetFrameBlock(D2CelCacheBlockStrc * pCacheBlock, D2GfxDataStrc * pGfxData) {
     if (!(pCacheBlock && pCacheBlock->tDecode.pAsyncData)) {
       return nullptr;
     }
@@ -849,7 +849,7 @@ DC6Block * SPRITECACHE_GetFrameBlock(D2CelCacheBlockStrc * pCacheBlock, D2GfxDat
 }
 
 // @sourcefile .\SRC\SpriteCache.cpp
-void __stdcall SPRITECACHE_LoadAndCacheDC6(D2CelFileCacheEntryStrc * pCelEntry, D2GfxDataStrc * pGfxData, D2CelCacheBlockStrc * pCacheBlock) {
+static void __stdcall SPRITECACHE_LoadAndCacheDC6(D2CelFileCacheEntryStrc * pCelEntry, D2GfxDataStrc * pGfxData, D2CelCacheBlockStrc * pCacheBlock) {
     void* nErrorLineResult;
     void* pFrameDataBase;
     int nFrameDataOffset;
@@ -1001,7 +1001,7 @@ void __fastcall GFX_AllocSpriteCache(D2GfxMemoryStrc * pGfxMemory, D2PoolManager
     /* LPCRITICAL_SECTION lpCriticalSection for InitializeCriticalSection */ InitializeCriticalSection(&pGfxMemory->lpCriticalSection);
 }
 
-void __stdcall SPRITECACHE_EvictOldest(int32_t nParam1, int32_t nParam2, int32_t nParam3) {
+static void __stdcall SPRITECACHE_EvictOldest(int32_t nParam1, int32_t nParam2, int32_t nParam3) {
     DWORD dwTick;
     if (!nParam1) {
       if (!*(int*)(nParam2 + 0x18)) {
@@ -1077,7 +1077,7 @@ D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_AddToLRU(uint32_t dwParam, D2Gfx
     return nullptr;
 }
 
-void SPRITECACHE_RemoveFromLRU(int32_t nParam1, int32_t nParam2) {
+static void SPRITECACHE_RemoveFromLRU(int32_t nParam1, int32_t nParam2) {
     int nCurEntry;
     int nNextEntry;
     if (!nParam2) {
@@ -1245,7 +1245,7 @@ void __stdcall SPRITECACHE_CancelPendingLoads() {
     }
 }
 
-D2SpriteCacheEntryStrc * __stdcall SPRITECACHE_Query(int32_t nParam1, int32_t nParam2, D2GfxMemoryStrc * pGfxMemory) {
+static D2SpriteCacheEntryStrc * __stdcall SPRITECACHE_Query(int32_t nParam1, int32_t nParam2, D2GfxMemoryStrc * pGfxMemory) {
     D2SpriteCacheEntryStrc* nNextNode;
     D2SpriteCacheEntryStrc* nEntry = 0;
     EnterCriticalSection(&pGfxMemory->lpCriticalSection);
@@ -1437,7 +1437,7 @@ uint32_t __stdcall SPRITECACHE_DecodeFrameByIndex(uint32_t * pReadBuffer, size_t
 
 // Load CEL sprite from archive into cache with optional palette override. Custom calling convention: ECX=path, EDX=codec header, EDI=cache entry, 3 stdcall stack params.
 // @sourcefile .\SRC\SpriteCache.cpp
-void __stdcall SPRITECACHE_LoadCelFileAndCache(char * szCelPath, D2CelFileCacheEntryStrc * pCelEntry, D2CelCacheBlockStrc * pCacheEntry, D2GfxDataStrc * pGfxData, int32_t nDirection, int32_t nFrameCount) {
+static void __stdcall SPRITECACHE_LoadCelFileAndCache(char * szCelPath, D2CelFileCacheEntryStrc * pCelEntry, D2CelCacheBlockStrc * pCacheEntry, D2GfxDataStrc * pGfxData, int32_t nDirection, int32_t nFrameCount) {
     uint32_t* puVar1;
     eD2UnitType eVar2;
     uint32_t uVar3;
@@ -1541,7 +1541,7 @@ void __stdcall SPRITECACHE_LoadCelFileAndCache(char * szCelPath, D2CelFileCacheE
 
 // Load sprite data from archive into bit buffer with decompression
 // @sourcefile .\SRC\SpriteCache.cpp
-uint32_t __stdcall SPRITECACHE_LoadFromArchive(D2GfxDataStrc * pGfxData, int nFrameStep, D2CelCacheBlockStrc * pCacheEntry, D2CelFileCacheEntryStrc * pCelEntry, int nFrameGroupIndex, char * szFileName) {
+static uint32_t __stdcall SPRITECACHE_LoadFromArchive(D2GfxDataStrc * pGfxData, int nFrameStep, D2CelCacheBlockStrc * pCacheEntry, D2CelFileCacheEntryStrc * pCelEntry, int nFrameGroupIndex, char * szFileName) {
     D2SpriteDecodeRequestStrc tDecodeRequest;
     int32_t* pEntryOffsetSlot;
     uint32_t* pOffsetIter;
@@ -1777,7 +1777,7 @@ void __stdcall SPRITECACHE_Shutdown(int32_t nParam) {
     CelCmp::GFX_DestroyGlobalCriticalSection();
 }
 
-uint32_t __stdcall SPRITECACHE_LoadDCCAndCache(D2CelFileCacheEntryStrc * pCelEntry, int32_t nParam1, int32_t nParam2, char * szText, D2GfxDataStrc * pGfxData) {
+static uint32_t __stdcall SPRITECACHE_LoadDCCAndCache(D2CelFileCacheEntryStrc * pCelEntry, int32_t nParam1, int32_t nParam2, char * szText, D2GfxDataStrc * pGfxData) {
     if (!pCelEntry) {
       return 0;
     }
@@ -1823,7 +1823,7 @@ uint32_t __stdcall SPRITECACHE_LoadDCCAndCache(D2CelFileCacheEntryStrc * pCelEnt
     return (uint32_t)(hFrameResult != 0);
 }
 
-BOOL __stdcall SPRITECACHE_LoadCelAndCache(D2CelFileCacheEntryStrc * pCelEntry, int32_t dwParam, int32_t nParam1, char * szText, D2GfxDataStrc * pGfxData) {
+static BOOL __stdcall SPRITECACHE_LoadCelAndCache(D2CelFileCacheEntryStrc * pCelEntry, int32_t dwParam, int32_t nParam1, char * szText, D2GfxDataStrc * pGfxData) {
     D2SpriteCacheEntryStrc* ppCacheEntry = (D2SpriteCacheEntryStrc*)SPRITECACHE_AllocEntry2(&D2GfxMemoryStrc_0089db60, (void*)0xb8, nullptr, 1);
     if (!ppCacheEntry) {
       return 0;
@@ -1867,7 +1867,7 @@ BOOL __stdcall SPRITECACHE_LoadCelAndCache(D2CelFileCacheEntryStrc * pCelEntry, 
     return 1;
 }
 
-void __stdcall SPRITECACHE_LoadSpriteWithConversion(D2CelFileCacheEntryStrc * pCelEntry, D2GfxDataStrc * pGfxData, int32_t nParam1, uint32_t nParam, char * szText, int32_t nParam2, LPSTR szText2) {
+static void __stdcall SPRITECACHE_LoadSpriteWithConversion(D2CelFileCacheEntryStrc * pCelEntry, D2GfxDataStrc * pGfxData, int32_t nParam1, uint32_t nParam, char * szText, int32_t nParam2, LPSTR szText2) {
     uint32_t nPaletteShiftRatio;
     if (!(pCelEntry && pGfxData)) {
       return;

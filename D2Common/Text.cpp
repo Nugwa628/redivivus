@@ -31,7 +31,7 @@ typedef int32_t (__fastcall *pfnTextMessageCompare)(uint16_t * pnCodeA, uint16_t
 namespace D2Common::Text {
 
 // @sourcefile .\Text\Text.cpp
-void TEXT_FreeAllMessages(D2GSPacketSrv0x27_TextStrc * ppPoolManager) {
+static void TEXT_FreeAllMessages(D2GSPacketSrv0x27_TextStrc * ppPoolManager) {
     D2GSPacketSrv0x27_EntryStrc* pMemoryToFree = ppPoolManager->pMessage;
     while (pMemoryToFree) {
       D2GSPacketSrv0x27_EntryStrc* pNext;

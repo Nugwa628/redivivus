@@ -95,7 +95,7 @@ void __thiscall SendPlayerEvent(void * pThis, uint32_t pUnitGid, uint8_t bParam)
     Fog::Debug::GuardStack();
 }
 
-void __stdcall SendPlayerInfo(uint16_t nParam, uint32_t nParam2, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2) {
+static void __stdcall SendPlayerInfo(uint16_t nParam, uint32_t nParam2, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2) {
     UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pUnit2);
     UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit2, pUnit);
     uint32_t uFlags = UNIT::PlayerList::PLAYERLIST_GetFlagsMasked(pUnit, pUnit2, (uint32_t)nParam);
@@ -158,7 +158,7 @@ void __fastcall PARTYSCREEN_UpdateSquelchRelation(::SGAMEDATA * pGame, D2UnitStr
     GAME::SCmd::NET_D2GS_SERVER_Send_0x75_UPDATEROSTER(pTarget, pUnit);
 }
 
-void RefreshPlayerStatus(D2UnitStrc * pUnit1, D2UnitStrc * pUnit2) {
+static void RefreshPlayerStatus(D2UnitStrc * pUnit1, D2UnitStrc * pUnit2) {
     int nUnit2GUID;
     int nUnit1GUID = !pUnit1 ? -1 : pUnit1->nUnitGUID;
     if (!pUnit2) {
@@ -391,7 +391,7 @@ void __fastcall PARTYSCREEN_SetHostileForPlayer(::SGAMEDATA * pGame, D2UnitStrc 
 }
 
 // @sourcefile .\PLAYER\PartyScreen.cpp
-void __stdcall PARTYSCREEN_SetHostileWithParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static void __stdcall PARTYSCREEN_SetHostileWithParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     uint32_t nUnitGUID;
     uint8_t bEventType;
     int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
@@ -533,25 +533,25 @@ eD2ServerIncomingStatus __fastcall PlayerScreen_DispatchAction(::SGAMEDATA * pGa
 }
 
 void __fastcall PARTYSCREEN_ClearHostileRelation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15);
-      exit(-1);
+    if (pUnit && pUnit->eUnitType == UNIT_PLAYER) {
+      UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
+      UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 0);
+      return;
     }
 
-    UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
-    UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 0);
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15);
+    exit(-1);
 }
 
 void __fastcall PARTYSCREEN_SetHostileRelation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x24);
-      exit(-1);
+    if (pUnit && pUnit->eUnitType == UNIT_PLAYER) {
+      UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
+      UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 1);
+      return;
     }
 
-    UNIT::PlayerList::PLAYERLIST_AddPlayerEntry(pGame, pUnit, pTarget);
-    UNIT::PlayerList::SendRelationshipStatus(pGame, pUnit, pTarget, 8, 1);
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x24);
+    exit(-1);
 }
 
 uint32_t __fastcall PLAYERSCREEN_CheckUnitsCanSeeEachOther(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pOtherUnit) {

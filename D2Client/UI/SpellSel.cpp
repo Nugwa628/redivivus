@@ -304,7 +304,7 @@ void __fastcall SPELLSEL_DrawKeyBindingText(int32_t nCmdIndex, int32_t nX, int32
     D2Win::Src::D2WinFont::DRAW_text(pWszKeyName, nX, nY, dwColor, 0);
 }
 
-void __stdcall SPELLSEL_DrawKeyBindingsForLeftHand(int32_t nSlotIndex, short * pSkillId, int32_t nIconX, int32_t nIconY) {
+static void __stdcall SPELLSEL_DrawKeyBindingsForLeftHand(int32_t nSlotIndex, short * pSkillId, int32_t nIconX, int32_t nIconY) {
     if (gSpellSelectionSkillIDs[0] == *pSkillId && gSpellSelLeftSkillBindings[0] == nSlotIndex && gSpellSelectionSkillIDs[0] != -1 && gSpellSelRightSkillBindings[0] == 1) {
       SPELLSEL_DrawKeyBindingText(0xe, nIconX + 0x22, nIconY - 0x23, 4);
     }
@@ -384,7 +384,7 @@ void __fastcall SPELLSEL_DrawSkillLevel(int32_t pThis, int32_t nScreenX, int32_t
     D2Win::Src::D2WinFont::DRAW_text(wszLevelBuf, nScreenX + 4, nIconY - 1, 3, 0);
 }
 
-void __stdcall SPELLSEL_DrawKeyBindingsForRightHand(int32_t nSlotIndex, short * pSkillId, int32_t nIconX, int32_t nIconY) {
+static void __stdcall SPELLSEL_DrawKeyBindingsForRightHand(int32_t nSlotIndex, short * pSkillId, int32_t nIconX, int32_t nIconY) {
     if (gSpellSelectionSkillIDs[0] == *pSkillId && gSpellSelLeftSkillBindings[0] == nSlotIndex && gSpellSelectionSkillIDs[0] != -1 && !gSpellSelRightSkillBindings[0]) {
       SPELLSEL_DrawKeyBindingText(0xe, nIconX + 0x22, nIconY - 0x23, 4);
     }
@@ -570,7 +570,7 @@ void __fastcall SPELLSEL_DrawSkillIcon(short * pSkillId, int32_t nSlotIndex, int
     SPELLSEL_DrawSkillLevel(nSkillId, nIconX, nIconY);
 }
 
-int32_t __stdcall SPELLSEL_RegisterSkillSlot(int32_t nGridX, int32_t nSlotIndex, int32_t bLeftHand, int32_t nGridY, D2SkillStrc * pSkill, int32_t nParam2) {
+static int32_t __stdcall SPELLSEL_RegisterSkillSlot(int32_t nGridX, int32_t nSlotIndex, int32_t bLeftHand, int32_t nGridY, D2SkillStrc * pSkill, int32_t nParam2) {
     gSpellSelGridRegion.aSkillGrid[gSpellSelGridRegion.sGridIndex[0]] = nParam2;
     gSpellSelGridRegion.aSkillGridRow2[gSpellSelGridRegion.sGridIndex[0]] = nSlotIndex;
     eD2Skills eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UI\\spellsel.cpp", 0x23d);
@@ -808,7 +808,7 @@ void __fastcall SPELLSEL_HandleSkillSelection(int32_t nSlotIndex) {
     } while ((int)pSlotSkillXPtr < (uintptr_t)((char*)&gSpellSelGridRegion + 240));
 }
 
-int SPELLSEL_IsSkillSlotValid(int32_t nSlot) {
+static int SPELLSEL_IsSkillSlotValid(int32_t nSlot) {
     int nChargesLeft;
     if (gSpellSelectionSkillIDs[nSlot] == -1) {
       return 0;
@@ -866,7 +866,7 @@ void __fastcall SPELLSEL_SetSkillSlot(int32_t nParam, int32_t nSkillId, int32_t 
     gSpellSelLeftSkillBindings[nParam] = nOwnerGUID;
 }
 
-void SPELLSEL_AssignSkillToSlot(int32_t nSlotIndex, int32_t nParam1, int32_t nParam2) {
+static void SPELLSEL_AssignSkillToSlot(int32_t nSlotIndex, int32_t nParam1, int32_t nParam2) {
     if (!(nParam1 < 0x10 && gSpellSelectionSkillIDs[nParam1] == -1)) {
       return;
     }
@@ -1234,7 +1234,7 @@ void __stdcall SPELLSEL_FreeSkilltreeGraphic() {
     pSpellsClassSkilltree[nD2PlayerClassID].pD2Archive = 0;
 }
 
-int32_t SPELLSEL_GetSkillTreeRowOffset(char cParam) {
+static int32_t SPELLSEL_GetSkillTreeRowOffset(char cParam) {
     if (cParam == '\x01') {
       return gnPanelOffsetY - 0x1a2 + ScreenSizeY;
     }
@@ -1257,7 +1257,7 @@ int32_t SPELLSEL_GetSkillTreeRowOffset(char cParam) {
     return gnPanelOffsetY - 0x4d + ScreenSizeY;
 }
 
-int32_t SPELLSEL_GetSkillTreeColumnOffset(char cParam) {
+static int32_t SPELLSEL_GetSkillTreeColumnOffset(char cParam) {
     if (cParam == '\x01') {
       return ScreenSizeX - gnPanelOffsetX - 0x131;
     }
@@ -1596,7 +1596,7 @@ void __stdcall SKILLTREE_DrawBackground() {
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nTabHighlightX + nScreenX, gnPanelOffsetY - 0x3f + ScreenSizeY, -1, DRAW_SOLID, nullptr);
 }
 
-BOOL __stdcall SKILLTREE_IsMouseOnSkillNode(int32_t nHitWidth, int32_t nHitHeight, int32_t nNodeScreenY, int32_t nNodeScreenX) {
+static BOOL __stdcall SKILLTREE_IsMouseOnSkillNode(int32_t nHitWidth, int32_t nHitHeight, int32_t nNodeScreenY, int32_t nNodeScreenX) {
     int nMouseX = ui::GetMouseX();
     int nMouseY = ui::GetMouseY();
     if (!(nNodeScreenX <= nMouseX && nMouseX <= nNodeScreenX + nHitWidth && nNodeScreenY - nHitHeight <= nMouseY && nMouseY <= nNodeScreenY)) {

@@ -461,7 +461,7 @@ BOOL __fastcall SKILLITEM_ItemSpellInit_UseStackable(::SGAMEDATA * pGame, D2Unit
     return 1;
 }
 
-D2InventoryStrc * SKILLITEM_FindItemInInventory(D2UnitStrc * pUnit, D2UnitStrc * nParam) {
+static D2InventoryStrc * SKILLITEM_FindItemInInventory(D2UnitStrc * pUnit, D2UnitStrc * nParam) {
     if (!nParam->pInventory) {
       return nullptr;
     }
@@ -485,7 +485,7 @@ D2InventoryStrc * SKILLITEM_FindItemInInventory(D2UnitStrc * pUnit, D2UnitStrc *
 }
 
 // @sourcefile .\SKILLS\SkillItem.cpp
-void SKILLITEM_ClearCursorFlagAndNotifyClient(D2UnitStrc * pUnit) {
+static void SKILLITEM_ClearCursorFlagAndNotifyClient(D2UnitStrc * pUnit) {
     D2UnitStrc* pUnitTmp;
     BOOL bHasCursorFlag;
     D2ClientStrc* pClient;

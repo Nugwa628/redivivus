@@ -1760,7 +1760,7 @@ void __stdcall GAMEDATA_LoadActTiles(uint32_t nAct) {
     D2CMP::SRC::TileProjects::Alloc((D2TileLibraryHashStrc**)&nAct, "data\\global\\tiles\\act1\\outdoors\\blank.dt1");
 }
 
-void GAMEDATA_CheckColorTxtOverride(uint32_t pUnused) {
+static void GAMEDATA_CheckColorTxtOverride(uint32_t pUnused) {
     D2MPQFileStrc* pFileHandle;
     char byColorByte;
     if (gbBloodFlag) {

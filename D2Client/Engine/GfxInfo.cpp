@@ -426,7 +426,7 @@ D2GfxInfoUnkStrc * __fastcall GFX_FindGfxInfoByModeAndWeapon(D2UnitStrc * pUnit,
 }
 
 // @sourcefile .\ENGINE\Gfx.cpp
-BOOL GFX_FreeGfxInfoEntry(D2UnitStrc * pUnit, D2GfxInfoUnkStrc * pGfxInfoUnk) {
+static BOOL GFX_FreeGfxInfoEntry(D2UnitStrc * pUnit, D2GfxInfoUnkStrc * pGfxInfoUnk) {
     D2GfxInfoUnkStrc* pMemoryToFree;
     D2GfxInfoStrc* pGfxInfo = UNIT::CUnit::GetGfxInfo(pUnit);
     if (!pGfxInfo) {
@@ -460,7 +460,7 @@ BOOL GFX_FreeGfxInfoEntry(D2UnitStrc * pUnit, D2GfxInfoUnkStrc * pGfxInfoUnk) {
     return 1;
 }
 
-BOOL __stdcall GFX_FindOrEvictGfxInfoEntry(int32_t nWeaponParam, D2GfxInfoUnkStrc * * ppGfxInfoUnk, int * pnOutCofData, D2UnitStrc * pUnit, int nAnimMode) {
+static BOOL __stdcall GFX_FindOrEvictGfxInfoEntry(int32_t nWeaponParam, D2GfxInfoUnkStrc * * ppGfxInfoUnk, int * pnOutCofData, D2UnitStrc * pUnit, int nAnimMode) {
     BOOL bFreed;
     D2GfxInfoUnkStrc* pCur;
     D2GfxInfoStrc* pGfxInfo = UNIT::CUnit::GetGfxInfo(pUnit);
@@ -672,7 +672,7 @@ uint32_t GFX_LoadGenericModeCof(D2UnitStrc * pUnit, uint32_t nComponent) {
 }
 
 // @sourcefile .\ENGINE\Gfx.cpp
-void __stdcall GFX_FreeAllGfxInfoEntries(int32_t nComponentCount, D2UnitStrc * pUnit) {
+static void __stdcall GFX_FreeAllGfxInfoEntries(int32_t nComponentCount, D2UnitStrc * pUnit) {
     int nComponent;
     D2GfxInfoUnkStrc* pMemoryToFree;
     D2GfxInfoUnkStrc* pNext;
@@ -706,7 +706,7 @@ void __stdcall GFX_FreeAllGfxInfoEntries(int32_t nComponentCount, D2UnitStrc * p
 }
 
 // @sourcefile .\ENGINE\Gfx.cpp
-void GFX_FreeOverlayList(int32_t pGfxInfo) {
+static void GFX_FreeOverlayList(int32_t pGfxInfo) {
     void* pMemoryToFree = *(void**)(pGfxInfo + 0x2c);
     while (pMemoryToFree) {
       void* pNext;

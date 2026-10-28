@@ -64,6 +64,21 @@ joined an existing project; they did not start it.
 - It is not finished. Some areas and features still crash. See
   [Known issues](#known-issues).
 
+### How close to the original
+
+[`asm_matching/`](asm_matching/README.md) recompiles the tree with Visual C++ 2005 SP1, the
+compiler that built `Game.exe`, and compares every function with the shipped 1.14d binary.
+At this commit:
+
+|Measure|Byte-identical to the original|
+|-|-|
+|Functions|3,747 of 15,521 (24.1%)|
+|Code|218,458 of 2,678,537 bytes (8.16%)|
+
+The rest compiles and runs but differs somewhere in its instructions. Each difference
+that the same generator rule or database gap causes everywhere is fixed there, so the
+count only grows.
+
 ## You need
 
 - Your own installation of Diablo II: Lord of Destruction, version 1.14. This repository
@@ -136,6 +151,8 @@ survive the next regeneration.
 
 - Much of the 1.14d reverse-engineering comes from [blizzhackers](https://blizzhackers.dev),
   dzik in particular.
+- The byte-match oracle in `asm_matching/` is Niehztog's, and Nugwa628 found many of the
+  difference classes it measures.
 - [D2MOO](https://github.com/ThePhrozenKeep/D2MOO) supplied many of the structure layouts
   this work started from in 2021, though it went another direction since.
 

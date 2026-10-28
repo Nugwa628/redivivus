@@ -313,7 +313,7 @@ void NPCMENU_AddHandledMessageId(short wMsgId) {
 
 // Runs the NPC quest-dependent menu-option enablers. For each of nEntryCount entries of pCallbackTable whose nNpcClassId matches: reads GetQuestState(pBitBuffer, nQuestId, nQuestFlag); with bCheckState != 0 calls pfnCallback when the state is set, with bCheckState == 0 when it is clear.
 // Returns the last called callback's result, or 1 when none ran (EDI starts at 1). Custom storage: table in ECX, count in EAX, RET 8.
-int32_t __stdcall NPCMENU_CheckQuestDependentCallbacks(D2NpcQuestCallbackEntry * pCallbackTable, int32_t nNpcClassId, D2BitBufferStrc * pBitBuffer, int32_t nEntryCount) {
+static int32_t __stdcall NPCMENU_CheckQuestDependentCallbacks(D2NpcQuestCallbackEntry * pCallbackTable, int32_t nNpcClassId, D2BitBufferStrc * pBitBuffer, int32_t nEntryCount) {
     BOOL bQuestState;
     int nResult = 1;
     if (0 >= nEntryCount) {
@@ -432,7 +432,7 @@ int __stdcall NPCMENU_ShowIntroduceDialog() {
     return 1;
 }
 
-int NPCMENU_CalculateDialogPosition(POINT * pPoint) {
+static int NPCMENU_CalculateDialogPosition(POINT * pPoint) {
     tagRECT rcViewport;
     int nViewOriginX;
     int nViewOriginY;
@@ -562,7 +562,7 @@ BOOL NPCMENU_IsItemIdentified(D2UnitStrc * pUnit) {
     return BVar1;
 }
 
-int NPCMENU_CanItemBeRepaired(D2UnitStrc * pUnit) {
+static int NPCMENU_CanItemBeRepaired(D2UnitStrc * pUnit) {
     int nCurrentDurability;
     int nMaxStack;
     int nChargeCount;
@@ -1043,28 +1043,28 @@ void __stdcall NPCMENU_ExecuteShopTransaction(int32_t nParam, uint8_t bParam) {
 
       GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT_INT(byTransactionCmd, _Interaction::nCurrentInteractedNpcGUID, gnNpcMenuTransactionItemGUID, (uint32_t)eItemAnimMode, nDialogStrIdx);
     }
-    if (Dialog::gpNpcTransactionWaitDialog) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11b6);
-      exit(-1);
+    if (!Dialog::gpNpcTransactionWaitDialog) {
+      local_c.x = 0;
+      local_c.y = 0;
+      NPCMENU_CalculateDialogPosition(&local_c);
+      Dialog::gpNpcTransactionWaitDialog = Dialog::AllocDialogStrc(local_c.x, local_c.y, NPCMENU_EmptyDialogDrawHandler, nullptr, 0, 0, 1, 0, 0, 0, 1);
+      dwTickCount = GetTickCount();
+      gnNpcMenuCurrentNpcClassId = dwTickCount + 60000;
+      gnNpcMenuCurrentNpcGUID = 0;
+      Dialog::DIALOG_SetHighlightStyle(Dialog::gpNpcTransactionWaitDialog, 0);
+      nParam3 = 0;
+      dwDialogArg2 = 0;
+      dwDialogArg3 = 1;
+      nDialogStrIdx = 0;
+      nTextAlign = 0;
+      nItemClassId = 0xf;
+      pszWaitStr = D2Lang::StrTable::strtable::GetLocaleString(0xd19);
+      Dialog::AddStringData(Dialog::gpNpcTransactionWaitDialog, pszWaitStr, nItemClassId, nTextAlign, nDialogStrIdx, dwDialogArg3, dwDialogArg2, nParam3);
+      return;
     }
 
-    local_c.x = 0;
-    local_c.y = 0;
-    NPCMENU_CalculateDialogPosition(&local_c);
-    Dialog::gpNpcTransactionWaitDialog = Dialog::AllocDialogStrc(local_c.x, local_c.y, NPCMENU_EmptyDialogDrawHandler, nullptr, 0, 0, 1, 0, 0, 0, 1);
-    dwTickCount = GetTickCount();
-    gnNpcMenuCurrentNpcClassId = dwTickCount + 60000;
-    gnNpcMenuCurrentNpcGUID = 0;
-    Dialog::DIALOG_SetHighlightStyle(Dialog::gpNpcTransactionWaitDialog, 0);
-    nParam3 = 0;
-    dwDialogArg2 = 0;
-    dwDialogArg3 = 1;
-    nDialogStrIdx = 0;
-    nTextAlign = 0;
-    nItemClassId = 0xf;
-    pszWaitStr = D2Lang::StrTable::strtable::GetLocaleString(0xd19);
-    Dialog::AddStringData(Dialog::gpNpcTransactionWaitDialog, pszWaitStr, nItemClassId, nTextAlign, nDialogStrIdx, dwDialogArg3, dwDialogArg2, nParam3);
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11b6);
+    exit(-1);
 }
 
 void __stdcall NPCMENU_CancelShopTransaction() {
@@ -1360,7 +1360,7 @@ uint32_t __stdcall NPCMENU_IsShopActive() {
     return (uint32_t)(_Interaction::geNpcUiState != NPCUI_NONE);
 }
 
-int32_t NPCMENU_FindMenuIndexByNpcId(int32_t nParam) {
+static int32_t NPCMENU_FindMenuIndexByNpcId(int32_t nParam) {
     if (!nParam) {
       return -1;
     }
@@ -2152,7 +2152,7 @@ int __stdcall NPCMENU_CloseConfirmDialogAndInteraction() {
     return 1;
 }
 
-void __stdcall NPCMENU_SendCainIdentifyItems(char cParam, int32_t nParam) {
+static void __stdcall NPCMENU_SendCainIdentifyItems(char cParam, int32_t nParam) {
     if (_Interaction::bInteractingWithNpc) {
       D2UnitStrc* pNpcUnit;
       pNpcUnit = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
@@ -3764,7 +3764,7 @@ int __stdcall NPCMENU_EnableKashyaHireOption() {
 }
 
 // bAddTradeOption: 0 removes the trade option from the NPC's menu, nonzero inserts it (before the hire option).
-BOOL __stdcall NPCMENU_ConfigureMenuOption(BOOL bAddTradeOption, int32_t nNpcMenuOptionId) {
+static BOOL __stdcall NPCMENU_ConfigureMenuOption(BOOL bAddTradeOption, int32_t nNpcMenuOptionId) {
     int nOptionsCount;
     D2NpcMenuOptionFunc* pnCallbackSlot;
     int nOptionIdx;

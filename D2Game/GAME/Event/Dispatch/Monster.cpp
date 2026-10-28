@@ -348,7 +348,7 @@ void __fastcall RegenAndPsnDecreaser(::SGAMEDATA * pGame, D2UnitStrc * pUnit, in
 }
 
 // Queries whether a monster supports a given animation mode (eAnimMode, 0..0xF). Consults the global gnMonsterAnimModeSequenceFlags table: returns 1 if that mode has sequence flags set, or if its alt-flags are clear and it requires MonStats it checks the unit's MonStats2 movement-flag bit ((&byMvFlags0)[mode>>3] & bitmask[mode&7]). Returns nonzero if the anim mode is available for this unit, 0 otherwise (incl. null unit or mode>=0x10). Pure lookup, no side effects.
-uint32_t MONSTER_HasAnimModeSequence(D2UnitStrc * pUnit, eD2MonsterAnimMode eAnimMode) {
+static uint32_t MONSTER_HasAnimModeSequence(D2UnitStrc * pUnit, eD2MonsterAnimMode eAnimMode) {
     // Static local variables (originally global data)
     static D2MonsterAnimModeFlagsStrc gnMonsterAnimModeSequenceFlags[16] = {
     {
@@ -564,7 +564,7 @@ BOOL __fastcall thunk_ExecuteTimerTrigger(::SGAMEDATA * pGame, D2UnitStrc * pUni
     return 1;
 }
 
-void CalculateCollisionDamage_Unused(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void CalculateCollisionDamage_Unused(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     bool _bInRange;
     bool bInRange;
     int32_t nDamage;
@@ -1307,7 +1307,7 @@ D2AiDispatchCallbacksStrc * __fastcall GetDropHandler(D2UnitStrc * pUnit, uint32
     return DropHandlerArray + nParam;
 }
 
-void __stdcall MONSTER_InitiateDefaultDeath(::SGAMEDATA * pGame, int32_t nParam, D2UnitStrc * pUnit) {
+static void __stdcall MONSTER_InitiateDefaultDeath(::SGAMEDATA * pGame, int32_t nParam, D2UnitStrc * pUnit) {
     D2MonsterKillStrc sMonsterKill;
     D2Common::Units::SetCurrentSkill(pUnit, nullptr);
     if (nParam && nParam != 0xc) {

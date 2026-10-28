@@ -528,7 +528,7 @@ void __fastcall PlayCutScene(char * szFile, int32_t nResolutionMode, void * fpFr
     gbPlayingCutScene = 0;
 }
 
-BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
+static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
     // Static local variables (originally global data)
     static uint32_t gnGlideRendererInitialized = 0x1; D2_STATIC_GUARD(gnGlideRendererInitialized, "D2Glide::Renderer::Glide::RENDERER_GLIDE_InitWindow::gnGlideRendererInitialized");
     static int gnGlideRefreshRate640; D2_STATIC_GUARD_BSS(gnGlideRefreshRate640, "D2Glide::Renderer::Glide::RENDERER_GLIDE_InitWindow::gnGlideRefreshRate640");
@@ -793,7 +793,7 @@ void __fastcall GLIDE_PixelDataFreeCallback_ClearCacheNodes(int * pCacheIndices)
     *(uint32_t*)(gGlideVertex0.aTextureCache[pCacheIndices[8] - 1].pNodes + (pCacheIndices[9] - 1) * 0x1c + 8) = 0;
 }
 
-int RENDERER_GLIDE_GetSpriteMetadata(D2GfxDataStrc * pGfxData, uint32_t * * ppMetadata) {
+static int RENDERER_GLIDE_GetSpriteMetadata(D2GfxDataStrc * pGfxData, uint32_t * * ppMetadata) {
     int bSpriteLoaded = D2CMP::SRC::SpriteCache::SPRITECACHE_GetOrLoadSprite(pGfxData, 0, 1);
     if (!bSpriteLoaded) {
       return 0;
@@ -815,7 +815,7 @@ int RENDERER_GLIDE_GetSpriteMetadata(D2GfxDataStrc * pGfxData, uint32_t * * ppMe
     return 1;
 }
 
-void RENDERER_GLIDE_CalculateTextureSize(GlideTexInfoStrc * pTexInfo) {
+static void RENDERER_GLIDE_CalculateTextureSize(GlideTexInfoStrc * pTexInfo) {
     // Static local variables (originally global data)
     static int gnGlideCacheSizeB[4] = { 0x0, -0x1, -0x2, -0x3 }; D2_STATIC_GUARD(gnGlideCacheSizeB, "D2Glide::Renderer::Glide::RENDERER_GLIDE_CalculateTextureSize::gnGlideCacheSizeB");
     static int gnGlideCacheSizeA[4] = { 0x0, 0x1, 0x2, 0x3 }; D2_STATIC_GUARD(gnGlideCacheSizeA, "D2Glide::Renderer::Glide::RENDERER_GLIDE_CalculateTextureSize::gnGlideCacheSizeA");
@@ -941,7 +941,7 @@ void RENDERER_GLIDE_CalculateTextureSize(GlideTexInfoStrc * pTexInfo) {
 }
 
 // Glide texture cache: uploads a DC6 frame to video memory. Determines LOD level based on texture size, allocates cache slot, renders frame to buffer, encrypts with hash, and downloads to TMU via grTexDownloadMipMap.
-int32_t __stdcall RENDERER_GLIDE_UploadTextureToCache(GlideTexInfoStrc * pTexInfo, BYTE * pPalette, uint8_t nOutlineColor, int32_t nMode) {
+static int32_t __stdcall RENDERER_GLIDE_UploadTextureToCache(GlideTexInfoStrc * pTexInfo, BYTE * pPalette, uint8_t nOutlineColor, int32_t nMode) {
     void* nErrorAddress;
     uint8_t* pbyPalettePixel;
     FxU32 startAddress;
@@ -1085,7 +1085,7 @@ int32_t __stdcall RENDERER_GLIDE_UploadTextureToCache(GlideTexInfoStrc * pTexInf
     }
 }
 
-void __stdcall RENDERER_GLIDE_DrawShadowQuad(int32_t nParam1, int32_t nParam2, GlideTexInfoStrc * nParam3) {
+static void __stdcall RENDERER_GLIDE_DrawShadowQuad(int32_t nParam1, int32_t nParam2, GlideTexInfoStrc * nParam3) {
     int32_t nTexWidth;
     int32_t iVar1;
     int nTexHeight;
@@ -1144,7 +1144,7 @@ void __stdcall RENDERER_GLIDE_DrawShadowQuad(int32_t nParam1, int32_t nParam2, G
 }
 
 // Glide renderer: draws a textured quad using the palette table at gpPaletteTable+0x114. Applies viewport scaling, handles palette color lookup, and submits a 4-vertex triangle fan via grDrawVertexArrayContiguous.
-void __stdcall RENDERER_GLIDE_DrawPalettedQuad(GlideTexInfoStrc * pGlideQuad, int32_t nParam1, int32_t nParam2, uint32_t nParam, int32_t nParam3, int32_t nParam4) {
+static void __stdcall RENDERER_GLIDE_DrawPalettedQuad(GlideTexInfoStrc * pGlideQuad, int32_t nParam1, int32_t nParam2, uint32_t nParam, int32_t nParam3, int32_t nParam4) {
     int32_t nTexHeight;
     RENDERER_GLIDE_SetColorCombine(1);
     RENDERER_GLIDE_SetTextureFiltering(1);
@@ -1205,7 +1205,7 @@ void __stdcall RENDERER_GLIDE_DrawPalettedQuad(GlideTexInfoStrc * pGlideQuad, in
     (*GLIDEDLL_grDitherMode_4)(2);
 }
 
-void RENDERER_GLIDE_SetDrawMode(int32_t nParam) {
+static void RENDERER_GLIDE_SetDrawMode(int32_t nParam) {
     int32_t nBlendModeArg;
     if (false) {
       default_case:
@@ -1459,7 +1459,7 @@ void __fastcall DrawVerticalCropImage(D2GfxDataStrc * pData, int32_t nPosX, int3
     RENDERER_GLIDE_DrawPalettedQuad(&texSizeBuf, nPosXSaved, nPosY, -1, 0, 0);
 }
 
-BOOL __stdcall RENDERER_GLIDE_CalculateClipRect(int32_t nScreenX, int32_t nScreenY, int32_t nPosY, uint32_t * pnClipBounds, D2RenderClipOutStrc * pnOutRect) {
+static BOOL __stdcall RENDERER_GLIDE_CalculateClipRect(int32_t nScreenX, int32_t nScreenY, int32_t nPosY, uint32_t * pnClipBounds, D2RenderClipOutStrc * pnOutRect) {
     int nScreenBottom = nScreenY + *(int*)(nScreenX + 0xc);
     int nSpriteWidth = *(int*)(nScreenX + 4);
     int nScreenRight = nPosY + *(int*)(nScreenX + 0x10);
@@ -1817,7 +1817,7 @@ void __stdcall RENDERER_GLIDE_FreeDebugFont() {
     gpGlideDebugFontTexture = 0;
 }
 
-LPINT __stdcall RENDERER_GLIDE_DrawDebugChar(int32_t nParam1, int32_t nParam2, char cParam) {
+static LPINT __stdcall RENDERER_GLIDE_DrawDebugChar(int32_t nParam1, int32_t nParam2, char cParam) {
     if (0x280 < nParam1) {
       return (LPINT)0x0;
     }
@@ -1867,7 +1867,7 @@ void __fastcall DrawString(int32_t nPosX, int32_t nPosY, char * szFormat, va_lis
     } while (nCharIdx < nStrLen);
 }
 
-void RENDERER_GLIDE_DrawLightRadialPoints(int32_t nParam1, GrColor_t nColor, int32_t nParam2) {
+static void RENDERER_GLIDE_DrawLightRadialPoints(int32_t nParam1, GrColor_t nColor, int32_t nParam2) {
     // Static local variables (originally global data)
     static int gnGlideRadialLightPtr2[8] = { 0x1, 0x2, 0x0, 0x1, 0x2, 0x3, 0x1, 0x2 }; D2_STATIC_GUARD(gnGlideRadialLightPtr2, "D2Glide::Renderer::Glide::RENDERER_GLIDE_DrawLightRadialPoints::gnGlideRadialLightPtr2");
     static int gnGlideRadialLightPtr[8] = { 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x2, 0x2 }; D2_STATIC_GUARD(gnGlideRadialLightPtr, "D2Glide::Renderer::Glide::RENDERER_GLIDE_DrawLightRadialPoints::gnGlideRadialLightPtr");
@@ -2303,7 +2303,7 @@ void __fastcall ClearScreen(BOOL bPartial) {
     (*GLIDEDLL_grBufferClear_12)(0, '\0', 0);
 }
 
-void __stdcall RENDERER_GLIDE_CalculateScreenBounds(int32_t nViewportMode, RECT * pnBounds, int32_t nScreenPanels, int * pnXOffset) {
+static void __stdcall RENDERER_GLIDE_CalculateScreenBounds(int32_t nViewportMode, RECT * pnBounds, int32_t nScreenPanels, int * pnXOffset) {
     if (!pnBounds) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x54);
       exit(-1);
@@ -2627,7 +2627,7 @@ BOOL __fastcall RENDERER_GLIDE_DrawWallTileSimple(int32_t nScreenPanels, D2TileL
 }
 
 // Draw wall tile with perspective projection in Glide renderer. Calculates 4 corner positions, tests screen bounds, applies color averaging and texturing. Returns 1 if tile was drawn, 0 otherwise.
-int32_t __stdcall RENDERER_GLIDE_DrawWallTilePerspective(int32_t nScreenPanels, D2TileLibraryEntryStrc * pTile, int nScreenX, int nScreenY, int pColorTable) {
+static int32_t __stdcall RENDERER_GLIDE_DrawWallTilePerspective(int32_t nScreenPanels, D2TileLibraryEntryStrc * pTile, int nScreenX, int nScreenY, int pColorTable) {
     D2FloatIntUnion DVar1;
     short int* psVar2;
     int nCornerFixedY;
@@ -2747,7 +2747,7 @@ int32_t __stdcall RENDERER_GLIDE_DrawWallTilePerspective(int32_t nScreenPanels, 
     return nZMid;
 }
 
-BOOL __stdcall RENDERER_GLIDE_DrawTransparentWallTile(int32_t nPosX, int32_t nPosY, int32_t pLight, GrColor_t nColor, D2TileLibraryEntryStrc * pTileLibraryEntry, int32_t nScreenPanels) {
+static BOOL __stdcall RENDERER_GLIDE_DrawTransparentWallTile(int32_t nPosX, int32_t nPosY, int32_t pLight, GrColor_t nColor, D2TileLibraryEntryStrc * pTileLibraryEntry, int32_t nScreenPanels) {
     BOOL bPerspective = D2CMP::SRC::SpriteCache::SPRITECACHE_AllocEntry(pTileLibraryEntry, 1, 0);
     if (!bPerspective) {
       return 0;
@@ -3210,7 +3210,7 @@ void __stdcall GLSMACK_UploadTextures() {
     (*GLIDEDLL_grTexDownloadMipMap_16)(gnGlideTMUHandle, gnGlideSmackTex2StartAddr, 3, &gTexInfoBlocks1Glide);
 }
 
-void __stdcall GLSMACK_DrawSmackerQuad(D2SmackerContextStrc * pSmackerData, int32_t nOffsetY, int32_t nAlpha) {
+static void __stdcall GLSMACK_DrawSmackerQuad(D2SmackerContextStrc * pSmackerData, int32_t nOffsetY, int32_t nAlpha) {
     // Static local variables (originally global data)
     static int gaGlideSmackerVertices; D2_STATIC_GUARD_BSS(gaGlideSmackerVertices, "D2Glide::Renderer::Glide::GLSMACK_DrawSmackerQuad::gaGlideSmackerVertices");
     static float gfGlideSmackerVertex1Y; D2_STATIC_GUARD_BSS(gfGlideSmackerVertex1Y, "D2Glide::Renderer::Glide::GLSMACK_DrawSmackerQuad::gfGlideSmackerVertex1Y");

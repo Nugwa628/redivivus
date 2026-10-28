@@ -653,12 +653,12 @@ void __fastcall Q31_ClaimReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     }
 
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_SiegeOnHaggorath);
-    if (!pQuestData) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2ee);
-      exit(-1);
+    if (pQuestData) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2ee);
+    exit(-1);
 }
 
 // A5Q1 object init fn 70: empty stub (no-op). Placeholder object initializer slot.

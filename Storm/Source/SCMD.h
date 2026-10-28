@@ -54,26 +54,11 @@ struct __attribute__((packed)) StormCmdArgDefStrc {
 namespace Storm::Source {
 
 // Function declarations
-// Parses command-line boolean argument with optional +/- prefix. Updates bitmask in cmdDef based on flags (sets bits on +/true, clears bits on -/false). Also updates external bitmask pointer if provided.
-// @blizzard ConvertBool (SCMD.CPP)
-void __fastcall SCMD_ConvertBool(struct D2GameNpcStrc * cmdDef, char * str, uint32_t * outConsumed);
-// Parses command-line integer argument using strtol (signed) or strtoul (unsigned) based on command definition flags. Stores parsed value and reports consumed character count. Copies result to external buffer if provided.
-// @blizzard ConvertNumber (SCMD.CPP)
-void __stdcall SCMD_ConvertNumber(struct D2UnitDataMonsterStrc * cmdDef, char * str, int * outConsumed);
-// @sourcefile .\SOURCE\SCMD.CPP
-// @blizzard ConvertString (SCMD.CPP)
-void __stdcall SCMD_ConvertString(char * str, struct D2UnitDataMonsterStrc * cmdDef, uint32_t * outConsumed);
-// @blizzard GenerateError (SCMD.CPP)
-void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCallback, char * szItem);
-// @blizzard ProcessFile (SCMD.CPP)
-BOOL __stdcall SCMD_ProcessFile(char * filename, int * pnParam, uint32_t dwParam, pfnSCmdUnknownArgCallback pfnCallback, pfnSCmdErrorCallback pfnErrorCallback);
 uint32_t __thiscall SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset);
 ::SCMD * __thiscall SCMD_GetListHead(::SCMD * pThis, ::SCMD * pNode);
 void __thiscall SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd);
 uint32_t __thiscall SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode);
 void __thiscall SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode);
-// @blizzard FindFlagDef (SCMD.CPP)
-struct StormCmdArgDefStrc * __stdcall SCMD_FindFlagDef(struct StormCmdArgDefStrc * cmdList, char * str, int minLen);
 uint32_t __thiscall SCMD_GetHandler(::SCMD * pThis, int nNodeOffset);
 void __fastcall SCMD_ClearList(struct D2StormListHead * nListPtr);
 void __fastcall SCMD_ClearAll(struct D2StormListHead * nListPtr);
@@ -87,14 +72,8 @@ void __fastcall SCMD_ClearAll(struct D2StormListHead * nListPtr);
 BOOL __stdcall SCmdRegisterArgument(uint32_t dwFlags, uint32_t dwId, char * szText, void * pVariable, uint32_t dwVariableBytes, uint32_t dwSetValue, uint32_t dwSetMask, SCMDCALLBACK pfnCallback);
 void __fastcall SCMD_FreeAllNodes(void * pListHead);
 uint32_t __thiscall SCMD_RemoveNode(::SCMD * pThis, ::SCMD * pNode);
-// @blizzard PerformConversion (SCMD.CPP)
-BOOL __fastcall SCMD_PerformConversion(char * str, struct StormCmdArgDefStrc * cmdDef, int * outConsumed);
-// @blizzard ProcessCurrentFlag (SCMD.CPP)
-BOOL __thiscall SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed);
 // @blizzard ProcessFlags (SCMD.CPP)
 BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * szText, int * pnOutConsumed);
-// @blizzard ProcessToken (SCMD.CPP)
-BOOL __fastcall SCMD_ProcessToken(uint32_t * cmdDefPtr, char * str, int * outPtr, int noFileExpand, pfnSCmdUnknownArgCallback unknownCb, pfnSCmdErrorCallback errorCb);
 // @blizzard SCmdCheckId (SCMD.CPP)
 uint32_t __stdcall SCmdCheckId(int nCmdId);
 // Tears the SCmd module down: frees the allocated string value at +0x3c of every string-typed command node in both lists, frees every node in both lists, and clears gbScmdHasPriorityCommand. No arguments.
@@ -148,5 +127,6 @@ void __stdcall SCmdProcessCommandLine(pfnSCmdUnknownArgCallback pfnUnknownCallba
 void StaticFini_gStormCmdListBackslash();
 // Runs at exit: removes every element from the Storm command-argument list gStormCmdListHeadSlash, then unlinks the list head itself.
 void StaticFini_gStormCmdListSlash();
+// 9 internal functions (defined in .cpp)
 
 } // namespace Storm::Source

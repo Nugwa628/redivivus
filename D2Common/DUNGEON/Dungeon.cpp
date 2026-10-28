@@ -251,7 +251,7 @@ D2RoomStrc * __fastcall DRLGROOM_AllocRoomStrc(D2PoolManagerStrc * pMemory) {
 }
 
 // @sourcefile .\DUNGEON\Dungeon.cpp
-void __stdcall DRLGROOM_UpdateRoomsNearAndCount(D2PoolManagerStrc * pMemory, D2RoomStrc * pRoom) {
+static void __stdcall DRLGROOM_UpdateRoomsNearAndCount(D2PoolManagerStrc * pMemory, D2RoomStrc * pRoom) {
     int32_t nNearCount = Drlg::DrlgRoom::GetRoomsNearCount(pRoom->pRoomEx);
     D2RoomStrc** ppRoomList = (D2RoomStrc**)D2_ALLOC_POOL_AT(pMemory, nNearCount * 4, ".\\DUNGEON\\Dungeon.cpp", 0x100);
     pRoom->ppRoomList = ppRoomList;
@@ -971,7 +971,7 @@ BOOL __fastcall DRLGROOM_ValidateClientList(D2RoomStrc * pRoom) {
 }
 
 // Sorts the client list of a room using bubble sort by client ID. Validates the list first, halts on error.
-int DRLGROOM_SortClientList(D2RoomStrc * pRoom) {
+static int DRLGROOM_SortClientList(D2RoomStrc * pRoom) {
     uint32_t nNonNullCount;
     int j;
     bool bSwapped;
@@ -1650,7 +1650,7 @@ int32_t __stdcall GetGridIndex(D2RoomStrc * pRoom, int32_t nX, int32_t nY) {
 }
 
 // Initializes a RoomEx's runtime data: sets up near rooms and vis tiles if not already done, initializes grid cells, sets up tile data for DRLG type, rolls the room seed, and increments the actmisc activation counters.
-void DRLGROOMEX_InitRoomExData(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx) {
+static void DRLGROOMEX_InitRoomExData(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx) {
     D2DrlgStrc* pDrlg = pRoomEx->pLevel->pDrlg;
     if (!pRoomEx->nDrlgRoomsExNearCount) {
       Drlg::DRLGROOMEX_InitNearRoomsAndVisTiles(pMemory, pRoomEx);
@@ -1664,7 +1664,7 @@ void DRLGROOMEX_InitRoomExData(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoom
 }
 
 // Moves a D2RoomExStrc to a different activation priority list. Unlinks from current pStatusPrev/pStatusNext chain and relinks into the sentinel list at pDrlg->aSubA0[nNewStatus].
-D2RoomExStrc * DRLGROOMEX_MoveToActivationList(D2RoomExStrc * pRoomEx, uint8_t nNewStatus) {
+static D2RoomExStrc * DRLGROOMEX_MoveToActivationList(D2RoomExStrc * pRoomEx, uint8_t nNewStatus) {
     if (pRoomEx->fRoomStatus == nNewStatus) {
       return pRoomEx;
     }
@@ -1741,7 +1741,7 @@ void __fastcall DRLGROOMEX_InitTileDataAndPresets(D2RoomExStrc * pRoomEx) {
 }
 
 // Recursively activates nearby RoomEx neighbours up to depth 3. For each adjacent room within pRoomEx->ppDrlgRoomsExNear[], calls DRLGROOMEX_InitNearRoomsAndVisTiles if not yet populated, increments the room's reference count at the current priority level, and dispatches gaRoomExActivationHandlers[priority] when the room's fRoomStatus meets the recursion priority threshold.
-void __stdcall InitNearRooms(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx, uint32_t nRecursion, D2DrlgStrc * pDrlg) {
+static void __stdcall InitNearRooms(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx, uint32_t nRecursion, D2DrlgStrc * pDrlg) {
     D2RoomExStrc* pDVar1;
     uint32_t nRecursionNextPacked;
     int nRefSlotIdx;
@@ -1815,7 +1815,7 @@ void __stdcall InitNearRooms(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx
 }
 
 // Initializes room data for the given room extension at the specified recursion depth. Allocates near rooms and populates tile data via preset/outdoor/maze handlers.
-void AddRoomDataActual(D2RoomExStrc * pRoomEx, uint8_t nInitDepth) {
+static void AddRoomDataActual(D2RoomExStrc * pRoomEx, uint8_t nInitDepth) {
     uint16_t* pnRefCount;
     D2DrlgStrc* pAct;
     pAct = pRoomEx->pLevel->pDrlg;
@@ -1843,7 +1843,7 @@ void AddRoomDataActual(D2RoomExStrc * pRoomEx, uint8_t nInitDepth) {
 }
 
 // Recalculates which activation priority list a RoomEx belongs to. Scans priorities 0-3 looking for the first one with a non-zero ref count, and moves the RoomEx to that list.
-void DRLGROOMEX_RecalcPriority(D2RoomExStrc * pRoomEx) {
+static void DRLGROOMEX_RecalcPriority(D2RoomExStrc * pRoomEx) {
     uint8_t nPriority;
     if (!(3 < pRoomEx->fRoomStatus || !pRoomEx->awRoomsInList[pRoomEx->fRoomStatus])) {
       return;

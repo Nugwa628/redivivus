@@ -559,7 +559,7 @@ BOOL __fastcall SKILLEMONST_SrvStFn61_SelfResurrect(::SGAMEDATA * pGame, D2UnitS
     return 1;
 }
 
-void __stdcall SKILLSOR_GetMeteorSubMissileCount(eMissilesId pParam, eD2Skills eSkill, int32_t nSkillLvl, ::SGAMEDATA * pGame, int32_t nCount, D2UnitStrc * pUnit) {
+static void __stdcall SKILLSOR_GetMeteorSubMissileCount(eMissilesId pParam, eD2Skills eSkill, int32_t nSkillLvl, ::SGAMEDATA * pGame, int32_t nCount, D2UnitStrc * pUnit) {
     // Static local variables (originally global data)
     static int gnSkillOffset_Sorceress_Fireball[4] = { 0x0, 0x0, 0x1, -0x1 }; D2_STATIC_GUARD(gnSkillOffset_Sorceress_Fireball, "D2Game::SKILLS::SkillEMonst::SKILLSOR_GetMeteorSubMissileCount::gnSkillOffset_Sorceress_Fireball");
     static int gnSkillOffset_Sorceress_Meteor[4] = { 0x1, -0x1, 0x0, 0x0 }; D2_STATIC_GUARD(gnSkillOffset_Sorceress_Meteor, "D2Game::SKILLS::SkillEMonst::SKILLSOR_GetMeteorSubMissileCount::gnSkillOffset_Sorceress_Meteor");
@@ -620,7 +620,7 @@ BOOL __fastcall Skills_SrvDoFunc_130_SpawnSubMissiles(::SGAMEDATA * pGame, D2Uni
     return 1;
 }
 
-void __stdcall SKILLEMONST_ApplyAuraBuff(D2UnitStrc * pUnit, D2UnitStrc * pTarget, eD2Skills eSkill, int32_t nSkillLvl) {
+static void __stdcall SKILLEMONST_ApplyAuraBuff(D2UnitStrc * pUnit, D2UnitStrc * pTarget, eD2Skills eSkill, int32_t nSkillLvl) {
     D2StateExArgStrc sStateExArg;
     if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return;
@@ -652,7 +652,7 @@ void __stdcall SKILLEMONST_ApplyAuraBuff(D2UnitStrc * pUnit, D2UnitStrc * pTarge
 }
 
 // Transforms a target monster into a new class derived from the skill's summon monster class (difficulty-scaled). Calls MONSTER_TransformMonsterClass, reattaches AI, fires lifecycle transition, applies STATE_changeclass, attaches a stat list (UNITSTAT_shortparam1 = new class id), and initialises sumumod umod slots on the target.
-void __stdcall SKILLEMONST_TransformMonsterClass(D2UnitStrc * pUnit, DWORD dwParam, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2, int32_t nParam) {
+static void __stdcall SKILLEMONST_TransformMonsterClass(D2UnitStrc * pUnit, DWORD dwParam, ::SGAMEDATA * pGame, D2UnitStrc * pUnit2, int32_t nParam) {
     D2AiGeneralStrc* pMonsterAiGeneral;
     eD2UnitType eUnitType;
     D2MonsterKillStrc sMonsterKill;

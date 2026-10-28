@@ -130,7 +130,7 @@ double DRAW_GetHueSector(double m1, double m2, double dHue) {
     return m1;
 }
 
-void DRAW_ConvertPaletteHSLtoRGB(D2HSLColorStrc * pHSLIn, uint8_t * pRGBOut) {
+static void DRAW_ConvertPaletteHSLtoRGB(D2HSLColorStrc * pHSLIn, uint8_t * pRGBOut) {
     double m1;
     uint8_t byGreen;
     double dVar1;
@@ -1084,7 +1084,7 @@ void __stdcall DRAW_BuildHSLTransformTables(LPPALETTEENTRY pPalette, LPPALETTEEN
     } while (pHSLSource);
 }
 
-void DRAW_BuildBrightenLightnessTable(D2HSLColorStrc * pHSLPalette, LPPALETTEENTRY pPalette) {
+static void DRAW_BuildBrightenLightnessTable(D2HSLColorStrc * pHSLPalette, LPPALETTEENTRY pPalette) {
     uint8_t rgbWorkBuffer[1024];
     double dOldLightness;
     int nColorIndex = 0x100;

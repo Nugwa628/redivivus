@@ -86,7 +86,7 @@ D2TileCmpTileSetStrc * __stdcall TILECMP_AllocTileSet() {
 }
 
 // @sourcefile .\SRC\Tilecmp.cpp
-void TILECMP_FreeTileSet(D2TileCmpTileSetStrc * pTileSet) {
+static void TILECMP_FreeTileSet(D2TileCmpTileSetStrc * pTileSet) {
     D2TileCmpTileNodeStrc* pvVar1;
     if (!pTileSet) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x54);
@@ -177,7 +177,7 @@ void __stdcall TILECMP_AddTileToSet(D2TileCmpTileSetListStrc * pTileSetList, uin
     }
 }
 
-BOOL __stdcall TILECMP_ValidateTilePixels(uint32_t * pTilePixels, int32_t nPitch, int32_t pTile) {
+static BOOL __stdcall TILECMP_ValidateTilePixels(uint32_t * pTilePixels, int32_t nPitch, int32_t pTile) {
     int iCol;
     int iRow;
     uint32_t dwPixel;
@@ -280,7 +280,7 @@ void __stdcall TILECMP_CacheTileData(int * pTileMeasures, uint32_t * pTilePixels
     exit(-1);
 }
 
-BOOL __stdcall TILECMP_CheckTilePatternRLE(uint32_t dwColorKey, char * pPixelBuf) {
+static BOOL __stdcall TILECMP_CheckTilePatternRLE(uint32_t dwColorKey, char * pPixelBuf) {
     int nCount = 0;
     while (*pPixelBuf == (char)dwColorKey && pPixelBuf[1] == (char)(dwColorKey >> 8) && pPixelBuf[2] == *(uint8_t*)((char*)&dwColorKey + 2)) {
       nCount++;
@@ -294,7 +294,7 @@ BOOL __stdcall TILECMP_CheckTilePatternRLE(uint32_t dwColorKey, char * pPixelBuf
 }
 
 // @sourcefile .\SRC\Tilecmp.cpp
-void __stdcall TILECMP_ExtractIsometricSubTile(int32_t pSubTile, void * pTileData, uint32_t dwColorKey, size_t nSubTileIndex, int32_t nSubTileOffset) {
+static void __stdcall TILECMP_ExtractIsometricSubTile(int32_t pSubTile, void * pTileData, uint32_t dwColorKey, size_t nSubTileIndex, int32_t nSubTileOffset) {
     void* nErrAddr;
     char* pSubTilePixelBuf = (char*)D2_ALLOC_AT(0x600, ".\\SRC\\Tilecmp.cpp", 0x154);
     if (!pSubTilePixelBuf) {
@@ -345,7 +345,7 @@ void __stdcall TILECMP_ExtractIsometricSubTile(int32_t pSubTile, void * pTileDat
 }
 
 // @sourcefile .\SRC\Tilecmp.cpp
-void TILECMP_Generate25SubTiles(D2TileCmpTileSetStrc * pTileSet, void * pDT1Data) {
+static void TILECMP_Generate25SubTiles(D2TileCmpTileSetStrc * pTileSet, void * pDT1Data) {
     // Static local variables (originally global data)
     static D2TileCmpSubTileOffset gaTileCmpSubTileOffsets[25] = {
     {
@@ -519,7 +519,7 @@ void __stdcall TILECMP_InitTileSetFromDT1(D2TileCmpTileSetStrc * pTileSet, int32
 
 // @sourcefile .\SRC\Tilecmp.cpp
 // @note ESI nErrLine is not a real input (ESI is only saved, then overwritten at 00609c82). It stays because the halt tail at 00609cbb is reached at two stack depths (PUSH 0x202 with ESI/EDI saved, PUSH 0x213 after POP ESI); without it the decompiler reads the 0x213 slot as unaff_ESI.
-void __stdcall TILECMP_SerializeTileSet(D2TileCmpTileSetStrc * pSrcTileSet, D2TileLibraryEntryStrc * pDstEntry, DWORD nErrLine) {
+static void __stdcall TILECMP_SerializeTileSet(D2TileCmpTileSetStrc * pSrcTileSet, D2TileLibraryEntryStrc * pDstEntry, DWORD nErrLine) {
     int nCopiedNodes;
     short int* pDstTileNode;
     uint16_t wOrientationTmp;
@@ -743,7 +743,7 @@ int32_t __fastcall TILECMP_CalculateCacheSize(int32_t nUnused, int32_t pTileCmpH
     }
 }
 
-size_t TILECMP_CopyTileNodes(void * pDstBuf, int32_t pTileSetEntry) {
+static size_t TILECMP_CopyTileNodes(void * pDstBuf, int32_t pTileSetEntry) {
     size_t nCumSize = *(int*)(pTileSetEntry + 0x50) * 0x14;
     memcpy(pDstBuf, *(void**)(pTileSetEntry + 0x54), nCumSize);
     void* pWritePtr = (void*)((int)pDstBuf + nCumSize);
@@ -1004,7 +1004,7 @@ void __stdcall TILECMP_RelocateSubTilePixelData(D2TileLibraryEntryStrc * pTile) 
     }
 }
 
-void TILECMP_ApplyFunctionToPixels(uint8_t * pPixelData, int32_t nPixelBytes, pfnTilecmpPixelCallback pPixelCallback) {
+static void TILECMP_ApplyFunctionToPixels(uint8_t * pPixelData, int32_t nPixelBytes, pfnTilecmpPixelCallback pPixelCallback) {
     if (0 >= nPixelBytes) {
       return;
     }
@@ -1067,7 +1067,7 @@ void __stdcall TILECMP_ProcessAllTilePixels(int32_t pTileCmpHdr, void * pNodeByt
 }
 
 // @sourcefile .\SRC\Tilecmp.cpp
-void __stdcall TILECMP_CompressSubTile(int nECXContext, uint32_t * pSrcSubTile, uint32_t * pDstSubTile, pfnRGBToPaletteIndex pfnGetPaletteIndex, uint32_t dwColorKey) {
+static void __stdcall TILECMP_CompressSubTile(int nECXContext, uint32_t * pSrcSubTile, uint32_t * pDstSubTile, pfnRGBToPaletteIndex pfnGetPaletteIndex, uint32_t dwColorKey) {
     if (!pSrcSubTile[4]) {
       *(uint16_t*)(pDstSubTile + 2) = (uint16_t)pDstSubTile[2] & 0xfffe;
       *(uint16_t*)((int)pDstSubTile + 10) = 0;

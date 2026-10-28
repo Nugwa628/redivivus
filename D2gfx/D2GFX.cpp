@@ -566,12 +566,7 @@ BOOL __stdcall D2GFX_UpdateWindowSize(int32_t nResolutionMode) {
     tagRECT rcCurrentClient;
     HWND hWndLocal;
     HWND hWnd = hwndD2GFX_Window;
-    if (!RENDERER_CurrentRenderedFunctions) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x232);
-      exit(-1);
-    }
-
-    {
+    if (RENDERER_CurrentRenderedFunctions) {
       int cy;
       nResolutionMode = nResolutionMode;
       if (bD2GFX_Windowed != 1) {
@@ -624,6 +619,9 @@ BOOL __stdcall D2GFX_UpdateWindowSize(int32_t nResolutionMode) {
       /* LPRECT lpRect for GetWindowRect */ /* HWND hWnd for GetWindowRect */ GetWindowRect(hWndLocal, &rInitialWindowRect);
       return 1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x232);
+    exit(-1);
 }
 
 void __stdcall D2GFX_ClearCaches() {

@@ -24,7 +24,7 @@ typedef void * (__stdcall *pfnSBmpAllocCallback)(uint32_t nSize);
 namespace Storm::Source::SBMP {
 
 // Validates TGA file header structure. Checks image type (1, 2, 9, or 10), color map type (0 or 1), bit depth (8, 24, or 32), and verifies image dimensions are within valid range (< 257).
-BOOL __stdcall SBMP_ValidateTGAHeader(TGAHeaderStrc * descriptor) {
+static BOOL __stdcall SBMP_ValidateTGAHeader(TGAHeaderStrc * descriptor) {
     uint8_t uVar1 = descriptor->nImageType;
     if (!((uVar1 == '\x01' || uVar1 == '\x02' || uVar1 == '\t' || uVar1 == '\n') && (descriptor->nColorMapType == '\0' && (descriptor->nPixelDepth == '\x18' && !(descriptor->nDescriptor & 0xf) || descriptor->nPixelDepth == ' ' && (descriptor->nDescriptor & 0xf) == 8) || descriptor->nColorMapType == '\x01' && descriptor->nPixelDepth == '\b' && (uint32_t)descriptor->nCMapLength + (uint32_t)descriptor->nCMapFirst < 0x101 && (descriptor->nCMapEntrySize == '\x18' || descriptor->nCMapEntrySize == ' ')) && !(descriptor->nDescriptor & 0xc0))) {
       return 0;
@@ -34,7 +34,7 @@ BOOL __stdcall SBMP_ValidateTGAHeader(TGAHeaderStrc * descriptor) {
 }
 
 // Decodes TGA color map (palette) into RGBA format. Reads palette entries from file, converts BGR(A) to RGBA byte order, and pads with alpha channel if needed. Supports 3 or 4 bytes per palette entry.
-BOOL __thiscall SBMP_DecodeTGAPalette(D2TgaHeaderStrc * pHeader, int nPaletteDataSize, uint32_t * pPaletteOut, uint8_t * pPaletteData) {
+static BOOL __thiscall SBMP_DecodeTGAPalette(D2TgaHeaderStrc * pHeader, int nPaletteDataSize, uint32_t * pPaletteOut, uint8_t * pPaletteData) {
     uint8_t byAlpha;
     uint32_t nFirstEntry = (uint32_t)pHeader->wColorMapFirst;
     uint32_t nBytesPerEntry = pHeader->wColorMapLength + nFirstEntry;
@@ -71,7 +71,7 @@ BOOL __thiscall SBMP_DecodeTGAPalette(D2TgaHeaderStrc * pHeader, int nPaletteDat
 }
 
 // Decodes TGA pixel data into output buffer. Handles both uncompressed (type 1/2) and RLE-compressed (type 9/10) formats. Supports horizontal/vertical flipping via image descriptor flags. Processes raw runs and repeat runs for RLE.
-BOOL __fastcall SBMP_DecodeTGAPixels(uint8_t * pSrcData, uint8_t * pTgaHeader, int nSrcDataSize, uint8_t * pDstPixels, int nMaxBytes) {
+static BOOL __fastcall SBMP_DecodeTGAPixels(uint8_t * pSrcData, uint8_t * pTgaHeader, int nSrcDataSize, uint8_t * pDstPixels, int nMaxBytes) {
     uint8_t* pbVar1;
     uint8_t* pbVar2;
     uint8_t bVar3;
@@ -259,7 +259,7 @@ BOOL __fastcall SBMP_DecodeTGAPixels(uint8_t * pSrcData, uint8_t * pTgaHeader, i
 
 // Reads Targa (.tga) image file from MPQ into memory. Validates TGA header, extracts width/height/bpp, reads palette (if present), and decodes pixel data (uncompressed or RLE-compressed).
 // @sourcefile .\SOURCE\SBMP.CPP
-int __fastcall SBMP_ReadTGA(D2MPQFileStrc * hFile, uint32_t * pWidth, void * palette, uint8_t * pixels, int nMaxPixelBytes, uint32_t * pHeight, uint32_t * pBpp) {
+static int __fastcall SBMP_ReadTGA(D2MPQFileStrc * hFile, uint32_t * pWidth, void * palette, uint8_t * pixels, int nMaxPixelBytes, uint32_t * pHeight, uint32_t * pBpp) {
     DWORD dwFileSize;
     uint8_t* pSrcData;
     uint32_t nIdFieldLen;
@@ -340,7 +340,7 @@ int __fastcall SBMP_ReadTGA(D2MPQFileStrc * hFile, uint32_t * pWidth, void * pal
     return 0;
 }
 
-int __stdcall SBMP_LoadFromMemory(uint8_t * pData, uint32_t dataSize, uint32_t * pPaletteOut, uint8_t * pixels, int nMaxPixelBytes, uint32_t * pWidth, uint32_t * pHeight, uint32_t * pBpp) {
+static int __stdcall SBMP_LoadFromMemory(uint8_t * pData, uint32_t dataSize, uint32_t * pPaletteOut, uint8_t * pixels, int nMaxPixelBytes, uint32_t * pWidth, uint32_t * pHeight, uint32_t * pBpp) {
     int nPaletteDataSize;
     BOOL bPaletteDecoded;
     int nColorMapSize;
@@ -395,7 +395,7 @@ int __stdcall SBMP_LoadFromMemory(uint8_t * pData, uint32_t dataSize, uint32_t *
     return 0;
 }
 
-int __thiscall SBMP_WriteTGA(void * pPixels, void * hFile, int nPalettePtr, int width, int height, int bpp, uint32_t stride) {
+static int __thiscall SBMP_WriteTGA(void * pPixels, void * hFile, int nPalettePtr, int width, int height, int bpp, uint32_t stride) {
     // Frame slots -800..-8 are ONE object: &dwBytesWritten is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     #pragma pack(push, 1)
@@ -472,7 +472,7 @@ int __thiscall SBMP_WriteTGA(void * pPixels, void * hFile, int nPalettePtr, int 
 }
 
 // @blizzard FlipImage (SBMP.CPP)
-void __thiscall SBMP_FlipImage(int numRows, void * dst, void * src, int dstSize, int rowWidth, int srcStride) {
+static void __thiscall SBMP_FlipImage(int numRows, void * dst, void * src, int dstSize, int rowWidth, int srcStride) {
     size_t _Size;
     if (!dst || !src || !dstSize || !rowWidth || !srcStride || !numRows) {
       SErr::SErrSetLastError(0x57);
@@ -503,7 +503,7 @@ void __thiscall SBMP_FlipImage(int numRows, void * dst, void * src, int dstSize,
 }
 
 // @blizzard FlushPacket (SBMP.CPP)
-void __stdcall SBMP_FlushPacket(D2GifLzwEncoderStrc * pState, int * ppOutput) {
+static void __stdcall SBMP_FlushPacket(D2GifLzwEncoderStrc * pState, int * ppOutput) {
     int iVar1 = pState->nBlockLen;
     if (!iVar1) {
       return;
@@ -517,7 +517,7 @@ void __stdcall SBMP_FlushPacket(D2GifLzwEncoderStrc * pState, int * ppOutput) {
 }
 
 // @blizzard Output (SBMP.CPP)
-void __fastcall SBMP_Output(int value, int * ppOutput, D2GifLzwEncoderStrc * pState) {
+static void __fastcall SBMP_Output(int value, int * ppOutput, D2GifLzwEncoderStrc * pState) {
     int iVar1;
     pState->nBitAccum |= value << ((uint8_t)pState->nBitCount & 0x1f);
     iVar1 = pState->nCodeSize + pState->nBitCount;
@@ -548,7 +548,7 @@ void __fastcall SBMP_Output(int value, int * ppOutput, D2GifLzwEncoderStrc * pSt
 }
 
 // @blizzard CompressPcxRow (SBMP.CPP)
-void __fastcall SBMP_CompressPcxRow(int count, int * ppInput, int * ppOutput) {
+static void __fastcall SBMP_CompressPcxRow(int count, int * ppInput, int * ppOutput) {
     int nRunLen;
     uint8_t byRunValue;
     do {
@@ -662,7 +662,7 @@ int __fastcall SBMP_EncodePcx256File(int nWidth, int nHeight, HANDLE hFile, int 
 }
 
 // @blizzard UncompressPcxImage (SBMP.CPP)
-void __fastcall SBMP_UncompressPcxImage(int dstSize, uint8_t * dst, int srcSize, uint8_t * src, uint32_t width, uint32_t stride, int bytesPerPixel) {
+static void __fastcall SBMP_UncompressPcxImage(int dstSize, uint8_t * dst, int srcSize, uint8_t * src, uint32_t width, uint32_t stride, int bytesPerPixel) {
     uint8_t bVar1;
     uint32_t nColIdx;
     int nDstOff;
@@ -792,7 +792,7 @@ void __fastcall SBMP_UncompressPcxImage(int dstSize, uint8_t * dst, int srcSize,
 }
 
 // @blizzard FindExtension (SBMP.CPP)
-char * __stdcall SBMP_FindExtension(char * path) {
+static char * __stdcall SBMP_FindExtension(char * path) {
     char* pScanPtr = SSTR::SStrChr(path, '\\');
     while (pScanPtr) {
       pScanPtr = SSTR::SStrChr(path, '\\');
@@ -812,7 +812,7 @@ char * __stdcall SBMP_FindExtension(char * path) {
 }
 
 // @blizzard DetermineImageType (SBMP.CPP)
-int SBMP_DetermineImageType(short magic) {
+static int SBMP_DetermineImageType(short magic) {
     if (magic == 0x50a) {
       return 2;
     }
@@ -821,7 +821,7 @@ int SBMP_DetermineImageType(short magic) {
 }
 
 // @blizzard DecodeBmpFile (SBMP.CPP)
-int __thiscall SBMP_DecodeBmpFile(int * pWidth, void * palette, D2MPQFileStrc * hFile, void * pixels, int nDstStride, int * pHeight, uint32_t * pBpp) {
+static int __thiscall SBMP_DecodeBmpFile(int * pWidth, void * palette, D2MPQFileStrc * hFile, void * pixels, int nDstStride, int * pHeight, uint32_t * pBpp) {
     uint8_t aPaletteScratch[1024];
     BITMAPFILEHEADER sBmpFileHeader;
     BITMAPINFOHEADER aBmpInfoExtraBuf;
@@ -890,7 +890,7 @@ int __thiscall SBMP_DecodeBmpFile(int * pWidth, void * palette, D2MPQFileStrc * 
 
 // Load a BMP from a raw in-memory file blob; pData points at the BITMAPFILEHEADER (14 bytes) followed immediately by BITMAPINFOHEADER and palette/pixel data
 // @blizzard DecodeBmpMem (SBMP.CPP)
-int __fastcall SBMP_DecodeBmpMem(int * pWidth, int * pHeight, uint32_t * pBpp, uint8_t * pData, int palette, void * pixels, int dstSize) {
+static int __fastcall SBMP_DecodeBmpMem(int * pWidth, int * pHeight, uint32_t * pBpp, uint8_t * pData, int palette, void * pixels, int dstSize) {
     int nPaletteByteOffset;
     uint8_t* pDstPaletteByte;
     int bHasPalette = palette;
@@ -938,7 +938,7 @@ int __fastcall SBMP_DecodeBmpMem(int * pWidth, int * pHeight, uint32_t * pBpp, u
 }
 
 // @blizzard EncodeBmp256File (SBMP.CPP)
-int __stdcall SBMP_EncodeBmp256File(int nPalettePtr, uint32_t nSrcStride, HANDLE hFile, void * pixels, int height) {
+static int __stdcall SBMP_EncodeBmp256File(int nPalettePtr, uint32_t nSrcStride, HANDLE hFile, void * pixels, int height) {
     RGBQUAD aPalette[256];
     DWORD dwPixelBytesWritten;
     BITMAPINFOHEADER sBmpInfoHdr;
@@ -986,7 +986,7 @@ int __stdcall SBMP_EncodeBmp256File(int nPalettePtr, uint32_t nSrcStride, HANDLE
 }
 
 // @blizzard ClearBlock (SBMP.CPP)
-void __stdcall SBMP_ClearBlock(D2GifLzwEncoderStrc * pState, int pDstBuf) {
+static void __stdcall SBMP_ClearBlock(D2GifLzwEncoderStrc * pState, int pDstBuf) {
     SSystem::SMemZero(pState->pHashTable, 0x4e2c);
     pState->nNextCode = pState->nClearCode + 2;
     SBMP_Output(pState->nClearCode, (int*)pDstBuf, pState);
@@ -995,7 +995,7 @@ void __stdcall SBMP_ClearBlock(D2GifLzwEncoderStrc * pState, int pDstBuf) {
 }
 
 // @blizzard CompressGifByte (SBMP.CPP)
-void __stdcall SBMP_CompressGifByte(D2GifLzwEncoderStrc * pState, int pDstBuf, uint32_t nNewCode) {
+static void __stdcall SBMP_CompressGifByte(D2GifLzwEncoderStrc * pState, int pDstBuf, uint32_t nNewCode) {
     int nProbeStep;
     if (pState->bFirst) {
       pState->nLastCode = nNewCode;
@@ -1096,7 +1096,7 @@ int __fastcall SBMP_CompressGifImage(int nSrcLen, uint8_t * pSrcPixels, int pDst
 }
 
 // @blizzard EncodeGif256File (SBMP.CPP)
-int __thiscall SBMP_EncodeGif256File(int width, void * hFile, int palette, uint8_t * pixels, int height) {
+static int __thiscall SBMP_EncodeGif256File(int width, void * hFile, int palette, uint8_t * pixels, int height) {
     // Frame slots -40..-8 are ONE object: &dwBytesWritten is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -1161,7 +1161,7 @@ int __thiscall SBMP_EncodeGif256File(int width, void * hFile, int palette, uint8
 }
 
 // @blizzard DecodePcxFile (SBMP.CPP)
-int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels, int * pHeight, int palette, int nParam, uint32_t * pWidth, int * pBpp) {
+static int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels, int * pHeight, int palette, int nParam, uint32_t * pWidth, int * pBpp) {
     bool bVar1;
     DWORD dwFileSize;
     uint8_t* src;
@@ -1228,7 +1228,7 @@ int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels, int *
 }
 
 // @blizzard DecodePcxMem (SBMP.CPP)
-int __thiscall SBMP_DecodePcxMem(uint32_t * pWidth, void * gifData, int dataSize, int palette, uint8_t * pixels, int dstSize, int * pHeight, int * pBpp) {
+static int __thiscall SBMP_DecodePcxMem(uint32_t * pWidth, void * gifData, int dataSize, int palette, uint8_t * pixels, int dstSize, int * pHeight, int * pBpp) {
     uint32_t width = (uint32_t)*(uint16_t*)((int)gifData + 8) - (uint32_t)*(uint16_t*)((int)gifData + 4) + 1;
     int nBpp = (uint32_t)*(uint8_t*)((int)gifData + 3) * (uint32_t)*(uint8_t*)((int)gifData + 0x41);
     int nHeight = (uint32_t)*(uint16_t*)((int)gifData + 10) - (uint32_t)*(uint16_t*)((int)gifData + 6) + 1;

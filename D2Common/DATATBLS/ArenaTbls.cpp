@@ -85,7 +85,7 @@ void __stdcall FreeArenaTxt() {
 }
 
 // Builds sgCharTemplateLevelIndex (int[64]): for each CharTemplate level the index of its first row. Rows (stride 0xf0, level byte at +0x1f) must be sorted by ascending level; halts at line 0x5c otherwise.
-void __stdcall TXT_BuildCharTemplateLevelIndex(D2CharTemplateTxt * pCharTemplateTxt, int32_t nCount) {
+static void __stdcall TXT_BuildCharTemplateLevelIndex(D2CharTemplateTxt * pCharTemplateTxt, int32_t nCount) {
     memset(sgCharTemplateLevelIndex, 0, 0x100);
     uint32_t nPrevLevel = 0;
     int i = 0;

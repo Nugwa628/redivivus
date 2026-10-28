@@ -857,7 +857,7 @@ void __fastcall Q20_InitData(D2QuestDataStrc * pQuestData) {
 // A3Q3 "Khalim's Will" — spawns the unique serpent/council monster pack (monClass 0x197) that
 // carries the quest item. Sets in-progress guard at +4 around the spawn; on success records spawned,
 // clears the "pending" flag (+3) and stores the spawned unit's GUID at +0x24. No quest-state writes.
-void Q20_SpawnUniqueSerpent(::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2QuestDataA3Q3Strc * pA3Q3Data) {
+static void Q20_SpawnUniqueSerpent(::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2QuestDataA3Q3Strc * pA3Q3Data) {
     pA3Q3Data->nBladeGivenFlag = '\x01';
     D2UnitStrc* pSerpentUnit = Monsters::SpawnUniquePack(pGame, pRoom, nullptr, 0x197, 1, 0, 0, 1);
     if (pSerpentUnit) {

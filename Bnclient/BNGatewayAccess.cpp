@@ -245,12 +245,12 @@ void __fastcall GetBattlenetRealmsList(int32_t nGatewayAccess) {
     bool bFileLoaded;
     DWORD dwFileSize = 0;
     _bFileLoaded = Storm::Source::SFile::SFileLoadFile("Data\\Global\\Realms.bin", (void**)(nGatewayAccess + 0x20), &dwFileSize, 0, 0);
-    if (!_bFileLoaded) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x188);
-      exit(-1);
+    if (_bFileLoaded) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x188);
+    exit(-1);
 }
 
 uint32_t * __stdcall WritingDefaultGatewayList(DWORD * pdwFileSize) {

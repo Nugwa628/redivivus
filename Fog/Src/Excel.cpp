@@ -449,7 +449,7 @@ int32_t __stdcall GetLinkNodeIndex(D2TxtLinkStrc * pLink, char * szItemCode, uin
     return -1;
 }
 
-uint8_t * __fastcall FOG_ValidateBytePtr(uint8_t * pbyte, uint8_t * pKey) {
+static uint8_t * __fastcall FOG_ValidateBytePtr(uint8_t * pbyte, uint8_t * pKey) {
     int nCmpResult = *(int*)pbyte;
     do {
       uint8_t* pNode;

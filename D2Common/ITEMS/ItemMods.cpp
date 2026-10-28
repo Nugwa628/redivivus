@@ -43,7 +43,7 @@
 
 namespace D2Common::ITEMS::ItemMods {
 
-D2MagixAffixModStrc * TXT_magixaffixes_GetModEntry(D2MagicAffixTxt * pMagicAffixLine, uint32_t nIndex) {
+static D2MagixAffixModStrc * TXT_magixaffixes_GetModEntry(D2MagicAffixTxt * pMagicAffixLine, uint32_t nIndex) {
     if (!pMagicAffixLine) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x79);
       exit(-1);
@@ -60,15 +60,15 @@ D2MagixAffixModStrc * TXT_magixaffixes_GetModEntry(D2MagicAffixTxt * pMagicAffix
 // Returns pTxtLine + 0xc + nMod * 0x10 (nMod in EAX, the line in ECX); halts (ItemMods.cpp line 129, nMod < MAX_UNIQUE_ITEM_PROPERTIES && nMod >= 0) when nMod >= 12.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 void * __stdcall TXT_UniqueItems_GetModEntry(void * pTxtLine, uint32_t nMod) {
-    if (!(nMod < 0xc)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x81);
-      exit(-1);
+    if (nMod < 0xc) {
+      return (void*)(nMod * 0x10 + 0xc + (int)pTxtLine);
     }
 
-    return (void*)(nMod * 0x10 + 0xc + (int)pTxtLine);
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x81);
+    exit(-1);
 }
 
-int32_t ITEMMOD_GetMaxLevelAtIndex(D2GemsTxt * pMagixAffixLine, uint32_t nIndex, uint32_t nParam) {
+static int32_t ITEMMOD_GetMaxLevelAtIndex(D2GemsTxt * pMagixAffixLine, uint32_t nIndex, uint32_t nParam) {
     D2MagixAffixModStrc* pModPtrTable[3];
     pModPtrTable[0] = pMagixAffixLine->aWeaponMods;
     pModPtrTable[1] = pMagixAffixLine->aHelmMods;
@@ -87,7 +87,7 @@ int32_t ITEMMOD_GetMaxLevelAtIndex(D2GemsTxt * pMagixAffixLine, uint32_t nIndex,
 }
 
 // Retrieves a specific property modifier from an affix line. Rolls property values based on min/max ranges and returns property code, parameter, and calculated value.
-int32_t ITEMMOD_GetPropertyFromAffix(D2MagicAffixTxt * pMagicAffixLine, uint32_t nParam, uint32_t nNumber, uint32_t nSelector) {
+static int32_t ITEMMOD_GetPropertyFromAffix(D2MagicAffixTxt * pMagicAffixLine, uint32_t nParam, uint32_t nNumber, uint32_t nSelector) {
     D2MagixAffixModStrc* pModEntry;
     int32_t nMaxLevel;
     int32_t nLine;
@@ -285,15 +285,15 @@ int32_t __stdcall ITEMMODS_GetQualityField2(int32_t nParam1, int32_t nParam2, in
 }
 
 void __stdcall ITEMMODS_GetQualityFields1_2_3(uint32_t nPackedQuality, uint32_t * pnParam1, uint32_t * pnParam2, uint32_t * pnParam3) {
-    if (!(pnParam1 && pnParam2 && pnParam3)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1aa);
-      exit(-1);
+    if (pnParam1 && pnParam2 && pnParam3) {
+      *pnParam1 = (nPackedQuality & 0x1f) / 3;
+      *pnParam2 = (nPackedQuality & 0x1f) % 3;
+      *pnParam3 = (int)nPackedQuality >> 5 & 0x1f;
+      return;
     }
 
-    *pnParam1 = (nPackedQuality & 0x1f) / 3;
-    *pnParam2 = (nPackedQuality & 0x1f) % 3;
-    *pnParam3 = (int)nPackedQuality >> 5 & 0x1f;
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1aa);
+    exit(-1);
 }
 
 int32_t __stdcall ITEMMODS_GetQualityField3(int32_t nParam1, int32_t nParam2, int32_t nParam3) {
@@ -301,7 +301,7 @@ int32_t __stdcall ITEMMODS_GetQualityField3(int32_t nParam1, int32_t nParam2, in
 }
 
 // Returns an existing stat list on pUnit (or pUnitUnknown if non-null) matching nState+nFlags, creating and attaching one if absent. Allocates via AllocStatList using the unit's memory pool and GUID, sets the state, then halts unrecoverably if allocation fails.
-D2StatListExStrc * __stdcall ITEMMOD_GetOrCreateStatList(D2UnitStrc * pUnit, int32_t nState, uint32_t nFlags, D2UnitStrc * pUnitUnknown) {
+static D2StatListExStrc * __stdcall ITEMMOD_GetOrCreateStatList(D2UnitStrc * pUnit, int32_t nState, uint32_t nFlags, D2UnitStrc * pUnitUnknown) {
     D2StatListExStrc* pStatList;
     void* pMemory;
     if (!pUnitUnknown) {
@@ -331,16 +331,16 @@ D2StatListExStrc * __stdcall ITEMMOD_GetOrCreateStatList(D2UnitStrc * pUnit, int
     }
 
     Stats::StatsEx::SetState(pStatList, nState);
-    if (!pStatList) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x201);
-      exit(-1);
+    if (pStatList) {
+      return pStatList;
     }
 
-    return pStatList;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x201);
+    exit(-1);
 }
 
 // For an enhanced-defense or enhanced-damage property, raises the item's armor class above its Items.txt maxac, or sets max/min (one-hand, two-hand, throw) damage to the Items.txt maximums, so an enhanced item rolls at least its base maximum.
-void __stdcall ITEMMOD_MaximizeStatForEnhanced(eD2UnitStat eEnhancedProp, D2UnitStrc * pUnit) {
+static void __stdcall ITEMMOD_MaximizeStatForEnhanced(eD2UnitStat eEnhancedProp, D2UnitStrc * pUnit) {
     int32_t nCurrentAC;
     int nNewAC;
     int nItemClassId;
@@ -409,7 +409,7 @@ void __stdcall ITEMMOD_MaximizeStatForEnhanced(eD2UnitStat eEnhancedProp, D2Unit
 }
 
 // Scales stat values by shifting left 8 bits for specific stat types (life, mana, stamina, resistances). Twenty-eight bytes: an ADD, a jump table and a shift through ECX, touching EDX not at all. PropertyFunc_MinMaxDamagePair loads the max-stat code into EDX before calling this and reads it back afterwards, so declaring EDX killed lost the code and every elemental and poison MAX damage value was scaled with garbage.
-void ITEMMOD_ScaleValueForStatType(int * pnParam, eD2UnitStat eStatType) {
+static void ITEMMOD_ScaleValueForStatType(int * pnParam, eD2UnitStat eStatType) {
     switch (eStatType) {
       case UNITSTAT_hitpoints:
 
@@ -431,7 +431,7 @@ void ITEMMOD_ScaleValueForStatType(int * pnParam, eD2UnitStat eStatType) {
 }
 
 // Rolls random value from [fmin, fmax] and applies to stat. Classic: exclusive upper bound. Expansion: inclusive upper bound (can hit max!). Uses item seed for deterministic RNG. Scales damage/poison values (shift left 8 bits).
-int32_t __stdcall ITEMMOD_ApplyRandomStatValue(D2UnitStrc * pUnit, int32_t nParam1, D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, int32_t nParam2, int32_t nParam3, int32_t nParam4, uint32_t nParam, D2SetsTxtFStrc * pProperty) {
+static int32_t __stdcall ITEMMOD_ApplyRandomStatValue(D2UnitStrc * pUnit, int32_t nParam1, D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, int32_t nParam2, int32_t nParam3, int32_t nParam4, uint32_t nParam, D2SetsTxtFStrc * pProperty) {
     int16_t wItemVersion;
     D2SeedStrc* pItemSeed;
     uint32_t uRandRange;
@@ -490,28 +490,28 @@ int32_t __stdcall ITEMMOD_ApplyRandomStatValue(D2UnitStrc * pUnit, int32_t nPara
     }
     ITEMMOD_ScaleValueForStatType(&nParam3, eUnitStat);
     D2StatListExStrc* pStatList = ITEMMOD_GetOrCreateStatList(pUnit, nParam4, nParam, pUnit2);
-    if (!pStatList) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x29d);
-      exit(-1);
-    }
+    if (pStatList) {
+      nStatValue = nParam3;
+      if (nParam2) {
+        nStatValue = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, eUnitStat, 0);
+        nStatValue = -nStatValue;
+      }
 
-    nStatValue = nParam3;
-    if (nParam2) {
-      nStatValue = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, eUnitStat, 0);
-      nStatValue = -nStatValue;
-    }
+      Stats::StatsEx::STATLIST_AddStatValue(pStatList, eUnitStat, nStatValue, 0);
+      if (eUnitStat != UNITSTAT_poisonmaxdam) {
+        return 1;
+      }
 
-    Stats::StatsEx::STATLIST_AddStatValue(pStatList, eUnitStat, nStatValue, 0);
-    if (eUnitStat != UNITSTAT_poisonmaxdam) {
+      Stats::StatsEx::STATLIST_AddStatValue(pStatList, UNITSTAT_poison_count, 1, 0);
       return 1;
     }
 
-    Stats::StatsEx::STATLIST_AddStatValue(pStatList, UNITSTAT_poison_count, 1, 0);
-    return 1;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x29d);
+    exit(-1);
 }
 
 // Core property-to-stat conversion. Applies stat value to unit, optionally maximizing enhanced stats and handling value removal.
-int32_t __stdcall PropertyFunc_SimpleStat(int32_t nParam1, D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3, int32_t nParam4, int32_t nParam5, D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, uint32_t nParam) {
+static int32_t __stdcall PropertyFunc_SimpleStat(int32_t nParam1, D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3, int32_t nParam4, int32_t nParam5, D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, uint32_t nParam) {
     int nBaseValue;
     if (nParam4 || nParam1 == 1) {
       ITEMMOD_MaximizeStatForEnhanced(eUnitStat, pUnit2);
@@ -707,12 +707,7 @@ int32_t __fastcall PropertyFunc_AllResistances(int32_t nType, D2UnitStrc * pUnit
       ITEMMOD_ApplyRandomStatValue(pItemUnit, nType, pUnit, UNITSTAT_poisonresist, nParam2, 0, nParam3, nParam, pProperty);
       return eStatCode;
     }
-    if (!pProperty) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x349);
-      exit(-1);
-    }
-
-    {
+    if (pProperty) {
       D2SeedStrc* pSeed;
       nRangeHigh = pProperty->fmax;
       pProperty = (D2SetsTxtFStrc*)pProperty->fmin;
@@ -741,6 +736,9 @@ int32_t __fastcall PropertyFunc_AllResistances(int32_t nType, D2UnitStrc * pUnit
       PropertyFunc_SimpleStat(nType, pUnit, (int32_t)pProperty, nParam2, 0, nParam3, pItemUnit, UNITSTAT_poisonresist, nParam);
       return eStatCode;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x349);
+    exit(-1);
 }
 
 // Property function for All Maximum Resistances (+X% max fire/light/cold/poison resist). Classic items: 4 independent RNG rolls via ITEMMOD_ApplyRandomStatValue. Expansion items: single RNG roll from property min/max applied identically to all four max-resist stats via PropertyFunc_SimpleStat. Halts if property data pointer is null.
@@ -756,12 +754,7 @@ int32_t __fastcall PropertyFunc_AllMaxResistances(int32_t nType, D2UnitStrc * pU
       ITEMMOD_ApplyRandomStatValue(pItemUnit, nType, pUnit, UNITSTAT_maxpoisonresist, nParam2, 0, nParam3, nParam, pProperty);
       return eStatCode;
     }
-    if (!pProperty) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x364);
-      exit(-1);
-    }
-
-    {
+    if (pProperty) {
       D2SeedStrc* pSeed;
       nRangeHigh = pProperty->fmax;
       pProperty = (D2SetsTxtFStrc*)pProperty->fmin;
@@ -789,6 +782,9 @@ int32_t __fastcall PropertyFunc_AllMaxResistances(int32_t nType, D2UnitStrc * pU
       PropertyFunc_SimpleStat(nType, pUnit, (int32_t)pProperty, nParam2, 0, nParam3, pItemUnit, UNITSTAT_maxpoisonresist, nParam);
       return eStatCode;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x364);
+    exit(-1);
 }
 
 // Item-property callback that rolls and applies minimum-damage stats (UNITSTAT_mindamage, UNITSTAT_secondary_mindamage, UNITSTAT_item_throw_mindamage) to a unit. Reads min/max range from pPropData[8/12], rolls a random value in [min,max] via RANDOM_RandomNumberSelector on the item seed (range is exclusive for older item versions). Looks up the item's Items.txt row to decide which damage stats apply: one-hand vs. two-hand min damage are written separately for weapons; throw-min is applied for throwable weapons or non-weapons. Calls PropertyFunc_SimpleStat for each applicable stat. Halts with an internal error if pPropData is null.
@@ -801,12 +797,7 @@ int32_t __fastcall PropertyFunc_MinDamage(int32_t nType, D2UnitStrc * pUnit, D2U
     D2SetsTxtFStrc* nRangeA;
     int32_t nErrLine;
     int32_t nProperty;
-    if (!pProperty) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x37b);
-      exit(-1);
-    }
-
-    {
+    if (pProperty) {
       int16_t wItemVersion;
       nRangeA = (D2SetsTxtFStrc*)pProperty->fmin;
       nRangeB = pProperty->fmax;
@@ -858,6 +849,9 @@ int32_t __fastcall PropertyFunc_MinDamage(int32_t nType, D2UnitStrc * pUnit, D2U
       PropertyFunc_SimpleStat(nType, pUnit, nProperty, nParam2, 0, nParam3, pItemUnit, UNITSTAT_item_throw_mindamage, nParam);
       return 1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x37b);
+    exit(-1);
 }
 
 // Property function for Maximum Damage bonus.
@@ -887,12 +881,7 @@ int32_t __fastcall PropertyFunc_MaxDamage(int32_t nType, D2UnitStrc * pUnit, D2U
     D2SetsTxtFStrc* nRangeA;
     int32_t nErrLine;
     int32_t nProperty;
-    if (!pProperty) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x397);
-      exit(-1);
-    }
-
-    {
+    if (pProperty) {
       int16_t wItemVersion;
       nRangeA = (D2SetsTxtFStrc*)pProperty->fmin;
       nRangeB = pProperty->fmax;
@@ -944,6 +933,9 @@ int32_t __fastcall PropertyFunc_MaxDamage(int32_t nType, D2UnitStrc * pUnit, D2U
       PropertyFunc_SimpleStat(nType, pUnit, nProperty, nParam2, 0, nParam3, pItemUnit, UNITSTAT_item_throw_maxdamage, nParam);
       return 1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x397);
+    exit(-1);
 }
 
 // Property function for % Enhanced Damage.
@@ -1335,12 +1327,7 @@ int32_t __fastcall ITEMMOD_ApplyTripleStat(int32_t nType, D2UnitStrc * pUnit, D2
     ITEMMOD_ScaleValueForStatType((int*)&eStatCode, eMaxStat);
     ITEMMOD_ScaleValueForStatType((int*)&pProperty, eLenStat);
     D2StatListExStrc* pStatList = ITEMMOD_GetOrCreateStatList(pItemUnit, nParam3, nParam, pUnit);
-    if (!pStatList) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4ad);
-      exit(-1);
-    }
-
-    {
+    if (pStatList) {
       int nMinVal;
       nMinVal = nLenVal;
       if (nParam2) {
@@ -1362,6 +1349,9 @@ int32_t __fastcall ITEMMOD_ApplyTripleStat(int32_t nType, D2UnitStrc * pUnit, D2
       Stats::StatsEx::STATLIST_AddStatValue(pStatList, UNITSTAT_poison_count, 1, 0);
       return 1;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4ad);
+    exit(-1);
 }
 
 // Property function for +X to Skill Y bonus. Reads skill ID from pPropEntry+4 and rolls level value from pPropEntry+8/C range (inclusive upper bound for expansion items). Adds UNITSTAT_item_singleskill with skill ID as layer to the item's stat list. Returns 0 if skill ID out of range or stat list unavailable.
@@ -2631,7 +2621,7 @@ void __stdcall ITEMMOD_ApplyPropertyToUnitStatsExpansion(uint32_t dwParam1, D2Un
 }
 
 // Top-level item-property applicator: applies one item/set property (described by a D2SetsTxtFStrc / properties.txt function row) to a unit's stat list. If the source item is an Expansion item (ITEM_GetItemData_wItemVersion != 0) it forwards to ITEMMOD_ApplyPropertyToUnitStatsExpansion (the full classic+expansion pipeline). Otherwise (classic item) it looks up the property's function code (fcode) in gaPropertyFuncTable and, if in range with a non-null handler, invokes that handler with the unit, the property row, its stat code and the passed magnitude/parameter args. Halts via ErrorManager if pSetsTxtF is null in the classic path. Mutates pUnit's stats; no return.
-void __stdcall ITEMMOD_ApplyPropertyToUnitStats(uint32_t dwParam1, D2UnitStrc * pUnit2, D2SetsTxtFStrc * pSetsTxtF, D2UnitStrc * pUnit, uint32_t dwParam2, uint32_t dwParam3, uint32_t dwParam4, uint32_t dwParam5, int32_t nParam, uint32_t nParam2, uint32_t dwParam6) {
+static void __stdcall ITEMMOD_ApplyPropertyToUnitStats(uint32_t dwParam1, D2UnitStrc * pUnit2, D2SetsTxtFStrc * pSetsTxtF, D2UnitStrc * pUnit, uint32_t dwParam2, uint32_t dwParam3, uint32_t dwParam4, uint32_t dwParam5, int32_t nParam, uint32_t nParam2, uint32_t dwParam6) {
     // Static local variables (originally global data)
     static D2PropertyFuncEntryStrc gaPropertyFuncTable[244] = {
     {
@@ -3617,12 +3607,7 @@ void __stdcall ITEMMOD_ApplyPropertyToUnitStats(uint32_t dwParam1, D2UnitStrc * 
       ITEMMOD_ApplyPropertyToUnitStatsExpansion(dwParam1, pUnit2, pUnit, dwParam2, dwParam3, dwParam4, pSetsTxtF, nParam, nParam2, dwParam6);
       return;
     }
-    if (!pSetsTxtF) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x66d);
-      exit(-1);
-    }
-
-    {
+    if (pSetsTxtF) {
       int nPropFuncCode;
       nPropFuncCode = pSetsTxtF->fcode;
       if (!(nPropFuncCode != -1 && -1 < nPropFuncCode && nPropFuncCode < sgptDataTable->nTxtPropertiesSize && gaPropertyFuncTable[nPropFuncCode].pfnHandler)) {
@@ -3632,6 +3617,9 @@ void __stdcall ITEMMOD_ApplyPropertyToUnitStats(uint32_t dwParam1, D2UnitStrc * 
       gaPropertyFuncTable[nPropFuncCode].pfnHandler(dwParam1, pUnit2, pUnit, pSetsTxtF, gaPropertyFuncTable[nPropFuncCode].nStatCode, dwParam5, nParam, nParam2, dwParam6);
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x66d);
+    exit(-1);
 }
 
 // Applies socketed-item / affix property modifiers onto a unit's stat list, dispatched by dwParam1 (property source: 0/2/5=3 props, 1=2 props from a magic affix via ITEMMOD_GetPropertyFromAffix; 3=unique item's 12 sEntry props; 4=set item's sEntry props plus the 10 partial-set bonus entries from sEntryEx keyed by item version). For affix cases it loops over the affix's property list, stopping at a negative fcode, calling ITEMMOD_ApplyPropertyToUnitStats for each. pUnit is the item being applied; pUnit2 the affected owner unit. No return value.

@@ -68,7 +68,7 @@ void * __fastcall D2FILE_AllocAndLoadD2File(D2PoolManagerStrc * pMemory, char * 
     return pBuffer;
 }
 
-int __stdcall FindMPQOnCd(char * pszMpqName, int * pnPriority, int * * ppArchive, LPSTR szText) {
+static int __stdcall FindMPQOnCd(char * pszMpqName, int * pnPriority, int * * ppArchive, LPSTR szText) {
     char* pcNextBackslash;
     DWORD dwDriveStringsLen;
     UINT nDriveType;
@@ -143,7 +143,7 @@ int __stdcall FindMPQOnCd(char * pszMpqName, int * pnPriority, int * * ppArchive
     return bOpenArchiveCdOk;
 }
 
-int * __stdcall FindMpqFromDiskOrCd(char * pszMpqName, int * pnPriority, int * ppArchive, LPSTR szText) {
+static int * __stdcall FindMpqFromDiskOrCd(char * pszMpqName, int * pnPriority, int * ppArchive, LPSTR szText) {
     uint32_t nFlags = 2;
     if (ppArchive) {
       nFlags = 3;

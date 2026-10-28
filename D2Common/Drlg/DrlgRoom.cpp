@@ -289,7 +289,7 @@ D2RoomExStrc * __fastcall DRLGSPAWN_GetRandomPresetSpawnPoint(int32_t nSpawnType
 // then scans preset units for UNIT_OBJECT with SubClass waypoint bit (0x40).
 // Outputs waypoint world coordinates into pX/pY.
 // Called by DRLGSPAWN_FindSpawnLocationInLevel.
-D2RoomExStrc * __stdcall DRLGSPAWN_FindWaypointRoomAndCoords(int * pX, int * pY, D2DrlgLevelStrc * pLevel) {
+static D2RoomExStrc * __stdcall DRLGSPAWN_FindWaypointRoomAndCoords(int * pX, int * pY, D2DrlgLevelStrc * pLevel) {
     D2ObjectsTxt* pObjectTxt;
     D2RoomExStrc* pRoomEx = pLevel->pRoomExFirst;
     while (true) {
@@ -335,7 +335,7 @@ D2RoomExStrc * __fastcall DRLGSPAWN_GetRoomAtLevelCenterOffset(int32_t nOffsetX,
 // Asserts that the level and its room list are non-null.
 // Uses RANDOM_RandomNumberSelector with the level seed and room count.
 // Called by DRLGSPAWN_FindSpawnLocationInLevel as fallback.
-D2RoomExStrc * DRLGSPAWN_GetRandomRoomFromLevel(D2DrlgLevelStrc * pLevel) {
+static D2RoomExStrc * DRLGSPAWN_GetRandomRoomFromLevel(D2DrlgLevelStrc * pLevel) {
     uint32_t nRandomIndex;
     if (!pLevel) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x13e);
@@ -534,7 +534,7 @@ void __fastcall DRLGWARP_InitWarpConnectionsBetweenLevels(D2DrlgStrc * pDrlg, ui
 }
 
 // Validates that warp flags on room tiles match the vis array entries for the level. Iterates room extensions checking warp tile destinations against expected vis connections.
-int DRLGWARP_ValidateWarpFlagsAgainstVis(D2DrlgLevelStrc * pLevel) {
+static int DRLGWARP_ValidateWarpFlagsAgainstVis(D2DrlgLevelStrc * pLevel) {
     D2LevelDefsTxt* pLevelDef;
     int* pWarpArray;
     uint32_t nWarpIndex;
@@ -805,7 +805,7 @@ BOOL __fastcall DRLGORTH_CompareByDirectionAndCoord(D2DrlgOrthStrc * pOrth1, D2D
     return 0;
 }
 
-void __stdcall DRLGROOMEX_ReplaceSub00(D2DrlgOrthStrc * * pRoomEx, D2DrlgOrthStrc * pOrth) {
+static void __stdcall DRLGROOMEX_ReplaceSub00(D2DrlgOrthStrc * * pRoomEx, D2DrlgOrthStrc * pOrth) {
     BOOL bShouldInsertBefore;
     D2DrlgOrthStrc* pOrthPrev = *pRoomEx;
     if (!pOrthPrev) {
@@ -1101,7 +1101,7 @@ char * __fastcall GetPickedLevelPrestFilePathFromRoomEx(D2RoomExStrc * pRoomEx) 
     return szFilePath;
 }
 
-void ReorderNearRoomList(int nRoomCount, D2RoomStrc * * ppRoomList) {
+static void ReorderNearRoomList(int nRoomCount, D2RoomStrc * * ppRoomList) {
     int nPassRemaining;
     D2RoomStrc* pRoomCurrent;
     D2RoomStrc* pRoomNext;
@@ -1236,7 +1236,7 @@ void DRLGROOM_FlagRoomExBorderingTown(D2RoomExStrc * pRoomEx) {
 
 // Grows pDrlgRoomEx->ppDrlgRoomsExNear by 1, appends pRoom, and reorders the near-room list. Halts on realloc failure.
 // @sourcefile .\DRLG\DrlgRoom.cpp
-void __stdcall DRLGROOMEX_ResizeArrayAndAddNewNearRoom(D2RoomExStrc * pDrlgRoomEx, D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomExStrc, D2RoomExStrc * pRoom) {
+static void __stdcall DRLGROOMEX_ResizeArrayAndAddNewNearRoom(D2RoomExStrc * pDrlgRoomEx, D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomExStrc, D2RoomExStrc * pRoom) {
     pDrlgRoomEx->nDrlgRoomsExNearCount++;
     D2RoomExStrc** ppNewNearRooms = (D2RoomExStrc**)D2_REALLOC_POOL_AT(pMemory, pDrlgRoomEx->ppDrlgRoomsExNear, pDrlgRoomEx->nDrlgRoomsExNearCount * 4, ".\\DRLG\\DrlgRoom.cpp", 0x314);
     pDrlgRoomEx->ppDrlgRoomsExNear = ppNewNearRooms;
@@ -1251,7 +1251,7 @@ void __stdcall DRLGROOMEX_ResizeArrayAndAddNewNearRoom(D2RoomExStrc * pDrlgRoomE
 
 // Allocates a tile-grid link for pSrcRoomEx that points to pLinkedRoomEx. Stores warp id for visSlot via DRLGLEVEL_GetWarpsIdIfExistsAndSetup, then prepends the new tile grid entry.
 // @sourcefile .\DRLG\DrlgRoom.cpp
-void __stdcall DRLGROOMEX_AllocRoomTile(D2RoomExStrc * pLinkedRoomEx, uint8_t visSlot, D2RoomExStrc * pSrcRoomEx) {
+static void __stdcall DRLGROOMEX_AllocRoomTile(D2RoomExStrc * pLinkedRoomEx, uint8_t visSlot, D2RoomExStrc * pSrcRoomEx) {
     D2DrlgRoomExRoomTileNodeStrc* pTileGrid = D2_NEW_POOL_AT(pSrcRoomEx->pLevel->pDrlg->pMemoryPool, D2DrlgRoomExRoomTileNodeStrc, ".\\DRLG\\DrlgRoom.cpp", 0x322);
     pTileGrid->pRoomTileNext = 0;
     pTileGrid->bEnabled = 0;

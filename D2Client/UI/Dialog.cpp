@@ -244,7 +244,7 @@ void __stdcall INPUT_DialogMouseDown(D2UIMouseMsgStrc * pMsg) {
     Storm::SMsgBreakHandlerChain(pMsg);
 }
 
-void __stdcall DIALOG_HandleEscapeKeyEvent(int32_t nParam, D2UIMouseMsgStrc * pMsg) {
+static void __stdcall DIALOG_HandleEscapeKeyEvent(int32_t nParam, D2UIMouseMsgStrc * pMsg) {
     pMsg->bHandled = 1;
     pMsg->dwResult = 0;
     Storm::SMsgBreakHandlerChain(pMsg);
@@ -471,7 +471,7 @@ void __stdcall INPUT_DialogPageDown(D2UIMouseMsgStrc * pMsg) {
     }
 }
 
-int DIALOG_HandleEnterKeyEvent(void * pDialog, uint32_t nKeyCode) {
+static int DIALOG_HandleEnterKeyEvent(void * pDialog, uint32_t nKeyCode) {
     uint16_t uVar1;
     if (*(int*)((int)pDialog + 0x20)) {
       return 0;
@@ -965,7 +965,7 @@ void __fastcall DIALOG_SetHighlightStyle(D2DialogStrc * pDialog, int32_t nStyle)
     pDialog->nHighlightStyle = nStyle;
 }
 
-void DIALOG_CenterStringLine(D2DialogStrc * pDialog, int32_t nIndex) {
+static void DIALOG_CenterStringLine(D2DialogStrc * pDialog, int32_t nIndex) {
     int32_t nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(1);
     D2Win::Src::D2WinFont::SetAndReturnLastFont(pDialog->aStringData[nIndex].nFont);
     int32_t nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(pDialog->aStringData[nIndex].szString);

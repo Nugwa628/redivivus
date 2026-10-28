@@ -233,7 +233,7 @@ BOOL __fastcall Q12_CheckJournalState(::SGAMEDATA * pGame) {
 }
 
 // A2Q4 - OnJournalActivate. Marks the quest journal entry as active (field_0xe=1) and sets the portal-placement substate to 2, then iterates players running UpdateQuestRecord to persist. If a tracked object exists, refreshes its update flag and removes its collision (opens the way). Called when the Cellar/staff path activates the Sanctuary entrance. Parameter 0 is the A2Q4 record and parameter 1 is the D2QuestDataStrc; they were recorded the wrong way round until 2026.08.30.
-void __stdcall Q12_OnJournalActivate(D2QuestDataA2Q4Strc * pQuestData, D2QuestDataStrc * pQuestContext) {
+static void __stdcall Q12_OnJournalActivate(D2QuestDataA2Q4Strc * pQuestData, D2QuestDataStrc * pQuestContext) {
     short int sVar1;
     *(uint8_t*)(char*)&sVar1 = pQuestData->nPortalPlacedStateLo;
     *(uint8_t*)((char*)&sVar1 + 1) = pQuestData->nPortalPlacedStateHi;

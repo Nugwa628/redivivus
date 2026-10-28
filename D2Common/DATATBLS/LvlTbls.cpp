@@ -927,7 +927,7 @@ int32_t __stdcall TXT_Levels_GetMonLvlForDifficulty(eD2LevelId eLevel, eD2Diffic
 
 // Scans the LevelDefs table for levels with the Portal flag set, counts them, allocates a server array (gpPortalLevelArray) of that size, and fills it with the level indices. Used at startup to build the list of portal-accessible levels. Halts if write index exceeds the counted portal level count.
 // @sourcefile .\DATATBLS\LvlTbls.cpp
-void LVLTBLS_BuildPortalLevelArray(D2LevelDefsTxt * pTxtLevelDefs) {
+static void LVLTBLS_BuildPortalLevelArray(D2LevelDefsTxt * pTxtLevelDefs) {
     int* pPortalFieldCur;
     int nLevelsRemaining = sgptDataTable->nTxtLevelsSize;
     nPortalLevelCount = 0;
@@ -1225,7 +1225,7 @@ D2LevelDefsTxt * __fastcall TXT_LevelDefs_GetLine(eD2LevelId eLevel) {
 }
 
 // Converts all forward slashes '/' in a level path string to backslashes '\\' in-place, then prepends the data directory prefix via wsprintfA. Used to normalize DS1/DT1 file paths loaded from level text tables to Windows path format.
-void __fastcall LVLTBLS_FixPathSlashes(char * szText, char * szPathPrefix) {
+static void __fastcall LVLTBLS_FixPathSlashes(char * szText, char * szPathPrefix) {
     int i;
     char szFormatBuf[60];
     char cCurrent;
@@ -2220,7 +2220,7 @@ void __stdcall TXT_FreeExpansionLvlTbls() {
 }
 
 // Looks up the automap level ID for a given level name string by linearly scanning a hardcoded name table (stride 0x10, ending before 0x6E7F8F). Returns the zero-based index of the matching entry, or 0 if the input starts with '0'. Halts with an internal error if the table end is exceeded.
-int32_t LVLTBLS_GetAutomapLevelId(char * szLevelName) {
+static int32_t LVLTBLS_GetAutomapLevelId(char * szLevelName) {
     // Static local variables (originally global data)
     static char gaAutomapLevelNames[36][16] = {
     {
@@ -2900,7 +2900,7 @@ int32_t LVLTBLS_GetAutomapLevelId(char * szLevelName) {
 }
 
 // Linear search through a hardcoded table of tile-name strings (e.g. "fl") to resolve an automap tile name to its integer tile ID. Returns 0 if the name starts with '0' or matches the first entry; halts with an internal error if the table end is overrun. In: szTileName (EDI). Out: matching tile ID or 0.
-int32_t LVLTBLS_GetAutomapTileId(char * szTileName) {
+static int32_t LVLTBLS_GetAutomapTileId(char * szTileName) {
     int nTileId = 0;
     if (*szTileName == '0') {
       return 0;

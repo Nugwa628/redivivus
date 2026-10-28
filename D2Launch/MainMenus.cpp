@@ -815,7 +815,7 @@ uint32_t __fastcall MAINMENU_CheckFileExists(char * szFileName) {
     return 1;
 }
 
-void MAINMENU_GetLocalizedFilePath(char * szPathFormat, char * szOutPath, char * szResolution) {
+static void MAINMENU_GetLocalizedFilePath(char * szPathFormat, char * szOutPath, char * szResolution) {
     D2MPQFileStrc* pFileHandle;
     char szLangAbbrev[4];
     D2Lang::StrTable::strtable::TABLES_GetLangAbbreviation(szLangAbbrev, 0);
@@ -1984,7 +1984,7 @@ void __stdcall GetAndDispatchAllPossible() {
     } while (true);
 }
 
-void __stdcall UIMENU_PlayCutScene(char * szSceneName, D2ControlMsg * pControlMsg) {
+static void __stdcall UIMENU_PlayCutScene(char * szSceneName, D2ControlMsg * pControlMsg) {
     char szFilePath[260];
     char pFourccTail[8];
     int32_t nFlags;
@@ -2231,7 +2231,7 @@ int __stdcall MAINMENU_CreateGameServerThreadPump(int nFrameIndex) {
     return 1;
 }
 
-void MAINMENU_SetSelectedClassInINI(eD2PlayerClassID ePlayerClass) {
+static void MAINMENU_SetSelectedClassInINI(eD2PlayerClassID ePlayerClass) {
     D2IniData_launcher->eCTEMP_eD2PlayerClassID = ePlayerClass;
     D2IniData_launcher->bAMAZON = false;
     D2IniData_launcher->bBARBARIAN = false;
@@ -2299,7 +2299,7 @@ BOOL __stdcall MAINMENU_OnPressInvokeCurrentMenuInstance(D2ControlMsg * pControl
     return 1;
 }
 
-void MAINMENU_SaveAccountAndPasswordToINI(D2ControlStrc * pAccountEditBox, D2ControlStrc * pIpEditBox) {
+static void MAINMENU_SaveAccountAndPasswordToINI(D2ControlStrc * pAccountEditBox, D2ControlStrc * pIpEditBox) {
     uint16_t* pwszValue;
     if (pAccountEditBox) {
       pwszValue = D2Win::Src::D2WinEditBox::FORMS_TextInput_GetValue(pAccountEditBox);
@@ -2385,7 +2385,7 @@ BOOL __stdcall MAINMENU_OnPressShowDisconnectedFromBattleNet2(D2ControlMsg * pCo
     return 1;
 }
 
-BOOL MAINMENU_IsD2GSJoinErrorRecoverable(int32_t nErrorCode) {
+static BOOL MAINMENU_IsD2GSJoinErrorRecoverable(int32_t nErrorCode) {
     switch (nErrorCode) {
       case 2:
 
@@ -2764,7 +2764,7 @@ int __stdcall MAINMENU_PollMCPCreateGamePump(int nFrameIndex) {
     return 1;
 }
 
-void __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextBox * pTextBox, int32_t nColor, uint8_t bCentered) {
+static void __stdcall MAINMENU_SetMultilineText(uint16_t * wszText, ::D2WinTextBox * pTextBox, int32_t nColor, uint8_t bCentered) {
     int nClearCount;
     uint16_t wszBuffer[1024];
     uint16_t* pwszLineStart = wszBuffer;
@@ -5095,7 +5095,7 @@ void __stdcall MAINMENU_BnetConnectionProgress() {
     D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsiSimple(gbBnetConnectionTimerActive, szDots);
 }
 
-BOOL MAINMENU_Unused17(char * szText) {
+static BOOL MAINMENU_Unused17(char * szText) {
     bool _bIsValidEmail;
     bool bIsValidEmail;
     if (!szText) {

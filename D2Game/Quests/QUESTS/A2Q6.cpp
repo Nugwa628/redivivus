@@ -323,7 +323,7 @@ void __fastcall Q14_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 }
 
 // A2Q6 "The Seven Tombs" — mark Duriel dead / quest just-completed for one player's record. Sets TheSevenTombs Step0x03 + JustCompleted(0xd) on the player's quest-record bitbuffer, then bumps that client's status to 2 (act-progress) for the current difficulty. This is the core "Duriel killed" record stamp; called per qualifying player in Duriel's Lair.
-void __stdcall Q14_SetDurielComplete(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
+static void __stdcall Q14_SetDurielComplete(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
     /* SetQuestState(TheSevenTombs, 0xd=JustCompleted) — Duriel killed self game
                           */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_JustCompleted);
     /* SetQuestState(TheSevenTombs, 3=Step0x03) — Duriel-dead progress bit */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Step0x03);

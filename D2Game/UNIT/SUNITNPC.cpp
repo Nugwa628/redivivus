@@ -730,7 +730,7 @@ void __fastcall SUNITNPC_RepairAllItems(D2UnitStrc * pPlayer, D2InventoryStrc * 
 // Picks a random item code from the NPC's trade list 1. Finds the D2GameNpcStrc for pUnit (00535f10). If the list (sTrade +0xc, count +0x10) is non-empty it takes RANDOM_RandomNumberSelector(pSeed, nTradeList1), advances pSeed, resolves the 12-byte entry's code at +4 to its ItemsTxt line, writes the code to *pdwOutItemCode and returns 1. An empty list writes 0 to *pdwOutItemCode and returns 0. *pdwReservedOut is written back with its own entry value. No repair cost is computed.
 // Halts: line 0x389 if the NPC is not found, 0x383 if its trade block is null, 0x384 if trade byte +3 is 0.
 // Provenance: 1.14d asm 00576c90..00576d85.
-int __stdcall SUNITNPC_RollTradeListItemCode(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2SeedStrc * pSeed, uint32_t dwReserved, uint32_t * pdwOutItemCode, uint32_t * pdwReservedOut, uint32_t nParam) {
+static int __stdcall SUNITNPC_RollTradeListItemCode(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2SeedStrc * pSeed, uint32_t dwReserved, uint32_t * pdwOutItemCode, uint32_t * pdwReservedOut, uint32_t nParam) {
     uint8_t bVar1;
     uint32_t nModulo;
     int nNpcIndex;
@@ -2046,7 +2046,7 @@ void __fastcall SUNITNPC_HandleIdentify(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     GAME::SCmd::NET_D2GS_SERVER_Send_0x2A_NpcTransaction(pClient, 0x2a, nTransactionResult, nPlayerGold, nNpcGUIDResult, bResult);
 }
 
-BOOL __stdcall UnitHasItemInInventory(int32_t guid, D2UnitStrc * pUnit) {
+static BOOL __stdcall UnitHasItemInInventory(int32_t guid, D2UnitStrc * pUnit) {
     if (!pUnit->pInventory) {
       return 0;
     }
@@ -2080,7 +2080,7 @@ void __fastcall SUNITNPC_CheckCanIdentify(::SGAMEDATA * pGame, D2UnitStrc * pUni
 }
 
 // Expansion-only: given a base item class ID and player level, randomly upgrades it to its uber or ultra variant using the NPC's RNG seed. Upgrade chance = (playerLevel - upgradeLevel) * chanceMult + 1, rolled against 10000. Returns the upgraded class ID if rolled, otherwise the original nItemClassId. Used when populating NPC shop inventory.
-uint32_t __stdcall SUNITNPC_RepairAndRecharge(::SGAMEDATA * pGame, uint32_t nItemClassId, int32_t nUberChanceMult, int32_t nUltraChanceMult, int32_t nPlayerLevel) {
+static uint32_t __stdcall SUNITNPC_RepairAndRecharge(::SGAMEDATA * pGame, uint32_t nItemClassId, int32_t nUberChanceMult, int32_t nUltraChanceMult, int32_t nPlayerLevel) {
     uint32_t nUltraClassId;
     uint32_t nUberClassId;
     if (!pGame->bExpansion) {

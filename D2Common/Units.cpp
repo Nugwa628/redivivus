@@ -742,7 +742,7 @@ void __stdcall GetRunAndWalkVelocityForPlayer(int32_t nUnused, int32_t ePlayerCl
     *pRunVelocity = (uint32_t)(uint8_t)pCharStatsTxt->RunVelocity;
 }
 
-void AddWalkVelocityStatIfExistToPlayer(D2UnitStrc * pUnit, int32_t ePlayerClassId) {
+static void AddWalkVelocityStatIfExistToPlayer(D2UnitStrc * pUnit, int32_t ePlayerClassId) {
     D2PoolManagerStrc* pMemory;
     eD2UnitType eUnitType;
     int32_t nUnitGUID;
@@ -935,7 +935,7 @@ void __stdcall SetAnimOrSeqMode(D2UnitStrc * pUnit, int32_t nAnimMode) {
     pUnit->eAnimMode.ePlayerMode = nAnimMode;
 }
 
-int32_t __stdcall UpdateSequenceMode(D2UnitStrc * pUnit, uint32_t nSeqMode) {
+static int32_t __stdcall UpdateSequenceMode(D2UnitStrc * pUnit, uint32_t nSeqMode) {
     uint32_t nFrameCount;
     uint8_t byActionFrame[4];
     uint32_t nStartFrame;
@@ -995,7 +995,7 @@ void __stdcall SetFrameNonRate(D2UnitStrc * pUnit, int32_t nRate, int32_t nFailR
     pUnit->nGfxCurrentFrame = nRate * 0x100 + nFailRate * -0x100 + pUnit->nGfxCurrentFrame;
 }
 
-int32_t UNITS_GetBaseWalkVelocity(eD2UnitType eUnitType, int32_t nClassId) {
+static int32_t UNITS_GetBaseWalkVelocity(eD2UnitType eUnitType, int32_t nClassId) {
     if (eUnitType == UNIT_PLAYER) {
       if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtCharStatsSize)) {
         return (uint32_t)*(volatile uint8_t*)0x40 << 8;
@@ -1013,7 +1013,7 @@ int32_t UNITS_GetBaseWalkVelocity(eD2UnitType eUnitType, int32_t nClassId) {
     return (int)sgptDataTable->pTxtMonStats[nClassId].Velocity << 8;
 }
 
-int32_t UNITS_GetAnimFrameTime(eD2UnitType eUnitType, int32_t nClassId, int32_t nAnimMode) {
+static int32_t UNITS_GetAnimFrameTime(eD2UnitType eUnitType, int32_t nClassId, int32_t nAnimMode) {
     D2MonStatsTxt* pMonStatsTxt;
     if (eUnitType == UNIT_PLAYER) {
       return nAnimMode != 3 ? 0xd5 : 0x65;
@@ -1042,7 +1042,7 @@ uint8_t * __stdcall UNITS_GetAnimTableEntry(int32_t nClassId, int32_t nAnimMode)
 }
 
 // Returns non-zero if the given animation mode is playable for the unit. For players, looks up the mode in gaPlayerAnimModeCheckTable; for monsters, uses gaAnimTableClassic/Expansion based on class ID. NPCs only allow modes 2 and 15. Also checks whether the current skill has the relevant skill-flag set (flag 0x1 with no 0x1000 override).
-BOOL __stdcall CanPlayAnimMode(D2UnitStrc * pUnit, int32_t nClassId, eD2UnitType eUnitType, int32_t nAnimMode) {
+static BOOL __stdcall CanPlayAnimMode(D2UnitStrc * pUnit, int32_t nClassId, eD2UnitType eUnitType, int32_t nAnimMode) {
     int* pAnimModeEntry;
     if (eUnitType == UNIT_PLAYER) {
       pAnimModeEntry = gaPlayerAnimModeCheckTable + nAnimMode * 5;
@@ -1135,7 +1135,7 @@ uint32_t __fastcall UNITS_CheckAnimateAtFrameEnd(int32_t nAnimMode, eD2UnitType 
     return (uint8_t)*((uint8_t*)pSkillsTxt + 0x6) & 8;
 }
 
-int __stdcall UNITS_GetAnimFrameSkip(int32_t nAnimMode, int32_t nParam, eD2UnitType eUnitType) {
+static int __stdcall UNITS_GetAnimFrameSkip(int32_t nAnimMode, int32_t nParam, eD2UnitType eUnitType) {
     if (eUnitType == UNIT_PLAYER) {
       return gaPlayerAnimModeCheckTable[nAnimMode * 5 + 4];
     }
@@ -1150,7 +1150,7 @@ int __stdcall UNITS_GetAnimFrameSkip(int32_t nAnimMode, int32_t nParam, eD2UnitT
 }
 
 // @sourcefile .\UNITS\Units.cpp
-BOOL HasSequenceTransition(D2UnitStrc * pUnit, int32_t nAnimMode, eD2UnitType eUnitType) {
+static BOOL HasSequenceTransition(D2UnitStrc * pUnit, int32_t nAnimMode, eD2UnitType eUnitType) {
     eD2Skills eSkill;
     D2SkillsTxt* pSkillsTxt;
     if (eUnitType == UNIT_PLAYER) {
@@ -1187,7 +1187,7 @@ BOOL HasSequenceTransition(D2UnitStrc * pUnit, int32_t nAnimMode, eD2UnitType eU
 }
 
 // Returns the diminished (soft-capped) value of a unit stat indexed by nParam into gaUnitStatDiminished[]. If the entry has nDiminishedFlag==1 and the raw value is non-zero, applies a harmonic-mean formula: (base * value) / (base + value), producing diminishing returns. Otherwise returns the raw shifted stat value unchanged.
-int32_t GetDiminishedStat(D2UnitStrc * pUnit, int32_t nParam) {
+static int32_t GetDiminishedStat(D2UnitStrc * pUnit, int32_t nParam) {
     // Static local variables (originally global data)
     static D2UnitStatDiminishedEntryStrc gaUnitStatDiminished[5] = {
     {
@@ -1452,7 +1452,7 @@ void __stdcall UpdateDirectionAndSpeed(D2UnitStrc * pUnit, int32_t nX, int32_t n
     PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, nX, nY, 0);
 }
 
-void __stdcall StoreOwnerTypeAndGUID(D2UnitStrc * pUnit, eD2UnitType eUnitType, int32_t nOwnerGUID) {
+static void __stdcall StoreOwnerTypeAndGUID(D2UnitStrc * pUnit, eD2UnitType eUnitType, int32_t nOwnerGUID) {
     D2StatListExStrc* pStatsEx;
     if (!pUnit) {
       return;

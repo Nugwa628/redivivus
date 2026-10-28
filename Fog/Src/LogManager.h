@@ -33,7 +33,6 @@ namespace Fog::Src::LogManager {
 
 // Function declarations
 int __stdcall DetectCpuVendor();
-void __stdcall DecodeCpuModelName(uint32_t nModel, int32_t nBrandId, char * pOutName, int32_t nVendor, int32_t nFamily, int32_t nType);
 int64_t __stdcall GetTimestamp();
 uint32_t __stdcall BenchmarkCpuSpeed();
 uint64_t __stdcall GetCpuVersionInfo();
@@ -126,5 +125,6 @@ void StaticFini_gLogMessageQueueCS();
 void StaticFini_gLogFileCS();
 // Runs at exit: removes every element still on the log message queue gLogMessageQueueHead, then unlinks the list head itself.
 void StaticFini_gLogMessageQueueHead();
+// 1 internal function (defined in .cpp)
 
 } // namespace Fog::Src::LogManager

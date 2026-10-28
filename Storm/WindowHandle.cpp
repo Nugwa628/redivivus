@@ -367,7 +367,7 @@ uint32_t __fastcall SMSG_FindWindow(int32_t nHandle) {
 }
 
 // @blizzard DeleteWindow (SMSG.CPP)
-void SMSG_DeleteWindow(uint32_t hWnd) {
+static void SMSG_DeleteWindow(uint32_t hWnd) {
     if (hWnd == gpActiveWindow) {
       gpActiveWindow = 0;
     }
@@ -385,7 +385,7 @@ void SMSG_DeleteWindow(uint32_t hWnd) {
 }
 
 // @blizzard InternalRegister (SMSG.CPP)
-void __stdcall SMSG_InternalRegister(uint32_t hWnd, int32_t pCallback, uint32_t dwEventTag, uint32_t dwContext) {
+static void __stdcall SMSG_InternalRegister(uint32_t hWnd, int32_t pCallback, uint32_t dwEventTag, uint32_t dwContext) {
     if (!pCallback) {
       Source::SErr::SErrSetLastError(0x57);
       return;
@@ -400,7 +400,7 @@ void __stdcall SMSG_InternalRegister(uint32_t hWnd, int32_t pCallback, uint32_t 
 }
 
 // @blizzard InternalUnregister (SMSG.CPP)
-void __stdcall SMSG_InternalUnregister(uint32_t nEventId, char * szText1, char * szText2, HWND hWnd) {
+static void __stdcall SMSG_InternalUnregister(uint32_t nEventId, char * szText1, char * szText2, HWND hWnd) {
     uint32_t nRecord = SMSG_FindWindow((int32_t)hWnd);
     if (!nRecord) {
       SMSG_AddWindow((uint32_t)hWnd);

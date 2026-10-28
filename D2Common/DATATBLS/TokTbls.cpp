@@ -744,12 +744,12 @@ void __fastcall TXT_AllocTxt_inventory(D2PoolManagerStrc * pMemory) {
     inventory[0x47].nOffset = 0xed;
     inventory[0x48].szName = "end";
     pTxtInventory = (D2InventoryTxt*)DataTbls::CompileTxt(pMemory, "inventory", inventory, &nTxtInventorySize, 0xf0);
-    if (nTxtInventorySize != 0x20) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x70);
-      exit(-1);
+    if (nTxtInventorySize == 0x20) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x70);
+    exit(-1);
 }
 
 void __stdcall FreeInventoryTable() {

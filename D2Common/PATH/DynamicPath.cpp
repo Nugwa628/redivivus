@@ -58,7 +58,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2DynamicPathStrc) == 0x200, "D2_NE
 
 namespace D2Common::PATH::DynamicPath {
 
-int32_t PATH_GetCollisionPatternFromMonStats(D2UnitStrc * pUnit) {
+static int32_t PATH_GetCollisionPatternFromMonStats(D2UnitStrc * pUnit) {
     D2MonStatsTxt* pMonStatsTxt;
     int nMonStatsIdx;
     if (!pUnit || (nMonStatsIdx = pUnit->nClassId , nMonStatsIdx < 0) || sgptDataTable->nTxtMonStatsSize <= nMonStatsIdx) {
@@ -746,13 +746,13 @@ void __stdcall PATH_SetMissileOffsets(D2DynamicPathStrc * pDynamicPath, uint8_t 
 }
 
 void __stdcall SetDistanceWithChecks(D2DynamicPathStrc * pDynamicPath, uint32_t nDistance) {
-    if (!(nDistance < 0x100)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x965);
-      exit(-1);
+    if (nDistance < 0x100) {
+      pDynamicPath->nDistance = (uint8_t)nDistance;
+      return;
     }
 
-    pDynamicPath->nDistance = (uint8_t)nDistance;
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x965);
+    exit(-1);
 }
 
 uint32_t __stdcall GetDistanceCastedToInt(D2DynamicPathStrc * pDynamicPath) {
@@ -852,7 +852,7 @@ uint32_t __stdcall PATH_HasRemainingDistance(D2DynamicPathStrc * pDynamicPath) {
 }
 
 // Attempts to build a single-step direct path from pDynamicPath's current position to its target unit. Snapshots the target's current X/Y into pDynamicPath-&gt;nTargetX/Y, validates both axes are within 99 units and non-zero, then writes a one-point path and advances along it. Sets flag bit 1 if the target falls outside the current room bounds. Returns dwPathPoints (1 on success, 0 on rejection).
-uint32_t PATH_BuildDirectPathToTarget(D2DynamicPathStrc * pDynamicPath) {
+static uint32_t PATH_BuildDirectPathToTarget(D2DynamicPathStrc * pDynamicPath) {
     short int sTargetY;
     int32_t nCoord;
     int32_t nRoomBound;
@@ -1132,7 +1132,7 @@ BOOL __stdcall PATH_RemoveUnitCollision(D2UnitStrc * pUnit, int32_t nParam) {
     return 1;
 }
 
-int32_t PATH_CalculateMissilePath(D2DynamicPathStrc * pDynamicPath, int32_t nParam) {
+static int32_t PATH_CalculateMissilePath(D2DynamicPathStrc * pDynamicPath, int32_t nParam) {
     uint32_t nPathPoints;
     int ePathType = pDynamicPath->ePathType;
     if (ePathType == 4) {
@@ -1161,7 +1161,7 @@ int32_t PATH_CalculateMissilePath(D2DynamicPathStrc * pDynamicPath, int32_t nPar
 }
 
 // Resolves the dynamic-path target position for pPathTypeArg's pTargetUnit. Reads the target's current X/Y (from static path for objects/tiles, dynamic path otherwise) into pDynamicPath->nTargetX/nTargetY. Returns 1 if there is no target unit; 0 if the resolved position is (0,0). For players/monsters applies a missile offset if set. For door objects, nudges the target +/-2 along X or Y depending on door orientation (so pathing aims to the open side), returning 2. Items and other handled unit types return 2. Halts via Fog ErrorManager if a unit it expects to be a door is not.
-uint8_t PATH_ResolveTargetPosition(D2PathTypeArg * pPathTypeArg, int32_t nDistMax) {
+static uint8_t PATH_ResolveTargetPosition(D2PathTypeArg * pPathTypeArg, int32_t nDistMax) {
     bool bIsDoor;
     eCollisionFlags sCoord;
     short int nTargetY;

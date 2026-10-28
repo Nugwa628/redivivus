@@ -558,7 +558,7 @@ D2AutomapCellStrc * __stdcall AUTOMAP_AllocCell() {
 // and inserts the cell into the AVL tree. Wall tiles (type >= 15)
 // get a Y offset of +24 pixels.
 // Source: .\\UI\\automap.cpp
-void __stdcall AUTOMAP_RevealTile(D2RoomExStrc * pRoomEx, D2AutomapCellStrc * pAutomapCell, D2DrlgTileDataStrc * pTileData) {
+static void __stdcall AUTOMAP_RevealTile(D2RoomExStrc * pRoomEx, D2AutomapCellStrc * pAutomapCell, D2DrlgTileDataStrc * pTileData) {
     int32_t nLevelType;
     int32_t nOrientation;
     int32_t nIndex;
@@ -621,7 +621,7 @@ void __stdcall AUTOMAP_AddCellByCoords(int16_t nCellNo, int16_t nPixelX, int16_t
     AUTOMAP_InsertCellIntoTree(pAutomapCellLocal, pAutomapCell1);
 }
 
-void __stdcall AUTOMAP_AddCellForUnit(int32_t nParam, D2AutomapCellStrc * pAutomapCell, D2UnitStrc * pUnit) {
+static void __stdcall AUTOMAP_AddCellForUnit(int32_t nParam, D2AutomapCellStrc * pAutomapCell, D2UnitStrc * pUnit) {
     D2AutomapCellStrc* pAutomapCell1 = AUTOMAP_AllocCell();
     int32_t nTargetX = D2Common::Units::GetTargetX(pUnit);
     int32_t nTargetY = D2Common::Units::GetTargetY(pUnit);
@@ -758,7 +758,7 @@ HANDLE __stdcall AUTOMAP_GetMapFileHandle() {
     return hFile;
 }
 
-void AUTOMAP_SaveLayerToFile(D2AutomapFileEntryStrc * pEntry) {
+static void AUTOMAP_SaveLayerToFile(D2AutomapFileEntryStrc * pEntry) {
     // Frame slots -16..-4 are ONE object: &dwFileSize is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -958,7 +958,7 @@ void __stdcall AUTOMAP_FreeCurrentLayerCells() {
     pSavedLayer->pExtras = 0;
 }
 
-void __stdcall AUTOMAP_InvalidateLayerEntry(int32_t nEntryOffset, HANDLE hFile, uint32_t * pLayerOffsets) {
+static void __stdcall AUTOMAP_InvalidateLayerEntry(int32_t nEntryOffset, HANDLE hFile, uint32_t * pLayerOffsets) {
     DWORD dwBytesWritten = 0;
     if (nEntryOffset) {
       Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, nEntryOffset, (PLONG)0x0, 0);
@@ -1925,7 +1925,7 @@ void __stdcall AUTOMAP_DrawMap() {
 // Returns 1 if unit should be drawn, 0 to skip.
 // Source: .\\UI\\automap.cpp
 // @sourcefile .\UI\automap.cpp
-uint32_t AUTOMAP_GetUnitColor(D2UnitStrc * pUnit, uint8_t * pbColorOut) {
+static uint32_t AUTOMAP_GetUnitColor(D2UnitStrc * pUnit, uint8_t * pbColorOut) {
     int16_t nMyPartyId;
     int16_t nUnitPartyId;
     D2RoomStrc* pRoom;
@@ -2244,12 +2244,7 @@ void __stdcall AUTOMAP_DrawDifficulty() {
     int32_t nTextWidth = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pZeroFill);
     pZeroFill = D2Lang::StrTable::strtable::GetLocaleString(0x1057);
     int32_t nFormatLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pZeroFill);
-    if (!(nTextWidth + 3 + nFormatLen < 300)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb2a);
-      exit(-1);
-    }
-
-    {
+    if (nTextWidth + 3 + nFormatLen < 300) {
       uint16_t* wFormat;
       pZeroFill = D2Lang::StrTable::strtable::GetLocaleString(nDiffStringId);
       wFormat = D2Lang::StrTable::strtable::GetLocaleString(0x1057);
@@ -2262,6 +2257,9 @@ void __stdcall AUTOMAP_DrawDifficulty() {
       AUTOMAP_TextHeightOffset += 0x10;
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb2a);
+    exit(-1);
 }
 
 void __stdcall AUTOMAP_LoadDC6Sprites() {
@@ -2557,7 +2555,7 @@ void __fastcall AUTOMAP_SetMiniMapType(int32_t nMiniMapType) {
     AUTOMAP_CenterOnPlayer(1);
 }
 
-void __stdcall AUTOMAP_DrawTextCentered(int32_t nCenterX, int32_t nBaseY, uint8_t byColor, char * szText) {
+static void __stdcall AUTOMAP_DrawTextCentered(int32_t nCenterX, int32_t nBaseY, uint8_t byColor, char * szText) {
     uint16_t wTextWide[26];
     char cCurChar;
     char* pStrScan = szText;
@@ -2580,7 +2578,7 @@ void __stdcall AUTOMAP_DrawTextCentered(int32_t nCenterX, int32_t nBaseY, uint8_
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nPrevFont);
 }
 
-void __stdcall AUTOMAP_DrawXMarker(int32_t nX, DWORD nColor, int32_t nY) {
+static void __stdcall AUTOMAP_DrawXMarker(int32_t nX, DWORD nColor, int32_t nY) {
     if (MiniMapType == 1) {
       nX--;
       nY += 5;
@@ -2599,7 +2597,7 @@ void __stdcall AUTOMAP_DrawXMarker(int32_t nX, DWORD nColor, int32_t nY) {
 // For objects: draws waypoint label (string 0xCF3) for red portals (classId 0x10B).
 // Source: .\\UI\\automap.cpp
 // @sourcefile .\UI\automap.cpp
-void AUTOMAP_DrawUnitMarker(D2UnitStrc * pUnit) {
+static void AUTOMAP_DrawUnitMarker(D2UnitStrc * pUnit) {
     int16_t nUnitPartyId;
     int nTemp;
     eD2States eUnitState;
@@ -2760,7 +2758,7 @@ void AUTOMAP_DrawUnitMarker(D2UnitStrc * pUnit) {
     AUTOMAP_DrawTextCentered(xLocation, yLocation, 1, pPlayerData->szCharName);
 }
 
-void AUTOMAP_DrawPartyMember(D2RosterStrc * pRoster) {
+static void AUTOMAP_DrawPartyMember(D2RosterStrc * pRoster) {
     int nScreenX = 0;
     int nScreenY = 0;
     D2UnitStrc* pMyPlayer = UNIT::Player::GetPlayerUnit_UI();

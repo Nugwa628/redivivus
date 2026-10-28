@@ -959,7 +959,7 @@ void __fastcall PLAYERSAVE_LinkPlayerToUnit(::SGAMEDATA * pGame, D2UnitStrc * pU
 }
 
 // Bootstraps a brand-new player unit for a connecting client: creates the unit, links it to the client, sends the init packet, places starting items, sets default left/right skills to Attack, then selects the class-specific start skill from CharStats.txt if present. Fires QUEST_OnPlayerJoinGame for act-0 quests. Outputs the created unit pointer.
-int32_t __stdcall PLAYERSAVE_CreateNewCharacter(D2ClientStrc * pSaveContext, ::SGAMEDATA * pGameStrc, D2UnitStrc * * dwArg1) {
+static int32_t __stdcall PLAYERSAVE_CreateNewCharacter(D2ClientStrc * pSaveContext, ::SGAMEDATA * pGameStrc, D2UnitStrc * * dwArg1) {
     D2SkillStrc* pDVar1;
     uint32_t nActId;
     int32_t nClassIdx;

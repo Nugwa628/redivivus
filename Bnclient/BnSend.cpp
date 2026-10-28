@@ -2499,7 +2499,7 @@ void __stdcall BNNEWS_TransformCDKeyCharacter(uint8_t bKeyChar, uint32_t * pValu
 }
 
 // Calculates checksum byte for CD key validation. Uses lookup table at 0x006df238. Iterates through 8 pairs of hex characters, accumulating checksum as bit flags.
-void BNSEND_CalculateCDKeyChecksum(uint32_t unused, char * szCDKey, uint32_t * pOutChecksum) {
+static void BNSEND_CalculateCDKeyChecksum(uint32_t unused, char * szCDKey, uint32_t * pOutChecksum) {
     // Static local variables (originally global data)
     static uint8_t gaCDKeyCharLookup[256] = {
     0xff,
@@ -2903,7 +2903,7 @@ BOOL __fastcall BNNEWS_DecodeCDKey26Char(char * szCDKey, uint32_t * pOutValue1, 
 }
 
 // Prepares CD key hash structure for authentication. Supports both 16-char (classic) and 26-char (expansion) CD keys. Output structure contains: key length, public value, product value, and 20-byte SHA-1 hash.
-int32_t __stdcall BNSEND_PrepareCDKeyHash(uint32_t nToken, uint32_t nServerToken, char * szCDKey, D2CDKeyHashStrc * pOutHash) {
+static int32_t __stdcall BNSEND_PrepareCDKeyHash(uint32_t nToken, uint32_t nServerToken, char * szCDKey, D2CDKeyHashStrc * pOutHash) {
     uint32_t aCDKeyHashInput[6];
     uint32_t nPublic2;
     BnCDKeyHashInput26 sHashInput26;

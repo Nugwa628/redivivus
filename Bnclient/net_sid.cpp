@@ -2394,7 +2394,7 @@ void __fastcall NET_SID_CLIENT_EncodeBuffer(uint32_t * pdwParam, uint32_t nParam
     }
 }
 
-int32_t NET_SID_CLIENT_DecodeAndValidateBuffer(int * pnParam, uint32_t nParam) {
+static int32_t NET_SID_CLIENT_DecodeAndValidateBuffer(int * pnParam, uint32_t nParam) {
     uint32_t nSearchLimit;
     int nNonNullCount;
     uint8_t szRandKey[20];
@@ -2433,7 +2433,7 @@ int32_t NET_SID_CLIENT_DecodeAndValidateBuffer(int * pnParam, uint32_t nParam) {
     return 0;
 }
 
-uint32_t * NET_SID_CLIENT_LoadAndDecodeCDKeyFile(uint32_t * pnParam, DWORD * dwParam) {
+static uint32_t * NET_SID_CLIENT_LoadAndDecodeCDKeyFile(uint32_t * pnParam, DWORD * dwParam) {
     *dwParam = 0x400;
     uint32_t* pLoadedKeyBuf = pnParam;
     Storm::Source::SFile::SFileLoadFile((char*)pnParam, (void**)&pLoadedKeyBuf, dwParam, 1, 0);

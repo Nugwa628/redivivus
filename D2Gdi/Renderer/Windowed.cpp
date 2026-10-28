@@ -70,7 +70,7 @@ void ClearCaches() {
 }
 
 // Allocates the GDI DIB section for windowed software rendering. Maps resolution mode (0=640×480, 1/2=800×600, 3=1360×700) to window dimensions, creates BITMAPINFO header with 8-bit indexed color, calls CreateDIBSection to allocate shared bitmap memory. Stores HBITMAP handle in RENDERER_WINDOWED_hDIBitmap global and pixel buffer pointer in ppvBits_007c9154. Initializes Y-buffer table via fpFillYBufferTable callback.
-void __stdcall RENDERER_WINDOWED_AllocateDIBSection(int nResolutionMode) {
+static void __stdcall RENDERER_WINDOWED_AllocateDIBSection(int nResolutionMode) {
     int iVar1;
     int iVar2;
     BITMAPINFO256 sBitmapInfo;
@@ -466,7 +466,7 @@ void __stdcall RENDERER_WINDOWED_ValidateDC6Visibility(DC6Block * pDC6Block, int
 }
 
 // Calculates clipped crop rectangle for DC6 image rendering. Takes input crop rect + DC6 position/dimensions, clamps to window bounds, calculates top/bottom skip lines for partial draws. Outputs adjusted crop rect (nClippedLeft, nClippedRight, skipTop, visibleHeight) to pOutput array. Used to optimize blits by pre-calculating which scanlines to draw.
-int __fastcall RENDERER_WINDOWED_CalculateCropRect(uint32_t * pCropRect, DC6Block * pDC6Block, int nPosY, int nPosX, uint32_t * pOutput) {
+static int __fastcall RENDERER_WINDOWED_CalculateCropRect(uint32_t * pCropRect, DC6Block * pDC6Block, int nPosY, int nPosX, uint32_t * pOutput) {
     int32_t nSpriteWidth = D2CMP::SRC::CelCmp::GetDC6Width(pDC6Block);
     int32_t nOffsetX = D2CMP::SRC::CelCmp::GetDC6Height(pDC6Block);
     uint32_t uClampedLeft = (int)*pCropRect < 1 ? 0 : *pCropRect;

@@ -104,7 +104,6 @@ namespace D2Client::UI::Dialog {
 void __stdcall INPUT_DialogClickHandler(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_DialogMouseUp(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_DialogMouseDown(struct D2UIMouseMsgStrc * pMsg);
-void __stdcall DIALOG_HandleEscapeKeyEvent(int32_t nParam, struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_DialogEscapeKey(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_DialogMouseWheel(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_DialogConfirm(struct D2UIMouseMsgStrc * pMsg);
@@ -112,7 +111,6 @@ void __stdcall INPUT_DialogNavigateUp(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_DialogNavigateDown(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_DialogPageUp(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_DialogPageDown(struct D2UIMouseMsgStrc * pMsg);
-int DIALOG_HandleEnterKeyEvent(void * pDialog, uint32_t nKeyCode);
 void __stdcall INPUT_DialogEnterKey(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_DialogKeyHandler(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall DIALOG_InitializeSystem();
@@ -126,10 +124,10 @@ void __fastcall DIALOG_DrawBackground(struct D2DialogStrc * pDialog);
 void __fastcall DIALOG_SetSelectedLine(struct D2DialogStrc * pDialog, int32_t nSubIndex);
 // Sets D2DialogStrc::nHighlightStyle (0x5C): 1=text highlight color, 2=animated cursor icons flanking selected line
 void __fastcall DIALOG_SetHighlightStyle(struct D2DialogStrc * pDialog, int32_t nStyle);
-void DIALOG_CenterStringLine(struct D2DialogStrc * pDialog, int32_t nIndex);
 void __fastcall DIALOG_RecalculateLayout(struct D2DialogStrc * pDialog);
 int32_t __fastcall DIALOG_GetSelectedIndex(struct D2DialogStrc * pDialog);
 int __stdcall GetDialogCounter();
 void __fastcall AddStringData(struct D2DialogStrc * pDialog, uint16_t * szString, uint32_t param_1, uint32_t param_2, int32_t nParam1, uint32_t nParam, fpDialogFunc nParam2, int32_t nParam3);
+// 3 internal functions (defined in .cpp)
 
 } // namespace D2Client::UI::Dialog

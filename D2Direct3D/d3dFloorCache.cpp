@@ -119,7 +119,7 @@ void __fastcall D3DFLOOR_SetPalette(D3DFloorCacheStrc * pCache, void * pPalette)
     Renderer::DIRECTD3D_LogError("SetPalette (floor surface)", nResult);
 }
 
-void __fastcall D3DFLOOR_InsertNodeAtTail(D3DFloorCacheNodeStrc * pNode, D3DFloorCacheStrc * pCache) {
+static void __fastcall D3DFLOOR_InsertNodeAtTail(D3DFloorCacheNodeStrc * pNode, D3DFloorCacheStrc * pCache) {
     if (!pCache->pUsedHead) {
       pCache->pUsedHead = pNode;
       pCache->pUsedTail = pNode;
@@ -170,7 +170,7 @@ D3DFloorCacheNodeStrc * __fastcall D3DFLOOR_RemoveNodeByIndex(D3DFloorCacheStrc 
     return (D3DFloorCacheNodeStrc*)pTargetNode;
 }
 
-int __stdcall D3DFLOOR_AllocateNodeFromFreeList(D3DFloorCacheStrc * pCache) {
+static int __stdcall D3DFLOOR_AllocateNodeFromFreeList(D3DFloorCacheStrc * pCache) {
     if (pCache->nUsedCount == pCache->nMaxNodes) {
       return 0;
     }
@@ -493,7 +493,7 @@ void __stdcall D3D_FreeSystemMemoryTexturesForTiles() {
     gpD3DSubtileSystemSurface = 0;
 }
 
-void __fastcall D3D_DecompressRLESubtileToBuffer(uint8_t * pDest, uint8_t * pSrc) {
+static void __fastcall D3D_DecompressRLESubtileToBuffer(uint8_t * pDest, uint8_t * pSrc) {
     uint8_t nSkipCount;
     int nRowsRemaining = 0x20;
     memset(pDest, 0, 0x400);

@@ -223,7 +223,7 @@ void __fastcall UpdateGameInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     (**ppfnUpdateGameInfo)((uint32_t)pGame->nServerToken, (int)nLevelDelta_00);
 }
 
-void PLAYER_AddEnergyStatPoints(D2UnitStrc * pUnit, int32_t nParam) {
+static void PLAYER_AddEnergyStatPoints(D2UnitStrc * pUnit, int32_t nParam) {
     if (!(nParam && pUnit)) {
       return;
     }
@@ -255,7 +255,7 @@ void PLAYER_AddEnergyStatPoints(D2UnitStrc * pUnit, int32_t nParam) {
 }
 
 // Spends nParam stat points into Vitality: decrements statpts by nParam, adds nParam to vitality, adds LifePerVitality*nParam*64 to maxhp (and to current HP if nParam>0, capped at maxhp), and adds StaminaPerVitality*nParam*64 to maxstamina (and stamina if nParam>0, capped). Uses CharStats.txt per-vitality multipliers.
-void PLAYER_AddVitalityStatPoints(int32_t nParam, D2UnitStrc * pUnit) {
+static void PLAYER_AddVitalityStatPoints(int32_t nParam, D2UnitStrc * pUnit) {
     if (!(nParam && pUnit)) {
       return;
     }

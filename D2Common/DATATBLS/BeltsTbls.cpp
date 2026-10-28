@@ -348,12 +348,12 @@ void __fastcall LoadBeltsTxt(D2PoolManagerStrc * pMemory) {
     belts[0x40].nOffset = 0x104;
     belts[0x41].szName = "end";
     pTxtBelts = (D2BeltsTxt*)DataTbls::CompileTxt(pMemory, "belts", belts, &nTxtBeltsSize, 0x108);
-    /* "nSize / NUM_GAME_RESOLUTIONS == NUM_BELT_STATS" */ if (nTxtBeltsSize / 2 != 7) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6a);
-      exit(-1);
+    /* "nSize / NUM_GAME_RESOLUTIONS == NUM_BELT_STATS" */ if (nTxtBeltsSize / 2 == 7) {
+      return;
     }
 
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x6a);
+    exit(-1);
 }
 
 void __stdcall FreeBeltsTxt() {

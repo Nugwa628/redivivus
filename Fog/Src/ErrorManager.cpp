@@ -333,7 +333,7 @@ __attribute__((noinline)) void * __stdcall GetInstructionPointer() {
 }
 
 // Formats debug output with optional timestamp and outputs to debugger/log. Supports flags: 0x04=prepend timestamp (HH:MM:SS.mmm format via GetLocalTime), 0x02=skip OutputDebugStringA, 0x01=write to LOG category via LogManager, 0x18=check CapsLock state. Uses a 4096-byte buffer for vsnprintf formatting with varargs, appending formatted text after timestamp if present.
-void __stdcall FormatDebugOutput(uint8_t bFlags, va_list vaArgs, char * szText) {
+static void __stdcall FormatDebugOutput(uint8_t bFlags, va_list vaArgs, char * szText) {
     char szOutputBuffer[4096];
     char cCurrent;
     szOutputBuffer[0] = '\0';

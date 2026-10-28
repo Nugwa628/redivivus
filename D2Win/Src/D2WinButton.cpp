@@ -155,12 +155,7 @@ void __fastcall D2WINBUTTON_SetImageIndex(::D2WinButton * pButton, int32_t nImag
 // Handles mouse wheel input for scrollable buttons. Checks scroll up/down flags (bits 3-4 of field 0x10), invokes wheel callback (field 0xd) if delta is non-zero. Uses global recursion counter.
 BOOL __fastcall D2WINBUTTON_HandleMouseWheel(::D2WinButton * pButton, int32_t nWheelDelta) {
     uint32_t dwState;
-    if (pButton->sControl.neD2FormType != FORM_Button) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe2);
-      exit(-1);
-    }
-
-    {
+    if (pButton->sControl.neD2FormType == FORM_Button) {
       D2ControlMsg sMsg;
       dwState = pButton->sControl.dwState;
       if (!(dwState & 1 && dwState & 4 && !pButton->bPressed && !pButton->bPressedInside && (0 < nWheelDelta && pButton->nButtonFlags & 8 || nWheelDelta < 0 && pButton->nButtonFlags & 0x10))) {
@@ -184,6 +179,9 @@ BOOL __fastcall D2WINBUTTON_HandleMouseWheel(::D2WinButton * pButton, int32_t nW
       gnFormControlCount--;
       return 0;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe2);
+    exit(-1);
 }
 
 // Sets custom user data field (field 0x9c) for application-specific button state.
@@ -199,7 +197,7 @@ void __fastcall D2WINBUTTON_SetCustomData(::D2WinButton * pButton, int32_t nCust
 }
 
 // Hit test for button bounds accounting for vertical offset (field 0x18). Returns TRUE if (x,y) falls within button rectangle.
-BOOL D2WINBUTTON_IsPointInside(::D2WinButton * pButton, int32_t nX, int32_t nY) {
+static BOOL D2WINBUTTON_IsPointInside(::D2WinButton * pButton, int32_t nX, int32_t nY) {
     int nButtonX = pButton->sControl.dwPosX;
     int nButtonY = pButton->sControl.dwPosY;
     if (!(nButtonX <= nX && nButtonY - pButton->sControl.dwSizeY <= nY && nX < pButton->sControl.dwSizeX + nButtonX && nY < nButtonY)) {
@@ -210,7 +208,7 @@ BOOL D2WINBUTTON_IsPointInside(::D2WinButton * pButton, int32_t nX, int32_t nY) 
 }
 
 // Renders button text with centering and optional dual-label display. Handles hotkey text (flag 0x40), text offset when images loaded, font selection (field 0x60), and color (field 0x264). Draws main label plus optional secondary string (field 0x270).
-void __stdcall D2WINBUTTON_DrawText(::D2WinButton * pButton, int nOffsetY) {
+static void __stdcall D2WINBUTTON_DrawText(::D2WinButton * pButton, int nOffsetY) {
     GLOBALPALLETE eGlobalPalette;
     int32_t bDrawBackground;
     int32_t nSecondaryXCenter;

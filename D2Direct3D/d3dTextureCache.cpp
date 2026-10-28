@@ -39,7 +39,7 @@ void __fastcall D3DTEXCACHE_SetPalette(D3DTextureCacheStrc * pCache, void * pPal
     Renderer::DIRECTD3D_LogError("SetPalette (texture surface)", nResult);
 }
 
-void __fastcall D3DTEXCACHE_InsertNodeAtTail(D3DTextureCacheNodeStrc * pNode, D3DTextureCacheStrc * pCache) {
+static void __fastcall D3DTEXCACHE_InsertNodeAtTail(D3DTextureCacheNodeStrc * pNode, D3DTextureCacheStrc * pCache) {
     if (!pCache->pUsedHead) {
       pCache->pUsedHead = pNode;
       pCache->pUsedTail = pNode;
@@ -91,7 +91,7 @@ D3DTextureCacheNodeStrc * __fastcall D3DTEXCACHE_RemoveNodeByIndex(D3DTextureCac
     return pTargetNode;
 }
 
-int __stdcall D3DTEXCACHE_AllocateNodeFromFreeList(D3DTextureCacheStrc * pCache) {
+static int __stdcall D3DTEXCACHE_AllocateNodeFromFreeList(D3DTextureCacheStrc * pCache) {
     if (pCache->nUsedCount == pCache->nMaxNodes) {
       return 0;
     }

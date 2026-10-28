@@ -90,7 +90,7 @@ int __stdcall ReadBytesFromSocket(D2QSSocketStrc * pMCPQSocket, char * pOutBuf, 
 }
 
 // NOTE: Register params: pQServerStrc (EAX): D2QSSocketStrc *
-int __stdcall ProcessReceivedData(D2QSSocketStrc * pQServerStrc, void * pBuffer, int nBufferSize) {
+static int __stdcall ProcessReceivedData(D2QSSocketStrc * pQServerStrc, void * pBuffer, int nBufferSize) {
     BOOL bBadHandlerPtr;
     int iVar2;
     uint16_t wMsgSize;
@@ -156,7 +156,7 @@ void __stdcall QSSOCKET_SetCallbackHandler2(D2QSSocketStrc * pQSSocket, int nHea
 }
 
 // NOTE: Register param types inferred (medium confidence): pQSSocketStrc (ESI): D2QSSocketStrc *
-void __stdcall QSSOCKET_BlockSocket(D2QSSocketStrc * pQSSocketStrc) {
+static void __stdcall QSSOCKET_BlockSocket(D2QSSocketStrc * pQSSocketStrc) {
     if (!pQSSocketStrc) {
       return;
     }
@@ -173,7 +173,7 @@ void __stdcall QSSOCKET_BlockSocket(D2QSSocketStrc * pQSSocketStrc) {
 }
 
 // Thread-safe socket close with critical section protection
-void __stdcall CloseSocket(D2QSSocketStrc * pQServer) {
+static void __stdcall CloseSocket(D2QSSocketStrc * pQServer) {
     if (!pQServer) {
       return;
     }

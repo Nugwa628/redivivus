@@ -593,7 +593,7 @@ void __fastcall DirectDrawErrorHandler(char * szContext, int32_t nErrorCode) {
     Fog::Src::LogManager::LOGFILE_WriteStringToFile("***** DirectDraw error: %s - %s (0x%x)", szContext, "< unknown >", nErrorCode);
 }
 
-BOOL InternalOpenWindow(int32_t nResolutionMode) {
+static BOOL InternalOpenWindow(int32_t nResolutionMode) {
     // Static local variables (originally global data)
     static uint32_t gdwDirectDrawPaletteSizes[4] = { 0x280, 0x320, 0x320, 0x0 }; D2_STATIC_GUARD(gdwDirectDrawPaletteSizes, "D2DDraw::Renderer::DirectDraw::InternalOpenWindow::gdwDirectDrawPaletteSizes");
     static uint32_t gdwDirectDrawSurfaceWidths[4] = { 0x1e0, 0x258, 0x258, 0x0 }; D2_STATIC_GUARD(gdwDirectDrawSurfaceWidths, "D2DDraw::Renderer::DirectDraw::InternalOpenWindow::gdwDirectDrawSurfaceWidths");
@@ -1142,7 +1142,7 @@ uint32_t __stdcall RENDERER_DDRAW_IsDC6OffScreen(int32_t nX, int32_t nY, int32_t
 }
 
 // DirectDraw renderer internal helpers for sprite visibility testing, clip rect computation, debug font rendering, shadow quality query, pixel/line drawing primitives, and smacker video frame blitting.
-BOOL __stdcall RENDERER_DDRAW_ComputeDC6ClipRect(int32_t nY, DC6Block * pDC6Block, int32_t nX, uint32_t * pOutClipRect, uint32_t * pInClipBounds) {
+static BOOL __stdcall RENDERER_DDRAW_ComputeDC6ClipRect(int32_t nY, DC6Block * pDC6Block, int32_t nX, uint32_t * pOutClipRect, uint32_t * pInClipBounds) {
     int32_t nWidth = D2CMP::SRC::CelCmp::GetDC6Width(pDC6Block);
     int32_t nHeight = D2CMP::SRC::CelCmp::GetDC6Height(pDC6Block);
     uint32_t nClipLeft = (int)*pInClipBounds < 1 ? 0 : *pInClipBounds;
@@ -1447,7 +1447,7 @@ void __stdcall D2ddDebugFont_Free() {
 }
 
 // DirectDraw renderer internal helpers for sprite visibility testing, clip rect computation, debug font rendering, shadow quality query, pixel/line drawing primitives, and smacker video frame blitting.
-LPINT __stdcall RENDERER_DDRAW_DrawDebugFontChar(int32_t nX, char cCharacter, int32_t nY) {
+static LPINT __stdcall RENDERER_DDRAW_DrawDebugFontChar(int32_t nX, char cCharacter, int32_t nY) {
     uint8_t* pCurPixel;
     uint8_t cFontByte;
     if (0x280 < nX) {
@@ -2125,7 +2125,7 @@ void __fastcall CloseSmacker(D2SmackerContextStrc * pContext) {
 }
 
 // DirectDraw renderer internal helpers for sprite visibility testing, clip rect computation, debug font rendering, shadow quality query, pixel/line drawing primitives, and smacker video frame blitting.
-void __stdcall RENDERER_DDRAW_BlitSmackerFrame(int32_t nHeight, int32_t nWidth, D2SmackerContextStrc * pDestRect) {
+static void __stdcall RENDERER_DDRAW_BlitSmackerFrame(int32_t nHeight, int32_t nWidth, D2SmackerContextStrc * pDestRect) {
     uint8_t* pPixelSrc;
     int32_t nPixelCount;
     if (!*(uint32_t*)((char*)&gaSmackerPaletteRemap + 256)) {

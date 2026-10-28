@@ -86,7 +86,7 @@ void __stdcall SERR_AddStormMessages() {
 // @module Internal to SErr.cpp; its only caller is SErrDisplayError 0041caf0. Not on the Storm 1.10b export table.
 // @oracle-negative It is NOT SErrGetErrorStr. That export takes 3 arguments and calls FormatMessage; this takes 1 and calls LoadStringA. The real SErrGetErrorStr is 0041c430. On the PPC the oracle inlines this LoadString step directly into SErrDisplayError, so there is no oracle counterpart to name it from.
 // @blizzard GetString (SERR.CPP)
-LPSTR * SERR_GetString(int32_t nErrorIndex) {
+static LPSTR * SERR_GetString(int32_t nErrorIndex) {
     // Static local variables (originally global data)
     static char * gaSErrMessageStrings[12] = {
     s_ERROR___u__0x_08x__006cf2e0,
@@ -150,7 +150,7 @@ void __stdcall SERR_InternalLeaveCriticalSection() {
 // @was SSYSTEM_DemangleSymbolName (pass 6, 2026.08.28) - the module prefix was wrong and is corrected; SErr.cpp membership is established (its only caller is SErrDisplayError).
 // @caution The tail "DemangleSymbolName" is NOT verified. It was carried over unchanged rather than guessed at. Only the callee set was checked this pass, not the body. There is no oracle counterpart: MWCC inlined whatever this is into SErrDisplayError on the PPC, so the oracle offers no name for it. If a later pass reads the body, correct or confirm the tail here.
 // @blizzard UndecorateObjectName (SERR.CPP)
-BOOL __stdcall SERR_UndecorateObjectName(char * szMangled, int32_t nMaxLen, char * szText) {
+static BOOL __stdcall SERR_UndecorateObjectName(char * szMangled, int32_t nMaxLen, char * szText) {
     uint32_t pcMarker = SSTR::SStrLen(szMangled);
     if (!(5 < pcMarker && *szMangled == '.' && szMangled[3] == 'U')) {
       return 0;

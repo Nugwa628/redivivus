@@ -149,7 +149,7 @@ D2RoomStrc * __fastcall FindBestSpotToSpawnItem(D2RoomStrc * pRoom, POINT * pPoi
 
 // Returns 1 when ItemsTxt row pItemsTxt may drop in level eLevel: spawnable, not a quest item, nLevel <= eLevel, wType == nItemTypeFilter (-1 = any) and, unless bSkipRarityRoll, a RANDOM_RandomNumberSelector(pSeed, nRarity - act) roll of 0.
 // Called by ITEMDROP_RollNormal/Exceptional/EliteItemClass; 1.14d asm 00555e00.
-BOOL __stdcall ITEMDROP_IsItemClassEligible(D2SeedStrc * pSeed, int32_t bSkipRarityRoll, eD2LevelId eLevel, D2ItemsTxt * pItemsTxt, int32_t nItemTypeFilter) {
+static BOOL __stdcall ITEMDROP_IsItemClassEligible(D2SeedStrc * pSeed, int32_t bSkipRarityRoll, eD2LevelId eLevel, D2ItemsTxt * pItemsTxt, int32_t nItemTypeFilter) {
     uint32_t nActDelta;
     if ((int)eLevel < 1) {
       eLevel = LEVEL_RogueEncampment;
@@ -375,7 +375,7 @@ int32_t __fastcall ITEMDROP_RollEliteItemClass(::SGAMEDATA * pGame, D2SeedStrc *
 }
 
 // Rolls the broad item quality tier (gold, exceptional, normal, or elite) for a monster drop at a given area level. Uses a 0-100 RNG roll with level-scaled thresholds: low levels skew toward gold; mid levels can yield normal/exceptional; high levels (≥0x42) halt. Delegates to ITEMDROP_RollExceptionalItemClass, RollNormalItemClass, or RollEliteItemClass based on the roll. One-time initializes the gold item class ID.
-int32_t __stdcall ITEMDROP_RollItemClassByLevel(::SGAMEDATA * pGame, D2SeedStrc * pSeed, int32_t nTCFilter, int32_t nMonsterLevel, int32_t bIsMonsterDrop, uint32_t nLevel) {
+static int32_t __stdcall ITEMDROP_RollItemClassByLevel(::SGAMEDATA * pGame, D2SeedStrc * pSeed, int32_t nTCFilter, int32_t nMonsterLevel, int32_t bIsMonsterDrop, uint32_t nLevel) {
     // Static local variables (originally global data)
     static uint32_t gnItemClassIdGold; D2_STATIC_GUARD_BSS(gnItemClassIdGold, "D2Game::ITEMS::Items::Drop::ITEMDROP_RollItemClassByLevel::gnItemClassIdGold");
 
@@ -430,7 +430,7 @@ int32_t __stdcall ITEMDROP_RollItemClassByLevel(::SGAMEDATA * pGame, D2SeedStrc 
     }
 }
 
-void ITEM_RollBaseArmorClass(D2UnitStrc * pUnit) {
+static void ITEM_RollBaseArmorClass(D2UnitStrc * pUnit) {
     uint32_t nClassId;
     uint32_t nMaxAc;
     if (!pUnit) {
@@ -457,7 +457,7 @@ void ITEM_RollBaseArmorClass(D2UnitStrc * pUnit) {
     }
 }
 
-void ITEM_SetBaseDamageStats(D2UnitStrc * pUnit) {
+static void ITEM_SetBaseDamageStats(D2UnitStrc * pUnit) {
     uint32_t nItemClassId;
     if (!pUnit) {
       nItemClassId = -1;
@@ -490,7 +490,7 @@ void ITEM_SetBaseDamageStats(D2UnitStrc * pUnit) {
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_item_throw_maxdamage, (uint32_t)(uint8_t)pItemsTxt->nMaxMisDam, 0);
 }
 
-uint32_t ITEM_CheckUniqueBitmask(uint32_t nUniqueFileIndex, ::SGAMEDATA * pGame) {
+static uint32_t ITEM_CheckUniqueBitmask(uint32_t nUniqueFileIndex, ::SGAMEDATA * pGame) {
     if (!pGame) {
       return 0;
     }
@@ -518,7 +518,7 @@ uint32_t __fastcall ITEM_IsUniqueAlreadyDropped(::SGAMEDATA * pGame, D2UnitStrc 
     return pGame->fUniqueSpawn[(int)nFileIndex >> 5] & gadwBitMasks[nFileIndex & 0x1f];
 }
 
-BOOL __stdcall ITEM_MarkUniqueAsDropped(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static BOOL __stdcall ITEM_MarkUniqueAsDropped(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     uint32_t nClassId = !pUnit ? -1 : pUnit->nClassId;
     D2ItemsTxt* pItemsTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(nClassId);
     if (!pItemsTxt) {
@@ -546,7 +546,7 @@ BOOL __stdcall ITEM_MarkUniqueAsDropped(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
     return 1;
 }
 
-BOOL __stdcall ITEM_RollMagicPrefixSuffix(D2ItemGenContextStrc * pItemGenCtx, D2UnitStrc * * ppUnit) {
+static BOOL __stdcall ITEM_RollMagicPrefixSuffix(D2ItemGenContextStrc * pItemGenCtx, D2UnitStrc * * ppUnit) {
     int pItemsTxt;
     pItemsTxt = pItemGenCtx->nForcePrefix;
     int16_t wMagicSuffix;
@@ -762,7 +762,7 @@ BOOL __stdcall ITEM_RollUniqueItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2It
 }
 
 // Rolls and assigns magic prefix and/or suffix for an item during generation. Respects forced prefix/suffix overrides from pItemGenCtx (nForcePrefix/nForceSuffix). If both overrides are absent, rolls randomly via ITEMMOD_RollMagicAffixVersioned. Halts if neither prefix nor suffix could be assigned. Clears ITEMFLAG_IDENTIFIED on success.
-void __stdcall ITEM_RollForcedMagicAffix(D2ItemGenContextStrc * pItemGenCtx, D2UnitStrc * pUnit) {
+static void __stdcall ITEM_RollForcedMagicAffix(D2ItemGenContextStrc * pItemGenCtx, D2UnitStrc * pUnit) {
     int16_t wMagicSuffix;
     int16_t wForcedPrefix;
     wForcedPrefix = 0;
@@ -904,7 +904,7 @@ void __stdcall ITEM_RollSocketCount(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2I
 }
 
 // Conditionally makes an item ethereal during drop generation. Eligible items are weapons or armor with durability, not unique or set quality, not quest items, and not flagged to suppress ethereal (pItemGenContext bit 1). Triggers on a 5% RNG roll or if the drop context forces ethereal (bit 2 or flag 0x400000). Applies ITEMMOD_ApplyEtherealBonus and halves max durability (setting current durability to the new max).
-void ITEM_ApplyEthereal(D2UnitStrc * pUnit, D2ItemGenContextStrc * pItemGenContext) {
+static void ITEM_ApplyEthereal(D2UnitStrc * pUnit, D2ItemGenContextStrc * pItemGenContext) {
     bool _bIsQuestItem;
     uint32_t bCheckResult;
     bool bIsQuestItem;
@@ -951,7 +951,7 @@ void ITEM_ApplyEthereal(D2UnitStrc * pUnit, D2ItemGenContextStrc * pItemGenConte
 }
 
 // Applies item-type-specific post-generation properties to a newly dropped item. Switch on wType: PlayerBodyPart/BodyPart sets file index from ctx; Charm rolls forced magic affix; Book/Scroll sets magic suffix from scroll-book index. Falls through to StaffMod roll and socket count roll for all other types.
-void __stdcall ITEM_ApplySpecialTypeProperties(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2ItemGenContextStrc * pItemGenContext) {
+static void __stdcall ITEM_ApplySpecialTypeProperties(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2ItemGenContextStrc * pItemGenContext) {
     uint32_t dwFileIndex_00;
     uint32_t dwFileIndex;
     int32_t nScrollBookIdx;
@@ -997,7 +997,7 @@ void __stdcall ITEM_ApplySpecialTypeProperties(D2UnitStrc * pUnit, ::SGAMEDATA *
 }
 
 // Expansion variant of ITEM_ApplySpecialTypeProperties. Applies all type-specific fixups non-exclusively using IsOfType checks (no switch): Charm gets forced magic affix, BodyPart/PlayerBodyPart get file index from ctx, Scroll/Book get magic suffix from scroll-book index. Does NOT roll sockets; always falls through to StaffMod.
-void ITEM_ApplySpecialTypePropertiesExp(D2UnitStrc * pUnit, D2ItemGenContextStrc * pItemGenContext) {
+static void ITEM_ApplySpecialTypePropertiesExp(D2UnitStrc * pUnit, D2ItemGenContextStrc * pItemGenContext) {
     int32_t nScrollIdx;
     DWORD dwFileIndex_00;
     uint32_t dwFileIndex;
@@ -1047,7 +1047,7 @@ void ITEM_ApplySpecialTypePropertiesExp(D2UnitStrc * pUnit, D2ItemGenContextStrc
     SKILLS::Items::StaffMod(pUnit, pItemGenContext);
 }
 
-void __stdcall ITEM_ApplyNormalTypeProperties(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2ItemGenContextStrc * pItemGenContext) {
+static void __stdcall ITEM_ApplyNormalTypeProperties(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2ItemGenContextStrc * pItemGenContext) {
     int16_t wItemVersion = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
     if (!wItemVersion) {
       ITEM_ApplySpecialTypeProperties(pUnit, pGame, pItemGenContext);
@@ -1232,7 +1232,7 @@ uint32_t __stdcall ITEM_RollItemQuality(D2UnitStrc * pUnit, D2ItemGenContextStrc
     }
 }
 
-void ITEM_ClearAllMagicAffixes(D2UnitStrc * * ppUnit) {
+static void ITEM_ClearAllMagicAffixes(D2UnitStrc * * ppUnit) {
     int i = 0;
     do {
       D2Common::ITEMS::Items::SetMagixPrefix(*ppUnit, 0, i);
@@ -1245,7 +1245,7 @@ void ITEM_ClearAllMagicAffixes(D2UnitStrc * * ppUnit) {
     D2Common::ITEMS::Items::ITEM_SetItemData_nFileIndex(*ppUnit, -1);
 }
 
-void __stdcall ITEM_FallbackToNormalQuality(D2UnitStrc * * ppUnit, ::SGAMEDATA * pGame, D2ItemGenContextStrc * pItemGenContext, int32_t nModSeedVal) {
+static void __stdcall ITEM_FallbackToNormalQuality(D2UnitStrc * * ppUnit, ::SGAMEDATA * pGame, D2ItemGenContextStrc * pItemGenContext, int32_t nModSeedVal) {
     ITEM_ClearAllMagicAffixes(ppUnit);
     D2Common::ITEMS::Items::SetModSeed(*ppUnit, nModSeedVal);
     D2SeedStrc* pSeed = D2Common::ITEMS::Items::GetItemSeed(*ppUnit);
@@ -1265,7 +1265,7 @@ void __stdcall ITEM_FallbackToNormalQuality(D2UnitStrc * * ppUnit, ::SGAMEDATA *
 }
 
 // Re-generates the item as QUALITY_SUPERIOR: clears its magic affixes, re-seeds mod and item seed from *pnParam (seed high 0x29A), rerolls the quality fields, sets the quality on the item and gen context, writes the new seed low back to *pnParam, and returns the result of ITEMMOD_RollSuperiorQualityMods.
-BOOL ITEM_FallbackToSuperiorQuality(int * pnParam, D2ItemGenContextStrc * pItemGenContext, D2UnitStrc * * ppUnit) {
+static BOOL ITEM_FallbackToSuperiorQuality(int * pnParam, D2ItemGenContextStrc * pItemGenContext, D2UnitStrc * * ppUnit) {
     ITEM_ClearAllMagicAffixes(ppUnit);
     D2Common::ITEMS::Items::SetModSeed(*ppUnit, *pnParam);
     D2SeedStrc* pSeed = D2Common::ITEMS::Items::GetItemSeed(*ppUnit);
@@ -1282,7 +1282,7 @@ BOOL ITEM_FallbackToSuperiorQuality(int * pnParam, D2ItemGenContextStrc * pItemG
 }
 
 // Downgrades the item being generated to QUALITY_MAGIC: clears its magic affixes, re-seeds mod and item seed from *pnParam (seed high 0x29A), rerolls the quality fields, sets the quality on the item and gen context, writes the new seed low back to *pnParam, and returns the result of ITEM_RollMagicPrefixSuffix (tested by ITEM_ApplyQualityAndAffixes at 557647/557783/557915).
-BOOL __stdcall ITEM_FallbackToMagicQuality(D2ItemGenContextStrc * pItemGenContext, int * pnParam, D2UnitStrc * * ppUnit) {
+static BOOL __stdcall ITEM_FallbackToMagicQuality(D2ItemGenContextStrc * pItemGenContext, int * pnParam, D2UnitStrc * * ppUnit) {
     ITEM_ClearAllMagicAffixes(ppUnit);
     D2Common::ITEMS::Items::SetModSeed(*ppUnit, *pnParam);
     D2SeedStrc* pSeed = D2Common::ITEMS::Items::GetItemSeed(*ppUnit);
@@ -1299,7 +1299,7 @@ BOOL __stdcall ITEM_FallbackToMagicQuality(D2ItemGenContextStrc * pItemGenContex
 }
 
 // Re-generates the item as QUALITY_RARE: clears its magic affixes, re-seeds mod and item seed from *pnParam (seed high 0x29A), rerolls the quality fields, sets the quality on the item and gen context, writes the new seed low back to *pnParam, and returns the result of RollingItem.
-BOOL ITEM_FallbackToRareQuality(int * pnParam, D2ItemGenContextStrc * pItemGenContext, D2UnitStrc * * ppUnit) {
+static BOOL ITEM_FallbackToRareQuality(int * pnParam, D2ItemGenContextStrc * pItemGenContext, D2UnitStrc * * ppUnit) {
     ITEM_ClearAllMagicAffixes(ppUnit);
     D2Common::ITEMS::Items::SetModSeed(*ppUnit, *pnParam);
     D2SeedStrc* pSeed = D2Common::ITEMS::Items::GetItemSeed(*ppUnit);
@@ -1839,7 +1839,7 @@ void __fastcall ITEM_FreeItemInventoryAndTimers(::SGAMEDATA * pGame, D2UnitStrc 
     GAME::Event::EVENT_FreeAllTimersForUnit(pGame, pUnit);
 }
 
-void INVENTORY_RemoveItemFromOwner(D2InventoryStrc * pInventory, D2UnitStrc * pUnit) {
+static void INVENTORY_RemoveItemFromOwner(D2InventoryStrc * pInventory, D2UnitStrc * pUnit) {
     D2UnitStrc* pCurItem = D2Common::INVENTORY::Inventory::INVENTORY_GetFirstItem(pInventory);
     while (true) {
       D2UnitStrc* pCarriedItem;
@@ -2240,7 +2240,7 @@ void __fastcall RefreshQuantity(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     GAME::Event::SetEvent(pGame, pUnit, 3, (int)(0x9c4 / (int64_t)nReplenishQuantity) + 1 + pGame->dwGameFrame, 0, 0);
 }
 
-int32_t ITEM_GetTotalMagicFind(D2UnitStrc * pUnit) {
+static int32_t ITEM_GetTotalMagicFind(D2UnitStrc * pUnit) {
     if (!(pUnit && pUnit->eUnitType < UNIT_OBJECT)) {
       return 0;
     }
@@ -2265,7 +2265,7 @@ int32_t __fastcall ITEMDROP_AdjustDrop(int32_t nParam1, int32_t nParam2, int32_t
 }
 
 // Item quality selector. QualityRatio.txt cascading rolls: Unique(128/idx) -> Set(128/idx) -> Rare(128/idx if allowed) -> Magic(128/idx) -> Superior(128/idx) else Normal. MF applies diminishing returns via ITEMDROP_AdjustDrop. The quality modifiers in pMagicFindUnit ([0]=magic, [1]=rare, [2]=set, [3]=unique, in 1024ths) reduce each roll chance. Returns eD2ItemTypes quality enum.
-int32_t __stdcall GAME_GetItemQuality(uint32_t nItemClassId, int32_t nVictimLevel, ::SGAMEDATA * pAttacker, D2UnitStrc * pGame, D2UnitStrc * pVictim, uint16_t * pMagicFindUnit) {
+static int32_t __stdcall GAME_GetItemQuality(uint32_t nItemClassId, int32_t nVictimLevel, ::SGAMEDATA * pAttacker, D2UnitStrc * pGame, D2UnitStrc * pVictim, uint16_t * pMagicFindUnit) {
     bool bHasMF;
     bHasMF = false;
     D2ItemsTxt* pItemTxt;
@@ -2431,7 +2431,7 @@ int32_t __stdcall GAME_GetItemQuality(uint32_t nItemClassId, int32_t nVictimLeve
     return (nRoll < 0x80) + 1;
 }
 
-void ITEM_ApplyGoldBonus(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static void ITEM_ApplyGoldBonus(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     if (!(pUnit2 && pUnit)) {
       return;
     }
@@ -3643,7 +3643,7 @@ D2UnitStrc * __fastcall ITEM_CloneFromSerializedData(::SGAMEDATA * pGame, D2Unit
 }
 
 // Three explicit GuardStack tails: GuardStack(0) on two early-out failure paths, GuardStack((int)pNewItem) on success. Matches its own doc comment: "Returns D2UnitStrc* or NULL on failure."
-D2UnitStrc * __stdcall ITEMGEN_CreateItemFromClassIdAndQuality(int32_t nItemClassId, eD2ItemTypes eD2ItemType, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, uint32_t eItemType, int32_t dwFileIndex, int32_t nFlags) {
+static D2UnitStrc * __stdcall ITEMGEN_CreateItemFromClassIdAndQuality(int32_t nItemClassId, eD2ItemTypes eD2ItemType, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, uint32_t eItemType, int32_t dwFileIndex, int32_t nFlags) {
     ::SGAMEDATA* pUnitGame;
     D2UnitStrc* pNewItem;
     POINT ptUnitPos;

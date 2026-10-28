@@ -135,7 +135,7 @@ uint32_t __fastcall ZLIB_Adler32(uint32_t nAdler, uint8_t * pbData, uint32_t nLe
     return nSum2 << 0x10 | nSum1;
 }
 
-uint32_t __stdcall ZLIB_Adler32Combine(uint32_t nAdler1, uint32_t nLen2Lo, uint32_t nLen2Hi, uint32_t nAdler2) {
+static uint32_t __stdcall ZLIB_Adler32Combine(uint32_t nAdler1, uint32_t nLen2Lo, uint32_t nLen2Hi, uint32_t nAdler2) {
     if ((int)nLen2Hi < 1 && ((int)nLen2Hi < 0 || false)) {
       return -1;
     }

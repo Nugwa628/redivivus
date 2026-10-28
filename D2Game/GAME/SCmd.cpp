@@ -117,7 +117,7 @@ typedef void (__fastcall *fpSUnitIterateCallback)(::SGAMEDATA * pGame, D2UnitStr
 namespace D2Game::GAME::SCmd {
 
 // @sourcefile .\GAME\SCmd.cpp
-void __stdcall SCMD_QueuePacketForClient(uint8_t * pBytes, size_t nSize, D2ClientStrc * pClient) {
+static void __stdcall SCMD_QueuePacketForClient(uint8_t * pBytes, size_t nSize, D2ClientStrc * pClient) {
     int nOffset = 0;
     if (!pClient) {
       return;
@@ -1270,7 +1270,7 @@ BOOL SCMD_DetectPositionDesync(int32_t pState, int32_t nNewPos) {
 }
 
 // Detects position desync for an owned monster. Verifies pUnit2 is a monster owned by pUnit, then compares its stored position against nNewPos. If the delta exceeds 8 units, or if a consecutive-desync counter exceeds 6, resets the counter and snaps the stored position to nNewPos, returning 1. Returns 0 if in sync or guard conditions fail.
-BOOL __stdcall SCMD_CheckMonsterPositionDesync(D2UnitStrc * pUnit, D2UnitStrc * pUnit2, int32_t nNewPos) {
+static BOOL __stdcall SCMD_CheckMonsterPositionDesync(D2UnitStrc * pUnit, D2UnitStrc * pUnit2, int32_t nNewPos) {
     D2UnitStrc* pOwner = Ai::AiGeneral::GetOwnerUnit(pUnit2);
     if (pOwner != pUnit) {
       return 0;
@@ -1308,7 +1308,7 @@ BOOL __stdcall SCMD_CheckMonsterPositionDesync(D2UnitStrc * pUnit, D2UnitStrc * 
 
 // Ensures a D2PartyDataStrc entry exists in pUnit2's player-data party list for the unit identified by pUnit, then checks whether the position/life snapshot has changed enough to warrant a network update. Both units must share the same party ID. Allocates a new node from the server memory pool if one is not found. Returns 1 if a state update should be broadcast (area changed, or life delta &gt;8 accumulated 6+ times), 0 otherwise.
 // @sourcefile .\GAME\SCmd.cpp
-BOOL __stdcall PLAYERDATA_AllocPartyData(D2UnitStrc * pUnit, int32_t nUnitLife, eD2LevelId eLevel, D2UnitStrc * pUnit2) {
+static BOOL __stdcall PLAYERDATA_AllocPartyData(D2UnitStrc * pUnit, int32_t nUnitLife, eD2LevelId eLevel, D2UnitStrc * pUnit2) {
     int nUnitGUID;
     ::SGAMEDATA* pGame;
     pGame = UNIT::SUnit::GetGamePointer(pUnit2);
@@ -1383,7 +1383,7 @@ BOOL __stdcall PLAYERDATA_AllocPartyData(D2UnitStrc * pUnit, int32_t nUnitLife, 
     return 1;
 }
 
-BOOL __stdcall SCMD_DispatchUnitPartyData(D2UnitStrc * pUnit, int32_t nUnitLife, eD2LevelId eLevel, D2UnitStrc * pUnit2) {
+static BOOL __stdcall SCMD_DispatchUnitPartyData(D2UnitStrc * pUnit, int32_t nUnitLife, eD2LevelId eLevel, D2UnitStrc * pUnit2) {
     int32_t nPartyDataChanged;
     if (!pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x712);
@@ -1491,18 +1491,18 @@ void __fastcall NET_D2GS_SERVER_Send_0x9D_ITEMUNITEX(D2ClientStrc * pClient, D2U
     D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, eItemFlag, 1);
     int32_t nSerializedLen = D2Common::ITEMS::Items::SerializeItem(pItem, sPacket.aBitStream, 0xf4, nullptr, 0, bSerializeFull);
     uint32_t nTotalPacketLen = nSerializedLen + 0xd;
-    if (!(nTotalPacketLen < 0xfd)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x7b4);
-      exit(-1);
+    if (nTotalPacketLen < 0xfd) {
+      D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
+      D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, eSavedItemFlag, 1);
+      sPacket.nPacketSize = (uint8_t)nTotalPacketLen;
+      SCMD_QueuePacketForClient(&sPacket.nPacketId, nTotalPacketLen & 0xff, pClient);
+      Send0x9DAllSocketedItems(pClient, pItem, eItemFlag);
+      Fog::Debug::GuardStack();
+      return;
     }
 
-    D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
-    D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, eSavedItemFlag, 1);
-    sPacket.nPacketSize = (uint8_t)nTotalPacketLen;
-    SCMD_QueuePacketForClient(&sPacket.nPacketId, nTotalPacketLen & 0xff, pClient);
-    Send0x9DAllSocketedItems(pClient, pItem, eItemFlag);
-    Fog::Debug::GuardStack();
-    return;
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x7b4);
+    exit(-1);
 }
 
 // @sourcefile .\GAME\SCmd.cpp
@@ -2580,12 +2580,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(D2ClientStrc * pClient, D2U
 // (SCMD_0x66_WardenStub @ 0x0054d740 returns PROCEED_NEXT without processing).
 // Likely disabled/removed in later patches after Warden was integrated into Battle.net realm.
 void __fastcall NET_D2GS_SERVER_Send_0xAE_WARDENDATA(D2ClientStrc * pClient, void * pParam, uint32_t nDataSize) {
-    if (!(nDataSize < 0x1fe)) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe38);
-      exit(-1);
-    }
-
-    {
+    if (nDataSize < 0x1fe) {
       D2GSPacketSrv0xAE sPacket;
       sPacket.nPacketId = 0xae;
       sPacket.nDataSize = (uint16_t)nDataSize;
@@ -2594,6 +2589,9 @@ void __fastcall NET_D2GS_SERVER_Send_0xAE_WARDENDATA(D2ClientStrc * pClient, voi
       Fog::Debug::GuardStack();
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe38);
+    exit(-1);
 }
 
 // Generic wrapper for sending state-related packets (0xA8 SetState or 0xAA AddUnit).

@@ -181,6 +181,8 @@ typedef DWORD (__stdcall *pfnUnDecorateSymbolName)(char * DecoratedName, char * 
 
 namespace Fog::Debug {
 
+static void InitializeDebugInfoTable(D2FogDebugModuleTableStrc * pTable);
+
 // Loads dbghelp.dll once and resolves its 64-bit symbol APIs into globals. Returns true when the library is (already) loaded and every API resolved, in AL.
 bool __stdcall DEBUG_LoadDbgHelp64Apis() {
     // Static local variables (originally global data)
@@ -954,7 +956,7 @@ int CompareUintDescending(LPCVOID pParam1, LPCVOID pParam2) {
     return 1;
 }
 
-void FormatModuleDebugString(char * szText, D2FogDebugModuleEntryStrc * pModule) {
+static void FormatModuleDebugString(char * szText, D2FogDebugModuleEntryStrc * pModule) {
     char szGuidStr[40];
     char szTimeStampSuffix[16];
     uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
@@ -1024,7 +1026,7 @@ void __fastcall EnumerateAndDumpAllFunctions(fnCrashOutputLine pOutputCallback, 
     GuardStack();
 }
 
-void InitializeDebugInfoTable(D2FogDebugModuleTableStrc * pTable) {
+static void InitializeDebugInfoTable(D2FogDebugModuleTableStrc * pTable) {
     D2FogDebugModuleEntryStrc* pEntryBase = pTable->aEntries;
     int nRemaining = 0xff;
     uint16_t* pEntryCursor = &pTable->aEntries[0].guidPdb.Data3;
@@ -1073,7 +1075,7 @@ void __fastcall DumpThreadContext(HANDLE hHandle) {
     GuardStack();
 }
 
-BOOL __stdcall GetSourceLineWithRetry(HANDLE hProcess, DWORD nAddress, void * pdwDisplacement, void * pLine) {
+static BOOL __stdcall GetSourceLineWithRetry(HANDLE hProcess, DWORD nAddress, void * pdwDisplacement, void * pLine) {
     if (!pSymGetLineFromAddr) {
       return 0;
     }
@@ -1360,7 +1362,7 @@ D2FogModuleNodeStrc * __stdcall EnumerateModulesPsapi(HANDLE hProcess) {
     return nullptr;
 }
 
-D2FogModuleNodeStrc * __stdcall EnumerateAndLogModules(HANDLE hProcess, uint32_t dwProcessId) {
+static D2FogModuleNodeStrc * __stdcall EnumerateAndLogModules(HANDLE hProcess, uint32_t dwProcessId) {
     D2FogModuleNodeStrc* pModuleList = EnumerateModulesToolhelp32(dwProcessId);
     D2FogModuleNodeStrc* pModuleListHead = pModuleList;
     if (!pModuleList) {
@@ -1569,7 +1571,7 @@ void __fastcall DumpAnnotatedStackMemory(HANDLE hSymHandle, CONTEXT * pContext, 
     GuardStack();
 }
 
-D2FogModuleNodeStrc * __stdcall LoadSymbolsForAllModules(HANDLE hProcess, uint32_t dwProcessId) {
+static D2FogModuleNodeStrc * __stdcall LoadSymbolsForAllModules(HANDLE hProcess, uint32_t dwProcessId) {
     // Static local variables (originally global data)
     static uint32_t gnSymbolLoadState; D2_STATIC_GUARD_BSS(gnSymbolLoadState, "Fog::Debug::LoadSymbolsForAllModules::gnSymbolLoadState");
 
@@ -1667,7 +1669,7 @@ BOOL __fastcall FILETOOLS_GetExecutableFolderPath(LPSTR lpFilename, DWORD nSize)
     return 1;
 }
 
-int BuildSymbolSearchPath(char * szSearchPath) {
+static int BuildSymbolSearchPath(char * szSearchPath) {
     int nResult;
     char szCurrentDir[512];
     char szComponent[512];

@@ -465,7 +465,7 @@ void __fastcall PlaceAct1245OutdoorBorders(D2DrlgLevelStrc * pLevel) {
 }
 
 // Calculates placement coordinates for a sub-level within the outdoor grid, writing results to pOutCoords.
-void __stdcall DRLGOUTPLACE_CalcSubLevelPlacement(int nHeight, int nWidth, D2DrlgSubLevelPlaceStrc * pOutCoords, D2DrlgSubLevelPlaceStrc * dwParam4, int32_t dwParam5) {
+static void __stdcall DRLGOUTPLACE_CalcSubLevelPlacement(int nHeight, int nWidth, D2DrlgSubLevelPlaceStrc * pOutCoords, D2DrlgSubLevelPlaceStrc * dwParam4, int32_t dwParam5) {
     int nOffsetX;
     nOffsetX = 0;
     int nOffsetY;
@@ -505,7 +505,7 @@ void __stdcall DRLGOUTPLACE_CalcSubLevelPlacement(int nHeight, int nWidth, D2Drl
 }
 
 // Server-side DRLG out-of-placement generator for the Spider Forest level (LEVEL_SpiderForest). Places three procedurally-connected sub-levels (ids 0x4c..0x4e) inside the forest using the drlg RNG seed: picks non-overlapping room placements (FreeRoomEx), allocates four scratch tile maps from the level memory pool, carves a maze of connecting paths/exits between sub-levels (flood/adjacency passes building per-cell connection-flag bitmasks 0x10/0x20/0x40/0x80), maps cell flags to tile codes via the gdwOutPlaceMap* lookup tables, writes the resulting grids back into each sub-level, sorts the three sub-levels, then GetLevelAndAllocs each and stores coords/size/automap. Frees the scratch maps and returns the last allocated sub-level. Halts via Fog ErrorManager on overflow/invalid tile. pLevel passed in EAX (custom convention); mutates pDrlg->nSeed throughout.
-D2DrlgLevelStrc * DRLGLEVEL_FixDrlgLevelForSpiderForest(D2DrlgLevelStrc * pLevel) {
+static D2DrlgLevelStrc * DRLGLEVEL_FixDrlgLevelForSpiderForest(D2DrlgLevelStrc * pLevel) {
     size_t nSize;
     int bNoOverlap;
     uint32_t nConnFlags;
