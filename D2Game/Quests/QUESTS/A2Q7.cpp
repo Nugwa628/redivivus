@@ -198,8 +198,8 @@ uint32_t __fastcall A2Q6_GetNextFalseTombPortalClassIdForGame(::SGAMEDATA * pGam
 }
 
 // Q14 accessor: returns the "town/Duriel portal already created" flag from A2Q6 data (field_0x0B). Returns 1 (treat as created) if quest not introduced. Used to gate the stairs-to-tombs operate and portal creation.
-uint8_t __fastcall Q14_GetPortalCreatedFlag(struct D2QuestArgStrc * pQuestArg) {
-    D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pQuestArg->pGame, QUESTINT_TheSevenTombs);
+uint8_t __fastcall Q14_GetPortalCreatedFlag(::SGAMEDATA * pGame) {
+    D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSevenTombs);
     if (!(pQuestData && pQuestData->bIsNotIntroduction)) {
       return 1;
     }
@@ -400,8 +400,8 @@ void __fastcall Objects_InitFn21(uint32_t * pInitArg) {
 
 // Q14 per-party-member callback: completes The Horadric Staff quest record for one player if not already complete and the player is in Act II. Sets Completed+JustCompleted and (unless mid-trade) strips the 3 staff component quest items (hsu/vip/msf). Invoked for every party member when the staff is placed in the orifice.
 void __fastcall Q14_CompleteHoradricStaffOnPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bIsTrading = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
     if (bIsTrading == 1) {
       return;
@@ -507,8 +507,8 @@ void __fastcall Q14_OnStaffUsedInOrifice(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     QUEST_RemoveQuestItemFromPlayer(pGame, pUnit, 0x20747368);
     QUEST_RemoveQuestItemFromPlayer(pGame, pUnit, 0x20706976);
     QUEST_RemoveQuestItemFromPlayer(pGame, pUnit, 0x2066736d);
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId != 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId != -1) {
       UNIT::Party::ExecuteFunctionForEveryPartyMember(pGame, nPartyId, (::fpExecuteOnUnitFunction)Q14_CompleteHoradricStaffOnPartyMember, 0);
     }
 
