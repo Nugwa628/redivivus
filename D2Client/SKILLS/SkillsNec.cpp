@@ -299,20 +299,20 @@ BOOL __fastcall Skills_CltStFunc_CheckSelectableCorpseSetParams(D2UnitStrc * pUn
     eD2UnitType eTargetType = pTarget->eUnitType;
     if (eTargetType == UNIT_OBJECT || 3 < (int)eTargetType && (int)eTargetType <= 5) {
       nTargetPos = pTarget->pPath.pStaticPath->nPosX;
-    } else if (!pTarget->pPath.pDynamicPath) {
-      nTargetPos = 0;
-    } else {
+    } else if (pTarget->pPath.pDynamicPath) {
       nTargetPos = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
+    } else {
+      nTargetPos = 0;
     }
 
     D2Common::Skills::SKILL_SetParam1(pSkill, nTargetPos);
     eTargetType = pTarget->eUnitType;
     if (eTargetType == UNIT_OBJECT || 3 < (int)eTargetType && (int)eTargetType <= 5) {
       nTargetPos = pTarget->pPath.pStaticPath->nPosY;
-    } else if (!pTarget->pPath.pDynamicPath) {
-      nTargetPos = 0;
-    } else {
+    } else if (pTarget->pPath.pDynamicPath) {
       nTargetPos = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
+    } else {
+      nTargetPos = 0;
     }
 
     D2Common::Skills::SKILL_SetParam2(pSkill, nTargetPos);
