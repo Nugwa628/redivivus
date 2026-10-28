@@ -292,15 +292,17 @@ BOOL __stdcall DRLGROOM_AddUnitToRoomList(D2UnitStrc * pUnit, D2RoomStrc * pRoom
         pUnit->pRoomNext = *ppUnitList;
         *ppUnitList = pUnit;
         ROOM_LinkUnitToUpdateList(pUnit);
-        if (pUnit->eUnitType != UNIT_PLAYER) {
-          if (pUnit->eUnitType != UNIT_MONSTER) {
+        switch (pUnit->eUnitType) {
+          case UNIT_PLAYER:
+            break;
+          case UNIT_MONSTER:
+            nLine = Stats::StatsEx::STATSEX_GetAlignment(pUnit);
+            if (nLine != 2) {
+              return 1;
+            }
+            break;
+          default:
             return 1;
-          }
-
-          nLine = Stats::StatsEx::STATSEX_GetAlignment(pUnit);
-          if (nLine != 2) {
-            return 1;
-          }
         }
 
         DUNGEON::Dungeon::DRLGROOM_IncreaseAlliedCount(pRoom);
