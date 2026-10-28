@@ -1060,19 +1060,18 @@ BOOL __stdcall COMCALLBACK_ValidateGameJoinability() {
     if (!nResult) {
       return 0;
     }
-    if (nMsgType) {
-      switch (nMsgType) {
-      case 2: {
-        Storm::Source::SSTR::SStrCopy(gbChannelUserCountFormatPadding, (char*)msgBuffer, 0x32);
-        return 1;
-      }
-      case 3: {
-        COMCALLBACK_HandleBannerAdFile(msgBuffer);
-        return 1;
-      }
-      }
-    } else {
+    switch (nMsgType) {
+    case 0:
       COMCALLBACK_CheckUserListFlags(msgBuffer);
+      break;
+    case 2: {
+      Storm::Source::SSTR::SStrCopy(gbChannelUserCountFormatPadding, (char*)msgBuffer, 0x32);
+      return 1;
+    }
+    case 3: {
+      COMCALLBACK_HandleBannerAdFile(msgBuffer);
+      return 1;
+    }
     }
 
     return 1;

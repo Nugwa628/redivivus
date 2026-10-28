@@ -350,11 +350,8 @@ void __stdcall CHATDLG_UpdateChannelOkButtonState() {
     uint16_t* pwszInput = D2Win::Src::D2WinEditBox::FORMS_TextInput_GetValue(&gpCtlChannelNameEditBox->sControl);
     BOOL bHasText = 0;
     if (pwszInput) {
-      char* pcCur;
       D2Lang::Unicode::UNISYS::UNICODE_WideToMultiByte(szText, (uint16_t*)pwszInput, 0x1f);
-      pcCur = szText;
-      pcCur = pcCur + strlen(pcCur) + 1;
-      if (pcCur != szText + 1) {
+      if (strlen(szText) >= 1) {
         bHasText = 1;
       }
     }
