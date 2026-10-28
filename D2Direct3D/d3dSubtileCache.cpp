@@ -177,10 +177,10 @@ static int __stdcall D3DSUBTILE_AllocateNodeFromFreeList(D3DSubtileCacheStrc * p
       D3DSubtileCacheNodeStrc* pNewFreeHead;
       pNewFreeHead = pNode->pNext;
       pCache->pFreeHead = pNewFreeHead;
-      if (!pNewFreeHead) {
-        pCache->pFreeTail = 0;
-      } else {
+      if (pNewFreeHead) {
         pNewFreeHead->pPrev = 0;
+      } else {
+        pCache->pFreeTail = 0;
       }
 
       pNode->pNext = 0;
