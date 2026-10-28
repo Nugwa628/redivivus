@@ -1863,10 +1863,10 @@ void __fastcall RecvForClient(D2QServerStrc * pQServer, D2QServerClientConnectio
         }
 
         /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pQServer->csClientLifecycle);
-        if (!pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx]) {
-          pQServer->ppModePacketQueueHeads[__frame0.nQueueModeIdx] = pPacketNode;
-        } else {
+        if (pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx]) {
           pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx]->pNext = pPacketNode;
+        } else {
+          pQServer->ppModePacketQueueHeads[__frame0.nQueueModeIdx] = pPacketNode;
         }
 
         pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx] = pPacketNode;
