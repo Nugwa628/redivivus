@@ -305,14 +305,14 @@ static uint32_t __stdcall SFILE_SearchHashTable(D2ArchiveStrc * pArchive, int16_
     } while (true);
 }
 
-static void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCount) {
+void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCount) {
     int nSectorsLeft;
     void* pSrc = (void*)(nSectorCount * 0x10 - 0x10 + pSectorTable);
     void* pDst = (void*)(nSectorCount * 0x2c - 0x2c + pSectorTable);
     if (1 < nSectorCount) {
       uint32_t* pDstExtra;
-      pDstExtra = (uint32_t*)((int)pDst + 0x24);
       nSectorsLeft = nSectorCount - 1;
+      pDstExtra = (uint32_t*)((int)pDst + 0x24);
       do {
         memmove(pDst, pSrc, 0x10);
         pSrc = (void*)((int)pSrc - 0x10);

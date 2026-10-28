@@ -681,10 +681,10 @@ void __stdcall AddRoomData(D2DrlgActStrc * pDrlgAct, eD2LevelId eLevel, int32_t 
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2d7);
       exit(-1);
     }
-    if (!pRoomCache) {
-      pRoomEx = 0;
-    } else {
+    if (pRoomCache) {
       pRoomEx = pRoomCache->pRoomEx;
+    } else {
+      pRoomEx = 0;
     }
 
     AddRoomDataPrepare(pDrlgAct->pDrlg, eLevel, nX, nY, pRoomEx);
@@ -696,10 +696,10 @@ void __stdcall RemoveRoomData(D2DrlgActStrc * pDrlgAct, eD2LevelId eLevel, int32
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e9);
       exit(-1);
     }
-    if (!pRoom) {
-      pRoomEx = 0;
-    } else {
+    if (pRoom) {
       pRoomEx = pRoom->pRoomEx;
+    } else {
+      pRoomEx = 0;
     }
 
     DRLGROOMEX_RemoveRoomDataPrepare(pDrlgAct->pDrlg, eLevel, nX, nY, pRoomEx);
