@@ -144,14 +144,17 @@ template<> void TSExplicitList<MappingEntryNode, -572662307>::LinkNode(::Mapping
     } else {
       pDestSlot = (TSLink<::MappingEntryNode>*)((uintptr_t)&pExisting->m_hashval + this->m_linkoffset);
     }
-    if (nLinkType != 1) {
-      TSLink<::MappingEntryNode>* pTVar1;
-      pTVar1 = pDestSlot->m_prevlink;
-      pSrcSlot->m_prevlink = pTVar1;
-      pSrcSlot->m_next = pTVar1->m_next;
-      pTVar1->m_next = (int)pNode;
-      pDestSlot->m_prevlink = pSrcSlot;
-      return;
+    switch (nLinkType) {
+      case 1:
+        break;
+      default:
+        TSLink<::MappingEntryNode>* pTVar1;
+        pTVar1 = pDestSlot->m_prevlink;
+        pSrcSlot->m_prevlink = pTVar1;
+        pSrcSlot->m_next = pTVar1->m_next;
+        pTVar1->m_next = (int)pNode;
+        pDestSlot->m_prevlink = pSrcSlot;
+        return;
     }
 
     pSrcSlot->m_prevlink = pDestSlot;

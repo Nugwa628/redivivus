@@ -148,13 +148,16 @@ BOOL __fastcall WAYPOINT_UpgradeSignature(D2WaypointStrc * pWaypoint) {
 // @sourcefile .\WayPoint\Waypoint.cpp
 void __stdcall Free(D2PoolManagerStrc * pMemory, D2WaypointStrc * pWaypoint) {
     uint16_t nSignature = pWaypoint->nSignature;
-    if (nSignature != 0x102) {
-      if (nSignature && nSignature != 0x101) {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x113);
-        exit(-1);
-      }
+    switch (nSignature) {
+      case 0x102:
+        break;
+      default:
+        if (nSignature && nSignature != 0x101) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x113);
+          exit(-1);
+        }
 
-      pWaypoint->nSignature = 0x102;
+        pWaypoint->nSignature = 0x102;
     }
 
     Fog::Memory::FreeServerMemory(pMemory, pWaypoint, ".\\WayPoint\\Waypoint.cpp", 0x121, 0);

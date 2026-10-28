@@ -323,20 +323,23 @@ void __fastcall PATH_SetDirection(D2DynamicPathStrc * pDynamicPath, uint8_t bRaw
     } else {
       eUnitType = pDynamicPath->pOwner->eUnitType;
     }
-    if (eUnitType != UNIT_OBJECT) {
-      if (eUnitType == UNIT_MISSILE) {
-        if (pDynamicPath->nFlags & 0x40) {
-          return;
-        }
-      } else if (eUnitType != UNIT_ITEM) {
-        if (bDirection == pDynamicPath->nNewDirection) {
-          return;
-        }
+    switch (eUnitType) {
+      case UNIT_OBJECT:
+        break;
+      default:
+        if (eUnitType == UNIT_MISSILE) {
+          if (pDynamicPath->nFlags & 0x40) {
+            return;
+          }
+        } else if (eUnitType != UNIT_ITEM) {
+          if (bDirection == pDynamicPath->nNewDirection) {
+            return;
+          }
 
-        pDynamicPath->nNewDirection = bDirection;
-        pDynamicPath->nDiffDirection = DIFFDIRECTIONS[((uint8_t)(bDirection - pDynamicPath->nDirection) & 0x3f) * 4];
-        return;
-      }
+          pDynamicPath->nNewDirection = bDirection;
+          pDynamicPath->nDiffDirection = DIFFDIRECTIONS[((uint8_t)(bDirection - pDynamicPath->nDirection) & 0x3f) * 4];
+          return;
+        }
     }
 
     pDynamicPath->nDirection = bDirection;
@@ -455,20 +458,23 @@ void __stdcall PATH_SetNewDirection(D2DynamicPathStrc * pDynamicPath, uint8_t bR
     } else {
       eUnitType = pDynamicPath->pOwner->eUnitType;
     }
-    if (eUnitType != UNIT_OBJECT) {
-      if (eUnitType == UNIT_MISSILE) {
-        if (pDynamicPath->nFlags & 0x40) {
-          return;
-        }
-      } else if (eUnitType != UNIT_ITEM) {
-        if (bDirection == pDynamicPath->nNewDirection) {
-          return;
-        }
+    switch (eUnitType) {
+      case UNIT_OBJECT:
+        break;
+      default:
+        if (eUnitType == UNIT_MISSILE) {
+          if (pDynamicPath->nFlags & 0x40) {
+            return;
+          }
+        } else if (eUnitType != UNIT_ITEM) {
+          if (bDirection == pDynamicPath->nNewDirection) {
+            return;
+          }
 
-        pDynamicPath->nNewDirection = bDirection;
-        pDynamicPath->nDiffDirection = DIFFDIRECTIONS[((uint8_t)(bDirection - pDynamicPath->nDirection) & 0x3f) * 4];
-        return;
-      }
+          pDynamicPath->nNewDirection = bDirection;
+          pDynamicPath->nDiffDirection = DIFFDIRECTIONS[((uint8_t)(bDirection - pDynamicPath->nDirection) & 0x3f) * 4];
+          return;
+        }
     }
 
     pDynamicPath->nDirection = bDirection;

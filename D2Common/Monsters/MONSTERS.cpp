@@ -625,14 +625,17 @@ uint32_t __stdcall MONSTER_GetMercType(D2UnitStrc * pUnit) {
 
     uint32_t nClassId = pUnit->nClassId;
     if (nClassId <= 359) {
-      if (nClassId == 359) {
-        return 3;
+      switch (nClassId) {
+        case 359:
+          return 3;
       }
-      if (nClassId == 271) {
-        return 1;
+      switch (nClassId) {
+        case 271:
+          return 1;
       }
-      if (nClassId == 338) {
-        return 2;
+      switch (nClassId) {
+        case 338:
+          return 2;
       }
     } else if (nClassId - 0x230 <= 1) {
       return 4;

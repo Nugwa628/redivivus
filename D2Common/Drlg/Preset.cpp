@@ -1537,8 +1537,11 @@ void __fastcall DRLGPRESET_AddPresetUnitToDrlgMap(D2PoolManagerStrc * pMemory, D
     Transform::CoordsRoomToWorld(&nWorldX, &nWorldY);
     for (; pPresetUnit; pPresetUnit = pPresetUnit->pPresetUnitNext) {
       if (pPresetUnit->eType != UNIT_MONSTER) {
-        if (pPresetUnit->eType != UNIT_OBJECT) {
-          goto add_preset_copy;
+        switch (pPresetUnit->eType) {
+          case UNIT_OBJECT:
+            break;
+          default:
+            goto add_preset_copy;
         }
         nTableSize = pPresetUnit->nClassId;
         switch (nTableSize) {
@@ -1546,15 +1549,16 @@ void __fastcall DRLGPRESET_AddPresetUnitToDrlgMap(D2PoolManagerStrc * pMemory, D
           case 0x105:
             break;
           default:
-            if (nTableSize == 0x245) {
-              roll_quarter_skip:
-              newSeed = D2_SEED_NEXT(*pSeed);
-              bInclude2 = !(newSeed.nSeedLow & 3);
-              commit_roll:
-              *pSeed = newSeed;
-              if (bInclude2) {
-                continue;
-              }
+            switch (nTableSize) {
+              case 0x245:
+                roll_quarter_skip:
+                newSeed = D2_SEED_NEXT(*pSeed);
+                bInclude2 = !(newSeed.nSeedLow & 3);
+                commit_roll:
+                *pSeed = newSeed;
+                if (bInclude2) {
+                  continue;
+                }
             }
             goto add_preset_copy;
         }
@@ -1591,8 +1595,9 @@ void __fastcall DRLGPRESET_AddPresetUnitToDrlgMap(D2PoolManagerStrc * pMemory, D
             nTableSize = sgptDataTable->nTxtMonStatsSize;
             nMonExtraBase = DATATBLS::MonsterTbls::MONSTERTBLS_ReturnZero();
             nTableSize = pPresetUnit->nClassId - nTableSize - nMonExtraBase;
-            if (nTableSize == 0x21) {
-              goto roll_quarter_skip;
+            switch (nTableSize) {
+              case 0x21:
+                goto roll_quarter_skip;
             }
             switch (nTableSize) {
             case 0x22: {

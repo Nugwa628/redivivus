@@ -460,8 +460,11 @@ int32_t __stdcall ITEMMOD_ApplyRandomStatValue(D2UnitStrc * pUnit, int32_t nPara
       }
 
       nParam3 = nRangeMin;
-      if (nParam1 != 1) {
-        goto apply_stat_value;
+      switch (nParam1) {
+        case 1:
+          break;
+        default:
+          goto apply_stat_value;
       }
     } else if (nStatValue != nRangeMin) {
       nRangeMax = nStatValue;
@@ -502,8 +505,11 @@ int32_t __stdcall ITEMMOD_ApplyRandomStatValue(D2UnitStrc * pUnit, int32_t nPara
     }
 
     Stats::StatsEx::STATLIST_AddStatValue(pStatList, eUnitStat, nStatValue, 0);
-    if (eUnitStat != UNITSTAT_poisonmaxdam) {
-      return 1;
+    switch (eUnitStat) {
+      case UNITSTAT_poisonmaxdam:
+        break;
+      default:
+        return 1;
     }
 
     Stats::StatsEx::STATLIST_AddStatValue(pStatList, UNITSTAT_poison_count, 1, 0);
@@ -1825,18 +1831,20 @@ int32_t __fastcall ITEMMOD_AddStatToItem(D2UnitStrc * pUnit, int32_t nParam1, in
     }
     if (!nParam2) {
       Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, eTargetStat, nParam3 << (pItemStatCost->valshift), (uint16_t)nParam12);
-      if (nParam == 0x3a) {
-        Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, UNITSTAT_poison_count, 1, 0);
+      switch (nParam) {
+        case 0x3a:
+          Stats::StatsEx::STATLIST_AddStatValue(pStatsEx, UNITSTAT_poison_count, 1, 0);
       }
     } else {
       int nPoisonCount;
       Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, eTargetStat, nParam3 << (pItemStatCost->valshift), nParam12);
-      if (nParam == 0x3a) {
-        nPoisonCount = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatsEx, UNITSTAT_poison_count, 0);
-        if (!nPoisonCount) {
-          Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_poison_count, 1, 0);
-          return nParam3;
-        }
+      switch (nParam) {
+        case 0x3a:
+          nPoisonCount = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatsEx, UNITSTAT_poison_count, 0);
+          if (!nPoisonCount) {
+            Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, UNITSTAT_poison_count, 1, 0);
+            return nParam3;
+          }
       }
     }
 
