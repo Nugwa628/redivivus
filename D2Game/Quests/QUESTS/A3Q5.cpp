@@ -493,7 +493,7 @@ void __fastcall Q22_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
 
 // Q22_Callback_11 (BLACKENED TEMPLE) — quest-state[0xb] NPC-gossip handler, the main Ormus dialog path. Bails if the quest is already Completed. For special NPC 0xff + msg 0x252: sets nStateFlag 2/3 and the bTaintedSunStartedFailed flag (string varies by Lam Esen's Tome completion). For Ormus (class 0xf5) + msg 0x272, only when at Step0x04: if Khalim's Will is done, strips the 5 Khalim's Will items (eye/heart/brain/flail qf1/qf2) from the player; if a JustCompleted flag is pending and live nStateFlag!=7, marks the quest-record JustCompleted, broadcasts live state 0xd, sets nStateFlag 7, runs the sequence filter, then writes record Completed and clears Step0x04, and adds the player to the completion GUID list. Finally sends the NPC gossip packet.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a3q5.cpp
-void __fastcall Q22_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q22_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     bool _bLamEsenDone;
     bool bLamEsenDone;
     int32_t nSetStateFlag;

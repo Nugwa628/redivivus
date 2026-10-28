@@ -467,7 +467,7 @@ int32_t __fastcall MISSILE_CltHitFn51_LightTrailJavelin(D2UnitStrc * pUnit, D2Un
     return 1;
 }
 
-int32_t __fastcall MISSILE_CltHitFn61_WorldStoneShake(D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
+static int32_t __fastcall MISSILE_CltHitFn61_WorldStoneShake(D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
     if (pTarget) {
       return 0;
     }
@@ -671,7 +671,7 @@ static int32_t MISSILE_GetSpeedTier(int32_t nParam) {
     return 10;
 }
 
-int MISSILE_CheckAndDecrementPierce(D2UnitStrc * pUnit) {
+static int MISSILE_CheckAndDecrementPierce(D2UnitStrc * pUnit) {
     D2MissilesTxt* pMissileTxt;
     int nResult = 3;
     int32_t nMissileClassId = D2Common::Units::Missile::GetClassId(pUnit);

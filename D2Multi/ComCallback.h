@@ -54,7 +54,6 @@ void __stdcall COMCALLBACK_ClearChannelUserList();
 void __fastcall COMCALLBACK_FormatWhisperFrom(uint16_t * wszText, char * szSenderName);
 void __fastcall COMCALLBACK_FormatWhisperTo(uint16_t * wszText, char * szTargetName);
 BOOL __stdcall COMCALLBACK_ValidateGameJoinability();
-int __fastcall PrintChannelText(uint32_t dwParam, char * szText, int32_t nColor);
 void __stdcall COMCALLBACK_UpdateChannelUserList();
 // Adds channel user to the visual list: stores status flags, parses raw data via CreateChannelUser, copies username, creates D2COMP composite, formats display data, updates channel user list UI.
 void __stdcall COMCALLBACK_AddUserToChannelList(struct D2ChannelUserStrc * pChannelUser, uint32_t nStatusFlags, char * szUsername, uint8_t * pbRawData);

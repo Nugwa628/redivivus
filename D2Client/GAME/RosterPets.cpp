@@ -74,7 +74,7 @@ void __stdcall FreeRosterPet() {
 }
 
 // @sourcefile .\GAME\RosterPets.cpp
-void __fastcall ROSTERPETS_RemoveRosterPetsBySkillID(int32_t nOwnerGUID, int32_t nRosterGUID) {
+static void __fastcall ROSTERPETS_RemoveRosterPetsBySkillID(int32_t nOwnerGUID, int32_t nRosterGUID) {
     D2RosterPetStrc* pPrev = 0;
     D2RosterPetStrc* pMemoryToFree = pRosterPet;
     if (!pRosterPet) {

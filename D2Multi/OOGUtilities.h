@@ -137,7 +137,6 @@ uint32_t __fastcall OOGUTIL_CheckCharacterLevel(uint8_t * pszLevelChars);
 // Copies: +8 gameid -> gwGameListCacheEntryPort; +0x14 -> gwOOGLobbyScreenState; +0x1c -> gszLanGameListEntryName;
 // +0x2c -> gszLanGameListEntryDescription. Called once per incoming MCP 0x05 game packet from JoinOrCreateGame.
 void __fastcall OOGMENU_AddGameToCache(int32_t pGameInfo);
-void __stdcall OOGMENU_RefreshGameListDisplay();
 void __fastcall OOGUTIL_Unused1(char * szText, uint16_t nParam);
 void __stdcall OOGMENU_RequestGameInfo();
 // Displays game details in the lobby textbox. Shows game description, elapsed time (HH:MM:SS), level restrictions (single level or range), max players, and iterates through all players to display their names and levels with class-specific formatting (Amazon/Sorceress/Necromancer/Paladin/Barbarian/Druid/Assassin). All formatted strings are written to a 256-byte buffer before being added to the display.

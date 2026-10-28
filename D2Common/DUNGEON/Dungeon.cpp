@@ -942,7 +942,7 @@ void __stdcall DRLGROOM_SetUnitInactiveProcessed(D2RoomStrc * pRoom, BOOL bSet) 
 }
 
 // Validates the client list of a room by checking that all entries in the client array (offset 0x48) are non-null. Halts if any entry is null.
-BOOL __fastcall DRLGROOM_ValidateClientList(D2RoomStrc * pRoom) {
+static BOOL __fastcall DRLGROOM_ValidateClientList(D2RoomStrc * pRoom) {
     uint32_t i = 0;
     if (!pRoom->nClientsCount) {
       return 1;

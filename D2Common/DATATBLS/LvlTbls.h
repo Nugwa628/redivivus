@@ -4063,8 +4063,6 @@ void __fastcall TXT_AllocTxt_leveldefs(struct D2PoolManagerStrc * pMemory);
 // @sourcefile .\DATATBLS\LvlTbls.cpp
 void __stdcall LVLTBLS_FreeLevelDefsTxt();
 struct D2LevelDefsTxt * __fastcall TXT_LevelDefs_GetLine(eD2LevelId eLevel);
-// Converts all forward slashes '/' in a level path string to backslashes '\\' in-place, then prepends the data directory prefix via wsprintfA. Used to normalize DS1/DT1 file paths loaded from level text tables to Windows path format.
-void __fastcall LVLTBLS_FixPathSlashes(char * szText, char * szPathPrefix);
 // Loads and compiles lvltypes.txt into the global pTxtLvlTypes / nTxtLvlTypesSize table. Builds a D2BinFieldInputStrc schema describing the row layout: 32 "File N" ASCII path fields (0x3b bytes each), plus Act (char) and Expansion (int), terminated by an END field; row stride 0x788. Calls CompileTxt to parse the txt via pMemory pool, then post-processes every row converting forward to back slashes in all 32 file-path strings via LVLTBLS_FixPathSlashes. Part of D2Common data-table init.
 void __fastcall TXT_AllocTxt_lvltypes(struct D2PoolManagerStrc * pMemory);
 void __stdcall thunk_UnloadBin_DataTbls();

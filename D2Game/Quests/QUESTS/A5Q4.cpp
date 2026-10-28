@@ -84,7 +84,7 @@ int __fastcall Q34_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
 }
 
 // Q34_StatusFilter (Betrayal of Harrogath). Computes the quest-log icon/state byte (*nUnknown) shown to the client from the QuestRecord bits: 0=not-yet (intro), 0x0c=CannotComplete-in-this-game, else maps Step0x04 bit (+4) or the in-memory nStateFlagPrev. Read-only on quest state.
-bool __fastcall Q34_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
+static bool __fastcall Q34_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
     *nUnknown = '\0';
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_BetrayalOfHaggorath, QUESTSTATE_Completed);
     if (BVar1) {
@@ -542,7 +542,7 @@ BOOL __fastcall Q34_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 }
 
 // Q34_OnNihlathakSpeak (Betrayal of Harrogath). Quest-timer callback (scheduled from Q34_Callback_08 after Nihlathak dies). If not already at nStateFlagPrev 4, broadcasts state-flag 4 (Q34_NotifyQuestState). Clears bEnteredDen. No QuestRecord access.
-uint8_t __fastcall Q34_OnNihlathakSpeak(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q34_OnNihlathakSpeak(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     D2QuestDataA5Q4Strc* pA5Q4SpecificData = pQuestData->pQuestSpecificData.pA5Q4;
     if (pQuestData->nStateFlagPrev != 4) {
       pQuestData->nQuestPacketFlags = '\0';

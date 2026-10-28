@@ -125,8 +125,6 @@ int __fastcall SBMP_DecodeBmpMem(int * pWidth, int * pHeight, uint32_t * pBpp, u
 int __stdcall SBMP_EncodeBmp256File(int nPalettePtr, uint32_t nSrcStride, HANDLE hFile, void * pixels, int height);
 // @blizzard CompressGifImage (SBMP.CPP)
 int __fastcall SBMP_CompressGifImage(int nSrcLen, uint8_t * pSrcPixels, int pDstBuf);
-// @blizzard DecodePcxFile (SBMP.CPP)
-int __fastcall SBMP_DecodePcxFile(struct D2MPQFileStrc * hFile, uint8_t * pixels, int * pHeight, int palette, int nParam, uint32_t * pWidth, int * pBpp);
 // Decodes an image already held in memory. With nFormat 0 it sniffs the first two bytes via SBMP_DetectFormat, then dispatches to SBMP_LoadBMPFromMemory / SBMP_LoadGIFFromMemory / SBMP_LoadFromMemory (TGA).
 // @oracle SBmpDecodeImage
 // @oracle-source Storm export vector SBmpDecodeImage @100cbc64 -> code 10004d00 = the traceback-named function .SBmpDecodeImage, in Mac PPC 1.10b Storm

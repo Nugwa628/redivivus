@@ -1133,7 +1133,7 @@ BOOL __fastcall Q04_RegisterTristramVisitor(::SGAMEDATA * pGame, D2UnitStrc * pU
 // A1Q4 — Q04_TimerDespawnRogueGuards: quest-timer entry that iterates all monsters
 // running Q04_DespawnRogueGuards (kills/clears the Rogue guards), then clears the
 // "despawn scheduled" flag (0x46).
-uint8_t __fastcall Q04_TimerDespawnRogueGuards(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q04_TimerDespawnRogueGuards(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 1, nullptr, (::fpExecuteOnUnitFunction)Q04_DespawnRogueGuards);
     pQuestData->pQuestSpecificData.pA1Q4->sSub.bRogueGuardTimerArmed = false;
     return '\x01';

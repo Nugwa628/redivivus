@@ -119,8 +119,6 @@ BOOL __stdcall AUTOMAP_GetParty();
 int32_t __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty);
 int32_t __stdcall AUTOMAP_GetPartyNames();
 int32_t __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames);
-void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, struct D2AutomapCellStrc * * ppRootNode);
-void __fastcall AUTOMAP_RotateCellLeft(uint32_t dwUnused, struct D2AutomapCellStrc * * ppRootNode);
 void __stdcall AUTOMAP_RebalanceTreeRight(struct D2AutomapCellStrc * * ppRootNode);
 // AVL tree left rebalance: handles single left rotation (right-right case) and double left-right rotation based on grandchild balance factor. Halts on unexpected balance states.
 void __stdcall AUTOMAP_RebalanceTreeLeft(struct D2AutomapCellStrc * * ppCell);
@@ -133,7 +131,6 @@ int32_t __fastcall AUTOMAP_InsertCellIntoTree(struct D2AutomapCellStrc * pAutoma
 // @sourcefile .\UI\automap.cpp
 struct D2AutomapCellStrc * __stdcall AUTOMAP_AllocCell();
 void __stdcall AUTOMAP_AddCellByCoords(int16_t nCellNo, int16_t nPixelX, int16_t nPixelY, struct D2AutomapCellStrc * pAutomapCell1, struct D2AutomapCellStrc * pAutomapCell2);
-void __stdcall AUTOMAP_AddCellForUnit(int32_t nParam, struct D2AutomapCellStrc * pAutomapCell, struct D2UnitStrc * pUnit);
 HANDLE __stdcall AUTOMAP_GetMapFileHandle();
 void __fastcall AUTOMAP_CalcCellTreeSize(struct D2AutomapCellStrc * pAutomapCell, uint32_t * nSize);
 void __fastcall AUTOMAP_SerializeCellTree(struct D2AutomapCellStrc * pAutomapCell);

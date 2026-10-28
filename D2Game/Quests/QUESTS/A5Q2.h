@@ -104,10 +104,6 @@ bool __fastcall Q32_ActiveFilter(struct D2QuestDataStrc * pQuestData, int32_t nT
 // (nSequenceQuestId) and invokes ITS sequence filter, propagating the "you may now start the next quest" unlock.
 // No direct QuestRecord writes here.
 void __fastcall Q32_SequenceFilter(struct D2QuestDataStrc * pQuestData);
-// Q32_Callback_14 (A5Q2 Rescue on Mount Arreat) -- state-handler slot[0xe].
-// Clears the player's QuestRecord Step0x04 bit for QUEST_RescueOnMountArreat (resets the "barricade freed"
-// transient progress flag). Counterpart to where Step0x04 is set in Q32_OnBarricadeDestroyed.
-void __fastcall Q32_Callback14_PlayerJoinedGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // A5Q2 (Rescue on Mount Arreat) state-handler slot 0xd — join/load state restore. On player (re)join: first clears the transient Step0x04 bit. Then, if quest is not Completed, FinishedInPreviousGame, or RewardAwaits, rehydrates server stateFlag from persisted step bits: Step0x03 set → stateFlag=3 (stateFlagPrev=1); Step0x02 set → stateFlag=2 (stateFlagPrev=1). Restores in-progress quest progression when a game is created or joined.
 void __fastcall Q32_Callback13_PlayerStartedGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // Q32_InitData (A5Q2 Rescue on Mount Arreat) -- quest init/registration.

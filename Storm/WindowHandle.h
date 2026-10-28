@@ -45,7 +45,6 @@ int * * __fastcall WND_AllocRecord(int32_t nMode, int32_t nSize, uint32_t dwFlag
 int * __fastcall WND_UnlinkAndFreeRecord(uint8_t byFreeFlags, int * pRecord);
 // @blizzard AddWindow (SMSG.CPP)
 void __stdcall SMSG_AddWindow(uint32_t hWnd);
-uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, struct StormWndRecStrc * pRecord);
 // @blizzard FindWindow (SMSG.CPP)
 uint32_t __fastcall SMSG_FindWindow(int32_t nHandle);
 // @blizzard SMsgDispatchMessage (SMSG.CPP)

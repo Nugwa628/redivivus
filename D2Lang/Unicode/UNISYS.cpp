@@ -665,7 +665,7 @@ char * __fastcall UNICODE_WideToMultiByte(char * pszDst, uint16_t * pwszSrc, int
     return pcVar1;
 }
 
-bool __fastcall UNICODE_CheckTrailingPunctuation(char * szSourceFile, uint16_t * pwChar) {
+static bool __fastcall UNICODE_CheckTrailingPunctuation(char * szSourceFile, uint16_t * pwChar) {
     uint32_t nGuardRetVal;
     uint16_t wszTable[20];
     uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;

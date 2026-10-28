@@ -90,8 +90,6 @@ void __fastcall CUBE_GenerateOutput(::SGAMEDATA * pGame, struct D2UnitStrc * pUn
 void __stdcall GetDateUnused(int * pnParam);
 // @sourcefile .\PLAYER\PlrTrade.cpp
 void __fastcall PLRTRADE_FreeTradeCopyInventory(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-// @sourcefile .\PLAYER\PlrTrade.cpp
-void __fastcall SendRemoveItemDisplayPacket0x92(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pOtherUnit);
 void __fastcall TRADE_RestoreInventoryFromBackup(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 // @sourcefile .\PLAYER\PlrTrade.cpp
 void __fastcall SendEventMsg(struct D2UnitStrc * pUnit, uint8_t nMessageType, char * szName);

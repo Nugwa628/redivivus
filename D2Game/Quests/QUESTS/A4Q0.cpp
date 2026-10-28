@@ -31,7 +31,7 @@
 namespace D2Game::Quests::QUESTS::A4Q0 {
 
 // Q25_Callback_11 (state-0xb handler) — fires when player picks Tyrael's quest-completing dialog: if NPC==0x16f (Tyrael) and message==0x298, mark QUEST_SpokeToTyrael Completed on the player's per-difficulty QuestRecord (pQuestRecordPool[nDifficulty+1]). This is the only state transition that closes the quest.
-void __fastcall Q25_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q25_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     if (!(pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo == 0x16f && pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex == 0x298)) {
       return;
     }
@@ -63,12 +63,12 @@ void __fastcall Q25_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 }
 
 // Q25_StatusFilter — stub: always returns false. QUEST_SpokeToTyrael has no status-bar/visibility logic of its own.
-bool __fastcall Q25_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
+static bool __fastcall Q25_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
     return false;
 }
 
 // Q25_ActiveFilter — returns true (quest interaction active) only for target class 0x16f (Tyrael) while QUEST_SpokeToTyrael is not yet Completed; false otherwise. Governs whether the quest icon/interaction shows on Tyrael.
-bool __fastcall Q25_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx) {
+static bool __fastcall Q25_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx) {
     if (nTargetClassId != 0x16f) {
       return false;
     }

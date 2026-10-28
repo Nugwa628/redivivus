@@ -727,7 +727,7 @@ void __fastcall Q18_SequenceFilter(D2QuestDataStrc * pQuestData) {
 }
 
 // Q18_CheckPlayerHasTome — Lam Esen's Tome, per-party-member predicate (called by ExecuteFunctionForEveryPartyMember from Q18_StatusFilter). If this party member carries the Tome item (0x20626262), set the shared bTaintedSunStartedFailed flag (reused as "someone in party has the tome") in the Lam Esen quest data. Read-only on quest record.
-void __fastcall Q18_CheckPlayerHasTome(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+static void __fastcall Q18_CheckPlayerHasTome(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2UnitStrc* pTomeItem = ITEMS::Items::Drop::HasQuestItem(pGame, pUnit, 0x20626262);
     if (!pTomeItem) {
       return;

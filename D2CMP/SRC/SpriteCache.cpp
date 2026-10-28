@@ -17414,7 +17414,7 @@ static void __stdcall SPRITECACHE_EvictOldest(int32_t nParam1, int32_t nParam2, 
     *(DWORD*)(nParam3 + 0x10) = dwTick;
 }
 
-D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_AddToLRU(uint32_t dwParam, D2GfxMemoryStrc * nParam, int32_t bPriority) {
+static D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_AddToLRU(uint32_t dwParam, D2GfxMemoryStrc * nParam, int32_t bPriority) {
     D2SpriteCacheEntryStrc* nLruHead;
     D2SpriteCacheEntryStrc** pNextPtr;
     D2SpriteCacheEntryStrc* nNext;

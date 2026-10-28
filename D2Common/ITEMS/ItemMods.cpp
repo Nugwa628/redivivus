@@ -1078,7 +1078,7 @@ int32_t __fastcall PropertyFunc_AllSkills(int32_t nType, D2UnitStrc * pUnit, D2U
 // - Max charges: 20 (rolled with variance)
 // - Current charges: 20 (starts at max)
 // - Packed value encodes all 3 fields into one stat
-int32_t __fastcall PropertyFunc_Charges(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
+static int32_t __fastcall PropertyFunc_Charges(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
     int32_t nReqLevel;
     int32_t nItemLevel;
     int nClampedSkillLevel;
@@ -1168,7 +1168,7 @@ int32_t __fastcall PropertyFunc_Charges(int32_t nType, D2UnitStrc * pUnit, D2Uni
 }
 
 // Property handler that packs three sub-values from a property entry into a single stat value and adds it to the unit's stat list. Reads three fields at pPropEntry+4/+8/+0xC, applies +0x100 offsets to the second and third, validates ranges (val1 &lt; 4, val2/val3 &lt; 0x400), then computes: stat = val1 + (val3*0x400 + val2)*4 and calls D2AddStatToStatsListEx. Halts on validation failure. Used for multi-field stats such as class/tab skill bonuses.
-int32_t __fastcall PropertyFunc_PackedStat(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
+static int32_t __fastcall PropertyFunc_PackedStat(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
     uint8_t* nPackedVal1;
     uint32_t nPackedVal2;
     uint32_t nPackedVal3;
@@ -1307,7 +1307,7 @@ int32_t __fastcall PropertyFunc_MinMaxDamagePair(int32_t nType, D2UnitStrc * pUn
 }
 
 // Applies three consecutive stat values (min, max, length/duration at eUnitStat+0, +1, +2) from a property entry to an item's stat list. Scales each value by stat type, gets or creates the stat list, and optionally negates existing values (remove mode when nParam2!=0). Increments UNITSTAT_poison_count when base stat is poisonmindam.
-int32_t __fastcall ITEMMOD_ApplyTripleStat(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
+static int32_t __fastcall ITEMMOD_ApplyTripleStat(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
     int nBaseValue;
     eD2UnitStat eMinStat = eStatCode;
     int32_t nLenVal = pProperty->fmin;
@@ -1397,7 +1397,7 @@ int32_t __fastcall PropertyFunc_SingleSkillBonus(int32_t nType, D2UnitStrc * pUn
 }
 
 // Property function for +X to Elemental Skills bonus (e.g. +2 to Fire Skills). Rolls value from property min/max range (inclusive for expansion items), then adds UNITSTAT_item_elemskill with hardcoded layer 1 to the item's stat list. Returns 0 if rolled value is zero or stat list unavailable.
-int32_t __fastcall PropertyFunc_ElemSkillBonus(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
+static int32_t __fastcall PropertyFunc_ElemSkillBonus(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
     D2SeedStrc* pSeed;
     int32_t nExistingValue;
     int nRangeLow;
@@ -1440,7 +1440,7 @@ int32_t __fastcall PropertyFunc_ElemSkillBonus(int32_t nType, D2UnitStrc * pUnit
 }
 
 // Property function for +X to [Class] Skills bonus (e.g. +2 to Sorceress Skills). Maps property code 0x53-0x57,0xb3-0xb4 to class skill layers 0-6 for UNITSTAT_item_addclassskills. Rolls value from property min/max range.
-int32_t __fastcall PropertyFunc_ClassSkillsBonus(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
+static int32_t __fastcall PropertyFunc_ClassSkillsBonus(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
     D2SeedStrc* pSeed;
     int32_t nExistingValue;
     int nRangeLow;
@@ -1508,7 +1508,7 @@ int32_t __fastcall PropertyFunc_ClassSkillsBonus(int32_t nType, D2UnitStrc * pUn
 }
 
 // No-op property handler: ignores all args and returns 1 (success). Default/placeholder entry in the ItemMods property-function dispatch table for properties with no stat-apply behavior.
-int32_t __fastcall PropertyFunc_ReturnTrue(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
+static int32_t __fastcall PropertyFunc_ReturnTrue(int32_t nType, D2UnitStrc * pUnit, D2UnitStrc * pItemUnit, D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext) {
     return 1;
 }
 

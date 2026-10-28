@@ -97,7 +97,7 @@ void __fastcall Q26_NotifyIzualKilledToPlayers(::SGAMEDATA * pGame) {
 }
 
 // [A4Q1 Izual helper] Per-unit IterateAllUnits callback: if this unit is within collision-distance 5 of the tracked target (Izual), set the "near" flag in the iteration context.
-void __fastcall Q26_CheckIzualProximity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nParam) {
+static void __fastcall Q26_CheckIzualProximity(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nParam) {
     int32_t nCollisionDist = D2Common::Collision::GetCollisionDistance(pUnit, *(D2UnitStrc**)(nParam + 0x14));
     if (nCollisionDist >= 5) {
       return;
@@ -763,7 +763,7 @@ void __stdcall Q23_UnlockHarrogathWaypoint(::SGAMEDATA * pGame, D2UnitStrc * pUn
 }
 
 // [A4Q3 Terror's End — expansion] Callback slot 0x0e. Cleanup: if Step0x09 (Diablo portal/go-to-act5 flag) is set but QUEST_AbleGoToAct5 not yet Completed, clear Step0x09. Keeps the portal-state flag consistent.
-void __fastcall Q27_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q27_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     if (!pGame->bExpansion) {
       return;

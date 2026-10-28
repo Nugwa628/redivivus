@@ -123,7 +123,7 @@ bool __fastcall Q40_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 }
 
 // Quest 40 (Siege on Harrogath) NPC-gossip callback. Dispatches on monster-class ID and dialog message index. For Drehya, Malah, Town (Korlic?), Qualkehk, and Deckard Cain: if the matching message index is spoken, calls PLAYER_SetSpokenWithNPC. Special Malah path also fetches the SiegeOnHaggorath quest data and sets nStateFlag=1 on first introduction (gate: bIsNotIntroduction && nStateFlag==0).
-void __fastcall Q40_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q40_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     D2QuestDataStrc* pSiegeQuestData;
     bool bMsgMatched;
     eD2MonsterClassId nMonStatsId;

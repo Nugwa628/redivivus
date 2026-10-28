@@ -296,7 +296,6 @@ struct D2FogModuleNodeStrc * __stdcall EnumerateModulesPsapi(HANDLE hProcess);
 struct D2FogModuleNodeStrc * __fastcall FindModuleContainingAddress(uint32_t nAddress, struct D2FogModuleNodeStrc * pModuleList);
 // Dumps stack memory with symbol annotations. Formats raw stack bytes as hex, identifies pointer values, and looks up module/symbol information for each dword.
 void __fastcall DumpAnnotatedStackMemory(HANDLE hSymHandle, CONTEXT * pContext, struct D2FogModuleNodeStrc * pModuleListHead);
-struct D2FogModuleNodeStrc * __stdcall LoadSymbolsForAllModules(HANDLE hProcess, uint32_t dwProcessId);
 BOOL __fastcall FILETOOLS_GetExecutableFolderPath(LPSTR lpFilename, DWORD nSize);
 // @sourcefile .\Src\Exceptions.cpp
 int __stdcall InitializeSymbolsWithRefcount();

@@ -731,7 +731,7 @@ void __fastcall Q32_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // Q32_Callback_14 (A5Q2 Rescue on Mount Arreat) -- state-handler slot[0xe].
 // Clears the player's QuestRecord Step0x04 bit for QUEST_RescueOnMountArreat (resets the "barricade freed"
 // transient progress flag). Counterpart to where Step0x04 is set in Q32_OnBarricadeDestroyed.
-void __fastcall Q32_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q32_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
     D2Common::QuestRecord::UnsetQuestState(pQuestRecord, QUEST_RescueOnMountArreat, QUESTSTATE_Step0x04);

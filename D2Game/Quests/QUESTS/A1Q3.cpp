@@ -538,7 +538,7 @@ bool __fastcall Q03_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 }
 
 // Q03_CheckPlayerHasMalus (A1Q3) — party-iteration callback. If this player carries the Horadric Malus ('hdm '), set the shared A1Q3 flag field_0xA0=1 (used by Q03_CheckPartyHasMalus to test whether anyone in the party holds the Malus). No quest-record writes.
-void __fastcall Q03_CheckPlayerHasMalus(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+static void __fastcall Q03_CheckPlayerHasMalus(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2UnitStrc* pMalusItem = ITEMS::Items::Drop::HasQuestItem(pGame, pUnit, 0x206d6468);
     if (!pMalusItem) {
       return;

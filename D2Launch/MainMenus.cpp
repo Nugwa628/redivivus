@@ -811,7 +811,7 @@ uint32_t __fastcall MAINMENU_CheckFileExists(char * szFileName) {
     return 1;
 }
 
-void MAINMENU_GetLocalizedFilePath(char * szPathFormat, char * szOutPath, char * szResolution) {
+static void MAINMENU_GetLocalizedFilePath(char * szPathFormat, char * szOutPath, char * szResolution) {
     D2MPQFileStrc* pFileHandle;
     char szLangAbbrev[4];
     D2Lang::StrTable::strtable::TABLES_GetLangAbbreviation(szLangAbbrev, 0);

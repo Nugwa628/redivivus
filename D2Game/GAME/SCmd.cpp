@@ -2096,7 +2096,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x8B_PlayerRelationship(D2ClientStrc * pCli
 }
 
 // @sourcefile .\GAME\SCmd.cpp
-void __fastcall NET_D2GS_SERVER_Send_0x8C_PLAYERFLAGS_Argument(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketSrv0x8C * pPacket) {
+static void __fastcall NET_D2GS_SERVER_Send_0x8C_PLAYERFLAGS_Argument(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketSrv0x8C * pPacket) {
     size_t nSize = 0xb;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\GAME\\SCmd.cpp", 0xbae);
     SCMD_QueuePacketForClient(&pPacket->nPacketId, nSize, pClient);
@@ -2125,7 +2125,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x8C_PLAYERFLAGS(D2UnitStrc * pUnit, uint32
 }
 
 // @sourcefile .\GAME\SCmd.cpp
-void __fastcall NET_D2GS_SERVER_Send_0x8D_PLAYERPARTY_Argument(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint8_t * pPacketBuf) {
+static void __fastcall NET_D2GS_SERVER_Send_0x8D_PLAYERPARTY_Argument(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint8_t * pPacketBuf) {
     size_t nSize = 7;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\GAME\\SCmd.cpp", 0xbd8);
     SCMD_QueuePacketForClient(pPacketBuf, nSize, pClient);
@@ -2162,7 +2162,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x8D_PLAYERPARTY(D2UnitStrc * pUnit, D2Unit
 }
 
 // @sourcefile .\GAME\SCmd.cpp
-void __fastcall NET_D2GS_SERVER_Send_0x8E_LINKDEADBODY_Argument(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint8_t * pPacketBuf) {
+static void __fastcall NET_D2GS_SERVER_Send_0x8E_LINKDEADBODY_Argument(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint8_t * pPacketBuf) {
     size_t nSize = 10;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\GAME\\SCmd.cpp", 0xbff);
     SCMD_QueuePacketForClient(pPacketBuf, nSize, pClient);

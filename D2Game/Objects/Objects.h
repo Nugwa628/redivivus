@@ -207,8 +207,6 @@ int32_t __fastcall OBJECT_AlwaysReturnOne(::SGAMEDATA * pGame, struct D2RoomStrc
 int32_t __fastcall OBJECT_PopulateGridObjects(::SGAMEDATA * pGame, struct D2RoomStrc * pRoom, struct D2DrlgRoomCoordsStrc * pGridBounds);
 // Fills a rectangular grid region with random item drops on a 2-tile stride (interior only: starts at xMin+1, yMin+1, capped to 12 cells per axis). For each cell, checks spawn collision and calls DROP_SpawnRandomItemInRoom if clear. Stops after 32 spawned items. Always returns 1.
 int32_t __fastcall OBJECT_PopulateGridItems(::SGAMEDATA * pGame, struct D2RoomStrc * pRoom, struct D2DrlgRoomCoordsStrc * pGridBounds);
-// Populates special objects for one room during level generation. Skips rooms that already have a waypoint, are outdoors-bordered, or are in town. Lazily initialises the per-level object RNG's room count on first call. Increments the room counter (pad_0x4) and, if the room's populate-fn pointer is set, calls OBJECT_RollAndDispatchPopulateFn; returns 1 on success, 0 otherwise.
-BOOL __stdcall OBJECT_PopulateRoomSpecialObjects(::SGAMEDATA * pGame, int32_t nParam, struct D2RoomStrc * pRoom);
 // Populates a room with objects drawn from the level's ObjGrp/ObjPrb table entries. For each of up to 8 group slots, rolls the room seed, checks spawn density constraints, then picks one object from the group's weighted probability list and invokes its PopulateFn dispatch (via OBJECTSPOPULATEFN table). Falls through special-object population first via OBJECT_PopulateRoomSpecialObjects.
 void __fastcall OBJECT_PopulateRoomObjects(::SGAMEDATA * pGame, struct D2RoomStrc * pRoom);
 void __fastcall OBJECT_CallPopulateFn(::SGAMEDATA * pGame, struct D2RoomStrc * pRoom, int32_t nObjectClassId);

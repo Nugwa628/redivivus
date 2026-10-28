@@ -109,7 +109,6 @@ extern D2InventoryScreenCoordinates pNpcInventoryScreenCoordinates;
 namespace D2Client::UI::Inv {
 
 // Function declarations
-void __stdcall InitializeiInventoryPages();
 void __stdcall InitializeColors();
 void __stdcall DrawItemSolidBackground(uint8_t nGridX, uint8_t nGridY, int32_t nParam1, int32_t nColorIndex, int32_t nParam2, struct D2GridScreenCoordinates * pCoords);
 BOOL __stdcall INV_IsPlayerInventoryMode();
@@ -117,11 +116,9 @@ void __stdcall INV_DrawSocketedItems(struct D2UnitStrc * pUnit, struct D2GridScr
 uint32_t __fastcall ITEM_CanTheseBeSocketed(struct D2UnitStrc * pUnit, struct D2UnitStrc * pTargetItem);
 void INV_DrawBodySlotCursorHighlight(struct D2InventoryStrc * pInventory);
 void InitInventory();
-BOOL __stdcall INV_FormatPlayerNameWithBase(uint16_t * wszText1, uint16_t * wszText2, struct D2UnitStrc * pUnit);
 // Formats weapon damage text for item tooltips, handling one-handed, two-handed, barbarian dual-wield, throwable, and missile potion damage display. Calculates min/max damage based on weapon type, applies color coding for modified stats, and formats elemental damage for missile potions with duration scaling.
 void __stdcall szPrintfBuffer(struct D2UnitStrc * pUnit, uint16_t * wszText);
 void __stdcall INV_FormatArmorClassText(struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2, uint16_t * wszText);
-void __stdcall INV_FormatAttackSpeedText(uint16_t * wszText, struct D2UnitStrc * pUnit);
 void __stdcall INV_LoadBodySlotImages();
 void __stdcall INV_FreeBodySlotImages();
 int32_t __stdcall INV_GetGoldButtonX();
@@ -238,7 +235,6 @@ void __stdcall INV_ShowBookTooltip();
 void __fastcall ITEM_BuildSetItemTooltip(struct D2UnitStrc * pUnit);
 // Displays tooltip for transmogrifiable items showing the target item type they will transform into. Checks item's bTransmogrify flag, looks up dwTMogType from ItemsTxt, formats tooltip with "Transforms into:" string followed by target item name, and positions tooltip based on current inventory page and screen coordinates.
 void __stdcall INV_ShowTransmogrifyTooltip();
-void __stdcall LoadItemDesc(struct D2UnitStrc * pUnit, int32_t bUsePlayer);
 void __stdcall DRAW_UI_Inventory();
 BOOL __stdcall ClickItemLeft(struct D2UnitStrc * pUnit, struct D2InventoryStrc * pInventory, DWORD x, DWORD y, struct D2UnitStrc * targetItem, struct D2InventoryLayout * pInvLayout, uint32_t nPage);
 uint32_t __fastcall EQUIP_ItemRight(struct D2UnitStrc * pUnit, struct D2InventoryStrc * pInventory, uint32_t nBodySlot);

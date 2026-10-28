@@ -323,7 +323,7 @@ void __fastcall PARTYSCREEN_SendPartyInvite(int32_t nParam, D2UnitStrc * pUnit, 
 }
 
 // @sourcefile .\PLAYER\PartyScreen.cpp
-void __fastcall PARTY_SendPlayerLeftEvent(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pOther) {
+static void __fastcall PARTY_SendPlayerLeftEvent(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pOther) {
     uint32_t nOtherGUID;
     if (pUnit == pOther) {
       return;
@@ -338,7 +338,7 @@ void __fastcall PARTY_SendPlayerLeftEvent(uint32_t dwUnused, D2UnitStrc * pUnit,
     SendPlayerEvent(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PartyScreen.cpp", 0x143), nOtherGUID, bEventType);
 }
 
-void __fastcall SendPlayerPartyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
+static void __fastcall SendPlayerPartyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
     if (pUnit == pTarget) {
       UNIT::PlayerList::SetPlayerRelationship(pUnit, pUnit, 1);
       GAME::SCmd::NET_D2GS_SERVER_Send_0x75_UPDATEROSTER(pUnit, pUnit);

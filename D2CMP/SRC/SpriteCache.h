@@ -124,7 +124,6 @@ int __stdcall SPRITECACHE_GetMaxSize();
 uint32_t __stdcall SPRITECACHE_GetCurrentSize();
 // @sourcefile .\SRC\SpriteCache.cpp
 void __fastcall GFX_AllocSpriteCache(struct D2GfxMemoryStrc * pGfxMemory, struct D2PoolManagerStrc * pMemory, void * pMaxMemory, fnSpriteCacheEntryRelease pfnReleaseEntry);
-struct D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_AddToLRU(uint32_t dwParam, struct D2GfxMemoryStrc * nParam, int32_t bPriority);
 // Counts the LRU cache blocks whose async load has not completed (ASYNCDATA_IsComplete == 0); halts on a block with no pAsyncData.
 // It frees nothing, it only counts (returns nPendingCount).
 int32_t __stdcall SPRITECACHE_CountPendingLoads();

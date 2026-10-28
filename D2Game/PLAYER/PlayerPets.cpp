@@ -90,7 +90,7 @@ typedef void (__stdcall *pfnPetForEachCallback)(D2UnitStrc * pPetUnit, void * pC
 namespace D2Game::PLAYER::PlayerPets {
 
 // @sourcefile .\PLAYER\PlayerPets.cpp
-void __fastcall Send0x7aSummonLog(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2PetArgStrc * pPetArgs) {
+static void __fastcall Send0x7aSummonLog(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2PetArgStrc * pPetArgs) {
     uint16_t nPetType = pPetArgs->nPetClassId;
     uint32_t nNameId = pPetArgs->nOwnerGUID;
     uint32_t nPetGUID = pPetArgs->nPetGUID;
@@ -326,7 +326,7 @@ static void __stdcall KillingPets(uint32_t nTargetGUID, D2PetListStrc * pPetList
 }
 
 // @sourcefile .\PLAYER\PlayerPets.cpp
-void __fastcall SummonAndAssign(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2PetArgStrc * pSummonArgs) {
+static void __fastcall SummonAndAssign(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2PetArgStrc * pSummonArgs) {
     D2ClientStrc* pClient;
     uint32_t uVar1;
     uint8_t byIndexId2;

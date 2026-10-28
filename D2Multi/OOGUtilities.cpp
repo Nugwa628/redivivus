@@ -71,6 +71,7 @@ typedef int (__stdcall *ChatDlgCallback)(uint32_t dwParam);
 #endif
 
 namespace D2Multi::Launcher {
+static void __stdcall OOGMENU_RefreshGameListDisplay();
 static uint32_t __stdcall LAUNCHER_ReadRegistryValue(LPCSTR szSubKey, LPCSTR szValueName, LPBYTE pbData, DWORD dwDataSize, LPDWORD pdwDataSize) {
     DWORD dwValueType;
     HKEY hKey;
@@ -1094,7 +1095,7 @@ void __fastcall OOGMENU_AddGameToCache(int32_t pGameInfo) {
     nGameListDifficultyFilter++;
 }
 
-void __stdcall OOGMENU_RefreshGameListDisplay() {
+static void __stdcall OOGMENU_RefreshGameListDisplay() {
     uint16_t* pwEntryPort;
     uint8_t szSelectedName[256];
     char szPortText[16];
