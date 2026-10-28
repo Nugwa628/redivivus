@@ -251,7 +251,6 @@ void SFILE_DecompressLzw_BufferWrite(void * pSrc, uint32_t * pnBytes, void * pBu
 // so SFile owning its own explode wrapper alongside SComp's is the real structure, not an error.
 // @blizzard DecompressLzw (SFILE.CPP)
 int32_t __stdcall SFILE_DecompressLzw(int32_t pSrcData, int32_t pDstData, int32_t nDstSize);
-void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCount);
 // @blizzard BuildDefaultBasePath (SFILE.CPP)
 void __stdcall SFILE_BuildDefaultBasePath();
 // @blizzard CheckForCdRom (SFILE.CPP)

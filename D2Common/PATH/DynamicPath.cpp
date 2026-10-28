@@ -1145,10 +1145,10 @@ void __stdcall PATH_AddUnitCollision(D2UnitStrc * pUnit) {
           eUnitType = pUnit->eUnitType;
           if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
             nPosY = pUnit->pPath.pStaticPath->nPosX;
-          } else if (pUnit->pPath.pDynamicPath) {
-            nPosY = GetXPos(pUnit->pPath.pDynamicPath);
-          } else {
+          } else if (!pUnit->pPath.pDynamicPath) {
             nPosY = 0;
+          } else {
+            nPosY = GetXPos(pUnit->pPath.pDynamicPath);
           }
 
           nPosX = Units::GetCollisionType(pUnit);
@@ -1227,10 +1227,10 @@ BOOL __stdcall PATH_RemoveUnitCollision(D2UnitStrc * pUnit, int32_t nParam) {
           eUnitType = pUnit->eUnitType;
           if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
             nPosX = pUnit->pPath.pStaticPath->nPosX;
-          } else if (pUnit->pPath.pDynamicPath) {
-            nPosX = GetXPos(pUnit->pPath.pDynamicPath);
-          } else {
+          } else if (!pUnit->pPath.pDynamicPath) {
             nPosX = 0;
+          } else {
+            nPosX = GetXPos(pUnit->pPath.pDynamicPath);
           }
 
           nCollisionType = Units::GetCollisionType(pUnit);
@@ -1248,19 +1248,19 @@ BOOL __stdcall PATH_RemoveUnitCollision(D2UnitStrc * pUnit, int32_t nParam) {
         eUnitType = pUnit->eUnitType;
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
           nPosY = pUnit->pPath.pStaticPath->nPosY;
-        } else if (pUnit->pPath.pDynamicPath) {
-          nPosY = GetYPos(pUnit->pPath.pDynamicPath);
-        } else {
+        } else if (!pUnit->pPath.pDynamicPath) {
           nPosY = 0;
+        } else {
+          nPosY = GetYPos(pUnit->pPath.pDynamicPath);
         }
 
         eUnitType = pUnit->eUnitType;
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
           nPosX = pUnit->pPath.pStaticPath->nPosX;
-        } else if (pUnit->pPath.pDynamicPath) {
-          nPosX = GetXPos(pUnit->pPath.pDynamicPath);
-        } else {
+        } else if (!pUnit->pPath.pDynamicPath) {
           nPosX = 0;
+        } else {
+          nPosX = GetXPos(pUnit->pPath.pDynamicPath);
         }
 
         nCollisionType = Units::GetCollisionType(pUnit);
@@ -1305,10 +1305,10 @@ BOOL __stdcall PATH_RemoveUnitCollision(D2UnitStrc * pUnit, int32_t nParam) {
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nPosX = GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nPosX = 0;
+    } else {
+      nPosX = GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     nCollisionType = Units::GetCollisionType(pUnit);
@@ -1411,10 +1411,10 @@ static uint8_t PATH_ResolveTargetPosition(D2PathTypeArg * pPathTypeArg, int32_t 
         if (!bTargetIsDoor) {
           if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
             nDoorTargetX = pTargetUnit->pPath.pStaticPath->nPosX;
-          } else if (pTargetUnit->pPath.pDynamicPath) {
-            nDoorTargetX = GetXPos(pTargetUnit->pPath.pDynamicPath);
-          } else {
+          } else if (!pTargetUnit->pPath.pDynamicPath) {
             nDoorTargetX = 0;
+          } else {
+            nDoorTargetX = GetXPos(pTargetUnit->pPath.pDynamicPath);
           }
           if (nDoorTargetX <= (uint16_t)pDynamicPath->Coords.tSubtile.nPosX) {
             pDynamicPath->nTargetX += 2;
@@ -1426,10 +1426,10 @@ static uint8_t PATH_ResolveTargetPosition(D2PathTypeArg * pPathTypeArg, int32_t 
         }
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
           nUnitPos = pTargetUnit->pPath.pStaticPath->nPosY;
-        } else if (pTargetUnit->pPath.pDynamicPath) {
-          nUnitPos = GetYPos(pTargetUnit->pPath.pDynamicPath);
-        } else {
+        } else if (!pTargetUnit->pPath.pDynamicPath) {
           nUnitPos = 0;
+        } else {
+          nUnitPos = GetYPos(pTargetUnit->pPath.pDynamicPath);
         }
         if (nUnitPos <= (uint16_t)pDynamicPath->Coords.tSubtile.nPosY) {
           pDynamicPath->nTargetY += 2;

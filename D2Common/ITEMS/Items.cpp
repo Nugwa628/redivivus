@@ -2805,10 +2805,10 @@ static void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * 
       eUnitType = pItem->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         uVal = pItem->pPath.pStaticPath->nPosX;
-      } else if (pItem->pPath.pDynamicPath) {
-        uVal = PATH::DynamicPath::GetXPos(pItem->pPath.pDynamicPath);
-      } else {
+      } else if (!pItem->pPath.pDynamicPath) {
         uVal = 0;
+      } else {
+        uVal = PATH::DynamicPath::GetXPos(pItem->pPath.pDynamicPath);
       }
 
       uVal = uVal ? uVal : 0;
@@ -2820,10 +2820,10 @@ static void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * 
       eUnitType = pItem->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         uVal = pItem->pPath.pStaticPath->nPosY;
-      } else if (pItem->pPath.pDynamicPath) {
-        uVal = PATH::DynamicPath::GetYPos(pItem->pPath.pDynamicPath);
-      } else {
+      } else if (!pItem->pPath.pDynamicPath) {
         uVal = 0;
+      } else {
+        uVal = PATH::DynamicPath::GetYPos(pItem->pPath.pDynamicPath);
       }
 
       uVal = uVal ? uVal : 0;

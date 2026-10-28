@@ -112,8 +112,12 @@ void __fastcall SendMercPackets(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, int32
     UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_experience, nStatVal);
     nStatVal = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pMerc, UNITSTAT_nextexp, 0);
     UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_nextexp, nStatVal);
-    UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_mindamage, D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_secondary_mindamage, 0) + D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_mindamage, 0));
-    UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_maxdamage, D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_secondary_maxdamage, 0) + D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_maxdamage, 0));
+    int32_t nStatTmp = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_secondary_mindamage, 0);
+    int32_t nSecondaryStatVal = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_mindamage, 0);
+    UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_mindamage, nStatTmp + nSecondaryStatVal);
+    nStatTmp = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_secondary_maxdamage, 0);
+    nSecondaryStatVal = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_maxdamage, 0);
+    UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_maxdamage, nStatTmp + nSecondaryStatVal);
     nStatVal = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_fireresist, 0);
     UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_fireresist, nStatVal);
     nStatVal = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_lightresist, 0);
