@@ -2255,11 +2255,11 @@ void __fastcall Q04_SetTristramActiveFlag(::SGAMEDATA * pGame) {
 // flag (whether the Tristram area is currently live). Getter only.
 uint32_t __fastcall Q04_IsTristramActive(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSearchForCain);
-    if (pQuestData) {
-      return (uint32_t)(pQuestData->pQuestSpecificData.pA1Q4->sSub.field_0x7B != 0);
+    if (!pQuestData) {
+      return 0;
     }
 
-    return 0;
+    return (uint32_t)(pQuestData->pQuestSpecificData.pA1Q4->sSub.field_0x7B != 0);
 }
 
 // A1Q4 — Q04_DropShieldRewards: drops the wirt's-leg/quest shield reward items.
