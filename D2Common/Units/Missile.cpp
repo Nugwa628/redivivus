@@ -231,7 +231,8 @@ void __stdcall SetOwner(D2UnitStrc * pUnit, D2UnitStrc * pOwner) {
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId && sgptDataTable->pTxtMissiles[nClassId].LastCollide)) {
+    D2MissilesTxt * pTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : NULL;
+    if (!(pTxt && pTxt->LastCollide)) {
       return;
     }
 
@@ -254,7 +255,8 @@ BOOL __stdcall CheckUnitIfOwner(D2UnitStrc * pMissile, D2UnitStrc * pUnit) {
     }
 
     int nClassId = pMissile->nClassId;
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId && sgptDataTable->pTxtMissiles[nClassId].LastCollide)) {
+    D2MissilesTxt * pTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : NULL;
+    if (!(pTxt && pTxt->LastCollide)) {
       return 0;
     }
 

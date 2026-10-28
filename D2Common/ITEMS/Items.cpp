@@ -547,7 +547,7 @@ void __stdcall ITEM_SetItemData_bVariant(D2UnitStrc * pUnit, bool bVariant) {
 }
 
 int32_t __stdcall ITEMTYPE_IsShoots(int32_t nItemType) {
-    D2ItemTypesTxt * pTxt = (-1 < nItemType && nItemType < sgptDataTable->nTxtItemTypesSize) ? &sgptDataTable->pTxtItemTypes[nItemType] : NULL;
+    D2ItemTypesTxt * pTxt = (0 <= nItemType && nItemType < sgptDataTable->nTxtItemTypesSize) ? &sgptDataTable->pTxtItemTypes[nItemType] : NULL;
     if (!pTxt) {
       return 0;
     }
@@ -5996,7 +5996,8 @@ static void __stdcall ITEMS_CalcStaffModsPriceModifier(int * pBuy, int * pSell, 
     }
 
     eD2ItemTypes eItemType = ITEM_GetItemData_wType(pItem);
-    if (!(-1 < (int)eItemType && (int)eItemType < sgptDataTable->nTxtItemTypesSize && sgptDataTable->pTxtItemTypes + eItemType && sgptDataTable->pTxtItemTypes[eItemType].staffmods != '\a')) {
+    D2ItemTypesTxt * pTxt = (0 <= (int)eItemType && (int)eItemType < sgptDataTable->nTxtItemTypesSize) ? &sgptDataTable->pTxtItemTypes[eItemType] : NULL;
+    if (!(pTxt && pTxt->staffmods != '\a')) {
       return;
     }
 

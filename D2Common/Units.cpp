@@ -1056,7 +1056,8 @@ static BOOL __stdcall CanPlayAnimMode(D2UnitStrc * pUnit, int32_t nClassId, eD2U
 
         return 0;
       }
-      if (0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId && sgptDataTable->pTxtMonStats[nClassId].npc) {
+      D2MonStatsTxt * pTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nClassId] : NULL;
+      if (pTxt && pTxt->npc) {
         if (nAnimMode == 2) {
           return 1;
         }
