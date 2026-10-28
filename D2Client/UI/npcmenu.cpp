@@ -560,7 +560,7 @@ BOOL NPCMENU_IsItemIdentified(D2UnitStrc * pUnit) {
     return BVar1;
 }
 
-int NPCMENU_CanItemBeRepaired(D2UnitStrc * pUnit) {
+static int NPCMENU_CanItemBeRepaired(D2UnitStrc * pUnit) {
     int nCurrentDurability;
     int nMaxStack;
     int nChargeCount;

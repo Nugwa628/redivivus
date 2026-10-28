@@ -778,7 +778,7 @@ static void __stdcall PANEL_HighlightBeltSlot(int32_t nBeltSlot, int32_t nHighli
     Engine::GfxInfo::D2GFX_DrawSolidRectExBySize(nRect[0], nRect[2], 0x1d, 0x1d, (uint32_t)gaPanelBeltColors[nHighlightColor], DRAW_VERYTRANSPARENT);
 }
 
-void CLIENT_HandleBeltSlotClick(D2InventoryStrc * pInventory) {
+static void CLIENT_HandleBeltSlotClick(D2InventoryStrc * pInventory) {
     D2BeltsTxt sBeltsTxt;
     D2UnitStrc* nFoundItemSlot;
     D2UnitStrc* pCursorItem_lcl = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pInventory);
