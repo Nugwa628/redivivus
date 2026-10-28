@@ -108,8 +108,8 @@ void __fastcall Q14_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int nTargetClassId;
     D2GSPacketSrv0x27_TextStrc* pTextControl;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if (!pQuestArgs->pTarget) {
       nTargetClassId = -1;
     } else {
@@ -233,8 +233,8 @@ void __fastcall Q14_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
 // A2Q6 "The Seven Tombs" — per-player notify helper. If the player's TheSevenTombs record is Completed OR FinishedInPreviousGame, AND not JustCompleted AND not CannotComplete, returns early (nothing to announce); otherwise pushes a quest-update packet (state 0xd=JustCompleted) to that player so the journal/UI refreshes. Used as the broadcast callback by QUEST_SetStateAndBroadcast throughout this quest.
 BOOL __fastcall Q14_NotifySevenTombsComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Completed);
     /* GetQuestState(TheSevenTombs, 0xf=FinishedInPreviousGame) */ /* GetQuestState(TheSevenTombs, 0xd=JustCompleted) — only notify if NOT
                          just-completed/cannot-complete */ /* GetQuestState(TheSevenTombs, 0xe=CannotCompleteQuestInGame) */ if (BVar2 || (BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_FinishedInPreviousGame) , BVar2 != 0)) {
@@ -258,8 +258,8 @@ void __fastcall Q14_Callback10_PlayerLeavesGame(D2QuestDataStrc * pQuestData, D2
 
 // A2Q6 "The Seven Tombs" — per-player quest-record step advance. If the player's record is NOT yet RewardAwaits(1), and the live quest nStateFlag > 1 (player has reached the staff-tomb stage), stamps the record to Step0x02 so the journal shows the quest started/in-progress. Iterated over players to keep records in sync.
 BOOL __fastcall Q14_UpdateQuestRecordStep(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -277,8 +277,8 @@ BOOL __fastcall Q14_UpdateQuestRecordStep(::SGAMEDATA * pGame, D2UnitStrc * pUni
 
 // A2Q6 "The Seven Tombs" — per-player completion-sound callback. If the player's TheSevenTombs record is JustCompleted(0xd), attaches/plays the quest-complete sound event (id 0x36) on that unit. Read-only on quest state.
 BOOL __fastcall Q14_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheSevenTombs, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheSevenTombs, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
@@ -338,8 +338,8 @@ void __stdcall Q14_SetDurielComplete(::SGAMEDATA * pQuestControl, D2UnitStrc * p
 
 // A2Q6 "The Seven Tombs" — per-player check: if this player is standing in Duriel's Lair and their record has none of JustCompleted/Step0x03/Step0x04 set yet, stamp completion via Q14_SetDurielComplete. Iterated after Duriel dies so anyone present in the lair gets credit. Asserts the quest-data pointer is non-null.
 BOOL __fastcall Q14_CheckDurielLairAndComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (!pRoom) {
       return 0;
@@ -379,8 +379,8 @@ void __fastcall Q14_SetDurielCompleteOnPartyMember(::SGAMEDATA * pGame, D2UnitSt
       return;
     }
 
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pQuestData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Completed);
     /* GetQuestState(TheSevenTombs, 3=Step0x03=Duriel-dead) */ /* GetQuestState(TheSevenTombs, 4=Step0x04) — credit party member only if no
                          progress bits + in Act II */ if (bQuestState == 1) {
@@ -413,14 +413,14 @@ void __fastcall Q14_SetDurielCompleteOnPartyMember(::SGAMEDATA * pGame, D2UnitSt
 
 // A2Q6 "The Seven Tombs" — if this player's record is JustCompleted(0xd), propagate Duriel-kill credit to their whole party by running Q14_SetDurielCompleteOnPartyMember for every party member. The reward fan-out trigger after a player completes.
 BOOL __fastcall Q14_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheSevenTombs, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheSevenTombs, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
 
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -430,8 +430,8 @@ BOOL __fastcall Q14_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
 // A2Q6 "The Seven Tombs" — per-player "you missed your chance" stamp. If the player's record has none of Completed/Step0x03/Step0x04 (i.e. they never got Duriel credit) at the moment completion is being finalized, sets CannotCompleteQuestInGame(0xe) and pushes a state-0xd packet. Marks latecomers as unable to finish this quest in the current game.
 BOOL __fastcall Q14_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -512,8 +512,8 @@ void __fastcall Q14_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     int32_t nPortalClassId;
     D2UnitStrc** ppSpawnedPortal;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     short int nNpcNo = pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo;
     short int nMessageIndex = pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex;
     D2QuestDataA2Q6Strc* pSpecificData = pQuestData->pQuestSpecificData.pA2Q6;
@@ -679,8 +679,8 @@ void __fastcall Q14_SetTombEntryOnPartyMember(::SGAMEDATA * pGame, D2UnitStrc * 
       return;
     }
 
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pQuestData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -719,8 +719,8 @@ void __fastcall Q14_SetTombEntryOnPartyMember(::SGAMEDATA * pGame, D2UnitStrc * 
 
 // A2Q6 "The Seven Tombs" — per-player: if standing in Duriel's Lair and record has none of Completed/Step0x03/Step0x04/Step0x05, set record Step0x05 (true tomb entered) and propagate it to the whole party via Q14_SetTombEntryOnPartyMember. The "entered Duriel's chamber" record trigger.
 BOOL __fastcall Q14_CheckTombEntryAndPropagate(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (!pRoom) {
       return 0;
@@ -754,8 +754,8 @@ BOOL __fastcall Q14_CheckTombEntryAndPropagate(::SGAMEDATA * pGame, D2UnitStrc *
 
     /* SetQuestState(TheSevenTombs, 5=Step0x05) — entered Duriel's Lair (level
                          0x49): mark tomb-entered, then propagate to party */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Step0x05);
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -792,7 +792,7 @@ void __fastcall Q14_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
                 /* SetQuestState(TheSevenTombs, 5=Step0x05) — player entered Duriel's chamber:
                          mark tomb-entered, then propagate to party */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Step0x05);
                 nPartyId = UNIT::SUnit::GetPartyId(pQuestArgs->pPlayer);
-                if (nPartyId != -1) {
+                if (nPartyId != 0xffff) {
                   UNIT::Party::ExecuteFunctionForEveryPartyMember(pQuestArgs->pGame, nPartyId, (::fpExecuteOnUnitFunction)Q14_SetTombEntryOnPartyMember, 0);
                 }
 
@@ -1023,16 +1023,16 @@ void __fastcall Q14_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // A2Q6 "The Seven Tombs" — handler slot 0xe: on this event, clears the player's TheHoradricStaff record Step0x09 bit (cross-quest cleanup tying staff completion into the tombs quest).
 void __fastcall Q14_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
     /* UnsetQuestState(TheHoradricStaff=0xa, 9=Step0x09) — cross-quest cleanup:
-                         clear staff sub-step */ D2Common::QuestRecord::UnsetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TheHoradricStaff, QUESTSTATE_Step0x09);
+                         clear staff sub-step */ D2Common::QuestRecord::UnsetQuestState(pQuestRecord, QUEST_TheHoradricStaff, QUESTSTATE_Step0x09);
 }
 
 // A2Q6 "The Seven Tombs" — handler slot 0xd: on-player-join state reconstruction. Clears TheHoradricStaff Step0x09; if staff Completed, arms Jerhyn AI + spawn flags. If TheSevenTombs record is Completed or FinishedInPreviousGame -> mark bCompletedPlayerJoined and bail. Else rebuild live nStateFlag/nStateFlagPrev from the record: Step0x02 -> (prev1,flag2); Step0x03 -> (prev5,flag5); Step0x04 -> (prev6,flag5). Restores in-progress quest state for a joining player from their saved record.
 void __fastcall Q14_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     /* UnsetQuestState(TheHoradricStaff=0xa, 9=Step0x09) — clear staff sub-step on
                          join */ D2Common::QuestRecord::UnsetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Step0x09);
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
