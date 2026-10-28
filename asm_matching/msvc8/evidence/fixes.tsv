@@ -359,3 +359,4 @@ fix_boolarith	d8c5681	32	16	0
 fix_fastcall	9e3e1e1	27	26	8	thiscall
 fix_switch	8242adc	295	30	0	single
 fix_bitmask	84c0b3c	272	198	7	
+fix_shiftbit	84c0b3c	99	63	0	
