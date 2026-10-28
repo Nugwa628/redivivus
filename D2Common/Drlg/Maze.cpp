@@ -737,10 +737,7 @@ void __stdcall GenerateWolrdstoneAndTombs(D2DrlgLevelStrc * pLevel) {
         DRLGMAZE_PickRoomPreset(pNew, 1);
       }
 
-      nRollValue = nRollValue + 1 & 0x80000003;
-      if ((int)nRollValue < 0) {
-        nRollValue = (nRollValue - 1 | -4) + 1;
-      }
+      nRollValue = (int)(nRollValue + 1) % 4;
 
       nLoopCount--;
     } while (nLoopCount);

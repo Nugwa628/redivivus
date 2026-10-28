@@ -2518,10 +2518,7 @@ BOOL __fastcall fpLDE2(D2DrlgLevelPlacementStrc * pLevelUnknown) {
       pLevelUnknown->aCurrentDir[pLevelUnknown->nCurrentNode] = pLevelUnknown->aInitialDir[pLevelUnknown->nCurrentNode];
     } else {
       uint32_t nNextDir;
-      nNextDir = pLevelUnknown->aCurrentDir[nCurrentNode] + 1U & 0x80000003;
-      if ((int)nNextDir < 0) {
-        nNextDir = (nNextDir - 1 | -4) + 1;
-      }
+      nNextDir = (int)(pLevelUnknown->aCurrentDir[nCurrentNode] + 1U) % 4;
       if (nNextDir == pLevelUnknown->aInitialDir[nCurrentNode]) {
         return 0;
       }
@@ -2570,10 +2567,7 @@ BOOL __fastcall fpLevelDataEntry(D2DrlgLevelPlacementStrc * pLevelUnknown) {
       pLevelUnknown->aCurrentDir[pLevelUnknown->nCurrentNode] = pLevelUnknown->aInitialDir[pLevelUnknown->nCurrentNode];
     } else {
       uint32_t nNextDir;
-      nNextDir = pLevelUnknown->aCurrentDir[nCurrentNode] + 1U & 0x80000007;
-      if ((int)nNextDir < 0) {
-        nNextDir = (nNextDir - 1 | -8) + 1;
-      }
+      nNextDir = (int)(pLevelUnknown->aCurrentDir[nCurrentNode] + 1U) % 8;
       if (nNextDir == pLevelUnknown->aInitialDir[nCurrentNode]) {
         return 0;
       }
@@ -2650,15 +2644,9 @@ BOOL __fastcall fpLDE4(D2DrlgLevelPlacementStrc * pLevelUnknown) {
       nFlipNext = pLevelUnknown->aFlipState[nCurrentNode];
     } else {
       uint32_t nNextDir;
-      nNextDir = pLevelUnknown->aCurrentDir[nCurrentNode] + pLevelUnknown->aStepCounter[nCurrentNode] & 0x80000003;
-      if ((int)nNextDir < 0) {
-        nNextDir = (nNextDir - 1 | -4) + 1;
-      }
+      nNextDir = (int)(pLevelUnknown->aCurrentDir[nCurrentNode] + pLevelUnknown->aStepCounter[nCurrentNode]) % 4;
 
-      nFlipNext = pLevelUnknown->aStepCounter[nCurrentNode] + 1U & 0x80000001;
-      if ((int)nFlipNext < 0) {
-        nFlipNext = (nFlipNext - 1 | -2) + 1;
-      }
+      nFlipNext = (int)(pLevelUnknown->aStepCounter[nCurrentNode] + 1U) % 2;
       if (nNextDir == pLevelUnknown->aInitialDir[nCurrentNode] && nFlipNext == pLevelUnknown->aFlipState[nCurrentNode]) {
         return 0;
       }
@@ -2739,15 +2727,9 @@ BOOL __fastcall fpLDE3(D2DrlgLevelPlacementStrc * pLevelUnknown) {
       nCurrentNode = pLevelUnknown->nCurrentNode;
       nNextFlip = pLevelUnknown->aFlipState[nCurrentNode];
     } else {
-      nNextDir = pLevelUnknown->aCurrentDir[nCurrentNode] + pLevelUnknown->aStepCounter[nCurrentNode] & 0x80000003;
-      if ((int)nNextDir < 0) {
-        nNextDir = (nNextDir - 1 | -4) + 1;
-      }
+      nNextDir = (int)(pLevelUnknown->aCurrentDir[nCurrentNode] + pLevelUnknown->aStepCounter[nCurrentNode]) % 4;
 
-      nNextFlip = pLevelUnknown->aStepCounter[nCurrentNode] + 1U & 0x80000001;
-      if ((int)nNextFlip < 0) {
-        nNextFlip = (nNextFlip - 1 | -2) + 1;
-      }
+      nNextFlip = (int)(pLevelUnknown->aStepCounter[nCurrentNode] + 1U) % 2;
       if (nNextDir == pLevelUnknown->aInitialDir[nCurrentNode] && nNextFlip == pLevelUnknown->aFlipState[nCurrentNode]) {
         return 0;
       }
@@ -2757,16 +2739,10 @@ BOOL __fastcall fpLDE3(D2DrlgLevelPlacementStrc * pLevelUnknown) {
     }
 
     pLevelUnknown->aStepCounter[nCurrentNode] = nNextFlip;
-    nNextDir = pLevelUnknown->aCurrentDir[pLevelUnknown->nCurrentNode] & 0x80000001;
-    if ((int)nNextDir < 0) {
-      nNextDir = (nNextDir - 1 | -2) + 1;
-    }
+    nNextDir = (int)(pLevelUnknown->aCurrentDir[pLevelUnknown->nCurrentNode]) % 2;
 
     pLevelUnknown->aCoordsAndSize[pLevelUnknown->nCurrentNode].WorldSize.x = nNextDir ? 0x60 : 0x38;
-    nNextDir = pLevelUnknown->aCurrentDir[pLevelUnknown->nCurrentNode] & 0x80000001;
-    if ((int)nNextDir < 0) {
-      nNextDir = (nNextDir - 1 | -2) + 1;
-    }
+    nNextDir = (int)(pLevelUnknown->aCurrentDir[pLevelUnknown->nCurrentNode]) % 2;
 
     pLevelUnknown->aCoordsAndSize[pLevelUnknown->nCurrentNode].WorldSize.y = (nNextDir ? -40 : 0) + 0x60;
     nCurrentNode = pLevelUnknown->nCurrentNode;
@@ -2917,10 +2893,7 @@ BOOL __fastcall DRLGPLACE_Adjacent8DirAligned(D2DrlgLevelPlacementStrc * pLevelU
       pLevelUnknown->aCurrentDir[pLevelUnknown->nCurrentNode] = pLevelUnknown->aInitialDir[pLevelUnknown->nCurrentNode];
     } else {
       uint32_t nNextDir;
-      nNextDir = pLevelUnknown->aCurrentDir[nNodeIdx] + 1U & 0x80000007;
-      if ((int)nNextDir < 0) {
-        nNextDir = (nNextDir - 1 | -8) + 1;
-      }
+      nNextDir = (int)(pLevelUnknown->aCurrentDir[nNodeIdx] + 1U) % 8;
       if (nNextDir == pLevelUnknown->aInitialDir[nNodeIdx]) {
         return 0;
       }
@@ -6254,10 +6227,7 @@ static void __stdcall DRLGOUTROOM_BuildVertexPathsWithJitter(D2DrlgLevelStrc * p
       sSeedRollY = D2_SEED_NEXT(param_eax->sSeed);
       param_eax->sSeed = sSeedRollY;
       nJitterDy = gnDrlgLevelVersion[uVar2];
-      uVar2 = uVar2 + 1 & 0x80000003;
-      if ((int)uVar2 < 0) {
-        uVar2 = (uVar2 - 1 | -4) + 1;
-      }
+      uVar2 = (int)(uVar2 + 1) % 4;
 
       nGridX8 = pVertex->nPosX * 8;
       pVertex->nPosX = nGridX8;

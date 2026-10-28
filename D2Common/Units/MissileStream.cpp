@@ -230,10 +230,7 @@ void __stdcall Update(D2UnitStrc * pUnit, D2UnitStrc * pMissile, int32_t nParam1
               pStream->pStream[nPathIdx] = nCreated;
               if (bExtended) {
                 nCreated = (int)(nExtraSpacing + ((int)nExtraSpacing >> 0x1f & 3U)) >> 2;
-                nExtraSpacingRem = nExtraSpacing & 0x80000003;
-                if ((int)nExtraSpacingRem < 0) {
-                  nExtraSpacingRem = (nExtraSpacingRem - 1 | -4) + 1;
-                }
+                nExtraSpacingRem = (int)(nExtraSpacing) % 4;
                 if (nExtraCycleCounter < (int)nExtraSpacingRem) {
                   nCreated++;
                 }
