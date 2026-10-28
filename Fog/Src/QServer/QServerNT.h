@@ -20,7 +20,6 @@ namespace Fog::Src::QServer::QServerNT {
 
 // Function declarations
 void __fastcall AwaitAndClose(struct D2QServerStrc * pQserver);
-int32_t __stdcall AcceptConnection(struct D2QServerStrc * pQServer, sockaddr * pSockAddr, int nWorkerIndex, int * pSockAddrLen);
 int __stdcall PopAndFreeCompletedSendPacket(struct D2QServerClientConnectionStrc * pClient);
 // Accept thread entry point for QServer network listener. Polls listening socket with select(), accepts incoming client connections via AcceptConnection(), and periodically sweeps expired hacklist entries to enforce IP-based rate limiting. Telemetry tracks performance of each accept operation substage (hacklist check, connection limit, IP rate, IOCP attachment, initial recv).
 DWORD __stdcall AcceptThreadMain(void * lpThreadParam);

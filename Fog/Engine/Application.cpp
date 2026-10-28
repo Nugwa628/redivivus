@@ -61,7 +61,7 @@ namespace Fog::Engine::Application {
 static uint32_t DEBUG_ParseRSDSDebugInfo(void * pDebugRecord, int32_t pModuleInfo);
 static uint32_t DEBUG_ParseNB01DebugInfo(void * pDebugRecord, int32_t pModuleInfo);
 
-uint32_t DEBUG_GetPEImageType(short * nMagic) {
+static uint32_t DEBUG_GetPEImageType(short * nMagic) {
     if (*nMagic != 0x10b) {
       return *nMagic != 0x20b ? 0 : 0x2;
     }
@@ -69,7 +69,7 @@ uint32_t DEBUG_GetPEImageType(short * nMagic) {
     return 1;
 }
 
-uint32_t DEBUG_ParsePEDebugDirectory(short * * pOutput, uint32_t * pnSize, int * pnRVA, short * pOptHeader) {
+static uint32_t DEBUG_ParsePEDebugDirectory(short * * pOutput, uint32_t * pnSize, int * pnRVA, short * pOptHeader) {
     uint32_t nDirSize;
     int nDirRVA;
     if (*pOptHeader == 0x10b) {
@@ -141,7 +141,7 @@ uint32_t __fastcall DEBUG_ParseDebugInfoFromMemory(uint32_t nDataSize, uint32_t 
     return nParseResult;
 }
 
-uint32_t __stdcall DEBUG_ParseDebugDataDirectory(uint32_t nCount, int32_t nBaseAddress, int32_t pDirEntries, int32_t pOutput) {
+static uint32_t __stdcall DEBUG_ParseDebugDataDirectory(uint32_t nCount, int32_t nBaseAddress, int32_t pDirEntries, int32_t pOutput) {
     BOOL bIsBadPtr;
     uint32_t nParseResult;
     int* pDebugData;
@@ -248,7 +248,7 @@ static uint32_t __stdcall DEBUG_ParseModuleHeaders(short * * ppModuleBase, short
 }
 
 // Adds a loaded module to the crash dump module list by parsing PE headers
-bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, int32_t nPathLength, short * pModuleBase) {
+static bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, int32_t nPathLength, short * pModuleBase) {
     int nCopyCount;
     D2DebugModuleInfo aModuleInfo;
     /* LPBOOL lpUsedDefaultChar for WideCharToMultiByte */ /* LPCSTR lpDefaultChar for WideCharToMultiByte */ /* int cbMultiByte for WideCharToMultiByte */ /* LPSTR lpMultiByteStr for WideCharToMultiByte */ /* int cchWideChar for WideCharToMultiByte */ /* LPCWSTR lpWideCharStr for WideCharToMultiByte */ /* DWORD dwFlags for WideCharToMultiByte */ /* UINT CodePage for WideCharToMultiByte */ aModuleInfo.pBase = 0;
@@ -747,7 +747,7 @@ void * MISC_OperatorNewShim(uint32_t nSize) {
     return pvVar1;
 }
 
-void __stdcall MISC_GetValueFromD2Ini(D2IniConfigStrc * pD2IniData) {
+static void __stdcall MISC_GetValueFromD2Ini(D2IniConfigStrc * pD2IniData) {
     UINT dwIniValue;
     char* pDestField;
     char szIniPath[260];
@@ -784,7 +784,7 @@ void __stdcall MISC_GetValueFromD2Ini(D2IniConfigStrc * pD2IniData) {
 
 }
 
-int32_t __stdcall INI_FindConfigValueIndex(uint8_t * pbArgName) {
+static int32_t __stdcall INI_FindConfigValueIndex(uint8_t * pbArgName) {
     int nIndex = 0;
     char* pbEntry = D2IniConfigValues[0].szCmdLineArg;
     uint32_t nByteOffset = 0;
@@ -883,7 +883,7 @@ static void INI_StripDelimiters(char * szText) {
     szText[nWriteIdx] = '\0';
 }
 
-int __fastcall INI_ParseCommandLineArg(uint8_t * pbArgName, char * szCmdLine, int32_t pOutValue) {
+static int __fastcall INI_ParseCommandLineArg(uint8_t * pbArgName, char * szCmdLine, int32_t pOutValue) {
     char szArgNameBuf[256];
     char cChar;
     int nDstOffset;

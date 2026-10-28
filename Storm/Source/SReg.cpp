@@ -37,7 +37,7 @@ int32_t __stdcall SRegGetBaseKey(uint8_t byFlags, char * szText, int32_t nBufSiz
 // @namespace-fix moved from Storm::Source::SSTR to Storm::Source::SReg. SReg is a separate
 // Storm module with its own nine exported symbols; nothing in this family belongs to the string module.
 // The SReg block occupies 00414930-0041513f, contiguous, between SStr and SFile.
-int __fastcall SREG_DeleteValueInternal(int32_t byFlags, char * pszSubKey, LPCSTR szValueName) {
+static int __fastcall SREG_DeleteValueInternal(int32_t byFlags, char * pszSubKey, LPCSTR szValueName) {
     DWORD lResult;
     DWORD lResult2;
     HKEY hKey;

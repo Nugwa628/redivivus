@@ -177,7 +177,7 @@ static D2QServerClientPacketStrc * __stdcall NET_QServerClientPacket_CreateStruc
     return pTailPacket;
 }
 
-int32_t __stdcall AcceptConnection(D2QServerStrc * pQServer, sockaddr * pSockAddr, int nWorkerIndex, int * pSockAddrLen) {
+static int32_t __stdcall AcceptConnection(D2QServerStrc * pQServer, sockaddr * pSockAddr, int nWorkerIndex, int * pSockAddrLen) {
     char* szClientIpStr;
     BOOL bBeginReadOk2;
     memset(&pQServer->aWorkerTelemetry[nWorkerIndex].qpcStampStart, 0, 0x48);
