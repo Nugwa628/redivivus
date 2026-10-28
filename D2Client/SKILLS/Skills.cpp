@@ -157,10 +157,10 @@ BOOL __fastcall GetCooordinates(D2UnitStrc * pUnit, int32_t * pX, int32_t * pY) 
       eUnitType = pTargetUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nBuffer2 = pTargetUnit->pPath.pStaticPath->nPosX;
-      } else if (!pTargetUnit->pPath.pDynamicPath) {
-        nBuffer2 = 0;
-      } else {
+      } else if (pTargetUnit->pPath.pDynamicPath) {
         nBuffer2 = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
+      } else {
+        nBuffer2 = 0;
       }
 
       *pX = nBuffer2;
