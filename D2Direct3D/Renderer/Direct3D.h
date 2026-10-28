@@ -1148,7 +1148,7 @@ void * __stdcall Catch_All_006b4d4b();
 BOOL __fastcall Initialize(HINSTANCE hInstance);
 BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWnd);
 // @sourcefile .\Src\d3dCore.cpp
-void Release();
+BOOL Release();
 BOOL __fastcall CreateWindow(HWND hWnd, int nResolutionMode);
 void __fastcall EndCutScene(HWND hWnd, int nResolutionMode, int nWindowState);
 void __fastcall PlayCutScene(char * szFile, int nResolutionMode, void * fpFrame);

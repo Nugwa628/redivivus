@@ -697,7 +697,7 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
     return __frame0.nResult;
 }
 
-void Release() {
+BOOL Release() {
     if (gbGlideInitialized) {
       GLSMACK_FreeBuffers();
       RENDERER_GLIDE_DestroyWindow();
@@ -713,10 +713,11 @@ void Release() {
       RENDERER_SelectedRendererCore = 0;
     }
     if (!lpGLIDE3x_dll) {
-      return;
+      return 1;
     }
 
     /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(lpGLIDE3x_dll);
+    return 1;
 }
 
 BOOL __fastcall CreateWindow(HWND hWnd, int32_t nResolutionMode) {
