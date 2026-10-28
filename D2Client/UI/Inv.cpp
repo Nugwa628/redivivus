@@ -5201,10 +5201,7 @@ void __fastcall INV_InitTradeMode(int32_t nParam) {
     gbInvTradeWindowOpen = 0;
     gbInvTradeWindowOpen2 = 0;
     gnInvInventoryGold = 0;
-    if (!nParam) {
-      g_nCurrentInventoryPage = 10;
-      Path::TypeOfUiOverlayOverWorld(0);
-    } else {
+    if (nParam) {
       char szPathBuf[260];
       gdwInvLastActionTickCount = 0;
       g_nCurrentInventoryPage = 0xb;
@@ -5213,6 +5210,9 @@ void __fastcall INV_InitTradeMode(int32_t nParam) {
         Storm::Source::SSTR::SStrPrintf(szPathBuf, 0x104, "%s\\ui\\panel\\trade", "DATA\\GLOBAL");
         gpInvShopTabImage = Core::Archive::IMAGE_LoadDC6Ex(szPathBuf, 0);
       }
+    } else {
+      g_nCurrentInventoryPage = 10;
+      Path::TypeOfUiOverlayOverWorld(0);
     }
 
     gShopTradeUIState = 0;
