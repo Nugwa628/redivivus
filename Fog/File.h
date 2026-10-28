@@ -121,7 +121,7 @@ bool FILETOOLS_GetTempPath_UTF8(LPSTR szDest);
 // WCHAR/wchar_t/wchar16/unicode to uint16_t (D2's own wide strings are ushort in decompiled bodies),
 // so a wcsrchr result inferred as wchar_t * came out as uint16_t * while the parameter stayed
 // LPCWSTR - half of a designed rewrite. LPWSTR is outside that rewrite set, so both sides now agree.
-uint32_t __fastcall FILETOOLS_CreateDirectoryW(LPWSTR lpPathName);
-BOOL __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName);
+bool __fastcall FILETOOLS_CreateDirectoryW(LPWSTR lpPathName);
+bool __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName);
 
 } // namespace Fog::File
