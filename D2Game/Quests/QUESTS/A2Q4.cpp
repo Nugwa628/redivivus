@@ -654,8 +654,7 @@ void __fastcall BlockHaremRoomForPlayerAccess(int32_t nParam, D2UnitStrc * pUnit
       return;
     }
 
-    pA2Q4Specific->nPortalPlacedStateLo = 0;
-    pA2Q4Specific->nPortalPlacedStateHi = 0;
+    *(uint16_t*)&pA2Q4Specific->nPortalPlacedStateLo = 0;
     void* pNullArg = 0;
     int32_t iVar1 = 0;
     pA2Q4Specific->field_0x20 = ptPlayerPos.x - 2;
