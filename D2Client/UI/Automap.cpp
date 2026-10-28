@@ -2214,14 +2214,15 @@ void __stdcall AUTOMAP_DrawDifficulty() {
     uint16_t wText[300];
     BOOL bMultiLineCenter;
     uint8_t eDifficulty = GAME::Game::GetDificulity();
-    if (eDifficulty == '\x01') {
+    switch (eDifficulty) {
+    case 1:
       /* Nightmare */ nDiffStringId = 0x1423;
-    } else {
-      if (eDifficulty != '\x02') {
-        return;
-      }
-
+      break;
+    case 2:
       /* Hell */ nDiffStringId = 0x1422;
+      break;
+    default:
+      return;
     }
 
     uint16_t* pZeroFill;

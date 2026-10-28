@@ -171,19 +171,18 @@ void __fastcall D2FILE_CloseFile(D2PoolManagerStrc * pMemory, D2MPQFileStrc * pF
 DWORD __fastcall D2FILE_GetFileSize(D2PoolManagerStrc * pMemory, D2MPQFileStrc * pFile, LPDWORD pFileSizeOut) {
     DWORD dwFileSizeResult;
     char szArchivePath[260];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!pFile) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x59);
       exit(-1);
     } else {
       dwFileSizeResult = Fog::Source::SFile::ERRORMANAGER_FGetFileSize(pFile, pFileSizeOut);
-      if (dwFileSizeResult) {
-        return dwFileSizeResult;
+      if (!dwFileSizeResult) {
+        Storm::Source::SFile::SFileGetFileName(pFile, szArchivePath, 0x104);
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5f);
+        exit(-1);
       }
 
-      Storm::Source::SFile::SFileGetFileName(pFile, szArchivePath, 0x104);
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5f);
-      exit(-1);
+      return dwFileSizeResult;
     }
 }
 
