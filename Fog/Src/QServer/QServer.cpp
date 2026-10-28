@@ -390,13 +390,13 @@ void __fastcall HACKL_RemoveIpFromHacklist(D2QServerStrc * pQServer, uint32_t nI
       pEntry = pCurEntry->pNext;
       pPrevEntry = pCurEntry;
       if (pCurEntry->ipAddress.S_un.S_addr == nIpAddress) {
-        if (!pNextEntry) {
+        if (pNextEntry) {
+          pNextEntry->pNext = pEntry;
+          D2_FREE(pCurEntry);
+        } else {
           pQServer->ppHacklistBuckets[nBucketIndex] = pQServer->ppHacklistBuckets[nBucketIndex]->pNext;
           Fog::Memory::FreeClientMemory(pCurEntry, ".\\Src\\QServer\\QServer.cpp", 0x4d7, 0);
           pNextEntry = 0;
-        } else {
-          pNextEntry->pNext = pEntry;
-          D2_FREE(pCurEntry);
         }
 
         pQServer->nHacklistSize--;
