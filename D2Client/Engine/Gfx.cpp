@@ -2525,12 +2525,17 @@ BOOL __fastcall GFX_DrawUnitSelectionShape(D2UnitStrc * pUnit) {
 
       D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(D2Common::Units::GetPrecisionX(pUnit), nWorldOffsetVal, nCoord, pScreenXOut, pScreenYOut);
       nCallResult = UI::Path::DRAW_GetTypeOfBorder();
-      if (nCallResult == 1) {
+      switch (nCallResult) {
+      case 1: {
         nParticleOffset = -((int)ScreenSizeX / 4);
         __frame0.nScreenX += nParticleOffset;
-      } else if (nCallResult == 2) {
+        break;
+      }
+      case 2: {
         nParticleOffset = (int)ScreenSizeX / 4;
         __frame0.nScreenX += nParticleOffset;
+        break;
+      }
       }
 
       __frame0.nScreenY += 0x10;

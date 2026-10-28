@@ -8595,8 +8595,8 @@ void __fastcall AITHINK_Fn1_SpecialCountess(::SGAMEDATA * pGame, D2UnitStrc * pU
       return;
     }
 
-    int nDistToTarget = pAiParam->nDistanceToTarget;
     int bInCombat = pAiParam->bEngagedInCombat;
+    int nDistToTarget = pAiParam->nDistanceToTarget;
     D2UnitStrc* pTarget = pAiParam->pTarget;
     D2MonsterAiCmdStrc* pHomeCmd = Ai::AiGeneral::FindMonsterAiCmd(pUnit, 10, 0);
     if (!pHomeCmd) {

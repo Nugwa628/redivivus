@@ -266,7 +266,7 @@ int32_t __stdcall GetCollisionDistance(D2UnitStrc * pUnit, D2UnitStrc * pTarget)
     }
 
     eUnitType = pTarget->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDy = pTarget->pPath.pStaticPath->nPosY;
     } else if (pTarget->pPath.pDynamicPath) {
       nDy = PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);

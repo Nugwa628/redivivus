@@ -1052,7 +1052,7 @@ static BOOL __stdcall ITEMMOD_GenerateRareAffixes(D2ItemGenContextStrc * pItemGe
 }
 
 // Rolls rare-quality affixes (prefixes/suffixes) onto an item. Picks 3-6 affixes (2-3 for jewels) via the item seed, alternating prefix/suffix slots, rejecting duplicates and same-group collisions (up to 3 existing slots, 251 reroll attempts). Stores chosen affixes into the unit's magic-prefix/suffix arrays, marks the item identified, applies each affix's stat mods, then runs StaffMod. Returns 1 on success, 0 if max-affix counts are zero or nothing rolled. Classic vs expansion item versions use different roll/max helpers.
-BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2UnitStrc * pUnit) {
+static BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2UnitStrc * pUnit) {
     uint32_t uVar1;
     short int wRarePrefix;
     short int wRareSuffix;

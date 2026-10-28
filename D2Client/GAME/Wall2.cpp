@@ -539,7 +539,7 @@ void __fastcall WALL2_ScheduleSoundSequence(uint32_t dwParam1, int32_t nParam1, 
       if (pStopHandle) {
         nActiveSoundId = D2Client::Sound::SOUND_GetSoundId(pStopHandle);
         if (nActiveSoundId) {
-          if (nBlockIdx) {
+          if ((uint32_t)nBlockIdx > 0) {
             pStopHandle = pSoundTxt->Block[nBlockIdx - 1];
           } else {
             pStopHandle = 0;

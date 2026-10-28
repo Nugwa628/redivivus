@@ -2477,7 +2477,7 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
       if (iVar1) {
         Path::TypeOfUiOverlayOverWorld(1);
         if (bAdjustMouse) {
-          iVar1 = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+          iVar1 = (int)ScreenSizeX / 4;
           if (iVar2 > iVar1) {
             ui::SetMouseXY(iVar2 - iVar1, y);
             return 1;
@@ -2486,7 +2486,7 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
       } else {
         Path::TypeOfUiOverlayOverWorld(0);
         if (bAdjustMouse && iVar2 < ScreenSizeX / 2) {
-          ui::SetMouseXY(((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) + iVar2, y);
+          ui::SetMouseXY(((int)ScreenSizeX / 4) + iVar2, y);
           return 1;
         }
       }
@@ -2504,17 +2504,17 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
             if (!bAdjustMouse) {
               return 1;
             }
-            if (ScreenSizeX / 2 >= iVar2) {
+            if (iVar2 <= ScreenSizeX / 2) {
               return 1;
             }
-            ui::SetMouseXY(iVar2 - ((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2), y);
+            ui::SetMouseXY(iVar2 - ((int)ScreenSizeX / 4), y);
             return 1;
           }
           Path::TypeOfUiOverlayOverWorld(2);
           if (!bAdjustMouse) {
             return 1;
           }
-          iVar1 = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+          iVar1 = (int)ScreenSizeX / 4;
           if (iVar2 >= ScreenSizeX - iVar1) {
             return 1;
           }
@@ -3706,7 +3706,7 @@ void __fastcall UI_ScrollConfigListHorizontal(int32_t nParam) {
     }
     if (nParam < 0) {
       nNewSelectedRow = g_ControlConfigUIState;
-      if (0 < g_ControlConfigUIState) {
+      if (0 < (int)g_ControlConfigUIState) {
         nNewSelectedRow = g_ControlConfigUIState - 1;
       }
       if (nNewSelectedRow < 0) {
@@ -3728,7 +3728,7 @@ void __fastcall UI_ScrollConfigListHorizontal(int32_t nParam) {
           nVisibleMaxRow++;
         }
 
-        if (g_ControlConfigUIState < nVisibleMaxRow) {
+        if ((int)g_ControlConfigUIState < (int)nVisibleMaxRow) {
           break;
         }
 
@@ -4618,7 +4618,7 @@ void __stdcall UI_UpdateNewStatSkillIcons() {
     bUIFlag = GetUIFlag(UI_NEWSKILLS);
     if (bUIFlag) {
       nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
-      if (nPointsAvailable < 1) {
+      if (nPointsAvailable <= 0) {
         Draw::SetUIFlag(UI_NEWSKILLS, UI_RESET, 0);
         return;
       }
@@ -6656,10 +6656,10 @@ void __stdcall PACKET_SendUnitInteraction0x44(D2UIMouseMsgStrc * pMsg) {
     }
 
     pPlayerOrCursorItem = UNIT::Player::GetPlayerUnit_UI();
-    if (pPlayerOrCursorItem) {
-      nUnitType = pPlayerOrCursorItem->nUnitGUID;
-    } else {
+    if (!pPlayerOrCursorItem) {
       nUnitType = -1;
+    } else {
+      nUnitType = pPlayerOrCursorItem->nUnitGUID;
     }
 
     GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT_INT(0x44, nUnitType, gnNpcShopActiveTab, 0, 2);
@@ -6738,10 +6738,10 @@ BOOL __stdcall NPCSHOP_IsRepairTabActive() {
     if (!nHoradricCubeUIState) {
       int nUnitType;
       pDVar1 = UNIT::Player::GetPlayerUnit_UI();
-      if (pDVar1) {
-        nUnitType = pDVar1->nUnitGUID;
-      } else {
+      if (!pDVar1) {
         nUnitType = -1;
+      } else {
+        nUnitType = pDVar1->nUnitGUID;
       }
 
       GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT_INT(0x44, nUnitType, gnNpcShopActiveTab, 0, 2);

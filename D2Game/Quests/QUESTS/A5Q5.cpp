@@ -858,8 +858,8 @@ void __fastcall Q35_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pQuestArgs->pTarget);
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     nPosYSpawn2 = D2Client::Units::GetYPosFromDynamicPathUnit(pQuestArgs->pTarget);
-    int32_t nPlayerLevel = D2Client::Units::GetXPosFromDynamicPathUnit(pQuestArgs->pTarget);
-    UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x231, nPlayerLevel, nPosYSpawn2, pGame, pRoom, bActiveUnit, nPosYSpawn, pCreateParam);
+
+    UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x231, D2Client::Units::GetXPosFromDynamicPathUnit(pQuestArgs->pTarget), nPosYSpawn2, pGame, pRoom, bActiveUnit, nPosYSpawn, pCreateParam);
     D2QuestDataStrc* pNextQuestData = GetQuestDataByQuestNoInternal(pQuestData->pGame, pQuestData->nSequenceQuestId);
     if (pNextQuestData) {
       /* FARPROC lpfn for IsBadCodePtr */ bIsCompleted = IsBadCodePtr((FARPROC)pQuestData->fpSequenceFilter);

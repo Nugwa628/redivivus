@@ -1233,8 +1233,8 @@ void __fastcall SKILLSCLT_SetMissilePathExtended(D2UnitStrc * pUnit, int32_t nIn
     }
 
     uint32_t nSP1Y = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-    uint32_t nSP1X = D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath);
-    uint32_t nCurDir = D2Common::Units::GetDirectionToCoords(pUnit, nSP1X, nSP1Y);
+
+    uint32_t nCurDir = D2Common::Units::GetDirectionToCoords(pUnit, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), nSP1Y);
     nCurDir &= 0xff;
     ullSeedTemp = (uint64_t)pUnitSeed->nSeedLow * 0x6ac690c5 + (uint64_t)pUnit->sSeed.nSeedHigh;
     nSerpentineSign = ullSeedTemp & 1 ? 0x1 : -0x1;

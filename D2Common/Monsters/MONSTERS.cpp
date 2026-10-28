@@ -783,7 +783,7 @@ void __stdcall MONSTER_GetSpawnParameters(D2UnitStrc * pUnit, int * pnMonId, uin
           nSpawnMonId = D2Game::Monsters::Spawn::MONSTER_GetMonsterClassByDifficulty(0x72 < sgptDataTable->nTxtMonStatsSize ? 0x72 : -1, (int32_t)pUnit);
           *pnMonId = nSpawnMonId;
           eUnitType = pUnitIn->eUnitType;
-          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
             nClassId = pUnitIn->pPath.pStaticPath->nPosX;
           } else if (pUnitIn->pPath.pDynamicPath) {
             nClassId = PATH::DynamicPath::GetXPos(pUnitIn->pPath.pDynamicPath);
@@ -793,7 +793,7 @@ void __stdcall MONSTER_GetSpawnParameters(D2UnitStrc * pUnit, int * pnMonId, uin
 
           *pnPosX = nClassId - 2;
           eUnitTypeForY = pUnitIn->eUnitType;
-          if (eUnitTypeForY == UNIT_OBJECT || 3 < (int)eUnitTypeForY && (int)eUnitTypeForY < 6) {
+          if (eUnitTypeForY == UNIT_OBJECT || 3 < (int)eUnitTypeForY && (int)eUnitTypeForY <= 5) {
             nClassId = pUnitIn->pPath.pStaticPath->nPosY;
           } else if (pUnitIn->pPath.pDynamicPath) {
             nClassId = PATH::DynamicPath::GetYPos(pUnitIn->pPath.pDynamicPath);

@@ -3428,8 +3428,8 @@ D2UnitStrc * __fastcall CreatingAMissile(::SGAMEDATA * pGame, eMissilesId nSrvMi
     }
 
     sSkillArg.nY = nOwnerCoord + nParam2;
-    sSkillArg.nSkillLevel = nSkillLvl;
     sSkillArg.eSkillNo = eSkill;
+    sSkillArg.nSkillLevel = nSkillLvl;
     sSkillArg.nMissileTxtNo = nSrvMissle;
     if (!nParam3 || !nParam4) {
       BOOL BVar1;

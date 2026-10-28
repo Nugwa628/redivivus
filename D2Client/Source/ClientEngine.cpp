@@ -1404,8 +1404,8 @@ static uint32_t __stdcall MONSTER_TryMoveTowardTarget(D2UnitStrc * pUnit, uint8_
       return 0;
     }
 
-    sMsg.nItemId = (uint32_t)bMoveStep * nStepY + local_c;
     sMsg.nSkillId = (uint32_t)bMoveStep * nStepX + nMonsterY;
+    sMsg.nItemId = (uint32_t)bMoveStep * nStepY + local_c;
     sMsg.nTargetUnitType = 0;
     sMsg.nTargetUnitId = D2Common::PATH::DynamicPath::GetPathType(pServerPath);
     sMsg.nSkillLvl = dwAnimMode;

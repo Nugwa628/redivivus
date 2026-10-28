@@ -251,8 +251,8 @@ int __stdcall FreeServer() {
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&gQServerGameListCs);
     UNIT::sunitproxy::SUNITPROXY_FreeAllNpcItemTables();
     gpQServerGameState = 0;
-    StartingAct = 0;
     QServerNextToken = 1;
+    StartingAct = 0;
     return 1;
 }
 

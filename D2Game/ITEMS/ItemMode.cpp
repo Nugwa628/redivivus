@@ -3547,8 +3547,8 @@ void __fastcall ITEMMODE_SetItemFlags(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
       nOwnerGUID = -1;
       byUnitType = 6;
     } else {
-      byUnitType = (uint8_t)pUnit->eUnitType;
       nOwnerGUID = pUnit->nUnitGUID;
+      byUnitType = (uint8_t)pUnit->eUnitType;
     }
 
     int32_t nZeroSkillQty = 0;

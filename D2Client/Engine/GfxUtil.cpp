@@ -918,13 +918,18 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
       pYAdjust = &__frame0.nScreenY;
       pXAdjust = &__frame0.nScreenX;
       nBais = 0;
-      nCoord = D2Common::Units::GetPrecisionY(pUnit);
-      D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(D2Common::Units::GetPrecisionX(pUnit), nCoord, nBais, pXAdjust, pYAdjust);
+
+      D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(D2Common::Units::GetPrecisionX(pUnit), D2Common::Units::GetPrecisionY(pUnit), nBais, pXAdjust, pYAdjust);
       uVar1 = UI::Path::DRAW_GetTypeOfBorder();
-      if (uVar1 == 1) {
-        __frame0.nScreenX -= (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
-      } else if (uVar1 == 2) {
-        __frame0.nScreenX += (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+      switch (uVar1) {
+      case 1: {
+        __frame0.nScreenX -= (int)ScreenSizeX / 4;
+        break;
+      }
+      case 2: {
+        __frame0.nScreenX += (int)ScreenSizeX / 4;
+        break;
+      }
       }
     } else {
       nBais = D2Common::Units::GetTargetX(pUnit);
