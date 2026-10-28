@@ -2010,8 +2010,11 @@ static BOOL ClickMapRightSkill(D2UnderMouseStrc * pUnderMouse) {
     } else {
       pSkillsTxt = sgptDataTable->pTxtSkills + eSkillId;
     }
-    if (pSkillsTxt->range == '\x01' && !(pUnderMouse->flags & 0x40)) {
-      pUnderMouse->flags |= 0x80;
+    switch (pSkillsTxt->range) {
+    case 1:
+      if (!(pUnderMouse->flags & 0x40)) {
+        pUnderMouse->flags |= 0x80;
+      }
     }
 
     INPUT_ExecuteSkillCommand(pUnderMouse);
@@ -2039,8 +2042,11 @@ static BOOL INPUT_HandleRightClickRepeat(D2UnderMouseStrc * pUnderMouse) {
     } else {
       pSkillsTxt = sgptDataTable->pTxtSkills + eSkillId;
     }
-    if (pSkillsTxt->range == '\x01' && !(pUnderMouse->flags & 0x40)) {
-      pUnderMouse->flags |= 0x80;
+    switch (pSkillsTxt->range) {
+    case 1:
+      if (!(pUnderMouse->flags & 0x40)) {
+        pUnderMouse->flags |= 0x80;
+      }
     }
 
     INPUT_ExecuteSkillCommand(pUnderMouse);
