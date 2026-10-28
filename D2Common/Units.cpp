@@ -1029,11 +1029,11 @@ static int32_t UNITS_GetAnimFrameTime(eD2UnitType eUnitType, int32_t nClassId, i
       } else {
         pMonStatsTxt = sgptDataTable->pTxtMonStats + nClassId;
       }
-      if (nAnimMode == 0xf) {
+      if (nAnimMode != 0xf) {
+        return (int)pMonStatsTxt->wWalkAnimSpeed;
+      } else {
         return (int)pMonStatsTxt->wRunAnimSpeed;
       }
-
-      return (int)pMonStatsTxt->wWalkAnimSpeed;
     } else {
       return nAnimMode != 3 ? 0xd5 : 0x65;
     }

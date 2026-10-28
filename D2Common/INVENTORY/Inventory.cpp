@@ -4453,7 +4453,21 @@ static uint32_t __stdcall INVENTORY_GetEquipSwapAction(D2UnitStrc * pUnit, D2Uni
     BOOL bIsSocketable;
     D2InventoryStrc* pInventory = pUnit1->pInventory;
     if (pNewItem) {
-      if (!pUnit2) {
+      if (pUnit2) {
+        bIsSocketable = ITEMS::Items::IsItemSocketable(pUnit2, pNewItem);
+        if (bIsSocketable) {
+          return 6;
+        }
+
+        int32_t bDualWield = INVENTORY_CanDualWieldItems(pUnit, pNewItem, pUnit1);
+        if (bDualWield) {
+          return 5;
+        }
+
+        int32_t ePage = Units::GetInventoryPage(pUnit1, 0, 1);
+        uint32_t bCanMoveToPage = INVENTORY_CanMoveEquippedToPage(pInventory, pNewItem, nParam, ePage);
+        return bCanMoveToPage ? 7 : 0;
+      } else {
         if (!pUnit) {
           return 1;
         }
@@ -4461,34 +4475,20 @@ static uint32_t __stdcall INVENTORY_GetEquipSwapAction(D2UnitStrc * pUnit, D2Uni
         bIsSocketable = INVENTORY_CanDualWieldItems(pUnit, pNewItem, pUnit1);
         return 2 - (bIsSocketable != 0);
       }
-
-      bIsSocketable = ITEMS::Items::IsItemSocketable(pUnit2, pNewItem);
-      if (bIsSocketable) {
-        return 6;
-      }
-
-      int32_t bDualWield = INVENTORY_CanDualWieldItems(pUnit, pNewItem, pUnit1);
-      if (bDualWield) {
-        return 5;
-      }
-
-      int32_t ePage = Units::GetInventoryPage(pUnit1, 0, 1);
-      uint32_t bCanMoveToPage = INVENTORY_CanMoveEquippedToPage(pInventory, pNewItem, nParam, ePage);
-      return bCanMoveToPage ? 7 : 0;
     } else {
       if (pUnit2) {
         return 3;
       }
-      if (!pUnit) {
+      if (pUnit) {
+        bIsSocketable = ITEMS::Items::IsTwoHanded(pUnit);
+        if (!bIsSocketable) {
+          return 0;
+        }
+
+        return 4;
+      } else {
         return 0;
       }
-
-      bIsSocketable = ITEMS::Items::IsTwoHanded(pUnit);
-      if (!bIsSocketable) {
-        return 0;
-      }
-
-      return 4;
     }
 }
 
