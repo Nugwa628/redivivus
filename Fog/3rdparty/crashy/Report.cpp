@@ -16,7 +16,7 @@ static int STRING_FormatVarArgs(char * szFormat, char * szDest, int32_t nDestSiz
 
 namespace Fog::_3rdparty::crashy {
 
-::Report * Constructor(::Report * pThis) {
+::Report * __fastcall Constructor(::Report * pThis) {
     pThis->_vfptr = (ReportVtable*)(void*)crashy::vftable;
     pThis->pFile = 0;
     pThis->nAttachmentCount = 0;
@@ -25,7 +25,7 @@ namespace Fog::_3rdparty::crashy {
     return pThis;
 }
 
-::Report * ScalarDeletingDestructor(::Report * pThis, uint32_t nFlags) {
+::Report * __fastcall ScalarDeletingDestructor(::Report * pThis, int32_t nEdxUnused, uint32_t nFlags) {
     pThis->_vfptr = (ReportVtable*)(void*)crashy::vftable;
     if (pThis->pFile) {
       fclose(pThis->pFile);
