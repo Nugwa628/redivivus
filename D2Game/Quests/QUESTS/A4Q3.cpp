@@ -220,8 +220,8 @@ BOOL __fastcall OBJOP_A4Q2_PandemoniumFortressGate(D2ObjectOperateFnArg * pOpera
 
 // A4Q3 Hell's Forge — Q28_PlayerNotifyCompletedForge: per-player state-broadcast callback (passed to QUEST_SetStateAndBroadcast). Sends quest-update 0x18 to the player ONLY in the transition window: Hell's Forge is Completed-or-FinishedInPreviousGame AND NOT (JustCompleted or CannotCompleteQuestInGame). I.e. notifies players who finished it in a prior game when they re-enter, suppressing duplicate "just done" notifications.
 BOOL __fastcall Q28_PlayerNotifyCompletedForge(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_HellsForge, QUESTSTATE_Completed);
     /* GetQuestState(QUEST_HellsForge=0x1b, FinishedInPreviousGame=0xf):
                          done-before-this-game also counts */ /* GetQuestState(QUEST_HellsForge=0x1b, JustCompleted=0xd): if
@@ -265,8 +265,8 @@ void __fastcall Objects_InitFn48(D2ObjectInitFnArg * pInitArg) {
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a4q3.cpp
 void __fastcall Q28_Callback04_ItemPickedUp(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_HellsForge, QUESTSTATE_Completed);
     if (bQuestState) {
       return;
@@ -287,8 +287,8 @@ void __fastcall Q28_Callback04_ItemPickedUp(D2QuestDataStrc * pQuestData, D2Ques
 
 // A4Q3 Hell's Forge — Q28_PlayerCompleteForgeInAct4: per-party-member completion applied to each member in Act IV (called via ExecuteFunctionForEveryPartyMember from the smash handler). If member hasn't already Completed/RewardAwaits Hell's Forge and is in Act IV: removes both quest items (Hellforge Hammer 'hfh ' and Mephisto's Soulstone 'mss '), sets JustCompleted+RewardAwaits, clears step-states, and increments a counter in the forge quest-specific data.
 void __fastcall Q28_PlayerCompleteForgeInAct4(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_HellsForge, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -349,8 +349,8 @@ BOOL __fastcall OBJOP_A4Q3_HellforgeSmash(D2ObjectOperateFnArg * pOperation) {
     }
 
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
-    D2BitBufferStrc* pQuestBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pQuestBitBuffer, QUEST_HellsForge, QUESTSTATE_Completed);
     /* GetQuestState(QUEST_HellsForge=0x1b, RewardAwaits=1): reward already pending?
                          bail */ if (bQuestState != 1) {
@@ -502,8 +502,8 @@ void __fastcall Q28_SequenceFilter(D2QuestDataStrc * pQuestData) {
 
 // A4Q3 Hell's Forge — Q28_PlayerUpdateForgeState: per-player QuestRecord sync from the internal stateFlag (called via IteratePlayerOrMonsterUnits when the forge progresses). If not already Completed/RewardAwaits: stateFlag 2 -> set Step0x05 (if bGotHammer, i.e. hammer received) else Step0x02; stateFlag 3 -> set Step0x03. Translates the shared internal forge progression into each player's quest-step bits.
 BOOL __fastcall Q28_PlayerUpdateForgeState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_HellsForge, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -652,8 +652,8 @@ void __fastcall Q28_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t nGossipMsgIdx;
     int32_t nTargetClassId;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if (!pQuestArgs->pTarget) {
       nTargetClassId = -1;
     } else {
@@ -777,9 +777,9 @@ void __fastcall Q28_Callback_14_CheckIfGotHammer(D2QuestDataStrc * pQuestData, D
 // A4Q3 Hell's Forge — load/join handler (state slot 0xd): reconstructs in-memory stateFlag from the player's persisted QuestRecord on game load or rejoin. Counts Hellforge Hammer in inventory. If quest not Completed/FinishedInPreviousGame and soulstone absent sets stateFlag=1; otherwise maps Step0x05 -> bGotHammer+prev=4+flag=2, Step0x03 -> prev=1+flag=3, Step0x02 -> prev=1+flag=2. No new quest-record writes.
 void __fastcall Q28_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
     D2QuestDataA4Q3Strc* pQuestSpecificData = pQuestData->pQuestSpecificData.pA4Q3;
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2UnitStrc* pHammerItem = ITEMS::Items::Drop::HasQuestItem(pQuestArgs->pGame, pQuestArgs->pPlayer, 0x20686668);
     if (pHammerItem) {
       pQuestSpecificData->nHammerDropCount++;
