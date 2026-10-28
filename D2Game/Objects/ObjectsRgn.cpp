@@ -230,7 +230,7 @@ D2ObjectRngStrc * __fastcall GetObjectLevelRng(::SGAMEDATA * pGame, eD2LevelId e
     return pGame->pObjectControl->aLevelsRng[eLevelId];
 }
 
-D2SeedStrc * __fastcall GetObjectControlSeed(::SGAMEDATA * pGame, D2RoomStrc * pRoom) {
+D2SeedStrc * __fastcall GetObjectControlSeed(::SGAMEDATA * pGame) {
     return &pGame->pObjectControl->sSeed;
 }
 
@@ -296,10 +296,10 @@ void __fastcall AllocObjectControlSub0x1110(::SGAMEDATA * pGame, D2UnitStrc * pU
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nCoord = pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nCoord = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nCoord = 0;
+    } else {
+      nCoord = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     pNewSub->sCoords.x = nCoord;
