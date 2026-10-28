@@ -260,7 +260,9 @@ void __fastcall Q26_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     bJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_RewardAwaits);
-    if (!bJustCompleted) {
+    if (bJustCompleted) {
+      nGossipMsgIdx = 3;
+    } else {
       int32_t nPlayerGUID = !pQuestArgs->pPlayer ? -1 : pQuestArgs->pPlayer->nUnitGUID;
       bJustCompleted = QUEST_HasPlayerParticipated(pQuestData, nPlayerGUID);
       if (bJustCompleted == 1) {
@@ -270,7 +272,7 @@ void __fastcall Q26_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (bCompleted == 1) {
         return;
       }
-      if (3 < pQuestData->nStateFlag && !bStep0x05Set) {
+      if (4 <= pQuestData->nStateFlag && !bStep0x05Set) {
         return;
       }
       if (!pQuestData->bIsNotIntroduction) {
@@ -281,11 +283,9 @@ void __fastcall Q26_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nGossipMsgIdx == -1) {
         return;
       }
-      if (5 < nGossipMsgIdx) {
+      if (6 <= nGossipMsgIdx) {
         return;
       }
-    } else {
-      nGossipMsgIdx = 3;
     }
 
     AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, nGossipMsgIdx);

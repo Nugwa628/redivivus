@@ -1895,7 +1895,7 @@ int __stdcall UTF8_ToUTF16(short * pszUTF16Out, int nOutMaxChars, uint8_t * pbUT
       pbUTF8In = (uint8_t*)(pszUTF16Out + 1);
       do {
         uByteCount = (uint32_t)gaUTF8ByteCountTable[*pOutStart];
-        if (pOutCur <= pOutStart + uByteCount) {
+        if (pOutStart + uByteCount >= pOutCur) {
           iAccum = -1 - uByteCount;
           goto report_counts;
         }
@@ -1928,12 +1928,12 @@ int __stdcall UTF8_ToUTF16(short * pszUTF16Out, int nOutMaxChars, uint8_t * pbUT
         }
 
         uByteCount = iAccum - gdwUTF8ConversionTab[uByteCount];
-        if (pszUTF16Out + nOutMaxChars <= (short*)pInStart) {
+        if ((short*)pInStart >= pszUTF16Out + nOutMaxChars) {
           output_full:
           iAccum = 1;
           goto report_counts;
         }
-        if (uByteCount < 0x10000) {
+        if (uByteCount <= 0xffff) {
           pbUTF8In += 2;
           *(short int*)pInStart = (short int)uByteCount;
           pInStart += 2;

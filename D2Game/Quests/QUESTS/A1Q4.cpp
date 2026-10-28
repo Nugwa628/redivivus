@@ -658,9 +658,9 @@ static void __stdcall Q04_SpawnDeckardCainNpc(D2RoomStrc * pRoom, ::SGAMEDATA * 
 
         FindSpawnableLocation(pSpawnRoomOut, &ptCainSpawnPos, 2, 0x100, &pSpawnRoomOut, 2, 100);
         if (!pSpawnRoomOut) {
+          pSpawnRoomOut = pRoom;
           ptCainSpawnPos.x = nX;
           ptCainSpawnPos.y = nY;
-          pSpawnRoomOut = pRoom;
         }
 
         iRetry++;

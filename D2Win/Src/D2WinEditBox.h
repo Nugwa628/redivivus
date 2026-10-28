@@ -63,7 +63,6 @@ BOOL __stdcall D2WINEDITBOX_CreateControl(struct D2ControlMsg * pControl, int eF
 BOOL __stdcall Push(struct D2ControlMsg * pControlMsg);
 int __stdcall D2WINEDITBOX_Unused_Placeholder_7(uint32_t dwUnused1, uint32_t dwUnused2, char * szText);
 uint32_t __stdcall D2WINEDITBOX_Unused_Placeholder_8(uint32_t dwUnused1, uint32_t dwUnused2, char * szText);
-void D2WINEDITBOX_UpdateCursorPosition(::D2WinEditBox * pEditBox);
 BOOL __fastcall D2WINEDITBOX_HandleKeyPress(::D2WinEditBox * pEditBox, uint8_t bParam);
 BOOL __fastcall D2WINEDITBOX_HandleKeyRelease(::D2WinEditBox * pEditBox, char cParam);
 int __fastcall D2WINEDITBOX_SetTextWide(::D2WinEditBox * pnParam, uint16_t * wszText);

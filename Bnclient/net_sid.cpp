@@ -2190,87 +2190,84 @@ int32_t __fastcall NET_SID_CLIENT_DecodeCDKeyHash(int * pnParam, uint32_t nParam
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x91);
       exit(-1);
     } else {
-      if (szCDKey) {
-        NET_SID_CLIENT_EncodeCDKeyHash(szCDKey, 0);
-        if (nParam < 9 || (nAlignedLen = nParam - 8 , (nAlignedLen & 0x3f) != 0)) {
-          Fog::Debug::GuardStack();
-          return 0;
-        }
+      if (!szCDKey) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x92);
+        exit(-1);
+      }
 
-        nBlockCounter = 0;
-        while (nAlignedLen) {
-          pSrcCopyPtr = (uint32_t*)pnParam;
-          pEncWorkPtr = (uint32_t*)abEncBlock;
-          for (nLoopIdx = 0x10; nLoopIdx; nLoopIdx--) {
-            *pEncWorkPtr = *pSrcCopyPtr;
-            pSrcCopyPtr++;
-            pEncWorkPtr++;
-          }
-
-          NET_SID_CLIENT_GetSHAState(0, shaState);
-          if (!(nBlockCounter & 7)) {
-            nLoopIdx = 0;
-            do {
-              NET_SID_CLIENT_IDEAEncryptDecrypt(0, (uint16_t*)(abEncBlock + nLoopIdx), (short int*)(abDecBlock + nLoopIdx));
-              nLoopIdx += 8;
-            } while (nLoopIdx < 0x40);
-          } else {
-            pEncBuf = (uint32_t*)abEncBlock;
-            pDecBuf = (uint32_t*)abDecBlock;
-            for (nLoopIdx = 0x10; nLoopIdx; nLoopIdx--) {
-              *pDecBuf = *pEncBuf;
-              pEncBuf++;
-              pDecBuf++;
-            }
-          }
-
-          nKeyByteIdx = 0x3e;
-          nLoopIdx = 0;
-          do {
-            abEncBlock[nLoopIdx] = abDecBlock[nLoopIdx] - *(char*)((int)shaState + (nKeyByteIdx + 1) % 0x14);
-            abEncBlock[nLoopIdx + 1] = abDecBlock[nLoopIdx + 1] - *(char*)((int)shaState + nKeyByteIdx % 0x14);
-            abEncBlock[nLoopIdx + 2] = abDecBlock[nLoopIdx + 2] - *(char*)((int)shaState + (nKeyByteIdx - 1) % 0x14);
-            nRoundKeyIdx = nKeyByteIdx - 2;
-            nKeyByteIdx += -4;
-            abEncBlock[nLoopIdx + 3] = abDecBlock[nLoopIdx + 3] - *(char*)((int)shaState + nRoundKeyIdx % 0x14);
-            nLoopIdx += 4;
-          } while (-2 < nKeyByteIdx);
-
-          if (!(nBlockCounter & 0xf)) {
-            NET_SID_CLIENT_SHA1Compress(0, (uint32_t*)abEncBlock, nullptr);
-          }
-
-          nBlockCounter++;
-          nAlignedLen -= 0x40;
-          pSrcCopyPtr = (uint32_t*)(pnParam + 0x10);
-          pInBufCopy = (uint32_t*)abEncBlock;
-          pWorkBuf = (uint32_t*)pnParam;
-          for (nLoopIdx = 0x10; pnParam = (int*)pSrcCopyPtr , nLoopIdx != 0; nLoopIdx--) {
-            *pWorkBuf = *pInBufCopy;
-            pInBufCopy++;
-            pWorkBuf++;
-          }
-        }
-
-        if ((char)pnParam[1] == '\0') {
-          NET_SID_CLIENT_GetSHAState(0, shaState);
-          if (*pnParam == shaState[0]) {
-            byDataByte = *(uint8_t*)((int)pnParam + 5);
-            NET_SID_CLIENT_ClearIDEAContexts();
-            NET_SID_CLIENT_ClearSHAContexts();
-            Fog::Debug::GuardStack();
-            return nParam - 0x48 + (uint32_t)byDataByte;
-          }
-        }
-
-        NET_SID_CLIENT_ClearIDEAContexts();
-        NET_SID_CLIENT_ClearSHAContexts();
-        Fog::Debug::GuardStack();
+      NET_SID_CLIENT_EncodeCDKeyHash(szCDKey, 0);
+      if (nParam < 9 || (nAlignedLen = nParam - 8 , (nAlignedLen & 0x3f) != 0)) {
         return 0;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x92);
-      exit(-1);
+      nBlockCounter = 0;
+      while (nAlignedLen) {
+        pSrcCopyPtr = (uint32_t*)pnParam;
+        pEncWorkPtr = (uint32_t*)abEncBlock;
+        for (nLoopIdx = 0x10; nLoopIdx; nLoopIdx--) {
+          *pEncWorkPtr = *pSrcCopyPtr;
+          pSrcCopyPtr++;
+          pEncWorkPtr++;
+        }
+
+        NET_SID_CLIENT_GetSHAState(0, shaState);
+        if (!(nBlockCounter & 7)) {
+          nLoopIdx = 0;
+          do {
+            NET_SID_CLIENT_IDEAEncryptDecrypt(0, (uint16_t*)(abEncBlock + nLoopIdx), (short int*)(abDecBlock + nLoopIdx));
+            nLoopIdx += 8;
+          } while (nLoopIdx < 0x40);
+        } else {
+          pEncBuf = (uint32_t*)abEncBlock;
+          pDecBuf = (uint32_t*)abDecBlock;
+          for (nLoopIdx = 0x10; nLoopIdx; nLoopIdx--) {
+            *pDecBuf = *pEncBuf;
+            pEncBuf++;
+            pDecBuf++;
+          }
+        }
+
+        nKeyByteIdx = 0x3e;
+        nLoopIdx = 0;
+        do {
+          abEncBlock[nLoopIdx] = abDecBlock[nLoopIdx] - *(char*)((int)shaState + (nKeyByteIdx + 1) % 0x14);
+          abEncBlock[nLoopIdx + 1] = abDecBlock[nLoopIdx + 1] - *(char*)((int)shaState + nKeyByteIdx % 0x14);
+          abEncBlock[nLoopIdx + 2] = abDecBlock[nLoopIdx + 2] - *(char*)((int)shaState + (nKeyByteIdx - 1) % 0x14);
+          nRoundKeyIdx = nKeyByteIdx - 2;
+          nKeyByteIdx += -4;
+          abEncBlock[nLoopIdx + 3] = abDecBlock[nLoopIdx + 3] - *(char*)((int)shaState + nRoundKeyIdx % 0x14);
+          nLoopIdx += 4;
+        } while (-2 < nKeyByteIdx);
+
+        if (!(nBlockCounter & 0xf)) {
+          NET_SID_CLIENT_SHA1Compress(0, (uint32_t*)abEncBlock, nullptr);
+        }
+
+        nBlockCounter++;
+        nAlignedLen -= 0x40;
+        pSrcCopyPtr = (uint32_t*)(pnParam + 0x10);
+        pInBufCopy = (uint32_t*)abEncBlock;
+        pWorkBuf = (uint32_t*)pnParam;
+        for (nLoopIdx = 0x10; pnParam = (int*)pSrcCopyPtr , nLoopIdx != 0; nLoopIdx--) {
+          *pWorkBuf = *pInBufCopy;
+          pInBufCopy++;
+          pWorkBuf++;
+        }
+      }
+
+      if ((char)pnParam[1] == '\0') {
+        NET_SID_CLIENT_GetSHAState(0, shaState);
+        if (*pnParam == shaState[0]) {
+          byDataByte = *(uint8_t*)((int)pnParam + 5);
+          NET_SID_CLIENT_ClearIDEAContexts();
+          NET_SID_CLIENT_ClearSHAContexts();
+          return nParam - 0x48 + (uint32_t)byDataByte;
+        }
+      }
+
+      NET_SID_CLIENT_ClearIDEAContexts();
+      NET_SID_CLIENT_ClearSHAContexts();
+      return 0;
     }
 }
 
@@ -2310,77 +2307,76 @@ void __fastcall NET_SID_CLIENT_EncodeBuffer(uint32_t * pdwParam, uint32_t nParam
       exit(-1);
     } else {
       nLine = NET_SID_CLIENT_CalculateAlignedBufferSize(nParam);
-      if (nBufferAlignment == nLine) {
-        NET_SID_CLIENT_EncodeCDKeyHash(szCDKey, 1);
-        nChunkSize = 0;
-        nBlockCounter = 0;
-        while (nParam) {
-          nChunkSize = nParam;
-          if (0x3f < nParam) {
-            nChunkSize = 0x40;
-          }
+      if (nBufferAlignment != nLine) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x108);
+        exit(-1);
+      }
 
-          memcpy(abPlainBlock, pdwParam, nChunkSize);
-          if (nChunkSize < 0x40) {
-            memset(abPlainBlock + nChunkSize, 0, 0x40 - nChunkSize);
-          }
+      NET_SID_CLIENT_EncodeCDKeyHash(szCDKey, 1);
+      nChunkSize = 0;
+      nBlockCounter = 0;
+      while (nParam) {
+        nChunkSize = nParam;
+        if (0x40 <= nParam) {
+          nChunkSize = 0x40;
+        }
 
-          NET_SID_CLIENT_GetSHAState(0, shaState);
-          if (!(nBlockCounter & 0xf)) {
-            NET_SID_CLIENT_SHA1Compress(0, (uint32_t*)abPlainBlock, nullptr);
-          }
+        memcpy(abPlainBlock, pdwParam, nChunkSize);
+        if (nChunkSize < 0x40) {
+          memset(abPlainBlock + nChunkSize, 0, 0x40 - nChunkSize);
+        }
 
+        NET_SID_CLIENT_GetSHAState(0, shaState);
+        if (!(nBlockCounter & 0xf)) {
+          NET_SID_CLIENT_SHA1Compress(0, (uint32_t*)abPlainBlock, nullptr);
+        }
+
+        nCopyCount = 0;
+        do {
+          abEncBlock[nCopyCount] = *(char*)((int)shaState + (0x3fU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount];
+          abEncBlock[nCopyCount + 1] = *(char*)((int)shaState + (0x3eU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount + 1];
+          abEncBlock[nCopyCount + 2] = *(char*)((int)shaState + (0x3dU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount + 2];
+          nKeyByteIdx = nCopyCount + 4;
+          abEncBlock[nCopyCount + 3] = *(char*)((int)shaState + (0x3cU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount + 3];
+          nCopyCount = nKeyByteIdx;
+        } while (nKeyByteIdx < 0x40);
+
+        if (!(nBlockCounter & 7)) {
           nCopyCount = 0;
           do {
-            abEncBlock[nCopyCount] = *(char*)((int)shaState + (0x3fU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount];
-            abEncBlock[nCopyCount + 1] = *(char*)((int)shaState + (0x3eU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount + 1];
-            abEncBlock[nCopyCount + 2] = *(char*)((int)shaState + (0x3dU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount + 2];
-            nKeyByteIdx = nCopyCount + 4;
-            abEncBlock[nCopyCount + 3] = *(char*)((int)shaState + (0x3cU - nCopyCount) % 0x14) + abPlainBlock[nCopyCount + 3];
-            nCopyCount = nKeyByteIdx;
-          } while (nKeyByteIdx < 0x40);
-
-          if (!(nBlockCounter & 7)) {
-            nCopyCount = 0;
-            do {
-              NET_SID_CLIENT_IDEAEncryptDecrypt(0, (uint16_t*)(abEncBlock + nCopyCount), (short int*)(abPlainBlock + nCopyCount));
-              nCopyCount += 8;
-            } while (nCopyCount < 0x40);
-          } else {
-            pSrcBlock = (uint32_t*)abEncBlock;
-            pDstBlock = (uint32_t*)abPlainBlock;
-            for (nCopyCount = 0x10; nCopyCount; nCopyCount--) {
-              *pDstBlock = *pSrcBlock;
-              pSrcBlock++;
-              pDstBlock++;
-            }
-          }
-
-          puVar1 = pdwParam + 0x10;
-          nBlockCounter++;
-          nParam -= nChunkSize;
-          pDstPtr = (uint32_t*)abPlainBlock;
-          pNextSrcBlock = pdwParam;
-          for (nCopyCount = 0x10; pdwParam = puVar1 , nCopyCount != 0; nCopyCount--) {
-            *pNextSrcBlock = *pDstPtr;
-            pDstPtr++;
-            pNextSrcBlock++;
+            NET_SID_CLIENT_IDEAEncryptDecrypt(0, (uint16_t*)(abEncBlock + nCopyCount), (short int*)(abPlainBlock + nCopyCount));
+            nCopyCount += 8;
+          } while (nCopyCount < 0x40);
+        } else {
+          pSrcBlock = (uint32_t*)abEncBlock;
+          pDstBlock = (uint32_t*)abPlainBlock;
+          for (nCopyCount = 0x10; nCopyCount; nCopyCount--) {
+            *pDstBlock = *pSrcBlock;
+            pSrcBlock++;
+            pDstBlock++;
           }
         }
 
-        NET_SID_CLIENT_GetSHAState(0, shaFinalState);
-        *pdwParam = shaFinalState[0];
-        *(uint8_t*)(pdwParam + 1) = 0;
-        *(char*)((int)pdwParam + 5) = (char)nChunkSize;
-        *(uint16_t*)((int)pdwParam + 6) = 0;
-        NET_SID_CLIENT_ClearIDEAContexts();
-        NET_SID_CLIENT_ClearSHAContexts();
-        Fog::Debug::GuardStack();
-        return;
+        puVar1 = pdwParam + 0x10;
+        nBlockCounter++;
+        nParam -= nChunkSize;
+        pDstPtr = (uint32_t*)abPlainBlock;
+        pNextSrcBlock = pdwParam;
+        for (nCopyCount = 0x10; pdwParam = puVar1 , nCopyCount != 0; nCopyCount--) {
+          *pNextSrcBlock = *pDstPtr;
+          pDstPtr++;
+          pNextSrcBlock++;
+        }
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x108);
-      exit(-1);
+      NET_SID_CLIENT_GetSHAState(0, shaFinalState);
+      *pdwParam = shaFinalState[0];
+      *(uint8_t*)(pdwParam + 1) = 0;
+      *(char*)((int)pdwParam + 5) = (char)nChunkSize;
+      *(uint16_t*)((int)pdwParam + 6) = 0;
+      NET_SID_CLIENT_ClearIDEAContexts();
+      NET_SID_CLIENT_ClearSHAContexts();
+      return;
     }
 }
 

@@ -15696,7 +15696,7 @@ void __fastcall AITHINK_Fn1_Bighead(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
     }
 
     int32_t nDistanceToTarget = thunk_GetCurrentLifePercentage(pUnit);
-    if (pMonStats->aip[0][pGame->nDifficulty] <= nDistanceToTarget) {
+    if (nDistanceToTarget >= pMonStats->aip[0][pGame->nDifficulty]) {
       if (bEngagedInCombat) {
         AI_ChangeModeAndTargetUnit(pGame, pUnit, 4, pTarget);
         return;
@@ -15738,7 +15738,7 @@ void __fastcall AITHINK_Fn1_Bighead(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
       }
 
       nRoll = D2Client::Archive::UNIT_GetModuloFromSeed(&pUnit->sSeed, 100);
-      if ((int)pMonStats->aip[1][pGame->nDifficulty] <= (int)nRoll) {
+      if ((int)nRoll >= (int)pMonStats->aip[1][pGame->nDifficulty]) {
         PlanNextAiMove(pGame, pUnit, 10);
         return;
       }

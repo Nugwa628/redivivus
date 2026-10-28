@@ -475,7 +475,7 @@ static int TEXT_DrawTextBoxWithBorderCheck(D2TextBoxStrc * pTextBox, int * pnPar
     switch (nBorderType) {
       case 1:
         {
-          if (ScreenSizeX / 2 - 10 < *pnParam) {
+          if (*pnParam > ScreenSizeX / 2 - 10) {
             return 1;
           }
 
@@ -1344,12 +1344,12 @@ void __fastcall TEXT_HandleEventMessagePacket(D2Packet0x5aEventStructure * pMess
       pwszLocale += 2;
     }
 
-    memset(awszName, 0, 16 * sizeof(awszName[0]));
-    memset(awszExtra, 0, 16 * sizeof(awszExtra[0]));
+    for (int i = 0; i < 16; i++) awszName[i] = 0;
+    for (int i = 0; i < 16; i++) awszExtra[i] = 0;
     char* pNameCursor;
     pNameCursor = pszName;
     pNameCursor = pNameCursor + strlen(pNameCursor) + 1;
-    if (0xe < (uint32_t)((int)pNameCursor - (int)(pMessageCtx->szName1 + 1))) {
+    if (0xf <= (uint32_t)((int)pNameCursor - (int)(pMessageCtx->szName1 + 1))) {
       pMessageCtx->szName1[0xf] = '\0';
     }
 

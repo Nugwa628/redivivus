@@ -1344,7 +1344,7 @@ uint32_t __stdcall D2WINEDITBOX_Unused_Placeholder_8(uint32_t dwUnused1, uint32_
     return 0;
 }
 
-void D2WINEDITBOX_UpdateCursorPosition(::D2WinEditBox * pEditBox) {
+static void D2WINEDITBOX_UpdateCursorPosition(::D2WinEditBox * pEditBox) {
     int nScrollStart;
     int nLoopCount;
     uint32_t nCursorPos;

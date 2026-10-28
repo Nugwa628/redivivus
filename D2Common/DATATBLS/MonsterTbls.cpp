@@ -1613,17 +1613,17 @@ BOOL __stdcall MONSTER_CalculateLevelScaledStats(int32_t nMonStatsId, int32_t bI
       }
     }
     if (nStatFlags & 0x20) {
-      if (!pMonStatsTxt->noRatio) {
+      if (pMonStatsTxt->noRatio) {
+        pOutStats->nTH = (int)pMonStatsTxt->aS1TH[nClampedDiff];
+        pOutStats->nS1MinD = (int)pMonStatsTxt->aS1MinD[nClampedDiff];
+        pOutStats->nS1MaxD = (int)pMonStatsTxt->aS1MaxD[nClampedDiff];
+      } else {
         nScaledStat = D2Client::Stats::D2ApplyPercent(pMonLvlEntry->TH[nChampionIdx * 3 + nClampedDiff], (int)pMonStatsTxt->aS1TH[nClampedDiff], 100);
         pOutStats->nTH = nScaledStat;
         nScaledStat = D2Client::Stats::D2ApplyPercent(pMonLvlEntry->DM[nChampionIdx * 3 + nClampedDiff], (int)pMonStatsTxt->aS1MinD[nClampedDiff], 100);
         pOutStats->nS1MinD = nScaledStat;
         nScaledStat = D2Client::Stats::D2ApplyPercent(pMonLvlEntry->DM[nChampionIdx * 3 + nClampedDiff], (int)pMonStatsTxt->aS1MaxD[nClampedDiff], 100);
         pOutStats->nS1MaxD = nScaledStat;
-      } else {
-        pOutStats->nTH = (int)pMonStatsTxt->aS1TH[nClampedDiff];
-        pOutStats->nS1MinD = (int)pMonStatsTxt->aS1MinD[nClampedDiff];
-        pOutStats->nS1MaxD = (int)pMonStatsTxt->aS1MaxD[nClampedDiff];
       }
     }
     if (nStatFlags & 0x40) {

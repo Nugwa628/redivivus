@@ -879,7 +879,7 @@ void __fastcall SKILL_HandleTeleportLanding(D2UnitStrc * pUnit) {
     D2SkillStrc* pSkill = D2Common::Units::GetCurrentSkill(pUnit);
     if (!pSkill) {
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nDestX = pUnit->pPath.pStaticPath->nPosX;
       } else if (!pUnit->pPath.pDynamicPath) {
         nDestX = 0;
@@ -891,7 +891,7 @@ void __fastcall SKILL_HandleTeleportLanding(D2UnitStrc * pUnit) {
     }
     if (!pSkill) {
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nDestY = pUnit->pPath.pStaticPath->nPosY;
       } else if (!pUnit->pPath.pDynamicPath) {
         nDestY = 0;

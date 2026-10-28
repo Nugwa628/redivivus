@@ -57,7 +57,6 @@ void __stdcall SOUND_ShutdownDirectSound();
 // Initializes DirectSound 8 with EAX 3.0 support - creates primary buffer, configures format, tests environment presets
 void __stdcall SOUND_InitDirectSound();
 void __fastcall SOUND_Initialize(uint32_t dwLanguageCode, HWND hWnd);
-int * SOUND_GetAmbientSoundEntry(int32_t nIndex);
 void __fastcall SOUND_InitMusicBuffer(uint32_t dwHwnd);
 void __stdcall SOUND_FreeMusicBuffer();
 void __stdcall SOUND_StopSoundThread();

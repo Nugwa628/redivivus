@@ -359,7 +359,7 @@ DWORD __stdcall AcceptThreadMain(void * lpThreadParam) {
     pQServer = *(D2QServerStrc**)lpThreadParam;
     int nWorkerIndex;
     nWorkerIndex = *(int*)((int)lpThreadParam + 4);
-    D2_FREE(lpThreadParam);
+    Fog::Memory::FreeClientMemory(lpThreadParam, ".\\Src\\QServer\\QServerNT.cpp", 0x10d, 0);
     DWORD dwSleepMs;
     dwSleepMs = GetTickCount();
     int nStopFlag;
@@ -387,9 +387,7 @@ DWORD __stdcall AcceptThreadMain(void * lpThreadParam) {
         if (nStopFlag == -1) {
           goto exit_thread;
         }
-        if (!nStopFlag) {
-          /* DWORD dwMilliseconds for Sleep */ dwNextSweepTick = 0x14;
-        } else {
+        if (nStopFlag) {
           /* LARGE_INTEGER * lpPerformanceCount for QueryPerformanceCounter */ QueryPerformanceCounter(&qpcStart);
           /* HANDLE hThread for GetThreadPriority */ nStopFlag = GetThreadPriority(pQServer->aAcceptThreadHandles[nWorkerIndex]);
           if (nStopFlag != 0x7fffffff) {
@@ -439,6 +437,8 @@ DWORD __stdcall AcceptThreadMain(void * lpThreadParam) {
           dwNextSweepTick = 0;
           dwSleepMs = dwLastSweepTick + 8 + (uint32_t)bRngCarry;
           dwLastSweepTick = dwSleepMs;
+        } else {
+          /* DWORD dwMilliseconds for Sleep */ dwNextSweepTick = 0x14;
         }
       } else {
         dwNextSweepTick = 10;
@@ -453,7 +453,6 @@ DWORD __stdcall AcceptThreadMain(void * lpThreadParam) {
     LeaveCriticalSection(&pQServer->csClientLifecycle);
     exit_thread:
     ErrorManager::StubHook2();
-    Debug::GuardStack();
     return 1;
 }
 

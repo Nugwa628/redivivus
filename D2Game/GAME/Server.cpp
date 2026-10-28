@@ -888,7 +888,6 @@ BOOL __fastcall FindMe_6E_Handler(int32_t nParam) {
     char szPlayerName[16];
     uint32_t nSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     BOOL bGotName = Clients::NET_D2GS_SERVER_GetPlayerNameByClientId(nParam, szPlayerName);
-    Fog::Debug::GuardStack();
     return (uint32_t)(bGotName != 0);
 }
 
@@ -991,7 +990,6 @@ void __fastcall NET_D2GS_SERVER_ProcessClientMessage_System(char * pBytes, int32
           D2Net::Game::Server::NET_D2GS_SERVER_SendPacketToClient(2, nClientId, szSendBuffer, 0x10);
           D2Net::Game::Server::QSERVER_KillConnection(nClientId);
           /* LONG * lpAddend for InterlockedDecrement */ InterlockedDecrement((LONG*)&lpAddend_00883d64);
-          Fog::Debug::GuardStack();
           return;
           case -4:
             D2Net::Game::Server::NET_QServer_FindIpAddressByClientIdForQServer(nClientId, szSendBuffer + 0x10, 0x10);
@@ -1003,7 +1001,6 @@ void __fastcall NET_D2GS_SERVER_ProcessClientMessage_System(char * pBytes, int32
       }
     }
 
-    Fog::Debug::GuardStack();
 }
 
 // PACKET RECEIVE ENTRY: Server processes incoming client packets.
@@ -2102,7 +2099,6 @@ void __stdcall RequestHostedGames(int32_t nParam) {
     } while ((int)pTokenCursor < (uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken)));
 
     ServerCmd::SERVERCMD_SendBufferToClient(nParam, 0xffff, 0, "");
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall NET_RequestHostedGames(int32_t nParam) {

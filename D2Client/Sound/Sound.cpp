@@ -97,18 +97,18 @@ void SOUND_LocalizeSoundPath(char * szFormat, uint32_t * pszOutPath) {
     }
 
     uint32_t dwLanguageCode = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
-    if (!dwLanguageCode) {
-      sprintf((char*)pszOutPath, szFormat, "DATA\\LOCAL", "CHI");
-      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, (char*)pszOutPath, 0, (void**)&pFile);
-      if (bOpened) {
-        Storm::Source::SFile::SFileCloseFile(pFile);
-      }
-    } else {
+    if (dwLanguageCode) {
       sprintf((char*)pszOutPath, szFormat, "DATA\\LOCAL", "ENG");
       bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, (char*)pszOutPath, 0, (void**)&pFile);
       if (bOpened) {
         Storm::Source::SFile::SFileCloseFile(pFile);
         return;
+      }
+    } else {
+      sprintf((char*)pszOutPath, szFormat, "DATA\\LOCAL", "CHI");
+      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, (char*)pszOutPath, 0, (void**)&pFile);
+      if (bOpened) {
+        Storm::Source::SFile::SFileCloseFile(pFile);
       }
     }
 }
@@ -5339,7 +5339,7 @@ int32_t __fastcall SOUND_CalculateDistance(int32_t pThis, int32_t nExcludeChanne
     return (int32_t)nChannelData;
 }
 
-void __stdcall SOUND_CalculateUnitDirection(D2UnitStrc * pUnit, int32_t nSoundId, float * pfDirection) {
+static void __stdcall SOUND_CalculateUnitDirection(D2UnitStrc * pUnit, int32_t nSoundId, float * pfDirection) {
     int32_t nOverrideX;
     int32_t nOverrideY;
     POINT ptPlayer;

@@ -60,8 +60,6 @@ int32_t __stdcall ITEMMODS_GetQualityField3(int32_t nParam1, int32_t nParam2, in
 void __stdcall ITEMMOD_MaximizeStatForEnhanced(eD2UnitStat eEnhancedProp, struct D2UnitStrc * pUnit);
 // Rolls random value from [fmin, fmax] and applies to stat. Classic: exclusive upper bound. Expansion: inclusive upper bound (can hit max!). Uses item seed for deterministic RNG. Scales damage/poison values (shift left 8 bits).
 int32_t __stdcall ITEMMOD_ApplyRandomStatValue(struct D2UnitStrc * pUnit, int32_t nParam1, struct D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, int32_t nParam2, int32_t nParam3, int32_t nParam4, uint32_t nParam, struct D2SetsTxtFStrc * pProperty);
-// Core property-to-stat conversion. Applies stat value to unit, optionally maximizing enhanced stats and handling value removal.
-int32_t __stdcall PropertyFunc_SimpleStat(int32_t nParam1, struct D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3, int32_t nParam4, int32_t nParam5, struct D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, uint32_t nParam);
 // Property-to-stat conversion with additional context parameter for situational stat application. Reads scaled value from pPropData+4, optionally maximizes enhanced-damage stats, gets or creates the stat list (using pUnit as context for ITEMMOD_GetOrCreateStatList), then adds or negates the stat value. Halts on stat list failure.
 int32_t __fastcall PropertyFunc_SimpleStatWithContext(int32_t nType, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItemUnit, struct D2SetsTxtFStrc * pProperty, eD2UnitStat eStatCode, int32_t nParam2, int32_t nParam3, uint32_t nParam, int32_t nContext);
 // Wrapper for simple stat application via PropertyFunc_SimpleStat.

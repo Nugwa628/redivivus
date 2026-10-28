@@ -511,7 +511,7 @@ int32_t __stdcall ITEMMOD_ApplyRandomStatValue(D2UnitStrc * pUnit, int32_t nPara
 }
 
 // Core property-to-stat conversion. Applies stat value to unit, optionally maximizing enhanced stats and handling value removal.
-int32_t __stdcall PropertyFunc_SimpleStat(int32_t nParam1, D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3, int32_t nParam4, int32_t nParam5, D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, uint32_t nParam) {
+static int32_t __stdcall PropertyFunc_SimpleStat(int32_t nParam1, D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3, int32_t nParam4, int32_t nParam5, D2UnitStrc * pUnit2, eD2UnitStat eUnitStat, uint32_t nParam) {
     int nBaseValue;
     if (nParam4 || nParam1 == 1) {
       ITEMMOD_MaximizeStatForEnhanced(eUnitStat, pUnit2);
@@ -548,7 +548,7 @@ int32_t __fastcall PropertyFunc_SimpleStatWithContext(int32_t nType, D2UnitStrc 
       if (!pProperty) {
         return 0;
       }
-      if (0xf < (int)eStatCode && (int)eStatCode < 0x13 || nType == 1) {
+      if (0x10 <= (int)eStatCode && (int)eStatCode <= 0x12 || nType == 1) {
         ITEMMOD_MaximizeStatForEnhanced(eStatCode, pItemUnit);
       }
 
@@ -994,8 +994,8 @@ int32_t __fastcall PropertyFunc_EnhancedDamage(int32_t nType, D2UnitStrc * pUnit
           nRolled++;
         }
 
-        pSeed = Items::GetItemSeed(pItemUnit);
-        nRolled = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nRolled);
+
+        nRolled = D2Client::Archive::RANDOM_RandomNumberSelector(Items::GetItemSeed(pItemUnit), nRolled);
         pProperty = (D2SetsTxtFStrc*)((uintptr_t)&nRangeLow->fcode + nRolled);
       }
       if (!pUnit || pUnit->eUnitType != UNIT_ITEM) {
@@ -1327,31 +1327,31 @@ int32_t __fastcall ITEMMOD_ApplyTripleStat(int32_t nType, D2UnitStrc * pUnit, D2
     ITEMMOD_ScaleValueForStatType((int*)&eStatCode, eMaxStat);
     ITEMMOD_ScaleValueForStatType((int*)&pProperty, eLenStat);
     D2StatListExStrc* pStatList = ITEMMOD_GetOrCreateStatList(pItemUnit, nParam3, nParam, pUnit);
-    if (pStatList) {
-      int nMinVal;
-      nMinVal = nLenVal;
-      if (nParam2) {
-        nMinVal = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, eMinStat, 0);
-        nBaseValue = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, eMinStat + UNITSTAT_energy, 0);
-        eStatCode = -nBaseValue;
-        nBaseValue = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, eMinStat + UNITSTAT_dexterity, 0);
-        pProperty = (D2SetsTxtFStrc*)-nBaseValue;
-        nMinVal = -nMinVal;
-      }
+    if (!pStatList) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4ad);
+      exit(-1);
+    }
 
-      Stats::StatsEx::STATLIST_AddStatValue(pStatList, eMinStat, nMinVal, 0);
-      Stats::StatsEx::STATLIST_AddStatValue(pStatList, eMinStat + UNITSTAT_energy, eStatCode, 0);
-      Stats::StatsEx::STATLIST_AddStatValue(pStatList, eMinStat + UNITSTAT_dexterity, (int32_t)pProperty, 0);
-      if (eMinStat != UNITSTAT_poisonmindam) {
-        return 1;
-      }
+    int nMinVal;
+    nMinVal = nLenVal;
+    if (nParam2) {
+      nMinVal = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, eMinStat, 0);
+      nBaseValue = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, eMinStat + UNITSTAT_energy, 0);
+      eStatCode = -nBaseValue;
+      nBaseValue = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, eMinStat + UNITSTAT_dexterity, 0);
+      pProperty = (D2SetsTxtFStrc*)-nBaseValue;
+      nMinVal = -nMinVal;
+    }
 
-      Stats::StatsEx::STATLIST_AddStatValue(pStatList, UNITSTAT_poison_count, 1, 0);
+    Stats::StatsEx::STATLIST_AddStatValue(pStatList, eMinStat, nMinVal, 0);
+    Stats::StatsEx::STATLIST_AddStatValue(pStatList, eMinStat + UNITSTAT_energy, eStatCode, 0);
+    Stats::StatsEx::STATLIST_AddStatValue(pStatList, eMinStat + UNITSTAT_dexterity, (int32_t)pProperty, 0);
+    if (eMinStat != UNITSTAT_poisonmindam) {
       return 1;
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4ad);
-    exit(-1);
+    Stats::StatsEx::STATLIST_AddStatValue(pStatList, UNITSTAT_poison_count, 1, 0);
+    return 1;
 }
 
 // Property function for +X to Skill Y bonus. Reads skill ID from pPropEntry+4 and rolls level value from pPropEntry+8/C range (inclusive upper bound for expansion items). Adds UNITSTAT_item_singleskill with skill ID as layer to the item's stat list. Returns 0 if skill ID out of range or stat list unavailable.

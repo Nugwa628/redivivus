@@ -535,7 +535,7 @@ D2RoomExStrc * __fastcall GetRandomRoomExFromLevel(D2DrlgLevelStrc * pLevel) {
       } else {
         sSeed = (D2SeedStrc)((uint64_t)nSeedLowOld * 0x6ac690c5 + nSeedLowCopy);
         pLevel->sSeed = sSeed;
-        nSelectedRoom = (uint32_t)(((uint64_t)d2_bits_of(sSeed) & 0xffffffff) % (uint64_t)nSelectedRoom);
+        nSelectedRoom = (uint32_t)(sSeed.nSeedLow % nSelectedRoom);
       }
     }
 
@@ -647,7 +647,7 @@ void __stdcall DRLGMAZE_ExpandRoomsWithPresets(D2DrlgLevelStrc * pLevel, uint32_
 }
 
 // Initialises the Throne of Destruction (Baal's chamber) level layout. Advances the first room's seed to pick a random direction (0-3), looks up two preset IDs from the gaBaalChamberPresets table for that direction, allocates and assigns them via DRLGMAZE_AllocRoomExAndPickPreset, then expands surrounding rooms with presets.
-void SetupBaalChamber(D2DrlgLevelStrc * pLevel) {
+static void SetupBaalChamber(D2DrlgLevelStrc * pLevel) {
     // Static local variables (originally global data)
     static uint32_t gaBaalChamberPresets[24] = {
     0x41e,
