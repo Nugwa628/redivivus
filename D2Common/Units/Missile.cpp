@@ -486,21 +486,21 @@ static BOOL __stdcall HasBonusStats(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
 // Accumulates all elemental damage stats from pUnit into pMissileDamageData, left-shifted by nShift. Reads fire/lightning/magic/cold/poison/life-drain/mana-drain/burning min+max stats and their durations from pUnit via GetStatUnsignedValue, then adds each (shifted) value to the corresponding field of D2MissileDamageDataStrc. Poison length uses skill_poison_override_length if present, otherwise poisonlength+poison_count. Custom register calling convention: pMissileDamageData=ESI, pUnit=EDI, nShift=BL.
 static void AddStatsToDamage(D2MissileDamageDataStrc * pMissileDamageData, D2UnitStrc * pUnit, BYTE nShift) {
     int nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_firemindam, 0);
-    pMissileDamageData->nFireMinDamage += nStatValue << (nShift);
+    pMissileDamageData->nFireMinDamage += nStatValue << (nShift & 0x1f);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_firemaxdam, 0);
-    pMissileDamageData->nFireMaxDamage += nStatValue << (nShift);
+    pMissileDamageData->nFireMaxDamage += nStatValue << (nShift & 0x1f);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_lightmindam, 0);
-    pMissileDamageData->nLightMinDamage += nStatValue << (nShift);
+    pMissileDamageData->nLightMinDamage += nStatValue << (nShift & 0x1f);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_lightmaxdam, 0);
-    pMissileDamageData->nLightMaxDamage += nStatValue << (nShift);
+    pMissileDamageData->nLightMaxDamage += nStatValue << (nShift & 0x1f);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_magicmindam, 0);
-    pMissileDamageData->nMagicMinDamage += nStatValue << (nShift);
+    pMissileDamageData->nMagicMinDamage += nStatValue << (nShift & 0x1f);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_magicmaxdam, 0);
-    pMissileDamageData->nMagicMaxDamage += nStatValue << (nShift);
+    pMissileDamageData->nMagicMaxDamage += nStatValue << (nShift & 0x1f);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_coldmindam, 0);
-    pMissileDamageData->nColdMinDamage += nStatValue << (nShift);
+    pMissileDamageData->nColdMinDamage += nStatValue << (nShift & 0x1f);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_coldmaxdam, 0);
-    pMissileDamageData->nColdMaxDamage += nStatValue << (nShift);
+    pMissileDamageData->nColdMaxDamage += nStatValue << (nShift & 0x1f);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_coldlength, 0);
     pMissileDamageData->nColdLength += nStatValue;
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_poisonmindam, 0);
@@ -722,17 +722,17 @@ int32_t __stdcall GetMinDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int32_t 
     int32_t nLevDamBonus = Skills::SKILLS_GetValueByLevelBreakpoints(nLevel, &pMissileTxt->MinLevDam1);
     int nValue = nLevDamBonus + pMissileTxt->MinDamage;
     if (pMissileTxt->DmgSymPerCalc == -1) {
-      return nValue << (pMissileTxt->HitShift);
+      return nValue << (pMissileTxt->HitShift & 0x1fU);
     }
 
     uint32_t nPercent = MISSILE_EvalMissileCalc(pUnit, pOwner, pMissileTxt->DmgSymPerCalc, nMissileId, nLevel);
     if (!nPercent) {
-      return nValue << (pMissileTxt->HitShift);
+      return nValue << (pMissileTxt->HitShift & 0x1fU);
     }
 
     nLevDamBonus = D2Client::Stats::D2ApplyPercent(nValue, nPercent, 100);
     nValue += nLevDamBonus;
-    return nValue << (pMissileTxt->HitShift);
+    return nValue << (pMissileTxt->HitShift & 0x1fU);
 }
 
 // Returns the maximum physical damage for a missile at a given level. Mirrors GetMinDamage but uses MaxDamage + MaxLevDam1 from D2MissilesTxt. Optionally scales by DmgSymPerCalc, then shifts by HitShift. Returns 0 for non-missile units or invalid missile IDs.
@@ -762,17 +762,17 @@ int32_t __stdcall GetMaxDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int32_t 
     int32_t nLevDamBonus = Skills::SKILLS_GetValueByLevelBreakpoints(nLevel, &pMissileTxt->MaxLevDam1);
     int nValue = nLevDamBonus + pMissileTxt->MaxDamage;
     if (pMissileTxt->DmgSymPerCalc == -1) {
-      return nValue << (pMissileTxt->HitShift);
+      return nValue << (pMissileTxt->HitShift & 0x1fU);
     }
 
     uint32_t nPercent = MISSILE_EvalMissileCalc(pUnit, pOwner, pMissileTxt->DmgSymPerCalc, nMissileId, nLevel);
     if (!nPercent) {
-      return nValue << (pMissileTxt->HitShift);
+      return nValue << (pMissileTxt->HitShift & 0x1fU);
     }
 
     nLevDamBonus = D2Client::Stats::D2ApplyPercent(nValue, nPercent, 100);
     nValue += nLevDamBonus;
-    return nValue << (pMissileTxt->HitShift);
+    return nValue << (pMissileTxt->HitShift & 0x1fU);
 }
 
 uint8_t __stdcall GetElemTypeFromMissileId(int32_t nMissileId) {
@@ -810,17 +810,17 @@ int32_t __stdcall GetMinElemDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int3
     int32_t nLevDamBonus = Skills::SKILLS_GetValueByLevelBreakpoints(nLevel, &pMissileTxt->MinELev1);
     int nValue = nLevDamBonus + pMissileTxt->EMin;
     if (pMissileTxt->EDmgSymPerCalc == -1) {
-      return nValue << (pMissileTxt->HitShift);
+      return nValue << (pMissileTxt->HitShift & 0x1fU);
     }
 
     uint32_t nPercent = MISSILE_EvalMissileCalc(pUnit, pOwner, pMissileTxt->EDmgSymPerCalc, nMissileId, nLevel);
     if (!nPercent) {
-      return nValue << (pMissileTxt->HitShift);
+      return nValue << (pMissileTxt->HitShift & 0x1fU);
     }
 
     nLevDamBonus = D2Client::Stats::D2ApplyPercent(nValue, nPercent, 100);
     nValue += nLevDamBonus;
-    return nValue << (pMissileTxt->HitShift);
+    return nValue << (pMissileTxt->HitShift & 0x1fU);
 }
 
 // Returns the maximum elemental damage for a missile at a given level. Mirrors GetMinElemDamage but uses EMax + MaxELev1 from D2MissilesTxt. Optionally scales by EDmgSymPerCalc, then shifts by HitShift. Returns 0 for non-missile units or invalid IDs.
@@ -850,17 +850,17 @@ int32_t __stdcall GetMaxElemDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int3
     int32_t nLevDamBonus = Skills::SKILLS_GetValueByLevelBreakpoints(nLevel, &pMissileTxt->MaxELev1);
     int nValue = nLevDamBonus + pMissileTxt->EMax;
     if (pMissileTxt->EDmgSymPerCalc == -1) {
-      return nValue << (pMissileTxt->HitShift);
+      return nValue << (pMissileTxt->HitShift & 0x1fU);
     }
 
     uint32_t nPercent = MISSILE_EvalMissileCalc(pUnit, pOwner, pMissileTxt->EDmgSymPerCalc, nMissileId, nLevel);
     if (!nPercent) {
-      return nValue << (pMissileTxt->HitShift);
+      return nValue << (pMissileTxt->HitShift & 0x1fU);
     }
 
     nLevDamBonus = D2Client::Stats::D2ApplyPercent(nValue, nPercent, 100);
     nValue += nLevDamBonus;
-    return nValue << (pMissileTxt->HitShift);
+    return nValue << (pMissileTxt->HitShift & 0x1fU);
 }
 
 int32_t __stdcall GetElementalLength(int32_t nUnused, D2UnitStrc * pUnit, int32_t nMissileId, int32_t nLevel) {

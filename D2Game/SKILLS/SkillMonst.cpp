@@ -135,13 +135,12 @@ BOOL __fastcall Skills_SrvDoFunc_083_MonsterMeleeAttack(::SGAMEDATA * pGame, D2U
     return bResult;
 }
 
-int32_t __fastcall SKILLMONST_SrvStFn43_MaggotEgg(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
+void __fastcall SKILLMONST_SrvStFn43_MaggotEgg(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     if (pUnit) {
       pUnit->eUnitFlags &= ~(UNITFLAG_ISVALIDTARGET | UNITFLAG_CANBEATTACKED | UNITFLAG_TARGETABLE);
     }
 
     D2Common::PATH::DynamicPath::PATH_SetCorpseCollision(pUnit, 1);
-    return 1;
 }
 
 // SrvDoFunc 84: spawns up to calc[0] minions of the summon class around the caster (expanding spawn radius 1-4 on failure), marks each NOXP, then kills the caster via SERVER_KillMonster (self-destruct on cast). Used by exploding-suicide minion monsters.
@@ -402,10 +401,10 @@ BOOL __fastcall SKILLMONST_SrvStFn46_AndrialSpray(::SGAMEDATA * pGame, D2UnitStr
     eD2UnitType eUnitType = pTarget->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nTargetX = pTarget->pPath.pStaticPath->nPosX;
-    } else if (pTarget->pPath.pDynamicPath) {
-      nTargetX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
-    } else {
+    } else if (!pTarget->pPath.pDynamicPath) {
       nTargetX = 0;
+    } else {
+      nTargetX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
     }
 
     D2Common::Skills::SKILL_SetParam1(pSkill, nTargetX);
@@ -1293,7 +1292,7 @@ BOOL __fastcall Skills_SrvDoFunc_096_HealTarget(::SGAMEDATA * pGame, D2UnitStrc 
 }
 
 // Resurrects a dead monster or player unit: restores HP to max, sets ISVALIDTARGET/CANBEATTACKED/TARGETABLE flags, and re-registers collision in the room. For monsters also sets NOXP+NOTC flags, triggers AI think, decrements kill count, attaches quest hooks, and sets monster collision type. Returns 1 on success, 0 if the unit has no room.
-int __fastcall SKILLMONST_ResurrectUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+void __fastcall SKILLMONST_ResurrectUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     int nX;
     eD2CollisionShapeType nCollisionWidth;
     int32_t iVar1;
@@ -1301,11 +1300,11 @@ int __fastcall SKILLMONST_ResurrectUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
     eD2UnitType eUnitType;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (!pRoom) {
-      return 0;
+      return;
     }
 
-    int nMaxHp = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxhp, 0);
-    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hitpoints, nMaxHp, 0);
+    int nMaxHp;
+    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hitpoints, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxhp, 0), 0);
     if (pUnit) {
       pUnit->eUnitFlags |= UNITFLAG_ISVALIDTARGET | UNITFLAG_CANBEATTACKED | UNITFLAG_TARGETABLE;
       if (pUnit->eUnitType == UNIT_MONSTER) {
@@ -1333,8 +1332,9 @@ int __fastcall SKILLMONST_ResurrectUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
           nMaxHp = 0;
         }
 
-        D2Common::Collision::AddCollision_Type(pRoom, nMaxHp, nPosY, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), 0x100);
-        return 1;
+        iVar1 = 0x100;
+        D2Common::Collision::AddCollision_Type(pRoom, nMaxHp, nPosY, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), iVar1);
+        return;
       }
     }
 
@@ -1358,8 +1358,8 @@ int __fastcall SKILLMONST_ResurrectUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
       nX = 0;
     }
 
-    D2Common::Collision::AddCollision_Type(pRoom, nX, nMaxHp, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), 0x80);
-    return 1;
+    iVar1 = 0x80;
+    D2Common::Collision::AddCollision_Type(pRoom, nX, nMaxHp, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), iVar1);
 }
 
 // Server-side skill do-func (index 097) that resurrects the caster's targeted dead monster. Validates the target is dead and not immune, checks collision at the corpse's tile, calls SKILLMONST_ResurrectUnit, triggers the revived monster's AI lifecycle transition (MONSTERAI_ExecuteLifecycleTransition), and applies the skill's srvoverlay visual. Returns 1 on success, 0 on any validation failure.

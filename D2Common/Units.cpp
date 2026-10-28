@@ -398,10 +398,10 @@ int32_t __stdcall GetAbsoluteXDistance(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) 
     eUnitType = pUnit2->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX2 = pUnit2->pPath.pStaticPath->nPosX;
-    } else if (pUnit2->pPath.pDynamicPath) {
-      nX2 = PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit2->pPath.pDynamicPath) {
       nX2 = 0;
+    } else {
+      nX2 = PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
     }
 
     int32_t nAbsDiff = nX1 - nX2;
@@ -428,10 +428,10 @@ int32_t __stdcall GetAbsoluteYDistance(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) 
     eUnitType = pUnit2->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY2 = pUnit2->pPath.pStaticPath->nPosY;
-    } else if (pUnit2->pPath.pDynamicPath) {
-      nY2 = PATH::DynamicPath::GetYPos(pUnit2->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit2->pPath.pDynamicPath) {
       nY2 = 0;
+    } else {
+      nY2 = PATH::DynamicPath::GetYPos(pUnit2->pPath.pDynamicPath);
     }
 
     int32_t nAbsDiff = nY1 - nY2;
@@ -1227,7 +1227,12 @@ static int32_t GetDiminishedStat(D2UnitStrc * pUnit, int32_t nParam) {
 
 void __stdcall SetAnimationSpeed(D2UnitStrc * pUnit, int32_t nSpeed) {
     uint32_t nClampedSpeed = nSpeed <= 0 ? 0 : nSpeed;
-    pUnit->nAnimSpeed = (short int)((int)nClampedSpeed < 0x7fff ? nClampedSpeed : 0x7fff);
+    if ((int)nClampedSpeed < 0x7fff) {
+      pUnit->nAnimSpeed = (short int)nClampedSpeed;
+      return;
+    }
+
+    pUnit->nAnimSpeed = 0x7fff;
 }
 
 uint32_t __stdcall IsAtEndOfFrameCycle(D2UnitStrc * pUnit) {
@@ -1670,7 +1675,7 @@ void __stdcall FreePlayerData(D2PoolManagerStrc * pMemory, D2UnitStrc * pUnit) {
         Waypoints::Free(pMemory, *(D2WaypointStrc**)(pUnit->pUnitData.pUnitDataPlayer->szCharName + iActIdx));
         iActIdx += 4;
       } while (iActIdx < 0x28);
-      Txt::Cube::FIELDTBLS_FreePlayerData_STUB(pUnit);
+      Txt::Cube::FIELDTBLS_FreePlayerData_STUB();
       Fog::Memory::FreeServerMemory(pMemory, pUnit->pUnitData.pUnitDataPlayer, ".\\UNITS\\Units.cpp", 0xf76, 0);
       pUnit->pUnitData.pUnitDataPlayer = 0;
       return;
@@ -2060,7 +2065,7 @@ int32_t __stdcall GetMeleeRange(D2UnitStrc * pUnit) {
 }
 
 // Tests whether the line segment from unit (x,y) with radius size to target (x2,y2) with radius size2 is blocked by room collision. Clamps both radii to 2, computes Manhattan-distance proximity rejection, then adjusts endpoints by the respective radii along the dominant axis before delegating to Collision::TestCollision with the supplied eCollisionFlag. Returns TRUE if a collision is detected.
-BOOL __fastcall TestCollision(int32_t x, int32_t size, int32_t x2, int32_t y, int32_t size2, int32_t y2, D2RoomStrc * pRoom, int32_t eCollisionFlag) {
+BOOL __stdcall TestCollision(int32_t x, int32_t size, int32_t x2, int32_t y, int32_t size2, int32_t y2, D2RoomStrc * pRoom, int32_t eCollisionFlag) {
     POINT ptTarget;
     POINT ptUnit;
     int nOffsetY2;
@@ -2767,10 +2772,10 @@ BOOL __stdcall IsObjectInInteractRange(D2UnitStrc * pUnit, D2UnitStrc * pObject)
     eUnitType = pObject->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nObjX = pObject->pPath.pStaticPath->nPosX;
-    } else if (pObject->pPath.pDynamicPath) {
-      nObjX = PATH::DynamicPath::GetXPos(pObject->pPath.pDynamicPath);
-    } else {
+    } else if (!pObject->pPath.pDynamicPath) {
       nObjX = 0;
+    } else {
+      nObjX = PATH::DynamicPath::GetXPos(pObject->pPath.pDynamicPath);
     }
 
     eUnitType = pObject->eUnitType;
