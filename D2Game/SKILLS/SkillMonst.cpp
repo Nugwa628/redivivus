@@ -149,12 +149,8 @@ BOOL __fastcall Skills_SrvDoFunc_084_SpawnMinionsAndSuicide(::SGAMEDATA * pGame,
     int nRadius;
     uint32_t nSpawnedCount;
     eD2MonsterAnimMode eAnimMode;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills;
-    if (!(pSkillTxt + eSkill)) {
+    D2SkillsTxt* pSkillTxt = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillTxt) {
       return 0;
     }
 
@@ -170,7 +166,7 @@ BOOL __fastcall Skills_SrvDoFunc_084_SpawnMinionsAndSuicide(::SGAMEDATA * pGame,
     }
 
     pUnit->nSeqAnimSpeed = 0;
-    int32_t nMaxSpawn = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxt[eSkill].calc[0], eSkill, nSkillLvl);
+    int32_t nMaxSpawn = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxt->calc[0], eSkill, nSkillLvl);
     if (0 < nMaxSpawn) {
       D2UnitStrc* pSpawned;
       pSpawned = Monster::Create::SpawnMonsterAtUnit(pGameSaved, pUnit, nClassId, eAnimMode, -1, 0);
@@ -789,12 +785,8 @@ BOOL __fastcall SKILLMONST_SrvStFn49_NestSpawn(::SGAMEDATA * pGame, D2UnitStrc *
 // SrvDoFunc 91: spawns a monster at coordinates stored in skill params 1-4 (class, X, Y, anim mode). Fires ENDANIM timer, clears uninterruptable state, removes collision at the spawn tile, spawns the monster, marks it NOXP|NOTC, and applies sumoverlay. Returns FALSE if room or coords invalid.
 BOOL __fastcall Skills_SrvDoFunc_091_SpawnMinionAtCoords(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     short int nOverlayId;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillsTxtBase + eSkill)) {
+    D2SkillsTxt* pSkillsTxtBase = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsTxtBase) {
       return 0;
     }
 
@@ -823,7 +815,7 @@ BOOL __fastcall Skills_SrvDoFunc_091_SpawnMinionAtCoords(::SGAMEDATA * pGame, D2
     }
 
     pUnit_00->eUnitFlags |= UNITFLAG_NOXP | UNITFLAG_NOTC;
-    nOverlayId = pSkillsTxtBase[eSkill].sumoverlay;
+    nOverlayId = pSkillsTxtBase->sumoverlay;
     if (!(0 <= nOverlayId && (int)nOverlayId < sgptDataTable->nTxtOverlaySize)) {
       return 1;
     }
@@ -996,12 +988,8 @@ BOOL __fastcall SKILLMONST_SrvStFn52_Emerge(::SGAMEDATA * pGame, D2UnitStrc * pU
 }
 
 BOOL __fastcall SKILLMONST_SrvStFn53_MonInferno(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillsTxtBase + eSkill)) {
+    D2SkillsTxt* pSkillsTxtBase = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsTxtBase) {
       return 0;
     }
 
@@ -1010,7 +998,7 @@ BOOL __fastcall SKILLMONST_SrvStFn53_MonInferno(::SGAMEDATA * pGame, D2UnitStrc 
       return 0;
     }
 
-    int nDuration = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxtBase[eSkill].calc[1], eSkill, nSkillLvl);
+    int nDuration = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxtBase->calc[1], eSkill, nSkillLvl);
     if (nDuration < 1) {
       nDuration = 1;
     }

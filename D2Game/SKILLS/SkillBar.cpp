@@ -242,12 +242,8 @@ static uint32_t __stdcall SKILLAMZ_CreateLightningFuryBolts(int32_t nParam1, int
 
 // Find Potion SrvDoFunc. Gets the target corpse, validates it is revive-eligible and not already flagged STATE_corpse_noselect, marks it no-select, rolls the unit seed mod 100 against calc[0] drop chance, and on success resolves a potion item code via SKILLAMZ_CreateLightningFuryBolts then drops it via SKILLS_DropItemByCode. Returns 1 if the corpse was processed.
 BOOL __fastcall Skills_SrvDoFunc_069_FindPotion(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxt = sgptDataTable->pTxtSkills;
-    if (!(pSkillsTxt + eSkill)) {
+    D2SkillsTxt* pSkillsTxt = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsTxt) {
       return 0;
     }
 
@@ -268,7 +264,7 @@ BOOL __fastcall Skills_SrvDoFunc_069_FindPotion(::SGAMEDATA * pGame, D2UnitStrc 
 
     D2Common::DATATBLS::ItemStats::SetState(pCorpse, STATE_corpse_noselect, 1);
     D2Common::Unit::ROOM_LinkUnitToUpdateList(pCorpse);
-    int32_t nDropChance = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxt[eSkill].calc[0], eSkill, nSkillLvl);
+    int32_t nDropChance = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxt->calc[0], eSkill, nSkillLvl);
     nRoll = D2Client::Archive::UNIT_GetModuloFromSeed(&pUnit->sSeed, 100);
     if ((int)nRoll >= nDropChance) {
       return 1;
@@ -562,12 +558,8 @@ BOOL __fastcall Skills_SrvDoFunc_072_FindItem(::SGAMEDATA * pGame, D2UnitStrc * 
 
 // Server do-func for Barbarian Double Throw (skill 74). Gets the active throwing weapon, reads its missile type, and spawns a missile via CreatingAMissile (or SKILLS_CreateMissileFromUnit for potion-type weapons). Applies to-hit (UNITSTAT_tohit) and damage-percent bonus (calc[0], UNITSTAT_damagepercent) stats to the created missile unit.
 BOOL __fastcall Skills_SrvDoFunc_074_DoubleThrow(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxt = sgptDataTable->pTxtSkills;
-    if (!(pSkillsTxt + eSkill)) {
+    D2SkillsTxt* pSkillsTxt = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsTxt) {
       return 0;
     }
 
@@ -594,7 +586,7 @@ BOOL __fastcall Skills_SrvDoFunc_074_DoubleThrow(::SGAMEDATA * pGame, D2UnitStrc
     int16_t nLayer = 0;
     bIsPotion = D2Common::Skills::SKILLS_CalcToHit(pUnit, eSkill, nSkillLvl);
     D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pWeaponOrMissile, UNITSTAT_tohit, bIsPotion, nLayer);
-    int32_t nValue = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxt[eSkill].calc[0], eSkill, nSkillLvl);
+    int32_t nValue = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxt->calc[0], eSkill, nSkillLvl);
     D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pWeaponOrMissile, UNITSTAT_damagepercent, nValue, 0);
     return 1;
 }
@@ -1447,12 +1439,8 @@ static void __stdcall SKILLBAR_InitChargeTarget(::SGAMEDATA * pGame, D2UnitStrc 
 }
 
 static BOOL __stdcall SKILLBAR_CanTargetPosition(D2UnitStrc * pUnit, int32_t nParam1, int32_t nParam2, int32_t nParam3) {
-    if (!(0 <= nParam3 && nParam3 < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillsTxtBase + nParam3)) {
+    D2SkillsTxt* pSkillsTxtBase = (0 <= nParam3 && nParam3 < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nParam3] : 0;
+    if (!pSkillsTxtBase) {
       return 0;
     }
 
@@ -1465,7 +1453,7 @@ static BOOL __stdcall SKILLBAR_CanTargetPosition(D2UnitStrc * pUnit, int32_t nPa
     if (!pRoom) {
       return 0;
     }
-    if (pSkillsTxtBase[nParam3].InTown) {
+    if (pSkillsTxtBase->InTown) {
       return 1;
     }
 

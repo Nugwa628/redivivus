@@ -411,12 +411,8 @@ BOOL __fastcall Skills_SrvDoFunc_117_Firestorm(::SGAMEDATA * pGame, D2UnitStrc *
     bool _bHasTarget;
     bool bHasTarget;
     D2SkillArgStrc sSkillArg;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillTxtBase + eSkill)) {
+    D2SkillsTxt* pSkillTxtBase = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillTxtBase) {
       return 0;
     }
 
@@ -428,7 +424,7 @@ BOOL __fastcall Skills_SrvDoFunc_117_Firestorm(::SGAMEDATA * pGame, D2UnitStrc *
       pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
     }
 
-    int32_t nMissileCount = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase[eSkill].calc[0], eSkill, nSkillLvl);
+    int32_t nMissileCount = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase->calc[0], eSkill, nSkillLvl);
     if (0 >= nMissileCount) {
       return 0;
     }
@@ -487,12 +483,8 @@ BOOL __fastcall Skills_SrvDoFunc_117_Firestorm(::SGAMEDATA * pGame, D2UnitStrc *
 BOOL __fastcall Skills_SrvDoFunc_118_Twister(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     bool _bResult;
     bool bResult;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillTxtBase + eSkill)) {
+    D2SkillsTxt* pSkillTxtBase = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillTxtBase) {
       return 0;
     }
 
@@ -504,7 +496,7 @@ BOOL __fastcall Skills_SrvDoFunc_118_Twister(::SGAMEDATA * pGame, D2UnitStrc * p
       pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
     }
 
-    int32_t nMissileCount = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase[eSkill].calc[0], eSkill, nSkillLvl);
+    int32_t nMissileCount = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase->calc[0], eSkill, nSkillLvl);
     if (0 >= nMissileCount) {
       return 0;
     }

@@ -2779,12 +2779,8 @@ void SKILLS_CalcPetSkillDamage(void * pThis, int * pnDamageOut) {
 }
 
 int32_t __fastcall SetDamageOnEvent(D2UnitStrc * pUnit, D2DamageStrc * pEvent, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxt = sgptDataTable->pTxtSkills;
-    if (!(pSkillsTxt + eSkill)) {
+    D2SkillsTxt* pSkillsTxt = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsTxt) {
       return 0;
     }
 
@@ -2792,7 +2788,7 @@ int32_t __fastcall SetDamageOnEvent(D2UnitStrc * pUnit, D2DamageStrc * pEvent, e
     int32_t nMinDamage = D2Common::Skills::SERVER_MinDamage(pUnit, eSkill, nSkillLvl, 1);
     int32_t nMaxDamage = D2Common::Skills::SERVER_MaxDamage(pUnit, eSkill, nSkillLvl, 1);
     uint32_t nRandDamage = D2Client::Archive::RANDOM_RandomNumberSelector(&pUnit->sSeed, nMaxDamage - nMinDamage);
-    SERVER_AppendDamageToUnitEvent(pUnit, pEvent, (eSkillEType)pSkillsTxt[eSkill].EType, nRandDamage + nMinDamage, nSynergy, nullptr, nullptr);
+    SERVER_AppendDamageToUnitEvent(pUnit, pEvent, (eSkillEType)pSkillsTxt->EType, nRandDamage + nMinDamage, nSynergy, nullptr, nullptr);
     return nRandDamage + nMinDamage;
 }
 
