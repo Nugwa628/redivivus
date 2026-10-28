@@ -566,7 +566,7 @@ void __fastcall Q14_OnStaffUsedInOrifice(::SGAMEDATA * pGame, D2UnitStrc * pUnit
 // IterateAllUnits callback for Q14_IsNpcStationary: if the player is within collision
 // distance < 0xC of pA2Q6Data->pTyraelSpawnAnchor (+0x40), sets
 // pA2Q6Data->bTyraelSpawnSpotOccupied (+0x44). Q14_IsNpcStationary passes its pA2Q6Data as pArgs.
-void __fastcall Q14_CheckUnitDistanceToTyrael(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2QuestDataA2Q6Strc * pA2Q6Data) {
+static void __fastcall Q14_CheckUnitDistanceToTyrael(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2QuestDataA2Q6Strc * pA2Q6Data) {
     int32_t nDistance = D2Common::Collision::GetCollisionDistance(pUnit, pA2Q6Data->pTyraelSpawnAnchor);
     if (nDistance >= 0xc) {
       return;
@@ -761,7 +761,7 @@ void __fastcall Q15_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
 }
 
 // Q15 (Act2Guard4Gossip) status filter: always returns false. The Jerhyn gossip pseudo-quest never shows in the quest-log status pass.
-bool __fastcall Q15_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
+static bool __fastcall Q15_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
     return false;
 }
 

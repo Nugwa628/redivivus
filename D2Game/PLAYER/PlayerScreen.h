@@ -36,9 +36,6 @@ void __fastcall PARTYSCREEN_AcceptPartyInvite(::SGAMEDATA * pGame, struct D2Unit
 void __fastcall PARTYSCREEN_SetMutualPlayerRelationship(int32_t nParam, struct D2UnitStrc * pUnit, struct D2UnitStrc * pInvitee, uint32_t dwUnused1, uint32_t dwUnused2);
 // @sourcefile .\PLAYER\PartyScreen.cpp
 void __fastcall PARTYSCREEN_SendPartyInvite(int32_t nParam, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget, uint32_t dwUnused1, uint32_t dwUnused2);
-// @sourcefile .\PLAYER\PartyScreen.cpp
-void __fastcall PARTY_SendPlayerLeftEvent(uint32_t dwUnused, struct D2UnitStrc * pUnit, struct D2UnitStrc * pOther);
-void __fastcall SendPlayerPartyInfo(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
 void __fastcall CallPlayerEventForEachPlayer(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint32_t dwParam1, uint32_t dwParam2, uint32_t dwParam3);
 // @sourcefile .\PLAYER\PartyScreen.cpp
 void __fastcall PARTYSCREEN_SetHostileForPlayer(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);

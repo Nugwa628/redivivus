@@ -2479,7 +2479,7 @@ static int32_t __stdcall OBJECT_RollAndDispatchPopulateFn(::SGAMEDATA * pGame, D
 }
 
 // Populates special objects for one room during level generation. Skips rooms that already have a waypoint, are outdoors-bordered, or are in town. Lazily initialises the per-level object RNG's room count on first call. Increments the room counter (pad_0x4) and, if the room's populate-fn pointer is set, calls OBJECT_RollAndDispatchPopulateFn; returns 1 on success, 0 otherwise.
-BOOL __stdcall OBJECT_PopulateRoomSpecialObjects(::SGAMEDATA * pGame, int32_t nParam, D2RoomStrc * pRoom) {
+static BOOL __stdcall OBJECT_PopulateRoomSpecialObjects(::SGAMEDATA * pGame, int32_t nParam, D2RoomStrc * pRoom) {
     int32_t nPopResult;
     BOOL bResult = D2Common::DUNGEON::Dungeon::HasWaypoint(pRoom);
     if (bResult) {

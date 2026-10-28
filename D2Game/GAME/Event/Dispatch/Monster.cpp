@@ -590,7 +590,7 @@ BOOL __fastcall PlanExecutionOfMonster(::SGAMEDATA * pGame, D2MonsterKillStrc * 
     return 1;
 }
 
-BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_A(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
+static BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_A(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pMonsterKill->pVictim, 10);
     return 1;
 }
@@ -655,7 +655,7 @@ BOOL __fastcall MONMODE_StartOtherAttack(::SGAMEDATA * pGame, D2MonsterKillStrc 
     return 1;
 }
 
-BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_B(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
+static BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_B(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pMonsterKill->pVictim, 6);
     return 1;
 }

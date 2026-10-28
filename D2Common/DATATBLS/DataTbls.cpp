@@ -1669,7 +1669,7 @@ void __fastcall TXT_SaveTableToBinFile(D2PoolManagerStrc * pMemory, char * szTab
 
 // Loads and compiles Skills.txt and SkillDesc.txt into the engine's runtime tables. Builds two large D2BinFieldInputStrc schemas (skills: flags, mana/level reqs, damage, elemental, calc/srvprgfunc string-linker columns, state and reqskill cross-links; skilldesc) and compiles both into sgtDataTable (pTxtSkills/nTxtSkillsCount, pTxtSkillDesc/nTxtSkillDescSize, their txt-links, nPassiveSkillsCount). Also derives per-class skill index tables (pSkillsPerClassStrc, pPassiveSkillsPerClassStrc, pSkillsPerClassCounter, nSkillCountMaxPerClass) and cross-references pets (pTxtPetType.nSkillId). Caches skillscode/skilldesccode bins. Must run after pTxtPetType is loaded; halts via ErrorManager on count overflow. Skill record stride 0x23c. __stdcall(pMemory).
 // @sourcefile .\DATATBLS\DataTbls.cpp
-void __stdcall TXT_AllocTxt_skill_skilldesc(D2PoolManagerStrc * pMemory) {
+static void __stdcall TXT_AllocTxt_skill_skilldesc(D2PoolManagerStrc * pMemory) {
     // Frame slots -16..-4 are ONE object: &pSkillDescLink is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -3814,7 +3814,7 @@ void __stdcall TXT_AllocTxt_difficultylevels(D2PoolManagerStrc * pMemory) {
 
 // Loads and compiles states.txt into sgtDataTable.pTxtStates (record stride 0x3C). Builds the column-binding descriptor: state name (linked to the States txt-link), group, a large block of behavior bit-flags (nosend/hide/transform/aura/active/curse/curable/staydeath variants/bossinv/shatter/etc.), per-state overlays (overlay1-4/pgsv/cast/rem), linked stat/missile/skill/sounds/itemtype/itemtrans, gfx fields, and client/server event+func indices. Creates the txt-link, calls CompileTxt, and error-halts if more than 255 states. Then allocates and zero-fills the per-state bitmask data tables (pStatesDataTbls, one 32-bit-rounded bitmask block per state, 0x28 entries) via DATATBLS_BuildStatesDataBitMask, and builds the grouped state lists for flag classes 0x04/0x0B/0x10/0x05 and the item-types state-data table. __fastcall(pMemory). Side effect: populates global state data tables.
 // @sourcefile .\DATATBLS\DataTbls.cpp
-void __fastcall TXT_AllocTxt_states(D2PoolManagerStrc * pMemory) {
+static void __fastcall TXT_AllocTxt_states(D2PoolManagerStrc * pMemory) {
     D2StatesDataTbls* pStateDataEntry;
     D2BinFieldInputStrc states[70];
     uint32_t nStateIdx = 0;

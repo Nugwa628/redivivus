@@ -251,7 +251,6 @@ void SFILE_DecompressLzw_BufferWrite(void * pSrc, uint32_t * pnBytes, void * pBu
 // so SFile owning its own explode wrapper alongside SComp's is the real structure, not an error.
 // @blizzard DecompressLzw (SFILE.CPP)
 int32_t __stdcall SFILE_DecompressLzw(int32_t pSrcData, int32_t pDstData, int32_t nDstSize);
-void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCount);
 // @blizzard BuildDefaultBasePath (SFILE.CPP)
 void __stdcall SFILE_BuildDefaultBasePath();
 // @blizzard CheckForCdRom (SFILE.CPP)
@@ -455,7 +454,6 @@ int __stdcall SFILE_EnumFilesInternal(struct D2ArchiveStrc * pArchive, char * sz
 // @blizzard SFileOpenFileEx (SFILE.CPP)
 int __stdcall SFileOpenFileEx(struct D2ArchiveStrc * pArchive, char * szFileName, uint32_t dwFlags, void * * phFile);
 struct D2MPQFileStrc * * __fastcall SFILE_AllocFileRecord3(int * * ppArchive, int32_t nInsertMode, int32_t nExtraSize, uint32_t nFlags);
-uint32_t __fastcall SFILE_RemoveAsyncRequestFromQueue(void * pListContext, int * pNode);
 struct D2MPQFileStrc * * __fastcall SFILE_AllocFileRecord4(int * * ppArchive, int32_t nInsertMode, int32_t nExtraSize, uint32_t nFlags);
 // @blizzard IssueRequest (SFILE.CPP)
 struct D2StormAsyncOpStrc * __stdcall SFILE_IssueRequest(uint32_t nFileOffset, uint32_t pChunkWritePtr, uint32_t pReadBufferBase, struct IDirectSoundBuffer * pStream, uint32_t pUserCtx2, struct D2StormAudioStreamRec * pParentStream, uint32_t nChunkSize, int32_t nTimeoutMs, uint32_t bUrgent, HANDLE hCompletionEvent, uint32_t bQueueImmediately, int32_t bIsLastChunk, struct D2StormAsyncCompletionStrc * pCompletion, struct D2MPQFileStrc * pMPQFile);

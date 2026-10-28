@@ -759,7 +759,7 @@ int __fastcall ITEMMOD_RollMagicAffixVersionedEx(D2UnitStrc * pUnit, int32_t nPa
 }
 
 // Selects a random eligible rare affix group for classic item generation. Iterates the prefix (this==0) or suffix half of the rare affix table, filters each entry with ITEMMOD_CanApplyAffix, builds a candidate index array (max 511 entries), then rolls the item seed to pick one. Returns the chosen table index + 1, or 0 if no candidates pass.
-uint32_t __fastcall ITEMMOD_GetMaxAffixGroupClassic(int32_t pThis, D2UnitStrc * pUnit) {
+static uint32_t __fastcall ITEMMOD_GetMaxAffixGroupClassic(int32_t pThis, D2UnitStrc * pUnit) {
     D2RareAffixTxt* pAffixRangeStart;
     int nAffixRangeBytes;
     uint32_t apiStack4108[1024];
@@ -824,7 +824,7 @@ uint32_t __fastcall ITEMMOD_GetMaxAffixGroupClassic(int32_t pThis, D2UnitStrc * 
 }
 
 // Selects a random valid rare affix index for an item. Iterates the prefix (this==0) or suffix (this!=0) range of the rare-affix table, calls ITEMMOD_CanApplyAffix for each entry to build a candidate list (up to 511), then rolls a random index via the item's seed. Returns the 1-based affix table index of the chosen affix, or 0 if no valid affix found.
-uint32_t __fastcall GetMaxToRoll(int32_t pThis, D2UnitStrc * pUnit) {
+static uint32_t __fastcall GetMaxToRoll(int32_t pThis, D2UnitStrc * pUnit) {
     D2RareAffixTxt* pAffixRangeStart;
     int nAffixRangeBytes;
     uint32_t apiStack4108[1024];
@@ -902,7 +902,7 @@ uint32_t __fastcall ITEMMOD_SelectMagicAffixVersioned(D2UnitStrc * pUnit, int32_
 }
 
 // Generates and applies the rare-quality affixes for an item on pUnit. Rolls the rare prefix/suffix name groups (classic vs expansion via ITEM_GetItemData_wItemVersion), stores them, then rolls a count of magic affixes (jewels: 2-3; otherwise from gnSkillItemAffixPropertyBySkill keyed by the item seed) and alternately rolls up to 3 prefixes and 3 suffixes with ITEMMOD_RollMagicAffixClassic, passing the forced ids in pItemGenContext->nForcePrefix[]/nForceSuffix[]. On success clears the identified flag, applies each rolled magicaffixes line's stats via ApplyRuneAndGemStats, runs StaffMod, and returns 1; returns 0 if no name group rolled. Halts via Fog ErrorManager if a slot index exceeds 3. Register arguments: pUnit in ESI; pItemGenContext on the stack.
-BOOL __stdcall ITEMMOD_GenerateRareAffixes(D2ItemGenContextStrc * pItemGenContext, D2UnitStrc * pUnit) {
+static BOOL __stdcall ITEMMOD_GenerateRareAffixes(D2ItemGenContextStrc * pItemGenContext, D2UnitStrc * pUnit) {
     // Static local variables (originally global data)
     static int gnSkillItemAffixPropertyBySkill[8] = { 0x3, 0x4, 0x4, 0x5, 0x5, 0x5, 0x6, 0x6 }; D2_STATIC_GUARD(gnSkillItemAffixPropertyBySkill, "D2Game::SKILLS::Items::ITEMMOD_GenerateRareAffixes::gnSkillItemAffixPropertyBySkill");
 

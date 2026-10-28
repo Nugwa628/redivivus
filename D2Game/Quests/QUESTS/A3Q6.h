@@ -34,11 +34,6 @@ uint32_t __fastcall Q23_CheckDuranceOfHateLevel2(::SGAMEDATA * pGame, struct D2U
 bool __fastcall Q23_ActiveFilter(struct D2QuestDataStrc * pQuestData, int32_t nTargetClassId, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2UnitStrc * pUnitEx);
 // Per-player iterator callback for A3Q6 The Guardian: syncs an individual player's QuestRecord journal sub-steps to the shared quest's nStateFlag/nStateFlagPrev. Skips players whose quest is already Completed or at Step0x11. Maps nStateFlag 2→Step0x02, 3→Step0x03; for state 4/5 further branches on nStateFlagPrev (2/3/4) to write Step0x04-Step0x09, reflecting which Cain/Ormus dialog steps Mephisto-quest progress has reached.
 BOOL __fastcall Q23_PlayerUpdateGuardianSteps(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// [The Guardian (Q23)] Marks the Mephisto quest COMPLETE for one player. Sets the player's QuestRecord
-// JustCompleted(0xd) + Completed(0) + Step0x11(0x0b, "Act4 unlocked / quest finalized"), then calls
-// SetClientStatus(3) to flag the client as able-to-progress (the gate that opens travel to Pandemonium/Act4).
-// @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a3q6.cpp
-void __stdcall Q23_SetGuardianQuestComplete(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer);
 // [The Guardian (Q23)] Per-player iterator run after Mephisto dies. If this player is standing in
 // Durance of Hate Level 3 (Mephisto's level) and hasn't yet completed/finalized the quest, calls
 // Q23_SetGuardianQuestComplete to mark JustCompleted/Completed/Step0x11 and bumps the participation
@@ -75,10 +70,6 @@ void __fastcall Q23_Callback03_ChangedLevel(struct D2QuestDataStrc * pQuestData,
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a3q6.cpp
 void __fastcall Q23_Callback11_ScrollMessage(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 void __fastcall Q23_Callback10_PlayerLeavesGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
-// [The Guardian (Q23)] Quest timer callback (armed by Callback_08 after Mephisto dies). Broadcasts
-// quest state 4 if not already at stateFlagPrev 4, and clears the bBloodRavenKilled/scratch flag in the
-// A3Q6 quest-specific struct. Used to drive the post-kill cinematic/state settle.
-uint8_t __fastcall Q23_QuestUpdate(::SGAMEDATA * pGame, struct D2QuestDataStrc * pQuestData);
 // [The Guardian (Q23)] Party-member iterator: for each party member NOT yet Completed who is physically
 // in Act III, mark the Guardian quest complete (Q23_SetGuardianQuestComplete) and bump participation
 // count. Gives nearby party members Mephisto-kill credit. (Called via ExecuteFunctionForEveryPartyMember.)

@@ -89,7 +89,7 @@ BOOL __fastcall Q31_NpcGossipHandler(::SGAMEDATA * pGame, D2UnitStrc * pUnit, vo
 }
 
 // A5Q1 status-icon filter: decides the quest-log icon/flag (*nUnknown) for Siege on Harrogath. If RewardAwaits(1) or JustCompleted(0xd): icon 3 (reward pending) unless Step0x05(5) reward-given -> icon 4. Else if intro shown and not Completed(0): CannotComplete(0xe) -> icon 0xc; otherwise default to nStateFlagPrev icon.
-bool __fastcall Q31_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * pbyIconFlag) {
+static bool __fastcall Q31_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * pbyIconFlag) {
     *pbyIconFlag = '\0';
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_SiegeOnHaggorath, QUESTSTATE_RewardAwaits);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_SiegeOnHaggorath, QUESTSTATE_JustCompleted) , bQuestState != 0)) {

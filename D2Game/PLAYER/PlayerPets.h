@@ -56,15 +56,12 @@ namespace D2Game::PLAYER::PlayerPets {
 
 // Function declarations
 // @sourcefile .\PLAYER\PlayerPets.cpp
-void __fastcall Send0x7aSummonLog(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2PetArgStrc * pPetArgs);
 // Iterates a player's pet list performing free or kill operations on each entry. If nParam1==0 calls KillHandlerPet (kill path); otherwise locates the pet monster, broadcasts a 0x7A summon-log packet, removes it from the DRLG room, and either frees the server unit (nParam2==0) or executes a Death lifecycle transition and sends a 0x9B merc-revive-cost packet to the client. Decrements nPets2/nMax and frees the D2PetStrc node from the game memory pool on removal.
 // @sourcefile .\PLAYER\PlayerPets.cpp
 void __stdcall PETS_FreeOrKillPetList(struct D2UnitStrc * pUnit, struct D2PetListStrc * pPetList, int32_t nParam1, int32_t nParam2, ::SGAMEDATA * pGame);
 // Releases all pet tracking memory for a player unit. Iterates every pet type list (skipping index 0), calling PETS_FreeOrKillPetList for each (type 7 = merc gets special kill flag). Frees the pet list array and the D2UnitDataPlayerPetsStrc itself from the game memory pool, then nulls pPets. Halts on missing player data.
 // @sourcefile .\PLAYER\PlayerPets.cpp
 void __fastcall FreePets(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-// @sourcefile .\PLAYER\PlayerPets.cpp
-void __fastcall SummonAndAssign(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2PetArgStrc * pSummonArgs);
 void __fastcall PETS_UpdatePetData(struct D2UnitStrc * pUnit, int32_t nParam, int32_t nTargetPetGUID, struct D2PetDataStrc * pNewPetData);
 // Returns the pet-type index (1..nTxtPetTypeSize-1) that owns the monster with the given GUID in the player's pet lists, or 0 if not found. Halts fatally if player data is null. Used to classify whether a unit is a summoned pet and of which type (e.g. 7 = merc).
 int32_t __fastcall GetOwnersPetType(struct D2UnitStrc * pUnit, int32_t nUnitGUID);

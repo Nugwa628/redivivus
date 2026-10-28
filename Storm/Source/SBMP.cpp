@@ -1152,7 +1152,7 @@ int __fastcall SBMP_EncodeGif256File(int width, void * hFile, int palette, uint8
 }
 
 // @blizzard DecodePcxFile (SBMP.CPP)
-int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels, int * pHeight, int palette, int nParam, uint32_t * pWidth, int * pBpp) {
+static int __fastcall SBMP_DecodePcxFile(D2MPQFileStrc * hFile, uint8_t * pixels, int * pHeight, int palette, int nParam, uint32_t * pWidth, int * pBpp) {
     bool bVar1;
     DWORD dwFileSize;
     uint8_t* src;

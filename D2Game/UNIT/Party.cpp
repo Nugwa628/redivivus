@@ -417,7 +417,7 @@ int32_t __fastcall CountPartyControlSubSize(::SGAMEDATA * pGame, int16_t nPartyI
     return nCount;
 }
 
-BOOL __fastcall CountAliveUnitsLevelSum(int32_t nContext, D2UnitStrc * pUnit, int * pLevelSum) {
+static BOOL __fastcall CountAliveUnitsLevelSum(int32_t nContext, D2UnitStrc * pUnit, int * pLevelSum) {
     BOOL bIsDead = SUnit::CheckForModeZeroDeath(pUnit);
     if (bIsDead) {
       return bIsDead;
@@ -428,7 +428,7 @@ BOOL __fastcall CountAliveUnitsLevelSum(int32_t nContext, D2UnitStrc * pUnit, in
     return bIsDead;
 }
 
-void __fastcall CountModeZero(int32_t * pContext, D2UnitStrc * pUnit, int * pCount) {
+static void __fastcall CountModeZero(int32_t * pContext, D2UnitStrc * pUnit, int * pCount) {
     if (!pUnit) {
       return;
     }

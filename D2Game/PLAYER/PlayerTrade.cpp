@@ -1667,7 +1667,7 @@ void __fastcall PLRTRADE_FreeTradeCopyInventory(::SGAMEDATA * pGame, D2UnitStrc 
 }
 
 // @sourcefile .\PLAYER\PlrTrade.cpp
-void __fastcall SendRemoveItemDisplayPacket0x92(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pOtherUnit) {
+static void __fastcall SendRemoveItemDisplayPacket0x92(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pOtherUnit) {
     int32_t nOtherGUID;
     if (pUnit == pOtherUnit) {
       return;

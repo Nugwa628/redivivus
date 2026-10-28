@@ -62,7 +62,6 @@ void __fastcall MISSILE_SetPathFromTotalFrames_ForCatapultChargedBall(struct D2U
 // Client-side hit function for missile type 046 (spiral sub-missile burst). On collision, spawns a circular grid of sub-missiles (HitSubMissile1) centred on the missile's position using SKILLS_CreateMissilespiralGrid. Sub-missile count = (level-1)*HitPar2+HitPar1, falling back to skill calc[3] if less than 1. Uses MISSILES_SetPathFromTotalFramesCallbackAlt as the path callback. Always returns 1.
 int32_t __fastcall MISSILE_CltHitFn46_CatapultChargedBall(struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
 int32_t __fastcall MISSILE_CltHitFn51_LightTrailJavelin(struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
-int32_t __fastcall MISSILE_CltHitFn61_WorldStoneShake(struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
 void __fastcall LIGHTMAP_SetQualityLevel(uint32_t dwParam);
 int __stdcall LIGHTMAP_GetQualityLevel();
 uint32_t __stdcall MISSILE_CanHitTarget(struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit1, struct D2MissilesTxt * pMissileTxt, struct D2UnitStrc * pUnit2);
@@ -73,7 +72,6 @@ int32_t __fastcall Missiles_SrvDoFuncData_07(struct D2UnitStrc * pUnit, struct D
 void __fastcall MISSILE_InitMissileUnit(struct D2UnitStrc * pUnit, struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, uint32_t nFlags);
 void __fastcall MISSILE_FreeClientMissile(struct D2UnitStrc * pUnit);
 int32_t __fastcall MISSILE_CltHitFn40_HealingBolt(struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
-int MISSILE_CheckAndDecrementPierce(struct D2UnitStrc * pUnit);
 void __fastcall MISSILE_RemoveClientSide(struct D2UnitStrc * pUnit);
 // Computes and stores the pierce count for missile pUnit against target pUnit2 (player or monster only). Checks MissilesTxt pierce flag (bit 2); if set, sums UNITSTAT_skill_pierce + UNITSTAT_item_pierce on the target, then runs a seeded RNG loop (up to 4 iterations) comparing random%100 against pierce chance to count successful pierces. Writes the result to missile's UNITSTAT_pierce_idx stat. Uses UNITSTAT_pierce_idx on the target as the RNG seed index for non-local players.
 void __stdcall MISSILE_CalculatePierceCount(struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2);

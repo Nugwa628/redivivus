@@ -194,7 +194,7 @@ static int32_t __stdcall DAMAGE_ApplyHealingToUnit(int32_t nParam, D2UnitStrc * 
     return nParam;
 }
 
-int32_t __stdcall DAMAGE_ApplyManaToUnit(int32_t nParam, D2UnitStrc * pUnit) {
+static int32_t __stdcall DAMAGE_ApplyManaToUnit(int32_t nParam, D2UnitStrc * pUnit) {
     if (nParam <= 0) {
       return 0;
     }
@@ -3385,7 +3385,7 @@ static void __stdcall SERVER_PlayerUpdateExperience(::SGAMEDATA * pGame, int32_t
 }
 
 // Iterator callback used when distributing kill experience to nearby party members. For each candidate player unit (pUnit), checks if dead (early-return), then tests whether the unit is within range of the victim (squared-distance threshold 0x1900). If in range, appends the unit and its level into the pPartyExp accumulator struct (max 8 players); halts fatally if the party array is full.
-BOOL __fastcall ExperienceLoopOverPlayers(uint32_t dwParam, D2UnitStrc * pUnit, D2PartyExperienceStrc * pPartyExp) {
+static BOOL __fastcall ExperienceLoopOverPlayers(uint32_t dwParam, D2UnitStrc * pUnit, D2PartyExperienceStrc * pPartyExp) {
     int nPlayerCount;
     int32_t nUnitPosX;
     int32_t nUnitPosY;

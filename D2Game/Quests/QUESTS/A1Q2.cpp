@@ -426,7 +426,7 @@ BOOL __fastcall Q02_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUn
 //     set bBloodRavenKilled/bNotifiedCompletion
 //   - QUEST_SetQuestRecordState(JustCompleted=0xd) on the killing player's record.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q2.cpp
-void __fastcall Q02_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q02_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     int32_t nTargetGUID;
     if (!pQuestData->bIsNotIntroduction) {
       return;

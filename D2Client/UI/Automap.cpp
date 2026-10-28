@@ -244,7 +244,7 @@ void __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames) {
     AutoMapPartyNames = nAutoMapPartyNames;
 }
 
-void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, D2AutomapCellStrc * * ppRootNode) {
+static void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, D2AutomapCellStrc * * ppRootNode) {
     D2AutomapCellStrc* pNode = *ppRootNode;
     if (!pNode) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x233);
@@ -264,7 +264,7 @@ void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, D2AutomapCellStrc * *
     }
 }
 
-void __fastcall AUTOMAP_RotateCellLeft(uint32_t dwUnused, D2AutomapCellStrc * * ppRootNode) {
+static void __fastcall AUTOMAP_RotateCellLeft(uint32_t dwUnused, D2AutomapCellStrc * * ppRootNode) {
     D2AutomapCellStrc* pNode = *ppRootNode;
     if (!pNode) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x244);
@@ -622,7 +622,7 @@ void __stdcall AUTOMAP_AddCellByCoords(int16_t nCellNo, int16_t nPixelX, int16_t
     AUTOMAP_InsertCellIntoTree(pAutomapCellLocal, pAutomapCell1);
 }
 
-void __stdcall AUTOMAP_AddCellForUnit(int32_t nParam, D2AutomapCellStrc * pAutomapCell, D2UnitStrc * pUnit) {
+static void __stdcall AUTOMAP_AddCellForUnit(int32_t nParam, D2AutomapCellStrc * pAutomapCell, D2UnitStrc * pUnit) {
     D2AutomapCellStrc* pAutomapCell1 = AUTOMAP_AllocCell();
     int32_t nTargetX = D2Common::Units::GetTargetX(pUnit);
     int32_t nTargetY = D2Common::Units::GetTargetY(pUnit);

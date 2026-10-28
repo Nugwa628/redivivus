@@ -58,10 +58,6 @@ void __fastcall Q14_CompleteHoradricStaffOnPartyMember(::SGAMEDATA * pGame, stru
 BOOL __fastcall OBJOP_A2Q7_OpenArcaneNpcTrade(struct D2ObjectOperateFnArg * pOperation);
 // Q14 core event: the Horadric Staff has been placed in the orifice. Completes The Horadric Staff quest record (Completed+JustCompleted) for the acting player and every party member, strips the staff component items, broadcasts event 3 (cinematic/quest log), flags Jerhyn to spawn (bShouldSpawnJerhyn) + field_0x0E, arms Q14_TimerCreatePortal (delay derived from missile 0x152 Range), and toggles HasPortal flags on the chamber rooms. This is the Seven Tombs / Tal Rasha chamber opening trigger.
 void __fastcall Q14_OnStaffUsedInOrifice(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2);
-// IterateAllUnits callback for Q14_IsNpcStationary: if the player is within collision
-// distance < 0xC of pA2Q6Data->pTyraelSpawnAnchor (+0x40), sets
-// pA2Q6Data->bTyraelSpawnSpotOccupied (+0x44). Q14_IsNpcStationary passes its pA2Q6Data as pArgs.
-void __fastcall Q14_CheckUnitDistanceToTyrael(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2QuestDataA2Q6Strc * pA2Q6Data);
 // Q14 predicate: is the Tyrael spawn location clear/stationary? True if already-placed flag set; else, when seal[3] active, scans all units near the candidate spot (Q14_CheckUnitDistanceToTyrael) and returns true only if nothing is too close. Gates Tyrael spawning after Duriel.
 // Returns a full 32-bit value: every return path writes all of EAX (MOV EAX,imm32 / XOR EAX,EAX / MOVZX EAX,<narrow>).
 // pNpc (EDX) is stored as D2QuestDataA2Q6Strc.pTyraelSpawnAnchor (+0x40) before the unit scan; the only caller passes its own unit.
@@ -80,8 +76,6 @@ void __fastcall Q15_Callback11_ScrollMessage(struct D2QuestDataStrc * pQuestData
 void __fastcall Q15_Callback00_NpcActivate(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // Q15 (Act2Guard4Gossip) state-8 handler: empty stub. No behavior.
 void __fastcall Q15_Callback08_MonsterKilled(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
-// Q15 (Act2Guard4Gossip) status filter: always returns false. The Jerhyn gossip pseudo-quest never shows in the quest-log status pass.
-bool __fastcall Q15_StatusFilter(struct D2QuestDataStrc * pQuestData, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown);
 // Q15 (Act2Guard4Gossip) active filter for Jerhyn (NPC 0x179): returns true (gossip is "active"/available) when the Jerhyn-spoke record is neither Completed nor JustCompleted, or when Radament's Lair just completed but Jerhyn not yet marked complete. Read-only on quest records. Decides whether Jerhyn currently has act-progress gossip to offer.
 bool __fastcall Q15_ActiveFilter(struct D2QuestDataStrc * pQuestData, int32_t nTargetClassId, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2UnitStrc * pUnitEx);
 // Q15 (Act2Guard4Gossip) quest-init: registers this slot as the Jerhyn gossip pseudo-quest. Zeroes the state-handler table, installs handler[0]=Callback_00 (dialog select), handler[8]=Callback_08 (stub), handler[0xb]=Callback_11 (message), sets pNpcMessages to the 0x179/0x3b gossip table, allocates A2Q7 quest-specific data, marks bIsActive, and crucially sets nQuestIdReal = QUEST_Act2Guard4Gossip with the status/active filters. This is the "extra" Act2 slot: NOT a public quest but the Jerhyn spoke-to gossip tracker.

@@ -322,7 +322,7 @@ void __stdcall SMSG_AddWindow(uint32_t hWnd) {
     pEntry->hWnd = (HWND)hWnd;
 }
 
-uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, StormWndRecStrc * pRecord) {
+static uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, StormWndRecStrc * pRecord) {
     uint32_t nOffset;
     StormWndRecStrc* pSVar1 = pRecord;
     if (!pRecord) {

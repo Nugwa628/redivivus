@@ -4964,12 +4964,12 @@ void __fastcall MISSMODE_ApplyMissileHitDamage(::SGAMEDATA * pGame, D2UnitStrc *
     UNIT::SUnitDmg::SERVER_GetHitCalculation(pGame, pOwner, pTarget, pEvent);
 }
 
-BOOL __fastcall MISSMODE_RedemptionHitNoMana(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget, int nEvent, uint32_t dwReserved) {
+static BOOL __fastcall MISSMODE_RedemptionHitNoMana(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget, int nEvent, uint32_t dwReserved) {
     BOOL BVar1 = SKILLS::SkillPal::SKILLSOR_GetBlizzardSubMissileCount((uint32_t)pGame, pUnit, pTarget, SKILL_Redemption, nEvent, 0);
     return BVar1;
 }
 
-BOOL __fastcall MISSMODE_RedemptionHitWithMana(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget, int nEvent, uint32_t dwReserved) {
+static BOOL __fastcall MISSMODE_RedemptionHitWithMana(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget, int nEvent, uint32_t dwReserved) {
     BOOL BVar1 = SKILLS::SkillPal::SKILLSOR_GetBlizzardSubMissileCount((uint32_t)pGame, pUnit, pTarget, SKILL_Redemption, nEvent, 1);
     return BVar1;
 }

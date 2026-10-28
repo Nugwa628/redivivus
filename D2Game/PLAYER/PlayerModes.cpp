@@ -295,11 +295,11 @@ void __fastcall PLRMODES_SetIdleMode(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DW
     D2Common::Units::SetCurrentSkill(pUnit, nullptr);
 }
 
-int32_t __fastcall PLRMODES_ModeCallback_DeathDead(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
+static int32_t __fastcall PLRMODES_ModeCallback_DeathDead(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
     return 1;
 }
 
-int32_t __fastcall PLRMODES_ModeCallback_Neutral(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
+static int32_t __fastcall PLRMODES_ModeCallback_Neutral(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
     return 1;
 }
 
@@ -933,7 +933,7 @@ void __fastcall PLRMODES_StartModeWithTarget(::SGAMEDATA * pGame, D2UnitStrc * p
     UNIT::SUnit::UNITS_SetupAnimTimerEvents(pGame, pUnit);
 }
 
-int32_t __fastcall PLRMODES_ModeCallback_GetHitCast(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
+static int32_t __fastcall PLRMODES_ModeCallback_GetHitCast(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
     return 1;
 }
 

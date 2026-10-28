@@ -1845,7 +1845,7 @@ static void INVENTORY_RemoveItemFromOwner(D2InventoryStrc * pInventory, D2UnitSt
 // IterateAllUnits per-unit callback: removes pItem from this unit's inventory.
 // Matches fpSUnitIterateCallback (ECX=pGame, EDX=pUnit, Stack[0x4]=pArgs); pGame is unused by the
 // body, which is why the register is never read. Confirmed by RET 0x4 and the CALL EBX at 00553914.
-void __fastcall ITEM_RemoveFromOwnerInventory(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pItem) {
+static void __fastcall ITEM_RemoveFromOwnerInventory(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pItem) {
     INVENTORY_RemoveItemFromOwner(pUnit->pInventory, pItem);
 }
 

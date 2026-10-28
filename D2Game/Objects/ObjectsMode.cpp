@@ -1937,7 +1937,7 @@ void __fastcall Shrines_CombatBoostFunction(D2ObjectOperateFnArg * pArguments, D
     D2Common::Stats::StatsEx::STATLIST_SetStatValue(pStatEx, UNITSTAT_tohit, nLine, 0);
 }
 
-void __fastcall SHRINE_OnStaminaExpire(D2UnitStrc * pUnit, eD2States eState, int32_t dwParam) {
+static void __fastcall SHRINE_OnStaminaExpire(D2UnitStrc * pUnit, eD2States eState, int32_t dwParam) {
     SKILLS::SkillsServer::DefaultExpireFunction(pUnit, eState, dwParam);
     int32_t nValue = D2Common::Stats::StatsEx::GetTxtMaxStamina(pUnit);
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_stamina, nValue, 0);
@@ -1975,7 +1975,7 @@ void __fastcall Shrines_StatBoostFunction(D2ObjectOperateFnArg * pArguments, D2S
     ApplyShrineBonus(pArguments->sArg.pVictim, pArguments->pAttacker, pTxtShrines->dwDurationInFrames, nModifiedStatValue, OBJECTSHRINEFUNCTION[uShrineIdx].eStat, OBJECTSHRINEFUNCTION[uShrineIdx].nState, nullptr);
 }
 
-void __fastcall SHRINE_OnSkillExpire(D2UnitStrc * pUnit, eD2States eState, int32_t dwParam) {
+static void __fastcall SHRINE_OnSkillExpire(D2UnitStrc * pUnit, eD2States eState, int32_t dwParam) {
     SKILLS::SkillsServer::DefaultExpireFunction(pUnit, eState, dwParam);
     SKILLS::SkillsServer::SKILLS_UpdatePassivesAndPets(pUnit);
 }
@@ -3002,7 +3002,7 @@ void __fastcall TakeWaypoint(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD nwpI
     ObjectsRgn::AllocObjectControlSub0x1110(pGame, pUnit, pRoomOther);
 }
 
-uint32_t __fastcall OBJMODE_ShrineManaRefill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
+static uint32_t __fastcall OBJMODE_ShrineManaRefill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
     int32_t nMaxMana = D2Common::Stats::StatsEx::GetTxtMaxMana(pUnit);
     int nValue = nMaxMana + nBoostAmount * 0x100;
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_mana, nValue, 0);
@@ -3010,27 +3010,27 @@ uint32_t __fastcall OBJMODE_ShrineManaRefill(::SGAMEDATA * pGame, D2UnitStrc * p
     return 1;
 }
 
-uint32_t __fastcall OBJMODE_ShrineEnergyBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
+static uint32_t __fastcall OBJMODE_ShrineEnergyBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
     D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pUnit, UNITSTAT_energy, nBoostAmount, 0);
     return 1;
 }
 
-uint32_t __fastcall OBJMODE_ShrineDexterityBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
+static uint32_t __fastcall OBJMODE_ShrineDexterityBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
     D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pUnit, UNITSTAT_dexterity, nBoostAmount, 0);
     return 1;
 }
 
-uint32_t __fastcall OBJMODE_ShrineVitalityBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
+static uint32_t __fastcall OBJMODE_ShrineVitalityBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
     D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pUnit, UNITSTAT_vitality, nBoostAmount, 0);
     return 1;
 }
 
-uint32_t __fastcall OBJMODE_ShrineStrengthBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
+static uint32_t __fastcall OBJMODE_ShrineStrengthBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
     D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pUnit, UNITSTAT_strength, nBoostAmount, 0);
     return 1;
 }
 
-uint32_t __fastcall OBJMODE_ShrineHealthRefill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
+static uint32_t __fastcall OBJMODE_ShrineHealthRefill(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
     int32_t nMaxHp = D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit);
     int nValue = nMaxHp + nBoostAmount * 0x100;
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hitpoints, nValue, 0);
@@ -3038,7 +3038,7 @@ uint32_t __fastcall OBJMODE_ShrineHealthRefill(::SGAMEDATA * pGame, D2UnitStrc *
     return 1;
 }
 
-uint32_t __fastcall OBJMODE_ShrineSkillPointBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
+static uint32_t __fastcall OBJMODE_ShrineSkillPointBoost(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nBoostAmount) {
     D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pUnit, UNITSTAT_newskills, nBoostAmount, 0);
     return 1;
 }

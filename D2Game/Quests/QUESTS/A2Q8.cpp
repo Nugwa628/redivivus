@@ -42,7 +42,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2QuestDataA2Q8Strc) == 0x2, "D2_NE
 namespace D2Game::Quests::QUESTS::A2Q8 {
 
 // Q16_Callback_11 - A2Q8 gossip ACK handler (state-fn slot 0xb). Fires when the player actually picks the gossip dialog (NPC 0x17a, message 0x12f); marks QUEST_Act2Guard5Gossip = Completed in the player's difficulty quest record so the line is not re-offered. No reward, no items - just records "already spoken".
-void __fastcall Q16_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q16_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     if (!(pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo == 0x17a && pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex == 0x12f)) {
       return;
     }
@@ -87,7 +87,7 @@ void __fastcall Q16_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, 0x17a, 0);
 }
 
-bool __fastcall Q16_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
+static bool __fastcall Q16_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
     return false;
 }
 

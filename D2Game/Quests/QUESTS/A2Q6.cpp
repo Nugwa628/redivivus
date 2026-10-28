@@ -327,7 +327,7 @@ void __fastcall Q14_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 }
 
 // A2Q6 "The Seven Tombs" — mark Duriel dead / quest just-completed for one player's record. Sets TheSevenTombs Step0x03 + JustCompleted(0xd) on the player's quest-record bitbuffer, then bumps that client's status to 2 (act-progress) for the current difficulty. This is the core "Duriel killed" record stamp; called per qualifying player in Duriel's Lair.
-void __stdcall Q14_SetDurielComplete(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
+static void __stdcall Q14_SetDurielComplete(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
     /* SetQuestState(TheSevenTombs, 0xd=JustCompleted) — Duriel killed self game
                           */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_JustCompleted);
     /* SetQuestState(TheSevenTombs, 3=Step0x03) — Duriel-dead progress bit */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Step0x03);
@@ -455,7 +455,7 @@ BOOL __fastcall Q14_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, v
 }
 
 // A2Q6 "The Seven Tombs" — fpStatusFilter: computes the journal status code (*nUnknown) shown for this quest. Gated on QUEST_AbleGoToAct2 Completed. If Jerhyn's gate already opened, uses cached code; else derives from TheSevenTombs record: Step0x03 -> 5, Step0x04 -> 6, Step0x05 -> nStateFlagPrev, nStateFlag<3 -> nStateFlagPrev, else 0xc. Read-only on quest state.
-bool __fastcall Q14_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
+static bool __fastcall Q14_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_AbleGoToAct2, QUESTSTATE_Completed);
     if (!BVar1) {
       *nUnknown = '\0';
@@ -660,7 +660,7 @@ void __fastcall Q14_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 }
 
 // A2Q6 "The Seven Tombs" — quest timer callback armed by Q14_Callback_08 (8 frames after entering Duriel's chamber). If nStateFlagPrev is not already 3/4/5, broadcasts quest state 3 (Duriel-encounter reached). Clears the bBloodRavenKilled-aliased flag. Returns 1 to indicate the timer is done.
-uint8_t __fastcall Q14_OnEndCallback(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q14_OnEndCallback(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     uint8_t bPrevFlag = pQuestData->nStateFlagPrev;
     D2QuestDataA2Q6Strc* pBloodRavenData = pQuestData->pQuestSpecificData.pA2Q6;
     if (bPrevFlag != 5 && bPrevFlag != 4 && bPrevFlag != 3) {
@@ -1021,7 +1021,7 @@ void __fastcall Q14_SequenceFilter(D2QuestDataStrc * pQuestData) {
 }
 
 // A2Q6 "The Seven Tombs" — handler slot 0xe: on this event, clears the player's TheHoradricStaff record Step0x09 bit (cross-quest cleanup tying staff completion into the tombs quest).
-void __fastcall Q14_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q14_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
     /* UnsetQuestState(TheHoradricStaff=0xa, 9=Step0x09) — cross-quest cleanup:

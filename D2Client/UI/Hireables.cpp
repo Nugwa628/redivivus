@@ -277,7 +277,7 @@ void __stdcall UI_DrawHirelingGoldCost(int nGoldCost, int32_t nDrawPositionX) {
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nStrLen);
 }
 
-DC6 * __fastcall GetRosterIcon(D2UnitStrc * pUnit, int32_t nSkillId, int32_t * pRosterGUID, uint32_t * pFlagOut) {
+static DC6 * __fastcall GetRosterIcon(D2UnitStrc * pUnit, int32_t nSkillId, int32_t * pRosterGUID, uint32_t * pFlagOut) {
     int nIconIndex;
     char szIconPath[256];
     if (nSkillId < 0) {

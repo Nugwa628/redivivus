@@ -433,7 +433,7 @@ BOOL __fastcall Q06_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 
 // A1Q6 helper: mark Sisters-to-the-Slaughter complete + grant reward for one player. Sets JustCompleted and RewardAwaits in the player's quest record, then SetClientStatus(1, difficulty) to flag the act-progress/Act2-unlock client state. Called from Andariel-death and L4-entry paths.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
-void __stdcall Q06_SetQuestCompletedAndReward(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
+static void __stdcall Q06_SetQuestCompletedAndReward(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
     /* SetQuestState(JustCompleted): mark quest just-completed for self player
                          (drives completion sound + UI) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
     /* SetQuestState(RewardAwaits): flag reward pending so Warriv offers Act2
@@ -601,7 +601,7 @@ uint8_t __fastcall Q06_TimerSpawnPortalAndNotify(::SGAMEDATA * pGame, D2QuestDat
 
 // A1Q6 deferred quest-update (scheduled by Q06_SequenceFilter timer): if stateFlag is still 0, bump to 1 (quest now introduced/visible in log). One-shot init nudge.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
-uint8_t __fastcall Q06_QuestUpdate(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q06_QuestUpdate(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     if (pQuestData->nStateFlag) {
       return '\x01';
     }

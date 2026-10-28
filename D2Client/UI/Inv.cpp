@@ -128,7 +128,7 @@ static D2GridScreenCoordinates gnTradePage2ScreenLeft = {}; D2_STATIC_GUARD(gnTr
 static D2GridScreenCoordinates gnTradePage2ScreenRight = {}; D2_STATIC_GUARD(gnTradePage2ScreenRight, "D2Client::UI::Inv::gnTradePage2ScreenRight");
 static bool gbInvOverlayFlag = 0; D2_STATIC_GUARD(gbInvOverlayFlag, "D2Client::UI::Inv::gbInvOverlayFlag");
 
-void __stdcall InitializeiInventoryPages() {
+static void __stdcall InitializeiInventoryPages() {
     // Static local variables (originally global data)
     static D2GridScreenCoordinates pTrophyCasePageGridCoordinates = {
     /* .nGridCols = */ 0,
@@ -2248,7 +2248,7 @@ static void INV_FormatPlayerNameOnItem(uint16_t * wszText, D2UnitStrc * pUnit) {
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszText, wszPossessiveBuffer);
 }
 
-BOOL __stdcall INV_FormatPlayerNameWithBase(uint16_t * wszText1, uint16_t * wszText2, D2UnitStrc * pUnit) {
+static BOOL __stdcall INV_FormatPlayerNameWithBase(uint16_t * wszText1, uint16_t * wszText2, D2UnitStrc * pUnit) {
     int i;
     uint16_t wszPlayerNameBuffer[512];
     BOOL bHasPlayerName = D2Common::ITEMS::Items::CheckItemFlag(pUnit, ITEMFLAG_PLAYERNAME, 0x70b, ".\\UI\\inv.cpp");
@@ -2903,7 +2903,7 @@ static void AppendQuanity(uint16_t * wszText, D2UnitStrc * pUnit) {
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, wszText2);
 }
 
-void __stdcall INV_FormatAttackSpeedText(uint16_t * wszText, D2UnitStrc * pUnit) {
+static void __stdcall INV_FormatAttackSpeedText(uint16_t * wszText, D2UnitStrc * pUnit) {
     // Static local variables (originally global data)
     static uint16_t uint16_t_ARRAY_00721e88[19] = {
     0xff8,
@@ -8655,7 +8655,7 @@ void __stdcall INV_ShowTransmogrifyTooltip() {
     exit(-1);
 }
 
-void __stdcall LoadItemDesc(D2UnitStrc * pUnit, int32_t bUsePlayer) {
+static void __stdcall LoadItemDesc(D2UnitStrc * pUnit, int32_t bUsePlayer) {
     D2UnitStrc* pCursorItem_lcl;
     BOOL bFlagCheck;
     int nMouseY;

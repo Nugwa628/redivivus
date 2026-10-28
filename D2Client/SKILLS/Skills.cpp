@@ -818,7 +818,7 @@ D2UnitStrc * __fastcall SKILL_FindClosestTargetWithStats(D2UnitStrc * pUnit, int
     return callbackData.pNextUnit;
 }
 
-BOOL __fastcall Skills_CltStFunc_CheckThrowableAmmoOrWeapon(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
+static BOOL __fastcall Skills_CltStFunc_CheckThrowableAmmoOrWeapon(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     uint32_t bIsMissilePotion;
     BOOL bHasWeaponDrawn = D2Common::COMPOSIT::Composit::COMPOSIT_HasWeaponDrawn(pUnit);
     if (bHasWeaponDrawn) {
@@ -840,7 +840,7 @@ BOOL __fastcall Skills_CltStFunc_CheckThrowableAmmoOrWeapon(D2UnitStrc * pUnit, 
     return 1;
 }
 
-BOOL __fastcall Skills_CltStFunc_CheckThrowableAmmoAndWeapon(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
+static BOOL __fastcall Skills_CltStFunc_CheckThrowableAmmoAndWeapon(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     BOOL bHasAmmo = SKILLS_CltCheckThrowableAmmo(pUnit);
     if (!bHasAmmo) {
       return 0;
@@ -850,7 +850,7 @@ BOOL __fastcall Skills_CltStFunc_CheckThrowableAmmoAndWeapon(D2UnitStrc * pUnit,
     return (uint32_t)(pWeapon != 0);
 }
 
-BOOL __fastcall Skills_CltStFunc_CheckTargetIsPetWithFlag(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
+static BOOL __fastcall Skills_CltStFunc_CheckTargetIsPetWithFlag(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     DWORD nUnitGUID;
     D2UnitStrc* pTargetUnit = UNIT::CUnit::GetConfirmedTargetUnit(pUnit);
     if (!(pTargetUnit && pTargetUnit->eUnitType == UNIT_MONSTER)) {
@@ -875,7 +875,7 @@ BOOL __fastcall Skills_CltStFunc_CheckTargetIsPetWithFlag(D2UnitStrc * pUnit, eD
     return (uint32_t)(sgptDataTable->pTxtPetType[nPetTypeIdx].unsummon != 0);
 }
 
-BOOL __fastcall Skills_CltStFunc_AlwaysAllow(D2UnitStrc * pUnit, eD2Skills eD2Skill, int nSkillLvl) {
+static BOOL __fastcall Skills_CltStFunc_AlwaysAllow(D2UnitStrc * pUnit, eD2Skills eD2Skill, int nSkillLvl) {
     return 1;
 }
 
@@ -2118,7 +2118,7 @@ uint32_t __fastcall SKILL_SpawnRandomMissilesInArea(D2UnitStrc * pUnit, uint8_t 
 
 // Client-side skill expiry handler called when a skill animation completes. If the unit's current skill is not STATE_skill_move and has no loop flag (bit 1), looks up the skill's srvdofunc: 0x43 stops and clears the uninterruptable skill (Paladin Holy Shield etc.), 0x4C stops and clears sound (Barbarian), 0x4D/0x4E handles teleport landing. No-ops for all other srvdofunc values.
 // @sourcefile .\SKILLS\Skills.cpp
-void __fastcall SKILLS_CltProcessActiveSkill(D2UnitStrc * pUnit, eD2Skills eExpiredSkill, int32_t nExpiredSkillLevel) {
+static void __fastcall SKILLS_CltProcessActiveSkill(D2UnitStrc * pUnit, eD2Skills eExpiredSkill, int32_t nExpiredSkillLevel) {
     D2SkillStrc* pSkill = D2Common::Units::GetCurrentSkill(pUnit);
     if (!pSkill) {
       return;

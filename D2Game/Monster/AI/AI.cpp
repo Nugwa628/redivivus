@@ -168,6 +168,30 @@ typedef int (__fastcall *UNITFINDTEST)(D2UnitStrc * pUnit, D2UnitFindArgStrc * p
 #endif
 
 namespace D2Game::Monster::AI {
+static void __fastcall AITHINK_Fn1_UberMephisto(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_SpawnTimerInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_BaalThrone(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn1_Ancient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_Nihlathak(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_NpcBarb(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn1_DruidWolf(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_VineInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_ShadowMasterNoInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_ShadowWarrior(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_BladeCreeper(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_SentryTimerInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn1_Vendor(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn1_UberDiablo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_BloodRaven(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_GenericSpawner(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn1_Griswold(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn1_Spirit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_Imp(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AITHINK_Fn0_SpecialMounting(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall HirelingRandomMoveCheck(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AI_Fn1_ArcaneTower(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AI_Fn1_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
+static void __fastcall AI_Fn0_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
 static void __fastcall AITHINK_Fn1_DeathMauler(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam);
 
 // Returns the squared Euclidean distance between two units' world positions. Reads static path coords for objects/items (unit types 2, 4-5) and dynamic path coords for monsters/players. Used by monster AI range checks.
@@ -217,7 +241,7 @@ int32_t __fastcall GetDistanceBetween(D2UnitStrc * pUnit, D2UnitStrc * pOther) {
     return nY * nY + nX * nX;
 }
 
-void __fastcall AI_Fn1_None(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AI_Fn1_None(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
 
 }
 
@@ -230,7 +254,7 @@ void __fastcall AI_Fn1_Idle(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamSt
     PlanNextAiMove(pGame, pUnit, 200);
 }
 
-uint32_t __fastcall AI_FindClosestAllyOfSameType(int nUnusedCtx, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2MonsterAiParameterStruct * ppBestResult) {
+static uint32_t __fastcall AI_FindClosestAllyOfSameType(int nUnusedCtx, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2MonsterAiParameterStruct * ppBestResult) {
     if (!(pCandidate && pCandidate->eUnitType == UNIT_MONSTER && pUnit != pCandidate)) {
       return 0;
     }
@@ -2417,7 +2441,7 @@ uint32_t __fastcall AI_ForEachFn11_AltHittableTarget(::SGAMEDATA * pGame, D2Unit
     return 0;
 }
 
-uint32_t __fastcall AI_ForEachFn08_NearestClosedDoor(uint32_t dwParam, int * pnParam, D2UnitStrc * pUnit, D2MonsterAiParameterStruct * ppResults) {
+static uint32_t __fastcall AI_ForEachFn08_NearestClosedDoor(uint32_t dwParam, int * pnParam, D2UnitStrc * pUnit, D2MonsterAiParameterStruct * ppResults) {
     if (!(pUnit && pUnit->eUnitType == UNIT_OBJECT)) {
       return 0;
     }
@@ -2437,7 +2461,7 @@ uint32_t __fastcall AI_ForEachFn08_NearestClosedDoor(uint32_t dwParam, int * pnP
     return 0;
 }
 
-int __fastcall AI_ForEachFn09_FindOwnMinionCorpse(uint32_t dwParam, D2UnitStrc * pUnit, D2UnitStrc * pOther, D2UnitStrc * * ppResults) {
+static int __fastcall AI_ForEachFn09_FindOwnMinionCorpse(uint32_t dwParam, D2UnitStrc * pUnit, D2UnitStrc * pOther, D2UnitStrc * * ppResults) {
     bool _bHasPassiveState;
     bool bHasPassiveState;
     D2UnitStrc* pDistAsUnit = (D2UnitStrc*)AI::GetDistance(pUnit, pOther);
@@ -2461,7 +2485,7 @@ int __fastcall AI_ForEachFn09_FindOwnMinionCorpse(uint32_t dwParam, D2UnitStrc *
     return 0;
 }
 
-uint32_t __fastcall AI_ForEachFn12_CountClassInRange(uint32_t dwParam, D2UnitStrc * pUnit, D2UnitStrc * pOther, int * pCountBuf) {
+static uint32_t __fastcall AI_ForEachFn12_CountClassInRange(uint32_t dwParam, D2UnitStrc * pUnit, D2UnitStrc * pOther, int * pCountBuf) {
     bool _bIsDead;
     bool bIsDead;
     if (!(pOther && pOther->eUnitType == UNIT_MONSTER && pOther->nClassId == *pCountBuf)) {
@@ -5047,7 +5071,7 @@ void __fastcall AI_Fn1_MosquitoNest(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
     PlanNextAiMove(pGame, pUnit, 0x19);
 }
 
-void __fastcall AI_Fn0_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AI_Fn0_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     if (!pAiParam->pMonStats) {
       return;
     }
@@ -5066,7 +5090,7 @@ void __fastcall AI_Fn0_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiPar
     pAiParam->pMonsterAiGeneral->dwArg0 = pGame->dwGameFrame + sgptDataTable->pTxtSkills[nSkillId].Param[1];
 }
 
-void __fastcall AI_Fn1_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AI_Fn1_BoneWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     if (pAiParam->pMonsterAiGeneral->dwArg0 < pGame->dwGameFrame) {
       MONSTERAI_CommandSkillAtPosition(pGame, pUnit, 0, 0, 0);
       return;
@@ -5545,7 +5569,7 @@ void __fastcall AI_Fn1_Megademon(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiPa
     MONSTERAI_CommandWalkToUnit(pGame, pUnit, pAttacker, 7);
 }
 
-void __fastcall AI_Fn1_ArcaneTower(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AI_Fn1_ArcaneTower(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2MonStatsTxt* pMonStats = pAiParam->pMonStats;
     D2AiGeneralStrc* pAiGeneral = pAiParam->pMonsterAiGeneral;
     D2UnitStrc* pAttacker = pAiParam->pTarget;
@@ -6314,7 +6338,7 @@ void __fastcall AI_Fn1_SuccubusWitch(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2
     }
 }
 
-void __fastcall HirelingRandomMoveCheck(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall HirelingRandomMoveCheck(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2SeedStrc DVar2;
     D2UnitStrc* pTarget = pAiParam->pTarget;
     uint32_t uVar1 = pUnit->sSeed.nSeedLow;
@@ -6511,7 +6535,7 @@ void __fastcall AI_Fn1_Overseer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiPar
     MONSTERAI_CommandWalkToUnit(pGame, pSelf, pTarget, 0);
 }
 
-uint32_t __fastcall MONSTERAI_CountGolemReviveMonsters(uint32_t pGame, D2UnitStrc * pUnit, D2UnitStrc * pMonsterCandidate, int * pCounter) {
+static uint32_t __fastcall MONSTERAI_CountGolemReviveMonsters(uint32_t pGame, D2UnitStrc * pUnit, D2UnitStrc * pMonsterCandidate, int * pCounter) {
     if (!(pUnit != pMonsterCandidate && pMonsterCandidate && pMonsterCandidate->eUnitType == UNIT_MONSTER)) {
       return 0;
     }
@@ -6575,7 +6599,7 @@ void __fastcall AITHINK_Fn1_MinionSpawner(::SGAMEDATA * pGame, D2UnitStrc * pUni
 }
 
 // Init function for Baal wave monster AI: selects a wave skill from gaBaalWaveSkillIndexTable via RNG and stores skill index + default state into pMonsterAiGeneral->dwArg1/dwArg2. Called as fpInit for BaalThrone entry.
-void __fastcall AITHINK_Fn0_SpecialMounting(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_SpecialMounting(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     // Static local variables (originally global data)
     static int gaBaalWaveSkillIndexTable[4] = { 0x2, 0x0, 0x4, 0x0 }; D2_STATIC_GUARD(gaBaalWaveSkillIndexTable, "D2Game::Monster::AI::AITHINK_Fn0_SpecialMounting::gaBaalWaveSkillIndexTable");
 
@@ -6697,7 +6721,7 @@ void __fastcall AITHINK_Fn1_SpecialMounting(::SGAMEDATA * pGame, D2UnitStrc * pU
     PlanNextAiMove(pGame, pUnit, 0x14);
 }
 
-void __fastcall AITHINK_Fn0_Imp(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_Imp(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     pAiParam->pMonsterAiGeneral->dwArg0 = -1;
 }
 
@@ -6937,7 +6961,7 @@ void __fastcall AITHINK_Fn1_BloodLord(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     PlanNextAiMove(pGame, pUnit, (int)pMonStats->aip[3][pGame->nDifficulty]);
 }
 
-void __fastcall AITHINK_Fn1_Spirit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn1_Spirit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     if (pAiParam->pMonsterAiGeneral->dwArg0) {
       PlanNextAiMove(pGame, pUnit, 0x32);
       return;
@@ -8505,7 +8529,7 @@ void __fastcall AI_Function1_SummonMaster(::SGAMEDATA * pGame, D2UnitStrc * pUni
     PlanNextAiMove(pGame, pUnit, 10);
 }
 
-void __fastcall AITHINK_Fn1_Griswold(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn1_Griswold(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2SeedStrc DVar1;
     D2UnitStrc* pTarget = pAiParam->pTarget;
     uint32_t nSeedLow = pUnit->sSeed.nSeedLow;
@@ -8779,7 +8803,7 @@ uint8_t __fastcall AI_GetRandomMonsterClassForLevel(::SGAMEDATA * pGame, D2UnitS
     return '\x01';
 }
 
-void __fastcall AITHINK_Fn0_GenericSpawner(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_GenericSpawner(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     AITHINK_Fn0_SpawnTimerInit(pGame, pUnit, pAiParam);
     pAiParam->pMonsterAiGeneral->nGenericSpawnerSpecific = -1;
 }
@@ -8841,7 +8865,7 @@ void __fastcall AI_Fn1_GenericSpawner(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     PlanNextAiMove(pGame, pUnit, 0x14);
 }
 
-void __fastcall AITHINK_Fn0_BloodRaven(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_BloodRaven(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     pAiParam->pMonsterAiGeneral->dwArg2 = 0;
 }
 
@@ -11663,11 +11687,11 @@ void MONSTERAI_SpawnSpecificMinions(void * pThis, D2UnitStrc * pUnit) {
     Create::SpawnMonsterAtUnit((::SGAMEDATA*)pThis, pUnit, 0x2c7, eD2MonsterAnimMode_ns::Neutral, 4, 0x40);
 }
 
-void __fastcall AITHINK_Fn1_UberDiablo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn1_UberDiablo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
 
 }
 
-void __fastcall AITHINK_Fn1_Vendor(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn1_Vendor(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2SeedStrc newSeed = D2_SEED_NEXT(pUnit->sSeed);
     pUnit->sSeed = newSeed;
     if ((int)(newSeed.nSeedLow % 100) < 0x14) {
@@ -11849,7 +11873,7 @@ void __fastcall AITHINK_Fn1_DarkWanderer(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     PlanNextAiMove(pGame, pUnit, 10);
 }
 
-void __fastcall AITHINK_Fn0_SentryTimerInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_SentryTimerInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2AiGeneralStrc* pDVar1 = pAiParam->pMonsterAiGeneral;
     pDVar1->dwArg0 = pGame->dwGameFrame;
     pDVar1->dwArg1 = -1;
@@ -11957,7 +11981,7 @@ void __fastcall AITHINK_Fn1_AssassinSentry(::SGAMEDATA * pGame, D2UnitStrc * pUn
     }
 }
 
-void __fastcall AITHINK_Fn0_BladeCreeper(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_BladeCreeper(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2AiGeneralStrc* pAiGeneral = pAiParam->pMonsterAiGeneral;
     pAiGeneral->dwArg0 = -1;
     pAiGeneral->dwArg1 = 1;
@@ -12402,7 +12426,7 @@ int32_t __fastcall MONSTERAI_CalculateSkillAuraRange(D2UnitStrc * pUnitStrc, D2U
     return fRange;
 }
 
-void __fastcall AITHINK_Fn0_ShadowWarrior(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_ShadowWarrior(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2AiGeneralStrc* pDVar1 = pAiParam->pMonsterAiGeneral;
     pDVar1->dwArg2 = 1;
     D2UnitStrc* pUnit_00 = Ai::AiGeneral::GetOwnerUnit(pUnit);
@@ -12663,7 +12687,7 @@ void __fastcall AITHINK_Fn0_ShadowMaster(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     } while ((int)pAiParam < nClassSkillCount);
 }
 
-void __fastcall AITHINK_Fn0_ShadowMasterNoInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_ShadowMasterNoInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2AiGeneralStrc* pDVar1 = pAiParam->pMonsterAiGeneral;
     pDVar1->dwArg2 = 1;
     D2UnitStrc* pUnit_00 = Ai::AiGeneral::GetOwnerUnit(pUnit);
@@ -13509,7 +13533,7 @@ void __fastcall AITHINK_Fn1_ShadowMaster(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     PlanNextAiMove(pGameCopy, pTmpUnit, 0xf);
 }
 
-void __fastcall AITHINK_Fn0_VineInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_VineInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     pAiParam->pMonsterAiGeneral->dwArg0 = 0;
 }
 
@@ -14126,7 +14150,7 @@ void __fastcall AI_Hireling_ThinkMeleeCombat(::SGAMEDATA * pGame, D2UnitStrc * p
     RestartAiThink(pGame, pUnit, (int)*(short int*)((uintptr_t)&pAiGeneral[1].dwArg0 + (uint32_t)pGame->nDifficulty * 2 + 2));
 }
 
-void __fastcall AITHINK_Fn1_DruidWolf(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn1_DruidWolf(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     if (pUnit && pUnit->nClassId == 0x1a4) {
       AI_Hireling_ThinkRangedCombat(pGame, pUnit, pAiParam);
       return;
@@ -14362,7 +14386,7 @@ void __fastcall AI_SetStoredPosition(D2AiParamStrc * pAiParam, int32_t nParam, i
     *(int32_t*)(nParam + 0x1c) = nY;
 }
 
-void __fastcall AITHINK_Fn0_NpcBarb(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_NpcBarb(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
 
 }
 
@@ -14719,7 +14743,7 @@ void __fastcall AITHINK_Fn1_Wussie(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ai
     PlanNextAiMove(pGame, pUnit, 0x19);
 }
 
-void __fastcall AITHINK_Fn0_Nihlathak(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_Nihlathak(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
 
 }
 
@@ -15107,7 +15131,7 @@ void __fastcall AITHINK_AncientMadawc(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     PlanNextAiMove(pGame, pUnit, 0x19);
 }
 
-void __fastcall AITHINK_Fn1_Ancient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn1_Ancient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     int nClassId = !pUnit ? -1 : pUnit->nClassId;
     if (nClassId == 0x21c) {
       AITHINK_AncientKoric(pGame, pUnit, pAiParam);
@@ -15178,7 +15202,7 @@ void __fastcall BaalThroneClearFunc(D2UnitStrc * pUnit, int32_t nParam, D2AiPara
     *pWaveArg &= -2;
 }
 
-void __fastcall AITHINK_Fn0_BaalThrone(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_BaalThrone(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
 
 }
 
@@ -15471,7 +15495,7 @@ void __fastcall AITHINK_Fn1_BaalMinion(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
     RestartAiThink(pGame, pUnit, (int)pMonStats->aip[3][pGame->nDifficulty]);
 }
 
-uint32_t __fastcall MONSTERAI_FindEnergyMonster(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, uint32_t dwUnused2) {
+static uint32_t __fastcall MONSTERAI_FindEnergyMonster(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, uint32_t dwUnused2) {
     BOOL fBoltCount = SKILLS::SkillEMonst::SKILLSOR_GetFrozenOrbBoltCount(pUnit, pCandidate);
     if (!fBoltCount) {
       return 0;
@@ -15936,7 +15960,7 @@ void __fastcall AITHINK_Fn1_Fallen(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ai
     PlanNextAiMove(pGame, pUnit, 10);
 }
 
-uint32_t __fastcall MONSTERAI_FindNearestEvilMonster(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * pOutResult) {
+static uint32_t __fastcall MONSTERAI_FindNearestEvilMonster(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * pOutResult) {
     if (!(pUnit != pCandidate && pCandidate && pCandidate->eUnitType == UNIT_MONSTER)) {
       return 0;
     }
@@ -16399,7 +16423,7 @@ void __fastcall AITHINK_Fn1_Goatman(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
 }
 
 // Unit-iteration callback used to locate a dead Fallen corpse eligible for revival by a Fallen Shaman. Accepts pCandidate if: it is a different monster unit; its base MonStats ID is 0x13 (Fallen) or 0x3A (Carver); alignment is neutral (0) and the corpse-dead flag (eUnitFlags bit 1) is set; has no passive or light state active; is in death animation mode (Kick); and is within the search radius stored in pOutResult[3]. On match, stores candidate in pOutResult[0], distance in pOutResult[2], and increments count at pOutResult[1].
-uint32_t __fastcall MONSTERAI_FindFallenForRevival(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2MonsterAiParameterStruct * pOutResult) {
+static uint32_t __fastcall MONSTERAI_FindFallenForRevival(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2MonsterAiParameterStruct * pOutResult) {
     if (!(pUnit != pCandidate && pCandidate && pCandidate->eUnitType == UNIT_MONSTER)) {
       return 0;
     }
@@ -17124,7 +17148,7 @@ void __fastcall AITHINK_Fn1_Mummy(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiP
 }
 
 // Unit-iterator callback used to find the best dead monster for a resurrection AI to raise. For each candidate: must be an allied UNIT_MONSTER, not pUnit itself, not alignment 2, flagged as dead (eUnitFlags bit 1 set), and have no passive state. Filters by undead type depending on whether pOutResult[5] is set. If within the range limit (pOutResult[4]), prefers monsters in Kick anim with no light state (written to *pOutResult), otherwise tracks partially-damaged non-Death candidates in pOutResult[1]. Always returns 0.
-uint32_t __fastcall MONSTERAI_FindMonsterToResurrect(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * pOutResult) {
+static uint32_t __fastcall MONSTERAI_FindMonsterToResurrect(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * pOutResult) {
     uint32_t bIsUndeadType;
     if (!(pCandidate && pCandidate->eUnitType == UNIT_MONSTER && pUnit != pCandidate)) {
       return 0;
@@ -17417,7 +17441,7 @@ BOOL __fastcall AI_Monster_ShrinkCollisionSize(::SGAMEDATA * pGame, D2UnitStrc *
     return 1;
 }
 
-uint32_t __fastcall MONSTERAI_FindLowHpTarget(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * pOutResult) {
+static uint32_t __fastcall MONSTERAI_FindLowHpTarget(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * pOutResult) {
     if (!(pCandidate && (pCandidate->eUnitType == UNIT_MONSTER || pCandidate->eUnitType == UNIT_PLAYER) && pUnit != pCandidate)) {
       return 0;
     }
@@ -19241,7 +19265,7 @@ void __fastcall AITHINK_Fn1_MaggotEgg(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     PlanNextAiMove(pGame, pUnit, (int)pMonStats->aip[0][pGame->nDifficulty]);
 }
 
-void __fastcall AITHINK_Fn0_SpawnTimerInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn0_SpawnTimerInit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
     D2AiGeneralStrc* pDVar1 = pAiParam->pMonsterAiGeneral;
     pDVar1->dwArg0 = pGame->dwGameFrame;
     pDVar1->dwArg1 = 0;
@@ -19626,7 +19650,7 @@ void __fastcall AITHINK_Fn1_ZakarumZealot(::SGAMEDATA * pGame, D2UnitStrc * pUni
 }
 
 // ForEach callback that searches for a wounded allied Hydra or Golem (classId 0xEB or 0xEE). Skips self, dead units, non-monsters, non-allies, and alignment==2 units. Accepts candidates within the search radius (ppSearchParams[3]) whose current HP percentage is below 61 (0x3D). Tracks the lowest-HP candidate in ppSearchParams[0] and increments a match counter in ppSearchParams[1]. Always returns 0.
-uint32_t __fastcall MONSTERAI_FindWoundedHydraGolem(int dwParam, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * ppSearchParams) {
+static uint32_t __fastcall MONSTERAI_FindWoundedHydraGolem(int dwParam, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * ppSearchParams) {
     if (!(pUnit != pCandidate && pCandidate && pCandidate->eUnitType == UNIT_MONSTER)) {
       return 0;
     }
@@ -20239,7 +20263,7 @@ D2UnitStrc * __fastcall AI_BAAL_FindRandomTargetPlayer(::SGAMEDATA * pGame, D2Un
     } while (true);
 }
 
-void __fastcall AITHINK_Fn1_UberMephisto(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
+static void __fastcall AITHINK_Fn1_UberMephisto(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiParamStrc * pAiParam) {
 
 }
 
@@ -21088,7 +21112,7 @@ void __fastcall FetishShamanAi_ClearInfernoState(::SGAMEDATA * pGame, D2UnitStrc
 }
 
 // ForEach callback for the Necromancer AI to locate its own summons (Skeleton classId 0x8D or Revive 0x18C). Accepts only monsters that are summoned (flag bit 1 set), not in a passive state, owned by pUnit (or revive with special ownership), alignment==0, within the search radius (ppSearchCtx[2]), and not of type 0xC. Splits matches: idle summons increment ppSearchCtx[5] and track nearest in [3]/[4]; active (Kick mode) summons track nearest in [0]/[1]. Returns 0.
-uint32_t __fastcall AI_Necromancer_FindOwnedSummonCallback(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pCandidateUnit, D2UnitStrc * * ppSearchCtx) {
+static uint32_t __fastcall AI_Necromancer_FindOwnedSummonCallback(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pCandidateUnit, D2UnitStrc * * ppSearchCtx) {
     D2UnitStrc* pOwnerOrDist;
     uint32_t bIsMonsterType;
     if (!(pUnit != pCandidateUnit && pCandidateUnit && pCandidateUnit->eUnitType == UNIT_MONSTER && pCandidateUnit->eUnitFlags >> 1 & 1)) {
@@ -21564,7 +21588,7 @@ void __fastcall AI_Fn1_FingerMage(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiP
     SERVER_UNIT_CastSkill(pGame, pUnit, pMonStats->aSkMode[0], (int)nSkill1Id, pUnit_00, 0, 0);
 }
 
-uint32_t __fastcall MONSTERAI_FindCorpseForRaising(int dwParam, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * ppSearchParams) {
+static uint32_t __fastcall MONSTERAI_FindCorpseForRaising(int dwParam, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * ppSearchParams) {
     if (!(pUnit != pCandidate && pCandidate && pCandidate->eUnitType == UNIT_MONSTER && !(pCandidate->eUnitFlags >> 9 & 1) && pCandidate->eUnitFlags >> 1 & 1)) {
       return 0;
     }
@@ -21848,7 +21872,7 @@ void __fastcall AI_Fn1_AbyssKnight(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ai
 }
 
 // Unit-search callback for Blood Lord (classId 0x136) target selection. Accepts a candidate unit only if it is an alive allied monster with UNITFLAG_NOXP set, neutral alignment, within the search radius, and itself a Blood Lord. Tracks the nearest candidate in ppSearchParams[0/3] and the lowest-HP candidate (below 40% life) in ppSearchParams[1/4] for priority healing/resurrection targeting.
-uint32_t __fastcall MONSTERAI_FindBloodLordTarget(int32_t nCallbackResult, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * ppSearchParams) {
+static uint32_t __fastcall MONSTERAI_FindBloodLordTarget(int32_t nCallbackResult, D2UnitStrc * pUnit, D2UnitStrc * pCandidate, D2UnitStrc * * ppSearchParams) {
     if (!(pCandidate != pUnit && pCandidate && pCandidate->eUnitType == UNIT_MONSTER)) {
       return 0;
     }

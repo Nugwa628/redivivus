@@ -77,12 +77,6 @@ struct D2RoomStrc * __fastcall DRLGWARP_GetWarpDestinationRoom(struct D2RoomExSt
 void __fastcall DRLGWARP_SetAllWarpTilesSelectValue(int32_t pRoomEx, uint32_t nSelectValue);
 void __fastcall DRLGWARP_UpdateWarpRoomExSelect(struct D2RoomExStrc * pRoomEx, eD2LevelId eLevel);
 void __fastcall DRLGWARP_UpdateWarpRoomExDeselect(struct D2RoomExStrc * pRoomEx, eD2LevelId eLevel);
-// Picks a random spawn point from the level's preset unit array.
-// Counts entries matching the given type (or its group via gaSpawnPointGroupTable),
-// rolls a seeded random index, then outputs the X/Y coordinates.
-// Also initializes the room at those coordinates.
-// Called by DRLGSPAWN_FindSpawnLocationInLevel.
-struct D2RoomExStrc * __fastcall DRLGSPAWN_GetRandomPresetSpawnPoint(int32_t nSpawnType, int * pnOutX, int * pnOutY, struct D2DrlgLevelStrc * pLevel);
 // Gets the room at the level's center position offset by (nOffsetX, nOffsetY).
 // Computes center as (WorldPos + WorldSize/2 - 2) plus the offsets.
 struct D2RoomExStrc * __fastcall DRLGSPAWN_GetRoomAtLevelCenterOffset(int32_t nOffsetX, int32_t nOffsetY, struct D2DrlgLevelStrc * pLevel);

@@ -913,9 +913,6 @@ eD2ServerIncomingStatus __fastcall SCMD_0x59_CommandNPC(::SGAMEDATA * pGame, str
 // @sourcefile .\PLAYER\PlrMsg.cpp
 eD2ServerIncomingStatus __fastcall SCMD_0x5F_SyncPosition(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, char * pPacket, size_t nSize);
 eD2ServerIncomingStatus __fastcall SCMD_0x60_WeaponSwap(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2GSPacketClt0x60_WeaponSwap * pPacket, size_t nSize);
-// Server check (PlrMsg) for whether a mercenary can take/use the item the player is offering, and performs the resulting action. Expansion-only (returns 3 in classic). Rejects unidentified or broken items. Potions (healing/thawing/antidote) are cast on the merc via SKILLITEM_DispatchItemSpell then moved to cursor (return 1). Otherwise checks the item type against the merc's class id: armor/helm allowed for all; Rogue(0x167) sword(1H)/shield; Desert(0x152) spear/polearm; Iron Wolf(0x10f) bow; Barbarian(0x230) 1H axe/helm; (0x231) 1H sword. If type allowed and ITEM_CheckEquipRequirements passes, swaps it onto the merc (MERC_SwapEquippedItem) firing sound event 0x57 (return 1) or 0x56 on swap failure (return 0); disallowed type fires sound 0x55 (return 0).
-// @sourcefile .\PLAYER\PlrMsg.cpp
-void __stdcall MERC_CanEquipItem(struct D2UnitStrc * pUnit, ::SGAMEDATA * pGame, struct D2UnitStrc * pUnit1, struct D2UnitStrc * pUnit2);
 // C->S 0x61 Merc Equip Item (3 bytes, Expansion only)
 // [op:1][bodyLoc:u16]
 // If cursor empty and bodyLoc!=0, equip/unequip merc item. Otherwise validate cursor item vs merc.

@@ -168,12 +168,12 @@ void Q24_SetupDarkWandererMapAi(void * pThis, int32_t nParam) {
 }
 
 // A3Q7 / slot QUESTINT_TheGuardian. Q24_StatusFilter: quest status-string filter callback (installed by Q24_InitData into fpStatusFilter). Stub - always returns false (no special status-bit suppression for this slot).
-bool __fastcall Q24_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
+static bool __fastcall Q24_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
     return false;
 }
 
 // A3Q7 / slot QUESTINT_TheGuardian. Q24_ActiveFilter: quest active/monster filter callback (installed by Q24_InitData into fpActiveFilter). Stub - always returns false.
-bool __fastcall Q24_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx) {
+static bool __fastcall Q24_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx) {
     return false;
 }
 

@@ -1550,7 +1550,7 @@ void __fastcall DumpAnnotatedStackMemory(HANDLE hSymHandle, CONTEXT * pContext, 
 
 }
 
-D2FogModuleNodeStrc * __stdcall LoadSymbolsForAllModules(HANDLE hProcess, uint32_t dwProcessId) {
+static D2FogModuleNodeStrc * __stdcall LoadSymbolsForAllModules(HANDLE hProcess, uint32_t dwProcessId) {
     // Static local variables (originally global data)
     static uint32_t gnSymbolLoadState; D2_STATIC_GUARD_BSS(gnSymbolLoadState, "Fog::Debug::LoadSymbolsForAllModules::gnSymbolLoadState");
 

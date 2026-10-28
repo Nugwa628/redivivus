@@ -138,7 +138,7 @@ namespace D2Client::UNIT::Player {
 
 // Client-side reaction handler invoked when a unit stat changes; dwStatIdAndSubIndex packs the stat id (high 16 bits, eD2UnitStat) and a sub-index (low 16 bits), nValue is the new value. Dispatches on stat id: item_lightradius/item_lightcolor update the unit's rendered light; item_nonclassskill/item_singleskill add or remove a granted skill on a player (AddSkill when newly granted and class-eligible, SKILL_RemoveSkillCallback when value drops to 0 and skill level is gone); item_charged_skill adds/removes a charged item skill (decoding charge level/max from the sub-index and item charge count, gated on the item owner matching the player). All other stats are no-ops here. Player/UI-side only.
 // @sourcefile .\UNIT\Player.cpp
-void __fastcall CLIENT_OnStatChanged(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pItem, uint32_t dwStatIdAndSubIndex, uint32_t dwUnused2, int32_t nValue) {
+static void __fastcall CLIENT_OnStatChanged(uint32_t dwUnused, D2UnitStrc * pUnit, D2UnitStrc * pItem, uint32_t dwStatIdAndSubIndex, uint32_t dwUnused2, int32_t nValue) {
     D2SkillStrc* pSkill;
     D2SkillsTxt* pSkillsTxt;
     uint32_t nChargeCount;

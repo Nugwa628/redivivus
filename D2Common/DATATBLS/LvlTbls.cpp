@@ -1224,7 +1224,7 @@ D2LevelDefsTxt * __fastcall TXT_LevelDefs_GetLine(eD2LevelId eLevel) {
 }
 
 // Converts all forward slashes '/' in a level path string to backslashes '\\' in-place, then prepends the data directory prefix via wsprintfA. Used to normalize DS1/DT1 file paths loaded from level text tables to Windows path format.
-void __fastcall LVLTBLS_FixPathSlashes(char * szText, char * szPathPrefix) {
+static void __fastcall LVLTBLS_FixPathSlashes(char * szText, char * szPathPrefix) {
     int i;
     char szFormatBuf[60];
     char cCurrent;

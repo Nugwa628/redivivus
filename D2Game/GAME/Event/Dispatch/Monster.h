@@ -70,7 +70,6 @@ BOOL __fastcall MONMODE_ProcessBlockAnimation(::SGAMEDATA * pGame, struct D2Unit
 BOOL __fastcall MONMODE_CompleteCastAndReset(::SGAMEDATA * pGame, struct D2MonsterKillStrc * pMonsterKill);
 // Schedules the deferred death animation for a monster. Clears combat state via FreeCombatAndChangeAnimMode, then if no AITHINK timer is pending: if the unit is stunned, schedules the death event 45 frames out; otherwise reads aidel from MonStatsTxt (SP) or TreasureClass offset by difficulty (MP/BNet) as the death-animation delay, defaulting to 15 frames if zero.
 BOOL __fastcall PlanExecutionOfMonster(::SGAMEDATA * pGame, struct D2MonsterKillStrc * pMonsterKill);
-BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_A(::SGAMEDATA * pGame, struct D2MonsterKillStrc * pMonsterKill);
 BOOL __fastcall MONMODE_RecoverToNeutral(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 void __fastcall MONSTERMODE_Mode10_OnEndFrame_NoOp(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 BOOL __fastcall MONMODE_ResetToNeutralWithDelay(::SGAMEDATA * pGame, struct D2MonsterKillStrc * pMonsterKill);
@@ -80,7 +79,6 @@ BOOL __fastcall MONMODE_StartOtherAttack(::SGAMEDATA * pGame, struct D2MonsterKi
 BOOL __fastcall DropHandlerGeneric(::SGAMEDATA * pGame, struct D2MonsterKillStrc * pMonsterKill);
 // Monster animation-mode tick for the skill-cast frame cycle (called from the game event dispatcher). If no current skill: advances the anim frame, fires a special missile at the action frame (or end-of-cycle), falls back to MONSTER_AttackTarget + DAMAGE_ProcessCombatQueueEntry. If a skill is active and flagged as in-motion (flag bit 0): calls GetTarget + UNITS_ProcessUnitMovement; on reaching the destination (result 2) marks skill flag bit 1, runs SKILLS_PeriodicSkillSpawnAndTimer, and advances the frame at the action point. Otherwise calls SKILLS_PeriodicSkillSpawnAndTimer and advances. Returns 1 normally, 2 at end-of-cycle.
 BOOL __fastcall MONMODE_ProcessSkillCast(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_B(::SGAMEDATA * pGame, struct D2MonsterKillStrc * pMonsterKill);
 // Attempts to make a monster flee from its current target. Checks MonStatsTxt flags 3 and 0xD (flee-capable); if both set and unit is not in Death mode, sets path type 8 (flee), calculates flee distance (10 for classId 0x4E/Andariel, else 5), computes a new path, and transitions to Flee anim mode (0xD). Returns 1 if flee was attempted, 0 if monster cannot flee.
 BOOL __fastcall MONMODE_TryFleeFromTarget(::SGAMEDATA * pGame, struct D2MonsterKillStrc * pMonsterKill);
 void __fastcall MONMODE_CompleteSkillSequence(::SGAMEDATA * pGame, struct D2MonsterKillStrc * pMonsterKill);

@@ -64,7 +64,7 @@
 
 namespace D2Client::UI::QuestLog {
 
-int32_t __fastcall QUESTLOG_FindQuestIndexById(int32_t nQuestId) {
+static int32_t __fastcall QUESTLOG_FindQuestIndexById(int32_t nQuestId) {
     int nIndex = 0;
     do {
       if (gaQuestInfoTable[nIndex].nStringIndex == nQuestId) {
@@ -766,7 +766,7 @@ void __stdcall QUESTLOG_AcknowledgeNewQuests() {
     } while ((int)nIndex < (int)gQuestLog.nQuestLogQuestCount);
 }
 
-int __fastcall QUESTLOG_ScrollCompleteCallback_ClearButton(void * pUserParam, uint32_t nReason, void * pDismissCallback) {
+static int __fastcall QUESTLOG_ScrollCompleteCallback_ClearButton(void * pUserParam, uint32_t nReason, void * pDismissCallback) {
     gQuestLog.bQuestLogButtonDown = 0;
     Text::TEXT_SetScrollCompleteCallback(nullptr, pUserParam);
     return 0;

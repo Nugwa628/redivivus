@@ -152,7 +152,7 @@ BOOL __fastcall Q11_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUn
 // A2Q3 - per-unit iterator cb (Q11_SendDarknessPacket): for each player in an act, send 0x53 "darkness"
 // env packet (subcmd 5) to blot out the sun, then a 0x5D quest-state packet (quest 10, flag 0x10).
 // No quest-record access; pure client notification of the Tainted-Sun darkening.
-BOOL __fastcall Q11_SendDarknessPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+static BOOL __fastcall Q11_SendDarknessPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2GSPacketSrv0x53 sPacket53;
     D2GSPacketSrv0x5D sPacket5D;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q3.cpp", 0x142);
@@ -177,7 +177,7 @@ BOOL __fastcall Q11_SendDarknessPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
 // A2Q3 - per-unit iterator cb (Q11_SendSunRestoredPacket): for each player in an act, send 0x53
 // "darkness" env packet (subcmd 2 = restore daylight) when the Tainted Sun Altar is destroyed.
 // No quest-record access; mirror of Q11_SendDarknessPacket that lifts the darkness.
-BOOL __fastcall Q11_SendSunRestoredPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+static BOOL __fastcall Q11_SendSunRestoredPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2GSPacketSrv0x53 sPacket;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q3.cpp", 0x165);
     uint8_t nActNo = GAME::Clients::GetAct(pClient);

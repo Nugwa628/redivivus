@@ -2252,7 +2252,7 @@ static void __stdcall ITEMMODE_ConsumeItem(::SGAMEDATA * pGame, D2UnitStrc * pUn
     ITEMMODE_DeleteItemFromInventory(pGame, pUnit2, pUnit, 0);
 }
 
-eD2Skills ITEMMODE_GetItemCastSkill(D2UnitStrc * pUnit) {
+static eD2Skills ITEMMODE_GetItemCastSkill(D2UnitStrc * pUnit) {
     uint32_t nSuffix;
     void* pvVar1;
     eD2Skills eSkillId = ~SKILL_Attack;
@@ -3322,7 +3322,7 @@ BOOL __fastcall ITEMMODE_HasSocketedItems(D2UnitStrc * pUnit, char * szFile, int
     return 1;
 }
 
-uint32_t __stdcall ITEMMODE_GetSocketCount(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static uint32_t __stdcall ITEMMODE_GetSocketCount(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     int16_t wPrefixB;
     int16_t wSuffixA;
     int16_t wSuffixB;

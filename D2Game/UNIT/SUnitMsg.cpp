@@ -156,7 +156,7 @@ void __fastcall PLAYER_InitBaseStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit, ui
     SUnitDmg::DAMAGE_SetUnitToLevel(pGame, pUnit, gaStartingLevelByAct[nAct]);
 }
 
-void __fastcall thunk_NET_D2GS_SERVER_Send_0x75_PlayerPartyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pOtherUnit) {
+static void __fastcall thunk_NET_D2GS_SERVER_Send_0x75_PlayerPartyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pOtherUnit) {
     GAME::SCmd::NET_D2GS_SERVER_Send_0x75_UPDATEROSTER(pUnit, pOtherUnit);
 }
 

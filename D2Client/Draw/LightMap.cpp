@@ -508,7 +508,7 @@ static void __stdcall LIGHTMAP_ApplyPointLight(int nQuality, D2LightMapStrc * pL
     } while (nRadius);
 }
 
-void __fastcall LIGHTMAP_SampleGridToBuffer(int unused, D2LightMapStrc * pLightMap) {
+static void __fastcall LIGHTMAP_SampleGridToBuffer(int unused, D2LightMapStrc * pLightMap) {
     uint8_t nCollisionVal;
     int nCellY;
     int nCellX;

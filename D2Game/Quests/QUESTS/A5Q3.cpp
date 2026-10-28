@@ -1232,7 +1232,7 @@ void __fastcall Q33_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2
 // Q33_CheckPlayerHasScrollOfResistance (PrisonOfIce): party-iterator cb. If the player holds the "ice " scroll quest item,
 // sets the shared flag pA5Q3->field_0xE2=1 (note: reads the quest data via QUESTINT_ToolsOfTheTrade internal-no which the
 // union aliases here). Used to test whether anyone in the party still carries the Scroll of Resistance.
-void __fastcall Q33_CheckPlayerHasScrollOfResistance(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+static void __fastcall Q33_CheckPlayerHasScrollOfResistance(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2UnitStrc* pScrollItem = ITEMS::Items::Drop::HasQuestItem(pGame, pUnit, 0x20656369);
     if (!pScrollItem) {
       return;

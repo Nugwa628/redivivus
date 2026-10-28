@@ -836,7 +836,7 @@ void __fastcall SKILLASS_SetupMissilePath(D2UnitStrc * pUnit, int32_t nParam) {
 }
 
 // Spawns a ring of missiles; skill-agnostic.
-void __fastcall SKILLASS_SpawnMissileRing(uint32_t dwParam, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pTarget, eMissilesId pParam, int32_t nTargetX, int32_t nTargetY, eD2Skills eSkill, int32_t nSkillLvl, int32_t nMissileStride) {
+static void __fastcall SKILLASS_SpawnMissileRing(uint32_t dwParam, D2UnitStrc * pUnit, ::SGAMEDATA * pGame, D2UnitStrc * pTarget, eMissilesId pParam, int32_t nTargetX, int32_t nTargetY, eD2Skills eSkill, int32_t nSkillLvl, int32_t nMissileStride) {
     int32_t nRoyalStrikeParam;
     D2SkillArgStrc sSkillArg;
     int anXYOffsetTable[128];
@@ -1696,7 +1696,7 @@ static void __stdcall SKILLBAR_ApplyWhirlwindDamage(::SGAMEDATA * pGame, D2Damag
     D2Common::Stats::StatsEx::STATLIST_SetItemStatActive(pUnit2, pMainWeapon, 1);
 }
 
-void __stdcall D2CalcKickDamage(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2SkillsTxt * pSkillTxt, int32_t nSkillLvl, BOOL bKickCheck, D2UnitStrc * pAttacker, eD2Skills eSkill) {
+static void __stdcall D2CalcKickDamage(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2SkillsTxt * pSkillTxt, int32_t nSkillLvl, BOOL bKickCheck, D2UnitStrc * pAttacker, eD2Skills eSkill) {
     D2DamageStrc sDamage;
     uint32_t nToHit = D2Common::Skills::SKILLS_CalcToHit(pAttacker, eSkill, nSkillLvl);
     int nProgToHit = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pAttacker, UNITSTAT_progressive_tohit, 0);
@@ -2135,7 +2135,7 @@ BOOL __fastcall Skills_SrvDoFunc_045_SummonTrapSentry(::SGAMEDATA * pGame, D2Uni
 }
 
 // Generic Assassin skill melee attack resolver. Computes to-hit (SKILLS_CalcToHit + progressive_tohit stat), runs DAMAGE_CalculateHitCheck; on hit applies progressive damage, elemental enhancement, conversion percent, SetDamageOnEvent, offensive damage calculation, and DispatchChargeUpDamage. Always finalises with DAMAGE_CalculateAndApplyDamage.
-void __stdcall SKILLASS_SkillMeleeAttack(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nParam, eD2Skills eSkill, D2UnitStrc * pUnit2) {
+static void __stdcall SKILLASS_SkillMeleeAttack(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nParam, eD2Skills eSkill, D2UnitStrc * pUnit2) {
     D2DamageStrc sDamage;
     if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return;

@@ -390,7 +390,7 @@ void __fastcall DrawFloorTile(D2DrlgTileDataStrc * pTileData, void * pParam, int
     DRAW_UpdateTileVisibilityBounds(pTileData, nWorldX, nWorldY, (int32_t)pFloor);
 }
 
-void __fastcall DRAW_DrawEdgeFloorTile(int32_t nWorldX, int32_t nParam, D2DrawFloorStrc * pDrawFloor) {
+static void __fastcall DRAW_DrawEdgeFloorTile(int32_t nWorldX, int32_t nParam, D2DrawFloorStrc * pDrawFloor) {
     D2DrlgTileDataStrc* pTileData;
     int32_t nWorldY_00 = nParam;
     int32_t nWorldY = nWorldX;
@@ -413,7 +413,7 @@ void __fastcall DRAW_DrawEdgeFloorTile(int32_t nWorldX, int32_t nParam, D2DrawFl
     DrawFloorTile(pTileData, (void*)0x1, nScreenX, nWorldX, nWorldY, nWorldY_00, pDrawFloor);
 }
 
-void __fastcall DrawSubTile(int32_t nTileX, int32_t nParam1, int32_t nParam2, int32_t nParam3, D2DrawFloorStrc * pDrawFloor) {
+static void __fastcall DrawSubTile(int32_t nTileX, int32_t nParam1, int32_t nParam2, int32_t nParam3, D2DrawFloorStrc * pDrawFloor) {
     int nBaseX = nTileX / 5 * 5;
     int nBaseY = nParam1 / 5 * 5;
     DRAW_DrawEdgeFloorTile(nBaseX, nBaseY, pDrawFloor);

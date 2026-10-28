@@ -305,7 +305,7 @@ static uint32_t __stdcall SFILE_SearchHashTable(D2ArchiveStrc * pArchive, int16_
     } while (true);
 }
 
-void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCount) {
+static void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCount) {
     int nSectorsLeft;
     void* pSrc = (void*)(nSectorCount * 0x10 - 0x10 + pSectorTable);
     void* pDst = (void*)(nSectorCount * 0x2c - 0x2c + pSectorTable);
@@ -3503,7 +3503,7 @@ D2MPQFileStrc * * __fastcall SFILE_AllocFileRecord3(int * * ppArchive, int32_t n
     return pFileRecord;
 }
 
-uint32_t __fastcall SFILE_RemoveAsyncRequestFromQueue(void * pListContext, int * pNode) {
+static uint32_t __fastcall SFILE_RemoveAsyncRequestFromQueue(void * pListContext, int * pNode) {
     int* pPrevSlot = pNode;
     if (!pNode) {
       pPrevSlot = (int*)((int)pListContext + 4);

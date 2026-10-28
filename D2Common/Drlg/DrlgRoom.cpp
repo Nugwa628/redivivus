@@ -187,7 +187,7 @@ void __fastcall DRLGWARP_UpdateWarpRoomExDeselect(D2RoomExStrc * pRoomEx, eD2Lev
 // rolls a seeded random index, then outputs the X/Y coordinates.
 // Also initializes the room at those coordinates.
 // Called by DRLGSPAWN_FindSpawnLocationInLevel.
-D2RoomExStrc * __fastcall DRLGSPAWN_GetRandomPresetSpawnPoint(int32_t nSpawnType, int * pnOutX, int * pnOutY, D2DrlgLevelStrc * pLevel) {
+static D2RoomExStrc * __fastcall DRLGSPAWN_GetRandomPresetSpawnPoint(int32_t nSpawnType, int * pnOutX, int * pnOutY, D2DrlgLevelStrc * pLevel) {
     // Static local variables (originally global data)
     static int gaSpawnPointGroupTable[28] = {
     0x1,
