@@ -135,12 +135,13 @@ BOOL __fastcall Skills_SrvDoFunc_083_MonsterMeleeAttack(::SGAMEDATA * pGame, D2U
     return bResult;
 }
 
-void __fastcall SKILLMONST_SrvStFn43_MaggotEgg(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
+int32_t __fastcall SKILLMONST_SrvStFn43_MaggotEgg(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     if (pUnit) {
       pUnit->eUnitFlags &= ~(UNITFLAG_ISVALIDTARGET | UNITFLAG_CANBEATTACKED | UNITFLAG_TARGETABLE);
     }
 
     D2Common::PATH::DynamicPath::PATH_SetCorpseCollision(pUnit, 1);
+    return 1;
 }
 
 // SrvDoFunc 84: spawns up to calc[0] minions of the summon class around the caster (expanding spawn radius 1-4 on failure), marks each NOXP, then kills the caster via SERVER_KillMonster (self-destruct on cast). Used by exploding-suicide minion monsters.
