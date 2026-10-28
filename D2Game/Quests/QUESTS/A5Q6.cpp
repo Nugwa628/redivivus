@@ -478,8 +478,8 @@ BOOL __fastcall Q36_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * p
 
 // A5Q6 Eve of Destruction. Per-player iterate callback: for any player whose quest is not RewardAwaits(1), set record CannotCompleteQuestInGame(0xe) and send the quest-state packet (quest 0x24). Marks players who were not present for the Baal kill so they can't re-complete it in this game instance.
 BOOL __fastcall SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    bool _bQuestState;
-    bool bQuestState;
+    BOOL _bQuestState;
+    BOOL bQuestState;
     D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
     D2BitBufferStrc* pBitBuffer = pQuestRecord;
     /* GetQuestState(QUEST_EveOfDestruction, ==1 RewardAwaits) — skip if reward
@@ -812,8 +812,8 @@ void __fastcall Q36_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2
 // A5Q6 Eve of Destruction (state-fn slot 0xd). Quest-load / late-join reconciliation. If the player has NOT completed (not Completed, not FinishedInPreviousGame, not RewardAwaits) but has progressed (Step0x03 set, or Step0x02 -> mark bAnyaTransformed): restore live quest nStateFlag to 3 (in-progress). If already completed/finished: set Step0x10 and push client status 5 (act done). Reconstructs quest progression for a joining/loading player.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q6.cpp
 void __fastcall Q36_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    bool _bQuestState;
-    bool bQuestState;
+    BOOL _bQuestState;
+    BOOL bQuestState;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
     D2BitBufferStrc* pBitBuffer = pQuestRecord;

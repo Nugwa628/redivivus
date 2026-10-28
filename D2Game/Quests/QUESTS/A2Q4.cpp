@@ -637,7 +637,7 @@ BOOL __fastcall Q12_CheckJerhynGateOpen(::SGAMEDATA * pGame) {
     }
 
     D2QuestDataA2Q4Strc* pDVar1 = pDVar2->pQuestSpecificData.pA2Q4;
-    if (!(pDVar1->bJerhynInitial == 1 && pDVar1->bJerhynGateOpened != 1)) {
+    if (!(pDVar1->bJerhynInitial == 1 && !pDVar1->bJerhynGateOpened)) {
       return 0;
     }
 
