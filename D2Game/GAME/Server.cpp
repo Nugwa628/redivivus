@@ -246,13 +246,14 @@ void __stdcall _TableNullSub24(uint32_t dwArg1, uint32_t dwArg2, uint32_t dwArg3
 
 }
 
-void __stdcall FreeServer() {
+int __stdcall FreeServer() {
     Clients::DeleteCriticalSections();
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&gQServerGameListCs);
     UNIT::sunitproxy::SUNITPROXY_FreeAllNpcItemTables();
     gpQServerGameState = 0;
     StartingAct = 0;
     QServerNextToken = 1;
+    return 1;
 }
 
 int32_t __fastcall SERVER_IsTokenValid(uint16_t nToken) {
