@@ -1004,7 +1004,7 @@ uint8_t __stdcall MONSTER_SetAlignmentCallback(int32_t nParam1, int32_t nParam2)
     return !pBodyItem;
 }
 
-static eD2ServerIncomingStatus ItemBelongsToInventoryOf(void * pThis, D2UnitStrc * pPlayer, uint32_t nItemGid) {
+static eD2ServerIncomingStatus __stdcall ItemBelongsToInventoryOf(void * pThis, D2UnitStrc * pPlayer, uint32_t nItemGid) {
     if (!pThis) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4e8);
       exit(-1);
