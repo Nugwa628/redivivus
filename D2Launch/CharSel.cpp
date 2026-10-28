@@ -1558,8 +1558,10 @@ void __fastcall UIMENU_SelectDifficultySinglePlayerOrTcpip(int32_t nCharLevel, i
     int32_t nTextArg1 = 7;
     D2Win::Src::D2WinTextBox::SetText(pDVar2, D2Lang::StrTable::strtable::GetLocaleString(0x2723), nTextArg1, (bool)byTextColor, nTextArg2);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08((D2ControlStrc*)pDVar2, 1);
-    D2Win::Src::D2WinMain::SetUnsetFlag0x08(MainMenus::FORMS_CreateAnyFormFromList(0xa8), 1);
-    D2Win::Src::D2WinMain::SetUnsetFlag0x08(MainMenus::FORMS_CreateAnyFormFromList(0xa9), 1);
+    pFormControl = MainMenus::FORMS_CreateAnyFormFromList(0xa8);
+    D2Win::Src::D2WinMain::SetUnsetFlag0x08(pFormControl, 1);
+    pFormControl = MainMenus::FORMS_CreateAnyFormFromList(0xa9);
+    D2Win::Src::D2WinMain::SetUnsetFlag0x08(pFormControl, 1);
     pFormControl = MainMenus::FORMS_CreateAnyFormFromList(0xaa);
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(pFormControl, 0);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08(pFormControl, 1);

@@ -156,7 +156,10 @@ void __stdcall AUTOMAP_SetupPosition() {
 
     gnAutomapPanelOffsetX = gnAutomapCenterX;
     gnAutomapPanelOffsetY = nAutomapCenterY;
-    if (MiniMapType != 1) {
+    switch (MiniMapType) {
+    case 1:
+      break;
+    default:
       gnAutomapClipRight = ScreenSizeX;
       gnAutomapClipLeft = -0x10;
       gnAutomapClipTop = -0x10;
