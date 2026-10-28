@@ -1475,23 +1475,23 @@ void __stdcall BnetReadFunction(uint32_t dwParam) {
 
 uint32_t __fastcall BNCLIENT_GetSocketPeerName(sockaddr * pSockAddr, int * pAddrLen) {
     D2NetDataStrc* pNetData = (D2NetDataStrc*)InterlockedCompareExchange((LONG*)&g_pBNetSocketData, 0, 0);
-    if (!pNetData) {
-      return 0;
+    if (pNetData) {
+      uint32_t nResult = Fog::Src::Safesock::GetPeerNameDoesReturn(pNetData, pSockAddr, pAddrLen);
+      return nResult;
     }
 
-    uint32_t nResult = Fog::Src::Safesock::GetPeerNameDoesReturn(pNetData, pSockAddr, pAddrLen);
-    return nResult;
+    return 0;
 }
 
 // Thread-safe wrapper around Fog::Safesock::GetSockNameDoesReturn. Returns local socket address info for Battle.net connection. Used by SID_AUTH_INFO sender.
 uint32_t __fastcall BNSEND_GetSocketAddress(sockaddr * pOutAddr, int * pOutAddrLen) {
     D2NetDataStrc* pNetData = (D2NetDataStrc*)InterlockedCompareExchange((LONG*)&g_pBNetSocketData, 0, 0);
-    if (!pNetData) {
-      return 0;
+    if (pNetData) {
+      uint32_t nResult = Fog::Src::Safesock::GetSockNameDoesReturn(pNetData, pOutAddr, pOutAddrLen);
+      return nResult;
     }
 
-    uint32_t nResult = Fog::Src::Safesock::GetSockNameDoesReturn(pNetData, pOutAddr, pOutAddrLen);
-    return nResult;
+    return 0;
 }
 
 int32_t __stdcall GET_GameVersion() {

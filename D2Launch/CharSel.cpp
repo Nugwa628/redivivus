@@ -318,11 +318,11 @@ void __stdcall CHARSEL_DestroySelectedChar() {
 static uint32_t CHARSEL_GetDaysUntilExpiry(uint32_t nExpiryTime) {
     __time32_t nTimeBuf;
     uint32_t uVar1 = _time32(&nTimeBuf);
-    if (nExpiryTime > uVar1) {
-      return (nExpiryTime - uVar1) / 0x15180;
+    if (nExpiryTime <= uVar1) {
+      return 0;
     }
 
-    return 0;
+    return (nExpiryTime - uVar1) / 0x15180;
 }
 
 // Draws local character slots in selection screen. Iterates gaCharSelScreenSlotControls[0-7] to render each slot's character name, level, class, and hardcore/expansion flags. Highlights selected slot, draws character preview sprite, and handles expired characters.
