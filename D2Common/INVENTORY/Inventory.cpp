@@ -1347,7 +1347,7 @@ D2UnitStrc * __stdcall INVENTORY_GetItemByGridOffset(D2InventoryStrc * pInventor
     }
 
     D2UnitStrc* pItem = 0;
-    if ((uint32_t)nGridOffset >= 13) {
+    if ((uint32_t)nGridOffset > 12) {
       return pItem;
     }
 

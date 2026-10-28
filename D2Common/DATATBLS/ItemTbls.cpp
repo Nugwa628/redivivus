@@ -4342,7 +4342,7 @@ int TXT_Gamble_SortFunction(LPCVOID pParam1, LPCVOID pParam2) {
     if (*(uint32_t*)((int)pParam1 + 4) > *(uint32_t*)((int)pParam2 + 4)) {
       return 1;
     } else {
-      return -(uint32_t)(*(uint32_t*)((int)pParam1 + 4) < *(uint32_t*)((int)pParam2 + 4));
+      return *(uint32_t*)((int)pParam1 + 4) < *(uint32_t*)((int)pParam2 + 4) ? -1 : 0;
     }
 }
 
