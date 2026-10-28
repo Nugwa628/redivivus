@@ -144,7 +144,7 @@ void __stdcall INVENTORY_FillGridRect(uint32_t nWidth, int32_t nStartCol, int32_
     int nColsRemaining;
     uint32_t* pCellPtr;
     int nRowEnd = (uint32_t)bParam + nStartRow;
-    if (nStartRow >= nRowEnd) {
+    if (nRowEnd <= nStartRow) {
       return;
     }
 
@@ -159,7 +159,7 @@ void __stdcall INVENTORY_FillGridRect(uint32_t nWidth, int32_t nStartCol, int32_
       }
 
       nStartRow++;
-    } while (nStartRow < nRowEnd);
+    } while (nRowEnd > nStartRow);
 }
 
 // Unlinks pItem from the doubly-linked page list (prev/next pointers in D2UnitDataItemStrc) and clears the corresponding grid-cell slots in pPageList->pGridCells. When bUseWidthHeight is non-zero, clears all width×height cells occupied by the item; otherwise clears only the single origin cell. Resets eInventoryGrid to INVENTORY_GRID_BODYLOC and nulls the prev/next links.

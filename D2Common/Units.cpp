@@ -2248,7 +2248,7 @@ BOOL __stdcall IsInMeleeRange(D2UnitStrc * pUnit, D2UnitStrc * pTarget, int32_t 
     if (pTarget->eUnitType == UNIT_MONSTER) {
       int nBaseId;
       nBaseId = D2Client::UNIT::Player::TXT_MonStats_GetBaseId(pTarget);
-      if (nBaseId < 0 || sgptDataTable->nTxtMonStatsSize <= nBaseId) {
+      if (0 > nBaseId || nBaseId >= sgptDataTable->nTxtMonStatsSize) {
         nBaseId = -1;
       }
       if (nBaseId == 0x102 || nBaseId == 0x105) {
@@ -2336,7 +2336,7 @@ uint32_t __stdcall CalcRecoveryPriority(D2UnitStrc * nMpDeficit) {
     if (nMinHp > nHp) {
       nHpDeficit = nMinHp - nHp >> 8;
     }
-    if (nMp < nMinMp) {
+    if (nMinMp > nMp) {
       nMpDeficit = (D2UnitStrc*)(nMinMp - nMp >> 8);
     }
     if (!nHpDeficit && !nMpDeficit) {
