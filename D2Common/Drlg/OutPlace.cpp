@@ -71,11 +71,11 @@ int32_t __fastcall DRLGOUTPLACE_GetAdjacentRoadPresetId(int32_t nDirX, int32_t n
     if (nTableIndex == -1) {
       return 0;
     }
-    if (3 >= nRoadType) {
-      return gnOutdoorsGridWidthByLevel[nRoadType + nTableIndex * 4 + 1];
+    if (nRoadType >= 4) {
+      return gRoadPresetIdLookupTable[nRoadType - 6 + nTableIndex * 2];
     }
 
-    return gRoadPresetIdLookupTable[nRoadType - 6 + nTableIndex * 2];
+    return gnOutdoorsGridWidthByLevel[nRoadType + nTableIndex * 4 + 1];
 }
 
 // Iterates all four border edges of an outdoor DRLG level grid, scanning inward from each edge and marking contiguous non-solid cells with flag 0x100 (blank/border) until a solid cell is encountered. Used during outdoor level generation to suppress tile rendering at level boundaries.

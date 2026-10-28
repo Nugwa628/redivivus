@@ -565,9 +565,9 @@ void __fastcall FillExternalCellFlags(D2DrlgGridStrc * pDrlgGrid, D2DrlgMapStrc 
     pDrlgGrid->nHeight = pDrlgCoord->nHeight;
     pDrlgGrid->pCellsFlags = (eD2GridCellFlags*)(&pCellPos->nNumber + pDrlgCoord->nPosY * nWidth + pDrlgCoord->nPosX);
     pDrlgGrid->pCellsRowOffsets = pCellFlags;
+    int nRowIdx = 0;
     int nRowOffset = 0;
-    if (0 < pDrlgCoord->nHeight) {
-      int nRowIdx = 0;
+    if (nRowIdx < pDrlgCoord->nHeight) {
       do {
         pDrlgGrid->pCellsRowOffsets[nRowIdx] = nRowOffset;
         nRowIdx++;
@@ -584,8 +584,8 @@ void __fastcall DRLGGRID_FreeGrid(D2PoolManagerStrc * pMemory, D2DrlgGridStrc * 
       Fog::Memory::FreeServerMemory(pMemory, pGrid->pCellsRowOffsets, ".\\DRLG\\DrlgGrid.cpp", 0x218, 0);
     }
 
-    pGrid->pCellsRowOffsets = 0;
     pGrid->pCellsFlags = 0;
+    pGrid->pCellsRowOffsets = 0;
 }
 
 // Clears grid metadata (flags/row offsets) and marks grid as unused.
