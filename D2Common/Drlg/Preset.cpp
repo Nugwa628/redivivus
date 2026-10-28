@@ -1002,12 +1002,14 @@ void __fastcall DRLGROOMEX_InitializePresetRoom(D2RoomExStrc * pRoomEx) {
     }
 
     BOOL bIsBurialGrounds = 0;
-    if (pPresetRoom->nLevelPrest == 1 || pPresetRoom->nLevelPrest == 0x6c) {
-      int gridCells1[1024];
-      bIsBurialGrounds = 1;
-      DrlgGrid::FillGrid(&pGrid, pRoomEx->sCoords.WorldSize.x + 1, pRoomEx->sCoords.WorldSize.y + 1, gridCells2, rowOffsets1);
-      DrlgGrid::FillGrid(&pOtherGrid, pRoomEx->sCoords.WorldSize.x + 1, pRoomEx->sCoords.WorldSize.y + 1, gridCells1, rowOffsets2);
-      pPresetRoom = pDrlgRoomExDataPreset;
+    switch (pPresetRoom->nLevelPrest) {
+      case 1:
+      case 0x6c:
+        int gridCells1[1024];
+        bIsBurialGrounds = 1;
+        DrlgGrid::FillGrid(&pGrid, pRoomEx->sCoords.WorldSize.x + 1, pRoomEx->sCoords.WorldSize.y + 1, gridCells2, rowOffsets1);
+        DrlgGrid::FillGrid(&pOtherGrid, pRoomEx->sCoords.WorldSize.x + 1, pRoomEx->sCoords.WorldSize.y + 1, gridCells1, rowOffsets2);
+        pPresetRoom = pDrlgRoomExDataPreset;
     }
 
     D2DrlgFileStrc* pDrlgFile = pPresetRoom->pMap->pDrlgFile;
@@ -1539,18 +1541,22 @@ void __fastcall DRLGPRESET_AddPresetUnitToDrlgMap(D2PoolManagerStrc * pMemory, D
           goto add_preset_copy;
         }
         nTableSize = pPresetUnit->nClassId;
-        if (nTableSize != 0xc4 && nTableSize != 0x105) {
-          if (nTableSize == 0x245) {
-            roll_quarter_skip:
-            newSeed = D2_SEED_NEXT(*pSeed);
-            bInclude2 = !(newSeed.nSeedLow & 3);
-            commit_roll:
-            *pSeed = newSeed;
-            if (bInclude2) {
-              continue;
+        switch (nTableSize) {
+          case 0xc4:
+          case 0x105:
+            break;
+          default:
+            if (nTableSize == 0x245) {
+              roll_quarter_skip:
+              newSeed = D2_SEED_NEXT(*pSeed);
+              bInclude2 = !(newSeed.nSeedLow & 3);
+              commit_roll:
+              *pSeed = newSeed;
+              if (bInclude2) {
+                continue;
+              }
             }
-          }
-          goto add_preset_copy;
+            goto add_preset_copy;
         }
         newSeed = D2_SEED_NEXT(*pSeed);
         *pSeed = newSeed;
