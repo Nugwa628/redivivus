@@ -17,9 +17,7 @@
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
-
 namespace D2Common::Drlg {
-
 static void __stdcall DRLGOUTDOOR_ApplySubstitutionGroup(D2UnkOutdoorStrc * pUnkOutdoor, D2LvlSubTxt * pLvlSub) {
     D2DrlgFileStrc* pFile = pLvlSub->pDrlgFile;
     uint32_t nModulo = pFile->nSubstGroups;
@@ -37,18 +35,15 @@ static void __stdcall DRLGOUTDOOR_ApplySubstitutionGroup(D2UnkOutdoorStrc * pUnk
     if (0 >= (int)nModulo) {
       return;
     }
-
     do {
       BOOL bPlaced;
       bPlaced = DRLGOUTDOOR_PlaceRandomBorderSubTiles(pUnkOutdoor, (int32_t)pLvlSub, (int*)(pFile->pSubstGroups + (int)(nRandStartGroup + nGroupIter) % (int)nModulo));
       if (bPlaced && !pLvlSub->BordType) {
         return;
       }
-
       nGroupIter++;
     } while (nGroupIter < (int)nModulo);
 }
-
 } // namespace D2Common::Drlg
 
 namespace D2Common::Drlg::TileSub {
@@ -111,13 +106,14 @@ void __fastcall InitializeDrlgFile(D2PoolManagerStrc * pMemory, D2LvlSubTxt * pL
 void __fastcall AddSecondaryBorder(D2UnkOutdoorStrc * pUnkOutdoor) {
     D2LvlSubTxt* pDVar1;
     D2LvlSubTxt* pLvlSubTxtRecord = DATATBLS::LvlTbls::TXT_LvlSub_GetLineFromSubType(pUnkOutdoor->nLvlSubId);
+    D2PoolManagerStrc* pMemory = pUnkOutdoor->pLevel->pDrlg->pDS1MemPool;
     if (pLvlSubTxtRecord->Type != pUnkOutdoor->nLvlSubId) {
       return;
     }
 
     do {
-      D2PoolManagerStrc* pMemory = pUnkOutdoor->pLevel->pDrlg->pDS1MemPool;
-      InitializeDrlgFile(pMemory, pLvlSubTxtRecord);
+      InitializeDrlgFile
+(pMemory, pLvlSubTxtRecord);
       DRLGOUTDOOR_ApplySubstitutionGroup(pUnkOutdoor, pLvlSubTxtRecord);
       pDVar1 = pLvlSubTxtRecord + 1;
       pLvlSubTxtRecord++;

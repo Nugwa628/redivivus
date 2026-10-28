@@ -241,7 +241,6 @@ void __stdcall ProcessQueuedPrimaryClick() {
     }
 
     int nY = UI::ui::GetMouseY();
-
     UNIT::Player::ClickMap(1, UI::ui::GetMouseX(), nY, mouseEventFlags);
 }
 
@@ -353,7 +352,6 @@ void __stdcall ProcessQueuedSecondaryClick() {
     }
 
     int nY = UI::ui::GetMouseY();
-
     UNIT::Player::ClickMap(4, UI::ui::GetMouseX(), nY, mouseEventFlags);
 }
 
@@ -593,7 +591,6 @@ void __stdcall GAMEDATA_InitializeEclipseEnvironment() {
       bEclipse = 1;
       nAngle = 0;
       nIndex = 5;
-
       D2Common::Environment::DRLGENV_InitializeEnvironment(sgpDrlgAct, UNIT::CUnit::GetCurrentRoom(), nIndex, nAngle, bEclipse);
       return;
     }
@@ -1178,10 +1175,6 @@ int32_t __fastcall GAMEDATA_GetCenteredTextX(uint16_t nStringId, int32_t nCenter
     uint16_t* pSourceStr;
     for (int i = 0; i < 0x64; i++) wszText[i] = 0;
 
-
-
-
-
     pSourceStr = D2Lang::StrTable::strtable::GetLocaleString(nStringId);
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszText, pSourceStr);
     int32_t nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszText);
@@ -1194,12 +1187,7 @@ void __stdcall GAMEDATA_DrawLoadingScreenText() {
     uint16_t* pClearPtr;
     for (int i = 0; i < 0x64; i++) wszText[i] = 0;
 
-
-
-
-
     iLoop = ScreenSizeX / 2;
-
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszText, D2Lang::StrTable::strtable::GetLocaleString(0x13ea));
     int32_t nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszText);
     int32_t nTextY = 0x3e;
@@ -1209,14 +1197,12 @@ void __stdcall GAMEDATA_DrawLoadingScreenText() {
 
     BOOL bDrawFlag = 0;
     int32_t nDrawColor = 4;
-
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x13ea), iLoop - nTextWidth / 2, nTextY, nDrawColor, bDrawFlag);
     if (!gClientGameData.CLIENT_bExpansion) {
       nTextWidth = GAMEDATA_GetCenteredTextX(0x13eb, ScreenSizeX / 2);
       bDrawFlag = 0;
       nDrawColor = 4;
       nTextY = 0x6b;
-
       D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x13eb), nTextWidth, nTextY, nDrawColor, bDrawFlag);
     }
 
@@ -1225,20 +1211,13 @@ void __stdcall GAMEDATA_DrawLoadingScreenText() {
       nTextWidth = 0x110;
     }
 
-
     for (int i = 0; i < 0x64; i++) wszText[i] = 0;
 
-
-
-
-
     iLoop = ScreenSizeX / 2;
-
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszText, D2Lang::StrTable::strtable::GetLocaleString(0x13ec));
     nTextY = D2Win::Src::D2WinFont::DRAW_text0(wszText);
     bDrawFlag = 0;
     nDrawColor = 4;
-
     D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x13ec), iLoop - nTextY / 2, nTextWidth, nDrawColor, bDrawFlag);
 }
 
@@ -1821,10 +1800,8 @@ void __stdcall ClearInGameUIFlags() {
     HWND hWnd;
     _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitGameDataPanel1, nHandlerCount);
     nHandlerCount = 2;
-
     _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel2, nHandlerCount);
     nHandlerCount = 2;
-
     _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel3, nHandlerCount);
 }
 
@@ -1833,10 +1810,8 @@ void __stdcall GAMEDATA_RegisterEventHandlers() {
     HWND hWnd;
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitGameDataPanel1, nCount);
     nCount = 2;
-
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel2, nCount);
     nCount = 2;
-
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel3, nCount);
 }
 
@@ -1922,7 +1897,6 @@ void __fastcall CLIENT_AllocAct(int32_t nActNo, int32_t nMapSeed, int32_t nAutom
       bEclipse = 1;
       nAngle = 0;
       nIndex = 5;
-
       D2Common::Environment::DRLGENV_InitializeEnvironment(sgpDrlgAct, UNIT::CUnit::GetCurrentRoom(), nIndex, nAngle, bEclipse);
     }
 
@@ -2109,10 +2083,6 @@ void __stdcall GAMEDATA_DrawCharacterPortrait() {
     uint16_t* pwClearCursor;
     for (int i = 0; i < 0x64; i++) awcName[i] = 0;
 
-
-
-
-
     char* pSrcChar = pIniData->szNAME;
     nTitleIndex = (uintptr_t)&sText - (int)pSrcChar;
     do {
@@ -2125,12 +2095,7 @@ void __stdcall GAMEDATA_DrawCharacterPortrait() {
     int32_t nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(awcName);
     D2Win::Src::D2WinFont::DRAW_text(awcName, ScreenSizeX / 2 - nTextWidth / 2, 0xbb, 4, 0);
     eD2PlayerStatus ePlayerStatus = pIniData->eCTEMP_eD2PlayerStatus;
-
     for (int i = 0; i < 0x64; i++) awcTitle[i] = 0;
-
-
-
-
 
     uint32_t nHardcoreFlag = ePlayerStatus & 4;
     if (CLIENT_nDifficulty == '\0') {
@@ -2311,7 +2276,6 @@ uint32_t __stdcall DRAW_Congratz(uint32_t dwUnused) {
       bDrawFlag = 0;
       nY = ScreenSizeY - 0x58 + nFrameOffset;
       dwColor = 0;
-
       D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x13ee), nQueryResult - nFrameOffset, nY, dwColor, bDrawFlag);
       UI::ui::DrawCursor();
       D2gfx::D2GFX::D2GFX_EndScene();
@@ -2887,10 +2851,8 @@ static uint32_t gdwHostGameThreadId; D2_STATIC_GUARD_BSS(gdwHostGameThreadId, "D
     HWND hWnd;
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsGameDataFlagInit, nFlagCount);
     nFlagCount = 1;
-
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitGameDataPanel1, nFlagCount);
     nFlagCount = 2;
-
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel2, nFlagCount);
     nFlagCount = 2;
     hWnd = D2gfx::D2GFX::GetHwnd();
@@ -2952,31 +2914,24 @@ static uint32_t gdwHostGameThreadId; D2_STATIC_GUARD_BSS(gdwHostGameThreadId, "D
     }
     if (!(!*(uint32_t*)(char*)&gEndGameUiState)) {
       nFlagCount = 10;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsGameDataFlagInit, nFlagCount);
       nFlagCount = 1;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitGameDataPanel1, nFlagCount);
       nFlagCount = 2;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel2, nFlagCount);
       nFlagCount = 2;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel3, nFlagCount);
       nFlagCount = 7;
-
       _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsGameDataUIFlagInit, nFlagCount);
       _Message::MessageGameLoop((::fpGameLoopFunction)DrawBetaScreen);
     } else {
       if (*(uint32_t*)((char*)&gEndGameUiState + 4)) {
         ExitGamePlayCutScene(5);
         nFlagCount = 10;
-
         _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsGameDataFlagInit, nFlagCount);
         ClearInGameUIFlags();
         ClientModeInGame::CLIENT_SetScreenResolution(0);
         nFlagCount = 9;
-
         _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel4, nFlagCount);
         _Message::MessageGameLoop((::fpGameLoopFunction)DRAW_Congratz);
       } else {
@@ -3008,12 +2963,10 @@ static uint32_t gdwHostGameThreadId; D2_STATIC_GUARD_BSS(gdwHostGameThreadId, "D
       D2IniData_client->eCTEMP_eD2PlayerStatus = (uint16_t)CLIENT_nDifficulty * 0x400 + 0x500 | D2IniData_client->eCTEMP_eD2PlayerStatus & 0xe0ff;
       if (bPlayCongrats) {
         nFlagCount = 10;
-
         _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsGameDataFlagInit, nFlagCount);
         ClearInGameUIFlags();
         ClientModeInGame::CLIENT_SetScreenResolution(2);
         nFlagCount = 9;
-
         _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel4, nFlagCount);
         _Message::MessageGameLoop((::fpGameLoopFunction)DRAW_Congratz);
       }
@@ -3027,7 +2980,6 @@ static uint32_t gdwHostGameThreadId; D2_STATIC_GUARD_BSS(gdwHostGameThreadId, "D
     ClientModeInGame::ClientAppModeQueue(APPMODE_EXITGAME);
     if (!(!*(uint32_t*)(char*)&gEndGameUiState)) {
       nFlagCount = 7;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsGameDataUIFlagInit, nFlagCount);
       gEndGameUiState.showCongrats = false;
       gEndGameUiState._pad0[0] = '\0';
@@ -3036,7 +2988,6 @@ static uint32_t gdwHostGameThreadId; D2_STATIC_GUARD_BSS(gdwHostGameThreadId, "D
     } else {
       if (*(uint32_t*)((char*)&gEndGameUiState + 4)) {
         nFlagCount = 9;
-
         _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel4, nFlagCount);
         gEndGameUiState.showCutscene = false;
         gEndGameUiState._pad1[0] = '\0';
@@ -3045,7 +2996,6 @@ static uint32_t gdwHostGameThreadId; D2_STATIC_GUARD_BSS(gdwHostGameThreadId, "D
       } else {
         if (bPlayCongrats && *(uint32_t*)((char*)&gExitCutsceneState + 4)) {
           nFlagCount = 9;
-
           _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel4, nFlagCount);
           gExitCutsceneState.cutscenePlayed = false;
           gExitCutsceneState._pad0[0] = '\0';
@@ -3053,7 +3003,6 @@ static uint32_t gdwHostGameThreadId; D2_STATIC_GUARD_BSS(gdwHostGameThreadId, "D
           gExitCutsceneState._pad0[2] = '\0';
         } else {
           nFlagCount = 10;
-
           _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsGameDataFlagInit, nFlagCount);
           ClearInGameUIFlags();
         }

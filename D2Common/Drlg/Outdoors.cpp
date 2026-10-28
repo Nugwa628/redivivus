@@ -422,8 +422,6 @@ BOOL __fastcall TestOutdoorLevelPreset(D2DrlgLevelStrc * pLevel, int32_t nX, int
     nSizeX += nY;
     while (nY < nSizeX) {
       for (nXIter = nX0; nXIter < nSizeY + nX0; nXIter++) {
-
-
           bIsInGrid = DrlgGrid::IsPointInsideGridArea(&pLevelData->sGridOutdoor, nXIter, nY);
           if (!bIsInGrid) {
             return 0;
@@ -434,9 +432,7 @@ BOOL __fastcall TestOutdoorLevelPreset(D2DrlgLevelStrc * pLevel, int32_t nX, int
             return 0;
           }
 
-
       }
-
 
       nY++;
     }
@@ -1351,11 +1347,8 @@ void __fastcall DRLGOUTDOOR_FreeOutdoorLevelData(D2DrlgLevelStrc * pLevel, BOOL 
     Fog::Memory::FreeServerMemory(pMemory, pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData, ".\\DRLG\\Outdoors.cpp", 0x3ac, 0);
     pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData = 0;
 }
-
 } // namespace D2Common::Drlg::Outdoors
-
 namespace D2Common::Drlg::Outdoors::Act4 {
-
 // Spawns outdoor presets for Act4 City of Damned / Plains of Despair.
 static void DRLGOUTDOOR_SpawnAct4OutdoorPresets(D2DrlgLevelStrc * pLevel) {
     // 0067e6c3 is LEA EAX,[EAX*0x4 + 0xfffffe60] and the loads are [EAX + 0x6f22b0] and
@@ -1369,11 +1362,9 @@ static void DRLGOUTDOOR_SpawnAct4OutdoorPresets(D2DrlgLevelStrc * pLevel) {
     // interior-address pass rebases a folded base onto the symbol that owns the target range.
     static const int aAct4OutdoorPresetBaseByLevel[3]  = {0x32c, 0x331, 0x337};
     static const int aAct4OutdoorSceneryBaseByLevel[3] = {0x33c, 0x340, 0x340};
-
     if (pLevel->eD2LevelId == 0x6a) {
       SpawnOutdoorLevelPreset(pLevel, 0x32b, -1, 0, '\x0f');
     }
-
     int nLevelIndex = (int)pLevel->eD2LevelId - 104;
     int nPresetBaseA = aAct4OutdoorPresetBaseByLevel[nLevelIndex];
     int nPresetBaseB = aAct4OutdoorSceneryBaseByLevel[nLevelIndex];
@@ -1387,7 +1378,6 @@ static void DRLGOUTDOOR_SpawnAct4OutdoorPresets(D2DrlgLevelStrc * pLevel) {
     if (pLevel->eD2LevelId == 0x69) {
       SpawnOutdoorLevelPreset(pLevel, 0x336, -1, 0, '\x0f');
     }
-
     nPresetBaseA += 4;
     SpawnOutdoorLevelPreset(pLevel, nPresetBaseA, -1, 0, '\x0f');
     SpawnOutdoorLevelPreset(pLevel, nPresetBaseA, -1, 0, '\x0f');
@@ -1404,9 +1394,7 @@ static void DRLGOUTDOOR_SpawnAct4OutdoorPresets(D2DrlgLevelStrc * pLevel) {
     SpawnOutdoorLevelPreset(pLevel, nPresetBaseB, -1, 0, '\x0f');
     SpawnOutdoorLevelPreset(pLevel, nPresetBaseB, -1, 0, '\x0f');
 }
-
 } // namespace D2Common::Drlg::Outdoors::Act4
-
 namespace D2Common::Drlg::Outdoors {
 
 // Places river of flame presets in Act 4 outdoor levels. Checks level data flags (0x400000 and 0x800000) to conditionally spawn LvlPrest 0x31E at two different Y positions (1 and 4).

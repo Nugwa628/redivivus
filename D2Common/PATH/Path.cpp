@@ -109,11 +109,8 @@ void __stdcall PATH_GetScreenVelocity(D2UnitStrc * pUnit, int * pnParam1, int * 
 void __stdcall STRUCT_FreePath(D2PoolManagerStrc * pMemory, void * pPath) {
     Fog::Memory::FreeServerMemory(pMemory, pPath, ".\\PATH\\Path.cpp", 0x3d9, 0);
 }
-
 } // namespace D2Common::PATH::Path
-
 namespace D2Common::Drlg::Path {
-
 // DRLGPATH_UpdateUnitRoom - Checks if a unit's current position is still within its room's bounds. If not, finds the correct room via DRLGROOM_FindBetterNearbyRoom and transfers the unit to the new room.
 static void __stdcall DRLGPATH_UpdateUnitRoom(D2RoomStrc * pRoom, D2DynamicPathStrc * pDynamicPath) {
     D2RoomStrc* pBetterRoom = pDynamicPath->pRoom;
@@ -147,7 +144,6 @@ static void __stdcall DRLGPATH_UpdateUnitRoom(D2RoomStrc * pRoom, D2DynamicPathS
     if (!pBetterRoom) {
       return;
     }
-
     Unit::DRLGROOM_AddUnitToRoom(pUnit, pBetterRoom);
     Unit::ROOM_LinkUnitToUpdateList(pUnit);
 }
@@ -163,7 +159,6 @@ static void __stdcall DRLGPATH_SetPathPosition(uint32_t nOffsetX, uint32_t nOffs
         return;
       }
     }
-
     pDynamicPath->Coords.tFixed.x = nOffsetX;
     pDynamicPath->Coords.tFixed.y = nOffsetYCopy;
     nOffsetY = nOffsetX >> 0xb;
@@ -175,12 +170,9 @@ static void __stdcall DRLGPATH_SetPathPosition(uint32_t nOffsetX, uint32_t nOffs
     if (!(pOwner && pDynamicPath->nFlags & 1)) {
       return;
     }
-
     DRLGPATH_UpdateUnitRoom(pRoom, pDynamicPath);
 }
-
 } // namespace D2Common::Drlg::Path
-
 namespace D2Common::PATH::Path {
 
 uint32_t __stdcall PATH_CalculateDistance(uint32_t nFromXfp, uint32_t nFromYfp, uint32_t nToXfp, uint32_t nToYfp) {
@@ -543,7 +535,6 @@ void __stdcall PATH_SetPathTarget(D2UnitStrc * pUnit, D2UnitStrc * pTargetUnit) 
       if (pSrcPath->pRoom != pTargetPath->pRoom) {
         pSrcPath->nFlags |= 1;
       }
-
       Drlg::Path::DRLGPATH_SetPathPosition(pTargetPath->Coords.tFixed.x, pTargetPath->Coords.tFixed.y, pTargetPath->pRoom, pSrcPath);
       return;
     }

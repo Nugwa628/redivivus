@@ -150,7 +150,6 @@ D2TileLibraryHeaderStrc * __stdcall Alloc(D2TileLibraryHashStrc * * ppHash, char
         szFilename[nNameCopyOffset] = cNameChar;
         szFilename++;
       } while (cNameChar != '\0');
-
       *ppHash = pExistingNode->pHash;
       return pTileData;
     }

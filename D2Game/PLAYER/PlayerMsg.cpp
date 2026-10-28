@@ -708,7 +708,6 @@ eD2ServerIncomingStatus __fastcall SERVER_InteractOrPick(D2UnitStrc * pUnit, eD2
         if (8 <= (int)pTargetUnit->eAnimMode.ePlayerMode) {
           return SERVERSTATUS_BAD_PARAMS;
         }
-
         nDist = D2Common::Collision::GetDistanceBetweenUnits(pUnit, pTargetUnit);
         if (nDist <= 0x32) {
           bInRange = D2Common::Units::IsObjectInInteractRange(pUnit, pTargetUnit);
@@ -721,11 +720,9 @@ eD2ServerIncomingStatus __fastcall SERVER_InteractOrPick(D2UnitStrc * pUnit, eD2
               return SERVERSTATUS_BAD_PARAMS;
             }
           }
-
           return SERVERSTATUS_OK;
         }
       }
-
       break;
       case UNIT_WARP:
         pTargetUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_WARP, uuid);
@@ -736,7 +733,6 @@ eD2ServerIncomingStatus __fastcall SERVER_InteractOrPick(D2UnitStrc * pUnit, eD2
             StartModeID(~SKILL_Attack - (bSetting != 0), pGame, UNIT_WARP, pUnit, uuid);
             return SERVERSTATUS_OK;
           }
-
           UNIT::SUnit::TakeStairs(pGame, pUnit, pTargetUnit);
           return SERVERSTATUS_OK;
         }
@@ -758,11 +754,9 @@ eD2ServerIncomingStatus __fastcall SERVER_InteractOrPick(D2UnitStrc * pUnit, eD2
           } else {
             StartModeID(~SKILL_Attack - (bSetting != 0), pGame, UNIT_ITEM, pUnit, uuid);
           }
-
           return SERVERSTATUS_OK;
         }
       }
-
       break;
       case UNIT_MONSTER:
         pTargetUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, uuid);
@@ -780,16 +774,13 @@ eD2ServerIncomingStatus __fastcall SERVER_InteractOrPick(D2UnitStrc * pUnit, eD2
             if (9 <= nDist) {
               return SERVERSTATUS_OK;
             }
-
             StartModeID(~SKILL_Attack - (bSetting != 0), pGame, UNIT_MONSTER, pUnit, uuid);
             return SERVERSTATUS_OK;
           }
-
           nDist = Player::GetPlayerTradeTickOrBusy(pUnit);
           if (nDist) {
             return SERVERSTATUS_OK;
           }
-
           D2Common::PATH::DynamicPath::ZeroPathPointsSize(pUnit->pPath.pDynamicPath);
           byNpcInteractFlag = 0;
           pMonAi = UNIT::sunitproxy::GetMonsterAI(pTargetUnit);
@@ -797,7 +788,6 @@ eD2ServerIncomingStatus __fastcall SERVER_InteractOrPick(D2UnitStrc * pUnit, eD2
           return SERVERSTATUS_OK;
         }
       }
-
       break;
       case UNIT_PLAYER:
         pTargetUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_PLAYER, uuid);
@@ -1058,14 +1048,10 @@ static uint32_t __stdcall IsAccessableCheck(DWORD nItemGid, ::SGAMEDATA * pGame,
 
           return 0;
         }
-
         break;
         case Death:
-
         case eD2PlayerAnimMode_ns::Neutral:
-
         case Walk:
-
         case eD2PlayerAnimMode_ns::GetHit:
           nResult = ItemIsOfPlayerAndNotOnCursor(nItemGid, pUnit, pGame);
         if (nResult == SERVERSTATUS_OK) {
@@ -1515,12 +1501,10 @@ static void __stdcall PLAYER_ProcessSkillOnEntity(D2UnitStrc * pUnit, ::SGAMEDAT
         bDualWieldOrMeleeCheck = D2Common::Units::IsInMovingModeEx(pTargetUnit);
         bDualWieldOrMeleeCheck = D2Common::Units::IsInMeleeRange(pUnit, pTargetUnit, bDualWieldOrMeleeCheck);
         if (!bDualWieldOrMeleeCheck) {
-
           StartModeID(D2Common::Skills::GetSkillId(pSkill, ".\\PLAYER\\PlrMsg.cpp", 0x7dd), pGame, eUnitType, pUnit, dwParam);
           return;
         }
       } else if (nSkillWeaponClass == 4) {
-
         StartModeID(D2Common::Skills::GetSkillId(pSkill, ".\\PLAYER\\PlrMsg.cpp", 0x7dd), pGame, eUnitType, pUnit, dwParam);
         return;
       }
@@ -3446,16 +3430,13 @@ eD2ServerIncomingStatus __fastcall SCMD_0x41_Resurrect(::SGAMEDATA * pGame, D2Un
     D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_uninterruptable, 1);
     D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_uninterruptable, 0);
     D2Common::Drlg::GetActNoFromLevelNumber(LEVEL_None);
-
     eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(D2Common::Units::UNITS_GetRoom(pUnit));
-
     eLevelId = D2Common::DUNGEON::Dungeon::GetTownLevelIdFromActNo(D2Common::Drlg::GetActNoFromLevelNumber(eLevelId));
     GAME::Level::InitLevel(pGame, pUnit, eLevelId, bArena);
     PlayerModes::PLRMODES_MoveToLocation(pGame, pUnit, nullptr, 1, 0, 0, 1);
     pSkill = D2Common::Units::GetLeftSkill(pUnit);
     if (pSkill) {
       nStatVal = D2Common::Skills::GetOwnerGUID(pSkill);
-
       SKILLS::SkillsServer::Server_SelectSkill(pUnit, 1, D2Common::Skills::GetSkillId(pSkill, ".\\PLAYER\\PlrMsg.cpp", 0x1209), nStatVal);
     }
 
@@ -3465,7 +3446,6 @@ eD2ServerIncomingStatus __fastcall SCMD_0x41_Resurrect(::SGAMEDATA * pGame, D2Un
     }
 
     nStatVal = D2Common::Skills::GetOwnerGUID(pSkill);
-
     SKILLS::SkillsServer::Server_SelectSkill(pUnit, 0, D2Common::Skills::GetSkillId(pSkill, ".\\PLAYER\\PlrMsg.cpp", 0x120e), nStatVal);
     return SERVERSTATUS_OK;
 }
@@ -4033,12 +4013,10 @@ eD2ServerIncomingStatus __fastcall SCMD_0x5F_SyncPosition(::SGAMEDATA * pGame, D
     if (bDead) {
       return SERVERSTATUS_OK;
     }
-
     nErrLine = D2Common::Collision::GetDistanceToXY(pUnit, nX, nY);
     if (5 > nErrLine) {
       return SERVERSTATUS_OK;
     }
-
     eSyncWarpState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_sync_warped);
     if (eSyncWarpState == STATE_none && nErrLine - 0xfU <= 0x1e) {
       bPathReachable = ValidateSyncWarpPath(pGame, pUnit, nY, nX);
@@ -4048,21 +4026,17 @@ eD2ServerIncomingStatus __fastcall SCMD_0x5F_SyncPosition(::SGAMEDATA * pGame, D
           return SERVERSTATUS_OK;
         }
       }
-
       SendReassignPlayer(pUnit, pClient, '\0');
       return SERVERSTATUS_OK;
     }
-
     pTarget = UNIT::SUnit::GetTargetEx(pGame, pUnit);
     if (pTarget) {
       return SERVERSTATUS_OK;
     }
-
     eAnimMode = Death;
     if (pUnit) {
       eAnimMode = pUnit->eAnimMode.ePlayerMode;
     }
-
     PlayerModes::PLRMODES_MoveToLocation(pGame, pUnit, nullptr, (eAnimMode == eD2PlayerAnimMode_ns::Run) + 2, nX, nY, 0);
     return SERVERSTATUS_OK;
 }
@@ -4475,13 +4449,11 @@ eD2ServerIncomingStatus __fastcall SCMD_0x63_ItemToBeltAuto(::SGAMEDATA * pGame,
               nDbgParam = 0;
               nItemPosY = nPrevInvPage;
               nY = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
-
               D2Common::INVENTORY::Inventory::UnusedDebug(".\\PLAYER\\PlrMsg.cpp", 0x1830, pInventory, D2Client::Units::GetXPosFromDynamicPathUnit(pItem), nY, invPage, nDbgParam, nItemPosY);
               D2Common::ITEMS::Items::ITEM_SetItemData_ePreviousPage(pItem, (uint8_t)nPrevInvPage);
               D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, INVPAGE_None);
               itemFlagMask = ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD);
               pItemInInv = pItem;
-
               GAME::SCmd::Send0x9DRemoveItemFromContainer(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x1834), pUnit, pItemInInv, itemFlagMask);
               D2Common::Units::SetupUpdateFlag(pItem, 4);
               pItem->eUnitFlags &= ~UNITFLAG_TARGETABLE;
@@ -4493,7 +4465,6 @@ eD2ServerIncomingStatus __fastcall SCMD_0x63_ItemToBeltAuto(::SGAMEDATA * pGame,
                 if (bFoundSlot) {
                   D2Common::Units::SetupUpdateFlag(pItem, 2);
                   itemFlagMask = ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD);
-
                   GAME::SCmd::Send0x9CItemPutInBelt(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrMsg.cpp", 0x1842), pUnit, pItem, itemFlagMask);
                 }
               }
@@ -4606,7 +4577,6 @@ void __fastcall PLAYERMSG_BroadcastPlayerSlain(::SGAMEDATA * pGame, D2UnitStrc *
         pUnit = pOwnerUnit;
       }
     }
-
     memset(packet0x5a.szName1, 0, 16 * sizeof(packet0x5a.szName1[0]));
     memset(packet0x5a.szName2 + 4, 0, 12 * sizeof(packet0x5a.szName2[0]));
     packet0x5a.nPacketId = 'Z';
@@ -4617,12 +4587,10 @@ void __fastcall PLAYERMSG_BroadcastPlayerSlain(::SGAMEDATA * pGame, D2UnitStrc *
     } else {
       packet0x5a.nArg = pUnit->nClassId;
     }
-
     packet0x5a.nArgTypes = '\x06';
     if (pUnit) {
       packet0x5a.nArgTypes = (uint8_t)pUnit->eUnitType;
     }
-
     memset(packet0x5a.szName2, 0, 4 * sizeof(packet0x5a.szName2[0]));
     pClient = UNIT::SUnit::SUNIT_GetClient(pVictim, ".\\PLAYER\\PlrMsg.cpp", 0x19c9);
     szCharName = GAME::Clients::GetCharName(pClient);
@@ -4632,7 +4600,6 @@ void __fastcall PLAYERMSG_BroadcastPlayerSlain(::SGAMEDATA * pGame, D2UnitStrc *
     } else {
       *(uint32_t*)(char*)&packet0x5a.szName1 &= -256;
     }
-
     eKillerType = UNIT_COUNT;
     if (pUnit) {
       eKillerType = pUnit->eUnitType;
@@ -4654,7 +4621,6 @@ void __fastcall PLAYERMSG_BroadcastPlayerSlain(::SGAMEDATA * pGame, D2UnitStrc *
         packet0x5a.szName2[1] = (char)((uint16_t)nBossNo >> 8);
       }
     }
-
     BroadcastEventMessage(pGame, &packet0x5a);
     return;
 }

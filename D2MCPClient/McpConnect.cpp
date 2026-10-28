@@ -303,7 +303,6 @@ void __stdcall CopyCharListToGlobal(char * pBytes, size_t nSize) {
               pszCursor = pszCursor + strlen(pszCursor) + 1;
               pszCursor = pszCursor + strlen(pszCursor) + 1;
             }
-
             return;
           }
         }
@@ -804,7 +803,6 @@ BOOL __fastcall NET_MCP_CLIENT_Incoming0x04(MCPPacketSrv0x04 * pBytes, size_t nS
     }
 
     int32_t nIpStringMaxLen = 0x12;
-
     Storm::Source::SSTR::SStrCopy(D2Client::MCP::D2GSConnectIp, Fog::Src::Safesock::NET_MakeIPV4AddressHumanFriendly((in_addr)pBytes->nGameIp), nIpStringMaxLen);
     return 1;
 }
@@ -1136,7 +1134,6 @@ void __stdcall MCPCONNECT_SanitizeWideString(uint16_t * wszText) {
       memmove(wszMatch, wszMatch + nLen + 1, (iVar1 - nLen) * 2);
       wszMatch = (uint16_t*)D2Lang::Unicode::UNISYS::UNICODE_FindSubstring((uint16_t*)wszText, (uint16_t*)wszToken);
     }
-
     return;
 }
 

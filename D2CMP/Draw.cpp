@@ -1082,7 +1082,6 @@ BOOL __stdcall DRAW_InitPalette(LPCSTR szPaletteFile, int nStartIndex, int nEndI
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3b9);
         exit(-1);
       }
-
       gnPaletteMaxIndex = nEndIndex;
       gnPaletteColorDepth = 1;
       iVar1 = -0x100;
@@ -1090,7 +1089,6 @@ BOOL __stdcall DRAW_InitPalette(LPCSTR szPaletteFile, int nStartIndex, int nEndI
         gaColorDistanceLookupTable[iVar1 + 0x100] = iVar1 * iVar1;
         iVar1++;
       } while (iVar1 < 0x100);
-
       gnDrawTransparentColorRGB = 0;
       szStringEnd = Storm::Source::SSTR::SStrLen((char*)szPaletteFile);
       if (!szStringEnd) {
@@ -1106,7 +1104,6 @@ BOOL __stdcall DRAW_InitPalette(LPCSTR szPaletteFile, int nStartIndex, int nEndI
         gbPaletteLoaded = 1;
         return 1;
       }
-
       /* HANDLE hTemplateFile for CreateFileA */ /* DWORD dwFlagsAndAttributes for CreateFileA */ /* DWORD dwCreationDisposition for CreateFileA */ /* LPSECURITY_ATTRIBUTES lpSecurityAttributes for CreateFileA */ /* DWORD dwShareMode for CreateFileA */ /* DWORD dwDesiredAccess for CreateFileA */ /* LPCSTR lpFileName for CreateFileA */ hFile = CreateFileA(lpFileName, 0x80000000, 1, (LPSECURITY_ATTRIBUTES)0x0, 3, 0, (HANDLE)0x0);
       if (hFile == (HANDLE)-1) {
         /* LPCSTR lpOutputString for OutputDebugStringA */ OutputDebugStringA("Unable to open ");
@@ -1114,7 +1111,6 @@ BOOL __stdcall DRAW_InitPalette(LPCSTR szPaletteFile, int nStartIndex, int nEndI
         /* LPCSTR lpOutputString for OutputDebugStringA */ OutputDebugStringA("\n");
         return 0;
       }
-
       /* LPDWORD lpFileSizeHigh for GetFileSize */ /* HANDLE hFile for GetFileSize */ DVar2 = GetFileSize(hFile, (LPDWORD)&nStartIndex);
       if (DVar2 == 0x300) {
         /* LPOVERLAPPED lpOverlapped for ReadFile */ /* LPDWORD lpNumberOfBytesRead for ReadFile */ /* DWORD nNumberOfBytesToRead for ReadFile */ /* LPVOID lpBuffer for ReadFile */ /* HANDLE hFile for ReadFile */ szPaletteFile = (LPCSTR)0x0;

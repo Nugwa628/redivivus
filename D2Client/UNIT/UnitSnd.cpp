@@ -248,12 +248,10 @@ void __fastcall UNITSND_ResolveSoundFromFlags(D2UnitStrc * pUnit, uint32_t nAnim
         *pnSoundIdOut = 0x141;
       break;
       case 8:
-
       case 9:
         *pnSoundIdOut = 0x149;
       break;
       case 6:
-
       case 7:
         *pnSoundIdOut = 0x14f;
       break;
@@ -329,29 +327,19 @@ int __fastcall UNITSND_GetHitSound(int32_t pSoundTable, uint32_t nAnimMode) {
     nSoundId = 0;
     switch (nAnimMode & 0xf) {
       case 1:
-
       case 2:
-
       case 3:
-
       case 4:
-
       case 5:
-
       case 6:
-
       case 7:
-
       case 8:
-
       case 9:
         return 0x18e;
       case 10:
-
       case 0xb:
         nSoundId = 0x191;
     }
-
     return nSoundId;
 }
 
@@ -465,7 +453,6 @@ void __fastcall UNITSND_UpdatePositionalAudio(D2UnitStrc * pUnit) {
         Sound::SOUND_StopUnitSoundByIndex(nChannelId, pUnit, 0);
       }
     }
-
     return;
 }
 
@@ -943,7 +930,6 @@ void __stdcall UNITSND_UpdateNeutralSound(D2UnitStrc * pUnit, int32_t bForceStop
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc2c);
       exit(-1);
     }
-
     D2MonSoundsTxt* pMonSoundsLine;
     pSfxNode = (int32_t*)pUnit->uSideData.pClientSide.pUnitSfxData;
     while (pSfxNode) {
@@ -955,7 +941,6 @@ void __stdcall UNITSND_UpdateNeutralSound(D2UnitStrc * pUnit, int32_t bForceStop
       } else {
         nChanSoundBase = pMonSoundsLine->Neutral;
       }
-
       nLine = Sound::SOUND_StopChannelById(nNeutralSoundId);
       nLine = Sound::SoundHdr::SOUNDHDR_GetSoundField0x60(nLine);
       pSfxNode = pSfxNodeNext;
@@ -1110,7 +1095,6 @@ void __fastcall UpdateUnitSfxOnModeChange(D2UnitStrc * pUnit) {
           Sound::SOUND_PlaySound(eSpecialSound, pUnit, 0, 0, 0);
         }
       }
-
       nClassId = GetSndUnitClassId(pUnit);
       if (pUnit->uSideData.pClientSide.bUnitSfx || nClassId == 0x3b) {
         eSpecialSound = UNITSND_GetModeChangeSound(pUnit->uSideData.pClientSide.nSfxMode, pUnit, nUnitMode);
@@ -1118,7 +1102,6 @@ void __fastcall UpdateUnitSfxOnModeChange(D2UnitStrc * pUnit) {
           Sound::SOUND_PlaySound(eSpecialSound, pUnit, 0, 0, 0);
         }
       }
-
       pUnit->uSideData.pClientSide.nSfxMode = nUnitMode;
       pUnit->uSideData.pClientSide.bUnitSfx = 1;
       return;
@@ -1718,7 +1701,6 @@ void __fastcall UNITSND_PlaySoundForMercenary(int32_t nUnitGUID, uint8_t eUnitTy
       if (nMercClassId != 0x10f) {
         return;
       }
-
       Sound::SOUND_PlaySound(0x10c2, pMercUnit, 0, 0, 0);
       return;
       case 0x10:
@@ -1726,13 +1708,11 @@ void __fastcall UNITSND_PlaySoundForMercenary(int32_t nUnitGUID, uint8_t eUnitTy
       if (eMercUnitType != UNIT_MONSTER) {
         return;
       }
-
       pMonSoundsLine = TxtGetSoundIdLineFromUnit(pMercUnit);
       if (!pMonSoundsLine) {
         Sound::SOUND_PlaySound(SOUND_NONE, pMercUnit, 0, 0, 0);
         return;
       }
-
       Sound::SOUND_PlaySound(pMonSoundsLine->Taunt, pMercUnit, 0, 0, 0);
       return;
       case 0x11:
@@ -2114,15 +2094,12 @@ void __fastcall UNITSND_DispatchModeChangeSound(D2UnitStrc * pUnit, int32_t pnPa
         Sound::SOUND_PlaySound(SOUND_WEAPON_1HS_LARGE_1, pUnit, 4, 0, 0);
         return;
         case 7:
-
         case 8:
           play_attack_sound:
           UNITSND_PlayAttackSound(pUnit, pnParam, 1);
         return;
         case 0:
-
         case 4:
-
         case 0x13:
           play_mode_change_sound:
           UNITSND_PlayModeChangeSound(pnParam, pUnit);

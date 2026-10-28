@@ -15,7 +15,7 @@ void tr_static_init() {
 
 }
 
-void __fastcall init_block(deflate_state * pDeflateState) {
+static void __fastcall init_block(deflate_state * pDeflateState) {
     ct_data* pwFreqEntry = pDeflateState->dyn_ltree;
     int nZeroCount = 0x11e;
     do {
@@ -309,11 +309,9 @@ static void send_tree(int32_t nMaxCode, ct_data * pTree, deflate_state * pDeflat
               nBitBufLen = pDeflateState->bi_valid;
               pDeflateState->bi_buf |= pDeflateState->bl_tree[nCurLen].fc << (byBitCount & 0x1f);
             }
-
             pDeflateState->bi_valid = nBitBufLen + nSymBitLen;
             nRepeatCount = nCount;
           }
-
           nSymBitLen = (uint32_t)pDeflateState->bl_tree[0x10].dl;
           byBitCount = (uint8_t)pDeflateState->bi_valid;
           if ((int)(0x10 - nSymBitLen) < pDeflateState->bi_valid) {
@@ -329,7 +327,6 @@ static void send_tree(int32_t nMaxCode, ct_data * pTree, deflate_state * pDeflat
             nBitBufLen = pDeflateState->bi_valid;
             pDeflateState->bi_buf |= pDeflateState->bl_tree[0x10].fc << (byBitCount & 0x1f);
           }
-
           nBitBufLen += nSymBitLen;
           nRepeatCount += -3;
           pDeflateState->bi_valid = nBitBufLen;

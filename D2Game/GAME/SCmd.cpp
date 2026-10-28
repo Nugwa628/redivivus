@@ -1194,15 +1194,12 @@ void __fastcall NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(D2ClientStrc * pClient, u
 
 void __fastcall NET_D2GS_SERVER_Send_0x78_TRADENAME(D2ClientStrc * pClient, D2GSPacketSrv0x78 * pPacketData) {
     uint8_t aPacket[21];
-    aPacket[0] = pPacketData->nPacketId;
-    aPacket[1] = pPacketData->szName[0];
-    aPacket[2] = pPacketData->szName[1];
-    aPacket[3] = pPacketData->szName[2];
-    *(uint32_t*)((char*)&aPacket + 4) = *(uint32_t*)(pPacketData->szName + 3);
-    *(uint32_t*)((char*)&aPacket + 8) = *(uint32_t*)(pPacketData->szName + 7);
-    *(uint32_t*)((char*)&aPacket + 12) = *(uint32_t*)(pPacketData->szName + 0xb);
-    *(uint32_t*)((char*)&aPacket + 16) = *(uint32_t*)(pPacketData->szName + 0xf);
-    aPacket[0x14] = *(uint8_t*)((uintptr_t)&pPacketData->nUnitGUID + 3);
+    *(uint32_t*)(char*)&aPacket = *(uint32_t*)pPacketData;
+    *(uint32_t*)((char*)&aPacket + 4) = ((uint32_t*)pPacketData)[1];
+    *(uint32_t*)((char*)&aPacket + 8) = ((uint32_t*)pPacketData)[2];
+    *(uint32_t*)((char*)&aPacket + 12) = ((uint32_t*)pPacketData)[3];
+    *(uint32_t*)((char*)&aPacket + 16) = ((uint32_t*)pPacketData)[4];
+    aPacket[0x14] = *(uint8_t*)((uint32_t*)pPacketData + 5);
     SCMD_QueuePacketForClient(aPacket, 0x15, pClient);
 }
 
@@ -1395,7 +1392,6 @@ static BOOL __stdcall SCMD_DispatchUnitPartyData(D2UnitStrc * pUnit, int32_t nUn
       if (pUnit2->eUnitType != UNIT_MONSTER) {
         return 0;
       }
-
       nResult = SCMD_CheckMonsterPositionDesync(pUnit, pUnit2, nUnitLife);
       return nResult;
     }
@@ -1424,7 +1420,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x7F_AllyPartyInfo_0x90_PartyAutoMapInfo(D2
       ((uint8_t*)&aPacket)[3] = 0xff;
     }
 
-
     eD2LevelId eLevelRaw = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(D2Common::Units::UNITS_GetRoom(pUnit));
     eD2LevelId eLevel = eLevelRaw & 0xffff;
     ((uint8_t*)&aPacket)[8] = (uint8_t)eLevelRaw;
@@ -1437,7 +1432,6 @@ void __fastcall NET_D2GS_SERVER_Send_0x7F_AllyPartyInfo_0x90_PartyAutoMapInfo(D2
     if (!((uint8_t*)&aPacket)[1]) {
       return;
     }
-
 
     nErrLineOrAddr = D2Common::Collision::GetCollisionDistance(Clients::CLIENTS_GetControlUnit(pClient, 0), pUnit);
     if (0x32 >= nErrLineOrAddr) {
@@ -1507,7 +1501,6 @@ void __fastcall Send0x9DRemoveItemFromContainer(D2ClientStrc * pClient, D2UnitSt
     }
 
     eInventoryPage ePage = D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pItem);
-
     D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, D2Common::ITEMS::Items::ITEM_GetItemData_ePreviousPage(pItem));
     NET_D2GS_SERVER_Send_0x9D_ITEMUNITEX(pClient, pUnit, pItem, 5, eItemFlag, 0);
     D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, ePage);
@@ -1775,16 +1768,12 @@ void __fastcall NET_D2GS_SERVER_Send_0x4C_UnitCastSkill_Target_0x4D_UnitCastSkil
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &pRoomList, &nRoomCount);
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       for (iRoom = 0; iRoom < nRoomCount; iRoom++) {
-
-
           if (pRoom == pRoomList[iRoom]) {
             ((uint8_t*)&aPacket)[1] = byAttackerTypeLo;
             goto send_cast_on_target;
           }
 
-
       }
-
     }
 
     uint32_t nTargetY = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
@@ -2808,7 +2797,6 @@ void Send0x9CItemHandleInShop(void * pThis, D2UnitStrc * pUnit, char cParam) {
       NET_D2GS_SERVER_Send_0x9C_ITEMEX((D2ClientStrc*)pThis, pUnit, 0xb, ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD), nUnidentifiedFlag);
     } else if (cParam == '9') {
       eCurrentPage = D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pUnit);
-
       D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pUnit, D2Common::ITEMS::Items::ITEM_GetItemData_ePreviousPage(pUnit));
       NET_D2GS_SERVER_Send_0x9C_ITEMEX((D2ClientStrc*)pThis, pUnit, 0xc, ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD), 0);
       D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pUnit, eCurrentPage);

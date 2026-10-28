@@ -168,7 +168,6 @@ static BOOL D2WINANIMIMAGE_UpdateFrame(::D2WinAnimImage * pAnimImage) {
       if (nAnimState != 4 || pAnimImage->nCurrentFrame < nFrames - 2) {
         goto wrap_frame_counter;
       }
-
       pAnimImage->nAnimState = 1;
     } else {
       if (pAnimImage->nCurrentFrame < nFrames - 2) {

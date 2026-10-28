@@ -493,7 +493,6 @@ static void __stdcall PLRMODES_UnequipAndPrepareItemForDrop(::SGAMEDATA * pGame,
       if (pUnit2) {
         pUnit2->eUnitFlags &= ~UNITFLAG_TARGETABLE;
       }
-
       ITEMS::ItemMode::ITEMMODE_UnequipItemStats(pGame, pUnit2, pUnit, 0, 1);
       D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pUnit2, ITEMFLAG_REMOVED, 1);
       D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pUnit2, ITEMCMD_DELETE, 1);
@@ -502,7 +501,6 @@ static void __stdcall PLRMODES_UnequipAndPrepareItemForDrop(::SGAMEDATA * pGame,
       if (bShouldReturnItem) {
         ITEMS::ItemMode::ITEMMODE_ReturnOne(0);
       }
-
       D2Common::ITEM_ProcessSetItemEquip(pUnit, pUnit2, 1, 1);
       D2Common::Units::RefreshInventory(pUnit, 1);
       return;
@@ -610,9 +608,7 @@ static int32_t __stdcall PLRMODES_CleanupInvalidCorpses(::SGAMEDATA * pGame, D2U
 }
 
 } // namespace D2Game::PLAYER::PlayerModes
-
 namespace D2Game {
-
 // @sourcefile .\PLAYER\PlrModes.cpp
 D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nX, int32_t nY, D2UnitStrc * pRoom) {
     D2RoomStrc* pSpawnRoom;
@@ -691,7 +687,6 @@ D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc 
               lExpTimes75 = (uint64_t)((uint64_t)(uint32_t)nExpQuotient << 32 | (uint64_t)(uint32_t)((nExpQuotient - iVar4) * 0x4b));
             }
           }
-
           pCorpseInventory = (D2InventoryStrc*)lExpTimes75;
           GAME::Clients::SetExperience(pClient, 0);
           D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit_00, UNITSTAT_experience, (int32_t)pCorpseInventory, 0);
@@ -701,7 +696,6 @@ D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc 
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x31a);
             exit(-1);
           }
-
           D2Common::INVENTORY::Inventory::INVENTORY_SetOwnerGUID(pCorpseInventory, pUnit->nUnitGUID);
           nBodyLocIndex = -1;
           do {
@@ -720,11 +714,9 @@ D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc 
                   Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x339);
                   exit(-1);
                 }
-
                 PLAYER::PlayerModes::PLRMODES_UnequipAndPrepareItemForDrop(pSavedGame, pUnit, pSlotItem, iVar5);
                 pUnit_00 = pSavedBodyUnit;
               }
-
               pItemUnit = pSlotItem;
               D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pSlotItem, INVPAGE_INVENTORY);
               pItemUnit = ITEMS::Items::Drop::ITEM_CloneFromSerializedData(pSavedGame, pItemUnit, pUnit, 1);
@@ -737,12 +729,10 @@ D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc 
                     if (pItemUnit) {
                       pItemUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
                     }
-
                     D2Common::Units::SetupUpdateFlag(pItemUnit, 0);
                     if (pItemUnit) {
                       pItemUnit->eUnitFlags &= ~UNITFLAG_ISRESURRECT;
                     }
-
                     D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pItemUnit, ITEMCMD_INVENTORY_PUT_ITEM, 1);
                     break;
                   }
@@ -754,26 +744,22 @@ D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc 
                   if (nBodyLocIndex == 0xb || nBodyLocIndex == 0xc) {
                     dwParam = 4;
                   }
-
                   BVar2 = D2Common::INVENTORY::Inventory::PutItemInInventory(pCorpseInventory, pItemUnit, dwParam);
                   if (BVar2) {
                     D2Common::ITEMS::Items::SetBodyLoc(pItemUnit, (eD2BodyLoc)nBodyLocIndex);
                     if (pItemUnit) {
                       pItemUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
                     }
-
                     D2Common::Units::SetupUpdateFlag(pItemUnit, 1);
                     D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItemUnit, INVPAGE_None);
                     D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pItemUnit, ITEMCMD_BODYLOC_PUT_ITEM, 1);
                     if (pItemUnit) {
                       pItemUnit->eUnitFlags &= ~UNITFLAG_ISRESURRECT;
                     }
-
                     break;
                   }
                 }
               }
-
               D2Common::Units::GetCoords(pUnit, &sUnitCoords);
               nMaxSearchRadius = 1;
               uVar3 = 1;
@@ -783,7 +769,6 @@ D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc 
               ITEMS::Items::Drop::DropItem(pSavedGame, (int32_t)pUnit, pItemUnit, pSpawnRoom, sDropCoords.x, sDropCoords.y);
               iVar5 = nBodyLocIndex;
             }
-
             next_body_loc:
             nBodyLocIndex = iVar5 + 1;
             if (0xd <= nBodyLocIndex) {
@@ -791,7 +776,6 @@ D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc 
               if (pUnit->eUnitType == UNIT_PLAYER) {
                 D2Common::Units::GetInventoryGoldLimit(pUnit);
               }
-
               D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_gold, 0, 0);
               pGame_00 = pSavedGame;
               PLAYER::PlayerModes::SERVERUNIT_GoldAmmountForDeadBody(pSavedGame, pUnit, pUnit_00, uVar3, 1);
@@ -799,7 +783,6 @@ D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc 
               return pUnit_00;
             }
           } while (true);
-
           D2Common::INVENTORY::Inventory::UpsertToUpdateList(pCorpseInventory, pItemUnit);
           D2Common::Units::RefreshInventory(pUnit_00, 1);
           Quests::QUESTS::QUEST_OnItemPickedUp(pSavedGame, pUnit_00, pItemUnit);
@@ -809,11 +792,8 @@ D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc 
       }
     }
 }
-
 } // namespace D2Game
-
 namespace D2Game::PLAYER::PlayerModes {
-
 static uint32_t __stdcall PLRMODES_IsCorpseOwnedByPlayer(::SGAMEDATA * pGame, D2UnitStrc * pCorpseUnitRaw, D2UnitStrc * pUnit) {
     D2UnitStrc* pCorpseOwner;
     uint32_t nPartyFlags;
@@ -833,12 +813,10 @@ static uint32_t __stdcall PLRMODES_IsCorpseOwnedByPlayer(::SGAMEDATA * pGame, D2
       if (pUnit->nUnitGUID == nPartyFlags) {
         return 1;
       }
-
       pCorpseOwner = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_PLAYER, nPartyFlags);
       if (!pCorpseOwner) {
         return 0;
       }
-
       nPartyFlags = UNIT::PlayerList::PLAYERLIST_GetFlagsMasked(pCorpseOwner, pUnit, 1);
       return nPartyFlags;
     }
@@ -879,7 +857,6 @@ void __fastcall PLRMODES_PickupCorpse(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
       D2Common::INVENTORY::Inventory::INVENTORY_RemoveCorpse(pUnit->pInventory, pCorpseUnit->nUnitGUID, 1);
       nPendingExperience = pCorpseUnit->nUnitGUID;
       eCorpseUnitType = pCorpseUnit->eUnitType;
-
       D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pCorpseUnit), eCorpseUnitType, nPendingExperience);
       GAME::SCmd::NET_D2GS_SERVER_Send_0x8E_CorpseAssign_Sender(pGame, pUnit->nUnitGUID, pCorpseUnit->nUnitGUID, 0);
       D2Common::Units::RemoveCollision_Vector(pCorpseUnit);

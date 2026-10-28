@@ -350,7 +350,6 @@ void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
     D2UniqueItemsTxt* pUniqueItemsTxtFlippy;
     D2SetItemsTxt* pSetItemsTxtFlippy;
     char* pcVar1;
-
     D2ItemsTxt* pItemsTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(Source::ClientEngine::CLIENT_GetEffectiveClassId(pUnit));
     if (!pItemsTxt) {
       return;
@@ -368,7 +367,6 @@ void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
           return;
         }
 
-
         pUniqueItemsTxtFlippy = DataTbls::INV_GetUniqueItemsTxtLine(D2Common::ITEMS::Items::ITEM_GetItemData_nFileIndex(pUnit));
         if (!pUniqueItemsTxtFlippy) {
           return;
@@ -380,7 +378,6 @@ void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
         if (iVar6 != 5) {
           return;
         }
-
 
         pSetItemsTxtFlippy = DataTbls::GetSetItemsLine(D2Common::ITEMS::Items::ITEM_GetItemData_nFileIndex(pUnit));
         if (!pSetItemsTxtFlippy) {
@@ -403,7 +400,6 @@ void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit) {
       int eQuality;
       eQuality = D2Common::ITEMS::Items::GetItemQuality(pUnit);
       if (eQuality == 5) {
-
         pSetItemsTxt = DataTbls::GetSetItemsLine(D2Common::ITEMS::Items::ITEM_GetItemData_nFileIndex(pUnit));
         if (pSetItemsTxt && (pcVar1 = pSetItemsTxt->invfile , *pcVar1 != '\0') || (pcVar1 = pItemsTxt->szSetInvFile , pItemsTxt->szSetInvFile[0] != '\0')) {
           pGfxData->dwFlags |= 0x10;
@@ -930,7 +926,6 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
       pXAdjust = &__frame0.nScreenX;
       nBais = 0;
       nCoord = D2Common::Units::GetPrecisionY(pUnit);
-
       D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(D2Common::Units::GetPrecisionX(pUnit), nCoord, nBais, pXAdjust, pYAdjust);
       uVar1 = UI::Path::DRAW_GetTypeOfBorder();
       if (uVar1 == 1) {
@@ -958,7 +953,6 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
         return 0;
       }
     }
-
 
     uint8_t* pCofData = GfxInfo::GFX_GetGfxInfoCofData(pUnit, Source::ClientEngine::CLIENT_GetEffectiveAnimMode(pUnit));
     if (!pCofData) {

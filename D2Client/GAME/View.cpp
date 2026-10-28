@@ -380,7 +380,6 @@ void __stdcall VIEW_FreeLookupTables() {
       if (gpViewPalByteTable32x40) {
         D2MEM_VirtualFree(gpViewPalByteTable32x40);
       }
-
       gpViewPalPointerTable32x8 = 0;
       gpViewPalByteTable32x16 = 0;
       gpViewPalByteTable16x32 = 0;

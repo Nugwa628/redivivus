@@ -668,7 +668,6 @@ void __fastcall BlockHaremRoomForPlayerAccess(int32_t nParam, D2UnitStrc * pUnit
       iVar1 = 0;
       bForcedSpawn = 1;
       pA2Q4Specific->nHaremBlockerY = ptPlayerPos.y;
-
       pBlockerUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x13e, pA2Q4Specific->field_0x20, pA2Q4Specific->nHaremBlockerY, *(::SGAMEDATA**)(nParam + 4), D2Common::Units::UNITS_GetRoom(pUnit), bForcedSpawn, iVar1, pNullArg);
       if (!pBlockerUnit) {
         return;
