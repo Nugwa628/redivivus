@@ -1452,7 +1452,7 @@ int32_t __stdcall SERVER_MinDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t
 
     int32_t nDamage = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->EMinLev);
     uint32_t uCalcResult = pSkillTxt->EDmgSymPerCalc;
-    nDamage = nDamage + pSkillTxt->EMin << (pSkillTxt->HitShift);
+    nDamage = nDamage + pSkillTxt->EMin << (pSkillTxt->HitShift & 0x1fU);
     if (uCalcResult != -1 && (0x100 < nDamage || pSkillTxt->EMinLev[0]) && pDataTable->pSkillsCode && uCalcResult < (uint32_t)pDataTable->nSkillsCodeSize) {
       D2SkillCalcContextStrc sCalcCtx;
       sCalcCtx.pUnit = pUnit;
@@ -1487,7 +1487,7 @@ int32_t __stdcall SERVER_MaxDamage(D2UnitStrc * pUnit, int32_t eSkillId, int32_t
 
     int32_t nDamage = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->EMaxLev);
     uint32_t uCalcResult = pSkillTxt->EDmgSymPerCalc;
-    nDamage = nDamage + pSkillTxt->EMax << (pSkillTxt->HitShift);
+    nDamage = nDamage + pSkillTxt->EMax << (pSkillTxt->HitShift & 0x1fU);
     if (uCalcResult != -1 && pDataTable->pSkillsCode && uCalcResult < (uint32_t)pDataTable->nSkillsCodeSize) {
       D2SkillCalcContextStrc sCalcCtx;
       sCalcCtx.pUnit = pUnit;
@@ -2102,10 +2102,11 @@ int32_t __fastcall SKILLS_CalculateSynergyValue_Recursive(int32_t nLevel, int32_
       nResult = SKILLS_CalculateSynergyValue_Recursive(nLevel - 1, nMinVal, nMaxVal);
       return nResult + 1;
     }
-    if (nCurrentVal > nMaxVal) {
-      nCurrentVal = nMaxVal;
+    if (nMaxVal >= nCurrentVal) {
+      return nCurrentVal;
     }
 
+    nCurrentVal = nMaxVal;
     return nCurrentVal;
 }
 
@@ -2195,10 +2196,10 @@ uint32_t __stdcall SKILL_FindTeleportPosition(D2UnitStrc * pUnit, D2UnitStrc * p
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       pUnit = (D2UnitStrc*)pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      pUnit = (D2UnitStrc*)PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       pUnit = 0;
+    } else {
+      pUnit = (D2UnitStrc*)PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     eD2UnitType eUnitTypeTmp = pCaster->eUnitType;
@@ -2273,10 +2274,10 @@ uint32_t __stdcall SKILL_FindTeleportPosition(D2UnitStrc * pUnit, D2UnitStrc * p
     eUnitTypeTmp = pCaster->eUnitType;
     if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
       nCasterX = pCaster->pPath.pDynamicPath->ScreenPos.y;
-    } else if (pCaster->pPath.pDynamicPath) {
-      nCasterX = PATH::DynamicPath::GetXPos(pCaster->pPath.pDynamicPath);
-    } else {
+    } else if (!pCaster->pPath.pDynamicPath) {
       nCasterX = 0;
+    } else {
+      nCasterX = PATH::DynamicPath::GetXPos(pCaster->pPath.pDynamicPath);
     }
 
     uint32_t nLosResult = SKILLS_HasLineOfSight(nCasterX, nUnit2, nX, nDestY, (D2RoomStrc*)pUnit, 0x804);
@@ -3798,17 +3799,17 @@ int32_t __stdcall SKILL_CalcMinDamage(D2UnitStrc * pUnit, int32_t nSkillId, int3
     int32_t nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MinLevDam);
     nMinDmg = nMinDmg + nLevDamBonus + pSkillTxt->MinDam;
     if (pSkillTxt->DmgSymPerCalc == -1) {
-      return nMinDmg << (pSkillTxt->HitShift);
+      return nMinDmg << (pSkillTxt->HitShift & 0x1fU);
     }
 
     nLevDamBonus = D2GetSkillCalc(pUnit, pSkillTxt->DmgSymPerCalc, nSkillId, nSkillLevel);
     if (!nLevDamBonus) {
-      return nMinDmg << (pSkillTxt->HitShift);
+      return nMinDmg << (pSkillTxt->HitShift & 0x1fU);
     }
 
     nLevDamBonus = D2Client::Stats::D2ApplyPercent(nMinDmg, nLevDamBonus, 100);
     nMinDmg += nLevDamBonus;
-    return nMinDmg << (pSkillTxt->HitShift);
+    return nMinDmg << (pSkillTxt->HitShift & 0x1fU);
 }
 
 // Calculates the maximum damage for a skill at a given level. If the skill's flags2 bit 1 is set, delegates to SKILLS_CalculateBaseDamageFromStats. Otherwise, optionally scales weapon max damage by SrcDam (handling two-handed weapons), adds MaxLev breakpoint bonus and MaxDam base, optionally applies DmgSymPerCalc formula percent modifier, and finally left-shifts by HitShift. bUseWeaponDamage controls whether weapon damage contributes.
@@ -3847,17 +3848,17 @@ int32_t __stdcall SKILL_CalcMaxDamage(D2UnitStrc * pUnit, int32_t nSkillId, int3
     nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MaxLevDam);
     nMaxDmg = nMaxDmg + nLevDamBonus + pSkillTxt->MaxDam;
     if (pSkillTxt->DmgSymPerCalc == -1) {
-      return nMaxDmg << (pSkillTxt->HitShift);
+      return nMaxDmg << (pSkillTxt->HitShift & 0x1fU);
     }
 
     nLevDamBonus = D2GetSkillCalc(pUnit, pSkillTxt->DmgSymPerCalc, nSkillId, nSkillLevel);
     if (!nLevDamBonus) {
-      return nMaxDmg << (pSkillTxt->HitShift);
+      return nMaxDmg << (pSkillTxt->HitShift & 0x1fU);
     }
 
     nLevDamBonus = D2Client::Stats::D2ApplyPercent(nMaxDmg, nLevDamBonus, 100);
     nMaxDmg += nLevDamBonus;
-    return nMaxDmg << (pSkillTxt->HitShift);
+    return nMaxDmg << (pSkillTxt->HitShift & 0x1fU);
 }
 
 // Evaluates a passive skill's elemental calc value for a specific element type (0=min fire/0x156, 1=min cold/0x157, 2=min lightning/0x158). Searches the skill's passivestat array for the matching stat ID, then calls D2GetSkillCalc on the corresponding passivecalc slot. Returns 0 if the skill/level is invalid or the element type is not found in passivestat.
