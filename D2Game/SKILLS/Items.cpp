@@ -1686,8 +1686,8 @@ BOOL __stdcall ITEMMOD_GenerateUniqueItem(D2UnitStrc * pItem) {
 // ITEMMOD_GenerateUniqueItem. It makes no magic item.
 BOOL __fastcall ITEMMOD_GenerateSetOrUniqueVersioned(D2UnitStrc * pUnit, D2ItemGenContextStrc * pItemGenContext) {
     BOOL BVar1;
-    int16_t sVar1 = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
-    if (sVar1) {
+    uint16_t sVar1 = D2Common::ITEMS::Items::ITEM_GetItemData_wItemVersion(pUnit);
+    if (sVar1 >= 1) {
       BVar1 = ITEMMOD_GenerateSetItem(pItemGenContext, pUnit);
       return BVar1;
     }

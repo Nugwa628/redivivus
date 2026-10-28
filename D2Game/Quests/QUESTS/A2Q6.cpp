@@ -75,7 +75,7 @@ namespace D2Game::Quests::QUESTS::A2Q6 {
 // a2q5.cpp - AI callback for The Summoner. When Summoner is killed, advances quest state and notifies players.
 void __fastcall Q13_AICallback_Summoner(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSummoner);
-    if (!(pQuestData && pQuestData->bIsNotIntroduction)) {
+    if (!(pQuestData && pQuestData->bIsNotIntroduction == 1)) {
       return;
     }
     if (!pQuestData->pQuestSpecificData.pA2Q5->field_0x1) {
@@ -295,7 +295,7 @@ void __fastcall Q14_PlayCompletionSoundAll(::SGAMEDATA * pGame) {
 // A2Q6 "The Seven Tombs" — talk callback for state 2 (slot fpQuestStateHandler[2]). On talking to Cain(0xfb): if bCainSaved, broadcasts quest state 4 then clears the slot. On talking to Jerhyn(0xc9): if field_0x08 set, broadcasts state 1; else if field_0x0A set, broadcasts state 6; then clears the slot and re-syncs every player's quest record via Q14_UpdateQuestRecordStep. Drives the post-Duriel Jerhyn/Cain dialogue that gates the reward & Act3 travel. (eFlags zeroed before each broadcast.)
 void __fastcall Q14_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame;
-    short int sVar1 = !pQuestArgs->pTarget ? -1 : (short int)pQuestArgs->pTarget->nClassId;
+    int32_t sVar1 = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA2Q6Strc* pDVar1 = pQuestData->pQuestSpecificData.pA2Q6;
     if (sVar1 == 0xfb) {
       if (pDVar1->bTyraelPortalFlag == 1) {

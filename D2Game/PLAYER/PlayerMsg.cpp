@@ -2183,7 +2183,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x13_InteractWithEntity(::SGAMEDATA * pG
     if (nSize != 9) {
       return SERVERSTATUS_BAD_PARAMS;
     }
-    if (UNIT_WARP < pPacket->nUnitType) {
+    if (pPacket->nUnitType >= 6) {
       return SERVERSTATUS_BAD_DATA;
     }
 
@@ -3817,7 +3817,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x59_CommandNPC(::SGAMEDATA * pGame, D2U
 
     uint32_t nTargetY = pPacket->nY;
     uint32_t nTargetX = pPacket->nX;
-    if (UNIT_WARP < pPacket->nUnitType) {
+    if (pPacket->nUnitType >= 6) {
       return SERVERSTATUS_BAD_DATA;
     }
 

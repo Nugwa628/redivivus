@@ -1539,10 +1539,10 @@ void __fastcall UNITS_PlaceUnitInRoom(D2UnitStrc * pUnit, int32_t nY, int32_t nX
         D2Common::PATH::DynamicPath::AllocDynamicPath(pGame->pMemoryPool, pRoom, nY, nX, pUnit, 0);
       D2Game::Monster::MONSTER_SetVelocityAndTransition(pGame, pUnit, nY, nX, nInitMode);
       iVar1 = IsRoomOccupied(pUnit);
-      if (!iVar1) {
-        UNITS_ResetUnitForReuse(pGame, pUnit);
-      } else {
+      if (iVar1) {
         D2Game::Monster::MONSTERAI_TriggerMageThink(pGame, pUnit);
+      } else {
+        UNITS_ResetUnitForReuse(pGame, pUnit);
       }
 
       break;
