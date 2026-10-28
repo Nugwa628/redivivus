@@ -1055,8 +1055,9 @@ static int SKILLMONST_TriggerModeChange(D2UnitStrc * pUnit, ::SGAMEDATA * pGame)
       nMonStatsExIdx = pUnit->nClassId;
       if (0 <= nMonStatsExIdx && nMonStatsExIdx < sgptDataTable->nTxtMonStatsSize) {
         nMonStatsExIdx = (int)sgptDataTable->pTxtMonStats[nMonStatsExIdx].MonStatsEx;
-        if (0 <= nMonStatsExIdx && nMonStatsExIdx < sgptDataTable->nTxtMonStatsExSize && sgptDataTable->pTxtMonStatsEx + nMonStatsExIdx) {
-          nEventDelay = (uint32_t)(uint8_t)sgptDataTable->pTxtMonStatsEx[nMonStatsExIdx].byInfernoLen;
+        D2MonStats2Txt* pMonStatsExRecord = (0 <= nMonStatsExIdx && nMonStatsExIdx < sgptDataTable->nTxtMonStatsExSize) ? &sgptDataTable->pTxtMonStatsEx[nMonStatsExIdx] : 0;
+        if (pMonStatsExRecord) {
+          nEventDelay = (uint32_t)(uint8_t)pMonStatsExRecord->byInfernoLen;
         }
       }
     }

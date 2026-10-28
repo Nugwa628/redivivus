@@ -1030,7 +1030,8 @@ void __fastcall MONSTER_EndOfFrameAiDispatch(::SGAMEDATA * pGame, D2UnitStrc * p
         nBaseMonClassId = -1;
       } else {
         nBaseMonClassId = pUnit->nClassId;
-        if (-1 < nBaseMonClassId && nBaseMonClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nBaseMonClassId) {
+        D2MonStatsTxt* pMonStatsRecord = (-1 < nBaseMonClassId && nBaseMonClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nBaseMonClassId] : 0;
+        if (pMonStatsRecord) {
           nBaseMonClassId = (int)sgptDataTable->pTxtMonStats[nBaseMonClassId].BaseId;
         }
         if (0 <= nBaseMonClassId) {

@@ -2895,7 +2895,8 @@ D2UnitStrc * __fastcall AI_FindUnitAtPositionByBaseId(uint32_t nUnused, D2RoomSt
           }
           if (pUnitIter->eUnitType == UNIT_MONSTER) {
             nPos = pUnitIter->nClassId;
-            if (-1 < nPos && nPos < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nPos) {
+            D2MonStatsTxt* pMonStatsRecord2 = (-1 < nPos && nPos < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nPos] : 0;
+            if (pMonStatsRecord2) {
               nPos = (int)sgptDataTable->pTxtMonStats[nPos].BaseId;
             }
             if (nPos == nBaseIdFilter) {
@@ -11099,8 +11100,9 @@ void __fastcall AITHINK_Fn1_Diablo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ai
                          So self if/block is for diablogaddon specifically */ if (nDecision != 5 && 0 <= pMonStat->aSkill[7]) {
       BOOL bSkillCastSucceeded;
       nSkillIdx = (int)pMonStat->aSkill[7];
-      if (0 <= nSkillIdx && nSkillIdx < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nSkillIdx) {
-        nSkillId = sgptDataTable->pTxtSkills[nSkillIdx].aurastate;
+      D2SkillsTxt* pSkillsRecord2 = (0 <= nSkillIdx && nSkillIdx < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nSkillIdx] : 0;
+      if (pSkillsRecord2) {
+        nSkillId = pSkillsRecord2->aurastate;
         if (0 <= nSkillId) {
           eUnitState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, (int)nSkillId);
           if (eUnitState == STATE_none) {
@@ -20653,8 +20655,9 @@ void __fastcall AI_Fn1_UberIzual(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiPa
     if (0 <= pMonStats->aSkill[1]) {
       int nAuraSkillId;
       nAuraSkillId = (int)pMonStats->aSkill[1];
-      if (0 <= nAuraSkillId && nAuraSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nAuraSkillId) {
-        nAuraState = sgptDataTable->pTxtSkills[nAuraSkillId].aurastate;
+      D2SkillsTxt* pSkillsRecord3 = (0 <= nAuraSkillId && nAuraSkillId < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nAuraSkillId] : 0;
+      if (pSkillsRecord3) {
+        nAuraState = pSkillsRecord3->aurastate;
         if (0 <= nAuraState) {
           eAuraStateResult = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, (int)nAuraState);
           if (eAuraStateResult == STATE_none) {
@@ -21817,8 +21820,9 @@ void __fastcall AI_Fn1_AbyssKnight(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Ai
     if (0 <= pMonStats->aSkill[1]) {
       int nAuraSkillId;
       nAuraSkillId = (int)pMonStats->aSkill[1];
-      if (0 <= nAuraSkillId && nAuraSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nAuraSkillId) {
-        nAuraStateId = sgptDataTable->pTxtSkills[nAuraSkillId].aurastate;
+      D2SkillsTxt* pSkillsRecord4 = (0 <= nAuraSkillId && nAuraSkillId < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nAuraSkillId] : 0;
+      if (pSkillsRecord4) {
+        nAuraStateId = pSkillsRecord4->aurastate;
         if (0 <= nAuraStateId) {
           eAuraState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, (int)nAuraStateId);
           if (eAuraState == STATE_none && nHpPct < pMonStats->aip[0][pGame->nDifficulty]) {
@@ -21946,8 +21950,9 @@ void __fastcall AI_Fn1_OblivionKnight(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
       int nAuraSkillId;
       if (0 < pMonStatsTxt->aSkill[3]) {
         nAuraSkillId = (int)pMonStatsTxt->aSkill[3];
-        if (0 <= nAuraSkillId && nAuraSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nAuraSkillId) {
-          nSkillId = sgptDataTable->pTxtSkills[nAuraSkillId].auratargetstate;
+        D2SkillsTxt* pSkillsRecord5 = (0 <= nAuraSkillId && nAuraSkillId < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[nAuraSkillId] : 0;
+        if (pSkillsRecord5) {
+          nSkillId = pSkillsRecord5->auratargetstate;
           if (0 < nSkillId) {
             eAuraState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pTarget, (int)nSkillId);
             if (eAuraState == STATE_none) {
@@ -22334,7 +22339,8 @@ BOOL __fastcall MONSTERAI_CanSpawnMonsterAt(int32_t nMonsterClassId, D2RoomStrc 
     eCollisionFlags eVar1;
     D2RoomStrc* pRoom_00;
     int32_t eCollisionFlag;
-    if (0 <= nMonsterClassId && nMonsterClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonsterClassId) {
+    D2MonStatsTxt* pMonStatsRecord3 = (0 <= nMonsterClassId && nMonsterClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nMonsterClassId] : 0;
+    if (pMonStatsRecord3) {
       nMonsterClassId = (int32_t)sgptDataTable->pTxtMonStats[nMonsterClassId].BaseId;
     }
     if (nMonsterClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nMonsterClassId) {

@@ -150,8 +150,9 @@ static void __fastcall MONSTER_OnCreateAttachQuests(D2UnknownCreateMonsterStrc *
     pGame = pQuestEventArg->pGame;
     int nBaseId;
     nBaseId = nUmodId;
-    if (0 <= nUmodId && nUmodId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nUmodId) {
-      nBaseId = (int)sgptDataTable->pTxtMonStats[nUmodId].BaseId;
+    D2MonStatsTxt* pMonStatsRecord = (0 <= nUmodId && nUmodId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nUmodId] : 0;
+    if (pMonStatsRecord) {
+      nBaseId = (int)pMonStatsRecord->BaseId;
     }
     if (0 <= nBaseId && nBaseId < sgptDataTable->nTxtMonStatsSize) {
       if (nBaseId <= 0x1b2) {
@@ -309,7 +310,8 @@ static void MONSTER_ApplySpecialUmods(D2UnitStrc * pUnit, D2UnknownCreateMonster
     nClassId = pCreateData->nClassId;
     ::SGAMEDATA* pGame;
     pGame = pCreateData->pGame;
-    if (-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId) {
+    D2MonStatsTxt* pMonStatsRecord2 = (-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nClassId] : 0;
+    if (pMonStatsRecord2) {
       nClassId = (int32_t)sgptDataTable->pTxtMonStats[nClassId].BaseId;
     }
     if (nClassId < 0) {

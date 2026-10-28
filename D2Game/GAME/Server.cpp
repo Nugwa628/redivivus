@@ -1681,9 +1681,10 @@ void __fastcall _TableNullSub25(char * szText, int32_t nId) {
 }
 
 void __fastcall MonsterIdToName(char * szText, int32_t nId) {
-    if (0 <= nId && nId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nId) {
+    D2MonStatsTxt* pMonStatsRecord = (0 <= nId && nId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nId] : 0;
+    if (pMonStatsRecord) {
       uint16_t* pwszSrc;
-      pwszSrc = D2Lang::StrTable::strtable::GetLocaleString(sgptDataTable->pTxtMonStats[nId].NameStr);
+      pwszSrc = D2Lang::StrTable::strtable::GetLocaleString(pMonStatsRecord->NameStr);
       D2Lang::Unicode::UNISYS::UNICODE_WideToMultiByte(szText, (uint16_t*)pwszSrc, 0x40);
       return;
     }
