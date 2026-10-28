@@ -701,7 +701,7 @@ bool __stdcall MISSILESMODE_CheckCollisionAtOffset(int32_t nDistance, D2RoomStrc
     ptFrom.x = nParam2;
     ptTo.x = nParam2 + nDistance;
     BOOL bCollides = D2Common::Collision::TestCollision(pRoom, &ptFrom, &ptTo, 4);
-    return (bool)('\x01' - (bCollides != 0));
+    return !bCollides;
 }
 
 // Server-side missile spawner that fills a square/circular area around the owning unit's position with copies of missile nMissileId. Centers on pUnit's path position (static or dynamic), then sweeps a (2*nRadiusParam+1) grid; for each cell within the radius (distance^2 <= nRadiusParam^2) it wall-tests via TestCollision(COLLIDE_WALL) and, if clear and the cell maps to a valid non-town room, fills a D2SkillArgStrc (owner, skill id, level) and calls CreatingMissile. nParam (when nonzero) sets a duration/total-frames field and an extra flag. Used for AoE patterns (e.g. nova-/firewall-style area fills).
