@@ -935,24 +935,27 @@ D2DrlgStrc * __fastcall DRLG_AllocDrlgActMisc(D2DrlgActStrc * pAct, eAct nActNo,
     pDrlgActMisc->nSeed = DVar1;
     pDrlgActMisc->dwStartSeed = seedLow;
     pDrlgActMisc->pfTownAutoMap = pfTownAutoMap;
-    if (nActNo == ACT_II) {
-      uint32_t nBossOffset;
-      do {
-        uSeedProduct = ((uint64_t)d2_bits_of(DVar1) & 0xffffffff) * 0x6ac690c5 + ((uint64_t)d2_bits_of(DVar1) >> 0x20);
-        nRandVal = (uint32_t)uSeedProduct;
-        nDivTmp = (int)((uSeedProduct & 0xffffffff) / 7);
-        nStaffLevelOffset = nRandVal + ((nRandVal - nDivTmp >> 1) + nDivTmp >> 2) * -7;
-        DVar1 = D2_SEED_NEXT_VAL(uSeedProduct);
-        nBossOffset = DVar1.nSeedLow % 7;
-      } while (nStaffLevelOffset == nBossOffset);
+    switch (nActNo) {
+      case ACT_II:
+        uint32_t nBossOffset;
+        do {
+          uSeedProduct = ((uint64_t)d2_bits_of(DVar1) & 0xffffffff) * 0x6ac690c5 + ((uint64_t)d2_bits_of(DVar1) >> 0x20);
+          nRandVal = (uint32_t)uSeedProduct;
+          nDivTmp = (int)((uSeedProduct & 0xffffffff) / 7);
+          nStaffLevelOffset = nRandVal + ((nRandVal - nDivTmp >> 1) + nDivTmp >> 2) * -7;
+          DVar1 = D2_SEED_NEXT_VAL(uSeedProduct);
+          nBossOffset = DVar1.nSeedLow % 7;
+        } while (nStaffLevelOffset == nBossOffset);
 
-      pDrlgActMisc->nSeed = DVar1;
-      pDrlgActMisc->nStaffTombLevel = nStaffLevelOffset + 0x42;
-      pDrlgActMisc->nBossTombLevel = nBossOffset + 0x42;
-    } else if (nActNo == ACT_III) {
-      DVar1 = D2_SEED_NEXT_VAL(DVar1);
-      pDrlgActMisc->nSeed = DVar1;
-      pDrlgActMisc->bJungleInterlink = DVar1.nSeedLow & 1;
+        pDrlgActMisc->nSeed = DVar1;
+        pDrlgActMisc->nStaffTombLevel = nStaffLevelOffset + 0x42;
+        pDrlgActMisc->nBossTombLevel = nBossOffset + 0x42;
+        break;
+      case ACT_III:
+        DVar1 = D2_SEED_NEXT_VAL(DVar1);
+        pDrlgActMisc->nSeed = DVar1;
+        pDrlgActMisc->bJungleInterlink = DVar1.nSeedLow & 1;
+        break;
     }
 
     /* D2Drlg allocates here another substructures */ DRLGACTMISC_LoadTileProjects(pDrlgActMisc);
