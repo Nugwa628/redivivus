@@ -363,33 +363,30 @@ void __fastcall RENDERER_GLIDE_SetColorCombine(int32_t nParam) {
 }
 
 void __fastcall RENDERER_GLIDE_SetAlphaBlendMode(int32_t nParam) {
-    int nBlendMode;
-    if (!gnGlideAlphaBlendMode || (nBlendMode = gnGlideAlphaBlendMode , nParam != gnGlideAlphaBlendMode)) {
-      nBlendMode = nParam;
-      switch (nParam) {
-        case 1:
-          (*GLIDEDLL_grAlphaCombine_20)(0, 0, 1, 2, 0);
-        (*GLIDEDLL_grAlphaBlendFunction_16)(4, 0, 0, 0);
-        gnGlideAlphaBlendMode = nParam;
-        return;
-        case 2:
-          (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
-        (*GLIDEDLL_grAlphaBlendFunction_16)(4, 4, 0, 0);
-        gnGlideAlphaBlendMode = nParam;
-        return;
-        case 3:
-          (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
-        (*GLIDEDLL_grAlphaBlendFunction_16)(0, 2, 0, 0);
-        gnGlideAlphaBlendMode = nParam;
-        return;
-        case 4:
-          (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
-        (*GLIDEDLL_grAlphaBlendFunction_16)(1, 5, 0, 0);
-        nBlendMode = nParam;
-      }
+    if (!(!gnGlideAlphaBlendMode || nParam != gnGlideAlphaBlendMode)) {
+      return;
     }
 
-    gnGlideAlphaBlendMode = nBlendMode;
+    switch (nParam) {
+    case 1:
+      (*GLIDEDLL_grAlphaCombine_20)(0, 0, 1, 2, 0);
+      (*GLIDEDLL_grAlphaBlendFunction_16)(4, 0, 0, 0);
+      break;
+    case 2:
+      (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
+      (*GLIDEDLL_grAlphaBlendFunction_16)(4, 4, 0, 0);
+      break;
+    case 3:
+      (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
+      (*GLIDEDLL_grAlphaBlendFunction_16)(0, 2, 0, 0);
+      break;
+    case 4:
+      (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
+      (*GLIDEDLL_grAlphaBlendFunction_16)(1, 5, 0, 0);
+      break;
+    }
+
+    gnGlideAlphaBlendMode = nParam;
 }
 
 void __fastcall RENDERER_GLIDE_SetTextureFiltering(int32_t nParam) {
