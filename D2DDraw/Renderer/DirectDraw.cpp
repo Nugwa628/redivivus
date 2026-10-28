@@ -388,11 +388,8 @@ BOOL __fastcall SetPalette(LPPALETTEENTRY pPalette) {
     uint8_t byGreenBlue;
     double dPaletteSize = (double)gnDirectDrawPaletteSize;
     PALETTEENTRY* ptEntry = gaPaletteEntries;
-    for (nIndex = 0x100; nIndex; nIndex--) {
-      *ptEntry = *pPalette;
-      pPalette++;
-      ptEntry++;
-    }
+    memcpy(ptEntry, pPalette, 0x100 * sizeof(*ptEntry));
+    nIndex = 0;
 
     Fog::Src::DataArrays::FOG_FillArrayWithRandomInts(gnDirectDrawGamma, (uint32_t*)aGammaCurve, dPaletteSize, (uint32_t*)0x1, 0x100, 0xff);
     nIndex = 0;
@@ -507,11 +504,7 @@ void __fastcall SetPaletteTable(BYTE * * ppPaletteTable) {
 
     int nCount;
     uint8_t** pDst = gaPaletteTableLocal;
-    for (nCount = 0x48; nCount; nCount--) {
-      *pDst = *ppPaletteTable;
-      ppPaletteTable++;
-      pDst++;
-    }
+    memcpy(pDst, ppPaletteTable, 0x48 * sizeof(*pDst));
 
     gpPaletteTable = gaPaletteTableLocal;
 }

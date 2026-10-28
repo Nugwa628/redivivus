@@ -1212,11 +1212,7 @@ void __stdcall DRAW_SetDarkThresholdEnabled(BOOL bEnabled) {
 void __stdcall DRAW_SetPaletteMask(uint8_t * pMaskData) {
     int nDwordCount;
     uint8_t* pDest = gaPaletteMaskData;
-    for (nDwordCount = 0x40; nDwordCount; nDwordCount--) {
-      *(uint32_t*)pDest = *(uint32_t*)pMaskData;
-      pMaskData += 4;
-      pDest += 4;
-    }
+    memcpy(pDest, pMaskData, 0x40 * 4);
 
     gbPaletteMaskEnabled = 1;
 }
@@ -1925,11 +1921,9 @@ LPPALETTEENTRY __stdcall DRAW_BuildAllPaletteTables(tagPALETTEENTRY * pPaletteEn
 
     LPPALETTEENTRY pPaletteData = (LPPALETTEENTRY)D2MEM_VirtualAlloc(0x6c327);
     LPPALETTEENTRY ptDstEntry = pPaletteData;
-    for (iEntry = 0x100; iEntry; iEntry--) {
-      *ptDstEntry = *pPaletteEntry;
-      pPaletteEntry++;
-      ptDstEntry++;
-    }
+    memcpy(ptDstEntry, pPaletteEntry, 0x100 * sizeof(*ptDstEntry));
+    ptDstEntry += 0x100;
+    iEntry = 0;
 
     DRAW_ConvertPaletteRGBtoHSL(ahslColors, &pPaletteData->peRed);
     DRAW_BuildAlphaBlendTables(pPaletteData);
@@ -1942,11 +1936,9 @@ LPPALETTEENTRY __stdcall DRAW_BuildAllPaletteTables(tagPALETTEENTRY * pPaletteEn
     DRAW_BuildScreenBlendAndDesatTable(pPaletteData);
     tagPALETTEENTRY* ptSrcEntry = (tagPALETTEENTRY*)gpPaletteArray;
     ptDstEntry = pPaletteData + 0x1ad80;
-    for (iEntry = 9; iEntry; iEntry--) {
-      *ptDstEntry = *ptSrcEntry;
-      ptSrcEntry++;
-      ptDstEntry++;
-    }
+    memcpy(ptDstEntry, ptSrcEntry, 9 * sizeof(*ptDstEntry));
+    ptSrcEntry += 9;
+    ptDstEntry += 9;
 
     uint8_t byGreen = ptSrcEntry->peGreen;
     ptDstEntry->peRed = ptSrcEntry->peRed;

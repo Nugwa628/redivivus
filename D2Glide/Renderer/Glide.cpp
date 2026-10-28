@@ -298,11 +298,7 @@ void __fastcall SetPaletteTable(BYTE * * ppPaletteTable) {
 
     int nCount;
     uint8_t** pDst = gaGlidePaletteTableData;
-    for (nCount = 0x48; nCount; nCount--) {
-      *pDst = *ppPaletteTable;
-      ppPaletteTable++;
-      pDst++;
-    }
+    memcpy(pDst, ppPaletteTable, 0x48 * sizeof(*pDst));
 
     gpPaletteTable = gaGlidePaletteTableData;
 }

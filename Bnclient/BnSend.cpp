@@ -2349,11 +2349,7 @@ static void __fastcall BNNEWS_ReallocateNewsTable(D2BnNewsTableStrc * pNewsTable
         pDst = (int*)((int)pNewsTable->pEntries + nByteOffset);
         if (pDst) {
           pSrc = (int*)(nByteOffset + (int)pObject);
-          for (nDwordsLeft = 0x102; nDwordsLeft; nDwordsLeft--) {
-            *pDst = *pSrc;
-            pSrc++;
-            pDst++;
-          }
+          memcpy(pDst, pSrc, 0x102 * sizeof(*pDst));
         }
 
         nByteOffset += 0x408;
@@ -2526,11 +2522,7 @@ BOOL __fastcall NET_SID_CLIENT_Incoming0x46(char * pBytes, size_t nSize) {
             nCacheByteOffset += -0x408;
             iVar1--;
             pSrcEntry = pDstEntry - 0x102;
-            for (nCopyCount = 0x102; nCopyCount; nCopyCount--) {
-              *pDstEntry = *pSrcEntry;
-              pSrcEntry++;
-              pDstEntry++;
-            }
+            memcpy(pDstEntry, pSrcEntry, 0x102 * sizeof(*pDstEntry));
           } while (iVar1);
         }
 

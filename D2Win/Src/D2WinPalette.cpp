@@ -130,11 +130,10 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
     PALETTEENTRY* pMemoryToFree = (PALETTEENTRY*)Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szText2, pFileSize, szSrcFile, nSrcLine2);
     PALETTEENTRY* pSrcArchive = pMemoryToFree;
     PALETTEENTRY* pDstIndexCounter = MostLikelyCurrentPalletePtr;
-    for (nCount = 0x100; nCount; nCount--) {
-      *pDstIndexCounter = *pSrcArchive;
-      pSrcArchive++;
-      pDstIndexCounter++;
-    }
+    memcpy(pDstIndexCounter, pSrcArchive, 0x100 * sizeof(*pDstIndexCounter));
+    pSrcArchive += 0x100;
+    pDstIndexCounter += 0x100;
+    nCount = 0;
 
     memcpy(gPaletteAct1, pMemoryToFree + 0xd40, 0x30000);
     memcpy(gPaletteDataBase, pMemoryToFree + 0x100, 0x3100);
@@ -143,29 +142,26 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
     memcpy(gPaletteDataBase + 0x2000, pMemoryToFree + 0x900, 0x1000);
     pSrcArchive = pMemoryToFree + 0xd00;
     pDstIndexCounter = (PALETTEENTRY*)(gPaletteDataBase + 0x3000);
-    for (nCount = 0x40; nCount; nCount--) {
-      *pDstIndexCounter = *pSrcArchive;
-      pSrcArchive++;
-      pDstIndexCounter++;
-    }
+    memcpy(pDstIndexCounter, pSrcArchive, 0x40 * sizeof(*pDstIndexCounter));
+    pSrcArchive += 0x40;
+    pDstIndexCounter += 0x40;
+    nCount = 0;
 
     memcpy(gPaletteAct1Outdoor, pMemoryToFree + 0x14d40, 0x8000);
     memcpy(gPaletteActNeutral, pMemoryToFree + 0x16d40, 0x10000);
     pSrcArchive = pMemoryToFree + 0x1ad40;
     pDstIndexCounter = (PALETTEENTRY*)gPaletteUnits;
-    for (nCount = 0x40; nCount; nCount--) {
-      *pDstIndexCounter = *pSrcArchive;
-      pSrcArchive++;
-      pDstIndexCounter++;
-    }
+    memcpy(pDstIndexCounter, pSrcArchive, 0x40 * sizeof(*pDstIndexCounter));
+    pSrcArchive += 0x40;
+    pDstIndexCounter += 0x40;
+    nCount = 0;
 
     pSrcArchive = pMemoryToFree + 0x1ad80;
     pDstIndexCounter = (PALETTEENTRY*)gnPaletteIndexCounter;
-    for (nCount = 9; nCount; nCount--) {
-      *pDstIndexCounter = *pSrcArchive;
-      pSrcArchive++;
-      pDstIndexCounter++;
-    }
+    memcpy(pDstIndexCounter, pSrcArchive, 9 * sizeof(*pDstIndexCounter));
+    pSrcArchive += 9;
+    pDstIndexCounter += 9;
+    nCount = 0;
 
     uint8_t BVar1 = pSrcArchive->peGreen;
     pDstIndexCounter->peRed = pSrcArchive->peRed;
@@ -173,11 +169,8 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
     pDstIndexCounter->peBlue = pSrcArchive->peBlue;
     uint8_t* pSrcBytes = &pMemoryToFree[0x1ad89].peFlags;
     uint8_t* pDstData = gPaletteTransposeBase;
-    for (nCount = 0x340; nCount; nCount--) {
-      *(uint32_t*)pDstData = *(uint32_t*)pSrcBytes;
-      pSrcBytes += 4;
-      pDstData += 4;
-    }
+    memcpy(pDstData, pSrcBytes, 0x340 * 4);
+    pSrcBytes += 0x340 * 4;
 
     nPaletteIdx = 0;
     do {

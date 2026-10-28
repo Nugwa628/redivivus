@@ -295,11 +295,8 @@ bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModulePath, in
     }
 
     pDst = aModuleInfo.szPath;
-    for (nCopyCount = 0x40; nCopyCount; nCopyCount--) {
-      *(uint32_t*)pDst = *(uint32_t*)pBasename;
-      pBasename += 4;
-      pDst += 4;
-    }
+    memcpy(pDst, pBasename, 0x40 * 4);
+    nCopyCount = 0;
 
     uint32_t nParseResult = DEBUG_ParseModuleHeaders((short int**)&aModuleInfo, pModuleBase);
     if ((char)nParseResult == '\0') {

@@ -1741,11 +1741,9 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x5E_QUESTPICKS(char * pBytes) {
     int nDwordCount;
     uint8_t* pSrc = (uint8_t*)(pBytes + 1);
     uint8_t* pDst = aQuestAvailabilityPacket;
-    for (nDwordCount = 9; nDwordCount; nDwordCount--) {
-      *(uint32_t*)pDst = *(uint32_t*)pSrc;
-      pSrc += 4;
-      pDst += 4;
-    }
+    memcpy(pDst, pSrc, 9 * 4);
+    pSrc += 9 * 4;
+    pDst += 9 * 4;
 
     *pDst = *pSrc;
     bReceivedQuestAvailabilityPacket = 1;

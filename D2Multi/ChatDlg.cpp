@@ -418,19 +418,16 @@ static BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
     if (!gnNotifyEnabled) {
       pcCmdEnd = "Player entering/leaving notifications are disabled.";
       pszMsgDst = szMessage;
-      for (i = 0xd; i; i--) {
-        *(uint32_t*)pszMsgDst = *(uint32_t*)pcCmdEnd;
-        pcCmdEnd += 4;
-        pszMsgDst += 4;
-      }
+      memcpy(pszMsgDst, pcCmdEnd, 0xd * 4);
+      pcCmdEnd += 0xd * 4;
+      pszMsgDst += 0xd * 4;
+      i = 0;
     } else {
       pcCmdEnd = "Player entering/leaving notifications are enabled.";
       pszMsgDst = szMessage;
-      for (i = 0xc; i; i--) {
-        *(uint32_t*)pszMsgDst = *(uint32_t*)pcCmdEnd;
-        pcCmdEnd += 4;
-        pszMsgDst += 4;
-      }
+      memcpy(pszMsgDst, pcCmdEnd, 0xc * 4);
+      pcCmdEnd += 0xc * 4;
+      pszMsgDst += 0xc * 4;
 
       *(uint16_t*)pszMsgDst = *(uint16_t*)pcCmdEnd;
       pszMsgDst[2] = pcCmdEnd[2];

@@ -2456,11 +2456,7 @@ void __stdcall D2GFX_SetPalette(LPPALETTEENTRY pPalette) {
       int nCount;
       pSrcEntry = pPalette;
       pDstEntry = gaPaletteCurrentBuffer;
-      for (nCount = 0x100; nCount; nCount--) {
-        *pDstEntry = *pSrcEntry;
-        pSrcEntry++;
-        pDstEntry++;
-      }
+      memcpy(pDstEntry, pSrcEntry, 0x100 * sizeof(*pDstEntry));
 
       RENDERER_CurrentRenderedFunctions->nfpSetPalette(pPalette);
       return;
@@ -3097,11 +3093,9 @@ void __fastcall PALETTE_InitColorLookupTables(BYTE * * ppPaletteTable) {
     int nCount;
     uint8_t* pDstRow;
     uint8_t** pPaletteEntry = gaPaletteBlendEntries;
-    for (nCount = 0x48; nCount; nCount--) {
-      *pPaletteEntry = *ppPaletteTable;
-      ppPaletteTable++;
-      pPaletteEntry++;
-    }
+    memcpy(pPaletteEntry, ppPaletteTable, 0x48 * sizeof(*pPaletteEntry));
+    pPaletteEntry += 0x48;
+    nCount = 0;
 
     gpPaletteBlendLookupTable = gaPaletteBlendEntries;
     pPaletteEntry = gaPaletteBlendEntries + 3;
@@ -3111,11 +3105,7 @@ void __fastcall PALETTE_InitColorLookupTables(BYTE * * ppPaletteTable) {
       pSrcEntry = *pPaletteEntry;
       pPaletteEntry++;
       pDstRow = pDst;
-      for (nCount = 0x40; nCount; nCount--) {
-        *(uint32_t*)pDstRow = *(uint32_t*)pSrcEntry;
-        pSrcEntry += 4;
-        pDstRow += 4;
-      }
+      memcpy(pDstRow, pSrcEntry, 0x40 * 4);
 
       pDst += 0x100;
     } while ((int)pPaletteEntry < (uintptr_t)((char*)&gaPaletteBlendEntries + 208));
