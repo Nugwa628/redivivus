@@ -2382,11 +2382,11 @@ static void __stdcall BigBuffer_FromBinary(void * pSrcBytes, uint32_t nByteCount
       byValue = *(uint8_t*)(i + (int)pSrcBytes);
       nWordIndex = i >> 2;
       nByteInWord = i & 3;
-      if (!nByteInWord) {
-        dwCurWord = 0;
-      } else {
+      if (nByteInWord) {
         SBIG_GrowToIndex(nWordIndex, pResult);
         dwCurWord = pResult->pData[pResult->nStartWord + nWordIndex];
+      } else {
+        dwCurWord = 0;
       }
 
       nAlignedCount = pResult->nStartWord + nWordIndex;
