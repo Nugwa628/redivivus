@@ -500,8 +500,8 @@ BOOL __fastcall Q27_PlayerEnterGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
     pPlayerData->dwTradeTick = 1;
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TerrorsEnd);
     pQuestData->pQuestSpecificData.pA4Q2->pPlayerUnit = pUnit;
-    pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TerrorsEnd, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TerrorsEnd, QUESTSTATE_JustCompleted);
     if (bJustCompleted) {
       D2GSPacketSrv0x5D sPacket5D;
       GAME::Level::InitLevel(pGame, pUnit, LEVEL_ThePandemoniumFortress, 0);
