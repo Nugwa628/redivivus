@@ -874,10 +874,10 @@ void __fastcall SKILL_HandleTeleportLanding(D2UnitStrc * pUnit) {
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nDestX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nDestX = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nDestX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nDestX = 0;
       }
     } else {
       nDestX = D2Common::Skills::SKILL_GetParam1(pSkill);
@@ -886,10 +886,10 @@ void __fastcall SKILL_HandleTeleportLanding(D2UnitStrc * pUnit) {
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nDestY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nDestY = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nDestY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nDestY = 0;
       }
     } else {
       nDestY = D2Common::Skills::SKILL_GetParam2(pSkill);
