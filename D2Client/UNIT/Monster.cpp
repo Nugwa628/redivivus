@@ -3128,7 +3128,7 @@ void __fastcall CLIENT_UpdateUnitNameplate(D2UnitStrc * pDynamicPath) {
     if (!pMonStats) {
       return;
     }
-    if (pMonStats->interact) {
+    if ((*((uint8_t*)pMonStats + 0xd) & gadwBitMasks[1])) {
       bIsCritter = Player::TXT_MonStats_MonStats2_GetFlagsByBitOffset(nClassId, TXTMonStats2Field0x04DWORD_ns::critter);
       if (!bIsCritter && pDynamicPath->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Neutral) {
         nCheckResult = CheckFlags(pDynamicPath, UNITFLAG_ISMERC);
