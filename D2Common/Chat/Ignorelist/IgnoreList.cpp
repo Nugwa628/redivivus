@@ -81,12 +81,12 @@ int32_t __fastcall SaveToFile(::IgnoreList * pThis) {
     }
 
     uint32_t uEntryOffset = pThis->tIgnoredPatterns.tFullList.m_terminator.m_next;
-    for (uEntryOffset = (int)uEntryOffset < 1 ? 0 : uEntryOffset; 0 < (int)uEntryOffset; uEntryOffset = *(uint32_t*)(pThis->tIgnoredPatterns.tFullList.m_linkoffset + uEntryOffset + 4)) {
+    for (uEntryOffset = (int)uEntryOffset <= 0 ? 0 : uEntryOffset; 0 < (int)uEntryOffset; uEntryOffset = *(uint32_t*)(pThis->tIgnoredPatterns.tFullList.m_linkoffset + uEntryOffset + 4)) {
       fprintf(pFile, "%s\n", *(uint32_t*)(uEntryOffset + 0x14));
     }
 
     uEntryOffset = pThis->tIgnoredAccounts.tFullList.m_terminator.m_next;
-    for (uEntryOffset = (int)uEntryOffset < 1 ? 0 : uEntryOffset; 0 < (int)uEntryOffset; uEntryOffset = *(uint32_t*)(pThis->tIgnoredAccounts.tFullList.m_linkoffset + uEntryOffset + 4)) {
+    for (uEntryOffset = (int)uEntryOffset <= 0 ? 0 : uEntryOffset; 0 < (int)uEntryOffset; uEntryOffset = *(uint32_t*)(pThis->tIgnoredAccounts.tFullList.m_linkoffset + uEntryOffset + 4)) {
       fprintf(pFile, "!%s\n", *(uint32_t*)(uEntryOffset + 0x14));
     }
 
@@ -174,10 +174,9 @@ int32_t CheckAccountNameIgnored(::IgnoreList * pThis, char * szAccountName) {
           Storm::Source::SSTR::SStrCopy(szAccountLower, szAccountName, 0x7fffffff);
           Storm::Source::SSTR::SStrLower(szAccountLower);
           uVar1 = pThis->tIgnoredAccounts.tFullList.m_terminator.m_next;
-          pCurEntry = (::StringEntryNode*)((int)uVar1 < 1 ? 0 : uVar1);
+          pCurEntry = (::StringEntryNode*)((int)uVar1 <= 0 ? 0 : uVar1);
           while (true) {
             if ((int)pCurEntry < 1) {
-              Fog::Debug::GuardStack();
               return 0;
             }
 
@@ -192,12 +191,10 @@ int32_t CheckAccountNameIgnored(::IgnoreList * pThis, char * szAccountName) {
           }
         }
 
-        Fog::Debug::GuardStack();
         return 1;
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -357,12 +354,12 @@ void __fastcall LoadFromFile(::IgnoreList * pThis) {
     if (pFile) {
       char* pszLine;
       szLineBuf[0] = '\0';
-      memset(szLineBuf + 1, 0, 0xff);
+      for (int i = 0x1; i < 0x100; i++) szLineBuf[i] = 0;
       pszLine = CRT_Fgets(szLineBuf, 0x100, pFile);
       while (pszLine) {
         pszIter = 0;
         uVar1 = Storm::Source::SSTR::SStrLen(szLineBuf);
-        if (uVar1) {
+        if ((uint32_t)uVar1 > 0) {
           do {
             if (szLineBuf[pszIter] == '\r' || szLineBuf[pszIter] == '\n') {
               szLineBuf[pszIter] = '\0';
@@ -387,7 +384,6 @@ void __fastcall LoadFromFile(::IgnoreList * pThis) {
       fclose(pFile);
     }
 
-    Fog::Debug::GuardStack();
 }
 
 ::IgnoreList * Constructor(::IgnoreList * pThis) {

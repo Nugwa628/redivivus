@@ -1365,7 +1365,7 @@ void __fastcall SUNITINACTIVE_RemoveInactiveUnitByTypeAndId(::SGAMEDATA * pGame,
               pPrevRecord->pNext = pCurRecord->pNext;
             }
 
-            D2_FREE_POOL(pGame->pMemoryPool, pCurRecord);
+            Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pCurRecord, ".\\UNIT\\SUnitInactive.cpp", 0x324, 0);
             return;
           }
 

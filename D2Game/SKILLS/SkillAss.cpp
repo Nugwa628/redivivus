@@ -89,12 +89,12 @@ typedef void (__fastcall *PFN_StatExpireCallback)(D2UnitStrc * pUnit, eD2States 
 namespace D2Game::SKILLS::SkillAss {
 
 D2MonEquipTxt * __fastcall SKILLBAR_GetVelocityAndSpreadForMissile(int32_t nParam) {
-    if (!(-1 < nParam && nParam < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nParam)) {
+    if (!(0 <= nParam && nParam < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nParam)) {
       return nullptr;
     }
 
     short int nMonEquipId = sgptDataTable->pTxtMonStats[nParam].nMonEquipId;
-    if (-1 >= nMonEquipId) {
+    if (0 > nMonEquipId) {
       return nullptr;
     }
 

@@ -462,8 +462,8 @@ int __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBase
     SERR_InternalEnterCriticalSection();
     SIZE_T dwBytes = 0xc;
     DWORD dwFlags = 4;
-    HANDLE hHeap = GetProcessHeap();
-    uint16_t* pNewModule = (uint16_t*)HeapAlloc(hHeap, dwFlags, dwBytes);
+
+    uint16_t* pNewModule = (uint16_t*)HeapAlloc(GetProcessHeap(), dwFlags, dwBytes);
     *pNewModule = wModuleId;
     *(HMODULE*)(pNewModule + 2) = dwModuleBase;
     *(void**)(pNewModule + 4) = (void*)gpErrorModuleList;

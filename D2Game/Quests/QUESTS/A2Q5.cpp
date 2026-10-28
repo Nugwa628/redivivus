@@ -87,7 +87,9 @@ void __fastcall Q13_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSummoner, QUESTSTATE_RewardAwaits);
-    if (!BVar1) {
+    if (BVar1) {
+      nMessageIndexMaybe = 1;
+    } else {
       int32_t nPlayerGUID = !pQuestArgs->pPlayer ? -1 : pQuestArgs->pPlayer->nUnitGUID;
       BVar1 = QUEST_HasPlayerParticipated(pQuestData, nPlayerGUID);
       if (BVar1) {
@@ -107,7 +109,7 @@ void __fastcall Q13_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (BVar1 == 1 && !BVar2) {
         return;
       }
-      if (1 < pQuestData->nStateFlag && !BVar2) {
+      if (2 <= pQuestData->nStateFlag && !BVar2) {
         return;
       }
 
@@ -115,11 +117,9 @@ void __fastcall Q13_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nMessageIndexMaybe == -1) {
         return;
       }
-      if (3 < nMessageIndexMaybe) {
+      if (4 <= nMessageIndexMaybe) {
         return;
       }
-    } else {
-      nMessageIndexMaybe = 1;
     }
 
     AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, nMessageIndexMaybe);

@@ -69,7 +69,7 @@ void __fastcall Q16_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     pPlayerData = GetQuestDataByQuestNoInternal(pQuestData->pGame, QUESTINT_TheTaintedSun);
-    if (!(!pPlayerData || !pPlayerData->bIsNotIntroduction || 3 < pPlayerData->nStateFlag)) {
+    if (!(!pPlayerData || !pPlayerData->bIsNotIntroduction || 4 <= pPlayerData->nStateFlag)) {
       return;
     }
 

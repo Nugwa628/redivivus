@@ -192,7 +192,6 @@ void __stdcall ANIMDATA_SetAnimSpeedForUnit(D2UnitStrc * pUnit, int32_t nParam) 
       pRecord[3] = nParam;
     }
 
-    Fog::Debug::GuardStack();
 }
 
 // Retrieves frame count, animation speed, and trigger frame from an AnimData

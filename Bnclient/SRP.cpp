@@ -257,7 +257,6 @@ void __stdcall SRP_ComputeServerProof(void * pParam1, void * pParam2, void * pPa
     SHA::SHA1_Update(sha1Ctx, pParam2, 0x14);
     SHA::SHA1_Update(sha1Ctx, pParam3, 0x28);
     SHA::SHA1_Final((uint8_t*)nParam, sha1Ctx);
-    Fog::Debug::GuardStack();
 }
 
 static BOOL __fastcall SRP_IsContextInitialized(D2Srp * pSrp) {

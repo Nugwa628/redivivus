@@ -67,8 +67,6 @@ void __fastcall AllocObjectData(struct D2UnitStrc * pUnit, struct D2RoomStrc * p
 // Adds a hardcoded visual overlay to specific object class IDs if the txt Overlay flag is set. Class 0x95 (Horadric Cube) in Neutral mode and 0x98 get OVERLAY_horadric_light; classes 0x162-0x164, 0x18D, 0x195-0x197, and 0x1C7 in Death mode get OVERLAY_multigleam. No-ops for all other classes or modes.
 void __fastcall OBJECT_AddVisualOverlay(struct D2UnitStrc * pUnit);
 void __fastcall FreeObjectData(struct D2UnitStrc * pUnit);
-// Advances the animation frame of an object unit for one game tick, driven by the object's D2ObjectsTxt data. Handles cyclic vs. non-cyclic animations, door-transition objects, special objects (classId 0xC reverse-playing, 0xBD torch state-machine walk→neutral), spawn-monster triggers on anim end (Neutral→Walk transition), selectable/collision/light-RGB updates, and overlay removal on specific shrine/chest IDs.
-void OBJECT_UpdateAnimation(struct D2UnitStrc * pUnit);
 // Gloaming shrine (nCode=16) server callback: reverses the activating player's character name string as an Easter egg effect
 void __fastcall OBJECT_ShrineGloaming_ReversePlayerName(struct D2UnitStrc * pUnit, struct D2UnitStrc * pPlayer, uint32_t dwParam);
 // Spawns a 5×5 grid of Fireball missiles (MISSILE_Fireball) centred on pUnit's position, toggling X/Y offsets from ±5 to ±20 in steps of 5. Missile level is clamped to 1–8 based on pPlayer's level/5. Called server-side for trap objects (e.g. fire towers).

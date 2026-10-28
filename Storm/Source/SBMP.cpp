@@ -1089,7 +1089,7 @@ int __fastcall SBMP_CompressGifImage(int nSrcLen, uint8_t * pSrcPixels, int pDst
 }
 
 // @blizzard EncodeGif256File (SBMP.CPP)
-static int __fastcall SBMP_EncodeGif256File(int width, void * hFile, int palette, uint8_t * pixels, int height) {
+int __fastcall SBMP_EncodeGif256File(int width, void * hFile, int palette, uint8_t * pixels, int height) {
     // Frame slots -40..-8 are ONE object: &dwBytesWritten is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -1149,7 +1149,6 @@ static int __fastcall SBMP_EncodeGif256File(int width, void * hFile, int palette
     WriteFile(hFile, (LPCVOID)&__frame0.bySentinel, 1, (LPDWORD)&__frame0.pPixelsCopy, (LPOVERLAPPED)0x0);
     /* LPOVERLAPPED lpOverlapped for WriteFile */ /* LPDWORD lpNumberOfBytesWritten for WriteFile */ /* DWORD nNumberOfBytesToWrite for WriteFile */ /* LPCVOID lpBuffer for WriteFile */ /* HANDLE hFile for WriteFile */ __frame0.bySentinel = 0x3b;
     WriteFile(hFile, (LPCVOID)&__frame0.bySentinel, 1, (LPDWORD)&__frame0.pPixelsCopy, (LPOVERLAPPED)0x0);
-    Fog::Debug::GuardStack();
     return 1;
 }
 

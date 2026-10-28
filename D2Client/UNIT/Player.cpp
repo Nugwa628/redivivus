@@ -100,6 +100,47 @@ typedef void (__fastcall *fpStatListExChangeCb)(::SGAMEDATA * pGame, D2UnitStrc 
 typedef void (__fastcall *fnUnitIterCallback)(void * pUnit);
 #endif
 
+namespace D2Client::Engine {
+
+static void __stdcall CLIENT_SetAnimModeAndMoveToCurrentPos(eD2PlayerAnimMode nAnimMode, BOOL bMovePlayerUnit, D2UnitStrc * pUnit) {
+    int nX;
+    int nY;
+    UNIT::UnitMode::UNITMODE_SetAnimMode(pUnit, nAnimMode);
+    if (!bMovePlayerUnit) {
+      return;
+    }
+
+    D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
+    if (pUnit != pPlayerUnit_lcl) {
+      return;
+    }
+
+    eD2UnitType eUnitType = pUnit->eUnitType;
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
+      nX = pUnit->pPath.pStaticPath->nPosX;
+    } else if (pUnit->pPath.pDynamicPath) {
+      nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
+    }
+
+    eUnitType = pUnit->eUnitType;
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
+      nY = pUnit->pPath.pStaticPath->nPosY;
+    } else if (!pUnit->pPath.pDynamicPath) {
+      nY = 0;
+    } else {
+      nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    }
+    if (!(nX && nY)) {
+      return;
+    }
+
+    UNIT::Path::PATH_MoveUnitToPoint(pUnit, (uint16_t)nX, nY, 0, 0, 0);
+}
+
+} // namespace D2Client::Engine
+
 namespace D2Client::UNIT::Player {
 
 // Client-side reaction handler invoked when a unit stat changes; dwStatIdAndSubIndex packs the stat id (high 16 bits, eD2UnitStat) and a sub-index (low 16 bits), nValue is the new value. Dispatches on stat id: item_lightradius/item_lightcolor update the unit's rendered light; item_nonclassskill/item_singleskill add or remove a granted skill on a player (AddSkill when newly granted and class-eligible, SKILL_RemoveSkillCallback when value drops to 0 and skill level is gone); item_charged_skill adds/removes a charged item skill (decoding charge level/max from the sub-index and item charge count, gated on the item owner matching the player). All other stats are no-ops here. Player/UI-side only.
@@ -2326,7 +2367,7 @@ void __fastcall CLIENT_WarpPlayerAndContinueMove(D2UnitStrc * pUnit, D2RoomStrc 
 }
 
 // Client-side stamina-depletion handler for the local player. When the player's stamina hits 0, cancels any active run/walk: if chasing a unit target, re-issues a follow message; otherwise captures the current destination, frees any pending light map, resets the current skill, and transitions the unit to Walk or TownWalk mode (or falls back to CLIENT_SetAnimModeAndMoveToCurrentPos if no valid path target). No-ops for non-local or non-zero stamina units.
-void CLIENT_CancelRunAndWalk(D2UnitStrc * pUnit) {
+static void CLIENT_CancelRunAndWalk(D2UnitStrc * pUnit) {
     eD2PlayerAnimMode nAnimMode;
     eD2PlayerAnimMode eNeutralMode;
     D2ServerMessageHandleStrc nStaminaOrDestX;
@@ -2777,149 +2818,6 @@ int32_t __fastcall ValidateClassId(int32_t nClassId) {
 
     nClassId = -1;
     return nClassId;
-}
-
-D2UnitStrc * __stdcall FindUnit(int32_t nUnitGUID, D2UnitStrc * * ppUnitHashTable, eD2UnitType eUnitType, int32_t nListIndex) {
-    D2UnitStrc* pCurUnit = ppUnitHashTable[nListIndex];
-    while (true) {
-      if (!pCurUnit) {
-        return nullptr;
-      }
-      if (pCurUnit->nUnitGUID == nUnitGUID) {
-        break;
-      }
-
-      pCurUnit = pCurUnit->pListNext;
-    }
-
-    if (pCurUnit->eUnitType != eUnitType) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5a);
-      exit(-1);
-    }
-
-    return pCurUnit;
-}
-
-D2UnitStrc * __fastcall UNITS_FindClientSideUnit(int32_t nUnitGUID, eD2UnitType eUnitType) {
-    // GUARD, not a reproduction: the table is 6 x 128 pointers, so a type past 5 reads
-    // clean off it and FindUnit dereferences whatever it finds. The original has no such
-    // check because it never receives a bad type; ours did, from a packet whose body was
-    // garbage. Retire this once that sender is found - it is masking, not fixing.
-    if ((uint32_t)eUnitType > 5) {
-      return nullptr;
-    }
-    D2UnitStrc* pUnit = FindUnit(nUnitGUID, ServerSideUnitHashTables[eUnitType], eUnitType, nUnitGUID & 0x7f);
-    return pUnit;
-}
-
-D2UnitStrc * __fastcall UNITS_FindServerSideUnit(int32_t nUnitGUID, eD2UnitType eUnitType) {
-    // GUARD, not a reproduction: the table is 6 x 128 pointers, so a type past 5 reads
-    // clean off it and FindUnit dereferences whatever it finds. The original has no such
-    // check because it never receives a bad type; ours did, from a packet whose body was
-    // garbage. Retire this once that sender is found - it is masking, not fixing.
-    if ((uint32_t)eUnitType > 5) {
-      return nullptr;
-    }
-    D2UnitStrc* pUnit = FindUnit(nUnitGUID, ClientSideUnitHashTables[eUnitType], eUnitType, nUnitGUID & 0x7f);
-    return pUnit;
-}
-
-D2UnitStrc * __fastcall MISSILE_GetOwnerUnit(D2UnitStrc * pUnit) {
-    D2UnitStrc* pOwnerUnit;
-    eD2UnitType eOwnerType;
-    if (!pUnit) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x83);
-      exit(-1);
-    }
-    if (!(pUnit->eUnitFlagsEx >> 10 & 1)) {
-      return nullptr;
-    }
-
-    eD2UnitType eUnitType = pUnit->eOwnerType;
-    uint32_t nUnitGUID = pUnit->nOwnerGUID;
-    if (eUnitType == UNIT_MISSILE) {
-      pOwnerUnit = FindUnit(nUnitGUID, ClientSideUnitHashTables[3], UNIT_MISSILE, nUnitGUID & 0x7f);
-      return pOwnerUnit;
-    }
-
-    pOwnerUnit = FindUnit(nUnitGUID, ServerSideUnitHashTables[eUnitType], eUnitType, nUnitGUID & 0x7f);
-    return pOwnerUnit;
-}
-
-// Inserts pUnit into the appropriate global unit hash table (server-side or client-side, selected by UNITFLAG bit 0x21). Computes bucket from nUnitGUID &amp; 0x7f and inserts in ascending GUID order. Halts (ERROR_UnrecoverableInternalError_Halt) if the unit already exists in the table. Returns 1 on successful insert, 0 if the unit was already present (duplicate path).
-uint32_t InsertIntoHashTable(D2UnitStrc * pUnit) {
-    D2UnitStrc* pPrevUnit;
-    uint32_t nHashBucket;
-    D2UnitStrc* pCurUnit;
-    D2UnitStrc* pNextUnit;
-    if (!pUnit || !(pUnit->eUnitFlags >> 0x15 & 1)) {
-      pPrevUnit = FindUnit(pUnit->nUnitGUID, ServerSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
-      if (!pPrevUnit) {
-        pPrevUnit = FindUnit(pUnit->nUnitGUID, ServerSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
-        if (pPrevUnit) {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa5);
-          exit(-1);
-        }
-
-        goto insert_sorted;
-      }
-    } else {
-      D2UnitStrc* (*papDVar1)[128];
-      pPrevUnit = FindUnit(pUnit->nUnitGUID, ClientSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
-      if (!pPrevUnit) {
-        pPrevUnit = FindUnit(pUnit->nUnitGUID, ClientSideUnitHashTables[pUnit->eUnitType], pUnit->eUnitType, pUnit->nUnitGUID & 0x7f);
-        if (pPrevUnit) {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9c);
-          exit(-1);
-        }
-
-        insert_sorted:
-        UnitSnd::MuteOrUnmuteUnitSounds(pUnit, 1);
-        nHashBucket = pUnit->nUnitGUID & 0x7f;
-        if (!(pUnit->eUnitFlags >> 0x15 & 1)) {
-          papDVar1 = ServerSideUnitHashTables;
-        } else {
-          papDVar1 = ClientSideUnitHashTables;
-        }
-
-        pNextUnit = papDVar1[pUnit->eUnitType][nHashBucket];
-        pPrevUnit = 0;
-        while (true) {
-          pCurUnit = pNextUnit;
-          if (!(pCurUnit && (uint32_t)pCurUnit->nUnitGUID > (uint32_t)pUnit->nUnitGUID)) {
-            break;
-          }
-
-          pPrevUnit = pCurUnit;
-          pNextUnit = pCurUnit->pListNext;
-        }
-
-        pUnit->pListNext = pCurUnit;
-        if (!pPrevUnit) {
-          papDVar1[pUnit->eUnitType][nHashBucket] = pUnit;
-          return 1;
-        }
-
-        pPrevUnit->pListNext = pUnit;
-        return 1;
-      }
-    }
-
-    return 0;
-}
-
-void CLIENT_SendIdlePlayerMessage(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
-      return;
-    }
-
-    eD2PlayerAnimMode eAnimMode = pUnit->eAnimMode.ePlayerMode;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    if (!(pRoom && (eAnimMode == eD2PlayerAnimMode_ns::Neutral || eAnimMode == TownNeutral))) {
-      return;
-    }
-
-    PlayerMessage(7, pUnit, nullptr, 1);
 }
 
 void __stdcall PLAYER_PlaceUnitInRoom(int32_t nParam1, D2RoomStrc * pRoom, D2UnitStrc * pUnit, int32_t nParam2) {

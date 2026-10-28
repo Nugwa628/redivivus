@@ -1177,10 +1177,8 @@ void __fastcall SKILLDESC_BuildMagicAffixDesc(struct D2UnitStrc * pUnit, uint16_
 int32_t __fastcall GetSkillParam4(eD2Skills eSkill);
 uint16_t __fastcall SKILLDESC_GetStatNameString(int32_t nSkillId, int32_t nStatOffset);
 int16_t GetSkillLongDescription(eD2Skills eSkill);
-int16_t GetAltSkillDescription(eD2Skills eSkillId);
 void __stdcall ApplyPassiveFireMasteryDamage(int32_t nParam, int32_t * nMinElemDamage, int32_t * nMaxElemDamage);
 void __stdcall ApplyPassiveLightningMasteryDamage(int32_t nParam, int32_t * nMinElemDamage, int32_t * nMaxElemDamage);
-uint16_t GetDamageTypeLocale(int32_t nElemType);
 int32_t __stdcall SKILLDESC_GetAuraBonusDamage();
 int __stdcall SKILLDESC_AccumulateAuraBonusDmg(struct D2UnitStrc * pUnit, int * pnMinDmgAcc, int * pnMaxDmgAcc, uint32_t * pdwElemColorOut);
 uint32_t SKILLDESC_FormatDamageRangeWithCalc(int32_t bPrefixSign, int32_t nMinVal, int32_t nMaxVal, uint16_t * wszText);
@@ -1242,10 +1240,6 @@ int __stdcall SKILLDESC_HasAnyClassSkill(struct D2UnitStrc * pUnit, int32_t nSki
 void __fastcall SKILLDESC_DrawSkillInfo(struct D2UnitStrc * pPlayerUnit, struct D2SkillStrc * pActiveSkill, int32_t nLayoutIndex);
 void __fastcall DRAW_UI_STAT_Damage(struct D2UnitStrc * pUnit);
 BOOL __fastcall SKILLDESC_GetSkillBonusText(struct D2UnitStrc * pUnit, int32_t nParam);
-uint32_t __stdcall SKILLDESC_FormatValueWithSign(int32_t pThis, uint16_t wStrId, int32_t nParam, uint16_t * wszText);
-// Register params: nSkillLevel (EAX), nSkillId (ECX), pUnitStrc (EDX). Writes the signed synergy bonus line for cold/poison skills.
-void __fastcall SKILLDESC_DescLineB_SignedFormat(int32_t nSkillLevel, int32_t nSkillId, struct D2UnitStrc * pUnitStrc, uint16_t * wszText, struct D2SkillsTxt * pSkillsTxt);
-void __stdcall SKILLDESC_DescLineE_PerLevelBonus(int32_t nSkillId, struct D2UnitStrc * pUnit, uint16_t * wszText, int32_t nParam1, struct D2SkillsTxt * pSkillsTxt);
 BOOL __fastcall SKILLDESC_ProcessDescLine(struct D2UnitStrc * pUnit, uint16_t * pwszOutput, struct D2SkillsTxt * pSkillsTxt, eD2Skills eSkill, int32_t nSkillLevel, int32_t nCalcIndex, int32_t nDescLineIndex, char cCharClass);
 void __fastcall SKILLDESC_BuildSkillTooltip(struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nClassMask, int32_t nSkillLevel, int32_t nCalcIndex, int32_t nScreenX, int32_t nScreenY);
 void __fastcall SKILLDESC_BuildSkillTooltip_NoMaxLevelCheck(struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nClassMask, int32_t nSkillLevel, int32_t nCalcIndex, int32_t nScreenX, int32_t nScreenY);
