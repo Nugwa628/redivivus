@@ -213,13 +213,13 @@ void __stdcall MISSILE_SetDamage(D2UnitStrc * pUnit, D2UnitStrc * pTarget, D2Dam
       dwTmp = D2Common::Monsters::MONSTERS::IsDemon(pTarget);
       if (dwTmp) {
         nStatValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_item_demondamage_percent, 0);
-        pDamage = (D2DamageStrc*)(pDamage->nReserved66 + nStatValue - 0x66);
+        pDamage = (D2DamageStrc*)(((uint8_t*)&pDamage->nReserved66) + nStatValue - 0x66);
       }
 
       BVar1 = D2Common::Monsters::MONSTERS::MONSTER_IsMonsterUndead(pTarget);
       if (BVar1) {
         nStatValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_item_undeaddamage_percent, 0);
-        pDamage = (D2DamageStrc*)(pDamage->nReserved66 + nStatValue - 0x66);
+        pDamage = (D2DamageStrc*)(((uint8_t*)&pDamage->nReserved66) + nStatValue - 0x66);
       }
       if (pTarget->eUnitType == UNIT_MONSTER) {
         nStatValue = pTarget->nClassId;
@@ -232,7 +232,7 @@ void __stdcall MISSILE_SetDamage(D2UnitStrc * pUnit, D2UnitStrc * pTarget, D2Dam
               do {
                 dwTmp = UNIT::SUnitDmg::DAMAGE_CheckMonsterTypeVsMonsterType((uint32_t)(uint16_t)aStatBonusValues[nStatValue].wSubIndex, (int)nMonType);
                 if (dwTmp) {
-                  pDamage = (D2DamageStrc*)(pDamage->nReserved66 + aStatBonusValues[nStatValue].nStatValue - 0x66);
+                  pDamage = (D2DamageStrc*)(((uint8_t*)&pDamage->nReserved66) + aStatBonusValues[nStatValue].nStatValue - 0x66);
                 }
 
                 nStatValue++;
