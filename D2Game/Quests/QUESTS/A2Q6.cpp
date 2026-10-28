@@ -327,13 +327,11 @@ void __fastcall Q14_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 }
 
 // A2Q6 "The Seven Tombs" — mark Duriel dead / quest just-completed for one player's record. Sets TheSevenTombs Step0x03 + JustCompleted(0xd) on the player's quest-record bitbuffer, then bumps that client's status to 2 (act-progress) for the current difficulty. This is the core "Duriel killed" record stamp; called per qualifying player in Duriel's Lair.
-void __stdcall Q14_SetDurielComplete(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
+static void __stdcall Q14_SetDurielComplete(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
     /* SetQuestState(TheSevenTombs, 0xd=JustCompleted) — Duriel killed self game
                           */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_JustCompleted);
     /* SetQuestState(TheSevenTombs, 3=Step0x03) — Duriel-dead progress bit */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSevenTombs, QUESTSTATE_Step0x03);
-    uint32_t nDifficulty = (uint32_t)pQuestControl->nDifficulty;
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q6.cpp", 0x182);
-    GAME::Clients::SetClientStatus(pClient, 2, nDifficulty);
+    GAME::Clients::SetClientStatus(UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q6.cpp", 0x182), 2, pQuestControl->nDifficulty);
 }
 
 // A2Q6 "The Seven Tombs" — per-player check: if this player is standing in Duriel's Lair and their record has none of JustCompleted/Step0x03/Step0x04 set yet, stamp completion via Q14_SetDurielComplete. Iterated after Duriel dies so anyone present in the lair gets credit. Asserts the quest-data pointer is non-null.

@@ -433,14 +433,12 @@ BOOL __fastcall Q06_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 
 // A1Q6 helper: mark Sisters-to-the-Slaughter complete + grant reward for one player. Sets JustCompleted and RewardAwaits in the player's quest record, then SetClientStatus(1, difficulty) to flag the act-progress/Act2-unlock client state. Called from Andariel-death and L4-entry paths.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
-void __stdcall Q06_SetQuestCompletedAndReward(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
+static void __stdcall Q06_SetQuestCompletedAndReward(::SGAMEDATA * pQuestControl, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
     /* SetQuestState(JustCompleted): mark quest just-completed for self player
                          (drives completion sound + UI) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
     /* SetQuestState(RewardAwaits): flag reward pending so Warriv offers Act2
                          travel; SetClientStatus then unlocks act progress */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_RewardAwaits);
-    uint32_t nDifficulty = (uint32_t)pQuestControl->nDifficulty;
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q6.cpp", 0x1c3);
-    GAME::Clients::SetClientStatus(pClient, 1, nDifficulty);
+    GAME::Clients::SetClientStatus(UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q6.cpp", 0x1c3), 1, pQuestControl->nDifficulty);
 }
 
 // A1Q6 per-player callback: if player record not Completed/FinishedInPreviousGame and player is in Catacombs Level 4, register them on all three NPC GUID lists (Cain/Akara/Kashya) and call Q06_SetQuestCompletedAndReward. Credits players present in the boss room when Andariel dies.
