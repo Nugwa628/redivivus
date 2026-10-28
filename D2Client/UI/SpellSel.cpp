@@ -1034,7 +1034,7 @@ void __fastcall SPELLSEL_DrawSkillGrid(D2UnitStrc * pUnit, int32_t nGridStartX, 
             nSkillId = (int)sgptDataTable->pTxtSkills[nSkillId].skilldesc;
             if (-1 < nSkillId && nSkillId < sgptDataTable->nTxtSkillDescSize) {
               pSkillDescTxt = sgptDataTable->pTxtSkillDesc + nSkillId;
-              if (pSkillDescTxt && (!bWeaponSwap || pSkillsTxt->leftskill) && !pSkillsTxt->passive) {
+              if (pSkillDescTxt && (!bWeaponSwap || (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[6])) && !pSkillsTxt->passive) {
                 dwSkillFlags = D2Common::Skills::SKILL_GetFlags(pCurSkill);
                 if (!(dwSkillFlags & 8)) {
                   nOwnerGUID = -1;
@@ -1043,7 +1043,7 @@ void __fastcall SPELLSEL_DrawSkillGrid(D2UnitStrc * pUnit, int32_t nGridStartX, 
                   bIsChargedOrValid = D2Common::Skills::SKILLS_GetSkillData(pCurSkill, &nOwnerGUID, nullptr, nullptr, &nChargesLeft);
                   if (!bWeaponSwap && !bIsChargedOrValid) {
                     nChargeQty = D2Common::Skills::SKILL_GetQuantity(pCurSkill);
-                    if (0 < nChargeQty && pSkillsTxt->scroll) {
+                    if (0 < nChargeQty && (*((uint8_t*)pSkillsTxt + 0x8) & gadwBitMasks[4])) {
                       bIsChargedOrValid = 1;
                     }
                   }
