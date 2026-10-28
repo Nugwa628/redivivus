@@ -72,7 +72,7 @@ D2CUnitEventStrc * __fastcall CUNITEVENT_Alloc(D2UnitStrc * pUnit, D2UnitStrc * 
       return nullptr;
     }
 
-    D2CUnitEventStrc* pNewEvent = D2_NEW_POOL(pUnit->pMemory, D2CUnitEventStrc);
+    D2CUnitEventStrc* pNewEvent = ((D2CUnitEventStrc*)Fog::Memory::AllocServerMemory(pUnit->pMemory, sizeof(D2CUnitEventStrc), ".\\UNIT\\CUnitEvent.cpp", 0x48, 0));
     pNewEvent->nEventType = 0;
     pNewEvent->nEventState = 0;
     pNewEvent->pNext = 0;
@@ -113,10 +113,10 @@ void __fastcall CUNITEVENT_RemoveByTypeAndState(D2UnitStrc * pUnit, int32_t nEve
 
       pvVar1 = pMemoryToFree->pPrev;
       if (pMemoryToFree->nEventType == nEventType && pMemoryToFree->nEventState == nEventState) {
-        if (!pMemoryToFree->pNext) {
-          pUnit->uSideData.pClientSide.pCUnitEventList = pvVar1;
-        } else {
+        if (pMemoryToFree->pNext) {
           pMemoryToFree->pNext->pPrev = pvVar1;
+        } else {
+          pUnit->uSideData.pClientSide.pCUnitEventList = pvVar1;
         }
         if (pMemoryToFree->pPrev) {
           pMemoryToFree->pPrev->pNext = pMemoryToFree->pNext;

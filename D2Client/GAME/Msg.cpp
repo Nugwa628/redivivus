@@ -66,10 +66,10 @@ void __fastcall NET_D2GS_CLIENT_Send_0x67(char * szGameName) {
     }
 
     uint32_t bIsArena = CLIENT_IsArenaMode();
-    if (!bIsArena) {
-      packet.nCharClass = nD2PlayerClassID;
-    } else {
+    if (bIsArena) {
       packet.nCharClass = CLIENT_GetDefaultCharClass();
+    } else {
+      packet.nCharClass = nD2PlayerClassID;
     }
 
     bIsArena = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
@@ -150,7 +150,7 @@ void __stdcall NET_D2GS_CLIENT_Send_0x6D_PING() {
     }
 
     DWORD dwTick = GetTickCount();
-    if (4999 >= dwTick - gdwLastPingSentTick) {
+    if (5000 > dwTick - gdwLastPingSentTick) {
       return;
     }
 
@@ -211,10 +211,10 @@ void __fastcall NET_D2GS_CLIENT_Send_0x68(int16_t nGameToken, int32_t nGameHash)
     uint32_t nLangOrArena = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
     packet.nLanguageCode = (uint8_t)nLangOrArena;
     nLangOrArena = CLIENT_IsArenaMode();
-    if (!nLangOrArena) {
-      packet.nCharClass = nD2PlayerClassID;
-    } else {
+    if (nLangOrArena) {
       packet.nCharClass = CLIENT_GetDefaultCharClass();
+    } else {
+      packet.nCharClass = nD2PlayerClassID;
     }
 
     Storm::Source::SSTR::SStrCopy(packet.szCharName, D2Game::Save::szSaveCharacterName, 0x7fffffff);
@@ -234,7 +234,7 @@ void NET_D2GS_CLIENT_Send_0x6A() {
 
 // Reads a character save file (.d2s) from disk into a memory buffer. Constructs the full file path from the save directory and character name, opens the file in binary read mode, seeks to end to get file size, allocates a client memory buffer of that size, rewinds to start, reads the entire file contents into the buffer, and returns the buffer pointer with size written to the output parameter.
 // @sourcefile .\GAME\Msg.cpp
-uint8_t * MSG_ReadSaveFileToBuffer(size_t * pnFileSize) {
+static uint8_t * MSG_ReadSaveFileToBuffer(size_t * pnFileSize) {
     size_t nFileSize;
     D2CharSelCompStrc* pBuffer;
     char szFilePath[1024];
@@ -256,7 +256,7 @@ uint8_t * MSG_ReadSaveFileToBuffer(size_t * pnFileSize) {
       nFileSize = ftell(pFile);
       *pnFileSize = nFileSize;
       fseek(pFile, 0, 0);
-      pBuffer = (D2CharSelCompStrc*)D2_ALLOC(*pnFileSize);
+      pBuffer = (D2CharSelCompStrc*)Fog::Memory::AllocClientMemory(*pnFileSize, ".\\GAME\\Msg.cpp", 0x1ff, 0);
       fread(pBuffer, *pnFileSize, 1, pFile);
       fclose(pFile);
       return (uint8_t*)pBuffer;
@@ -354,7 +354,7 @@ void __fastcall NET_D2GS_CLIENT_Send_0x6C(int32_t bAnimate) {
     D2Net::SRC::Client::NET_D2GS_CLIENT_SendPacketAfterChecks(nBytesCopied + 7U, 0, (char*)&sPacket);
     gnD2GSBytesSentTotal = gnD2GSBytesSentTotal + nBytesCopied + 7U;
     gnD2GSPacketsSentTotal++;
-    D2_FREE(pReadPtr);
+    Fog::Memory::FreeClientMemory(pReadPtr, ".\\GAME\\Msg.cpp", 0x262, 0);
     if (nTotalChunks) {
       gnLoadingProgressRatio = (nTotalChunks << 8) / nTotalChunks;
       return;
@@ -1141,13 +1141,13 @@ void __fastcall NET_D2GS_CLIENT_Send_Chat(D2ChatPacketBuildStrc * pChatPacket) {
     sPacket.nMsgType = pChatPacket->nMsgType;
     sPacket.nIMEMode = pChatPacket->nIMEMode;
     uint32_t nMsgLen = Storm::Source::SSTR::SStrCopy(sPacket.abData, pChatPacket->szMsg, 0x100);
-    if (!pChatPacket->szTarget) {
-      sPacket.abData[nMsgLen + 1] = '\0';
-      pcVar1 = sPacket.abData + nMsgLen + 2;
-    } else {
+    if (pChatPacket->szTarget) {
       uint32_t nTargetLen;
       nTargetLen = Storm::Source::SSTR::SStrCopy(sPacket.abData + nMsgLen + 1, pChatPacket->szTarget, 0x10);
       pcVar1 = sPacket.abData + nTargetLen + nMsgLen + 2;
+    } else {
+      sPacket.abData[nMsgLen + 1] = '\0';
+      pcVar1 = sPacket.abData + nMsgLen + 2;
     }
 
     *pcVar1 = '\0';

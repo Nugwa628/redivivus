@@ -62,8 +62,8 @@ void __stdcall SERR_AddStormFacility(uint16_t wModuleId) {
 
     SIZE_T dwBytes = 0xc;
     DWORD dwFlags = 4;
-    HANDLE hHeap = GetProcessHeap();
-    uint16_t* pNewNode = (uint16_t*)HeapAlloc(hHeap, dwFlags, dwBytes);
+
+    uint16_t* pNewNode = (uint16_t*)HeapAlloc(GetProcessHeap(), dwFlags, dwBytes);
     *ppTailLink = (uint32_t)pNewNode;
     *pNewNode = wModuleId;
     HMODULE hModule = SSystem::StormGetInstance();
@@ -86,7 +86,7 @@ void __stdcall SERR_AddStormMessages() {
 // @module Internal to SErr.cpp; its only caller is SErrDisplayError 0041caf0. Not on the Storm 1.10b export table.
 // @oracle-negative It is NOT SErrGetErrorStr. That export takes 3 arguments and calls FormatMessage; this takes 1 and calls LoadStringA. The real SErrGetErrorStr is 0041c430. On the PPC the oracle inlines this LoadString step directly into SErrDisplayError, so there is no oracle counterpart to name it from.
 // @blizzard GetString (SERR.CPP)
-LPSTR * SERR_GetString(int32_t nErrorIndex) {
+static LPSTR * SERR_GetString(int32_t nErrorIndex) {
     // Static local variables (originally global data)
     static char * gaSErrMessageStrings[12] = {
     s_ERROR___u__0x_08x__006cf2e0,
@@ -364,8 +364,8 @@ LPSTR * SERR_GetString(int32_t nErrorIndex) {
     int nLen = 0x100;
     char* pcVar1 = gszErrorStringBuffer;
     UINT uID = nErrorIndex + 0x5100;
-    HMODULE hInstance_lcl = SSystem::StormGetInstance();
-    /* HINSTANCE hInstance for LoadStringA */ nLen = LoadStringA(hInstance_lcl, uID, pcVar1, nLen);
+
+    /* HINSTANCE hInstance for LoadStringA */ nLen = LoadStringA(SSystem::StormGetInstance(), uID, pcVar1, nLen);
     pcVar1 = gszErrorStringBuffer;
     if (nLen) {
       return (LPSTR*)pcVar1;
@@ -407,9 +407,9 @@ void __stdcall SERR_InternalLeaveCriticalSection() {
 // @was SSYSTEM_DemangleSymbolName (pass 6, 2026.08.28) - the module prefix was wrong and is corrected; SErr.cpp membership is established (its only caller is SErrDisplayError).
 // @caution The tail "DemangleSymbolName" is NOT verified. It was carried over unchanged rather than guessed at. Only the callee set was checked this pass, not the body. There is no oracle counterpart: MWCC inlined whatever this is into SErrDisplayError on the PPC, so the oracle offers no name for it. If a later pass reads the body, correct or confirm the tail here.
 // @blizzard UndecorateObjectName (SERR.CPP)
-BOOL __stdcall SERR_UndecorateObjectName(char * szMangled, int32_t nMaxLen, char * szText) {
+static BOOL __stdcall SERR_UndecorateObjectName(char * szMangled, int32_t nMaxLen, char * szText) {
     uint32_t pcMarker = SSTR::SStrLen(szMangled);
-    if (!(5 < pcMarker && *szMangled == '.' && szMangled[3] == 'U')) {
+    if (!(6 <= pcMarker && *szMangled == '.' && szMangled[3] == 'U')) {
       return 0;
     }
 
@@ -427,7 +427,7 @@ BOOL __stdcall SERR_UndecorateObjectName(char * szMangled, int32_t nMaxLen, char
     *pcVar1 = '\0';
     while (true) {
       pcVar1--;
-      if (!(szText <= pcVar1 && *pcVar1 == '_')) {
+      if (!(pcVar1 >= szText && *pcVar1 == '_')) {
         break;
       }
 
@@ -458,7 +458,7 @@ void __stdcall SErrPrepareAppFatal(void * pfnCallback, uint32_t nCallbackParam) 
 // @oracle-basis Callee set {EnterCriticalSection, GetProcessHeap, HeapAlloc, LeaveCriticalSection} is the oracle's exactly. The oracle prologue at 10015890 saves r3 and r4 and nothing else, so the true arity is 2; Ghidra's third parameter dwParam2 is unused in the body and is spurious.
 // @corroboration Its one caller is D2Client CLIENT_LoadLNG - D2 registering the loaded .LNG string table as an error message source. That is the API's documented purpose and it is a caller from outside Storm, as an export should have.
 // @oracle-note The rival SSYSTEM_RegisterErrorModule 0041c0f0 writes the same gpErrorModuleList but calls GetModuleHandleA and takes no critical section, so it is the internal self-registration helper, not the export. Left under its descriptive name.
-void __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBase, uint32_t dwParam2) {
+int __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBase, uint32_t dwParam2) {
     SERR_InternalEnterCriticalSection();
     SIZE_T dwBytes = 0xc;
     DWORD dwFlags = 4;
@@ -469,6 +469,7 @@ void __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBas
     *(void**)(pNewModule + 4) = (void*)gpErrorModuleList;
     gpErrorModuleList = pNewModule;
     SERR_InternalLeaveCriticalSection();
+    return 1;
 }
 
 // Stores dwErrCode into Storm's own dwLastErrorCode global and then forwards it to the Win32 SetLastError.
@@ -530,13 +531,13 @@ void __stdcall SErrRegisterHandler(pfnSErrDisplayCallback pfnCallback) {
     uint32_t nPrevLinkOffset;
     SERR_InternalEnterCriticalSection();
     StormLinkStrc** pNode = (StormLinkStrc**)SMem::SMemAlloc(0xc, gszSSystemListAllocTag, -2, 0x8000008);
-    if (!pNode) {
-      pNewCallback = 0;
-      pNode = &gnStormErrorCallbackCount.pPrevLink;
-    } else {
+    if (pNode) {
       *pNode = 0;
       pNode[1] = 0;
       pNewCallback = pNode;
+    } else {
+      pNewCallback = 0;
+      pNode = &gnStormErrorCallbackCount.pPrevLink;
     }
 
     StormLinkStrc* iVar1 = *pNode;
@@ -615,7 +616,6 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
     __frame0.pStackTracePtr = pStackTrace;
     __frame0.pCustomMsgPtr = (char*)pCustomMsg;
     if (gbSSystemShutdownInProgress || gbSSystemErrorDialogActive) {
-      Fog::Debug::GuardStack();
       return 0;
     }
 
@@ -690,14 +690,9 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
     pWriteMsg += nErrorCodeArg;
     if (__frame0.pStackTracePtr && (char)*__frame0.pStackTracePtr != '\0') {
       switch (nTraceFlags) {
-        case -4:
+        case -1:
           pStackTraceArg = __frame0.pStackTracePtr;
-        ppFormat = SERR_GetString(0xb);
-        /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
-        break;
-        case -3:
-          pStackTraceArg = __frame0.pStackTracePtr;
-        ppFormat = SERR_GetString(6);
+        ppFormat = SERR_GetString(4);
         /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
         break;
         case -2:
@@ -705,9 +700,14 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
         ppFormat = SERR_GetString(5);
         /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
         break;
-        case -1:
+        case -3:
           pStackTraceArg = __frame0.pStackTracePtr;
-        ppFormat = SERR_GetString(4);
+        ppFormat = SERR_GetString(6);
+        /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
+        break;
+        case -4:
+          pStackTraceArg = __frame0.pStackTracePtr;
+        ppFormat = SERR_GetString(0xb);
         /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
         break;
         default:
@@ -759,7 +759,7 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
 
     iVar1 = 7;
     __frame0.nMsgBoxFlags = (uint32_t)(nMessageFlags != 0) * 2 + 1 | 0x52010;
-    for (pCallbackNode = (StormSErrHandlerNode*)(gnStormErrorCallbackCount.pNext < 1 ? 0 : gnStormErrorCallbackCount.pNext); 0 < (int)pCallbackNode; pCallbackNode = pCallbackNode->pNext) {
+    for (pCallbackNode = (StormSErrHandlerNode*)(gnStormErrorCallbackCount.pNext <= 0 ? 0 : gnStormErrorCallbackCount.pNext); 0 < (int)pCallbackNode; pCallbackNode = pCallbackNode->pNext) {
       pCustomMsgArg = __frame0.pCustomMsgPtr;
       if (!__frame0.pCustomMsgPtr) {
         pCustomMsgArg = "";
@@ -809,7 +809,6 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
     }
 
     gbSSystemErrorDialogActive = 0;
-    Fog::Debug::GuardStack();
     return iVar1;
 }
 
@@ -848,7 +847,6 @@ void __stdcall SErrReportNamedResourceLeak(char * szMessage, char * szText) {
       }
       if (!gnSSystemOption1) {
         SErrDisplayError(0x8510007f, szFormatted, -3, nullptr, 1, 1);
-        Fog::Debug::GuardStack();
         return;
       }
 
@@ -856,7 +854,6 @@ void __stdcall SErrReportNamedResourceLeak(char * szMessage, char * szText) {
       /* LPCSTR lpOutputString for OutputDebugStringA */ OutputDebugStringA(szDebugOutput);
     }
 
-    Fog::Debug::GuardStack();
 }
 
 // Under the error critical section, walks gpStormErrorCallbackListHead and removes every node whose handler slot (+8) equals the argument.

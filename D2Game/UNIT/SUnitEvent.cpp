@@ -53,7 +53,7 @@ void __fastcall UNITEVENT_FreeAllEvents(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
     while (pMemoryToFree) {
       D2SUnitEventStrc* pNextEvent;
       pNextEvent = pMemoryToFree->pNext;
-      D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\SUnitEvent.cpp", 0x3d, 0);
       pMemoryToFree = pNextEvent;
     }
 
@@ -66,7 +66,7 @@ D2SUnitEventStrc * __fastcall SUNITEVENT_Alloc(::SGAMEDATA * pGame, D2UnitStrc *
       return nullptr;
     }
 
-    D2SUnitEventStrc* pNewEvent = D2_NEW_POOL(pGame->pMemoryPool, D2SUnitEventStrc);
+    D2SUnitEventStrc* pNewEvent = ((D2SUnitEventStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2SUnitEventStrc), ".\\UNIT\\SUnitEvent.cpp", 0x57, 0));
     pNewEvent->nUnitEvent = '\0';
     pNewEvent->field_0x1 = 0;
     pNewEvent->nFlags = 0;
@@ -110,19 +110,19 @@ void __fastcall SUNITEVENT_RemoveEventsByQueueAndOwner(::SGAMEDATA * pGame, D2Un
 
       pNextEvent = pMemoryToFree->pNext;
       if (pMemoryToFree->nQueueNo == nQueueNo && pMemoryToFree->nOwnerKey == nOwnerKey) {
-        if (!(pMemoryToFree->nFlags & 1)) {
-          if (!pMemoryToFree->pPrev) {
-            pUnit->uSideData.pServerSide.pSrvUnitEventList = pNextEvent;
-          } else {
+        if (pMemoryToFree->nFlags & 1) {
+          pMemoryToFree->nFlags |= 2;
+        } else {
+          if (pMemoryToFree->pPrev) {
             pMemoryToFree->pPrev->pNext = pNextEvent;
+          } else {
+            pUnit->uSideData.pServerSide.pSrvUnitEventList = pNextEvent;
           }
           if (pMemoryToFree->pNext) {
             pMemoryToFree->pNext->pPrev = pMemoryToFree->pPrev;
           }
 
-          D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
-        } else {
-          pMemoryToFree->nFlags |= 2;
+          Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\SUnitEvent.cpp", 0x95, 0);
         }
       }
     }
@@ -170,16 +170,16 @@ int32_t __fastcall UNITEVENT_DispatchEventsByType(::SGAMEDATA * pGame, uint32_t 
         pMemoryToFree->nFlags &= 0xfffe;
         pNextEvent = pMemoryToFree->pNext;
         if (pMemoryToFree->nFlags & 2 || !pMemoryToFree->nQueueNo) {
-          if (!pMemoryToFree->pPrev) {
-            pUnit->uSideData.pServerSide.pSrvUnitEventList = pNextEvent;
-          } else {
+          if (pMemoryToFree->pPrev) {
             pMemoryToFree->pPrev->pNext = pNextEvent;
+          } else {
+            pUnit->uSideData.pServerSide.pSrvUnitEventList = pNextEvent;
           }
           if (pMemoryToFree->pNext) {
             pMemoryToFree->pNext->pPrev = pMemoryToFree->pPrev;
           }
 
-          D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+          Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\SUnitEvent.cpp", 0xeb, 0);
         }
       }
     }

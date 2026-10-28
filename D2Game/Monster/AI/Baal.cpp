@@ -100,7 +100,7 @@ uint32_t __fastcall AI_Baal_IsPortalInRange(uint32_t dwParam, D2UnitStrc * pUnit
 
 // Calculate threat/risk score for Baal monster based on target distance, resistances, and skill levels
 // @sourcefile .\Ai\AiBaal.cpp
-int32_t __stdcall RiskAssignmentBaal(D2UnitStrc * pUnit, D2UnitStrc * pTarget, void * pAnchorData) {
+static int32_t __stdcall RiskAssignmentBaal(D2UnitStrc * pUnit, D2UnitStrc * pTarget, void * pAnchorData) {
     int32_t nLifePercent;
     eD2Skills eSkillId;
     uint32_t nRightAttackRank;
@@ -139,7 +139,7 @@ int32_t __stdcall RiskAssignmentBaal(D2UnitStrc * pUnit, D2UnitStrc * pTarget, v
       D2SkillsTxt* pSkillTxt;
       nLeftSkillLevel = D2Common::Skills::GetSkillLevel(pTarget, pSkill, 1);
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\Ai\\AiBaal.cpp", 0x75);
-      if ((int)eSkillId < 0 || sgptDataTable->nTxtSkillsCount <= (int)eSkillId) {
+      if ((int)eSkillId < 0 || (int)eSkillId >= sgptDataTable->nTxtSkillsCount) {
         pSkillTxt = 0;
       } else {
         pSkillTxt = sgptDataTable->pTxtSkills + eSkillId;
@@ -154,7 +154,7 @@ int32_t __stdcall RiskAssignmentBaal(D2UnitStrc * pUnit, D2UnitStrc * pTarget, v
     } else {
       nMeleeScore = D2Common::Skills::GetSkillLevel(pTarget, pSkill, 1);
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\Ai\\AiBaal.cpp", 0x7b);
-      if ((int)eSkillId < 0 || sgptDataTable->nTxtSkillsCount <= (int)eSkillId) {
+      if ((int)eSkillId < 0 || (int)eSkillId >= sgptDataTable->nTxtSkillsCount) {
         nRightAttackRank = (uint32_t)*(volatile uint8_t*)0x18e;
       } else {
         nRightAttackRank = (uint32_t)(uint8_t)sgptDataTable->pTxtSkills[eSkillId].attackrank;
@@ -173,7 +173,7 @@ int32_t __stdcall RiskAssignmentBaal(D2UnitStrc * pUnit, D2UnitStrc * pTarget, v
     }
     if (pTarget && pTarget->eUnitType == UNIT_MONSTER) {
       nMonClassId = pTarget->nClassId;
-      if (nMonClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nMonClassId || !(sgptDataTable->pTxtMonStats + nMonClassId) || (uint8_t)sgptDataTable->pTxtMonStats[nMonClassId].threat < 2) {
+      if (nMonClassId < 0 || nMonClassId >= sgptDataTable->nTxtMonStatsSize || !(sgptDataTable->pTxtMonStats + nMonClassId) || (uint8_t)sgptDataTable->pTxtMonStats[nMonClassId].threat < 2) {
         return 0;
       }
     }
@@ -188,7 +188,7 @@ int32_t __stdcall RiskAssignmentBaal(D2UnitStrc * pUnit, D2UnitStrc * pTarget, v
 }
 
 // Baal-AI target selector: scans the game's per-act player unit-node lists (pGame->pUnitNodes[0..]) to pick the highest-scoring player target for the Baal monster pUnit2. For the first list it calls an indirect predicate (pUnit, called as code ptr) to gate candidates, skipping dead/dying players, then scores survivors via RiskAssignmentBaal; later lists are filtered by matching act. Tracks a separate best-of-secondary-list candidate and, if it's very close (collision dist <5) and not already in melee range, repaths Baal toward it (SetTarget/PATH_CalculatePath); if no path, that candidate becomes the result. Writes candidate count to *pnParam2 and best score to *pnParam1; returns the chosen target unit. Halts via Fog error if pUnit is null or a node holds a non-player. Custom calling convention (pUnit2 in EBX).
-D2UnitStrc * __stdcall SelectTargetBaal(::SGAMEDATA * pGame, int * pnParam1, int * pnParam2, int32_t nParam, fpAiTargetPredicate pUnit, D2UnitStrc * pUnit2) {
+static D2UnitStrc * __stdcall SelectTargetBaal(::SGAMEDATA * pGame, int * pnParam1, int * pnParam2, int32_t nParam, fpAiTargetPredicate pUnit, D2UnitStrc * pUnit2) {
     int nScore;
     BOOL bInMeleeRange;
     D2UnitStrc* pTargetUnit;
@@ -206,7 +206,7 @@ D2UnitStrc * __stdcall SelectTargetBaal(::SGAMEDATA * pGame, int * pnParam1, int
     D2UnitStrc* pBestTarget = 0;
     int nBestScore = 0;
     int nCandidateCount = 0;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nAnchorX = pUnit2->pPath.pStaticPath->nPosX;
     } else if (!pUnit2->pPath.pDynamicPath) {
       nAnchorX = 0;
@@ -215,12 +215,12 @@ D2UnitStrc * __stdcall SelectTargetBaal(::SGAMEDATA * pGame, int * pnParam1, int
     }
 
     eUnitType = pUnit2->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nAnchorY = pUnit2->pPath.pStaticPath->nPosY;
-    } else if (!pUnit2->pPath.pDynamicPath) {
-      nAnchorY = 0;
-    } else {
+    } else if (pUnit2->pPath.pDynamicPath) {
       nAnchorY = D2Common::PATH::DynamicPath::GetYPos(pUnit2->pPath.pDynamicPath);
+    } else {
+      nAnchorY = 0;
     }
 
     eAct eAnchorAct = pUnit2->nAct;
@@ -330,24 +330,24 @@ uint32_t __fastcall AI_BAAL_IsUnitInRange(D2UnitStrc * pUnit, int * pnParam) {
       exit(-1);
     } else {
       int32_t nX;
-      if (pnParam) {
-        if (pUnit->nAct != *(eAct*)(pnParam + 6)) {
-          return 0;
-        }
-
-        nLine = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-        nX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-        nDist = GetCollisionDistanceFromXY((D2UnitStrc*)pnParam, nX, nLine);
-        return (uint32_t)(nDist < 0x3fc);
+      if (!pnParam) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11e);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11e);
-      exit(-1);
+      if (pUnit->nAct != *(eAct*)(pnParam + 6)) {
+        return 0;
+      }
+
+      nLine = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
+
+      nDist = GetCollisionDistanceFromXY((D2UnitStrc*)pnParam, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nLine);
+      return (uint32_t)(nDist < 0x3fc);
     }
 }
 
 // @sourcefile .\Ai\AiBaal.cpp
-BOOL AI_BAAL_IsSkillPowerful(D2UnitStrc * pUnit, D2SkillStrc * pSkill) {
+static BOOL AI_BAAL_IsSkillPowerful(D2UnitStrc * pUnit, D2SkillStrc * pSkill) {
     int nSkillLevel;
     bool bSignedLessOrEqual;
     if (!pSkill) {
@@ -377,7 +377,7 @@ BOOL AI_BAAL_IsSkillPowerful(D2UnitStrc * pUnit, D2SkillStrc * pSkill) {
 }
 
 // @sourcefile .\Ai\AiBaal.cpp
-BOOL AI_BAAL_HasPowerfulSkill(D2UnitStrc * pUnit) {
+static BOOL AI_BAAL_HasPowerfulSkill(D2UnitStrc * pUnit) {
     int nSkillLevel;
     D2SkillStrc* pSkill = D2Common::Units::GetRightSkill(pUnit);
     if (pSkill) {
@@ -428,7 +428,7 @@ int32_t __stdcall AI_BAAL_SelectWeightedAction(int * pnWeights, int32_t nWeightC
       } else {
         sNewSeed = (D2SeedStrc)((uint64_t)nSeedLow * 0x6ac690c5 + nSeedHigh);
         pUnit->sSeed = sNewSeed;
-        nRandResult = (uint32_t)(((uint64_t)d2_bits_of(sNewSeed) & 0xffffffff) % (uint64_t)nRandResult);
+        nRandResult = (uint32_t)(sNewSeed.nSeedLow % nRandResult);
       }
     }
 
@@ -459,7 +459,7 @@ int32_t __stdcall AI_BAAL_CloneChooseAction(::SGAMEDATA * pGame, D2UnitStrc * pU
     anWeights[0xc] = 10;
     anWeights[0] = 0;
     int nBaseWeight = 0x32;
-    memset(anWeights + 2, 0, 6 * sizeof(anWeights[0]));
+    for (int i = 2; i < 8; i++) anWeights[i] = 0;
     anWeights[8] = 0x14;
     anWeights[9] = 0x1e;
     anWeights[10] = 0x96;
@@ -532,7 +532,7 @@ int32_t __stdcall AI_BAAL_CloneChooseAction(::SGAMEDATA * pGame, D2UnitStrc * pU
 }
 
 // Weighted random action selector for Baal's throne-room fight (custom regs: stack params pGame/pUnit/nParam2..4, ESI=pUnit2=Baal). Builds a 16-entry weight table seeded with base action weights, boosting the "act" entry by (100-Baal's life pct) plus a difficulty-dependent base (125 on Normal else 100), and adjusting entries based on the flags nParam2 (wave count <2), nParam3, AI_BAAL_HasPowerfulSkill, and nParam4. Sums total weight, draws a roll from pUnit2->sSeed (power-of-two fast path uses mask, else modulo), advancing the seed LCG, then walks the table accumulating weights and returns the index of the first bucket exceeding the roll (defaults to 1 if none). Return value is the chosen Baal action/skill index; no other side effects besides advancing Baal's seed.
-int32_t __stdcall AI_BAAL_ThroneRoomChooseAction(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3, int32_t nParam4, D2UnitStrc * pUnit2) {
+static int32_t __stdcall AI_BAAL_ThroneRoomChooseAction(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nParam2, int32_t nParam3, int32_t nParam4, D2UnitStrc * pUnit2) {
     int anWeights[17];
     int64_t nSeedProduct;
     int64_t lSeedProduct;
@@ -742,7 +742,7 @@ int32_t __stdcall AI_Baal_SelectActionWeighted(::SGAMEDATA * pGame, int32_t nPar
       } else {
         sNewSeed = (D2SeedStrc)((uint64_t)nRandRoll * 0x6ac690c5 + nSeedHighExt);
         pUnit2->sSeed = sNewSeed;
-        nRandRoll = (uint32_t)(((uint64_t)d2_bits_of(sNewSeed) & 0xffffffff) % (uint64_t)nTotalWeight);
+        nRandRoll = (uint32_t)(sNewSeed.nSeedLow % nTotalWeight);
       }
     }
 
@@ -763,7 +763,7 @@ int32_t __stdcall AI_Baal_SelectActionWeighted(::SGAMEDATA * pGame, int32_t nPar
 }
 
 // Evaluates and returns the next combat action index for Baal's AI. When nCombatAiState==0 and no target (pUnit2 null): checks collision at Baal's current position and returns 4 if blocked, else 1 with 8% chance or 1. When a target is present: determines if the target's player-object is in the Throne Room within 75 units, measures distance to anchor point, tests melee range and wall collision, then delegates to AI_BAAL_CloneChooseAction (melee), AI_Baal_SelectActionWeighted (wall), or AI_BAAL_ThroneRoomChooseAction. Returns the chosen action index.
-int32_t __stdcall AI_BaalEvaluateCombatAction(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, int32_t nParam1, int32_t nParam2, int32_t nParam3, int32_t nParam4, D2UnitStrc * pUnit2, D2UnitStrc * pUnit3) {
+static int32_t __stdcall AI_BaalEvaluateCombatAction(D2UnitStrc * pUnit, ::SGAMEDATA * pGame, int32_t nParam1, int32_t nParam2, int32_t nParam3, int32_t nParam4, D2UnitStrc * pUnit2, D2UnitStrc * pUnit3) {
     bool _bInThroneRoom;
     bool _bVeryFarFromAnchor;
     bool _bInMeleeRange;
@@ -788,34 +788,34 @@ int32_t __stdcall AI_BaalEvaluateCombatAction(D2UnitStrc * pUnit, ::SGAMEDATA * 
     if (!pUnit2) {
       D2SeedStrc DVar1;
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nAction = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nAction = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nAction = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nAction = 0;
       }
 
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nDistToAnchorPt = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nDistToAnchorPt = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nDistToAnchorPt = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nDistToAnchorPt = 0;
       }
 
       eCollisionFlag = 0x40;
       nCollisionWidth = COLLISION_PATTERN_BIG_UNIT_PRESENCE;
-      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-      nAction = D2Common::Collision::CheckCollision_BlockPlayer_Type(pRoom, nDistToAnchorPt, nAction, nCollisionWidth, eCollisionFlag);
+
+      nAction = D2Common::Collision::CheckCollision_BlockPlayer_Type(D2Common::Units::UNITS_GetRoom(pUnit), nDistToAnchorPt, nAction, nCollisionWidth, eCollisionFlag);
       if (nAction) {
         return 4;
       }
 
       DVar1 = D2_SEED_NEXT(pUnit->sSeed);
       pUnit->sSeed = DVar1;
-      return (uint32_t)((int)(DVar1.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) / 100) * -100) < 8) * 8 + 1;
+      return (uint32_t)((int)(DVar1.nSeedLow % 100) < 8) * 8 + 1;
     }
     if (!pGame) {
       pGame = UNIT::SUnit::GetGamePointer(pUnit);
@@ -823,11 +823,11 @@ int32_t __stdcall AI_BaalEvaluateCombatAction(D2UnitStrc * pUnit, ::SGAMEDATA * 
 
     _bInThroneRoom = 0;
     if (pUnit2->eUnitType == UNIT_PLAYER) {
-      nFoundGUID = PLAYER::Player::GetPlayerUniqueId(pUnit2);
-      pFoundUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_OBJECT, nFoundGUID);
+
+      pFoundUnit = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_OBJECT, PLAYER::Player::GetPlayerUniqueId(pUnit2));
       if (pFoundUnit) {
-        pRoom = D2Common::Units::UNITS_GetRoom(pFoundUnit);
-        eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+
+        eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(D2Common::Units::UNITS_GetRoom(pFoundUnit));
         if (eLevelId == LEVEL_TheWorldstoneChamber && (!nParam4 || (nDistToAnchor = D2Common::Collision::GetDistanceToXY(pFoundUnit, *(int32_t*)(nParam4 + 0xc), *(int32_t*)(nParam4 + 0x10)) , nDistToAnchor < 0x4b))) {
           _bInThroneRoom = 1;
         }
@@ -868,7 +868,7 @@ void __fastcall AI_BAAL_CountPowerfulSkills(int32_t nSkillNode, int * pnSelfSkil
 }
 
 // Baal-AI helper that spawns a single weakened Baal clone minion. First counts existing "powerful skill" minions via CallForEachMinion/AI_BAAL_CountPowerfulSkills and bails if any already exist (one-clone guard). Resolves Baal's current target/owner, derives a spawn position near the target (or Baal) by jittering its X/Y with the room/unit RNG (mod 0x18 offsets), finds a valid nearby room, and spawns the clone monster (class id ~0x23a) via SpawnMonster. The clone is flagged NOXP|NOTC, restarts AI thinking, is registered as Baal's minion (AssignMinionOwner/AddMinionToList, mutual StoreOwner), and gets 1/3 of Baal's max-hp/current-hp with hpregen 0. On success increments a counter at *(nParam+0x18) and returns 1 (packed in EAX high bits); returns 0 if guard hit, owner dead, or spawn failed.
-bool __stdcall AI_Baal_SpawnClone(::SGAMEDATA * pGame, int32_t nParam, D2UnitStrc * pUnit) {
+static bool __stdcall AI_Baal_SpawnClone(::SGAMEDATA * pGame, int32_t nParam, D2UnitStrc * pUnit) {
     // Frame slots -32..-24 are ONE object: &nSeedMulHi is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -915,50 +915,50 @@ bool __stdcall AI_Baal_SpawnClone(::SGAMEDATA * pGame, int32_t nParam, D2UnitStr
     __frame0.nCloneClassId = 0x23a < sgptDataTable->nTxtMonStatsSize ? 0x23a : -1;
     D2Common::Monsters::MONSTERS::MONSTER_GetSpawnParameters(pUnit, (int*)&__frame0.nCloneClassId, &__frame1.pMemoryTmp, &__frame1.nSpawnYOut, (uint32_t*)&eSpawnAnimMode, (uint32_t)pGame->nDifficulty, nullptr);
     pTargetUnit = UNIT::SUnit::GetTargetEx(pGame, pUnit);
-    if (!pTargetUnit) {
-      eOwnerType = pUnit->eUnitType;
-      if (eOwnerType == UNIT_OBJECT || 3 < (int)eOwnerType && (int)eOwnerType < 6) {
-        __frame1.nTargetX = pUnit->pPath.pStaticPath->nPosX;
-        goto spawn_near_center;
-      }
-
-      pDynamicPath = pUnit->pPath.pDynamicPath;
-    } else {
+    if (pTargetUnit) {
       eOwnerType = pTargetUnit->eUnitType;
-      if (eOwnerType == UNIT_OBJECT || 3 < (int)eOwnerType && (int)eOwnerType < 6) {
+      if (eOwnerType == UNIT_OBJECT || 3 < (int)eOwnerType && (int)eOwnerType <= 5) {
         __frame1.nTargetX = pTargetUnit->pPath.pStaticPath->nPosX;
         goto spawn_near_center;
       }
 
       pDynamicPath = pTargetUnit->pPath.pDynamicPath;
-    }
-    if (!pDynamicPath) {
-      __frame1.nTargetX = 0;
     } else {
+      eOwnerType = pUnit->eUnitType;
+      if (eOwnerType == UNIT_OBJECT || 3 < (int)eOwnerType && (int)eOwnerType <= 5) {
+        __frame1.nTargetX = pUnit->pPath.pStaticPath->nPosX;
+        goto spawn_near_center;
+      }
+
+      pDynamicPath = pUnit->pPath.pDynamicPath;
+    }
+    if (pDynamicPath) {
       __frame1.nTargetX = D2Common::PATH::DynamicPath::GetXPos(pDynamicPath);
+    } else {
+      __frame1.nTargetX = 0;
     }
 
     spawn_near_center:
-    if (!pTargetUnit) {
-      eOwnerType = pUnit->eUnitType;
-      if (eOwnerType == UNIT_OBJECT || 3 < (int)eOwnerType && (int)eOwnerType < 6) {
-        nPosY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (pUnit->pPath.pDynamicPath) {
-        nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-      }
-    } else {
+    if (pTargetUnit) {
       eOwnerType = pTargetUnit->eUnitType;
-      if (eOwnerType == UNIT_OBJECT || 3 < (int)eOwnerType && (int)eOwnerType < 6) {
+      if (eOwnerType == UNIT_OBJECT || 3 < (int)eOwnerType && (int)eOwnerType <= 5) {
         nPosY = pTargetUnit->pPath.pStaticPath->nPosY;
       } else if (pTargetUnit->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pTargetUnit->pPath.pDynamicPath);
+      }
+    } else {
+      eOwnerType = pUnit->eUnitType;
+      if (eOwnerType == UNIT_OBJECT || 3 < (int)eOwnerType && (int)eOwnerType <= 5) {
+        nPosY = pUnit->pPath.pStaticPath->nPosY;
+      } else if (pUnit->pPath.pDynamicPath) {
+        nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
       }
     }
     uint64_t uSeedRollX = (uint64_t)pUnit->sSeed.nSeedLow * 0x6ac690c5 + (uint64_t)pUnit->sSeed.nSeedHigh;
     __frame1.pMemoryTmp = (int)uSeedRollX + (int)((uSeedRollX & 0xffffffff) / 0x18) * -0x18 - 0xc + __frame1.nTargetX;
     D2SeedStrc sNewSeed = D2_SEED_NEXT_VAL(uSeedRollX);
     pUnit->sSeed = sNewSeed;
-    uint32_t nSpawnYJitter = sNewSeed.nSeedLow + (int)(((uint64_t)d2_bits_of(sNewSeed) & 0xffffffff) / 0x18) * -0x18 - 0xc + nPosY;
+    uint32_t nSpawnYJitter = sNewSeed.nSeedLow % 0x18 - 0xc + nPosY;
     __frame1.nSpawnYOut = nSpawnYJitter;
     D2RoomStrc* pSpawnRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     pSpawnRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pSpawnRoom, __frame1.pMemoryTmp, nSpawnYJitter);
@@ -1146,8 +1146,8 @@ void __fastcall AI_Baal_ExecuteAction(::SGAMEDATA * pGame, D2UnitStrc * pUnit, i
           pnY = &__frame0.nUnitY;
           pnX = &__frame0.nUnitX;
           pRoomCoordList = 0;
-          pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-          BVar1 = Monsters::Spawn::SPAWN_FindRandomPositionForMonster(pGame, pRoom, pRoomCoordList, nClassId, pnX, pnY, nTeleportParam);
+
+          BVar1 = Monsters::Spawn::SPAWN_FindRandomPositionForMonster(pGame, D2Common::Units::UNITS_GetRoom(pUnit), pRoomCoordList, nClassId, pnX, pnY, nTeleportParam);
           if (BVar1) {
             SERVER_UNIT_CastSkill(pGame, pUnit, pMonStats->aSkMode[4], (int)pMonStats->aSkill[4], nullptr, __frame0.nUnitX, __frame0.nUnitY);
             return;
@@ -1171,8 +1171,8 @@ void __fastcall BaalCrabAi_ResetInfernoAndReattach(::SGAMEDATA * pGame, D2UnitSt
     int storedCommandArg2 = 0;
     D2MonsterAiCmdStrc* pInfernoCommand = Ai::AiGeneral::FindMonsterAiCmd(pUnit, 10, 0);
     if (pInfernoCommand) {
-      storedCommandArg2 = pInfernoCommand->nCmdArg[2];
       storedCommandArg1 = pInfernoCommand->nCmdArg[1];
+      storedCommandArg2 = pInfernoCommand->nCmdArg[2];
     }
 
     eD2States currentInfernoState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_inferno);
@@ -1185,8 +1185,8 @@ void __fastcall BaalCrabAi_ResetInfernoAndReattach(::SGAMEDATA * pGame, D2UnitSt
     if (!pInfernoCommand && storedCommandArg1 && storedCommandArg2) {
       D2AiCmdArgumentsStrc cmdArgs;
       cmdArgs.nCmdId = 10;
-      cmdArgs.nCmdArg2 = storedCommandArg2;
       cmdArgs.nCmdArg1 = storedCommandArg1;
+      cmdArgs.nCmdArg2 = storedCommandArg2;
       Ai::AiGeneral::CreateAiCmdAndFill(pGame, pUnit, &cmdArgs);
     }
 
@@ -1205,21 +1205,21 @@ void __fastcall AI_Fn1_BaalCrab(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2AiPar
       D2AiCmdArgumentsStrc anchorCmdArgs;
       eUnitType = pUnit->eUnitType;
       anchorCmdArgs.nCmdId = 10;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         anchorCmdArgs.nCmdArg1 = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        anchorCmdArgs.nCmdArg1 = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         anchorCmdArgs.nCmdArg1 = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        anchorCmdArgs.nCmdArg1 = 0;
       }
 
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         anchorCmdArgs.nCmdArg2 = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        anchorCmdArgs.nCmdArg2 = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         anchorCmdArgs.nCmdArg2 = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        anchorCmdArgs.nCmdArg2 = 0;
       }
 
       Ai::AiGeneral::CreateAiCmdAndFill(pGame, pUnit, &anchorCmdArgs);
@@ -1239,21 +1239,21 @@ void __fastcall AI_Baal_SpawnTentacle(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     eD2MonsterAnimMode aeAnimModes[3];
     POINT ptSpawn;
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       ptSpawn.x = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      ptSpawn.x = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       ptSpawn.x = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      ptSpawn.x = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       ptSpawn.y = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      ptSpawn.y = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       ptSpawn.y = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      ptSpawn.y = 0;
     }
 
     D2SeedStrc sNewSeed = D2_SEED_NEXT(pUnit->sSeed);

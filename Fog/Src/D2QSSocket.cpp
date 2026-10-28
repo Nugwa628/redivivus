@@ -156,7 +156,7 @@ void __stdcall QSSOCKET_SetCallbackHandler2(D2QSSocketStrc * pQSSocket, int nHea
 }
 
 // NOTE: Register param types inferred (medium confidence): pQSSocketStrc (ESI): D2QSSocketStrc *
-void __stdcall QSSOCKET_BlockSocket(D2QSSocketStrc * pQSSocketStrc) {
+static void __stdcall QSSOCKET_BlockSocket(D2QSSocketStrc * pQSSocketStrc) {
     if (!pQSSocketStrc) {
       return;
     }
@@ -173,7 +173,7 @@ void __stdcall QSSOCKET_BlockSocket(D2QSSocketStrc * pQSSocketStrc) {
 }
 
 // Thread-safe socket close with critical section protection
-void __stdcall CloseSocket(D2QSSocketStrc * pQServer) {
+static void __stdcall CloseSocket(D2QSSocketStrc * pQServer) {
     if (!pQServer) {
       return;
     }
@@ -259,7 +259,6 @@ void __stdcall ReceiveLoopCallback(D2QSSocketStrc * pQSSocket) {
               /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&pQSSocket->pSafesock->pSync);
             }
 
-            Debug::GuardStack();
             return;
           }
 
@@ -278,7 +277,6 @@ void __stdcall ReceiveLoopCallback(D2QSSocketStrc * pQSSocket) {
 
     cleanup:
     CloseSocket(pQSSocket);
-    Debug::GuardStack();
 }
 
 // lpStartAddress parameter of CreateThread
@@ -338,31 +336,31 @@ D2QSSocketStrc * __stdcall STRUCT_D2QSSocket_Init(char * szIpAddress, int nPort,
       char* pszScan;
       pszScan = szIpAddress;
       pszScan = pszScan + strlen(pszScan) + 1;
-      if ((uint32_t)((int)pszScan - (int)(szIpAddress + 1)) < 0x103) {
-        pD2QSSocket = D2_NEW(D2QSSocketStrc);
-        if (!pD2QSSocket) {
-          return pD2QSSocket;
-        }
+      if (!((uint32_t)((int)pszScan - (int)(szIpAddress + 1)) < 0x103)) {
+        ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x243);
+        exit(-1);
+      }
 
-        memset(pD2QSSocket, 0, 0x194);
-        Storm::Source::SSTR::SStrCopy(pD2QSSocket->szIpAddress, szIpAddress, 0x104);
-        if (!szName) {
-          dwErrorCode = 0x40;
-          szName = "UNKNOWN";
-        } else {
-          dwErrorCode = 4;
-        }
-
-        Storm::Source::SSTR::SStrCopy(pD2QSSocket->szName, szName, dwErrorCode);
-        pD2QSSocket->nPort = nPort;
-        D2QSQueue::D2QSQUEUE_Initialize(&pD2QSSocket->aQueue);
-        pD2QSSocket->nHeaderSize = 2;
-        pD2QSSocket->nSizeFieldOffset = 0;
+      pD2QSSocket = ((D2QSSocketStrc*)Fog::Memory::AllocClientMemory(sizeof(D2QSSocketStrc), ".\\Src\\D2QSSocket.cpp", 0x245, 0));
+      if (!pD2QSSocket) {
         return pD2QSSocket;
       }
 
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x243);
-      exit(-1);
+      memset(pD2QSSocket, 0, 0x194);
+      Storm::Source::SSTR::SStrCopy(pD2QSSocket->szIpAddress, szIpAddress, 0x104);
+      if (szName) {
+        dwErrorCode = 4;
+      } else {
+        dwErrorCode = 0x40;
+        szName = "UNKNOWN";
+      }
+
+      Storm::Source::SSTR::SStrCopy(pD2QSSocket->szName, szName, dwErrorCode);
+      pD2QSSocket->nPort = nPort;
+      D2QSQueue::D2QSQUEUE_Initialize(&pD2QSSocket->aQueue);
+      pD2QSSocket->nHeaderSize = 2;
+      pD2QSSocket->nSizeFieldOffset = 0;
+      return pD2QSSocket;
     }
 }
 
@@ -380,7 +378,7 @@ void __stdcall FreeD2QSSocket(D2QSSocketStrc * pSocket) {
       pSocket->pSafesock = 0;
     }
 
-    D2_FREE(pSocket);
+    Fog::Memory::FreeClientMemory(pSocket, ".\\Src\\D2QSSocket.cpp", 0x27c, 0);
 }
 
 void __stdcall QSSOCKET_WaitForEvent(D2QSSocketStrc * pQSSocket, DWORD dwTimeout) {
@@ -429,7 +427,6 @@ int32_t __stdcall NET_MCP_CLIENT_Send(D2QSSocketStrc * pQSocket, char * pBytes, 
     uint16_t nDataSize = nDataSizeNoHeader;
     _nDataSizeNoHeader = (uint32_t)nDataSizeNoHeader;
     if (!pQSocket || !pQSocket->pSafesock || !pQSocket->pSafesock->bConnected) {
-      Debug::GuardStack();
       return -1;
     }
     if (pQSocket->nHeaderSize == 4 && pQSocket->nSizeFieldOffset == 2) {
@@ -447,7 +444,7 @@ int32_t __stdcall NET_MCP_CLIENT_Send(D2QSSocketStrc * pQSocket, char * pBytes, 
       nTotalSendSize = _nDataSizeNoHeader + 3;
     } else {
       *(uint16_t*)(char*)&abLenHeader = nDataSize + 2;
-      if (0x2063 < (uint16_t)*(uint16_t*)(char*)&abLenHeader) {
+      if (0x2064 <= (uint16_t)*(uint16_t*)(char*)&abLenHeader) {
         ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x71);
         exit(-1);
       }
@@ -464,7 +461,6 @@ int32_t __stdcall NET_MCP_CLIENT_Send(D2QSSocketStrc * pQSocket, char * pBytes, 
     }
 
     int nSendResult = NET_MCP_CLIENT_SendPacketToQSocket(pQSocket, (char*)aSendBuf, (short int)nTotalSendSize);
-    Debug::GuardStack();
     return nSendResult + (_nDataSizeNoHeader - nTotalSendSize);
 }
 

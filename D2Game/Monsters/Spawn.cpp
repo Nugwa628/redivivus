@@ -56,7 +56,7 @@
 namespace D2Game::Monsters::Spawn {
 
 int32_t __fastcall MONSTER_GetMonsterClassByDifficulty(int32_t nMonstatId, int32_t nParam) {
-    if (!(-1 < nMonstatId && nMonstatId < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nMonstatId && nMonstatId < sgptDataTable->nTxtMonStatsSize)) {
       return -1;
     }
 
@@ -76,7 +76,7 @@ int32_t __fastcall MONSTER_GetMonsterClassByDifficulty(int32_t nMonstatId, int32
       if (nClassId < 0) {
         return nClassId;
       }
-      if (sgptDataTable->nTxtMonStatsSize <= nClassId) {
+      if (nClassId >= sgptDataTable->nTxtMonStatsSize) {
         return nClassId;
       }
 
@@ -91,7 +91,7 @@ int32_t __fastcall MONSTER_GetMonsterClassByDifficulty(int32_t nMonstatId, int32
     return nClassId;
 }
 
-void __stdcall GetRoomCorners(D2RoomStrc * pRoom, int * pnRight, int * pnLeft, int * pnTop, int * pnBottom, D2RoomCoordListStrc * pCoordList) {
+static void __stdcall GetRoomCorners(D2RoomStrc * pRoom, int * pnRight, int * pnLeft, int * pnTop, int * pnBottom, D2RoomCoordListStrc * pCoordList) {
     D2DrlgRoomCoordsStrc pDrlgRoomCoords;
     if (!pCoordList) {
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &pDrlgRoomCoords);
@@ -112,7 +112,7 @@ void __stdcall GetRoomCorners(D2RoomStrc * pRoom, int * pnRight, int * pnLeft, i
 }
 
 // Returns TRUE if world coordinates (nX, nY) are within the WarpDist radius of any warp entry point or the act spawn location for the room's level. Used to prevent monster spawns too close to level transitions. Reads warp coordinates and WarpDist from Levels.txt.
-BOOL __stdcall CheckWarpSpawnCoords(D2RoomStrc * pRoom, ::SGAMEDATA * pGame, int32_t nX, int32_t nY) {
+static BOOL __stdcall CheckWarpSpawnCoords(D2RoomStrc * pRoom, ::SGAMEDATA * pGame, int32_t nX, int32_t nY) {
     // Frame slots -12..-4 are ONE object: &nActSpawnY is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -198,9 +198,9 @@ BOOL __fastcall SPAWN_FindRandomPositionForMonster(::SGAMEDATA * pGame, D2RoomSt
       pRoomSeed = &pRoomWork->sSeed;
     }
 
-    for (nTryCount = 0; nTryCount <= 0x13; nTryCount++) {
+    for (nTryCount = 0; nTryCount < 0x14; nTryCount++) {
       BOOL bWarpCheckOk;
-      if (nRoomWidth < 1) {
+      if (nRoomWidth <= 0) {
         nRand = 0;
       } else if (!(nRoomWidth & nRoomWidth - 1U)) {
         seedNext = D2_SEED_NEXT(*pRoomSeed);
@@ -209,11 +209,11 @@ BOOL __fastcall SPAWN_FindRandomPositionForMonster(::SGAMEDATA * pGame, D2RoomSt
       } else {
         seedNext = D2_SEED_NEXT(*pRoomSeed);
         *pRoomSeed = seedNext;
-        nRand = (uint32_t)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) % (uint64_t)(uint32_t)nRoomWidth);
+        nRand = (uint32_t)(seedNext.nSeedLow % (uint32_t)nRoomWidth);
       }
 
       nX = nRand + nRoomLeft;
-      if ((int)nRoomTop < 1) {
+      if ((int)nRoomTop <= 0) {
         nRand = 0;
       } else if (!(nRoomTop & nRoomTop - 1)) {
         seedNext = D2_SEED_NEXT(*pRoomSeed);
@@ -222,20 +222,20 @@ BOOL __fastcall SPAWN_FindRandomPositionForMonster(::SGAMEDATA * pGame, D2RoomSt
       } else {
         seedNext = D2_SEED_NEXT(*pRoomSeed);
         *pRoomSeed = seedNext;
-        nRand = (uint32_t)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) % (uint64_t)nRoomTop);
+        nRand = (uint32_t)(seedNext.nSeedLow % nRoomTop);
       }
 
       nY = nRand + nRoomHeight;
       if (!nParam || (bWarpCheckOk = CheckWarpSpawnCoords(pRoomWork, pGameLocal, nX, nY) , !bWarpCheckOk)) {
-        if (!bUseCoordList) {
-          pSpawnedUnit = Monster::Create::SpawnMonsterAtRoomPos(pGameLocal, pRoomWork, nX, nY, nClassId, eD2MonsterAnimMode_ns::Neutral, -1, 1);
-        } else {
+        if (bUseCoordList) {
           nGridIdx = D2Common::DUNGEON::Dungeon::GetGridIndex(pRoomWork, nX, nY);
           if (nGridIdx != nCoordListIdx) {
             continue;
           }
 
           pSpawnedUnit = Monster::Create::SpawnMonsterInRoomCoordList(pGameLocal, pRoomWork, pCoordList, nX, nY, nClassId, eD2MonsterAnimMode_ns::Neutral, -1, 1);
+        } else {
+          pSpawnedUnit = Monster::Create::SpawnMonsterAtRoomPos(pGameLocal, pRoomWork, nX, nY, nClassId, eD2MonsterAnimMode_ns::Neutral, -1, 1);
         }
         if (pSpawnedUnit) {
           *pX = nX;
@@ -281,7 +281,7 @@ BOOL __stdcall SPAWN_SpawnMonsterGroupAtRandom(::SGAMEDATA * pGame, D2RoomStrc *
     int nTryCount = 0;
     while (true) {
       uint32_t nRand;
-      if (nRoomWidth < 1) {
+      if (nRoomWidth <= 0) {
         nRand = 0;
       } else if (!(nRoomWidth & nRoomWidth - 1U)) {
         seedNext = D2_SEED_NEXT(*pRoomSeed);
@@ -290,11 +290,11 @@ BOOL __stdcall SPAWN_SpawnMonsterGroupAtRandom(::SGAMEDATA * pGame, D2RoomStrc *
       } else {
         seedNext = D2_SEED_NEXT(*pRoomSeed);
         *pRoomSeed = seedNext;
-        nRand = (uint32_t)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) % (uint64_t)(uint32_t)nRoomWidth);
+        nRand = (uint32_t)(seedNext.nSeedLow % (uint32_t)nRoomWidth);
       }
 
       nBaseX = nRand + nRoomLeft;
-      if (nRoomHeight < 1) {
+      if (nRoomHeight <= 0) {
         nRand = 0;
       } else {
         ullSeedProduct = (uint64_t)pRoomSeed->nSeedLow * 0x6ac690c5;
@@ -305,7 +305,7 @@ BOOL __stdcall SPAWN_SpawnMonsterGroupAtRandom(::SGAMEDATA * pGame, D2RoomStrc *
         } else {
           seedNext = (D2SeedStrc)(ullSeedProduct + pRoomSeed->nSeedHigh);
           *pRoomSeed = seedNext;
-          nRand = (uint32_t)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) % (uint64_t)(uint32_t)nRoomHeight);
+          nRand = (uint32_t)(seedNext.nSeedLow % (uint32_t)nRoomHeight);
         }
       }
 
@@ -320,15 +320,15 @@ BOOL __stdcall SPAWN_SpawnMonsterGroupAtRandom(::SGAMEDATA * pGame, D2RoomStrc *
 
       do {
         pOffsetEntry = pGroupOffsets + 3;
-        if (!bUseCoordList) {
-          pSpawnedUnit = Monster::Create::SpawnMonsterAtRoomPos(pGame, pRoom, *pOffsetEntry + nBaseX, pGroupOffsets[4] + nBaseY, nClassId, eD2MonsterAnimMode_ns::Neutral, -1, 1);
-        } else {
+        if (bUseCoordList) {
           nGridIdx = D2Common::DUNGEON::Dungeon::GetGridIndex(pRoom, *pOffsetEntry + nBaseX, pGroupOffsets[4]);
           if (nGridIdx != nCoordListIdx) {
             break;
           }
 
           pSpawnedUnit = Monster::Create::SpawnMonsterInRoomCoordList(pGame, pRoom, pCoordList, *pOffsetEntry + nBaseX, pGroupOffsets[4] + nBaseY, nClassId, eD2MonsterAnimMode_ns::Neutral, -1, 1);
+        } else {
+          pSpawnedUnit = Monster::Create::SpawnMonsterAtRoomPos(pGame, pRoom, *pOffsetEntry + nBaseX, pGroupOffsets[4] + nBaseY, nClassId, eD2MonsterAnimMode_ns::Neutral, -1, 1);
         }
         if (!pSpawnedUnit) {
           break;
@@ -336,7 +336,7 @@ BOOL __stdcall SPAWN_SpawnMonsterGroupAtRandom(::SGAMEDATA * pGame, D2RoomStrc *
 
         nSpawnedCount++;
         pGroupOffsets = pOffsetEntry;
-        if (nGroupSize <= nSpawnedCount) {
+        if (nSpawnedCount >= nGroupSize) {
           *pOffsetX = nBaseX;
           *pOffsetY = nBaseY;
           return 1;
@@ -344,14 +344,14 @@ BOOL __stdcall SPAWN_SpawnMonsterGroupAtRandom(::SGAMEDATA * pGame, D2RoomStrc *
       } while (true);
 
       nTryCount++;
-      if (0x13 < nTryCount) {
+      if (0x14 <= nTryCount) {
         return 0;
       }
     }
 }
 
 // Spawns a monster of nClassId at a random valid position in pRoom/pCoordList, then spawns a random number of minions around it (count drawn from [bParam1-1, bParam2-1]). Also places an object (0x232) near the boss if it has the ObjCol flag and ValidateClassId returns 0x210. Returns the spawned boss unit, or NULL if no position found or params are invalid.
-D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithMinions(::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2RoomCoordListStrc * pCoordList, uint8_t bParam1, uint8_t bParam2, uint32_t nClassId) {
+static D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithMinions(::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2RoomCoordListStrc * pCoordList, uint8_t bParam1, uint8_t bParam2, uint32_t nClassId) {
     int32_t nValidatedClassId;
     int nMinionIdx;
     int32_t nFoundX;
@@ -360,7 +360,7 @@ D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithMinions(::SGAMEDATA * pGame, D2Room
     int32_t nObjClassId;
     ::SGAMEDATA* pGameCopy;
     void* pNullArg;
-    if (!(bParam1 && bParam2 && bParam1 <= bParam2)) {
+    if (!(bParam1 && bParam2 && bParam2 >= bParam1)) {
       return nullptr;
     }
 
@@ -384,8 +384,8 @@ D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithMinions(::SGAMEDATA * pGame, D2Room
         bActive = true;
         pGameCopy = pGame;
         bHasObjColFlag = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-        nValidatedClassId = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-        UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x232, nValidatedClassId, bHasObjColFlag, pGameCopy, pRoom, bActive, nObjClassId, pNullArg);
+
+        UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x232, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), bHasObjColFlag, pGameCopy, pRoom, bActive, nObjClassId, pNullArg);
       }
     }
 
@@ -397,10 +397,10 @@ D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithMinions(::SGAMEDATA * pGame, D2Room
     return pUnit;
 }
 
-D2UnitStrc * __stdcall MONSTER_SpawnMonsterGroup(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int32_t nClassId, int32_t nX, int32_t nY) {
+static D2UnitStrc * __stdcall MONSTER_SpawnMonsterGroup(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int32_t nClassId, int32_t nX, int32_t nY) {
     D2MonStatsTxt* pMonStatLine;
     int32_t nMinionIdx;
-    if (nClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nClassId) {
+    if (nClassId < 0 || nClassId >= sgptDataTable->nTxtMonStatsSize) {
       pMonStatLine = 0;
     } else {
       pMonStatLine = sgptDataTable->pTxtMonStats + nClassId;
@@ -408,7 +408,7 @@ D2UnitStrc * __stdcall MONSTER_SpawnMonsterGroup(::SGAMEDATA * pGame, D2RoomStrc
 
     uint8_t byMinGrp = pMonStatLine->MinGrp;
     uint8_t byMaxGrp = pMonStatLine->MaxGrp;
-    if (!(byMinGrp && byMaxGrp && byMinGrp <= byMaxGrp)) {
+    if (!(byMinGrp && byMaxGrp && byMaxGrp >= byMinGrp)) {
       return nullptr;
     }
 
@@ -430,7 +430,7 @@ D2UnitStrc * __stdcall MONSTER_SpawnMonsterGroup(::SGAMEDATA * pGame, D2RoomStrc
     return pUnit;
 }
 
-BOOL __stdcall SPAWN_SpawnMonsterFormation(::SGAMEDATA * pGame, int32_t nClassId, D2RoomStrc * pRoom, int * pGroupOffsetTable) {
+static BOOL __stdcall SPAWN_SpawnMonsterFormation(::SGAMEDATA * pGame, int32_t nClassId, D2RoomStrc * pRoom, int * pGroupOffsetTable) {
     bool _bSuccess;
     bool bSuccess;
     int32_t nOffsetX;
@@ -444,7 +444,7 @@ BOOL __stdcall SPAWN_SpawnMonsterFormation(::SGAMEDATA * pGame, int32_t nClassId
     return _bSuccess;
 }
 
-void __stdcall MONSTER_SetMinionsForBoss(D2RoomCoordListStrc * pRoomCoordList, int32_t nMinionClassId, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall MONSTER_SetMinionsForBoss(D2RoomCoordListStrc * pRoomCoordList, int32_t nMinionClassId, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     bool _bIsBossType;
     bool bIsBossType;
     _bIsBossType = CheckMonsterType(pUnit, 4);
@@ -454,7 +454,7 @@ void __stdcall MONSTER_SetMinionsForBoss(D2RoomCoordListStrc * pRoomCoordList, i
 
     D2SeedStrc seedNext = D2_SEED_NEXT(pUnit->sSeed);
     pUnit->sSeed = seedNext;
-    int32_t nMinionCount = seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 3) * -3 + 1;
+    int32_t nMinionCount = seedNext.nSeedLow % 3 + 1;
     if (0 >= nMinionCount) {
       return;
     }
@@ -481,12 +481,12 @@ uint32_t __stdcall MONSTER_SpawnUniquePackInRoom(D2RoomStrc * pRoom, ::SGAMEDATA
 }
 
 // Resolves the effective monster class ID for spawning in a given level, handling variant substitution. For Fallen (baseId=0x13) and Zombie (baseId=0x3a), remaps to level-appropriate variants based on eLevelId (BlackMarsh, TamoeHighland, PitLevel1/2). Returns the original nClassId unchanged if no substitution applies or if out of MonStats bounds.
-int32_t MONSTER_ValidateSpawnForLevel(int32_t nClassId, eD2LevelId eLevelId) {
+static int32_t MONSTER_ValidateSpawnForLevel(int32_t nClassId, eD2LevelId eLevelId) {
     int32_t nBaseId = nClassId;
-    if (-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId) {
+    if (0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId) {
       nBaseId = (int32_t)sgptDataTable->pTxtMonStats[nClassId].BaseId;
     }
-    if (-1 >= nBaseId) {
+    if (0 > nBaseId) {
       return nClassId;
     }
 
@@ -521,8 +521,8 @@ int32_t MONSTER_ValidateSpawnForLevel(int32_t nClassId, eD2LevelId eLevelId) {
     return nClassId;
 }
 
-BOOL SPAWN_IsExcludedMonsterClass(int32_t nClassId) {
-    if (nClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nClassId) {
+static BOOL SPAWN_IsExcludedMonsterClass(int32_t nClassId) {
+    if (nClassId < 0 || nClassId >= sgptDataTable->nTxtMonStatsSize) {
       nClassId = -1;
     }
 
@@ -549,7 +549,7 @@ BOOL SPAWN_IsExcludedMonsterClass(int32_t nClassId) {
 }
 
 // Spawns a monster at (nX, nY) and, for monsters with the objCol flag set, also creates a paired collision object (object class 0x23b or 0x23c depending on class). Handles the special case of class 0x1b2 (Rescue quest monster): offsets X by -1 and forces Dead mode if the RescueOnMountArreat quest is incomplete. Skips critter-type monsters entirely. Returns the spawned D2UnitStrc or NULL on failure.
-D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithCollisionObj(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int32_t nX, int32_t nY, eD2MonsterAnimMode dwParam, int32_t nClassId) {
+static D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithCollisionObj(::SGAMEDATA * pGame, D2RoomStrc * pRoom, int32_t nX, int32_t nY, eD2MonsterAnimMode dwParam, int32_t nClassId) {
     bool _bRescueQuestDone;
     bool _bObjColFlag;
     bool bRescueQuestDone;
@@ -558,7 +558,7 @@ D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithCollisionObj(::SGAMEDATA * pGame, D
     int32_t nValidatedClassId;
     bool bActive;
     void* pNullExtra;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize)) {
       return nullptr;
     }
 
@@ -607,8 +607,8 @@ D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithCollisionObj(::SGAMEDATA * pGame, D
       nValidatedClassId = 0;
       bActive = true;
       nColObjPosY = D2Client::Units::GetYPosFromDynamicPathUnit(pMonster);
-      nColObjPosX2 = D2Client::Units::GetXPosFromDynamicPathUnit(pMonster);
-      UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x23b, nColObjPosX2, nColObjPosY, pGame, pRoom, bActive, nValidatedClassId, pNullExtra);
+
+      UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x23b, D2Client::Units::GetXPosFromDynamicPathUnit(pMonster), nColObjPosY, pGame, pRoom, bActive, nValidatedClassId, pNullExtra);
       return pMonster;
     }
 
@@ -621,8 +621,8 @@ D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithCollisionObj(::SGAMEDATA * pGame, D
     int32_t nInitialMode = 0;
     bool bActive2 = true;
     nValidatedClassId = D2Client::Units::GetYPosFromDynamicPathUnit(pMonster);
-    int32_t nColObjPosX = D2Client::Units::GetXPosFromDynamicPathUnit(pMonster);
-    UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x23c, nColObjPosX, nValidatedClassId, pGame, pRoom, bActive2, nInitialMode, pNullExtra);
+
+    UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x23c, D2Client::Units::GetXPosFromDynamicPathUnit(pMonster), nValidatedClassId, pGame, pRoom, bActive2, nInitialMode, pNullExtra);
     return pMonster;
 }
 
@@ -672,8 +672,8 @@ D2UnitStrc * __fastcall SpawnMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, in
       } else if (nValidClassId == 0x205 && (uVar9 = Quests::QUESTS::CheckIntroductionFlagByInternalQuestId(pGameLocal, QUESTINT_SiegeOnHaggorath) , uVar9 != 0) && (eLevelId2 = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom) , eLevelId2 == LEVEL_BloodyFoothills)) {
         nMonCode = 0x206 < sgptDataTable->nTxtMonStatsSize ? 0x206 : -1;
       }
-      if (pGameLocal->nDifficulty) {
-        if (nMonCode < 0 || (nValidClassId = nMonCode , sgptDataTable->nTxtMonStatsSize <= nMonCode)) {
+      if ((uint32_t)pGameLocal->nDifficulty > 0) {
+        if (nMonCode < 0 || (nValidClassId = nMonCode , nMonCode >= sgptDataTable->nTxtMonStatsSize)) {
           nValidClassId = -1;
         }
         if ((nValidClassId == 0x1c5 || nValidClassId == 0x211) && eLevelId == LEVEL_BloodyFoothills) {
@@ -742,6 +742,10 @@ D2UnitStrc * __fastcall SpawnMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, in
         case LEVEL_FlayerJungle:
           nResolvedClassId = 1;
         break;
+        case LEVEL_A3SewersLevel1:
+
+        case LEVEL_A3SewersLevel2:
+          nResolvedClassId = 2; break;
         case LEVEL_SwampyPitLevel1:
 
         case LEVEL_SwampyPitLevel2:
@@ -755,10 +759,6 @@ D2UnitStrc * __fastcall SpawnMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, in
         case LEVEL_FlayerDungeonLevel3:
           nResolvedClassId = 0;
         break;
-        case LEVEL_A3SewersLevel1:
-
-        case LEVEL_A3SewersLevel2:
-          nResolvedClassId = 2;
       }
 
       uVar9 = MONSTER_GetMonsterClassByDifficulty(0x105 < sgptDataTable->nTxtMonStatsSize ? 0x105 : -1, nResolvedClassId);
@@ -791,10 +791,15 @@ D2UnitStrc * __fastcall SpawnMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, in
       case 0x1a:
         if (!pGameLocal->nDifficulty) {
           nValidClassId = 0;
-          if (nMonCode == 0x18) {
+          switch (nMonCode) {
+          case 0x18: {
             nValidClassId = (eLevelId != LEVEL_BloodyFoothills ? -37 : 0) + 0x211;
-          } else if (nMonCode == 0x1a) {
+            break;
+          }
+          case 0x1a: {
             nValidClassId = 0x1c5;
+            break;
+          }
           }
 
           nResolvedClassId = D2Client::DataTbls::CheckMonStatId(nValidClassId);
@@ -872,7 +877,7 @@ D2UnitStrc * __fastcall SpawnMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, in
     return pDVar8;
 }
 
-BOOL MONSTER_CanSpawnInRoom(D2RoomStrc * pRoom, ::SGAMEDATA * pGame) {
+static BOOL MONSTER_CanSpawnInRoom(D2RoomStrc * pRoom, ::SGAMEDATA * pGame) {
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     D2MonsterRegionStrc* pMonsterRegion = Monster::MonsterRegion::ReturnMonsterRegionEntryForLevel(pGame->pMonsterRegion, eLevelId);
     if (!pMonsterRegion) {
@@ -913,7 +918,7 @@ BOOL __fastcall CheckIfBaseIsFallenOrScarabAndSet(int32_t nMonstatId) {
     if (nMonstatId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonstatId) {
       nMonstatId = (int32_t)sgptDataTable->pTxtMonStats[nMonstatId].BaseId;
     }
-    if (!(-1 < nMonstatId && nMonstatId < sgptDataTable->nTxtMonStatsSize && (nMonstatId == 19 || nMonstatId == 91))) {
+    if (!(0 <= nMonstatId && nMonstatId < sgptDataTable->nTxtMonStatsSize && (nMonstatId == 19 || nMonstatId == 91))) {
       return 0;
     }
 
@@ -1001,7 +1006,7 @@ void __fastcall MONSTER_SpawnRoomMonsters(::SGAMEDATA * pGame, D2RoomStrc * pRoo
                   if (pMonStatLine->sparsePopulate != '\0') {
                     seedNext = D2_SEED_NEXT(pGame->pGameSeed);
                     pGame->pGameSeed = seedNext;
-                    if ((int)(uint32_t)(uint8_t)pMonStatLine->sparsePopulate < (int)(seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 100) * -100)) {
+                    if ((int)(seedNext.nSeedLow % 100) > (int)(uint32_t)(uint8_t)pMonStatLine->sparsePopulate) {
                       goto next_density_slot;
                     }
                   }
@@ -1032,7 +1037,7 @@ void __fastcall MONSTER_SpawnRoomMonsters(::SGAMEDATA * pGame, D2RoomStrc * pRoo
 }
 
 // Initializes a wandering monster in pRoom for the given level. Looks up act-specific wandering monster params (gaActWanderingMonsterParams), picks a random class ID from the act's pool using the room seed, finds a valid position, spawns the monster as Neutral, registers it in the game target table (slot 8), and increments pMonsterRegion->nMonsterCounter. No-ops if act >= 5 or the monster count param is 0.
-void __stdcall MONSTER_InitWanderingMonsterRegion(D2MonsterRegionStrc * pMonsterRegion, ::SGAMEDATA * pGame, D2LevelsTxt * pLevelsTxt, D2RoomStrc * pRoom) {
+static void __stdcall MONSTER_InitWanderingMonsterRegion(D2MonsterRegionStrc * pMonsterRegion, ::SGAMEDATA * pGame, D2LevelsTxt * pLevelsTxt, D2RoomStrc * pRoom) {
     // Static local variables (originally global data)
     static int gaWanderingMonsterClassIds[1] = { 0x10e }; D2_STATIC_GUARD(gaWanderingMonsterClassIds, "D2Game::Monsters::Spawn::MONSTER_InitWanderingMonsterRegion::gaWanderingMonsterClassIds");
     static int8_t gaActWanderingMonsterParams[5][2] = {
@@ -1055,10 +1060,10 @@ void __stdcall MONSTER_InitWanderingMonsterRegion(D2MonsterRegionStrc * pMonster
     if (!(uint8_t)gaActWanderingMonsterParams[byAct][1]) {
       return;
     }
-    if (!pRoom) {
-      pSeed = 0;
-    } else {
+    if (pRoom) {
       pSeed = &pRoom->sSeed;
+    } else {
+      pSeed = 0;
     }
 
     uint32_t nWanderingClassId = D2Client::Archive::UNIT_GetModuloFromSeed(pSeed, (uint32_t)(uint8_t)gaActWanderingMonsterParams[byAct][1]);
@@ -1077,11 +1082,11 @@ void __stdcall MONSTER_InitWanderingMonsterRegion(D2MonsterRegionStrc * pMonster
     pMonsterRegion->nMonsterCounter++;
 }
 
-void __stdcall MONSTER_InitWanderingForLevel(::SGAMEDATA * pGame, eD2LevelId eLevel, D2RoomStrc * pRoom, D2LevelsTxt * pLevelsTxt) {
+static void __stdcall MONSTER_InitWanderingForLevel(::SGAMEDATA * pGame, eD2LevelId eLevel, D2RoomStrc * pRoom, D2LevelsTxt * pLevelsTxt) {
     D2SeedStrc* pRoomSeed = !pRoom ? 0 : &pRoom->sSeed;
     D2SeedStrc seedRolled = D2_SEED_NEXT(*pRoomSeed);
     *pRoomSeed = seedRolled;
-    if ((int)(seedRolled.nSeedLow + (int)(((uint64_t)d2_bits_of(seedRolled) & 0xffffffff) / 100) * -100) >= 3) {
+    if ((int)(seedRolled.nSeedLow % 100) >= 3) {
       return;
     }
 
@@ -1097,7 +1102,7 @@ void __fastcall MONSTER_TrySpawnWanderingMonster(::SGAMEDATA * pGame, D2RoomStrc
     D2SeedStrc* pRoomSeed = !pRoom ? 0 : &pRoom->sSeed;
     D2SeedStrc seedNext = D2_SEED_NEXT(*pRoomSeed);
     *pRoomSeed = seedNext;
-    if (!(!((uint64_t)d2_bits_of(seedNext) & 0x7fff) && !pRoom->nClientsCount)) {
+    if (!(!(seedNext.nSeedLow & 0x7fff) && !pRoom->nClientsCount)) {
       return;
     }
 

@@ -278,26 +278,26 @@ void __fastcall CMD_InvokeCallbackByParam(int32_t nParam) {
       }
 
       /* FARPROC lpfn for IsBadCodePtr */ bIsBadPtr = IsBadCodePtr((FARPROC)gpfnScrollDownButtonHandler);
-      if (!bIsBadPtr) {
-        (*gpfnScrollDownButtonHandler)();
-        return;
+      if (bIsBadPtr) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x38b);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x38b);
-      exit(-1);
+      (*gpfnScrollDownButtonHandler)();
+      return;
     } else {
       if (!gpfnScrollUpButtonHandler) {
         return;
       }
 
       /* FARPROC lpfn for IsBadCodePtr */ bIsBadPtr = IsBadCodePtr((FARPROC)gpfnScrollUpButtonHandler);
-      if (!bIsBadPtr) {
-        (*gpfnScrollUpButtonHandler)();
-        return;
+      if (bIsBadPtr) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 899);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 899);
-      exit(-1);
+      (*gpfnScrollUpButtonHandler)();
+      return;
     }
 }
 
@@ -332,7 +332,7 @@ void __stdcall CMD_LoadDefaultKeyBindings(DWORD dwParam) {
         Fog::Source::SFile::thunk_ReadFile(hFile, aKeyBindFileBuf, 0x47a, &dwParam, (LPOVERLAPPED)0x0);
         Fog::Source::SFile::SFILE_Win32CloseHandle(hFile);
         if (dwParam == 0x47a) {
-          pKeyData = D2_NEW_POOL(nullptr, D2CmdTbl_Line0x50f);
+          pKeyData = ((D2CmdTbl_Line0x50f*)Fog::Memory::AllocServerMemory(nullptr, sizeof(D2CmdTbl_Line0x50f), ".\\UI\\CmdTbl.cpp", 0x50f, 0));
           pFileBufCursor = (uint16_t*)aKeyBindFileBuf;
           pDst = pKeyData;
           for (nCount = 0x11e; nCount; nCount--) {
@@ -373,7 +373,7 @@ void __stdcall CMD_LoadDefaultKeyBindings(DWORD dwParam) {
         return;
       }
 
-      D2_FREE(pKeyData);
+      Fog::Memory::FreeClientMemory(pKeyData, ".\\UI\\CmdTbl.cpp", 0x531, 0);
     }
 }
 
@@ -384,7 +384,7 @@ void __fastcall CMD_ResetKeyBindingsToDefaults(DWORD dwParam) {
     do {
       *pWKeyCode = 0xffff;
       pWKeyCode += 5;
-    } while ((int)pWKeyCode < (uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 4));
+    } while ((int)pWKeyCode < (int)((uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 4)));
 
     int* pSrcDefault = gaKeyBindingsDefault;
     D2KeyBindStrc* pDstBinding = g_KeyBindingsTable;
@@ -720,7 +720,7 @@ void __fastcall CMD_UnbindCommand(int32_t nCmdIndex, int32_t nSlot) {
       }
 
       pBinding = (PD2KeyBindSlot)((int)pBinding + 10);
-    } while ((int)pBinding < (uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 6));
+    } while ((int)pBinding < (int)((uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 6)));
 }
 
 uint32_t __fastcall CMD_IsCommandBound(int32_t nCmdIndex, int32_t nSlot) {
@@ -1083,17 +1083,23 @@ uint16_t * __fastcall CMD_GetKeyDescForCommand(int32_t nCmdIndex, int32_t nSlot)
         describe_key:
         {
           switch (wKeyCode) {
-            case 8:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2c);
+            case 0x100:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf15);
             return pWVar1;
-            case 0x10:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2f);
+            case 0x101:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf16);
+            return pWVar1;
+            case 0x102:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf17);
+            return pWVar1;
+            case 0x103:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf18);
+            return pWVar1;
+            case 0x104:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf19);
             return pWVar1;
             case 0x11:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf30);
-            return pWVar1;
-            case 0x1b:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf1e);
             return pWVar1;
             case 0x21:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf34);
@@ -1101,14 +1107,17 @@ uint16_t * __fastcall CMD_GetKeyDescForCommand(int32_t nCmdIndex, int32_t nSlot)
             case 0x22:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf35);
             return pWVar1;
-            case 0x2c:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf37);
+            case 0x1b:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf1e);
             return pWVar1;
-            case 0x2d:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf38);
+            case 0x90:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2b);
             return pWVar1;
-            case 0x2e:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf39);
+            case 8:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2c);
+            return pWVar1;
+            case 0x10:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2f);
             return pWVar1;
             case 0x60:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf3b);
@@ -1155,26 +1164,17 @@ uint16_t * __fastcall CMD_GetKeyDescForCommand(int32_t nCmdIndex, int32_t nSlot)
             case 0x6f:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf49);
             return pWVar1;
-            case 0x90:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2b);
-            return pWVar1;
             case 0x91:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf4a);
             return pWVar1;
-            case 0x100:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf15);
+            case 0x2c:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf37);
             return pWVar1;
-            case 0x101:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf16);
+            case 0x2d:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf38);
             return pWVar1;
-            case 0x102:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf17);
-            return pWVar1;
-            case 0x103:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf18);
-            return pWVar1;
-            case 0x104:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf19);
+            case 0x2e:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf39);
             return pWVar1;
           }
         }
@@ -1261,12 +1261,12 @@ void __fastcall CMD_ToggleKeyConfigMode(int32_t nEnable, int32_t bUpdateUIHandle
       if (gbKeyConfigModeActive == 1) {
         nHandlerCount = 4;
         gbKeyConfigModeActive = 0;
-        hWnd = D2gfx::D2GFX::GetHwnd();
-        _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, gsUICmdTblFlagInit, nHandlerCount);
+
+        _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
         if (bUpdateUIHandlers && !gbNormalUIHandlersRegistered) {
           nHandlerCount = 2;
-          hWnd = D2gfx::D2GFX::GetHwnd();
-          _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, &gUIFlagCmdTableInit, nHandlerCount);
+
+          _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagCmdTableInit, nHandlerCount);
           gbNormalUIHandlersRegistered = 1;
         }
       }
@@ -1274,14 +1274,14 @@ void __fastcall CMD_ToggleKeyConfigMode(int32_t nEnable, int32_t bUpdateUIHandle
       gbKeyConfigModeActive = 1;
       if (bUpdateUIHandlers && gbNormalUIHandlersRegistered) {
         nHandlerCount = 2;
-        hWnd = D2gfx::D2GFX::GetHwnd();
-        _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gUIFlagCmdTableInit, nHandlerCount);
+
+        _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagCmdTableInit, nHandlerCount);
         gbNormalUIHandlersRegistered = 0;
       }
 
       nHandlerCount = 4;
-      hWnd = D2gfx::D2GFX::GetHwnd();
-      _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, gsUICmdTblFlagInit, nHandlerCount);
+
+      _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
       return;
     }
 }
@@ -1328,7 +1328,7 @@ void __stdcall CMD_LoadUserKeyBindings() {
 
           next_command:
           nCmdIndex++;
-          if (0x38 < nCmdIndex) {
+          if (0x39 <= nCmdIndex) {
             nCmdIndex = 0;
             pDstTable = &wFileMagic.aBindings[0].wKeyCode;
             do {
@@ -1345,12 +1345,12 @@ void __stdcall CMD_LoadUserKeyBindings() {
 
               nCmdIndex++;
               pDstTable += 5;
-              if (0x71 < nCmdIndex) {
+              if (0x72 <= nCmdIndex) {
                 pDstTable = &g_KeyBindingsTable[0].wKeyCode;
                 do {
                   *pDstTable = 0xffff;
                   pDstTable += 5;
-                } while ((int)pDstTable < (uintptr_t)&g_KeyBindingsTable + 1144);
+                } while ((int)pDstTable < (int)((uintptr_t)&g_KeyBindingsTable + 1144));
 
                 pBindingRow = wFileMagic.aBindings;
                 pDstCopy = g_KeyBindingsTable;
@@ -1375,7 +1375,7 @@ void __stdcall CMD_LoadUserKeyBindings() {
     do {
       *pDstTable = 0xffff;
       pDstTable += 5;
-    } while ((int)pDstTable < (uintptr_t)&g_KeyBindingsTable + 1144);
+    } while ((int)pDstTable < (int)((uintptr_t)&g_KeyBindingsTable + 1144));
 
     int* piVar1 = gaKeyBindingsDefault;
     pBindingRow = g_KeyBindingsTable;
@@ -1398,8 +1398,8 @@ void __stdcall CMD_InitKeyBindings() {
 
     int32_t nHandlerCount = 4;
     gbKeyConfigModeActive = 1;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, gsUICmdTblFlagInit, nHandlerCount);
+
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
 }
 
 void __stdcall CMD_ExitKeyConfigMode() {
@@ -1410,8 +1410,8 @@ void __stdcall CMD_ExitKeyConfigMode() {
 
     int32_t nHandlerCount = 4;
     gbKeyConfigModeActive = 0;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, gsUICmdTblFlagInit, nHandlerCount);
+
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
 }
 
 void __fastcall CMD_InitKeyConfigUI(int32_t nFadeInDuration, int32_t nHoldDuration, int32_t nFadeOutDuration, eD2LevelId eLevelId, int32_t bForce) {

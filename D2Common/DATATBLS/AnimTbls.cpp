@@ -48,7 +48,7 @@ namespace D2Common::DATATBLS::AnimTbls {
 D2AnimDataStrc * __fastcall TXT_AllocTxt_AnimTbls(D2PoolManagerStrc * pMemory) {
     char szFilePath[260];
     uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
-    D2AnimDataStrc* pAnimTbls = D2_NEW_POOL(nullptr, D2AnimDataStrc);
+    D2AnimDataStrc* pAnimTbls = ((D2AnimDataStrc*)Fog::Memory::AllocServerMemory(nullptr, sizeof(D2AnimDataStrc), ".\\DATATBLS\\AnimTbls.cpp", 0x83, 0));
     memset(pAnimTbls, 0, 0x4a4);
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFilePath, "%s\\AnimData.d2", "DATA\\GLOBAL");
     D2AnimDataBucketStrc* pArchive = (D2AnimDataBucketStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(pMemory, szFilePath, nullptr, ".\\DATATBLS\\AnimTbls.cpp", 0x8a);
@@ -64,7 +64,6 @@ D2AnimDataStrc * __fastcall TXT_AllocTxt_AnimTbls(D2PoolManagerStrc * pMemory) {
 
     pAnimTbls->pDefaultRecord.nFrames = 0x800;
     pAnimTbls->pDefaultRecord.nAnimSpeed = 0x100;
-    Fog::Debug::GuardStack();
     return pAnimTbls;
 }
 
@@ -77,8 +76,8 @@ void __fastcall ANIMDATA_FreeAnimDataRecord(void * * pParam) {
       return;
     }
 
-    D2_FREE(*pParam);
-    D2_FREE_POOL(nullptr, pParam);
+    Fog::Memory::FreeClientMemory(*pParam, ".\\DATATBLS\\AnimTbls.cpp", 0xbe, 0);
+    Fog::Memory::FreeServerMemory(nullptr, pParam, ".\\DATATBLS\\AnimTbls.cpp", 0xbf, 0);
 }
 
 // pdwName1 in EDI, pdwName2 in ESI: TRUE when both 8-byte names match as two dwords. Halts (AnimTbls.cpp lines 217/218, StringLength((LPCTSTR)pdwName2) <= 8) on a name longer than 8.
@@ -87,16 +86,16 @@ BOOL __stdcall ANIMDATA_CompareNames(uint32_t * pdwName1, uint32_t * pdwName2) {
     uint32_t uVar1 = Storm::Source::SSTR::SSTR_StringLength((char*)pdwName1);
     if (uVar1 < 9) {
       uVar1 = Storm::Source::SSTR::SSTR_StringLength((char*)pdwName2);
-      if (uVar1 < 9) {
-        if (*pdwName1 == *pdwName2) {
-          return (uint32_t)(pdwName1[1] == pdwName2[1]);
-        }
-
-        return 0;
+      if (!(uVar1 <= 8)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xda);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xda);
-      exit(-1);
+      if (*pdwName1 == *pdwName2) {
+        return (uint32_t)(pdwName1[1] == pdwName2[1]);
+      }
+
+      return 0;
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd9);
       exit(-1);
@@ -107,7 +106,7 @@ BOOL __stdcall ANIMDATA_CompareNames(uint32_t * pdwName1, uint32_t * pdwName2) {
 // byte-sum hash, then walks the hash bucket comparing 8-byte names.
 // Returns pointer to the matching record or NULL.
 // Source: .\\DATATBLS\\AnimTbls.cpp
-int * ANIMDATA_GetRecordByNameHash(int * pnParam) {
+static int * ANIMDATA_GetRecordByNameHash(int * pnParam) {
     char cChar = (char)*pnParam;
     int* pszChar = pnParam;
     while (cChar != '\0') {
@@ -133,7 +132,7 @@ int * ANIMDATA_GetRecordByNameHash(int * pnParam) {
     int nRecordCount = pAnimTbls->pHashTable[nHashValue & 0xff]->nCount;
     D2AnimDataRecordStrc* szRecordName = pAnimTbls->pHashTable[nHashValue & 0xff]->aRecords;
     while (true) {
-      if (nRecordCount < 1) {
+      if (nRecordCount <= 0) {
         return nullptr;
       }
 
@@ -176,7 +175,6 @@ D2AnimDataRecordStrc * __fastcall ANIMDATA_GetAnimDataForUnit(D2UnitStrc * pUnit
       pRecord = &pDVar1->pDefaultRecord;
     }
 
-    Fog::Debug::GuardStack();
     return pRecord;
 }
 

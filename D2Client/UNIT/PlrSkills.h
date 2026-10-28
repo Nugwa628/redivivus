@@ -27,7 +27,6 @@ void __fastcall PLRSKILLS_DrawChargeTrailIfPrimary(struct D2UnitStrc * pUnit, ui
 // @sourcefile .\UNIT\PlrSkills.cpp
 void __fastcall PLRSKILLS_DrawSkillTrail_Secondary(struct D2UnitStrc * pUnit, uint32_t nParam);
 void __fastcall PLRSKILLS_DrawChargeTrailIfSecondary(struct D2UnitStrc * pUnit, uint32_t nParam);
-void __stdcall STATES_RemoveOverlayById(struct D2UnitStrc * pUnit, int32_t nParam);
 void __fastcall PLRSKILLS_StateSetFn01_ProgressiveCharge(struct D2UnitStrc * pUnit, eD2States eState);
 void __fastcall PLRSKILLS_StateRemFn01_ProgressiveCharge(struct D2UnitStrc * pUnit, eD2States eState);
 void __fastcall PLRSKILLS_StateSetFn02_CloakOfShadows(struct D2UnitStrc * pUnit, eD2States eState);
@@ -71,7 +70,6 @@ void __fastcall PLRSKILLS_StateSetFn19RemFn12_SkillDelay(struct D2UnitStrc * pUn
 void __stdcall STATES_UpdateColorShiftAndLight(struct D2UnitStrc * pUnit);
 // Attaches visual overlay effects to a unit when a state is applied. Reads the States.txt row for eState, resolves cast/overlay/overlay2 IDs (randomly selecting from 1-of-N groups via the unit seed), and calls GFX_AddOverlayToUnit with the appropriate mode (3=normal, 4=cast, 8/9=linked-state). Skips if nooverlays is set or eState is out of range. For linked states, temporarily sets/clears the state flag to determine whether the cast overlay should be suppressed by a hide-state.
 void __fastcall STATES_AddStateOverlays(struct D2UnitStrc * pUnit, eD2States eState);
-void STATES_ResetUnitGfxAndMode(struct D2UnitStrc * pUnit);
 // Applies eState to pUnit: validates bounds, skips dead units if notondead is set, plays onsound, clears/reuses existing stat-list if noclear=0, sets the state bit, updates color-shift/light, adds overlays, and if the unit is active with a light-state sets NODRAW+DRAWSHADOW flags. If transform!=0, resets gfx/anim mode.
 void __fastcall STATES_SetStateOnUnit(struct D2UnitStrc * pUnit, eD2States eState);
 // Removes eState from pUnit: if a matching stat-list exists, removes and recalculates stats then frees it, plays offsound, clears the state bit, updates color-shift, adds the removerlay overlay (random 1-of-N selection), removes overlay[0..1], and if transform!=0 resets gfx/anim mode. Calls UpdateAnimSpeed at the end.

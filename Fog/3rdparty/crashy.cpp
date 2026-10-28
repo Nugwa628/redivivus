@@ -81,11 +81,9 @@ void __stdcall SYSTEM_GetCurrentProcessThreadCount() {
 
     /* HANDLE hObject for CloseHandle */ CloseHandle(hSnapshot);
     if (bFound) {
-      Debug::GuardStack();
       return;
     }
 
-    Debug::GuardStack();
 }
 
 uint32_t __stdcall SYSTEM_GetStackRegion(LPCVOID * ppStackBase, LPCVOID pAddress, LPCVOID * ppStackTop) {
@@ -97,7 +95,7 @@ uint32_t __stdcall SYSTEM_GetStackRegion(LPCVOID * ppStackBase, LPCVOID pAddress
 
     pVqResult = (LPCVOID)(mbi.RegionSize + (int)mbi.BaseAddress);
     *ppStackTop = pVqResult;
-    if (pAddress >= pVqResult) {
+    if (pVqResult <= pAddress) {
       return (uint32_t)pVqResult & -256;
     }
 
@@ -156,7 +154,6 @@ char __stdcall SYSTEM_CaptureThreadContext(int * pnStackTop, DWORD dwThreadId, i
         /* HANDLE hObject for CloseHandle */ CloseHandle(hThread);
       }
 
-      Debug::GuardStack();
       return (char)dwStackRegionResult;
     }
 
@@ -174,7 +171,6 @@ char __stdcall SYSTEM_CaptureThreadContext(int * pnStackTop, DWORD dwThreadId, i
       }
     }
 
-    Debug::GuardStack();
     return '\0';
 }
 
@@ -203,7 +199,6 @@ bool __stdcall InternalCheckCorp() {
     uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int nWsaStartupResult = WSAStartup(0x202, &wsaData);
     if (nWsaStartupResult) {
-      Debug::GuardStack();
       return false;
     }
 
@@ -214,7 +209,6 @@ bool __stdcall InternalCheckCorp() {
     }
 
     WSACleanup();
-    Debug::GuardStack();
     return bIsBlizzardHost;
 }
 
@@ -343,11 +337,9 @@ bool __fastcall ErrorReportingLaunch(char * szText, D2BlizzardErrorArgument * pA
         File::STRING_AppendStringToString(&__frame0.szCmdLine, 0x1000, szText);
         File::STRING_AppendStringToString(&__frame0.szCmdLine, 0x1000, "\"");
         bExists = File::FILETOOLS_StartApplicationWithCommandLine_UTF8(__frame0.szExePath, &__frame0.szCmdLine);
-        Debug::GuardStack();
         return bExists;
       }
     }
-    Debug::GuardStack();
     return false;
 }
 

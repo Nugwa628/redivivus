@@ -129,21 +129,21 @@ void __stdcall Q34_SpawnNihlathakPortal(D2QuestDataStrc * pQuestData, D2UnitStrc
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
     BOOL BVar1 = 1;
@@ -152,8 +152,8 @@ void __stdcall Q34_SpawnNihlathakPortal(D2QuestDataStrc * pQuestData, D2UnitStrc
     eD2LevelId eLevel = LEVEL_NihlathaksTemple;
     nPosY += 5;
     nPosX += 10;
-    pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, pRoom, nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
+
+    BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
     if (!BVar1) {
       return;
     }
@@ -211,8 +211,8 @@ void __fastcall Q34_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     eD2LevelId eLevel = LEVEL_NihlathaksTemple;
     nPosY += 5;
     nPosX += 10;
-    pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    BVar2 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, pRoom, nPosX, nPosY, eLevel, ppPortal, nClassId, BVar2);
+
+    BVar2 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eLevel, ppPortal, nClassId, BVar2);
     if (!BVar2) {
       return;
     }
@@ -448,7 +448,7 @@ BOOL __fastcall Q34_CheckNearNihlathak(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       uint32_t nAdjacentIdx;
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &ppAdjacentRooms, (int*)&nAdjacentRoomCount);
       nAdjacentIdx = 0;
-      if (nAdjacentRoomCount) {
+      if ((uint32_t)nAdjacentRoomCount > 0) {
         do {
           if (ppAdjacentRooms[nAdjacentIdx] == (D2RoomStrc*)pBetrayalQuest->pRoomTarget) {
             bIsNearNihlathak = '\x01';
@@ -653,10 +653,10 @@ void __fastcall Q34_SpawnNihlathakPortalTimer(::SGAMEDATA * pGame, D2UnitStrc * 
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
@@ -674,8 +674,8 @@ void __fastcall Q34_SpawnNihlathakPortalTimer(::SGAMEDATA * pGame, D2UnitStrc * 
     eD2LevelId eLevel = LEVEL_NihlathaksTemple;
     nPosY += 5;
     nPosX += 10;
-    pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, pRoom, nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
+
+    BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
     if (!BVar1) {
       return;
     }
@@ -768,7 +768,7 @@ void __fastcall Q34_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->pNpcMessages = &A5Q4::aNpcGossipData;
     pQuestData->bIsActive = true;
     pQuestData->nStateFlag = 0;
-    D2QuestDataA5Q4Strc* pQuestSpecificData = D2_NEW_POOL(pSVar1->pMemoryPool, D2QuestDataA5Q4Strc);
+    D2QuestDataA5Q4Strc* pQuestSpecificData = ((D2QuestDataA5Q4Strc*)Fog::Memory::AllocServerMemory(pSVar1->pMemoryPool, sizeof(D2QuestDataA5Q4Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q4.cpp", 0x30d, 0));
     pQuestData->pQuestSpecificData.pA5Q4 = pQuestSpecificData;
     pQuestData->nQuestIdReal = QUEST_BetrayalOfHaggorath;
     pQuestData->fpStatusFilter = Q34_StatusFilter;

@@ -62,7 +62,7 @@ static char * gpszPaletteSkyDat[4] = { 0 }; D2_STATIC_GUARD(gpszPaletteSkyDat, "
 static char * gpszPaletteSkyPl2[4] = { 0 }; D2_STATIC_GUARD(gpszPaletteSkyPl2, "D2Launch::Launcher::gpszPaletteSkyPl2");
 
 void __stdcall CHARSEL_ResetCharListUI() {
-    BOOL bDownArrowVisible = D2Client::CharScreen::TotalCurrentChars < 1 || D2Client::CharScreen::nSelectedCharIndex <= gnCharSelLoadMoreEntryIndex ? 0 : 1;
+    BOOL bDownArrowVisible = D2Client::CharScreen::TotalCurrentChars < 1 || (int)D2Client::CharScreen::nSelectedCharIndex <= (int)gnCharSelLoadMoreEntryIndex ? 0 : 1;
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpCtlCharSelDownArrow->sControl, bDownArrowVisible);
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCtlCharSelDeleteButton, (uint32_t)(0 < D2Client::CharScreen::TotalCurrentChars));
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCharSelExitButton, 1);
@@ -88,7 +88,9 @@ void __stdcall UIMENU_ChangeHavingMultipleRealmsAsia123() {
     if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET) {
       BOOL bIsExpansion;
       bIsExpansion = Fog::D2CheckExpansionGame();
-      if (!bIsExpansion) {
+      if (bIsExpansion) {
+        CharSel::UIMENU_ItsLikeRealmSelectionMenuButOffsetToRightSide();
+      } else {
         gpCtlRealmSelectionPanel = MainMenus::FORMS_CreateAnyFormFromList(0x73);
         D2Win::Src::D2WinMain::FORMS_SetGlobalFormImage(gpCtlRealmSelectionPanel, 1);
         D2Win::Src::D2WinMain::SetUnsetFlag0x08(gpCtlRealmSelectionPanel, 1);
@@ -102,8 +104,6 @@ void __stdcall UIMENU_ChangeHavingMultipleRealmsAsia123() {
         D2Win::Src::D2WinMain::SetUnsetFlag0x08(gnRealmSelectionOffset, 1);
         gnCharSelImageOffset = MainMenus::FORMS_CreateAnyFormFromList(0x78);
         D2Win::Src::D2WinMain::SetUnsetFlag0x08(gnCharSelImageOffset, 1);
-      } else {
-        CharSel::UIMENU_ItsLikeRealmSelectionMenuButOffsetToRightSide();
       }
 
       nRealmIndex = 0;
@@ -266,10 +266,10 @@ void __stdcall CHARSEL_ParseRealmCharList(char * szRealmName, char * szText, int
     if (bShouldCache) {
       CharSel::CHARSEL_CacheRealmData(szRealmName, pRecordHeader, (int)aSaveData - (int)pRecordHeader);
     }
-    if (*(uint16_t*)(pRecordHeader + 1) <= nCharCount) {
+    if (nCharCount >= *(uint16_t*)(pRecordHeader + 1)) {
       gnCharSelLoadedCharCount = 1;
     }
-    if (*(uint16_t*)(pRecordHeader + 7) < *(uint16_t*)(pRecordHeader + 3)) {
+    if (*(uint16_t*)(pRecordHeader + 3) > *(uint16_t*)(pRecordHeader + 7)) {
       pwszHeader = D2Lang::StrTable::strtable::GetLocaleString(0x2b3b);
       szText = (char*)((uint32_t)szText & -65536);
       gnCharSelLoadingEntryIndex = D2Client::CharScreen::TotalCurrentChars;
@@ -295,23 +295,26 @@ BOOL __stdcall CHARSEL_OnPressPumpRealmCharListLoad(D2ControlMsg * pControlMsg) 
       gbCharSelScreenWaitTimeout = GetTickCount();
       return 1;
     }
-    if (gnCharSelBNetLoadState == 2) {
+    switch (gnCharSelBNetLoadState) {
+    case 2: {
       uint32_t nMcpThreadStatus;
       CharSel::CHARSEL_ShowWaitTimeout();
       nMcpThreadStatus = MainMenus::MAINMENU_PollMCPThreadStatus();
-      if (!nMcpThreadStatus) {
+      if (nMcpThreadStatus) {
+        bVar2 = nMcpThreadStatus == 2;
+      } else {
         D2MCPClient::McpConnect::CopyCharListToGlobal(nullptr, 0);
         gnCharSelBNetLoadState = 3;
         iVar1 = D2MCPClient::McpConnect::NET_MCP_CLIENT_Send_0x19_CharList2();
         bVar2 = !iVar1;
-      } else {
-        bVar2 = nMcpThreadStatus == 2;
       }
       if (bVar2) {
         nStatusCode = D2MCPClient::McpConnect::GetD2GSJoinResult();
         CharSel::CHARSEL_SetStatusMessage(nStatusCode);
       }
-    } else if (gnCharSelBNetLoadState == 3) {
+      break;
+    }
+    case 3: {
       CharSel::CHARSEL_ShowWaitTimeout();
       D2MCPClient::McpConnect::NET_MCP_CLIENT_ReadAndParsePacket();
       szText = (char*)D2MCPClient::McpConnect::MCPCONNECT_GetCharListPacket();
@@ -327,11 +330,12 @@ BOOL __stdcall CHARSEL_OnPressPumpRealmCharListLoad(D2ControlMsg * pControlMsg) 
       CHARSEL_ParseRealmCharList(gszPendingRealmName, szText, 1);
       return 1;
     }
+    }
 
     return 1;
 }
 
-void CHARSEL_RequestRealmCharList(char * szRealmName) {
+static void CHARSEL_RequestRealmCharList(char * szRealmName) {
     CharSel::CHARSEL_DestroyAllCharEntries();
     gbCharSelArrowsHidden = 0;
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpControlCharSelArrows, 1);
@@ -673,16 +677,16 @@ BOOL __stdcall HandleUpdateToExpansion(D2ControlMsg * pControlMsg) {
           bUpgradeOk = MainMenus::MAINMENU_UpgradeCharacterToExpansion(pSelectedCharacter, aszCommandAnsi);
           if (!bUpgradeOk) {
             nJoinResult = D2MCPClient::McpConnect::GetD2GSJoinResult();
-            if (nJoinResult == 0x7b) {
+            if (nJoinResult != 0x7b) {
+              pwszMessage = D2Lang::StrTable::strtable::GetLocaleString(0x145b);
+            } else {
               Fog::File::CONTAINER_InitializeBuffer(awszFormattedMsg, 2, 0x100, MainMenus::STRING_ZeroOneWCHAR);
               Fog::File::CONTAINER_InitializeBuffer(awszCharName, 2, 0x100, MainMenus::STRING_ZeroOneWCHAR);
               D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(awszCharName, pSelectedCharacter->szCharname, 0x100);
               pwszMessage = awszCharName;
-              pwszFormat = D2Lang::StrTable::strtable::GetLocaleString(0x2b89);
-              D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, awszFormattedMsg, pwszFormat, (uint16_t*)pwszMessage);
+
+              D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x100, awszFormattedMsg, D2Lang::StrTable::strtable::GetLocaleString(0x2b89), (uint16_t*)pwszMessage);
               pwszMessage = awszFormattedMsg;
-            } else {
-              pwszMessage = D2Lang::StrTable::strtable::GetLocaleString(0x145b);
             }
 
             MainMenus::MAINMENU_ShowPopupWithCancel(pwszMessage, UIMENU_CharacterSelectAllGameTypes);
@@ -751,9 +755,9 @@ BOOL __stdcall LAUNCHER_StartGameWithSelectedCharacter(D2ControlMsg * pControlMs
     return 1;
 }
 
-void __fastcall LAUNCHER_InitNetworkLobbyQueue(D2IniConfigStrc * pIniConfig) {
+int __fastcall LAUNCHER_InitNetworkLobbyQueue(D2IniConfigStrc * pIniConfig) {
     if (pIniConfig->pBNetClientCallbacks) {
-      return;
+      return 1;
     }
 
     gpBNetCallbacks = Bnclient::NET_InitAndGetLobbyChatQueue();
@@ -764,6 +768,7 @@ void __fastcall LAUNCHER_InitNetworkLobbyQueue(D2IniConfigStrc * pIniConfig) {
 
     pIniConfig->pBNetClientCallbacks = gpBNetCallbacks;
     gpBNetCallbacks->pfnSetLoggingFlag((uint32_t)pIniConfig);
+    return 1;
 }
 
 void __stdcall LAUNCHER_SetBusyFlag() {
@@ -885,26 +890,26 @@ int __fastcall ShowOogErrorDialog(D2OogErrorDataStrc * pErrorData) {
     uint16_t awszBody[512];
     size_t cchBufferSize;
     eOogErrorCode eVar1 = pErrorData->eErrorCode;
-    uint16_t* pwszClearCursor = awszBody;
-    for (nTitleStrId = 0x100; nTitleStrId; nTitleStrId--) {
-      pwszClearCursor[0] = L'\0';
-      pwszClearCursor[1] = L'\0';
-      pwszClearCursor += 2;
-    }
+    uint16_t* pwszClearCursor;
+    for (int i = 0; i < 0x200; i++) awszBody[i] = 0;
 
-    pwszClearCursor = awszFooter;
-    for (nTitleStrId = 0x100; nTitleStrId; nTitleStrId--) {
-      pwszClearCursor[0] = L'\0';
-      pwszClearCursor[1] = L'\0';
-      pwszClearCursor += 2;
-    }
 
-    pwszClearCursor = awszTitle;
-    for (nTitleStrId = 0x100; nTitleStrId; nTitleStrId--) {
-      pwszClearCursor[0] = L'\0';
-      pwszClearCursor[1] = L'\0';
-      pwszClearCursor += 2;
-    }
+
+
+
+
+    for (int i = 0; i < 0x200; i++) awszFooter[i] = 0;
+
+
+
+
+
+
+    for (int i = 0; i < 0x200; i++) awszTitle[i] = 0;
+
+
+
+
 
     int bDisconnectOnClose = 1;
     pfnUIMenuInstance pfnOnClose = MainMenus::UIMENU_MainMenu;
@@ -949,23 +954,23 @@ int __fastcall ShowOogErrorDialog(D2OogErrorDataStrc * pErrorData) {
 
       case OOG_ERROR_CHAR_NAME_DIALOG_2:
         Fog::File::CONTAINER_InitializeBuffer(awszCharName, 2, 0x200, MainMenus::STRING_ZeroOneWCHAR);
-      if (pErrorData->pCustomData) {
-        D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(awszCharName, (char*)pErrorData->pCustomData, 0x200);
-        cchBufferSize = 0x200;
-        pwszClearCursor = D2Lang::StrTable::strtable::GetLocaleString(0x147f);
-        D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszTitle, pwszClearCursor, cchBufferSize);
-        cchBufferSize = 0x200;
-        pwszClearCursor = D2Lang::StrTable::strtable::GetLocaleString(pErrorData->eErrorCode != OOG_ERROR_CHAR_NAME_DIALOG ? 0x2aa2 : 0x1450);
-        D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszBody, pwszClearCursor, cchBufferSize);
-        cchBufferSize = 0x200;
-        pwszClearCursor = D2Lang::StrTable::strtable::GetLocaleString(0x1451);
-        D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszFooter, pwszClearCursor, cchBufferSize);
-        MainMenus::UIMENU_CrashingCantTestIt(awszTitle, awszBody, awszCharName, awszFooter, MainMenus::UIMENU_MainMenu);
-        return 0;
+      if (!pErrorData->pCustomData) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2ad);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2ad);
-      exit(-1);
+      D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(awszCharName, (char*)pErrorData->pCustomData, 0x200);
+      cchBufferSize = 0x200;
+
+      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszTitle, D2Lang::StrTable::strtable::GetLocaleString(0x147f), cchBufferSize);
+      cchBufferSize = 0x200;
+
+      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszBody, D2Lang::StrTable::strtable::GetLocaleString(pErrorData->eErrorCode != OOG_ERROR_CHAR_NAME_DIALOG ? 0x2aa2 : 0x1450), cchBufferSize);
+      cchBufferSize = 0x200;
+
+      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszFooter, D2Lang::StrTable::strtable::GetLocaleString(0x1451), cchBufferSize);
+      MainMenus::UIMENU_CrashingCantTestIt(awszTitle, awszBody, awszCharName, awszFooter, MainMenus::UIMENU_MainMenu);
+      return 0;
       case OOG_ERROR_11:
         nTitleStrId = 0x147f;
       nBodyStrId = 0x14ec;
@@ -976,56 +981,6 @@ int __fastcall ShowOogErrorDialog(D2OogErrorDataStrc * pErrorData) {
       nFooterStrId = 0x1446;
       nBodyStrId = 0x1445;
       nPopupType = 2;
-      break;
-      case OOG_ERROR_MAIN_MENU:
-        nTitleStrId = 0x147c;
-      nBodyStrId = 0x1458;
-      nPopupType = 1;
-      bDisconnectOnClose = 0;
-      pfnOnClose = MainMenus::UIMENU_MainMenuAgain;
-      break;
-      case OOG_ERROR_BNET_ACCOUNT_CHECK:
-        nErrorAddress = Storm::Source::SSTR::SStrCmp(gszOogLastIniStringCache, D2IniData_launcher->szLastBnetAccount, 0x7fffffff);
-      if (!nErrorAddress) {
-        gnBnetAccountLoginFailCount++;
-      } else {
-        gnBnetAccountLoginFailCount = 1;
-        Storm::Source::SSTR::SStrCopy(gszOogLastIniStringCache, D2IniData_launcher->szLastBnetAccount, 0x10);
-      }
-
-      nTitleStrId = 0x147c;
-      nPopupType = 1;
-      bDisconnectOnClose = 0;
-      pfnOnClose = MainMenus::UIMENU_MainMenuAgain;
-      if (gnBnetAccountLoginFailCount < 2) {
-        nBodyStrId = 0x1457;
-      } else {
-        nBodyStrId = 0x2b63;
-        MainMenus::MAINMENU_SetGlobalValue3(1);
-      }
-
-      break;
-      case OOG_ERROR_15:
-        nTitleStrId = 0x147c;
-      nBodyStrId = 0x1459;
-      nPopupType = 1;
-      bDisconnectOnClose = 0;
-      pfnOnClose = MainMenus::UIMENU_MainMenuAgain;
-      break;
-      case OOG_ERROR_CONNECT_16:
-        nTitleStrId = 0x1480;
-      nBodyStrId = 0x14e5;
-      nPopupType = 1;
-      break;
-      case OOG_ERROR_CONNECT_17:
-        nTitleStrId = 0x1480;
-      nBodyStrId = 0x14ea;
-      nPopupType = 1;
-      break;
-      case OOG_ERROR_CONNECT_18:
-        nTitleStrId = 0x1480;
-      nBodyStrId = 0x14e3;
-      nPopupType = 1;
       break;
       case OOG_ERROR_CREATE_ACCOUNT_1:
         nTitleStrId = 0x1481;
@@ -1083,11 +1038,61 @@ int __fastcall ShowOogErrorDialog(D2OogErrorDataStrc * pErrorData) {
       pfnOnClose = MainMenus::UIMENU_CreateBattleNetAccount;
       bDisconnectOnClose = 0;
       break;
+      case OOG_ERROR_MAIN_MENU:
+        nTitleStrId = 0x147c;
+      nBodyStrId = 0x1458;
+      nPopupType = 1;
+      bDisconnectOnClose = 0;
+      pfnOnClose = MainMenus::UIMENU_MainMenuAgain;
+      break;
+      case OOG_ERROR_BNET_ACCOUNT_CHECK:
+        nErrorAddress = Storm::Source::SSTR::SStrCmp(gszOogLastIniStringCache, D2IniData_launcher->szLastBnetAccount, 0x7fffffff);
+      if (!nErrorAddress) {
+        gnBnetAccountLoginFailCount++;
+      } else {
+        gnBnetAccountLoginFailCount = 1;
+        Storm::Source::SSTR::SStrCopy(gszOogLastIniStringCache, D2IniData_launcher->szLastBnetAccount, 0x10);
+      }
+
+      nTitleStrId = 0x147c;
+      nPopupType = 1;
+      bDisconnectOnClose = 0;
+      pfnOnClose = MainMenus::UIMENU_MainMenuAgain;
+      if (gnBnetAccountLoginFailCount < 2) {
+        nBodyStrId = 0x1457;
+      } else {
+        nBodyStrId = 0x2b63;
+        MainMenus::MAINMENU_SetGlobalValue3(1);
+      }
+
+      break;
+      case OOG_ERROR_15:
+        nTitleStrId = 0x147c;
+      nBodyStrId = 0x1459;
+      nPopupType = 1;
+      bDisconnectOnClose = 0;
+      pfnOnClose = MainMenus::UIMENU_MainMenuAgain;
+      break;
+      case OOG_ERROR_CONNECT_16:
+        nTitleStrId = 0x1480;
+      nBodyStrId = 0x14e5;
+      nPopupType = 1;
+      break;
+      case OOG_ERROR_CONNECT_17:
+        nTitleStrId = 0x1480;
+      nBodyStrId = 0x14ea;
+      nPopupType = 1;
+      break;
+      case OOG_ERROR_CONNECT_18:
+        nTitleStrId = 0x1480;
+      nBodyStrId = 0x14e3;
+      nPopupType = 1;
+      break;
       case OOG_ERROR_CUSTOM_MESSAGE:
         D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(awszBody, (char*)pErrorData->pCustomData, 0x200);
       cchBufferSize = 0x200;
-      pwszClearCursor = D2Lang::StrTable::strtable::GetLocaleString(0x147c);
-      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszTitle, pwszClearCursor, cchBufferSize);
+
+      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszTitle, D2Lang::StrTable::strtable::GetLocaleString(0x147c), cchBufferSize);
       MainMenus::UIMENU_CreatePopupWithContent(awszTitle, awszBody, MainMenus::UIMENU_MainMenuAgain);
       return 0;
       default:
@@ -1098,17 +1103,17 @@ int __fastcall ShowOogErrorDialog(D2OogErrorDataStrc * pErrorData) {
     }
 
     cchBufferSize = 0x200;
-    pwszClearCursor = D2Lang::StrTable::strtable::GetLocaleString(nBodyStrId);
-    D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszBody, pwszClearCursor, cchBufferSize);
+
+    D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszBody, D2Lang::StrTable::strtable::GetLocaleString(nBodyStrId), cchBufferSize);
     if (nFooterStrId != -1) {
       cchBufferSize = 0x200;
-      pwszClearCursor = D2Lang::StrTable::strtable::GetLocaleString((uint16_t)nFooterStrId);
-      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszFooter, pwszClearCursor, cchBufferSize);
+
+      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszFooter, D2Lang::StrTable::strtable::GetLocaleString((uint16_t)nFooterStrId), cchBufferSize);
     }
     if (nTitleStrId != -1) {
       cchBufferSize = 0x200;
-      pwszClearCursor = D2Lang::StrTable::strtable::GetLocaleString((uint16_t)nTitleStrId);
-      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszTitle, pwszClearCursor, cchBufferSize);
+
+      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(awszTitle, D2Lang::StrTable::strtable::GetLocaleString((uint16_t)nTitleStrId), cchBufferSize);
     }
     if (!nPopupType) {
       MainMenus::MAINMENU_ShowPopupWithCancel(awszBody, pfnOnClose);
@@ -1126,7 +1131,7 @@ int __fastcall ShowOogErrorDialog(D2OogErrorDataStrc * pErrorData) {
     return 0;
 }
 
-void __fastcall LAUNCHER_ShowOogErrorDialog_ForEnterEmail(eOogErrorCode eErrorCode, void * pCustomData) {
+static void __fastcall LAUNCHER_ShowOogErrorDialog_ForEnterEmail(eOogErrorCode eErrorCode, void * pCustomData) {
     D2OogErrorDataStrc sErrorData;
     sErrorData.eErrorCode = eErrorCode;
     sErrorData.pCustomData = pCustomData;
@@ -1310,7 +1315,7 @@ int __fastcall EnterEmailMessagePumper(D2IniConfigStrc * pIniConfig, int32_t bCr
       char* szPass;
       szPass = pIniConfig->szLastKnownIpTcpIp;
       gpBNetCallbacks->pfnSendLogonRequest(pIniConfig->szLastBnetAccount, szPass);
-      memset(szPass, 0, 4 * sizeof(szPass[0]));
+      for (int i = 0; i < 4; i++) szPass[i] = 0;
       memset(pIniConfig->szLastKnownIpTcpIp + 4, 0, 20 * sizeof(pIniConfig->szLastKnownIpTcpIp[0]));
       D2Win::Src::D2WinMain::MessagePump(MainMenus::LAUNCHER_PollBNConnectionPump);
       if (gnBusyFlag || (bSocketConnected = MainMenus::MAINMENU_GetGlobalValue2() , bSocketConnected != 0)) {
@@ -1566,8 +1571,8 @@ uint32_t __fastcall LAUNCHER_LoadCharacterAppearanceFromD2s(char * szCharacterNa
 
     size_t nBytesRead;
     nBytesRead = fread((D2CharSelCompStrc*)&sSaveFile, 1, 0x2000, pSaveFile);
-    if (7 < nBytesRead && sSaveFile.sHeader.dwHeader == 0xaa55aa55) {
-      if (sSaveFile.sHeader.dwFileVersion < 0x5c) {
+    if (8 <= nBytesRead && sSaveFile.sHeader.dwHeader == 0xaa55aa55) {
+      if (sSaveFile.sHeader.dwFileVersion <= 0x5b) {
         if (nBytesRead < 0x82 || sSaveFile.sHeader.dwFileVersion < 0x47) {
           goto cleanup;
         }
@@ -1656,10 +1661,10 @@ BOOL __fastcall UpdateSaveFileToExpansion(char * szCharname) {
     }
 
     Fog::Source::SFile::thunk_ReadFile(hFile, &sSaveFile, 0x2000, &__frame0.dwBytesRead, (LPOVERLAPPED)0x0);
-    if (!(7 < __frame0.dwBytesRead && sSaveFile.sHeader.dwHeader == 0xaa55aa55)) {
+    if (!(8 <= __frame0.dwBytesRead && sSaveFile.sHeader.dwHeader == 0xaa55aa55)) {
       return 0;
     }
-    if (sSaveFile.sHeader.dwFileVersion < 0x5c) {
+    if (sSaveFile.sHeader.dwFileVersion <= 0x5b) {
       if (__frame0.dwBytesRead < 0x82) {
         return 0;
       }

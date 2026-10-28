@@ -53,7 +53,6 @@ int32_t __stdcall DRAW_GetBottomPanelY();
 void __stdcall DRAW_RegisterDrawHandlers();
 void __stdcall DRAW_RefreshNpcDialog();
 uint32_t __stdcall DRAW_IsDialogActive();
-void __stdcall DRAW_CenteredText(int32_t nFontId, int32_t nY, DWORD dwColor, uint16_t * wszText);
 void __stdcall DRAW_MonsterUnderCursorImmunites();
 void __fastcall DRAW_MonsterHealthBar(struct D2UnitStrc * pUnit);
 // Draw UI label showing unit name/life under mouse cursor during gameplay

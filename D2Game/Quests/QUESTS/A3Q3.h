@@ -119,10 +119,6 @@ void __fastcall Q20_Callback13_PlayerStartedGame(struct D2QuestDataStrc * pQuest
 // the 0x30-byte A3Q3-specific state struct (nQuestStage=0).
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a3q3.cpp
 void __fastcall Q20_InitData(struct D2QuestDataStrc * pQuestData);
-// A3Q3 "Khalim's Will" — spawns the unique serpent/council monster pack (monClass 0x197) that
-// carries the quest item. Sets in-progress guard at +4 around the spawn; on success records spawned,
-// clears the "pending" flag (+3) and stores the spawned unit's GUID at +0x24. No quest-state writes.
-void Q20_SpawnUniqueSerpent(::SGAMEDATA * pGame, struct D2RoomStrc * pRoom, struct D2QuestDataA3Q3Strc * pA3Q3Data);
 // A3Q3 "Khalim's Will" — accessor: returns the quest's "blade has been given/dropped" flag
 // (bTaintedSunStartedFailed field of the A3Q3 state struct) from the global quest data. Read-only.
 uint32_t __fastcall Q20_GetBladeHasBeenGiven(::SGAMEDATA * pGame);

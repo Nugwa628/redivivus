@@ -80,7 +80,7 @@ void __stdcall INPUT_UseItemClick(D2UIMouseMsgStrc * pMsg) {
     }
 
     pPlayerUnit_lcl = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pPlayerUnit_lcl->pInventory);
-    if (!(pPlayerUnit_lcl && nParam1 - 0x7b < 0x59 && uMouseY - 0x6a < 0x73)) {
+    if (!(pPlayerUnit_lcl && nParam1 - 0x7b <= 0x58 && uMouseY - 0x6a <= 0x72)) {
       return;
     }
 
@@ -221,8 +221,8 @@ void __stdcall TEXT_DrawCashDisplay() {
             dwColor = D2Win::Src::D2WinFont::DRAW_text0(pMemoryToFree->wszLine);
             D2Win::Src::D2WinFont::DRAW_text(pMemoryToFree->wszLine, 0xa0 - dwColor / 2, nTabIdx, 4, 0);
             pWordWrapNode = pMemoryToFree->pNext;
-            D2_FREE(pMemoryToFree->wszLine);
-            D2_FREE(pMemoryToFree);
+            Fog::Memory::FreeClientMemory(pMemoryToFree->wszLine, ".\\UI\\UseItem.cpp", 0x2c3, 0);
+            Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\UI\\UseItem.cpp", 0x2c4, 0);
             nTabIdx += 0x14;
             pMemoryToFree = pWordWrapNode;
           } while (pWordWrapNode);

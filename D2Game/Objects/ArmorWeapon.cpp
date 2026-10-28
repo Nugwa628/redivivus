@@ -49,7 +49,7 @@ void __stdcall Roll(::SGAMEDATA * pGame, D2RoomStrc * pRoom, D2DrlgRoomCoordsStr
     int nXEnd = pDrlgCoords->dwXSize - nObjSizeX;
     uint32_t nObjSizeY = pDVar4->SizeY;
     uint32_t uVar5 = pDrlgCoords->dwYSize - nObjSizeY + iVar1;
-    if (!((uint64_t)d2_bits_of(DVar2) & 1)) {
+    if (!(DVar2.nSeedLow & 1)) {
       sSpawnCoord.nY = iVar1 + 1;
       for (uVar5 = pDrlgCoords->dwXStart + nObjSizeX; uVar5 < (uint32_t)(nXEnd + iVar6); uVar5 += nObjSizeX * 2) {
         sSpawnCoord.nX = uVar5;

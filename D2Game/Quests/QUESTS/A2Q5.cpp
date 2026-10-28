@@ -239,7 +239,7 @@ BOOL __fastcall Q13_CheckSummonerKillAndReward(::SGAMEDATA * pGame, D2UnitStrc *
 
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pDVar3, &ppAdjacentRooms, (int*)&nAdjacentRoomCount);
       iAdjacentRoom = 0;
-      if (nAdjacentRoomCount) {
+      if ((uint32_t)nAdjacentRoomCount > 0) {
         do {
           if (ppAdjacentRooms[iAdjacentRoom] == pDVar1->pSummonerRoom) {
             bPlayerNearSummoner = 1;
@@ -453,7 +453,7 @@ void __fastcall Q13_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->pNpcMessages = &A2Q5::aNpcGossipData;
     pQuestData->bIsActive = true;
     pQuestData->nStateFlag = 0;
-    D2QuestDataA2Q5Strc* pQuestSpecificData = D2_NEW_POOL(pQuestData->pGame->pMemoryPool, D2QuestDataA2Q5Strc);
+    D2QuestDataA2Q5Strc* pQuestSpecificData = ((D2QuestDataA2Q5Strc*)Fog::Memory::AllocServerMemory(pQuestData->pGame->pMemoryPool, sizeof(D2QuestDataA2Q5Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q5.cpp", 0x212, 0));
     pQuestData->sStateFunctions.fpQuestStateHandler[0] = Q13_Callback00_NpcActivate;
     pQuestData->fpStatusFilter = 0;
     pQuestData->pQuestSpecificData.pA2Q5 = pQuestSpecificData;

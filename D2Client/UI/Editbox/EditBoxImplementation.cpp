@@ -347,7 +347,7 @@ int OnChar(::EditBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
               if (pThis->nTextLength < (int)(uint32_t)pThis->nMaxLength) {
                 nLimit = pThis->nTextLength;
               }
-              if ((int)(nLimit - 1) <= bIsValidChar) {
+              if (bIsValidChar >= (int)(nLimit - 1)) {
                 break;
               }
 
@@ -375,7 +375,7 @@ int OnChar(::EditBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
               if (pThis->nTextLength < (int)(uint32_t)pThis->nMaxLength) {
                 nLimit = pThis->nTextLength;
               }
-              if ((int)nLimit <= bIsValidChar) {
+              if (bIsValidChar >= (int)nLimit) {
                 break;
               }
 
@@ -391,11 +391,7 @@ int OnChar(::EditBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
         pMsg->dwResult = 0;
         goto consume_char;
       }
-      if (!bIsValidChar) {
-        if (byChar == 0x20 || byChar == 0x1b || byChar == 0xd) {
-          return 0;
-        }
-      } else {
+      if (bIsValidChar) {
         nTextLen = (uint32_t)pThis->nMaxLength;
         nLimit = pThis->nTextLength;
         if ((int)nLimit < (int)(nTextLen - 1)) {
@@ -406,16 +402,16 @@ int OnChar(::EditBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
             pThis->wszString[pThis->nCursorPos] = L'\0';
             pThis->nTextLength++;
           } else {
-            if ((int)nTextLen <= (int)nLimit) {
+            if ((int)nLimit >= (int)nTextLen) {
               nLimit = nTextLen;
             }
-            if ((int)uVar2 <= (int)nLimit) {
+            if ((int)nLimit >= (int)uVar2) {
               do {
                 bIsValidChar = nLimit - 1;
                 pWVar1 = pThis->wszString + nLimit;
                 nLimit--;
                 *pWVar1 = pThis->wszString[bIsValidChar];
-              } while (pThis->nCursorPos <= (int)nLimit);
+              } while ((int)nLimit >= pThis->nCursorPos);
             }
             if (pThis->nTextLength < (int)(uint32_t)pThis->nMaxLength) {
               pThis->nTextLength++;
@@ -430,12 +426,12 @@ int OnChar(::EditBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
           pMemoryToFree = D2Win::Src::D2WinFont::D2WINFONT_WordWrapString(pThis->wszString, &nLineCount, pThis->nWidth);
           while (pMemoryToFree) {
             pNextWordWrapNode = pMemoryToFree->pNext;
-            D2_FREE(pMemoryToFree->wszLine);
-            D2_FREE(pMemoryToFree);
+            Fog::Memory::FreeClientMemory(pMemoryToFree->wszLine, ".\\UI\\editbox.cpp", 0x203, 0);
+            Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\UI\\editbox.cpp", 0x204, 0);
             pMemoryToFree = pNextWordWrapNode;
           }
 
-          if (pThis->nMaxLines < nLineCount) {
+          if (nLineCount > pThis->nMaxLines) {
             pThis->nTextLength--;
             pThis->nCursorPos--;
             pThis->wszString[pThis->nTextLength] = L'\0';
@@ -444,14 +440,11 @@ int OnChar(::EditBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
         if (!pThis->pfnCharFilter) {
           nWideLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pThis->wszString);
           if (nWideLen) {
-            if (!pThis->bNumericOnly) {
-              nWideLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pThis->wszString);
-              pThis->nTextLength = nWideLen;
-            } else {
+            if (pThis->bNumericOnly) {
               D2Lang::WideCharToUTF8(szUtf8Buf, pThis->wszString, (uint32_t)pThis->nMaxLength);
               nLimit = pThis->nMaxValue;
               nTextLen = atol(szUtf8Buf);
-              if (nLimit < nTextLen) {
+              if (nTextLen > nLimit) {
                 sprintf(szUtf8Buf, "%d", nLimit);
                 memset(pThis->wszString, 0, (uint32_t)pThis->nMaxLength * 2);
                 D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(pThis->wszString, szUtf8Buf, (uint32_t)pThis->nMaxLength);
@@ -459,8 +452,15 @@ int OnChar(::EditBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
                 pThis->nCursorPos = nWideLen;
                 pThis->nTextLength = nWideLen;
               }
+            } else {
+              nWideLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(pThis->wszString);
+              pThis->nTextLength = nWideLen;
             }
           }
+        }
+      } else {
+        if (byChar == 0x20 || byChar == 0x1b || byChar == 0xd) {
+          return 0;
         }
       }
     }
@@ -533,9 +533,9 @@ int OnLeftArrow(::EditBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     pThis->nPosY = nPosY;
     pThis->bHasFocus = 0;
     pThis->nBlinkTick = 0;
-    uint16_t* pAllocBuf = (uint16_t*)D2_ALLOC(nAllocSize);
+    uint16_t* pAllocBuf = (uint16_t*)Fog::Memory::AllocClientMemory(nAllocSize, ".\\UI\\editbox.cpp", 0x5d, 0);
     pThis->wszString = pAllocBuf;
-    pAllocBuf = (uint16_t*)D2_ALLOC(nAllocSize);
+    pAllocBuf = (uint16_t*)Fog::Memory::AllocClientMemory(nAllocSize, ".\\UI\\editbox.cpp", 0x5e, 0);
     pThis->wszScratch = pAllocBuf;
     memset(pThis->wszString, 0, nAllocSize);
     memset(pThis->wszScratch, 0, nAllocSize);
@@ -549,7 +549,7 @@ int OnLeftArrow(::EditBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     pThis->bNumericOnly = 1;
     pThis->bCursorVisible = 1;
     memcpy(szZeroBuf, "0000000000", 0xb);
-    memset(wszZeroBuf, 0, 11 * sizeof(wszZeroBuf[0]));
+    for (int i = 0; i < 11; i++) wszZeroBuf[i] = 0;
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nFont);
     D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszZeroBuf, szZeroBuf, 0xb);
     if (nWidth < 1) {

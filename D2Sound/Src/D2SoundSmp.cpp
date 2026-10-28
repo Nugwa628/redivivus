@@ -54,7 +54,7 @@ D2SoundSmpStrc * __fastcall CallSounds(uint32_t nSoundFlags, uint32_t dwSamplePa
       return nullptr;
     }
 
-    D2SoundSmpStrc* pSoundSmp = D2_NEW(D2SoundSmpStrc);
+    D2SoundSmpStrc* pSoundSmp = ((D2SoundSmpStrc*)Fog::Memory::AllocClientMemory(sizeof(D2SoundSmpStrc), ".\\Src\\D2SoundSmp.cpp", 0x1d9, 0));
     memset(pSoundSmp, 0, 0x60);
     BOOL bCreated = SOUNDSMP_CreateSoundBuffer(nSoundFlags, pSoundSmp);
     if (bCreated) {
@@ -71,32 +71,32 @@ D2SoundSmpStrc * __fastcall CallSounds(uint32_t nSoundFlags, uint32_t dwSamplePa
 BOOL __fastcall SOUNDSMP_LoadWavDataIntoBuffer(D2SoundSmpStrc * ppSoundSmp, int * pWavData, uint32_t nWavDataSize) {
     WAVEFORMATEX waveFormat;
     uint32_t uVar1 = nWavDataSize;
-    if (ppSoundSmp && ppSoundSmp->pDSBuffer && pWavData && nWavDataSize) {
-      uint8_t* pPcmData;
-      /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gSoundSmpCs);
-      nWavDataSize = uVar1;
-      pPcmData = (uint8_t*)SOUNDSMP_ParseWavHeader(pWavData, &nWavDataSize, &waveFormat);
-      if ((uint32_t)ppSoundSmp->nMinBufSize < nWavDataSize) {
-        ppSoundSmp->nPcmSize = nWavDataSize;
-        ppSoundSmp->pPcmData = pPcmData;
-        SOUNDSMP_WriteToBuffer(ppSoundSmp, 0, 0, ppSoundSmp->nBufSize);
-        ppSoundSmp->bLoaded = 1;
-        if (!ppSoundSmp->bLooping && (uint32_t)ppSoundSmp->nPcmSize < (uint32_t)ppSoundSmp->nBufSize) {
-          ppSoundSmp->nLoopEnd = ppSoundSmp->nPcmSize;
-        } else {
-          ppSoundSmp->nLoopEnd = -1;
-        }
+    if (!(ppSoundSmp && ppSoundSmp->pDSBuffer && pWavData && nWavDataSize)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 599);
+      exit(-1);
+    }
 
-        /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gSoundSmpCs);
-        return 1;
-      }
-
+    uint8_t* pPcmData;
+    /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gSoundSmpCs);
+    nWavDataSize = uVar1;
+    pPcmData = (uint8_t*)SOUNDSMP_ParseWavHeader(pWavData, &nWavDataSize, &waveFormat);
+    if (!((uint32_t)ppSoundSmp->nMinBufSize < nWavDataSize)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x25f);
       exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 599);
-    exit(-1);
+    ppSoundSmp->nPcmSize = nWavDataSize;
+    ppSoundSmp->pPcmData = pPcmData;
+    SOUNDSMP_WriteToBuffer(ppSoundSmp, 0, 0, ppSoundSmp->nBufSize);
+    ppSoundSmp->bLoaded = 1;
+    if (!ppSoundSmp->bLooping && (uint32_t)ppSoundSmp->nPcmSize < (uint32_t)ppSoundSmp->nBufSize) {
+      ppSoundSmp->nLoopEnd = ppSoundSmp->nPcmSize;
+    } else {
+      ppSoundSmp->nLoopEnd = -1;
+    }
+
+    /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gSoundSmpCs);
+    return 1;
 }
 
 BOOL __fastcall SOUNDSMP_Play(D2SoundSmpStrc * ppSoundSmp) {
@@ -128,21 +128,21 @@ int32_t __fastcall SOUNDSMP_IsPlaying(D2SoundSmpStrc * pnParam) {
 
 uint32_t __fastcall SOUNDSMP_GetStatus(D2SoundSmpStrc * ppSoundSmp) {
     D2SoundSmpStrc* dwStatus = ppSoundSmp;
-    if (ppSoundSmp && ppSoundSmp->pDSBuffer) {
-      HRESULT nHResult;
-      /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gSoundSmpCs);
-      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nHResult = ppSoundSmp->pDSBuffer->lpVtbl->GetStatus(ppSoundSmp->pDSBuffer, (DWORD*)&dwStatus);
-      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ if (nHResult < 0) {
-        LeaveCriticalSection(&gSoundSmpCs);
-        return 0;
-      }
-
-      LeaveCriticalSection(&gSoundSmpCs);
-      return (uint32_t)dwStatus & 1;
+    if (!(ppSoundSmp && ppSoundSmp->pDSBuffer)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2b0);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2b0);
-    exit(-1);
+    HRESULT nHResult;
+    /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gSoundSmpCs);
+    /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nHResult = ppSoundSmp->pDSBuffer->lpVtbl->GetStatus(ppSoundSmp->pDSBuffer, (DWORD*)&dwStatus);
+    /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ if (nHResult < 0) {
+      LeaveCriticalSection(&gSoundSmpCs);
+      return 0;
+    }
+
+    LeaveCriticalSection(&gSoundSmpCs);
+    return (uint32_t)dwStatus & 1;
 }
 
 void __fastcall SOUNDSMP_SetVolume(D2SoundSmpStrc * ppSoundSmp, int nVolume) {
@@ -173,12 +173,12 @@ void __fastcall SOUNDSMP_SetVolume(D2SoundSmpStrc * ppSoundSmp, int nVolume) {
 // Returns pSoundSmp->nVolume, the value SOUNDSMP_SetVolume stores; halts (line 740) on NULL.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 int __fastcall SOUNDSMP_GetVolume(D2SoundSmpStrc * pSoundSmp) {
-    if (pSoundSmp) {
-      return pSoundSmp->nVolume;
+    if (!pSoundSmp) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e4);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e4);
-    exit(-1);
+    return pSoundSmp->nVolume;
     return pSoundSmp->nVolume;
 }
 
@@ -203,17 +203,17 @@ void __fastcall SOUNDSMP_SetPan(D2SoundSmpStrc * ppSoundSmp, int32_t nPan) {
 }
 
 void SOUNDSMP_Set3DPosition(D2SoundSmpStrc * pThis, float nSoundHandle, float dwParam, float pD2SoundsTxt) {
-    if (pThis && pThis->pDSBuffer) {
-      if (!(pThis->dwFlags & 2)) {
-        return;
-      }
+    if (!(pThis && pThis->pDSBuffer)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x302);
+      exit(-1);
+    }
 
-      pThis->pDS3DBuffer->lpVtbl->SetPosition(pThis->pDS3DBuffer, nSoundHandle, dwParam, pD2SoundsTxt, 0);
+    if (!(pThis->dwFlags & 2)) {
       return;
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x302);
-    exit(-1);
+    pThis->pDS3DBuffer->lpVtbl->SetPosition(pThis->pDS3DBuffer, nSoundHandle, dwParam, pD2SoundsTxt, 0);
+    return;
 }
 
 uint32_t __fastcall SOUNDSMP_GetStreamProgress(D2SoundSmpStrc * nParam) {
@@ -311,12 +311,12 @@ void __fastcall SOUNDSMP_SetEaxRoomLevel(D2SoundSmpStrc * pSoundSmp, float fPara
 }
 
 uint32_t __fastcall SOUNDSMP_IsStreaming(D2SoundSmpStrc * nParam) {
-    if (nParam) {
-      return (uint32_t)(nParam->pStreamFile != 0);
+    if (!nParam) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x37a);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x37a);
-    exit(-1);
+    return (uint32_t)(nParam->pStreamFile != 0);
     return (uint32_t)(nParam->pStreamFile != 0);
 }
 
@@ -442,7 +442,7 @@ void __fastcall CleanupSoundBuffer(uint32_t nParam) {
     if (!dwSpeakerFlag) {
       return;
     }
-    if ((int)nParam < 1) {
+    if ((int)nParam <= 0) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x387);
       exit(-1);
     }
@@ -452,7 +452,7 @@ void __fastcall CleanupSoundBuffer(uint32_t nParam) {
     uint32_t nVolumeStep = (uint32_t)((uint64_t)nCurrentVolume / ((uint64_t)nParam / 0x14));
     while (nCurrentVolume) {
       /* DWORD dwMilliseconds for Sleep */ /* Patch self out */ Sleep(0x14);
-      if (nVolumeStep < nCurrentVolume) {
+      if (nCurrentVolume > nVolumeStep) {
         nCurrentVolume -= nVolumeStep;
       } else {
         nCurrentVolume = 0;
@@ -496,7 +496,7 @@ void __fastcall SOUNDSMP_CheckBufferLost(D2SoundSmpStrc * ppnParam) {
 
 // The local holding the EAX interface was typed IUnknown *. It is IKsPropertySet *, the declared type
 // of D2SoundSmpStrc.pEaxInterface, which is what the assignment reads.
-void SOUNDSMP_ReleaseInterfaces(D2SoundSmpStrc * ppnParam) {
+static void SOUNDSMP_ReleaseInterfaces(D2SoundSmpStrc * ppnParam) {
     SOUNDSMP_Stop(ppnParam);
     IKsPropertySet* pInterface = ppnParam->pEaxInterface;
     if (pInterface) {
@@ -530,7 +530,7 @@ void __fastcall SOUNDSMP_Destroy(D2SoundSmpStrc * pSoundSmp) {
     SOUNDSMP_ReleaseInterfaces(pSoundSmp);
     D2SoundUntil::SOUND_sD2SoundSmp_Free(&gpSoundSampleList, (int32_t)pSoundSmp);
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gSoundSmpCs);
-    D2_FREE(pSoundSmp);
+    Fog::Memory::FreeClientMemory(pSoundSmp, ".\\Src\\D2SoundSmp.cpp", 0x21d, 0);
 }
 
 void __fastcall SOUNDSMP_Reset(D2SoundSmpStrc * pSoundSmp) {
@@ -541,43 +541,43 @@ void __fastcall SOUNDSMP_Reset(D2SoundSmpStrc * pSoundSmp) {
       exit(-1);
     } else {
       uint32_t nFlags;
-      if (!pSoundSmp->pStreamFile) {
-        /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gSoundSmpCs);
-        DVar1 = SOUND_GetHardwareAccelerationFlag();
-        if (!DVar1) {
-          nFlags = pSoundSmp->dwFlags;
-          SOUNDSMP_ReleaseInterfaces(pSoundSmp);
-          SOUNDSMP_CreateSoundBuffer(nFlags, pSoundSmp);
-        } else {
-          pSoundSmp->pPcmData = 0;
-          pSoundSmp->nPcmSize = 0;
-          pSoundSmp->field_08 = 0;
-          pSoundSmp->nWritePos = 0;
-          pSoundSmp->bAtEnd = 0;
-          pSoundSmp->bLooping = 0;
-          pSoundSmp->nMinBufSize = 0;
-        }
-
-        pSoundSmp->pDSBuffer->lpVtbl->SetCurrentPosition(pSoundSmp->pDSBuffer, 0);
-        This = pSoundSmp->pDS3DBuffer;
-        if (This) {
-          This->lpVtbl->SetMaxDistance(This, 100.0, 0);
-          pSoundSmp->pDS3DBuffer->lpVtbl->SetMinDistance(pSoundSmp->pDS3DBuffer, 2.0, 0);
-        }
-        if (!(pSoundSmp->dwFlags & 2)) {
-          pSoundSmp->pDSBuffer->lpVtbl->SetPan(pSoundSmp->pDSBuffer, 0);
-        } else {
-          SOUNDSMP_Set3DPosition(pSoundSmp, 0.0, 0.0, 0.0);
-        }
-
-        SOUNDSMP_SetEaxObstruction(pSoundSmp, 0.0);
-        SOUNDSMP_SetVolume(pSoundSmp, 0xff);
-        /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gSoundSmpCs);
-        return;
+      if (pSoundSmp->pStreamFile) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x227);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x227);
-      exit(-1);
+      /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gSoundSmpCs);
+      DVar1 = SOUND_GetHardwareAccelerationFlag();
+      if (DVar1) {
+        pSoundSmp->pPcmData = 0;
+        pSoundSmp->nPcmSize = 0;
+        pSoundSmp->field_08 = 0;
+        pSoundSmp->nWritePos = 0;
+        pSoundSmp->bAtEnd = 0;
+        pSoundSmp->bLooping = 0;
+        pSoundSmp->nMinBufSize = 0;
+      } else {
+        nFlags = pSoundSmp->dwFlags;
+        SOUNDSMP_ReleaseInterfaces(pSoundSmp);
+        SOUNDSMP_CreateSoundBuffer(nFlags, pSoundSmp);
+      }
+
+      pSoundSmp->pDSBuffer->lpVtbl->SetCurrentPosition(pSoundSmp->pDSBuffer, 0);
+      This = pSoundSmp->pDS3DBuffer;
+      if (This) {
+        This->lpVtbl->SetMaxDistance(This, 100.0, 0);
+        pSoundSmp->pDS3DBuffer->lpVtbl->SetMinDistance(pSoundSmp->pDS3DBuffer, 2.0, 0);
+      }
+      if (!(pSoundSmp->dwFlags & 2)) {
+        pSoundSmp->pDSBuffer->lpVtbl->SetPan(pSoundSmp->pDSBuffer, 0);
+      } else {
+        SOUNDSMP_Set3DPosition(pSoundSmp, 0.0, 0.0, 0.0);
+      }
+
+      SOUNDSMP_SetEaxObstruction(pSoundSmp, 0.0);
+      SOUNDSMP_SetVolume(pSoundSmp, 0xff);
+      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gSoundSmpCs);
+      return;
     }
 }
 
@@ -665,10 +665,27 @@ DWORD __stdcall D2SOUNDSMP_SoundUpdateThreadProc(void * lpThreadParam) {
             SOUNDSMP_SetVolume(ppnParam, (int)((ppnParam->field_0x54 - ppnParam->field_0x50) * (dwWaitResult - piVar5)) / (ppnParam->field_0x5c - piVar5) + ppnParam->field_0x50);
           }
         }
-        if (!ppnParam->pStreamFile) {
+        if (ppnParam->pStreamFile) {
+          bMusicOn = Storm::Source::SFile::SFileDdaGetPos(ppnParam->pStreamFile, &__frame0.nStreamOffsetBytes, &__frame0.nStreamSizeBytes);
+          if (!bMusicOn) {
+            if (!ppnParam->pDSBuffer) {
+              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x292);
+              exit(-1);
+            }
+
+            /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gSoundSmpCs);
+            if (ppnParam->pStreamFile) {
+              SOUNDSMP_CancelStream(ppnParam);
+            }
+
+            ppnParam->pDSBuffer->lpVtbl->Stop(ppnParam->pDSBuffer);
+            /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ ppnParam->bIsPlaying = 0;
+            LeaveCriticalSection(&gSoundSmpCs);
+          }
+        } else {
           if (ppnParam->bIsPlaying) {
             HVar1 = ppnParam->pDSBuffer->lpVtbl->GetCurrentPosition(ppnParam->pDSBuffer, (DWORD*)&__frame0.pPlayCursor, &__frame0.nWriteCursorBytes);
-            if (-1 < HVar1) {
+            if (0 <= HVar1) {
               nBufMask = ppnParam->nBufSize - 1;
               pListNode = ppnParam->field_08 & nBufMask;
               piVar5 = ppnParam->field_08 - pListNode;
@@ -692,33 +709,16 @@ DWORD __stdcall D2SOUNDSMP_SoundUpdateThreadProc(void * lpThreadParam) {
                   SOUNDSMP_ClearBuffer(ppnParam->pDSBuffer, nBufMask, nBufMask);
                   ppnParam->bLoaded = 1;
                 }
-                if ((uint32_t)ppnParam->nHalfBufSize <= __frame0.pPlayCursor && ppnParam->bLoaded == 1) {
+                if (__frame0.pPlayCursor >= (uint32_t)ppnParam->nHalfBufSize && ppnParam->bLoaded == 1) {
                   SOUNDSMP_ClearBuffer(ppnParam->pDSBuffer, 0, ppnParam->nHalfBufSize);
                   ppnParam->bLoaded = 0;
                 }
-                if ((uint32_t)ppnParam->nPcmSize < (uint32_t)ppnParam->field_08) {
+                if ((uint32_t)ppnParam->field_08 > (uint32_t)ppnParam->nPcmSize) {
                   ppnParam->pDSBuffer->lpVtbl->Stop(ppnParam->pDSBuffer);
                   ppnParam->bIsPlaying = 0;
                 }
               }
             }
-          }
-        } else {
-          bMusicOn = Storm::Source::SFile::SFileDdaGetPos(ppnParam->pStreamFile, &__frame0.nStreamOffsetBytes, &__frame0.nStreamSizeBytes);
-          if (!bMusicOn) {
-            if (!ppnParam->pDSBuffer) {
-              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x292);
-              exit(-1);
-            }
-
-            /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gSoundSmpCs);
-            if (ppnParam->pStreamFile) {
-              SOUNDSMP_CancelStream(ppnParam);
-            }
-
-            ppnParam->pDSBuffer->lpVtbl->Stop(ppnParam->pDSBuffer);
-            /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ ppnParam->bIsPlaying = 0;
-            LeaveCriticalSection(&gSoundSmpCs);
           }
         }
 
@@ -796,7 +796,7 @@ float __stdcall SOUNDSMP_ClampAttenuation(float fParam) {
     return (float)fVar1;
 }
 
-int * __stdcall SOUNDSMP_FindWavChunk(uint32_t * pRemainingSize, uint32_t * pChunkSize, int32_t nChunkId, int * pChunkHeader) {
+static int * __stdcall SOUNDSMP_FindWavChunk(uint32_t * pRemainingSize, uint32_t * pChunkSize, int32_t nChunkId, int * pChunkHeader) {
     uint32_t dwChunkDataSize;
     uint32_t dwRemainingSize = *pRemainingSize;
     while (true) {
@@ -840,7 +840,7 @@ int * __fastcall SOUNDSMP_ParseWavHeader(int * pWavData, uint32_t * pDataSize, W
     WORD* pChunkData;
     int* piVar1;
     uint32_t nChunkSize;
-    if (0x1f >= *pDataSize) {
+    if (0x20 > *pDataSize) {
       return nullptr;
     }
 
@@ -851,7 +851,7 @@ int * __fastcall SOUNDSMP_ParseWavHeader(int * pWavData, uint32_t * pDataSize, W
 
     nChunkSize = 0;
     pChunkData = (WORD*)SOUNDSMP_FindWavChunk(pDataSize, &nChunkSize, 0x20746d66, pWavData + 3);
-    if (!(pChunkData && 0xf < nChunkSize && nChunkSize <= *pDataSize)) {
+    if (!(pChunkData && 0x10 <= nChunkSize && *pDataSize >= nChunkSize)) {
       return nullptr;
     }
 
@@ -864,7 +864,7 @@ int * __fastcall SOUNDSMP_ParseWavHeader(int * pWavData, uint32_t * pDataSize, W
     pWavFormat->wBitsPerSample = pChunkData[7];
     pWavFormat->cbSize = 0;
     piVar1 = SOUNDSMP_FindWavChunk(pDataSize, &nChunkSize, 0x61746164, (int*)((int)pChunkData + nChunkSize));
-    if (!(piVar1 && nChunkSize <= *pDataSize)) {
+    if (!(piVar1 && *pDataSize >= nChunkSize)) {
       return nullptr;
     }
 

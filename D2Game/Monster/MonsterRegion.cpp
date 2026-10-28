@@ -335,7 +335,7 @@ void __fastcall FreeMonsterRegion(D2PoolManagerStrc * pMemory, int32_t nParam) {
     do {
       nParam += 4;
       if (*(void**)nParam) {
-        D2_FREE_POOL(pMemory, *(void**)nParam);
+        Fog::Memory::FreeServerMemory(pMemory, *(void**)nParam, ".\\MONSTER\\MonsterRegion.cpp", 0xc5, 0);
       }
 
       i++;
@@ -384,18 +384,18 @@ short * __fastcall InitializeSpawnCount(D2MonsterRegionStrc * * ppMonsterRegion,
         pMonData++;
       } while ((int)pMatchedMonData < (int)(uint32_t)pMonsterRegion->nSpawnCount);
 
-      if (12 < (int)pMatchedMonData) {
+      if (13 <= (int)pMatchedMonData) {
         return nullptr;
       }
     }
 
     pMatchedMonData = pMonData;
-    if (!(-1 < nMonStatId && nMonStatId < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nMonStatId && nMonStatId < sgptDataTable->nTxtMonStatsSize)) {
       return (short int*)pMatchedMonData;
     }
 
     nMonStatId = (int)sgptDataTable->pTxtMonStats[nMonStatId].MonStatsEx;
-    if (!(-1 < nMonStatId && nMonStatId < sgptDataTable->nTxtMonStatsExSize && sgptDataTable->pTxtMonStatsEx + nMonStatId && 2 < (uint8_t)sgptDataTable->pTxtMonStatsEx[nMonStatId].TotalPieces)) {
+    if (!(0 <= nMonStatId && nMonStatId < sgptDataTable->nTxtMonStatsExSize && sgptDataTable->pTxtMonStatsEx + nMonStatId && 2 < (uint8_t)sgptDataTable->pTxtMonStatsEx[nMonStatId].TotalPieces)) {
       return (short int*)pMatchedMonData;
     }
 
@@ -495,12 +495,7 @@ void __fastcall UpdateMonsterRegion(D2MonsterRegionStrc * * ppMonsterRegion, eD2
     uint32_t bIsUnique;
     uint32_t* pnSpawnCount;
     D2MonsterRegionStrc* pNewRegion = ppMonsterRegion[eLevel2];
-    if (!pUnit) {
-      if (!nParam && !bIsDead && !nMonFlags) {
-        pnSpawnCount = (uint32_t*)&ppMonsterRegion[eLevel]->dwMonSpawnCount;
-        (*pnSpawnCount)--;
-      }
-    } else {
+    if (pUnit) {
       int32_t nAlignment;
       if (pNewRegion != ppMonsterRegion[eLevel]) {
         SetLevelId(pUnit, eLevel);
@@ -515,6 +510,11 @@ void __fastcall UpdateMonsterRegion(D2MonsterRegionStrc * * ppMonsterRegion, eD2
             return;
           }
         }
+      }
+    } else {
+      if (!nParam && !bIsDead && !nMonFlags) {
+        pnSpawnCount = (uint32_t*)&ppMonsterRegion[eLevel]->dwMonSpawnCount;
+        (*pnSpawnCount)--;
       }
     }
 }

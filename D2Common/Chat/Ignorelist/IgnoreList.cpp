@@ -60,23 +60,21 @@ int32_t AppendLineToFile(::IgnoreList * pThis, char * szLine) {
         pThis->pAppendFile = _File;
         if (_File) {
           _Count = 1;
-          nStrLen = Storm::Source::SSTR::SStrLen(szPath);
-          fwrite(szPath, nStrLen, _Count, _File);
+
+          fwrite(szPath, Storm::Source::SSTR::SStrLen(szPath), _Count, _File);
           iVar1 = fclose(pThis->pAppendFile);
           uVar2 = (uint32_t)!iVar1;
         }
 
-        Fog::Debug::GuardStack();
         return uVar2;
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
 // Writes the ignore list to its file: one ignored name pattern per line, then each ignored account prefixed with '!'.
-int32_t SaveToFile(::IgnoreList * pThis) {
+int32_t __fastcall SaveToFile(::IgnoreList * pThis) {
     FILE* pFile = fopen(pThis->szIgnoreFilePath, "w");
     if (!pFile) {
       return 0;
@@ -230,9 +228,9 @@ int32_t CheckIgnored(::IgnoreList * pThis, char * szPlayerName) {
       _bIsEnabled = pThis->_vfptr->GetPersistentSetting(pThis);
       if (_bIsEnabled) {
         szSuffix[0] = '\0';
-        memset(szSuffix + 1, 0, 0xff);
+        for (int i = 0x1; i < 0x100; i++) szSuffix[i] = 0;
         szPrefix[0] = '\0';
-        memset(szPrefix + 1, 0, 0xff);
+        for (int i = 0x1; i < 0x100; i++) szPrefix[i] = 0;
         IGNORELIST_ExtractPrefix(szPlayerName, szPrefix, 0x100);
         pThis->_vfptr->GetMappedValue(pThis, szPrefix, szSuffix, 0x100);
         if (szSuffix[0] == '\0') {
@@ -244,21 +242,18 @@ int32_t CheckIgnored(::IgnoreList * pThis, char * szPlayerName) {
           check_alternate_name:
           _bIsEnabled = CheckCharNameIgnored(pThis, szSuffix);
           if (_bIsEnabled) {
-            Fog::Debug::GuardStack();
             return 1;
           }
         }
         if (szPrefix[0] != '\0') {
           _bIsEnabled = CheckCharNameIgnored(pThis, szPrefix);
           if (_bIsEnabled) {
-            Fog::Debug::GuardStack();
             return 1;
           }
         }
       }
     }
 
-    Fog::Debug::GuardStack();
     return 0;
 }
 
@@ -353,7 +348,7 @@ int32_t AddByAccountName(::IgnoreList * pThis, char * szAccountName) {
     return 0;
 }
 
-void LoadFromFile(::IgnoreList * pThis) {
+void __fastcall LoadFromFile(::IgnoreList * pThis) {
     uint32_t uVar1;
     TSHashTable<::StringEntryNode, ::HASHKEY_STRI>* pHashTable;
     uint32_t pszIter;
@@ -432,7 +427,6 @@ void LoadFromFile(::IgnoreList * pThis) {
     pThis->nPersistentIgnore = __frame0.nPersistentIgnore;
     LoadFromFile(pThis);
     ExceptionList = __frame0.pPrevExceptionList;
-    Fog::Debug::GuardStack();
     return pThis;
 }
 
@@ -495,16 +489,13 @@ void AddAccountMapping(::IgnoreList * pThis, char * szRaw, int32_t nRawLen) {
           Storm::Source::SSTR::SStrPack(&__frame0.cPatternPrefix, __frame0.szCharName, 0x100);
           pszPatternDup = Storm::Source::SSTR::SStrDup(&__frame0.cPatternPrefix);
           pNameEntry->szMappedValue = (char*)pszPatternDup;
-          Fog::Debug::GuardStack();
           return;
         }
 
-        Fog::Debug::GuardStack();
         return;
       }
     }
 
-    Fog::Debug::GuardStack();
 }
 
 } // namespace D2Common::Chat::Ignorelist::IgnoreList

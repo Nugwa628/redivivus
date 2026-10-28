@@ -299,7 +299,7 @@ void __fastcall Q23_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
       nGossipLineIdx = 6;
     } else {
-      if (5 < pQuestData->nStateFlag) {
+      if (6 <= pQuestData->nStateFlag) {
         if (_bCompleted != 1) {
           return;
         }
@@ -312,7 +312,7 @@ void __fastcall Q23_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nGossipLineIdx == -1) {
         return;
       }
-      if (7 < nGossipLineIdx) {
+      if (8 <= nGossipLineIdx) {
         return;
       }
     }
@@ -360,7 +360,7 @@ void __fastcall Q23_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     if (pQuestArgs->sQuestArgs.sNpcActivate.pTextControl == (D2GSPacketSrv0x27_TextStrc*)0x4b) {
       D2BitBufferStrc* pBitBuffer;
       QUESTGUID_RemovePlayerFromQuest(pQuestData, pQuestArgs);
-      if (1 < pQuestData->nStateFlag && pQuestData->nStateFlag < 4) {
+      if (1 < pQuestData->nStateFlag && pQuestData->nStateFlag <= 3) {
         pGame = pQuestArgs->pGame;
         pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
         pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
@@ -392,7 +392,7 @@ void __fastcall Q23_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
         UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Q23_PlayerUpdateGuardianSteps);
       }
     }
-    if (0x61 < nLamEsenDone2 && pQuestData->bIsNotIntroduction && !pQuestData->nStateFlag) {
+    if (0x62 <= nLamEsenDone2 && pQuestData->bIsNotIntroduction && !pQuestData->nStateFlag) {
       pQuestData->nStateFlag = 1;
       pQuestData->sStateFunctions.fpQuestStateHandler[2] = Q23_Callback02_NpcDeactivate;
     }
@@ -432,12 +432,12 @@ void __fastcall Q23_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
       }
 
       nLamEsenDone2 = QUEST_GetQuestRecordState(pQuestArgs->pGame, QUEST_LamEsensTome, 0xd);
-      if (nLamEsenDone2 != 1) {
-        nJournalStringId = 0x1ae;
-        nEventId = 5;
-      } else {
+      if (nLamEsenDone2 == 1) {
         nJournalStringId = 0x1aa;
         nEventId = 4;
+      } else {
+        nJournalStringId = 0x1ae;
+        nEventId = 5;
       }
     }
 
@@ -924,7 +924,7 @@ void __fastcall Q23_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->nInitNo = 6;
     pQuestData->fpStatusFilter = 0;
     pQuestData->fpActiveFilter = Q23_ActiveFilter;
-    D2QuestDataA3Q6Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA3Q6Strc);
+    D2QuestDataA3Q6Strc* pQuestSpecificData = ((D2QuestDataA3Q6Strc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2QuestDataA3Q6Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q6.cpp", 0x380, 0));
     pQuestData->pQuestSpecificData.pA3Q6 = pQuestSpecificData;
     memset(pQuestSpecificData, 0, 0x34);
 }

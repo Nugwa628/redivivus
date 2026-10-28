@@ -314,7 +314,7 @@ void __fastcall Q18_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (!pQuestData->bIsNotIntroduction) {
         return;
       }
-      if (3 < pQuestData->nStateFlag) {
+      if (4 <= pQuestData->nStateFlag) {
         return;
       }
 
@@ -322,7 +322,7 @@ void __fastcall Q18_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nGossipIndex == -1) {
         return;
       }
-      if (5 < nGossipIndex) {
+      if (6 <= nGossipIndex) {
         return;
       }
     } else {
@@ -630,7 +630,7 @@ void __fastcall Q18_Callback09_PlayerDroppedWithQuestItem(D2QuestDataStrc * pQue
     D2QuestDataA3Q1Strc* pA2Q3Data = pQuestData->pQuestSpecificData.pA3Q1;
     int32_t* piVar1 = &pA2Q3Data->nPlayersInArea;
     (*piVar1)--;
-    if (!(!*piVar1 && pQuestData->bIsNotIntroduction && pA2Q3Data->bNotifiedPlayers && pQuestData->nStateFlag < 4)) {
+    if (!(!*piVar1 && pQuestData->bIsNotIntroduction && pA2Q3Data->bNotifiedPlayers && pQuestData->nStateFlag <= 3)) {
       return;
     }
 
@@ -787,8 +787,8 @@ bool __fastcall Q18_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
       *nUnknown = '\f';
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       if (pRoom) {
-        eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-        neAct = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
+
+        neAct = D2Common::Drlg::GetActNoFromLevelNumber(D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom));
         if (neAct == ACT_III && pLamEsenData->nPlayersInArea) {
           *nUnknown = '\x01';
         }
@@ -811,7 +811,7 @@ void __fastcall Q18_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->fpActiveFilter = Q18_ActiveFilter;
     pQuestData->fpSequenceFilter = (QUESTSEQ)Q18_SequenceFilter;
     pQuestData->nSequenceQuestId = QUEST_BladeOfTheOldReligion;
-    D2QuestDataA3Q1Strc* pQuestSpecificData = D2_NEW_POOL(pQuestData->pGame->pMemoryPool, D2QuestDataA3Q1Strc);
+    D2QuestDataA3Q1Strc* pQuestSpecificData = ((D2QuestDataA3Q1Strc*)Fog::Memory::AllocServerMemory(pQuestData->pGame->pMemoryPool, sizeof(D2QuestDataA3Q1Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q1.cpp", 0x3ad, 0));
     pQuestData->pQuestSpecificData.pA3Q1 = pQuestSpecificData;
     pQuestData->sStateFunctions.fpQuestStateHandler[4] = Q18_Callback04_ItemPickedUp;
     pQuestData->sStateFunctions.fpQuestStateHandler[5] = Q18_Callback05_ItemDropped;

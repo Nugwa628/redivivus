@@ -166,7 +166,7 @@ template<> void TSExplicitList<MappingEntryNode, -572662307>::Destructor() {
 template<> ::MappingEntryNode * TSHashTable<MappingEntryNode, HASHKEY_STRI>::Ptr(uint32_t dwHashVal, ::HASHKEY_STRI * pKey) {
     int32_t nCmpResult;
     uint32_t uFirstEntry = this->tSlotListArray.m_data[dwHashVal & this->nSlotMask].m_terminator.m_next;
-    ::MappingEntryNode* pEntry = (::MappingEntryNode*)((int)uFirstEntry < 1 ? 0 : uFirstEntry);
+    ::MappingEntryNode* pEntry = (::MappingEntryNode*)((int)uFirstEntry <= 0 ? 0 : uFirstEntry);
     while (true) {
       if ((int)pEntry < 1) {
         return nullptr;
@@ -221,8 +221,8 @@ template<> ::MappingEntryNode * TSHashTable<MappingEntryNode, HASHKEY_STRI>::Ptr
     ::HASHKEY_STRI* ppszSearchKey = (::HASHKEY_STRI*)&szKey;
     nExState = 0;
     szKey = pszDupKey;
-    uint32_t uHash = Storm::Source::SSTR::SStrHash(pszText, 0, 0);
-    uint32_t* pFoundEntry = (uint32_t*)this->Ptr(uHash, ppszSearchKey);
+
+    uint32_t* pFoundEntry = (uint32_t*)this->Ptr(Storm::Source::SSTR::SStrHash(pszText, 0, 0), ppszSearchKey);
     if (pszDupKey) {
       Storm::SMem::SMemFree(pszDupKey, "d:\\diablo2\\Diablo2\\3rdparty\\storm\\h\\stpl.h", 0x5e4, 0);
     }
@@ -385,7 +385,7 @@ template<> void TSGrowableArray<TSExplicitList<MappingEntryNode, -572662307>>::D
 
 template<> void TSGrowableArray<TSExplicitList<MappingEntryNode, -572662307>>::Reserve(uint32_t nCount, int32_t bRound) {
     uint32_t uNewCapacity = nCount + this->m_count;
-    if (this->m_alloc >= uNewCapacity) {
+    if (uNewCapacity <= this->m_alloc) {
       return;
     }
     if (bRound) {
@@ -422,7 +422,7 @@ template<> void TSGrowableArray<TSExplicitList<MappingEntryNode, -572662307>>::S
     uint32_t* pBucketSlot;
     if (this->m_count < nCount) {
       uint32_t uGranularity;
-      if (this->m_alloc < nCount) {
+      if (nCount > this->m_alloc) {
         uGranularity = this->m_chunk;
         if (!uGranularity) {
           uGranularity = this->CalcChunkSize(nCount);
@@ -818,7 +818,7 @@ template<> TSHashTable<::MappingEntryNode, ::HASHKEY_STRI>* TSHashTable<MappingE
 // Check load factor and rehash the mapping entry hash table if chain length exceeds threshold
 template<> int32_t TSHashTable<MappingEntryNode, HASHKEY_STRI>::MonitorFullness(uint32_t nSlot) {
     TSLink<::MappingEntryNode>* pTVar1;
-    if (0x3fe < this->nSlotMask) {
+    if (0x3ff <= this->nSlotMask) {
       return 0;
     }
     if (this->nFullnessIndicator < 4) {
@@ -828,10 +828,10 @@ template<> int32_t TSHashTable<MappingEntryNode, HASHKEY_STRI>::MonitorFullness(
     }
 
     uint32_t nChainLen = this->tSlotListArray.m_data[nSlot].m_terminator.m_next;
-    nChainLen = (int)nChainLen < 1 ? 0 : nChainLen;
+    nChainLen = (int)nChainLen <= 0 ? 0 : nChainLen;
     while (true) {
       TSExplicitList<::MappingEntryNode, -572662307>* pNode;
-      if ((int)nChainLen < 1) {
+      if ((int)nChainLen <= 0) {
         return 0;
       }
 
@@ -841,10 +841,10 @@ template<> int32_t TSHashTable<MappingEntryNode, HASHKEY_STRI>::MonitorFullness(
       }
 
       pNode = this->tSlotListArray.m_data + nSlot;
-      if (!nChainLen) {
-        pTVar1 = &pNode->m_terminator;
-      } else {
+      if (nChainLen) {
         pTVar1 = (TSLink<::MappingEntryNode>*)(pNode->m_linkoffset + nChainLen);
+      } else {
+        pTVar1 = &pNode->m_terminator;
       }
 
       nChainLen = pTVar1->m_next;
@@ -864,10 +864,10 @@ template<> ::MappingEntryNode * TSHashTable<MappingEntryNode, HASHKEY_STRI>::New
     }
 
     ::MappingEntryNode* pEntry = this->pVtable->InternalNew(this, this->tSlotListArray.m_data + nBucketIdx, nExtraBytes, dwFlags);
-    if (!pEntry) {
-      pListNode = &this->tFullList.m_terminator;
-    } else {
+    if (pEntry) {
       pListNode = (TSLink<::MappingEntryNode>*)((uintptr_t)&pEntry->m_hashval + this->tFullList.m_linkoffset);
+    } else {
+      pListNode = &this->tFullList.m_terminator;
     }
 
     TSLink<::MappingEntryNode>* pTVar1 = pListNode->m_prevlink;
@@ -914,8 +914,8 @@ template<> ::MappingEntryNode * TSHashTable<MappingEntryNode, HASHKEY_STRI>::New
     szKey = (char*)pObject;
     uint32_t dwExtraData1 = nExtraBytes;
     uint32_t dwExtraData2 = dwFlags;
-    uint32_t dwHash = Storm::Source::SSTR::SStrHash(pszText, 0, 0);
-    ::MappingEntryNode* pszDup = this->New(dwHash, pKey, dwExtraData1, dwExtraData2);
+
+    ::MappingEntryNode* pszDup = this->New(Storm::Source::SSTR::SStrHash(pszText, 0, 0), pKey, dwExtraData1, dwExtraData2);
     if (pObject) {
       Storm::SMem::SMemFree(pObject, "d:\\diablo2\\Diablo2\\3rdparty\\storm\\h\\stpl.h", 0x5e4, 0);
     }

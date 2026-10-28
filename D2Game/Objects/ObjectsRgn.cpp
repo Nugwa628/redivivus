@@ -197,7 +197,7 @@ void __fastcall FreeObjectControl(::SGAMEDATA * pGame) {
     D2ObjectControlSub0x1110* pMemoryToFree = pObjectControl->pSub0x1110;
     while (pMemoryToFree) {
       pPrevSub = pMemoryToFree->pPrev;
-      D2_FREE_POOL(pGame->pMemoryPool, pMemoryToFree);
+      Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\OBJECTS\\objrgn.cpp", 0xc1, 0);
       pMemoryToFree = pPrevSub;
     }
 
@@ -207,7 +207,7 @@ void __fastcall FreeObjectControl(::SGAMEDATA * pGame) {
       ppLevelRng = pObjectControl->aLevelsRng;
       do {
         ppLevelRng++;
-        D2_FREE_POOL(pGame->pMemoryPool, *ppLevelRng);
+        Fog::Memory::FreeServerMemory(pGame->pMemoryPool, *ppLevelRng, ".\\OBJECTS\\objrgn.cpp", 0xe2, 0);
         iLevelIdx++;
       } while (iLevelIdx < sgptDataTable->nTxtLevelsSize);
     }
@@ -216,14 +216,14 @@ void __fastcall FreeObjectControl(::SGAMEDATA * pGame) {
     iLevelIdx = 8;
     do {
       if (*ppShrineRng) {
-        D2_FREE_POOL(pGame->pMemoryPool, *ppShrineRng);
+        Fog::Memory::FreeServerMemory(pGame->pMemoryPool, *ppShrineRng, ".\\OBJECTS\\objrgn.cpp", 0xe8, 0);
       }
 
       ppShrineRng++;
       iLevelIdx--;
     } while (iLevelIdx);
 
-    D2_FREE_POOL(pGame->pMemoryPool, pGame->pObjectControl);
+    Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pGame->pObjectControl, ".\\OBJECTS\\objrgn.cpp", 0xec, 0);
 }
 
 D2ObjectRngStrc * __fastcall GetObjectLevelRng(::SGAMEDATA * pGame, eD2LevelId eLevelId) {
@@ -264,7 +264,6 @@ void SendDebugMessageToEveryone(void * pThis, char * pMessage) {
     *(uint8_t*)((char*)&nMsgBuf.nUnitGUID + 3) = 2;
     *(uint8_t*)((char*)&nMsgBuf.nUnitGUID + 1) = 1;
     GAME::Server::ForEachClient((::SGAMEDATA*)pThis, (fpForEachClientFn)Send_0x26_Chat, &nMsgBuf);
-    Fog::Debug::GuardStack();
 }
 
 void __fastcall Debug(::SGAMEDATA * pGame) {
@@ -287,16 +286,15 @@ void __fastcall Debug(::SGAMEDATA * pGame) {
     SendDebugMessageToEveryone(pGame, szMsgBuf);
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szMsgBuf, "%d rooms tried to place 1+ group(s); %d rooms w/no objs\n", (uint32_t)(uint16_t)nSecurityCookie2->aObjectTypeCount[0x61], (uint32_t)(uint16_t)nSecurityCookie2->aObjectTypeCount[0]);
     SendDebugMessageToEveryone(pGame, szMsgBuf);
-    Fog::Debug::GuardStack();
 }
 
 // @sourcefile .\OBJECTS\objrgn.cpp
 void __fastcall AllocObjectControlSub0x1110(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2RoomStrc * pRoom) {
     int32_t nCoord;
     D2ObjectControlStrc* pObjectControl = pGame->pObjectControl;
-    D2ObjectControlSub0x1110* pNewSub = D2_NEW_POOL(pGame->pMemoryPool, D2ObjectControlSub0x1110);
+    D2ObjectControlSub0x1110* pNewSub = ((D2ObjectControlSub0x1110*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2ObjectControlSub0x1110), ".\\OBJECTS\\objrgn.cpp", 0x177, 0));
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nCoord = pUnit->pPath.pStaticPath->nPosX;
     } else if (!pUnit->pPath.pDynamicPath) {
       nCoord = 0;
@@ -306,12 +304,12 @@ void __fastcall AllocObjectControlSub0x1110(::SGAMEDATA * pGame, D2UnitStrc * pU
 
     pNewSub->sCoords.x = nCoord;
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nCoord = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nCoord = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nCoord = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nCoord = 0;
     }
 
     pNewSub->sCoords.y = nCoord;
@@ -347,7 +345,7 @@ void __fastcall Objects_InitFn17(D2ObjectInitFnArg * pInitArg) {
             GAME::Event::SetEvent(pInitArg->pGame, pInitArg->pObject, 1, (pObjectsTxt->FrameCnt[1] >> 8) + pInitArg->pGame->dwGameFrame, 0, 0);
           }
 
-          D2_FREE_POOL(pInitArg->pGame->pMemoryPool, pSub0x1110);
+          Fog::Memory::FreeServerMemory(pInitArg->pGame->pMemoryPool, pSub0x1110, ".\\OBJECTS\\objrgn.cpp", 0x19b, 0);
           pObjectControl->pSub0x1110 = 0;
           return;
         }
@@ -522,7 +520,7 @@ int32_t __fastcall OBJECT_HandleObjectMode(D2ObjectModeArg * pObjectModeArg) {
     eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     eAct eActNo = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
     __frame0.pLevelRng = pObjectModeArg->pGame->pObjectControl->aLevelsRng[eLevel];
-    if (!(__frame0.pLevelRng->nMonClassId < 0 || sgptDataTable->nTxtMonStatsSize <= __frame0.pLevelRng->nMonClassId)) {
+    if (!(__frame0.pLevelRng->nMonClassId < 0 || __frame0.pLevelRng->nMonClassId >= sgptDataTable->nTxtMonStatsSize)) {
       return __frame0.pLevelRng->nMonClassId;
     }
 

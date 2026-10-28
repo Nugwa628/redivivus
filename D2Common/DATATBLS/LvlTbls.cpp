@@ -794,7 +794,7 @@ void __fastcall TXT_AllocTxt_levels(D2PoolManagerStrc * pMemory) {
     levels[0x8d].nOffset = 0;
     levels[0x8d].fpLinker = 0;
     sgtDataTable.pTxtLevels = (D2LevelsTxt*)DataTbls::CompileTxt(pMemory, "levels", levels, &sgtDataTable.nTxtLevelsSize, 0x220);
-    if (0x3ff < sgtDataTable.nTxtLevelsSize) {
+    if (0x400 <= sgtDataTable.nTxtLevelsSize) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 199);
       exit(-1);
     }
@@ -812,8 +812,8 @@ void __fastcall TXT_AllocTxt_levels(D2PoolManagerStrc * pMemory) {
       memset(pWVar2, 0, 0x50);
       memset((void*)&pDVar1[i].wszLevelWarp[0], 0, 0x50);
       nWideCharBufLen = 0x28;
-      pwszLevelWarpStr = D2Lang::StrTable::strtable::STRTABLE_GetStringByKey((uint8_t*)(pDVar1->LevelName + nByteOffset));
-      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(pWVar2, pwszLevelWarpStr, nWideCharBufLen);
+
+      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(pWVar2, D2Lang::StrTable::strtable::STRTABLE_GetStringByKey((uint8_t*)(pDVar1->LevelName + nByteOffset)), nWideCharBufLen);
       nWideCharBufLen = 0x28;
       pDVar1[i].wszLevelName[39] = 0;
       pWVar2 = D2Lang::StrTable::strtable::STRTABLE_GetStringByKey((uint8_t*)(pDVar1->LevelWarp + nByteOffset));
@@ -927,7 +927,7 @@ int32_t __stdcall TXT_Levels_GetMonLvlForDifficulty(eD2LevelId eLevel, eD2Diffic
 
 // Scans the LevelDefs table for levels with the Portal flag set, counts them, allocates a server array (gpPortalLevelArray) of that size, and fills it with the level indices. Used at startup to build the list of portal-accessible levels. Halts if write index exceeds the counted portal level count.
 // @sourcefile .\DATATBLS\LvlTbls.cpp
-void LVLTBLS_BuildPortalLevelArray(D2LevelDefsTxt * pTxtLevelDefs) {
+static void LVLTBLS_BuildPortalLevelArray(D2LevelDefsTxt * pTxtLevelDefs) {
     int* pPortalFieldCur;
     int nLevelsRemaining = sgptDataTable->nTxtLevelsSize;
     nPortalLevelCount = 0;
@@ -947,7 +947,7 @@ void LVLTBLS_BuildPortalLevelArray(D2LevelDefsTxt * pTxtLevelDefs) {
 
       nPortalLevelCount = nPortalLevels;
       if (nPortalLevels) {
-        pPortalLevelIds = D2_ALLOC_POOL(nullptr, nPortalLevels * 4);
+        pPortalLevelIds = Fog::Memory::AllocServerMemory(nullptr, nPortalLevels * 4, ".\\DATATBLS\\LvlTbls.cpp", 0x16c, 0);
         nPortalLevels = nPortalLevelCount;
         gpPortalLevelArray = pPortalLevelIds;
         memset(pPortalLevelIds, 0, nPortalLevelCount * 4);
@@ -963,7 +963,7 @@ void LVLTBLS_BuildPortalLevelArray(D2LevelDefsTxt * pTxtLevelDefs) {
     pPortalFieldCur = &pTxtLevelDefs->Portal;
     do {
       if (*pPortalFieldCur) {
-        if ((int)nPortalLevels <= nPortalWriteIdx) {
+        if (nPortalWriteIdx >= (int)nPortalLevels) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x177);
           exit(-1);
         }
@@ -1213,11 +1213,11 @@ void __stdcall LVLTBLS_FreeLevelDefsTxt() {
       return;
     }
 
-    D2_FREE_POOL(nullptr, gpPortalLevelArray);
+    Fog::Memory::FreeServerMemory(nullptr, gpPortalLevelArray, ".\\DATATBLS\\LvlTbls.cpp", 0x1d9, 0);
 }
 
 D2LevelDefsTxt * __fastcall TXT_LevelDefs_GetLine(eD2LevelId eLevel) {
-    if (!(-1 < (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize)) {
+    if (!(0 <= (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize)) {
       return nullptr;
     }
 
@@ -1256,7 +1256,6 @@ void __fastcall LVLTBLS_FixPathSlashes(char * szText, char * szPathPrefix) {
       } while (cCurrent != '\0');
     }
 
-    Fog::Debug::GuardStack();
 }
 
 // Loads and compiles lvltypes.txt into the global pTxtLvlTypes / nTxtLvlTypesSize table. Builds a D2BinFieldInputStrc schema describing the row layout: 32 "File N" ASCII path fields (0x3b bytes each), plus Act (char) and Expansion (int), terminated by an END field; row stride 0x788. Calls CompileTxt to parse the txt via pMemory pool, then post-processes every row converting forward to back slashes in all 32 file-path strings via LVLTBLS_FixPathSlashes. Part of D2Common data-table init.
@@ -1465,12 +1464,12 @@ void __stdcall thunk_UnloadBin_DataTbls() {
 }
 
 D2LvlTypesTxt * __stdcall TXT_LvlTypes_GetLine(int32_t nLvlTypeId) {
-    if (pTxtLvlTypes) {
-      return pTxtLvlTypes + nLvlTypeId;
+    if (!pTxtLvlTypes) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x251);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x251);
-    exit(-1);
+    return pTxtLvlTypes + nLvlTypeId;
     return pTxtLvlTypes + nLvlTypeId;
 }
 
@@ -1640,7 +1639,7 @@ void __fastcall TXT_AllocTxt_lvlprest(D2PoolManagerStrc * pMemory, int32_t nPara
     if (nParam) {
       size_t nAllocSize;
       nAllocSize = sgptDataTable->nTxtLvlPrestSize * 0x18;
-      pTxtLvlTbls = (D2LvlTblsTxt*)D2_ALLOC(nAllocSize);
+      pTxtLvlTbls = (D2LvlTblsTxt*)Fog::Memory::AllocClientMemory(nAllocSize, ".\\DATATBLS\\LvlTbls.cpp", 0x2a7, 0);
       memset(pTxtLvlTbls, 0, nAllocSize);
     }
 
@@ -1700,7 +1699,7 @@ void __stdcall TXT_LvlTbls_Free() {
         } while (i < sgptDataTable->nTxtLvlPrestSize * 6);
       }
 
-      D2_FREE(pMemoryToFree);
+      Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\DATATBLS\\LvlTbls.cpp", 0x2d2, 0);
       pTxtLvlTbls = 0;
     }
     if (!sgtDataTable.pTxtLvlPrest) {
@@ -1711,7 +1710,7 @@ void __stdcall TXT_LvlTbls_Free() {
 }
 
 D2LvlPrestTxt * __stdcall TXT_LvlPrest_GetLine(int32_t nLvlPrestId) {
-    if (!(-1 < nLvlPrestId && nLvlPrestId < sgptDataTable->nTxtLvlPrestSize)) {
+    if (!(0 <= nLvlPrestId && nLvlPrestId < sgptDataTable->nTxtLvlPrestSize)) {
       return nullptr;
     }
 
@@ -1742,37 +1741,37 @@ void __fastcall TXT_AllocTxt_lvlwarp(D2PoolManagerStrc * pMemory) {
     D2BinFieldInputStrc lvlwarp[13];
     int nTxtLvlWarpSize_lcl;
     lvlwarp[0].eType = FIELDTYPE_INT;
-    lvlwarp[1].eType = FIELDTYPE_INT;
-    lvlwarp[2].eType = FIELDTYPE_INT;
-    lvlwarp[3].eType = FIELDTYPE_INT;
-    lvlwarp[4].eType = FIELDTYPE_INT;
-    lvlwarp[5].eType = FIELDTYPE_INT;
-    lvlwarp[6].eType = FIELDTYPE_INT;
-    lvlwarp[7].eType = FIELDTYPE_INT;
-    lvlwarp[8].eType = FIELDTYPE_INT;
-    lvlwarp[9].eType = FIELDTYPE_INT;
-    lvlwarp[10].eType = FIELDTYPE_INT;
     lvlwarp[0].nSize = 0;
     lvlwarp[0].nOffset = 0;
     lvlwarp[0].fpLinker = 0;
+    lvlwarp[1].eType = FIELDTYPE_INT;
     lvlwarp[1].nSize = 0;
     lvlwarp[1].fpLinker = 0;
+    lvlwarp[2].eType = FIELDTYPE_INT;
     lvlwarp[2].nSize = 0;
     lvlwarp[2].fpLinker = 0;
+    lvlwarp[3].eType = FIELDTYPE_INT;
     lvlwarp[3].nSize = 0;
     lvlwarp[3].fpLinker = 0;
+    lvlwarp[4].eType = FIELDTYPE_INT;
     lvlwarp[4].nSize = 0;
     lvlwarp[4].fpLinker = 0;
+    lvlwarp[5].eType = FIELDTYPE_INT;
     lvlwarp[5].nSize = 0;
     lvlwarp[5].fpLinker = 0;
+    lvlwarp[6].eType = FIELDTYPE_INT;
     lvlwarp[6].nSize = 0;
     lvlwarp[6].fpLinker = 0;
+    lvlwarp[7].eType = FIELDTYPE_INT;
     lvlwarp[7].nSize = 0;
     lvlwarp[7].fpLinker = 0;
+    lvlwarp[8].eType = FIELDTYPE_INT;
     lvlwarp[8].nSize = 0;
     lvlwarp[8].fpLinker = 0;
+    lvlwarp[9].eType = FIELDTYPE_INT;
     lvlwarp[9].nSize = 0;
     lvlwarp[9].fpLinker = 0;
+    lvlwarp[10].eType = FIELDTYPE_INT;
     lvlwarp[10].nSize = 0;
     lvlwarp[10].fpLinker = 0;
     lvlwarp[0xb].fpLinker = 0;
@@ -2043,7 +2042,7 @@ void __fastcall TXT_AllocTxt_lvlsub(D2PoolManagerStrc * pMemory, int32_t nParam,
     if (0 < nTxtLvlSubSize) {
       size_t nAllocSize;
       do {
-        if (nMaxTypeId < pLvlSubTxt->Type) {
+        if (pLvlSubTxt->Type > nMaxTypeId) {
           nMaxTypeId = pLvlSubTxt->Type;
         }
 
@@ -2053,7 +2052,7 @@ void __fastcall TXT_AllocTxt_lvlsub(D2PoolManagerStrc * pMemory, int32_t nParam,
 
       if (nMaxTypeId) {
         nAllocSize = nMaxTypeId * 4 + 4;
-        gpnLvlSubTypeToIndex = (int*)D2_ALLOC_POOL(nullptr, nAllocSize);
+        gpnLvlSubTypeToIndex = (int*)Fog::Memory::AllocServerMemory(nullptr, nAllocSize, ".\\DATATBLS\\LvlTbls.cpp", 0x3a6, 0);
         memset(gpnLvlSubTypeToIndex, 0, nAllocSize);
         i = 0;
         nRowCount = nTxtLvlSubSize;
@@ -2122,7 +2121,7 @@ void __stdcall TXT_FreeTxt_LvlSub() {
         } while (i < nTxtLvlSubSize);
       }
 
-      D2_FREE(pMemoryToFree);
+      Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\DATATBLS\\LvlTbls.cpp", 0x3d8, 0);
       gpaDrlgLvlSubPresetFiles = 0;
     }
     if (sgpTxtLvlSub) {
@@ -2143,7 +2142,7 @@ void __stdcall TXT_FreeTxt_LvlSub() {
       return;
     }
 
-    D2_FREE_POOL(nullptr, gpnLvlSubTypeToIndex);
+    Fog::Memory::FreeServerMemory(nullptr, gpnLvlSubTypeToIndex, ".\\DATATBLS\\LvlTbls.cpp", 0x3e8, 0);
     gpnLvlSubTypeToIndex = 0;
 }
 
@@ -2155,12 +2154,12 @@ D2LvlSubTxt * __fastcall TXT_LvlSub_GetLineFromSubType(int32_t nSubType) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3f2);
       exit(-1);
     } else {
-      if (gpnLvlSubTypeToIndex) {
-        return sgpTxtLvlSub + gpnLvlSubTypeToIndex[nSubType];
+      if (!gpnLvlSubTypeToIndex) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3f3);
+        exit(-1);
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3f3);
-      exit(-1);
+      return sgpTxtLvlSub + gpnLvlSubTypeToIndex[nSubType];
     }
 }
 
@@ -2177,7 +2176,7 @@ void __stdcall TXT_LoadExpansionLvlTbls() {
     }
 
     size_t nAllocSize = nTxtLvlTypesSize << 0xc;
-    D2ExpansionLvlTblsTxt* pExpLvlTblsRow = (D2ExpansionLvlTblsTxt*)D2_ALLOC_POOL(nullptr, nAllocSize);
+    D2ExpansionLvlTblsTxt* pExpLvlTblsRow = (D2ExpansionLvlTblsTxt*)Fog::Memory::AllocServerMemory(nullptr, nAllocSize, ".\\DATATBLS\\LvlTbls.cpp", 0x413, 0);
     pExpansionLvlTbls = pExpLvlTblsRow;
     memset(pExpLvlTblsRow, 0, nAllocSize);
     BOOL bIsExpansion = Fog::D2CheckExpansionGame();
@@ -2216,11 +2215,11 @@ void __stdcall TXT_FreeExpansionLvlTbls() {
       return;
     }
 
-    D2_FREE_POOL(nullptr, pExpansionLvlTbls);
+    Fog::Memory::FreeServerMemory(nullptr, pExpansionLvlTbls, ".\\DATATBLS\\LvlTbls.cpp", 0x43a, 0);
 }
 
 // Looks up the automap level ID for a given level name string by linearly scanning a hardcoded name table (stride 0x10, ending before 0x6E7F8F). Returns the zero-based index of the matching entry, or 0 if the input starts with '0'. Halts with an internal error if the table end is exceeded.
-int32_t LVLTBLS_GetAutomapLevelId(char * szLevelName) {
+static int32_t LVLTBLS_GetAutomapLevelId(char * szLevelName) {
     // Static local variables (originally global data)
     static char gaAutomapLevelNames[36][16] = {
     {
@@ -2900,7 +2899,7 @@ int32_t LVLTBLS_GetAutomapLevelId(char * szLevelName) {
 }
 
 // Linear search through a hardcoded table of tile-name strings (e.g. "fl") to resolve an automap tile name to its integer tile ID. Returns 0 if the name starts with '0' or matches the first entry; halts with an internal error if the table end is overrun. In: szTileName (EDI). Out: matching tile ID or 0.
-int32_t LVLTBLS_GetAutomapTileId(char * szTileName) {
+static int32_t LVLTBLS_GetAutomapTileId(char * szTileName) {
     int nTileId = 0;
     if (*szTileName == '0') {
       return 0;
@@ -2944,8 +2943,7 @@ void __fastcall TXT_AllocTxt_automap(D2PoolManagerStrc * pMemory) {
     int nIndex;
     Seed::SEED_InitDefault(psDataTableSeed);
     D2SeedStrc* pSeed = psDataTableSeed;
-    psDataTableSeed->nSeedLow = 0;
-    pSeed->nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(pSeed, 0);
     automap[0].eType = FIELDTYPE_ASCII;
     automap[1].eType = FIELDTYPE_ASCII;
     automap[2].eType = FIELDTYPE_CHAR;
@@ -2997,7 +2995,7 @@ void __fastcall TXT_AllocTxt_automap(D2PoolManagerStrc * pMemory) {
     automap[9].nOffset = 0;
     automap[9].fpLinker = 0;
     D2AutomapTxt* pTxtAutomap = (D2AutomapTxt*)DataTbls::CompileTxt(pMemory, "automap", automap, &nTxtAutomapSize, 0x2c);
-    D2AutoMapLvlTbls* pAutoMapLvlTbls_lcl = (D2AutoMapLvlTbls*)D2_ALLOC_POOL(nullptr, nTxtAutomapSize << 5);
+    D2AutoMapLvlTbls* pAutoMapLvlTbls_lcl = (D2AutoMapLvlTbls*)Fog::Memory::AllocServerMemory(nullptr, nTxtAutomapSize << 5, ".\\DATATBLS\\LvlTbls.cpp", 0x4f7, 0);
     memset(pAutoMapLvlTbls_lcl, 0, nTxtAutomapSize << 5);
     int nTxtRow = 0;
     if (0 < nTxtAutomapSize) {
@@ -3048,7 +3046,7 @@ void __fastcall TXT_AllocTxt_automap(D2PoolManagerStrc * pMemory) {
       ((D2AutomapRelatedTxt*)(pMiddlePointer - 1))->nIndex = -1;
       *pMiddlePointer = -1;
       pMiddlePointer += 2;
-    } while ((int)pMiddlePointer < (uintptr_t)&gpaAutoMapRelated + 292);
+    } while ((int)pMiddlePointer < (int)((uintptr_t)&gpaAutoMapRelated + 292));
 
     int nAutoMapRow = 0;
     if (0 < nTxtAutomapSize) {
@@ -3070,12 +3068,12 @@ void __fastcall TXT_AllocTxt_automap(D2PoolManagerStrc * pMemory) {
         gpaAutoMapRelated[nIndex].nCount = nAutoMapRow;
       } while (nAutoMapRow < nTxtAutomapSize);
     }
-    if (nAutoMapRow <= nTxtAutomapSize) {
-      return;
+    if (!(nAutoMapRow <= nTxtAutomapSize)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), (int32_t)pTxtAutomap);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), (int32_t)pTxtAutomap);
-    exit(-1);
+    return;
 }
 
 int32_t __fastcall GetRandomCellNo(int32_t nLevelType, int32_t nOrientation, int32_t nIndex, int32_t nSubIndex) {
@@ -3115,7 +3113,7 @@ int32_t __fastcall GetRandomCellNo(int32_t nLevelType, int32_t nOrientation, int
 // @sourcefile .\DATATBLS\LvlTbls.cpp
 void __stdcall FreeAutoMapLvlTbls() {
     if (pAutoMapLvlTbls) {
-      D2_FREE_POOL(nullptr, pAutoMapLvlTbls);
+      Fog::Memory::FreeServerMemory(nullptr, pAutoMapLvlTbls, ".\\DATATBLS\\LvlTbls.cpp", 0x551, 0);
     }
 
     pAutoMapLvlTbls = 0;

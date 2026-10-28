@@ -59,11 +59,12 @@ HWND __stdcall WND_GetActiveWindow() {
 }
 
 // @blizzard SMsgPopRegisterState (SMSG.CPP)
-void __stdcall SMsgPopRegisterState(char * szText) {
+int __stdcall SMsgPopRegisterState(char * szText) {
     Source::SEVT::SEvtPopState((char*)0x534d5348, szText);
     Source::SEVT::SEvtPopState((char*)0x534d5349, szText);
     Source::SEVT::SEvtPopState((char*)0x534d534a, szText);
     Source::SEVT::SEvtPopState((char*)0x534d5347, szText);
+    return 1;
 }
 
 // @blizzard SMsgPushRegisterState (SMSG.CPP)
@@ -154,7 +155,7 @@ void __fastcall WND_InsertListNode(int * * pNode, int32_t nMode, int * * ppAncho
 
 uint32_t __fastcall WND_GetNodeMaskedOffset(int32_t pThis, int32_t pNode) {
     if (pNode) {
-      return (int)*(uint32_t*)(pNode + 4) < 1 ? 0 : *(uint32_t*)(pNode + 4);
+      return (int)*(uint32_t*)(pNode + 4) <= 0 ? 0 : *(uint32_t*)(pNode + 4);
     }
 
     pNode = pThis + 4;
@@ -289,13 +290,13 @@ void __stdcall SMSG_AddWindow(uint32_t hWnd) {
     StormWndRecStrc* pEntry;
     uint32_t nOffset;
     StormWndRecStrc* pRecord = (StormWndRecStrc*)SMem::SMemAlloc(0xc, s___AUWNDREC___00708850, -2, 8);
-    if (!pRecord) {
-      pEntry = 0;
-      pRecord = (StormWndRecStrc*)&gpWndTrackingListHead.pPrevLink;
-    } else {
+    if (pRecord) {
       pRecord->link.pPrevLink = 0;
       pRecord->link.pNext = 0;
       pEntry = pRecord;
+    } else {
+      pEntry = 0;
+      pRecord = (StormWndRecStrc*)&gpWndTrackingListHead.pPrevLink;
     }
 
     StormLinkStrc* nNext = pRecord->link.pPrevLink;
@@ -351,9 +352,9 @@ uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, StormWndRecStrc * 
 
 // @blizzard FindWindow (SMSG.CPP)
 uint32_t __fastcall SMSG_FindWindow(int32_t nHandle) {
-    uint32_t nRecord = gpWndTrackingListHead.pNext < 1 ? 0 : gpWndTrackingListHead.pNext;
+    uint32_t nRecord = gpWndTrackingListHead.pNext <= 0 ? 0 : gpWndTrackingListHead.pNext;
     while (true) {
-      if ((int)nRecord < 1) {
+      if ((int)nRecord <= 0) {
         return 0;
       }
       if (*(int*)(nRecord + 8) == nHandle) {
@@ -367,7 +368,7 @@ uint32_t __fastcall SMSG_FindWindow(int32_t nHandle) {
 }
 
 // @blizzard DeleteWindow (SMSG.CPP)
-void SMSG_DeleteWindow(uint32_t hWnd) {
+static void SMSG_DeleteWindow(uint32_t hWnd) {
     if (hWnd == gpActiveWindow) {
       gpActiveWindow = 0;
     }
@@ -385,7 +386,7 @@ void SMSG_DeleteWindow(uint32_t hWnd) {
 }
 
 // @blizzard InternalRegister (SMSG.CPP)
-void __stdcall SMSG_InternalRegister(uint32_t hWnd, int32_t pCallback, uint32_t dwEventTag, uint32_t dwContext) {
+static void __stdcall SMSG_InternalRegister(uint32_t hWnd, int32_t pCallback, uint32_t dwEventTag, uint32_t dwContext) {
     if (!pCallback) {
       Source::SErr::SErrSetLastError(0x57);
       return;
@@ -400,7 +401,7 @@ void __stdcall SMSG_InternalRegister(uint32_t hWnd, int32_t pCallback, uint32_t 
 }
 
 // @blizzard InternalUnregister (SMSG.CPP)
-void __stdcall SMSG_InternalUnregister(uint32_t nEventId, char * szText1, char * szText2, HWND hWnd) {
+static void __stdcall SMSG_InternalUnregister(uint32_t nEventId, char * szText1, char * szText2, HWND hWnd) {
     uint32_t nRecord = SMSG_FindWindow((int32_t)hWnd);
     if (!nRecord) {
       SMSG_AddWindow((uint32_t)hWnd);

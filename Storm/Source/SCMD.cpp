@@ -148,7 +148,7 @@ void __stdcall SCMD_ConvertString(char * str, D2UnitDataMonsterStrc * cmdDef, ui
 }
 
 // @blizzard GenerateError (SCMD.CPP)
-void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCallback, char * szItem) {
+static void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCallback, char * szItem) {
     UINT uID;
     int nMsgIdx;
     uint32_t sCallbackArgs[3];
@@ -158,17 +158,16 @@ void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCa
     if (errorCode == 0x6e) {
       nMsgIdx = 2;
       uID = 0x5203;
-    } else if (errorCode == 0x85100065) {
-      nMsgIdx = 0;
-      uID = 0x5201;
-    } else {
+    } else if (errorCode != 0x85100065) {
       if (errorCode != 0x8510006d) {
-        Fog::Debug::GuardStack();
         return;
       }
 
       nMsgIdx = 1;
       uID = 0x5202;
+    } else {
+      nMsgIdx = 0;
+      uID = 0x5201;
     }
 
     int cchBufferMax = 0x100;
@@ -195,11 +194,10 @@ void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCa
     sCallbackArgs[0] = errorCode;
     sCallbackArgs[1] = (uint32_t)szItem;
     (*pfnCallback)(sCallbackArgs);
-    Fog::Debug::GuardStack();
 }
 
 // @blizzard ProcessFile (SCMD.CPP)
-BOOL __stdcall SCMD_ProcessFile(char * filename, int * pnParam, uint32_t dwParam, pfnSCmdUnknownArgCallback pfnCallback, pfnSCmdErrorCallback pfnErrorCallback) {
+static BOOL __stdcall SCMD_ProcessFile(char * filename, int * pnParam, uint32_t dwParam, pfnSCmdUnknownArgCallback pfnCallback, pfnSCmdErrorCallback pfnErrorCallback) {
     DWORD dwBytesRead;
     HANDLE hFile = CreateFileA(filename, 0x80000000, 1, (LPSECURITY_ATTRIBUTES)0x0, 3, 0x8000000, (HANDLE)0x0);
     if (hFile == (HANDLE)-1) {
@@ -244,7 +242,7 @@ uint32_t SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset) {
     return pNode;
 }
 
-void SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd) {
+static void SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd) {
     uint32_t nNextOffset;
     ::SCMD* pPrevLink = (::SCMD*)pNode;
     if (!pNode) {
@@ -297,11 +295,11 @@ void SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd)
 
 uint32_t SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode) {
     if (pNode) {
-      return (int)*(uint32_t*)(pNode + 4) < 1 ? 0 : *(uint32_t*)(pNode + 4);
+      return (int)*(uint32_t*)(pNode + 4) <= 0 ? 0 : *(uint32_t*)(pNode + 4);
     }
 
     pNode = (::SCMD*)(pThis + 4);
-    return (int)*(uint32_t*)(pNode + 4) < 1 ? 0 : *(uint32_t*)(pNode + 4);
+    return (int)*(uint32_t*)(pNode + 4) <= 0 ? 0 : *(uint32_t*)(pNode + 4);
 }
 
 void SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode) {
@@ -329,7 +327,7 @@ void SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode) {
 }
 
 // @blizzard FindFlagDef (SCMD.CPP)
-StormCmdArgDefStrc * __stdcall SCMD_FindFlagDef(StormCmdArgDefStrc * cmdList, char * str, int minLen) {
+static StormCmdArgDefStrc * __stdcall SCMD_FindFlagDef(StormCmdArgDefStrc * cmdList, char * str, int minLen) {
     int nCmpResult;
     uint32_t pcStrEnd = SSTR::SStrLen(str);
     int uBestLen = minLen - 1;
@@ -507,13 +505,13 @@ BOOL __stdcall SCmdRegisterArgument(uint32_t dwFlags, uint32_t dwId, char * szTe
     if (!bValidArgType) {
       StormCmdArgDefStrc* pNewNode;
       pNewNode = (StormCmdArgDefStrc*)SMem::SMemAlloc(0x40, s___AUCMDDEF___0074c47c, -2, 8);
-      if (!pNewNode) {
-        pPrevLink = 0;
-        pNewNode = (StormCmdArgDefStrc*)&gStormCmdListHeadSlash.pPrevLink;
-      } else {
+      if (pNewNode) {
         pNewNode->pPrev = 0;
         pNewNode->pNext = 0;
         pPrevLink = pNewNode;
+      } else {
+        pPrevLink = 0;
+        pNewNode = (StormCmdArgDefStrc*)&gStormCmdListHeadSlash.pPrevLink;
       }
 
       pListHead = pNewNode->pPrev;
@@ -537,13 +535,13 @@ BOOL __stdcall SCmdRegisterArgument(uint32_t dwFlags, uint32_t dwId, char * szTe
       gStormCmdListHeadSlash.pPrevLink = (StormLinkStrc*)pNewNode;
     } else {
       ppBackslashCmdNode = (StormCmdArgDefStrc*)SMem::SMemAlloc(0x40, s___AUCMDDEF___0074c47c, -2, 8);
-      if (!ppBackslashCmdNode) {
-        pPrevLink = 0;
-        ppBackslashCmdNode = (StormCmdArgDefStrc*)&gStormCmdListHeadBackslash.pPrevLink;
-      } else {
+      if (ppBackslashCmdNode) {
         ppBackslashCmdNode->pPrev = 0;
         ppBackslashCmdNode->pNext = 0;
         pPrevLink = ppBackslashCmdNode;
+      } else {
+        pPrevLink = 0;
+        ppBackslashCmdNode = (StormCmdArgDefStrc*)&gStormCmdListHeadBackslash.pPrevLink;
       }
 
       pListHead = ppBackslashCmdNode->pPrev;
@@ -660,14 +658,14 @@ BOOL __fastcall SCMD_PerformConversion(char * str, StormCmdArgDefStrc * cmdDef, 
     uint32_t nArgTypeFlags = cmdDef->nArgTypeFlags & 0x30000;
     if (!nArgTypeFlags) {
       SCMD_ConvertBool((D2GameNpcStrc*)cmdDef, str, (uint32_t*)outConsumed);
-    } else if (nArgTypeFlags == 0x10000) {
-      SCMD_ConvertNumber((D2UnitDataMonsterStrc*)cmdDef, str, outConsumed);
-    } else {
+    } else if (nArgTypeFlags != 0x10000) {
       if (nArgTypeFlags != 0x20000) {
         return 0;
       }
 
       SCMD_ConvertString(str, (D2UnitDataMonsterStrc*)cmdDef, (uint32_t*)outConsumed);
+    } else {
+      SCMD_ConvertNumber((D2UnitDataMonsterStrc*)cmdDef, str, outConsumed);
     }
 
     cmdDef->bSupplied = 1;
@@ -724,7 +722,7 @@ BOOL __fastcall SCMD_PerformConversion(char * str, StormCmdArgDefStrc * cmdDef, 
 }
 
 // @blizzard ProcessCurrentFlag (SCMD.CPP)
-BOOL SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed) {
+static BOOL SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed) {
     int iVar1;
     int nArgConsumed;
     *outConsumed = 0;
@@ -747,7 +745,7 @@ BOOL SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsume
       }
 
       *outConsumed = iVar1;
-      cmdDef = (int*)SCMD_FindFlagDef((StormCmdArgDefStrc*)((int)((StormCmdArgDefStrc*)cmdDef)->pNext < 1 ? 0 : (uint32_t)((StormCmdArgDefStrc*)cmdDef)->pNext), (char*)(pCmdCtx + 1), (int)pCmdCtx[5]);
+      cmdDef = (int*)SCMD_FindFlagDef((StormCmdArgDefStrc*)((int)((StormCmdArgDefStrc*)cmdDef)->pNext <= 0 ? 0 : (uint32_t)((StormCmdArgDefStrc*)cmdDef)->pNext), (char*)(pCmdCtx + 1), (int)pCmdCtx[5]);
     } while (cmdDef);
 
     return 1;
@@ -790,7 +788,7 @@ BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * 
           uVar3 = uVar1 - 1;
           if ((int)(szMatchBuf + nMatchNameLen + uVar3) < 0x100) {
             SSTR::SStrCopy(szMatchBuf + (uVar1 - 1), szText, 0x100);
-            pCmdEntry = SCMD_FindFlagDef((StormCmdArgDefStrc*)(gStormCmdListHeadSlash.pNext < 1 ? 0 : gStormCmdListHeadSlash.pNext), szMatchBuf, 0);
+            pCmdEntry = SCMD_FindFlagDef((StormCmdArgDefStrc*)(gStormCmdListHeadSlash.pNext <= 0 ? 0 : gStormCmdListHeadSlash.pNext), szMatchBuf, 0);
             nMatchNameLen = nMatchLen;
             if (pCmdEntry) {
               piVar4 = (int*)pCmdEntry->nTextLen;
@@ -810,7 +808,6 @@ BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * 
           SCMD_GenerateError(0x85100065, pfnErrorCallback, szText);
         }
 
-        Fog::Debug::GuardStack();
         return 0;
       }
       szArgLine = szText + (int)piVar4;
@@ -828,7 +825,6 @@ BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * 
 
       BVar2 = SCMD_ProcessCurrentFlag(pCmdCtx, szArgLine, &nConsumed);
       if (!BVar2) {
-        Fog::Debug::GuardStack();
         return 0;
       }
 
@@ -836,12 +832,11 @@ BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * 
       cCurChar = *szText;
     }
 
-    Fog::Debug::GuardStack();
     return 1;
 }
 
 // @blizzard ProcessToken (SCMD.CPP)
-BOOL __fastcall SCMD_ProcessToken(uint32_t * cmdDefPtr, char * str, int * outPtr, int noFileExpand, pfnSCmdUnknownArgCallback unknownCb, pfnSCmdErrorCallback errorCb) {
+static BOOL __fastcall SCMD_ProcessToken(uint32_t * cmdDefPtr, char * str, int * outPtr, int noFileExpand, pfnSCmdUnknownArgCallback unknownCb, pfnSCmdErrorCallback errorCb) {
     BOOL bParseResult;
     if (*str == '@' && !noFileExpand) {
       bParseResult = SCMD_ProcessFile(str + 1, outPtr, (uint32_t)cmdDefPtr, unknownCb, errorCb);
@@ -858,7 +853,13 @@ BOOL __fastcall SCMD_ProcessToken(uint32_t * cmdDefPtr, char * str, int * outPtr
       bParseResult = SCMD_ProcessCurrentFlag((int**)outPtr, str, (int*)&errorCb);
       return bParseResult;
     }
-    if (!(StormCmdArgDefStrc*)*cmdDefPtr) {
+    if (!(!(StormCmdArgDefStrc*)*cmdDefPtr)) {
+      bParseResult = SCMD_PerformConversion(str, (StormCmdArgDefStrc*)*cmdDefPtr, (int*)&errorCb);
+      if (bParseResult) {
+        *cmdDefPtr = (int)*(uint32_t*)(*cmdDefPtr + 4) <= 0 ? 0 : *(uint32_t*)(*cmdDefPtr + 4);
+        return 1;
+      }
+    } else {
       int iVar1;
       if (unknownCb) {
         iVar1 = (*unknownCb)(str);
@@ -866,12 +867,6 @@ BOOL __fastcall SCMD_ProcessToken(uint32_t * cmdDefPtr, char * str, int * outPtr
       }
       if (errorCb) {
         SCMD_GenerateError(0x85100065, errorCb, str);
-      }
-    } else {
-      bParseResult = SCMD_PerformConversion(str, (StormCmdArgDefStrc*)*cmdDefPtr, (int*)&errorCb);
-      if (bParseResult) {
-        *cmdDefPtr = (int)*(uint32_t*)(*cmdDefPtr + 4) < 1 ? 0 : *(uint32_t*)(*cmdDefPtr + 4);
-        return 1;
       }
     }
 
@@ -896,7 +891,7 @@ uint32_t __stdcall SCmdCheckId(int nCmdId) {
       }
 
       nListIndex++;
-    } while (nListIndex < 2);
+    } while (nListIndex <= 1);
 
     return 0;
 }
@@ -925,7 +920,7 @@ uint32_t __stdcall SCmdDestroy() {
       }
 
       nListIndex++;
-    } while (nListIndex < 2);
+    } while (nListIndex <= 1);
 
     SCMD_FreeAllNodes(&gStormCmdListHeadBackslash);
     SCMD_FreeAllNodes(&gStormCmdListHeadSlash);
@@ -955,7 +950,7 @@ int __stdcall SCmdGetNum(int nCmdId) {
       }
 
       nListIndex++;
-    } while (nListIndex < 2);
+    } while (nListIndex <= 1);
 
     return 0;
 }
@@ -996,7 +991,7 @@ uint32_t __stdcall SCmdGetString(int dwCmdId, char * szText, int dwBufferSize) {
       }
 
       nListIndex++;
-    } while (nListIndex < 2);
+    } while (nListIndex <= 1);
 
     return 0;
 }
@@ -1056,7 +1051,6 @@ BOOL __fastcall SCMD_ProcessString(uint32_t * ppszCursor, int * pCmdCtx, uint32_
     }
 
     cCursorChar = *(char*)*ppszCursor;
-    Fog::Debug::GuardStack();
     return (uint32_t)(cCursorChar == '\0');
 }
 
@@ -1110,7 +1104,7 @@ void __stdcall SCmdProcess(char * szCommandLine, int bSkipFirstToken, pfnSCmdUnk
             bVar1 = false;
           }
 
-          if (*(int*)(nCmdNode + 4) < 1) {
+          if (*(int*)(nCmdNode + 4) <= 0) {
             break;
           }
 
@@ -1123,12 +1117,10 @@ void __stdcall SCmdProcess(char * szCommandLine, int bSkipFirstToken, pfnSCmdUnk
         if (pfnErrorCallback && !bVar1) {
           SCMD_GenerateError(0x8510006d, pfnErrorCallback, "");
         }
-        Fog::Debug::GuardStack();
         return;
       }
     }
 
-    Fog::Debug::GuardStack();
 }
 
 // Processes the process's own command line: GetCommandLineA() then SCmdProcess(cmdline, 1, arg1, arg2).

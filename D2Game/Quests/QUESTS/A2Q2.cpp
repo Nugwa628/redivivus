@@ -114,7 +114,7 @@ bool __fastcall Q10_IsRadamentCompleted(::SGAMEDATA * pGame) {
 // Returns 1 (quest "live"/should be shown) when NOT yet Completed and NOT
 // FinishedInPreviousGame, OR when JustCompleted/CannotCompleteQuestInGame is set;
 // returns 0 once fully closed out. Drives whether to push a quest-log update to client.
-BOOL __stdcall Q10_CheckHoradricStaffState(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static BOOL __stdcall Q10_CheckHoradricStaffState(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
     D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
@@ -141,13 +141,14 @@ BOOL __stdcall Q10_CheckHoradricStaffState(D2UnitStrc * pUnit, ::SGAMEDATA * pGa
 // Q10_NotifyHoradricStaffActive. If Q10_CheckHoradricStaffState says the quest is
 // live, send quest-log update (msg 9 = The Horadric Staff) to the player. Pure
 // notification wrapper; no state changes.
-void __stdcall Q10_NotifyHoradricStaffActive(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
+static int __stdcall Q10_NotifyHoradricStaffActive(D2UnitStrc * pUnit, ::SGAMEDATA * pGame) {
     BOOL bIsQuestLive = Q10_CheckHoradricStaffState(pUnit, pGame);
     if (!bIsQuestLive) {
-      return;
+      return 0;
     }
 
     QUEST_SendQuestUpdateToPlayer(pGame, pUnit, 9);
+    return 0;
 }
 
 // Q10_CheckQuestItemsForDialog. Inspects which quest items the player holds and
@@ -397,7 +398,9 @@ void __fastcall Q10_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_RewardAwaits);
-    if (!bIsCompleted) {
+    if (bIsCompleted) {
+      nGossipMsgIndex = 4;
+    } else {
       bool bHasQuestItem;
       bHasQuestItem = (bool)Q10_CheckQuestItemsForDialog(pQuestArgs->pPlayer, pQuestData, &byItemDialogMsg);
       if (!bHasQuestItem || byItemDialogMsg == 0xff) {
@@ -408,7 +411,9 @@ void __fastcall Q10_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         }
 
         bIsCompleted = QUEST_HasPlayerParticipated(pQuestData, nPlayerGUID);
-        if (!bIsCompleted) {
+        if (bIsCompleted) {
+          nGossipMsgIndex = 5;
+        } else {
           if (bRewardAwaits == 1) {
             if (!bIsJustCompleted) {
               return;
@@ -427,14 +432,10 @@ void __fastcall Q10_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
           }
 
           nGossipMsgIndex = (uint32_t)byItemDialogMsg;
-        } else {
-          nGossipMsgIndex = 5;
         }
       } else {
         nGossipMsgIndex = (uint32_t)byItemDialogMsg;
       }
-    } else {
-      nGossipMsgIndex = 4;
     }
 
     AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, 0xf4, nGossipMsgIndex);
@@ -481,9 +482,7 @@ void __fastcall Q10_Callback04_ItemPickedUp(D2QuestDataStrc * pQuestData, D2Ques
     }
 
     int iVar1 = pItemTxt->dwCode;
-    if (iVar1 == 0x20317274 && !bStep0x03Set) {
-      pQuestData->nStateFlagPrev = 1;
-    } else {
+    if (!(iVar1 == 0x20317274 && !bStep0x03Set)) {
       if (iVar1 != 0x20706976 && iVar1 != 0x20786f62) {
         if (iVar1 != 0x2066736d) {
           return;
@@ -503,6 +502,8 @@ void __fastcall Q10_Callback04_ItemPickedUp(D2QuestDataStrc * pQuestData, D2Ques
       } else {
         pQuestData->nStateFlagPrev = 2;
       }
+    } else {
+      pQuestData->nStateFlagPrev = 1;
     }
 
     D2UnitStrc* pUnit = pQuestArgs->pPlayer;
@@ -982,7 +983,7 @@ void __fastcall Q10_Callback09_PlayerDroppedWithQuestItem(D2QuestDataStrc * pQue
     eD2HostGameType eGameType;
     D2QuestDataA2Q2Strc* pA2Q2Data = pQuestData->pQuestSpecificData.pA2Q2;
     uint32_t dwItemCode = D2Common::ITEMS::Items::ITEM_GetItemsTxt_szCode(pQuestArgs->pTarget);
-    if (dwItemCode < 0x20747369) {
+    if (dwItemCode <= 0x20747368) {
       switch (dwItemCode) {
         case 0x20747368:
           {
@@ -1056,7 +1057,7 @@ void __fastcall Q10_InitData(D2QuestDataStrc * pQuestData) {
     memset(&pQuestData->sStateFunctions, 0, 0x3c);
     pQuestData->pNpcMessages = A2Q2::aNpcGossipData;
     pQuestData->bIsActive = true;
-    D2QuestDataA2Q2Strc* pQuestSpecificData = D2_NEW_POOL(pQuestData->pGame->pMemoryPool, D2QuestDataA2Q2Strc);
+    D2QuestDataA2Q2Strc* pQuestSpecificData = ((D2QuestDataA2Q2Strc*)Fog::Memory::AllocServerMemory(pQuestData->pGame->pMemoryPool, sizeof(D2QuestDataA2Q2Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q2.cpp", 0x3ed, 0));
     pQuestData->pQuestSpecificData.pA2Q2 = pQuestSpecificData;
     pQuestData->nQuestIdReal = QUEST_TheHoradricStaff;
     pQuestData->fpStatusFilter = Q10_StatusFilter;

@@ -40,11 +40,6 @@ void __stdcall SBIG_Accumulator_MulAndAdd(uint32_t * pnParam, uint32_t nAddend);
 // @caution THE TAIL IS ACTIVELY MISLEADING and pass 6 deliberately did NOT rename it. It computes no offset; it assembles a 64-bit value from a high and a low word, MAKE64(hi, lo). No oracle counterpart exists. Read the body before trusting this name.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer, not a bitset. Chunk cap = 256/sizeof(element).
 int64_t __stdcall SBIG_Accumulator_ComputeOffset(uint32_t nMultiplicand, uint32_t nAddend);
-// @was SBIG_DecodeVariableLengthInt (pass 6, 2026.08.28)
-// @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
-// @oracle-method PLAUSIBLE, and the strongest of the plausibles. It is byte-for-byte the loop the oracle inlines in .FromStream__FR9BigBufferPCvUiPUi @1009b620, and it is the exact inverse of BigBuffer_EncodeDataBytes 00421bd0, which pass 5 confirmed against .EncodeDataBytes__FR29TSGrowableArray<Uc,8TSCD<Uc>>Ui @1009b8a0. The oracle has no separate DecodeDataBytes symbol, so the name is the inferred counterpart of a confirmed one rather than a read export.
-// @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void BigBuffer_DecodeDataBytes(uint32_t * pnReadPos, uint8_t * pBuffer, uint32_t * pnValue, uint32_t nBufferLen);
 // @was SBIG_DynArray_GetElementPtr (pass 6, 2026.08.28)
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
 // @oracle-method CONFIRMED. Body is 'return this->m_data + nIndex*4', identical to the oracle's .__vc__15TSBaseArray<Ui>FUi @1009b390. operator[](Ui) on the dword element array.
@@ -140,11 +135,6 @@ BOOL __fastcall SBIG_BigBuffer_IsLowestBitClear(struct BigBuffer * pBitSet);
 // @oracle-method NOUN CORRECTION ONLY. Inlined on the oracle side. Tail unchanged and unverified.
 // @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
 int32_t __stdcall SBIG_BigBuffer_FindLowestBit(struct BigBuffer * pBitSet);
-// @was SBIG_BitSet_GetFirstWord (pass 6, 2026.08.28)
-// @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
-// @oracle-method NOUN CORRECTION ONLY. Tail unchanged and unverified.
-// @struct The container header is {+0 m_alloc, +4 m_count, +8 m_data, +0xc m_chunk}. BigBuffer extends it with {+0x10 m_offset}, proven by the oracle's .Count__9BigBuffer being m_count - m_offset. The Ghidra type still called D2WndBitSetStrc IS BigBuffer; it is not a bitset. Chunk cap = 256/sizeof(element).
-void SBIG_BigBuffer_GetFirstWord(uint32_t dwUnused, uint32_t * pOutWord, struct BigBuffer * pBitSet);
 // @caution Its only two callers are Fog::SHA::SHA1_ApplyBigInt and Fog::SHA::SHA1_CompareBigInt, not SBig. It is a 9-byte thunk onto SBIG_BitSet_Compare, so it was moved with the rest, but it may in truth be a COMDAT of the Fog SHA translation unit. Unresolved.
 // @was SBIG_BitSet_CompareWrapper (pass 6, 2026.08.28)
 // @module-history Pass 5 established the module: this function sits in the contiguous COMDAT run 00420eb0-00421d80 that SBig.cpp instantiates, and it was moved out of D2Client::WindowHandle into Storm::Source::SBig with a mechanical WND_ -> SBIG_ prefix swap, its descriptive tail left unverified. Pass 6 bound the tail.
@@ -266,55 +256,10 @@ void __fastcall SBIG_GrowToIndexNoZero(int32_t nIndex, struct BigBuffer * pDword
 void __fastcall SBIG_SetOffset(int32_t nOffset, struct BigBuffer * pBigNum);
 void __fastcall SBIG_TrimLeadingZeros(struct BigBuffer * pDwordArray);
 void * __fastcall SBIG_CopyAssign(void * pSource, uint32_t * pDest);
-// @renamed-from SBIG_AddValueWithCarry (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Add__FR9BigBufferRC9BigBufferUi @100a0300 -- the scalar overload: sole target of SBigInc, and .FindPrime / .FromStr call it exactly where 1.14d FindPrime / FromStr call this. Was SBIG_AddValueWithCarry.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Add_Ui(uint32_t nCarry, struct BigBuffer * pSource, struct BigBuffer * pDest);
-// @renamed-from SBIG_Add (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Add__FR9BigBufferRC9BigBufferRC9BigBuffer @100a01a0 -- sole target of SBigAdd's forwarder in both builds; 3 buffer args.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Add(struct BigBuffer * pSourceA, struct BigBuffer * pSourceB, struct BigBuffer * pDest);
-// @renamed-from SBIG_BitwiseAnd (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .And__FR9BigBufferRC9BigBufferRC9BigBuffer @100a0070 -- sole target of SBigAnd's forwarder.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_And(struct BigBuffer * pSourceA, struct BigBuffer * pSourceB, struct BigBuffer * pDest);
-// Compare big integer array against scalar value
-// @renamed-from SBIG_CompareValue (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Compare__FRC9BigBufferUi @1009ff50 -- the only other callee of .ToStr besides .Div_Ux, and 1.14d ToStr calls exactly this pair. Compares a BigBuffer against a scalar. Was SBIG_CompareValue.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-int32_t __stdcall BigBuffer_Compare_Ui(uint32_t nValue, struct BigBuffer * pBigIntArray);
 // @renamed-from SBIG_DivModValue64 (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Div__FR9BigBufferPUiRC9BigBufferUx @1009fdd0 -- scalar divide with a uint* remainder out-param and a 64-bit divisor; called by .ToStr, .IsPrime and .Div in the PPC exactly where 1.14d ToStr/IsPrime/Div call this. Was SBIG_DivModValue64.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
 void __stdcall BigBuffer_Div_Ux(uint32_t * pRemainderOut, struct BigBuffer * pDividend, uint32_t nDivisorLo, uint32_t nDivisorHi, struct BigBuffer * pQuotient);
-// @renamed-from SBIG_IsOdd (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .IsOdd__FRC9BigBuffer @1009e4d0 -- sole target of SBigIsOdd's forwarder.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void BigBuffer_IsOdd(struct BigBuffer * pBignum);
-// @renamed-from SBIG_IsOne (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .IsOne__FRC9BigBuffer @1009e3f0 -- sole target of SBigIsOne's forwarder; also called by .IsPrime and .FindPrime where 1.14d does the same.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-BOOL BigBuffer_IsOne(struct BigBuffer * pBignum);
-// @renamed-from SBIG_IsZero (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .IsZero__FRC9BigBuffer @1009db10 -- sole target of SBigIsZero's forwarder; also called by .Gcd, .InvMod and .IsPrime where 1.14d does the same.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-uint32_t BigBuffer_IsZero(struct BigBuffer * pBignum);
-// @renamed-from SBIG_MulValue64 (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Mul__FR9BigBufferRC9BigBufferUx @1009d9f0 -- scalar overload with a 64-bit multiplier; called by .FromStr and .Div where 1.14d calls this. Was SBIG_MulValue64.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Mul_Ux(struct BigBuffer * pSource, uint32_t nMultiplierLo, uint32_t nMultiplierHi, struct BigBuffer * pDest);
-// @renamed-from SBIG_BitwiseNot (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Not__FR9BigBufferRC9BigBuffer @1009d620 -- sole target of SBigNot's forwarder; 2 args.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Not(struct BigBuffer * pSource, struct BigBuffer * pDest);
-// @renamed-from SBIG_BitwiseOr (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Or__FR9BigBufferRC9BigBufferRC9BigBuffer @1009d4f0 -- sole target of SBigOr's forwarder.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Or(struct BigBuffer * pLhs, struct BigBuffer * pRhs, struct BigBuffer * pResult);
-// @renamed-from SBIG_SetBit (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Set2Exp__FR9BigBufferUi @1009c730 -- sole target of SBigSet2Exp's forwarder; also called by .FindPrime where 1.14d FindPrime calls this. Sets the value to 2^n. Was SBIG_SetBit.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Set2Exp(uint32_t nBitPos, struct BigBuffer * pResult);
 // @renamed-from SBIG_SetToOne (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .SetOne__FR9BigBuffer @1009c6b0 -- sole target of SBigSetOne's forwarder; also called by .InvMod and .PowMod where 1.14d does the same. Was SBIG_SetToOne.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
@@ -323,54 +268,14 @@ void BigBuffer_SetOne(struct BigBuffer * pResult);
 // @oracle Mac PPC 1.10b Storm mangled symbol .SetZero__FR9BigBuffer @1009c660 -- sole target of SBigSetZero's forwarder; PPC body is one SetCount(0). Also called by .InvMod, .FromStr and .Div where 1.14d calls this. Was SBIG_ShrinkToOffset.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
 void BigBuffer_SetZero(struct BigBuffer * pResult);
-// @renamed-from SBIG_ShiftLeft (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Shl__FR9BigBufferRC9BigBufferUi @1009c3f0 -- sole target of SBigShl's forwarder; also called by .Rand and .Div.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Shl(struct BigBuffer * pSrc, struct BigBuffer * pResult, uint32_t nShiftBits);
 // @renamed-from SBIG_ShiftRight (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Shr__FR9BigBufferRC9BigBufferUi @1009c2c0 -- sole target of SBigShr's forwarder; also called by .Rand, .Div and .IsPrime.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
 void __stdcall BigBuffer_Shr(struct BigBuffer * pSrc, struct BigBuffer * pResult, uint32_t nShiftBits);
-// @renamed-from SBIG_Negate (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Sub__FR9BigBufferRC9BigBufferUi @1009bed0 -- the scalar overload: sole target of SBigDec, and .IsPrime / .FindPrime call it exactly where 1.14d calls this (the n-1 step). It does not negate. Was SBIG_Negate.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Sub_Ui(struct BigBuffer * pSrc, struct BigBuffer * pResult, uint32_t nSubtrahend);
-// @renamed-from SBIG_Sub (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Sub__FR9BigBufferRC9BigBufferRC9BigBuffer @1009bd70 -- sole target of SBigSub's forwarder; also called by .Div, .InvMod and .FindPrime.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Sub(struct BigBuffer * pLhs, struct BigBuffer * pRhs, struct BigBuffer * pResult);
-// @renamed-from SBIG_BitwiseXor (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Xor__FR9BigBufferRC9BigBufferRC9BigBuffer @1009bc40 -- sole target of SBigXor's forwarder.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Xor(struct BigBuffer * pLhs, struct BigBuffer * pRhs, struct BigBuffer * pResult);
-// @renamed-from SBIG_ImportBytes (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .FromBinary__FR9BigBufferPCvUi @1009b7b0 -- sole target of SBigFromBinary's forwarder; also the sole bignum callee of .FromStream, matching 1.14d FromStream. Was SBIG_ImportBytes.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_FromBinary(void * pSrcBytes, uint32_t nByteCount, struct BigBuffer * pResult);
 // @renamed-from SBIG_ImportDecimalString (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .FromStr__FR9BigBufferPCc @1009b700 -- sole target of SBigFromStr's forwarder; callee set {SetZero, Mul_Ux, Add_Ui} matches .FromStr exactly - a decimal-string accumulator. Was SBIG_ImportDecimalString.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
 void BigBuffer_FromStr(struct BigBuffer * pResult, char * szText);
-// @renamed-from SBIG_ImportVarint (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .FromStream__FR9BigBufferPCvUiPUi @1009b620 -- 4 args with a bytes-consumed out-param; decodes the length prefix then calls FromBinary, exactly as .FromStream does. Was SBIG_ImportVarint.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_FromStream(struct BigBuffer * pResult, int * pnBytesRead, uint8_t * pSrc, uint32_t nMaxLen);
-// @renamed-from SBIG_SetValue (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .FromUnsigned__FR9BigBufferUi @1009b080 -- sole target of SBigFromUnsigned's forwarder; also called by .IsPrime where 1.14d IsPrime calls this. Was SBIG_SetValue.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_FromUnsigned(uint32_t dwValue, struct BigBuffer * pResult);
-// @renamed-from SBIG_ExportBytes (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .ToBinary__FR29TSGrowableArray<Uc,8TSCD<Uc>>RC9BigBuffer @1009ae00 -- the target of all three SBigToBinary* forms; like .ToBinary its only callee is ToBinaryAppend. Was SBIG_ExportBytes.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void BigBuffer_ToBinary(struct BigBuffer * pBigNum, struct TSGrowableArray_Uc * pOutBuffer);
-// @renamed-from SBIG_ExportDecimalString (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .ToStr__FR29TSGrowableArray<Uc,8TSCD<Uc>>RC9BigBufferR8BigStack @1009a330 -- the target of all three SBigToStr* forms; callee set {Div_Ux, Compare_Ui} matches .ToStr exactly. Was SBIG_ExportDecimalString.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_ToStr(struct BigStack * pStack, struct BigBuffer * pValue, struct TSGrowableArray_Uc * pOutBuffer);
-// @renamed-from SBIG_ExportVarint (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .ToStream__FR29TSGrowableArray<Uc,8TSCD<Uc>>RC9BigBuffer @1009a290 -- the target of all three SBigToStream* forms; callee set {ToBinary, EncodeDataBytes, ToBinaryAppend} matches .ToStream exactly. Was SBIG_ExportVarint.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void BigBuffer_ToStream(struct TSGrowableArray_Uc * pOutBuffer, struct BigBuffer * pSrcBignum);
 // @renamed-from SBIG_AddWrapper (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm -- PPC export vector SBigAdd -> 1009a250, 64B thunk, single bl .Add__FR9BigBufferRC9BigBufferRC9BigBuffer. 1.14d: 3-arg forwarder onto BigBuffer_Add 00422300.
 // @oracle-note Real Storm export name, present in the 337-name TVector export table at 100cbc34-100ce064.
@@ -500,11 +405,6 @@ void __stdcall SBigToStreamPtr(struct BigData * pBigData, uint8_t * * ppBufferOu
 // @oracle-note Real Storm export name, present in the 337-name TVector export table at 100cbc34-100ce064.
 void __stdcall SBigXor(struct BigData * pResult, struct BigData * pBigA, struct BigData * pBigB);
 void __fastcall SBIG_CopyBigNumToTemp(struct BigStack * pStack, struct BigBuffer * pDest, struct BigBuffer * pSrc);
-// Big integer division with modulo: divides pDividend by pDivisor, writing quotient and remainder.
-// @renamed-from SBIG_DivMod (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .Div__FR9BigBufferR9BigBufferRC9BigBufferRC9BigBufferR8BigStack @1009f6a0 -- 5 args (quot, rem, a, b, stack); callee set {SetZero, Div_Ux, Shl, 64-bit divide, Mul_Ux, Sub, Shr} matches .Div one for one. Was SBIG_DivMod.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_Div(struct BigBuffer * pQuotient, struct BigBuffer * pRemainder, struct BigBuffer * pDivisor, struct BigStack * pStack, struct BigBuffer * pDividend);
 // @renamed-from SBIG_GCD (2026-08-28, Storm PowerPC oracle pass 4)
 // @oracle Mac PPC 1.10b Storm mangled symbol .Gcd__FR9BigBufferRC9BigBufferRC9BigBufferR8BigStack @1009ec60 -- 4 args; callee set {Div, IsZero} matches .Gcd exactly. Was SBIG_GCD.
 // @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
@@ -565,10 +465,6 @@ void __stdcall SBigRand(struct BigData * pnParam1, struct BigData * pnParam2, st
 // @oracle Mac PPC 1.10b Storm -- PPC SBigSquare -> 100992e0, single bl .Square__FR9BigBufferRC9BigBufferR8BigStack (3 args -> 2-arg C API). 1.14d: 2-arg forwarder onto BigBuffer_Square 00424b00, which like .Square calls no other bignum routine.
 // @oracle-note Real Storm export name, present in the 337-name TVector export table at 100cbc34-100ce064.
 void __stdcall SBigSquare(struct BigData * pResult, struct BigData * pBigSrc);
-// @renamed-from SBIG_ModInverse (2026-08-28, Storm PowerPC oracle pass 4)
-// @oracle Mac PPC 1.10b Storm mangled symbol .InvMod__FR9BigBufferRC9BigBufferRC9BigBufferR8BigStack @1009e5b0 -- 4 args; callee set {SetOne, SetZero, Div, Mul, Add, IsZero, Sub} matches .InvMod exactly. Was SBIG_ModInverse.
-// @oracle-note Internal, NOT an export: absent from the 337-name export table by design. The real symbol is the free function without a class qualifier; the BigBuffer_ prefix is a local disambiguator, and _Ui / _Ux are the MWCC mangling tokens for the scalar overloads.
-void __stdcall BigBuffer_InvMod(struct BigBuffer * pnResult, struct BigBuffer * pnModulus, struct BigStack * pStack, struct BigBuffer * pnInput);
 // PowMod: *pnResult = pnBase ^ pnExponent mod pnModulus over BigBuffer digits, scanning the exponent two bits at a time (square twice, then multiply by apBasePowers[bits] = base, base^2 or base^3) with BigBuffer_MulMod/Square/Div on pStack's scratch buffers.
 // Provenance: 1.14d asm 00425150; PPC Storm 1.10b symbol PowMod__FR9BigBufferRC9BigBufferRC9BigBufferRC9BigBufferR8BigStack (internal, not an export).
 void __stdcall BigBuffer_PowMod(struct BigBuffer * pnResult, struct BigBuffer * pnBase, struct BigBuffer * pnExponent, struct BigBuffer * pnModulus, struct BigStack * pStack);

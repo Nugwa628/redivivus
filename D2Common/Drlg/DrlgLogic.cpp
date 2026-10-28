@@ -78,11 +78,11 @@ void __fastcall FreeDrlgCoordList(D2RoomExStrc * pRoomEx) {
     while (pRoomCoordList) {
       D2RoomCoordListStrc* pNextCoord;
       pNextCoord = pRoomCoordList->pNext;
-      D2_FREE_POOL(pMemory, pRoomCoordList);
+      Fog::Memory::FreeServerMemory(pMemory, pRoomCoordList, ".\\DRLG\\DrlgLogic.cpp", 0x101, 0);
       pRoomCoordList = pNextCoord;
     }
 
-    D2_FREE_POOL(pMemory, pDrlgCoordList);
+    Fog::Memory::FreeServerMemory(pMemory, pDrlgCoordList, ".\\DRLG\\DrlgLogic.cpp", 0x106, 0);
     pRoomEx->pDrlgCoordList = 0;
 }
 
@@ -129,7 +129,7 @@ void __fastcall InitializeDrlgCoordList(D2RoomExStrc * pRoomEx, int nMatchIndex,
 }
 
 // Sets grid flag 8 (door) for tiles with flag 4 and no orientation.
-void __stdcall DRLGLOGIC_SetGridDoorFlags(D2DrlgGridStrc * pGrid, D2RoomExStrc * pRoomEx) {
+static void __stdcall DRLGLOGIC_SetGridDoorFlags(D2DrlgGridStrc * pGrid, D2RoomExStrc * pRoomEx) {
     D2DrlgTileDataStrc* pTileData;
     D2DrlgTileGridStrc* pRoomTiles = pRoomEx->pRoomTiles;
     uint32_t nTileIndex = 0;
@@ -259,7 +259,7 @@ void __stdcall DRLGLOGIC_BuildCoordRegions(D2RoomExStrc * pRoomEx, D2DrlgCoordLi
           nOrientFlagsLow = nOrientFlags & 0xfffffff;
           nRowY = DrlgGrid::GetGridFlags(&pCoordList->sCoordIndexGrid, iCellX, nCellY);
           if (!nRowY) {
-            _Dst = D2_NEW_POOL(pMemory, D2RoomCoordListStrc);
+            _Dst = ((D2RoomCoordListStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2RoomCoordListStrc), ".\\DRLG\\DrlgLogic.cpp", 0x201, 0));
             memset(_Dst, 0, 0x30);
             _Dst->nIndex = nOrientFlagsLow;
             _Dst->bNode = (uint32_t)((nOrientFlags & 0x20000000) == 0x20000000);
@@ -290,7 +290,7 @@ void __stdcall DRLGLOGIC_BuildCoordRegions(D2RoomExStrc * pRoomEx, D2DrlgCoordLi
             bRowBreak = false;
             nRowY = nCellY;
             do {
-              if (nGridHeight <= nRowY) {
+              if (nRowY >= nGridHeight) {
                 break;
               }
 
@@ -338,15 +338,15 @@ void __stdcall DRLGLOGIC_BuildCoordRegions(D2RoomExStrc * pRoomEx, D2DrlgCoordLi
             _Dst->pRect.right = nColX;
             _Dst->pRect.bottom = nRowY;
             nRowY = pRoomEx->sCoords.WorldPosition.x + pRoomEx->sCoords.WorldSize.x;
-            if (nRowY <= _Dst->pRect.right) {
+            if (_Dst->pRect.right >= nRowY) {
               _Dst->pRect.right = nRowY;
             }
 
             nRowY = pRoomEx->sCoords.WorldSize.y + pRoomEx->sCoords.WorldPosition.y;
-            if (nRowY <= _Dst->pRect.bottom) {
+            if (_Dst->pRect.bottom >= nRowY) {
               _Dst->pRect.bottom = nRowY;
             }
-            if (pRoomEx->sCoords.WorldSize.x + pRoomEx->sCoords.WorldPosition.x <= _Dst->pRect.left || pRoomEx->sCoords.WorldPosition.y + pRoomEx->sCoords.WorldSize.y <= _Dst->pRect.top) {
+            if (_Dst->pRect.left >= pRoomEx->sCoords.WorldSize.x + pRoomEx->sCoords.WorldPosition.x || _Dst->pRect.top >= pRoomEx->sCoords.WorldPosition.y + pRoomEx->sCoords.WorldSize.y) {
               _Dst->pRect.left = 0;
               _Dst->pRect.top = 0;
               _Dst->pRect.right = 0;
@@ -367,13 +367,13 @@ void __fastcall AllocDrlgCoordList(D2RoomExStrc * pRoomEx) {
     D2RoomCoordListStrc* pCoord;
     D2DrlgLevelStrc* pLevel = pRoomEx->pLevel;
     D2PoolManagerStrc* pMemory = pLevel->pDrlg->pMemoryPool;
-    D2DrlgCoordListStrc* pCoordList = D2_NEW_POOL(pMemory, D2DrlgCoordListStrc);
+    D2DrlgCoordListStrc* pCoordList = ((D2DrlgCoordListStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2DrlgCoordListStrc), ".\\DRLG\\DrlgLogic.cpp", 0xdf, 0));
     memset(pCoordList, 0, 0x34);
     pRoomEx->pDrlgCoordList = pCoordList;
     pCoordList->eFlags |= 1;
     pLevel->nLastRoomExCoordsIndex = 1;
     pCoordList->nListSize = 1;
-    pCoord = D2_NEW_POOL(pMemory, D2RoomCoordListStrc);
+    pCoord = ((D2RoomCoordListStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2RoomCoordListStrc), ".\\DRLG\\DrlgLogic.cpp", 0xe9, 0));
     pCoordList->pCoord = pCoord;
     memset(pCoord, 0, pCoordList->nListSize * 0x30);
     pCoordList->pCoord->nIndex = pLevel->nLastRoomExCoordsIndex;
@@ -412,10 +412,10 @@ int __stdcall DRLGLOGIC_GetRoomCoordIndexAt(D2RoomExStrc * pRoomEx, int nX, int 
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x29c);
       exit(-1);
     }
-    if (!(pDVar1->eFlags & 1)) {
-      pDVar2 = (D2RoomCoordListStrc*)DrlgGrid::GetGridFlags(&pDVar1->sCoordIndexGrid, nX - pRoomEx->sCoords.WorldPosition.x, nY - pRoomEx->sCoords.WorldPosition.y);
-    } else {
+    if (pDVar1->eFlags & 1) {
       pDVar2 = pDVar1->pCoord;
+    } else {
+      pDVar2 = (D2RoomCoordListStrc*)DrlgGrid::GetGridFlags(&pDVar1->sCoordIndexGrid, nX - pRoomEx->sCoords.WorldPosition.x, nY - pRoomEx->sCoords.WorldPosition.y);
     }
     if (!pDVar2) {
       return -1;
@@ -431,10 +431,10 @@ int32_t __fastcall DRLG_ROOMEX_GetGridIndex(D2RoomExStrc * pRoomEx, int32_t nX, 
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x29c);
       exit(-1);
     }
-    if (!(pCoordList->eFlags & 1)) {
-      pCoordEntry = (D2RoomCoordListStrc*)DrlgGrid::GetGridFlags(&pCoordList->sCoordIndexGrid, nX / 5 - pRoomEx->sCoords.WorldPosition.x, nY / 5 - pRoomEx->sCoords.WorldPosition.y);
-    } else {
+    if (pCoordList->eFlags & 1) {
       pCoordEntry = pCoordList->pCoord;
+    } else {
+      pCoordEntry = (D2RoomCoordListStrc*)DrlgGrid::GetGridFlags(&pCoordList->sCoordIndexGrid, nX / 5 - pRoomEx->sCoords.WorldPosition.x, nY / 5 - pRoomEx->sCoords.WorldPosition.y);
     }
     if (!pCoordEntry) {
       return -1;
@@ -459,17 +459,17 @@ D2RoomCoordListStrc * __fastcall DRLGLOGIC_GetCoordListFromSubtilePos(D2RoomExSt
 }
 
 D2RoomCoordListStrc * __fastcall GetCoordList(D2RoomExStrc * pRoomEx) {
-    if (pRoomEx->pDrlgCoordList) {
-      return pRoomEx->pDrlgCoordList->pCoord;
+    if (!pRoomEx->pDrlgCoordList) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2cd);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2cd);
-    exit(-1);
+    return pRoomEx->pDrlgCoordList->pCoord;
     return pRoomEx->pDrlgCoordList->pCoord;
 }
 
 // Links the DRLG coordinate-list grids of two adjacent rooms at border point (nX,nY). Looks up each room's coord-list grid index at the border point, validates that both grids exist, are different, belong to the same level, and share the same node flag, then calls InitializeDrlgCoordList to merge them. Halts fatally if pSrcRoom has no coord list.
-void __stdcall DRLGLOGIC_LinkCoordListEntry(int32_t nY, int32_t nX, D2RoomExStrc * pNeighborRoom, D2RoomExStrc * pSrcRoom) {
+static void __stdcall DRLGLOGIC_LinkCoordListEntry(int32_t nY, int32_t nX, D2RoomExStrc * pNeighborRoom, D2RoomExStrc * pSrcRoom) {
     int32_t nNeighborCoordIndex;
     int nDestIndex;
     int nSrcIndex;
@@ -481,18 +481,18 @@ void __stdcall DRLGLOGIC_LinkCoordListEntry(int32_t nY, int32_t nX, D2RoomExStrc
     D2DrlgCoordListStrc* pNeighborCoordList = pSrcRoom->pDrlgCoordList;
     if (pNeighborCoordList) {
       D2RoomCoordListStrc* pCoordEntry;
-      if (!(pNeighborCoordList->eFlags & 1)) {
-        nNeighborCoordIndex = DrlgGrid::GetGridFlags(&pNeighborCoordList->sCoordIndexGrid, nX - pSrcRoom->sCoords.WorldPosition.x, nY - pSrcRoom->sCoords.WorldPosition.y);
-      } else {
+      if (pNeighborCoordList->eFlags & 1) {
         nNeighborCoordIndex = (int32_t)pNeighborCoordList->pCoord;
+      } else {
+        nNeighborCoordIndex = DrlgGrid::GetGridFlags(&pNeighborCoordList->sCoordIndexGrid, nX - pSrcRoom->sCoords.WorldPosition.x, nY - pSrcRoom->sCoords.WorldPosition.y);
       }
 
       pNeighborCoordList = pNeighborRoom->pDrlgCoordList;
       if (pNeighborCoordList) {
-        if (!(pNeighborCoordList->eFlags & 1)) {
-          pCoordEntry = (D2RoomCoordListStrc*)DrlgGrid::GetGridFlags(&pNeighborCoordList->sCoordIndexGrid, nX - pNeighborRoom->sCoords.WorldPosition.x, nY - pNeighborRoom->sCoords.WorldPosition.y);
-        } else {
+        if (pNeighborCoordList->eFlags & 1) {
           pCoordEntry = pNeighborCoordList->pCoord;
+        } else {
+          pCoordEntry = (D2RoomCoordListStrc*)DrlgGrid::GetGridFlags(&pNeighborCoordList->sCoordIndexGrid, nX - pNeighborRoom->sCoords.WorldPosition.x, nY - pNeighborRoom->sCoords.WorldPosition.y);
         }
 
         nDestIndex = *(int*)(nNeighborCoordIndex + 0x28);
@@ -524,7 +524,7 @@ void __stdcall DRLGLOGIC_LinkCoordListEntry(int32_t nY, int32_t nX, D2RoomExStrc
 }
 
 // Links coord lists at boundaries between this room and its near rooms.
-void DRLGLOGIC_LinkBorderCoordLists(D2RoomExStrc * pRoomEx) {
+static void DRLGLOGIC_LinkBorderCoordLists(D2RoomExStrc * pRoomEx) {
     int nCoordValue;
     int nNearIndex = 0;
     if (0 >= pRoomEx->nDrlgRoomsExNearCount) {
@@ -575,7 +575,7 @@ void __fastcall DRLGLOGIC_BuildRoomCoordList(D2RoomExStrc * pRoomEx, int nOrient
     D2PoolManagerStrc* pPoolManagerStrc = pLevel->pDrlg->pMemoryPool;
     D2DrlgGridStrc* nOrientGridFlagsSave = (D2DrlgGridStrc*)nOrientGridFlags;
     D2DrlgLevelStrc* pLevelCtx = pLevel;
-    D2DrlgCoordListStrc* pCoordListStrc = D2_NEW_POOL(pPoolManagerStrc, D2DrlgCoordListStrc);
+    D2DrlgCoordListStrc* pCoordListStrc = ((D2DrlgCoordListStrc*)Fog::Memory::AllocServerMemory(pPoolManagerStrc, sizeof(D2DrlgCoordListStrc), ".\\DRLG\\DrlgLogic.cpp", 0xdf, 0));
     memset(pCoordListStrc, 0, 0x34);
     pRoomEx->pDrlgCoordList = pCoordListStrc;
     DRLGLOGIC_SetGridDoorFlags(pGrid, pRoomEx);
@@ -601,7 +601,7 @@ void __fastcall DRLGLOGIC_BuildRoomCoordList(D2RoomExStrc * pRoomEx, int nOrient
     DrlgGrid::ResetGrid(&sLocalGrid);
     nCoordCount = sCoordCtx.nCoordIndex - nCoordIndexStart + 1;
     pCoordListStrc->nListSize = nCoordCount;
-    pAllocCoordArray = (D2RoomCoordListStrc*)D2_ALLOC_POOL(pPoolManagerStrc, nCoordCount * 0x30);
+    pAllocCoordArray = (D2RoomCoordListStrc*)Fog::Memory::AllocServerMemory(pPoolManagerStrc, nCoordCount * 0x30, ".\\DRLG\\DrlgLogic.cpp", 0xe9, 0);
     pCoordListStrc->pCoord = pAllocCoordArray;
     memset(pAllocCoordArray, 0, pCoordListStrc->nListSize * 0x30);
     pLevelCtx->nLastRoomExCoordsIndex += pCoordListStrc->nListSize;

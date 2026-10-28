@@ -26,7 +26,6 @@ void Destructor(::ListBoxImplementation * pThis);
 int GetItemCount(::ListBoxImplementation * pThis);
 void Clear(::ListBoxImplementation * pThis);
 void DrawScrollbar(::ListBoxImplementation * pThis);
-int GetVisibleItemCount(::ListBoxImplementation * pThis);
 void DrawTruncatedText(::ListBoxImplementation * pThis, uint16_t * wszText, int nX, int nY, int nColor);
 void AddItem(::ListBoxImplementation * pThis, uint16_t * wszLine0, uint16_t * wszLine1, uint16_t * wszLine2, uint16_t * wszLine3, uint16_t * wszLine4, uint16_t * wszLine5, uint32_t dwItemData, int nColor, BOOL bUseDefaultColor, int nFont);
 BOOL IsMouseOnScrollUp(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
@@ -34,7 +33,6 @@ BOOL IsMouseOnScrollDown(::ListBoxImplementation * pThis, struct D2UIMouseMsgStr
 BOOL IsMouseOnScrollTrack(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 BOOL IsMouseInBounds(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 int OnMouseWheel(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
-void EnsureSelectionVisible(::ListBoxImplementation * pThis);
 int OnUpArrow(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 int OnDownArrow(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 int OnLeftArrow(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
@@ -44,7 +42,7 @@ int OnMouseMove(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg)
 int OnChar(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 int GetValue(::ListBoxImplementation * pThis);
 uint32_t GetItemUserData(::ListBoxImplementation * pThis, int nIndex);
-void Draw(::ListBoxImplementation * pThis);
+void __fastcall Draw(::ListBoxImplementation * pThis);
 int HandleScrollTrackClick(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 int OnMouseDown(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 int OnMouseUp(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);

@@ -28,7 +28,7 @@ void FOG_ClearStruct12Bytes(uint32_t * pdwParam) {
 
 // @sourcefile .\Src\DataArrays.cpp
 D2DataArrayStrc * __fastcall FOG_CreateDataArray(char * pszName, int numObjects, int nObjectSize) {
-    D2DataArrayStrc* local_EAX_31 = (D2DataArrayStrc*)D2_ALLOC(numObjects * nObjectSize + 0x120);
+    D2DataArrayStrc* local_EAX_31 = (D2DataArrayStrc*)Fog::Memory::AllocClientMemory(numObjects * nObjectSize + 0x120, ".\\Src\\DataArrays.cpp", 0x34, 0);
     if (!local_EAX_31) {
       return local_EAX_31;
     }
@@ -45,33 +45,33 @@ D2DataArrayStrc * __fastcall FOG_CreateDataArray(char * pszName, int numObjects,
 // @sourcefile .\Src\DataArrays.cpp
 void __fastcall FreeWeatherPointer(void * pParam) {
     memset(pParam, 0, 0x120);
-    D2_FREE(pParam);
+    Fog::Memory::FreeClientMemory(pParam, ".\\Src\\DataArrays.cpp", 0x4c, 0);
 }
 
 void __fastcall FOG_InitDataArray(D2DataArrayStrc * pDataArray) {
     int nObjectOffset;
-    if (pDataArray->bInitialized) {
-      int nObjectIndex;
-      nObjectIndex = 0;
-      pDataArray->nHighestUsedIndex = -1;
-      pDataArray->nUsedCount = 0;
-      pDataArray->nNextFreeIndex = 0;
-      pDataArray->nMagic = -0x8000;
-      if (0 >= pDataArray->numObjects) {
-        return;
-      }
+    if (!pDataArray->bInitialized) {
+      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x68);
+      exit(-1);
+    }
 
-      do {
-        nObjectOffset = pDataArray->nObjectSize * nObjectIndex;
-        nObjectIndex++;
-        *(uint16_t*)(nObjectOffset + (int)pDataArray->pData) = 0;
-      } while (nObjectIndex < pDataArray->numObjects);
-
+    int nObjectIndex;
+    nObjectIndex = 0;
+    pDataArray->nHighestUsedIndex = -1;
+    pDataArray->nUsedCount = 0;
+    pDataArray->nNextFreeIndex = 0;
+    pDataArray->nMagic = -0x8000;
+    if (0 >= pDataArray->numObjects) {
       return;
     }
 
-    ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x68);
-    exit(-1);
+    do {
+      nObjectOffset = pDataArray->nObjectSize * nObjectIndex;
+      nObjectIndex++;
+      *(uint16_t*)(nObjectOffset + (int)pDataArray->pData) = 0;
+    } while (nObjectIndex < pDataArray->numObjects);
+
+    return;
 }
 
 uint32_t __fastcall FOG_GetMissileField(D2MissilesTxt * pMissilesTxt) {
@@ -121,26 +121,26 @@ short * __fastcall FOG_GetDataArrayEntry(D2DataArrayStrc * pDataArray, int nHand
     if (nHandle == -1) {
       return nullptr;
     }
-    if (nHandle < 0 || (nHighWord = (int)(short int)((uint32_t)nHandle >> 0x10) , pDataArray->numObjects <= nHighWord)) {
+    if (nHandle < 0 || (nHighWord = (int)(short int)((uint32_t)nHandle >> 0x10) , nHighWord >= pDataArray->numObjects)) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0xdb);
       exit(-1);
     } else {
       short int* pEntry;
-      if (pDataArray->bInitialized) {
-        pEntry = (short int*)(pDataArray->nObjectSize * nHighWord + (int)pDataArray->pData);
-        nSlotId = *pEntry;
-        if (!nSlotId) {
-          return nullptr;
-        }
-        if (!((short int)nHandle && nSlotId != (short int)nHandle)) {
-          return pEntry;
-        }
-
-        return nullptr;
+      if (!pDataArray->bInitialized) {
+        ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0xde);
+        exit(-1);
       }
 
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0xde);
-      exit(-1);
+      pEntry = (short int*)(pDataArray->nObjectSize * nHighWord + (int)pDataArray->pData);
+      nSlotId = *pEntry;
+      if (!nSlotId) {
+        return nullptr;
+      }
+      if (!((short int)nHandle && nSlotId != (short int)nHandle)) {
+        return pEntry;
+      }
+
+      return nullptr;
     }
 }
 

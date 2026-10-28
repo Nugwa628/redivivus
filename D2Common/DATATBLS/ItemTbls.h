@@ -127,7 +127,6 @@ BOOL ITEMTBLS_CheckItemTypeRecursive(int32_t nItemTypeId, int32_t nTargetTypeId)
 void __fastcall TXT_AllocTxt_itemtypes(struct D2PoolManagerStrc * pMemory);
 // @sourcefile .\DATATBLS\ItemTbls.cpp
 void __stdcall ITEMTBLS_FreeItemTypes();
-BOOL __stdcall ITEMTBLS_CheckIfDataFileExists(char * szFileExt, struct D2PoolManagerStrc * pPoolManagerStrc, char * szFileName);
 // Builds the Runes.txt (rune word) data table for D2Common. Defines the column schema (name, rune name, complete/server flags, itype1-6/etype1-3 item-type filters linked to ItemTypes, rune1-6 base codes linked to Items, and 7 t1code/param/min/max stat triplets linked to Properties), loads "runessrv" (.txt/.bin/.xls, halting via Fog ErrorManager if none found), compiles it into pTxtRunes (stride 0x120, count nTxtRunesSize), then resolves each row's "complete" string-table key into its string id at offset 0x82. ECX = pool manager. No return.
 // @sourcefile .\DATATBLS\ItemTbls.cpp
 void __fastcall TXT_AllocTxt_runes(struct D2PoolManagerStrc * pMemory);

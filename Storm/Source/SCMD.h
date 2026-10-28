@@ -63,17 +63,10 @@ void __stdcall SCMD_ConvertNumber(struct D2UnitDataMonsterStrc * cmdDef, char * 
 // @sourcefile .\SOURCE\SCMD.CPP
 // @blizzard ConvertString (SCMD.CPP)
 void __stdcall SCMD_ConvertString(char * str, struct D2UnitDataMonsterStrc * cmdDef, uint32_t * outConsumed);
-// @blizzard GenerateError (SCMD.CPP)
-void __stdcall SCMD_GenerateError(uint32_t errorCode, pfnSCmdErrorCallback pfnCallback, char * szItem);
-// @blizzard ProcessFile (SCMD.CPP)
-BOOL __stdcall SCMD_ProcessFile(char * filename, int * pnParam, uint32_t dwParam, pfnSCmdUnknownArgCallback pfnCallback, pfnSCmdErrorCallback pfnErrorCallback);
 uint32_t SCMD_GetListOffset(::SCMD * pThis, int nBaseOffset);
 ::SCMD * SCMD_GetListHead(::SCMD * pThis, ::SCMD * pNode);
-void SCMD_MoveToList(::SCMD * pThis, ::SCMD * pNode, int nParam, ::SCMD * pScmd);
 uint32_t SCMD_GetNextOffset(::SCMD * pThis, ::SCMD * pNode);
 void SCMD_UnlinkNode(::SCMD * pThis, ::SCMD * pNode);
-// @blizzard FindFlagDef (SCMD.CPP)
-struct StormCmdArgDefStrc * __stdcall SCMD_FindFlagDef(struct StormCmdArgDefStrc * cmdList, char * str, int minLen);
 uint32_t SCMD_GetHandler(::SCMD * pThis, int nNodeOffset);
 void __fastcall SCMD_ClearList(struct D2StormListHead * nListPtr);
 void __fastcall SCMD_ClearAll(struct D2StormListHead * nListPtr);
@@ -89,12 +82,8 @@ void __fastcall SCMD_FreeAllNodes(void * pListHead);
 uint32_t SCMD_RemoveNode(::SCMD * pThis, ::SCMD * pNode);
 // @blizzard PerformConversion (SCMD.CPP)
 BOOL __fastcall SCMD_PerformConversion(char * str, struct StormCmdArgDefStrc * cmdDef, int * outConsumed);
-// @blizzard ProcessCurrentFlag (SCMD.CPP)
-BOOL SCMD_ProcessCurrentFlag(int * * pCmdCtx, char * szArgLine, int * outConsumed);
 // @blizzard ProcessFlags (SCMD.CPP)
 BOOL __fastcall SCMD_ProcessFlags(pfnSCmdErrorCallback pfnErrorCallback, char * szText, int * pnOutConsumed);
-// @blizzard ProcessToken (SCMD.CPP)
-BOOL __fastcall SCMD_ProcessToken(uint32_t * cmdDefPtr, char * str, int * outPtr, int noFileExpand, pfnSCmdUnknownArgCallback unknownCb, pfnSCmdErrorCallback errorCb);
 // @blizzard SCmdCheckId (SCMD.CPP)
 uint32_t __stdcall SCmdCheckId(int nCmdId);
 // Tears the SCmd module down: frees the allocated string value at +0x3c of every string-typed command node in both lists, frees every node in both lists, and clears gbScmdHasPriorityCommand. No arguments.

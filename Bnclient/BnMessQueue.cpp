@@ -44,8 +44,8 @@ void __stdcall BNMESSQUEUE_Shutdown() {
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&lpCriticalSection_00882004);
 }
 
-void __fastcall BNMESSQUEUE_EnqueueBytes(int32_t nEventType, char * pBytes, size_t nSize) {
-    ::BnMessQueue* pNewMessage = D2_NEW(::BnMessQueue);
+int __fastcall BNMESSQUEUE_EnqueueBytes(int32_t nEventType, char * pBytes, size_t nSize) {
+    ::BnMessQueue* pNewMessage = ((::BnMessQueue*)Fog::Memory::AllocClientMemory(sizeof(::BnMessQueue), ".\\BnMessQueue.cpp", 0x37, 0));
     if (nSize < 0x121) {
       if (!nSize) {
         pNewMessage->bBuffer[0] = '\0';
@@ -60,51 +60,51 @@ void __fastcall BNMESSQUEUE_EnqueueBytes(int32_t nEventType, char * pBytes, size
     pNewMessage->nDataSize = nSize;
     pNewMessage->nZero = nEventType;
     pNewMessage->pNext = 0;
-    if (nSize < 0x121) {
-      ::BnMessQueue* pFirstMessage;
-      /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
-      pFirstMessage = pNewMessage;
-      if (nLobbyChatCurrentMessage) {
-        nLobbyChatQueueMessages->pNext = pNewMessage;
-        pFirstMessage = nLobbyChatCurrentMessage;
-      }
-
-      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nLobbyChatCurrentMessage = pFirstMessage;
-      nLobbyChatQueueMessages = pNewMessage;
-      LeaveCriticalSection(&lpCriticalSection_00882004);
-      return;
+    if (!(nSize < 0x121)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x44);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x44);
-    exit(-1);
+    ::BnMessQueue* pFirstMessage;
+    /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
+    pFirstMessage = pNewMessage;
+    if (nLobbyChatCurrentMessage) {
+      nLobbyChatQueueMessages->pNext = pNewMessage;
+      pFirstMessage = nLobbyChatCurrentMessage;
+    }
+
+    /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nLobbyChatCurrentMessage = pFirstMessage;
+    nLobbyChatQueueMessages = pNewMessage;
+    LeaveCriticalSection(&lpCriticalSection_00882004);
+    return 1;
 }
 
 uint32_t __fastcall BNMESSQUEUE_EnqueueString(int32_t nEventType, char * szMessage) {
     char cCurrentChar;
-    ::BnMessQueue* pNewMessage = D2_NEW(::BnMessQueue);
+    ::BnMessQueue* pNewMessage = ((::BnMessQueue*)Fog::Memory::AllocClientMemory(sizeof(::BnMessQueue), ".\\BnMessQueue.cpp", 0x5c, 0));
     char* pDestBuffer = pNewMessage->bBuffer;
     Storm::Source::SSTR::SStrCopy(pDestBuffer, szMessage, 0x120);
     pDestBuffer = pDestBuffer + strlen(pDestBuffer) + 1;
     pNewMessage->nDataSize = (size_t)(pDestBuffer + (1 - (int)(pNewMessage->bBuffer + 1)));
     pNewMessage->nZero = nEventType;
     pNewMessage->pNext = 0;
-    if (pDestBuffer + (1 - (int)(pNewMessage->bBuffer + 1)) < (char*)0x121) {
-      ::BnMessQueue* pFirstMessage;
-      /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
-      pFirstMessage = pNewMessage;
-      if (nLobbyChatCurrentMessage) {
-        nLobbyChatQueueMessages->pNext = pNewMessage;
-        pFirstMessage = nLobbyChatCurrentMessage;
-      }
-
-      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nLobbyChatCurrentMessage = pFirstMessage;
-      nLobbyChatQueueMessages = pNewMessage;
-      LeaveCriticalSection(&lpCriticalSection_00882004);
-      return 1;
+    if (!(pDestBuffer + (1 - (int)(pNewMessage->bBuffer + 1)) < (char*)0x121)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x62);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x62);
-    exit(-1);
+    ::BnMessQueue* pFirstMessage;
+    /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
+    pFirstMessage = pNewMessage;
+    if (nLobbyChatCurrentMessage) {
+      nLobbyChatQueueMessages->pNext = pNewMessage;
+      pFirstMessage = nLobbyChatCurrentMessage;
+    }
+
+    /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nLobbyChatCurrentMessage = pFirstMessage;
+    nLobbyChatQueueMessages = pNewMessage;
+    LeaveCriticalSection(&lpCriticalSection_00882004);
+    return 1;
 }
 
 // Dequeues next Battle.net lobby chat message. Thread-safe dequeue from global linked list (nLobbyChatCurrentMessage). Copies message buffer to output, returns data size. Returns 0 if queue empty.
@@ -117,7 +117,7 @@ size_t __fastcall BNMESSQUEUE_DequeueMessage(int * pMessageTypeOut, void * pBuff
       *pMessageTypeOut = pBVar2->nZero;
       sVar1 = pBVar2->nDataSize;
       pBVar2 = pBVar2->pNext;
-      D2_FREE(nLobbyChatCurrentMessage);
+      Fog::Memory::FreeClientMemory(nLobbyChatCurrentMessage, ".\\BnMessQueue.cpp", 0x86, 0);
       nLobbyChatCurrentMessage = pBVar2;
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00882004);
       return sVar1;
@@ -127,16 +127,17 @@ size_t __fastcall BNMESSQUEUE_DequeueMessage(int * pMessageTypeOut, void * pBuff
     return 0;
 }
 
-void __stdcall BNMESSQUEUE_ClearAll() {
+int __stdcall BNMESSQUEUE_ClearAll() {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
     while (nLobbyChatCurrentMessage) {
       ::BnMessQueue* pBVar1;
       pBVar1 = nLobbyChatCurrentMessage->pNext;
-      D2_FREE(nLobbyChatCurrentMessage);
+      Fog::Memory::FreeClientMemory(nLobbyChatCurrentMessage, ".\\BnMessQueue.cpp", 0x9f, 0);
       nLobbyChatCurrentMessage = pBVar1;
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00882004);
+    return 1;
 }
 
 uint32_t __fastcall BNMESSQUEUE_SetStateIfZero(int32_t nState) {
@@ -149,7 +150,7 @@ uint32_t __fastcall BNMESSQUEUE_SetStateIfZero(int32_t nState) {
     return 1;
 }
 
-void __fastcall BNMESSQUEUE_SetStateWithString(int32_t nState, char * szMessage) {
+int __fastcall BNMESSQUEUE_SetStateWithString(int32_t nState, char * szMessage) {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
     if (!g_nBattleNetConnectionState) {
       g_nBattleNetConnectionState = nState;
@@ -157,6 +158,7 @@ void __fastcall BNMESSQUEUE_SetStateWithString(int32_t nState, char * szMessage)
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00882004);
+    return 1;
 }
 
 uint32_t __fastcall SID_SetStateFlag1(uint32_t nState) {
@@ -166,10 +168,11 @@ uint32_t __fastcall SID_SetStateFlag1(uint32_t nState) {
     return 1;
 }
 
-void __fastcall SID_SetStateFlag2(uint32_t nData) {
+int __fastcall SID_SetStateFlag2(uint32_t nData) {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection_00882004);
     g_nBattleNetConnectionData = nData;
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection_00882004);
+    return 1;
 }
 
 } // namespace Bnclient

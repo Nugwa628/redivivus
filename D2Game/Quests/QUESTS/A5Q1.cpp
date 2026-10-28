@@ -116,7 +116,7 @@ bool __fastcall Q31_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
       *pbyIconFlag = '\f';
       return true;
     }
-    if (4 < pQuestData->nStateFlag) {
+    if (5 <= pQuestData->nStateFlag) {
       return true;
     }
 
@@ -276,19 +276,19 @@ void __fastcall Q31_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     BOOL bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_RewardAwaits);
-    if (!bRewardAwaits) {
+    if (bRewardAwaits) {
+      bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Step0x05);
+      if (!bCompleted) {
+        AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nNPCClassId, 3);
+        return;
+      }
+    } else {
       uint32_t nGossipLineIdx;
       if (bCompleted != 1 && (pQuestData->nStateFlag < 4 || bJustCompleted) && pQuestData->bIsNotIntroduction) {
         nGossipLineIdx = gdwQuestCallbackAddressQ31[pQuestData->nStateFlag];
         if (nGossipLineIdx != -1 && nGossipLineIdx < 8) {
           AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nNPCClassId, nGossipLineIdx);
         }
-      }
-    } else {
-      bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Step0x05);
-      if (!bCompleted) {
-        AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nNPCClassId, 3);
-        return;
       }
     }
 }
@@ -329,7 +329,7 @@ BOOL __fastcall Q31_CheckNearShenk(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void
       uint32_t nAdjRoomIdx;
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &pAdjacentRooms, (int*)&nAdjRoomCount);
       nAdjRoomIdx = 0;
-      if (nAdjRoomCount) {
+      if ((uint32_t)nAdjRoomCount > 0) {
         do {
           if (pAdjacentRooms[nAdjRoomIdx] == pA5Q1Data->pShenkRoom) {
             bIsNearShenkRoom = '\x01';
@@ -478,7 +478,7 @@ void __fastcall Q31_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     BOOL bQuestState;
     D2BitBufferStrc* pBitBuffer;
     ::SGAMEDATA* pGame;
-    if (pQuestArgs->sQuestArgs.sNpcActivate.nIndex - 0x6eU < 3) {
+    if (pQuestArgs->sQuestArgs.sNpcActivate.nIndex - 0x6eU <= 2) {
       if (pQuestData->bIsNotIntroduction && (pQuestData->nStateFlag == 1 || pQuestData->nStateFlag == 2)) {
         QUEST_SetStateFlag(pQuestData, 3, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q1.cpp", 0x229);
         UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Q31_SyncQuestProgress);
@@ -621,7 +621,7 @@ void __fastcall Q31_InitData(D2QuestDataStrc * pQuestData) {
     pQuestData->pNpcMessages = &A5Q1::aNpcGossipData;
     pQuestData->bIsActive = true;
     pQuestData->nStateFlag = 0;
-    D2QuestDataA5Q1Strc* pQuestSpecificData = D2_NEW_POOL(pGame->pMemoryPool, D2QuestDataA5Q1Strc);
+    D2QuestDataA5Q1Strc* pQuestSpecificData = ((D2QuestDataA5Q1Strc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2QuestDataA5Q1Strc), "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q1.cpp", 0x2d3, 0));
     pQuestData->pQuestSpecificData.pA5Q1 = pQuestSpecificData;
     pQuestData->nQuestIdReal = QUEST_SiegeOnHaggorath;
     pQuestData->fpStatusFilter = Q31_StatusFilter;
@@ -684,8 +684,8 @@ void __fastcall Objects_InitFn71(D2ObjectInitFnArg * pInitArg) {
       return;
     }
 
-    sSpawnPos.y = pInitArg->nY;
     sSpawnPos.x = pInitArg->nX;
+    sSpawnPos.y = pInitArg->nY;
     FindSpawnableLocation(pInitArg->pRoom, &sSpawnPos, 2, 0x100, &pSpawnRoom, 0x10, 100);
     if (!pSpawnRoom) {
       return;

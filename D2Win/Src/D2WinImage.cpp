@@ -57,12 +57,12 @@ void __fastcall D2WINTEXTBOX_SetTextFromAnsiSimple(::D2WinTextBox * pTextBox, ch
       exit(-1);
     }
 
-    uint16_t* pBufCursor = wszWorkBuf;
-    for (nClearCount = 0x200; nClearCount; nClearCount--) {
-      pBufCursor[0] = L'\0';
-      pBufCursor[1] = L'\0';
-      pBufCursor += 2;
-    }
+    uint16_t* pBufCursor;
+    for (int i = 0; i < 0x400; i++) wszWorkBuf[i] = 0;
+
+
+
+
 
     D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszWorkBuf, szText, 0x400);
     D2WinTextBox::SetText(pTextBox, wszWorkBuf, 4, false, 0);
@@ -71,12 +71,12 @@ void __fastcall D2WINTEXTBOX_SetTextFromAnsiSimple(::D2WinTextBox * pTextBox, ch
 void __fastcall D2WINTEXTBOX_SetTextFromAnsi(::D2WinTextBox * pTextBox, char * szText, int32_t nLineStyle) {
     int nClearCount;
     uint16_t wszWorkBuf[1024];
-    uint16_t* pBufCursor = wszWorkBuf;
-    for (nClearCount = 0x200; nClearCount; nClearCount--) {
-      pBufCursor[0] = L'\0';
-      pBufCursor[1] = L'\0';
-      pBufCursor += 2;
-    }
+    uint16_t* pBufCursor;
+    for (int i = 0; i < 0x400; i++) wszWorkBuf[i] = 0;
+
+
+
+
 
     if (!pTextBox) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11e);
@@ -133,7 +133,7 @@ BOOL __stdcall D2WINIMAGE_SetFrame(::D2WinImage * pImage, int32_t nFrame) {
     }
 
     nLine = D2CMP::SRC::CelCmp::IMAGE_GetFramesCount(pImage->sControl.pDC6);
-    if (nLine - 1 < nFrame) {
+    if (nFrame > nLine - 1) {
       nFrame = nLine - 1;
     }
     if (nFrame < 0) {
@@ -254,12 +254,12 @@ void __stdcall D2WinImage_Draw(D2GfxTileRectStrc * pScreenRect, D2GfxTileRectStr
       if (0 < iVar1) {
         do {
           sClipRect.nX0 = pDstRect->nX0 + nParam1;
-          if (sClipRect.nX0 < pScreenRect->nX0) {
+          if (pScreenRect->nX0 > sClipRect.nX0) {
             sClipRect.nX0 = pScreenRect->nX0;
           }
 
           sClipRect.nX1 = pScreenRect->nX1;
-          if (sClipRect.nX0 + nTileCountX <= pScreenRect->nX1) {
+          if (pScreenRect->nX1 >= sClipRect.nX0 + nTileCountX) {
             sClipRect.nX1 = sClipRect.nX0 + nTileCountX;
           }
 
