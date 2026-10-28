@@ -67,5 +67,6 @@ bool __fastcall ErrorReportingLaunch(char * szText, struct D2BlizzardErrorArgume
 char * ILT_strrchr(char * _Str, int32_t _Ch);
 void __stdcall SYSTEM_EnterCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
 void __stdcall LeaveCriticalSection_System(LPCRITICAL_SECTION lpCriticalSection);
+void __stdcall DebugThread();
 
 } // namespace Fog::_3rdparty::crashy
