@@ -2023,7 +2023,16 @@ static void __stdcall TC_ParseTreasureClassEntry(D2ParsedTreasureClassStrc * pPa
 
     int32_t nNodeId;
     nNodeId = Fog::Src::Excel::GetLinkNodeIndex(sgtDataTable.pTxtMonsterTblsLink, szItemCode, 0);
-    if (nNodeId <= 0) {
+    if (nNodeId > 0) {
+      pTCEntry = AddOneParsedTCEntry(pParsedTC);
+      pTCEntry->nFlags |= TC_Monster;
+      pTCEntry->nItemClassId = (int16_t)nNodeId;
+      if (!sgtDataTable.pParsedTreasureClass[nNodeId].nTotalWeightClassic) {
+        pTCEntry->nFlags |= TC_Expansion;
+      }
+
+      bIsExpansionItem = (uint32_t)!sgtDataTable.pParsedTreasureClass[nNodeId].nTotalWeightClassic;
+    } else {
       if (!sgtDataTable.pTxtUniqueItemsLink || (nNodeId = Fog::Src::Excel::GetLinkNodeIndex(sgtDataTable.pTxtUniqueItemsLink, szItemCode, 0) , nNodeId <= 0)) {
         if (!sgtDataTable.pTxtSetItemsLink) {
           return;
@@ -2047,15 +2056,6 @@ static void __stdcall TC_ParseTreasureClassEntry(D2ParsedTreasureClassStrc * pPa
       pTCEntry->nItemLinkNodeId = (int16_t)nNodeId;
       bIsExpansionItem = 1;
       pTCEntry->nItemClassId = wItemClassId[0];
-    } else {
-      pTCEntry = AddOneParsedTCEntry(pParsedTC);
-      pTCEntry->nFlags |= TC_Monster;
-      pTCEntry->nItemClassId = (int16_t)nNodeId;
-      if (!sgtDataTable.pParsedTreasureClass[nNodeId].nTotalWeightClassic) {
-        pTCEntry->nFlags |= TC_Expansion;
-      }
-
-      bIsExpansionItem = (uint32_t)!sgtDataTable.pParsedTreasureClass[nNodeId].nTotalWeightClassic;
     }
 
     apply_prob_and_modifiers:

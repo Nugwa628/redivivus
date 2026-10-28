@@ -903,11 +903,11 @@ BOOL __fastcall DRLGCOORDS_IsAdjacentOrOverlapping(D2DrlgCoordsStrc * pDrlgCoord
       nDistY = nPosA - pCoordinatesAndSizeB->WorldSize.y - nPosB;
     }
     if (!nMaxDist) {
-      if (0 < nDistX) {
+      if (0 >= nDistX) {
+        bSignedGreater = nDistY > 0;
+      } else {
         return 0;
       }
-
-      bSignedGreater = nDistY > 0;
     } else {
       if (!nDistX && nDistY <= nMaxDist) {
         return 1;

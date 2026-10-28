@@ -818,12 +818,12 @@ void __stdcall RefreshInventory(D2UnitStrc * pUnit, BOOL bHasInventory) {
       Unit::ROOM_LinkUnitToUpdateList(pUnit);
     }
     if (pUnit) {
-      if (!bHasInventory) {
+      if (bHasInventory) {
+        pUnit->eUnitFlagsEx |= UNITFLAGEX_HASINV;
+      } else {
         pUnit->eUnitFlagsEx &= ~UNITFLAGEX_HASINV;
         return;
       }
-
-      pUnit->eUnitFlagsEx |= UNITFLAGEX_HASINV;
     }
     if (!(bHasInventory && pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
       return;
@@ -919,11 +919,11 @@ int32_t __stdcall GetAnimOrSeqMode(D2UnitStrc * pUnit) {
     if (!pUnit) {
       return 0;
     }
-    if (!((pUnit->eUnitType == UNIT_PLAYER || pUnit->eUnitType == UNIT_MONSTER) && pUnit->pAnimSeq)) {
+    if ((pUnit->eUnitType == UNIT_PLAYER || pUnit->eUnitType == UNIT_MONSTER) && pUnit->pAnimSeq) {
+      return pUnit->nSeqMode;
+    } else {
       return pUnit->eAnimMode.ePlayerMode;
     }
-
-    return pUnit->nSeqMode;
 }
 
 void __stdcall SetAnimOrSeqMode(D2UnitStrc * pUnit, int32_t nAnimMode) {
@@ -1000,41 +1000,43 @@ void __stdcall SetFrameNonRate(D2UnitStrc * pUnit, int32_t nRate, int32_t nFailR
 }
 
 static int32_t UNITS_GetBaseWalkVelocity(eD2UnitType eUnitType, int32_t nClassId) {
-    if (eUnitType == UNIT_PLAYER) {
+    if (eUnitType != UNIT_PLAYER) {
+      if (eUnitType != UNIT_MONSTER) {
+        return 0;
+      }
+      if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize)) {
+        return (int)*(volatile uint8_t*)0x32 << 8;
+      }
+
+      return (int)sgptDataTable->pTxtMonStats[nClassId].Velocity << 8;
+    } else {
       if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtCharStatsSize)) {
         return (uint32_t)*(volatile uint8_t*)0x40 << 8;
       }
 
       return (uint32_t)(uint8_t)sgptDataTable->pTxtCharStats[nClassId].WalkVelocity << 8;
     }
-    if (eUnitType != UNIT_MONSTER) {
-      return 0;
-    }
-    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize)) {
-      return (int)*(volatile uint8_t*)0x32 << 8;
-    }
-
-    return (int)sgptDataTable->pTxtMonStats[nClassId].Velocity << 8;
 }
 
 static int32_t UNITS_GetAnimFrameTime(eD2UnitType eUnitType, int32_t nClassId, int32_t nAnimMode) {
     D2MonStatsTxt* pMonStatsTxt;
-    if (eUnitType == UNIT_PLAYER) {
+    if (eUnitType != UNIT_PLAYER) {
+      if (eUnitType != UNIT_MONSTER) {
+        return 0;
+      }
+      if (nClassId < 0 || nClassId >= sgptDataTable->nTxtMonStatsSize) {
+        pMonStatsTxt = 0;
+      } else {
+        pMonStatsTxt = sgptDataTable->pTxtMonStats + nClassId;
+      }
+      if (nAnimMode == 0xf) {
+        return (int)pMonStatsTxt->wRunAnimSpeed;
+      }
+
+      return (int)pMonStatsTxt->wWalkAnimSpeed;
+    } else {
       return nAnimMode != 3 ? 0xd5 : 0x65;
     }
-    if (eUnitType != UNIT_MONSTER) {
-      return 0;
-    }
-    if (nClassId < 0 || nClassId >= sgptDataTable->nTxtMonStatsSize) {
-      pMonStatsTxt = 0;
-    } else {
-      pMonStatsTxt = sgptDataTable->pTxtMonStats + nClassId;
-    }
-    if (nAnimMode == 0xf) {
-      return (int)pMonStatsTxt->wRunAnimSpeed;
-    }
-
-    return (int)pMonStatsTxt->wWalkAnimSpeed;
 }
 
 uint8_t * __stdcall UNITS_GetAnimTableEntry(int32_t nClassId, int32_t nAnimMode) {
@@ -1600,11 +1602,11 @@ int32_t __stdcall GetBeltType(D2UnitStrc * pUnit) {
 int32_t __stdcall GetCurrentLifePercentage(D2UnitStrc * pUnit) {
     int nCurHp = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hitpoints, 0);
     int32_t nMaxHp = Stats::StatsEx::GetTxtMaxHp(pUnit);
-    if (!(nMaxHp >> 8)) {
+    if (nMaxHp >> 8) {
+      return (nCurHp >> 8) * 100 / (nMaxHp >> 8);
+    } else {
       return 0;
     }
-
-    return (nCurHp >> 8) * 100 / (nMaxHp >> 8);
 }
 
 BOOL __stdcall IsSoftMonster(D2UnitStrc * pUnit) {
@@ -1875,22 +1877,22 @@ int32_t __stdcall GetDefense(D2UnitStrc * pUnit) {
         }
       }
     }
-    if (nBaseArmor <= 0) {
+    if (nBaseArmor > 0) {
+      nDexBonus = nDexBonus * nBaseArmor / 100;
+    } else {
       nDexBonus = (int)((uint64_t)((int64_t)(nDexBonus * nBaseArmor) * -0x51eb851f) >> 0x20);
       nDexBonus = (nDexBonus >> 5) - (nDexBonus >> 0x1f);
-    } else {
-      nDexBonus = nDexBonus * nBaseArmor / 100;
     }
 
     nSkillArmorPct = nBaseArmor + nDexBonus;
     nBaseArmor = Stats::StatsEx::STATSEX_GetCurrentStat(pUnitOrig, UNITSTAT_armor_override_percent, 0);
-    if (!nBaseArmor) {
+    if (nBaseArmor) {
+      nItemArmorPct = D2Client::Stats::D2ApplyPercent(nSkillArmorPct, nBaseArmor, 100);
+      nSkillArmorPct += nItemArmorPct;
+      return nSkillArmorPct;
+    } else {
       return nSkillArmorPct;
     }
-
-    nItemArmorPct = D2Client::Stats::D2ApplyPercent(nSkillArmorPct, nBaseArmor, 100);
-    nSkillArmorPct += nItemArmorPct;
-    return nSkillArmorPct;
 }
 
 int32_t __stdcall GetAttackRate(D2UnitStrc * pUnit) {
@@ -1980,27 +1982,27 @@ int32_t __stdcall GetBlockRate(D2UnitStrc * pUnit, BOOL bExpansion) {
     if (eUnitType == UNIT_PLAYER) {
       int32_t nShieldResult;
       nShieldResult = INVENTORY::Inventory::INVENTORY_GetEquippedShield(pUnit->pInventory, nullptr);
-      if (!nShieldResult) {
-        return 0;
-      }
-
-      nToBlock = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_toblock, 0);
-      iVar1 = pUnit->nClassId;
-      if (iVar1 < 0 || iVar1 >= sgptDataTable->nTxtCharStatsSize) {
-        pCharStats = 0;
-      } else {
-        pCharStats = sgptDataTable->pTxtCharStats + iVar1;
-      }
-
-      nToBlock += (uint32_t)(uint8_t)pCharStats->BlockFactor;
-      if (bExpansion) {
-        iVar1 = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_dexterity, 0);
-        nLevel = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
-        if (nLevel <= 1) {
-          nLevel = 1;
+      if (nShieldResult) {
+        nToBlock = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_toblock, 0);
+        iVar1 = pUnit->nClassId;
+        if (iVar1 < 0 || iVar1 >= sgptDataTable->nTxtCharStatsSize) {
+          pCharStats = 0;
+        } else {
+          pCharStats = sgptDataTable->pTxtCharStats + iVar1;
         }
 
-        nToBlock = (iVar1 - 0xf) * nToBlock / (nLevel * 2);
+        nToBlock += (uint32_t)(uint8_t)pCharStats->BlockFactor;
+        if (bExpansion) {
+          iVar1 = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_dexterity, 0);
+          nLevel = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
+          if (nLevel <= 1) {
+            nLevel = 1;
+          }
+
+          nToBlock = (iVar1 - 0xf) * nToBlock / (nLevel * 2);
+        }
+      } else {
+        return 0;
       }
     } else {
       if (eUnitType != UNIT_MONSTER) {
@@ -2581,25 +2583,26 @@ void __stdcall SetShiftRightSkillData(D2UnitStrc * pUnit, eD2Skills eSkill, int3
 }
 
 void __stdcall SetWeaponGUID(D2UnitStrc * pUnit, D2UnitStrc * pWeapon) {
-    if (!pUnit || pUnit->eUnitType != UNIT_PLAYER) {
-      return;
-    }
-
-    D2UnitDataPlayerStrc* pPlayerData = pUnit->pUnitData.pUnitDataPlayer;
-    if (!pPlayerData) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x14c5);
-      exit(-1);
-    } else {
-      if (!pWeapon) {
-        pPlayerData->nWeaponGUID = 0;
-        return;
-      }
-      if (pWeapon->eUnitType != UNIT_ITEM) {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x14c9);
+    if (!(!pUnit || pUnit->eUnitType != UNIT_PLAYER)) {
+      D2UnitDataPlayerStrc* pPlayerData = pUnit->pUnitData.pUnitDataPlayer;
+      if (!pPlayerData) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x14c5);
         exit(-1);
-      }
+      } else {
+        if (pWeapon) {
+          if (pWeapon->eUnitType != UNIT_ITEM) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x14c9);
+            exit(-1);
+          }
 
-      pPlayerData->nWeaponGUID = pWeapon->nUnitGUID;
+          pPlayerData->nWeaponGUID = pWeapon->nUnitGUID;
+          return;
+        } else {
+          pPlayerData->nWeaponGUID = 0;
+          return;
+        }
+      }
+    } else {
       return;
     }
 }
@@ -2984,16 +2987,16 @@ D2UnitStrc * __stdcall GetWeaponBySkill(D2UnitStrc * pUnit, int32_t nParam) {
     }
 
     bIsWeaponType = ITEMS::Items::ITEMS_IsA(pSelectedWeapon, ITEMTYPE_Weapon);
-    if (!bIsWeaponType) {
+    if (bIsWeaponType) {
+      bCanDualWield = ITEMS::Items::ITEM_CheckIfItemIsNotBrokenAndNotDisabled(pSelectedWeapon);
+      if (!bCanDualWield) {
+        return pEquippedWeapon;
+      }
+
+      return pSelectedWeapon;
+    } else {
       return pEquippedWeapon;
     }
-
-    bCanDualWield = ITEMS::Items::ITEM_CheckIfItemIsNotBrokenAndNotDisabled(pSelectedWeapon);
-    if (!bCanDualWield) {
-      return pEquippedWeapon;
-    }
-
-    return pSelectedWeapon;
 }
 
 // Returns the weapon animation-class field used to drive a player unit's attack/cast animation selection. Resolves the unit's effective type/class/anim-mode through SKILLS_GetStateTransformGfx (handling shape-shift transforms). Only meaningful for players in Attack1/Attack2 or (when dual-wield capable) Skill3/Skill4 modes: fetches the relevant weapon via GetWeaponBySkill, reads its weapon anim class (ITEM_GetWeaponAnimClass), and indexes gdwUnitStrucFieldMask by (transformed-class * 7 + animclass) to return the field mask/value. Returns 0 for non-players or other modes. pUnit = the unit being animated.
@@ -3160,12 +3163,12 @@ uint32_t __fastcall GetHitClassForPlayerOrMonster(D2UnitStrc * pUnit) {
       if (pUnit->eUnitType == UNIT_PLAYER) {
         uint8_t byHitClass;
         pWeapon = GetWeaponBySkill(pUnit, 0);
-        if (!pWeapon) {
+        if (pWeapon) {
+          byHitClass = ITEMS::Items::ITEM_GetItemsTxt_bHitClass(pWeapon);
+          return (uint32_t)byHitClass;
+        } else {
           return 1;
         }
-
-        byHitClass = ITEMS::Items::ITEM_GetItemsTxt_bHitClass(pWeapon);
-        return (uint32_t)byHitClass;
       }
       if (pUnit->eUnitType != UNIT_MONSTER) {
         return 0;

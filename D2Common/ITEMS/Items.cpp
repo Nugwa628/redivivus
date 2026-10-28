@@ -340,33 +340,34 @@ bool __stdcall ITEM_EditItemData_eItemFlag(D2UnitStrc * pUnit, eD2ItemFlag eItem
     }
 
     pUnit = (D2UnitStrc*)pUnit->pUnitData.pUnitDataItem;
-    if (!pUnit) {
-      return (uint8_t)(uint32_t)(uintptr_t)pUnit;
-    }
-    if (bSet) {
-      eD2ItemFlag eFlagsToSet;
-      *(uint8_t*)(char*)&eFlagsToSet = pUnit->nAct;
-      *(uint8_t*)((char*)&eFlagsToSet + 1) = pUnit->unk0x19[0];
-      *(uint8_t*)((char*)&eFlagsToSet + 2) = pUnit->unk0x19[1];
-      *(uint8_t*)((char*)&eFlagsToSet + 3) = pUnit->unk0x19[2];
-      eFlagsToSet |= eItemFlag;
-      pUnit->nAct = (char)eFlagsToSet;
-      pUnit->unk0x19[0] = (char)((uint32_t)eFlagsToSet >> 8);
-      pUnit->unk0x19[1] = (char)((uint32_t)eFlagsToSet >> 0x10);
-      pUnit->unk0x19[2] = (char)((uint32_t)eFlagsToSet >> 0x18);
-      return (uint8_t)(uint32_t)(uintptr_t)pUnit;
-    }
+    if (pUnit) {
+      if (bSet) {
+        eD2ItemFlag eFlagsToSet;
+        *(uint8_t*)(char*)&eFlagsToSet = pUnit->nAct;
+        *(uint8_t*)((char*)&eFlagsToSet + 1) = pUnit->unk0x19[0];
+        *(uint8_t*)((char*)&eFlagsToSet + 2) = pUnit->unk0x19[1];
+        *(uint8_t*)((char*)&eFlagsToSet + 3) = pUnit->unk0x19[2];
+        eFlagsToSet |= eItemFlag;
+        pUnit->nAct = (char)eFlagsToSet;
+        pUnit->unk0x19[0] = (char)((uint32_t)eFlagsToSet >> 8);
+        pUnit->unk0x19[1] = (char)((uint32_t)eFlagsToSet >> 0x10);
+        pUnit->unk0x19[2] = (char)((uint32_t)eFlagsToSet >> 0x18);
+        return (uint8_t)(uint32_t)(uintptr_t)pUnit;
+      }
 
-    *(uint8_t*)(char*)&dwFlagsToClear = pUnit->nAct;
-    *(uint8_t*)((char*)&dwFlagsToClear + 1) = pUnit->unk0x19[0];
-    *(uint8_t*)((char*)&dwFlagsToClear + 2) = pUnit->unk0x19[1];
-    *(uint8_t*)((char*)&dwFlagsToClear + 3) = pUnit->unk0x19[2];
-    dwFlagsToClear &= ~eItemFlag;
-    pUnit->nAct = (char)dwFlagsToClear;
-    pUnit->unk0x19[0] = (char)(dwFlagsToClear >> 8);
-    pUnit->unk0x19[1] = (char)(dwFlagsToClear >> 0x10);
-    pUnit->unk0x19[2] = (char)(dwFlagsToClear >> 0x18);
-    return (uint8_t)(uint32_t)(uintptr_t)pUnit;
+      *(uint8_t*)(char*)&dwFlagsToClear = pUnit->nAct;
+      *(uint8_t*)((char*)&dwFlagsToClear + 1) = pUnit->unk0x19[0];
+      *(uint8_t*)((char*)&dwFlagsToClear + 2) = pUnit->unk0x19[1];
+      *(uint8_t*)((char*)&dwFlagsToClear + 3) = pUnit->unk0x19[2];
+      dwFlagsToClear &= ~eItemFlag;
+      pUnit->nAct = (char)dwFlagsToClear;
+      pUnit->unk0x19[0] = (char)(dwFlagsToClear >> 8);
+      pUnit->unk0x19[1] = (char)(dwFlagsToClear >> 0x10);
+      pUnit->unk0x19[2] = (char)(dwFlagsToClear >> 0x18);
+      return (uint8_t)(uint32_t)(uintptr_t)pUnit;
+    } else {
+      return (uint8_t)(uint32_t)(uintptr_t)pUnit;
+    }
 }
 
 eD2ItemFlag __stdcall ITEM_GetItemData_eD2ItemFlag(D2UnitStrc * pUnit) {
@@ -2014,21 +2015,21 @@ static BOOL QualityCanHaveSockets(eD2ItemQuality eQuality) {
 BOOL __stdcall ITEM_ValidateItemQuantity(D2UnitStrc * pUnit) {
     if (pUnit) {
       int nQuantity = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_quantity, 0);
-      if (nQuantity > 0) {
+      if (nQuantity <= 0) {
+        int32_t nThrowableMinVal = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pUnit, UNITSTAT_item_throwable, 0);
+        if (nThrowableMinVal) {
+          Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_quantity, 0, 0);
+        } else {
+          nQuantity = ITEM_GetMaxStack(pUnit);
+          if (0 < nQuantity) {
+            return 0;
+          }
+        }
+
+        return 1;
+      } else {
         return 1;
       }
-
-      int32_t nThrowableMinVal = Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pUnit, UNITSTAT_item_throwable, 0);
-      if (nThrowableMinVal) {
-        Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_quantity, 0, 0);
-      } else {
-        nQuantity = ITEM_GetMaxStack(pUnit);
-        if (0 < nQuantity) {
-          return 0;
-        }
-      }
-
-      return 1;
     } else {
       return 0;
     }
@@ -2120,41 +2121,41 @@ int32_t __stdcall PLAYER_GetUnidentifiedItemsCount(D2UnitStrc * pUnit) {
     bool bOnValidPage;
     int32_t nCount = 0;
     D2UnitStrc* pCurItem = INVENTORY::Inventory::INVENTORY_GetFirstItem(pUnit->pInventory);
-    if (!pCurItem) {
-      return nCount;
-    }
-
-    nCount = 0;
-    do {
-      D2UnitStrc* pCarriedItem;
-      pCarriedItem = INVENTORY::Inventory::GetCarriedItem(pCurItem);
-      if (!pCarriedItem || pCarriedItem->eUnitType != UNIT_ITEM || !pCarriedItem->pUnitData.pUnitDataMissile || (pCarriedItem->pUnitData.pUnitDataMissile->eOwnerType & ITEMFLAG_IDENTIFIED) == UNIT_PLAYER) {
-        iVar1 = INVENTORY::Inventory::ITEM_GetItemData_eD2InventoryGridType(pCurItem);
-        if (iVar1 == INVENTORY_GRID_TYPE_INVENTORY) {
-          if (pCarriedItem && pCarriedItem->eUnitType == UNIT_ITEM) {
-            if (pCarriedItem->pUnitData.pUnitDataItem && pCarriedItem->pUnitData.pUnitDataItem->ePage == INVPAGE_INVENTORY) {
-              nCount++;
-            } else {
-              if (true && pCarriedItem->pUnitData.pUnitDataItem) {
-                bOnValidPage = pCarriedItem->pUnitData.pUnitDataItem->ePage == INVPAGE_CUBE;
-                if (bOnValidPage) {
-                  nCount++;
+    if (pCurItem) {
+      nCount = 0;
+      do {
+        D2UnitStrc* pCarriedItem;
+        pCarriedItem = INVENTORY::Inventory::GetCarriedItem(pCurItem);
+        if (!pCarriedItem || pCarriedItem->eUnitType != UNIT_ITEM || !pCarriedItem->pUnitData.pUnitDataMissile || (pCarriedItem->pUnitData.pUnitDataMissile->eOwnerType & ITEMFLAG_IDENTIFIED) == UNIT_PLAYER) {
+          iVar1 = INVENTORY::Inventory::ITEM_GetItemData_eD2InventoryGridType(pCurItem);
+          if (iVar1 == INVENTORY_GRID_TYPE_INVENTORY) {
+            if (pCarriedItem && pCarriedItem->eUnitType == UNIT_ITEM) {
+              if (pCarriedItem->pUnitData.pUnitDataItem && pCarriedItem->pUnitData.pUnitDataItem->ePage == INVPAGE_INVENTORY) {
+                nCount++;
+              } else {
+                if (true && pCarriedItem->pUnitData.pUnitDataItem) {
+                  bOnValidPage = pCarriedItem->pUnitData.pUnitDataItem->ePage == INVPAGE_CUBE;
+                  if (bOnValidPage) {
+                    nCount++;
+                  }
                 }
               }
             }
-          }
-        } else {
-          bOnValidPage = iVar1 == INVENTORY_GRID_TYPE_BODYLOC;
-          if (bOnValidPage) {
-            nCount++;
+          } else {
+            bOnValidPage = iVar1 == INVENTORY_GRID_TYPE_BODYLOC;
+            if (bOnValidPage) {
+              nCount++;
+            }
           }
         }
-      }
 
-      pCurItem = INVENTORY::Inventory::INVENTORY_GetNextItem(pCurItem);
-    } while (pCurItem);
+        pCurItem = INVENTORY::Inventory::INVENTORY_GetNextItem(pCurItem);
+      } while (pCurItem);
 
-    return nCount;
+      return nCount;
+    } else {
+      return nCount;
+    }
 }
 
 int32_t __stdcall ITEMS_ModifyPotionValueByDifficulty(D2UnitStrc * pNpc, int32_t nValue) {
@@ -3360,10 +3361,11 @@ int __stdcall ITEM_GetSpellIcon(D2UnitStrc * pUnit) {
         nBookTxtIdx = 0;
       }
       nBooksTxtLine = DATATBLS::ItemTbls::TXT_Books_GetLine(nBookTxtIdx);
-      if (nBooksTxtLine) {
+      if (!nBooksTxtLine) {
+        return -1;
+      } else {
         return (uint32_t)*(uint8_t*)((int)nBooksTxtLine + 2);
       }
-      return -1;
     }
 }
 

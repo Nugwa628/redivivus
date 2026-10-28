@@ -1958,13 +1958,13 @@ D2DrlgRoomAStarNodeStrc * __stdcall DRLGPATH_AdvancePathNodeChain(D2DrlgAStarCon
 
       pNode = (D2DrlgRoomAStarNodeStrc*)pNode->pParent;
       pNode->pSeedPtr = (void*)((int)pNode->pSeedPtr + 4);
-      if (!pAStarCtx->bRandomizeDirection) {
-        pNode->nDirection = pNode->nDirection + *(int*)pNode->pSeedPtr & 7;
-      } else {
+      if (pAStarCtx->bRandomizeDirection) {
         pDVar1 = pAStarCtx->pSeed;
         lSeedNext = D2_SEED_NEXT(*pDVar1);
         *pDVar1 = lSeedNext;
         pNode->nDirection = gnDrlgMemoryMax[lSeedNext.nSeedLow & 0x1f] + *(int*)pNode->pSeedPtr + pNode->nDirection & 7;
+      } else {
+        pNode->nDirection = pNode->nDirection + *(int*)pNode->pSeedPtr & 7;
       }
 
       pNode->nFlags++;
@@ -2701,11 +2701,12 @@ int32_t __fastcall PATH_FindPathAStarLocalPool(D2PathTypeArg * pPathTypeArg) {
       }
       pBestNodeOut = (void**)Path::DRLGPATH_PopBestNodeFromOpenList((uintptr_t)&abyOpenList);
     } while (pBestNodeOut);
-    if (!pClosestNode) {
+    if (pClosestNode) {
+      int32_t nExtractResult = Path::DRLGPATH_ExtractPathFromResult2((int32_t)pPathTypeArg, pClosestNode);
+      return nExtractResult;
+    } else {
       return 0;
     }
-    int32_t nExtractResult = Path::DRLGPATH_ExtractPathFromResult2((int32_t)pPathTypeArg, pClosestNode);
-    return nExtractResult;
 }
 } // namespace D2Common::Drlg
 namespace D2Common::Drlg::Path {

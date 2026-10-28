@@ -1216,26 +1216,26 @@ BOOL __stdcall SkillCalculateIfWeCanSkillThisSkill(D2UnitStrc * pUnit, eD2Skills
         return 0;
       }
     }
-    if (pSkillTxt->reqskill[2] < 0) {
+    if (pSkillTxt->reqskill[2] >= 0) {
+      pReqSkillTxt = D2Client::GAME::SCmd::TXT_Skills_GetLine((int)pSkillTxt->reqskill[2]);
+      if (!pReqSkillTxt) {
+        return 0;
+      }
+
+      nReqLevel = UNIT_GetSkillBySkillId(pReqSkillTxt, pUnit);
+      if (!nReqLevel) {
+        return 0;
+      }
+
+      nReqLevel = GetSkillLevelById(pUnit, (int)pSkillTxt->reqskill[2]);
+      if (0 >= nReqLevel) {
+        return 0;
+      }
+
+      return 1;
+    } else {
       return 1;
     }
-
-    pReqSkillTxt = D2Client::GAME::SCmd::TXT_Skills_GetLine((int)pSkillTxt->reqskill[2]);
-    if (!pReqSkillTxt) {
-      return 0;
-    }
-
-    nReqLevel = UNIT_GetSkillBySkillId(pReqSkillTxt, pUnit);
-    if (!nReqLevel) {
-      return 0;
-    }
-
-    nReqLevel = GetSkillLevelById(pUnit, (int)pSkillTxt->reqskill[2]);
-    if (0 >= nReqLevel) {
-      return 0;
-    }
-
-    return 1;
 }
 
 uint32_t __stdcall SpendSkillPointOnSkill(D2UnitStrc * pUnit, eD2Skills eSkill) {
@@ -1276,31 +1276,31 @@ uint32_t __stdcall SpendSkillPointOnSkill(D2UnitStrc * pUnit, eD2Skills eSkill) 
 uint32_t __stdcall SKILLS_CalcToHit(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLevel) {
     D2SkillCalcContextStrc sCalcCtx;
     if ((int)eSkill >= 0) {
-      if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
-        return 0;
-      }
+      if ((int)eSkill < sgptDataTable->nTxtSkillsCount) {
+        D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + eSkill;
+        if (!pSkillTxt) {
+          return 0;
+        }
+        if (0 >= nSkillLevel) {
+          return 0;
+        }
 
-      D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + eSkill;
-      if (!pSkillTxt) {
-        return 0;
-      }
-      if (0 >= nSkillLevel) {
-        return 0;
-      }
+        uint32_t nToHitCalcIdx = pSkillTxt->ToHitCalc;
+        if (nToHitCalcIdx == -1) {
+          return (nSkillLevel - 1) * pSkillTxt->LevToHit + pSkillTxt->ToHit;
+        }
+        if (!(sgptDataTable->pSkillsCode && nToHitCalcIdx < (uint32_t)sgptDataTable->nSkillsCodeSize)) {
+          return 0;
+        }
 
-      uint32_t nToHitCalcIdx = pSkillTxt->ToHitCalc;
-      if (nToHitCalcIdx == -1) {
-        return (nSkillLevel - 1) * pSkillTxt->LevToHit + pSkillTxt->ToHit;
-      }
-      if (!(sgptDataTable->pSkillsCode && nToHitCalcIdx < (uint32_t)sgptDataTable->nSkillsCodeSize)) {
+        sCalcCtx.pUnit = pUnit;
+        sCalcCtx.nSkillId = eSkill;
+        sCalcCtx.nSkillLevel = nSkillLevel;
+        uint32_t uFormulaResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)sgptDataTable->pSkillsCode + nToHitCalcIdx), sgptDataTable->nSkillsCodeSize - nToHitCalcIdx, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
+        return uFormulaResult;
+      } else {
         return 0;
       }
-
-      sCalcCtx.pUnit = pUnit;
-      sCalcCtx.nSkillId = eSkill;
-      sCalcCtx.nSkillLevel = nSkillLevel;
-      uint32_t uFormulaResult = Fog::Skills::SKILLS_CompileSkillFormula((uint32_t*)((uint8_t*)sgptDataTable->pSkillsCode + nToHitCalcIdx), sgptDataTable->nSkillsCodeSize - nToHitCalcIdx, (fnSkillCalcMethod)SKILLS_DescCalcCallback_Eval, gaSkillCalcMethods, gnSkillCalcMethodCount, &sCalcCtx);
-      return uFormulaResult;
     } else {
       return 0;
     }
@@ -1310,24 +1310,24 @@ int32_t __stdcall SKILLS_GetTotalSkillLevel(D2UnitStrc * pUnit, eD2Skills eSkill
     int32_t nLevelBonus;
     if (pUnit) {
       D2SkillStrc* pSkill = GetSkill(pUnit, eSkill);
-      if (!pSkill) {
+      if (pSkill) {
+        uint32_t nLevel = pSkill->nLevel;
+        if (pSkill->nOwnerGUID == -1) {
+          nLevelBonus = SKILL_GetLevelBonus(pSkill, pUnit);
+          nLevel += nLevelBonus;
+        }
+
+        nLevel = (int)nLevel <= 0 ? 0 : nLevel;
+        nLevelBonus = DATATBLS::DataTbls::TXT_Experience_GetMaxLevel(0);
+        if ((int)nLevel < nLevelBonus) {
+          return nLevel;
+        }
+
+        nLevelBonus = DATATBLS::DataTbls::TXT_Experience_GetMaxLevel(0);
+        return nLevelBonus;
+      } else {
         return 0;
       }
-
-      uint32_t nLevel = pSkill->nLevel;
-      if (pSkill->nOwnerGUID == -1) {
-        nLevelBonus = SKILL_GetLevelBonus(pSkill, pUnit);
-        nLevel += nLevelBonus;
-      }
-
-      nLevel = (int)nLevel <= 0 ? 0 : nLevel;
-      nLevelBonus = DATATBLS::DataTbls::TXT_Experience_GetMaxLevel(0);
-      if ((int)nLevel < nLevelBonus) {
-        return nLevel;
-      }
-
-      nLevelBonus = DATATBLS::DataTbls::TXT_Experience_GetMaxLevel(0);
-      return nLevelBonus;
     } else {
       return 0;
     }
@@ -1384,11 +1384,11 @@ static int32_t __stdcall SKILLS_CalculateBaseDamageFromStats(int32_t nType, D2Un
     if (nDamage < 1) {
       nDamage = 1;
     }
-    if (!nType) {
+    if (nType) {
+      return (int)nDamage / 4 << 8;
+    } else {
       return nDamage / 3 * 0x100;
     }
-
-    return (int)nDamage / 4 << 8;
 }
 
 // Applies an Sorceress elemental mastery passive bonus to a base damage value. Given an element type (fire/lightning/cold/freeze/poison), reads the corresponding passive mastery stat from pUnit and scales nBaseDamage by that percentage via D2ApplyPercent. Returns the adjusted damage, or 0 if no mastery bonus or unrecognized element type.
@@ -3406,7 +3406,10 @@ static BOOL SKILLS_HasEnoughManaForSkill(D2SkillStrc * pSkillStrc, D2UnitStrc * 
 
         nManaCost = pSkillTxt2->lvlmana * nClampedLevel + (int)pSkillTxt2->mana << (uint8_t)pSkillTxt2->manashift;
         eVenomState = DATATBLS::ItemStats::UNIT_GetUnitState(pUnitStrc, STATE_blood_mana);
-        if (eVenomState == STATE_none) {
+        if (eVenomState != STATE_none) {
+          nCurrentStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnitStrc, UNITSTAT_hitpoints, 0);
+          return (uint32_t)(nCurrentStatValue >= nManaCost);
+        } else {
           if (pSkillTxt2->srvdofunc == 0x74) {
             bIsBerserk = DATATBLS::ItemStats::UNITS_IsShapeshifted(pUnitStrc);
             if (bIsBerserk) {
@@ -3417,9 +3420,6 @@ static BOOL SKILLS_HasEnoughManaForSkill(D2SkillStrc * pSkillStrc, D2UnitStrc * 
           iVar1 = Stats::StatsEx::STATSEX_GetCurrentStat(pUnitStrc, UNITSTAT_mana, 0);
           return (uint32_t)(iVar1 >= nManaCost);
         }
-
-        nCurrentStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnitStrc, UNITSTAT_hitpoints, 0);
-        return (uint32_t)(nCurrentStatValue >= nManaCost);
       }
 
       nErrorLine = 0x6ee;
@@ -3742,59 +3742,59 @@ int32_t __stdcall SKILL_CalcMinDamage(D2UnitStrc * pUnit, int32_t nSkillId, int3
     int nMinDmg;
     D2UnitStrc* pWeapon;
     if (nSkillId >= 0) {
-      if (nSkillId >= sgptDataTable->nTxtSkillsCount) {
+      if (nSkillId < sgptDataTable->nTxtSkillsCount) {
+        D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + nSkillId;
+        if (!pSkillTxt) {
+          return 1;
+        }
+        if (pSkillTxt->Kick) {
+          int nDexterity;
+          if (!pUnit || pUnit->eUnitType != UNIT_PLAYER) {
+            nMinDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
+            nMinDmg *= 3;
+          } else {
+            nDexterity = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_dexterity, 0);
+            nMinDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_strength, 0);
+            nMinDmg = nMinDmg + nDexterity - 0x14;
+          }
+          if (nMinDmg < 1) {
+            nMinDmg = 1;
+            return (int)nMinDmg / 4 << 8;
+          } else {
+            return (int)nMinDmg / 4 << 8;
+          }
+        }
+
+        nMinDmg = 0;
+        if (!(pSkillTxt->SrcDam == '\0' || !bUseWeaponDamage)) {
+          pWeapon = Units::GetWeaponBySkill(pUnit, 0);
+          if (!pWeapon || (nMinDmg = INVENTORY::Inventory::INVENTORY_GetWeaponHandedness(pUnit, pUnit->pInventory) , nMinDmg != 2)) {
+            nMinDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_mindamage, 0);
+          } else {
+            nMinDmg = Stats::StatsEx::GetTxtMinDamage(pWeapon, 1);
+          }
+
+          nMinDmg = (uint32_t)(uint8_t)pSkillTxt->SrcDam * nMinDmg;
+          nMinDmg = (int)nMinDmg / 128;
+        }
+
+        int32_t nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MinLevDam);
+        nMinDmg = nMinDmg + nLevDamBonus + pSkillTxt->MinDam;
+        if (pSkillTxt->DmgSymPerCalc == -1) {
+          return nMinDmg << (pSkillTxt->HitShift);
+        }
+
+        nLevDamBonus = D2GetSkillCalc(pUnit, pSkillTxt->DmgSymPerCalc, nSkillId, nSkillLevel);
+        if (nLevDamBonus) {
+          nLevDamBonus = D2Client::Stats::D2ApplyPercent(nMinDmg, nLevDamBonus, 100);
+          nMinDmg += nLevDamBonus;
+          return nMinDmg << (pSkillTxt->HitShift);
+        } else {
+          return nMinDmg << (pSkillTxt->HitShift);
+        }
+      } else {
         return 1;
       }
-
-      D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + nSkillId;
-      if (!pSkillTxt) {
-        return 1;
-      }
-      if (pSkillTxt->Kick) {
-        int nDexterity;
-        if (!pUnit || pUnit->eUnitType != UNIT_PLAYER) {
-          nMinDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
-          nMinDmg *= 3;
-        } else {
-          nDexterity = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_dexterity, 0);
-          nMinDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_strength, 0);
-          nMinDmg = nMinDmg + nDexterity - 0x14;
-        }
-        if (nMinDmg >= 1) {
-          return (int)nMinDmg / 4 << 8;
-        }
-
-        nMinDmg = 1;
-        return (int)nMinDmg / 4 << 8;
-      }
-
-      nMinDmg = 0;
-      if (!(pSkillTxt->SrcDam == '\0' || !bUseWeaponDamage)) {
-        pWeapon = Units::GetWeaponBySkill(pUnit, 0);
-        if (!pWeapon || (nMinDmg = INVENTORY::Inventory::INVENTORY_GetWeaponHandedness(pUnit, pUnit->pInventory) , nMinDmg != 2)) {
-          nMinDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_mindamage, 0);
-        } else {
-          nMinDmg = Stats::StatsEx::GetTxtMinDamage(pWeapon, 1);
-        }
-
-        nMinDmg = (uint32_t)(uint8_t)pSkillTxt->SrcDam * nMinDmg;
-        nMinDmg = (int)nMinDmg / 128;
-      }
-
-      int32_t nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MinLevDam);
-      nMinDmg = nMinDmg + nLevDamBonus + pSkillTxt->MinDam;
-      if (pSkillTxt->DmgSymPerCalc == -1) {
-        return nMinDmg << (pSkillTxt->HitShift);
-      }
-
-      nLevDamBonus = D2GetSkillCalc(pUnit, pSkillTxt->DmgSymPerCalc, nSkillId, nSkillLevel);
-      if (!nLevDamBonus) {
-        return nMinDmg << (pSkillTxt->HitShift);
-      }
-
-      nLevDamBonus = D2Client::Stats::D2ApplyPercent(nMinDmg, nLevDamBonus, 100);
-      nMinDmg += nLevDamBonus;
-      return nMinDmg << (pSkillTxt->HitShift);
     } else {
       return 1;
     }
@@ -3804,47 +3804,47 @@ int32_t __stdcall SKILL_CalcMinDamage(D2UnitStrc * pUnit, int32_t nSkillId, int3
 int32_t __stdcall SKILL_CalcMaxDamage(D2UnitStrc * pUnit, int32_t nSkillId, int32_t nSkillLevel, int32_t bUseWeaponDamage) {
     int32_t nLevDamBonus;
     if (nSkillId >= 0) {
-      if (nSkillId >= sgptDataTable->nTxtSkillsCount) {
-        return 2;
-      }
-
-      D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + nSkillId;
-      if (!pSkillTxt) {
-        return 2;
-      }
-
-      int nMaxDmg = 0;
-      if (pSkillTxt->Kick) {
-        nLevDamBonus = SKILLS_CalculateBaseDamageFromStats(0, pUnit);
-        return nLevDamBonus;
-      }
-      if (!(pSkillTxt->SrcDam == '\0' || !bUseWeaponDamage)) {
-        D2UnitStrc* pWeapon;
-        pWeapon = Units::GetWeaponBySkill(pUnit, 0);
-        if (!pWeapon || (nMaxDmg = INVENTORY::Inventory::INVENTORY_GetWeaponHandedness(pUnit, pUnit->pInventory) , nMaxDmg != 2)) {
-          nMaxDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxdamage, 0);
-        } else {
-          nMaxDmg = Stats::StatsEx::GetTxtMaxDamage(pWeapon, 0x18);
+      if (nSkillId < sgptDataTable->nTxtSkillsCount) {
+        D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + nSkillId;
+        if (!pSkillTxt) {
+          return 2;
         }
 
-        nMaxDmg = (uint32_t)(uint8_t)pSkillTxt->SrcDam * nMaxDmg;
-        nMaxDmg = (int)nMaxDmg / 128;
-      }
+        int nMaxDmg = 0;
+        if (pSkillTxt->Kick) {
+          nLevDamBonus = SKILLS_CalculateBaseDamageFromStats(0, pUnit);
+          return nLevDamBonus;
+        }
+        if (!(pSkillTxt->SrcDam == '\0' || !bUseWeaponDamage)) {
+          D2UnitStrc* pWeapon;
+          pWeapon = Units::GetWeaponBySkill(pUnit, 0);
+          if (!pWeapon || (nMaxDmg = INVENTORY::Inventory::INVENTORY_GetWeaponHandedness(pUnit, pUnit->pInventory) , nMaxDmg != 2)) {
+            nMaxDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxdamage, 0);
+          } else {
+            nMaxDmg = Stats::StatsEx::GetTxtMaxDamage(pWeapon, 0x18);
+          }
 
-      nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MaxLevDam);
-      nMaxDmg = nMaxDmg + nLevDamBonus + pSkillTxt->MaxDam;
-      if (pSkillTxt->DmgSymPerCalc == -1) {
-        return nMaxDmg << (pSkillTxt->HitShift);
-      }
+          nMaxDmg = (uint32_t)(uint8_t)pSkillTxt->SrcDam * nMaxDmg;
+          nMaxDmg = (int)nMaxDmg / 128;
+        }
 
-      nLevDamBonus = D2GetSkillCalc(pUnit, pSkillTxt->DmgSymPerCalc, nSkillId, nSkillLevel);
-      if (!nLevDamBonus) {
-        return nMaxDmg << (pSkillTxt->HitShift);
-      }
+        nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MaxLevDam);
+        nMaxDmg = nMaxDmg + nLevDamBonus + pSkillTxt->MaxDam;
+        if (pSkillTxt->DmgSymPerCalc == -1) {
+          return nMaxDmg << (pSkillTxt->HitShift);
+        }
 
-      nLevDamBonus = D2Client::Stats::D2ApplyPercent(nMaxDmg, nLevDamBonus, 100);
-      nMaxDmg += nLevDamBonus;
-      return nMaxDmg << (pSkillTxt->HitShift);
+        nLevDamBonus = D2GetSkillCalc(pUnit, pSkillTxt->DmgSymPerCalc, nSkillId, nSkillLevel);
+        if (nLevDamBonus) {
+          nLevDamBonus = D2Client::Stats::D2ApplyPercent(nMaxDmg, nLevDamBonus, 100);
+          nMaxDmg += nLevDamBonus;
+          return nMaxDmg << (pSkillTxt->HitShift);
+        } else {
+          return nMaxDmg << (pSkillTxt->HitShift);
+        }
+      } else {
+        return 2;
+      }
     } else {
       return 2;
     }
@@ -3853,51 +3853,52 @@ int32_t __stdcall SKILL_CalcMaxDamage(D2UnitStrc * pUnit, int32_t nSkillId, int3
 // Evaluates a passive skill's elemental calc value for a specific element type (0=min fire/0x156, 1=min cold/0x157, 2=min lightning/0x158). Searches the skill's passivestat array for the matching stat ID, then calls D2GetSkillCalc on the corresponding passivecalc slot. Returns 0 if the skill/level is invalid or the element type is not found in passivestat.
 uint32_t __stdcall SKILL_GetPassiveElementCalc(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLevel, int32_t nElementType) {
     int nMinStatId;
-    if ((int)eSkill < 0) {
-      return 0;
-    }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
-      return 0;
-    }
+    if ((int)eSkill >= 0) {
+      if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+        return 0;
+      }
 
-    D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + eSkill;
-    if (!pSkillTxt) {
-      return 0;
-    }
-    if (nSkillLevel < 1) {
-      return 0;
-    }
-    if (!nElementType) {
-      nMinStatId = 0x156;
-      nElementType = 0x159;
-    } else if (nElementType == 1) {
-      nMinStatId = 0x157;
-      nElementType = 0x15a;
+      D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + eSkill;
+      if (!pSkillTxt) {
+        return 0;
+      }
+      if (nSkillLevel < 1) {
+        return 0;
+      }
+      if (!nElementType) {
+        nMinStatId = 0x156;
+        nElementType = 0x159;
+      } else if (nElementType == 1) {
+        nMinStatId = 0x157;
+        nElementType = 0x15a;
+      } else {
+        if (nElementType != 2) {
+          return 0;
+        }
+
+        nMinStatId = 0x158;
+        nElementType = 0x15b;
+      }
+
+      int nPassiveSlot = 0;
+      short int* pPassiveStat = pSkillTxt->passivestat;
+      while (*pPassiveStat != nMinStatId && *pPassiveStat != nElementType) {
+        nPassiveSlot++;
+        pPassiveStat++;
+        if (4 < nPassiveSlot) {
+          return 0;
+        }
+      }
+
+      if (nPassiveSlot >= 5) {
+        return 0;
+      }
+
+      uint32_t nCalcResult = D2GetSkillCalc(pUnit, pSkillTxt->passivecalc[nPassiveSlot], eSkill, nSkillLevel);
+      return nCalcResult;
     } else {
-      if (nElementType != 2) {
-        return 0;
-      }
-
-      nMinStatId = 0x158;
-      nElementType = 0x15b;
-    }
-
-    int nPassiveSlot = 0;
-    short int* pPassiveStat = pSkillTxt->passivestat;
-    while (*pPassiveStat != nMinStatId && *pPassiveStat != nElementType) {
-      nPassiveSlot++;
-      pPassiveStat++;
-      if (4 < nPassiveSlot) {
-        return 0;
-      }
-    }
-
-    if (nPassiveSlot >= 5) {
       return 0;
     }
-
-    uint32_t nCalcResult = D2GetSkillCalc(pUnit, pSkillTxt->passivecalc[nPassiveSlot], eSkill, nSkillLevel);
-    return nCalcResult;
 }
 
 // Initialises a unit's skill list with class default skills if not already populated. Checks whether the base Attack skill (skill 0, nOwnerGUID -1) is present; if not, allocates it plus all class-specific skills from CharStats.txt (up to 10 entries). Also ensures left and right skill slots are assigned, defaulting to Attack (left) and skill 0 (right) if unset.

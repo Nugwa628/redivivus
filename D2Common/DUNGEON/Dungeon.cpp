@@ -1125,33 +1125,33 @@ int32_t __stdcall DRLGROOM_GetIdleTicks(D2RoomStrc * pRoom) {
 BOOL __fastcall DRLGROOM_HasUniqueClient(D2RoomStrc * pRoom1, D2RoomStrc * pRoom2) {
     D2ClientStrc** pClient1Iter;
     int i = 0;
-    if (0 >= pRoom2->nClientsCount) {
+    if (0 < pRoom2->nClientsCount) {
+      int nClients1 = pRoom1->nClientsCount;
+      do {
+        int j;
+        j = 0;
+        if (0 < nClients1) {
+          pClient1Iter = pRoom1->pClients;
+          do {
+            if (*pClient1Iter == pRoom2->pClients[i]) {
+              break;
+            }
+
+            j++;
+            pClient1Iter++;
+          } while (j < nClients1);
+        }
+        if (j >= nClients1) {
+          return 1;
+        }
+
+        i++;
+      } while (i < pRoom2->nClientsCount);
+
+      return 0;
+    } else {
       return 0;
     }
-
-    int nClients1 = pRoom1->nClientsCount;
-    do {
-      int j;
-      j = 0;
-      if (0 < nClients1) {
-        pClient1Iter = pRoom1->pClients;
-        do {
-          if (*pClient1Iter == pRoom2->pClients[i]) {
-            break;
-          }
-
-          j++;
-          pClient1Iter++;
-        } while (j < nClients1);
-      }
-      if (j >= nClients1) {
-        return 1;
-      }
-
-      i++;
-    } while (i < pRoom2->nClientsCount);
-
-    return 0;
 }
 
 // @sourcefile .\DUNGEON\Dungeon.cpp
@@ -1601,22 +1601,22 @@ D2RoomStrc * __stdcall SpawnUnit(D2DrlgActStrc * pDrlgAct, eD2LevelId eLevel, in
       pDrlgAct = 0;
       nLocalY = 0;
       pSpawnRoom = Drlg::DrlgRoom::DRLGSPAWN_FindSpawnLocationInLevel(*ppDVar1, eLevel, nParam, (int*)&pDrlgAct, &nLocalY);
-      if (!pSpawnRoom) {
+      if (pSpawnRoom) {
+        Drlg::Transform::CoordsRoomToWorld((int32_t*)&pDrlgAct, &nLocalY);
+        ptSpawnCoord.x = (uintptr_t)&pDrlgAct->eLevelIdFirst + 3;
+        ptSpawnCoord.y = nLocalY + 3;
+        pFreeCoordRoom = Collision::GetFreeCoordinates_WithNeighboorRooms(pSpawnRoom, &ptSpawnCoord, nParam2, 0x1c09, 0);
+        if (!pFreeCoordRoom) {
+          nErrorLine = 0x238;
+        } else {
+          *pnParam1 = ptSpawnCoord.x;
+          *pnParam2 = ptSpawnCoord.y;
+          pSpawnRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pSpawnRoom, *pnParam1, ptSpawnCoord.y);
+          return pSpawnRoom;
+        }
+      } else {
         return nullptr;
       }
-
-      Drlg::Transform::CoordsRoomToWorld((int32_t*)&pDrlgAct, &nLocalY);
-      ptSpawnCoord.x = (uintptr_t)&pDrlgAct->eLevelIdFirst + 3;
-      ptSpawnCoord.y = nLocalY + 3;
-      pFreeCoordRoom = Collision::GetFreeCoordinates_WithNeighboorRooms(pSpawnRoom, &ptSpawnCoord, nParam2, 0x1c09, 0);
-      if (pFreeCoordRoom) {
-        *pnParam1 = ptSpawnCoord.x;
-        *pnParam2 = ptSpawnCoord.y;
-        pSpawnRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pSpawnRoom, *pnParam1, ptSpawnCoord.y);
-        return pSpawnRoom;
-      }
-
-      nErrorLine = 0x238;
     }
 
     Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), nErrorLine);
@@ -2022,11 +2022,11 @@ D2RoomStrc * __fastcall DRLGROOMEX_GetCurrentSubA0(D2DrlgStrc * pDrlg) {
 // Gets the ActMiscSubA0 for a specific RoomEx within its Drlg context. Checks the RoomEx's field_0x44 priority and linked list position to determine the correct SubA0 entry. Returns NULL if at sentinel.
 D2RoomStrc * __fastcall DRLGROOMEX_GetSubA0ForRoom(D2DrlgStrc * pDrlg, D2RoomExStrc * pRoomEx) {
     D2RoomExStrc* pStatusNext = pRoomEx->pStatusNext;
-    if (!((pRoomEx->fRoomStatus != '\0' || pStatusNext != pDrlg->aSubA0 || (pStatusNext = pDrlg->aSubA0[1].pStatusNext , pStatusNext != pDrlg->aSubA0 + 1)) && pStatusNext)) {
+    if ((pRoomEx->fRoomStatus != '\0' || pStatusNext != pDrlg->aSubA0 || (pStatusNext = pDrlg->aSubA0[1].pStatusNext , pStatusNext != pDrlg->aSubA0 + 1)) && pStatusNext) {
+      return pStatusNext->pRoom;
+    } else {
       return nullptr;
     }
-
-    return pStatusNext->pRoom;
 }
 
 // Reads cached DrlgActMisc state from the static data table (sgtDataTable). Outputs field_0x8 and field_0x468 values for both client-side (A) and server-side (B) actmisc instances.
@@ -2090,11 +2090,11 @@ void __stdcall DRLGROOMEX_UpdateClientRoomExActivation(D2DrlgStrc * pDrlg) {
 // Provenance: asm 0061ba10..0061ba26 (RET), aligned entry after padding; unreferenced in 1.14d.
 BOOL __stdcall LEVEL_IsNotTownAndNotArreatSummit(eD2LevelId eLevel) {
     BOOL BVar1 = Drlg::LEVEL_CheckIfLevelIsTown(eLevel);
-    if (!BVar1) {
+    if (BVar1) {
+      return 0;
+    } else {
       return (uint32_t)(eLevel != LEVEL_ArreatSummit);
     }
-
-    return 0;
 }
 
 BOOL __fastcall RoomEx_method_0(D2RoomExStrc * pRoomEx) {

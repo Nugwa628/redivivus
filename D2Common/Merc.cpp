@@ -180,12 +180,12 @@ static D2MonSeqMonsterTbls * __stdcall GetMonsterSequenceTable(D2UnitStrc * pUni
     }
 
     D2MonStatsTxt* pMonStatsTxt = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetLine(nWeaponClass);
-    if (!pMonStatsTxt) {
+    if (pMonStatsTxt) {
+      pSeqTable = DATATBLS::MonsterTbls::GetMonsterSequenceTableByIndex(nSequenceId);
+      return pSeqTable;
+    } else {
       return pSeqTable;
     }
-
-    pSeqTable = DATATBLS::MonsterTbls::GetMonsterSequenceTableByIndex(nSequenceId);
-    return pSeqTable;
 }
 
 // 2022.01.09 - dzik

@@ -822,10 +822,10 @@ static void DRLGPRESET_AddAndSetPresetUnits(D2RoomExStrc * pRoomEx) {
 
         pCurrent->pPresetUnitNext = pRoomEx->pPresetUnit;
         pRoomEx->pPresetUnit = pCurrent;
-        if (!pPrevPresetUnit) {
-          pNextPresetUnit = *(D2PresetUnitStrc**)(pMapDataRaw + 0x38);
-        } else {
+        if (pPrevPresetUnit) {
           pNextPresetUnit = pPrevPresetUnit->pPresetUnitNext;
+        } else {
+          pNextPresetUnit = *(D2PresetUnitStrc**)(pMapDataRaw + 0x38);
         }
       } else {
         pNextPresetUnit = pCurrent->pPresetUnitNext;

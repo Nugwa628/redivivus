@@ -711,15 +711,15 @@ void __fastcall InitCache(D2DrlgStrc * pDrlg, D2DrlgTileDataStrc * pDrlgActSub18
       nParam3 = 0;
       nTileSubType = 0;
       if (byActNo) {
-        if (byActNo == 1) {
-          nTileSubType = 1;
-        } else {
+        if (byActNo != 1) {
           if (byActNo != 2) {
             return;
           }
 
           nParam3 = 0x1d;
           nTileSubType = 0xc;
+        } else {
+          nTileSubType = 1;
         }
       }
 
@@ -877,9 +877,7 @@ void __fastcall DRLGLEVEL_SetLevelSizeAndAlignVsDependentLevel(D2DrlgStrc * pDrl
     int nRealOffsetX;
     nRealOffsetX = 0;
     pLevel->sCoordinatesAndSize.WorldSize.y = pLevelDef->SizeY[pDrlg->nDifficulty];
-    if (!nDependLevelId) {
-      nRealOffsetY = 0;
-    } else {
+    if (nDependLevelId) {
       D2DrlgLevelStrc* pLevelDepend;
       /* Loop thru levels and find level by DependId */ for (pLevelDepend = pDrlg->pLevel; pLevelDepend; pLevelDepend = pLevelDepend->pLevelNext) {
         if (pLevelDepend->eD2LevelId == nDependLevelId) {
@@ -891,6 +889,8 @@ void __fastcall DRLGLEVEL_SetLevelSizeAndAlignVsDependentLevel(D2DrlgStrc * pDrl
       take_depend_offset:
       nRealOffsetX = pLevelDepend->sCoordinatesAndSize.WorldPosition.x;
       nRealOffsetY = pLevelDepend->sCoordinatesAndSize.WorldPosition.y;
+    } else {
+      nRealOffsetY = 0;
     }
 
     pLevel->sCoordinatesAndSize.WorldPosition.x = pLevelDef->OffsetX + nRealOffsetX;
@@ -4180,12 +4180,12 @@ int32_t __fastcall PATH_FindPathTowardWithAStarFallback(D2PathTypeArg * pPathTyp
     }
 
     nResult = nTowardResult;
-    if (!nTowardResult) {
+    if (nTowardResult) {
+      nResult = PATH_FindPathToward(pPathTypeArg);
+      return nResult;
+    } else {
       return nResult;
     }
-
-    nResult = PATH_FindPathToward(pPathTypeArg);
-    return nResult;
 }
 
 int32_t __fastcall PATH_FindPathSingleStep(D2PathTypeArg * pPathTypeArg) {

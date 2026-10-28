@@ -41,27 +41,27 @@ static uint16_t aaWaypointsBitMasks_0__1_[112][2] = { 0 }; D2_STATIC_GUARD(aaWay
 
 BOOL __stdcall FindLevelIdByWaypointId(uint16_t nWaypointId, eD2LevelId * pLevelId) {
     *pLevelId = LEVEL_None;
-    if (nWaypointId >= 0xff) {
-      return 0;
-    }
-
-    eD2LevelId eLevel = LEVEL_RogueEncampment;
-    if (1 >= sgptDataTable->nTxtLevelsSize) {
-      return 0;
-    }
-
-    do {
-      D2LevelsTxt* pLevelsTxt;
-      pLevelsTxt = DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevel);
-      if (pLevelsTxt->Waypoint == nWaypointId) {
-        *pLevelId = eLevel;
-        return 1;
+    if (nWaypointId < 0xff) {
+      eD2LevelId eLevel = LEVEL_RogueEncampment;
+      if (1 >= sgptDataTable->nTxtLevelsSize) {
+        return 0;
       }
 
-      eLevel += LEVEL_RogueEncampment;
-    } while ((int)eLevel < sgptDataTable->nTxtLevelsSize);
+      do {
+        D2LevelsTxt* pLevelsTxt;
+        pLevelsTxt = DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevel);
+        if (pLevelsTxt->Waypoint == nWaypointId) {
+          *pLevelId = eLevel;
+          return 1;
+        }
 
-    return 0;
+        eLevel += LEVEL_RogueEncampment;
+      } while ((int)eLevel < sgptDataTable->nTxtLevelsSize);
+
+      return 0;
+    } else {
+      return 0;
+    }
 }
 
 BOOL __stdcall FindWaypointIdByLevelId(eD2LevelId eLevel, int16_t * pWaypointId) {

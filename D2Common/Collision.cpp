@@ -2147,12 +2147,12 @@ D2RoomStrc * __stdcall GetFreeCoordinates(D2RoomStrc * pRoom, POINT * pPoint, PO
       DATATBLS::FieldTbls::FIELDTBLS_FreePoint(pFieldPath);
     }
     if (nBestDist == -1) {
-      if (!bAllowNeighboorRooms) {
+      if (bAllowNeighboorRooms) {
+        pFoundRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, pPoint->x, pPoint->y);
+        return pFoundRoom;
+      } else {
         return nullptr;
       }
-
-      pFoundRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, pPoint->x, pPoint->y);
-      return pFoundRoom;
     }
 
     pFoundRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, pPoint->x, pPoint->y);

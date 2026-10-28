@@ -87,25 +87,25 @@ static int32_t STATLIST_BinarySearchInsertPos(int32_t nParam, int * pnParam) {
     int nMid;
     int nCount = (int)(short int)pnParam[1];
     int nLo = 0;
-    if (0 >= nCount) {
+    if (0 < nCount) {
+      do {
+        int nEntryKey;
+        nMid = (nCount - nLo) / 2 + nLo;
+        nEntryKey = *(int*)(*pnParam + nMid * 8);
+        if (nParam > nEntryKey) {
+          nLo = nMid + 1;
+          nMid = nCount;
+        } else if (nEntryKey <= nParam) {
+          return -1;
+        }
+
+        nCount = nMid;
+      } while (nLo < nMid);
+
+      return nLo;
+    } else {
       return nLo;
     }
-
-    do {
-      int nEntryKey;
-      nMid = (nCount - nLo) / 2 + nLo;
-      nEntryKey = *(int*)(*pnParam + nMid * 8);
-      if (nParam > nEntryKey) {
-        nLo = nMid + 1;
-        nMid = nCount;
-      } else if (nEntryKey <= nParam) {
-        return -1;
-      }
-
-      nCount = nMid;
-    } while (nLo < nMid);
-
-    return nLo;
 }
 
 static int32_t __stdcall STATLIST_BinarySearchStatInfoArray(int32_t nParam, D2StatInfoStrc * pStatInfo) {
@@ -186,23 +186,23 @@ static int32_t STATLIST_BinarySearchChangedInsertPos(D2ChangedStatArrayStrc * pS
     int nMid;
     int nCount = (int)pStatInfo->wCount;
     int nLo = 0;
-    if (0 >= nCount) {
+    if (0 < nCount) {
+      do {
+        nMid = (nCount - nLo) / 2 + nLo;
+        if (nParam > pStatInfo->pChangedStatIds[nMid]) {
+          nLo = nMid + 1;
+          nMid = nCount;
+        } else if (pStatInfo->pChangedStatIds[nMid] <= nParam) {
+          return -1;
+        }
+
+        nCount = nMid;
+      } while (nLo < nMid);
+
+      return nLo;
+    } else {
       return nLo;
     }
-
-    do {
-      nMid = (nCount - nLo) / 2 + nLo;
-      if (nParam > pStatInfo->pChangedStatIds[nMid]) {
-        nLo = nMid + 1;
-        nMid = nCount;
-      } else if (pStatInfo->pChangedStatIds[nMid] <= nParam) {
-        return -1;
-      }
-
-      nCount = nMid;
-    } while (nLo < nMid);
-
-    return nLo;
 }
 
 // Records a changed stat into the D2StatListExStrc dirty-tracking array so it can be saved later. Guards: only runs if the stat-list has the dirty-tracking flag (bit 31), skips volatile stats (hp/mana/stamina/exp/gold), skips stats not in ItemStatCost or lacking the SAVED flag. Finds the sorted insertion position via binary search; if the changed-stat array is full, reallocates it (+4 slots via Fog ReAllocServerMemory). Shifts existing entries and inserts the shifted-stat id, then increments wCount.
