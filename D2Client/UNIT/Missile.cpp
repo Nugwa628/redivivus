@@ -874,7 +874,7 @@ D2UnitStrc * __fastcall MakeMissile(D2SkillArgStrc * pSkillArg) {
     nSlowPct = 100;
     uint32_t nVelForPath;
     nVelForPath = nVelocityRaw;
-    if (pSkillArg->pOwner && pMissileTxt->CanSlow) {
+    if (pSkillArg->pOwner && (*((uint8_t*)pMissileTxt + 0x4) & gadwBitMasks[3])) {
       eD2States eSlowState;
       eSlowState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pSkillArg->pOwner, STATE_slowmissiles);
       if (eSlowState != STATE_none) {
