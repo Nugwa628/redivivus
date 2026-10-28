@@ -324,7 +324,7 @@ BOOL __stdcall UNITS_IsShapeshifted(D2UnitStrc * pUnit) {
     if (!pUnit) {
       return 0;
     } else {
-      return pUnit->eUnitFlagsEx >> 3 & 1;
+      return (uint32_t)pUnit->eUnitFlagsEx >> 3 & 1;
     }
 }
 
