@@ -109,8 +109,6 @@ void __stdcall FreeGamePalShift() {
         Fog::Memory::FreeClientMemory(gpPalShiftEntryListHead, ".\\GAME\\PalShift.cpp", 0x84, 0);
         gpPalShiftEntryListHead = pNextEntry;
       } while (pNextEntry);
-
-      gpPalShiftEntryListHead = 0;
     }
     if (gpMonsterPalShiftList) {
       Fog::Memory::FreeClientMemory(gpMonsterPalShiftList, ".\\GAME\\PalShift.cpp", 0x8a, 0);

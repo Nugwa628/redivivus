@@ -4361,12 +4361,14 @@ void __stdcall INPUT_ConfigConfirmEntry(D2UIMouseMsgStrc * pMsg) {
       pMsg->bHandled = 0;
       return;
     }
-    if (!gnConfigBindingFirstClick) {
+    if (gnConfigBindingFirstClick) {
+      if (!(pMsg->uLParam.nLParam & 0x40000000U) && gpStatDescriptorTable[g_ControlConfigUIState].nCmdIndex != 0x39) {
+        UI_ConfigKeyBindModeEnable();
+        Sound::SOUND_PlaySound(SOUND_CURSOR_SELECT, nullptr, 0, 0, 0);
+        gnConfigBindingFirstClick = 0;
+      }
+    } else {
       gnConfigBindingFirstClick = 1;
-    } else if (!(pMsg->uLParam.nLParam & 0x40000000U) && gpStatDescriptorTable[g_ControlConfigUIState].nCmdIndex != 0x39) {
-      UI_ConfigKeyBindModeEnable();
-      Sound::SOUND_PlaySound(SOUND_CURSOR_SELECT, nullptr, 0, 0, 0);
-      gnConfigBindingFirstClick = 0;
     }
 
     pMsg->bHandled = 1;
