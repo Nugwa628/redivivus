@@ -1912,21 +1912,23 @@ void __stdcall UIMENU_PlayerProfileLabels() {
 // Provenance: asm 00443e10..00443ea0; the forms are the ones OOGUTIL_CreateViewProfileDialog / OOGUTIL_CreateEditProfileDialog create.
 void __stdcall OOGUTIL_CloseProfileDialog() {
     if (gnProfileDialogMode) {
+      ::D2WinTextBox** ppFormToDestroy;
       if (gnProfileDialogMode == 1) {
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm(&gpProfileViewBackground);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileViewAccountName);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileViewSex);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileViewLocation);
-        D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileViewDescription);
+        ppFormToDestroy = &gpProfileViewDescription;
       } else {
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm(&gpProfileEditBackground);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileEditAccountName);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileEditSex);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileEditLocation);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileEditDescription);
-        D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileCloseButton);
+        ppFormToDestroy = (::D2WinTextBox**)&gpProfileCloseButton;
       }
 
+      D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)ppFormToDestroy);
       gnProfileDialogMode = 0;
       D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gUIPlayerProfileCharacterNameLabel);
       D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gUIPlayerProfileCharacterLevelLabel);
@@ -3203,9 +3205,8 @@ void __stdcall UIMENU_JoinGame() {
 
     gpOogGameListDetailsPanelControl = (::D2WinTextBox*)D2Win::Src::D2WinMain::FORMS_CreateAnyForm(gaPredefinedForms_b + 0x37);
     DWORD dwTickNow = GetTickCount();
-    dwTickNow -= gdwLastGameListRefreshTick;
-    if (dwTickNow >= 5000) {
-      gdwLastGameListRefreshTick += dwTickNow;
+    if (5000 <= dwTickNow - gdwLastGameListRefreshTick) {
+      gdwLastGameListRefreshTick += dwTickNow - gdwLastGameListRefreshTick;
       OOGMENU_RequestGameList();
     }
 

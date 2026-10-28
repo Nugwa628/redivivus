@@ -701,7 +701,7 @@ bool __stdcall MISSILESMODE_CheckCollisionAtOffset(int32_t nDistance, D2RoomStrc
     ptFrom.x = nParam2;
     ptTo.x = nParam2 + nDistance;
     BOOL bCollides = D2Common::Collision::TestCollision(pRoom, &ptFrom, &ptTo, 4);
-    return (bool)('\x01' - (bCollides != 0));
+    return !bCollides;
 }
 
 // Server-side missile spawner that fills a square/circular area around the owning unit's position with copies of missile nMissileId. Centers on pUnit's path position (static or dynamic), then sweeps a (2*nRadiusParam+1) grid; for each cell within the radius (distance^2 <= nRadiusParam^2) it wall-tests via TestCollision(COLLIDE_WALL) and, if clear and the cell maps to a valid non-town room, fills a D2SkillArgStrc (owner, skill id, level) and calls CreatingMissile. nParam (when nonzero) sets a duration/total-frames field and an extra flag. Used for AoE patterns (e.g. nova-/firewall-style area fills).
@@ -4063,10 +4063,10 @@ BOOL __fastcall Missiles_SrvHitFunc_SpawnSubMissileAtDirectionPoint(::SGAMEDATA 
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       sSkillArg.nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      sSkillArg.nY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       sSkillArg.nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      sSkillArg.nY = 0;
     }
 
     memset(&sSkillArg, 0, 0x5c);
@@ -4344,10 +4344,10 @@ BOOL __fastcall Missiles_SrvHitFunc_AreaDamageAndSpawnSubMissile(::SGAMEDATA * p
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nMissileY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nMissileY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nMissileY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nMissileY = 0;
     }
 
     MISSILE_SetDamage(pUnit, nullptr, &sDamage);
@@ -5390,10 +5390,10 @@ int __fastcall Hits(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarge
       }
 
       D2Common::Units::Missile::SetOwner(pUnit, pTarget);
-      if (!pUnit) {
-        eCurrMode = 0;
-      } else {
+      if (pUnit) {
         eCurrMode = pUnit->eAnimMode.ePlayerMode;
+      } else {
+        eCurrMode = 0;
       }
 
       bIsOwner = MISSMODE_CheckCollisionMode(eCurrMode, (int*)pTarget);
@@ -5896,10 +5896,10 @@ int __fastcall MISSMODE_SrvDoFn09_BatLightningBolt(::SGAMEDATA * pGame, D2UnitSt
     ::SGAMEDATA* pGameArg = pGame;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnitPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nUnitPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nUnitPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nUnitPosX = 0;
     }
 
     eUnitType = pUnit->eUnitType;
@@ -7726,10 +7726,10 @@ int __fastcall MISSILESMODE_SrvDoFn34_BaalTauntControl(::SGAMEDATA * pGame, D2Un
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nSubMissileCount = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nSubMissileCount = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nSubMissileCount = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nSubMissileCount = 0;
       }
 
       pDVar1 = &pUnit->sSeed;

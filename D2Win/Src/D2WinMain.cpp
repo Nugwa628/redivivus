@@ -1152,7 +1152,7 @@ BOOL __stdcall FreeInGameGFX() {
     return 1;
 }
 
-int __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
+void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
     DWORD TickCountA;
     uint32_t dwSleepMs;
     tagMSG windowMsg;
@@ -1209,11 +1209,10 @@ int __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
 
     RENDERER_DrawOutOfGameScene();
     if (ghwndMsgHook) {
-      return 0;
+      return;
     }
 
     gbMessageLoopActive = 1;
-    return 0;
 }
 
 void __stdcall MOUSE_CaptureMousePosition(HWND * phWnd) {
