@@ -80,8 +80,8 @@ namespace D2Game::Quests::QUESTS::A5Q2 {
 // OR FinishedInPreviousGame(0xf), AND is NOT in the transient JustCompleted(0xd)/CannotComplete(0xe)
 // states. Otherwise no-op. Reads QuestRecord bits for QUEST_RescueOnMountArreat.
 BOOL __fastcall Q32_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RescueOnMountArreat, QUESTSTATE_Completed);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RescueOnMountArreat, QUESTSTATE_FinishedInPreviousGame) , bQuestState != 0)) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RescueOnMountArreat, QUESTSTATE_JustCompleted);
@@ -123,8 +123,8 @@ void __fastcall Q32_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 // stateFlag==2 -> set Step0x02, stateFlag==3 -> set Step0x03. These step bits let the client UI show
 // progress and let Q32_Callback_13 restore stateFlag on re-entry.
 BOOL __fastcall Q32_UpdateQuestStep(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RescueOnMountArreat, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -180,8 +180,8 @@ void __fastcall Q32_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     }
 
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     *(uint32_t*)(char*)&pBitBuffer2 = (uint32_t)(uintptr_t)pBitBuffer;
     if (sVar1 == 0x4e80) {
       pDVar2->bQuestCompleted = true;
@@ -320,8 +320,8 @@ void __fastcall Q32_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int nNPCClassId;
     uint32_t nGossipLineIdx;
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_JustCompleted);
     if (!pQuestArgs->pTarget) {
@@ -377,8 +377,8 @@ void __fastcall Q32_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 // field_0xAC counter: 0xf->Step0x05 (all/most freed), 0xe->Step0x06, else->Step0x07 (fewest freed).
 // This is how rescue credit (and the reward tier) propagates to nearby party members.
 void __fastcall Q32_SetCompleteForPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RescueOnMountArreat, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -445,8 +445,8 @@ void __fastcall Q32_Callback10_PlayerLeavesGame(D2QuestDataStrc * pQuestData, D2
 // prisoners were killed (>=5 lost) so the quest can no longer be completed this game session. nParam is the
 // player unit (byte[0x6d] = nDifficulty used to index pQuestRecordPool).
 BOOL __fastcall Q32_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RescueOnMountArreat, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -642,8 +642,8 @@ void __fastcall Q32_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     }
 
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -734,15 +734,15 @@ void __fastcall Q32_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // transient progress flag). Counterpart to where Step0x04 is set in Q32_OnBarricadeDestroyed.
 void __fastcall Q32_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2Common::QuestRecord::UnsetQuestState(pQuestRecord, QUEST_RescueOnMountArreat, QUESTSTATE_Step0x04);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2Common::QuestRecord::UnsetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_RescueOnMountArreat, QUESTSTATE_Step0x04);
 }
 
 // A5Q2 (Rescue on Mount Arreat) state-handler slot 0xd — join/load state restore. On player (re)join: first clears the transient Step0x04 bit. Then, if quest is not Completed, FinishedInPreviousGame, or RewardAwaits, rehydrates server stateFlag from persisted step bits: Step0x03 set → stateFlag=3 (stateFlagPrev=1); Step0x02 set → stateFlag=2 (stateFlagPrev=1). Restores in-progress quest progression when a game is created or joined.
 void __fastcall Q32_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     D2Common::QuestRecord::UnsetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Step0x04);
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestState) {
@@ -898,14 +898,14 @@ void __fastcall Objects_InitFn62(D2ObjectInitFnArg * pInitArg) {
 // runs Q32_SetCompleteForPartyMember for every party member -- spreading rescue completion + reward tier to the
 // whole party. No-op for solo/non-just-completed players.
 BOOL __fastcall Q32_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_RescueOnMountArreat, QUESTSTATE_JustCompleted);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_RescueOnMountArreat, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }
 
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -917,8 +917,8 @@ BOOL __fastcall Q32_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * p
 // If the player's QuestRecord shows JustCompleted(0xd), plays the quest-completion sound/event (event sound 0x51,
 // SetupUpdateEvent_AttachEventSound) on that player. nParam = player unit (byte[0x6d]=nDifficulty for pQuestRecordPool index).
 BOOL __fastcall Q32_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_RescueOnMountArreat, QUESTSTATE_JustCompleted);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_RescueOnMountArreat, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }

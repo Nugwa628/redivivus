@@ -36,6 +36,7 @@ namespace D2Common::Text {
 
 // Function declarations
 // @sourcefile .\Text\Text.cpp
+void TEXT_FreeAllMessages(struct D2GSPacketSrv0x27_TextStrc * ppPoolManager);
 // @sourcefile .\Text\Text.cpp
 void __stdcall STRUCT_FreeTxtMessageForPacket0x27(struct D2GSPacketSrv0x27_TextStrc * pGSPacketSrv0x27_Text);
 // @sourcefile .\Text\Text.cpp
