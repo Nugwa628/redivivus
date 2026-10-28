@@ -482,10 +482,10 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x07_NEWROOM(char * pBytes) {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    if (!pUnit) {
-      pRoomCache = 0;
-    } else {
+    if (pUnit) {
       pRoomCache = D2Common::Units::UNITS_GetRoom(pUnit);
+    } else {
+      pRoomCache = 0;
     }
 
     D2Common::DUNGEON::Dungeon::AddRoomData(sgpDrlgAct, (eD2LevelId)(uint8_t)pBytes[5], (uint32_t)nX, (uint32_t)nY, pRoomCache);
