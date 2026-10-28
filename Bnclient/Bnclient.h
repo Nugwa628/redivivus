@@ -97,7 +97,6 @@ uint32_t CACHE_ComputeCRC32(int32_t nByteLen, uint8_t * pbData);
 void CACHE_EncryptBlock(uint32_t nParam1, uint32_t nParam2, uint32_t * pnParam);
 LPFILETIME * CACHE_GetFileTime(uint32_t nParam);
 void __stdcall CACHE_InitCryptTable();
-void CACHE_BuildFilePath(LPSTR szText);
 // Closes and deletes the Fog cache file. Closes ghCacheFileHandle if open, builds cache file path to %APPDATA%\Blizzard Entertainment\Diablo II\bncache.dat, and deletes it via DeleteFileA.
 void __stdcall CACHE_DeleteFile();
 // @sourcefile .\BnSend.cpp
