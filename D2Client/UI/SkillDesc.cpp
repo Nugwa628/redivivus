@@ -6409,10 +6409,10 @@ BOOL __fastcall SKILLDESC_GetSkillBonusText(D2UnitStrc * pUnit, int32_t nParam) 
     if (!pUnit) {
       return 0;
     }
-    if (!nParam) {
-      pSkill = D2Common::Units::GetRightSkill(pUnit);
-    } else {
+    if (nParam) {
       pSkill = D2Common::Units::GetLeftSkill(pUnit);
+    } else {
+      pSkill = D2Common::Units::GetRightSkill(pUnit);
     }
 
     __frame0.pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill);
