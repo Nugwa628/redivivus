@@ -311,48 +311,46 @@ D2MonModeTxt * __stdcall TxtGetMonModeLine(uint32_t nId, int32_t nModeIndex) {
     if (nId >= (uint32_t)nTxtMonModeSize) {
       return nullptr;
     }
-    if (nModeIndex) {
-      if (nModeIndex != 1) {
-        return nullptr;
-      }
-      if (!(pTxtMonMode3 + nId)) {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x129);
-        exit(-1);
-      }
-
-      return pTxtMonMode3 + nId;
-    } else {
+    switch (nModeIndex) {
+    case 0:
       if (!(pTxtMonMode2 + nId)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x126);
         exit(-1);
       }
 
       return pTxtMonMode2 + nId;
+    case 1:
+      if (!(pTxtMonMode3 + nId)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x129);
+        exit(-1);
+      }
+
+      return pTxtMonMode3 + nId;
     }
+    return nullptr;
 }
 
 D2ObjTypeTxt * __stdcall TxtGetObjTypeModeLine(uint32_t nId, int32_t nModeIndex) {
     if (nId >= (uint32_t)nTxtObjTypeModeSize) {
       return nullptr;
     }
-    if (nModeIndex) {
-      if (nModeIndex != 1) {
-        return nullptr;
-      }
-      if (!(pTxtObjMode + nId)) {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x13c);
-        exit(-1);
-      }
-
-      return (D2ObjTypeTxt*)(pTxtObjMode + nId);
-    } else {
+    switch (nModeIndex) {
+    case 0:
       if (!(pTxtObjType + nId)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x139);
         exit(-1);
       }
 
       return pTxtObjType + nId;
+    case 1:
+      if (!(pTxtObjMode + nId)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x13c);
+        exit(-1);
+      }
+
+      return (D2ObjTypeTxt*)(pTxtObjMode + nId);
     }
+    return nullptr;
 }
 
 D2CompositTxt * __stdcall TxtCompositGetLine(int32_t nId) {
