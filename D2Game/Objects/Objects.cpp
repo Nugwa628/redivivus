@@ -316,7 +316,7 @@ D2UnitStrc * __fastcall SERVER_InitUnitObject(::SGAMEDATA * pGame, D2RoomStrc * 
     }
 
     int nObjSpawnIdx = nMonStatsId - 0x23e;
-    if (gnObjectSpawnChanceInitVal <= nObjSpawnIdx) {
+    if (nObjSpawnIdx >= (int)gnObjectSpawnChanceInitVal) {
       return nullptr;
     }
 
