@@ -1153,7 +1153,7 @@ void __fastcall MONSTER_TransformToClassId(D2UnitStrc * pUnit, int32_t nClassId)
 
     D2Common::PATH::DynamicPath::SetVelocities(pDynamicPath, (int)pMonStatsTxtNew->Velocity << 8, ".\\UNIT\\Monster.cpp", 0x2b8);
     D2Common::PATH::DynamicPath::PATH_RestoreMonsterCollision(pUnit, 0);
-    if (pMonStatsTxtNew->interact && !pUnit->pInventory) {
+    if ((*((uint8_t*)pMonStatsTxtNew + 0xd) & gadwBitMasks[1]) && !pUnit->pInventory) {
       pInventory = D2Common::INVENTORY::Inventory::STRUCT_CreatePlayerInventory(nullptr, pUnit);
       pUnit->pInventory = pInventory;
     }
@@ -1176,21 +1176,21 @@ void __fastcall MONSTER_TransformToClassId(D2UnitStrc * pUnit, int32_t nClassId)
     uint32_t nRandStartFrame;
     nRandStartFrame = Archive::RANDOM_RandomNumberSelector(&pUnit->sSeed, pUnit->nFrameCount);
     pUnit->nGfxCurrentFrame = nRandStartFrame;
-    if (pMonStats2->isSel) {
+    if ((*((uint8_t*)pMonStats2 + 0x4) & gadwBitMasks[3])) {
       pUnit->eUnitFlags |= UNITFLAG_TARGETABLE;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
     }
 
     pUnit->eUnitFlagsEx &= ~UNITFLAGEX_NODRAW;
-    if (!pMonStats2->shadow) {
+    if (!(*((uint8_t*)pMonStats2 + 0x5) & gadwBitMasks[6])) {
       pUnit->eUnitFlags |= UNITFLAG_DRAWSHADOW;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_DRAWSHADOW;
     }
 
     pUnit->eUnitFlags |= UNITFLAG_ISVALIDTARGET;
-    if (!pMonStats2->isAtt) {
+    if (!(*((uint8_t*)pMonStats2 + 0x5) & gadwBitMasks[1])) {
       eUpdatedFlags = pUnit->eUnitFlags & ~UNITFLAG_CANBEATTACKED;
     } else {
       eUpdatedFlags = pUnit->eUnitFlags | UNITFLAG_CANBEATTACKED;
@@ -1214,7 +1214,7 @@ void __fastcall MONSTER_TransformToClassId(D2UnitStrc * pUnit, int32_t nClassId)
       nMonStats2Idx++;
     } while (nMonStats2Idx < 8);
 
-    if (!pMonStatsTxtNew->npc) {
+    if (!(*((uint8_t*)pMonStatsTxtNew + 0xd) & gadwBitMasks[0])) {
       D2SeedStrc DVar1;
       DVar1 = D2_SEED_NEXT(pUnit->sSeed);
       pUnit->sSeed = DVar1;
