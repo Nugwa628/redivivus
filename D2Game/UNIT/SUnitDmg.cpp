@@ -1972,7 +1972,7 @@ BOOL __stdcall DAMAGE_CheckKnockbackThreshold(D2UnitStrc * pUnit, D2DamageStrc *
     return 0;
 }
 
-static void __stdcall DAMAGE_RemoveObjectAtSameCoords(int32_t nClassId, D2UnitStrc * pUnit) {
+void __stdcall DAMAGE_RemoveObjectAtSameCoords(int32_t nClassId, D2UnitStrc * pUnit) {
     POINT ptObjPos;
     POINT ptUnitPos;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
