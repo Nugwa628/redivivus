@@ -372,10 +372,10 @@ int __stdcall NPCMENU_ShowSelectedDialogOption() {
     uint32_t nMessageId = D2Common::Text::TEXT_GetMessageByIndex(pOverheadText, nSelectedIndex - nDialogBaseOffset);
     uint16_t wMessageId = (uint16_t)nMessageId;
     gnNpcMenuScrollCompleteMode = wMessageId;
-    if (!_Interaction::bInteractingWithNpc) {
-      pNpcUnit = 0;
-    } else {
+    if (_Interaction::bInteractingWithNpc) {
       pNpcUnit = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
+    } else {
+      pNpcUnit = 0;
     }
 
     Text::TEXT_ShowNpcDialog(pNpcUnit, wMessageId, 0);
