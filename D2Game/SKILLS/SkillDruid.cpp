@@ -1076,7 +1076,7 @@ BOOL __fastcall Skills_SrvDoFunc_123_Tornado(::SGAMEDATA * pGame, D2UnitStrc * p
       return 0;
     }
 
-    D2Common::Units::Missile::SetTargetX(pUnit_00, uVar2 & 0xff);
+    D2Common::Units::Missile::SetTargetX(pUnit_00, (uint8_t)uVar2);
     UNIT::SUnitMsg::SERVER_SendUnitMessagePacket(pUnit, nullptr, (uint16_t)eSkill, (uint16_t)nSkillLvl, nTargetY, nTargetX, (uint8_t)uVar2);
     return 1;
 }

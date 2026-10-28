@@ -1616,7 +1616,7 @@ static BOOL __stdcall PLAYER_CalculateMovementTarget(D2UnitStrc * pPlayerUnit, D
     uint32_t nMinMoveDist = 3;
     if (!(nAbsDist & 4) || !(nAbsDist & 0x40)) {
       if (nAbsDist & 8) {
-        nMinMoveDist = (nAbsDist & 0xff) >> 6 & 1 | 4;
+        nMinMoveDist = (uint8_t)nAbsDist >> 6 & 1 | 4;
       } else {
         if (nAbsDist & 0x10) {
           nMinMoveDist = 0;

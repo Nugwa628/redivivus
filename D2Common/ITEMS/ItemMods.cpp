@@ -218,7 +218,7 @@ BOOL __stdcall ITEMMOD_SetChargedSkillCharges(D2UnitStrc * pUnit, int32_t nSkill
           nNewCharges = nMaxCharges;
         }
 
-        Stats::StatsEx::STATLIST_SetStatValueInBaseArraySafe(pStatList, UNITSTAT_item_charged_skill, nMaxCharges * 0x100 + (nNewCharges & 0xff), nStatKey, pUnit);
+        Stats::StatsEx::STATLIST_SetStatValueInBaseArraySafe(pStatList, UNITSTAT_item_charged_skill, nMaxCharges * 0x100 + (uint8_t)nNewCharges, nStatKey, pUnit);
         return 1;
       }
     }

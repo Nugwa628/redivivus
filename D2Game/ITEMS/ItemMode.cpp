@@ -246,7 +246,7 @@ void __fastcall STATSLISTEX_FunctionCallback(::SGAMEDATA * pGame, D2UnitStrc * p
         }
       break;
       case UNITSTAT_item_addclassskills:
-        if (pUnit->eUnitType == UNIT_PLAYER && pUnit->nClassId == (fOldMaxStat & 0xffff) || (_bIsMercUnit = D2Common::Monsters::MONSTERS::MONSTER_GetMercType(pUnit) , _bIsMercUnit != 0)) {
+        if (pUnit->eUnitType == UNIT_PLAYER && pUnit->nClassId == (uint16_t)fOldMaxStat || (_bIsMercUnit = D2Common::Monsters::MONSTERS::MONSTER_GetMercType(pUnit) , _bIsMercUnit != 0)) {
           goto apply_passive_states;
         }
       nNewValue = pUnit->eUnitType;
@@ -309,7 +309,7 @@ void __fastcall STATSLISTEX_FunctionCallback(::SGAMEDATA * pGame, D2UnitStrc * p
 
       break;
       case UNITSTAT_state:
-        eState = fOldMaxStat & 0xffff;
+        eState = (uint16_t)fOldMaxStat;
       if (true && (int)eState < sgptDataTable->nTxtStatesSize) {
         eCurrentState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, eState);
         if (!nNewValue) {
@@ -339,13 +339,13 @@ void __fastcall STATSLISTEX_FunctionCallback(::SGAMEDATA * pGame, D2UnitStrc * p
         goto apply_passive_states;
       case UNITSTAT_item_aura:
         if (!nNewValue) {
-          SKILLS::SkillItem::SKILL_DeactivateAura(pGame, pUnit, eSkill, fOldMaxStat & 0xffff);
+          SKILLS::SkillItem::SKILL_DeactivateAura(pGame, pUnit, eSkill, (uint16_t)fOldMaxStat);
           return;
         }
-      SKILLS::SkillItem::SKILL_ProcessPeriodicAuraTick(pGame, pUnit, eSkill, fOldMaxStat & 0xffff, nNewValue);
+      SKILLS::SkillItem::SKILL_ProcessPeriodicAuraTick(pGame, pUnit, eSkill, (uint16_t)fOldMaxStat, nNewValue);
       return;
       case UNITSTAT_item_addskill_tab:
-        if (pUnit->eUnitType == UNIT_PLAYER && pUnit->nClassId == (fOldMaxStat & 0xffff) >> 3 || (bIsMerc = D2Common::Monsters::MONSTERS::MONSTER_GetMercType(pUnit) , bIsMerc != 0)) {
+        if (pUnit->eUnitType == UNIT_PLAYER && pUnit->nClassId == (uint16_t)fOldMaxStat >> 3 || (bIsMerc = D2Common::Monsters::MONSTERS::MONSTER_GetMercType(pUnit) , bIsMerc != 0)) {
           goto apply_passive_states;
         }
       nNewValue = pUnit->eUnitType;
@@ -356,7 +356,7 @@ void __fastcall STATSLISTEX_FunctionCallback(::SGAMEDATA * pGame, D2UnitStrc * p
         return;
       }
 
-      fOldMaxStat = (fOldMaxStat & 0xffff) >> 3;
+      fOldMaxStat = (uint16_t)fOldMaxStat >> 3;
       match_transformed_class:
       if (nOldValue == fOldMaxStat) {
         apply_passive_states:
@@ -366,11 +366,11 @@ void __fastcall STATSLISTEX_FunctionCallback(::SGAMEDATA * pGame, D2UnitStrc * p
       break;
       case UNITSTAT_item_charged_skill:
         if (pItemOwner) {
-          nChargedSkillParam = fOldMaxStat & 0xffff;
+          nChargedSkillParam = (uint16_t)fOldMaxStat;
           nChargedSkillId = sgptDataTable->dwChargedSkillLevelMask & nChargedSkillParam;
           nSkillLevel = (int)nChargedSkillParam >> ((uint8_t)sgptDataTable->nChargedSkillLevelBits & 0x1f);
           _bChargedCountActive = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pItemOwner, eStat, (uint16_t)fOldMaxStat);
-          nNewValue = _bChargedCountActive & 0xff;
+          nNewValue = (uint8_t)_bChargedCountActive;
           if (nNewValue) {
             pItemOwnerUnit = D2Common::Stats::StatsEx::SEVER_ITEM_GetOwner(pItemOwner, nullptr);
             if (pItemOwnerUnit == pUnit) {
@@ -455,7 +455,7 @@ static eD2Skills ITEMMODE_GetItemSkillId(D2UnitStrc * pUnit) {
     }
 
     uint32_t nSuffixId = D2Common::ITEMS::Items::GetMagicSuffix(pUnit, 0);
-    void* pBookLine = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine(nSuffixId & 0xffff);
+    void* pBookLine = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine((uint16_t)nSuffixId);
     if (!pBookLine) {
       return ~SKILL_Attack;
     }
@@ -2260,7 +2260,7 @@ static eD2Skills ITEMMODE_GetItemCastSkill(D2UnitStrc * pUnit) {
     if (bIsType) {
       int* pBookTxt;
       nSuffix = D2Common::ITEMS::Items::GetMagicSuffix(pUnit, 0);
-      pBookTxt = (int*)D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine(nSuffix & 0xffff);
+      pBookTxt = (int*)D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine((uint16_t)nSuffix);
       if (!pBookTxt) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfa4);
         exit(-1);
@@ -2275,7 +2275,7 @@ static eD2Skills ITEMMODE_GetItemCastSkill(D2UnitStrc * pUnit) {
     }
 
     nSuffix = D2Common::ITEMS::Items::GetMagicSuffix(pUnit, 0);
-    pvVar1 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine(nSuffix & 0xffff);
+    pvVar1 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine((uint16_t)nSuffix);
     if (!pvVar1) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xfab);
       exit(-1);
@@ -4387,9 +4387,9 @@ void __fastcall ITEMMODE_RemoveItemFromBelt(::SGAMEDATA * pGame, D2UnitStrc * pU
               bCopyInv = 1;
               nErrorLine = D2Common::Units::GetInventoryPage(pUnit, nSrcPage, pGameSaved->bExpansion);
               if (pUnit->eUnitType == UNIT_PLAYER) {
-                if ((nSrcPage & 0xff) == 1) {
+                if ((uint8_t)nSrcPage == 1) {
                   bCopyInv = 0;
-                } else if ((nSrcPage & 0xff) == 2) {
+                } else if ((uint8_t)nSrcPage == 2) {
                   pBestDropRoom = (D2RoomStrc*)0x1;
                 }
               }
@@ -6602,9 +6602,9 @@ static void __stdcall ITEMMODE_RemoveItemsFromCube(::SGAMEDATA * pGame, D2UnitSt
             bRefreshInv = 1;
             iVar2 = D2Common::Units::GetInventoryPage(pUnit2, nSrcPage, pGame->bExpansion);
             if (pUnit2->eUnitType == UNIT_PLAYER) {
-              if ((nSrcPage & 0xff) == 1) {
+              if ((uint8_t)nSrcPage == 1) {
                 bRefreshInv = 0;
-              } else if ((nSrcPage & 0xff) == 2) {
+              } else if ((uint8_t)nSrcPage == 2) {
                 bInTrade = 1;
               }
             }

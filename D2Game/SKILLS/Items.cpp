@@ -508,7 +508,7 @@ static BOOL HasSufixOrPrefix(int32_t nGroupId, D2UnitStrc * pUnit) {
     iSlot = 0;
     while (true) {
       uSuffixId = D2Common::ITEMS::Items::GetMagicSuffix(pUnit, iSlot);
-      pAffixTxt = D2Common::DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(uSuffixId & 0xffff);
+      pAffixTxt = D2Common::DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)uSuffixId);
       if (!pAffixTxt) {
         return 0;
       }
@@ -1039,7 +1039,7 @@ static BOOL __stdcall ITEMMOD_GenerateRareAffixes(D2ItemGenContextStrc * pItemGe
       }
 
       nAffixLineIdx = D2Common::ITEMS::Items::GetMagicSuffix(pUnit, nPrefixSlot2);
-      pDVar11 = D2Common::DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(nAffixLineIdx & 0xffff);
+      pDVar11 = D2Common::DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)nAffixLineIdx);
       if (pDVar11) {
         D2Common::ITEMS::ItemMods::ApplyRuneAndGemStats(0, nullptr, pUnit, pDVar11, 0, 0);
       }
@@ -1126,7 +1126,7 @@ BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2UnitStrc *
             nRolledAffixRaw = ITEMMOD_RollMagicAffixClassic(pUnit, 1, 1, 0, 0, 0, 0);
           }
 
-          nRolledAffixMasked = nRolledAffixRaw & 0xffff;
+          nRolledAffixMasked = (uint16_t)nRolledAffixRaw;
           uVar1 = nRolledAffixMasked;
           *(uint16_t*)(char*)&nRolledAffixMasked = (uint16_t)nRolledAffixRaw;
           if (!(uint16_t)nRolledAffixMasked) {
@@ -1136,7 +1136,7 @@ BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2UnitStrc *
           iDupCheckSlot = 0;
           while (true) {
             nRolledAffixRaw = D2Common::ITEMS::Items::GetMagicSuffix(pUnit, iDupCheckSlot);
-            pExistingAffixTxt = D2Common::DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(nRolledAffixRaw & 0xffff);
+            pExistingAffixTxt = D2Common::DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)nRolledAffixRaw);
             if (pExistingAffixTxt) {
               pRolledAffixTxt = D2Common::DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(uVar1);
               if ((uint16_t)nRolledAffixMasked == (short int)nRolledAffixRaw || pRolledAffixTxt->group == pExistingAffixTxt->group) {
@@ -1167,7 +1167,7 @@ BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2UnitStrc *
             nRolledAffixRaw = ITEMMOD_RollMagicAffixClassic(pUnit, 1, 1, 0, 1, 0, 0);
           }
 
-          nRolledAffixMasked = nRolledAffixRaw & 0xffff;
+          nRolledAffixMasked = (uint16_t)nRolledAffixRaw;
           uVar1 = nRolledAffixMasked;
           *(uint16_t*)(char*)&nRolledAffixMasked = (uint16_t)nRolledAffixRaw;
           if (!(uint16_t)nRolledAffixMasked) {
@@ -1218,7 +1218,7 @@ BOOL __stdcall RollPrefixes(D2ItemGenContextStrc * pItemGenContext, D2UnitStrc *
       }
 
       nRolledAffixRaw = D2Common::ITEMS::Items::GetMagicSuffix(pUnit, iStatApplySlot);
-      pExistingAffixTxt = D2Common::DATATBLS::ItemTbls::TXT_magicaffixes_GetLine(nRolledAffixRaw & 0xffff);
+      pExistingAffixTxt = D2Common::DATATBLS::ItemTbls::TXT_magicaffixes_GetLine((uint16_t)nRolledAffixRaw);
       if (pExistingAffixTxt) {
         D2Common::ITEMS::ItemMods::ApplyRuneAndGemStats(0, nullptr, pUnit, pExistingAffixTxt, 0, 0);
       }

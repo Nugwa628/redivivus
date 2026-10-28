@@ -1377,7 +1377,7 @@ BOOL __fastcall Skills_SrvDoFunc_113_UseScrollOrBook(::SGAMEDATA * pGame, D2Unit
       uVar3 = D2Common::ITEMS::Items::ITEMS_IsA(pUnit_00, ITEMTYPE_Book);
       if (uVar3) {
         uVar4 = D2Common::ITEMS::Items::GetMagicSuffix(pUnit_00, 0);
-        pvVar5 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine(uVar4 & 0xffff);
+        pvVar5 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine((uint16_t)uVar4);
         if (pvVar5 && *(eD2Skills*)((int)pvVar5 + 0xc) == eVar1) {
           iVar6 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit_00, UNITSTAT_quantity, 0);
           if (0 < iVar6) {
@@ -1388,7 +1388,7 @@ BOOL __fastcall Skills_SrvDoFunc_113_UseScrollOrBook(::SGAMEDATA * pGame, D2Unit
         uVar3 = D2Common::ITEMS::Items::ITEMS_IsA(pUnit_00, ITEMTYPE_Scroll);
         if (uVar3) {
           uVar4 = D2Common::ITEMS::Items::GetMagicSuffix(pUnit_00, 0);
-          pvVar5 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine(uVar4 & 0xffff);
+          pvVar5 = D2Common::DATATBLS::ItemTbls::TXT_Books_GetLine((uint16_t)uVar4);
           if (pvVar5 && *(eD2Skills*)((int)pvVar5 + 8) == eVar1) {
             break;
           }
@@ -2154,8 +2154,8 @@ BOOL __fastcall ITEMEVENT_CastOnDeath(::SGAMEDATA * pGame, uint32_t nUnitEvent, 
       return 0;
     }
 
-    eD2Skills eProcSkill = (int)(eSkill & 0xffff) >> ((uint8_t)sgptDataTable->nChargedSkillLevelBits & 0x1f);
-    eD2Skills eSkillLevel = sgptDataTable->dwChargedSkillLevelMask & eSkill & 0xffff;
+    eD2Skills eProcSkill = (int)((uint16_t)eSkill) >> ((uint8_t)sgptDataTable->nChargedSkillLevelBits & 0x1f);
+    eD2Skills eSkillLevel = sgptDataTable->dwChargedSkillLevelMask & (uint16_t)eSkill;
     D2SeedStrc DVar1 = D2_SEED_NEXT(pUnit->sSeed);
     pUnit->sSeed = DVar1;
     if (!((int)(DVar1.nSeedLow % 100) < nProcChance && 0 <= (int)eProcSkill && (int)eProcSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eProcSkill)) {

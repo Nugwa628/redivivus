@@ -1313,7 +1313,7 @@ int __stdcall NET_SID_CLIENT_Send_0x50_AuthInfo() {
       /* LPCSTR lpProcName for GetProcAddress */ /* HMODULE hModule for GetProcAddress */ pfnGetSystemDefaultUILanguage = GetProcAddress(hKernel32, "GetSystemDefaultUILanguage");
       if (pfnGetSystemDefaultUILanguage) {
         uVar1 = (*pfnGetSystemDefaultUILanguage)();
-        /* HMODULE hLibModule for FreeLibrary */ __frame0.sAuthInfoPacket.dwLanguageId = uVar1 & 0xffff;
+        /* HMODULE hLibModule for FreeLibrary */ __frame0.sAuthInfoPacket.dwLanguageId = (uint16_t)uVar1;
         FreeLibrary(hKernel32);
         goto add_country_and_send;
       }

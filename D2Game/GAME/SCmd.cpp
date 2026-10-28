@@ -950,7 +950,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x21_SETSKILLLEVEL(D2ClientStrc * pClient, 
     packet.skill = (uint16_t)eSkill;
     packet.packetId = 0x21;
     packet.nBaseAmount = nBaseAmount;
-    int32_t nLevelBonus = D2Common::Skills::GetSkillBonus(pUnit, eSkill & 0xffff);
+    int32_t nLevelBonus = D2Common::Skills::GetSkillBonus(pUnit, (uint16_t)eSkill);
     packet.nLevelBonus = (uint8_t)nLevelBonus;
     SCMD_QueuePacketForClient(&packet.packetId, 0xc, pClient);
 }

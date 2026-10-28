@@ -211,7 +211,7 @@ D2UnitStrc * __stdcall ITEM_CreateItemFromGroundPacket(uint16_t nItemX, uint32_t
       pUnitDataItemDetails = &itemDetails;
     }
 
-    D2UnitStrc* pUnit = CUnit::UNIT_CreateWarp(*(int32_t*)(pPacketData + 4), pUnitDataItemDetails->classId, (uint32_t)nItemX, nItemY & 0xffff, UNIT_ITEM, (uint32_t)pUnitDataItemDetails->nAnimMode);
+    D2UnitStrc* pUnit = CUnit::UNIT_CreateWarp(*(int32_t*)(pPacketData + 4), pUnitDataItemDetails->classId, (uint32_t)nItemX, (uint16_t)nItemY, UNIT_ITEM, (uint32_t)pUnitDataItemDetails->nAnimMode);
     D2Common::ITEMS::Items::ITEM_LoadFromSaveData(pUnit, pPacketData + 8, bVar1 - 8, 0, nullptr, 0x60, &bLoadFailed);
     if (bLoadFailed) {
       CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pPacketData + 4), UNIT_ITEM);
@@ -247,7 +247,7 @@ D2UnitStrc * __stdcall ITEM_CreateItemFromBodyPacket(uint16_t nItemX, uint32_t n
       pUnitDataItemDetails = &itemDetails;
     }
 
-    D2UnitStrc* pUnit = CUnit::UNIT_CreateWarp(*(int32_t*)(pPacketData + 4), pUnitDataItemDetails->classId, (uint32_t)nItemX, nItemY & 0xffff, UNIT_ITEM, (uint32_t)pUnitDataItemDetails->nAnimMode);
+    D2UnitStrc* pUnit = CUnit::UNIT_CreateWarp(*(int32_t*)(pPacketData + 4), pUnitDataItemDetails->classId, (uint32_t)nItemX, (uint16_t)nItemY, UNIT_ITEM, (uint32_t)pUnitDataItemDetails->nAnimMode);
     D2Common::ITEMS::Items::ITEM_LoadFromSaveData(pUnit, pPacketData + 0xd, bVar1 - 0xd, 0, nullptr, 0x60, &bLoadFailed);
     if (bLoadFailed) {
       CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pPacketData + 4), UNIT_ITEM);
@@ -1038,7 +1038,7 @@ BOOL __fastcall ITEM_UpdateChargedSkillStat(D2UnitStrc * pUnit, int32_t nParam, 
           nChargeCount = nLevel;
         }
 
-        D2Common::Stats::StatsEx::STATLIST_SetStatValueInBaseArraySafe(pStatList, UNITSTAT_item_charged_skill, nLevel * 0x100 + (nChargeCount & 0xff), nStatParamPacked, pUnit);
+        D2Common::Stats::StatsEx::STATLIST_SetStatValueInBaseArraySafe(pStatList, UNITSTAT_item_charged_skill, nLevel * 0x100 + (uint8_t)nChargeCount, nStatParamPacked, pUnit);
         return 1;
       }
     }
@@ -1557,8 +1557,8 @@ void __stdcall ITEM_PlaceItemInContainer(D2UnitStrc * pUnit, uint32_t nYPos, int
     int32_t nDelay;
     int32_t nLine;
     int32_t nSoundVolume;
-    D2Common::Units::SetXForStaticUnit(pUnit, nItemX & 0xffff);
-    D2Common::Units::SetYForStaticUnit(pUnit, nYPos & 0xffff);
+    D2Common::Units::SetXForStaticUnit(pUnit, (uint16_t)nItemX);
+    D2Common::Units::SetYForStaticUnit(pUnit, (uint16_t)nYPos);
     D2InventoryStrc* pInventory = pUnit2->pInventory;
     int nXPos = 0;
     if (!pInventory) {

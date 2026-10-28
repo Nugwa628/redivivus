@@ -1901,7 +1901,7 @@ void __fastcall CLIENT_AllocAct(int32_t nActNo, int32_t nMapSeed, int32_t nAutom
     }
 
     gbActInitExpansionFlag = 0;
-    UI::Draw::SetActNo(nActNo & 0xff);
+    UI::Draw::SetActNo((uint8_t)nActNo);
     UI::Draw::Draw_UI_LoadGame(1);
     D2GameGame0x546->nInitSeed = 0;
     D2GameGame0x546->nAutomap = 0;

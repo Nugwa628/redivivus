@@ -1374,7 +1374,7 @@ BOOL __fastcall ITEMEVENT_SorAuraManaAbsorb(::SGAMEDATA * pGame, uint32_t nUnitE
       nAbsorbPct = D2Client::Units::GetYPosFromDynamicPathUnit(pTarget);
       nDirection = D2Common::Units::GetDirectionToCoords(pUnit, D2Client::Units::GetXPosFromDynamicPathUnit(pTarget), nAbsorbPct);
       bIsMerc = D2Common::Monsters::MONSTERS::MONSTERS_GetGfxOffsetTable2((uint8_t)nDirection);
-      D2Common::Units::SetOverlay(pUnit, (int)pSkillTxt->prgoverlay + (bIsMerc & 0xff), 0);
+      D2Common::Units::SetOverlay(pUnit, (int)pSkillTxt->prgoverlay + (uint8_t)bIsMerc, 0);
     }
     if ((int)nCurMana >= 1) {
       return 1;

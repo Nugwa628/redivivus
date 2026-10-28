@@ -1270,7 +1270,7 @@ void __stdcall SUNITINACTIVE_SaveInactiveUnit(::SGAMEDATA * pGame, D2UnitStrc * 
         uVar9 = GAME::Event::EVENT_TimerTypeExistsOnUnit(pGame, pUnit, UNITEVENTCALLBACK_ACTIVESTATE);
         _Dst->nUnitGUID = uVar9 >> 0x10;
         uVar9 = GAME::Event::EVENT_TimerTypeExistsOnUnit(pGame, pUnit, UNITEVENTCALLBACK_ACTIVESTATE);
-        _Dst->nDropItemCode = uVar9 & 0xffff;
+        _Dst->nDropItemCode = (uint16_t)uVar9;
       } else {
         iVar6 = pUnit->nClassId;
         if (iVar6 == 0x3b || iVar6 == 0x3c || iVar6 == 100) {

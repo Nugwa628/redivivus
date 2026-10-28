@@ -1424,7 +1424,7 @@ int32_t __stdcall DRLGPATH_GetWeightedDistancePacked(uint32_t nParam1, uint32_t 
     0xb
 }; D2_STATIC_GUARD(gaPathWeightTable, "D2Common::Drlg::Path::DRLGPATH_GetWeightedDistancePacked::gaPathWeightTable");
 
-    int nAbsDX = (nParam1 & 0xffff) - (nParam2 & 0xffff);
+    int nAbsDX = (uint16_t)nParam1 - ((uint16_t)nParam2);
     if (nAbsDX < 0) {
       nAbsDX = -nAbsDX;
     }
@@ -1503,7 +1503,7 @@ static BOOL __stdcall DRLGPATH_RaycastCollisionLine(int * pVelocity, uint32_t nP
     uint32_t nPackedSrc = nParam;
     int nFpIterX = nParam * 0x10000 + 0x8000;
     uint32_t nPackedDst = *pnParam;
-    int nAbsDX = (nPackedDst & 0xffff) - (nFpIterX >> 0x10 & 0xffffU);
+    int nAbsDX = (uint16_t)nPackedDst - (nFpIterX >> 0x10 & 0xffffU);
     int nFpIterY = (nParam & -65536) + 0x8000;
     int nVelX = *pVelocity;
     int nVelY = pVelocity[1];
@@ -1884,7 +1884,7 @@ uint32_t __fastcall DRLGPATH_ValidateFullPath(D2PathTypeArg * pPathTypeArgs) {
 // Computes a simple distance heuristic between two packed coordinates: min(dx,dy) + max(dx,dy)*2. This is equivalent to a simple diagonal distance estimation.
 int32_t __stdcall DRLGPATH_GetSimpleDistancePacked(uint32_t nParam1, uint32_t nParam2) {
     int nResult;
-    int nDX = (nParam2 & 0xffff) - (nParam1 & 0xffff);
+    int nDX = (uint16_t)nParam2 - ((uint16_t)nParam1);
     if (nDX < 0) {
       nDX = -nDX;
     }
@@ -2039,7 +2039,7 @@ int32_t __fastcall DRLGPATH_FindPathAStar(D2DrlgRoomCoordsStrc * pRoomCoords, D2
     sStartNode.nY = pPathTypeArg->pCoords.nPosX;
     *(uint16_t*)(char*)&nCostLimit = pPathTypeArg->pCoords.nOffsetY;
     *(uint16_t*)((char*)&nCostLimit + 2) = pPathTypeArg->pCoords.nPosY;
-    int nPathLength = (nCostLimit & 0xffff) - (*(uint32_t*)((char*)&sStartNode + 8) & 0xffff);
+    int nPathLength = (uint16_t)nCostLimit - (*(uint32_t*)((char*)&sStartNode + 8) & 0xffff);
     if (nPathLength < 0) {
       nPathLength = -nPathLength;
     }
@@ -2115,7 +2115,7 @@ int32_t __fastcall DRLGPATH_FindPathAStar(D2DrlgRoomCoordsStrc * pRoomCoords, D2
 
 // Alternate simple distance heuristic between two packed coordinates. Same formula as DRLGPATH_GetSimpleDistancePacked but used by the secondary A* pathfinder (PathTypeFunc_01).
 int32_t __stdcall DRLGPATH_GetSimpleDistancePacked2(uint32_t nParam1, uint32_t nParam2) {
-    int nAbsDX = (nParam1 & 0xffff) - (nParam2 & 0xffff);
+    int nAbsDX = (uint16_t)nParam1 - ((uint16_t)nParam2);
     if (nAbsDX < 0) {
       nAbsDX = -nAbsDX;
     }
@@ -2663,7 +2663,7 @@ int32_t __fastcall PATH_FindPathAStarLocalPool(D2PathTypeArg * pPathTypeArg) {
       abyOpenList.nPoolCount++;
       memset(pNewNode, 0, 0x38);
     }
-    int32_t nDeltaX = (nPackedSrc & 0xffff) - (nUnusedParam & 0xffff);
+    int32_t nDeltaX = (uint16_t)nPackedSrc - ((uint16_t)nUnusedParam);
     pNewNode->nGCost = 0;
     if (nDeltaX < 0) {
       nDeltaX = -nDeltaX;
@@ -2711,14 +2711,14 @@ int32_t __fastcall PATH_FindPathAStarLocalPool(D2PathTypeArg * pPathTypeArg) {
 namespace D2Common::Drlg::Path {
 // Computes the squared Euclidean distance between two packed (X|Y) coordinates. Returns dx*dx + dy*dy. No callers found - likely referenced via function pointer table or dead code.
 int32_t __stdcall DRLGPATH_GetSquaredDistancePacked(uint32_t nPackedA, uint32_t nPackedB) {
-    int nDeltaX = (nPackedA & 0xffff) - (nPackedB & 0xffff);
+    int nDeltaX = (uint16_t)nPackedA - ((uint16_t)nPackedB);
     int nDeltaY = (nPackedA >> 0x10) - (nPackedB >> 0x10);
     return nDeltaY * nDeltaY + nDeltaX * nDeltaX;
 }
 
 // Computes a direction lookup value from two packed coordinates using a table at 0x6F1E28. The index is computed as (dy*3 - srcX + dstX), suggesting a 3-state direction encoding. No callers found - likely used via function pointer.
 uint32_t __stdcall DRLGPATH_GetDirectionLookupFromPacked(uint32_t nSrcPacked, uint32_t nDstPacked) {
-    return gaPathDirectionLookupTable[((nDstPacked >> 0x10) - (nSrcPacked >> 0x10)) * 3 - (nSrcPacked & 0xffff) + (nDstPacked & 0xffff)];
+    return gaPathDirectionLookupTable[((nDstPacked >> 0x10) - (nSrcPacked >> 0x10)) * 3 - ((uint16_t)nSrcPacked) + (uint16_t)nDstPacked];
 }
 
 // Attempts to step in a preferred direction, falling back to alternate directions on collision. Uses direction lookup tables at 0x6F1D98 to compute the target position. Tries up to 4 directions before marking the step as failed. Used by the dual-scan pathfinder (PathTypeFunc_15).

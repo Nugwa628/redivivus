@@ -12244,7 +12244,7 @@ BOOL __fastcall MONSTERAI_CanSummonPetType(::SGAMEDATA * pGameStrc, D2UnitStrc *
     } else {
       nExistingPetClass = byPetTypeA->nPetGUID;
     }
-    if ((int)pDVar1->summon == (nExistingPetClass & 0xffff)) {
+    if ((int)pDVar1->summon == (uint16_t)nExistingPetClass) {
       return 0;
     }
 
@@ -21012,7 +21012,7 @@ void __fastcall AI_Fn1_GargoyleTrap(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2A
 
     uint32_t nDirection;
     nDirection = D2Common::Units::GetDirectionToCoords(pUnit, nTargetX, nSelfY);
-    D2Common::PATH::DynamicPath::SetDirectionAndNewDirection(pUnit->pPath.pDynamicPath, gaGargoyleTrapDirRemap[gaGargoyleTrapDirToOctant[nDirection & 0xff]]);
+    D2Common::PATH::DynamicPath::SetDirectionAndNewDirection(pUnit->pPath.pDynamicPath, gaGargoyleTrapDirRemap[gaGargoyleTrapDirToOctant[(uint8_t)nDirection]]);
     if (nDeltaX < 0) {
       nDeltaX = -nDeltaX;
     }
@@ -21339,7 +21339,7 @@ BOOL __fastcall AI_Monster_CastDirectionalSkillAtTarget(::SGAMEDATA * pGame, D2U
     while (true) {
       nDirOctant &= 7;
       abyDirOctant[0] = (uint8_t)nDirOctant;
-      D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(aDirFrameOffsets[nDirOctant & 0xff], &nOffsetX, &nOffsetY);
+      D2Common::Monsters::MONSTERS::MONSTERS_GetCompositeDimensions(aDirFrameOffsets[(uint8_t)nDirOctant], &nOffsetX, &nOffsetY);
       eUnitType2 = pUnit->eUnitType;
       if (eUnitType2 == UNIT_OBJECT || 3 < (int)eUnitType2 && (int)eUnitType2 <= 5) {
         nTargetUnitType = pUnit->pPath.pStaticPath->nPosX;
