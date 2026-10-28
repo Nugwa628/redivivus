@@ -53,10 +53,10 @@ void __fastcall TypeOfUiOverlayOverWorld(uint32_t eBorderType) {
           MouseYRelatedB = 0;
         break;
         case 1:
-          MouseYRelatedB = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
+          MouseYRelatedB = -((int)ScreenSizeX / 4);
         break;
         case 2:
-          MouseYRelatedB = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+          MouseYRelatedB = (int)ScreenSizeX / 4;
       }
     }
 

@@ -963,7 +963,7 @@ void __stdcall STATLIST_SetUnitState(D2UnitStrc * pUnit, eD2States eState, int32
     }
 
     int nStatesSize = sgptDataTable->nTxtStatesSize + 0x1f;
-    pStatsEx->pStateFlags[((int)(nStatesSize + (nStatesSize >> 0x1f & 0x1fU)) >> 5) + nFlagsWordIdx] |= gadwBitMasks[eStateBit];
+    pStatsEx->pStateFlags[((int)nStatesSize / 32) + nFlagsWordIdx] |= gadwBitMasks[eStateBit];
     pStatesTxtLine = D2Client::DataTbls::MonsterTbls::TXT_States_GetLine(eState);
     if (!pStatesTxtLine) {
       return;
@@ -1019,7 +1019,7 @@ int32_t __stdcall STATLIST_GetUnitGfxFlags(D2UnitStrc * pUnit) {
     }
 
     int nStatesSize = sgptDataTable->nTxtStatesSize + 0x1f;
-    return (int32_t)(pStatsEx->pStateFlags + ((int)(nStatesSize + (nStatesSize >> 0x1f & 0x1fU)) >> 5));
+    return (int32_t)(pStatsEx->pStateFlags + ((int)nStatesSize / 32));
 }
 
 int32_t __stdcall STATLIST_CopyStatsToBuffer(D2UnitStrc * pUnit, D2StatStrc * pStatBuf, int32_t nParam) {
@@ -1946,7 +1946,7 @@ D2StatListExStrc * __stdcall AllocStatListEx(D2UnitStrc * pUnit, uint32_t dwFlag
     pStatsEx->sStatList.nFlags = dwFlags & 1 | 0x80000000;
     pStatsEx->pOwner = pUnit;
     int nStatesSizePadded = sgptDataTable->nTxtStatesSize + 0x1f;
-    size_t nStateFlagsAllocSize = ((int)(nStatesSizePadded + (nStatesSizePadded >> 0x1f & 0x1fU)) >> 5) * 8;
+    size_t nStateFlagsAllocSize = ((int)nStatesSizePadded / 32) * 8;
     int* pStateFlags = (int*)Fog::Memory::AllocServerMemory(pUnit->pMemory, nStateFlagsAllocSize, ".\\Stats\\StatsEx.cpp", 0x593, 0);
     pStatsEx->pStateFlags = pStateFlags;
     pStatsExAlloc = (D2StatListExStrc*)memset(pStateFlags, 0, nStateFlagsAllocSize);

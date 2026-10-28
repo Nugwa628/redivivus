@@ -4175,7 +4175,7 @@ static void __fastcall TXT_AllocTxt_states(D2PoolManagerStrc * pMemory) {
       exit(-1);
     }
 
-    int nDwordCount = (int)(sgtDataTable.nTxtStatesSize + 0x1f + (sgtDataTable.nTxtStatesSize + 0x1f >> 0x1f & 0x1fU)) >> 5;
+    int nDwordCount = (int)(sgtDataTable.nTxtStatesSize + 0x1f) / 32;
     size_t nAllocSize = nDwordCount * 0xa0;
     sgtDataTable.pStatesDataTbls = (D2StatesDataTbls*)D2_ALLOC_POOL(nullptr, nAllocSize);
     memset(sgtDataTable.pStatesDataTbls, 0, nAllocSize);

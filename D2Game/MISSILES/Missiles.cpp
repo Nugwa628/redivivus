@@ -213,7 +213,7 @@ D2UnitStrc * __fastcall CreatingMissile(::SGAMEDATA * pGame, D2SkillArgStrc * pA
       }
     } else {
       nTmpY = (uint32_t)(uint8_t)pMissileTxt->VelLev * pArgs->nSkillLevel;
-      nVelocity = ((int)(nTmpY + (nTmpY >> 0x1f & 7U)) >> 3) + (uint32_t)(uint8_t)pMissileTxt->Vel;
+      nVelocity = ((int)nTmpY / 8) + (uint32_t)(uint8_t)pMissileTxt->Vel;
       nVelocity <<= 8;
     }
     if (pMissileTxt->CanSlow) {

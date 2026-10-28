@@ -939,7 +939,7 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
     while (nStartY < 0 || nStartY >= RENDERER_nWindowHeight || nX < 0 || nX >= RENDERER_nWindowWidth) {
       nSqrtIter += nDistSq;
       if (0x10000 <= nSqrtIter || nSqrtIter <= -0x10000) {
-        nStartY = (int)(nSqrtIter + (nSqrtIter >> 0x1f & 0xffffU)) >> 0x10;
+        nStartY = (int)nSqrtIter / 65536;
         nX += nStartY;
         nSqrtIter += nStartY * -0x10000;
         nStartY = nY;
@@ -947,7 +947,7 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
 
       nAccumX += nStepX;
       if (0xffff < nAccumX || nAccumX < -0xffff) {
-        nAccumY = (int)(nAccumX + (nAccumX >> 0x1f & 0xffffU)) >> 0x10;
+        nAccumY = (int)nAccumX / 65536;
         nStartY = nY + nAccumY;
         nAccumX += nAccumY * -0x10000;
         nY = nStartY;
@@ -969,7 +969,7 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
     while (true) {
       nSqrtIter += nDistSq;
       if (0x10000 <= nSqrtIter || nSqrtIter <= -0x10000) {
-        nStartY = (int)(nSqrtIter + (nSqrtIter >> 0x1f & 0xffffU)) >> 0x10;
+        nStartY = (int)nSqrtIter / 65536;
         nX += nStartY;
         pbCurrent += nStartY;
         nSqrtIter += nStartY * -0x10000;
@@ -983,7 +983,7 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
 
       nAccumX += nStepX;
       if (0x10000 <= nAccumX || nAccumX <= -0x10000) {
-        nStartY = (int)(nAccumX + (nAccumX >> 0x1f & 0xffffU)) >> 0x10;
+        nStartY = (int)nAccumX / 65536;
         nY += nStartY;
         pbCurrent += RENDERER_nWindowWidth * nStartY;
         nAccumX += nStartY * -0x10000;

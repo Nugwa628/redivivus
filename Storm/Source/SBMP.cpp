@@ -1386,7 +1386,7 @@ void __stdcall SBmpSaveImageEx(LPCSTR szText, int nPalette, uint8_t * pbPixels, 
         return;
       }
       if (!dwStride) {
-        dwStride = ((int)(nBpp + 7 + (nBpp + 7 >> 0x1f & 7U)) >> 3) * nWidth;
+        dwStride = ((int)(nBpp + 7) / 8) * nWidth;
       }
 
       /* HANDLE hTemplateFile for CreateFileA */ /* DWORD dwFlagsAndAttributes for CreateFileA */ /* DWORD dwCreationDisposition for CreateFileA */ /* LPSECURITY_ATTRIBUTES lpSecurityAttributes for CreateFileA */ /* DWORD dwShareMode for CreateFileA */ /* DWORD dwDesiredAccess for CreateFileA */ /* LPCSTR lpFileName for CreateFileA */ hFile = CreateFileA(szText, 0x40000000, 0, (LPSECURITY_ATTRIBUTES)0x0, 2, 0x80, (HANDLE)0x0);
@@ -1468,7 +1468,7 @@ uint32_t __stdcall SBmpAllocLoadImage(char * szText, void * pPalette, uint32_t *
           }
 
           iProbeResult = nWidth * nHeight * nBppOverride;
-          nSize_00 = (int)(iProbeResult + (iProbeResult >> 0x1f & 7U)) >> 3;
+          nSize_00 = (int)iProbeResult / 8;
           if (pfnAlloc) {
             pvAllocResult = (*pfnAlloc)(nSize_00);
             *ppOutputBuf = (uint32_t)(uintptr_t)pvAllocResult;

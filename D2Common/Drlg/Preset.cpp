@@ -1160,7 +1160,7 @@ static void __stdcall DRLGPRESET_InitDrlgMapPopLocations(int32_t nPopCount, D2Dr
       pPos = pDrlgMap->pPopsIndex + nPopIndex;
       nX0 = *pPos;
       nPopIndex++;
-      *pPos = ((int)(nX0 + (nX0 >> 0x1f & 3U)) >> 2) - 1;
+      *pPos = ((int)nX0 / 4) - 1;
     } while (nPopCount > nPopIndex);
 }
 
@@ -1778,7 +1778,7 @@ static void __stdcall DRLGPRESET_BuildPresetArea(D2DrlgMapStrc * pDrlgMap, D2Drl
                         nErrLine = 0;
                       } else {
                         nCellFlags = (int)((int)pMemoryOrXIndex->pPools + (((int)pMemoryOrXIndex >> 0x1f & 7U) - 0x20)) >> 3;
-                        nErrLine = (int)(nFlags + (nFlags >> 0x1f & 7U)) >> 3;
+                        nErrLine = (int)nFlags / 8;
                       }
 
                       DrlgGrid::AlterGridFlag(pDrlgGrid, nCellFlags, nErrLine, 1 << ((char)nTileType + 4U & 0x1f), 0);
@@ -1862,8 +1862,8 @@ static void __stdcall DRLGPRESET_BuildPresetArea(D2DrlgMapStrc * pDrlgMap, D2Drl
             } else {
               nVisIndex = pPresetUnit->nPosX / 5;
               nWarpDestLevel = pPresetUnit->nPosY / 5;
-              nObjCellX = (int)(nVisIndex + (nVisIndex >> 0x1f & 7U)) >> 3;
-              nErrLine = (int)(nWarpDestLevel + (nWarpDestLevel >> 0x1f & 7U)) >> 3;
+              nObjCellX = (int)nVisIndex / 8;
+              nErrLine = (int)nWarpDestLevel / 8;
             }
             DrlgGrid::AlterGridFlag(pDrlgGrid, nObjCellX, nErrLine, 0x30000, 0);
           }

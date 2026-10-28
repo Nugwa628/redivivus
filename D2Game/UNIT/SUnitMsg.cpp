@@ -398,7 +398,7 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
       uint32_t uVar1;
       _Src = D2Common::DATATBLS::ItemStats::thunk_UNIT_GetStateList_StateFlags(pUnit);
       nFlagDwordCount = sgptDataTable->nTxtStatesSize + 0x1f;
-      nFlagDwordCount = (int)(nFlagDwordCount + (nFlagDwordCount >> 0x1f & 0x1fU)) >> 5;
+      nFlagDwordCount = (int)nFlagDwordCount / 32;
       nStateFlagDwordCount = nFlagDwordCount;
       memcpy(aStateFlagDwords, _Src, nFlagDwordCount * 4);
       sPacket.nUnitGUID = pUnit->nUnitGUID;
@@ -552,7 +552,7 @@ void __fastcall PLAYER_SendStateDeltaToClient(D2UnitStrc * pUnit, D2ClientStrc *
       eD2States eState_00;
       _Src = (void*)D2Common::DATATBLS::ItemStats::STATES_AssertGetGfxFlags(pUnit);
       nFlagDwordCountTmp = sgptDataTable->nTxtStatesSize + 0x1f;
-      nFlagDwordCount = (int)(nFlagDwordCountTmp + (nFlagDwordCountTmp >> 0x1f & 0x1fU)) >> 5;
+      nFlagDwordCount = (int)nFlagDwordCountTmp / 32;
       nStateFlagDwordCount = nFlagDwordCount;
       memcpy(aStateFlagDwords, _Src, nFlagDwordCount * 4);
       eUnitType = pUnit->eUnitType;

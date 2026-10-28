@@ -90,7 +90,7 @@ void __stdcall STATES_ClearGfxFlags(D2UnitStrc * pUnit) {
     }
 
     int nBufSize = sgptDataTable->nTxtStatesSize + 0x1f;
-    memset(pGfxFlags, 0, ((int)(nBufSize + (nBufSize >> 0x1f & 0x1fU)) >> 5) * 4);
+    memset(pGfxFlags, 0, ((int)nBufSize / 32) * 4);
 }
 
 BOOL __stdcall STATES_HasAnyGfxFlag(D2UnitStrc * pUnit) {
@@ -100,7 +100,7 @@ BOOL __stdcall STATES_HasAnyGfxFlag(D2UnitStrc * pUnit) {
     }
 
     int nDwordCount = sgptDataTable->nTxtStatesSize + 0x1f;
-    nDwordCount = (int)(nDwordCount + (nDwordCount >> 0x1f & 0x1fU)) >> 5;
+    nDwordCount = (int)nDwordCount / 32;
     int i = 0;
     if (0 >= nDwordCount) {
       return 0;
@@ -141,7 +141,7 @@ void __stdcall STATES_FilterStatesByContext(D2UnitStrc * pUnit, int32_t nParam) 
     }
 
     int nDwordCount = sgptDataTable->nTxtStatesSize + 0x1f;
-    nDwordCount = (int)(nDwordCount + (nDwordCount >> 0x1f & 0x1fU)) >> 5;
+    nDwordCount = (int)nDwordCount / 32;
     if (!nParam) {
       if (!pUnit || pUnit->eUnitType != UNIT_PLAYER) {
         if (0 < nDwordCount) {
@@ -202,7 +202,7 @@ BOOL STATES_HasMatchingStateFlag(D2UnitStrc * pUnit, D2StatesDataTbls * pStatesD
     }
 
     int nDwordCount = sgptDataTable->nTxtStatesSize + 0x1f;
-    nDwordCount = (int)(nDwordCount + (nDwordCount >> 0x1f & 0x1fU)) >> 5;
+    nDwordCount = (int)nDwordCount / 32;
     int i = 0;
     if (0 >= nDwordCount) {
       return 0;
@@ -232,7 +232,7 @@ void __stdcall STATES_MoveToGfxFlags(D2UnitStrc * pUnit, uint32_t * pMaskWords) 
 
     int nGfxOffset = sgptDataTable->nTxtStatesSize + 0x1f;
     int i = 0;
-    if (0 < (int)(nGfxOffset + (nGfxOffset >> 0x1f & 0x1fU)) >> 5) {
+    if (0 < (int)nGfxOffset / 32) {
       int iVar1;
       iVar1 = pGfxFlags - (int)pMaskWords;
       nGfxOffset = (int)nStateOffset - (int)pMaskWords;
@@ -244,7 +244,7 @@ void __stdcall STATES_MoveToGfxFlags(D2UnitStrc * pUnit, uint32_t * pMaskWords) 
         *pGfxWord &= ~*pMaskWords;
         nTxtStatesSize = sgptDataTable->nTxtStatesSize + 0x1f;
         pMaskWords++;
-      } while (i < (int)(nTxtStatesSize + (nTxtStatesSize >> 0x1f & 0x1fU)) >> 5);
+      } while (i < (int)nTxtStatesSize / 32);
     }
 
     Unit::ROOM_LinkUnitToUpdateList(pUnit);

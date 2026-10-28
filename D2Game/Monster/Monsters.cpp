@@ -1063,7 +1063,7 @@ void __fastcall MONSTER_CorpseExplode(::SGAMEDATA * pGame, D2UnitStrc * pUnit, u
     switch (byDifficulty) {
       case DIFFICULTY_NORMAL:
         {
-          nDamageAdjusted -= (int)(nDamageAdjusted + ((int)nDamageAdjusted >> 0x1f & 3U)) >> 2;
+          nDamageAdjusted -= (int)nDamageAdjusted / 4;
           break;
         }
       case DIFFICULTY_NIGHTMARE:
@@ -1074,7 +1074,7 @@ void __fastcall MONSTER_CorpseExplode(::SGAMEDATA * pGame, D2UnitStrc * pUnit, u
         }
       case DIFFICULTY_HELL:
         {
-          nDamageAdjusted = (int)(nDamageAdjusted + ((int)nDamageAdjusted >> 0x1f & 7U)) >> 3;
+          nDamageAdjusted = (int)nDamageAdjusted / 8;
           break;
         }
     }
@@ -2968,9 +2968,9 @@ void __fastcall MONSTER_RecalculateCombatStats(D2UnitStrc * pUnit, uint32_t nDif
       goto add_damage_stats;
     }
     if (__frame0.nExpansionMod) {
-      nLevel += (int)(nLevel * __frame0.nExpansionMod + (nLevel * __frame0.nExpansionMod >> 0x1f & 0x7fU)) >> 7;
-      iVar2 += (int)(iVar2 * __frame0.nExpansionMod + (iVar2 * __frame0.nExpansionMod >> 0x1f & 0x7fU)) >> 7;
-      iVar1 += (int)(iVar1 * __frame0.nExpansionMod + (iVar1 * __frame0.nExpansionMod >> 0x1f & 0x7fU)) >> 7;
+      nLevel += (int)(nLevel * __frame0.nExpansionMod) / 128;
+      iVar2 += (int)(iVar2 * __frame0.nExpansionMod) / 128;
+      iVar1 += (int)(iVar1 * __frame0.nExpansionMod) / 128;
     }
 
     add_damage_stats:
@@ -2998,9 +2998,9 @@ void __fastcall MONSTER_RecalculateCombatStats(D2UnitStrc * pUnit, uint32_t nDif
         nLevel = sMonStats.nElMaxD;
         iVar2 = sMonStats.nElMinD;
         if (__frame0.pGame->bExpansion && __frame0.nExpansionMod) {
-          iVar2 = ((int)(sMonStats.nElMinD * __frame0.nExpansionMod + (sMonStats.nElMinD * __frame0.nExpansionMod >> 0x1f & 0x7fU)) >> 7) + sMonStats.nElMinD;
-          nLevel = ((int)(sMonStats.nElMaxD * __frame0.nExpansionMod + (sMonStats.nElMaxD * __frame0.nExpansionMod >> 0x1f & 0x7fU)) >> 7) + sMonStats.nElMaxD;
-          __frame0.nElLengthScaled = ((int)(sMonStats.nElDur * __frame0.nExpansionMod + (sMonStats.nElDur * __frame0.nExpansionMod >> 0x1f & 0x7fU)) >> 7) + sMonStats.nElDur;
+          iVar2 = ((int)(sMonStats.nElMinD * __frame0.nExpansionMod) / 128) + sMonStats.nElMinD;
+          nLevel = ((int)(sMonStats.nElMaxD * __frame0.nExpansionMod) / 128) + sMonStats.nElMaxD;
+          __frame0.nElLengthScaled = ((int)(sMonStats.nElDur * __frame0.nExpansionMod) / 128) + sMonStats.nElDur;
         }
 
         bVar1 = __frame0.pElModeCur[(int)(__frame0.pMonStats->aElType + __frame0.bExpansion)];

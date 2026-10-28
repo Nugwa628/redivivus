@@ -128,11 +128,11 @@ void __stdcall DRAW_AltItems() {
                 nColorIdx = __frame0.nPerspY;
                 switch (uBorderType) {
                 case 1: {
-                  __frame0.nItemPosX -= (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+                  __frame0.nItemPosX -= (int)ScreenSizeX / 4;
                   break;
                 }
                 case 2: {
-                  __frame0.nItemPosX += (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+                  __frame0.nItemPosX += (int)ScreenSizeX / 4;
                   __frame0.nItemX = __frame0.nItemPosX;
                   goto layout_label;
                 }

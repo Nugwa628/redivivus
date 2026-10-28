@@ -1138,7 +1138,7 @@ BOOL __fastcall Skills_SrvDoFunc_095_SpawnTrapMissile(::SGAMEDATA * pGame, D2Uni
     sSkillArg.nY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
     sSkillArg.nSkillLevel = nSkillLvl;
     int nVelCalc = (uint32_t)(uint8_t)pMissileTxt->VelLev * nSkillLvl;
-    sSkillArg.nVelocityOverride = ((int)(nVelCalc + (nVelCalc >> 0x1f & 7U)) >> 3) + (uint32_t)(uint8_t)pMissileTxt->Vel;
+    sSkillArg.nVelocityOverride = ((int)nVelCalc / 8) + (uint32_t)(uint8_t)pMissileTxt->Vel;
     sSkillArg.nMissileTxtNo = nMissileId;
     BOOL BVar1 = SkillsServer::SKILLS_GetTargetOrCursorPos(pGame, pUnit, (uint32_t*)&sSkillArg.nUnitX, (uint32_t*)&sSkillArg.nUnitY);
     if (BVar1) {
@@ -1205,7 +1205,7 @@ BOOL __fastcall Skills_SrvDoFunc_152_SpawnTrapMissileVariant(::SGAMEDATA * pGame
     sSkillArg.nY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
     sSkillArg.nSkillLevel = nSkillLvl;
     int nVelCalc = (uint32_t)(uint8_t)pMissileTxt->VelLev * nSkillLvl;
-    sSkillArg.nVelocityOverride = ((int)(nVelCalc + (nVelCalc >> 0x1f & 7U)) >> 3) + (uint32_t)(uint8_t)pMissileTxt->Vel;
+    sSkillArg.nVelocityOverride = ((int)nVelCalc / 8) + (uint32_t)(uint8_t)pMissileTxt->Vel;
     sSkillArg.nMissileTxtNo = nMissileId;
     BOOL BVar1 = SkillsServer::SKILLS_GetTargetOrCursorPos(pGame, pUnit, (uint32_t*)&sSkillArg.nUnitX, (uint32_t*)&sSkillArg.nUnitY);
     if (BVar1) {

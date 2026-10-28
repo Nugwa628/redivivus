@@ -243,7 +243,7 @@ uint8_t * * __stdcall VIEW_AllocPalettePointerTable(uint32_t nDim, uint32_t nSte
           nInnerLeft = nSteps;
           nAccum = nOuter << 0x10;
           do {
-            nPaletteIdx = (int)(nAccum + (nAccum >> 0x1f & 0xffffU)) >> 0x10;
+            nPaletteIdx = (int)nAccum / 65536;
             *pWrite = gPaletteTransitionTable + (nPaletteIdx & 0xff) * 0x100;
             pWrite++;
             nAccum += nMidScaled / (int)nSteps;
@@ -283,7 +283,7 @@ uint8_t * * __stdcall VIEW_AllocPalettePointerTable2(uint32_t nDim, int32_t nSte
       do {
         nAccum = nOuter << 0x10;
         for (nStepLeft = nSteps; nStepLeft; nStepLeft--) {
-          *pWrite = gPaletteTransitionTable + ((int)(nAccum + (nAccum >> 0x1f & 0xffffU)) >> 0x10 & 0xffU) * 0x100;
+          *pWrite = gPaletteTransitionTable + ((int)nAccum / 65536 & 0xffU) * 0x100;
           pWrite++;
           nAccum += nMidScaled / nSteps;
         }
