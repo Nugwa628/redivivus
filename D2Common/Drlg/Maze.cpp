@@ -742,17 +742,20 @@ void __stdcall GenerateWolrdstoneAndTombs(D2DrlgLevelStrc * pLevel) {
       nLoopCount--;
     } while (nLoopCount);
 
-    if (pLevel->nLevelType == 0x11) {
-      pDVar1 = pRoomExStrc->pRoomExData.pRoomExDataPreset;
-      pDVar1->nLevelPrest = gnMazeRoomCountX[nRollValue].nX;
-      pDVar1->nFlags |= 2;
-      pDVar1->nPickedFile = -1;
-    } else if (pLevel->nLevelType == 0x22) {
-      pDVar1 = pRoomExStrc->pRoomExData.pRoomExDataPreset;
-      pDVar1->nLevelPrest = gnMazeRoomCountX[nRollValue].nY;
-      pDVar1->nFlags |= 2;
-      pDVar1->nPickedFile = -1;
-      return;
+    switch (pLevel->nLevelType) {
+      case 0x11:
+        pDVar1 = pRoomExStrc->pRoomExData.pRoomExDataPreset;
+        pDVar1->nLevelPrest = gnMazeRoomCountX[nRollValue].nX;
+        pDVar1->nFlags |= 2;
+        pDVar1->nPickedFile = -1;
+        break;
+      case 0x22:
+        pDVar1 = pRoomExStrc->pRoomExData.pRoomExDataPreset;
+        pDVar1->nLevelPrest = gnMazeRoomCountX[nRollValue].nY;
+        pDVar1->nFlags |= 2;
+        pDVar1->nPickedFile = -1;
+        return;
+        break;
     }
 }
 
@@ -1361,12 +1364,16 @@ void __fastcall DRLGMAZE_GenerateLevel(D2DrlgLevelStrc * pLevel) {
     }
 
     finish_level:
-    if (pLevel->eD2LevelId == 0x1c) {
-      Act1::Barracks::DRLGMAZE_GenerateBarracksLayout(pLevel);
-    } else if (pLevel->eD2LevelId == 0x6b) {
-      Act4::RiverOfFlames::DRLGMAZE_GenerateRiverOfFlames(pLevel);
-    } else {
-      DRLGLEVEL_AdjustRoomCoordinates(pLevel);
+    switch (pLevel->eD2LevelId) {
+      case 0x1c:
+        Act1::Barracks::DRLGMAZE_GenerateBarracksLayout(pLevel);
+        break;
+      case 0x6b:
+        Act4::RiverOfFlames::DRLGMAZE_GenerateRiverOfFlames(pLevel);
+        break;
+      default:
+        DRLGLEVEL_AdjustRoomCoordinates(pLevel);
+        break;
     }
     ForAllButDenOfEvil(pLevel);
     pSearchRoom = pLevel->pRoomExFirst;

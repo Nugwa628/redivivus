@@ -1670,26 +1670,29 @@ void __stdcall AllocDynamicPath(D2PoolManagerStrc * pMemory, D2RoomStrc * pRoom,
           pDynamicPath->nFlags &= -524033;
           pDynamicPath->ePathType = 2;
           pDynamicPath->nDirOffset = 0;
-          if (pDynamicPath->dwPrevPathType == 0xb) {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x871);
-            exit(-1);
-          } else {
-            if (pDynamicPath->dwPrevPathType == 8) {
-              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x872);
+          switch (pDynamicPath->dwPrevPathType) {
+            case 0xb:
+              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x871);
               exit(-1);
-            }
+              break;
+            default:
+              if (pDynamicPath->dwPrevPathType == 8) {
+                Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x872);
+                exit(-1);
+              }
 
-            nUnitWidth = D2Client::UNIT::Player::TXT_MonStats_GetBaseId(pUnit_00);
-            if (!(nUnitWidth < 0 || nUnitWidth >= sgptDataTable->nTxtMonStatsSize || nUnitWidth != 0x26)) {
-              pUnit_00->pPath.pDynamicPath->nUnitWidth = 5;
-              pDynamicPath->nCollisionPattern = 0x804;
-              pDynamicPath->nDistMax = 0xe;
-            } else {
-              nUnitWidth = PATH_GetCollisionPatternFromMonStats(pUnit_00);
-              pDynamicPath->nCollisionPattern = nUnitWidth;
-              pDynamicPath->nDistMax = 0xe;
-            }
-            goto place_and_set_screen_pos;
+              nUnitWidth = D2Client::UNIT::Player::TXT_MonStats_GetBaseId(pUnit_00);
+              if (!(nUnitWidth < 0 || nUnitWidth >= sgptDataTable->nTxtMonStatsSize || nUnitWidth != 0x26)) {
+                pUnit_00->pPath.pDynamicPath->nUnitWidth = 5;
+                pDynamicPath->nCollisionPattern = 0x804;
+                pDynamicPath->nDistMax = 0xe;
+              } else {
+                nUnitWidth = PATH_GetCollisionPatternFromMonStats(pUnit_00);
+                pDynamicPath->nCollisionPattern = nUnitWidth;
+                pDynamicPath->nDistMax = 0xe;
+              }
+              goto place_and_set_screen_pos;
+              break;
           }
         } else {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x861);
