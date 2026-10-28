@@ -6257,7 +6257,7 @@ void __fastcall MISSILE_ClientFrameUpdate(D2UnitStrc * pUnit) {
 
       pRoom = Player::DRLGROOM_FindBetterNearbyRoom(nullptr, nX, nPosY);
     }
-    if (!pMissileTxt->Town) {
+    if (!(*((uint8_t*)pMissileTxt + 0x5) & gadwBitMasks[2])) {
       bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom);
       if (bIsInTown) {
         MISSILE_RemoveClientSide(pUnit);
