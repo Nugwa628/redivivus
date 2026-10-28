@@ -1385,7 +1385,7 @@ void __fastcall STATES_DispatchSetFunc(D2UnitStrc * pUnit, eD2States eState) {
     }
 
     D2StatesTxt* pDVar1 = sgptDataTable->pTxtStates + eState;
-    if (!(pDVar1 && (!pDVar1->notondead || (pUnit->eUnitType != UNIT_MONSTER || pUnit->eAnimMode.ePlayerMode != Kick) && (pUnit->eUnitType != UNIT_PLAYER || pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead)))) {
+    if (!(pDVar1 && (!(*((uint8_t*)pDVar1 + 0x14) & gadwBitMasks[7]) || (pUnit->eUnitType != UNIT_MONSTER || pUnit->eAnimMode.ePlayerMode != Kick) && (pUnit->eUnitType != UNIT_PLAYER || pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead)))) {
       return;
     }
 
