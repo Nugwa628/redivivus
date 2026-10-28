@@ -38,7 +38,7 @@ namespace D2Client::UI::Trade {
 
 int __stdcall ConfirmExchange() {
     Sound::SOUND_PlaySound(SOUND_CURSOR_SELECT, nullptr, 0, 0, 0);
-    Dialog::FreeDialogStrc();
+    Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeAgreeDialog);
     Dialog::gpTradeAgreeDialog = 0;
     g_nTradeWindowState = 3;
     GAME::Msg::NET_D2GS_CLIENT_Send_SHORT_SHORT_SHORT(0x4f, 3, 0, 0);
@@ -47,7 +47,7 @@ int __stdcall ConfirmExchange() {
 
 int __stdcall TRADE_GetPlayerGoldAmount() {
     Sound::SOUND_PlaySound(SOUND_CURSOR_SELECT, nullptr, 0, 0, 0);
-    Dialog::FreeDialogStrc();
+    Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeAgreeDialog);
     Dialog::gpTradeAgreeDialog = 0;
     g_nTradeWindowState = 7;
     GAME::Msg::NET_D2GS_CLIENT_Send_SHORT_SHORT_SHORT(0x4f, 2, 0, 0);
@@ -90,7 +90,7 @@ int __stdcall DrawAgreeToTrade() {
 
 int __stdcall TRADE_GetPartnerGoldAmount() {
     Sound::SOUND_PlaySound(SOUND_CURSOR_SELECT, nullptr, 0, 0, 0);
-    Dialog::FreeDialogStrc();
+    Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeCancelDialog);
     Dialog::gpTradeCancelDialog = 0;
     g_nTradeWindowState = 7;
     gdwTradeThrottleTimestamp = GetTickCount();
@@ -245,7 +245,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x77_TRADEREQUEST(char * pBytes) {
           return;
         }
 
-        Dialog::FreeDialogStrc();
+        Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeCancelDialog);
         Dialog::gpTradeCancelDialog = 0;
         return;
         case 4:

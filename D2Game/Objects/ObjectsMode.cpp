@@ -146,7 +146,8 @@ void __fastcall OBJMODE_UpdateDayNightState(::SGAMEDATA * pGame, D2UnitStrc * pU
           return;
         }
 
-        pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
+        D2Common::Units::UNITS_GetRoom(pUnit);
+        pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
         sNewSeed = D2_SEED_NEXT(*pSeed);
         *pSeed = sNewSeed;
         GAME::Event::SetEvent(pGame, pUnit, 8, sNewSeed.nSeedLow % 0xfa + 0x19 + pGame->dwGameFrame, 0, 0);
@@ -338,7 +339,8 @@ void __fastcall OBJMODE_UpdateTrapObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       pUnit->eAnimMode.ePlayerMode = Walk;
     }
 
-    D2SeedStrc* pControlSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
+    D2Common::Units::UNITS_GetRoom(pUnit);
+    D2SeedStrc* pControlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
     OBJMODE_TriggerProximityEffect(pGame, pUnit);
     D2SeedStrc seedNext = D2_SEED_NEXT(*pControlSeed);
     uint32_t uRandLow = seedNext.nSeedLow;
@@ -944,7 +946,8 @@ static void OBJMODE_SpawnMonsterFromObject(eD2MonsterAnimMode eMonsterAnimMode, 
 
 void __fastcall OBJMODE_SpawnRandomMonsters(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2ObjectOperateFnArg sOperation;
-    sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
+    D2Common::Units::UNITS_GetRoom(pUnit);
+    sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
     D2SeedStrc seedNext = D2_SEED_NEXT(*sOperation.pSeed);
     *sOperation.pSeed = seedNext;
     int nSpawnCount = (seedNext.nSeedLow & 1) + 1;
@@ -1430,20 +1433,20 @@ void __fastcall Shrines_StormShrineFunction(D2ObjectOperateFnArg * pArguments, D
     eD2UnitType eUnitType = pTargetUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nUnitIdx = pTargetUnit->pPath.pStaticPath->nPosX;
-    } else if (pTargetUnit->pPath.pDynamicPath) {
-      nUnitIdx = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pTargetUnit->pPath.pDynamicPath) {
       nUnitIdx = 0;
+    } else {
+      nUnitIdx = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
     }
 
     pTargetUnit = pArguments->sArg.pVictim;
     eUnitType = pTargetUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       sUnitFindArg.nY = pTargetUnit->pPath.pStaticPath->nPosY;
-    } else if (pTargetUnit->pPath.pDynamicPath) {
-      sUnitFindArg.nY = D2Common::PATH::DynamicPath::GetYPos(pTargetUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pTargetUnit->pPath.pDynamicPath) {
       sUnitFindArg.nY = 0;
+    } else {
+      sUnitFindArg.nY = D2Common::PATH::DynamicPath::GetYPos(pTargetUnit->pPath.pDynamicPath);
     }
 
     memset(&sUnitFindArg, 0, 0x38);
@@ -1486,20 +1489,20 @@ void __fastcall Shrines_StormShrineFunction(D2ObjectOperateFnArg * pArguments, D
         eUnitType = pTargetUnit->eUnitType;
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
           sSkillArg.nX = pTargetUnit->pPath.pStaticPath->nPosX;
-        } else if (pTargetUnit->pPath.pDynamicPath) {
-          sSkillArg.nX = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
-        } else {
+        } else if (!pTargetUnit->pPath.pDynamicPath) {
           sSkillArg.nX = 0;
+        } else {
+          sSkillArg.nX = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
         }
 
         pTargetUnit = pArguments->sArg.pVictim;
         eUnitType = pTargetUnit->eUnitType;
         if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
           sSkillArg.nY = pTargetUnit->pPath.pStaticPath->nPosY;
-        } else if (pTargetUnit->pPath.pDynamicPath) {
-          sSkillArg.nY = D2Common::PATH::DynamicPath::GetYPos(pTargetUnit->pPath.pDynamicPath);
-        } else {
+        } else if (!pTargetUnit->pPath.pDynamicPath) {
           sSkillArg.nY = 0;
+        } else {
+          sSkillArg.nY = D2Common::PATH::DynamicPath::GetYPos(pTargetUnit->pPath.pDynamicPath);
         }
         if (!nRowParity) {
           sSkillArg.nUnitX = (int)pTxtShrinesLocal;
@@ -1663,10 +1666,10 @@ void __fastcall Shrines_ExplodingShrineFunction(D2ObjectOperateFnArg * pArgument
       eUnitType = pCreatedItem->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         sItemGenCtx.maxDurability = pCreatedItem->pPath.pStaticPath->nPosX;
-      } else if (pCreatedItem->pPath.pDynamicPath) {
-        sItemGenCtx.maxDurability = D2Common::PATH::DynamicPath::GetXPos(pCreatedItem->pPath.pDynamicPath);
-      } else {
+      } else if (!pCreatedItem->pPath.pDynamicPath) {
         sItemGenCtx.maxDurability = 0;
+      } else {
+        sItemGenCtx.maxDurability = D2Common::PATH::DynamicPath::GetXPos(pCreatedItem->pPath.pDynamicPath);
       }
 
       pCreatedItem = pArguments->sArg.pVictim;
@@ -1797,10 +1800,10 @@ void __fastcall Shrines_PoisonShrineFunction(D2ObjectOperateFnArg * pArguments, 
       eUnitType = pCreatedItem->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         sItemGenCtx.maxDurability = pCreatedItem->pPath.pStaticPath->nPosX;
-      } else if (pCreatedItem->pPath.pDynamicPath) {
-        sItemGenCtx.maxDurability = D2Common::PATH::DynamicPath::GetXPos(pCreatedItem->pPath.pDynamicPath);
-      } else {
+      } else if (!pCreatedItem->pPath.pDynamicPath) {
         sItemGenCtx.maxDurability = 0;
+      } else {
+        sItemGenCtx.maxDurability = D2Common::PATH::DynamicPath::GetXPos(pCreatedItem->pPath.pDynamicPath);
       }
 
       pCreatedItem = pArguments->sArg.pVictim;
@@ -2379,7 +2382,8 @@ BOOL __fastcall InteractWithObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint
         sOperation.sArg.pGame = pGame;
         sOperation.sArg.pVictim = pUnit_00;
         sOperation.pAttacker = pUnit;
-        sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit_00));
+        D2Common::Units::UNITS_GetRoom(pUnit_00);
+        sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
         sOperation.nObjectClassId = nUnitId;
         bResult = (*OBJECTSOPERATEFN[*(uint8_t*)(nTxt + 0x1b3)])(&sOperation);
         return bResult;
@@ -3643,7 +3647,8 @@ void __fastcall KillUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
           byHitCount = pUnit->pUnitData.pUnitDataMonster->Components[0] + 1;
           pUnit->pUnitData.pUnitDataMonster->Components[0] = byHitCount;
           if (byHitCount < 2) {
-            ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
+            D2Common::Units::UNITS_GetRoom(pUnit);
+            ObjectsRgn::GetObjectControlSeed(pGame);
             OBJMODE_TriggerProximityEffect(pGame, pUnit);
             GAME::Event::SetEvent(pGame, pUnit, 9, pGame->dwGameFrame + 0x19, 0, 0);
             return;
@@ -3652,7 +3657,8 @@ void __fastcall KillUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
           sOperation.pAttacker = 0;
           sOperation.sArg.pGame = pGame;
           sOperation.sArg.pVictim = pUnit;
-          sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
+          D2Common::Units::UNITS_GetRoom(pUnit);
+          sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
           sOperation.nObjectClassId = pUnit->nClassId;
           ppDropResult = RollChestDrops(&sOperation, ITEMTYPE_None1);
           if (ppDropResult) {
@@ -4201,7 +4207,8 @@ void __fastcall OBJMODE_RollChestLoot(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2ObjectOperateFnArg sOperation;
     sOperation.sArg.pGame = pGame;
     sOperation.sArg.pVictim = pUnit;
-    sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
+    D2Common::Units::UNITS_GetRoom(pUnit);
+    sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
     uint32_t dwFindGUID = GetUnitGUIDFromUnitTimerArg(pUnit);
     sOperation.pAttacker = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_PLAYER, dwFindGUID);
     RollChestDrops(&sOperation, ITEMTYPE_None1);

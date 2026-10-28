@@ -131,8 +131,8 @@ uint8_t __fastcall Q35_ResetAncientsStatues(::SGAMEDATA * pGame, D2QuestDataStrc
 
 // [A5Q5 = Rite of Passage] Q35_NotifyQuestState: per-player quest-update notifier (packet 0x23). Sends only if RiteOfPassage is in a finished/locked state: (Completed OR FinishedInPreviousGame) AND NOT JustCompleted AND NOT CannotCompleteQuestInGame. Otherwise no-op.
 BOOL __fastcall Q35_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RiteOfPassage, QUESTSTATE_Completed);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RiteOfPassage, QUESTSTATE_FinishedInPreviousGame) , bQuestState != 0)) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RiteOfPassage, QUESTSTATE_JustCompleted);
@@ -341,8 +341,8 @@ void __fastcall Q35_SpawnAncientTimer(D2QuestDataStrc * pQuestData, D2UnitStrc *
 
 // [A5Q5 = Rite of Passage] Q35_UpdateQuestStep: per-player record sync (run via IteratePlayerOrMonsterUnits). If not Completed and player level >= (diff+1)*20 (the lvl-gate to read the Ancients' scroll), mirrors the live nStateFlag into the saved quest record: nStateFlag 2 -> Step0x02, 3 -> Step0x03.
 BOOL __fastcall Q35_UpdateQuestStep(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RiteOfPassage, QUESTSTATE_Completed);
     if (bIsCompleted == 1) {
       return 0;
@@ -500,8 +500,8 @@ void __fastcall Q35_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     eD2Quests nQuestId;
     D2QuestDataA5Q5Strc* pQuestSpecificData = pQuestData->pQuestSpecificData.pA5Q5;
     ::SGAMEDATA* pGame = pQuestData->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (!pQuestArgs->pTarget) {
       nNpcId = ~MonsterUnitSkeleton1;
@@ -630,8 +630,8 @@ static uint32_t __stdcall RewardExperienceFromAncients(::SGAMEDATA * pQuestData,
 
 // [A5Q5 = Rite of Passage] Q35_SetCompleteForPartyMember: party-completion callback. If member not Completed, is level-gated (>=(diff+1)*20) and physically in Act V, sets RiteOfPassage Completed + JustCompleted and awards XP. Shares the kill credit with the whole party.
 void __fastcall Q35_SetCompleteForPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RiteOfPassage, QUESTSTATE_Completed);
     if (bCompleted) {
       return;
@@ -675,8 +675,8 @@ void __fastcall Q35_Callback10_PlayerLeavesGame(D2QuestDataStrc * pQuestData, D2
 
 // [A5Q5 = Rite of Passage] Q35_SetCannotComplete: per-player callback run after the Ancients die. If a player is NOT Completed and NOT JustCompleted (e.g. under the level gate, so they missed credit), marks RiteOfPassage CannotCompleteQuestInGame and sends packet 0x23 — they must re-fight in a new game.
 BOOL __fastcall Q35_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RiteOfPassage, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -719,8 +719,8 @@ BOOL __fastcall Q35_OnAncientsDefeated(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       return 0;
     }
 
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestCompleted) {
       return 0;
@@ -732,8 +732,8 @@ BOOL __fastcall Q35_OnAncientsDefeated(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
                          done for self player, then awards XP (Q35_RewardExperienceFromAncients) and
                          propagates to the party */ D2Common::QuestRecord::SetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     RewardExperienceFromAncients(pGame, pUnit);
-    uint16_t nPlayerPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPlayerPartyId == 0xffff) {
+    int16_t nPlayerPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPlayerPartyId == -1) {
       return 0;
     }
 
@@ -974,8 +974,8 @@ void __fastcall Q35_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // [A5Q5 = Rite of Passage] Q35_Callback_13 (sub-handler idx 0xd): on game load, reconstructs live nStateFlag/nStateFlagPrev from the saved quest record. Completed/FinishedInPreviousGame -> set field_0x4A (done). Step0x03 -> nStateFlag 3. Step0x02 -> nStateFlag 2. Read-only on records.
 void __fastcall Q35_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     /* GetQuestState(nQuestIdReal, 0xf=FinishedInPreviousGame): same as Completed
                          for load purposes — quest already done */ if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_FinishedInPreviousGame) , bQuestState != 0)) {
@@ -1336,8 +1336,8 @@ BOOL __fastcall OBJOP_A5Q5_WorldstonePortalActivate(D2ObjectOperateFnArg * pOper
     }
 
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (!bQuestState) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_RewardAwaits);
@@ -1436,15 +1436,15 @@ BOOL __fastcall OBJOP_A5Q5_AncientsQuestStateQuery(D2ObjectOperateFnArg * pOpera
     bool _bQuestCompleted;
     bool bQuestCompleted;
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty];
-    _bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_RiteOfPassage, QUESTSTATE_Completed);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
+    _bQuestCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_RiteOfPassage, QUESTSTATE_Completed);
     if (!_bQuestCompleted) {
       return 0;
     }
 
     ::SGAMEDATA* pGame2 = pOperation->sArg.pGame;
-    D2BitBufferStrc* pQuestRecord2 = D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame2->nDifficulty];
-    _bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord2, QUEST_RiteOfPassage, QUESTSTATE_Step0x04);
+    D2UnitDataPlayerStrc* pPlayerData2 = D2Common::Units::GetPlayerData(pOperation->pAttacker);
+    _bQuestCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData2->pQuestRecord[pGame2->nDifficulty], QUEST_RiteOfPassage, QUESTSTATE_Step0x04);
     if (_bQuestCompleted) {
       return 0;
     }

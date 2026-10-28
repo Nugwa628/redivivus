@@ -1010,15 +1010,15 @@ void __fastcall AddActiveCountToDrlgLevel(D2DrlgLevelStrc * pLevel, int32_t nCou
 void __fastcall ChangeActiveRoomBetweenLevels(D2RoomExStrc * pRoomEx, D2RoomExStrc * pRoomEx2) {
     D2DrlgLevelStrc* pLevel;
     D2DrlgLevelStrc* pLevel2;
-    if (pRoomEx) {
-      pLevel = pRoomEx->pLevel;
-    } else {
+    if (!pRoomEx) {
       pLevel = 0;
-    }
-    if (pRoomEx2) {
-      pLevel2 = pRoomEx2->pLevel;
     } else {
+      pLevel = pRoomEx->pLevel;
+    }
+    if (!pRoomEx2) {
       pLevel2 = 0;
+    } else {
+      pLevel2 = pRoomEx2->pLevel;
     }
     if (pLevel == pLevel2) {
       return;
@@ -1738,10 +1738,10 @@ void __stdcall DRLGOUTDOOR_ApplyLvlSubTileData(D2PoolManagerStrc * pMemory, int3
           nXDelta = baseX - nSubXBase;
           nSubY = nSubXBase;
           do {
-            if (pSubTxt->pDrlgFile->nFloorLayers) {
-              uGridFlags = DrlgGrid::GetGridFlags(&pSubTxt->pFloorGrid, nSubY, nSubRow);
-            } else {
+            if (!pSubTxt->pDrlgFile->nFloorLayers) {
               uGridFlags = 0;
+            } else {
+              uGridFlags = DrlgGrid::GetGridFlags(&pSubTxt->pFloorGrid, nSubY, nSubRow);
             }
             if (uGridFlags & 2) {
               DrlgGrid::AlterGridFlag(pRoomCtx->pFloorGrid, nXDelta + nSubY, gridRow, uGridFlags | 0x80, 3);
