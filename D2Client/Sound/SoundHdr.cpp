@@ -863,7 +863,7 @@ void __stdcall SOUNDHDR_Shutdown() {
     if (pTxtSounds) {
       int nSoundId;
       nSoundId = 1;
-      if (1 < nTxtSoundsSize) {
+      if (1 < (int)nTxtSoundsSize) {
         do {
           SOUNDHDR_FreeSoundBuffer(nSoundId);
           nSoundId++;

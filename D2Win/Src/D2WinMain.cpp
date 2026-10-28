@@ -254,7 +254,7 @@ D2ControlStrc * __stdcall FORMS_CreateAnyForm(FORMS_PredefinedFormStrc * pForm) 
     void* pSmack;
     ::D2WinProgressBar* pProgressBar;
     void* pAccountList;
-    DC6* pBackgroundDC6 = !pForm->pDC6 ? 0 : *pForm->pDC6;
+    DC6* pBackgroundDC6 = pForm->pDC6 ? *pForm->pDC6 : 0;
     switch (pForm->neD2FormType) {
       case FORM_TextBox:
         pTextBox = D2WinTextBox::D2WinTextBox(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nExtraParam, pForm->nLabelAsLocaleStringId, pBackgroundDC6, pForm->fpOnPressCallback, pForm->nFlagsOrType, (int*)pForm->pTypeArg2, (int*)pForm->pTypeArg1);

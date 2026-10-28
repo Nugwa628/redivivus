@@ -2548,10 +2548,7 @@ int32_t __stdcall SKILLDESC_GetAuraBonusDamage() {
 
     int nTotalDmg = 0;
     int nStateIdx = 0;
-    if (0 >= (short int)sgptDataTable->nAllStatesDataTblFlag0x04Size) {
-      return nTotalDmg;
-    }
-
+    if (0 < (short int)sgptDataTable->nAllStatesDataTblFlag0x04Size) {
     do {
       eD2States eState;
       eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, (int)sgptDataTable->pAllStatesDataTblFlag0x04[nStateIdx].nStateId);
@@ -2580,6 +2577,7 @@ int32_t __stdcall SKILLDESC_GetAuraBonusDamage() {
 
       nStateIdx++;
     } while (nStateIdx < (short int)sgptDataTable->nAllStatesDataTblFlag0x04Size);
+    }
 
     return nTotalDmg;
 }
