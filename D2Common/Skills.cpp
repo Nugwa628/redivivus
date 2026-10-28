@@ -1301,7 +1301,7 @@ uint32_t __stdcall SKILLS_CalcToHit(D2UnitStrc * pUnit, eD2Skills eSkill, int32_
 
         uint32_t nToHitCalcIdx = pSkillTxt->ToHitCalc;
         switch (nToHitCalcIdx) {
-          case -1:
+          case (uint32_t)-1:
             return (nSkillLevel - 1) * pSkillTxt->LevToHit + pSkillTxt->ToHit;
         }
         if (!sgptDataTable->pSkillsCode) {
