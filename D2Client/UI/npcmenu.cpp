@@ -4119,7 +4119,7 @@ void __stdcall NPCMENU_HandleMenuSelection(int32_t nParam, D2UnitStrc * pUnit) {
 void __fastcall SetPlayersMercInfo(int16_t nParam, int32_t nParam2) {
     nMercNameId = nParam;
     D2Client::Merc::nMercReviveCost = nParam2;
-    if (nParam != -1) {
+    if ((uint16_t)nParam != 0xffff) {
       return;
     }
 
