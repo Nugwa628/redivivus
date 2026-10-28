@@ -122,7 +122,8 @@ void __stdcall EnableWaypoint(D2WaypointStrc * pWaypoint, uint16_t nWaypointId) 
 // @sourcefile .\WayPoint\Waypoint.cpp
 D2WaypointStrc * __stdcall Alloc(D2PoolManagerStrc * pMemory) {
     D2WaypointStrc* pWaypoint = ((D2WaypointStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2WaypointStrc), ".\\WayPoint\\Waypoint.cpp", 0xfc, 0));
-    memset(pWaypoint, 0, sizeof(D2WaypointStrc));
+    pWaypoint->nSignature = 0;
+    memset(pWaypoint->aWaypointBits, 0, 7 * sizeof(pWaypoint->aWaypointBits[0]));
     pWaypoint->nSignature = 0x102;
     /* Always have access to 1st waypoint */ pWaypoint->aWaypointBits[D2Client::Waypoint::aaWaypointsBitMasks[0][0] - 1] |= D2Client::Waypoint::aaWaypointsBitMasks[0][1];
     return pWaypoint;
@@ -174,7 +175,8 @@ void __stdcall CopyWaypointBits(D2WaypointStrc * pWaypoint, uint8_t * nWaypointB
       }
 
       pWaypoint->nSignature = 0x102;
-      memset(pWaypoint, 0, sizeof(D2WaypointStrc));
+      pWaypoint->nSignature = 0;
+      memset(pWaypoint->aWaypointBits, 0, 7 * sizeof(pWaypoint->aWaypointBits[0]));
     }
 
     /* Sets 1st Waypoint always available */ pWaypoint->aWaypointBits[D2Client::Waypoint::aaWaypointsBitMasks[0][0] - 1] |= D2Client::Waypoint::aaWaypointsBitMasks[0][1];
