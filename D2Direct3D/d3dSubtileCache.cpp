@@ -303,10 +303,10 @@ void __fastcall D3DSUBTILE_Free(D3DSubtileCacheStrc * pCache, BOOL bInvalidateAl
           if (pNode) {
             pNextUsed = pNode->pNext;
             pCache->pUsedHead = pNextUsed;
-            if (!pNextUsed) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextUsed) {
               pNextUsed->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pNode->pNext = 0;
