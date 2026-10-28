@@ -604,11 +604,11 @@ void __stdcall DRLGROOM_IncreaseAlliedCount(D2RoomStrc * pRoom) {
 }
 
 int32_t __stdcall GetAlliedCountFromRoom(D2RoomStrc * pRoom) {
-    if (pRoom) {
+    if (!pRoom) {
+      return 0;
+    } else {
       return pRoom->nAllies;
     }
-
-    return 0;
 }
 
 void __stdcall DRLGROOM_DecreaseAlliedCount(D2RoomStrc * pRoom) {
@@ -1313,11 +1313,11 @@ D2DrlgStrc * __stdcall GetDrlgFromAct(D2DrlgActStrc * pDrlgAct) {
 }
 
 int32_t __stdcall GetInitSeedFromAct(D2DrlgActStrc * pDrlgAct) {
-    if (pDrlgAct) {
+    if (!pDrlgAct) {
+      return 0;
+    } else {
       return pDrlgAct->dwInitSeed;
     }
-
-    return 0;
 }
 
 D2RoomExStrc * __fastcall GetRoomExFromRoom(D2RoomStrc * pRoom) {

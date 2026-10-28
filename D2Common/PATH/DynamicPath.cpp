@@ -658,11 +658,11 @@ void __stdcall GetTargetTypeAndGUID(D2DynamicPathStrc * pDynamicPath, eD2UnitTyp
 }
 
 D2UnitStrc * __stdcall GetTargetUnit(D2DynamicPathStrc * pDynamicPath) {
-    if (pDynamicPath) {
+    if (!pDynamicPath) {
+      return nullptr;
+    } else {
       return pDynamicPath->pTargetUnit;
     }
-
-    return nullptr;
 }
 
 int32_t __stdcall GetCollisionType(D2DynamicPathStrc * pDynamicPath) {

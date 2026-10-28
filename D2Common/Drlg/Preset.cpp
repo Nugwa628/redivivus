@@ -656,7 +656,11 @@ static void CreateObjectPresetsForMap(D2DrlgMapStrc * pMapStrc, D2PoolManagerStr
     DrlgGrid::FillExternalCellFlags(&floorGrid, (D2DrlgMapStrc*)pMapStrc->pDrlgFile->pFloorLayer[0], &mapCoords, mapCoords.nWidth + 1, floorFlagsBuf);
     mapCoords.nPosX = pMapStrc->nRealOffsetX;
     mapCoords.nPosY = pMapStrc->nRealOffsetY;
-    if (pMapStrc->pTxtLevelPrest->Def != 0x1b) {
+    if (pMapStrc->pTxtLevelPrest->Def == 0x1b) {
+      CreateObjectPresets(mapCoords.nPosX, mapCoords.nPosY, pMapStrc, pMemory);
+      CreateObjectPresets2(-1, &floorGrid, pMemory, pMapStrc);
+      DrlgGrid::ResetGrid(&floorGrid);
+    } else {
       uint32_t cellFlags;
       if (0 < mapCoords.nWidth) {
         do {
@@ -674,10 +678,6 @@ static void CreateObjectPresetsForMap(D2DrlgMapStrc * pMapStrc, D2PoolManagerStr
       DrlgGrid::ResetGrid(&floorGrid);
       return;
     }
-
-    CreateObjectPresets(mapCoords.nPosX, mapCoords.nPosY, pMapStrc, pMemory);
-    CreateObjectPresets2(-1, &floorGrid, pMemory, pMapStrc);
-    DrlgGrid::ResetGrid(&floorGrid);
 }
 
 static void __stdcall CreateMonsterPreset(D2PoolManagerStrc * pMemory, D2DrlgMapStrc * pDrlgMap) {

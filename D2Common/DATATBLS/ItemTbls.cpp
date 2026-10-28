@@ -3652,29 +3652,29 @@ D2ItemRatioTxt * __stdcall TXT_QualityRatio_GetLine(uint32_t nItemClassId, uint3
     }
 
     int nRatioIdx = 0;
-    if (0 >= nTxtItemRatioSize) {
-      return nullptr;
-    }
-
-    short int* pEntry = &pTxtItemRatio->Version;
-    do {
-      if (uVar1 == (uint8_t)*(char*)((int)pEntry + 3) && bIsUpgradeable == *(uint8_t*)(pEntry + 1)) {
-        wMinVal = *pEntry;
-        if (wMinVal <= nQualityTier && (int)nBestMinVal <= (int)(uint32_t)wMinVal) {
-          nBestMatchIdx = nRatioIdx;
-          nBestMinVal = (uint32_t)wMinVal;
+    if (0 < nTxtItemRatioSize) {
+      short int* pEntry = &pTxtItemRatio->Version;
+      do {
+        if (uVar1 == (uint8_t)*(char*)((int)pEntry + 3) && bIsUpgradeable == *(uint8_t*)(pEntry + 1)) {
+          wMinVal = *pEntry;
+          if (wMinVal <= nQualityTier && (int)nBestMinVal <= (int)(uint32_t)wMinVal) {
+            nBestMatchIdx = nRatioIdx;
+            nBestMinVal = (uint32_t)wMinVal;
+          }
         }
+
+        nRatioIdx++;
+        pEntry += 0x22;
+      } while (nRatioIdx < nTxtItemRatioSize);
+
+      if (-1 >= nBestMatchIdx) {
+        return nullptr;
       }
 
-      nRatioIdx++;
-      pEntry += 0x22;
-    } while (nRatioIdx < nTxtItemRatioSize);
-
-    if (-1 >= nBestMatchIdx) {
+      return pTxtItemRatio + nBestMatchIdx;
+    } else {
       return nullptr;
     }
-
-    return pTxtItemRatio + nBestMatchIdx;
 }
 
 int SORT_ItemDescPriority(LPCVOID pParam1, LPCVOID pParam2) {

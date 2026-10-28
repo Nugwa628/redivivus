@@ -1434,11 +1434,11 @@ int32_t __stdcall DRLGPATH_GetWeightedDistancePacked(uint32_t nParam1, uint32_t 
       nAbsDY = -nAbsDY;
     }
     if (nAbsDX < 8 && nAbsDY < 8) {
-      if ((int)gaPathWeightTable[nAbsDX + nAbsDY * 8] >= 0) {
+      if ((int)gaPathWeightTable[nAbsDX + nAbsDY * 8] < 0) {
+        return 0;
+      } else {
         return gaPathWeightTable[nAbsDX + nAbsDY * 8] + 1;
       }
-
-      return 0;
     }
     if (nAbsDY >= nAbsDX) {
       return nAbsDX + nAbsDY * 2;
@@ -2124,11 +2124,11 @@ int32_t __stdcall DRLGPATH_GetSimpleDistancePacked2(uint32_t nParam1, uint32_t n
     if (nAbsDY < 0) {
       nAbsDY = -nAbsDY;
     }
-    if (nAbsDX < nAbsDY) {
+    if (nAbsDX >= nAbsDY) {
+      return nAbsDY + nAbsDX * 2;
+    } else {
       return nAbsDX + nAbsDY * 2;
     }
-
-    return nAbsDY + nAbsDX * 2;
 }
 
 // Searches the open list hash table for a node matching the given packed position. Returns the node if found, NULL otherwise.

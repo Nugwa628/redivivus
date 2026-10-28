@@ -1328,15 +1328,15 @@ uint32_t __stdcall INVENTORY_HasEquippedWeaponClass(D2InventoryStrc * pInventory
     if (!pInventory) {
       return 0;
     }
-    if (pInventory->nSignatureMagic == 0x1020304) {
+    if (pInventory->nSignatureMagic != 0x1020304) {
+      pItem = 0;
+    } else {
       pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
       if (!pGridInfo) {
         pItem = 0;
       } else {
         pItem = pGridInfo->pGridCells[5];
       }
-    } else {
-      pItem = 0;
     }
 
     BOOL BVar6 = ITEMS::Items::ITEM_CheckIfItemIsNotBrokenAndNotDisabled(pItem);
@@ -2034,15 +2034,15 @@ BOOL __stdcall INVENTORY_GetEquippedWeaponInfo(D2InventoryStrc * pInventory, D2U
 
     *bResult = 0;
     D2UnitStrc* pDVar7 = GetEquipedWeapon(pInventory);
-    if (pInventory->nSignatureMagic == 0x1020304) {
+    if (pInventory->nSignatureMagic != 0x1020304) {
+      pItem = 0;
+    } else {
       pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
       if (!pGridInfo) {
         pItem = 0;
       } else {
         pItem = pGridInfo->pGridCells[4];
       }
-    } else {
-      pItem = 0;
     }
 
     BOOL BVar1 = ITEMS::Items::ITEM_CheckIfItemIsNotBrokenAndNotDisabled(pItem);
@@ -2209,19 +2209,19 @@ void __stdcall UpsertToUpdateList(D2InventoryStrc * pInventory, D2UnitStrc * pIt
 }
 
 D2InventoryToBeUpdatedStrc * __stdcall GetNextUpdate(D2InventoryToBeUpdatedStrc * pUpdate) {
-    if (pUpdate) {
+    if (!pUpdate) {
+      return nullptr;
+    } else {
       return pUpdate->pNext;
     }
-
-    return nullptr;
 }
 
 uint32_t __stdcall GetUpdatesUUid(D2InventoryToBeUpdatedStrc * pInventoryToBeUpdated) {
-    if (pInventoryToBeUpdated) {
+    if (!pInventoryToBeUpdated) {
+      return 0;
+    } else {
       return pInventoryToBeUpdated->nUnitGuid;
     }
-
-    return 0;
 }
 
 int32_t __stdcall ITEM_ItemsInItem(D2InventoryStrc * pInventory) {
@@ -2935,35 +2935,35 @@ int32_t __stdcall INVENTORY_GetCorpseCount(D2InventoryStrc * pInventory) {
 
 // Returns pCorpse->pNext (+0xc).
 D2CorpseStrc * __stdcall INVENTORY_GetNextCorpse(D2CorpseStrc * pCorpse) {
-    if (pCorpse) {
+    if (!pCorpse) {
+      return nullptr;
+    } else {
       return pCorpse->pNext;
     }
-
-    return nullptr;
 }
 
 int32_t __stdcall ROOMCORPSE_GetGUID(D2CorpseStrc * pCorpse) {
-    if (pCorpse) {
+    if (!pCorpse) {
+      return 0;
+    } else {
       return pCorpse->nUnitGUID;
     }
-
-    return 0;
 }
 
 int32_t __stdcall CORPSE_GetMercClassId(int32_t nParam) {
-    if (nParam) {
+    if (!nParam) {
+      return 0;
+    } else {
       return *(int32_t*)(nParam + 8);
     }
-
-    return 0;
 }
 
 D2RoomStrc * * __stdcall CORPSE_GetData(D2RoomStrc * pRoom) {
-    if (pRoom) {
+    if (!pRoom) {
+      return nullptr;
+    } else {
       return pRoom->ppRoomList;
     }
-
-    return nullptr;
 }
 
 static void ITEM_GetBodyComponents(D2UnitStrc * pUnit, uint8_t * pbParam) {
@@ -4556,11 +4556,11 @@ D2UnitStrc * __stdcall INVENTORY_GetNextItem(D2UnitStrc * pUnit) {
 
 // Returns the item unit if pUnit is of type ITEM (unitType == 4), otherwise returns null.
 D2UnitStrc * __stdcall GetCarriedItem(D2UnitStrc * pUnit) {
-    if (pUnit) {
+    if (!pUnit) {
+      return nullptr;
+    } else {
       return (D2UnitStrc*)(pUnit->eUnitType != UNIT_ITEM ? 0 : (uint32_t)pUnit);
     }
-
-    return nullptr;
 }
 
 int32_t __stdcall ITEM_GetGUID(D2UnitStrc * pUnit) {
