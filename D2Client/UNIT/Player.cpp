@@ -670,7 +670,7 @@ uint32_t __stdcall PLAYER_CheckSkillUsability(int * pnUsabilityCode, D2UnitStrc 
     if (!pSkillsTxt) {
       return 0;
     }
-    if (0 < nUsabilityCode && (nUsabilityCode <= 2 || nUsabilityCode == 4) && pSkillsTxt->AttackNoMana) {
+    if (0 < nUsabilityCode && (nUsabilityCode <= 2 || nUsabilityCode == 4) && (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[4])) {
       D2SkillStrc* pSkill;
       pSkill = D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_Attack, pUnit);
       *ppSkill = pSkill;
