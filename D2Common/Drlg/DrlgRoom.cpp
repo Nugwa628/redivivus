@@ -975,11 +975,10 @@ BOOL __fastcall AreXYInsideCoordinates(D2DrlgCoordsStrc * pDrlgCoords, int32_t n
     }
 
     int nPosY = pDrlgCoords->WorldPosition.y;
-    if (!(nPosY <= nY && nX < pDrlgCoords->WorldSize.x + nPosX)) {
-      return 0;
+    if (nY >= nPosY && nX < pDrlgCoords->WorldSize.x + nPosX) {
+      return (uint32_t)(nY < pDrlgCoords->WorldSize.y + nPosY);
     }
-
-    return (uint32_t)(nY < pDrlgCoords->WorldSize.y + nPosY);
+    return 0;
 }
 
 uint32_t __fastcall DRLGCOORDS_IsPointInside(D2DrlgCoordsStrc * pDrlgCoords, int32_t nX, int32_t nY) {
@@ -989,11 +988,10 @@ uint32_t __fastcall DRLGCOORDS_IsPointInside(D2DrlgCoordsStrc * pDrlgCoords, int
     }
 
     int nPosY = pDrlgCoords->WorldPosition.y;
-    if (!(nPosY <= nY && nX <= pDrlgCoords->WorldSize.x + nPosX)) {
-      return 0;
+    if (nY >= nPosY && nX <= pDrlgCoords->WorldSize.x + nPosX) {
+      return (uint32_t)(nY <= pDrlgCoords->WorldSize.y + nPosY);
     }
-
-    return (uint32_t)(nY <= pDrlgCoords->WorldSize.y + nPosY);
+    return 0;
 }
 
 // Checks if world coordinates (nWorldX, nWorldY) fall within a RoomEx's
