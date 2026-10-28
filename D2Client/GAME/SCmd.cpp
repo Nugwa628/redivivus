@@ -501,10 +501,10 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x08_REMOVEROOM(char * pBytes) {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    if (!pUnit) {
-      pRoom = 0;
-    } else {
+    if (pUnit) {
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
+    } else {
+      pRoom = 0;
     }
 
     D2Common::DUNGEON::Dungeon::RemoveRoomData(sgpDrlgAct, (eD2LevelId)(uint8_t)pBytes[5], (uint32_t)nX, (uint32_t)nY, pRoom);
