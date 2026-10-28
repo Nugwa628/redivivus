@@ -157,7 +157,7 @@ BOOL __fastcall Q33_UpdateQuestStep(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
 void __fastcall Q33_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     int32_t nTargetClassId = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA5Q3Strc* pA5Q3Data = pQuestData->pQuestSpecificData.pA5Q3;
-    if (nTargetClassId != 0x201) {
+    if ((uint16_t)nTargetClassId != 0x201) {
       return;
     }
     if (pA5Q3Data->bMalachaiTalked) {
