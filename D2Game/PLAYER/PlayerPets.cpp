@@ -542,7 +542,7 @@ static void __stdcall PETS_TeleportToRoom(D2UnitStrc * pUnit, ::SGAMEDATA * pGam
 
     pPrevRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pPrevRoom);
-    bool eNewAct = (bool)D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
+    uint8_t eNewAct = (uint8_t)D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
     pUnit->nAct = eNewAct;
     pUnit->pDrlgAct = pGame->pAct[eNewAct];
     D2Common::Unit::ROOM_LinkUnitToUpdateList(pUnit);
