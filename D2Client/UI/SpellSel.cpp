@@ -2072,7 +2072,7 @@ void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, D2SkillsTxt * pSkillTxt
     if (nColumnX < nMouseX && nMouseX < nColumnX + 0x30 && nRowY - 0x30 < nMouseY && nMouseY < nRowY) {
       nGlobalPaletteShift = PALETTE_BLUE;
     }
-    if (!pSkillTxt->InGame) {
+    if (!(*((uint8_t*)pSkillTxt + 0x5) & gadwBitMasks[2])) {
       nGlobalPaletteShift = PALETTE_RED;
     }
 
