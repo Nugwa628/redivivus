@@ -983,14 +983,16 @@ uint32_t __fastcall CHATDLG_SendProfileData(char * szAccount, char * szSex, char
 uint32_t __stdcall CHATDLG_ToggleLadderNews(D2ControlMsg * pControlMsg) {
     uint16_t nStringId;
     uint16_t awszMessage[20];
-    if (!gbLadderNewsExpanded) {
+    if (gbLadderNewsExpanded) {
+      D2Win::Src::D2WinButton::D2WINBUTTON_SetImageIndex(gpCtlLobbyLadderNewsToggle, 0);
+      gbLadderNewsExpanded = 0;
+      nStringId = 0x14d7;
+    } else {
       int nRand;
       D2Win::Src::D2WinButton::D2WINBUTTON_SetImageIndex(gpCtlLobbyLadderNewsToggle, 2);
       gbLadderNewsExpanded = 1;
       nRand = rand();
-      if (!(nRand % 1000)) {
-        nStringId = 0x14d8;
-      } else {
+      if ((nRand % 1000)) {
         nRand = rand();
         if (!(nRand % 1000)) {
           nRand = rand();
@@ -1007,11 +1009,9 @@ uint32_t __stdcall CHATDLG_ToggleLadderNews(D2ControlMsg * pControlMsg) {
         }
 
         nStringId = 0x14d6;
+      } else {
+        nStringId = 0x14d8;
       }
-    } else {
-      D2Win::Src::D2WinButton::D2WINBUTTON_SetImageIndex(gpCtlLobbyLadderNewsToggle, 0);
-      gbLadderNewsExpanded = 0;
-      nStringId = 0x14d7;
     }
 
     uint16_t* szText = D2Lang::StrTable::strtable::GetLocaleString(nStringId);
