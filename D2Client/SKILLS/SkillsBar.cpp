@@ -255,12 +255,12 @@ BOOL __fastcall Skills_CltDoFunc_Bar_Whirlwind_CorpseExplosion(D2UnitStrc * pUni
     if (!pMonStats2) {
       return 0;
     }
-    if (!pMonStats2->large) {
+    if (pMonStats2->large) {
+      eCorpseMissile = (eMissilesId)pSkillTxt->cltmissile[3];
+    } else {
       if (pMonStats2->isSmall) {
         eCorpseMissile = (eMissilesId)pSkillTxt->cltmissile[2];
       }
-    } else {
-      eCorpseMissile = (eMissilesId)pSkillTxt->cltmissile[3];
     }
     if (!(0 <= (int)eCorpseMissile && (int)eCorpseMissile < sgptDataTable->nTxtMissilesSize)) {
       return 0;
