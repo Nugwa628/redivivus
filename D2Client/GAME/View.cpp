@@ -402,7 +402,7 @@ void __fastcall SetFlag0x1(D2GameViewStrc * pGameView) {
 }
 
 void __fastcall SetViewRectangleSize(D2GameViewStrc * pGameView, int32_t xLeft, int32_t yTop, int32_t xRight, int32_t yBottom) {
-    BOOL _bPerspective;
+    bool _bPerspective;
     bool bPerspective;
     if (!pGameView) {
       return;

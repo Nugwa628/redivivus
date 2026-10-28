@@ -157,10 +157,10 @@ BOOL __fastcall GetCooordinates(D2UnitStrc * pUnit, int32_t * pX, int32_t * pY) 
       eUnitType = pTargetUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nBuffer2 = pTargetUnit->pPath.pStaticPath->nPosX;
-      } else if (pTargetUnit->pPath.pDynamicPath) {
-        nBuffer2 = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
-      } else {
+      } else if (!pTargetUnit->pPath.pDynamicPath) {
         nBuffer2 = 0;
+      } else {
+        nBuffer2 = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
       }
 
       *pX = nBuffer2;
@@ -422,20 +422,20 @@ D2UnitStrc * __fastcall MakeMissile(eMissilesId neMissilesId, D2UnitStrc * pUnit
     sSkillArg.pOwner = pUnit;
     if (eOwnerUnitType == UNIT_OBJECT || 3 < (int)eOwnerUnitType && (int)eOwnerUnitType <= 5) {
       nOwnerPos = pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nOwnerPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nOwnerPos = 0;
+    } else {
+      nOwnerPos = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     sSkillArg.nX = nOwnerPos + nOffsetX;
     eOwnerUnitType = pUnit->eUnitType;
     if (eOwnerUnitType == UNIT_OBJECT || 3 < (int)eOwnerUnitType && (int)eOwnerUnitType <= 5) {
       nOwnerPos = pUnit->pPath.pStaticPath->nPosY;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nOwnerPos = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nOwnerPos = 0;
+    } else {
+      nOwnerPos = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
     }
 
     sSkillArg.nY = nOwnerPos + nOffsetY;
@@ -476,7 +476,7 @@ static int32_t SKILL_CanTargetDeadMonster(D2UnitStrc * pUnit, eD2Skills eSkills)
     if (!pSkillTxt) {
       return 0;
     }
-    if (!((*((uint8_t*)pSkillTxt + 0x6) & gadwBitMasks[5]) && pTarget->eUnitType == UNIT_MONSTER && pTarget->eAnimMode.ePlayerMode == Kick)) {
+    if (!(pSkillTxt->SearchEnemyXY && pTarget->eUnitType == UNIT_MONSTER && pTarget->eAnimMode.ePlayerMode == Kick)) {
       return 1;
     }
 
@@ -735,10 +735,10 @@ void __fastcall SKILL_ForEachUnitInRadius(D2UnitStrc * pUnit, int32_t nCenterX, 
               eUnitType = pUnit2->eUnitType;
               if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
                 nUnitXPos = pUnit2->pPath.pStaticPath->nPosX;
-              } else if (pUnit2->pPath.pDynamicPath) {
-                nUnitXPos = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
-              } else {
+              } else if (!pUnit2->pPath.pDynamicPath) {
                 nUnitXPos = 0;
+              } else {
+                nUnitXPos = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
               }
 
               nDistanceSq = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(nCenterXSaved, nCenterY, nUnitXPos, nUnitY);
@@ -1304,7 +1304,7 @@ uint32_t __fastcall SKILL_ExecuteClientDoFunc(D2UnitStrc * pUnit, eD2Skills eSki
           nOffsetY += nTargetY;
         }
       }
-      if ((*((uint8_t*)pSkillTxt + 0x4) & gadwBitMasks[1])) {
+      if (pSkillTxt->lob) {
         pMissileUnit = UNIT::Missile::MISSILE_CreateFromUnitWithOffset(pUnitSaved, (int)pSkillTxt->cltmissile[0], nTargetX, nTargetY, nOffsetX, nOffsetY, eSkillId, nSkillLevel, 0);
       } else {
         pMissileUnit = Skills::MakeMissile((int)pSkillTxt->cltmissile[0], pUnitSaved, eSkillId, nSkillLevel, nTargetX, nTargetY, nOffsetX, nOffsetY);
@@ -1421,10 +1421,7 @@ void __fastcall SKILL_ExecuteClientProgressFunc(D2UnitStrc * pUnit, D2UnitStrc *
     bHadTarget = GetCooordinates(pUnit, (int32_t*)aSavedSP1Y, (int32_t*)aSavedSP1X);
     D2UnitStrc* pSavedTarget;
     pSavedTarget = UNIT::CUnit::GetConfirmedTargetUnit(pUnit);
-    if (pUnit2) {
-      D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pUnit2);
-      pUnit->nInitSeed = (uint32_t)bDirection;
-    } else {
+    if (!pUnit2) {
       if (!nTargetX) {
         goto run_progress_func;
       }
@@ -1432,6 +1429,9 @@ void __fastcall SKILL_ExecuteClientProgressFunc(D2UnitStrc * pUnit, D2UnitStrc *
         D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, (int16_t)nTargetX, (int16_t)nTargetY);
         pUnit->nInitSeed = (uint32_t)bDirection;
       }
+    } else {
+      D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pUnit2);
+      pUnit->nInitSeed = (uint32_t)bDirection;
     }
     if (nTargetX && !nTargetY) {
       pUnit->nInitSeed = nTargetX;

@@ -40,8 +40,8 @@ struct ReportVtable {
 namespace Fog::_3rdparty::crashy {
 
 // Function declarations
-::Report * __fastcall Constructor(::Report * pThis);
-::Report * __fastcall ScalarDeletingDestructor(::Report * pThis, int32_t nEdxUnused, uint32_t nFlags);
+::Report * Constructor(::Report * pThis);
+::Report * ScalarDeletingDestructor(::Report * pThis, uint32_t nFlags);
 void __fastcall Destructor(::Report * pThis);
 int8_t Open(::Report * pThis, char * szFileName);
 int8_t __fastcall Close(::Report * pThis);

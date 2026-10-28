@@ -430,7 +430,7 @@ BOOL __stdcall BeginCutScene();
 BOOL __stdcall RENDERER_DDRAW_DestroyWindow();
 BOOL __fastcall ResizeWindow(HWND hWnd, BOOL bForceResize);
 // @sourcefile .\Src\ddCore.cpp
-BOOL Release();
+void Release();
 void __fastcall EndCutScene(HWND hWnd, int32_t nResolutionMode, int32_t nWindowState);
 void thunk_Release();
 // @sourcefile .\Src\ddCore.cpp

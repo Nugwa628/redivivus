@@ -1051,9 +1051,7 @@ BOOL __stdcall InternalCutsceneWindow() {
     }
 
     nLine = pWindowHandleBuffer->lpVtbl->SetDisplayMode(pWindowHandleBuffer, 0x280, 0x1e0, nBitDepth);
-    if (nLine) {
-      szErrorMsg = "SetDisplayMode failed!";
-    } else {
+    if (!nLine) {
       ddSurfDesc.dwSize = 0x6c;
       memset(&ddSurfDesc.dwFlags, 0, 0x68);
       ddSurfDesc.dwFlags = 1;
@@ -1066,6 +1064,8 @@ BOOL __stdcall InternalCutsceneWindow() {
       }
 
       szErrorMsg = "Failed to create primary surface for cutscenes";
+    } else {
+      szErrorMsg = "SetDisplayMode failed!";
     }
 
     DirectDrawErrorHandler(szErrorMsg, nLine);
@@ -1322,12 +1322,12 @@ BOOL __fastcall ResizeWindow(HWND hWnd, BOOL bForceResize) {
 }
 
 // @sourcefile .\Src\ddCore.cpp
-BOOL Release() {
+void Release() {
     // Static local variables (originally global data)
     static IUnknown * gpDDrawComObject; D2_STATIC_GUARD_BSS(gpDDrawComObject, "D2DDraw::Renderer::DirectDraw::Release::gpDDrawComObject");
 
     if (!gnDDrawSurfaceHeight) {
-      return 1;
+      return;
     }
 
     InternalReleaseWindow();
@@ -1353,7 +1353,6 @@ BOOL Release() {
 
     D2ddDebugFont_Free();
     gnDDrawSurfaceHeight = 0;
-    return 1;
 }
 
 void __fastcall EndCutScene(HWND hWnd, int32_t nResolutionMode, int32_t nWindowState) {
@@ -1939,7 +1938,7 @@ void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEn
         if (!(nAlpha < 0x40)) {
           nDrawMode = 1;
         } else {
-          if (nAlpha <= 0) {
+          if (nAlpha == '\0') {
             return;
           }
 

@@ -843,12 +843,12 @@ static BOOL __stdcall HIRELING_DrawPortraitIcon(D2UnitStrc * pUnit, int * pnYTog
     int nX = *pnX;
     D2UnitStrc* pMercUnit = UNIT::Player::UNITS_FindClientSideUnit((int32_t)pUnit, UNIT_MONSTER);
     UI_DrawHirelingNameFromUnit(nX, nY, pMercUnit);
-    if (*pnYToggle) {
-      *pnY -= *pnYToggle;
-      *pnYToggle = 0;
-    } else {
+    if (!*pnYToggle) {
       *pnYToggle = 10;
       *pnY += 10;
+    } else {
+      *pnY -= *pnYToggle;
+      *pnYToggle = 0;
     }
 
     gpHireHoverUnit = *pnX;

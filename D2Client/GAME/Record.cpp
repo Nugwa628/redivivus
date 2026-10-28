@@ -46,10 +46,9 @@ namespace D2Client::GAME::Record {
 // @sourcefile .\GAME\Record.cpp
 void __stdcall AllocGameRecord() {
     D2GameRecordStrc* pRecord = ((D2GameRecordStrc*)Fog::Memory::AllocClientMemory(sizeof(D2GameRecordStrc), ".\\GAME\\Record.cpp", 0x35, 0));
-    D2GameRecordStrc* pPrev = gpCurrentGameRecord;
     pRecord->nEntrySize = 0;
     pRecord->nPlaybackIndex = 0;
-    pPrev->pNext = pRecord;
+    gpCurrentGameRecord->pNext = pRecord;
     pRecord->pNext = 0;
     gpCurrentGameRecord = pRecord;
 }

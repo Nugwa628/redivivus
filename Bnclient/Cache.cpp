@@ -28,10 +28,9 @@ static void CACHE_DecryptBlock(uint32_t dwKey, uint32_t * pdwData, uint32_t nByt
 static uint32_t __stdcall CACHE_HashString(int32_t nParam, char * szText) {
     uint32_t dwHash = 0x7fed7fed;
     int nHashSeed = -0x11111112;
-    while (szText && *szText != '\0') {
+    for (; szText && *szText != '\0'; szText++) {
       int nUpperChar;
       nUpperChar = toupper((int)*szText);
-      szText++;
       dwHash = dwHash + nHashSeed ^ *(uint32_t*)((int)g_pCacheCryptTable + (nParam * 0x100 + (int)(char)nUpperChar) * 4);
       nHashSeed = nHashSeed * 0x21 + (int)(char)nUpperChar + 3 + dwHash;
     }

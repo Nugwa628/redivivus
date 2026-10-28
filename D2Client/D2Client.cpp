@@ -1561,7 +1561,7 @@ void __fastcall MONSTER_FreeMonsterPath(int * pThis) {
 }
 
 int __stdcall NPCMENU_ConfirmTransactionReturn() {
-    UI::Dialog::FreeDialogStrc((D2DialogStrc*)UI::Dialog::gpNpcTransactionConfirmDialog);
+    UI::Dialog::FreeDialogStrc();
     UI::Dialog::gpNpcTransactionConfirmDialog = 0;
     if (gnNpcMenuTransactionType == 5) {
       UI::npcmenu::NPCMENU_BuildMercHireMenu();
@@ -1577,7 +1577,7 @@ int __stdcall NPCMENU_ConfirmTransactionReturn() {
 int __stdcall NPCMENU_GetCurrentMenuId() {
     GAME::Select::ClearSelectedUnit();
     Sound::SOUND_PlaySound(SOUND_CURSOR_PASS, nullptr, 0, 0, 0);
-    UI::Dialog::FreeDialogStrc((D2DialogStrc*)UI::Dialog::gpNpcTradeErrorDialog);
+    UI::Dialog::FreeDialogStrc();
     UI::Dialog::gpNpcTradeErrorDialog = 0;
     if (_Interaction::geNpcUiState != NPCUI_TRADE_REJECTED) {
       if (gnNpcMenuTransactionType == 6) {

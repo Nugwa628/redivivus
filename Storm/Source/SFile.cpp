@@ -162,12 +162,11 @@ static void SFILE_Decrypt(uint32_t nSeed, uint32_t * pData, uint32_t nByteLen) {
 static uint32_t __stdcall SFILE_Hash(int32_t nHashKind, char * szText) {
     uint32_t nHash = 0x7fed7fed;
     int nSeed = -0x11111112;
-    while (szText && *szText != '\0') {
-      uint8_t nUpper;
-      nUpper = (uint8_t)toupper((int)*szText);
-      szText++;
-      nHash = nHash + nSeed ^ *(uint32_t*)((int)g_pStormMpqCryptTable + (nHashKind * 0x100 + nUpper) * 4);
-      nSeed = nSeed * 0x21 + nUpper + 3 + nHash;
+    for (; szText && *szText != '\0'; szText++) {
+      uint32_t nUpper;
+      nUpper = toupper((int)*szText);
+      nHash = nHash + nSeed ^ *(uint32_t*)((int)g_pStormMpqCryptTable + (nHashKind * 0x100 + (nUpper & 0xff)) * 4);
+      nSeed = nSeed * 0x21 + (nUpper & 0xff) + 3 + nHash;
     }
 
     return nHash;
@@ -229,18 +228,17 @@ static int __stdcall SFILE_ReadFileChecked(int32_t * pMPQFile, void * pOutputBuf
         }
 
         dwLastError = GetLastError();
-        switch (gnSFileReadErrorMode) {
-        case 0:
+        if (!gnSFileReadErrorMode) {
           return 0;
-        case 1:
-          goto ask_handler;
-        case 2:
-          SErr::SErrDisplayError(dwLastError, pnBytesRead, -4, nullptr, 0, 1);
+        }
+        if (gnSFileReadErrorMode == 1) {
           break;
+        }
+        if (gnSFileReadErrorMode == 2) {
+          SErr::SErrDisplayError(dwLastError, pnBytesRead, -4, nullptr, 0, 1);
         }
       }
 
-    ask_handler:
       if (!pfnSFileReadErrorHandler) {
         return 0;
       }
@@ -307,14 +305,14 @@ static uint32_t __stdcall SFILE_SearchHashTable(D2ArchiveStrc * pArchive, int16_
     } while (true);
 }
 
-static void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCount) {
+void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCount) {
     int nSectorsLeft;
     void* pSrc = (void*)(nSectorCount * 0x10 - 0x10 + pSectorTable);
     void* pDst = (void*)(nSectorCount * 0x2c - 0x2c + pSectorTable);
     if (1 < nSectorCount) {
       uint32_t* pDstExtra;
-      pDstExtra = (uint32_t*)((int)pDst + 0x24);
       nSectorsLeft = nSectorCount - 1;
+      pDstExtra = (uint32_t*)((int)pDst + 0x24);
       do {
         memmove(pDst, pSrc, 0x10);
         pSrc = (void*)((int)pSrc - 0x10);
@@ -3553,10 +3551,10 @@ D2StormAsyncOpStrc * __stdcall SFILE_IssueRequest(uint32_t nFileOffset, uint32_t
     int bArgsValid;
     D2StormAsyncOpStrc* pPrevBack;
     D2StormAsyncOpStrc* pRequest = 0;
-    if (pChunkWritePtr && !pStream) {
-      bArgsValid = -1;
-    } else {
+    if (!pChunkWritePtr && !pStream) {
       bArgsValid = 0;
+    } else {
+      bArgsValid = -1;
     }
     if (!bArgsValid) {
       SErr::SErrSetLastError(0x57);
@@ -5721,9 +5719,8 @@ void __fastcall CRC32_UpdateCRC(uint8_t * pbData, int32_t nLength, uint32_t * pd
       dwCrc = -1;
     }
     if (byFlags & 2) {
-      while (nLength) {
+      for (; nLength; nLength--) {
         dwCrc = dwCrc >> 8 ^ gdwSFileCompressionMethod[(*pbData ^ dwCrc) & 0xff];
-        nLength--;
         pbData++;
       }
     }

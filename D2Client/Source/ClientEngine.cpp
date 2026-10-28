@@ -250,10 +250,10 @@ void __stdcall CLIENT_QuestEvent_RestoreTaintedSun() {
     eUnitType = pObject->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pObject->pPath.pStaticPath->nPosX;
-    } else if (pObject->pPath.pDynamicPath) {
-      nX = D2Common::PATH::DynamicPath::GetXPos(pObject->pPath.pDynamicPath);
-    } else {
+    } else if (!pObject->pPath.pDynamicPath) {
       nX = 0;
+    } else {
+      nX = D2Common::PATH::DynamicPath::GetXPos(pObject->pPath.pDynamicPath);
     }
 
     pPlayer = UNIT::Missile::CastAttack(pPlayer, MISSILE_Taintedsuncontrol, nX, nY, SKILL_Attack, 1);
@@ -341,10 +341,10 @@ void __fastcall CLIENT_SpawnOverseerControlMissile(D2UnitStrc * pUnit) {
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nX = 0;
+    } else {
+      nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     D2UnitStrc* pMissile = UNIT::Missile::CastAttack(pUnit, MISSILE_Overseercontrol, nX, nY, SKILL_Attack, 1);
@@ -554,10 +554,10 @@ void __fastcall CLIENT_SpawnTowerMistEffect(D2UnitStrc * pUnit) {
       eFindType = pTarget->eUnitType;
       if (eFindType == UNIT_OBJECT || 3 < (int)eFindType && (int)eFindType <= 5) {
         nY = pTarget->pPath.pStaticPath->nPosY;
-      } else if (pTarget->pPath.pDynamicPath) {
-        nY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
-      } else {
+      } else if (!pTarget->pPath.pDynamicPath) {
         nY = 0;
+      } else {
+        nY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
       }
     } else {
       eFindType = pUnit->eUnitType;
@@ -1136,10 +1136,10 @@ void __fastcall DRLGROOM_SpawnRandomMonsters(D2RoomStrc * pRoom) {
     }
 
     D2LevelsTxt* pLevelsTxt = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevelId);
-    if (pRoom) {
-      pSeed = &pRoom->sSeed;
-    } else {
+    if (!pRoom) {
       pSeed = 0;
+    } else {
+      pSeed = &pRoom->sSeed;
     }
 
     int nSlotIndex = 0;
@@ -1373,10 +1373,10 @@ static uint32_t __stdcall MONSTER_TryMoveTowardTarget(D2UnitStrc * pUnit, uint8_
     eVar1 = pTarget->eUnitType;
     if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
       nTargetY = pTarget->pPath.pStaticPath->nPosY;
-    } else if (pTarget->pPath.pDynamicPath) {
-      nTargetY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
-    } else {
+    } else if (!pTarget->pPath.pDynamicPath) {
       nTargetY = 0;
+    } else {
+      nTargetY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
     }
 
     int nStepY = 0;
@@ -1586,10 +1586,10 @@ static uint32_t CLIENT_CheckIfUnitPositionsMatch(D2UnitStrc * pnUnit1, D2UnitStr
     eUnitType = pnUnit2->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnit2Y = pnUnit2->pPath.pStaticPath->nPosY;
-    } else if (pnUnit2->pPath.pDynamicPath) {
-      nUnit2Y = D2Common::PATH::DynamicPath::GetYPos(pnUnit2->pPath.pDynamicPath);
-    } else {
+    } else if (!pnUnit2->pPath.pDynamicPath) {
       nUnit2Y = 0;
+    } else {
+      nUnit2Y = D2Common::PATH::DynamicPath::GetYPos(pnUnit2->pPath.pDynamicPath);
     }
     if (!(nUnit1X == nUnit2X && nUnit1Y == nUnit2Y)) {
       return 0;

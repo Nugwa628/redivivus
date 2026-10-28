@@ -255,12 +255,12 @@ BOOL __fastcall Skills_CltDoFunc_Bar_Whirlwind_CorpseExplosion(D2UnitStrc * pUni
     if (!pMonStats2) {
       return 0;
     }
-    if (pMonStats2->large) {
-      eCorpseMissile = (eMissilesId)pSkillTxt->cltmissile[3];
-    } else {
+    if (!pMonStats2->large) {
       if (pMonStats2->isSmall) {
         eCorpseMissile = (eMissilesId)pSkillTxt->cltmissile[2];
       }
+    } else {
+      eCorpseMissile = (eMissilesId)pSkillTxt->cltmissile[3];
     }
     if (!(0 <= (int)eCorpseMissile && (int)eCorpseMissile < sgptDataTable->nTxtMissilesSize)) {
       return 0;
@@ -870,29 +870,29 @@ void __fastcall SKILL_HandleTeleportLanding(D2UnitStrc * pUnit) {
     }
 
     D2SkillStrc* pSkill = D2Common::Units::GetCurrentSkill(pUnit);
-    if (pSkill) {
-      nDestX = D2Common::Skills::SKILL_GetParam1(pSkill);
-    } else {
+    if (!pSkill) {
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nDestX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (pUnit->pPath.pDynamicPath) {
-        nDestX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-      } else {
+      } else if (!pUnit->pPath.pDynamicPath) {
         nDestX = 0;
+      } else {
+        nDestX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
       }
-    }
-    if (pSkill) {
-      nDestY = D2Common::Skills::SKILL_GetParam2(pSkill);
     } else {
+      nDestX = D2Common::Skills::SKILL_GetParam1(pSkill);
+    }
+    if (!pSkill) {
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nDestY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (pUnit->pPath.pDynamicPath) {
-        nDestY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-      } else {
+      } else if (!pUnit->pPath.pDynamicPath) {
         nDestY = 0;
+      } else {
+        nDestY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
       }
+    } else {
+      nDestY = D2Common::Skills::SKILL_GetParam2(pSkill);
     }
 
     eD2CollisionShapeType nType = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);

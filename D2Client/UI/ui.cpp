@@ -1617,7 +1617,7 @@ void __stdcall UI_CloseCurrentDialog() {
       gnGoldDialogTransactionMode = gpDialogDefaultActionCallback->pVtable->GetValue(gpDialogDefaultActionCallback);
     }
     if (Dialog::gpDialog) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpDialog);
+      Dialog::FreeDialogStrc();
       Dialog::gpDialog = 0;
     }
     if (gpCurrentDialog) {
@@ -1846,20 +1846,20 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
 
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 0;
-          if (pAllocCtx) {
-            gpCurrentDialog = Spinner::SpinnerWrapper::Constructor((::SpinnerWrapper*)pAllocCtx, 0xdf, 0xdb, 0, (fpSpinnerRepeatAction)UI_GoldDialogScrollCallback);
-          } else {
+          if (!pAllocCtx) {
             gpCurrentDialog = 0;
+          } else {
+            gpCurrentDialog = Spinner::SpinnerWrapper::Constructor((::SpinnerWrapper*)pAllocCtx, 0xdf, 0xdb, 0, (fpSpinnerRepeatAction)UI_GoldDialogScrollCallback);
           }
 
           nCleanupStage = -1;
           Dialog::AllocDialogSub(Dialog::gpDialog, gpCurrentDialog, 0, 0);
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 1;
-          if (pAllocCtx) {
-            gpDialogDefaultActionCallback = Editbox::EditBoxWrapper::Constructor(pAllocCtx, 0x102, 0xe4, 100, 1, pnCurrentGold, 10, UI_GoldInputCallback_ReturnZero, 1);
-          } else {
+          if (!pAllocCtx) {
             gpDialogDefaultActionCallback = 0;
+          } else {
+            gpDialogDefaultActionCallback = Editbox::EditBoxWrapper::Constructor(pAllocCtx, 0x102, 0xe4, 100, 1, pnCurrentGold, 10, UI_GoldInputCallback_ReturnZero, 1);
           }
 
           nCleanupStage = -1;
@@ -1870,10 +1870,10 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
 
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 2;
-          if (pAllocCtx) {
-            gpUiGoldTransactionDialog = Button::ButtonWrapper::Constructor((::ButtonWrapper*)pAllocCtx, 0xfa, 0x11f, 0, UI_GoldDialogConfirmCallback);
-          } else {
+          if (!pAllocCtx) {
             gpUiGoldTransactionDialog = 0;
+          } else {
+            gpUiGoldTransactionDialog = Button::ButtonWrapper::Constructor((::ButtonWrapper*)pAllocCtx, 0xfa, 0x11f, 0, UI_GoldDialogConfirmCallback);
           }
 
           nCleanupStage = -1;
@@ -1881,10 +1881,10 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
           gpUiGoldTransactionDialog->pVtable->SetAccelerator(gpUiGoldTransactionDialog, 1);
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 3;
-          if (pAllocCtx) {
-            gpUiGoldDialogCancelButton = Button::ButtonWrapper::Constructor((::ButtonWrapper*)pAllocCtx, 0x163, 0x11f, 1, UI_ButtonCallback_CloseDialog);
-          } else {
+          if (!pAllocCtx) {
             gpUiGoldDialogCancelButton = 0;
+          } else {
+            gpUiGoldDialogCancelButton = Button::ButtonWrapper::Constructor((::ButtonWrapper*)pAllocCtx, 0x163, 0x11f, 1, UI_ButtonCallback_CloseDialog);
           }
 
           nCleanupStage = -1;
@@ -2232,7 +2232,14 @@ void __fastcall DRAW_UnitUnderMouse(D2UnitStrc * pUnit) {
       }
     }
     nResult = D2gfx::D2GFX::D2GFX_IsPerspectiveActive();
-    if (nResult) {
+    if (!nResult) {
+      nX = D2Common::Units::GetTargetX(pUnit);
+      nY = Path::DRAW_GetWorldOffsetX();
+      nHealthBarScreenX = nX - nY;
+      nX = D2Common::Units::GetTargetY(pUnit);
+      nY = Path::DRAW_GetWorldOffsetY();
+      gnMercenaryHealthBarScreenY = nX - nY;
+    } else {
       nX = D2Common::Units::GetPrecisionX(pUnit);
       nY = D2Common::Units::GetPrecisionY(pUnit);
       nResult = D2gfx::D2GFX::D2GFX_IsInPerspectiveBounds(nX, nY);
@@ -2255,13 +2262,6 @@ void __fastcall DRAW_UnitUnderMouse(D2UnitStrc * pUnit) {
       }
       gnMercenaryHealthBarScreenY = (int)__frame0.pLevelTxtResult->MonLvl;
       nHealthBarScreenX = __frame0.nScreenX;
-    } else {
-      nX = D2Common::Units::GetTargetX(pUnit);
-      nY = Path::DRAW_GetWorldOffsetX();
-      nHealthBarScreenX = nX - nY;
-      nX = D2Common::Units::GetTargetY(pUnit);
-      nY = Path::DRAW_GetWorldOffsetY();
-      gnMercenaryHealthBarScreenY = nX - nY;
     }
     switch (pUnit->eUnitType) {
       case UNIT_PLAYER:
@@ -2474,7 +2474,13 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
           Path::TypeOfUiOverlayOverWorld(3);
           return 1;
         }
-      if (iVar1) {
+      if (!iVar1) {
+        Path::TypeOfUiOverlayOverWorld(0);
+        if (bAdjustMouse && iVar2 < ScreenSizeX / 2) {
+          ui::SetMouseXY(((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) + iVar2, y);
+          return 1;
+        }
+      } else {
         Path::TypeOfUiOverlayOverWorld(1);
         if (bAdjustMouse) {
           iVar1 = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
@@ -2482,12 +2488,6 @@ DWORD __fastcall SetUIFlag(eD2UIvars eUI, eD2UIvarsSetType neD2UIvarsSetType, DW
             ui::SetMouseXY(iVar2 - iVar1, y);
             return 1;
           }
-        }
-      } else {
-        Path::TypeOfUiOverlayOverWorld(0);
-        if (bAdjustMouse && iVar2 < ScreenSizeX / 2) {
-          ui::SetMouseXY(((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) + iVar2, y);
-          return 1;
         }
       }
       break;
@@ -4597,38 +4597,38 @@ void __stdcall UI_UpdateNewStatSkillIcons() {
     D2UnitStrc* pUnit;
     pUnit = UNIT::Player::GetPlayerUnit_UI();
     bUIFlag = GetUIFlag(UI_NEWSTATS);
-    if (bUIFlag) {
-      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_statpts, 0);
-      if (nPointsAvailable) {
-        goto update_new_skills_icon;
-      }
-
-      neD2UIvarsSetType = UI_RESET;
-    } else {
+    if (!bUIFlag) {
       nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_statpts, 0);
       if (!nPointsAvailable || (bUIFlag = GetUIFlag(UI_STATSCREEN) , bUIFlag != 0)) {
         goto update_new_skills_icon;
       }
 
       neD2UIvarsSetType = UI_SET;
+    } else {
+      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_statpts, 0);
+      if (nPointsAvailable) {
+        goto update_new_skills_icon;
+      }
+
+      neD2UIvarsSetType = UI_RESET;
     }
 
     Draw::SetUIFlag(UI_NEWSTATS, neD2UIvarsSetType, 0);
     update_new_skills_icon:
     bUIFlag = GetUIFlag(UI_NEWSKILLS);
-    if (bUIFlag) {
-      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
-      if (nPointsAvailable < 1) {
-        Draw::SetUIFlag(UI_NEWSKILLS, UI_RESET, 0);
-        return;
-      }
-    } else {
+    if (!bUIFlag) {
       nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
       if (0 < nPointsAvailable) {
         bUIFlag = GetUIFlag(UI_SKILLTREE);
         if (!bUIFlag) {
           Draw::SetUIFlag(UI_NEWSKILLS, UI_SET, 0);
         }
+      }
+    } else {
+      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
+      if (nPointsAvailable < 1) {
+        Draw::SetUIFlag(UI_NEWSKILLS, UI_RESET, 0);
+        return;
       }
     }
 }
@@ -4866,7 +4866,7 @@ bool __stdcall UI_CanAllocateStatPoint(int32_t nParam) {
     }
 
     bUIFlag = GetUIFlag(UI_NPCSHOP);
-    return (bool)bUIFlag;
+    return bUIFlag != 0;
 }
 
 void __stdcall UI_DrawLevelUpButtonLeft() {
@@ -6570,11 +6570,11 @@ void __stdcall UI_InitTradeState() {
 void __fastcall UI_CloseTradeWindow(int32_t nParam) {
     gbTradeWindowOpen = 0;
     if (Dialog::gpTradeCancelDialog) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeCancelDialog);
+      Dialog::FreeDialogStrc();
       Dialog::gpTradeCancelDialog = 0;
     }
     if (Dialog::gpTradeAgreeDialog) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeAgreeDialog);
+      Dialog::FreeDialogStrc();
       Dialog::gpTradeAgreeDialog = 0;
     }
     if (g_nTradeWindowState == 7) {
@@ -6641,10 +6641,10 @@ void __stdcall PACKET_SendUnitInteraction0x44(D2UIMouseMsgStrc * pMsg) {
       }
 
       pPlayerOrCursorItem = UNIT::Player::GetPlayerUnit_UI();
-      if (pPlayerOrCursorItem) {
-        pPlayerOrCursorItem = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pPlayerOrCursorItem->pInventory);
-      } else {
+      if (!pPlayerOrCursorItem) {
         pPlayerOrCursorItem = 0;
+      } else {
+        pPlayerOrCursorItem = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pPlayerOrCursorItem->pInventory);
       }
 
       ITEM_SetItemOnHand(pPlayerOrCursorItem);
@@ -6656,10 +6656,10 @@ void __stdcall PACKET_SendUnitInteraction0x44(D2UIMouseMsgStrc * pMsg) {
     }
 
     pPlayerOrCursorItem = UNIT::Player::GetPlayerUnit_UI();
-    if (pPlayerOrCursorItem) {
-      nUnitType = pPlayerOrCursorItem->nUnitGUID;
-    } else {
+    if (!pPlayerOrCursorItem) {
       nUnitType = -1;
+    } else {
+      nUnitType = pPlayerOrCursorItem->nUnitGUID;
     }
 
     GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT_INT(0x44, nUnitType, gnNpcShopActiveTab, 0, 2);
@@ -6725,10 +6725,10 @@ BOOL __stdcall NPCSHOP_IsRepairTabActive() {
     }
     if (gnPlayerCashDisplay == 2) {
       pDVar1 = UNIT::Player::GetPlayerUnit_UI();
-      if (pDVar1) {
-        pDVar1 = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pDVar1->pInventory);
-      } else {
+      if (!pDVar1) {
         pDVar1 = 0;
+      } else {
+        pDVar1 = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pDVar1->pInventory);
       }
 
       ITEM_SetItemOnHand(pDVar1);
@@ -6738,10 +6738,10 @@ BOOL __stdcall NPCSHOP_IsRepairTabActive() {
     if (!nHoradricCubeUIState) {
       int nUnitType;
       pDVar1 = UNIT::Player::GetPlayerUnit_UI();
-      if (pDVar1) {
-        nUnitType = pDVar1->nUnitGUID;
-      } else {
+      if (!pDVar1) {
         nUnitType = -1;
+      } else {
+        nUnitType = pDVar1->nUnitGUID;
       }
 
       GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT_INT(0x44, nUnitType, gnNpcShopActiveTab, 0, 2);
@@ -6867,7 +6867,7 @@ void __fastcall UI_HandleHoradricCubePacket(int32_t pPacket) {
       case 4:
         gnPlayerCashDisplay = 2;
       if (Dialog::gpHoradricCubeDialog) {
-        Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpHoradricCubeDialog);
+        Dialog::FreeDialogStrc();
         Dialog::gpHoradricCubeDialog = 0;
       }
 

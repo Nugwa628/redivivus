@@ -38,10 +38,10 @@ static uint32_t SMEM_GetHandleByCaller(int * pnName, uint32_t nNameLen) {
 
     int nNameVersion;
     uint32_t uHash = 0;
-    if (pnName) {
-      nNameVersion = *pnName;
-    } else {
+    if (!pnName) {
       nNameVersion = 0;
+    } else {
+      nNameVersion = *pnName;
     }
     if (gdwSMemLastHashedHeapKey && pnName == (int*)g_SMemCachedHeapNamePtr && nNameLen == g_SMemCachedHeapNameLength) {
       if (nNameVersion == g_SMemCachedHeapNameVersion) {

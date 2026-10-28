@@ -334,7 +334,7 @@ BOOL IsMouseInBounds(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     return 1;
 }
 
-int __fastcall OnMouseWheel(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
+int OnMouseWheel(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     short int nWheelDelta = *(short int*)((uintptr_t)&pMsg->nWParam + 2);
     if (nWheelDelta < 1) {
       if (nWheelDelta < 0) {
@@ -364,7 +364,7 @@ void __fastcall EnsureSelectionVisible(::ListBoxImplementation * pThis) {
     pThis->nFirstVisibleIndex++;
 }
 
-int __fastcall OnUpArrow(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
+int OnUpArrow(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     if (!pThis->pfnOnItemActivated) {
       pThis->nSelectedIndex = pThis->nFirstVisibleIndex;
     }
@@ -386,7 +386,7 @@ int __fastcall OnUpArrow(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2
     return 1;
 }
 
-int __fastcall OnDownArrow(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
+int OnDownArrow(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     if (!pThis->pfnOnItemActivated) {
       int nLastVisibleIdx;
       nLastVisibleIdx = pThis->nVisibleRows - 1 + pThis->nFirstVisibleIndex;
@@ -412,11 +412,11 @@ int __fastcall OnDownArrow(::ListBoxImplementation * pThis, int32_t nEdxUnused, 
     return 1;
 }
 
-int __fastcall OnLeftArrow(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
+int OnLeftArrow(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     return 0;
 }
 
-int __fastcall OnRightArrow(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
+int OnRightArrow(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     return 0;
 }
 
@@ -468,7 +468,7 @@ int HitTestItem(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     return i;
 }
 
-int __fastcall OnMouseMove(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
+int OnMouseMove(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     int32_t nMouseX = (int32_t)pMsg->uLParam.sMousePos.nMouseX;
     int32_t nMouseY = (int32_t)pMsg->uLParam.sMousePos.nMouseY;
     if (!(pThis->nPosX < nMouseX && nMouseX < pThis->nWidth + pThis->nPosX && pThis->nPosY < nMouseY && nMouseY < pThis->nHeight + pThis->nPosY)) {
@@ -479,7 +479,7 @@ int __fastcall OnMouseMove(::ListBoxImplementation * pThis, int32_t nEdxUnused, 
     return 0;
 }
 
-int __fastcall OnChar(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
+int OnChar(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     if (!pThis->pfnOnItemActivated) {
       return 0;
     }
@@ -713,7 +713,7 @@ int HandleScrollTrackClick(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * p
     return 1;
 }
 
-int __fastcall OnMouseDown(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
+int OnMouseDown(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     int32_t nMouseX = (int32_t)pMsg->uLParam.sMousePos.nMouseX;
     int32_t nMouseY = (int32_t)pMsg->uLParam.sMousePos.nMouseY;
     if (nMouseX <= pThis->nPosX || pThis->nWidth + pThis->nPosX <= nMouseX || nMouseY <= pThis->nPosY || pThis->nHeight + pThis->nPosY <= nMouseY) {
@@ -753,7 +753,7 @@ int __fastcall OnMouseDown(::ListBoxImplementation * pThis, int32_t nEdxUnused, 
     return 1;
 }
 
-int __fastcall OnMouseUp(::ListBoxImplementation * pThis, int32_t nEdxUnused, D2UIMouseMsgStrc * pMsg) {
+int OnMouseUp(::ListBoxImplementation * pThis, D2UIMouseMsgStrc * pMsg) {
     BOOL nIsOnTarget;
     int nHitItemIdx;
     if (!pThis->bMouseDown) {

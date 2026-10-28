@@ -741,17 +741,17 @@ void __stdcall D2GFX_EndCutScene() {
     }
 
     ::D2GFX_EndCutScene = D2GFX_EndCutSceneCurrentState;
-    if (D2GFX_EndCutSceneCurrentState) {
+    if (!D2GFX_EndCutSceneCurrentState) {
+      DRAW_HideTaskbarAppBars();
+      do {
+        /* BOOL bShow for ShowCursor */ nCursorDisplayCount = ShowCursor(0);
+      } while (-1 < nCursorDisplayCount);
+    } else {
       /* int nCmdShow for ShowWindow */ /* HWND hWnd for ShowWindow */ ShowWindow(hwndD2GFX_Window, 6);
       D2GFX_ResetViewport();
       do {
         /* BOOL bShow for ShowCursor */ nCursorDisplayCount = ShowCursor(1);
       } while (nCursorDisplayCount < 0);
-    } else {
-      DRAW_HideTaskbarAppBars();
-      do {
-        /* BOOL bShow for ShowCursor */ nCursorDisplayCount = ShowCursor(0);
-      } while (-1 < nCursorDisplayCount);
     }
 
     RENDERER_CurrentRenderedFunctions->nfpEndCutScene(hwndD2GFX_Window, nResolutionMode, ::D2GFX_EndCutScene);

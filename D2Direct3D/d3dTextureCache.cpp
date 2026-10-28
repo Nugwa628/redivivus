@@ -101,10 +101,10 @@ static int __stdcall D3DTEXCACHE_AllocateNodeFromFreeList(D3DTextureCacheStrc * 
       D3DTextureCacheNodeStrc* pNewFreeHead;
       pNewFreeHead = pDVar1->pNext;
       pCache->pFreeHead = pNewFreeHead;
-      if (pNewFreeHead) {
-        pNewFreeHead->pPrev = 0;
-      } else {
+      if (!pNewFreeHead) {
         pCache->pFreeTail = 0;
+      } else {
+        pNewFreeHead->pPrev = 0;
       }
 
       pDVar1->pNext = 0;
@@ -165,10 +165,10 @@ void __fastcall D3DTEXCACHE_InvalidateByTilePtr(D3DTextureCacheStrc * pCache) {
       D3DTextureCacheNodeStrc* pNextUsedNode;
       pNextUsedNode = pUsedNode->pNext;
       pCache->pUsedHead = pNextUsedNode;
-      if (pNextUsedNode) {
-        pNextUsedNode->pPrev = 0;
-      } else {
+      if (!pNextUsedNode) {
         pCache->pUsedTail = 0;
+      } else {
+        pNextUsedNode->pPrev = 0;
       }
 
       pUsedNode->pNext = 0;
@@ -262,10 +262,10 @@ int32_t __fastcall D3DTEXCACHE_EnsureAvailableNode(D3DTextureCacheStrc * pCache)
         if (pEvictNode) {
           pNextUsedHead = pEvictNode->pNext;
           pCache->pUsedHead = pNextUsedHead;
-          if (pNextUsedHead) {
-            pNextUsedHead->pPrev = 0;
-          } else {
+          if (!pNextUsedHead) {
             pCache->pUsedTail = 0;
+          } else {
+            pNextUsedHead->pPrev = 0;
           }
 
           pEvictNode->pNext = 0;

@@ -344,70 +344,79 @@ void __fastcall RENDERER_GLIDE_SetTextureMode(int32_t nParam) {
 }
 
 void __fastcall RENDERER_GLIDE_SetColorCombine(int32_t nParam) {
-    if (!(!gnGlideColorCombineMode || nParam != gnGlideColorCombineMode)) {
-      return;
+    int nPrevMode;
+    if (!gnGlideColorCombineMode || (nPrevMode = gnGlideColorCombineMode , nParam != gnGlideColorCombineMode)) {
+      if (nParam != 1) {
+        nPrevMode = nParam;
+        if (nParam == 2) {
+          (*GLIDEDLL_grColorCombine_20)(1, 0, 1, 2, 0);
+          gnGlideColorCombineMode = nParam;
+          return;
+        }
+      } else {
+        (*GLIDEDLL_grColorCombine_20)(3, 1, 0, 1, 0);
+        nPrevMode = nParam;
+      }
     }
 
-    switch (nParam) {
-    case 1:
-      (*GLIDEDLL_grColorCombine_20)(3, 1, 0, 1, 0);
-      break;
-    case 2:
-      (*GLIDEDLL_grColorCombine_20)(1, 0, 1, 2, 0);
-      break;
-    }
-
-    gnGlideColorCombineMode = nParam;
+    gnGlideColorCombineMode = nPrevMode;
 }
 
 void __fastcall RENDERER_GLIDE_SetAlphaBlendMode(int32_t nParam) {
-    if (!(!gnGlideAlphaBlendMode || nParam != gnGlideAlphaBlendMode)) {
-      return;
+    int nBlendMode;
+    if (!gnGlideAlphaBlendMode || (nBlendMode = gnGlideAlphaBlendMode , nParam != gnGlideAlphaBlendMode)) {
+      nBlendMode = nParam;
+      switch (nParam) {
+        case 1:
+          (*GLIDEDLL_grAlphaCombine_20)(0, 0, 1, 2, 0);
+        (*GLIDEDLL_grAlphaBlendFunction_16)(4, 0, 0, 0);
+        gnGlideAlphaBlendMode = nParam;
+        return;
+        case 2:
+          (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
+        (*GLIDEDLL_grAlphaBlendFunction_16)(4, 4, 0, 0);
+        gnGlideAlphaBlendMode = nParam;
+        return;
+        case 3:
+          (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
+        (*GLIDEDLL_grAlphaBlendFunction_16)(0, 2, 0, 0);
+        gnGlideAlphaBlendMode = nParam;
+        return;
+        case 4:
+          (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
+        (*GLIDEDLL_grAlphaBlendFunction_16)(1, 5, 0, 0);
+        nBlendMode = nParam;
+      }
     }
 
-    switch (nParam) {
-    case 1:
-      (*GLIDEDLL_grAlphaCombine_20)(0, 0, 1, 2, 0);
-      (*GLIDEDLL_grAlphaBlendFunction_16)(4, 0, 0, 0);
-      break;
-    case 2:
-      (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
-      (*GLIDEDLL_grAlphaBlendFunction_16)(4, 4, 0, 0);
-      break;
-    case 3:
-      (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
-      (*GLIDEDLL_grAlphaBlendFunction_16)(0, 2, 0, 0);
-      break;
-    case 4:
-      (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
-      (*GLIDEDLL_grAlphaBlendFunction_16)(1, 5, 0, 0);
-      break;
-    }
-
-    gnGlideAlphaBlendMode = nParam;
+    gnGlideAlphaBlendMode = nBlendMode;
 }
 
 void __fastcall RENDERER_GLIDE_SetTextureFiltering(int32_t nParam) {
-    if (!(!gnGlideTextureFilteringMode || nParam != gnGlideTextureFilteringMode)) {
-      return;
+    int nFilterMode;
+    if (!gnGlideTextureFilteringMode || (nFilterMode = gnGlideTextureFilteringMode , nParam != gnGlideTextureFilteringMode)) {
+      if (nParam == 1) {
+        (*GLIDEDLL_grTexFilterMode_12)(0, 0, 0);
+        nFilterMode = nParam;
+        if (1 < gnGlideTextureMemoryUsed) {
+          (*GLIDEDLL_grTexFilterMode_12)(1, 0, 0);
+          nFilterMode = nParam;
+        }
+      } else {
+        nFilterMode = nParam;
+        if (nParam == 2) {
+          (*GLIDEDLL_grTexFilterMode_12)(0, 1, 1);
+          nFilterMode = nParam;
+          if (1 < gnGlideTextureMemoryUsed) {
+            (*GLIDEDLL_grTexFilterMode_12)(1, 1, 1);
+            gnGlideTextureFilteringMode = nParam;
+            return;
+          }
+        }
+      }
     }
 
-    switch (nParam) {
-    case 1:
-      (*GLIDEDLL_grTexFilterMode_12)(0, 0, 0);
-      if (1 < gnGlideTextureMemoryUsed) {
-        (*GLIDEDLL_grTexFilterMode_12)(1, 0, 0);
-      }
-      break;
-    case 2:
-      (*GLIDEDLL_grTexFilterMode_12)(0, 1, 1);
-      if (1 < gnGlideTextureMemoryUsed) {
-        (*GLIDEDLL_grTexFilterMode_12)(1, 1, 1);
-      }
-      break;
-    }
-
-    gnGlideTextureFilteringMode = nParam;
+    gnGlideTextureFilteringMode = nFilterMode;
 }
 
 int * GetRenderStatistics() {
@@ -619,7 +628,12 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
 
     RENDERER_GLIDE_GenerateDebugFont();
     __frame0.nResult = 0;
-    if (nParam) {
+    if (!nParam) {
+      screen_resolution = 7;
+      RENDERER_nWindowWidth = 0x280;
+      RENDERER_nWindowHeight = 0x1e0;
+      refresh_rate = gnGlideRefreshRate640;
+    } else {
       screen_resolution = 8;
       RENDERER_nWindowWidth = 800;
       RENDERER_nWindowHeight = 600;
@@ -628,18 +642,15 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
       if (nParam != 2) {
         goto open_sst_window;
       }
-    } else {
-      screen_resolution = 7;
-      RENDERER_nWindowWidth = 0x280;
-      RENDERER_nWindowHeight = 0x1e0;
-      refresh_rate = gnGlideRefreshRate640;
     }
 
     gbGlidePerspectiveMode = 1;
     open_sst_window:
     gnGlideWindowHandle = nParam2;
     ghGlideSstWindow = (*GLIDEDLL_grSstWinOpen_28)(nParam2, screen_resolution, refresh_rate, 2, 0, 2, 0);
-    if (ghGlideSstWindow) {
+    if (!ghGlideSstWindow) {
+      Fog::Src::LogManager::LOGFILE_WriteStringToFile("Opening Glide window failed!");
+    } else {
       ghGlideWindow = 1;
       if (gnGlideRendererInitialized) {
         nTMUCount = 0;
@@ -690,14 +701,12 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
       if (bInitTexMemOk) {
         return 1;
       }
-    } else {
-      Fog::Src::LogManager::LOGFILE_WriteStringToFile("Opening Glide window failed!");
     }
 
     return __frame0.nResult;
 }
 
-BOOL Release() {
+void Release() {
     if (gbGlideInitialized) {
       GLSMACK_FreeBuffers();
       RENDERER_GLIDE_DestroyWindow();
@@ -713,11 +722,10 @@ BOOL Release() {
       RENDERER_SelectedRendererCore = 0;
     }
     if (!lpGLIDE3x_dll) {
-      return 1;
+      return;
     }
 
     /* HMODULE hLibModule for FreeLibrary */ FreeLibrary(lpGLIDE3x_dll);
-    return 1;
 }
 
 BOOL __fastcall CreateWindow(HWND hWnd, int32_t nResolutionMode) {

@@ -123,7 +123,7 @@ BOOL __stdcall CHARSEL_HandleKeyNavClassic(int32_t pKeyMsg);
 void __stdcall CHARSEL_ShowWaitTimeout();
 BOOL __stdcall CHARSEL_InitRealmSelection();
 // @sourcefile .\Src\CharSel.cpp
-int __stdcall CHARSEL_CreateCharEntry(uint16_t * wszCharName, uint16_t * wszCommandString, int32_t nEntryType, int32_t ePlayerClass);
+int __stdcall CHARSEL_CreateCharEntry(uint16_t * wszCharName, uint16_t * wszCommandString, int32_t nEntryType, bool ePlayerClass);
 void __stdcall CHARSEL_AddCreateNewEntry();
 void __stdcall CHARSEL_AddRetrievingEntry();
 // @sourcefile .\Src\CharSel.cpp

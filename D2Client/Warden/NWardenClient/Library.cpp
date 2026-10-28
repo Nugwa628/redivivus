@@ -9,7 +9,7 @@
 
 namespace D2Client::Warden::NWardenClient {
 
-::Library * __fastcall Constructor(::Library * pThis) {
+::Library * Constructor(::Library * pThis) {
     pThis->_vfptr = (LibraryVtable*)(void*)NWardenClient::vftable;
     return pThis;
 }

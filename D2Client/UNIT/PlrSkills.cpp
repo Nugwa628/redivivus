@@ -264,10 +264,10 @@ void __fastcall PLRSKILLS_StateSetFn03_Blaze(D2UnitStrc * pUnit, eD2States eStat
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
     int nSkillLevel = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
     D2SkillStrc* pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1);
-    if (pSkill) {
-      nCurSkillLvl = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 1);
-    } else {
+    if (!pSkill) {
       nCurSkillLvl = 0;
+    } else {
+      nCurSkillLvl = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 1);
     }
     if (nCurSkillLvl == nSkillLevel) {
       return;
@@ -1206,7 +1206,7 @@ void __fastcall STATES_SetStateOnUnit(D2UnitStrc * pUnit, eD2States eState) {
     if (!pDVar1) {
       return;
     }
-    if ((*((uint8_t*)pDVar1 + 0x14) & gadwBitMasks[7]) && (pUnit->eUnitType == UNIT_MONSTER && pUnit->eAnimMode.ePlayerMode == Kick || pUnit->eUnitType == UNIT_PLAYER && pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Dead)) {
+    if (pDVar1->notondead && (pUnit->eUnitType == UNIT_MONSTER && pUnit->eAnimMode.ePlayerMode == Kick || pUnit->eUnitType == UNIT_PLAYER && pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Dead)) {
       D2Common::DATATBLS::ItemStats::SetState(pUnit, eState, 1);
       return;
     }
@@ -1215,7 +1215,7 @@ void __fastcall STATES_SetStateOnUnit(D2UnitStrc * pUnit, eD2States eState) {
     if (eStateLinked != STATE_none) {
       D2StatListExStrc* pStatList;
       pStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit, eState);
-      if (!(*((uint8_t*)pDVar1 + 0x14) & gadwBitMasks[4])) {
+      if (!pDVar1->noclear) {
         D2Common::Stats::StatsEx::STATLIST_FreeChildStatLists(pStatList);
       }
     } else {
@@ -1238,7 +1238,7 @@ void __fastcall STATES_SetStateOnUnit(D2UnitStrc * pUnit, eD2States eState) {
         pUnit->eUnitFlags = pUnit->eUnitFlags & ~UNITFLAG_TARGETABLE | UNITFLAG_DRAWSHADOW;
       }
     }
-    if (!(*((uint8_t*)pDVar1 + 0x10) & gadwBitMasks[3])) {
+    if (!pDVar1->transform) {
       return;
     }
 
@@ -1297,7 +1297,7 @@ void __fastcall PLRSKILLS_RemoveStateFromUnit(D2UnitStrc * pUnit, eD2States eSta
     if (0 <= pDVar1->overlay[1]) {
       STATES_RemoveOverlayById(pUnit, (int)pDVar1->overlay[1]);
     }
-    if ((*((uint8_t*)pDVar1 + 0x10) & gadwBitMasks[3])) {
+    if (pDVar1->transform) {
       STATES_ResetUnitGfxAndMode(pUnit);
     }
 
@@ -1385,7 +1385,7 @@ void __fastcall STATES_DispatchSetFunc(D2UnitStrc * pUnit, eD2States eState) {
     }
 
     D2StatesTxt* pDVar1 = sgptDataTable->pTxtStates + eState;
-    if (!(pDVar1 && (!(*((uint8_t*)pDVar1 + 0x14) & gadwBitMasks[7]) || (pUnit->eUnitType != UNIT_MONSTER || pUnit->eAnimMode.ePlayerMode != Kick) && (pUnit->eUnitType != UNIT_PLAYER || pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead)))) {
+    if (!(pDVar1 && (!pDVar1->notondead || (pUnit->eUnitType != UNIT_MONSTER || pUnit->eAnimMode.ePlayerMode != Kick) && (pUnit->eUnitType != UNIT_PLAYER || pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead)))) {
       return;
     }
 

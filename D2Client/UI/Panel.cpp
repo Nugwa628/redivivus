@@ -273,7 +273,7 @@ void __fastcall SPELLSEL_DrawSkillIcon(D2UnitStrc * pUnit, D2SkillStrc * pSkill,
 
     DC6* pSkillIconDC6 = SpellSel::ARCHIVE_LoadSpellsClassSkillicon(&pSkillTxt->skill);
     GLOBALPALLETE ePalette = SpellSel::SPELLSEL_GetSkillPalette(pUnit, pSkill);
-    if (!(*((uint8_t*)pSkillTxt + 0x5) & gadwBitMasks[0])) {
+    if (!pSkillTxt->InTown) {
       D2RoomStrc* pRoom;
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       if (pRoom) {
@@ -1185,7 +1185,11 @@ void __stdcall Draw_EquipmentNeedToRepairBody() {
       nRepairState = 0;
       bIsShield = 0;
       bIsQuiver = 0;
-      if (pItem) {
+      if (!pItem) {
+        if (eEquipSlot != BODYLOC_R_ARM && eEquipSlot != BODYLOC_L_ARM) {
+          Draw_EquipmentNeedToRepairBody_1(bIsQuiver, bIsShield, eEquipSlot, nRepairState);
+        }
+      } else {
         bHasDurability = D2Common::ITEMS::Items::ITEM_CheckIfItemHasDurability(pItem);
         if (bHasDurability) {
           BVar1 = D2Common::ITEMS::Items::IsStackable(pItem);
@@ -1206,10 +1210,6 @@ void __stdcall Draw_EquipmentNeedToRepairBody() {
         }
 
         Draw_EquipmentNeedToRepairBody_1(bIsQuiver, bIsShield, eEquipSlot, nRepairState);
-      } else {
-        if (eEquipSlot != BODYLOC_R_ARM && eEquipSlot != BODYLOC_L_ARM) {
-          Draw_EquipmentNeedToRepairBody_1(bIsQuiver, bIsShield, eEquipSlot, nRepairState);
-        }
       }
 
       pSlotLocEntry2++;
@@ -1319,10 +1319,7 @@ static void PANEL_DrawCharacterInfo(int32_t nPanelOffsetY) {
     D2GfxDataStrc sGfxData;
     memset(&sGfxData, 0, 0x48);
     DWORD eResolutionMode = D2gfx::D2GFX::D2GFX_GetResolutionMode();
-    switch (eResolutionMode) {
-    case 2:
-      break;
-    default:
+    if (eResolutionMode != 2) {
       if (!CtrlPnl7) {
         CtrlPnl7 = ui::ARCHIVE_LoadOverlayImageUsedInGame("Panel\\CtrlPnl7");
       }
@@ -1528,7 +1525,11 @@ static void CLIENT_HandleBeltMouseDown(D2InventoryStrc * pInventory, int32_t nMo
 
     pItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemInBeltSlot(pInventory, nBeltSlot);
     gnBeltSlotUnderCursor = nBeltSlot;
-    if (pItem) {
+    if (!pItem) {
+      gpPanelBeltSlot = 0;
+      gpPanelBeltLastHoverItem = 0;
+      gpPanelBeltHoverItem = 0;
+    } else {
       int32_t nItemXPos;
       gpPanelBeltSlot = 1;
       if (pItem != gpPanelBeltLastHoverItem) {
@@ -1540,10 +1541,6 @@ static void CLIENT_HandleBeltMouseDown(D2InventoryStrc * pInventory, int32_t nMo
         gnBeltTooltipY = aInvRect[2];
         return;
       }
-    } else {
-      gpPanelBeltSlot = 0;
-      gpPanelBeltLastHoverItem = 0;
-      gpPanelBeltHoverItem = 0;
     }
 }
 

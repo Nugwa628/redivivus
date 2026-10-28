@@ -196,14 +196,14 @@ BOOL __fastcall MPQ_LoadVideoMpqFiles(::fpRequiredUserAction nfpRequiredUserActi
     if (bDirectMode) {
       nfpRequiredUserAction = 0;
     }
-    if (bExpansion) {
-      MPQ_d2Xvideo = Fog::Archive::ARCHIVE_LoadMPQ("d2Xvideo.mpq", nZero, (::fpRequiredUserAction)(bool (*)())nfpRequiredUserAction, 1000);
-      if (!MPQ_d2Xvideo) {
+    if (!bExpansion) {
+      MPQ_d2video = Fog::Archive::ARCHIVE_LoadMPQ("d2video.mpq", nZero, (::fpRequiredUserAction)(bool (*)())nfpRequiredUserAction, 1000);
+      if (!MPQ_d2video) {
         return 0;
       }
     } else {
-      MPQ_d2video = Fog::Archive::ARCHIVE_LoadMPQ("d2video.mpq", nZero, (::fpRequiredUserAction)(bool (*)())nfpRequiredUserAction, 1000);
-      if (!MPQ_d2video) {
+      MPQ_d2Xvideo = Fog::Archive::ARCHIVE_LoadMPQ("d2Xvideo.mpq", nZero, (::fpRequiredUserAction)(bool (*)())nfpRequiredUserAction, 1000);
+      if (!MPQ_d2Xvideo) {
         return 0;
       }
     }

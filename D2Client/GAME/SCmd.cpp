@@ -482,10 +482,10 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x07_NEWROOM(char * pBytes) {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    if (pUnit) {
-      pRoomCache = D2Common::Units::UNITS_GetRoom(pUnit);
-    } else {
+    if (!pUnit) {
       pRoomCache = 0;
+    } else {
+      pRoomCache = D2Common::Units::UNITS_GetRoom(pUnit);
     }
 
     D2Common::DUNGEON::Dungeon::AddRoomData(sgpDrlgAct, (eD2LevelId)(uint8_t)pBytes[5], (uint32_t)nX, (uint32_t)nY, pRoomCache);
@@ -501,10 +501,10 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x08_REMOVEROOM(char * pBytes) {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    if (pUnit) {
-      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    } else {
+    if (!pUnit) {
       pRoom = 0;
+    } else {
+      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     }
 
     D2Common::DUNGEON::Dungeon::RemoveRoomData(sgpDrlgAct, (eD2LevelId)(uint8_t)pBytes[5], (uint32_t)nX, (uint32_t)nY, pRoom);
@@ -541,7 +541,7 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x0A_RemoveObject(char * pBytes) {
       }
     }
 
-    UNIT::CUnit::RemoveObjectFromServerObjectTable(nUnitGUID, (eD2UnitType)(uint8_t)pBytes[1]);
+    UNIT::CUnit::RemoveObjectFromServerObjectTable((eD2UnitType)(uint8_t)pBytes[1], nUnitGUID);
 }
 
 void __fastcall NET_D2GS_CLIENT_Incoming0x0B_UNITCTRL(char * pBytes) {

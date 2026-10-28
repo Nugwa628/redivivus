@@ -546,12 +546,7 @@ void __fastcall WEATHER_SpawnBubble(int nScreenX, int nScreenY, int nWorldX, int
     nRoll = pEnvironmentBubbles->pData;
     short int nBubbleIndex = (short int)(nSlot >> 0x10);
     uint32_t bPerspective = D2gfx::D2GFX::D2GFX_IsPerspectiveActive();
-    if (bPerspective) {
-      nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
-      *(int32_t*)((int)nRoll + nBubbleIndex * 0x18 + 4) = (nRollResult - 2) * 0x10000 + nWorldX;
-      nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
-      nRange = (nRollResult - 2) * 0x10000 + nWorldY;
-    } else {
+    if (!bPerspective) {
       int32_t iVar1;
       nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 0x50);
       nRange = nRollResult - 0x28;
@@ -563,6 +558,11 @@ void __fastcall WEATHER_SpawnBubble(int nScreenX, int nScreenY, int nWorldX, int
       iVar1 = Seed::RollBetweenMinAndMax(pSeed, -nRange, nRange * 2);
       *(int32_t*)((int)nRoll + nBubbleIndex * 0x18 + 4) = iVar1 + nScreenX;
       nRange = nRollResult - 0x1e + nScreenY;
+    } else {
+      nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
+      *(int32_t*)((int)nRoll + nBubbleIndex * 0x18 + 4) = (nRollResult - 2) * 0x10000 + nWorldX;
+      nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
+      nRange = (nRollResult - 2) * 0x10000 + nWorldY;
     }
 
     *(int*)((int)nRoll + nBubbleIndex * 0x18 + 8) = nRange;

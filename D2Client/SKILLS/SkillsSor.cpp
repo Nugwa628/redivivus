@@ -708,7 +708,7 @@ int32_t __fastcall SKILLSSOR_StateCltEventFn01_ChillingArmor(int32_t nParam1, D2
     }
 
     D2MissilesTxt* pMissileTxt = GetMissleById(pMissile->nClassId);
-    if (!(*((uint8_t*)pMissileTxt + 0x5) & gadwBitMasks[1])) {
+    if (!pMissileTxt->ReturnFire) {
       return 0;
     }
 

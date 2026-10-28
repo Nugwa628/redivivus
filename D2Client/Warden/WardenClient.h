@@ -116,18 +116,18 @@ void __fastcall WARDEN_CbFreeModuleStruct(void * pParam);
 // @sourcefile .\WARDEN\WardenClient.cpp
 LPVOID * __fastcall WARDEN_DestroyModuleObject(uint8_t bFreeStruct, LPVOID * ppModule);
 uint32_t __stdcall WARDEN_DownloadModule(char * dwParam1, void * dwParam2, uint32_t pModuleRequest);
-void __fastcall SendPacket(::WardenClient * pThis, int32_t nEdxUnused, void * pData, uint32_t nLen);
-bool __fastcall CheckModule(::WardenClient * pThis, int32_t nEdxUnused, uint8_t * pModuleHash, void * pRc4Key);
-void __fastcall LoadModule(::WardenClient * pThis, int32_t nEdxUnused, uint8_t * pModuleHash, void * pData, uint32_t nSize);
+void SendPacket(::WardenClient * pThis, void * pData, uint32_t nLen);
+bool CheckModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pRc4Key);
+void LoadModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pData, uint32_t nSize);
 // @sourcefile .\WARDEN\WardenClient.cpp
-void * __fastcall AllocateMemory(::WardenClient * pThis, int32_t nEdxUnused, uint32_t nSize);
+void * AllocateMemory(::WardenClient * pThis, uint32_t nSize);
 // @sourcefile .\WARDEN\WardenClient.cpp
-void __fastcall FreeMemory(::WardenClient * pThis, int32_t nEdxUnused, void * pMem);
+void FreeMemory(::WardenClient * pThis, void * pMem);
 // @sourcefile .\WARDEN\WardenClient.cpp
-void __fastcall SetRC4Data(::WardenClient * pThis, int32_t nEdxUnused, void * pData, uint32_t nSize);
+void SetRC4Data(::WardenClient * pThis, void * pData, uint32_t nSize);
 // @sourcefile .\WARDEN\WardenClient.cpp
-bool __fastcall GetRC4Data(::WardenClient * pThis, int32_t nEdxUnused, void * pDest, uint32_t * pnSize);
-::WardenClient * __fastcall Constructor(::WardenClient * pThis);
+bool GetRC4Data(::WardenClient * pThis, void * pDest, uint32_t * pnSize);
+::WardenClient * Constructor(::WardenClient * pThis);
 // @sourcefile .\WARDEN\WardenClient.cpp
 void __stdcall WARDEN_UnloadActiveModule();
 // @sourcefile .\WARDEN\WardenClient.cpp

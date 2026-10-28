@@ -729,10 +729,10 @@ static void MONSTER_SpawnRandomAttachedMissile(D2UnitStrc * pUnit) {
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nErrLine = pUnit->pPath.pStaticPath->nPosX;
-    } else if (pUnit->pPath.pDynamicPath) {
-      nErrLine = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    } else {
+    } else if (!pUnit->pPath.pDynamicPath) {
       nErrLine = 0;
+    } else {
+      nErrLine = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
     }
 
     D2UnitStrc* pMissileUnit = Missile::CastAttack(pUnit, nMissileId, nErrLine, nRandMissileIdx, SKILL_Attack, 1);
@@ -962,19 +962,19 @@ void __fastcall MONSTER_InitMonsterUnit(D2UnitStrc * pUnit, uint32_t nParam1, in
     uint32_t nRandStartFrame;
     nRandStartFrame = Archive::RANDOM_RandomNumberSelector(&pUnit->sSeed, pUnit->nFrameCount);
     pUnit->nGfxCurrentFrame = nRandStartFrame;
-    if ((*((uint8_t*)pMonStats2 + 0x4) & gadwBitMasks[3])) {
+    if (pMonStats2->isSel) {
       pUnit->eUnitFlags |= UNITFLAG_TARGETABLE;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
     }
-    if (!(*((uint8_t*)pMonStats2 + 0x5) & gadwBitMasks[6])) {
+    if (!pMonStats2->shadow) {
       pUnit->eUnitFlags |= UNITFLAG_DRAWSHADOW;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_DRAWSHADOW;
     }
 
     pUnit->eUnitFlags |= UNITFLAG_ISVALIDTARGET;
-    if (!(*((uint8_t*)pMonStats2 + 0x5) & gadwBitMasks[1])) {
+    if (!pMonStats2->isAtt) {
       eUpdatedFlags = pUnit->eUnitFlags & ~UNITFLAG_CANBEATTACKED;
     } else {
       eUpdatedFlags = pUnit->eUnitFlags | UNITFLAG_CANBEATTACKED;
@@ -1153,7 +1153,7 @@ void __fastcall MONSTER_TransformToClassId(D2UnitStrc * pUnit, int32_t nClassId)
 
     D2Common::PATH::DynamicPath::SetVelocities(pDynamicPath, (int)pMonStatsTxtNew->Velocity << 8, ".\\UNIT\\Monster.cpp", 0x2b8);
     D2Common::PATH::DynamicPath::PATH_RestoreMonsterCollision(pUnit, 0);
-    if ((*((uint8_t*)pMonStatsTxtNew + 0xd) & gadwBitMasks[1]) && !pUnit->pInventory) {
+    if (pMonStatsTxtNew->interact && !pUnit->pInventory) {
       pInventory = D2Common::INVENTORY::Inventory::STRUCT_CreatePlayerInventory(nullptr, pUnit);
       pUnit->pInventory = pInventory;
     }
@@ -1176,21 +1176,21 @@ void __fastcall MONSTER_TransformToClassId(D2UnitStrc * pUnit, int32_t nClassId)
     uint32_t nRandStartFrame;
     nRandStartFrame = Archive::RANDOM_RandomNumberSelector(&pUnit->sSeed, pUnit->nFrameCount);
     pUnit->nGfxCurrentFrame = nRandStartFrame;
-    if ((*((uint8_t*)pMonStats2 + 0x4) & gadwBitMasks[3])) {
+    if (pMonStats2->isSel) {
       pUnit->eUnitFlags |= UNITFLAG_TARGETABLE;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
     }
 
     pUnit->eUnitFlagsEx &= ~UNITFLAGEX_NODRAW;
-    if (!(*((uint8_t*)pMonStats2 + 0x5) & gadwBitMasks[6])) {
+    if (!pMonStats2->shadow) {
       pUnit->eUnitFlags |= UNITFLAG_DRAWSHADOW;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_DRAWSHADOW;
     }
 
     pUnit->eUnitFlags |= UNITFLAG_ISVALIDTARGET;
-    if (!(*((uint8_t*)pMonStats2 + 0x5) & gadwBitMasks[1])) {
+    if (!pMonStats2->isAtt) {
       eUpdatedFlags = pUnit->eUnitFlags & ~UNITFLAG_CANBEATTACKED;
     } else {
       eUpdatedFlags = pUnit->eUnitFlags | UNITFLAG_CANBEATTACKED;
@@ -1214,7 +1214,7 @@ void __fastcall MONSTER_TransformToClassId(D2UnitStrc * pUnit, int32_t nClassId)
       nMonStats2Idx++;
     } while (nMonStats2Idx < 8);
 
-    if (!(*((uint8_t*)pMonStatsTxtNew + 0xd) & gadwBitMasks[0])) {
+    if (!pMonStatsTxtNew->npc) {
       D2SeedStrc DVar1;
       DVar1 = D2_SEED_NEXT(pUnit->sSeed);
       pUnit->sSeed = DVar1;
@@ -3128,7 +3128,7 @@ void __fastcall CLIENT_UpdateUnitNameplate(D2UnitStrc * pDynamicPath) {
     if (!pMonStats) {
       return;
     }
-    if ((*((uint8_t*)pMonStats + 0xd) & gadwBitMasks[1])) {
+    if (pMonStats->interact) {
       bIsCritter = Player::TXT_MonStats_MonStats2_GetFlagsByBitOffset(nClassId, TXTMonStats2Field0x04DWORD_ns::critter);
       if (!bIsCritter && pDynamicPath->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Neutral) {
         nCheckResult = CheckFlags(pDynamicPath, UNITFLAG_ISMERC);

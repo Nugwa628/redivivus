@@ -203,10 +203,10 @@ void __fastcall FreeLightMap(D2LightMapStrc * pLightMap) {
           exit(-1);
         }
 
-        if (pPrevLightMap) {
-          pPrevLightMap->pPrev = pDVar1->pPrev;
-        } else {
+        if (!pPrevLightMap) {
           gpLightMap = pDVar1->pPrev;
+        } else {
+          pPrevLightMap->pPrev = pDVar1->pPrev;
         }
         if (pLightMap->pPixelMap) {
           Fog::Memory::FreeClientMemory(pLightMap->pPixelMap, ".\\DRAW\\dLightMap.cpp", 0x181, 0);

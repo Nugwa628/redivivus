@@ -63,6 +63,6 @@ struct LibraryVtable {
 namespace D2Client::Warden::NWardenClient {
 
 // Function declarations
-::Library * __fastcall Constructor(::Library * pThis);
+::Library * Constructor(::Library * pThis);
 
 } // namespace D2Client::Warden::NWardenClient
