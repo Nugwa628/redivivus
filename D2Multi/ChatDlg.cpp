@@ -364,7 +364,6 @@ void __stdcall CHATDLG_UpdateChannelOkButtonState() {
 
 static int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
     int nUpper1;
-    int nUpper2;
     char cCur;
     char* pcEnd1 = szText1;
     pcEnd1 = pcEnd1 + strlen(pcEnd1) + 1;
@@ -383,9 +382,8 @@ static int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
       }
 
       nRemaining--;
-      nUpper1 = toupper((int)*szText1);
-      nUpper2 = toupper((int)*szText2);
-      if (nUpper1 != nUpper2) {
+      nUpper1 = toupper((int)*szText1) - toupper((int)*szText2);
+      if (nUpper1) {
         break;
       }
 
@@ -393,7 +391,7 @@ static int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
       szText2++;
     }
 
-    return (uint32_t)(nUpper1 != nUpper2 && -1 < nUpper1 - nUpper2) * 2 - 1;
+    return nUpper1 > 0 ? 1 : -1;
 }
 
 static BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
@@ -534,7 +532,7 @@ BOOL __stdcall CHATDLG_DetectCDKeyInString(char * szText) {
     return 0;
 }
 
-D2ControlStrc * FORMS_CreateAnyFormFromListEx(int32_t nFormIndex) {
+static D2ControlStrc * FORMS_CreateAnyFormFromListEx(int32_t nFormIndex) {
     if (0x1f < FORMS_nListExCount) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1475);
       exit(-1);
@@ -985,14 +983,16 @@ uint32_t __fastcall CHATDLG_SendProfileData(char * szAccount, char * szSex, char
 uint32_t __stdcall CHATDLG_ToggleLadderNews(D2ControlMsg * pControlMsg) {
     uint16_t nStringId;
     uint16_t awszMessage[20];
-    if (!gbLadderNewsExpanded) {
+    if (gbLadderNewsExpanded) {
+      D2Win::Src::D2WinButton::D2WINBUTTON_SetImageIndex(gpCtlLobbyLadderNewsToggle, 0);
+      gbLadderNewsExpanded = 0;
+      nStringId = 0x14d7;
+    } else {
       int nRand;
       D2Win::Src::D2WinButton::D2WINBUTTON_SetImageIndex(gpCtlLobbyLadderNewsToggle, 2);
       gbLadderNewsExpanded = 1;
       nRand = rand();
-      if (!(nRand % 1000)) {
-        nStringId = 0x14d8;
-      } else {
+      if ((nRand % 1000)) {
         nRand = rand();
         if (!(nRand % 1000)) {
           nRand = rand();
@@ -1009,11 +1009,9 @@ uint32_t __stdcall CHATDLG_ToggleLadderNews(D2ControlMsg * pControlMsg) {
         }
 
         nStringId = 0x14d6;
+      } else {
+        nStringId = 0x14d8;
       }
-    } else {
-      D2Win::Src::D2WinButton::D2WINBUTTON_SetImageIndex(gpCtlLobbyLadderNewsToggle, 0);
-      gbLadderNewsExpanded = 0;
-      nStringId = 0x14d7;
     }
 
     uint16_t* szText = D2Lang::StrTable::strtable::GetLocaleString(nStringId);

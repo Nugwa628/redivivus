@@ -126,7 +126,7 @@ static D2GridScreenCoordinates gnTradePage2ScreenTop = {}; D2_STATIC_GUARD(gnTra
 static D2GridScreenCoordinates gnTradePage2ScreenBottom = {}; D2_STATIC_GUARD(gnTradePage2ScreenBottom, "D2Client::UI::Inv::gnTradePage2ScreenBottom");
 static D2GridScreenCoordinates gnTradePage2ScreenLeft = {}; D2_STATIC_GUARD(gnTradePage2ScreenLeft, "D2Client::UI::Inv::gnTradePage2ScreenLeft");
 static D2GridScreenCoordinates gnTradePage2ScreenRight = {}; D2_STATIC_GUARD(gnTradePage2ScreenRight, "D2Client::UI::Inv::gnTradePage2ScreenRight");
-static bool gbInvOverlayFlag = 0; D2_STATIC_GUARD(gbInvOverlayFlag, "D2Client::UI::Inv::gbInvOverlayFlag");
+static BOOL gbInvOverlayFlag = 0; D2_STATIC_GUARD(gbInvOverlayFlag, "D2Client::UI::Inv::gbInvOverlayFlag");
 
 void __stdcall InitializeiInventoryPages() {
     // Static local variables (originally global data)
@@ -4024,14 +4024,14 @@ static int32_t __stdcall ClickItemRight(D2UnitStrc * pItem, D2InventoryStrc * pG
       nCellHeightDivisor = (uint32_t)pInventoryGridScreenCoordinated.nCellHeight;
     } else {
       bExpansion = GAME::Game::CLIENT_CheckExpansion();
-      if (!bExpansion) {
-        nCol = (uint32_t)((int)pGridCoords - pBankPageGridScreenCoordinates.nPixelLeft) / (uint32_t)pBankPageGridScreenCoordinates.nCellWidth;
-        nRowOffset = (int)pItem - pBankPageGridScreenCoordinates.nTop;
-        nCellHeightDivisor = (uint32_t)pBankPageGridScreenCoordinates.nCellHeight;
-      } else {
+      if (bExpansion) {
         nCol = (uint32_t)((int)pGridCoords - pBigBankPageGridScreenCoordinates.nPixelLeft) / (uint32_t)pBigBankPageGridScreenCoordinates.nCellWidth;
         nRowOffset = (int)pItem - pBigBankPageGridScreenCoordinates.nTop;
         nCellHeightDivisor = (uint32_t)pBigBankPageGridScreenCoordinates.nCellHeight;
+      } else {
+        nCol = (uint32_t)((int)pGridCoords - pBankPageGridScreenCoordinates.nPixelLeft) / (uint32_t)pBankPageGridScreenCoordinates.nCellWidth;
+        nRowOffset = (int)pItem - pBankPageGridScreenCoordinates.nTop;
+        nCellHeightDivisor = (uint32_t)pBankPageGridScreenCoordinates.nCellHeight;
       }
     }
 
@@ -4070,10 +4070,10 @@ static int32_t __stdcall ClickItemRight(D2UnitStrc * pItem, D2InventoryStrc * pG
       eUnitType = pPlayer->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosY = pPlayer->pPath.pStaticPath->nPosY;
-      } else if (!pPlayer->pPath.pDynamicPath) {
-        nPosY = 0;
-      } else {
+      } else if (pPlayer->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pPlayer->pPath.pDynamicPath);
+      } else {
+        nPosY = 0;
       }
 
       bExpansion = UNIT::PlayerIsUnInterruptable(pItemAtCell);
@@ -5201,10 +5201,7 @@ void __fastcall INV_InitTradeMode(int32_t nParam) {
     gbInvTradeWindowOpen = 0;
     gbInvTradeWindowOpen2 = 0;
     gnInvInventoryGold = 0;
-    if (!nParam) {
-      g_nCurrentInventoryPage = 10;
-      Path::TypeOfUiOverlayOverWorld(0);
-    } else {
+    if (nParam) {
       char szPathBuf[260];
       gdwInvLastActionTickCount = 0;
       g_nCurrentInventoryPage = 0xb;
@@ -5213,6 +5210,9 @@ void __fastcall INV_InitTradeMode(int32_t nParam) {
         Storm::Source::SSTR::SStrPrintf(szPathBuf, 0x104, "%s\\ui\\panel\\trade", "DATA\\GLOBAL");
         gpInvShopTabImage = Core::Archive::IMAGE_LoadDC6Ex(szPathBuf, 0);
       }
+    } else {
+      g_nCurrentInventoryPage = 10;
+      Path::TypeOfUiOverlayOverWorld(0);
     }
 
     gShopTradeUIState = 0;
@@ -6511,17 +6511,7 @@ static void INV_DrawHirelingStats(D2UnitStrc * pUnit) {
         }
 
         pDmgTypeStatArray = (eD2UnitStat*)D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxdamage, 0);
-        if (!pRightArmItem) {
-          iServerStat = UNIT::GetClassId(pUnit);
-          if (iServerStat == 0x10f) {
-            eStatId = UNITSTAT_dexterity;
-          } else {
-            eStatId = UNITSTAT_strength;
-          }
-
-          iDamageValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eStatId, 0);
-          iStatRaw += iDamageValue;
-        } else {
+        if (pRightArmItem) {
           bResult = D2Common::ITEMS::Items::IsTwoHanded(pRightArmItem);
           if (bResult) {
             iDamageValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pRightArmItem, UNITSTAT_mindamage, 0);
@@ -6551,6 +6541,16 @@ static void INV_DrawHirelingStats(D2UnitStrc * pUnit) {
           iServerStat = D2Common::Skills::SKILLS_GetItemBonusDamage(pUnit, pRightArmItem, nullptr, 1);
           iStatRaw += iServerStat;
           iStatBonusPct = D2Common::Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pRightArmItem, UNITSTAT_item_normaldamage, 0);
+        } else {
+          iServerStat = UNIT::GetClassId(pUnit);
+          if (iServerStat == 0x10f) {
+            eStatId = UNITSTAT_dexterity;
+          } else {
+            eStatId = UNITSTAT_strength;
+          }
+
+          iDamageValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eStatId, 0);
+          iStatRaw += iDamageValue;
         }
         if (iStatRaw <= -0x5a) {
           iStatRaw = -0x5a;

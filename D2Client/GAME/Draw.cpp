@@ -1124,11 +1124,11 @@ void __fastcall dShadowPass(D2GameViewStrc * pGameView) {
             if (pShadowNode->dwType & 2) {
               Engine::Gfx::DrawUnitShadows((D2UnitStrc*)pShadowNode->pData);
             }
-          } else if (!bIsPerspective) {
+          } else if (bIsPerspective) {
+            D2gfx::D2GFX::D2GFX_DrawShadowTile(*(D2TileLibraryEntryStrc**)((int)pShadowNode->pData + 0x18), pShadowNode->nX, pShadowNode->nY, 4, nScreenPanels);
+          } else {
             pWallTileEntry = (int*)pShadowNode->pData;
             D2gfx::D2GFX::D2GFX_DrawShadowTile((D2TileLibraryEntryStrc*)pWallTileEntry[6], pGameView->pView.left - pGameView->nCenterX + *pWallTileEntry, pWallTileEntry[1] - pGameView->nCenterY + pGameView->pView.top, 4, nScreenPanels);
-          } else {
-            D2gfx::D2GFX::D2GFX_DrawShadowTile(*(D2TileLibraryEntryStrc**)((int)pShadowNode->pData + 0x18), pShadowNode->nX, pShadowNode->nY, 4, nScreenPanels);
           }
         }
       }

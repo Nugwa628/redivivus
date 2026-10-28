@@ -148,7 +148,7 @@ int __fastcall SFILE_EnsurePathEndsWithBackslash(char * szText1, uint32_t nMaxLe
     }
 
     uint32_t nLength = Storm::Source::SSTR::SStrLen(szText1);
-    if (!(!nLength || szText1[nLength - 1] != '\\')) {
+    if (nLength > 0 && szText1[nLength - 1] == '\\') {
       return 1;
     }
     if (nLength + 1 == nMaxLen) {

@@ -214,7 +214,7 @@ D2UnitStrc * __stdcall ITEM_CreateItemFromGroundPacket(uint16_t nItemX, uint32_t
     D2UnitStrc* pUnit = CUnit::UNIT_CreateWarp(*(int32_t*)(pPacketData + 4), pUnitDataItemDetails->classId, (uint32_t)nItemX, nItemY & 0xffff, UNIT_ITEM, (uint32_t)pUnitDataItemDetails->nAnimMode);
     D2Common::ITEMS::Items::ITEM_LoadFromSaveData(pUnit, pPacketData + 8, bVar1 - 8, 0, nullptr, 0x60, &bLoadFailed);
     if (bLoadFailed) {
-      CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pPacketData + 4));
+      CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pPacketData + 4), UNIT_ITEM);
       return nullptr;
     }
 
@@ -250,7 +250,7 @@ D2UnitStrc * __stdcall ITEM_CreateItemFromBodyPacket(uint16_t nItemX, uint32_t n
     D2UnitStrc* pUnit = CUnit::UNIT_CreateWarp(*(int32_t*)(pPacketData + 4), pUnitDataItemDetails->classId, (uint32_t)nItemX, nItemY & 0xffff, UNIT_ITEM, (uint32_t)pUnitDataItemDetails->nAnimMode);
     D2Common::ITEMS::Items::ITEM_LoadFromSaveData(pUnit, pPacketData + 0xd, bVar1 - 0xd, 0, nullptr, 0x60, &bLoadFailed);
     if (bLoadFailed) {
-      CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pPacketData + 4));
+      CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pPacketData + 4), UNIT_ITEM);
       return nullptr;
     }
 
@@ -347,7 +347,11 @@ static void ITEM_RestoreSkillSelections(int * pSkillSaveState, D2UnitStrc * pUni
         pCurrentSkill = D2Common::Units::GetLeftSkill(pUnit);
         if (pSkillLeft != pCurrentSkill) {
           nCanUseResult = PlrSkills::PLRSKILLS_CanUseSkillCheck(pUnit, pSkillLeft);
-          if (nCanUseResult != 2 && nCanUseResult != 7) {
+          switch (nCanUseResult) {
+          case 2:
+          case 7:
+            break;
+          default:
             D2Common::Skills::SelectSkillLeft(pUnit, pSkillSaveState[4], pSkillSaveState[6]);
           }
         }
@@ -368,7 +372,9 @@ static void ITEM_RestoreSkillSelections(int * pSkillSaveState, D2UnitStrc * pUni
     }
 
     nCanUseResult = PlrSkills::PLRSKILLS_CanUseSkillCheck(pUnit, pSkillLeft);
-    if (!(nCanUseResult != 2 && nCanUseResult != 7)) {
+    switch (nCanUseResult) {
+    case 2:
+    case 7:
       return;
     }
 
@@ -832,7 +838,10 @@ void __fastcall ITEM_UpdateItemAnimation(D2UnitStrc * pUnit) {
 }
 
 void __fastcall ItemMessage(int32_t eMessageType, D2UnitStrc * pUnit, D2ServerMessageHandleStrc * pMessage, int32_t nUpdateFlag) {
-    if (eMessageType != 2) {
+    switch (eMessageType) {
+    case 2:
+      break;
+    default:
       return;
     }
 
@@ -927,11 +936,11 @@ static void __stdcall ITEM_RemoveEquippedItemForSwap(D2UnitStrc * pItem, D2UnitS
       D2Common::INVENTORY::Inventory::NullSub_2Arg(pInventory, nBodyLocIdx);
     }
     if (!pItem) {
-      CUnit::RemoveObjectFromServerObjectTable(UNIT_COUNT, -1);
+      CUnit::RemoveObjectFromServerObjectTable(-1, UNIT_COUNT);
       return;
     }
 
-    CUnit::RemoveObjectFromServerObjectTable(pItem->eUnitType, pItem->nUnitGUID);
+    CUnit::RemoveObjectFromServerObjectTable(pItem->nUnitGUID, pItem->eUnitType);
 }
 
 // Returns the drop-sound ID for an item unit. First reads wDropSound from the item's ItemsTxt row. If the item is unique (quality 7), overrides with the UniqueItemsTxt dropsound field; if set (quality 5), overrides with SetItemsTxt dropsound. Returns 0 for null input or when no positive sound is found.
@@ -1123,7 +1132,7 @@ void __fastcall ITEM_HandleCursorItemRemoval(int32_t pbPacket) {
     D2Common::INVENTORY::Inventory::CopyInventoryOfPlayerOrFree(pInventory, nullptr);
     pLocalPlayer = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pInventory);
     UI::ui::ITEM_SetItemOnHand(pLocalPlayer);
-    CUnit::RemoveObjectFromServerObjectTable(pUnit->eUnitType, nCursorItemGUID);
+    CUnit::RemoveObjectFromServerObjectTable(nCursorItemGUID, pUnit->eUnitType);
     UI::npcmenu::NPCMENU_OnCursorItemRemoved(nCursorItemGUID);
 }
 
@@ -1139,7 +1148,7 @@ void __fastcall HandleItemToCursor(uint8_t * pbParam) {
       D2UnitStrc* pItem;
       pItem = Player::UNITS_FindClientSideUnit(*(int32_t*)(pbParam + 4), UNIT_ITEM);
       if (pItem) {
-        CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pbParam + 4));
+        CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pbParam + 4), UNIT_ITEM);
       }
 
       pItem = ITEM_CreateItemFromGroundPacket(0, 0, 0, pbParam, &itemDetails);
@@ -1266,7 +1275,7 @@ void __fastcall ITEM_HandleItemCopyToCursor(uint8_t * pbParam) {
       return;
     }
 
-    CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pbParam + 4));
+    CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pbParam + 4), UNIT_ITEM);
     D2UnitStrc* pUnit = ITEM_CreateItemFromBodyPacket(0, 0, 0, pbParam, &stItemDetails);
     if (!pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd35);
@@ -1448,7 +1457,7 @@ void __fastcall HandleItemDroppedToGround(uint8_t * pbParam) {
         goto place_on_ground;
       }
 
-      CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pbParam + 4));
+      CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pbParam + 4), UNIT_ITEM);
       bIsReload = (uint32_t)((uint32_t)(uint16_t)*(uint16_t*)((char*)&stItemDetails + 8) << 16 | (uint32_t)(uint16_t)stItemDetails.y);
     }
 
@@ -1525,7 +1534,7 @@ void __fastcall HandleItemOnGround(uint8_t * pBuffer) {
         pBuffer = pBuffer2;
       }
 
-      CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pBuffer + 4));
+      CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pBuffer + 4), UNIT_ITEM);
     }
 
     nLine = 0;
@@ -1637,13 +1646,7 @@ void __fastcall HandleItemPutInContainer(uint8_t * pbParam) {
     if (pItem) {
       uint8_t ePage;
       nFlagResult = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(sItemDetails.flags, ITEMFLAG_RELOAD);
-      if (!nFlagResult) {
-        ePage = sItemDetails.nInvPage;
-        ITEM_SetAnimModeAndPlace(pItem, nullptr, (uint32_t)sItemDetails.x, (uint32_t)sItemDetails.y, (uint32_t)sItemDetails.nAnimMode, 0);
-        D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, ePage);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, sItemDetails.flags, 1);
-      } else {
+      if (nFlagResult) {
         pBelongsResult = D2Common::INVENTORY::Inventory::ItemBelongsToInventoryOfPlayer(pPlayerUnit_lcl->pInventory, pItem);
         if (pBelongsResult) {
           eInvPage = D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pItem);
@@ -1666,11 +1669,17 @@ void __fastcall HandleItemPutInContainer(uint8_t * pbParam) {
           }
         }
 
-        CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pbParam + 4));
+        CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pbParam + 4), UNIT_ITEM);
         pItem = ITEM_CreateItemFromGroundPacket(0, 0, 0, pbParam, &sItemDetails);
         if (!pItem) {
           return;
         }
+      } else {
+        ePage = sItemDetails.nInvPage;
+        ITEM_SetAnimModeAndPlace(pItem, nullptr, (uint32_t)sItemDetails.x, (uint32_t)sItemDetails.y, (uint32_t)sItemDetails.nAnimMode, 0);
+        D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, ePage);
+        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
+        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, sItemDetails.flags, 1);
       }
     } else {
       pItem = ITEM_CreateItemFromGroundPacket(0, 0, 1, pbParam, &sItemDetails);
@@ -1768,7 +1777,7 @@ void __fastcall HandleItemRemoveFromContainer(uint8_t * pBytes) {
           bIsReload = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(stItemDetails.flags, ITEMFLAG_RELOAD);
           pBytesSaved2 = pBytesSaved;
           if (bIsReload) {
-            CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pBytesSaved + 4));
+            CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pBytesSaved + 4), UNIT_ITEM);
             pItem = ITEM_CreateItemFromBodyPacket(0, 0, 0, pBytesSaved2, &stItemDetails);
             if (!pItem) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), (int32_t)(D2InventoryStrc*)0x4dd);
@@ -1786,7 +1795,7 @@ void __fastcall HandleItemRemoveFromContainer(uint8_t * pBytes) {
           UI::ui::ITEM_SetItemOnHand(pBelongsResult);
           ITEM_RemoveUninterruptableState(pItem);
         } else {
-          CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, pItem->nUnitGUID);
+          CUnit::RemoveObjectFromServerObjectTable(pItem->nUnitGUID, UNIT_ITEM);
           pBelongsResult = Player::GetPlayerUnit_UI();
           if (pOwnerUnit == pBelongsResult) {
             if (stItemDetails.nInvPage == INVPAGE_CORPSE) {
@@ -2017,7 +2026,7 @@ void __fastcall HandleItemIndirectSwapBodyItem(uint8_t * pBytes) {
       if (pNewItem) {
         uVar1 = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(stItemDetails.flags, ITEMFLAG_RELOAD);
         if (uVar1) {
-          CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pBytesPacket + 4));
+          CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pBytesPacket + 4), UNIT_ITEM);
           pNewItem = ITEM_CreateItemFromBodyPacket(0, 0, 0, pBytesPacket, &stItemDetails);
           if (!pNewItem) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x618);
@@ -2136,14 +2145,14 @@ void __fastcall HandleItemUnequip(uint8_t * pBytes) {
 
       nItemComponent = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(stItemDetails.flags, ITEMFLAG_REMOVED);
       if (nItemComponent) {
-        CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pBytesSaved + 4));
+        CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pBytesSaved + 4), UNIT_ITEM);
         return;
       }
 
       uVar1 = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(stItemDetails.flags, ITEMFLAG_RELOAD);
       pOwnerUnitSaved3 = pBytesSaved;
       if (uVar1) {
-        CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pBytesSaved + 4));
+        CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pBytesSaved + 4), UNIT_ITEM);
         pUnequippedItem = ITEM_CreateItemFromBodyPacket(0, 0, 0, pOwnerUnitSaved3, &stItemDetails);
         if (!pUnequippedItem) {
           pUnequippedItem = 0;
@@ -2172,7 +2181,7 @@ void __fastcall HandleItemUnequip(uint8_t * pBytes) {
     } else {
       pOwnerUnit = Player::UNITS_FindClientSideUnit(*(int32_t*)(pBytesSaved + 4), UNIT_ITEM);
       if (pOwnerUnit) {
-        CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pOwnerUnitSaved3 + 4));
+        CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pOwnerUnitSaved3 + 4), UNIT_ITEM);
         return;
       }
     }
@@ -2198,7 +2207,7 @@ void __stdcall ITEM_HandleSwapBodyEquipItem(int32_t nParam1, D2UnitDataItemDetai
       pItem = Player::UNITS_FindClientSideUnit(*(int32_t*)(nParam1 + 4), UNIT_ITEM);
       bIsReload = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(pItemDetails->flags, ITEMFLAG_RELOAD);
       if (bIsReload) {
-        CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(nParam1 + 4));
+        CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(nParam1 + 4), UNIT_ITEM);
         pItem = ITEM_CreateItemFromBodyPacket(0, 0, 0, (uint8_t*)nParam1, pItemDetails);
         if (!pItem) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6b7);
@@ -2268,18 +2277,14 @@ static void __stdcall ITEM_HandleSwapBodyUnequipItem(uint8_t * pPacketData, D2Un
     if (pOwnerUnit->eUnitType == UNIT_PLAYER) {
       D2UnitStrc* pBelongsResult;
       pInventory = pOwnerUnit->pInventory;
-      if (!pInventory) {
-        nErrorLineVal = 0x6ef;
-      } else {
+      if (pInventory) {
         pBodyItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemByGridOffset(pInventory, (uint32_t)pUnitDataItemDetails->nBodyLoc);
         Units::IfPlayer(pOwnerUnit);
         D2Common::INVENTORY::Inventory::INVENTORY_SwapPrimaryWeaponOnRemoval(pInventory, pBodyItem);
         SRC::CelCmp::GFX_ClearAllModeFlags(pOwnerUnit, (uint32_t)pPacketData[3]);
         D2Common::INVENTORY::Inventory::GetCurrentItemOnBodyLocation(pOwnerUnit, pInventory, &pBodyItem, (uint32_t)pUnitDataItemDetails->nBodyLoc);
         pBelongsResult = D2Common::INVENTORY::Inventory::ItemBelongsToInventoryOfPlayer(pInventory, pBodyItem);
-        if (!pBelongsResult) {
-          nErrorLineVal = 0x6f7;
-        } else {
+        if (pBelongsResult) {
           if (pBelongsResult == pBodyItem) {
             if (pOwnerUnit->eUnitType == UNIT_PLAYER) {
               D2Common::INVENTORY::Inventory::GetEquipedWeapon(pOwnerUnit->pInventory);
@@ -2294,7 +2299,7 @@ static void __stdcall ITEM_HandleSwapBodyUnequipItem(uint8_t * pPacketData, D2Un
             D2Common::INVENTORY::Inventory::NullSub_2Arg(pInventory, (uint32_t)pUnitDataItemDetails->nBodyLoc);
             nFlagResult = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(pUnitDataItemDetails->flags, ITEMFLAG_RELOAD);
             if (nFlagResult) {
-              CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pPacketData + 4));
+              CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pPacketData + 4), UNIT_ITEM);
               pBelongsResult = Player::GetPlayerUnit_UI();
               if (pOwnerUnit == pBelongsResult) {
                 pBodyItem = ITEM_CreateItemFromBodyPacket(0, 0, 0, pPacketData, pUnitDataItemDetails);
@@ -2323,7 +2328,11 @@ static void __stdcall ITEM_HandleSwapBodyUnequipItem(uint8_t * pPacketData, D2Un
           }
 
           nErrorLineVal = 0x6f8;
+        } else {
+          nErrorLineVal = 0x6f7;
         }
+      } else {
+        nErrorLineVal = 0x6ef;
       }
     }
 
@@ -2442,7 +2451,7 @@ void __fastcall NET_D2GS_CLIENT_HandleItemAddQuantity(uint8_t * pbParam) {
     D2UnitStrc* pItem = Player::UNITS_FindClientSideUnit(*(int32_t*)(pbParam + 4), UNIT_ITEM);
     D2Common::ITEMS::Items::ITEM_LoadFromSaveData(pItem, pbParam + 8, byPacketLen - 8, 0, nullptr, 0x60, (int*)&pLoadResult);
     if (pLoadResult) {
-      CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pbParam + 4));
+      CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pbParam + 4), UNIT_ITEM);
       return;
     }
 
@@ -2546,7 +2555,7 @@ void __fastcall HandleItemInShop(uint8_t * pbParam) {
       iVar1 = D2Common::Units::GetInventoryPage(__frame0.pNpcUnit, __frame0.bIsReload, bIsExpansion);
       D2Common::INVENTORY::Inventory::UnusedDebug(".\\UNIT\\Item.cpp", 0x81b, pInventory, (uint32_t)stItemDetails.x, (uint32_t)stItemDetails.y, (eInventoryPage)iVar1, 1, nShopResult);
       UI::ui::UI_SendMouseMoveMessage();
-      CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pbParam + 4));
+      CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pbParam + 4), UNIT_ITEM);
       UI::npcmenu::NPCMENU_OnItemInShop(*(int32_t*)(pbParam + 4));
       return;
     }
@@ -2560,7 +2569,7 @@ void __fastcall HandleItemInShop(uint8_t * pbParam) {
       D2Common::INVENTORY::Inventory::INVENTORY_CheckDoItemBelongToInventory(pInventory, pItem);
       nShopResult = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(stItemDetails.flags, ITEMFLAG_RELOAD);
       if (nShopResult) {
-        CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pbParam + 4));
+        CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pbParam + 4), UNIT_ITEM);
         pItem = ITEM_CreateItemFromGroundPacket(0, 0, 0, pbParam, &stItemDetails);
         if (!pItem) {
           return;
@@ -2619,7 +2628,7 @@ static void ITEM_HandleSwapContainerNewItem(uint8_t * pPacketData, D2UnitDataIte
       pItem = Player::UNITS_FindClientSideUnit(*(int32_t*)(pPacketData + 4), UNIT_ITEM);
       bIsReload = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(pUnitDataItemDetails->flags, ITEMFLAG_RELOAD);
       if (bIsReload) {
-        CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pPacketData + 4));
+        CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pPacketData + 4), UNIT_ITEM);
         pItem = ITEM_CreateItemFromGroundPacket(0, 0, 0, pPacketData, pUnitDataItemDetails);
         if (!pItem) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x874);
@@ -2726,7 +2735,7 @@ static void __stdcall ITEM_HandleSwapContainerOldItem(uint8_t * pPacketData, D2U
           UI::Inv::INV_ResetHoverAndContextState();
           bIsReload = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(pUnitDataItemDetails->flags, ITEMFLAG_RELOAD);
           if (bIsReload) {
-            CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pPacketData + 4));
+            CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pPacketData + 4), UNIT_ITEM);
             pItem = ITEM_CreateItemFromGroundPacket(0, 0, 0, pPacketData, pUnitDataItemDetails);
             if (!pItem) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8bb);
@@ -2816,10 +2825,10 @@ void __fastcall HandleItemPutInBelt(uint8_t * pbParam) {
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nIndex = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nIndex = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nIndex = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nIndex = 0;
       }
       UI::Panel::PANEL_SetBeltSlotHoverFlag(nIndex, 1);
       UI::ui::UI_SendMouseMoveMessage();
@@ -2886,7 +2895,7 @@ void __fastcall HandleItemRemoveFromBelt(uint8_t * pbParam) {
         return;
       }
 
-      CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pBytesSaved + 4));
+      CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pBytesSaved + 4), UNIT_ITEM);
       UI::ui::ITEM_SetItemOnHand(nullptr);
       return;
     }
@@ -3010,7 +3019,7 @@ void __fastcall ITEM_HandleItemCursorAssign(D2GSPacketSrv0x3F * pPacket) {
     BOOL bInventoryOpen;
     D2UnitStrc* pItem;
     uint32_t nTypeIdx;
-    if (pPacket->nSkillId != -1) {
+    if ((uint16_t)pPacket->nSkillId != 0xffff) {
       nTypeIdx = 0;
       if ((uint32_t)gnCursorAutoOpenInventoryTypeCount > 0) {
         do {
@@ -3119,7 +3128,7 @@ void __fastcall HandleItemAutoUnequip(uint8_t * pPacketData) {
           Engine::Gfx::GFX_LoadUnitModeCof(pOwnerUnit, 0);
           nItemComponent = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(sItemDetails.flags, ITEMFLAG_RELOAD);
           if (nItemComponent) {
-            CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pPacketData + 4));
+            CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pPacketData + 4), UNIT_ITEM);
             pPlayer = Player::GetPlayerUnit_UI();
             if (pOwnerUnit == pPlayer) {
               pBodyItem = ITEM_CreateItemFromBodyPacket(0, 0, 0, pPacketData, &sItemDetails);
@@ -3259,7 +3268,7 @@ void __fastcall ITEM_HandleItemMoveToBodyLoc(uint8_t * pbParam) {
 
     uint32_t bIsReload = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(stItemDetails.flags, ITEMFLAG_RELOAD);
     if (bIsReload) {
-      CUnit::RemoveObjectFromServerObjectTable(UNIT_ITEM, *(uint32_t*)(pbParam + 4));
+      CUnit::RemoveObjectFromServerObjectTable(*(uint32_t*)(pbParam + 4), UNIT_ITEM);
       pItem = ITEM_CreateItemFromBodyPacket(0, 0, 0, pbParam, &stItemDetails);
       if (!pItem) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb8d);
@@ -3357,7 +3366,7 @@ D2UnitStrc * __fastcall HandleItemUpdateStats(uint8_t * pbPacket) {
           D2Common::Stats::StatsEx::STATLIST_RemoveFromOwnerAndRecalc(pUnit, pCursorItem_lcl);
         }
 
-        CUnit::RemoveObjectFromServerObjectTable(pLocalPlayer->eUnitType, pLocalPlayer->nUnitGUID);
+        CUnit::RemoveObjectFromServerObjectTable(pLocalPlayer->nUnitGUID, pLocalPlayer->eUnitType);
       }
 
       UI::Inv::INV_ResetHoverAndContextState();
@@ -3409,7 +3418,7 @@ D2UnitStrc * __fastcall HandleItemUpdateStats(uint8_t * pbPacket) {
         bFlag = pRemovedItem->nUnitGUID;
       }
 
-      CUnit::RemoveObjectFromServerObjectTable(eRemovedItemUnitType, bFlag);
+      CUnit::RemoveObjectFromServerObjectTable(bFlag, eRemovedItemUnitType);
       pRemovedItem = 0;
       if (pUnit == pLocalPlayer) {
         UI::Inv::INV_ResetHoverAndContextState();
@@ -3484,7 +3493,7 @@ D2UnitStrc * __fastcall HandleItemUpdateStats(uint8_t * pbPacket) {
             D2Common::Stats::StatsEx::STATLIST_RemoveFromOwnerAndRecalc(pUnit, pLocalPlayer);
           }
 
-          CUnit::RemoveObjectFromServerObjectTable(pLocalPlayer->eUnitType, pLocalPlayer->nUnitGUID);
+          CUnit::RemoveObjectFromServerObjectTable(pLocalPlayer->nUnitGUID, pLocalPlayer->eUnitType);
         }
 
         UI::Panel::PANEL_ClearBeltSlotHover();
@@ -3534,7 +3543,7 @@ D2UnitStrc * __fastcall HandleItemUpdateStats(uint8_t * pbPacket) {
       pbVar2 = pbPacketSaved;
       pLocalPlayer = Player::UNITS_FindClientSideUnit(*(int32_t*)(pbPacketSaved + 4), UNIT_ITEM);
       if (pLocalPlayer) {
-        CUnit::RemoveObjectFromServerObjectTable(pLocalPlayer->eUnitType, pLocalPlayer->nUnitGUID);
+        CUnit::RemoveObjectFromServerObjectTable(pLocalPlayer->nUnitGUID, pLocalPlayer->eUnitType);
       }
 
       pCursorItem_lcl = ITEM_CreateItemFromBodyPacket(0, 0, 0, pbVar2, &stItemDetails);

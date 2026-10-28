@@ -1660,11 +1660,12 @@ int32_t __stdcall crc32_big(uint32_t nLength, uint32_t dwInitialCrc, uint8_t * p
 
 uint32_t __fastcall gf2_matrix_times(uint32_t dwVec, uint32_t * pdwMat) {
     uint32_t uVar1 = 0;
-    for (; dwVec; dwVec >>= 1) {
+    while (dwVec) {
       if (dwVec & 1) {
         uVar1 ^= *pdwMat;
       }
 
+      dwVec >>= 1;
       pdwMat++;
     }
 
@@ -1680,11 +1681,13 @@ static void gf2_matrix_square(uint32_t * pdwMatA, uint32_t * pdwMatB) {
       uint32_t* pdwCol;
       dwAccum = 0;
       pdwCol = pdwMatB;
-      for (dwBits = *(uint32_t*)(nByteOffset + (int)pdwMatA); dwBits; dwBits >>= 1) {
+      dwBits = *(uint32_t*)(nByteOffset + (int)pdwMatA);
+      while (dwBits) {
         if (dwBits & 1) {
           dwAccum ^= *pdwCol;
         }
 
+        dwBits >>= 1;
         pdwCol++;
       }
 

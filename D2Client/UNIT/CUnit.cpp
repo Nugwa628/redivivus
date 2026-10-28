@@ -1159,7 +1159,7 @@ uint32_t __fastcall SKILL_IsTargetOwnedPet(D2UnitStrc * pUnit, int * pnSkillPara
     if (pSkill) {
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UNIT\\CUnit.cpp", 0xb4a);
       pSkillsTxt = GAME::SCmd::TXT_Skills_GetLine(eSkillId);
-      if (pSkillsTxt && pSkillsTxt->TargetPet) {
+      if (pSkillsTxt && (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[1])) {
         bHasPetSkill = true;
       }
     }
@@ -1168,7 +1168,7 @@ uint32_t __fastcall SKILL_IsTargetOwnedPet(D2UnitStrc * pUnit, int * pnSkillPara
     if (pSkill) {
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UNIT\\CUnit.cpp", 0xb55);
       pSkillsTxt = GAME::SCmd::TXT_Skills_GetLine(eSkillId);
-      if (pSkillsTxt && pSkillsTxt->TargetPet) {
+      if (pSkillsTxt && (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[1])) {
         nOwnerGUID = GAME::RosterPets::GetRosterOwnerGUID(pnSkillParams[3]);
         return (uint32_t)(nOwnerGUID == pUnit->nUnitGUID);
       }
@@ -1991,7 +1991,7 @@ static void RemoveObject(int32_t nIndex, D2UnitStrc * * ppUnitTable, eD2UnitType
     FreeAny(pUnit);
 }
 
-void __fastcall RemoveObjectFromServerObjectTable(eD2UnitType eUnitType, uint32_t nUnitGUID) {
+void __fastcall RemoveObjectFromServerObjectTable(uint32_t nUnitGUID, eD2UnitType eUnitType) {
     CUnit::RemoveObject(nUnitGUID & 0x7f, ServerSideUnitHashTables[eUnitType], eUnitType, nUnitGUID);
 }
 

@@ -702,10 +702,10 @@ void __fastcall SKILL_ExecuteItemCast(D2UnitStrc * pUnit, eD2Skills eSkill, shor
     nSavedSP1Y = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
     eD2UnitFlags eSavedUnitFlags;
     eSavedUnitFlags = pUnit->eUnitFlags;
-    if (!pTargetUnit) {
-      D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, nParam1, nParam2);
-    } else {
+    if (pTargetUnit) {
       D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pTargetUnit);
+    } else {
+      D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, nParam1, nParam2);
     }
     if (pSkillTxt->ItemCltCheckStart) {
       int bTargetIsActive;
@@ -741,10 +741,10 @@ void __fastcall SKILL_ExecuteItemCast(D2UnitStrc * pUnit, eD2Skills eSkill, shor
 
     Skills::SKILL_ExecuteClientDoFunc(pUnit, eSkill, (int32_t)pDoFuncData, (uint32_t)nParam);
     restore_caster_state:
-    if (!pSavedTarget) {
-      D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, (int16_t)nSavedSP1X, (int16_t)nSavedSP1Y);
-    } else {
+    if (pSavedTarget) {
       D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pSavedTarget);
+    } else {
+      D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, (int16_t)nSavedSP1X, (int16_t)nSavedSP1Y);
     }
     if (!(eSavedUnitFlags >> 6 & 1)) {
       pUnit->eUnitFlags &= ~UNITFLAG_SKSRVDOFUNC;

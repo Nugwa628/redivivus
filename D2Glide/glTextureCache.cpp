@@ -163,10 +163,10 @@ static int GLTEXCACHE_AllocateNode(GlTextureCacheStrc * pCache) {
     uint8_t* pNewFreeHead;
     pNewFreeHead = (uint8_t*)pAllocNode[5];
     pCache->pFreeHead = pNewFreeHead;
-    if (!pNewFreeHead) {
-      pCache->pFreeTail = 0;
-    } else {
+    if (pNewFreeHead) {
       for (int i = 24; i < 28; i++) pNewFreeHead[i] = 0;
+    } else {
+      pCache->pFreeTail = 0;
     }
 
     pAllocNode[5] = 0;
@@ -220,10 +220,10 @@ void __fastcall GLTEXCACHE_EvictLRU(GlTextureCacheStrc * pCache) {
       uint8_t* pNextNode;
       pNextNode = *(uint8_t**)(pEvictNode + 0x14);
       pCache->pActiveHead = pNextNode;
-      if (!pNextNode) {
-        pCache->pActiveTail = 0;
-      } else {
+      if (pNextNode) {
         *(uint32_t*)(pNextNode + 0x18) = 0;
+      } else {
+        pCache->pActiveTail = 0;
       }
 
       *(uint32_t*)(pEvictNode + 0x14) = 0;
@@ -285,10 +285,10 @@ int __fastcall GLTEXCACHE_EnsureCapacity(GlTextureCacheStrc * pCache) {
         if (pEvictNode) {
           pNextNode = *(uint8_t**)(pEvictNode + 0x14);
           pCache->pActiveHead = pNextNode;
-          if (!pNextNode) {
-            pCache->pActiveTail = 0;
-          } else {
+          if (pNextNode) {
             for (int i = 24; i < 28; i++) pNextNode[i] = 0;
+          } else {
+            pCache->pActiveTail = 0;
           }
 
           for (int i = 20; i < 28; i++) pEvictNode[i] = 0;

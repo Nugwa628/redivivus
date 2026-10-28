@@ -747,10 +747,10 @@ int __fastcall ROSTER_GetHostileFlag(D2RosterStrc * pRoster) {
     }
 
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
-    if (!pPlayer) {
-      nUnitGUID = -1;
-    } else {
+    if (pPlayer) {
       nUnitGUID = pPlayer->nUnitGUID;
+    } else {
+      nUnitGUID = -1;
     }
 
     uint32_t bFlag = UNIT::PlayerList::GetFlag(nUnitGUID, pRoster->nRosterGUID, 8);

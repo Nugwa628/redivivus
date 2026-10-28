@@ -141,7 +141,7 @@ void __stdcall D2WIN_HandleCursorHide(int32_t nParam);
 void __stdcall D2WIN_HandleMouseLeave(int32_t nParam);
 BOOL __stdcall D2GFX_PreSetupBeforeCreatingWindow(HINSTANCE hInstance, eD2RendererMode eRenderedMode, BOOL bWindowed, BOOL bDontUseCompression);
 BOOL __stdcall FreeInGameGFX();
-void __stdcall MessagePump(pfnFramePump pfnFrameCallback);
+int __stdcall MessagePump(pfnFramePump pfnFrameCallback);
 void __stdcall MOUSE_CaptureMousePosition(HWND * phWnd);
 void __stdcall INPUT_FormTabKey(struct D2UIMouseMsgStrc * pMsg);
 // @sourcefile .\Src\D2WinMain.cpp
