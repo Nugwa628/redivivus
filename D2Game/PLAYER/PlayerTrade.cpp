@@ -221,11 +221,11 @@ static void __stdcall GOLD_HandleStashGoldTransaction(int32_t nGoldAmount, ::SGA
 }
 
 uint32_t PLAYERTRADE_CompareUint32(uint32_t * pnParam1, uint32_t * pnParam2) {
-    if (*pnParam2 >= *pnParam1) {
-      return (uint32_t)(*pnParam1 != *pnParam2);
+    if (*pnParam1 > *pnParam2) {
+      return -1;
     }
 
-    return -1;
+    return (uint32_t)(*pnParam1 != *pnParam2);
 }
 
 // Removes all items from the cube before transmutation. Iterates through the player's inventory, extracts items from INVPAGE_CUBE, sets their page to None, and frees them from the server unit system. Returns the inventory pointer.

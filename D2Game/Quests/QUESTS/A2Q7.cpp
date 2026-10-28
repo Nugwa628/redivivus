@@ -189,12 +189,11 @@ int __fastcall Q14_IsSevenTombsProgressed(::SGAMEDATA * pGame) {
 // and then 0059d720. A wrapper that supplies the quest record.
 uint32_t __fastcall A2Q6_GetNextFalseTombPortalClassIdForGame(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSevenTombs);
-    if (!pQuestData) {
-      return 0x133;
+    if (pQuestData) {
+      return A2Q6_GetNextFalseTombPortalClassId(pQuestData);
     }
 
-    uint32_t uVar1 = A2Q6_GetNextFalseTombPortalClassId(pQuestData);
-    return uVar1;
+    return 0x133;
 }
 
 // Q14 accessor: returns the "town/Duriel portal already created" flag from A2Q6 data (field_0x0B). Returns 1 (treat as created) if quest not introduced. Used to gate the stairs-to-tombs operate and portal creation.
