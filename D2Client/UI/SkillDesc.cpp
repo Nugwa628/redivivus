@@ -2318,17 +2318,13 @@ void __fastcall SKILLDESC_BuildMagicAffixDesc(D2UnitStrc * pUnit, uint16_t * wsz
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x21c);
         exit(-1);
       }
+
       *wszText = L'\0';
       bIsSocketFiller = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Gem);
-      if (!bIsSocketFiller) {
-        bIsSocketFiller = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Rune);
-        if (!bIsSocketFiller) {
-          return;
-        }
-
+      if (bIsSocketFiller) {
         pGemsTxtLine = D2Common::DATATBLS::ItemTbls::TXT_Gems_GetLine(pItemsTxtLine->dwGemOffset);
         if (!pGemsTxtLine) {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x223);
           exit(-1);
         }
 
@@ -2365,9 +2361,13 @@ void __fastcall SKILLDESC_BuildMagicAffixDesc(D2UnitStrc * pUnit, uint16_t * wsz
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszAffixLine, wszLocalStr);
         SKILLDESC_FormatMagicPrefixDesc(pUnit, pGemsTxtLine, 0, wszText, nMaxBufferSize, wszAffixLine);
       } else {
+        bIsSocketFiller = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Rune);
+        if (!bIsSocketFiller) {
+          return;
+        }
         pGemsTxtLine = D2Common::DATATBLS::ItemTbls::TXT_Gems_GetLine(pItemsTxtLine->dwGemOffset);
         if (!pGemsTxtLine) {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x223);
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
           exit(-1);
         }
         wszLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
@@ -5631,13 +5631,13 @@ static void SKILLDESC_DescLine8_AppendMana(int32_t nParam1, D2UnitStrc * pUnit, 
     SKILLDESC_FormatSignedRangeOrValue(nToHitResult, 0x10a6, 0x10b3, 1, wszText);
 }
 
-static void __stdcall SKILLDESC_FormatMissileDamage(int32_t nMinDamage, int32_t nMaxDamage, uint16_t wDmgTypeStringId, uint16_t * wszText) {
+static int __stdcall SKILLDESC_FormatMissileDamage(int32_t nMinDamage, int32_t nMaxDamage, uint16_t wDmgTypeStringId, uint16_t * wszText) {
     uint16_t wszNumBuf[32];
     char szFormattedA[32];
     for (int i = 0; i < 32; i++) wszNumBuf[i] = 0;
     if (!nMinDamage) {
       if (!nMaxDamage) {
-        return;
+        return 0;
       }
     } else if (nMinDamage == nMaxDamage) {
       /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szFormattedA, "%d", nMinDamage);
@@ -5656,6 +5656,7 @@ static void __stdcall SKILLDESC_FormatMissileDamage(int32_t nMinDamage, int32_t 
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, pLocalStr);
     pLocalStr = D2Lang::StrTable::strtable::GetLocaleString(0xf9e);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszText, pLocalStr);
+    return 1;
 }
 
 static void __stdcall SKILLDESC_DescLine16_MissileDamage(int32_t nMissileId, D2UnitStrc * pOwner, int32_t nLevel, int32_t nParam, uint16_t * wszText) {
