@@ -280,11 +280,11 @@ void __fastcall Q12_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArg->pPlayer)->pQuestRecord[pSVar1->nDifficulty];
     D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if ((short int)nNPCNo == 0x14b) {
-      if ((nMessageIndex & 0xffff) == 0xba) {
+      if ((uint16_t)nMessageIndex == 0xba) {
         /* SetQuestState Step0x07 - Drognan first hint about Summoner (msg 0xba) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Step0x07);
         return;
       }
-      if ((nMessageIndex & 0xffff) - 0xbb <= 2) {
+      if ((uint16_t)nMessageIndex - 0xbb <= 2) {
         /* SetQuestState Step0x08 - Drognan tells Summoner location (msg 0xbb-0xbd) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Step0x08);
         return;
       }

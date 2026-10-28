@@ -601,7 +601,9 @@ void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut) {
               }
 
               bArchiveOpened = __strnicmp(__frame3.szLineBuffer, "delete ", 7);
-              if (bArchiveOpened) {
+              if (!bArchiveOpened) {
+                /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(&__frame3.cDestPathBuf);
+              } else {
                 bArchiveOpened = __strnicmp(__frame3.szLineBuffer, "extract ", 8);
                 if (bArchiveOpened) {
                   bArchiveOpened = __strnicmp(__frame3.szLineBuffer, "execute ", 8);
@@ -612,8 +614,6 @@ void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut) {
                 } else {
                   BNDOWNLOAD_ExtractFileFromArchive(&__frame2.szEntryName, __frame0.pArchiveHandle, &__frame3.cDestPathBuf);
                 }
-              } else {
-                /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(&__frame3.cDestPathBuf);
               }
 
               lpFileName = __frame0.pVerifySigOut;

@@ -1330,10 +1330,10 @@ uint32_t __stdcall INVENTORY_HasEquippedWeaponClass(D2InventoryStrc * pInventory
     }
     if (pInventory->nSignatureMagic == 0x1020304) {
       pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
-      if (pGridInfo) {
-        pItem = pGridInfo->pGridCells[5];
-      } else {
+      if (!pGridInfo) {
         pItem = 0;
+      } else {
+        pItem = pGridInfo->pGridCells[5];
       }
     } else {
       pItem = 0;
@@ -2750,20 +2750,20 @@ int __stdcall INVENTORY_GetWeaponHandedness(D2UnitStrc * pUnit, D2InventoryStrc 
     }
     if (pInventory->nSignatureMagic == 0x1020304) {
       pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
-      if (pGridInfo) {
-        pLeftArmItem = pGridInfo->pGridCells[5];
-      } else {
+      if (!pGridInfo) {
         pLeftArmItem = 0;
+      } else {
+        pLeftArmItem = pGridInfo->pGridCells[5];
       }
     } else {
       pLeftArmItem = 0;
     }
     if (pInventory->nSignatureMagic == 0x1020304) {
       pGridInfo = ReinitializeInventoryGrid(pInventory, &gsInventoryBodyLocGridSize, 0);
-      if (pGridInfo) {
-        pRightArmItem = pGridInfo->pGridCells[4];
-      } else {
+      if (!pGridInfo) {
         pRightArmItem = 0;
+      } else {
+        pRightArmItem = pGridInfo->pGridCells[4];
       }
     } else {
       pRightArmItem = 0;

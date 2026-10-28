@@ -1130,7 +1130,7 @@ int32_t __stdcall SMemHeapSize(int32_t nHeapId, uint32_t dwFlags, int32_t pObjec
 }
 
 // @blizzard AllocateHeapBlock (SMEM.CPP)
-uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFlags, D2FogHeapDescStrc * pHeap) {
+static uint32_t * __stdcall SMEM_AllocateHeapBlock(uint32_t nSize, uint8_t byFlags, D2FogHeapDescStrc * pHeap) {
     BOOL nBlockResult;
     LPVOID pDebugPage;
     uint32_t* pDebugHeader;

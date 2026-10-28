@@ -1218,9 +1218,9 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
         }
 
         nMissileId = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_mindamage, 0);
-        nMissileId = (int)(nMissileId * nSrcMissDmgPct + ((int)(nMissileId * nSrcMissDmgPct) >> 0x1f & 0x7fU)) >> 7;
+        nMissileId = (int)(nMissileId * nSrcMissDmgPct) / 128;
         nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_maxdamage, 0);
-        nParam = (int)(nStatVal * nSrcMissDmgPct + ((int)(nStatVal * nSrcMissDmgPct) >> 0x1f & 0x7fU)) >> 7;
+        nParam = (int)(nStatVal * nSrcMissDmgPct) / 128;
         nDmgPercentBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_damagepercent, 0);
         nItemMinDmgBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_mindamage_percent, 0);
         nItemMaxDmgPercent = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_maxdamage_percent, 0);
@@ -1302,8 +1302,8 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
         }
       }
 
-      nParam = (int)(nParam * nSourceDamage + ((int)(nParam * nSourceDamage) >> 0x1f & 0x7fU)) >> 7;
-      nMissileId = (int)(nMissileId * nSourceDamage + ((int)(nMissileId * nSourceDamage) >> 0x1f & 0x7fU)) >> 7;
+      nParam = (int)(nParam * nSourceDamage) / 128;
+      nMissileId = (int)(nMissileId * nSourceDamage) / 128;
       nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pOwner, UNITSTAT_damagepercent, 0);
       nDmgPercentBonus = nDmgPercentBonus + nStatVal + nItemMinDmgBonus;
       nItemMinDmgBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pOwner, UNITSTAT_item_mindamage_percent, 0);

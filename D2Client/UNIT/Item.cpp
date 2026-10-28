@@ -1550,7 +1550,7 @@ void __fastcall HandleItemOnGround(uint8_t * pBuffer) {
 }
 
 // Places pUnit (an item) into pUnit2's inventory at the given grid coords (nItemX, nYPos), then calls INVENTORY_PlaceItemAtCoords for the resolved inventory page. If the item belongs to the local player: plays a pickup sound (nParam==1) or refreshes cursor item (otherwise). Handles Horadric Cube quest trigger for scroll/tome items (nParam==3). Client-side only (calls D2Client functions).
-void __stdcall ITEM_PlaceItemInContainer(D2UnitStrc * pUnit, uint32_t nYPos, int32_t nParam, D2UnitStrc * pUnit2, uint32_t nItemX) {
+static void __stdcall ITEM_PlaceItemInContainer(D2UnitStrc * pUnit, uint32_t nYPos, int32_t nParam, D2UnitStrc * pUnit2, uint32_t nItemX) {
     bool _bIsExpansion;
     bool bIsExpansion;
     eD2Sounds eSoundId;

@@ -439,8 +439,8 @@ D2UnitStrc * __fastcall MakeMissile(eMissilesId neMissilesId, D2UnitStrc * pUnit
     }
 
     sSkillArg.nY = nOwnerPos + nOffsetY;
-    sSkillArg.nSkillLevel = nSkillLevel;
     sSkillArg.eSkillNo = eSkill;
+    sSkillArg.nSkillLevel = nSkillLevel;
     sSkillArg.nMissileTxtNo = neMissilesId;
     if (!nX || !nY) {
       BOOL bGotCoords;

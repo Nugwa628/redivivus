@@ -173,8 +173,6 @@ int16_t __fastcall ITEMMOD_RollMagicAffixVersioned(struct D2UnitStrc * pUnit, in
 int __fastcall ITEMMOD_RollMagicAffixVersionedEx(struct D2UnitStrc * pUnit, int32_t nParam, int bExclude, int32_t param_1, int nParam4, int nForcedAffix, int nParam6);
 // Version dispatcher: tail-calls GetMaxToRoll or ITEMMOD_GetMaxAffixGroupClassic, both uint32_t-returning ("chosen affix table index + 1, or 0"), as a bare statement.
 uint32_t __fastcall ITEMMOD_SelectMagicAffixVersioned(struct D2UnitStrc * pUnit, int32_t nParam);
-// Rolls rare-quality affixes (prefixes/suffixes) onto an item. Picks 3-6 affixes (2-3 for jewels) via the item seed, alternating prefix/suffix slots, rejecting duplicates and same-group collisions (up to 3 existing slots, 251 reroll attempts). Stores chosen affixes into the unit's magic-prefix/suffix arrays, marks the item identified, applies each affix's stat mods, then runs StaffMod. Returns 1 on success, 0 if max-affix counts are zero or nothing rolled. Classic vs expansion item versions use different roll/max helpers.
-BOOL __stdcall RollPrefixes(struct D2ItemGenContextStrc * pItemGenContext, struct D2UnitStrc * pUnit);
 // Early-out returns bCanBeRare (0) directly; the dispatched branches tail-call ITEMMOD_GenerateRareAffixes or RollPrefixes, both documented "Returns 1 on success, 0 ..." and both dropped as bare statements.
 BOOL __fastcall RollingItem(struct D2UnitStrc * pUnit, struct D2ItemGenContextStrc * pItemGenContext);
 // Rare affix selection. Count: 1-6 based on ilvl (>70=4-6, >50=3-6, >30=2-6, else 1-6). Alternates prefix/suffix by seed LSB. Enforces 3-slot cap per type. 252 retry limit for duplicates. Applies name filtering from RarePrefix/RareSuffix tables.

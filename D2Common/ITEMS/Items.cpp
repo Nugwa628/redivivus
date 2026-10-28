@@ -2745,9 +2745,9 @@ static void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * 
 
       Fog::BitBuffer::WriteValueToBitBuffer(pBitBuffer, uVal, 4);
       nErrLine = D2Client::Units::GetXPosFromDynamicPathUnit(pItem);
-      if (!nErrLine || (uVal = D2Client::Units::GetXPosFromDynamicPathUnit(pItem) , uVal < 0xf)) {
+      if ((uint32_t)nErrLine <= 0 || (uVal = D2Client::Units::GetXPosFromDynamicPathUnit(pItem) , uVal < 0xf)) {
         nErrLine = D2Client::Units::GetXPosFromDynamicPathUnit(pItem);
-        if (nErrLine) {
+        if ((uint32_t)nErrLine > 0) {
           uVal = D2Client::Units::GetXPosFromDynamicPathUnit(pItem);
         } else {
           uVal = 0;
@@ -2765,7 +2765,7 @@ static void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * 
       nErrLine = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
       if ((uint32_t)nErrLine <= 0 || (uVal = D2Client::Units::GetYPosFromDynamicPathUnit(pItem) , uVal < 0xf)) {
         nErrLine = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
-        if (nErrLine) {
+        if ((uint32_t)nErrLine > 0) {
           uVal = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
         } else {
           uVal = 0;

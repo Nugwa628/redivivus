@@ -567,8 +567,8 @@ static void AUTOMAP_RevealAfterTeleport(D2UnitStrc * pUnit, D2UnitStrc * pUnit2,
     uint16_t nTileX = (uint16_t)roomCoords.sTileRect.left;
     uint16_t nTileY = (uint16_t)roomCoords.sTileRect.top;
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit2, ".\\OBJECTS\\ObjMode.cpp", 0x361);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x07_MapReveal(pClient, (uint8_t)eLevelId, nTileX, nTileY);
+
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x07_MapReveal(UNIT::SUnit::SUNIT_GetClient(pUnit2, ".\\OBJECTS\\ObjMode.cpp", 0x361), (uint8_t)eLevelId, nTileX, nTileY);
     D2Common::Unit::ROOM_LinkUnitToUpdateList(pUnit2);
     if (!pUnit2) {
       return;
@@ -3649,9 +3649,9 @@ void __fastcall KillUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
             return;
           }
 
-          sOperation.pAttacker = 0;
           sOperation.sArg.pGame = pGame;
           sOperation.sArg.pVictim = pUnit;
+          sOperation.pAttacker = 0;
           sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
           sOperation.nObjectClassId = pUnit->nClassId;
           ppDropResult = RollChestDrops(&sOperation, ITEMTYPE_None1);

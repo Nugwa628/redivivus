@@ -725,9 +725,9 @@ int32_t __fastcall SKILLSSOR_StateCltEventFn01_ChillingArmor(int32_t nParam1, D2
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.eSkillNo = eSkill;
     sSkillArg.nFlags = 0x20;
-    sSkillArg.nSkillLevel = nParam2;
     sSkillArg.pOwner = pUnit;
     sSkillArg.pMissile = pUnit;
+    sSkillArg.nSkillLevel = nParam2;
     sSkillArg.nMissileTxtNo = eMissileId;
     sSkillArg.nUnitX = Units::GetXPosFromDynamicPathUnit(pOwnerUnit);
     sSkillArg.nUnitY = Units::GetYPosFromDynamicPathUnit(pOwnerUnit);

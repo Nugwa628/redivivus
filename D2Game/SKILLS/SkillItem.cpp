@@ -1415,8 +1415,8 @@ BOOL __fastcall Skills_SrvDoFunc_113_UseScrollOrBook(::SGAMEDATA * pGame, D2Unit
 
       bUseMerc = 0;
       pDVar2 = (D2UnitStrc*)&eSkill;
-      iVar7 = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00);
-      ITEMS::ItemMode::SERVER_UseItemAtCoords(pGame, pUnit, DVar9, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), iVar7, pDVar2, bUseMerc);
+
+      ITEMS::ItemMode::SERVER_UseItemAtCoords(pGame, pUnit, DVar9, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00), pDVar2, bUseMerc);
       return 1;
     }
     if (!pUnit_00) {
@@ -1426,8 +1426,8 @@ BOOL __fastcall Skills_SrvDoFunc_113_UseScrollOrBook(::SGAMEDATA * pGame, D2Unit
     }
 
     eD2Skills* bResult = &eSkill;
-    iVar7 = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00);
-    ITEMS::ItemMode::SpecialItemsBonuses(pGame, pUnit, DVar9, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), iVar7, (BOOL*)bResult);
+
+    ITEMS::ItemMode::SpecialItemsBonuses(pGame, pUnit, DVar9, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00), (BOOL*)bResult);
     return 1;
 }
 

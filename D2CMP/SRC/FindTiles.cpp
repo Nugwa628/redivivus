@@ -194,46 +194,46 @@ int32_t __fastcall FINDTILE_Lookup(int * * pHashTable, int32_t pResultArray, uin
       exit(-1);
     } else {
       int* pEntry;
-      if (pResultArray) {
-        if (!nMaxResults) {
-          return 0;
-        }
+      if (!pResultArray) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd0);
+        exit(-1);
+      }
 
-        i = FINDTILE_ComputeHash((char)nParam4, (char)nTileSubType, (char)nTileType);
-        pEntry = pHashTable[i & 0xff];
-        if (!pEntry) {
-          return nResultCount;
-        }
+      if (!nMaxResults) {
+        return 0;
+      }
 
-        bMatched = false;
-        do {
-          if (bMatched) {
-            goto copy_matches;
-          }
-          if (pEntry[1] == nParam4 && *pEntry == nTileSubType && pEntry[2] == nTileType) {
-            bMatched = true;
-          } else {
-            pEntry = (int*)pEntry[4];
-          }
-        } while (pEntry);
-
-        if (!bMatched) {
-          return nResultCount;
-        }
-
-        copy_matches:
-        pChainNode = (void*)pEntry[3];
-        for (i = 0; pChainNode && i < nMaxResults; i++) {
-          nResultCount++;
-          *(uint32_t*)(pResultArray + i * 4) = *(uint32_t*)pChainNode;
-          pChainNode = *(void**)((int)pChainNode + 4);
-        }
-
+      i = FINDTILE_ComputeHash((char)nParam4, (char)nTileSubType, (char)nTileType);
+      pEntry = pHashTable[i & 0xff];
+      if (!pEntry) {
         return nResultCount;
       }
 
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd0);
-      exit(-1);
+      bMatched = false;
+      do {
+        if (bMatched) {
+          goto copy_matches;
+        }
+        if (pEntry[1] == nParam4 && *pEntry == nTileSubType && pEntry[2] == nTileType) {
+          bMatched = true;
+        } else {
+          pEntry = (int*)pEntry[4];
+        }
+      } while (pEntry);
+
+      if (!bMatched) {
+        return nResultCount;
+      }
+
+      copy_matches:
+      pChainNode = (void*)pEntry[3];
+      for (i = 0; pChainNode && i < nMaxResults; i++) {
+        nResultCount++;
+        *(uint32_t*)(pResultArray + i * 4) = *(uint32_t*)pChainNode;
+        pChainNode = *(void**)((int)pChainNode + 4);
+      }
+
+      return nResultCount;
     }
 }
 

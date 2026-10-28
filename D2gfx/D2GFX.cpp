@@ -751,7 +751,7 @@ void __stdcall D2GFX_EndCutScene() {
       DRAW_HideTaskbarAppBars();
       do {
         /* BOOL bShow for ShowCursor */ nCursorDisplayCount = ShowCursor(0);
-      } while (-1 < nCursorDisplayCount);
+      } while (0 <= nCursorDisplayCount);
     }
 
     RENDERER_CurrentRenderedFunctions->nfpEndCutScene(hwndD2GFX_Window, nResolutionMode, ::D2GFX_EndCutScene);

@@ -540,7 +540,7 @@ static int32_t __stdcall OBJECT_SelectRandomShrineType(::SGAMEDATA * pGame, uint
       D2SeedStrc* pObjSeed;
       nRandIdx = pShrinesRng->nShrinesCount[byShrineCategory];
       pObjSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
-      if ((int)nRandIdx < 1) {
+      if ((int)nRandIdx <= 0) {
         nRandIdx = 0;
       } else if (!(nRandIdx & nRandIdx - 1)) {
         DVar1 = D2_SEED_NEXT(*pObjSeed);
@@ -549,7 +549,7 @@ static int32_t __stdcall OBJECT_SelectRandomShrineType(::SGAMEDATA * pGame, uint
       } else {
         DVar1 = D2_SEED_NEXT(*pObjSeed);
         *pObjSeed = DVar1;
-        nRandIdx = (uint32_t)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) % (uint64_t)nRandIdx);
+        nRandIdx = (uint32_t)(DVar1.nSeedLow % nRandIdx);
       }
 
       nShrineId = *(int*)((uint8_t*)pShrinesRng->aShrinesRng[byShrineCategory] + nRandIdx * 4);

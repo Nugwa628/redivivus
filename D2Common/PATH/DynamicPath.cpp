@@ -1409,7 +1409,7 @@ static uint8_t PATH_ResolveTargetPosition(D2PathTypeArg * pPathTypeArg, int32_t 
         bTargetIsDoor = Units::CheckIfObjectOrientationIs1(pTargetUnit);
         eUnitType = pTargetUnit->eUnitType;
         if (!bTargetIsDoor) {
-          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
             nDoorTargetX = pTargetUnit->pPath.pStaticPath->nPosX;
           } else if (pTargetUnit->pPath.pDynamicPath) {
             nDoorTargetX = GetXPos(pTargetUnit->pPath.pDynamicPath);
