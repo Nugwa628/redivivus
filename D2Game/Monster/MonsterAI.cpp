@@ -482,7 +482,7 @@ void __fastcall FreeAndResetAiSub(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Uni
     Quests::QUESTS::QUEST_OnNpcDeactivate(pGame, pUnit, pMonster);
     D2MonsterAiSubStrc* pPrevSubAi = 0;
     D2MonsterAiSubStrc* pSubAi = pMonsterAi->pAiSub;
-    if (!pMonsterAi->pAiSub) {
+    if (!pSubAi) {
       return;
     }
 

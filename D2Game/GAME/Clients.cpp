@@ -593,7 +593,7 @@ void __fastcall GAME_CollectNearbyUnitPositions(D2ClientStrc * pClient, uint32_t
       aProximityNodes[0].nNext = 0;
       aProximityNodes[0].nDistance = 0;
       nRoomIdx = 0;
-      if (nAdjacentRoomCount) {
+      if (0 < nAdjacentRoomCount) {
         do {
           for (pPlayerUnit_lcl = ppAdjacentRooms[nRoomIdx]->pUnitList; pPlayerUnit_lcl; pPlayerUnit_lcl = pPlayerUnit_lcl->pRoomNext) {
             CLIENT_AddUnitToProximitySortedList(nX, pPlayerUnit_lcl, nY, &pnMaxDist, pClient, nMaxUnits, aProximityNodes);

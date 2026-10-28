@@ -1161,11 +1161,10 @@ BOOL __fastcall ITEM_RefreshBuffStates(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
     } while (nClearStatesLeft);
 
     BOOL bApplied = ITEM_ApplyTimedBuffStats(pGame, pUnit, pItem, pTarget, nX, nY, eSkill);
-    if (!bApplied) {
-      return bRefreshApplied;
+    if (bApplied) {
+      bRefreshApplied = 1;
     }
 
-    bRefreshApplied = 1;
     return bRefreshApplied;
 }
 

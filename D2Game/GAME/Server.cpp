@@ -2142,7 +2142,7 @@ void __stdcall QSERVER_ShutdownAllGames() {
       }
 
       pTokenCursor++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenCursor) {
         return;
       }
     } while (true);
@@ -2605,7 +2605,7 @@ void __stdcall QSERVER_CountObjectsAndPlayersAllGames(int32_t * pBucketCountdown
       }
 
       pTokenCursor++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenCursor) {
         return;
       }
     } while (true);
@@ -2659,7 +2659,7 @@ void __stdcall QSERVER_BroadcastPlayerMessage(int32_t nMsgType, uint32_t dwEvent
       }
 
       pTokenCursor++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenCursor) {
         return;
       }
     } while (true);
@@ -2764,7 +2764,7 @@ uint32_t __fastcall QSERVER_FindGameTokenByName(char * szGameName) {
       }
 
       pTokenCursor++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenCursor) {
         return 0;
       }
     } while (true);
@@ -2827,7 +2827,7 @@ BOOL __fastcall GAME_CheckIfGameNameExistsSafely(char * szGameName) {
       }
 
       pTokenCursor++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenCursor) {
         return 1;
       }
     } while (true);
@@ -3093,7 +3093,7 @@ int32_t __stdcall QSERVER_DispatchAndCleanup(uint32_t * pTokenCursor, int32_t bF
 
       next_game:
       pTokenCursor++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenCursor) {
         if (!bAnyGameDispatched) {
           return 0;
         }
