@@ -4866,7 +4866,7 @@ bool __stdcall UI_CanAllocateStatPoint(int32_t nParam) {
     }
 
     bUIFlag = GetUIFlag(UI_NPCSHOP);
-    return bUIFlag != 0;
+    return (bool)bUIFlag;
 }
 
 void __stdcall UI_DrawLevelUpButtonLeft() {
