@@ -2873,10 +2873,7 @@ void __stdcall RemoveCollision_Vector(D2UnitStrc * pUnit) {
     }
 
     int32_t eCollisionFlag = D2Common::Units::GetCollisionType(pUnit);
-    uint32_t nVectorY = GetUnitSizeY(pUnit);
-    uint32_t nVectorX = GetUnitSizeX(pUnit);
-
-    Collision::RemoveCollision_Vector(UNITS_GetRoom(pUnit), nX, nY, nVectorX, nVectorY, eCollisionFlag);
+    Collision::RemoveCollision_Vector(UNITS_GetRoom(pUnit), nX, nY, GetUnitSizeX(pUnit), GetUnitSizeY(pUnit), eCollisionFlag);
 }
 
 // Returns the current facing direction (0–15) for a unit based on its path. For objects/portals uses the static path position; for units with a dynamic path, compares current XY to the next-step waypoint (SP1). If both X and Y match (unit is at its next waypoint), falls back to DynamicPath::UpdateDirection. Otherwise calls GetDirectionToCoords toward the next SP1 position.

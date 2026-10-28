@@ -1563,7 +1563,7 @@ uint32_t __stdcall ITEM_GetItemsTxt_bGemApplyType(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall TXT_ItemTypes_CheckEquivalence(uint32_t nItemClassId, eD2ItemTypes eItemType) {
-    if ((int)eItemType < 0 || sgptDataTable->nTxtItemTypesSize <= (int)eItemType) {
+    if ((int)eItemType < 0 || (int)eItemType >= sgptDataTable->nTxtItemTypesSize) {
       return 0;
     }
 
@@ -1573,10 +1573,10 @@ uint32_t __stdcall TXT_ItemTypes_CheckEquivalence(uint32_t nItemClassId, eD2Item
     }
 
     eD2ItemTypes eType1 = TXT_Items_GetType(nItemClassId);
-    if (!(-1 < (int)eType1 && (int)eType1 < sgptDataTable->nTxtItemTypesSize)) {
+    if (!(0 <= (int)eType1 && (int)eType1 < sgptDataTable->nTxtItemTypesSize)) {
       return 0;
     }
-    if (*(uint32_t*)(sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eType1 + ((int)eItemType >> 5)) * 4) & gadwBitMasks[eItemType & ITEMTYPE_Hammer]) {
+    if (*(uint32_t*)((uint8_t*)sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eType1 + ((int)eItemType >> 5)) * 4) & gadwBitMasks[eItemType & ITEMTYPE_Hammer]) {
       return 1;
     }
 
@@ -1585,15 +1585,15 @@ uint32_t __stdcall TXT_ItemTypes_CheckEquivalence(uint32_t nItemClassId, eD2Item
       return 0;
     }
 
-    return *(uint32_t*)(sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eSecondaryType + ((int)eItemType >> 5)) * 4) & gadwBitMasks[eItemType & ITEMTYPE_Hammer];
+    return *(uint32_t*)((uint8_t*)sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eSecondaryType + ((int)eItemType >> 5)) * 4) & gadwBitMasks[eItemType & ITEMTYPE_Hammer];
 }
 
 uint32_t __stdcall ITEMS_CheckItemTypeEquivalence(eD2ItemTypes eItemType1, eD2ItemTypes eItemType2) {
-    if (!(-1 < (int)eItemType1 && (int)eItemType1 < sgptDataTable->nTxtItemTypesSize && -1 < (int)eItemType2 && (int)eItemType2 < sgptDataTable->nTxtItemTypesSize)) {
+    if (!(0 <= (int)eItemType1 && (int)eItemType1 < sgptDataTable->nTxtItemTypesSize && 0 <= (int)eItemType2 && (int)eItemType2 < sgptDataTable->nTxtItemTypesSize)) {
       return 0;
     }
 
-    return *(uint32_t*)(sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eItemType1 + ((int)eItemType2 >> 5)) * 4) & gadwBitMasks[eItemType2 & ITEMTYPE_Hammer];
+    return *(uint32_t*)((uint8_t*)sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eItemType1 + ((int)eItemType2 >> 5)) * 4) & gadwBitMasks[eItemType2 & ITEMTYPE_Hammer];
 }
 
 // @blizzard ITEMSIsA

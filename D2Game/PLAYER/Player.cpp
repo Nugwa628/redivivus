@@ -253,7 +253,7 @@ void __fastcall PLAYER_MoveToLocationWithTimeout(::SGAMEDATA * pGame, D2UnitStrc
 
 // @sourcefile .\PLAYER\Player.cpp
 static uint32_t __stdcall PLAYER_PlaceItemInInventory(::SGAMEDATA * pGame, int32_t nParam, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
-    int32_t nItemX;
+    int32_t nItemGUID;
     int bItemPlaced;
     int32_t bPlaced;
     int32_t nErrorLine;
@@ -262,7 +262,7 @@ static uint32_t __stdcall PLAYER_PlaceItemInInventory(::SGAMEDATA * pGame, int32
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb4);
       exit(-1);
     } else {
-      int32_t nItemY;
+      int32_t nItemX;
       if (!pUnit) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb5);
         exit(-1);
@@ -272,9 +272,7 @@ static uint32_t __stdcall PLAYER_PlaceItemInInventory(::SGAMEDATA * pGame, int32
       nErrorLine = pUnit2->nUnitGUID;
       pInventory = 0;
       bPlaced = 1;
-      nItemY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit2);
-
-      bItemPlaced = ITEMS::ItemMode::SERVER_ItemToInventory(".\\PLAYER\\Player.cpp", 0xba, pGame, pUnit, nErrorLine, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit2), nItemY, nParam, bPlaced, pInventory);
+      bItemPlaced = ITEMS::ItemMode::SERVER_ItemToInventory(".\\PLAYER\\Player.cpp", 0xba, pGame, pUnit, nErrorLine, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit2), D2Client::Units::GetYPosFromDynamicPathUnit(pUnit2), nParam, bPlaced, pInventory);
       return (uint32_t)(bItemPlaced != 0);
     }
 }

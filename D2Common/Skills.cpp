@@ -2039,8 +2039,8 @@ int32_t __stdcall SKILLS_GetItemBonusDamage(D2UnitStrc * pUnit, D2UnitStrc * pIt
 uint32_t __stdcall SKILLS_HasLineOfSight(LONG lParam1, LONG lParam2, LONG lParam3, LONG lParam4, D2RoomStrc * pRoom, int32_t eCollisionFlag) {
     POINT ptSrc;
     POINT ptDest;
-    ptSrc.y = lParam2;
     ptSrc.x = lParam1;
+    ptSrc.y = lParam2;
     ptDest.x = lParam3;
     ptDest.y = lParam4;
     BOOL bCollisionResult = Collision::TestCollision(pRoom, &ptSrc, &ptDest, eCollisionFlag);

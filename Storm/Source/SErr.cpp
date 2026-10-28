@@ -829,11 +829,11 @@ void SErrDisplayErrorFmt(uint32_t nErrorCode, uint32_t * pStackTrace, int32_t nT
 // @oracle-basis Callee set identical to the oracle's and distinctive: SRegLoadValue (a registry read is unique to this function in the whole module, in both builds), SStrPrintf, SErrDisplayError, OutputDebugString. Arity 2 = 2. The literal "handle never released" confirms the operation independently of the oracle.
 void __stdcall SErrReportNamedResourceLeak(char * szMessage, char * szText) {
     // Static local variables (originally global data)
-    static int gnDebugMemoryInitFlag; D2_STATIC_GUARD_BSS(gnDebugMemoryInitFlag, "Storm::Source::SErr::SErrReportNamedResourceLeak::gnDebugMemoryInitFlag");
-    static uint32_t gbDebugMemoryInitialized; D2_STATIC_GUARD_BSS(gbDebugMemoryInitialized, "Storm::Source::SErr::SErrReportNamedResourceLeak::gbDebugMemoryInitialized");
+    static int gnDebugMemoryInitFlag;
+    static uint32_t gbDebugMemoryInitialized;
 
     char szDebugOutput[200];
-    uint32_t szFormatted[64];
+    char szFormatted[256];
     uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!gbDebugMemoryInitialized) {
       gbDebugMemoryInitialized = 1;
@@ -841,12 +841,12 @@ void __stdcall SErrReportNamedResourceLeak(char * szMessage, char * szText) {
     }
     if (gnDebugMemoryInitFlag) {
       if (!szText || *szText == '\0') {
-        SSTR::SStrPrintf((char*)szFormatted, 0x100, "%s", szMessage);
+        SSTR::SStrPrintf(szFormatted, 0x100, "%s", szMessage);
       } else {
-        SSTR::SStrPrintf((char*)szFormatted, 0x100, "%s (%s)", szMessage, szText);
+        SSTR::SStrPrintf(szFormatted, 0x100, "%s (%s)", szMessage, szText);
       }
       if (!gnSSystemOption1) {
-        SErrDisplayError(0x8510007f, szFormatted, -3, nullptr, 1, 1);
+        SErrDisplayError(0x8510007f, (uint32_t*)szFormatted, -3, nullptr, 1, 1);
         return;
       }
 

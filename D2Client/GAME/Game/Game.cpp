@@ -1289,7 +1289,10 @@ void __fastcall ClientInit_StartingAct(D2IniConfigStrc * pIniConfig) {
     if (!iVar1) {
       return;
     }
-    if (iVar1 < 6) {
+    if (!(iVar1 < 6)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd26);
+      exit(-1);
+    } else {
       if (!(0 < iVar1)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd27);
         exit(-1);
@@ -1297,9 +1300,6 @@ void __fastcall ClientInit_StartingAct(D2IniConfigStrc * pIniConfig) {
 
       D2Game::GAME::Server::SetupStartingAct(iVar1 - 1);
       return;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd26);
-      exit(-1);
     }
 }
 

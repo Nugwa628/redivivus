@@ -1845,6 +1845,7 @@ void __stdcall CLIENT_UpdateUnitGfxState() {
 
 void __fastcall FaceTarget(D2UnitStrc * pUnit, int32_t nParam) {
     int32_t nTargetY;
+    int32_t nTargetX;
     Path::ConfirmTarget(pUnit);
     if (!pUnit->pPath.pDynamicPath) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x946);
@@ -1862,9 +1863,7 @@ void __fastcall FaceTarget(D2UnitStrc * pUnit, int32_t nParam) {
       exit(-1);
     }
 
-    nTargetY = Units::GetYPosFromDynamicPathUnit(pTarget);
-
-    D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pDynamicPath, Units::GetXPosFromDynamicPathUnit(pTarget), nTargetY, nParam);
+    D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pDynamicPath, Units::GetXPosFromDynamicPathUnit(pTarget), Units::GetYPosFromDynamicPathUnit(pTarget), nParam);
 }
 
 // Determines whether pUnit may interact with / target pUnit2 (hostility & targetability check). Returns nonzero if interaction allowed, 0 if not. Resolves pets to their player owner via RosterPets::GetRosterOwnerGUID and charmed/owned units. In town: only allows player-vs-player when ROSTER_CheckPlayerCanLoot permits looting a dead party member. Out of town: rejects self/same-unit; player-vs-player uses loot rights then PlayerList party flag (8); against monsters consults MonStats2 alSel/noSel flags (always-selectable / never-selectable); players may always interact with items and objects; otherwise falls back to Path::IsAllyOf (returns true only if NOT an ally). Also blocks a player from interacting with an enemy pet they don't own.
