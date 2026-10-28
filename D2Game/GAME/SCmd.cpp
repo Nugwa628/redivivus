@@ -223,7 +223,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x0D_UNITCHANGE_XY(D2ClientStrc * pClient, 
     *(uint16_t*)((char*)&aPacket + 9) = wY;
     ((uint8_t*)&aPacket)[0xb] = bParam2;
     ((uint8_t*)&aPacket)[0xc] = bParam3;
-    if (5 < nUnitType) {
+    if (nUnitType >= 6) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x136);
       exit(-1);
     }
@@ -257,7 +257,7 @@ void __fastcall NET_D2GS_SERVER_Send_0x0F_UNITCHANGE_XYPOS(D2ClientStrc * pClien
     ((uint8_t*)&aPacket)[0xb] = bParam2;
     *(uint16_t*)((char*)&aPacket + 12) = wX2;
     *(uint16_t*)((char*)&aPacket + 14) = wY2;
-    if (5 < nUnitType) {
+    if (nUnitType >= 6) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x166);
       exit(-1);
     }
