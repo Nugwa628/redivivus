@@ -1215,8 +1215,8 @@ void __stdcall CheckClientTimeouts(::SGAMEDATA * pGame, int * pnParam) {
       dwClientTimeout = pClient->dwTimeOut;
       if (dwCurrentTick > dwClientTimeout && (dwFileFlags && 10000 < dwCurrentTick - dwClientTimeout && 10 < (uint32_t)pClient->tQServerExt.nHeartbeatSampleCount || 45000 < dwCurrentTick - dwClientTimeout || pClient->tQServerExt.nForceTimeoutDisconnect) && BattleNetServerService) {
         bSaveUnknownFlag = 0;
-        pCharName = Clients::GetCharName(pClient);
-        PLAYER::PlayerSave::SaveGameAllGameTypes(pGame, Clients::CLIENTS_GetControlUnit(pClient, 0), pCharName, bSaveUnknownFlag);
+
+        PLAYER::PlayerSave::SaveGameAllGameTypes(pGame, Clients::CLIENTS_GetControlUnit(pClient, 0), Clients::GetCharName(pClient), bSaveUnknownFlag);
         *pnParam = 1;
         SERVER_DisconnectClient(pGame, pClient, 0);
       }

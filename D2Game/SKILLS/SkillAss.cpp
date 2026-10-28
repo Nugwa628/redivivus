@@ -2088,8 +2088,8 @@ BOOL __fastcall Skills_SrvDoFunc_044_SummonBladeSentinel(::SGAMEDATA * pGame, D2
     int32_t nRelocFlags = 0;
     nMonClassIdOrLevel = 0;
     uint32_t nPosY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-    uint32_t nPosX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-    UNIT::SUnit::SUNIT_RelocateUnit(pGame, pUnit_00, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, nMonClassIdOrLevel, nRelocFlags);
+
+    UNIT::SUnit::SUNIT_RelocateUnit(pGame, pUnit_00, D2Common::Units::UNITS_GetRoom(pUnit), D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nPosY, nMonClassIdOrLevel, nRelocFlags);
     local_2c.nUnused0 = 0;
     local_2c.nUnused1 = 0;
     local_2c.nCmdArg1 = 0;
@@ -2878,8 +2878,8 @@ BOOL __fastcall Skills_SrvDoFunc_050_DragonTail_FireExplosion(::SGAMEDATA * pGam
     int32_t nRadius = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxt->aurarangecalc, eSkill, nSkillLvl);
     uint32_t nCollisionFlags = 0;
     D2DamageStrc* pExplosionDamage = &sFireExplosionDamage;
-    int32_t nPosY = D2Client::Units::GetYPosFromDynamicPathUnit(pTarget);
-    SkillsServer::SKILLS_ApplyAreaDamage(pGame, pUnit, D2Client::Units::GetXPosFromDynamicPathUnit(pTarget), nPosY, nRadius, pExplosionDamage, nCollisionFlags);
+
+    SkillsServer::SKILLS_ApplyAreaDamage(pGame, pUnit, D2Client::Units::GetXPosFromDynamicPathUnit(pTarget), D2Client::Units::GetYPosFromDynamicPathUnit(pTarget), nRadius, pExplosionDamage, nCollisionFlags);
     return 1;
 }
 

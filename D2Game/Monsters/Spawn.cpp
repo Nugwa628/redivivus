@@ -383,8 +383,8 @@ static D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithMinions(::SGAMEDATA * pGame,
         nObjClassId = 0;
         bActive = true;
         pGameCopy = pGame;
-        bHasObjColFlag = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-        UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x232, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), bHasObjColFlag, pGameCopy, pRoom, bActive, nObjClassId, pNullArg);
+
+        UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x232, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), D2Client::Units::GetYPosFromDynamicPathUnit(pUnit), pGameCopy, pRoom, bActive, nObjClassId, pNullArg);
       }
     }
 

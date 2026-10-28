@@ -116,12 +116,12 @@ uint32_t __fastcall MONSTER_CheckMonTypeHasFlag(D2UnitStrc * pUnit, int32_t nMon
     }
 
     int nMonStatId = pUnit->nClassId;
-    if (!(-1 < nMonStatId && nMonStatId < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nMonStatId && nMonStatId < sgptDataTable->nTxtMonStatsSize)) {
       return 0;
     }
 
     D2MonStatsTxt* pMonStatsTxt = sgptDataTable->pTxtMonStats + nMonStatId;
-    if (!(pMonStatsTxt && -1 < pMonStatsTxt->MonType && (int)pMonStatsTxt->MonType < sgptDataTable->nTxtMonTypeSize && -1 < nMonTypeFlag && nMonTypeFlag < sgptDataTable->nTxtMonTypeSize)) {
+    if (!(pMonStatsTxt && 0 <= pMonStatsTxt->MonType && (int)pMonStatsTxt->MonType < sgptDataTable->nTxtMonTypeSize && 0 <= nMonTypeFlag && nMonTypeFlag < sgptDataTable->nTxtMonTypeSize)) {
       return 0;
     }
 
@@ -283,14 +283,14 @@ static BOOL __stdcall MONSTER_CanApplyUniqueModifier(D2MonUModTxt * pD2MonUModTx
     bool _bHasFlag;
     bool bHasFlag;
     int32_t nClassId;
-    if (pD2MonUModTxt->enabled == '\0' || !nParam && 99 < (uint16_t)pD2MonUModTxt->version) {
+    if (pD2MonUModTxt->enabled == '\0' || !nParam && 100 <= (uint16_t)pD2MonUModTxt->version) {
       return 0;
     }
 
     int nExcludeIdx = 0;
     short int* pExclude = &pD2MonUModTxt->exclude1;
     do {
-      if (*pExclude < 1) {
+      if (*pExclude <= 0) {
         break;
       }
 
@@ -324,7 +324,7 @@ static BOOL __stdcall MONSTER_CanApplyUniqueModifier(D2MonUModTxt * pD2MonUModTx
         {
           if (pUnit) {
             nExcludeIdx = pUnit->nClassId;
-            if (-1 < nExcludeIdx) {
+            if (0 <= nExcludeIdx) {
               if (nExcludeIdx < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nExcludeIdx && sgptDataTable->pTxtMonStats[nExcludeIdx].isMelee) {
                 return 0;
               }
@@ -451,7 +451,7 @@ int32_t __stdcall MONUMOD_RollRandomModifier(D2UnitStrc * pUnit, uint8_t * pUsed
     int nCandidates = 0;
     uint32_t nTotalWeight = 0;
     int nTxtSizeSaved = nPickIdx;
-    if (nPickIdx < 1) {
+    if (nPickIdx <= 0) {
       pUmodEntry = 0;
     } else {
       pUmodEntry = sgptDataTable->pTxtMonUmod;
@@ -482,7 +482,7 @@ int32_t __stdcall MONUMOD_RollRandomModifier(D2UnitStrc * pUnit, uint8_t * pUsed
         pUmodEntry++;
       } while (nUmodIdx < nPickIdx);
     }
-    if ((int)nTotalWeight < 1) {
+    if ((int)nTotalWeight <= 0) {
       nRoll = 0;
     } else {
       nRoll = pUnit->sSeed.nSeedLow;
@@ -1822,8 +1822,8 @@ void __fastcall MONSTER_MissileSplitOnHit(::SGAMEDATA * pGame, D2UnitStrc * pUni
     nDirSignX += nTargetX;
     nActivateFrame = 0;
     nVelocityOverride = 0;
-    nMissileLevel = D2Common::Units::Missile::GetLevel(pMissileUnit);
-    SKILLS::SkillsServer::CreatingAMissile(pGameLocal, eMissileId, pOwnerUnit, D2Common::Units::Missile::GetSkillId(pTarget), nMissileLevel, nVelocityOverride, nActivateFrame, nDirSignX, nOwnerDirSignX, nParam5);
+
+    SKILLS::SkillsServer::CreatingAMissile(pGameLocal, eMissileId, pOwnerUnit, D2Common::Units::Missile::GetSkillId(pTarget), D2Common::Units::Missile::GetLevel(pMissileUnit), nVelocityOverride, nActivateFrame, nDirSignX, nOwnerDirSignX, nParam5);
     if (!(pOwnerUnit->eUnitType == UNIT_MONSTER && pOwnerUnit->pUnitData.pUnitDataMonster)) {
       return;
     }
@@ -2125,7 +2125,7 @@ void __fastcall MONSTER_SuicideExplosion(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     eD2UnitType eUnitType;
     uint32_t nSeedLow;
     D2SeedStrc sSeedNext;
-    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || sgptDataTable->nTxtMonStatsSize <= nClassId) {
+    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || nClassId >= sgptDataTable->nTxtMonStatsSize) {
       pMonStatsTxt = 0;
     } else {
       pMonStatsTxt = sgptDataTable->pTxtMonStats + nClassId;

@@ -796,8 +796,8 @@ void MONSTER_InitSpecialMonster(D2UnitStrc * pUnit, int32_t nClassId) {
         case 0x19d:
           nMissileLevel = 1;
         eSkill = SKILL_Attack;
-        nPosY = Units::GetYPosFromDynamicPathUnit(pUnit);
-        pTargetUnit = Missile::CastAttack(pUnit, MISSILE_BladeCreeper, Units::GetXPosFromDynamicPathUnit(pUnit), nPosY, eSkill, nMissileLevel);
+
+        pTargetUnit = Missile::CastAttack(pUnit, MISSILE_BladeCreeper, Units::GetXPosFromDynamicPathUnit(pUnit), Units::GetYPosFromDynamicPathUnit(pUnit), eSkill, nMissileLevel);
         if (pTargetUnit) {
           D2Common::Units::StoreOwner(pTargetUnit, pUnit);
           return;
@@ -816,8 +816,8 @@ void MONSTER_InitSpecialMonster(D2UnitStrc * pUnit, int32_t nClassId) {
         case 0x23a:
           nMissileLevel = 1;
         eSkill = SKILL_Attack;
-        nPosY = Units::GetYPosFromDynamicPathUnit(pUnit);
-        Missile::CastAttack(pUnit, MISSILE_Baalteleport, Units::GetXPosFromDynamicPathUnit(pUnit), nPosY, eSkill, nMissileLevel);
+
+        Missile::CastAttack(pUnit, MISSILE_Baalteleport, Units::GetXPosFromDynamicPathUnit(pUnit), Units::GetYPosFromDynamicPathUnit(pUnit), eSkill, nMissileLevel);
       }
     }
 }
