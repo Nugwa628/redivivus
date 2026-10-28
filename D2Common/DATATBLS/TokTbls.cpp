@@ -287,17 +287,16 @@ D2PlrTypeModeTxt * __stdcall TxtGetPlrTypeModeLine(uint32_t nMode, int32_t nMode
     if (!pTxtPlrTypeMode1) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x110);
       exit(-1);
-    } else if (!nModeIndex) {
+    }
+    switch (nModeIndex) {
+    case 0:
       if (!(pTxtPlrTypeMode2 + nMode)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x113);
         exit(-1);
       }
 
       return pTxtPlrTypeMode2 + nMode;
-    } else {
-      if (nModeIndex != 1) {
-        return nullptr;
-      }
+    case 1:
       if (!(pTxtPlrTypeMode3 + nMode)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x116);
         exit(-1);
@@ -305,6 +304,7 @@ D2PlrTypeModeTxt * __stdcall TxtGetPlrTypeModeLine(uint32_t nMode, int32_t nMode
 
       return pTxtPlrTypeMode3 + nMode;
     }
+    return nullptr;
 }
 
 D2MonModeTxt * __stdcall TxtGetMonModeLine(uint32_t nId, int32_t nModeIndex) {

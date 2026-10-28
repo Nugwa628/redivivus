@@ -2124,7 +2124,7 @@ int32_t __stdcall DRLGPATH_GetSimpleDistancePacked2(uint32_t nParam1, uint32_t n
     if (nAbsDY < 0) {
       nAbsDY = -nAbsDY;
     }
-    if (nAbsDY > nAbsDX) {
+    if (nAbsDX < nAbsDY) {
       return nAbsDX + nAbsDY * 2;
     }
 
