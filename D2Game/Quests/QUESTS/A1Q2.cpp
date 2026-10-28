@@ -79,8 +79,8 @@ bool __fastcall QuestDataBool(D2QuestDataStrc * pQuestData) {
 // QuestRecord state ids: 0=Completed, 0xf=FinishedInPreviousGame,
 // 0xd=JustCompleted, 0xe=CannotCompleteInGame.
 BOOL __fastcall Q02_NotifyQuestStateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersBurialGrounds, QUESTSTATE_Completed);
     /* GetQuestState(QUESTSTATE_FinishedInPreviousGame=0xf): carried over from a
                          prior game */ /* GetQuestState(QUESTSTATE_JustCompleted=0xd): if set, suppress (already
@@ -100,8 +100,8 @@ BOOL __fastcall Q02_NotifyQuestStateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * p
 
 // A1Q2 Sisters' Burial Grounds per-player iterate callback. Mirrors the global quest nStateFlag into the player's QuestRecord step bits, skipping players who are already Completed or RewardAwaits. nStateFlag==2 -> Step0x02 (quest accepted); nStateFlag==3 with prev==1 -> Step0x03; nStateFlag==3 otherwise -> Step0x04 (Blood Raven dead, return to Kashya). Called by IteratePlayerOrMonsterUnits after state transitions.
 BOOL __fastcall Q02_SyncQuestStepToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersBurialGrounds, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -230,8 +230,8 @@ void __fastcall Q02_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t nPlayerId;
     int32_t iTargetId = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState0 = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     BOOL bQuestState1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_RewardAwaits);
     if (bQuestState1) {
@@ -329,8 +329,8 @@ BOOL __fastcall Q02_SetRewardForNearbyPlayers(::SGAMEDATA * pGame, D2UnitStrc * 
       }
     }
 
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnitLocal)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnitLocal);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersBurialGrounds, QUESTSTATE_Completed);
     /* GetQuestState(QUESTSTATE_RewardAwaits=1): skip if reward already pending */ if (bQuestState) {
       return 0;
@@ -357,8 +357,8 @@ BOOL __fastcall Q02_SetRewardForNearbyPlayers(::SGAMEDATA * pGame, D2UnitStrc * 
 // kill in a future game.
 // State ids: 0=Completed,1=RewardAwaits,0xe=CannotCompleteQuestInGame.
 BOOL __fastcall Q02_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersBurialGrounds, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -380,8 +380,8 @@ BOOL __fastcall Q02_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pU
 // has QUESTSTATE_JustCompleted (id 0xd) set this session, plays the quest-done
 // fanfare via SetupUpdateEvent_AttachEventSound(event 0x22).
 BOOL __fastcall Q02_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_SistersBurialGrounds, QUESTSTATE_JustCompleted);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_SistersBurialGrounds, QUESTSTATE_JustCompleted);
     if (bQuestState != 1) {
       return 0;
     }
@@ -395,14 +395,14 @@ BOOL __fastcall Q02_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 // member of that player's party (ExecuteFunctionForEveryPartyMember) so partied
 // players also get quest credit for the Blood Raven kill.
 BOOL __fastcall Q02_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_SistersBurialGrounds, QUESTSTATE_JustCompleted);
+    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_SistersBurialGrounds, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
 
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -572,8 +572,8 @@ void __fastcall Q02_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // A1Q2 Sisters' Burial Grounds, state-0xd (load/join reconcile) handler. Restores in-memory nStateFlag/nStateFlagPrev from persisted QuestRecord step bits for a joining or loading player. Skips if Completed or FinishedInPreviousGame. Step0x04 -> nStateFlag=3/prev=2; Step0x03 -> nStateFlag=3/prev=1; Step0x02 -> nStateFlag=2/prev=1. Reads record only.
 void __fastcall Q02_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestState) {
       return;
