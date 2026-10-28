@@ -912,11 +912,7 @@ D2UnitStrc * __fastcall MakeMissile(D2SkillArgStrc * pSkillArg) {
         if (pTargetUnit) {
           goto retarget_if_overlapping;
         }
-      } else if (!pTargetUnit) {
-        if (nDestXLocal == nMissileX && nDestY == nY) {
-          SKILLS::Skills::GetPositionNextToPlayerDirection(pDVar6, &nDestXLocal, &nDestY);
-        }
-      } else {
+      } else if (pTargetUnit) {
         retarget_if_overlapping:
         if (pDVar6 && pTargetUnit != pDVar6) {
           nDistX = Units::GetXPosFromDynamicPathUnit(pDVar6);
@@ -929,6 +925,10 @@ D2UnitStrc * __fastcall MakeMissile(D2SkillArgStrc * pSkillArg) {
               pTargetUnit = 0;
             }
           }
+        }
+      } else {
+        if (nDestXLocal == nMissileX && nDestY == nY) {
+          SKILLS::Skills::GetPositionNextToPlayerDirection(pDVar6, &nDestXLocal, &nDestY);
         }
       }
 
