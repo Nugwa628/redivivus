@@ -64,7 +64,7 @@ static void DRLGLOGIC_PopulateGridCoordIndices(int * pnParam) {
             pnParam[6]++;
             pnParam[7] = pnParam[6] & 0xfffffffU | 0x10000000;
             nCellFlags = GetGridFlags((D2DrlgGridStrc*)pnParam[4], nGridX, nGridY);
-            if ((nCellFlags & 0x1e0ff00) == 0x1e00000 || (int)nCellFlags < 0) {
+            if ((nCellFlags & 0x1e0ff00) == 0x1e00000 || (nCellFlags & 0x80000000)) {
               pnParam[7] |= 0x20000000;
             }
             DRLGGRID_FloodFillGridCoords(pnParam, nGridX, nGridY, -1);
