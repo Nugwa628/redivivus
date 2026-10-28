@@ -81,12 +81,12 @@ static uint32_t __stdcall LAUNCHER_ReadRegistryValue(LPCSTR szSubKey, LPCSTR szV
     }
     /* LPDWORD lpcbData for RegQueryValueExA */ /* LPBYTE lpData for RegQueryValueExA */ /* LPDWORD lpType for RegQueryValueExA */ *pdwDataSize = dwDataSize;
     /* LPDWORD lpReserved for RegQueryValueExA */ /* LPCSTR lpValueName for RegQueryValueExA */ /* HKEY hKey for RegQueryValueExA */ lStatus = RegQueryValueExA(hKey, szValueName, (LPDWORD)0x0, &dwValueType, pbData, pdwDataSize);
-    if (!lStatus) {
-      /* HKEY hKey for RegCloseKey */ lStatus = RegCloseKey(hKey);
-      return (uint32_t)!lStatus;
+    if (lStatus) {
+      /* HKEY hKey for RegCloseKey */ RegCloseKey(hKey);
+      return 0;
     }
-    /* HKEY hKey for RegCloseKey */ RegCloseKey(hKey);
-    return 0;
+    /* HKEY hKey for RegCloseKey */ lStatus = RegCloseKey(hKey);
+    return (uint32_t)!lStatus;
 }
 } // namespace D2Multi::Launcher
 namespace D2Multi::OOGUtilities {
