@@ -30,6 +30,17 @@ Only as many sites per n as the original reads the table at n beyond what
 ours already does; a bit with more sites than that is left alone. The value
 of every rewritten expression is the same, or, for a bitfield, has the same
 truth. Kept where the function comes out more similar.
+
+With --inverse, the companion table gadwInvBitMasks[n] == ~(1 << n): the
+original clears a flag with it, `mov edx, dword ptr [gadwInvBitMasks];
+and dword ptr [ecx + 8], edx` (D2WINMAIN_SetControlVisible, 004f96f0),
+where Ghidra writes `dwState &= -2`. The sites, in a function the original
+reads that table at n: `E & K`, `E &= K` with K `~(1 << n)` - `~4`, `~NAME`,
+`-5`, `0xfffffffb`, or at 16 or 8 bits `0xfffb`, `0xfb` -, and the clearing
+of a one-bit bitfield, `X->flag = 0;`, which becomes `*((uint8_t *)X +
+OFF) &= gadwInvBitMasks[n];`. A function that sets the flag it clears reads
+both tables and matches only with both rewritten, so its gadwBitMasks sites
+join the same edit: one edit per function.
 """
 import argparse
 import collections
@@ -47,6 +58,13 @@ import ours as ourslib  # noqa: E402
 from oracle_config import BUILD, ORACLE, REPO  # noqa: E402
 
 TABLE = '?gadwBitMasks@@3PAIA'
+NAME = 'gadwBitMasks'
+INVERSE = False
+TOKEN = r'(?:0x[0-9a-fA-F]+|\d+|[A-Z_][A-Z0-9_]*\b)[uUlL]*'
+INVCONST = re.compile(r'(?<![&|])(?P<op>&=?)\s*(?P<k>~\s*\(\s*' + TOKEN + r'\s*\)|~\s*' + TOKEN +
+                      r'|0x[0-9a-fA-F]+[uUlL]*|-\d+)(?=\s*(?:\)|;|,|\?|&&|\|\||==|!=))')
+FIELDCLR = re.compile(r'(?<![\w>.])(?P<x>[A-Za-z_]\w*(?:(?:->|\.)[A-Za-z_]\w*|\[[^\[\]]*\])*)(?P<op>->|\.)'
+                      r'(?P<f>[A-Za-z_]\w*)\s*=\s*(?:0|false)\s*;')
 CONST = re.compile(r'(?<![&|])(?P<op>&|\||\|=)\s*(?P<k>0x[0-9a-fA-F]+|\d+|[A-Z_][A-Z0-9_]*\b)[uUlL]*'
                    r'(?=\s*(?:\)|;|,|\?|&&|\|\||==|!=))')
 ENUMERATOR = re.compile(r'^\s*(?:constexpr\s+[\w:]+\s+)?(?P<n>[A-Z_][A-Z0-9_]*)\s*=\s*(?P<v>0x[0-9a-fA-F]+|\d+)'
@@ -112,7 +130,7 @@ def ref_bits(ref, lo):
                 n = (t[1] - lo) // 4
                 bits[n] += 1
                 if k + 1 < len(ref):
-                    m = re.match(r'test byte ptr \[\w+ \+ (0x[0-9a-f]+|\d+)\]', ref[k + 1].text)
+                    m = re.match(r'(?:test|and) byte ptr \[\w+ \+ (0x[0-9a-f]+|\d+)\]', ref[k + 1].text)
                     if m:
                         offs.add((int(m.group(1), 0), n))
     return bits, offs
@@ -125,6 +143,25 @@ def our_bits(ours):
             if t[0] == 'data' and isinstance(t[1], tuple) and t[1][0] == TABLE and '*' not in i.text:
                 bits[t[1][1] // 4] += 1
     return bits
+
+
+def inverse_bit(k, names):
+    """n where the constant k clears bit n alone (`~K`, K == 1 << n, or the
+    complement written out at 32, 16 or 8 bits), else None."""
+    k = re.sub(r'\s+', '', k)
+    if k.startswith('~'):
+        t = k.lstrip('~').strip('()').rstrip('uUlL')
+        v = int(t, 0) if t[0].isdigit() else names.get(t)
+        if v is None or v <= 0 or v & (v - 1):
+            return None
+        return v.bit_length() - 1
+    t = k.rstrip('uUlL')
+    v = int(t, 0) & 0xffffffff
+    w = 32 if v > 0xffff or t.startswith('-') else 16 if v > 0xff else 8
+    c = ~v & ((1 << w) - 1)
+    if c <= 0 or c & (c - 1):
+        return None
+    return c.bit_length() - 1
 
 
 def boolean_at(line, a, b):
@@ -144,6 +181,23 @@ def sites(lines, lo, hi, want, offs, fields, names):
         line = lines[k]
         code = line.split('//', 1)[0]
         if code.lstrip().startswith(('#', '/*', '*')):
+            continue
+        if INVERSE:
+            for m in INVCONST.finditer(code):
+                n = inverse_bit(m.group('k'), names)
+                if n is not None and n in want:
+                    found[n].append((k, m.start('k'), m.end('k'), '%s[%d]' % (NAME, n)))
+            for m in FIELDCLR.finditer(code):
+                cand = fields.get(m.group('f'))
+                if cand and len(cand) > 1:
+                    cand = {c for c in cand if c in offs}
+                if not cand or len(cand) != 1:
+                    continue
+                off, n = sorted(cand)[0]
+                if n not in want:
+                    continue
+                x = m.group('x') if m.group('op') == '->' else '&' + m.group('x')
+                found[n].append((k, m.start(), m.end(), '*((uint8_t *)%s + 0x%x) &= %s[%d];' % (x, off, NAME, n)))
             continue
         for m in CONST.finditer(code):
             v = int(m.group('k'), 0) if m.group('k')[0].isdigit() else names.get(m.group('k'))
@@ -195,6 +249,19 @@ def site_edit(cpp, ln, old, a, b, new):
     return fn
 
 
+def chain(fns):
+    """One edit applying several site edits in turn."""
+    def fn(texts):
+        texts = dict(texts)
+        for f in fns:
+            r = f(texts)
+            if r is None:
+                return None
+            texts.update(r)
+        return texts
+    return fn
+
+
 def candidates(rows, status, model, syms, pats, lo):
     """tu -> [(original start, line index, old line, start, end, new text)]."""
     fields = bitfields()
@@ -235,21 +302,37 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--apply', action='store_true')
     ap.add_argument('-j', '--jobs', type=int, default=4)
+    ap.add_argument('--inverse', action='store_true',
+                    help='clear bits through gadwInvBitMasks instead')
     ap.add_argument('patterns', nargs='*')
     args = ap.parse_args()
+    global TABLE, NAME, INVERSE
     rows = audit.load_funcmap(os.path.join(ORACLE, 'evidence', 'funcmap.tsv'))
     status = {}
     for line in open(os.path.join(ORACLE, 'evidence', 'audit.tsv')):
         p = line.rstrip('\n').split('\t')
         if p[0] != 'start' and len(p) > 9:
             status[int(p[0], 16)] = p[9]
+    _ref, model = audit.load_context()
+    syms = audit.sym_map(rows)
+    if args.inverse:
+        # A function setting and clearing one flag reads both tables, and
+        # matches only with both rewritten: its gadwBitMasks sites go into
+        # the same edit as its gadwInvBitMasks ones.
+        TABLE, NAME, INVERSE = '?gadwInvBitMasks@@3PAIA', 'gadwInvBitMasks', True
     lo = table_address()
     if lo is None:
         print('0 sites: %s not in evidence/datamap.tsv' % TABLE)
         return 0
-    _ref, model = audit.load_context()
-    syms = audit.sym_map(rows)
     cands = candidates(rows, status, model, syms, args.patterns, lo)
+    if args.inverse:
+        TABLE, NAME, INVERSE = '?gadwBitMasks@@3PAIA', 'gadwBitMasks', False
+        lo = table_address()
+        if lo is not None:
+            fns = {c[0] for v in cands.values() for c in v}
+            for tu, v in candidates(rows, status, model, syms, sorted(cands), lo).items():
+                cands[tu].extend(c for c in v if c[0] in fns)
+        TABLE, NAME, INVERSE = '?gadwInvBitMasks@@3PAIA', 'gadwInvBitMasks', True
     total = sum(len(v) for v in cands.values())
     print('%d sites in %d TUs' % (total, len(cands)))
     if not args.apply:
@@ -261,13 +344,20 @@ def main():
     groups = {}
     for tu in sorted(cands):
         cpp = os.path.join(REPO, tu + '.cpp')
-        groups[tu] = ([fixlib.Edit('%s:%d:%d' % (tu, k + 1, a), [s], [s], site_edit(cpp, k, old, a, b, new),
-                                   require_gain=True)
-                       for s, k, old, a, b, new in cands[tu]], [cpp])
+        if not args.inverse:
+            groups[tu] = ([fixlib.Edit('%s:%d:%d' % (tu, k + 1, a), [s], [s], site_edit(cpp, k, old, a, b, new),
+                                       require_gain=True)
+                           for s, k, old, a, b, new in cands[tu]], [cpp])
+            continue
+        per = collections.defaultdict(list)
+        for s, k, old, a, b, new in cands[tu]:
+            per[s].append(site_edit(cpp, k, old, a, b, new))
+        groups[tu] = ([fixlib.Edit('%s:%08x' % (tu, s), [s], [s], chain(fs), require_gain=True)
+                       for s, fs in sorted(per.items())], [cpp])
     kept, gained = fixlib.apply_batch(groups, (rows, model, syms, quarantined), jobs=args.jobs,
                                       log=lambda m: print(m, flush=True))
     print('kept %d of %d edits, MATCH %+d' % (kept, total, gained))
-    fixlib.record('fix_bitmask', total, kept, gained)
+    fixlib.record('fix_bitmask' + (' --inverse' if INVERSE else ''), total, kept, gained)
     return 0
 
 
