@@ -1179,8 +1179,8 @@ void __fastcall LAUNCHER_DeleteCharacterFiles(D2CharSelStrc * pCharSel, char * s
 uint32_t __fastcall LAUNCHER_LoadCharacterAppearanceFromD2s(char * szCharacterName, uint8_t * pOutputBuffer) {
     int i;
     char* pbEquipSrc;
-    uint8_t byOutPlayerClass;
-    uint8_t cPlayerClass;
+    uint32_t byOutPlayerClass;
+    uint32_t cPlayerClass;
     uint8_t* pbWritePtr;
     uint8_t* pbVisualSrc;
     D2SaveFileBufferStrc sSaveFile;

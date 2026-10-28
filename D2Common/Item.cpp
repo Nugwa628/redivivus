@@ -121,7 +121,7 @@ void __fastcall ITEM_UpdateSetItemStates(D2UnitStrc * pUnit, uint32_t nEquippedM
       return;
     }
 
-    uint8_t byBonusFunc = pSetItemTxt->addFunc;
+    uint32_t byBonusFunc = pSetItemTxt->addFunc;
     if (!byBonusFunc) {
       return;
     }

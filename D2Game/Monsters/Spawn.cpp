@@ -1047,12 +1047,12 @@ static void __stdcall MONSTER_InitWanderingMonsterRegion(D2MonsterRegionStrc * p
     D2SeedStrc* pSeed;
     int32_t nX;
     int32_t nY;
-    uint8_t byAct = pLevelsTxt->Act;
+    uint32_t byAct = pLevelsTxt->Act;
     if (byAct >= 5) {
       return;
     }
 
-    uint8_t byMonBaseOffset = gaActWanderingMonsterParams[byAct][0];
+    uint32_t byMonBaseOffset = gaActWanderingMonsterParams[byAct][0];
     if (!(uint8_t)gaActWanderingMonsterParams[byAct][1]) {
       return;
     }

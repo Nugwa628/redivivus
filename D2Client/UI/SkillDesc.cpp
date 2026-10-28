@@ -4704,7 +4704,7 @@ void __fastcall SKILLDESC_DrawSkillDmgAuraElem(D2UnitStrc * pUnit, D2SkillStrc *
       return;
     }
 
-    uint8_t byDmgShiftFactor = pSkillsTxt->SrcDam;
+    uint32_t byDmgShiftFactor = pSkillsTxt->SrcDam;
     pSkillsTxt = 0;
     SKILLDESC_CalcAuraDamageRange(pUnit, &nMinDamage, &nMaxDamage, (uint32_t*)&pSkillsTxt, 0, 0, pSkill, 0, nullptr);
     nMinDamage *= (uint32_t)byDmgShiftFactor;
@@ -4862,7 +4862,7 @@ void __fastcall SKILLDESC_DrawSkillDmgElem2HAlt(D2UnitStrc * pUnit, D2SkillStrc 
       return;
     }
 
-    uint8_t byDmgShiftFactor = pSkillsTxt->SrcDam;
+    uint32_t byDmgShiftFactor = pSkillsTxt->SrcDam;
     D2UnitStrc* pUnitSaved = pUnit;
     uint32_t nElemType = SKILLDESC_ElemTypeToColorIndex((eD2ElementalDamageTypeDWORD)pSkillsTxt->EType);
     int32_t nDamageShifted = D2Common::Skills::SKILL_CalcMinDamage(pUnit, (int)pSkillsTxt->skill, nSkillLevel, 0);

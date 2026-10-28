@@ -708,7 +708,7 @@ uint32_t __fastcall _tr_tally(deflate_state * pDeflateState, int32_t nDist, int3
     if (!nDist) {
       pDeflateState->dyn_ltree[nLc].fc++;
     } else {
-      uint8_t byDistCode;
+      uint32_t byDistCode;
       pDeflateState->matches++;
       pDeflateState->dyn_ltree[gaZlibLengthCodeTable[nLc] + 0x101].fc++;
       if (nDist - 1U < 0x100) {
