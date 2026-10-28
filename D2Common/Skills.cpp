@@ -2140,11 +2140,10 @@ int32_t __stdcall SKILLS_CalculateManaCostShifted(int32_t eSkillId, int32_t nSki
       pSkillsTxt = sgptDataTable->pTxtSkills + eSkillId;
       if (pSkillsTxt) {
         nLine = (int)pSkillsTxt->lvlmana * (nSkillLevel - 1) + (int)pSkillsTxt->mana << (uint8_t)pSkillsTxt->manashift >> 8;
-        if (nLine >= 0) {
-          return nLine;
+        if (nLine < 0) {
+          nLine = 0;
         }
 
-        nLine = 0;
         return nLine;
       }
     }
