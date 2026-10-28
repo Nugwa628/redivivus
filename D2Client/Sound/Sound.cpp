@@ -85,34 +85,6 @@ uint32_t __fastcall SOUND_FileExists(char * szFileName) {
     return 1;
 }
 
-void SOUND_LocalizeSoundPath(char * szFormat, uint32_t * pszOutPath) {
-    D2MPQFileStrc* pFile;
-    char szLangAbbrev[4];
-    D2Lang::StrTable::strtable::TABLES_GetLangAbbreviation(szLangAbbrev, 0);
-    sprintf((char*)pszOutPath, szFormat, "DATA\\LOCAL", szLangAbbrev);
-    int bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, (char*)pszOutPath, 0, (void**)&pFile);
-    if (bOpened) {
-      Storm::Source::SFile::SFileCloseFile(pFile);
-      return;
-    }
-
-    uint32_t dwLanguageCode = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
-    if (dwLanguageCode) {
-      sprintf((char*)pszOutPath, szFormat, "DATA\\LOCAL", "ENG");
-      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, (char*)pszOutPath, 0, (void**)&pFile);
-      if (bOpened) {
-        Storm::Source::SFile::SFileCloseFile(pFile);
-        return;
-      }
-    } else {
-      sprintf((char*)pszOutPath, szFormat, "DATA\\LOCAL", "CHI");
-      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, (char*)pszOutPath, 0, (void**)&pFile);
-      if (bOpened) {
-        Storm::Source::SFile::SFileCloseFile(pFile);
-      }
-    }
-}
-
 float __stdcall SOUND_CalculateAngle1(float fParam1, float fParam2) {
     if (fParam2 >= fParam1) {
       return fParam2;

@@ -5613,33 +5613,6 @@ char * __stdcall MAINMENU_GetRealmNameIfValid(int nIndex) {
     return pcVar2;
 }
 
-uint32_t CHARSEL_FindRealmByName(char * szText) {
-    char* pszRealmName;
-    int32_t nCmp;
-    int nIndex = 0;
-    while (true) {
-      int nRealmCount;
-      nRealmCount = MAINMENU_GetRealmCount();
-      if (nRealmCount <= nIndex) {
-        return 0;
-      }
-
-      pszRealmName = MAINMENU_GetRealmName(nIndex);
-      if (!pszRealmName) {
-        break;
-      }
-
-      nCmp = Storm::Source::SSTR::SStrCmpI(szText, pszRealmName, 0x7fffffff);
-      if (!nCmp) {
-        return 1;
-      }
-
-      nIndex++;
-    }
-
-    return 0;
-}
-
 BOOL __stdcall MAINMENU_OnPressShowExpansionCreditsPage(D2ControlMsg * pControlMsg) {
     BOOL bIsExpansionGame = Fog::D2CheckExpansionGame();
     if (!bIsExpansionGame) {

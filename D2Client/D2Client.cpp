@@ -1208,6 +1208,42 @@ void __fastcall UNITMODE_ExecuteDeferredAction(D2UnitStrc * pUnit) {
     UNIT::UnitMode::UNITMODE_ExecuteSkillAction(nActionType, pUnit, eTargetType, nUnitGUID, 0);
 }
 
+} // namespace D2Client
+
+namespace D2Client::Sound {
+
+static void SOUND_LocalizeSoundPath(char * szFormat, uint32_t * pszOutPath) {
+    D2MPQFileStrc* pFile;
+    char szLangAbbrev[4];
+    D2Lang::StrTable::strtable::TABLES_GetLangAbbreviation(szLangAbbrev, 0);
+    sprintf((char*)pszOutPath, szFormat, "DATA\\LOCAL", szLangAbbrev);
+    int bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, (char*)pszOutPath, 0, (void**)&pFile);
+    if (bOpened) {
+      Storm::Source::SFile::SFileCloseFile(pFile);
+      return;
+    }
+
+    uint32_t dwLanguageCode = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
+    if (dwLanguageCode) {
+      sprintf((char*)pszOutPath, szFormat, "DATA\\LOCAL", "ENG");
+      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, (char*)pszOutPath, 0, (void**)&pFile);
+      if (bOpened) {
+        Storm::Source::SFile::SFileCloseFile(pFile);
+        return;
+      }
+    } else {
+      sprintf((char*)pszOutPath, szFormat, "DATA\\LOCAL", "CHI");
+      bOpened = Storm::Source::SFile::SFileOpenFileEx(nullptr, (char*)pszOutPath, 0, (void**)&pFile);
+      if (bOpened) {
+        Storm::Source::SFile::SFileCloseFile(pFile);
+      }
+    }
+}
+
+} // namespace D2Client::Sound
+
+namespace D2Client {
+
 // The ECX slot that carries a function pointer was one variable holding three callees with two
 // different conventions - fpRequiredUserAction (bool __cdecl(void)), UI_ShowPopupDialog and
 // NET_D2GS_CLIENT_Send_0x6D_PING (void __stdcall(void)). Typing it void * split it into two register

@@ -30,6 +30,100 @@ namespace Fog::Engine::Application {
 static bool DEBUG_CaptureThreadContext(uint32_t dwThreadId, LPCONTEXT pContext);
 } // namespace Fog::Engine::Application
 namespace Fog::File {
+
+static void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPath);
+
+static uint32_t __stdcall FILETOOLS_ExtractFilename(char * szDest, char * szSrcPath, char * nDestSize);
+
+} // namespace Fog::File
+
+namespace Fog::_3rdparty::crashy {
+
+int8_t AddAttachment(::Report * pThis, char * szPath, int8_t bCopyToReportDir) {
+    char* pBaseDirPtr;
+    uint32_t uVar1;
+    char* pDst;
+    char (*pEntrySlot)[1024];
+    int nCopyRemaining;
+    char szPathCopy[1024];
+    char cCh;
+    uint32_t local_8;
+    local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
+    ::Report* pFileReg;
+    pFileReg = pThis;
+    if (0xf < pThis->nAttachmentCount) {
+      return '\0';
+    }
+    if (bCopyToReportDir == '\0') {
+      pDst = szPath;
+      pDst = pDst + strlen(pDst) + 1;
+      if ((uint32_t)((int)pDst - (int)(szPath + 1)) < 0x400) {
+        store_path:
+        pEntrySlot = pFileReg->aszAttachmentPaths + pFileReg->nAttachmentCount;
+        nCopyRemaining = 0x3ff;
+        do {
+          cCh = *szPath;
+          (*pEntrySlot)[0] = cCh;
+          pEntrySlot = (char (*)[1024])(*pEntrySlot + 1);
+          szPath++;
+          if (cCh == '\0') {
+            if (nCopyRemaining) {
+              goto count_attachment;
+            }
+
+            break;
+          }
+
+          nCopyRemaining--;
+        } while (nCopyRemaining);
+
+        (*pEntrySlot)[0] = '\0';
+        szPath = szPath + strlen(szPath) + 1;
+        count_attachment:
+        pFileReg->nAttachmentCount++;
+        return '\x01';
+      }
+    } else if (pThis->szReportDir[0] != '\0') {
+      pDst = szPathCopy;
+      nCopyRemaining = 0x3ff;
+      pBaseDirPtr = pThis->szReportDir;
+      do {
+        cCh = *pBaseDirPtr;
+        *pDst = cCh;
+        pDst++;
+        pBaseDirPtr++;
+        if (cCh == '\0') {
+          if (nCopyRemaining) {
+            goto copy_file_into_report_dir;
+          }
+
+          break;
+        }
+
+        nCopyRemaining--;
+      } while (nCopyRemaining);
+
+      *pDst = '\0';
+      pBaseDirPtr = pBaseDirPtr + strlen(pBaseDirPtr) + 1;
+      copy_file_into_report_dir:
+      pBaseDirPtr += -1 - (int)pThis->szReportDir;
+      if (pBaseDirPtr < (char*)0x400) {
+        szPathCopy[(int)pBaseDirPtr] = '/';
+        uVar1 = File::FILETOOLS_ExtractFilename(szPathCopy + (int)(pBaseDirPtr + 1), szPath, (char*)((uintptr_t)&local_8 - (int)(szPathCopy + (int)(pBaseDirPtr + 1))));
+        if ((char)uVar1 != '\0') {
+          File::FILETOOLS_CopyFile_UTF8(szPath, szPathCopy);
+          szPath = szPathCopy;
+          goto store_path;
+        }
+      }
+    }
+
+    return '\0';
+}
+
+} // namespace Fog::_3rdparty::crashy
+
+namespace Fog::File {
 static char * STRING_CopyStringBounded(int32_t nDestSize, char * szDest, char * szSrc);
 
 void __stdcall CONTAINER_InitializeBuffer(void * pBuffer, int32_t nTypeSize, int32_t nBufferSize, CONTAINER_TypeInitialValue fpInitValueCallback) {
@@ -442,7 +536,7 @@ uint32_t __stdcall FILETOOLS_ExtractDirectory(char * szDest, char * nDestSize, c
     return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)((uint32_t)szDest >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)1);
 }
 
-uint32_t __stdcall FILETOOLS_ExtractFilename(char * szDest, char * szSrcPath, char * nDestSize) {
+static uint32_t __stdcall FILETOOLS_ExtractFilename(char * szDest, char * szSrcPath, char * nDestSize) {
     char* pSep;
     pSep = strrchr(szSrcPath, 0x2f);
     char* pLastSep;
@@ -642,7 +736,7 @@ FILE * __stdcall FILETOOLS_OpenFile_WriteMode_UTF8(LPCSTR lpMultiByteStr) {
     return nullptr;
 }
 
-void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPath) {
+static void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPath) {
     uint16_t wszSrc[260];
     uint16_t wszDest[260];
     uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
@@ -655,19 +749,6 @@ void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPath) {
       }
     }
 
-}
-
-// Writes the process temp path into the caller's buffer and reports success. The result is a single byte in AL (XOR AL,AL / the sole caller does TEST AL,AL); EDX is never written, so declaring an 8-byte return invented a high dword out of nothing.
-bool FILETOOLS_GetTempPath_UTF8(LPSTR szDest) {
-    uint16_t wszTempPath[260];
-    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
-    DWORD nPathLen = GetTempPathW(0x104, (LPWSTR)wszTempPath);
-    if (!nPathLen) {
-      return false;
-    }
-
-    int iVar1 = WideCharToMultiByte(0xfde9, 0, (LPCWSTR)wszTempPath, nPathLen + 1, szDest, 0x400, (LPCSTR)0x0, (LPBOOL)0x0);
-    return iVar1 != 0;
 }
 
 // Recursively creates a directory path (CreateDirectoryW, then split at the last separator and

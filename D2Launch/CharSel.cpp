@@ -41,6 +41,9 @@
 #include "D2Win/D2WinScrollbar.h"
 #include "D2Win/D2WinTimer.h"
 #include "D2MCPClient/McpConnect.h"
+#include "D2Sound/Src/D2SoundFast.h"
+#include "D2Win/Src/D2WinButton.h"
+#include "D2Win/Src/D2WinPalette.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -58,6 +61,37 @@
 
 static_assert(sizeof(void*) != 4 || sizeof(::D2CharSelStrc) == 0x350, "D2_NEW(D2CharSelStrc): the 32-bit layout must be the 0x350 bytes 1.14d allocates");
 
+
+namespace D2Launch::MainMenus {
+
+static uint32_t CHARSEL_FindRealmByName(char * szText) {
+    char* pszRealmName;
+    int32_t nCmp;
+    int nIndex = 0;
+    while (true) {
+      int nRealmCount;
+      nRealmCount = MAINMENU_GetRealmCount();
+      if (nRealmCount <= nIndex) {
+        return 0;
+      }
+
+      pszRealmName = MAINMENU_GetRealmName(nIndex);
+      if (!pszRealmName) {
+        break;
+      }
+
+      nCmp = Storm::Source::SSTR::SStrCmpI(szText, pszRealmName, 0x7fffffff);
+      if (!nCmp) {
+        return 1;
+      }
+
+      nIndex++;
+    }
+
+    return 0;
+}
+
+} // namespace D2Launch::MainMenus
 
 namespace D2Launch::CharSel {
 
@@ -945,7 +979,7 @@ void __stdcall CHARSEL_DestroyAllCharEntries() {
     gpCharSelPendingEntry = 0;
 }
 
-void __stdcall CHARSEL_EnumerateLocalSaves() {
+static void __stdcall CHARSEL_EnumerateLocalSaves() {
     // Static local variables (originally global data)
     static char gszLocalSaveFilenameBuffer[256] = {
     0,
@@ -2271,5 +2305,209 @@ BOOL __stdcall CHARSEL_OnPressPumpRealmCharListLoad(D2ControlMsg * pControlMsg) 
     }
     }
     return 1;
+}
+
+static void CHARSEL_RequestRealmCharList(char * szRealmName) {
+    CharSel::CHARSEL_DestroyAllCharEntries();
+    gbCharSelArrowsHidden = 0;
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpControlCharSelArrows, 1);
+    uint32_t dwRealmHash = Storm::Source::SSTR::SStrHash(szRealmName, 0, 0);
+    DWORD dwNowTick = GetTickCount();
+    D2RealmCharListCacheEntryStrc* pCacheEntry = gpRealmCharListCache;
+    do {
+      if (!pCacheEntry) {
+        break;
+      }
+      if (pCacheEntry->nHash == dwRealmHash && (int)dwNowTick <= pCacheEntry->nExpireTick) {
+        if (pCacheEntry->pData) {
+          CHARSEL_ParseRealmCharList(szRealmName, (char*)pCacheEntry->pData, 0);
+          return;
+        }
+
+        break;
+      }
+
+      pCacheEntry = pCacheEntry->pNext;
+    } while (true);
+
+    BOOL bIsConnected = gpBNetCallbacks->pfnIsSocketConnected();
+    if (!bIsConnected) {
+      uint16_t* pwszErrorMsg;
+      pwszErrorMsg = D2Lang::StrTable::strtable::GetLocaleString(0x14e3);
+      MainMenus::MAINMENU_ShowPopupWithCancel(pwszErrorMsg, MainMenus::UIMENU_MainMenu);
+      return;
+    }
+
+    gnCharSelBNetLoadState = 1;
+    gszPendingRealmName = szRealmName;
+}
+
+void __fastcall CHARSEL_LoadCharList(char * szText) {
+    gnCharSelLoadedCharCount = 0;
+    if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET) {
+      D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ClearAllLines(gpControlCharSelList);
+      D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(gpControlCharSelList, szText, 0);
+      CHARSEL_RequestRealmCharList(szText);
+      CharSel::CHARSEL_UpdateSelectedCharDisplay();
+      CharSel::DRAW_LocalCharsInSelectionScreen0();
+      return;
+    }
+    if (OogCurrentCharSelectionMode == CHAR_SELECTION_SP || OogCurrentCharSelectionMode == CHAR_SELECTION_BNET_OPEN_Unsure || OogCurrentCharSelectionMode == CHAR_SELECTION_TCP_IP) {
+      BOOL bIsExpansion;
+      CharSel::CHARSEL_DestroyAllCharEntries();
+      bIsExpansion = Fog::D2CheckExpansionGame();
+      if (!bIsExpansion) {
+        CharSel::CHARSEL_AddCreateNewEntry();
+      }
+
+      CharSel::CHARSEL_EnumerateLocalSaves();
+    }
+
+    CharSel::CHARSEL_UpdateSelectedCharDisplay();
+    CharSel::DRAW_LocalCharsInSelectionScreen0();
+}
+
+void __stdcall UIMENU_CharacterSelectAllGameTypes() {
+    int nSlotIndex;
+    uint16_t* pwszLabel;
+    ::D2WinTextBox* pSlotControl;
+    uint32_t nFoundRealmIndex;
+    D2BNetGatewayAccessStr* pGatewayAccess;
+    char* szRealmName;
+    int nSlotY;
+    uint8_t byTmp;
+    BOOL bIsExpansion;
+    bIsExpansion = Fog::D2CheckExpansionGame();
+    if (bIsExpansion) {
+      CHARSEL_InitCharSelScreen();
+      return;
+    }
+
+    MainMenus::FORMS_DestroyLists();
+    D2Win::Src::D2WinMain::D2WINMAIN_SetBackgroundDC6(DC6_CharSelect_charselectbckg);
+    MainMenus::D2GFX_SetPaletteForDraw("palette\\sky\\pal.dat", "palette\\sky\\pal.pl2");
+    if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET) {
+      MainMenus::MAINMENU_QueryAndBuildRealmList();
+      nSlotIndex = MainMenus::MAINMENU_GetRealmCount();
+      if (nSlotIndex == -1) {
+        LAUNCHER_DisconnectFromBnet();
+        pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(0x14e3);
+        MainMenus::MAINMENU_ShowPopupWithCancel(pwszLabel, MainMenus::UIMENU_MainMenu);
+        return;
+      }
+      if (!nSlotIndex) {
+        LAUNCHER_DisconnectFromBnet();
+        pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(0x14aa);
+        MainMenus::MAINMENU_ShowPopupWithCancel(pwszLabel, MainMenus::UIMENU_MainMenu);
+        return;
+      }
+    }
+
+    nCharacterSelectionIndex = 1;
+    D2Client::CharScreen::TotalCurrentChars = 0;
+    g_nCharSelNavigationIndex = 0;
+    D2Client::CharScreen::nSelectedCharIndex = 0;
+    gnCharSelSelectedIndex = 0;
+    gnCharSelScrollOffset = 0;
+    gpCharSelStatusTextBox = 0;
+    gnCharSelBNetLoadState = 0;
+    D2ControlStrc* pTimerControl;
+    pTimerControl = MainMenus::FORMS_CreateAnyFormFromListExEx(0x7a);
+    D2Win::Src::D2WinTimer::D2WINTIMER_Start((int*)pTimerControl);
+    D2Win::Src::D2WinEditBox::D2WINEDITBOX_Destroy((int*)pTimerControl);
+    D2IniData_launcher->nDifficulty = 0;
+    gpCharSelExitButton = MainMenus::FORMS_CreateAnyFormFromListExEx(0x7c);
+    gpCtlCharSelDownArrow = (::D2WinButton*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x7d);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible((D2ControlStrc*)gpCtlCharSelDownArrow, 0);
+    gpCtlCharSelDeleteButton = MainMenus::FORMS_CreateAnyFormFromListExEx(0x7e);
+    gpCtlCharSelOKButton = (::D2WinButton*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x99);
+    gpCtlCharSelectGameTypeBtn = MainMenus::FORMS_CreateAnyFormFromListExEx(0x9a);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&gpCtlCharSelOKButton->sControl, 0);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gpCtlCharSelectGameTypeBtn, 0);
+    gpaCharSelectDisplay = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x9b);
+    gpCharSelDeleteButton = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x9d);
+    gpCharSelExpansionToggle = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x9e);
+    gpControlCharSelArrows = MainMenus::FORMS_CreateAnyFormFromListExEx(0x9f);
+    nSlotIndex = 0;
+    memset(gaCharSelScreenSlotControls, 0, 8 * sizeof(gaCharSelScreenSlotControls[0]));
+    if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET) {
+      int32_t nRegResult;
+      gnCharSelScreenSlotCount = 4;
+      nSlotY = 0xf6;
+      do {
+        D2Win::Src::D2WinPalette::D2WINPAL_SetGammaRamp(1);
+        pSlotControl = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(nSlotIndex + 0x80);
+        gaCharSelScreenSlotControls[nSlotIndex] = pSlotControl;
+        D2Win::Src::D2WinPalette::D2WINPAL_SetGammaRamp(0);
+        gnCharSlotYPositions[nSlotIndex] = nSlotY;
+        nSlotIndex++;
+        nSlotY += 0x5d;
+      } while (nSlotIndex < gnCharSelScreenSlotCount);
+
+      gpCharSelStatusTextBox = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x98);
+      gnCharSelScrollOffset = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x79);
+      D2Win::Src::D2WinButton::D2WINBUTTON_SetBounds(gpCtlCharSelOKButton, 0x27a, 0x8f, 0x1d, 0x14);
+      MainMenus::FORMS_CreateAnyFormFromListExEx(0x65);
+      gpControlRealmSelectDropdown = MainMenus::FORMS_CreateAnyFormFromListExEx(0x67);
+      gpControlCharSelList = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x68);
+      nSlotIndex = 0;
+      byTmp = 0;
+      nRegResult = 4;
+      /* Current Realm */ /* Current Realm */ /* Current Realm */ pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(0x2b32);
+      pSlotControl = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x66);
+      D2Win::Src::D2WinTextBox::SetText(pSlotControl, pwszLabel, nRegResult, (bool)byTmp, nSlotIndex);
+      nRegResult = Storm::Source::SReg::SRegLoadString("Diablo II", "Preferred Realm", 0, PreferredClosedRealm, 0x100);
+      if (nRegResult) {
+        nFoundRealmIndex = MainMenus::CHARSEL_FindRealmByName(PreferredClosedRealm);
+        if (nFoundRealmIndex) {
+          goto load_char_list;
+        }
+      }
+
+      pGatewayAccess = (D2BNetGatewayAccessStr*)gpBNetCallbacks->pfnBnetLoadAndReturn();
+      nRegResult = 0x7fffffff;
+      szRealmName = Bnclient::BNGatewayAccess::Realm(pGatewayAccess, pGatewayAccess->nCurGatewayIdx);
+      Storm::Source::SSTR::SStrCopy(PreferredClosedRealm, szRealmName, nRegResult);
+      Storm::Source::SReg::SRegSaveString((uint32_t*)"Diablo II", "Preferred Realm", 0, PreferredClosedRealm);
+      nFoundRealmIndex = MainMenus::CHARSEL_FindRealmByName(PreferredClosedRealm);
+      if (!nFoundRealmIndex) {
+        nSlotIndex = MainMenus::MAINMENU_GetRealmCount();
+        if (nSlotIndex < 1) {
+          szRealmName = 0;
+        } else {
+          szRealmName = MainMenus::MAINMENU_GetRealmName(0);
+        }
+
+        Storm::Source::SSTR::SStrCopy(PreferredClosedRealm, szRealmName, 0x7fffffff);
+        Storm::Source::SReg::SRegSaveString((uint32_t*)"Diablo II", "Preferred Realm", 0, PreferredClosedRealm);
+      }
+    } else {
+      gnCharSelScreenSlotCount = 5;
+      nSlotY = 0x99;
+      do {
+        D2Win::Src::D2WinPalette::D2WINPAL_SetGammaRamp(1);
+        pSlotControl = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(nSlotIndex + 0x7f);
+        gaCharSelScreenSlotControls[nSlotIndex] = pSlotControl;
+        D2Win::Src::D2WinPalette::D2WINPAL_SetGammaRamp(0);
+        gnCharSlotYPositions[nSlotIndex] = nSlotY;
+        nSlotIndex++;
+        nSlotY += 0x5d;
+      } while (nSlotIndex < gnCharSelScreenSlotCount);
+
+      D2Win::Src::D2WinButton::D2WINBUTTON_SetBounds(gpCtlCharSelOKButton, 0x27a, 0x32, 0x1d, 0x14);
+    }
+
+    load_char_list:
+    gpaCharSelCharacterList = (::D2WinImage*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x96);
+    gpControlCharSelImage = (::D2WinImage*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x97);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive((D2ControlStrc*)gpControlCharSelImage, 0);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCharSelExitButton, 0);
+    CHARSEL_LoadCharList(PreferredClosedRealm);
+    nSlotIndex = D2Sound::Src::D2SoundFast::SOUND_GetOptionsMusic();
+    if (nSlotIndex) {
+      D2Sound::Src::D2SoundFast::SOUND_SetMusicEnabled(1);
+    }
+
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCharSelExitButton, 1);
 }
 } // namespace D2Launch::Launcher

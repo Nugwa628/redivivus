@@ -102,7 +102,6 @@ void __stdcall DRAW_LocalCharsInSelectionScreen();
 void __stdcall DRAW_LocalCharsInSelectionScreen0();
 // @sourcefile .\Src\CharSel.cpp
 void __stdcall CHARSEL_DestroyAllCharEntries();
-void __stdcall CHARSEL_EnumerateLocalSaves();
 int __stdcall CHARSEL_UpdateSelectionExpansion();
 // @sourcefile .\Src\CharSel.cpp
 BOOL __stdcall CHARSEL_UpdateSelectedCharDisplay();
