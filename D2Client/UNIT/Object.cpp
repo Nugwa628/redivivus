@@ -106,7 +106,7 @@ BOOL __fastcall OBJECT_CheckAutoLight(D2UnitStrc * pUnit, int32_t bSkipCofLoad) 
         if (pUnit->eAnimMode.ePlayerMode == Death) {
           pUnit->eAnimMode.ePlayerMode = eD2PlayerAnimMode_ns::Neutral;
           if (!bSkipCofLoad) {
-            Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+            Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
           }
           D2Common::Units::InitAnimMode(pUnit);
           UNIT::SetMonsterFlags(pUnit, UNITFLAG_TARGETABLE, (uint32_t)pTxtLine->Selectable[pUnit->eAnimMode.ePlayerMode]);
@@ -122,7 +122,7 @@ BOOL __fastcall OBJECT_CheckAutoLight(D2UnitStrc * pUnit, int32_t bSkipCofLoad) 
     }
     pUnit->eAnimMode.ePlayerMode = Death;
     if (!bSkipCofLoad) {
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+      Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     }
     D2Common::Units::InitAnimMode(pUnit);
     OBJECT_SetLightRGB(pTxtLine->Red, pTxtLine->Green, pTxtLine->Blue, (uint16_t)(uint8_t)pTxtLine->Lit[pUnit->eAnimMode.ePlayerMode], pUnit);
@@ -299,7 +299,7 @@ static void OBJECT_ToggleDoorState(D2UnitStrc * pUnit) {
     }
 
     pUnit->nGfxCurrentFrame = (uint32_t)byStartFrame;
-    Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+    Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     D2Common::Units::InitAnimMode(pUnit);
     if (pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->Selectable[pUnit->eAnimMode.ePlayerMode]) {
       pUnit->eUnitFlags |= UNITFLAG_TARGETABLE;
@@ -369,7 +369,7 @@ static void OBJECT_UpdateAnimation(D2UnitStrc * pUnit) {
         if (pUnit->nClassId == 0xbd && (eAnimMode == Opened || eAnimMode == Special1)) {
           pUnit->eAnimMode.ePlayerMode = eAnimMode + Operating;
           pUnit->nGfxCurrentFrame = (uint32_t)pTxtLine->Start[eAnimMode + Operating] << 8;
-          Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+          Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
           D2Common::Units::InitAnimMode(pUnit);
           return;
         }
@@ -391,7 +391,7 @@ static void OBJECT_UpdateAnimation(D2UnitStrc * pUnit) {
         }
 
         pUnit->nGfxCurrentFrame = (uint32_t)pTxtLine->Start[2] << 8;
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
         D2Common::Units::InitAnimMode(pUnit);
         if (pTxtLine->Overlay && ((iVar1 = pUnit->nClassId , iVar1 == 0x162 || iVar1 == 0x163) || iVar1 == 0x18d || iVar1 == 0x195 || iVar1 == 0x197 || iVar1 == 0x196 || iVar1 == 0x164)) {
           Engine::GfxInfo::GFX_RemoveOverlayById(0x47, pUnit);
@@ -423,7 +423,7 @@ static void OBJECT_UpdateAnimation(D2UnitStrc * pUnit) {
       if (*pGfxFrame < 0) {
         pUnit->eAnimMode.ePlayerMode = eD2PlayerAnimMode_ns::GetHit;
         pUnit->nGfxCurrentFrame = (uint32_t)pTxtLine->Start[4] << 8;
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
         D2Common::Units::InitAnimMode(pUnit);
         return;
       }
@@ -457,7 +457,7 @@ static void __stdcall OBJECT_HandlePortalOpen(int32_t bTargetable, int32_t nNewA
       if (pUnit->eAnimMode.ePlayerMode == Walk && pTxtLine->FrameCnt[3] != 0x100) {
         pUnit->nGfxCurrentFrame = (uint32_t)pTxtLine->Start[0];
         D2Common::Units::SetupUpdateFlag(pUnit, 3);
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
         pUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
         iVar5 = Units::GetYPosFromDynamicPathUnit(pUnit);
         nErrLine = Units::GetXPosFromDynamicPathUnit(pUnit);
@@ -486,7 +486,7 @@ static void __stdcall OBJECT_HandlePortalOpen(int32_t bTargetable, int32_t nNewA
         }
 
         D2Common::Units::SetupUpdateFlag(pUnit, nNewAnimMode);
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
       }
 
       byStartFrame = pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->Start[nNewAnimMode];
@@ -496,7 +496,7 @@ static void __stdcall OBJECT_HandlePortalOpen(int32_t bTargetable, int32_t nNewA
       }
 
       D2Common::Units::SetupUpdateFlag(pUnit, 1);
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+      Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
       pUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
       byStartFrame = pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->Start[2];
     }
@@ -517,7 +517,7 @@ static void OBJECT_UpdateModeAndProperties(D2UnitStrc * pUnit, D2ServerMessageHa
     } else {
       int nObjClassId;
       D2Common::Units::SetupUpdateFlag(pUnit, pMessage->nItemId);
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+      Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
       if (pDVar1->Overlay && ((nObjClassId = pUnit->nClassId , nObjClassId == 0x162 || nObjClassId == 0x163) || nObjClassId == 0x18d || nObjClassId == 0x195 || nObjClassId == 0x197 || nObjClassId == 0x196 || nObjClassId == 0x164) && pUnit->eAnimMode.ePlayerMode == Death) {
         Engine::Gfx::GFX_AddOverlayToUnit(pUnit, OVERLAY_multigleam, 3, 0, 0, 0, 0, 0);
       }
@@ -927,7 +927,7 @@ bool __fastcall OBJECT_ClientFn_TimedSpecial1_7to12s(D2UnitStrc * pUnit) {
       pUnit->dwTickCount = iVar3 + DVar2;
       pUnit->nGfxCurrentFrame = (uint32_t)pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->Start[5];
       D2Common::Units::SetupUpdateFlag(pUnit, 3);
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+      Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     }
     if (pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Run) {
       D2ObjectsTxt* pDVar1;
@@ -935,7 +935,7 @@ bool __fastcall OBJECT_ClientFn_TimedSpecial1_7to12s(D2UnitStrc * pUnit) {
       if (pUnit->nGfxCurrentFrame >= (int)(pDVar1->FrameCnt[3] - 0x100)) {
         pUnit->nGfxCurrentFrame = (uint32_t)pDVar1->Start[0];
         D2Common::Units::SetupUpdateFlag(pUnit, 0);
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
       }
     }
 
@@ -965,7 +965,7 @@ bool __fastcall OBJECT_ClientFn_TimedSpecial1Or2_23to33s(D2UnitStrc * pUnit) {
       }
 
       D2Common::Units::SetupUpdateFlag(pUnit, iVar5);
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+      Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     }
 
     eD2PlayerAnimMode eVar1 = pUnit->eAnimMode.ePlayerMode;
@@ -974,7 +974,7 @@ bool __fastcall OBJECT_ClientFn_TimedSpecial1Or2_23to33s(D2UnitStrc * pUnit) {
       if (pUnit->nGfxCurrentFrame >= (int)(pDVar2->FrameCnt[eVar1] - 0x100)) {
         pUnit->nGfxCurrentFrame = (uint32_t)pDVar2->Start[0];
         D2Common::Units::SetupUpdateFlag(pUnit, 0);
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
       }
     }
 
@@ -992,7 +992,7 @@ bool __fastcall OBJECT_ClientFn_TimedSpecial1_20to30s(D2UnitStrc * pUnit) {
       pUnit->dwTickCount = iVar3 + DVar2;
       pUnit->nGfxCurrentFrame = (uint32_t)pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->Start[5];
       D2Common::Units::SetupUpdateFlag(pUnit, 3);
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+      Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     }
     if (Walk < pUnit->eAnimMode.ePlayerMode) {
       D2ObjectsTxt* pDVar1;
@@ -1000,7 +1000,7 @@ bool __fastcall OBJECT_ClientFn_TimedSpecial1_20to30s(D2UnitStrc * pUnit) {
       if (pUnit->nGfxCurrentFrame == pDVar1->FrameCnt[pUnit->eAnimMode.ePlayerMode] - 0x100) {
         pUnit->nGfxCurrentFrame = (uint32_t)pDVar1->Start[0];
         D2Common::Units::SetupUpdateFlag(pUnit, 0);
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
       }
     }
 
@@ -1018,14 +1018,14 @@ bool __fastcall OBJECT_ClientFn_OperateCycle_10s(D2UnitStrc * pUnit) {
         pUnit->dwTickCount = DVar1 + 10000;
         pUnit->nGfxCurrentFrame = (uint32_t)pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->Start[1];
         D2Common::Units::SetupUpdateFlag(pUnit, 1);
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
         return true;
       }
     } else if (pUnit->eAnimMode.ePlayerMode != Death && pUnit->dwTickCount < DVar1) {
       iVar2 = SEED_RollRange(&pUnit->sSeed, 0x1194, 0x1d4c);
       pUnit->dwTickCount = iVar2 + DVar1;
       D2Common::Units::SetupUpdateFlag(pUnit, 0);
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+      Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     }
 
     return true;
@@ -1047,14 +1047,14 @@ bool __fastcall OBJECT_ClientFn_OperateCycle_3s(D2UnitStrc * pUnit) {
         pUnit->dwTickCount = DVar1 + 3000;
         pUnit->nGfxCurrentFrame = (uint32_t)pUnit->pUnitData.pUnitDataObject->pTxtObjectsLine->Start[1];
         D2Common::Units::SetupUpdateFlag(pUnit, 1);
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
         return true;
       }
     } else if (pUnit->eAnimMode.ePlayerMode != Death && pUnit->dwTickCount < DVar1) {
       iVar2 = SEED_RollRange(&pUnit->sSeed, 0x9c4, 0x1d4c);
       pUnit->dwTickCount = iVar2 + DVar1;
       D2Common::Units::SetupUpdateFlag(pUnit, 0);
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+      Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     }
 
     return true;
@@ -1137,7 +1137,7 @@ bool __fastcall OBJECT_ClientFn_RiteOfPassageAncients(D2UnitStrc * pUnit) {
 
     UnitMode::UNITMODE_ExecuteSkillAction(UNITMODEACTION_ITEM_INTERACT, pUnit_00, 2, pUnit->nUnitGUID, 0);
     D2Common::Units::SetupUpdateFlag(pUnit, 2);
-    Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+    Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     return true;
 }
 
@@ -1214,7 +1214,7 @@ bool __fastcall OBJECT_ClientFn_OperateToOpened(D2UnitStrc * pUnit) {
 
     pUnit->eAnimMode.ePlayerMode = Walk;
     pUnit->nGfxCurrentFrame = 0;
-    Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+    Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     D2Common::Units::InitAnimMode(pUnit);
     return true;
 }
