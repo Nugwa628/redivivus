@@ -2713,10 +2713,10 @@ void __stdcall NPCMENU_ShowMainMenuDialog() {
         Dialog::gpNpcMainMenuDialog = Dialog::AllocDialogStrc(nDialogPosX.x, nDialogPosX.y, NPCMENU_RepairDrawCallback, NPCMENU_RepairMouseCallback, 0, 0, 1, 0, 0, 0, 1);
         Dialog::DIALOG_SetHighlightStyle(Dialog::gpNpcMainMenuDialog, 1);
         for (int i = 0; i < 0x50; i++) wszNpcName[i] = 0;
-        if (!_Interaction::bInteractingWithNpc) {
-          pNpcUnit = 0;
-        } else {
+        if (_Interaction::bInteractingWithNpc) {
           pNpcUnit = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
+        } else {
+          pNpcUnit = 0;
         }
         pszDialogPtr = UNIT::CUnit::GetName(pNpcUnit);
         D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszNpcName, pszDialogPtr);
