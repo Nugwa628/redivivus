@@ -572,7 +572,7 @@ void __fastcall TEXT_InsertScreenMessage(uint16_t * * ppwszText) {
       if (pPrev) {
         pPrev->pNext = 0;
       }
-      if (AllMessagesMaybe.nCount) {
+      if (AllMessagesMaybe.nCount >= 1) {
         AllMessagesMaybe.nCount--;
       }
     }

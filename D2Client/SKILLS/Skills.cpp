@@ -779,7 +779,7 @@ BOOL __fastcall SKILLS_RadiusCallback_FindMinMaxGUID(D2fpSkillFuncArg * pFuncArg
     } else {
       nUnitGUID = pUnit->nUnitGUID;
     }
-    if (pFuncArgSub->nExcludeGUID < nUnitGUID && nUnitGUID < pFuncArgSub->nNextGUID) {
+    if (nUnitGUID > pFuncArgSub->nExcludeGUID && nUnitGUID < pFuncArgSub->nNextGUID) {
       pFuncArgSub->nCount++;
       pFuncArgSub->nNextGUID = nUnitGUID;
       pFuncArgSub->pNextUnit = pUnit;

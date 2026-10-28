@@ -367,7 +367,7 @@ void __fastcall NET_D2GS_CLIENT_PacketHandle_from0xAF(uint8_t * pBytes, size_t n
 void __fastcall NET_D2GS_CLIENT_Incoming0x01_NEWGAME(char * pBytes) {
     eD2ArenaFlags eArenaFlags = *(eD2ArenaFlags*)(pBytes + 2);
     Game::CLIENT_SetDifficulty(pBytes[1]);
-    Game::CLIENT_SetExpansion((bool)pBytes[6]);
+    Game::CLIENT_SetExpansion(pBytes[6]);
     Game::CLIENT_SetLadder((uint32_t)(uint8_t)pBytes[7]);
     CLIENT_SetArenaFlags(eArenaFlags);
     UI::Draw::InitializeUI();
