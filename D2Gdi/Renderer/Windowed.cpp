@@ -253,21 +253,13 @@ void __fastcall SetPalette(LPPALETTEENTRY pPalette) {
 
     /* PALETTEENTRY * pPalEntries for SetPaletteEntries */ /* UINT cEntries for SetPaletteEntries */ /* UINT iStart for SetPaletteEntries */ /* HPALETTE hpal for SetPaletteEntries */ SetPaletteEntries(RENDERER_WINDOWED_hPalette, 0, 0x100, pPalette);
     tagPALETTEENTRY* pDitherRemapEntry = (tagPALETTEENTRY*)gaDirectDrawDitherPaletteRemap;
-    for (nRemaining = 0x100; nRemaining; nRemaining--) {
-      *pDitherRemapEntry = *pPalette;
-      pPalette++;
-      pDitherRemapEntry++;
-    }
+    memcpy(pDitherRemapEntry, pPalette, 0x100 * sizeof(*pDitherRemapEntry));
 }
 
 void __fastcall SetPaletteTable(BYTE * * ppPaletteTable) {
     int nRemaining;
     uint8_t** pPaletteTableDst = gpGlidePaletteTableData;
-    for (nRemaining = 0x48; nRemaining; nRemaining--) {
-      *pPaletteTableDst = *ppPaletteTable;
-      ppPaletteTable++;
-      pPaletteTableDst++;
-    }
+    memcpy(pPaletteTableDst, ppPaletteTable, 0x48 * sizeof(*pPaletteTableDst));
 
     gpPaletteTable = gpGlidePaletteTableData;
 }

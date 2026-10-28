@@ -1943,11 +1943,9 @@ void __fastcall QUESTLOG_ToggleQuestScreen(DWORD dwParam) {
 void __fastcall NET_D2GS_CLIENT_Incoming0x52_QUESTSTATUS(char * pBytes) {
     int nDwordCopyCount;
     bool* pQuestStateDst = (bool*)&gQuestLog.aQuestLogStateBuffer;
-    for (nDwordCopyCount = 10; nDwordCopyCount; nDwordCopyCount--) {
-      *(uint32_t*)pQuestStateDst = *(uint32_t*)pBytes;
-      pBytes += 4;
-      pQuestStateDst += 4;
-    }
+    memcpy(pQuestStateDst, pBytes, 10 * 4);
+    pBytes += 10 * 4;
+    pQuestStateDst += 10 * 4;
 
     *(uint16_t*)pQuestStateDst = *(uint16_t*)pBytes;
     gQuestLog.bQuestLogWindowOpen = 0;

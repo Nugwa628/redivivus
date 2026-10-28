@@ -883,11 +883,7 @@ int32_t __fastcall RENDERER_D3D_CreateSystemMemoryTexture(IDirectDrawSurface7 * 
     ddSurfaceDesc.dwCaps = 0x840;
     uint32_t* pSrcTemplate = gsD3DTextureDescTemplate;
     DWORD* pDstPixelFormat = ddSurfaceDesc.ddpfPixelFormat;
-    for (nCopyCount = 8; nCopyCount; nCopyCount--) {
-      *pDstPixelFormat = *pSrcTemplate;
-      pSrcTemplate++;
-      pDstPixelFormat++;
-    }
+    memcpy(pDstPixelFormat, pSrcTemplate, 8 * sizeof(*pDstPixelFormat));
 
     ddSurfaceDesc.dwWidth = nWidth;
     ddSurfaceDesc.dwHeight = nHeight;
@@ -2735,11 +2731,7 @@ BOOL __fastcall RENDERER_D3D_CreateSurfaceWithTexture(IDirectDrawSurface7 * * pd
     ddsdSize.ddsCapsRest[0] = 0x80;
     uint32_t* pDstPixelFmt = gsD3DTextureDescTemplate;
     DWORD* pSrcTemplate = ddsdSize.ddpfPixelFormat;
-    for (iLoop = 8; iLoop; iLoop--) {
-      *pSrcTemplate = *pDstPixelFmt;
-      pDstPixelFmt++;
-      pSrcTemplate++;
-    }
+    memcpy(pSrcTemplate, pDstPixelFmt, 8 * sizeof(*pSrcTemplate));
 
     ddsdSize.dwHeight = nHeight;
     ddsdSize.dwWidth = nWidth;
