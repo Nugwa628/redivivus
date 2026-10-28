@@ -1693,7 +1693,7 @@ void __fastcall DATATBLS_CompileUniqueTitleTxt(D2PoolManagerStrc * pMemory, char
     aBinFields[1].nSize = 0;
     aBinFields[1].nOffset = 0;
     aBinFields[1].fpLinker = 0;
-    if (nTitleIdx >= 4) {
+    if (nTitleIdx > 3) {
       return;
     }
 

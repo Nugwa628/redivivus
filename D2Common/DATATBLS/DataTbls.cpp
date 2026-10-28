@@ -209,10 +209,10 @@ int __stdcall DATATBLS_GetLevelFromExperience(int32_t ePlayerClass, uint32_t nPa
 
 // @sourcefile .\DATATBLS\DataTbls.cpp
 int32_t __fastcall DATATBLS_AppendDataToBuffer(void * * pParam, int * pnParam, int * pnCapacity, void * pSrc, size_t nSize) {
-    while (*pnCapacity <= (int)(*pnParam + nSize)) {
+    while ((int)(*pnParam + nSize) >= *pnCapacity) {
       void* pRealloced;
       *pnCapacity += 0x400;
-      if (0x7ffffffe < *pnCapacity) {
+      if (*pnCapacity >= 0x7fffffff) {
         return 0;
       }
 

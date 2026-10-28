@@ -981,7 +981,7 @@ void __fastcall AddActiveCountToDrlgLevel(D2DrlgLevelStrc * pLevel, int32_t nCou
     eD2LevelId nVisLevelId;
     pLevel->nActiveCount += nCount;
     pLevel->dwInactiveFrames = 10;
-    pLevel->nActiveCount = (int)pLevel->nActiveCount < 1 ? 0 : pLevel->nActiveCount;
+    pLevel->nActiveCount = (int)pLevel->nActiveCount <= 0 ? 0 : pLevel->nActiveCount;
     pVisLevelIds = DrlgRoom::DRLGWARP_GetVisArrayFromLevelId(pLevel->pDrlg, pLevel->eD2LevelId);
     i = 0;
     do {
