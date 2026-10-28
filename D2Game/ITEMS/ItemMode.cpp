@@ -744,8 +744,10 @@ static void ITEMMODE_GetEquippedWeapons(D2UnitStrc * * ppUnit1, D2UnitStrc * * p
 
 static BOOL ITEMMODE_IsSkillUsableCheck(D2UnitStrc * pUnit, D2SkillStrc * pSkill) {
     int32_t nCanUseResult = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pSkill);
-    if (!(nCanUseResult != 2 && nCanUseResult != 7)) {
-      return 0;
+    switch (nCanUseResult) {
+      case 2:
+      case 7:
+        return 0;
     }
 
     return 1;
