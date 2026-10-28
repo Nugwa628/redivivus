@@ -2175,7 +2175,7 @@ void __stdcall CHARSEL_ParseRealmCharList(char * szRealmName, char * szText, int
       }
       pwszSubHeader = D2Lang::StrTable::strtable::GetLocaleString(nSubHeaderStrId);
       gnCharSelLoadMoreEntryIndex = D2Client::CharScreen::TotalCurrentChars;
-      CharSel::CHARSEL_CreateCharEntry(pwszHeader, pwszSubHeader, 1, true);
+      CharSel::CHARSEL_CreateCharEntry(pwszHeader, pwszSubHeader, 1, 0xc);
     }
     uint32_t nRemaining = (uint32_t)*(uint16_t*)(pRecordHeader + 3);
     if (nCharCount < *(uint16_t*)(pRecordHeader + 3)) {
@@ -2217,7 +2217,7 @@ void __stdcall CHARSEL_ParseRealmCharList(char * szRealmName, char * szText, int
       pwszHeader = D2Lang::StrTable::strtable::GetLocaleString(0x2b3b);
       szText = (char*)((uint32_t)szText & -65536);
       gnCharSelLoadingEntryIndex = D2Client::CharScreen::TotalCurrentChars;
-      CharSel::CHARSEL_CreateCharEntry(pwszHeader, (uint16_t*)&szText, 2, true);
+      CharSel::CHARSEL_CreateCharEntry(pwszHeader, (uint16_t*)&szText, 2, 0x12);
     }
     CharSel::CHARSEL_UpdateSelectedCharDisplay();
 }
