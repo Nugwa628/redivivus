@@ -692,8 +692,7 @@ void __fastcall Q19_UpdateOrbCount(::SGAMEDATA * pGame, int nParam) {
     }
 
     D2QuestDataA3Q2Strc* pQuestData = pKhalimsWillQuestData->pQuestSpecificData.pA3Q2;
-    int32_t* pnOrbCount = &pQuestData->nKhalimsWillCount;
-    *pnOrbCount += nParam;
+    pQuestData->nKhalimsWillCount += nParam;
     pQuestData->bOrbCountUpdated = true;
 }
 

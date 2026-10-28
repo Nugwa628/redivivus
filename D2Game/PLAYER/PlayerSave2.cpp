@@ -174,8 +174,7 @@ void __fastcall SaveMercData(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2SaveFile
     uint32_t uVar2 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pMerc, UNITSTAT_experience, 0);
     pSaveHeader->sMerc.dwExperience = uVar2;
     pSaveHeader->sMerc.dwFlags = 0;
-    uint16_t* puVar1 = &pSaveHeader->sMerc.wNameIndex;
-    *puVar1 -= pHirelingTxt->nNameFirst;
+    pSaveHeader->sMerc.wNameIndex -= pHirelingTxt->nNameFirst;
     bIsDead = UNIT::SUnit::CheckForModeZeroDeath(pMerc);
     if (!bIsDead) {
       return;

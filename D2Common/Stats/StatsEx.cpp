@@ -2260,8 +2260,7 @@ void __stdcall STATLIST_MarkUnitStatsChanged(D2UnitStrc * pUnit) {
       }
     }
 
-    int* pnRootFlags = &pStatsExRoot->sStatList.nFlags;
-    *pnRootFlags &= -3;
+    pStatsExRoot->sStatList.nFlags &= -3;
 }
 
 // Iteratively removes all stats from pStatList whose value is non-zero (treating them as child-list references). For each iteration, binary-searches the base stat array for the first stat entry, removes it via STATLIST_RemoveStatFromArray, propagates the negated value through STATLIST_PropagateStatChange, and if the owner is a player notifies the stat tracking system. Loops until no stats remain. No-op on NULL input.
@@ -2328,8 +2327,7 @@ void __stdcall STATLIST_FreeUnitChildStatLists(D2UnitStrc * pUnit) {
       return;
     }
 
-    int* pnUnitStatsFlags = &pUnit->pStatsEx->sStatList.nFlags;
-    *pnUnitStatsFlags &= -257;
+    pUnit->pStatsEx->sStatList.nFlags &= -257;
     pStatsEx = pUnit->pStatsEx;
     if (!(pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U)) {
       return;
