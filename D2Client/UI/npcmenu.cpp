@@ -283,10 +283,10 @@ int __fastcall NPCMENU_ScrollCompleteShowNextMessage(void * pUserParam, uint32_t
         pDVar2 = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
         if (pDVar2) {
           gnNpcMenuScrollCompleteMode = nParam;
-          if (!_Interaction::bInteractingWithNpc) {
-            pDVar2 = 0;
-          } else {
+          if (_Interaction::bInteractingWithNpc) {
             pDVar2 = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
+          } else {
+            pDVar2 = 0;
           }
 
           Text::TEXT_ShowNpcDialog(pDVar2, nParam, 0);
