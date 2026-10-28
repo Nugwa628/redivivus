@@ -1227,12 +1227,7 @@ static int32_t GetDiminishedStat(D2UnitStrc * pUnit, int32_t nParam) {
 
 void __stdcall SetAnimationSpeed(D2UnitStrc * pUnit, int32_t nSpeed) {
     uint32_t nClampedSpeed = nSpeed <= 0 ? 0 : nSpeed;
-    if ((int)nClampedSpeed < 0x7fff) {
-      pUnit->nAnimSpeed = (short int)nClampedSpeed;
-      return;
-    }
-
-    pUnit->nAnimSpeed = 0x7fff;
+    pUnit->nAnimSpeed = (short int)((int)nClampedSpeed < 0x7fff ? nClampedSpeed : 0x7fff);
 }
 
 uint32_t __stdcall IsAtEndOfFrameCycle(D2UnitStrc * pUnit) {
