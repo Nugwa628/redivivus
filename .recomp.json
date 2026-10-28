@@ -8,9 +8,15 @@
   "project": "Redivivus",
   "status": "playable",
   "targets": ["Windows"],
-  "toolchain": "Ghidra",
-  "approach": "Ghidra decompilation of the 1.14d Game.exe, turned into C++ that builds by a generator; fixes go into Ghidra or the generator, not the output",
+  "toolchain": ["Ghidra", "Ghidra-reconstruct", "Mingw-w64"],
+  "approach": "Ghidra decompilation of the shipped Game.exe, turned into C++ that builds by a generator; fixes go into Ghidra or the generator, never into the output",
   "maintainers": [{ "name": "jaenster", "link": "https://github.com/jaenster" }],
-  "help": ["Typing in Ghidra", "Byte matching against MSVC 2005", "Testing in game"],
-  "notes": "The game runs and plays. Progress is the share of the original's code that rebuilds byte for byte with MSVC 2005, measured by asm_matching/."
+  "links": [
+    { "label": "Website", "url": "https://redivivus.app" },
+    { "label": "Generator", "url": "https://github.com/jaenster/ghidra-reconstruct" },
+    { "label": "Issues", "url": "https://github.com/jaenster/redivivus/issues" }
+  ],
+  "help": ["Typing functions and structs in Ghidra", "Byte matching against MSVC 2005", "Generator passes (TypeScript)", "Playtesting and bug reports"],
+  "tags": ["c++", "ghidra", "byte-matching", "lord-of-destruction", "1.14d"],
+  "notes": "The 1.14d Game.exe, which holds both classic Diablo II and Lord of Destruction, recovered function by function as C++ that builds with mingw-w64 into a game that runs and plays. Not a reimplementation. The tree is regenerated from the Ghidra database, so fixes go there or into the generator. Progress is the share of the original's code that rebuilds byte for byte with MSVC 2005, measured by asm_matching/."
 }
