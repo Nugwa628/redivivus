@@ -199,11 +199,14 @@ BOOL __stdcall ITEMMOD_SetChargedSkillCharges(D2UnitStrc * pUnit, int32_t nSkill
     BOOL bSubFound;
     uint32_t nMaxCharges;
     uint32_t nNewCharges;
-    if (!(pUnit && pUnit->eUnitType == UNIT_ITEM)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_ITEM) {
       return 0;
     }
 
-    uint32_t nStatKey = (nSkillId << (uint8_t)sgptDataTable->nChargedSkillLevelBits) + (sgptDataTable->dwChargedSkillLevelMask & nChargeSlot);
+    uint32_t nStatKey = (nSkillId << sgptDataTable->nChargedSkillLevelBits) + (sgptDataTable->dwChargedSkillLevelMask & nChargeSlot);
     for (pStatList = Stats::StatsEx::GetStatsByFlags(pUnit, 0x40); pStatList; pStatList = Stats::StatsEx::STATLIST_FindStatListWithFlags(pStatList, 0x40)) {
       int nChargedSkillVal;
       nChargedSkillVal = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_item_charged_skill, nStatKey);
