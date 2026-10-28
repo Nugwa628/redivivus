@@ -832,9 +832,9 @@ void __stdcall WEATHER_DrawParticles() {
     int nClipLeft = 0;
     uint32_t eBorderType = UI::Path::DRAW_GetTypeOfBorder();
     if (eBorderType == 1) {
-      nClipRight += ((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) * -2;
+      nClipRight += ((int)ScreenSizeX / 4) * -2;
     } else if (eBorderType == 2) {
-      nClipLeft = ((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) * 2;
+      nClipLeft = ((int)ScreenSizeX / 4) * 2;
     }
 
     D2WeatherParticleStrc* pParticleData = (D2WeatherParticleStrc*)pEnvironmentParticles->pData;
@@ -1014,9 +1014,9 @@ void __stdcall DRAW_Overlay_Weather() {
         nYEnd = ScreenSizeY - 0x2f;
         eBorderType = UI::Path::DRAW_GetTypeOfBorder();
         if (eBorderType == 1) {
-          nClipLeft += ((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) * -2;
+          nClipLeft += ((int)ScreenSizeX / 4) * -2;
         } else if (eBorderType == 2) {
-          nXStart = ((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2) * 2;
+          nXStart = ((int)ScreenSizeX / 4) * 2;
         }
 
         D2gfx::D2GFX::D2GFX_DrawSolidRectEx(nXStart, 0, nClipLeft, nYEnd, 0xff, DRAW_SOLID);
@@ -1060,13 +1060,13 @@ void __fastcall WEATHER_DrawBubbles(D2DataArrayStrc * pBubbleArray, DC6 * * pDC6
     eBorderType = UI::Path::DRAW_GetTypeOfBorder();
     switch (eBorderType) {
     case 1: {
-      nPositionX = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+      nPositionX = (int)ScreenSizeX / 4;
       nXOffset = -nPositionX;
       __frame0.nMaxX = nScreenWidth + nPositionX * -2;
       break;
     }
     case 2: {
-      nXOffset = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+      nXOffset = (int)ScreenSizeX / 4;
       __frame0.nMinX = nXOffset * 2;
       break;
     }

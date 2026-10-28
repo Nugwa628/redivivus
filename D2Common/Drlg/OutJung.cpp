@@ -46,8 +46,8 @@ void __fastcall BuildJungle(D2DrlgLevelStrc * pLevel) {
 
     D2LevelDefsTxt* pSpiderForestDefs = DATATBLS::LvlTbls::TXT_LevelDefs_GetLine(LEVEL_SpiderForest);
     uint8_t byDifficulty = pLevel->pDrlg->nDifficulty;
-    int nLevelWidthCells = (int)(pSpiderForestDefs->SizeX[byDifficulty] + (pSpiderForestDefs->SizeX[byDifficulty] >> 0x1f & 0x1fU)) >> 5;
-    int nLevelHeightCells = (int)(pSpiderForestDefs->SizeY[byDifficulty] + (pSpiderForestDefs->SizeY[byDifficulty] >> 0x1f & 0x1fU)) >> 5;
+    int nLevelWidthCells = (int)pSpiderForestDefs->SizeX[byDifficulty] / 32;
+    int nLevelHeightCells = (int)pSpiderForestDefs->SizeY[byDifficulty] / 32;
     int nPresetArrayIdx = 0;
     uint32_t nSeedModulo = D2Client::Archive::UNIT_GetModuloFromSeed(&pLevel->sSeed, (uint32_t)(pLevel->nUnknown_1B8 == 3) * 4 + 2);
     int nSpecialPresetCount = 0;

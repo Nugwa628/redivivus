@@ -1240,7 +1240,7 @@ int __fastcall ReadStats(::SGAMEDATA * pGameStrc, D2UnitStrc * pUnit, short * * 
     }
 
     short int* pReadCursor = *ppReadPos;
-    int32_t nBitmaskBytes = (int)(bParam2 + 7 + ((int)(bParam2 + 7) >> 0x1f & 7U)) >> 3;
+    int32_t nBitmaskBytes = (int)(bParam2 + 7) / 8;
     if ((short int*)((int)pReadCursor + nBitmaskBytes + 2) > pEndBuf) {
       return 0x12;
     }

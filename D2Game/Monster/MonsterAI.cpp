@@ -176,13 +176,13 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
         D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_experience, nCalc, 0);
       }
       nLevelDiff = pHirelingTxt->strPerlvl * nTmp;
-      nCalc = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->str;
+      nCalc = ((int)nLevelDiff / 8) + pHirelingTxt->str;
       if (nCalc < 10) {
         nCalc = 10;
       }
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_strength, nCalc, 0);
       nLevelDiff = pHirelingTxt->dexPerlvl * nTmp;
-      nCalc = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->dex;
+      nCalc = ((int)nLevelDiff / 8) + pHirelingTxt->dex;
       if (nCalc < 10) {
         nCalc = 10;
       }
@@ -196,10 +196,10 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
       nUnsignedStatVal = pHirelingTxt->defPerlvl * nTmp + pHirelingTxt->defense;
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_armorclass, (int)nUnsignedStatVal < 0 ? 0 : nUnsignedStatVal, 0);
       nLevelDiff = pHirelingTxt->dmgPerlvl * nTmp;
-      uVar1 = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->dmgMin;
+      uVar1 = ((int)nLevelDiff / 8) + pHirelingTxt->dmgMin;
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_secondary_mindamage, (int)uVar1 < 0 ? 0 : uVar1, 0);
       nLevelDiff = pHirelingTxt->dmgPerlvl * nTmp;
-      nCalc = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->dmgMax;
+      nCalc = ((int)nLevelDiff / 8) + pHirelingTxt->dmgMax;
       if (nCalc < 1) {
         nCalc = 1;
       }
@@ -207,7 +207,7 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
       uVar1 = pHirelingTxt->arPerlvl * nTmp + pHirelingTxt->ar;
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_tohit, (int)uVar1 < 0 ? 0 : uVar1, 0);
       nLevelDiff = pHirelingTxt->resistPerlvl * nTmp;
-      uVar1 = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 3U)) >> 2) + pHirelingTxt->resist;
+      uVar1 = ((int)nLevelDiff / 4) + pHirelingTxt->resist;
       uVar1 = (int)uVar1 < 0 ? 0 : uVar1;
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_fireresist, uVar1, 0);
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_lightresist, uVar1, 0);

@@ -169,7 +169,7 @@ static int32_t MISSILE_GetPoisonNovaRadius(int32_t pMissileTxtRaw, int32_t nCurr
       return 1;
     }
     if (nCurrentFrame < 0x55) {
-      return (int)(nCurrentFrame - 0xf + (nCurrentFrame - 0xf >> 0x1f & 3U)) >> 2;
+      return (int)(nCurrentFrame - 0xf) / 4;
     }
 
     int nMaxRadius = *(short int*)(pMissileTxtRaw + 0x96) - 0x32;
@@ -866,7 +866,7 @@ D2UnitStrc * __fastcall MakeMissile(D2SkillArgStrc * pSkillArg) {
       }
     } else {
       nPosY = (uint32_t)(uint8_t)pMissileTxt->VelLev * pSkillArg->nSkillLevel;
-      nVelocityRaw = ((int)(nPosY + (nPosY >> 0x1f & 7U)) >> 3) + (uint32_t)(uint8_t)pMissileTxt->Vel;
+      nVelocityRaw = ((int)nPosY / 8) + (uint32_t)(uint8_t)pMissileTxt->Vel;
       nVelocityRaw <<= 8;
     }
 
@@ -4565,7 +4565,7 @@ int32_t __fastcall MISSILE_CltHitFn47_CatapultSpikeBall(D2UnitStrc * pUnit, D2Un
       }
     }
 
-    SKILLS::Skills::SKILL_SpawnRandomMissilesInArea(pUnit, (uint8_t*)(int)pMissileTxt->CltHitSubMissile1, nCount, (int)(nCount + (nCount >> 0x1f & 3U)) >> 2, D2Common::Units::Missile::GetSkillId(pUnit), nSkillLevel);
+    SKILLS::Skills::SKILL_SpawnRandomMissilesInArea(pUnit, (uint8_t*)(int)pMissileTxt->CltHitSubMissile1, nCount, (int)nCount / 4, D2Common::Units::Missile::GetSkillId(pUnit), nSkillLevel);
     if (0 > pMissileTxt->CltHitSubMissile2) {
       return 1;
     }
@@ -8356,8 +8356,8 @@ void __fastcall MISSILE_CltDoFn22_BrDeathLightningBolt(D2UnitStrc * pUnit) {
 
               nNewDeltaX = (nPosX + nNewDeltaX) * 3;
               nClassId = (nNewDeltaY + nClassId) * 3;
-              nNewDeltaX = (int)(nNewDeltaX + (nNewDeltaX >> 0x1f & 3U)) >> 2;
-              nClassId = (int)(nClassId + (nClassId >> 0x1f & 3U)) >> 2;
+              nNewDeltaX = (int)nNewDeltaX / 4;
+              nClassId = (int)nClassId / 4;
               if (nNewDeltaX || nClassId) {
                 nPosX = Units::GetYPosFromDynamicPathUnit(pUnit);
                 nY = (short int)nPosX + (short int)nClassId;
@@ -8659,8 +8659,8 @@ void __fastcall MISSILE_CltDoFn27_BossFireWallMaker(D2UnitStrc * pUnit) {
           apply_diagonal_turn:
           nClassId = (nClassId + nTargetXDelta) * 3;
           nTurnDeltaX = (nTargetY + nTurnDeltaX) * 3;
-          nTargetXDelta = (int)(nClassId + (nClassId >> 0x1f & 3U)) >> 2;
-          nTargetY = (int)(nTurnDeltaX + (nTurnDeltaX >> 0x1f & 3U)) >> 2;
+          nTargetXDelta = (int)nClassId / 4;
+          nTargetY = (int)nTurnDeltaX / 4;
         } else if ((sTurnSeed.nSeedLow & 3) == 2) {
           nTurnDeltaX = -nTargetXDelta;
           nClassId = nTargetY;

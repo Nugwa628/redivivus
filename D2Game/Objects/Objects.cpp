@@ -717,7 +717,7 @@ void __fastcall Objects_InitFn02(D2ObjectInitFnArg * pInitArg) {
     D2SeedStrc* pObjSeed = pInitArg->pSeed;
     D2SeedStrc seedRolled = D2_SEED_NEXT(*pObjSeed);
     *pObjSeed = seedRolled;
-    if ((int)(seedRolled.nSeedLow % 100) < (int)(((int)((int)pLevelsTxt->MonLvl[0] + ((int)pLevelsTxt->MonLvl[0] >> 0x1f & 7U)) >> 3) + 5U & 0xffff)) {
+    if ((int)(seedRolled.nSeedLow % 100) < (int)(((int)pLevelsTxt->MonLvl[0] / 8) + 5U & 0xffff)) {
       int32_t nRolledFrame;
       nRolledFrame = D2Client::SEED_RollRange(pInitArg->pSeed, 1, 9);
       pInitArg->pObject->pUnitData.pUnitDataPlayer->szCharName[4] = (char)nRolledFrame;
@@ -1315,7 +1315,7 @@ D2UnitStrc * __stdcall OBJECT_PlaceAtBiasedPosition(::SGAMEDATA * pGame, int32_t
           nLine = D2Client::SEED_RollRange(pSeed, 1, 2);
           nCandidateX = nLine + sRoomCoords.dwXStart;
           nCallbackResult = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nYSize / 2);
-          nCandidateY = ((int)(nYSize + (nYSize >> 0x1f & 3U)) >> 2) + nCallbackResult + sRoomCoords.dwYStart;
+          nCandidateY = ((int)nYSize / 4) + nCallbackResult + sRoomCoords.dwYStart;
         }
       }
       if (nCandidateX && nCandidateY && sRoomCoords.dwXStart + 1 <= (int)(nCandidateX & 0xffff) && sRoomCoords.dwYStart + 1 <= (int)(nCandidateY & 0xffff) && (int)(nCandidateX & 0xffff) < sRoomCoords.dwXStart - 1 + sRoomCoords.dwXSize && (int)(nCandidateY & 0xffff) < sRoomCoords.dwYStart - 1 + sRoomCoords.dwYSize) {
@@ -2433,7 +2433,7 @@ static int32_t __stdcall OBJECT_RollAndDispatchPopulateFn(::SGAMEDATA * pGame, D
     }
 
     int nRoomArea = *(int*)(pObjRng + 8);
-    if (*(int*)(pObjRng + 4) > nRoomArea - ((int)(nRoomArea + (nRoomArea >> 0x1f & 3U)) >> 2)) {
+    if (*(int*)(pObjRng + 4) > nRoomArea - ((int)nRoomArea / 4)) {
       nDensityPct += 5;
     }
     if (nEnabledPopTypes[7] >= nDensityPct + 0xc) {

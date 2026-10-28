@@ -1096,17 +1096,17 @@ void __fastcall ITEM_AddStatCostsToPrices(D2UnitStrc * pItem, int * pnSellPrice,
                 nCostTmp = pSkillsTxt->costmult;
                 nRepairCostTmp = pSkillsTxt->costadd;
                 nCostAdd = nCostTmp * *pnSellPriceSaved * nStatVal;
-                nSellCostSum = nSellCostSum + ((int)(nCostAdd + (nCostAdd >> 0x1f & 0x3ffU)) >> 10) + nRepairCostTmp;
+                nSellCostSum = nSellCostSum + ((int)nCostAdd / 1024) + nRepairCostTmp;
                 nCostAdd = *pnBuyPrice * nCostTmp * nStatVal;
-                nBuyCostSum = nBuyCostSum + ((int)(nCostAdd + (nCostAdd >> 0x1f & 0xfffU)) >> 0xc) + nRepairCostTmp;
+                nBuyCostSum = nBuyCostSum + ((int)nCostAdd / 4096) + nRepairCostTmp;
                 nCostTmp = *pnRepairPrice * nCostTmp * nStatVal;
-                nRepairCostTmp = ((int)(nCostTmp + (nCostTmp >> 0x1f & 0x3ffU)) >> 10) + nRepairCostTmp;
+                nRepairCostTmp = ((int)nCostTmp / 1024) + nRepairCostTmp;
               } else {
                 nCostAdd = pSkillsTxt->costmult;
                 nRepairCostTmp = pSkillsTxt->costadd;
-                nSellCostSum = nSellCostSum + ((int)(nCostTmp + (nCostTmp >> 0x1f & 0x3ffU)) >> 10) * nCostAdd + nRepairCostTmp;
-                nBuyCostSum = nBuyCostSum + ((int)(*pnBuyPrice * nStatVal + ((int)(*pnBuyPrice * nStatVal) >> 0x1f & 0xfffU)) >> 0xc) * nCostAdd + nRepairCostTmp;
-                nRepairCostTmp = ((int)(*pnRepairPrice * nStatVal + ((int)(*pnRepairPrice * nStatVal) >> 0x1f & 0x3ffU)) >> 10) * nCostAdd + nRepairCostTmp;
+                nSellCostSum = nSellCostSum + ((int)nCostTmp / 1024) * nCostAdd + nRepairCostTmp;
+                nBuyCostSum = nBuyCostSum + ((int)(*pnBuyPrice * nStatVal) / 4096) * nCostAdd + nRepairCostTmp;
+                nRepairCostTmp = ((int)(*pnRepairPrice * nStatVal) / 1024) * nCostAdd + nRepairCostTmp;
               }
 
               nRepairCostSum += nRepairCostTmp;
@@ -1127,22 +1127,22 @@ void __fastcall ITEM_AddStatCostsToPrices(D2UnitStrc * pItem, int * pnSellPrice,
               if (0xffff < nCostTmp && pSkillsTxt->costmult) {
                 nRepairCostTmp = pSkillsTxt->costmult;
                 nCostAdd = pSkillsTxt->costadd;
-                nCostTmp = ((int)(nCostTmp + (nCostTmp >> 0x1f & 0x3ffU)) >> 10) * nRepairCostTmp + nCostAdd;
-                nCostResult = (int)(*pnBuyPrice * nAvgDmgCost + ((int)(*pnBuyPrice * nAvgDmgCost) >> 0x1f & 0xfffU)) >> 0xc;
+                nCostTmp = ((int)nCostTmp / 1024) * nRepairCostTmp + nCostAdd;
+                nCostResult = (int)(*pnBuyPrice * nAvgDmgCost) / 4096;
                 goto add_costs_divide_first;
               }
 
               nCostTmp = pSkillsTxt->costmult;
               nCostAdd = pSkillsTxt->costadd;
               nRepairCostTmp = nCostTmp * nSellPriceIn * nAvgDmgCost;
-              nCostResult = ((int)(nRepairCostTmp + (nRepairCostTmp >> 0x1f & 0x3ffU)) >> 10) + nCostAdd;
+              nCostResult = ((int)nRepairCostTmp / 1024) + nCostAdd;
               nRepairCostTmp = *pnBuyPrice * nCostTmp * nAvgDmgCost;
-              nRepairCostTmp = (int)(nRepairCostTmp + (nRepairCostTmp >> 0x1f & 0xfffU)) >> 0xc;
+              nRepairCostTmp = (int)nRepairCostTmp / 4096;
               add_costs_multiply_first:
               nBuyCostSum = nBuyCostSum + nRepairCostTmp + nCostAdd;
               nCostTmp = *pnRepairPrice * nCostTmp * nAvgDmgCost;
               nSellCostSum += nCostResult;
-              nRepairCostTmp = (int)(nCostTmp + (nCostTmp >> 0x1f & 0x3ffU)) >> 10;
+              nRepairCostTmp = (int)nCostTmp / 1024;
               break;
               case '\x04':
                 ItemMods::ITEMMODS_CalculateRepairCost(nStatVal, 0, 0, &nRepairCost, &nRepairMinDmg, &nRepairMaxDmg);
@@ -1152,20 +1152,20 @@ void __fastcall ITEM_AddStatCostsToPrices(D2UnitStrc * pItem, int * pnSellPrice,
                 nCostTmp = pStatCostTxt->multiply;
                 nCostAdd = pStatCostTxt->add;
                 nRepairCostTmp = nCostTmp * *pnSellPriceSaved * nAvgDmgCost;
-                nCostResult = ((int)(nRepairCostTmp + (nRepairCostTmp >> 0x1f & 0x3ffU)) >> 10) + nCostAdd;
+                nCostResult = ((int)nRepairCostTmp / 1024) + nCostAdd;
                 nRepairCostTmp = *pnBuyPrice * nCostTmp * nAvgDmgCost;
-                nRepairCostTmp = (int)(nRepairCostTmp + (nRepairCostTmp >> 0x1f & 0x3ffU)) >> 10;
+                nRepairCostTmp = (int)nRepairCostTmp / 1024;
                 goto add_costs_multiply_first;
               }
 
               nRepairCostTmp = pStatCostTxt->multiply;
               nCostAdd = pStatCostTxt->add;
-              nCostTmp = ((int)(nCostTmp + (nCostTmp >> 0x1f & 0x3ffU)) >> 10) * nRepairCostTmp + nCostAdd;
-              nCostResult = (int)(*pnBuyPrice * nAvgDmgCost + ((int)(*pnBuyPrice * nAvgDmgCost) >> 0x1f & 0x3ffU)) >> 10;
+              nCostTmp = ((int)nCostTmp / 1024) * nRepairCostTmp + nCostAdd;
+              nCostResult = (int)(*pnBuyPrice * nAvgDmgCost) / 1024;
               add_costs_divide_first:
               nSellCostSum += nCostTmp;
               nBuyCostSum = nBuyCostSum + nCostResult * nRepairCostTmp + nCostAdd;
-              nRepairCostTmp = ((int)(*pnRepairPrice * nAvgDmgCost + ((int)(*pnRepairPrice * nAvgDmgCost) >> 0x1f & 0x3ffU)) >> 10) * nRepairCostTmp;
+              nRepairCostTmp = ((int)(*pnRepairPrice * nAvgDmgCost) / 1024) * nRepairCostTmp;
               break;
               default:
                 nCostTmp = *pnSellPriceSaved * nStatVal;
@@ -1173,20 +1173,20 @@ void __fastcall ITEM_AddStatCostsToPrices(D2UnitStrc * pItem, int * pnSellPrice,
                 nCostTmp = pStatCostTxt->multiply;
                 nCostAdd = pStatCostTxt->add;
                 nRepairCostTmp = nCostTmp * *pnSellPriceSaved * nStatVal;
-                nCostResult = ((int)(nRepairCostTmp + (nRepairCostTmp >> 0x1f & 0x3ffU)) >> 10) + nCostAdd;
+                nCostResult = ((int)nRepairCostTmp / 1024) + nCostAdd;
                 nRepairCostTmp = *pnBuyPrice * nCostTmp * nStatVal;
-                nBuyCostSum = nBuyCostSum + ((int)(nRepairCostTmp + (nRepairCostTmp >> 0x1f & 0x3ffU)) >> 10) + nCostAdd;
+                nBuyCostSum = nBuyCostSum + ((int)nRepairCostTmp / 1024) + nCostAdd;
                 nCostTmp = *pnRepairPrice * nCostTmp * nStatVal;
                 nSellCostSum += nCostResult;
-                nRepairCostTmp = (int)(nCostTmp + (nCostTmp >> 0x1f & 0x3ffU)) >> 10;
+                nRepairCostTmp = (int)nCostTmp / 1024;
                 break;
               }
 
               nRepairCostTmp = pStatCostTxt->multiply;
               nCostAdd = pStatCostTxt->add;
-              nSellCostSum = nSellCostSum + ((int)(nCostTmp + (nCostTmp >> 0x1f & 0x3ffU)) >> 10) * nRepairCostTmp + nCostAdd;
-              nBuyCostSum = nBuyCostSum + ((int)(*pnBuyPrice * nStatVal + ((int)(*pnBuyPrice * nStatVal) >> 0x1f & 0x3ffU)) >> 10) * nRepairCostTmp + nCostAdd;
-              nRepairCostTmp = ((int)(*pnRepairPrice * nStatVal + ((int)(*pnRepairPrice * nStatVal) >> 0x1f & 0x3ffU)) >> 10) * nRepairCostTmp;
+              nSellCostSum = nSellCostSum + ((int)nCostTmp / 1024) * nRepairCostTmp + nCostAdd;
+              nBuyCostSum = nBuyCostSum + ((int)(*pnBuyPrice * nStatVal) / 1024) * nRepairCostTmp + nCostAdd;
+              nRepairCostTmp = ((int)(*pnRepairPrice * nStatVal) / 1024) * nRepairCostTmp;
             }
 
             nRepairCostTmp += nCostAdd;
@@ -1274,7 +1274,7 @@ int32_t __stdcall ITEMS_CalculateGamblePrice(int32_t nLevel, D2UnitStrc * pItem)
       pNormItemsTxt = DATATBLS::ItemTbls::ConvertItemCodeToClassIdAndGetItemsTxtLine(szUltraCode, &nUberClassId);
       if (pNormItemsTxt) {
         nUltraWeight = (nLevel - (uint32_t)(uint8_t)pNormItemsTxt->nLevel) * 100;
-        nUltraWeight = ((int)(nUltraWeight + (nUltraWeight >> 0x1f & 3U)) >> 2) + 1;
+        nUltraWeight = ((int)nUltraWeight / 4) + 1;
         if (nUltraWeight < 0) {
           nUltraWeight = 0;
         }
@@ -6002,15 +6002,15 @@ static void __stdcall ITEMS_CalcStaffModsPriceModifier(int * pBuy, int * pSell, 
               nSkillCostMult = pSkillTxt->costmult;
               nCostAdd = pSkillTxt->costadd;
               nCostMult = nSkillCostMult * *pBuy;
-              nBuyDelta += (((int)(nCostMult + (nCostMult >> 0x1f & 0x3ffU)) >> 10) + nCostAdd) * nSkillLvlMult;
-              nSellDeltaAccum += (((int)(*pSell * nSkillCostMult + (*pSell * nSkillCostMult >> 0x1f & 0xfffU)) >> 0xc) + nCostAdd) * nSkillLvlMult;
-              nRepairDeltaAccum += (((int)(*pRepair * nSkillCostMult + (*pRepair * nSkillCostMult >> 0x1f & 0x3ffU)) >> 10) + nCostAdd) * nSkillLvlMult;
+              nBuyDelta += (((int)nCostMult / 1024) + nCostAdd) * nSkillLvlMult;
+              nSellDeltaAccum += (((int)(*pSell * nSkillCostMult) / 4096) + nCostAdd) * nSkillLvlMult;
+              nRepairDeltaAccum += (((int)(*pRepair * nSkillCostMult) / 1024) + nCostAdd) * nSkillLvlMult;
             } else {
               nSkillCostMult = pSkillTxt->costmult;
               nCostAdd = pSkillTxt->costadd;
-              nCostMult = (int)(nSkillCostMult + (nSkillCostMult >> 0x1f & 0x3ffU)) >> 10;
+              nCostMult = (int)nSkillCostMult / 1024;
               nBuyDelta += (nCostMult * *pBuy + nCostAdd) * nSkillLvlMult;
-              nSellDeltaAccum += (((int)(nSkillCostMult + (nSkillCostMult >> 0x1f & 0xfffU)) >> 0xc) * *pSell + nCostAdd) * nSkillLvlMult;
+              nSellDeltaAccum += (((int)nSkillCostMult / 4096) * *pSell + nCostAdd) * nSkillLvlMult;
               nRepairDeltaAccum += (*pRepair * nCostMult + nCostAdd) * nSkillLvlMult;
             }
           }
@@ -6140,12 +6140,12 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
             }
           } else {
             iVar1 = pItemsTxt->dwCost * nQuantity;
-            iVar1 = (int)(iVar1 + (iVar1 >> 0x1f & 0x3ffU)) >> 10;
+            iVar1 = (int)iVar1 / 1024;
             __frame0.nSellPrice = iVar1;
             __frame0.nBuyPrice = iVar1;
             iVar6 = ITEM_GetMaxStack(pItem);
             iVar6 *= pItemsTxt->dwCost;
-            __frame0.nRepairPrice = (int)(iVar6 + (iVar6 >> 0x1f & 0x3ffU)) >> 10;
+            __frame0.nRepairPrice = (int)iVar6 / 1024;
           }
         } else {
           uVar4 = GetMagicSuffix(pItem, 0);
@@ -6205,15 +6205,15 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
         if (iVar1 < 0x10000 || !pMagicAffixTxt->multiply) {
           __frame0.nQualityMod = pMagicAffixTxt->add;
           nAffixRepairDelta = pMagicAffixTxt->multiply;
-          iVar7 = ((int)(nAffixRepairDelta * iVar1 + (nAffixRepairDelta * iVar1 >> 0x1f & 0x3ffU)) >> 10) + __frame0.nQualityMod;
-          iVar6 = ((int)(nAffixRepairDelta * __frame0.nBuyPrice + (nAffixRepairDelta * __frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) + __frame0.nQualityMod;
-          __frame0.nQualityMod = ((int)(nAffixRepairDelta * __frame0.nRepairPrice + (nAffixRepairDelta * __frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) + __frame0.nQualityMod;
+          iVar7 = ((int)(nAffixRepairDelta * iVar1) / 1024) + __frame0.nQualityMod;
+          iVar6 = ((int)(nAffixRepairDelta * __frame0.nBuyPrice) / 1024) + __frame0.nQualityMod;
+          __frame0.nQualityMod = ((int)(nAffixRepairDelta * __frame0.nRepairPrice) / 1024) + __frame0.nQualityMod;
         } else {
           __frame0.nQualityMod = pMagicAffixTxt->add;
           nAffixRepairDelta = pMagicAffixTxt->multiply;
           iVar7 = ((int)(iVar1 + (uVar4 & 0x3ff)) >> 10) * nAffixRepairDelta + __frame0.nQualityMod;
-          iVar6 = ((int)(__frame0.nBuyPrice + (__frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) * nAffixRepairDelta + __frame0.nQualityMod;
-          __frame0.nQualityMod = ((int)(__frame0.nRepairPrice + (__frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) * nAffixRepairDelta + __frame0.nQualityMod;
+          iVar6 = ((int)__frame0.nBuyPrice / 1024) * nAffixRepairDelta + __frame0.nQualityMod;
+          __frame0.nQualityMod = ((int)__frame0.nRepairPrice / 1024) * nAffixRepairDelta + __frame0.nQualityMod;
         }
       }
       if (!false) {
@@ -6234,15 +6234,15 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
             if (iVar1 < 0x10000 || !pSetItemsTxt->costMult) {
               nAffixRepairDelta = pSetItemsTxt->costMult;
               iVar5 = pSetItemsTxt->costAdd;
-              iVar7 = iVar7 + ((int)(nAffixRepairDelta * iVar1 + (nAffixRepairDelta * iVar1 >> 0x1f & 0x3ffU)) >> 10) + iVar5;
-              iVar6 = iVar6 + ((int)(nAffixRepairDelta * __frame0.nBuyPrice + (nAffixRepairDelta * __frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) + iVar5;
-              __frame0.nQualityMod = __frame0.nQualityMod + ((int)(nAffixRepairDelta * __frame0.nRepairPrice + (nAffixRepairDelta * __frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) + iVar5;
+              iVar7 = iVar7 + ((int)(nAffixRepairDelta * iVar1) / 1024) + iVar5;
+              iVar6 = iVar6 + ((int)(nAffixRepairDelta * __frame0.nBuyPrice) / 1024) + iVar5;
+              __frame0.nQualityMod = __frame0.nQualityMod + ((int)(nAffixRepairDelta * __frame0.nRepairPrice) / 1024) + iVar5;
             } else {
               nAffixRepairDelta = pSetItemsTxt->costAdd;
               iVar5 = pSetItemsTxt->costMult;
               iVar7 = iVar7 + ((int)(iVar1 + (uVar4 & 0x3ff)) >> 10) * iVar5 + nAffixRepairDelta;
-              iVar6 = iVar6 + ((int)(__frame0.nBuyPrice + (__frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
-              __frame0.nQualityMod = __frame0.nQualityMod + ((int)(__frame0.nRepairPrice + (__frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
+              iVar6 = iVar6 + ((int)__frame0.nBuyPrice / 1024) * iVar5 + nAffixRepairDelta;
+              __frame0.nQualityMod = __frame0.nQualityMod + ((int)__frame0.nRepairPrice / 1024) * iVar5 + nAffixRepairDelta;
             }
           }
 
@@ -6258,15 +6258,15 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
               if (iVar1 < 0x10000 || !pMagicAffixTxt->multiply) {
                 iVar5 = pMagicAffixTxt->multiply;
                 nAffixRepairDelta = pMagicAffixTxt->add;
-                nAffixSellDelta = ((int)(iVar5 * iVar1 + (iVar5 * iVar1 >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
-                nAffixBuyDelta = ((int)(iVar5 * __frame0.nBuyPrice + (iVar5 * __frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
-                nAffixRepairDelta = ((int)(iVar5 * __frame0.nRepairPrice + (iVar5 * __frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
+                nAffixSellDelta = ((int)(iVar5 * iVar1) / 1024) + nAffixRepairDelta;
+                nAffixBuyDelta = ((int)(iVar5 * __frame0.nBuyPrice) / 1024) + nAffixRepairDelta;
+                nAffixRepairDelta = ((int)(iVar5 * __frame0.nRepairPrice) / 1024) + nAffixRepairDelta;
               } else {
                 iVar5 = pMagicAffixTxt->multiply;
                 nAffixRepairDelta = pMagicAffixTxt->add;
                 nAffixSellDelta = ((int)(iVar1 + (uVar4 & 0x3ff)) >> 10) * iVar5 + nAffixRepairDelta;
-                nAffixBuyDelta = ((int)(__frame0.nBuyPrice + (__frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
-                nAffixRepairDelta = ((int)(__frame0.nRepairPrice + (__frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
+                nAffixBuyDelta = ((int)__frame0.nBuyPrice / 1024) * iVar5 + nAffixRepairDelta;
+                nAffixRepairDelta = ((int)__frame0.nRepairPrice / 1024) * iVar5 + nAffixRepairDelta;
               }
 
               iVar7 += nAffixSellDelta;
@@ -6280,15 +6280,15 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
               if (iVar1 < 0x10000 || !pMagicAffixTxt->multiply) {
                 iVar5 = pMagicAffixTxt->multiply;
                 nAffixRepairDelta = pMagicAffixTxt->add;
-                nAffixSellDelta = ((int)(iVar5 * iVar1 + (iVar5 * iVar1 >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
-                nAffixBuyDelta = ((int)(iVar5 * __frame0.nBuyPrice + (iVar5 * __frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
-                nAffixRepairDelta = ((int)(iVar5 * __frame0.nRepairPrice + (iVar5 * __frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
+                nAffixSellDelta = ((int)(iVar5 * iVar1) / 1024) + nAffixRepairDelta;
+                nAffixBuyDelta = ((int)(iVar5 * __frame0.nBuyPrice) / 1024) + nAffixRepairDelta;
+                nAffixRepairDelta = ((int)(iVar5 * __frame0.nRepairPrice) / 1024) + nAffixRepairDelta;
               } else {
                 iVar5 = pMagicAffixTxt->multiply;
                 nAffixRepairDelta = pMagicAffixTxt->add;
                 nAffixSellDelta = ((int)(iVar1 + (uVar4 & 0x3ff)) >> 10) * iVar5 + nAffixRepairDelta;
-                nAffixBuyDelta = ((int)(__frame0.nBuyPrice + (__frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
-                nAffixRepairDelta = ((int)(__frame0.nRepairPrice + (__frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
+                nAffixBuyDelta = ((int)__frame0.nBuyPrice / 1024) * iVar5 + nAffixRepairDelta;
+                nAffixRepairDelta = ((int)__frame0.nRepairPrice / 1024) * iVar5 + nAffixRepairDelta;
               }
 
               iVar7 += nAffixSellDelta;
@@ -6309,15 +6309,15 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
               if (iVar1 < 0x10000 || !pUniqueItemsTxt->costMult) {
                 nAffixRepairDelta = pUniqueItemsTxt->costMult;
                 iVar5 = pUniqueItemsTxt->costAdd;
-                iVar7 = iVar7 + ((int)(nAffixRepairDelta * iVar1 + (nAffixRepairDelta * iVar1 >> 0x1f & 0x3ffU)) >> 10) + iVar5;
-                iVar6 = iVar6 + ((int)(nAffixRepairDelta * __frame0.nBuyPrice + (nAffixRepairDelta * __frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) + iVar5;
-                __frame0.nQualityMod = __frame0.nQualityMod + ((int)(nAffixRepairDelta * __frame0.nRepairPrice + (nAffixRepairDelta * __frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) + iVar5;
+                iVar7 = iVar7 + ((int)(nAffixRepairDelta * iVar1) / 1024) + iVar5;
+                iVar6 = iVar6 + ((int)(nAffixRepairDelta * __frame0.nBuyPrice) / 1024) + iVar5;
+                __frame0.nQualityMod = __frame0.nQualityMod + ((int)(nAffixRepairDelta * __frame0.nRepairPrice) / 1024) + iVar5;
               } else {
                 nAffixRepairDelta = pUniqueItemsTxt->costAdd;
                 iVar5 = pUniqueItemsTxt->costMult;
                 iVar7 = iVar7 + ((int)(iVar1 + (uVar4 & 0x3ff)) >> 10) * iVar5 + nAffixRepairDelta;
-                iVar6 = iVar6 + ((int)(__frame0.nBuyPrice + (__frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
-                __frame0.nQualityMod = __frame0.nQualityMod + ((int)(__frame0.nRepairPrice + (__frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
+                iVar6 = iVar6 + ((int)__frame0.nBuyPrice / 1024) * iVar5 + nAffixRepairDelta;
+                __frame0.nQualityMod = __frame0.nQualityMod + ((int)__frame0.nRepairPrice / 1024) * iVar5 + nAffixRepairDelta;
               }
 
               break;
@@ -6331,15 +6331,15 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
             if (iVar1 < 0x10000 || !pMagicAffixTxt->multiply) {
               iVar5 = pMagicAffixTxt->multiply;
               nAffixRepairDelta = pMagicAffixTxt->add;
-              nAffixBuyDelta = ((int)(iVar5 * iVar1 + (iVar5 * iVar1 >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
-              nAffixSellDelta = ((int)(iVar5 * __frame0.nBuyPrice + (iVar5 * __frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
-              nAffixRepairDelta = ((int)(iVar5 * __frame0.nRepairPrice + (iVar5 * __frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
+              nAffixBuyDelta = ((int)(iVar5 * iVar1) / 1024) + nAffixRepairDelta;
+              nAffixSellDelta = ((int)(iVar5 * __frame0.nBuyPrice) / 1024) + nAffixRepairDelta;
+              nAffixRepairDelta = ((int)(iVar5 * __frame0.nRepairPrice) / 1024) + nAffixRepairDelta;
             } else {
               iVar5 = pMagicAffixTxt->multiply;
               nAffixRepairDelta = pMagicAffixTxt->add;
               nAffixBuyDelta = ((int)(iVar1 + (uVar4 & 0x3ff)) >> 10) * iVar5 + nAffixRepairDelta;
-              nAffixSellDelta = ((int)(__frame0.nBuyPrice + (__frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
-              nAffixRepairDelta = ((int)(__frame0.nRepairPrice + (__frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
+              nAffixSellDelta = ((int)__frame0.nBuyPrice / 1024) * iVar5 + nAffixRepairDelta;
+              nAffixRepairDelta = ((int)__frame0.nRepairPrice / 1024) * iVar5 + nAffixRepairDelta;
             }
 
             iVar7 += nAffixBuyDelta;
@@ -6353,15 +6353,15 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
             if (iVar1 < 0x10000 || !pMagicAffixTxt->multiply) {
               iVar5 = pMagicAffixTxt->multiply;
               nAffixRepairDelta = pMagicAffixTxt->add;
-              iVar1 = ((int)(iVar5 * iVar1 + (iVar5 * iVar1 >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
-              nAffixSellDelta = ((int)(iVar5 * __frame0.nBuyPrice + (iVar5 * __frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) + nAffixRepairDelta;
-              iVar5 = (int)(iVar5 * __frame0.nRepairPrice + (iVar5 * __frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10;
+              iVar1 = ((int)(iVar5 * iVar1) / 1024) + nAffixRepairDelta;
+              nAffixSellDelta = ((int)(iVar5 * __frame0.nBuyPrice) / 1024) + nAffixRepairDelta;
+              iVar5 = (int)(iVar5 * __frame0.nRepairPrice) / 1024;
             } else {
               nAffixRepairDelta = pMagicAffixTxt->add;
               iVar5 = pMagicAffixTxt->multiply;
               iVar1 = ((int)(iVar1 + (uVar4 & 0x3ff)) >> 10) * iVar5 + nAffixRepairDelta;
-              nAffixSellDelta = ((int)(__frame0.nBuyPrice + (__frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5 + nAffixRepairDelta;
-              iVar5 = ((int)(__frame0.nRepairPrice + (__frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) * iVar5;
+              nAffixSellDelta = ((int)__frame0.nBuyPrice / 1024) * iVar5 + nAffixRepairDelta;
+              iVar5 = ((int)__frame0.nRepairPrice / 1024) * iVar5;
             }
 
             iVar7 += iVar1;
@@ -6385,13 +6385,13 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
     ITEMS_AddInventoryValueToTotal(&__frame0.nSellPrice, &__frame0.nBuyPrice, &__frame0.nRepairPrice, pItem);
     bIsStackable = CheckItemFlag(pItem, ITEMFLAG_ETHEREAL, 0xca3, ".\\ITEMS\\Items.cpp");
     if (bIsStackable) {
-      __frame0.nBuyPrice = (int)(__frame0.nBuyPrice + (__frame0.nBuyPrice >> 0x1f & 3U)) >> 2;
+      __frame0.nBuyPrice = (int)__frame0.nBuyPrice / 4;
     }
 
     iVar1 = __frame0.nBuyPrice;
     iVar3 = TXT_ItemTypes_CheckClass(pItem);
     if (iVar3) {
-      iVar1 = (int)(iVar1 + (iVar1 >> 0x1f & 3U)) >> 2;
+      iVar1 = (int)iVar1 / 4;
       __frame0.nBuyPrice = iVar1;
     }
     if (nTransactionType == 1) {
@@ -6430,21 +6430,21 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
     if (pNpcTxt) {
       if (__frame0.nSellPrice < 0x10000 || (iVar6 = pNpcTxt->sellMult , !iVar6)) {
         iVar6 = pNpcTxt->sellMult;
-        __frame0.nSellPrice = (int)(iVar6 * __frame0.nSellPrice + (iVar6 * __frame0.nSellPrice >> 0x1f & 0x3ffU)) >> 10;
+        __frame0.nSellPrice = (int)(iVar6 * __frame0.nSellPrice) / 1024;
       } else {
-        __frame0.nSellPrice = ((int)(__frame0.nSellPrice + (__frame0.nSellPrice >> 0x1f & 0x3ffU)) >> 10) * iVar6;
+        __frame0.nSellPrice = ((int)__frame0.nSellPrice / 1024) * iVar6;
       }
       if (iVar1 < 0x10000 || !iVar6) {
         iVar1 = pNpcTxt->buyMult * iVar1;
-        __frame0.nBuyPrice = (int)(iVar1 + (iVar1 >> 0x1f & 0x3ffU)) >> 10;
+        __frame0.nBuyPrice = (int)iVar1 / 1024;
       } else {
-        __frame0.nBuyPrice = ((int)(iVar1 + (iVar1 >> 0x1f & 0x3ffU)) >> 10) * pNpcTxt->buyMult;
+        __frame0.nBuyPrice = ((int)iVar1 / 1024) * pNpcTxt->buyMult;
       }
       if (__frame0.nRepairPrice < 0x10000 || !pNpcTxt->repMult) {
         iVar1 = pNpcTxt->repMult * __frame0.nRepairPrice;
-        iVar1 = (int)(iVar1 + (iVar1 >> 0x1f & 0x3ffU)) >> 10;
+        iVar1 = (int)iVar1 / 1024;
       } else {
-        iVar1 = ((int)(__frame0.nRepairPrice + (__frame0.nRepairPrice >> 0x1f & 0x3ffU)) >> 10) * pNpcTxt->repMult;
+        iVar1 = ((int)__frame0.nRepairPrice / 1024) * pNpcTxt->repMult;
       }
 
       pQuestMultEntry = &pNpcTxt->questsellmultA;
@@ -6454,19 +6454,19 @@ int32_t __fastcall ITEMS_CalcTransactionCost(D2UnitStrc * pUnit, D2UnitStrc * pI
           bIsStackable = QuestRecord::GetQuestState(pQuestBitBuffer, pQuestMultEntry[-3], QUESTSTATE_Completed);
           if (bIsStackable == 1 || (bIsStackable = QuestRecord::GetQuestState(pQuestBitBuffer, pQuestMultEntry[-3], QUESTSTATE_RewardAwaits) , bIsStackable == 1)) {
             if (__frame0.nSellPrice < 0x10000 || !*pQuestMultEntry) {
-              __frame0.nSellPrice = (int)(*pQuestMultEntry * __frame0.nSellPrice + (*pQuestMultEntry * __frame0.nSellPrice >> 0x1f & 0x3ffU)) >> 10;
+              __frame0.nSellPrice = (int)(*pQuestMultEntry * __frame0.nSellPrice) / 1024;
             } else {
-              __frame0.nSellPrice = ((int)(__frame0.nSellPrice + (__frame0.nSellPrice >> 0x1f & 0x3ffU)) >> 10) * *pQuestMultEntry;
+              __frame0.nSellPrice = ((int)__frame0.nSellPrice / 1024) * *pQuestMultEntry;
             }
             if (__frame0.nBuyPrice < 0x10000 || !pQuestMultEntry[3]) {
-              __frame0.nBuyPrice = (int)(pQuestMultEntry[3] * __frame0.nBuyPrice + (pQuestMultEntry[3] * __frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10;
+              __frame0.nBuyPrice = (int)(pQuestMultEntry[3] * __frame0.nBuyPrice) / 1024;
             } else {
-              __frame0.nBuyPrice = ((int)(__frame0.nBuyPrice + (__frame0.nBuyPrice >> 0x1f & 0x3ffU)) >> 10) * pQuestMultEntry[3];
+              __frame0.nBuyPrice = ((int)__frame0.nBuyPrice / 1024) * pQuestMultEntry[3];
             }
             if (iVar1 < 0x10000 || !pQuestMultEntry[6]) {
-              iVar1 = (int)(pQuestMultEntry[6] * iVar1 + (pQuestMultEntry[6] * iVar1 >> 0x1f & 0x3ffU)) >> 10;
+              iVar1 = (int)(pQuestMultEntry[6] * iVar1) / 1024;
             } else {
-              iVar1 = ((int)(iVar1 + (iVar1 >> 0x1f & 0x3ffU)) >> 10) * pQuestMultEntry[6];
+              iVar1 = ((int)iVar1 / 1024) * pQuestMultEntry[6];
             }
           }
         }

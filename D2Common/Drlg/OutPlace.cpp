@@ -1393,8 +1393,8 @@ void __fastcall BuildKurast(D2DrlgLevelStrc * pLevel) {
 
     nLevelWidthCells = pLevel->sCoordinatesAndSize.WorldSize.x;
     int nLevelHeightCells = pLevel->sCoordinatesAndSize.WorldSize.y;
-    nLevelWidthCells = ((int)(nLevelWidthCells + (nLevelWidthCells >> 0x1f & 7U)) >> 3) - 4;
-    nLevelHeightCells = ((int)(nLevelHeightCells + (nLevelHeightCells >> 0x1f & 7U)) >> 3) - 4;
+    nLevelWidthCells = ((int)nLevelWidthCells / 8) - 4;
+    nLevelHeightCells = ((int)nLevelHeightCells / 8) - 4;
     switch (pLevel->eD2LevelId) {
       case 0x4f:
         Outdoors::SpawnOutdoorLevelPreset(pLevel, 0x277, 0, 0, '\x0f');
