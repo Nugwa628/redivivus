@@ -2301,35 +2301,7 @@ void DRAW_UI_NPC_INTERACTION(short * nParam) {
         Dialog::DIALOG_DrawBackground(Dialog::gpNpcTradeErrorDialog);
         return;
       }
-      if (!Dialog::gpNpcTransactionWaitDialog) {
-        if (Dialog::gpNpcTransactionConfirmDialog) {
-          pNpcUnit = UNIT::Player::GetPlayerUnit_UI();
-          pNpcUnit = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pNpcUnit->pInventory);
-          if (!pNpcUnit) {
-            pNpcUnit = ui::GetCursorItem();
-            if (!pNpcUnit) {
-              Dialog::DIALOG_DrawBackground(Dialog::gpNpcTransactionConfirmDialog);
-              return;
-            }
-          }
-
-          _Interaction::geNpcUiState = NPCUI_SHOP;
-          Inv::INV_HandleGambleMessage(nParam);
-          gbNpcMenuShopTransactionActive = GetTickCount();
-          gnNpcMenuShopTransactionCost++;
-          Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpNpcTransactionConfirmDialog);
-          Dialog::gpNpcTransactionConfirmDialog = 0;
-          return;
-        }
-        if (Dialog::gpNpcMercListDialog) {
-          Dialog::DIALOG_DrawBackground(Dialog::gpNpcMercListDialog);
-          return;
-        }
-        if (Dialog::gpNpcMainMenuDialog) {
-          Dialog::DIALOG_DrawBackground(Dialog::gpNpcMainMenuDialog);
-          return;
-        }
-      } else {
+      if (Dialog::gpNpcTransactionWaitDialog) {
         pNpcUnit = GetInteractedUnit();
         if (pNpcUnit) {
           pNpcUnit = GetInteractedUnit();
@@ -2365,6 +2337,34 @@ void DRAW_UI_NPC_INTERACTION(short * nParam) {
           ClientModeInGame::D2CLIENT_SetExitVar1(0);
           GAME::Game::D2CLIENT_SetExitVar2(1);
           GAME::Game::D2CLIENT_SetExitVar3ToTrue();
+          return;
+        }
+      } else {
+        if (Dialog::gpNpcTransactionConfirmDialog) {
+          pNpcUnit = UNIT::Player::GetPlayerUnit_UI();
+          pNpcUnit = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pNpcUnit->pInventory);
+          if (!pNpcUnit) {
+            pNpcUnit = ui::GetCursorItem();
+            if (!pNpcUnit) {
+              Dialog::DIALOG_DrawBackground(Dialog::gpNpcTransactionConfirmDialog);
+              return;
+            }
+          }
+
+          _Interaction::geNpcUiState = NPCUI_SHOP;
+          Inv::INV_HandleGambleMessage(nParam);
+          gbNpcMenuShopTransactionActive = GetTickCount();
+          gnNpcMenuShopTransactionCost++;
+          Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpNpcTransactionConfirmDialog);
+          Dialog::gpNpcTransactionConfirmDialog = 0;
+          return;
+        }
+        if (Dialog::gpNpcMercListDialog) {
+          Dialog::DIALOG_DrawBackground(Dialog::gpNpcMercListDialog);
+          return;
+        }
+        if (Dialog::gpNpcMainMenuDialog) {
+          Dialog::DIALOG_DrawBackground(Dialog::gpNpcMainMenuDialog);
           return;
         }
       }
