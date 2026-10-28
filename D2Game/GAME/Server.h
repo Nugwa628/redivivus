@@ -251,7 +251,7 @@ void __fastcall _TableNullSub21(void * pParam);
 uint8_t * __stdcall _TableNullSub22();
 uint8_t * __stdcall _TableNullSub23();
 void __stdcall _TableNullSub24(uint32_t dwArg1, uint32_t dwArg2, uint32_t dwArg3, uint32_t dwArg4);
-int __stdcall FreeServer();
+void __stdcall FreeServer();
 int32_t __fastcall SERVER_IsTokenValid(uint16_t nToken);
 void __stdcall QSERVER_SetGlobalInstance(TSExportTableSync<::SGAMEDATA, struct HSGAMEDATA__*, struct HSGAMEDATALOCK__*, CCritSect, 0>* pQServerState, void * pInitState);
 void __stdcall SetupAsBnetServer(struct D2BattleNetEventCallbackTable * pBnetCallbacks);
