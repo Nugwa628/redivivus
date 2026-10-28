@@ -479,11 +479,9 @@ void __fastcall ASYNCDATA_Free(D2AsyncData_Line0x128 * pAsyncData) {
             *ppListEntry = pAsyncData->pNextDeferred;
             break;
           }
-
           ppListEntry = &(*ppListEntry)->pNextDeferred;
         } while (ppListEntry);
       }
-
       bIsComplete = ASYNCDATA_IsComplete(pAsyncData);
       if (!bIsComplete) {
         Storm::Source::SFile::SFILE_CancelAsyncRequestNoReturn((int32_t)pAsyncData->pReadBuffer);

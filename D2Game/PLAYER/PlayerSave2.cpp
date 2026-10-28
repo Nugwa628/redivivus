@@ -588,7 +588,6 @@ int __fastcall SaveSkills(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * pStar
 
     *pWriteCursor = 0x6669;
     pWriteCursor++;
-
     uint32_t nClassId = GAME::Clients::GetPlayerClassId(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrSave2.cpp", 0x307));
     if (7 <= (int)nClassId) {
       return 2;
@@ -601,7 +600,6 @@ int __fastcall SaveSkills(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * pStar
       do {
         eSkill = D2Common::Skills::SKILLS_GetClassSkillByIndex(nClassId, iSkill);
         bCountBonuses = 0;
-
         nHardPoints = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1), bCountBonuses);
         *(char*)pWriteCursor = (char)nHardPoints;
         pWriteCursor = (uint16_t*)((int)pWriteCursor + 1);
@@ -1421,7 +1419,6 @@ int __fastcall PLRSAVE_LoadCorpseFromBuffer(::SGAMEDATA * pGame, D2UnitStrc * pU
 
           pCorpseUnit->eUnitFlags &= ~UNITFLAG_CANBEATTACKED;
           UNIT::SUnit::SetClient(pCorpseUnit, pClient);
-
           D2Common::Units::SetNameInPlayerData(pCorpseUnit, GAME::Clients::GetCharName(pClient));
           UNIT::SUnit::SetSeed(pCorpseUnit, &pGame->pGameSeed);
           D2Common::DATATBLS::ItemStats::SetState(pCorpseUnit, STATE_playerbody, 1);
@@ -1576,7 +1573,6 @@ int LoadMerc2(void * pThis, D2UnitStrc * pUnit, D2UnitStrc * * ppUnit, D2UnitStr
       ITEMS::ItemMode::ITEMMODE_ReturnZero3(0);
       bIsDead = UNIT::SUnit::CheckForModeZeroDeath(pUnit);
       if (!bIsDead) {
-
         D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hitpoints, D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit), bIsDead);
       }
     }
@@ -1648,7 +1644,6 @@ BOOL __fastcall CreateItemIronGolemItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
         bSocketMode = 1;
         nSocketBodyLoc = 0;
         pInvDummy = &__frame0.nPutItemResult;
-
         _bPutResult = ITEMS::ItemMode::PutItemInItem(pGame, __frame0.pOwnerUnit, dwSocketedItemGUID, D2Client::UNIT::GetGUID(__frame0.pGolemItem), pInvDummy, nSocketBodyLoc, bSocketMode, nSocketSlotX, nSocketSlotY);
         if (!_bPutResult) {
           UNIT::SUnit::FreeServerUnit(pGame, __frame0.pGolemItem);
@@ -1920,10 +1915,8 @@ int32_t __fastcall PLAYERSAVE_LoadModernFormat(::SGAMEDATA * pGame, D2ClientStrc
           nNewCharError = PLAYERSAVE_CreateNewCharacter(pClientSaved, pGame, ppUnit);
           return nNewCharError;
         }
-
         goto return_load_error;
       }
-
       bIsFatalError = nLoadError < 0;
     } else {
       uint32_t dwParam;

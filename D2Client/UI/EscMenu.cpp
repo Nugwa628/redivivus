@@ -44,57 +44,46 @@ typedef void (__fastcall *pfnEscMenuItemAction)(D2EscMenuItemStrc * pItem, D2UIM
 #endif
 
 namespace D2Client::UI::Chat {
-
 static int UI_SLIDER_GetValueFromPosition(int32_t nCurrentPos, int32_t nMinPos, D2EscMenuItemStrc * pSliderItem, int32_t nMaxPos) {
     int nStepCount = pSliderItem->nSubImageCount - 1;
     float fStepCount = (float)nStepCount;
     if (nStepCount < 0) {
       fStepCount += 4.2949673e+09;
     }
-
     nStepCount = nMaxPos - nMinPos + 1;
     float fRange = (float)nStepCount;
     if (nStepCount < 0) {
       fRange += 4.2949673e+09;
     }
-
     float fOffset = (float)(nCurrentPos - nMinPos);
     if (nCurrentPos - nMinPos < 0) {
       fOffset += 4.2949673e+09;
     }
-
     int32_t nResultValue = (int32_t)(int64_t)std::nearbyint(fRange * fStepCount / fOffset);
     return nResultValue;
 }
-
 static int UI_SLIDER_GetPositionFromValue(int32_t nMinPos, D2EscMenuItemStrc * pSliderItem, int32_t nMaxPos) {
     float fRange = (float)(nMaxPos - nMinPos);
     if (nMaxPos - nMinPos < 0) {
       fRange += 4.2949673e+09;
     }
-
     int nSteps = pSliderItem->nSubImageCount - 1;
     float fStepCount = (float)nSteps;
     if (nSteps < 0) {
       fStepCount += 4.2949673e+09;
     }
-
     float fCurrentValue = (float)pSliderItem->nImageIndex;
     if (pSliderItem->nImageIndex < 0) {
       fCurrentValue += 4.2949673e+09;
     }
-
     float fBasePos = (float)nMinPos;
     if (nMinPos < 0) {
       fBasePos += 4.2949673e+09;
     }
-
     int32_t nResultPos = (int32_t)(int64_t)std::nearbyint(fBasePos + fCurrentValue * (fRange / fStepCount));
     return nResultPos;
 }
-
 } // namespace D2Client::UI::Chat
-
 namespace D2Client::UI::EscMenu {
 
 void __fastcall UI_SLIDER_ApplyMasterVolumeFromSlider(D2EscMenuItemStrc * pItem, D2UIMouseMsgStrc * pMsg) {
@@ -103,55 +92,40 @@ void __fastcall UI_SLIDER_ApplyMasterVolumeFromSlider(D2EscMenuItemStrc * pItem,
 }
 
 } // namespace D2Client::UI::EscMenu
-
 namespace D2Client::UI::Chat {
-
 void __fastcall UI_SLIDER_ApplyMasterVolume(D2EscMenuItemStrc * pItem, D2UIMouseMsgStrc * pMsg) {
     int nCurrentVolume = D2Sound::Src::D2SoundFast::SOUND_GetMasterVolume();
     int32_t nSliderValue = UI_SLIDER_GetValueFromPosition(100, 0, pItem, nCurrentVolume);
     pItem->nImageIndex = nSliderValue;
 }
-
 } // namespace D2Client::UI::Chat
-
 namespace D2Client::UI::EscMenu {
-
 void __fastcall UI_SLIDER_ApplyMusicVolumeFromSlider(D2EscMenuItemStrc * pItem, D2UIMouseMsgStrc * pMsg) {
     int nVolume = Chat::UI_SLIDER_GetPositionFromValue(0, pItem, 100);
     D2Sound::Src::D2SoundFast::SOUND_SetMusicVolume(nVolume);
 }
 
 } // namespace D2Client::UI::EscMenu
-
 namespace D2Client::UI::Chat {
-
 void __fastcall UI_SLIDER_ApplyMusicVolume(D2EscMenuItemStrc * pItem, D2UIMouseMsgStrc * pMsg) {
     int nCurrentVolume = D2Sound::Src::D2SoundFast::SOUND_GetMusicVolume();
     int32_t nSliderValue = UI_SLIDER_GetValueFromPosition(100, 0, pItem, nCurrentVolume);
     pItem->nImageIndex = nSliderValue;
 }
-
 } // namespace D2Client::UI::Chat
-
 namespace D2Client::UI::EscMenu {
-
 void __fastcall UI_SLIDER_ApplyPositionalBiasFromSlider(D2EscMenuItemStrc * pItem, D2UIMouseMsgStrc * pMsg) {
     int nBias = Chat::UI_SLIDER_GetPositionFromValue(0, pItem, 100);
     D2Sound::Src::D2SoundFast::SOUND_SetPositionalBias(nBias);
 }
-
 } // namespace D2Client::UI::EscMenu
-
 namespace D2Client::UI::Chat {
-
 void __fastcall UI_SLIDER_ApplyPositionalBias(D2EscMenuItemStrc * pItem, D2UIMouseMsgStrc * pMsg) {
     int nCurrentBias = D2Sound::Src::D2SoundFast::SOUND_GetPositionalBias();
     int32_t nSliderValue = UI_SLIDER_GetValueFromPosition(100, 0, pItem, nCurrentBias);
     pItem->nImageIndex = nSliderValue;
 }
-
 } // namespace D2Client::UI::Chat
-
 namespace D2Client::UI::EscMenu {
 
 void __fastcall UI_SLIDER_ApplyLightQuality(D2EscMenuItemStrc * pItem, D2UIMouseMsgStrc * pMsg) {
@@ -1065,7 +1039,6 @@ void __stdcall DRAW_EscMenu() {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x64c);
         exit(-1);
       }
-
       nMouseX = ui::GetMouseX();
       nMouseY = ui::GetMouseY();
       nVerticalSpacing = gpEscMenuItemCount->nVerticalSpacing;
@@ -1135,7 +1108,6 @@ void __stdcall DRAW_EscMenu() {
           nItemIndex++;
         } while (nItemIndex < gpEscMenuItemCount->nItemCount);
       }
-
       memset(&sGfxData, 0, 0x48);
       sGfxData.pDC6 = ui::UI_GetCursorIconIndex();
       if (DRAW_RotatingStarPosition) {
@@ -1143,7 +1115,6 @@ void __stdcall DRAW_EscMenu() {
       } else {
         sGfxData.nFrameNumber = 0;
       }
-
       nVerticalSpacing = gpEscMenuCurrentTable[gnEscMenuSelectedIndex].nYPosition + gpEscMenuItemCount->nStarOffset;
       D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, ScreenSizeX / 2 - SizeCurrentSelectedEscMenuItem - 0xf9, nVerticalSpacing, -1, DRAW_SOLID, nullptr);
       sGfxData.nFrameNumber = DRAW_RotatingStarPosition;
@@ -1157,7 +1128,6 @@ void __stdcall DRAW_EscMenu() {
       if ((int)DRAW_RotatingStarPosition >= 0) {
         return;
       }
-
       DRAW_RotatingStarPosition = (DRAW_RotatingStarPosition - 1 | -8) + 1;
       return;
     }

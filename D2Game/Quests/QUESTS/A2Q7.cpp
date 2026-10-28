@@ -253,7 +253,6 @@ uint8_t __fastcall Q14_TimerCreatePortal(::SGAMEDATA * pGame, D2QuestDataStrc * 
               } else {
                 D2Common::Units::SetupUpdateFlag(pUnit, 1);
                 bReset = 1;
-
                 D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(D2Common::Units::UNITS_GetRoom(pDVar1), bReset);
                 D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(pNearbyRoom, 1);
               }

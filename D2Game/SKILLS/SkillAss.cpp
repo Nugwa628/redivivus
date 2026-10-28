@@ -113,7 +113,6 @@ BOOL __fastcall SKILLASS_SrvStFn22_PsychicHammer(::SGAMEDATA * pGame, D2UnitStrc
       return 0;
     }
 
-
     bIsInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(D2Common::Units::UNITS_GetRoom(pTarget));
     if (bIsInTown) {
       return 0;
@@ -282,7 +281,6 @@ BOOL __fastcall Skills_SrvDoFunc_034_ChargeUpStackMelee(::SGAMEDATA * pGame, D2U
 
     memset(&sDamage, 0, 0x70);
     int32_t nHitFlags = 0;
-
     uint32_t nHitResult = UNIT::SUnitDmg::DAMAGE_CalculateHitCheck(pGame, pUnit, pTarget, D2Common::Skills::SKILLS_CalcToHit(pUnit, eSkill, nSkillLvl), nHitFlags, (eD2UnitType)pTarget);
     sDamage.wResultFlags = (short int)nHitResult;
     uint8_t bySrcDam = pSkillRecord->SrcDam;
@@ -343,7 +341,6 @@ static void __stdcall SKILLBAR_HandleWarCryStun(D2StatListExStrc * pStatList, D2
 
     int nEffSkillLvl = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
     BOOL bApplyBonus = 1;
-
     int nCurrentSkillLvl = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::SKILLS_GetSkillByEnum(eSkill, pUnit), bApplyBonus);
     if (nCurrentSkillLvl > nEffSkillLvl) {
       nEffSkillLvl = nCurrentSkillLvl;
@@ -364,7 +361,6 @@ static void __stdcall SKILLBAR_HandleWarCryStun(D2StatListExStrc * pStatList, D2
 
     int32_t nCalcBonus = D2Common::Skills::D2GetSkillCalc(pUnit, pDVar1->calc[0], eSkill, nEffSkillLvl);
     pDamage->dwEnDmgPct += nCalcBonus * nCurrentSkillLvl;
-
     pUnit_00 = UNIT::SUnit::GetTargetEx(UNIT::SUnit::GetGamePointer(pUnit), pUnit);
     if (!pUnit_00) {
       return;
@@ -392,7 +388,6 @@ void __stdcall SKILLASS_AddChargeUpDamageRange(D2UnitStrc * pUnit, D2StatListExS
 
     int nEffSkillLvl = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
     BOOL bApplyBonus = 1;
-
     int nActualSkillLvl = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::SKILLS_GetSkillByEnum(eSkill, pUnit), bApplyBonus);
     if (nEffSkillLvl < nActualSkillLvl) {
       nEffSkillLvl = nActualSkillLvl;
@@ -444,7 +439,6 @@ void __stdcall SKILLASS_ApplyChargeUpDamage(D2UnitStrc * pUnit, D2StatListExStrc
 
     int nSkillLvl = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
     BOOL bApplyBonus = 1;
-
     int nChargeLevel = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::SKILLS_GetSkillByEnum(eSkill, pUnit), bApplyBonus);
     if (nChargeLevel > nSkillLvl) {
       nSkillLvl = nChargeLevel;
@@ -628,10 +622,6 @@ uint32_t __fastcall SKILLBAR_ApplyWarCryDamage(D2SkillCallbackContextStrc * pCon
     uint32_t* pSrcDamage = (uint32_t*)pContext->pCallbackArg;
     uint32_t* pDstDamage = (uint32_t*)&sDamage;
     memcpy(pDstDamage, pSrcDamage, 0x1c * sizeof(*pDstDamage));
-
-
-
-
 
     SkillsServer::SKILLS_ApplyDamageToTarget(pContext->pGame, pContext->pUnit, pUnit, &sDamage, 0);
     return 1;
@@ -1477,7 +1467,6 @@ void __fastcall SKILLASS_ReleaseChargeUpAttack(::SGAMEDATA * pGame, D2UnitStrc *
               nChargeLvlMax = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
               bInMeleeRange = 1;
               nEffectiveSkillLvl = nChargeLvlMax;
-
               nChargeLvl = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::SKILLS_GetSkillByEnum(eSkillId, pUnit), bInMeleeRange);
               if (nChargeLvl > nChargeLvlMax) {
                 nChargeLvlMax = nChargeLvl;
@@ -2095,13 +2084,11 @@ BOOL __fastcall Skills_SrvDoFunc_044_SummonBladeSentinel(::SGAMEDATA * pGame, D2
     }
 
     nMonClassIdOrLevel = 0;
-
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit_00, UNITSTAT_level, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0), nMonClassIdOrLevel);
     int32_t nRelocFlags = 0;
     nMonClassIdOrLevel = 0;
     uint32_t nPosY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
     uint32_t nPosX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-
     UNIT::SUnit::SUNIT_RelocateUnit(pGame, pUnit_00, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, nMonClassIdOrLevel, nRelocFlags);
     local_2c.nUnused0 = 0;
     local_2c.nUnused1 = 0;
@@ -2430,7 +2417,6 @@ BOOL __fastcall Skills_SrvDoFunc_047_CloakOfShadows(::SGAMEDATA * pGame, D2UnitS
       nAuraStatIdx++;
       pStatPtr++;
     } while (nAuraStatIdx < 6);
-
 
     SkillsServer::SKILLS_ApplyAreaEffect(pGameSaved, pAuraTarget, 0, 0, D2Common::Skills::D2GetSkillCalc(pUnitSaved, pSkillTxt->aurarangecalc, eSkillOrig, nSkillLvl), pSkillTxt->aurafilter, SKILL_ApplyTimedStateWithCurseExpiry, &sCurseArgs, 1, ".\\SKILLS\\SkillAss.cpp", 0x874);
     return 1;
@@ -2893,7 +2879,6 @@ BOOL __fastcall Skills_SrvDoFunc_050_DragonTail_FireExplosion(::SGAMEDATA * pGam
     uint32_t nCollisionFlags = 0;
     D2DamageStrc* pExplosionDamage = &sFireExplosionDamage;
     int32_t nPosY = D2Client::Units::GetYPosFromDynamicPathUnit(pTarget);
-
     SkillsServer::SKILLS_ApplyAreaDamage(pGame, pUnit, D2Client::Units::GetXPosFromDynamicPathUnit(pTarget), nPosY, nRadius, pExplosionDamage, nCollisionFlags);
     return 1;
 }

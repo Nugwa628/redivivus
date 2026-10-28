@@ -60,7 +60,6 @@ int32_t AppendLineToFile(::IgnoreList * pThis, char * szLine) {
         pThis->pAppendFile = _File;
         if (_File) {
           _Count = 1;
-
           fwrite(szPath, Storm::Source::SSTR::SStrLen(szPath), _Count, _File);
           iVar1 = fclose(pThis->pAppendFile);
           uVar2 = (uint32_t)!iVar1;

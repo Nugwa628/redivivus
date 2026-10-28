@@ -211,7 +211,6 @@ void __fastcall FreeLightMap(D2LightMapStrc * pLightMap) {
         if (pLightMap->pPixelMap) {
           Fog::Memory::FreeClientMemory(pLightMap->pPixelMap, ".\\DRAW\\dLightMap.cpp", 0x181, 0);
         }
-
         Fog::Memory::FreeClientMemory(pLightMap, ".\\DRAW\\dLightMap.cpp", 0x183, 0);
         nFreedLightMapsCounter++;
         return;
@@ -1007,7 +1006,6 @@ static void LIGHTMAP_ApplyLightWithPixelMap(D2LightMapStrc * pLightMap) {
         if ((int)nDistY < 0) {
           nDistY = -nDistY;
         }
-
         do {
           nIntensity = *pPixelData;
           if (nIntensity < 0x10) {
@@ -1015,23 +1013,19 @@ static void LIGHTMAP_ApplyLightWithPixelMap(D2LightMapStrc * pLightMap) {
             if ((int)nDistX < 0) {
               nDistX = -nDistX;
             }
-
             nDistX = Weather::WEATHER_ApproximateDistance(nDistX, nDistY);
             nIntensity = ((int)((pLightMap->nRadiusX - nDistX) * (int)((int64_t)((uint64_t)nGamma << 0x10) / (int64_t)nRadius)) >> 0x10) * (8 - (nIntensity >> 1)) >> 3;
             if (0 < nIntensity) {
               LIGHTMAP_AddLightToCell(nYCoord, nIntensity, pLightMap->nRed, pLightMap->nGreen, pLightMap->nBlue, nCurX);
             }
           }
-
           pPixelData++;
           nXLoopCount--;
           nCurX += 8;
         } while (nXLoopCount);
-
         nYCoord += 8;
         nYLoopCount--;
       } while (nYLoopCount);
-
       return;
     }
 }

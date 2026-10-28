@@ -384,7 +384,6 @@ static D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithMinions(::SGAMEDATA * pGame,
         bActive = true;
         pGameCopy = pGame;
         bHasObjColFlag = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-
         UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x232, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), bHasObjColFlag, pGameCopy, pRoom, bActive, nObjClassId, pNullArg);
       }
     }
@@ -607,7 +606,6 @@ static D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithCollisionObj(::SGAMEDATA * p
       nValidatedClassId = 0;
       bActive = true;
       nColObjPosY = D2Client::Units::GetYPosFromDynamicPathUnit(pMonster);
-
       UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x23b, D2Client::Units::GetXPosFromDynamicPathUnit(pMonster), nColObjPosY, pGame, pRoom, bActive, nValidatedClassId, pNullExtra);
       return pMonster;
     }
@@ -621,7 +619,6 @@ static D2UnitStrc * __stdcall SPAWN_SpawnMonsterWithCollisionObj(::SGAMEDATA * p
     int32_t nInitialMode = 0;
     bool bActive2 = true;
     nValidatedClassId = D2Client::Units::GetYPosFromDynamicPathUnit(pMonster);
-
     UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x23c, D2Client::Units::GetXPosFromDynamicPathUnit(pMonster), nValidatedClassId, pGame, pRoom, bActive2, nInitialMode, pNullExtra);
     return pMonster;
 }
@@ -743,7 +740,6 @@ D2UnitStrc * __fastcall SpawnMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, in
           nResolvedClassId = 1;
         break;
         case LEVEL_A3SewersLevel1:
-
         case LEVEL_A3SewersLevel2:
           nResolvedClassId = 2; break;
         case LEVEL_SwampyPitLevel1:

@@ -129,7 +129,6 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa1);
         exit(-1);
       }
-
       pMonStats2 = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetMonStats2((int)(short int)pMonData->nClassId);
       if (pMonStats2) {
         nBytesToCompare = (uint32_t)pMonData->pad;
@@ -156,11 +155,9 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
                   nEligibleComps = D2Client::Archive::UNIT_GetModuloFromSeed(pSeed, (uint32_t)byCompCount);
                   pSlot->aComponentVariants[0] = (uint8_t)nEligibleComps;
                 }
-
                 pSlot = (D2MonsterRegionFieldSubStrc*)(pSlot->aComponentVariants + 1);
                 nMaxRetries--;
               } while (nMaxRetries);
-
               pMonData->pad++;
               nNumChampions--;
               pNextSlot++;
@@ -174,11 +171,9 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
                   aCompIndices[nEligibleComps + 1] = byCompCount;
                   nEligibleComps++;
                 }
-
                 byCompCount++;
                 pCompIter++;
               } while (byCompCount < 0x10);
-
               if (nEligibleComps == 1) {
                 bySecondCompIdx = aCompIndices[1];
                 aCompIndices[0] = aCompIndices[1];
@@ -187,7 +182,6 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
                 if ((int)nEligibleComps < 2) {
                   return;
                 }
-
                 nRand1 = D2Client::Archive::UNIT_GetModuloFromSeed(pSeed, nEligibleComps);
                 byCompCount = aCompIndices[nRand1 + 1];
                 aCompIndices[nRand1 + 1] = aCompIndices[nEligibleComps];
@@ -236,12 +230,10 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
 
                       pNextSlot->aComponentVariants[bySecondCompIdx] = byCompVariant;
                     }
-
                     bIsSlotDuplicate = false;
                     if ((uint32_t)pMonData->pad <= 0) {
                       break;
                     }
-
                     pSlot = pMonData->aArray;
                     nExistingSlots = (uint32_t)pMonData->pad;
                     do {
@@ -295,7 +287,6 @@ void __stdcall SEED_RollChampionPack(D2SeedStrc * pSeed, D2MonsterRegionFieldStr
                       pSlot++;
                       nExistingSlots--;
                     } while (nExistingSlots);
-
                     if (!bIsSlotDuplicate || !nMaxRetries) {
                       break;
                     }
@@ -454,7 +445,6 @@ BOOL __fastcall SKILLITEM_ItemSpellInit_UseStackable(::SGAMEDATA * pGame, D2Unit
 
     int32_t nParam = 1;
     BOOL bUseUnitGUID = 0;
-
     GAME::SCmd::NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\SkillItem.cpp", 0x40), pItem, nSpellIcon, bUseUnitGUID, nParam, (uint16_t)eSkill);
     return 1;
 }
@@ -504,7 +494,6 @@ static void SKILLITEM_ClearCursorFlagAndNotifyClient(D2UnitStrc * pUnit) {
         nParam = 0;
         bHasCursorFlag = 1;
         nItemSlot = 0xff;
-
         GAME::SCmd::NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\SkillItem.cpp", 0x7a), pUnitTmp2, nItemSlot, bHasCursorFlag, nParam, nSkillId);
       }
     }
@@ -1427,7 +1416,6 @@ BOOL __fastcall Skills_SrvDoFunc_113_UseScrollOrBook(::SGAMEDATA * pGame, D2Unit
       bUseMerc = 0;
       pDVar2 = (D2UnitStrc*)&eSkill;
       iVar7 = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00);
-
       ITEMS::ItemMode::SERVER_UseItemAtCoords(pGame, pUnit, DVar9, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), iVar7, pDVar2, bUseMerc);
       return 1;
     }
@@ -1439,7 +1427,6 @@ BOOL __fastcall Skills_SrvDoFunc_113_UseScrollOrBook(::SGAMEDATA * pGame, D2Unit
 
     eD2Skills* bResult = &eSkill;
     iVar7 = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit_00);
-
     ITEMS::ItemMode::SpecialItemsBonuses(pGame, pUnit, DVar9, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit_00), iVar7, (BOOL*)bResult);
     return 1;
 }
@@ -1455,7 +1442,6 @@ void __fastcall SKILL_ProcessPeriodicAuraTick(::SGAMEDATA * pGame, D2UnitStrc * 
     }
 
     GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSTATS, param_1);
-
     GAME::Event::SetEvent(pGame, pUnit, 9, SkillsServer::SKILLS_CalcPerDelayInterval(pGame, pUnit, pSkillTxt, eSkill, nParam), param_1, eSkill);
     if (!pSkillTxt->immediate) {
       return;
@@ -2109,7 +2095,6 @@ BOOL __fastcall ITEMEVENT_CastOnAttack(::SGAMEDATA * pGame, uint32_t nUnitEvent,
       }
 
       nCastY = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-
       Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, eProcSkill, eSkillLevel, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), nCastY, nProcChance);
     } else if (pTarget) {
       Monster::AI::SKILL_CastOnTargetUnit(pTarget, eProcSkill, eSkillLevel, pTarget, 0);
@@ -2150,7 +2135,6 @@ BOOL __fastcall ITEMEVENT_CastOnStriking(::SGAMEDATA * pGame, uint32_t nUnitEven
     if (!pTarget) {
       uint32_t nCastX;
       nRandRoll = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-
       Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, eProcSkill, eSkillLevel, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), nRandRoll, nProcChance);
       return 1;
     }
@@ -2182,7 +2166,6 @@ BOOL __fastcall ITEMEVENT_CastOnDeath(::SGAMEDATA * pGame, uint32_t nUnitEvent, 
     if (!pTarget) {
       uint32_t nCastY;
       nCastY = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-
       Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, eProcSkill, eSkillLevel, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), nCastY, nProcChance);
       return 1;
     }

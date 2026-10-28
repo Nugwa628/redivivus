@@ -449,17 +449,13 @@ void __fastcall TEXT_DrawTextBoxAtPosition(D2TextBoxStrc * pTextBox, int32_t nSc
     Engine::GfxInfo::D2GFX_DrawSolidRectExBySize(nScreenX, nScreenY + 4, (uint32_t)pTextBox->nWidth, pTextBox->nHeight - 5, 0, DRAW_TRANSPARENT);
     int32_t nSavedFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(0xd);
     for (int nLineIdx = 0; nLineIdx < nLineCount; nLineIdx++) {
-
-
         if (!pCurLine) {
           break;
         }
 
         D2Win::Src::D2WinFont::DRAW_text(pCurLine->wszLine, nScreenX + 10, (nLineIdx - nLineCount + pTextBox->nLineCount) * 0xf + 0x12 + nScreenY, 0, 0);
         pCurLine = pCurLine->pNext;
-
     }
-
 
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nSavedFont);
 }
@@ -1751,7 +1747,6 @@ void __fastcall TEXT_ProcessChatMessage(MessageStrc * pMessage) {
       D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszShortName, pMessage->name, 0x10);
       pWVar2 = wszMsgBuf;
       pszWideOut = wszShortName;
-
       D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x264, wszFormatBuf, D2Lang::StrTable::strtable::GetLocaleString(0xe4a), (uint16_t*)pszWideOut, pWVar2);
       ui::UI_RemoveColorCodesFromString(wszFormatBuf);
       TEXT_PrintGameString(wszFormatBuf, 2);
@@ -1764,7 +1759,6 @@ void __fastcall TEXT_ProcessChatMessage(MessageStrc * pMessage) {
       if (pbNameScan + (-1 - (int)(pMessage->name + 1)) < (char*)0xf) {
         D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszShortName, pMessage->name, 0x10);
         D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszFormatBuf, wszShortName);
-
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszFormatBuf, D2Lang::StrTable::strtable::GetLocaleString(0xe46));
         D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszMsgBuf, wszMessage);
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszFormatBuf, wszMsgBuf);
@@ -1793,7 +1787,6 @@ void __fastcall TEXT_ProcessChatMessage(MessageStrc * pMessage) {
               D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszNameBuf2, pMessage->name, 0x10);
               D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszFormatBuf, wszNameBuf2);
               ui::AppendAsWideChar(wszFormatBuf, '\x04');
-
               D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszMsgBuf, D2Lang::StrTable::strtable::GetLocaleString(0xfd0));
               D2Lang::Unicode::UNISYS::AppendToBuffer(wszMsgBuf, wszMessage);
               ui::AppendAsWideChar(wszMsgBuf, '\0');
@@ -4020,7 +4013,6 @@ void __stdcall TEXT_CloseScrollingText() {
     if (gbTextEventHandlersRegistered == 1) {
       nHandlerCount = 7;
       gbTextEventHandlersRegistered = 0;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUITextFlagInit, nHandlerCount);
     }
     if (!gpTextScrollBoxImage) {
@@ -4317,7 +4309,6 @@ void __stdcall TEXT_OpenMessageLogDialog() {
       nField = 4;
       nPosY = 0;
       nPosX = 0x15;
-
       Dialog::AddStringData(Dialog::DialogHandle, D2Lang::StrTable::strtable::GetLocaleString(0xfc3), nPosX, nPosY, nField, nEnabled, nCbArg, nEntryIdx);
       nEntryIdx = 1;
       pfnCloseCallback = TEXT_CloseMessageLogDialog;
@@ -4325,7 +4316,6 @@ void __stdcall TEXT_OpenMessageLogDialog() {
       nField = 0;
       nPosY = 0;
       nPosX = ScreenSizeY - 0xa5;
-
       Dialog::AddStringData(Dialog::DialogHandle, D2Lang::StrTable::strtable::GetLocaleString(0x1030), nPosX, nPosY, nField, nEnabled, pfnCloseCallback, nEntryIdx);
       pLogListAlloc = (::ListBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
       nSehTryLevel = 0;
@@ -5247,7 +5237,6 @@ static int __stdcall TEXT_UpdateScrollingText(int32_t bClose, void * pParam) {
 
       nCount = 7;
       gbTextEventHandlersRegistered = 0;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUITextFlagInit, nCount);
       return 0;
     }
@@ -5292,7 +5281,6 @@ int __stdcall TEXT_HandleEscapeKey() {
         } else {
           TEXT_CloseScrollingText();
         }
-
         ui::UI_UpdateCursorAnimationTimer();
       }
 
@@ -5300,7 +5288,6 @@ int __stdcall TEXT_HandleEscapeKey() {
       if (gbTextEventHandlersRegistered == 1) {
         nLine = 7;
         gbTextEventHandlersRegistered = 0;
-
         _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUITextFlagInit, nLine);
       }
 
@@ -5545,7 +5532,6 @@ void __fastcall TEXT_DrawMessageLogAndOverhead(D2GameViewStrc * pGameView, void 
         if (gbTextEventHandlersRegistered == 1) {
           nErrorLine = 7;
           gbTextEventHandlersRegistered = 0;
-
           _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUITextFlagInit, nErrorLine);
         }
       }
@@ -5576,7 +5562,6 @@ void __fastcall TEXT_DrawMessageLogAndOverhead(D2GameViewStrc * pGameView, void 
       if (gbTextEventHandlersRegistered == 1) {
         nErrorLine = 7;
         gbTextEventHandlersRegistered = 0;
-
         _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUITextFlagInit, nErrorLine);
       }
     }
@@ -5659,7 +5644,6 @@ void __fastcall TEXT_ShowNpcDialog(D2UnitStrc * pUnit, uint16_t nParam, uint32_t
 
     gbTextScrollBoxAnimating = 0;
     int32_t nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(8);
-
     gpTextScrollingBox = TEXT_AllocTextBox(D2Lang::StrTable::strtable::GetLocaleString(nParam), 2);
     if (!gpTextScrollingBox) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1024);
@@ -5675,7 +5659,6 @@ void __fastcall TEXT_ShowNpcDialog(D2UnitStrc * pUnit, uint16_t nParam, uint32_t
       nHandlers = 0;
       nVolume = 0;
       nPrevFont = 5;
-
       gpTextScrollBoxBuffer = Sound::SOUND_PlaySound(nSoundId, UNIT::Player::GetPlayerUnit_UI(), nPrevFont, nVolume, nHandlers);
       gpTextScrollBoxDC6 = nSoundId;
     }
@@ -5690,7 +5673,6 @@ void __fastcall TEXT_ShowNpcDialog(D2UnitStrc * pUnit, uint16_t nParam, uint32_t
     gbTextEventHandlersRegistered = 1;
     gbTextNpcMenuActive = GetTickCount();
     nPrevFont = 7;
-
     _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUITextFlagInit, nPrevFont);
 }
 
@@ -5739,7 +5721,6 @@ void __fastcall TEXT_ShowScrollingText(uint16_t nParam, int32_t nParam2, int32_t
 
     gbTextScrollBoxAnimating = 0;
     int32_t nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(8);
-
     gpTextScrollingBox = TEXT_AllocTextBox(D2Lang::StrTable::strtable::GetLocaleString(nParam), 2);
     if (!gpTextScrollingBox) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1063);
@@ -5755,7 +5736,6 @@ void __fastcall TEXT_ShowScrollingText(uint16_t nParam, int32_t nParam2, int32_t
       gbTextEventHandlersRegistered = 1;
       gbTextNpcMenuActive = GetTickCount();
       nPrevFont = 7;
-
       _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUITextFlagInit, nPrevFont);
     }
 
@@ -5764,7 +5744,6 @@ void __fastcall TEXT_ShowScrollingText(uint16_t nParam, int32_t nParam2, int32_t
       nHandlers = 0;
       nVolume = 0;
       nPrevFont = 5;
-
       gpTextScrollBoxBuffer = Sound::SOUND_PlaySound(nSoundId, UNIT::Player::GetPlayerUnit_UI(), nPrevFont, nVolume, nHandlers);
       gpTextScrollBoxDC6 = nSoundId;
     }

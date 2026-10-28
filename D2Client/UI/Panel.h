@@ -63,7 +63,6 @@ void __stdcall PANEL_ShowRunButtonTooltip();
 void __stdcall PANEL_DrawRunButton();
 void __stdcall PANEL_DrawStaminaBar();
 void __stdcall PANEL_DrawMenuButton();
-void CLIENT_HandleBeltSlotClick(struct D2InventoryStrc * pInventory);
 uint32_t __stdcall PANEL_GetBeltSlotHoverFlag();
 int __stdcall PANEL_CheckBeltUseBlocked();
 void __stdcall PANEL_DrawExperienceBar();

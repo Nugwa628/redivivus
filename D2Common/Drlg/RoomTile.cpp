@@ -56,9 +56,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2DrlgTileLinkStrc) == 0xc, "D2_NEW
 
 static_assert(sizeof(void*) != 4 || sizeof(::D2DrlgTileGridStrc) == 0x2c, "D2_NEW(D2DrlgTileGridStrc): the 32-bit layout must be the 0x2c bytes 1.14d allocates");
 
-
 namespace D2Common::Drlg::Preset {
-
 // Spawns a single preset unit (monster, object, or item) from a tile data record into the room. Looks up the preset type index via DRLGPRESET_FindPresetTypeIndex, transforms room-local tile coordinates to world space, bounds-checks against the room size, then calls AllocPresetUnit. Marks the preset-unit entry as consumed (flag 0x20) on success. Special-cases shrine objects (IDs 0x5b-0x5c) with a seed-modulo 3 branch.
 // Seven arguments, four in registers: pTileData in EDI, pRoomEx in ESI, nWorldY in EAX, nPresetId in EDX. nWorldY is a world Y coordinate: MOV EBX,EAX at 0066d9e7 then SUB EBX,[ESI+0x38] (WorldPosition.y) at 0066da33 mirrors SUB EAX,[ESI+0x34] on nWorldX (1.14d asm).
 static void __stdcall CreatesPresets(D2DrlgTileDataStrc * pTileData, D2RoomExStrc * pRoomEx, int nWorldY, uint32_t nPresetId, int * pPresetUnit, int nWorldX, int nTileType) {
@@ -72,16 +70,13 @@ static void __stdcall CreatesPresets(D2DrlgTileDataStrc * pTileData, D2RoomExStr
       if (*(uint8_t*)(pPresetUnit + 5) & 0x20) {
         return;
       }
-
       iVar1 = pPresetUnit[7];
     }
-
     int32_t nPresetTypeIndex;
     nPresetTypeIndex = DRLGPRESET_FindPresetTypeIndex(pRoomEx->pLevel->eD2LevelId, nPresetId, (uint32_t)(iVar1 == 9));
     if (nPresetTypeIndex == -1) {
       return;
     }
-
     nWorldX -= pRoomEx->sCoords.WorldPosition.x;
     nTileType = nWorldY - pRoomEx->sCoords.WorldPosition.y;
     Transform::CoordsRoomToWorld(&nWorldX, &nTileType);
@@ -99,7 +94,6 @@ static void __stdcall CreatesPresets(D2DrlgTileDataStrc * pTileData, D2RoomExStr
     if (nTileType >= pRoomEx->sCoords.WorldSize.y * 5) {
       return;
     }
-
     nMonStatsId = gPresetTypeTables.aTypes[nPresetTypeIndex].nUnitId;
     eUnitType = gPresetTypeTables.aTypes[nPresetTypeIndex].eUnitType;
     bUseMonStats = 0;
@@ -110,18 +104,14 @@ static void __stdcall CreatesPresets(D2DrlgTileDataStrc * pTileData, D2RoomExStr
     } else if (eUnitType == UNIT_OBJECT && (bUseMonStats = 0 , 0x5a < nMonStatsId) && nMonStatsId < 0x5d && (nSeedMod = D2Client::Archive::UNIT_GetModuloFromSeed(&pRoomEx->sSeed, 3) , !nSeedMod)) {
       goto mark_processed;
     }
-
     DrlgRoom::AllocPresetUnit(pRoomEx, pRoomEx->pLevel->pDrlg->pMemoryPool, eUnitType, nMonStatsId, bUseMonStats, iVar1, nTileType);
     mark_processed:
     if (pPresetUnit) {
       pPresetUnit[5] |= 0x20;
     }
 }
-
 } // namespace D2Common::Drlg::Preset
-
 namespace D2Common::Drlg {
-
 // Sets wall tile flags on the tile data based on the tile type (orientation, transparency, etc). Decodes raw DS1 tile flags bitfield into semantic nFlags bits. Register arguments: pTileData in EDI, nTileType in EBX, pRoomEx in ECX, nWorldX in EAX; nRawTileFlags and nWorldY on the stack.
 // All three call sites (0066dce9 in DRLGROOMTILE_CreateWallTileData, 0066e776 and 0066e92e in DRLGROOMTILE_UpdateTileType) do MOV ECX,ESI with ESI holding the room. nWorldX and nWorldY are forwarded to CreatesPresets.
 static void __stdcall DRLGROOMTILE_SetWallTileFlags(D2DrlgTileDataStrc * pTileData, int nTileType, D2RoomExStrc * pRoomEx, int nWorldX, uint32_t nRawTileFlags, int nWorldY) {
@@ -165,7 +155,6 @@ static void __stdcall DRLGROOMTILE_SetWallTileFlags(D2DrlgTileDataStrc * pTileDa
     if (nRawTileFlags & 4) {
       pTileData->nFlags |= 0x2000;
     }
-
     uint32_t uVar1 = D2CMP::DUNGEON::Dungeon::TILEPROJECT_GetTileCount((int32_t)pTileData->pTileLibraryEntry);
     if (uVar1 & 1) {
       pTileData->nFlags |= 4;
@@ -173,10 +162,8 @@ static void __stdcall DRLGROOMTILE_SetWallTileFlags(D2DrlgTileDataStrc * pTileDa
     if (!(uVar1 & 4)) {
       return;
     }
-
     pTileData->nFlags |= 0x800;
 }
-
 // Allocates the next wall tile slot in pRoomEx's tile grid, links it into the *ppTileHead list, converts minimap coords to screen coords, sets colour/type/flags, then recursively creates a shadow tile (type 4) when nTileType==3 and propagates nGridFlags bits into that shadow tile's flags.
 D2DrlgTileDataStrc * __fastcall DRLGROOMTILE_CreateWallTileData(D2RoomExStrc * pRoomEx, D2DrlgTileDataStrc * * ppTileHead, int nPosX, int nPosY, uint32_t nGridFlags, int pTileLibEntry, int nTileType) {
     uint32_t nLibFlags;
@@ -188,7 +175,6 @@ D2DrlgTileDataStrc * __fastcall DRLGROOMTILE_CreateWallTileData(D2RoomExStrc * p
       pTileData->pNext = *ppTileHead;
       *ppTileHead = pTileData;
     }
-
     pTileGrid->nWalls++;
     int nScreenX = nPosX;
     pTileData->nPosX = nPosX - pRoomEx->sCoords.WorldPosition.x;
@@ -208,7 +194,6 @@ D2DrlgTileDataStrc * __fastcall DRLGROOMTILE_CreateWallTileData(D2RoomExStrc * p
     if (nTileType != 3) {
       return pTileData;
     }
-
     int nShadowTileLibEntry = DRLG_FindHTile(pRoomEx, 4, nGridFlags);
     D2DrlgTileDataStrc* pShadowTile = DRLGROOMTILE_CreateWallTileData(pRoomEx, ppTileHead, nPosX, nPosY, nGridFlags, nShadowTileLibEntry, 4);
     pShadowTile->nFlags |= (nGridFlags >> 0x12 & 3) * 0x4000 + 0x4000;
@@ -241,7 +226,6 @@ D2DrlgTileDataStrc * __fastcall DRLGROOMTILE_CreateWallTileData(D2RoomExStrc * p
     if (nGridFlags & 4) {
       pShadowTile->nFlags |= 0x2000;
     }
-
     nLibFlags = D2CMP::DUNGEON::Dungeon::TILEPROJECT_GetTileCount((int32_t)pShadowTile->pTileLibraryEntry);
     if (nLibFlags & 1) {
       pShadowTile->nFlags |= 4;
@@ -249,11 +233,9 @@ D2DrlgTileDataStrc * __fastcall DRLGROOMTILE_CreateWallTileData(D2RoomExStrc * p
     if (!(nLibFlags & 4)) {
       return pTileData;
     }
-
     pShadowTile->nFlags |= 0x800;
     return pTileData;
 }
-
 } // namespace D2Common::Drlg
 
 namespace D2Common::Drlg::RoomTile {
@@ -326,7 +308,6 @@ static void __stdcall DRLGROOMTILE_SetWarpTileDirection(D2DrlgTileLinkStrc * pTi
       if (nCurrentDir == nDirection) {
         return;
       }
-
       pNewWarpEntry = (D2DrlgTileDataStrc*)DATATBLS::LvlTbls::TXT_LvlWarp_Setup(pNewWarpEntry->nScreenX, nDirection);
       pTileLink[1].pTileData = pNewWarpEntry;
       return;
@@ -790,7 +771,6 @@ static void __stdcall DRLGROOMTILE_ProcessTile(eD2GridCellFlags nFlags, D2RoomEx
     if ((nFlags & CELLFLAGS_0x80000000) != CELLFLAGS_NONE) {
       switch (nOtherFlags) {
         case CELLFLAGS_0x08 | CELLFLAGS_0x02:
-
         case CELLFLAGS_0x08 | CELLFLAGS_0x02 | CELLFLAGS_0x01:
           if (8 <= nMainIndex) {
             return;

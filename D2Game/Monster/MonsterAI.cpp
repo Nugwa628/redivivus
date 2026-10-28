@@ -151,17 +151,14 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe2);
         exit(-1);
       }
-
       if (!(pMerc || (pMerc = PLAYER::PlayerPets::SERVER_GetUnitPetByTypeId(pGame, pPlayer, PETTYPE_hireable, 0) , pMerc != 0))) {
         return;
       }
-
       D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pPlayer, UNITSTAT_level, 0);
       nTmp = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pMerc, UNITSTAT_level, 0);
       if (!nLevel) {
         nLevel = nTmp + 1;
       }
-
       AI::SendNpcMessageOrHoverText(pGame, pMerc, pPlayer, 0xd7c, 1);
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_level, nLevel, 0);
       pPetData = PLAYER::PlayerPets::GetPlayersPetData(pPlayer, pMerc->nUnitGUID);
@@ -169,7 +166,6 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
       if (!pHirelingTxt) {
         return;
       }
-
       nTmp = nLevel - pHirelingTxt->level;
       nCalc = D2Common::DATATBLS::DataTbls::TXT_Experience_GetMaxLevel(0);
       if (!(nLevel < nCalc - 1)) {
@@ -177,33 +173,28 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
       } else {
         nCalc = D2Common::Merc::GetBaseExperience(nLevel + 1, pHirelingTxt->expPerLvl);
       }
-
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_nextexp, nCalc, 0);
       nCalc = D2Common::Merc::GetBaseExperience(nLevel, pHirelingTxt->expPerLvl);
       nLevelDiff = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pMerc, UNITSTAT_experience, 0);
       if (nLevelDiff < nCalc) {
         D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_experience, nCalc, 0);
       }
-
       nLevelDiff = pHirelingTxt->strPerlvl * nTmp;
       nCalc = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->str;
       if (nCalc < 10) {
         nCalc = 10;
       }
-
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_strength, nCalc, 0);
       nLevelDiff = pHirelingTxt->dexPerlvl * nTmp;
       nCalc = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->dex;
       if (nCalc < 10) {
         nCalc = 10;
       }
-
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_dexterity, nCalc, 0);
       nCalc = pHirelingTxt->hpPerlvl * 0x100 * nTmp + pHirelingTxt->hp * 0x100;
       if (nCalc < 0x2800) {
         nCalc = 0x2800;
       }
-
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_maxhp, nCalc, 0);
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_hitpoints, nCalc, 0);
       nUnsignedStatVal = pHirelingTxt->defPerlvl * nTmp + pHirelingTxt->defense;
@@ -216,7 +207,6 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
       if (nCalc < 1) {
         nCalc = 1;
       }
-
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_secondary_maxdamage, nCalc, 0);
       uVar1 = pHirelingTxt->arPerlvl * nTmp + pHirelingTxt->ar;
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_tohit, (int)uVar1 < 0 ? 0 : uVar1, 0);
@@ -669,7 +659,6 @@ void __fastcall ClearAISub(::SGAMEDATA * pGame, D2UnitStrc * pUnit, fpAiClear fp
       uVar6 = 0;
       nMonsterGUID = D2Client::UNIT::GetGUID(pUnit);
       byMonsterUnitType = '\x01';
-
       GAME::SCmd::NET_D2GS_SERVER_Send_0x62_INTERACTION_STOP(UNIT::SUnit::SUNIT_GetClient(pAiSub->pUnit, ".\\MONSTER\\MonsterAI.cpp", 0x35c), 'b', byMonsterUnitType, nMonsterGUID, uVar6);
       if (!bClientSide || (bHasInteractInfo = UNIT::SUnit::GetInteractInfo(pAiSub->pUnit, &eUnitType, &nUnitGUID) , bHasInteractInfo && eUnitType == UNIT_MONSTER) && (nMonsterGUID2 = D2Client::UNIT::GetGUID(pUnit) , nUnitGUID == nMonsterGUID2)) {
         UNIT::SUnit::ClearInteractInfo(pAiSub->pUnit);
@@ -712,20 +701,17 @@ void __fastcall MERC_HireAndReplaceMerc(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     if (pExistingMerc) {
       D2ClientStrc* pClient;
       dwZeroReviveCost = 0;
-
       GAME::SCmd::NET_D2GS_SERVER_Send_0x9B_MercReviveCost(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\MONSTER\\MonsterAI.cpp", 0x52), 0xffff, dwZeroReviveCost);
       Ai::AiGeneral::AssignMinionOwner(pGame, pExistingMerc, -1, UNIT_MONSTER, 0, 0);
       PLAYER::PlayerPets::RemovePetByGuidAndNotify(pGame, pUnit, pExistingMerc->nUnitGUID, 0);
       nOldMercGUID = pExistingMerc->nUnitGUID;
       eOldMercUnitType = UNIT_MONSTER;
-
       D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pExistingMerc), eOldMercUnitType, nOldMercGUID);
       UNIT::SUnit::FreeServerUnit(pGame, pExistingMerc);
     }
 
     sPetData.nSeed = pHireInfo->nSeed;
     sPetData.nNameId = (int)(uint16_t)pHireInfo->nNameStringId;
-
     BVar1 = D2Common::Merc::RollMercStats(pGame->bExpansion, pUnit, pHireInfo->nSeed, D2Common::Merc::GetMercAct(pGame->bExpansion, 0, pHireInfo->nNameStringId), (uint32_t)pGame->nDifficulty, &sMercHireData);
     if (!BVar1) {
       return;

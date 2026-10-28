@@ -1120,7 +1120,6 @@ void __fastcall GetBnetIp(char * szText, int32_t nParam) {
     *szText = '\0';
     BNGatewayAccess::Load(&ActualRealmInfo);
     int32_t bHasRegistryOverride = nParam;
-
     Storm::Source::SSTR::SStrCopy(szText, BNGatewayAccess::DNS(&ActualRealmInfo, ActualRealmInfo.nCurGatewayIdx), bHasRegistryOverride);
     bHasRegistryOverride = Storm::Source::SReg::SRegLoadString("Diablo II", "BNETIP", 0, szRegistryBuf, 0x100);
     if (bHasRegistryOverride) {
@@ -3200,13 +3199,11 @@ void __stdcall NET_SID_CLIENT_Send_0x42_CDKey3() {
       if (!bHash1Ok) {
         return;
       }
-
       uVar2 = BNSEND_GetServerToken();
       bHash1Ok = BNSEND_PrepareCDKeyHash(gnBNetCDKeyHashSize, uVar2, szOwnerCopy2, &aClassicHashBuf);
       if (!bHash1Ok) {
         return;
       }
-
       aExpansionPacket[0] = gnBNetCDKeyHashSize;
       aExpansionPacket[1] = 2;
       aExpansionPacket[2] = nProductId;

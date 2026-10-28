@@ -823,7 +823,6 @@ BOOL __fastcall Skills_SrvDoFunc_009_FrenzyMeleeHit(::SGAMEDATA * pGame, D2UnitS
     PLAYER::PlayerModes::PLRMODES_CheckWeaponQuantityAndDurability(pGame, pUnit);
     PLAYER::PlayerModes::PLRMODES_BreakZeroDurabilityWeapons(pGame, pUnit);
     SKILLBAR_ApplyFrenzyStack(pGame, pUnit, eSkill, nSkillLvl);
-
     pTarget = SkillsServer::SKILLS_FindNextUnitInAreaByGUID(pGame, pUnit, 0, 0, SkillsServer::GetMeleeRangePlusFour(pUnit), 0x20003, pTarget->nUnitGUID, nullptr);
     bHitResult = SKILLBAR_SkillMeleeAttack(pGame, pUnit, pTarget, eSkill, nSkillLvl);
     return bHitResult;
@@ -929,7 +928,6 @@ BOOL __fastcall SKILLBAR_SrvStFn38_Whirlwind(::SGAMEDATA * pGame, D2UnitStrc * p
     eD2CollisionShapeType nType = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);
     uint32_t nCollideX = nTargetX;
     uint32_t nCollideY = nTargetY;
-
     D2Common::Collision::AddCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nCollideX, nCollideY, nType, eCollisionFlag);
     UNIT::SUnit::SetUninterruptableState(pUnit, 1);
     D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_skill_move, 1);
@@ -1086,7 +1084,6 @@ void __fastcall SKILL_DeactivateAndRestoreCollision(::SGAMEDATA * pGameStrc, D2U
       eD2CollisionShapeType nUnitWidth;
       eCollisionFlag_00 = eCollisionFlag;
       nUnitWidth = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);
-
       D2Common::Collision::RemoveCollision_Type(D2Common::Units::UNITS_GetRoom(pUnit), nCollideX, nCollideY, nUnitWidth, eCollisionFlag_00);
     }
 
@@ -1400,7 +1397,6 @@ static BOOL __stdcall SKILLBAR_FindValidLeapTarget(D2UnitStrc * pUnit, int32_t n
       LVar1 = sCandidatePos.x;
       if (pRoom) {
         nRange = 0x1c09;
-
         nRange = D2Common::Collision::CheckCollision_BlockPlayer_Type(pRoom, LVar1, nY, D2Common::PATH::DynamicPath::GetUnitWidth(pUnit), nRange);
         if (!nRange) {
           bHasLOS = D2Common::Skills::SKILLS_HasLineOfSight(nSrcX, nSrcY, LVar1, nY, pRoom, 0x804);
@@ -1642,7 +1638,6 @@ static void __stdcall SKILLBAR_CalculateChargePath(::SGAMEDATA * pGame, int32_t 
     }
 
     uint32_t nTargetGUID = D2Common::Skills::SKILL_GetParam4(pSkill);
-
     D2UnitStrc* pTarget = UNIT::SUnit::FindUnitFromTable(pGame, D2Common::Skills::SKILL_GetParam3(pSkill), nTargetGUID);
     if (!pTarget) {
       return;
@@ -2002,13 +1997,11 @@ BOOL __fastcall Skills_SrvDoFunc_078_LeapAttack(::SGAMEDATA * pGame, D2UnitStrc 
         bArrived = SKILL_InitTransportPath(pSkill, pUnit);
         return bArrived;
       }
-
       nFlags = D2Common::Skills::SKILL_GetFlags(pSkill);
       if (nFlags & 0x200) {
         bArrived = SKILLBAR_WhirlwindHitCycle(pGame, eSkill, nSkillLvl, pUnit);
         return bArrived;
       }
-
       D2Common::Skills::SKILL_SetFlags(pSkill, 0x1000);
     }
 

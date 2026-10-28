@@ -2636,9 +2636,7 @@ static int32_t DRLGPATH_CheckSurroundingCollisions(D2PathTypeArg * pPathTypeArg)
 }
 
 } // namespace D2Common::Drlg::Path
-
 namespace D2Common::Drlg {
-
 // Fallback A* used when the greedy directional search does not reach the destination and the squared distance is under 0x145. The whole search state is ONE 0x32EC-byte frame object whose base is handed to every helper, which then reach the rest by byte offset: DRLGPATH_AllocPathNode takes the pool count at base+0x2FC4 and node n at base+0x404+n*0x38; DRLGPATH_InsertNodeSorted and PopBestNodeFromOpenList use the closed buckets at base+0x200 and the sorted head at base+0x400; DRLGPATH_PropagateNodeCosts uses the queue at base+0x2FC8 and its count at base+0x32E8. Split into separate locals the helpers wrote nodes over unrelated stack and read the list head out of garbage, which faulted on every player move long enough to need the A* fallback and on NPC paths.
 int32_t __fastcall PATH_FindPathAStarLocalPool(D2PathTypeArg * pPathTypeArg) {
     D2DrlgPathSearchCtxStrc abyOpenList;
@@ -2650,7 +2648,6 @@ int32_t __fastcall PATH_FindPathAStarLocalPool(D2PathTypeArg * pPathTypeArg) {
     if (!iVar1) {
       return 0;
     }
-
     D2DrlgPathNodeStrc* pNewNode = 0;
     abyOpenList.nPoolCount = 0;
     abyOpenList.pSortedHead = 0;
@@ -2666,13 +2663,11 @@ int32_t __fastcall PATH_FindPathAStarLocalPool(D2PathTypeArg * pPathTypeArg) {
       abyOpenList.nPoolCount++;
       memset(pNewNode, 0, 0x38);
     }
-
     int32_t nDeltaX = (nPackedSrc & 0xffff) - (nUnusedParam & 0xffff);
     pNewNode->nGCost = 0;
     if (nDeltaX < 0) {
       nDeltaX = -nDeltaX;
     }
-
     int32_t nDeltaY = (nPackedSrc >> 0x10) - (nUnusedParam >> 0x10);
     if (nDeltaY < 0) {
       nDeltaY = -nDeltaY;
@@ -2682,7 +2677,6 @@ int32_t __fastcall PATH_FindPathAStarLocalPool(D2PathTypeArg * pPathTypeArg) {
     } else {
       nHeuristic = (short int)nDeltaX + (short int)nDeltaY * 2;
     }
-
     pNewNode->nX = (uint16_t)nPackedSrc;
     pNewNode->nY = *(uint16_t*)((char*)&nPackedSrc + 2);
     pNewNode->nHCost = nHeuristic;
@@ -2693,7 +2687,6 @@ int32_t __fastcall PATH_FindPathAStarLocalPool(D2PathTypeArg * pPathTypeArg) {
     if (!pBestNodeOut) {
       return 0;
     }
-
     do {
       BOOL bExpandedAny;
       if (!pClosestNode || (short int)*(uint16_t*)((int)pBestNodeOut + 6) < (short int)*(uint16_t*)((int)pClosestNode + 6) || *(uint16_t*)((int)pBestNodeOut + 6) == *(uint16_t*)((int)pClosestNode + 6) && *(short int*)(pClosestNode + 2) + 5 < (int)(short int)*(uint16_t*)(pBestNodeOut + 2)) {
@@ -2702,27 +2695,20 @@ int32_t __fastcall PATH_FindPathAStarLocalPool(D2PathTypeArg * pPathTypeArg) {
       if (!*(uint16_t*)((int)pBestNodeOut + 6)) {
         break;
       }
-
       bExpandedAny = Path::DRLGPATH_ExpandAllNeighbors((uint16_t*)pBestNodeOut, (uintptr_t)&abyOpenList, nUnusedParam, pPathTypeArg);
       if (!bExpandedAny) {
         break;
       }
-
       pBestNodeOut = (void**)Path::DRLGPATH_PopBestNodeFromOpenList((uintptr_t)&abyOpenList);
     } while (pBestNodeOut);
-
     if (!pClosestNode) {
       return 0;
     }
-
     int32_t nExtractResult = Path::DRLGPATH_ExtractPathFromResult2((int32_t)pPathTypeArg, pClosestNode);
     return nExtractResult;
 }
-
 } // namespace D2Common::Drlg
-
 namespace D2Common::Drlg::Path {
-
 // Computes the squared Euclidean distance between two packed (X|Y) coordinates. Returns dx*dx + dy*dy. No callers found - likely referenced via function pointer table or dead code.
 int32_t __stdcall DRLGPATH_GetSquaredDistancePacked(uint32_t nPackedA, uint32_t nPackedB) {
     int nDeltaX = (nPackedA & 0xffff) - (nPackedB & 0xffff);
@@ -2796,7 +2782,6 @@ static BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg,
     if (!iVar2) {
       return 1;
     }
-
     nErrorAddr = *(int32_t*)(pScannerState[6] + *pScannerState * 4);
     *pScannerState = nErrorAddr;
     *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[nErrorAddr * 2] + (short int)pScannerState[2];
@@ -2806,7 +2791,6 @@ static BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg,
     if (!iVar2) {
       return 1;
     }
-
     iVar1 = *(int*)(pScannerState[6] + *pScannerState * 4);
     *pScannerState = iVar1;
     *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[iVar1 * 2] + (short int)pScannerState[2];
@@ -2816,7 +2800,6 @@ static BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg,
     if (!iVar2) {
       return 1;
     }
-
     pScannerState[4] = 1;
     iVar1 = *(int*)(pScannerState[6] + *pScannerState * 4);
     *pScannerState = iVar1;

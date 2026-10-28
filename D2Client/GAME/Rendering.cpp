@@ -171,9 +171,7 @@ void __stdcall DRAW_UI_FPSStats() {
     }
     if (gbFPSStatsEnabled) {
       int32_t nStat;
-
       D2gfx::D2GFX::D2GFX_DrawString(10, 2, "%d FPS  %d Skip", fps, Game::GetFPSSkip());
-
       D2gfx::D2GFX::D2GFX_DrawString(0xa0, 2, "Ping: %d", Game::GetPing());
       /* LPMEMORYSTATUS lpBuffer for GlobalMemoryStatus */ memStatus.dwLength = 0x20;
       GlobalMemoryStatus(&memStatus);
@@ -212,18 +210,13 @@ void __stdcall DRAW_UI_FPSStats() {
         return;
       }
 
-
       D2gfx::D2GFX::D2GFX_DrawString(10, 0x78, "GFX Memory->%i", Engine::Gfx::GFX_GetCofCacheFlags());
       iVar1 = Engine::Gfx::GFX_GetGfxSystemFlags();
-
       D2gfx::D2GFX::D2GFX_DrawString(10, 0x84, "COF Memory->%i of %i", Engine::Gfx::GFX_GetCofCacheMemUsage(), iVar1);
       uVar2 = D2CMP::SRC::SpriteCache::SPRITECACHE_GetCacheSize();
-
       D2gfx::D2GFX::D2GFX_DrawString(10, 0x90, "Sprite Cache Memory->%i of %i", D2CMP::SRC::SpriteCache::SPRITECACHE_GetTotalEntries(), uVar2);
-
       D2gfx::D2GFX::D2GFX_DrawString(10, 0x9c, "Async Files->%i", Fog::FOG_GetAsyncFileCount_ReturnZero());
       nCelCacheCurrent = D2CMP::SRC::SpriteCache::SPRITECACHE_GetCurrentSize();
-
       D2gfx::D2GFX::D2GFX_DrawString(10, 0xa8, "CelData Cache Memory->%i of %i", D2CMP::SRC::SpriteCache::SPRITECACHE_GetMaxSize(), nCelCacheCurrent);
       D2Client::Sound::SoundHdr::SOUNDHDR_Nop();
       DrawRenderStats();

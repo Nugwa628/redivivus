@@ -329,7 +329,6 @@ void __fastcall PLRSKILLS_StateSetFn05_ChangeClass(D2UnitStrc * pUnit, eD2States
     int32_t nDir = 1;
     int32_t nYPos = Units::GetYPosFromDynamicPathUnit(pUnit);
     int nTargetY = nYPos + 10;
-
     D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pDynamicPath, Units::GetXPosFromDynamicPathUnit(pUnit), nTargetY, nDir);
 }
 
@@ -1190,7 +1189,7 @@ static void STATES_ResetUnitGfxAndMode(D2UnitStrc * pUnit) {
     }
 
     reload_anim_state:
-    Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+    Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 1);
     D2Common::Units::InitAnimMode(pUnit);
     pUnit->nGfxCurrentFrame = 0;
     D2Common::Units::SetCurrentSkill(pUnit, nullptr);

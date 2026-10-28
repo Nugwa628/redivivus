@@ -586,7 +586,6 @@ BOOL __stdcall D2GFX_UpdateWindowSize(int32_t nResolutionMode) {
     if (!(rcCurrentClient.right - rcCurrentClient.left <= 0x320 && rcCurrentClient.bottom - rcCurrentClient.top <= 0x258)) {
       return 1;
     }
-
     /* UINT fWinIni for SystemParametersInfoA */ /* PVOID pvParam for SystemParametersInfoA */ /* UINT uiParam for SystemParametersInfoA */ /* UINT uiAction for SystemParametersInfoA */ __frame0.nWorkAreaLeft = 0;
     __frame0.nWorkAreaTop = 0;
     __frame0.nWorkAreaRight = 0;
@@ -612,12 +611,10 @@ BOOL __stdcall D2GFX_UpdateWindowSize(int32_t nResolutionMode) {
     if (nWindowX < 0) {
       nWindowX = 0;
     }
-
     nWorkAreaHeight = (nWorkAreaHeight - cy) / 2 + __frame0.nWorkAreaTop;
     if (nWorkAreaHeight < 0) {
       nWorkAreaHeight = 0;
     }
-
     /* UINT uFlags for SetWindowPos */ /* int cy for SetWindowPos */ /* int cx for SetWindowPos */ /* int Y for SetWindowPos */ /* int X for SetWindowPos */ /* HWND hWndInsertAfter for SetWindowPos */ /* HWND hWnd for SetWindowPos */ SetWindowPos(hwndD2GFX_Window, HWND_NOTOPMOST, nWindowX, nWorkAreaHeight, __frame0.rcNewWindow.right - __frame0.rcNewWindow.left, cy, 0x14);
     D2GFX_GetWindowSizeByResolutionMode(nResolutionMode, (int*)&rInitialWindowRect.right, (int*)&rInitialWindowRect.bottom);
     /* LPRECT lpRect for GetWindowRect */ /* HWND hWnd for GetWindowRect */ GetWindowRect(hWndLocal, &rInitialWindowRect);

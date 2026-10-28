@@ -220,10 +220,6 @@ void DrawTruncatedText(::ListBoxImplementation * pThis, uint16_t * wszText, int 
     uint16_t* pWcharClear;
     for (int i = 0; i < 0x400; i++) wszWorkBuffer[i] = 0;
 
-
-
-
-
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszWorkBuffer, wszText);
     int32_t nPixelWidth = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszWorkBuffer);
     nPixelWidth = D2Win::Src::D2WinFont::D2WINFONT_GetStringPixelWidthN((uint16_t*)wszWorkBuffer, nPixelWidth);

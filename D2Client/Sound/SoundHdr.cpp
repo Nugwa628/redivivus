@@ -54,16 +54,13 @@
 #define D2_FREE(p) Fog::Memory::FreeClientMemory((p), __FILE__, __LINE__, 0)
 #endif
 
-
 namespace D2Client {
-
 static void SOUNDHDR_CompleteAsyncLoad(int32_t pSoundHdr) {
     void* nAddress;
     if (*(int*)(pSoundHdr + 0x86) != 1) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x40);
       exit(-1);
     }
-
     nAddress = Fog::Src::AsyncData::ASYNCDATA_GetResult(*(D2AsyncData_Line0x128**)(pSoundHdr + 0x82));
     *(void**)(pSoundHdr + 0x6c) = (void*)nAddress;
     size_t nReadSize = Fog::Src::AsyncData::ASYNCDATA_GetReadSize(*(D2AsyncData_Line0x128**)(pSoundHdr + 0x82));
@@ -72,7 +69,6 @@ static void SOUNDHDR_CompleteAsyncLoad(int32_t pSoundHdr) {
     GAME::Sound::SOUND_ParseStreamWavHeader(pSoundHdr);
     gnSoundAsyncLoadCount--;
 }
-
 } // namespace D2Client
 
 namespace D2Client::Sound::SoundHdr {
@@ -434,7 +430,6 @@ void __stdcall TXT_AllocTxt_sounds_soundenviron() {
         nLine = 0x101;
         szSourceFile = ".\\Sound\\SoundHdr.cpp";
         pFileSize = &nFileSize;
-
         pD2File = (D2ArchiveStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(D2Win::Src::D2WinArchive::ReturnZero(), szPath, pFileSize, szSourceFile, nLine);
         pBinExcel = Fog::Src::Excel::STRUCT_CreateBinFieldExcelAndFillData(pD2File, nFileSize);
         nTxtSoundsSize = Fog::Src::Excel::TXT_GetLinesCountFromBinFieldExcel(pBinExcel);
@@ -447,7 +442,6 @@ void __stdcall TXT_AllocTxt_sounds_soundenviron() {
         nLine = 0x10d;
         szSourceFile = ".\\Sound\\SoundHdr.cpp";
         pFileSize = &nFileSize;
-
         pD2File = (D2ArchiveStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(D2Win::Src::D2WinArchive::ReturnZero(), szPath, pFileSize, szSourceFile, nLine);
         pBinExcel = Fog::Src::Excel::STRUCT_CreateBinFieldExcelAndFillData(pD2File, nFileSize);
         nTxtSoundEnvironSize = Fog::Src::Excel::TXT_GetLinesCountFromBinFieldExcel(pBinExcel);
@@ -515,7 +509,6 @@ void __stdcall TXT_AllocTxt_sounds_soundenviron() {
         }
 
         nMaxSong = (gnSoundIdRangeMax - gpSoundHdrGlobal + 1) * 4;
-
         memset(D2_ALLOC(nMaxSong), 0, nMaxSong);
         return;
       }
@@ -834,26 +827,22 @@ void __fastcall SOUNDHDR_BuildSoundPath(int32_t nSoundId, uint32_t * pszOutPath)
       pScanDwordEnd = pSoundCopy->Filename;
       pSoundCopy = (D2SoundsTxt*)(pScanDwordEnd + 1);
     } while (*pszDst != '\0');
-
     nFilenameLen = (int)(pScanDwordEnd + 1) - (int)pSound;
     pszDst = (char*)((int)pszOutPath - 1);
     do {
       pScanDwordEnd = pszDst + 1;
       pszDst++;
     } while (*pScanDwordEnd != '\0');
-
     for (nDwordCount = nFilenameLen >> 2; nDwordCount; nDwordCount--) {
       *(uint32_t*)pszDst = *(uint32_t*)pSound->Filename;
       pSound = (D2SoundsTxt*)(pSound->Filename + 4);
       pszDst += 4;
     }
-
     for (nFilenameLen &= 3; nFilenameLen; nFilenameLen--) {
       *pszDst = pSound->Filename[0];
       pSound = (D2SoundsTxt*)(pSound->Filename + 1);
       pszDst++;
     }
-
     return;
 }
 
@@ -963,7 +952,6 @@ void __fastcall SOUNDHDR_LoadSoundFile(int32_t nSoundId, int32_t bForceSync, int
       nResult = 0x301;
       szSourceFile = ".\\Sound\\SoundHdr.cpp";
       pSoundDataBytes = &pSound->nSoundDataBytes;
-
       pSoundData = Fog::Archive::D2FILE_AllocAndLoadD2File(D2Win::Src::D2WinArchive::ReturnZero(), szPath, (uint32_t*)pSoundDataBytes, szSourceFile, nResult);
       pSound->pSoundDataBuffer = pSoundData;
       if (pSoundData) {

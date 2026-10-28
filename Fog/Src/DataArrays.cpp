@@ -70,7 +70,6 @@ void __fastcall FOG_InitDataArray(D2DataArrayStrc * pDataArray) {
       nObjectIndex++;
       *(uint16_t*)(nObjectOffset + (int)pDataArray->pData) = 0;
     } while (nObjectIndex < pDataArray->numObjects);
-
     return;
 }
 

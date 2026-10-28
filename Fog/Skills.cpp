@@ -29,7 +29,7 @@ typedef int (__fastcall *CalcGetFunctionParameterCount_t)(int nFunctionIndex);
 
 namespace Fog::Skills {
 
-void __fastcall SKILLS_PushValue(int * pStack, int value) {
+static void __fastcall SKILLS_PushValue(int * pStack, int value) {
     if (pStack[0x40] >= 0x40) {
       return;
     }
@@ -93,7 +93,6 @@ uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, f
         if ((int)pbNext2 - (int)pdwParam >= nParam) {
           return 0;
         }
-
         nArgCount = (*pFunction)((uint32_t)*pbNext2, dwParam);
         goto push_and_skip_byte_operand;
         default:
@@ -105,7 +104,6 @@ uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, f
         if ((int)pbNext2 - (int)pdwParam >= nParam) {
           return 0;
         }
-
         nArgCount = (*pFunction)((int)*(short int*)pbNext2, dwParam);
         SKILLS_PushValue(aFormulaValueStack, nArgCount);
         pbNext2 = pbReadPtr + 3;
@@ -118,7 +116,6 @@ uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, f
         if ((int)pbNext2 - (int)pdwParam >= nParam) {
           return 0;
         }
-
         uFuncResult = (*pFunction)(*(int32_t*)pbNext2, dwParam);
         SKILLS_PushValue(aFormulaValueStack, uFuncResult);
         pbNext2 = pbReadPtr + 5;
@@ -290,7 +287,6 @@ uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, f
           aFormulaValueStack[nArgCount] = -nIntResult;
           goto commit_push;
         }
-
         break;
         case 0x16:
           if (nArgCount <= 0) {
@@ -397,7 +393,6 @@ uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, f
           uVar1 = (uint32_t)(uOperandB <= nIntResult);
           goto push_comparison_result;
         }
-
         break;
         case 0xb:
           if (nArgCount <= 0) {
@@ -418,7 +413,6 @@ uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, f
           uVar1 = (uint32_t)(uOperandB > nIntResult);
           goto push_comparison_result;
         }
-
         break;
         case 0xd:
           if (nArgCount <= 0) {
@@ -439,7 +433,6 @@ uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, f
           uVar1 = (uint32_t)(uOperandB >= nIntResult);
           goto push_comparison_result;
         }
-
         break;
         case 0xe:
           if (nArgCount <= 0) {
@@ -460,7 +453,6 @@ uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, f
           uVar1 = (uint32_t)(uOperandB == nIntResult);
           goto push_comparison_result;
         }
-
         break;
         case 0xf:
           if (nArgCount <= 0) {
@@ -481,7 +473,6 @@ uint32_t __stdcall SKILLS_CompileSkillFormula(uint32_t * pdwParam, int nParam, f
           uVar1 = (uint32_t)(uOperandB != nIntResult);
           goto push_comparison_result;
         }
-
         break;
       }
 

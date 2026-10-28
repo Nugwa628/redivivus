@@ -255,7 +255,6 @@ static void __stdcall Q27_SpawnDiabloPortal(D2QuestArgStrc * pQuestArgs, D2Quest
     pRoomsNear = &pPortalRoom;
     eCollisionFlags = 0x400;
     nScanRadius = 2;
-
     FindSpawnableLocation(D2Common::Units::UNITS_GetRoom(pQuestArgs->pTarget), &ptSpawnPos, nScanRadius, eCollisionFlags, pRoomsNear, nSpawnMaxTries, nSearchIterations);
     if (!pPortalRoom) {
       return;
@@ -599,7 +598,6 @@ uint8_t __fastcall QuitGameAfterDia(::SGAMEDATA * pGame, D2QuestDataStrc * pQues
           pQuestSpecificA4Q2 = pDVar1;
           nY = D2Client::Units::GetYPosFromDynamicPathUnit(pDVar2);
           nX = D2Client::Units::GetXPosFromDynamicPathUnit(pDVar2);
-
           pDVar2 = Q27_SpawnDiablo(pQuestData->pGame, D2Common::Units::UNITS_GetRoom(pDVar2), nX, nY, pQuestSpecificA4Q2);
           if (pDVar2) {
             *(uint8_t*)((int)pDVar1->sQuestGUID.aPlayerGUID + 2) = 0;
@@ -629,7 +627,6 @@ static void __stdcall Q27_SetTerrorsEndCompleted(D2BitBufferStrc * pBitBuffer, :
       /* SetQuestState(TerrorsEnd, Step0x07) — classic-only: Tyrael-dialog-seen
                          marker */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TerrorsEnd, QUESTSTATE_Step0x07);
       nDifficulty = (uint32_t)pGame->nDifficulty;
-
       GAME::Clients::SetClientStatus(UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x250), 4, nDifficulty);
     }
 
@@ -655,7 +652,6 @@ void __fastcall Q27_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * p
     if (!pRoom) {
       return;
     }
-
 
     eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom));
     if (neAct != ACT_IV) {
@@ -1021,10 +1017,8 @@ void __fastcall Q27_Callback_08_KillHandler(D2QuestDataStrc * pQuestData, D2Ques
           if (!pQuestSpecificData->abSealActivated[iSealIdx]) {
             return;
           }
-
           iSealIdx++;
         } while (iSealIdx < 5);
-
         Q27_ActivateAllSealsKillChaos((int*)pQuestSpecificData, pQuestData->pGame);
         if (!pQuestSpecificData->bDiabloSpawnStarted) {
           pQuestSpecificData->nDiabloKillTick = 0;

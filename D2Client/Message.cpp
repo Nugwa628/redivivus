@@ -80,7 +80,6 @@ int32_t __fastcall MessageGameLoop(::fpGameLoopFunction nfpGameLoopFunction) {
           /* LPMSG lpMsg for TranslateAcceleratorA */ /* HACCEL hAccTable for TranslateAcceleratorA */ hWnd = D2gfx::D2GFX::GetHwnd();
           /* HWND hWnd for TranslateAcceleratorA */ TranslateAcceleratorA(hWnd, hAccTable, lpMsg);
         }
-
         /* MSG * lpMsg for TranslateMessage */ TranslateMessage(&msg);
         /* MSG * lpMsg for DispatchMessageA */ DispatchMessageA(&msg);
       } else {
@@ -185,7 +184,6 @@ void __fastcall MESSAGE_RegisterEventHandlerBatch(HWND hWnd, D2UIFlagInitStrc * 
       pnMessageCode += 3;
       nCount--;
     } while (nCount);
-
     return;
 }
 
@@ -207,7 +205,6 @@ void __fastcall MESSAGE_UnregisterEventHandlerBatch(HWND hWnd, D2UIFlagInitStrc 
       pnMessageCode += 3;
       nCount--;
     } while (nCount);
-
     return;
 }
 
