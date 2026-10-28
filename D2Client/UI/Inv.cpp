@@ -4024,14 +4024,14 @@ static int32_t __stdcall ClickItemRight(D2UnitStrc * pItem, D2InventoryStrc * pG
       nCellHeightDivisor = (uint32_t)pInventoryGridScreenCoordinated.nCellHeight;
     } else {
       bExpansion = GAME::Game::CLIENT_CheckExpansion();
-      if (!bExpansion) {
-        nCol = (uint32_t)((int)pGridCoords - pBankPageGridScreenCoordinates.nPixelLeft) / (uint32_t)pBankPageGridScreenCoordinates.nCellWidth;
-        nRowOffset = (int)pItem - pBankPageGridScreenCoordinates.nTop;
-        nCellHeightDivisor = (uint32_t)pBankPageGridScreenCoordinates.nCellHeight;
-      } else {
+      if (bExpansion) {
         nCol = (uint32_t)((int)pGridCoords - pBigBankPageGridScreenCoordinates.nPixelLeft) / (uint32_t)pBigBankPageGridScreenCoordinates.nCellWidth;
         nRowOffset = (int)pItem - pBigBankPageGridScreenCoordinates.nTop;
         nCellHeightDivisor = (uint32_t)pBigBankPageGridScreenCoordinates.nCellHeight;
+      } else {
+        nCol = (uint32_t)((int)pGridCoords - pBankPageGridScreenCoordinates.nPixelLeft) / (uint32_t)pBankPageGridScreenCoordinates.nCellWidth;
+        nRowOffset = (int)pItem - pBankPageGridScreenCoordinates.nTop;
+        nCellHeightDivisor = (uint32_t)pBankPageGridScreenCoordinates.nCellHeight;
       }
     }
 
