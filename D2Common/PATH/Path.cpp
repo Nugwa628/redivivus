@@ -578,7 +578,7 @@ bool __stdcall PATH_ComputeMovementStep(uint32_t * pnOutX, uint32_t * pnOutY, D2
         }
 
         nRecalcResult = PATH_RecalculatePath(pUnit, (uint32_t)(pSkillsTxt->pTargetUnit != 0));
-        return (bool)('\x01' - (nRecalcResult != 0));
+        return !nRecalcResult;
       }
     }
 
