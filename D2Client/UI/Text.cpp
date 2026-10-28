@@ -1295,8 +1295,7 @@ static BOOL TEXT_FormatEventMessage(int32_t pEventData, uint16_t * wszText) {
 
     int32_t nPlayerGUID = pPlayerUnit_lcl->nUnitGUID;
     uint32_t nIgnoreFlag = 4;
-    int32_t nRosterGUID = GAME::Roster::GetRosterGUID(pRoster);
-    nIgnoreFlag = UNIT::PlayerList::GetFlag(nPlayerGUID, nRosterGUID, nIgnoreFlag);
+    nIgnoreFlag = UNIT::PlayerList::GetFlag(nPlayerGUID, GAME::Roster::GetRosterGUID(pRoster), nIgnoreFlag);
     if (!nIgnoreFlag) {
       return 1;
     }

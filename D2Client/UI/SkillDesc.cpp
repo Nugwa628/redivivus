@@ -5545,8 +5545,7 @@ static void __stdcall SKILLDESC_DescLine32_MissileDamage(D2UnitStrc * pUnit, int
       return;
     }
 
-    uint8_t byElemType = D2Common::Units::Missile::GetElemTypeFromMissileId(nParam2);
-    DamgeTypeToText((uint32_t)byElemType, wDmgTypeLocaleId, nMinElemDmg >> 8, nMaxElemDmg >> 8, wszText);
+    DamgeTypeToText((uint32_t)D2Common::Units::Missile::GetElemTypeFromMissileId(nParam2), wDmgTypeLocaleId, nMinElemDmg >> 8, nMaxElemDmg >> 8, wszText);
 }
 
 void __stdcall SKILLDESC_DescLine9_ElemDamage(D2UnitStrc * pUnit, uint16_t * wszText, int32_t eSkill, int32_t nFlatBonus, int32_t nSkillLevel, uint32_t nPercentBonus) {

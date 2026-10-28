@@ -5101,8 +5101,7 @@ void __stdcall MAINMENU_EnterEmailCleanup() {
     uint16_t* wszEmail = D2Win::Src::D2WinEditBox::FORMS_TextInput_GetValue(&gpnEmailBuffer->sControl);
     uint16_t* wszEmailConfirm = D2Win::Src::D2WinEditBox::FORMS_TextInput_GetValue(&gpCtlEnterEmailInput->sControl);
     int32_t nEmailLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszEmail);
-    int32_t nEmailConfirmLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszEmailConfirm);
-    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCtlEmailConfirmButton, (uint32_t)(0 < nEmailLen || 0 < nEmailConfirmLen));
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCtlEmailConfirmButton, (uint32_t)(0 < nEmailLen || 0 < D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszEmailConfirm)));
 }
 
 // Edit-box change callback installed via D2WINEDITBOX_SetInputMode @004fdb00 into D2WinEditBox+0x26c (fpChangeCallback). Signature proven by RET 0x4 (1 stack arg, callee cleans) and MOV EAX,1.

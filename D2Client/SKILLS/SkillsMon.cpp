@@ -1135,8 +1135,7 @@ void __fastcall SKILLSMON_SetMissilePathRandom(D2UnitStrc * pUnit, int32_t nPara
 
     D2DynamicPathStrc* pDynamicPath = pUnit->pPath.pDynamicPath;
     D2SeedStrc* pUnitSeed = &pUnit->sSeed;
-    uint32_t nXSP1 = D2Common::PATH::DynamicPath::GetXSP1(pDynamicPath);
-    D2Common::Seed::InitSeed_Param_666(pUnitSeed, nXSP1 + nParam);
+    D2Common::Seed::InitSeed_Param_666(pUnitSeed, D2Common::PATH::DynamicPath::GetXSP1(pDynamicPath) + nParam);
     D2SeedStrc sNewSeed = D2_SEED_NEXT(*pUnitSeed);
     *pUnitSeed = sNewSeed;
     if (0x13 >= sNewSeed.nSeedLow % 100) {
@@ -2517,8 +2516,7 @@ void __fastcall SKILLSMON_SetMissilePathLinear(D2UnitStrc * pUnit, int32_t nPara
     }
 
     D2DynamicPathStrc* pDynamicPath = pUnit->pPath.pDynamicPath;
-    uint32_t nXSP1 = D2Common::PATH::DynamicPath::GetXSP1(pDynamicPath);
-    D2Common::Seed::InitSeed_Param_666(&pUnit->sSeed, nXSP1 + nParam);
+    D2Common::Seed::InitSeed_Param_666(&pUnit->sSeed, D2Common::PATH::DynamicPath::GetXSP1(pDynamicPath) + nParam);
     D2Common::PATH::DynamicPath::PATH_SetPathType(pDynamicPath, 10);
     D2Common::PATH::DynamicPath::OverwriteDistanceAndMaxDistance(pDynamicPath, (uint8_t)nTotalFrames);
     D2Common::PATH::DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);

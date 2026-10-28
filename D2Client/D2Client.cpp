@@ -345,18 +345,15 @@ void __stdcall CMD_AutomapCycleFade() {
 }
 
 void __stdcall CMD_AutomapToggleParty() {
-    BOOL BVar1 = UI::Automap::AUTOMAP_GetParty();
-    UI::Automap::AUTOMAP_SetParty((uint32_t)!BVar1);
+    UI::Automap::AUTOMAP_SetParty((uint32_t)!UI::Automap::AUTOMAP_GetParty());
 }
 
 void __stdcall CMD_AutomapTogglePartyNames() {
-    int32_t iVar1 = UI::Automap::AUTOMAP_GetPartyNames();
-    UI::Automap::AUTOMAP_SetPartyNames((uint32_t)!iVar1);
+    UI::Automap::AUTOMAP_SetPartyNames((uint32_t)!UI::Automap::AUTOMAP_GetPartyNames());
 }
 
 void __stdcall CMD_AutomapToggleLeft() {
-    int32_t iVar1 = UI::Automap::AUTOMAP_GetLeft();
-    UI::Automap::AUTOMAP_SetLeft((uint32_t)!iVar1);
+    UI::Automap::AUTOMAP_SetLeft((uint32_t)!UI::Automap::AUTOMAP_GetLeft());
 }
 
 void __stdcall CMD_ToggleSkillTree() {

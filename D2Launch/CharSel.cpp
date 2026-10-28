@@ -1763,8 +1763,7 @@ BOOL __stdcall CHARSEL_OnPressScrollCharListDown(D2ControlMsg * pControlMsg) {
 }
 
 void __stdcall CHARSEL_ScrollCharList(int32_t nScrollDelta) {
-    int nCurrentScrollPos = D2Win::Src::D2WinTextBox::D2WINTEXTBOX_RefreshScrollbar(gpCtlCharSelScrollbar);
-    D2Win::Src::D2WinTextBox::D2WINTEXTBOX_SetScrollbarPosition(gpCtlCharSelScrollbar, nCurrentScrollPos + nScrollDelta);
+    D2Win::Src::D2WinTextBox::D2WINTEXTBOX_SetScrollbarPosition(gpCtlCharSelScrollbar, D2Win::Src::D2WinTextBox::D2WINTEXTBOX_RefreshScrollbar(gpCtlCharSelScrollbar) + nScrollDelta);
 }
 
 BOOL __stdcall CHARSEL_HandleKeyNavExpansion(int32_t pKeyMsg) {

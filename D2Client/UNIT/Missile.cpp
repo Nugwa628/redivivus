@@ -3220,8 +3220,7 @@ int32_t __fastcall MISSILE_CltHitFn29_GrimWard(D2UnitStrc * pUnit, D2UnitStrc * 
       return 1;
     }
 
-    uint8_t nDirection = D2Common::PATH::DynamicPath::GetDirection(pUnit->pPath.pDynamicPath);
-    D2Common::PATH::DynamicPath::SetDirectionAndNewDirection(pOwner->pPath.pDynamicPath, nDirection);
+    D2Common::PATH::DynamicPath::SetDirectionAndNewDirection(pOwner->pPath.pDynamicPath, D2Common::PATH::DynamicPath::GetDirection(pUnit->pPath.pDynamicPath));
     return 1;
 }
 
