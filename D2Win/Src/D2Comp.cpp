@@ -1372,7 +1372,7 @@ BOOL __fastcall D2COMP_SetAnimationMode(D2CharSelCompStrc * pCompUnit, int32_t n
 // Provenance: 1.14d asm 00504370 (pair scan over gnCompWeaponClassCodeMapCount entries); no callers, the same scan is inlined in D2COMP_AllocTxt_EverythingItems.
 int __stdcall D2COMP_GetWeaponClassCodeIndex(int32_t nWeaponClassCode) {
     uint32_t nIndex = 0;
-    if (!gnCompWeaponClassCodeMapCount) {
+    if (gnCompWeaponClassCodeMapCount <= 0) {
       return 0;
     }
 
