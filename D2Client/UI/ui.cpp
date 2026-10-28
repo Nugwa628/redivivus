@@ -2712,28 +2712,32 @@ bool __stdcall UI_ShowPopupDialog() {
 }
 
 static int UI_GetCursorFrameOffset(int32_t nCursorIndex) {
-    if (gnCursorDataCount == 7) {
+    switch (gnCursorDataCount) {
+    case 7:
       if (!(nCursorIndex < 7)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x90);
         exit(-1);
       }
 
       return CursorData[nCursorIndex].nFrameOffset;
-    } else {
+      break;
+    default:
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8f);
       exit(-1);
     }
 }
 
 static int32_t UI_GetCursorMaxFrames(int32_t nCursorIndex) {
-    if (gnCursorDataCount == 7) {
+    switch (gnCursorDataCount) {
+    case 7:
       if (!(nCursorIndex < 7)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9b);
         exit(-1);
       }
 
       return CursorData[nCursorIndex].nMaxFrames << 8;
-    } else {
+      break;
+    default:
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9a);
       exit(-1);
     }

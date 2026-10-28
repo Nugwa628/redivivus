@@ -1241,7 +1241,8 @@ int __stdcall SPELLSEL_IsWaitingForSkill() {
     }
 
     eD2States eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_uninterruptable);
-    if (eState == STATE_none) {
+    switch (eState) {
+    case STATE_none:
       return BooleanWaitingForSkillingMaybe;
     }
 

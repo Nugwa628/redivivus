@@ -849,7 +849,8 @@ int __stdcall CLIENT_GetDenOfEvilLightIntensity(uint8_t * pRed, uint8_t * pGreen
 
 int __fastcall ROOM_GetLevelLightColor(D2RoomStrc * pRoom, char * pRed, char * pGreen, char * pBlue) {
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    if (eLevelId == LEVEL_DenOfEvil) {
+    switch (eLevelId) {
+    case LEVEL_DenOfEvil:
       int iVar1;
       iVar1 = CLIENT_GetDenOfEvilLightIntensity((uint8_t*)pRed, (uint8_t*)pGreen, (uint8_t*)pBlue);
       return iVar1;
