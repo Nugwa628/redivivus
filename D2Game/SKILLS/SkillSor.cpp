@@ -403,12 +403,8 @@ BOOL __fastcall Skills_SrvDoFunc_017_ChargedBolt(::SGAMEDATA * pGame, D2UnitStrc
     if (pUnit) {
       pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
     }
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillTxtBase + eSkill)) {
+    D2SkillsTxt* pSkillTxtBase = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillTxtBase) {
       return 0;
     }
 
@@ -417,7 +413,7 @@ BOOL __fastcall Skills_SrvDoFunc_017_ChargedBolt(::SGAMEDATA * pGame, D2UnitStrc
       return 0;
     }
 
-    int32_t nMissileCount = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase[eSkill].calc[0], eSkill, nSkillLvl);
+    int32_t nMissileCount = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase->calc[0], eSkill, nSkillLvl);
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.nFlags = 0x21;
     sSkillArg.pOwner = pUnit;
@@ -758,12 +754,8 @@ BOOL __fastcall Skills_SrvDoFunc_022_Nova_FrostNova(::SGAMEDATA * pGame, D2UnitS
     if (pUnit) {
       pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
     }
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillTxtBase + eSkill)) {
+    D2SkillsTxt* pSkillTxtBase = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillTxtBase) {
       return 0;
     }
 
@@ -773,7 +765,7 @@ BOOL __fastcall Skills_SrvDoFunc_022_Nova_FrostNova(::SGAMEDATA * pGame, D2UnitS
     }
 
     int32_t nVelocity = D2Common::DATATBLS::MissileTbls::MISSILETBLS_CalculateVelocity(peMissileId, nSkillLvl);
-    int32_t nCalc0 = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase[eSkill].calc[0], eSkill, nSkillLvl);
+    int32_t nCalc0 = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase->calc[0], eSkill, nSkillLvl);
     SkillsServer::SKILLS_CreateMissileRing(pGame, pUnit, pUnit, peMissileId, eSkill, nSkillLvl, nVelocity + nCalc0);
     return 1;
 }

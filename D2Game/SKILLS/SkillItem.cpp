@@ -2387,12 +2387,8 @@ BOOL __fastcall ITEMEVENT_ApplyHitDamage(::SGAMEDATA * pGame, uint32_t nUnitEven
     }
 
     int32_t nUnit = nSkillLvl;
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills;
-    if (!(pSkillTxt + eSkill)) {
+    D2SkillsTxt* pSkillTxt = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillTxt) {
       return 0;
     }
     if (nSkillLvl < 0) {
@@ -2406,7 +2402,7 @@ BOOL __fastcall ITEMEVENT_ApplyHitDamage(::SGAMEDATA * pGame, uint32_t nUnitEven
     sDamage.wResultFlags = 0x4021;
     UNIT::SUnitDmg::DAMAGE_ApplyDamageToUnit(pGame, pCaster, pTarget, 1, &sDamage);
     UNIT::SUnitDmg::SERVER_GetHitCalculation(pGame, pCaster, pTarget, &sDamage);
-    sCltOverlay = pSkillTxt[eSkill].cltoverlaya;
+    sCltOverlay = pSkillTxt->cltoverlaya;
     if (!(-1 < sCltOverlay && (int)sCltOverlay < sgptDataTable->nTxtOverlaySize)) {
       return 1;
     }

@@ -135,12 +135,8 @@ BOOL __fastcall Skills_SrvDoFunc_064_Sacrifice(::SGAMEDATA * pGame, D2UnitStrc *
     D2DamageStrc sDamage;
     int32_t nDmgFromHit;
     uint32_t n100Percent;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillsTxtBase + eSkill)) {
+    D2SkillsTxt* pSkillsTxtBase = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsTxtBase) {
       return 0;
     }
 
@@ -164,7 +160,7 @@ BOOL __fastcall Skills_SrvDoFunc_064_Sacrifice(::SGAMEDATA * pGame, D2UnitStrc *
 
     n100Percent = 100;
 
-    sDamage.dwPhysDamage = D2Client::Stats::D2ApplyPercent(nDmgFromHit, D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxtBase[eSkill].calc[1], eSkill, nSkillLvl), n100Percent);
+    sDamage.dwPhysDamage = D2Client::Stats::D2ApplyPercent(nDmgFromHit, D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxtBase->calc[1], eSkill, nSkillLvl), n100Percent);
     sDamage.dwDmgTotal = sDamage.dwPhysDamage;
     UNIT::SUnitDmg::DAMAGE_ApplyDamageToUnit(pGame, pUnit, pUnit, 0, &sDamage);
     UNIT::SUnitDmg::SERVER_GetHitCalculation(pGame, pUnit, pUnit, &sDamage);
@@ -1452,12 +1448,8 @@ BOOL __fastcall Skills_SrvDoFunc_079_Conversion(::SGAMEDATA * pGame, D2UnitStrc 
 // Server do-function for skill 80 (Smite). Gets the current attack target, spawns the Smite missile via CreatingMissile aimed at the target's position, sets the missile's target unit type/GUID, and applies the skill's srvoverlay to the target unit. Returns 1 on success, 0 on invalid skill, no missile ID, or no target.
 BOOL __fastcall Skills_SrvDoFunc_080_FistOfTheHeavens(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     D2SkillArgStrc sSkillArg;
-    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxt = sgptDataTable->pTxtSkills;
-    if (!(pSkillsTxt + eSkill)) {
+    D2SkillsTxt* pSkillsTxt = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsTxt) {
       return 0;
     }
 
@@ -1486,7 +1478,7 @@ BOOL __fastcall Skills_SrvDoFunc_080_FistOfTheHeavens(::SGAMEDATA * pGame, D2Uni
 
     D2Common::Units::Missile::SetTargetX(pUnit_01, pUnit_00->eUnitType);
     D2Common::Units::Missile::SetTargetY(pUnit_01, pUnit_00->nUnitGUID);
-    short int nOverlayId = pSkillsTxt[eSkill].srvoverlay;
+    short int nOverlayId = pSkillsTxt->srvoverlay;
     if (!(0 <= nOverlayId && (int)nOverlayId < sgptDataTable->nTxtOverlaySize)) {
       return 1;
     }
