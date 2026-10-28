@@ -355,3 +355,4 @@ fix_bitmask	e4d933d	265	194	7
 fix_globalwidth	3898c1f	34	30	9	
 fix_nestcall	b4822ff	1265	14	1	
 fix_inplace	d8c5681	76	13	1	
+fix_boolarith	d8c5681	32	16	0	
