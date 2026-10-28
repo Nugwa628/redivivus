@@ -154,8 +154,8 @@ uint32_t __stdcall QUEST_IsPlayerGUIDInTrackingList(D2QuestDataA1Q5Strc * pListB
 }
 
 BOOL __fastcall Q05_NotifyQuestStateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ForgottenTower, QUESTSTATE_Completed);
     if (bQuestState) {
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ForgottenTower, QUESTSTATE_JustCompleted);
@@ -173,8 +173,8 @@ BOOL __fastcall Q05_NotifyQuestStateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * p
 
 // A1Q5 "Forgotten Tower" — on-join sync callback. Reads the joining player's persisted quest record; if the tower is not yet Completed or RewardAwaits, inspects the shared quest nStateFlag/nStateFlagPrev and re-applies the matching SetQuestState (Step0x02–0x06) to the player's bit buffer so late-joiners see the correct journal progress. No loot or reward granted here.
 BOOL __fastcall Q05_SyncQuestStepToPlayer(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ForgottenTower, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -578,8 +578,8 @@ BOOL __fastcall Q05_MarkCompleteForPlayersInTower(::SGAMEDATA * pGame, D2UnitStr
     uint16_t nRewardPlayerCount;
     D2QuestDataA1Q5Strc* pA1Q5Data;
     D2QuestDataA1Q5Strc* pQuestSpecific;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ForgottenTower, QUESTSTATE_Completed);
     if (bQuestCompleted == 1) {
       return 0;
@@ -723,8 +723,8 @@ void __fastcall Q05_CheckAndUpdateOnAreaEntry(::SGAMEDATA * pGame, D2UnitStrc * 
       return;
     }
 
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -791,8 +791,8 @@ bool __fastcall Q05_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 }
 
 BOOL __fastcall Q05_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ForgottenTower, QUESTSTATE_Completed);
     if (bCompleted == 1) {
       return 0;
@@ -804,8 +804,8 @@ BOOL __fastcall Q05_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pU
 }
 
 BOOL __fastcall Q05_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_ForgottenTower, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_ForgottenTower, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }
@@ -991,8 +991,8 @@ void __fastcall Q05_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
 // A1Q5 "Forgotten Tower" — quest callback slot 13 (game-load re-sync). Reads the joining player's persisted quest record; if the quest is already Completed or FinishedInPreviousGame, returns immediately. Otherwise reconstructs the volatile nStateFlag/nStateFlagPrev pair by priority-checking Step0x06, Step0x05, Step0x03, Step0x02 so that the quest controller resumes at the correct sub-step after a game reload. Mirror of Q05_SyncQuestStepToPlayer but sets both state fields.
 void __fastcall Q05_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestState) {
       return;

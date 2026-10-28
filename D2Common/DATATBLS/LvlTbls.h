@@ -4052,9 +4052,9 @@ namespace D2Common::DATATBLS::LvlTbls {
 // Builds the 142-column field-descriptor table for Levels.txt (palette/act/teleport flags, monster levels and densities per difficulty, object groups/probabilities, the mon/nmon/umon/cmon spawn lists and their counts, themes, sound env, waypoint, and the LevelName/LevelWarp/EntryFile strings) and compiles it into sgtDataTable.pTxtLevels via CompileTxt (row stride 0x220). Halts via Fog ErrorManager if more than 0x3ff levels. Post-compile per level row: converts LevelName/LevelWarp keys to wide strings via the string table, and counts the populated entries in the mon/nmon/umon lists (terminated by a negative id, max 0x19), storing the three counts in bytes preceding the mon array. __fastcall, pMemory = data-table pool. Called once at data-table load.
 void __fastcall TXT_AllocTxt_levels(struct D2PoolManagerStrc * pMemory);
 struct D2LevelsTxt * __stdcall TXT_Levels_GetLine(eD2LevelId eLevel);
-bool __stdcall LEVEL_CanHaveRain(eD2LevelId eLevel);
+uint8_t __stdcall LEVEL_CanHaveRain(eD2LevelId eLevel);
 uint32_t __stdcall LVLTBLS_GetNoPer(uint32_t nParam);
-bool __stdcall LEVEL_CanHaveMud(eD2LevelId eLevel);
+uint8_t __stdcall LEVEL_CanHaveMud(eD2LevelId eLevel);
 void __stdcall LVLTBLS_FreeLevelsTxt();
 int32_t __stdcall TXT_Levels_GetMonLvlForDifficulty(eD2LevelId eLevel, eD2Difficulty nDifficulty, BOOL bIsExpansion);
 eD2LevelId * __fastcall GetPortalLevelArrayFromPortalFlags(uint32_t * pdwParam);
