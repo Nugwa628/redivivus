@@ -6641,10 +6641,10 @@ void __stdcall PACKET_SendUnitInteraction0x44(D2UIMouseMsgStrc * pMsg) {
       }
 
       pPlayerOrCursorItem = UNIT::Player::GetPlayerUnit_UI();
-      if (!pPlayerOrCursorItem) {
-        pPlayerOrCursorItem = 0;
-      } else {
+      if (pPlayerOrCursorItem) {
         pPlayerOrCursorItem = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pPlayerOrCursorItem->pInventory);
+      } else {
+        pPlayerOrCursorItem = 0;
       }
 
       ITEM_SetItemOnHand(pPlayerOrCursorItem);
@@ -6656,10 +6656,10 @@ void __stdcall PACKET_SendUnitInteraction0x44(D2UIMouseMsgStrc * pMsg) {
     }
 
     pPlayerOrCursorItem = UNIT::Player::GetPlayerUnit_UI();
-    if (!pPlayerOrCursorItem) {
-      nUnitType = -1;
-    } else {
+    if (pPlayerOrCursorItem) {
       nUnitType = pPlayerOrCursorItem->nUnitGUID;
+    } else {
+      nUnitType = -1;
     }
 
     GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT_INT(0x44, nUnitType, gnNpcShopActiveTab, 0, 2);
