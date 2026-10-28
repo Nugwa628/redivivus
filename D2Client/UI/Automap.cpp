@@ -195,7 +195,7 @@ int32_t AUTOMAP_GetFade() {
     return nAutoMapFade;
 }
 
-void __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
+int32_t __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
     if (MiniMapType == 1 && nAutomapFade == 1) {
       nAutomapFade = (bAutoMapFade ? -2 : 0) + 2;
       nAutoMapFade = 1;
@@ -204,44 +204,49 @@ void __fastcall AUTOMAP_SetFade(int32_t nAutomapFade) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMapFade", 0, nAutomapFade);
     bAutoMapFade = nAutomapFade;
     nAutoMapFade = nAutomapFade;
+    return nAutomapFade;
 }
 
 int32_t __stdcall AUTOMAP_GetCenters() {
     return nAutoMapCenters;
 }
 
-void __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters) {
+int32_t __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Centers", 0, nAutoMapCenters);
     Automap::nAutoMapCenters = nAutoMapCenters;
+    return nAutoMapCenters;
 }
 
 int32_t __stdcall AUTOMAP_GetLeft() {
     return AutoMapLeft;
 }
 
-void __fastcall AUTOMAP_SetLeft(int32_t nAutoMapLeft) {
+int32_t __fastcall AUTOMAP_SetLeft(int32_t nAutoMapLeft) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Left", 0, nAutoMapLeft);
     AutoMapLeft2 = nAutoMapLeft;
     AutoMapLeft3 = nAutoMapLeft;
     AutoMapLeft = nAutoMapLeft;
+    return nAutoMapLeft;
 }
 
 BOOL __stdcall AUTOMAP_GetParty() {
     return nAutoMapParty;
 }
 
-void __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty) {
+int32_t __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Party", 0, nAutoMapParty);
     Automap::nAutoMapParty = nAutoMapParty;
+    return nAutoMapParty;
 }
 
 int32_t __stdcall AUTOMAP_GetPartyNames() {
     return AutoMapPartyNames;
 }
 
-void __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames) {
+int32_t __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Party Names", 0, nAutoMapPartyNames);
     AutoMapPartyNames = nAutoMapPartyNames;
+    return nAutoMapPartyNames;
 }
 
 void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, D2AutomapCellStrc * * ppRootNode) {
@@ -2396,7 +2401,6 @@ void __stdcall AUTOMAP_Init() {
 }; D2_STATIC_GUARD(gnAutoMapInitialZoomLevel, "D2Client::UI::Automap::AUTOMAP_Init::gnAutoMapInitialZoomLevel");
 
     int nCellId;
-    uint32_t* pPriorityValue;
     int32_t nRegValue = 0;
     AUTOMAP_LoadDC6Sprites();
     uint32_t* pPriorityTable = gnAutoMapCellPriority;
@@ -2409,9 +2413,8 @@ void __stdcall AUTOMAP_Init() {
     do {
       uint32_t nCellIndex;
       nCellIndex = *pCellEntry;
-      pPriorityValue = pCellEntry + 1;
+      gnAutoMapCellPriority[nCellIndex] = pCellEntry[1];
       pCellEntry += 2;
-      gnAutoMapCellPriority[nCellIndex] = *pPriorityValue;
     } while ((int)pCellEntry < (int)(gnAutoMapInitialZoomLevel + 98));
     // The original's bound is `pCellEntry < 0x7113e0`, and 0x7113e0 is where nAutoMapCenters
     // happens to sit immediately after this 49-pair table - so the compiler spelled "the end of

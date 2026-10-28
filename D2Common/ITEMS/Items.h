@@ -136,7 +136,7 @@ void __stdcall ResetItemSeed(struct D2UnitStrc * pUnit);
 int32_t __stdcall GetModSeed(struct D2UnitStrc * pUnit);
 void __stdcall SetModSeed(struct D2UnitStrc * pUnit, int32_t nModSeed);
 // Returns nQuality from D2UnitDataItemStrc. Returns 2 (NORMAL) if unit is null, not an item, or has no item data. Thirty-seven bytes reading the unit from [EBP+8] and touching EAX only, so it preserves ECX; CalculateTransactionCost_Impl carries a magic-or-better flag there across this call.
-int __stdcall GetItemQuality(struct D2UnitStrc * pUnit);
+int GetItemQuality(struct D2UnitStrc * pUnit);
 void __stdcall SetItemQuality(struct D2UnitStrc * pUnit, eD2ItemQuality eItemQuality);
 int16_t __stdcall GetMagicPrefix(struct D2UnitStrc * pUnit, int32_t nIndex);
 void __stdcall SetMagixPrefix(struct D2UnitStrc * pUnit, int16_t wMagicPrefix, int32_t nIndex);

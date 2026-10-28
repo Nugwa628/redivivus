@@ -121,8 +121,8 @@ bool __fastcall Q23_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 // Per-player iterator callback for A3Q6 The Guardian: syncs an individual player's QuestRecord journal sub-steps to the shared quest's nStateFlag/nStateFlagPrev. Skips players whose quest is already Completed or at Step0x11. Maps nStateFlag 2→Step0x02, 3→Step0x03; for state 4/5 further branches on nStateFlagPrev (2/3/4) to write Step0x04-Step0x09, reflecting which Cain/Ormus dialog steps Mephisto-quest progress has reached.
 BOOL __fastcall Q23_PlayerUpdateGuardianSteps(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     uint8_t byStateFlagPrev;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Completed);
     /* GetQuestState(Guardian=0x16, Step0x11=0x0b): bail if quest finalized (Act4
                          unlocked) */ if (bQuestState == 1) {
@@ -186,11 +186,13 @@ BOOL __fastcall Q23_PlayerUpdateGuardianSteps(::SGAMEDATA * pGame, D2UnitStrc * 
 // JustCompleted(0xd) + Completed(0) + Step0x11(0x0b, "Act4 unlocked / quest finalized"), then calls
 // SetClientStatus(3) to flag the client as able-to-progress (the gate that opens travel to Pandemonium/Act4).
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a3q6.cpp
-static void __stdcall Q23_SetGuardianQuestComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
+void __stdcall Q23_SetGuardianQuestComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer) {
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_JustCompleted);
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Completed);
     D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Step0x11);
-    GAME::Clients::SetClientStatus(UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q6.cpp", 0xcc), 3, pGame->nDifficulty);
+    uint32_t nDifficulty = (uint32_t)pGame->nDifficulty;
+    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a3q6.cpp", 0xcc);
+    GAME::Clients::SetClientStatus(pClient, 3, nDifficulty);
 }
 
 // [The Guardian (Q23)] Per-player iterator run after Mephisto dies. If this player is standing in
@@ -200,8 +202,8 @@ static void __stdcall Q23_SetGuardianQuestComplete(::SGAMEDATA * pGame, D2UnitSt
 BOOL __fastcall Q23_PlayerCheckDuranceLevel3Complete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     bool _bQuestState;
     bool bQuestState;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (!pRoom) {
       return 0;
@@ -236,8 +238,8 @@ BOOL __fastcall Q23_PlayerCheckDuranceLevel3Complete(::SGAMEDATA * pGame, D2Unit
 // CannotCompleteQuestInGame=0xe), push quest-update packet 0x14 to the player's client so the journal
 // and "Act4 available" UI refresh. Otherwise no-op.
 BOOL __fastcall Q23_PlayerNotifyCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Completed);
     /* GetQuestState(Guardian=0x16, FinishedInPreviousGame=0x0f) */ /* GetQuestState(Guardian=0x16, JustCompleted=0x0d): is there a pending "just
                          completed" notify? */ /* GetQuestState(Guardian=0x16, CannotCompleteQuestInGame=0x0e): pending "cannot
@@ -272,8 +274,8 @@ void __fastcall Q23_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t nTargetClassId;
     uint32_t nGossipLineIdx;
     ::SGAMEDATA* pGameInner = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGameInner->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGameInner->nDifficulty];
     /* GetQuestState(Guardian=0x16, Completed=0) */ _bStep11 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Completed);
     /* GetQuestState(nQuestIdReal=Guardian, Step0x11=0x0d? NOTE imm 0xd here):
                          finalized-state probe for dialog branch */ _bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_JustCompleted);
@@ -459,8 +461,8 @@ void __fastcall Q23_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     short int nNPCNo = pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo;
     short int nMsgIdx = pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex;
     ::SGAMEDATA* pUnitPlayerData = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pUnitPlayerData->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pGameInner = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pGameInner->pQuestRecord[pUnitPlayerData->nDifficulty];
     /* GetQuestState(Guardian=0x16, Step0x11=0x0b): is quest finalized? */ _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Step0x11);
     /* GetQuestState(Guardian=0x16, Completed=0): if !Step0x11 && Completed -> bail
                           */ if (!_bQuestState) {
@@ -537,8 +539,8 @@ uint8_t __fastcall Q23_QuestUpdate(::SGAMEDATA * pGame, D2QuestDataStrc * pQuest
 // in Act III, mark the Guardian quest complete (Q23_SetGuardianQuestComplete) and bump participation
 // count. Gives nearby party members Mephisto-kill credit. (Called via ExecuteFunctionForEveryPartyMember.)
 void __fastcall Q23_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bAlreadyCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Completed);
     if (bAlreadyCompleted == 1) {
       return;
@@ -568,14 +570,14 @@ void __fastcall Q23_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * p
 // [The Guardian (Q23)] Per-player iterator: if THIS player just completed (JustCompleted set), find
 // their party and propagate Mephisto-kill completion to every party member via Q23_PartyMember_SetCompleted.
 BOOL __fastcall Q23_PropagateCompletionToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheGuardian, QUESTSTATE_JustCompleted);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TheGuardian, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }
 
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -588,8 +590,8 @@ BOOL __fastcall Q23_PropagateCompletionToParty(::SGAMEDATA * pGame, D2UnitStrc *
 // players who were NOT present for the Mephisto kill so they get the "can't complete in this game" journal
 // entry rather than credit.
 BOOL __fastcall Q23_PartyMember_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -610,8 +612,8 @@ BOOL __fastcall Q23_PartyMember_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStr
 // [The Guardian (Q23)] Per-player iterator: if THIS player just completed (JustCompleted), play the
 // quest-complete moo/sound event (0x42) on them. Cosmetic completion feedback.
 BOOL __fastcall Q23_PartyMember_PlayCompleteSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheGuardian, QUESTSTATE_JustCompleted);
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TheGuardian, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }
@@ -822,8 +824,8 @@ void __fastcall Q23_SequenceFilter(D2QuestDataStrc * pQuestData) {
 // the act-progress field (skips reconstruction). Maps each saved step to the matching (flag,prevFlag) pair.
 void __fastcall Q23_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Completed);
     /* GetQuestState(Guardian=0x16, Step0x11=0x0b): finalized -> skip rebuild */ /* GetQuestState(AbleGoToAct4=0x17, Completed=0): if Act4 already unlocked ->
                          skip rebuild */ if (bQuestState == 1 || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGuardian, QUESTSTATE_Step0x11) , bQuestState == 1) || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_AbleGoToAct4, QUESTSTATE_Completed) , bQuestState == 1)) {

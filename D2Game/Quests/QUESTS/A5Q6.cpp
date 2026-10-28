@@ -97,8 +97,8 @@ namespace D2Game::Quests::QUESTS::A5Q6 {
 BOOL __fastcall SendQuestBitsIfNeeded(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     bool _bQuestState;
     bool bQuestState;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     /* GetQuestState(QUEST_EveOfDestruction, 0=Completed) — Baal quest already
                          done? */ _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Completed);
     /* GetQuestState(QUEST_EveOfDestruction, 0xf=FinishedInPreviousGame) —
@@ -158,8 +158,8 @@ void __fastcall Q36_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 // A5Q6 Eve of Destruction. Per-player iterate callback: drives the journal "in progress" sub-steps. If the player's quest is neither Completed(0) nor RewardAwaits(1), and they are in Act V, read the live quest nStateFlag: nStateFlag==2 -> set record state Step0x02; nStateFlag==3 -> set record state Step0x03. Mirrors the server-side quest progression flag into the player's saved quest record bits.
 BOOL __fastcall SetStep0x2And0x3(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     bool bQuestState;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Completed);
     if (BVar1 == 1) {
       return 0;
@@ -397,8 +397,8 @@ void __fastcall Q36_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q6.cpp
 void __fastcall Q36_SetCompleteForPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     bool bQuestState;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Completed);
     if (BVar1 == 1) {
       return;
@@ -462,14 +462,14 @@ static void __stdcall Q36_CompleteQuestAndSetStatus(D2UnitStrc * pUnit, D2BitBuf
 
 // A5Q6 Eve of Destruction. Per-player iterate callback: if this player's quest is JustCompleted(0xd), look up their party and propagate Baal-kill credit to every party member via ExecuteFunctionForEveryPartyMember(Q36_SetCompleteForPartyMember).
 BOOL __fastcall Q36_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
+    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
 
-    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == 0xffff) {
+    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == -1) {
       return 0;
     }
 
@@ -481,8 +481,8 @@ BOOL __fastcall Q36_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * p
 BOOL __fastcall SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     bool _bQuestState;
     bool bQuestState;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     /* GetQuestState(QUEST_EveOfDestruction, ==1 RewardAwaits) — skip if reward
                          pending; else mark CannotComplete */ _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Completed);
     if (_bQuestState == 1) {
@@ -501,18 +501,19 @@ BOOL __fastcall Q36_SendCompletionNotification(::SGAMEDATA * pGame, D2UnitStrc *
     bool _bJustCompleted;
     bool bJustCompleted;
     D2GSPacketSrv0x5D abyQuestPacket;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
     /* GetQuestState(QUEST_EveOfDestruction, 0xd=JustCompleted) — only send
-                         completion FX/packet if just killed Baal */ _bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
+                         completion FX/packet if just killed Baal */ _bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
     if (!_bJustCompleted) {
       return 0;
     }
 
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q6.cpp", 0x1d8);
-    memset(&abyQuestPacket, 0, sizeof(abyQuestPacket));
+    abyQuestPacket.nExtra = 0;
     abyQuestPacket.nPacketId = ']';
     abyQuestPacket.nQuestId = '$';
     abyQuestPacket.nAlertFlags = '\x02';
+    abyQuestPacket.nFilterStatus = '\0';
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &abyQuestPacket);
     UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pUnit, 0x53, pUnit);
     return 0;
@@ -798,8 +799,8 @@ void __fastcall Q36_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2
     bool _bQuestCompleted;
     bool bQuestCompleted;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     /* GetQuestState(QUEST_EveOfDestruction, 0=Completed) — only set Step0x10 once
                          quest complete */ _bQuestCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (!_bQuestCompleted) {
@@ -816,8 +817,8 @@ void __fastcall Q36_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D
     bool _bQuestState;
     bool bQuestState;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
-    D2BitBufferStrc* pBitBuffer = pQuestRecord;
+    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     /* GetQuestState(QUEST_EveOfDestruction, 0=Completed) — if done, jump to set
                          Step0x10 + status 5 */ _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     /* GetQuestState(QUEST_EveOfDestruction, 0xf=FinishedInPreviousGame) — also
@@ -850,7 +851,9 @@ void __fastcall Q36_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D
 
     /* SetQuestState(QUEST_EveOfDestruction, 0xa=Step0x10) — final "left act V"
                          bit for already-completed loader */ D2Common::QuestRecord::SetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Step0x10);
-    GAME::Clients::SetClientStatus(UNIT::SUnit::SUNIT_GetClient(pQuestArgs->pPlayer, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q6.cpp", 0x2fe), 5, pQuestData->pGame->nDifficulty);
+    uint32_t nDifficulty = (uint32_t)pQuestData->pGame->nDifficulty;
+    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pQuestArgs->pPlayer, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q6.cpp", 0x2fe);
+    GAME::Clients::SetClientStatus(pClient, 5, nDifficulty);
 }
 
 // A5Q6 Eve of Destruction — quest INIT (nInitNo=4). Allocates the 0xa8-byte A5Q6 quest-specific struct, wires up the state-handler vtable (slots: 0=Callback_00 gossip, 2=Callback_02 tentacle, 3=Callback_03 accept, 8=Callback_08 Baal death, 0xa=Callback_10 leave, 0xb=Callback_11 dialog, 0xd=Callback_13 load, 0xe=Callback_14), sets the act-V NPC gossip table (monstats 0x1ff/0x208/0x201/0x203/0x200), nQuestIdReal=QUEST_EveOfDestruction, fpActiveFilter=Q36_ActiveFilter, fpSequenceFilter=Q36_SequenceFilter, nSequenceQuestId=QUEST_PrisonOfIce. Zeroes the struct + GUID list.
