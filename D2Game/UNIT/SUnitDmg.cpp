@@ -3260,11 +3260,11 @@ int32_t __fastcall DAMAGE_SafeShiftMultiply(int32_t nParam1, int32_t nParam2, in
     }
 
     uint8_t byShift = (uint8_t)nShiftBits;
-    if (0x7fffffff >> ((char)(nParam2 >> (byShift)) + byShift & 0x1f) < nParam1) {
-      return (nParam1 >> (byShift)) * nParam2;
+    if (0x7fffffff >> ((char)(nParam2 >> (byShift & 0x1f)) + byShift & 0x1f) < nParam1) {
+      return (nParam1 >> (byShift & 0x1f)) * nParam2;
     }
 
-    nParam1 = nParam1 * nParam2 >> (byShift);
+    nParam1 = nParam1 * nParam2 >> (byShift & 0x1f);
     return nParam1;
 }
 
@@ -3280,11 +3280,11 @@ int32_t __stdcall XP_ApplyLevelExpRatio(int32_t nLevel, int32_t nParam) {
     }
 
     uint8_t byShift = (uint8_t)nExpRatioBase;
-    if (0x7fffffff >> ((char)((int)nExpRatioLevel >> (byShift)) + byShift & 0x1f) < nParam) {
-      return (nParam >> (byShift)) * nExpRatioLevel;
+    if (0x7fffffff >> ((char)((int)nExpRatioLevel >> (byShift & 0x1f)) + byShift & 0x1f) < nParam) {
+      return (nParam >> (byShift & 0x1f)) * nExpRatioLevel;
     }
 
-    nParam = (int)(nExpRatioLevel * nParam) >> (byShift);
+    nParam = (int)(nExpRatioLevel * nParam) >> (byShift & 0x1f);
     return nParam;
 }
 
