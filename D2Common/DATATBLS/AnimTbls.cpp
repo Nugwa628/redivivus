@@ -199,7 +199,23 @@ void __stdcall ANIMDATA_SetAnimSpeedForUnit(D2UnitStrc * pUnit, int32_t nParam) 
 // fallback to default record.
 BOOL __stdcall ANIMDATA_GetFramesSpeedAndTrigger(int * pszName, uint32_t * pnFrameCount, int * pnAnimSpeed, uint32_t * pnTriggerFrame) {
     int* pRecord = ANIMDATA_GetRecordByNameHash(pszName);
-    if (!pRecord) {
+    if (pRecord) {
+      *pnFrameCount = pRecord[2];
+      *pnAnimSpeed = pRecord[3];
+      uint32_t nFrameIndex = 0;
+      if ((uint32_t)pRecord[2] > 0) {
+        do {
+          if (0x90 <= nFrameIndex || *(char*)(nFrameIndex + 0x10 + (int)pRecord) != '\0') {
+            break;
+          }
+
+          nFrameIndex++;
+        } while (nFrameIndex < (uint32_t)pRecord[2]);
+      }
+
+      *pnTriggerFrame = nFrameIndex;
+      return 1;
+    } else {
       D2AnimDataStrc* pAnimTbls;
       pAnimTbls = DataTbls::TXT_AnimTbls_Get();
       *pnFrameCount = pAnimTbls->pDefaultRecord.nFrames;
@@ -207,22 +223,6 @@ BOOL __stdcall ANIMDATA_GetFramesSpeedAndTrigger(int * pszName, uint32_t * pnFra
       *pnTriggerFrame = *pnFrameCount;
       return 0;
     }
-
-    *pnFrameCount = pRecord[2];
-    *pnAnimSpeed = pRecord[3];
-    uint32_t nFrameIndex = 0;
-    if ((uint32_t)pRecord[2] > 0) {
-      do {
-        if (0x90 <= nFrameIndex || *(char*)(nFrameIndex + 0x10 + (int)pRecord) != '\0') {
-          break;
-        }
-
-        nFrameIndex++;
-      } while (nFrameIndex < (uint32_t)pRecord[2]);
-    }
-
-    *pnTriggerFrame = nFrameIndex;
-    return 1;
 }
 
 } // namespace D2Common::DATATBLS::AnimTbls

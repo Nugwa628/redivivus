@@ -810,11 +810,11 @@ static BOOL SKILLS_CheckStartMana(D2UnitStrc * pUnit, D2SkillStrc * pSkill) {
 }
 
 D2SkillsTxt * __fastcall GetSkillsTxt(D2SkillStrc * pSkill) {
-    if (pSkill) {
+    if (!pSkill) {
+      return nullptr;
+    } else {
       return pSkill->pRecord;
     }
-
-    return nullptr;
 }
 
 int32_t __stdcall GetShrineBonus(D2UnitStrc * pUnit) {
@@ -3803,50 +3803,51 @@ int32_t __stdcall SKILL_CalcMinDamage(D2UnitStrc * pUnit, int32_t nSkillId, int3
 // Calculates the maximum damage for a skill at a given level. If the skill's flags2 bit 1 is set, delegates to SKILLS_CalculateBaseDamageFromStats. Otherwise, optionally scales weapon max damage by SrcDam (handling two-handed weapons), adds MaxLev breakpoint bonus and MaxDam base, optionally applies DmgSymPerCalc formula percent modifier, and finally left-shifts by HitShift. bUseWeaponDamage controls whether weapon damage contributes.
 int32_t __stdcall SKILL_CalcMaxDamage(D2UnitStrc * pUnit, int32_t nSkillId, int32_t nSkillLevel, int32_t bUseWeaponDamage) {
     int32_t nLevDamBonus;
-    if (nSkillId < 0) {
-      return 2;
-    }
-    if (nSkillId >= sgptDataTable->nTxtSkillsCount) {
-      return 2;
-    }
-
-    D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + nSkillId;
-    if (!pSkillTxt) {
-      return 2;
-    }
-
-    int nMaxDmg = 0;
-    if (pSkillTxt->Kick) {
-      nLevDamBonus = SKILLS_CalculateBaseDamageFromStats(0, pUnit);
-      return nLevDamBonus;
-    }
-    if (!(pSkillTxt->SrcDam == '\0' || !bUseWeaponDamage)) {
-      D2UnitStrc* pWeapon;
-      pWeapon = Units::GetWeaponBySkill(pUnit, 0);
-      if (!pWeapon || (nMaxDmg = INVENTORY::Inventory::INVENTORY_GetWeaponHandedness(pUnit, pUnit->pInventory) , nMaxDmg != 2)) {
-        nMaxDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxdamage, 0);
-      } else {
-        nMaxDmg = Stats::StatsEx::GetTxtMaxDamage(pWeapon, 0x18);
+    if (nSkillId >= 0) {
+      if (nSkillId >= sgptDataTable->nTxtSkillsCount) {
+        return 2;
       }
 
-      nMaxDmg = (uint32_t)(uint8_t)pSkillTxt->SrcDam * nMaxDmg;
-      nMaxDmg = (int)nMaxDmg / 128;
-    }
+      D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + nSkillId;
+      if (!pSkillTxt) {
+        return 2;
+      }
 
-    nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MaxLevDam);
-    nMaxDmg = nMaxDmg + nLevDamBonus + pSkillTxt->MaxDam;
-    if (pSkillTxt->DmgSymPerCalc == -1) {
+      int nMaxDmg = 0;
+      if (pSkillTxt->Kick) {
+        nLevDamBonus = SKILLS_CalculateBaseDamageFromStats(0, pUnit);
+        return nLevDamBonus;
+      }
+      if (!(pSkillTxt->SrcDam == '\0' || !bUseWeaponDamage)) {
+        D2UnitStrc* pWeapon;
+        pWeapon = Units::GetWeaponBySkill(pUnit, 0);
+        if (!pWeapon || (nMaxDmg = INVENTORY::Inventory::INVENTORY_GetWeaponHandedness(pUnit, pUnit->pInventory) , nMaxDmg != 2)) {
+          nMaxDmg = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxdamage, 0);
+        } else {
+          nMaxDmg = Stats::StatsEx::GetTxtMaxDamage(pWeapon, 0x18);
+        }
+
+        nMaxDmg = (uint32_t)(uint8_t)pSkillTxt->SrcDam * nMaxDmg;
+        nMaxDmg = (int)nMaxDmg / 128;
+      }
+
+      nLevDamBonus = SKILLS_GetValueByLevelBreakpoints(nSkillLevel, pSkillTxt->MaxLevDam);
+      nMaxDmg = nMaxDmg + nLevDamBonus + pSkillTxt->MaxDam;
+      if (pSkillTxt->DmgSymPerCalc == -1) {
+        return nMaxDmg << (pSkillTxt->HitShift);
+      }
+
+      nLevDamBonus = D2GetSkillCalc(pUnit, pSkillTxt->DmgSymPerCalc, nSkillId, nSkillLevel);
+      if (!nLevDamBonus) {
+        return nMaxDmg << (pSkillTxt->HitShift);
+      }
+
+      nLevDamBonus = D2Client::Stats::D2ApplyPercent(nMaxDmg, nLevDamBonus, 100);
+      nMaxDmg += nLevDamBonus;
       return nMaxDmg << (pSkillTxt->HitShift);
+    } else {
+      return 2;
     }
-
-    nLevDamBonus = D2GetSkillCalc(pUnit, pSkillTxt->DmgSymPerCalc, nSkillId, nSkillLevel);
-    if (!nLevDamBonus) {
-      return nMaxDmg << (pSkillTxt->HitShift);
-    }
-
-    nLevDamBonus = D2Client::Stats::D2ApplyPercent(nMaxDmg, nLevDamBonus, 100);
-    nMaxDmg += nLevDamBonus;
-    return nMaxDmg << (pSkillTxt->HitShift);
 }
 
 // Evaluates a passive skill's elemental calc value for a specific element type (0=min fire/0x156, 1=min cold/0x157, 2=min lightning/0x158). Searches the skill's passivestat array for the matching stat ID, then calls D2GetSkillCalc on the corresponding passivecalc slot. Returns 0 if the skill/level is invalid or the element type is not found in passivestat.

@@ -468,22 +468,22 @@ static BOOL __stdcall HasBonusStats(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
         return 1;
       }
     }
-    if (!pUnit) {
+    if (pUnit) {
+      nItemBonusDamage = Skills::SKILLS_GetItemBonusDamage(pItem, pUnit, nullptr, 2);
+      if (!nItemBonusDamage) {
+        return 0;
+      }
+
+      DVar1 = D2_SEED_NEXT(pItem->sSeed);
+      pItem->sSeed = DVar1;
+      if ((int)(DVar1.nSeedLow % 100) >= nItemBonusDamage) {
+        return 0;
+      }
+
+      return 1;
+    } else {
       return 0;
     }
-
-    nItemBonusDamage = Skills::SKILLS_GetItemBonusDamage(pItem, pUnit, nullptr, 2);
-    if (!nItemBonusDamage) {
-      return 0;
-    }
-
-    DVar1 = D2_SEED_NEXT(pItem->sSeed);
-    pItem->sSeed = DVar1;
-    if ((int)(DVar1.nSeedLow % 100) >= nItemBonusDamage) {
-      return 0;
-    }
-
-    return 1;
 }
 
 // Accumulates all elemental damage stats from pUnit into pMissileDamageData, left-shifted by nShift. Reads fire/lightning/magic/cold/poison/life-drain/mana-drain/burning min+max stats and their durations from pUnit via GetStatUnsignedValue, then adds each (shifted) value to the corresponding field of D2MissileDamageDataStrc. Poison length uses skill_poison_override_length if present, otherwise poisonlength+poison_count. Custom register calling convention: pMissileDamageData=ESI, pUnit=EDI, nShift=BL.

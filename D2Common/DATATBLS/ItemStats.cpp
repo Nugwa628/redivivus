@@ -321,11 +321,11 @@ BOOL __stdcall STATES_HasArmorState(D2UnitStrc * pUnit) {
 
 // Returns (pUnit->eUnitFlagsEx >> 3) & 1, the UNITFLAGEX_ISSHAPESHIFTED bit; 0 for a NULL unit. Evidence: 0063a40e MOV EAX,[EAX+0xc8]; SHR 3; AND 1.
 BOOL __stdcall UNITS_IsShapeshifted(D2UnitStrc * pUnit) {
-    if (pUnit) {
+    if (!pUnit) {
+      return 0;
+    } else {
       return pUnit->eUnitFlagsEx >> 3 & 1;
     }
-
-    return 0;
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray11(eD2States eState) {

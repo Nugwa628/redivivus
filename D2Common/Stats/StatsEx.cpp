@@ -289,11 +289,11 @@ int32_t __stdcall STATLIST_LookupBaseStatWithMinAccr(D2ItemStatCostTxt * pItemSt
 }
 
 static void * STATLIST_GetEffectiveStatsArray(D2StatListExStrc * pStatList) {
-    if (!(pStatList->sStatList.nFlags & 0x80000000U)) {
+    if (pStatList->sStatList.nFlags & 0x80000000U) {
+      return &pStatList->sFullStats;
+    } else {
       return &pStatList->sStatList.sBaseStats;
     }
-
-    return &pStatList->sFullStats;
 }
 
 // Binary-searches pStatEx's stat array for the packed stat key (wStatIndex:wSubIndex == nParam), returns its nStatValue. If the ItemStatCost record has ITEMSTATCOSTFLAG_FMIN set and the owning unit is a player or monster and the found value is below minaccr, returns minaccr left-shifted by valshift instead. Returns 0 if stat not found.
@@ -467,11 +467,11 @@ D2StatListStrc * __stdcall AllocStatList(D2PoolManagerStrc * pMemory, int32_t nF
 }
 
 eD2UnitType __stdcall GetOwnerType(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return UNIT_COUNT;
+    } else {
       return pStatList->sStatList.eOwnerType;
     }
-
-    return UNIT_COUNT;
 }
 
 int32_t __stdcall STATLIST_GetStatCountFromStatList(D2StatListExStrc * pStatList) {
@@ -507,11 +507,11 @@ void __stdcall SetState(D2StatListExStrc * pStatsEx, eD2States eState) {
 }
 
 eD2States __stdcall GetState(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return STATE_none;
+    } else {
       return pStatList->sStatList.eState;
     }
-
-    return STATE_none;
 }
 
 void __stdcall SetTimeout_WithFlag(D2StatListExStrc * pStatList, int32_t nTimeout) {

@@ -3156,29 +3156,30 @@ uint32_t __stdcall GetWeaponAnimClass(D2UnitStrc * pUnit) {
 
 uint32_t __fastcall GetHitClassForPlayerOrMonster(D2UnitStrc * pUnit) {
     D2UnitStrc* pWeapon;
-    if (!pUnit) {
-      return 0;
-    }
-    if (pUnit->eUnitType == UNIT_PLAYER) {
-      uint8_t byHitClass;
-      pWeapon = GetWeaponBySkill(pUnit, 0);
-      if (!pWeapon) {
-        return 1;
+    if (pUnit) {
+      if (pUnit->eUnitType == UNIT_PLAYER) {
+        uint8_t byHitClass;
+        pWeapon = GetWeaponBySkill(pUnit, 0);
+        if (!pWeapon) {
+          return 1;
+        }
+
+        byHitClass = ITEMS::Items::ITEM_GetItemsTxt_bHitClass(pWeapon);
+        return (uint32_t)byHitClass;
+      }
+      if (pUnit->eUnitType != UNIT_MONSTER) {
+        return 0;
       }
 
-      byHitClass = ITEMS::Items::ITEM_GetItemsTxt_bHitClass(pWeapon);
-      return (uint32_t)byHitClass;
-    }
-    if (pUnit->eUnitType != UNIT_MONSTER) {
+      D2MonStats2Txt* pMonStats2 = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetMonStats2(pUnit->nClassId);
+      if (!pMonStats2) {
+        return 0;
+      }
+
+      return (uint32_t)(uint8_t)pMonStats2->HitClass;
+    } else {
       return 0;
     }
-
-    D2MonStats2Txt* pMonStats2 = D2Client::DataTbls::MonsterTbls::TXT_MonStats_GetMonStats2(pUnit->nClassId);
-    if (!pMonStats2) {
-      return 0;
-    }
-
-    return (uint32_t)(uint8_t)pMonStats2->HitClass;
 }
 
 uint32_t __fastcall GetWeaponClass(D2UnitStrc * pUnit) {
@@ -3286,7 +3287,23 @@ void __stdcall AdvanceAnimFrame(D2UnitStrc * pUnit) {
     uint32_t nSeqMode;
     D2AnimDataRecordStrc* pAnimData;
     pUnit->nActionFrame = 0;
-    if (!pUnit->pAnimSeq) {
+    if (pUnit->pAnimSeq) {
+      int32_t iVar1;
+      nSeqMode = pUnit->nSeqFrame;
+      pUnit->eUnitFlags &= ~UNITFLAG_SQGFXCHANGE;
+      uVar2 = pUnit->nSeqAnimSpeed + nSeqMode;
+      pUnit->nSeqFrame = uVar2;
+      if ((int)uVar2 >= (int)pUnit->nSeqFrameCount) {
+        pUnit->nSeqFrame = uVar2 - pUnit->nSeqFrameCount;
+      }
+
+      pUnit->nFrameCount -= pUnit->nSeqAnimSpeed;
+      iVar1 = UpdateSequenceMode(pUnit, nSeqMode);
+      if (iVar1) {
+        pUnit->eUnitFlags |= UNITFLAG_SQGFXCHANGE;
+        return;
+      }
+    } else {
       nPrevFrame = pUnit->nGfxCurrentFrame >> 8;
       if (0x100 <= pUnit->nAnimSpeed) {
         nPrevFrame++;
@@ -3347,22 +3364,6 @@ void __stdcall AdvanceAnimFrame(D2UnitStrc * pUnit) {
 
           nPrevFrame++;
         } while (nPrevFrame <= nAnimClassOffset);
-      }
-    } else {
-      int32_t iVar1;
-      nSeqMode = pUnit->nSeqFrame;
-      pUnit->eUnitFlags &= ~UNITFLAG_SQGFXCHANGE;
-      uVar2 = pUnit->nSeqAnimSpeed + nSeqMode;
-      pUnit->nSeqFrame = uVar2;
-      if ((int)uVar2 >= (int)pUnit->nSeqFrameCount) {
-        pUnit->nSeqFrame = uVar2 - pUnit->nSeqFrameCount;
-      }
-
-      pUnit->nFrameCount -= pUnit->nSeqAnimSpeed;
-      iVar1 = UpdateSequenceMode(pUnit, nSeqMode);
-      if (iVar1) {
-        pUnit->eUnitFlags |= UNITFLAG_SQGFXCHANGE;
-        return;
       }
     }
 }

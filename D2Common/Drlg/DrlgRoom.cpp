@@ -1097,12 +1097,12 @@ BOOL __fastcall HasWaypoint(D2RoomExStrc * pRoomEx) {
 }
 
 char * __fastcall GetPickedLevelPrestFilePathFromRoomEx(D2RoomExStrc * pRoomEx) {
-    if (pRoomEx->nPresetType != 2) {
+    if (pRoomEx->nPresetType == 2) {
+      char* szFilePath = Preset::DRLGPRESET_GetPickedFilePathFromRoomEx(pRoomEx);
+      return szFilePath;
+    } else {
       return "None";
     }
-
-    char* szFilePath = Preset::DRLGPRESET_GetPickedFilePathFromRoomEx(pRoomEx);
-    return szFilePath;
 }
 
 static void ReorderNearRoomList(int nRoomCount, D2RoomStrc * * ppRoomList) {
