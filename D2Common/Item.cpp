@@ -137,7 +137,7 @@ void __fastcall ITEM_UpdateSetItemStates(D2UnitStrc * pUnit, uint32_t nEquippedM
             nBonusIdx += -4;
           }
 
-          bDisabled = !(nEquippedMask & 1 << ((uint8_t)nQuality & 0x1f));
+          bDisabled = !(nEquippedMask & 1 << (uint8_t)nQuality);
           if (bDisabled) {
             eState = *(eD2States*)((int)gaSetItemBonusStates + nBonusIdx);
           } else {

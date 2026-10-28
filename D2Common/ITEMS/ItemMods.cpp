@@ -172,7 +172,7 @@ int __stdcall ITEMMOD_FindChargedSkill(D2UnitStrc * pUnit, int32_t nParam1, int3
         return 0;
       }
 
-      nChargedSkillVal = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_item_charged_skill, (nParam1 << ((uint8_t)nStatCostShift & 0x1f)) + (uStatCostMask & nParam2));
+      nChargedSkillVal = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_item_charged_skill, (nParam1 << (uint8_t)nStatCostShift) + (uStatCostMask & nParam2));
       if (nChargedSkillVal) {
         break;
       }
@@ -203,7 +203,7 @@ BOOL __stdcall ITEMMOD_SetChargedSkillCharges(D2UnitStrc * pUnit, int32_t nSkill
       return 0;
     }
 
-    uint32_t nStatKey = (nSkillId << ((uint8_t)sgptDataTable->nChargedSkillLevelBits & 0x1f)) + (sgptDataTable->dwChargedSkillLevelMask & nChargeSlot);
+    uint32_t nStatKey = (nSkillId << (uint8_t)sgptDataTable->nChargedSkillLevelBits) + (sgptDataTable->dwChargedSkillLevelMask & nChargeSlot);
     for (pStatList = Stats::StatsEx::GetStatsByFlags(pUnit, 0x40); pStatList; pStatList = Stats::StatsEx::STATLIST_FindStatListWithFlags(pStatList, 0x40)) {
       int nChargedSkillVal;
       nChargedSkillVal = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_item_charged_skill, nStatKey);
@@ -1162,7 +1162,7 @@ static int32_t __fastcall PropertyFunc_Charges(int32_t nType, D2UnitStrc * pUnit
     D2SeedStrc* pSeed = Items::GetItemSeed(pItemUnit);
     uint32_t nRandChargeOffset = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nSkillLevel - nChargesDiv8);
     D2StatListExStrc* pStatsEx = ITEMMOD_GetOrCreateStatList(pItemUnit, nParam3, nParam, pUnit);
-    nClampedSkillLevel = eSkill << ((uint8_t)sgptDataTable->nChargedSkillLevelBits & 0x1f);
+    nClampedSkillLevel = eSkill << (uint8_t)sgptDataTable->nChargedSkillLevelBits;
     Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, eStatCode, (nRandChargeOffset + 1 + nChargesDiv8 & 0xff) + nSkillLevel * 0x100, (uint32_t)((uint32_t)(uint16_t)(short int)((uint32_t)nClampedSkillLevel >> 0x10) << 16 | (uint32_t)(uint16_t)((short int)nClampedSkillLevel + ((uint16_t)sgptDataTable->dwChargedSkillLevelMask & (uint16_t)nChargeSkillLevel))));
     return 1;
 }
