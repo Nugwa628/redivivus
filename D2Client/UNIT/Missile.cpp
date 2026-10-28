@@ -591,7 +591,7 @@ void __fastcall MISSILE_InitMissileUnit(D2UnitStrc * pUnit, D2RoomStrc * pRoom, 
 
     D2Common::PATH::DynamicPath::PATH_ChangeCollisionType(pDynamicPath, eCollisionFlag);
     D2Common::PATH::DynamicPath::PATH_SetCollisionPattern(pDynamicPath, MISSILECLTCOLLIDEFUNCS[(uint8_t)pMissileTxt->CollideType].nFlags);
-    if (pMissileTxt->CanDestroy) {
+    if ((*((uint8_t*)pMissileTxt + 0x4) & gadwBitMasks[4])) {
       pUnit->eUnitFlags |= UNITFLAG_CANBEATTACKED;
     } else {
       pUnit->eUnitFlags &= ~UNITFLAG_CANBEATTACKED;
