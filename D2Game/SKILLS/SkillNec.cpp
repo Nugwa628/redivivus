@@ -1471,10 +1471,10 @@ uint32_t __fastcall SKILLNEC_ApplyCorpseExplosionToUnit(D2SkillCallbackContextSt
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDistFromMissile = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nDistFromMissile = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nDistFromMissile = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nDistFromMissile = 0;
     }
 
     nDistFromMissile = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(pExplosionArgs->nX, pExplosionArgs->nY, nDistFromMissile, nPosY);
@@ -2139,10 +2139,10 @@ BOOL __fastcall Skills_SrvDoFunc_062_BonePrison(::SGAMEDATA * pGame, D2UnitStrc 
         eOwnerType = pUnit_00->eUnitType;
         if (eOwnerType == UNIT_OBJECT || 3 < (int)eOwnerType && (int)eOwnerType <= 5) {
           nDir = pUnit_00->pPath.pStaticPath->nPosX;
-        } else if (!pUnit_00->pPath.pDynamicPath) {
-          nDir = 0;
-        } else {
+        } else if (pUnit_00->pPath.pDynamicPath) {
           nDir = D2Common::PATH::DynamicPath::GetXPos(pUnit_00->pPath.pDynamicPath);
+        } else {
+          nDir = 0;
         }
 
         nDir = D2Common::Drlg::Path::DRLGPATH_GetDirectionFromCoords(nDir, nY, nCursorX, nCursorY);

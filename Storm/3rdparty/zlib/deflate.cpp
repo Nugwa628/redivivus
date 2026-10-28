@@ -367,17 +367,20 @@ static void lm_init(deflate_state * pDeflateState) {
     pDeflateState->window_size = pDeflateState->w_size * 2;
     pDeflateState->head[pDeflateState->hash_size - 1] = 0;
     memset(pDeflateState->head, 0, pDeflateState->hash_size * 2 - 2);
-    pDeflateState->max_lazy_match = gaSSCompDeflateBlockTable[pDeflateState->level].nMaxLazy;
-    pDeflateState->good_match = gaSSCompDeflateBlockTable[pDeflateState->level].nGoodLength;
-    pDeflateState->nice_match = gaSSCompDeflateBlockTable[pDeflateState->level].nNiceLength;
-    pDeflateState->max_chain_length = gaSSCompDeflateBlockTable[pDeflateState->level].nMaxChain;
+    int iVar1 = pDeflateState->level;
+    pDeflateState->max_lazy_match = (uint32_t)gaSSCompDeflateBlockTable[iVar1].nMaxLazy;
+    pDeflateState->good_match = (uint32_t)gaSSCompDeflateBlockTable[iVar1].nGoodLength;
+    pDeflateState->nice_match = (uint32_t)gaSSCompDeflateBlockTable[iVar1].nNiceLength;
+    uint16_t wMaxChainLen = gaSSCompDeflateBlockTable[iVar1].nMaxChain;
     pDeflateState->strstart = 0;
     pDeflateState->block_start = 0;
     pDeflateState->lookahead = 0;
     pDeflateState->insert = 0;
-    pDeflateState->match_length = pDeflateState->prev_length = 2;
     pDeflateState->match_available = 0;
     pDeflateState->ins_h = 0;
+    pDeflateState->max_chain_length = (uint32_t)wMaxChainLen;
+    pDeflateState->prev_length = 2;
+    pDeflateState->match_length = 2;
 }
 
 static uint32_t __stdcall longest_match(uint32_t nCurMatch, deflate_state * pDeflateState) {

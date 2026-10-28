@@ -3010,7 +3010,7 @@ void __fastcall ITEM_HandleItemCursorAssign(D2GSPacketSrv0x3F * pPacket) {
     BOOL bInventoryOpen;
     D2UnitStrc* pItem;
     uint32_t nTypeIdx;
-    if ((uint16_t)pPacket->nSkillId != 0xffff) {
+    if (pPacket->nSkillId != -1) {
       nTypeIdx = 0;
       if ((uint32_t)gnCursorAutoOpenInventoryTypeCount > 0) {
         do {
