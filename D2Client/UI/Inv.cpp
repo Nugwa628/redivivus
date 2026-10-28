@@ -4070,10 +4070,10 @@ static int32_t __stdcall ClickItemRight(D2UnitStrc * pItem, D2InventoryStrc * pG
       eUnitType = pPlayer->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosY = pPlayer->pPath.pStaticPath->nPosY;
-      } else if (!pPlayer->pPath.pDynamicPath) {
-        nPosY = 0;
-      } else {
+      } else if (pPlayer->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pPlayer->pPath.pDynamicPath);
+      } else {
+        nPosY = 0;
       }
 
       bExpansion = UNIT::PlayerIsUnInterruptable(pItemAtCell);
