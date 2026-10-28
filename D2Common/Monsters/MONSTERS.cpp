@@ -712,7 +712,7 @@ void __stdcall MONSTER_GetSpawnParameters(D2UnitStrc * pUnit, int * pnMonId, uin
       if (pTxt) {
         nBaseId = (int)pTxt->BaseId;
       }
-      if ((int)nBaseId < 0 || (nMonStatsTblSize = sgptDataTable->nTxtMonStatsSize , nMonStatsTblSize <= (int)nBaseId)) {
+      if ((nBaseId & 0x80000000) || (nMonStatsTblSize = sgptDataTable->nTxtMonStatsSize , nMonStatsTblSize <= (int)nBaseId)) {
         nBaseId = ~MonsterUnitSkeleton1;
       } else {
         if (0x14e < (int)nBaseId) {

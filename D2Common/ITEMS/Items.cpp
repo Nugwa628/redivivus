@@ -1291,7 +1291,7 @@ static int32_t __stdcall ITEMS_CalculateGamblePrice(int32_t nLevel, D2UnitStrc *
     }
 
     uint32_t nWeightedBaseCost = nBaseLevel - 0x2d;
-    return ((int)((((int)nWeightedBaseCost < 0 ? 0 : nWeightedBaseCost) - nBaseLevel / 2 + nLevel) * 0xfa) / 3 + ((10000 - nUltraWeight - nUberWeight) * nBaseCost * nAvgStack + nUltraCost * nUltraWeight + nUberCost * nUberWeight) / 10000) * ((nLevel * 2 + 1) / 3 + 0x14) / 0xf;
+    return ((int)((((nWeightedBaseCost & 0x80000000) ? 0 : nWeightedBaseCost) - nBaseLevel / 2 + nLevel) * 0xfa) / 3 + ((10000 - nUltraWeight - nUberWeight) * nBaseCost * nAvgStack + nUltraCost * nUltraWeight + nUberCost * nUberWeight) / 10000) * ((nLevel * 2 + 1) / 3 + 0x14) / 0xf;
 }
 
 int32_t __stdcall TXT_Items_GetMaxStack(uint32_t nItemClassId) {

@@ -141,7 +141,7 @@ static void __stdcall DRLGROOMTILE_SetWallTileFlags(D2DrlgTileDataStrc * pTileDa
     if (nRawTileFlags & 8) {
       pTileData->nFlags |= 4;
     }
-    if ((int)nRawTileFlags < 0) {
+    if ((nRawTileFlags & 0x80000000)) {
       pTileData->nFlags |= 8;
     } else {
       pTileData->nFlags &= -9;
