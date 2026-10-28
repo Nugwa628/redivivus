@@ -174,8 +174,7 @@ void __stdcall CopyWaypointBits(D2WaypointStrc * pWaypoint, uint8_t * nWaypointB
       }
 
       pWaypoint->nSignature = 0x102;
-      pWaypoint->nSignature = 0;
-      memset(pWaypoint->aWaypointBits, 0, 7 * sizeof(pWaypoint->aWaypointBits[0]));
+      memset(pWaypoint, 0, sizeof(D2WaypointStrc));
     }
 
     /* Sets 1st Waypoint always available */ pWaypoint->aWaypointBits[D2Client::Waypoint::aaWaypointsBitMasks[0][0] - 1] |= D2Client::Waypoint::aaWaypointsBitMasks[0][1];
