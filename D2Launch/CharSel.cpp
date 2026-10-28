@@ -1722,8 +1722,7 @@ void __stdcall UIMENU_AreYouSureWouWantToDeleteThisCharacter() {
     int nTextArg2 = 0;
     uint8_t byTextColor = 0;
     int32_t nTextArg1 = 0;
-    uint16_t* szText = D2Lang::StrTable::strtable::GetLocaleString(0x142b);
-    D2Win::Src::D2WinTextBox::SetText(pDVar2, szText, nTextArg1, (bool)byTextColor, nTextArg2);
+    D2Win::Src::D2WinTextBox::SetText(pDVar2, D2Lang::StrTable::strtable::GetLocaleString(0x142b), nTextArg1, (bool)byTextColor, nTextArg2);
 }
 
 BOOL __stdcall CHARSEL_OnPressDestroyFormList(D2ControlMsg * pControlMsg) {

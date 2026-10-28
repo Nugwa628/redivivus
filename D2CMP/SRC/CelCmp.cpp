@@ -1496,7 +1496,7 @@ void __stdcall CELCMP_InvokeFormatSpecificCleanup(int32_t nParam, BYTE * dwParam
 
     uint32_t* puVar1;
     iFrame = 0;
-    if (!(*(int*)(nParam + 0x10) * *(int*)(nParam + 0x14))) {
+    if (!((uint32_t)(*(int*)(nParam + 0x10) * *(int*)(nParam + 0x14)) > 0)) {
       return;
     }
 

@@ -538,7 +538,7 @@ static D2ControlStrc * FORMS_CreateAnyFormFromListEx(int32_t nFormIndex) {
 
 void __stdcall FORMS_DestroyListEx() {
     int nIndex = 0;
-    if (0 < FORMS_nListExCount) {
+    if (0 < (int)FORMS_nListExCount) {
       D2ControlStrc** pForm;
       pForm = FORMS_pListEx;
       do {
