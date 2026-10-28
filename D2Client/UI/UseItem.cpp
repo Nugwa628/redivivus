@@ -279,7 +279,7 @@ void __stdcall UI_CloseHoradricCubeWindow() {
     int32_t nHandlerCount = 8;
     _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagMapInit, nHandlerCount);
     if (Dialog::gpHoradricCubeDialog) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpHoradricCubeDialog);
+      Dialog::FreeDialogStrc();
       Dialog::gpHoradricCubeDialog = 0;
     }
     Draw::SetUIFlag(UI_ANVIL, UI_RESET, 0);

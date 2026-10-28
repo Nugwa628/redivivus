@@ -84,8 +84,8 @@ bool __fastcall Q26_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 
 // Q26_PlayerUpdateFallenAngelState — per-player record sync (run via IteratePlayerOrMonsterUnits). Mirrors the global quest stateflag into each player's QuestRecord bit-buffer while quest not Completed: stateflag 2 -> Step0x02; stateflag 3 -> Step0x04 if Jerhyn AI active else Step0x03. Keeps individual players' progress markers aligned with shared quest state.
 BOOL __fastcall Q26_PlayerUpdateFallenAngelState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheFallenAngel, QUESTSTATE_Completed);
     if (BVar2 == 1) {
       return 0;
@@ -136,8 +136,8 @@ void __fastcall Q26_SequenceFilter(D2QuestDataStrc * pQuestData) {
 
 // Q26_PlayerNotifyCompleted — completion-notify predicate+send (callback for QUEST_SetStateAndBroadcast). Sends quest-update packet 0x16 to a player only if the Fallen Angel quest is Completed-or-FinishedInPreviousGame AND not (JustCompleted) AND not (CannotCompleteQuestInGame); otherwise no-op. Pushes the finished UI update to relevant players.
 BOOL __fastcall Q26_PlayerNotifyCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar1->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheFallenAngel, QUESTSTATE_Completed);
     if (BVar2 || (BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheFallenAngel, QUESTSTATE_FinishedInPreviousGame) , BVar2 != 0)) {
       BVar2 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheFallenAngel, QUESTSTATE_JustCompleted);
@@ -166,8 +166,8 @@ void __fastcall Q26_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     ::SGAMEDATA* pGame = pQuestData->pGame;
     short int sNPCNo = pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo;
     short int sMsgIdx = pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     if (sNPCNo == 0x16f) {
       eD2Quests eQuest;
       if (sMsgIdx == 0x29e) {
@@ -242,8 +242,8 @@ void __fastcall Q26_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t nTargetClassId;
     uint32_t nGossipMsgIdx;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     BOOL bStep0x05Set = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_JustCompleted);
     if (!pQuestArgs->pTarget) {
@@ -375,8 +375,8 @@ BOOL __fastcall Q26_PlayerCheckNearIzual(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       }
     }
 
-    D2UnitDataPlayerStrc* pIzualRoom = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pIzualRoom->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheFallenAngel, QUESTSTATE_Completed);
     if (_bQuestState) {
       return 0;
@@ -454,8 +454,8 @@ void __fastcall Q26_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     }
 
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], pQuestData->nQuestIdReal, QUESTSTATE_Completed);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pQuestRecord, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (BVar1 == 1) {
       return;
     }
@@ -490,8 +490,8 @@ void __fastcall Q26_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 // Q26_Callback_13 — load/init-from-record handler (handler[0xd], reconstructs in-memory stateflag from saved QuestRecord on game load). If quest not Completed/FinishedInPreviousGame: Step0x04 -> stateflag 3 + bJerhynAiActive (prev 2); Step0x03 -> stateflag 3 (prev 1); Step0x02 -> stateflag 2 (prev 1). Restores Fallen Angel progress when a game (re)starts.
 void __fastcall Q26_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (BVar1) {
       return;

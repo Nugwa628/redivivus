@@ -2747,10 +2747,10 @@ static void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * 
       nErrLine = D2Client::Units::GetXPosFromDynamicPathUnit(pItem);
       if (!nErrLine || (uVal = D2Client::Units::GetXPosFromDynamicPathUnit(pItem) , uVal < 0xf)) {
         nErrLine = D2Client::Units::GetXPosFromDynamicPathUnit(pItem);
-        if (!nErrLine) {
-          uVal = 0;
-        } else {
+        if (nErrLine) {
           uVal = D2Client::Units::GetXPosFromDynamicPathUnit(pItem);
+        } else {
+          uVal = 0;
         }
       } else {
         uVal = 0xf;
@@ -2765,10 +2765,10 @@ static void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * 
       nErrLine = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
       if ((uint32_t)nErrLine <= 0 || (uVal = D2Client::Units::GetYPosFromDynamicPathUnit(pItem) , uVal < 0xf)) {
         nErrLine = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
-        if (!nErrLine) {
-          uVal = 0;
-        } else {
+        if (nErrLine) {
           uVal = D2Client::Units::GetYPosFromDynamicPathUnit(pItem);
+        } else {
+          uVal = 0;
         }
       } else {
         uVal = 0xf;
@@ -2805,10 +2805,10 @@ static void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * 
       eUnitType = pItem->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         uVal = pItem->pPath.pStaticPath->nPosX;
-      } else if (!pItem->pPath.pDynamicPath) {
-        uVal = 0;
-      } else {
+      } else if (pItem->pPath.pDynamicPath) {
         uVal = PATH::DynamicPath::GetXPos(pItem->pPath.pDynamicPath);
+      } else {
+        uVal = 0;
       }
 
       uVal = uVal ? uVal : 0;
@@ -2820,10 +2820,10 @@ static void __stdcall SerializeSimpleItem(D2UnitStrc * pItem, D2BitBufferStrc * 
       eUnitType = pItem->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         uVal = pItem->pPath.pStaticPath->nPosY;
-      } else if (!pItem->pPath.pDynamicPath) {
-        uVal = 0;
-      } else {
+      } else if (pItem->pPath.pDynamicPath) {
         uVal = PATH::DynamicPath::GetYPos(pItem->pPath.pDynamicPath);
+      } else {
+        uVal = 0;
       }
 
       uVal = uVal ? uVal : 0;
