@@ -517,7 +517,7 @@ int32_t __stdcall MONUMOD_RollRandomModifier(D2UnitStrc * pUnit, uint8_t * pUsed
 
 // Rolls and assigns unique-modifier (UMod) enchantments to a newly spawned monster. If bResult is set, first rolls against the champion threshold (MonUMod.txt constants row 0) to potentially make the monster a champion instead; if champion, calls MONSTER_SelectChampionMod and returns. Otherwise rolls 1+difficulty extra UMod slots, calls MONUMOD_RollRandomModifier up to that count (avoiding already-assigned mods via a local dedup table), and appends each selected UMod ID to pUnitDataMonster->MonUModList. Guards against stack overflow via security cookie.
 // [override: patch]
-static void MONSTER_RollAndAssignUMods(void * pThis, ::SGAMEDATA * pGame, BOOL bResult) {
+static void __stdcall MONSTER_RollAndAssignUMods(void * pThis, ::SGAMEDATA * pGame, BOOL bResult) {
     int32_t nActiveUMods;
     uint32_t nRoll;
     int nSlotIdx;
@@ -1321,10 +1321,10 @@ void __fastcall MONSTER_DeathPoisonCloud(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
     SKILLS::SkillsServer::CreatingAMissile(pGame, MISSILE_Corpsepoisoncloud, pUnit, SKILL_Attack, nLevel, 0, 0, nPosX, nPosY, 1);
@@ -1434,19 +1434,19 @@ void __fastcall MONSTER_BugLightningDeathBolts(::SGAMEDATA * pGame, D2UnitStrc *
     sSkillArg.pOwner = pUnit;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       sSkillArg.nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      sSkillArg.nX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       sSkillArg.nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      sSkillArg.nX = 0;
     }
 
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       sSkillArg.nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      sSkillArg.nY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       sSkillArg.nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      sSkillArg.nY = 0;
     }
 
     sSkillArg.nSkillLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
@@ -1458,19 +1458,19 @@ void __fastcall MONSTER_BugLightningDeathBolts(::SGAMEDATA * pGame, D2UnitStrc *
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
         nPosX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosX = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosX = 0;
       }
 
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
         nPosY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosY = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosY = 0;
       }
 
       nDirX = gaMissileOffsets_BugLightningX[nDirLoopIdx];
@@ -2082,10 +2082,10 @@ void __fastcall MONSTER_AoEPhysicalDamage(::SGAMEDATA * pGame, D2UnitStrc * pUni
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     UNIT::SUnitDmg::DAMAGE_ApplyAreaOfEffectDamage(pGame, pUnit, nClassId, nPosY, iVar2 * sVar1, &sDamage, 0, 0, nullptr, 0);
@@ -2225,10 +2225,10 @@ void __fastcall MONSTER_SuicideExplosion(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nMissileSpawnX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nMissileSpawnX = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nMissileSpawnX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nMissileSpawnX = 0;
       }
 
       eMissileId = MISSILE_Suicidecorpseexplode;

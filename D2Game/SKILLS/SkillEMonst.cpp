@@ -1417,10 +1417,10 @@ D2UnitStrc * __fastcall SKILLEMONST_FindNearbyCorpse(::SGAMEDATA * pGame, D2Unit
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       sUnitFindArg.nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      sUnitFindArg.nY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       sUnitFindArg.nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      sUnitFindArg.nY = 0;
     }
 
     memset(&sUnitFindArg, 0, 0x38);
