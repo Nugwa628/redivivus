@@ -174,8 +174,7 @@ void __fastcall SaveMercData(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2SaveFile
     uint32_t uVar2 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pMerc, UNITSTAT_experience, 0);
     pSaveHeader->sMerc.dwExperience = uVar2;
     pSaveHeader->sMerc.dwFlags = 0;
-    uint16_t* puVar1 = &pSaveHeader->sMerc.wNameIndex;
-    *puVar1 -= pHirelingTxt->nNameFirst;
+    pSaveHeader->sMerc.wNameIndex -= pHirelingTxt->nNameFirst;
     bIsDead = UNIT::SUnit::CheckForModeZeroDeath(pMerc);
     if (!bIsDead) {
       return;
@@ -530,13 +529,13 @@ BOOL __fastcall SaveStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * pStar
                   nClampedValue = nRawStatValue;
                   if (byCsvBitWidth < 0x20) {
                     if (pStatCostTxt->dwItemStatFlags & ITEMSTATCOSTFLAG_CSVSIGNED) {
-                      nClampMask = -1 << (byCsvBitWidth - 1 & 0x1f);
+                      nClampMask = -1 << (byCsvBitWidth - 1);
                       nClamped = nRawStatValue;
                       if ((int)nRawStatValue <= (int)nClampMask) {
                         nClamped = nClampMask;
                       }
 
-                      nClampedValue = (1 << (byCsvBitWidth - 1 & 0x1f)) - 1;
+                      nClampedValue = (1 << (byCsvBitWidth - 1)) - 1;
                       if ((int)nClamped < (int)nClampedValue) {
                         nClampedValue = nRawStatValue;
                         if ((int)nRawStatValue <= (int)nClampMask) {
@@ -544,7 +543,7 @@ BOOL __fastcall SaveStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * pStar
                         }
                       }
                     } else {
-                      nClampMask = (1 << (byCsvBitWidth & 0x1f)) - 1;
+                      nClampMask = (1 << (byCsvBitWidth)) - 1;
                       nClampedValue = (int)nRawStatValue < 1 ? 0 : nRawStatValue;
                       if ((int)nClampMask <= (int)nClampedValue) {
                         nClampedValue = nClampMask;

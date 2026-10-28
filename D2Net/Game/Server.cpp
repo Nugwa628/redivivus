@@ -218,8 +218,10 @@ void __stdcall NET_DisconnectIP(in_addr addr, char * szText, int32_t nFlags) {
 }
 
 // @sourcefile .\SRC\Server.cpp
-void __stdcall QSERVER_KillConnection(int32_t nClientId) {
+int __stdcall QSERVER_KillConnection(int32_t nClientId) {
+    int nResult;
     Fog::Src::thunk_CloseRemoteConnection(pQServer, nClientId, ".\\SRC\\Server.cpp", 0x1d4);
+    return nResult;
 }
 
 void __stdcall NET_Thunk_QServerSetHacklistAddLineHook(fpD2QServerLineHook pfnHook) {

@@ -679,9 +679,10 @@ bool FILETOOLS_GetTempPath_UTF8(LPSTR szDest) {
 // WCHAR/wchar_t/wchar16/unicode to uint16_t (D2's own wide strings are ushort in decompiled bodies),
 // so a wcsrchr result inferred as wchar_t * came out as uint16_t * while the parameter stayed
 // LPCWSTR - half of a designed rewrite. LPWSTR is outside that rewrite set, so both sides now agree.
-bool __fastcall FILETOOLS_CreateDirectoryW(LPWSTR lpPathName) {
-    if (CreateDirectoryW(lpPathName, (LPSECURITY_ATTRIBUTES)0x0)) {
-      return true;
+uint32_t __fastcall FILETOOLS_CreateDirectoryW(LPWSTR lpPathName) {
+    BOOL bCreated = CreateDirectoryW(lpPathName, (LPSECURITY_ATTRIBUTES)0x0);
+    if (bCreated) {
+      return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)((uint32_t)bCreated >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)1);
     }
 
     DWORD dwAttribs = GetFileAttributesW(lpPathName);
@@ -692,30 +693,34 @@ bool __fastcall FILETOOLS_CreateDirectoryW(LPWSTR lpPathName) {
     LPWSTR pLastSep = wcsrchr(lpPathName, L'\\');
     LPWSTR pSep = wcsrchr(lpPathName, L'/');
     if (pSep > pLastSep) {
-      pLastSep = wcsrchr(lpPathName, L'/');
+      pSep = wcsrchr(lpPathName, L'/');
+      pLastSep = pSep;
     }
     if (!pLastSep) {
-      return false;
+      return (uint32_t)pSep & -256;
     }
 
     *pLastSep = L'\0';
-    if (!FILETOOLS_CreateDirectoryW(lpPathName)) {
-      return false;
+    pSep = (LPWSTR)FILETOOLS_CreateDirectoryW(lpPathName);
+    if ((char)(uintptr_t)pSep == '\0') {
+      return (uint32_t)pSep & -256;
     }
 
-    *pLastSep = L'\\';
-    return CreateDirectoryW(lpPathName, (LPSECURITY_ATTRIBUTES)0x0) != 0;
+    /* LPSECURITY_ATTRIBUTES lpSecurityAttributes for CreateDirectoryW */ /* LPCWSTR lpPathName for CreateDirectoryW */ *pLastSep = L'\\';
+    bCreated = CreateDirectoryW(lpPathName, (LPSECURITY_ATTRIBUTES)0x0);
+    return (uint32_t)(bCreated != 0);
 }
 
-bool __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName) {
+BOOL __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName) {
     uint16_t wszPath[260];
     uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     int nConverted = MultiByteToWideChar(0xfde9, 0, szPathName, -1, (LPWSTR)wszPath, 0x104);
     if (!nConverted) {
-      return false;
+      return 0;
     }
 
-    return FILETOOLS_CreateDirectoryW((LPWSTR)wszPath);
+    uint32_t uVar1 = FILETOOLS_CreateDirectoryW((LPWSTR)wszPath);
+    return uVar1;
 }
 
 } // namespace Fog::File
