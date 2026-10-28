@@ -24,7 +24,6 @@ void SetSelectedUnit_I(struct D2UnitStrc * pUnit);
 void __stdcall ClearSelectedUnit();
 void __stdcall SetCanBeSelectedToFalse();
 uint32_t __stdcall SELECT_IsDoorBlockingUnit(struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2);
-int32_t SELECT_GetDistanceSquared(struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2);
 void __fastcall SELECT_SetPetSeedTimestamp(int32_t bEnabled, struct D2UnitStrc * pUnit, int32_t nTimestamp);
 void __fastcall SELECT_SetExclusionRect(RECT * pRect);
 int __fastcall UnitIsOfTypeMonster(struct D2UnitStrc * pUnit, ::SGAMEDATA * pGame);

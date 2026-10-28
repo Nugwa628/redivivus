@@ -55,7 +55,6 @@ int __fastcall SPELLSEL_FindChargedSkill2(struct D2UnitStrc * pUnit, int32_t nTa
 int __fastcall SPELLSEL_FindChargedSkill3(struct D2UnitStrc * pUnit, int32_t nTargetSkillId);
 int __fastcall SPELLSEL_FindChargedSkill4(struct D2UnitStrc * pUnit, int32_t nTargetSkillId);
 void __stdcall INPUT_SpellSelectClick(struct D2UIMouseMsgStrc * pMsg);
-void __stdcall SPELLSEL_ClearSkillBinding(short * pSkillId, int32_t nChargesLeft);
 void __stdcall SPELLSEL_ClearChargedSkillBindings();
 void __fastcall SPELLSEL_HandleSkillSelection(int32_t nSlotIndex);
 void __fastcall SPELLSEL_ActivateSkillSlot(int32_t nSlot);
@@ -66,21 +65,13 @@ void __fastcall SPELLSEL_DrawSkillGrid(struct D2UnitStrc * pUnit, int32_t nGridS
 void __fastcall SPELLSEL_CycleRightHandSkills(int32_t nParam);
 void __stdcall SPELLSEL_RenderAllSkillGrids();
 void __stdcall SPELLSEL_ClearWaitingForSkillFlag();
-int __stdcall SPELLSEL_IsWaitingForSkill();
 void __stdcall ARCHIVE_LoadSpellsClassSkilltree();
 void __stdcall SPELLSEL_FreeSkilltreeGraphic();
-void __stdcall SPELLSEL_DrawSkilltreeBackground(struct DC6 * pDC6, int32_t nParam);
-void __stdcall DRAW_UI_SkillsWindow_II();
 void __stdcall thunk_D2GFX_GetColorFromPalette_C();
-void __stdcall SPELLSEL_DrawTabHighlight(int32_t nParam);
 void __stdcall SKILLTREE_DrawBackground();
-void __stdcall SKILLTREE_RenderSkillTree();
 void __stdcall INPUT_SkillTreeLeftClick(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall ClickOnScreenSkillWindow(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall SKILLTREE_FreeResources();
-void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, struct D2SkillsTxt * pSkillTxt, int32_t nDisplayLevel, int32_t nSkillIconState, GLOBALPALLETE nGlobalPaletteShift);
-void __stdcall DRAW_UI_SkillSkillsWithAvailableSkills();
-void __stdcall SKILLTREE_DrawAllSkillNodes();
 void __stdcall DRAW_UI_SkillWindow();
 
 } // namespace D2Client::UI::SpellSel

@@ -34,16 +34,13 @@ namespace Bnclient::BnDownload {
 // Function declarations
 void __stdcall BNDOWNLOAD_SetCancelFlag();
 uint32_t __stdcall BNDOWNLOAD_HasActiveDownloads();
-BOOL __stdcall NET_RecvExact(SOCKET hSocket, int32_t pBuffer, uint32_t nLen);
 int32_t __fastcall BNDOWNLOAD_PerformCheckRevision(uint32_t * pdwVersionOut, uint32_t * pdwChecksumOut, uint8_t * pbResultOut);
-void __fastcall BNDOWNLOAD_ExtractFileFromArchive(char * szFileName, struct D2ArchiveStrc * pArchive, LPCSTR szFilePath);
 void __fastcall BNDOWNLOAD_UpdateProgressPercent(uint32_t dwUnused, int32_t nBytesDone, uint32_t nTotalSize);
 void __fastcall BNDOWNLOAD_ResetState(int nResetValue);
 int __stdcall BNDOWNLOAD_GetProgress();
 int __fastcall BNDOWNLOAD_SetPatchFilename(char * szText);
 uint32_t __stdcall BNDOWNLOAD_HasPatchFilename();
 // Processes BNet prepatch.lst from downloaded MPQ archive - executes patches, extracts files, launches updates
-void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut);
 int __fastcall BNDOWNLOAD_ApplyPrepatch(uint32_t * pdwParam);
 uint32_t __stdcall BnetDownloadFile_II(void * lpThreadParam);
 void __fastcall BNDOWNLOAD_InitiateFileDownload(struct D2BnetDownloadStateStrc * pDownloadCtx, uint32_t nParam, uint32_t eFileType, uint32_t nOpcode, FILETIME * pFileTime, char * szText1, char * szText2);

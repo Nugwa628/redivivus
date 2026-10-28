@@ -30,12 +30,8 @@ int32_t __stdcall DRAW_GetWorldOffsetX();
 int32_t __stdcall DRAW_GetWorldOffsetY();
 void __fastcall ConvertCoordToPerspectiveView(int * pX, int * pY);
 void __fastcall DRAW_DrawRoomUnits(struct D2RoomStrc * pRoom);
-void __fastcall DEBUG_DrawRoomBoundsRect(int32_t nX, int32_t nY, BYTE bColor);
-void __stdcall DEBUG_DrawUnitShadowBounds(struct D2UnitStrc * pUnit);
 void __stdcall DEBUG_DrawWarpUnitBounds();
 void __stdcall DRAW_UpdateMouseWorldOffsets();
-void __stdcall DRAW_DrawRoomCollisionGrid(struct D2RoomStrc * pRoom);
-void __stdcall DRAW_DrawRoomWallTiles(struct D2RoomStrc * pRoom);
 // Debug overlay (non-DirectDraw renderers only): draws the player's logical room index as on-screen text ("Logical Room->%d") plus the current room's collision grid and wall-tile overlays. Dev visualization left in the retail binary.
 void __stdcall DEBUG_DrawLogicalRoomOverlay();
 

@@ -292,7 +292,7 @@ D2RosterPetSeedStrc * __fastcall GetSeed(int32_t nRosterGUID) {
 }
 
 // Returns 1 (hostile) or 0 (friendly) for two units. If pRosterUnit is a roster pet, hostility is determined by whether pUnit is the pet's owner (0) or not (delegates to CheckRostersArePartied). For non-pet units, returns 1 unless both are monsters that are allies via IsAllyOf. Null unit arguments always yield hostile.
-uint32_t __fastcall ROSTER_AreUnitsHostile(D2UnitStrc * pUnit, D2UnitStrc * pRosterUnit) {
+static uint32_t __fastcall ROSTER_AreUnitsHostile(D2UnitStrc * pUnit, D2UnitStrc * pRosterUnit) {
     D2RosterPetStrc* pRosterPet;
     uint32_t bHostile;
     int nRosterGUID;

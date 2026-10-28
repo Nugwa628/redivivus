@@ -1011,7 +1011,7 @@ BOOL __stdcall CLIENT_MovePlayerToPosition(D2UnitStrc * pUnit, int16_t nX, int16
 }
 
 // Client-side handler for a player attempting to interact with a world object (by unit ID nParam1). Looks up the object, checks the just_portaled curse state for waypoints (classId 0x3b). If within range and line-of-sight, executes UNITMODEACTION_ITEM_INTERACT; otherwise moves the player toward the object's tile position. Stores last skill hit via D2Client for the interaction. Returns without action if object not found.
-void __stdcall PLAYER_InteractWithObject(int32_t nParam1, D2UnderMouseStrc * pUnderMouse) {
+static void __stdcall PLAYER_InteractWithObject(int32_t nParam1, D2UnderMouseStrc * pUnderMouse) {
     int16_t nY;
     int16_t nX;
     eD2States eCurseState;
@@ -1237,7 +1237,7 @@ static void __stdcall PLAYER_ExecuteSkillAtUnit(eD2UnitType eTargetUnitType, int
     PLAYER_ExecuteModeBasedAction(nWeaponClass, pUnderMouse);
 }
 
-BOOL __stdcall PLAYER_CheckPendingInteraction(int32_t nTargetType, int32_t nTargetGUID) {
+static BOOL __stdcall PLAYER_CheckPendingInteraction(int32_t nTargetType, int32_t nTargetGUID) {
     D2UnitStrc* pPlayerUnit_lcl = GetPlayerUnit_UI();
     if (!(pPlayerUnit_lcl && pPlayerUnit_lcl->eUnitType == UNIT_PLAYER)) {
       return 0;
@@ -1524,7 +1524,7 @@ static uint32_t INPUT_ValidateSkillAction(D2UnderMouseStrc * pUnderMouse) {
     return 1;
 }
 
-void INPUT_ContinuePlayerMovement(D2UnderMouseStrc * pMouse) {
+static void INPUT_ContinuePlayerMovement(D2UnderMouseStrc * pMouse) {
     D2UnitStrc* pUnit = pMouse->pPlayer;
     if (!(pUnit && pUnit->eUnitType == UNIT_PLAYER)) {
       return;
@@ -2167,7 +2167,7 @@ int __fastcall ClickMap(int32_t clickType, int32_t nX, int32_t nY, uint8_t mouse
     return 0;
 }
 
-uint8_t __stdcall PLAYER_GetWeaponTypeForAnimation(D2UnitStrc * pPlayerUnit, D2UnitStrc * pUnit) {
+static uint8_t __stdcall PLAYER_GetWeaponTypeForAnimation(D2UnitStrc * pPlayerUnit, D2UnitStrc * pUnit) {
     D2UnitStrc* pLeftArmItem;
     BOOL BVar2;
     D2InventoryStrc* pPlayerInventory;

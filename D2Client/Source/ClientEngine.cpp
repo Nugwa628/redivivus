@@ -104,7 +104,7 @@ void __stdcall CLIENT_QuestEvent_CairnStonesPortal() {
     UI::CmdTbl::CMD_InitKeyConfigUI(iVar1, (int)pDVar2->Range + iVar1 * -2, iVar1, LEVEL_StonyField, 1);
 }
 
-void __stdcall DenOfEvilSpecific(D2RoomStrc * pRoom) {
+static void __stdcall DenOfEvilSpecific(D2RoomStrc * pRoom) {
     uint32_t nRandCoord;
     D2SkillArgStrc sSkillArg;
     D2DrlgRoomCoordsStrc sRoomCoords;
@@ -182,7 +182,7 @@ void __stdcall CLIENT_QuestEvent_DenOfEvilLightReset() {
 }
 
 // Iterate act rooms and apply DenOfEvil-specific lighting to matching rooms.
-void __stdcall ClientLight_ApplyDenOfEvilLighting() {
+static void __stdcall ClientLight_ApplyDenOfEvilLighting() {
     D2RoomStrc* pRoom;
     for (pRoom = D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomFromAct(sgpDrlgAct); pRoom; pRoom = pRoom->pDrlgRoomNext) {
       eD2LevelId eLevelId;
@@ -824,7 +824,7 @@ void __stdcall CLIENT_BossDeath_Baal() {
     UNIT::Missile::CastAttack(pPlayerUnit_lcl, MISSILE_BaalfxControl, nX, nY, SKILL_Attack, 1);
 }
 
-int __stdcall CLIENT_GetDenOfEvilLightIntensity(uint8_t * pRed, uint8_t * pGreen, uint8_t * pBlue) {
+static int __stdcall CLIENT_GetDenOfEvilLightIntensity(uint8_t * pRed, uint8_t * pGreen, uint8_t * pBlue) {
     if (::DenOfEvilLight) {
       return 0;
     }
@@ -972,7 +972,7 @@ void __fastcall CLIENT_SpawnWorldstoneShakeParticle(D2UnitStrc * pUnit) {
     CLIENT_CheckWorldstoneShake(UNIT::CUnit::GetCurrentRoom());
 }
 
-void DRAW_Overlay_SecondsLeftToGame(D2QServerClientConnectionStrc * pQServerClientConnection) {
+static void DRAW_Overlay_SecondsLeftToGame(D2QServerClientConnectionStrc * pQServerClientConnection) {
     int nClearCount;
     uint16_t wszText[256];
     int32_t nHighResTime = Fog::Src::LogManager::LOGMGR_GetHighResolutionTime();

@@ -158,7 +158,7 @@ void __fastcall DRAW_DrawRoomUnits(D2RoomStrc * pRoom) {
     } while (i < nRoomCount);
 }
 
-void __fastcall DEBUG_DrawRoomBoundsRect(int32_t nX, int32_t nY, BYTE bColor) {
+static void __fastcall DEBUG_DrawRoomBoundsRect(int32_t nX, int32_t nY, BYTE bColor) {
     RECT rect;
     rect.top = nY - MouseYOffset;
     rect.left = nX - MouseXOffset - 0x10;
@@ -167,7 +167,7 @@ void __fastcall DEBUG_DrawRoomBoundsRect(int32_t nX, int32_t nY, BYTE bColor) {
     D2gfx::D2GFX::D2GFX_DrawRect(&rect, bColor);
 }
 
-void __stdcall DEBUG_DrawUnitShadowBounds(D2UnitStrc * pUnit) {
+static void __stdcall DEBUG_DrawUnitShadowBounds(D2UnitStrc * pUnit) {
     RECT rect;
     int nY;
     int32_t nX;
@@ -293,7 +293,7 @@ void __stdcall DRAW_UpdateMouseWorldOffsets() {
     MouseYOffset += nShakeY;
 }
 
-void __stdcall DRAW_DrawRoomCollisionGrid(D2RoomStrc * pRoom) {
+static void __stdcall DRAW_DrawRoomCollisionGrid(D2RoomStrc * pRoom) {
     int32_t nGridIndex;
     D2DrlgRoomCoordsStrc roomCoords;
     RECT rect;
@@ -334,7 +334,7 @@ void __stdcall DRAW_DrawRoomCollisionGrid(D2RoomStrc * pRoom) {
     } while (nY < roomCoords.dwYSize + 5 + nYStart);
 }
 
-void __stdcall DRAW_DrawRoomWallTiles(D2RoomStrc * pRoom) {
+static void __stdcall DRAW_DrawRoomWallTiles(D2RoomStrc * pRoom) {
     int32_t* pY;
     int32_t* pX;
     uint32_t nTileFlags;

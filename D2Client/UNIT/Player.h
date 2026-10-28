@@ -91,16 +91,12 @@ uint32_t __stdcall PLAYER_ValidateSkillMessage(int * pnUsabilityCode, struct D2U
 BOOL __fastcall PlayerMessage(int32_t nMessageType, struct D2UnitStrc * pUnit, struct D2ServerMessageHandleStrc * pMessage, int32_t eNeutralMode);
 BOOL __stdcall CLIENT_MovePlayerToPosition(struct D2UnitStrc * pUnit, int16_t nX, int16_t nY, int32_t nSkillActionMode);
 // Client-side handler for a player attempting to interact with a world object (by unit ID nParam1). Looks up the object, checks the just_portaled curse state for waypoints (classId 0x3b). If within range and line-of-sight, executes UNITMODEACTION_ITEM_INTERACT; otherwise moves the player toward the object's tile position. Stores last skill hit via D2Client for the interaction. Returns without action if object not found.
-void __stdcall PLAYER_InteractWithObject(int32_t nParam1, struct D2UnderMouseStrc * pUnderMouse);
 void __fastcall PLAYER_InteractAtTarget(int32_t nParam);
 uint32_t __fastcall SKILL_CheckAuraRange(struct D2SkillStrc * pSkill, struct D2UnitStrc * pUnit, int * pnMinX, int * pnMinY);
-BOOL __stdcall PLAYER_CheckPendingInteraction(int32_t nTargetType, int32_t nTargetGUID);
-void INPUT_ContinuePlayerMovement(struct D2UnderMouseStrc * pMouse);
 void __stdcall PLAYER_ClearRecursionClick();
 BOOL __fastcall IsUnitNotMoving(struct D2UnderMouseStrc * pUnderMouse);
 // Client input dispatcher for map clicks. Converts raw screen coordinates to perspective-view world coords, builds a D2UnderMouseStrc with the player and currently selected unit, sets run/walk and force-move flags from mouseEventFlags, then dispatches to the appropriate handler based on clickType (0=left-down, 1=left-hold, 2=left-up, 3=right-down, 4=right-hold, 5=right-up). Guards against re-entrant calls and ESC-menu-open state.
 int __fastcall ClickMap(int32_t clickType, int32_t nX, int32_t nY, uint8_t mouseEventFlags);
-uint8_t __stdcall PLAYER_GetWeaponTypeForAnimation(struct D2UnitStrc * pPlayerUnit, struct D2UnitStrc * pUnit);
 // Client-side handler for a player-death message (msg ptr arg: type byte at +1, dead-unit GUID at +2, killer GUID at +6). Locates the dead player unit; if inactive sets its anim mode to Death. If the dead unit is the local player, finds the killer unit, makes the corpse non-colliding (width 5), and copies the dead unit's position/facing onto the corpse. Then walks the dead unit's inventory unequipping each equipped (grid type 3) item: swaps primary weapon, clears weapon anim mode flags, removes item stats, reloads the unit COF, and drops the item from the client object table.
 void __fastcall PLAYER_HandlePlayerDeath(struct D2GSPacketSrv0x74 * pDeathMsg);
 uint32_t __fastcall PLAYER_GetAppearanceBytes(uint32_t * pAppearanceOut, uint32_t nBufSize);

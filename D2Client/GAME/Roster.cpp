@@ -79,7 +79,7 @@ static D2RosterStrc * GetRosterPlayerByGUID(int32_t nRosterGUID) {
     return nullptr;
 }
 
-D2RosterStrc * __stdcall GetPlayerRoster() {
+static D2RosterStrc * __stdcall GetPlayerRoster() {
     int nGUID;
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
     if (!pPlayer) {
@@ -243,7 +243,7 @@ char * __fastcall GetRosterName(D2RosterStrc * pRoster) {
 }
 
 // Insertion-sorts a singly-linked D2RosterStrc list ascending by szRosterName (lexicographic). Builds a new sorted list by walking the original and inserting each node at its comparison position. Returns the sorted head, or NULL on NULL input.
-D2RosterStrc * __stdcall ROSTER_SortByName(D2RosterStrc * pRoster) {
+static D2RosterStrc * __stdcall ROSTER_SortByName(D2RosterStrc * pRoster) {
     D2RosterStrc* pCmpA;
     int nCmp;
     D2RosterStrc* pCmpB;
@@ -289,7 +289,7 @@ D2RosterStrc * __stdcall ROSTER_SortByName(D2RosterStrc * pRoster) {
 }
 
 // Insertion-sorts a D2RosterStrc singly-linked list descending by nArenaScore (used as level proxy). Takes the head of an unsorted list via EAX, returns the head of the sorted list. Operates in-place by relinking pNext pointers; does not allocate.
-D2RosterStrc * ROSTER_SortByLevel(D2RosterStrc * pRoster) {
+static D2RosterStrc * ROSTER_SortByLevel(D2RosterStrc * pRoster) {
     D2RosterStrc* pCur;
     D2RosterStrc* pPrev;
     D2RosterStrc* pScan;
@@ -353,7 +353,7 @@ void AllocRosterPartyList(int16_t nPartyId) {
 }
 
 // @sourcefile .\GAME\Roster.cpp
-void __stdcall FreeRosterPartyList() {
+static void __stdcall FreeRosterPartyList() {
     D2RosterPartyListStrc* pMemoryToFree = pRosterPartyList;
     while (pMemoryToFree) {
       D2RosterPartyListStrc* pSavedNext;
@@ -395,7 +395,7 @@ static D2RosterStrc * ROSTER_CollectPartiesIntoPartyList(D2RosterPartyListStrc *
 }
 
 // Insertion-sorts the global pRosterPartyList singly-linked list ascending by nPartyId. Rebuilds the list in-place by relinking pNext pointers and reassigns the global head when done. No allocation; operates on the existing D2RosterPartyListStrc chain.
-void __stdcall ROSTER_SortPartyListsByPartyId() {
+static void __stdcall ROSTER_SortPartyListsByPartyId() {
     D2RosterPartyListStrc* pScanNode;
     D2RosterPartyListStrc* pInsertAfter;
     D2RosterPartyListStrc* pScan;
@@ -490,7 +490,7 @@ static void __stdcall ROSTER_MoveRosterPlayerToFrontOfParty(int16_t nPartyId, in
 }
 
 // @sourcefile .\GAME\Roster.cpp
-void __stdcall ROSTER_GroupPlayersIntoParties() {
+static void __stdcall ROSTER_GroupPlayersIntoParties() {
     D2RosterPartyListStrc* pRosterPartyList;
     short int nPartyId;
     D2RosterPartyListStrc* pPartyListHead;
@@ -519,7 +519,7 @@ void __stdcall ROSTER_GroupPlayersIntoParties() {
     } while (true);
 }
 
-void __stdcall ROSTER_SortAllParties() {
+static void __stdcall ROSTER_SortAllParties() {
     D2RosterStrc* pSortedOwner;
     D2RosterPartyListStrc* pPartyIter;
     for (pPartyIter = pRosterPartyList; pPartyIter; pPartyIter = pPartyIter->pNext) {
@@ -537,7 +537,7 @@ void __stdcall ROSTER_SortAllParties() {
     ROSTER_SortPartyListsByPartyId();
 }
 
-void __stdcall ROSTER_FlattenPartyListsIntoSingleRosterChain() {
+static void __stdcall ROSTER_FlattenPartyListsIntoSingleRosterChain() {
     D2RosterPartyListStrc* pPartyList;
     D2RosterStrc* pWalkCurrent;
     D2RosterStrc* pWalkNext;
@@ -901,7 +901,7 @@ void __fastcall ClickParty_i(D2RosterStrc * pRoster) {
     UI::Party::ResetPartyUi();
 }
 
-D2RosterStrc * __stdcall ROSTER_LeaveParty() {
+static D2RosterStrc * __stdcall ROSTER_LeaveParty() {
     int nGUID;
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
     if (!pPlayer) {
