@@ -562,40 +562,40 @@ void __fastcall LinkPortalCoords(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
       eUnitType = pUnit2->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nCoordVal = pUnit2->pPath.pStaticPath->nPosX;
-      } else if (pUnit2->pPath.pDynamicPath) {
-        nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
-      } else {
+      } else if (!pUnit2->pPath.pDynamicPath) {
         nCoordVal = 0;
+      } else {
+        nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
       }
 
       pUnit->pUnitData.pUnitDataObject->nLinkedPortalX = nCoordVal;
       eUnitTypeTmp = pUnit2->eUnitType;
       if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
         nCoordVal = pUnit2->pPath.pStaticPath->nPosY;
-      } else if (pUnit2->pPath.pDynamicPath) {
-        nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit2->pPath.pDynamicPath);
-      } else {
+      } else if (!pUnit2->pPath.pDynamicPath) {
         nCoordVal = 0;
+      } else {
+        nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit2->pPath.pDynamicPath);
       }
 
       pUnit->pUnitData.pUnitDataObject->nLinkedPortalY = nCoordVal;
       eUnitTypeTmp = pUnit->eUnitType;
       if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
         nCoordVal = pUnit->pPath.pStaticPath->nPosX;
-      } else if (pUnit->pPath.pDynamicPath) {
-        nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-      } else {
+      } else if (!pUnit->pPath.pDynamicPath) {
         nCoordVal = 0;
+      } else {
+        nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
       }
 
       pUnit2->pUnitData.pUnitDataObject->nLinkedPortalX = nCoordVal;
       eUnitTypeTmp = pUnit->eUnitType;
       if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
         nCoordVal = pUnit->pPath.pStaticPath->nPosY;
-      } else if (pUnit->pPath.pDynamicPath) {
-        nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-      } else {
+      } else if (!pUnit->pPath.pDynamicPath) {
         nCoordVal = 0;
+      } else {
+        nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
       }
 
       pUnit2->pUnitData.pUnitDataObject->nLinkedPortalY = nCoordVal;
@@ -1751,8 +1751,8 @@ uint32_t __fastcall UNITS_CanUseSkillOnTarget(::SGAMEDATA * pGame, D2UnitStrc * 
       }
     }
 
-    uint16_t nCasterPartyId = GetPartyId(pUnit);
-    if (nCasterPartyId == 0xffff) {
+    int16_t nCasterPartyId = GetPartyId(pUnit);
+    if (nCasterPartyId == -1) {
       return 0;
     }
 
@@ -1761,7 +1761,7 @@ uint32_t __fastcall UNITS_CanUseSkillOnTarget(::SGAMEDATA * pGame, D2UnitStrc * 
       return 0;
     }
 
-    uint16_t nTargetPartyId = GetPartyId(pTargetUnit);
+    int16_t nTargetPartyId = GetPartyId(pTargetUnit);
     return (uint32_t)(nCasterPartyId == nTargetPartyId);
 }
 
@@ -2484,10 +2484,10 @@ void __fastcall UNITS_FreeInventoryItems(::SGAMEDATA * pGame, D2UnitStrc * pUnit
             eCarriedUnitType = pCarriedItem->eUnitType;
             if (eCarriedUnitType == UNIT_OBJECT || 3 < (int)eCarriedUnitType && (int)eCarriedUnitType <= 5) {
               nItemPosX = pCarriedItem->pPath.pStaticPath->nPosX;
-            } else if (pCarriedItem->pPath.pDynamicPath) {
-              nItemPosX = D2Common::PATH::DynamicPath::GetXPos(pCarriedItem->pPath.pDynamicPath);
-            } else {
+            } else if (!pCarriedItem->pPath.pDynamicPath) {
               nItemPosX = 0;
+            } else {
+              nItemPosX = D2Common::PATH::DynamicPath::GetXPos(pCarriedItem->pPath.pDynamicPath);
             }
 
             D2Common::INVENTORY::Inventory::UnusedDebug(".\\UNIT\\SUnit.cpp", 0xa03, pInventory, nItemPosX, nItemPosY, (eInventoryPage)iVar1, 0, nInvLocPackedXY);

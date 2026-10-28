@@ -411,10 +411,10 @@ void __fastcall PLAYER_CreateStarterItems(::SGAMEDATA * pGame, D2UnitStrc * pUni
         eItemUnitType = pNewItem->eUnitType;
         if (eItemUnitType == UNIT_OBJECT || 3 < (int)eItemUnitType && (int)eItemUnitType <= 5) {
           bIsQuiver = pNewItem->pPath.pStaticPath->nPosX;
-        } else if (pNewItem->pPath.pDynamicPath) {
-          bIsQuiver = D2Common::PATH::DynamicPath::GetXPos(pNewItem->pPath.pDynamicPath);
-        } else {
+        } else if (!pNewItem->pPath.pDynamicPath) {
           bIsQuiver = 0;
+        } else {
+          bIsQuiver = D2Common::PATH::DynamicPath::GetXPos(pNewItem->pPath.pDynamicPath);
         }
 
         pGameLocal = __frame0.pGameSaved;
