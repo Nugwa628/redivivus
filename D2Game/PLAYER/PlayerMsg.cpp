@@ -2435,8 +2435,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1C_UnequipToInventory(::SGAMEDATA * pG
       return SERVERSTATUS_BAD_PARAMS;
     }
 
-    uint16_t uVar1 = pPacket->nBodyLoc;
-    uint32_t nBodyLoc = (uint32_t)uVar1;
+    uint32_t nBodyLoc = pPacket->nBodyLoc;
     if (nBodyLoc - 1 > 9) {
       return SERVERSTATUS_BAD_DATA;
     }
@@ -2448,7 +2447,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1C_UnequipToInventory(::SGAMEDATA * pG
     }
 
     nSize = 0;
-    BOOL nEquipResult = ITEMS::ItemMode::EquipItem(pGame, pUnit, (eD2BodyLoc)uVar1, 0, &nSize);
+    BOOL nEquipResult = ITEMS::ItemMode::EquipItem(pGame, pUnit, (eD2BodyLoc)nBodyLoc, 0, &nSize);
     if (!(!nEquipResult && nSize)) {
       return SERVERSTATUS_OK;
     }
