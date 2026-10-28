@@ -1200,12 +1200,11 @@ BOOL __fastcall Missiles_SrvHitFunc_AreaSplashDamage(::SGAMEDATA * pGame, D2Unit
 }
 
 BOOL __fastcall Missiles_SrvHitFunc_WallHitDelegateToAreaDamage(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
-    if (pTarget) {
-      return 0;
+    if (!pTarget) {
+      return Missiles_SrvHitFunc_AreaSplashDamage(pGame, pUnit, nullptr);
     }
 
-    BOOL bResult = Missiles_SrvHitFunc_AreaSplashDamage(pGame, pUnit, nullptr);
-    return bResult;
+    return 0;
 }
 
 // Server-side missile hit handler for healing projectiles. Validates the missile and target, checks skill-target alignment and CanUseSkillOnTarget. Computes a heal amount from skill calcs (calc[0]/calc[1]) with a random roll, clamps to the target's max HP, sets UNITSTAT_hitpoints, and optionally applies ProgOverlay. Returns 3 (pass-through) if target type/alignment check fails based on sHitPar2 (0=any, 1=undead, 2=demon); returns 4 if target cannot be healed.

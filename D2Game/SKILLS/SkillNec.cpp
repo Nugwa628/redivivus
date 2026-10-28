@@ -327,11 +327,11 @@ void __fastcall SKILLNEC_OnCurseExpire(D2UnitStrc * pUnit, eD2States eState, int
 }
 
 uint32_t __fastcall SKILLNEC_IsReviveOrRaiseSkeleton(eD2Skills eSkill) {
-    if (eSkill == SKILL_Penetrate) {
-      return 1;
+    if (eSkill != SKILL_Penetrate) {
+      return (uint32_t)(eSkill == SKILL_Meteor);
     }
 
-    return (uint32_t)(eSkill == SKILL_Meteor);
+    return 1;
 }
 
 uint32_t __fastcall SKILLNEC_ValidateAttackableTarget(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
