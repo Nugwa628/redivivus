@@ -163,6 +163,15 @@ functions that commit stopped matching differ in nothing else. The values
 are in the original's code at each call, so the generator can keep them -
 for instance with macros that take the location as arguments.
 
+**Linkage and statement order the regeneration changed.** The generator
+decides `static` and the order of a body's statements; these came out other
+than the original compiled them:
+
+- GFXUTIL_GetCompositePaletteIndex (004da770): `static uint8_t __fastcall GFXUTIL_GetCompositePaletteIndex(D2UnitStrc * pUnit, uint8_t byComponent)` -> `uint8_t __fastcall GFXUTIL_GetCompositePaletteIndex(D2UnitStrc * pUnit, uint8_t byComponent)`; `oracle diff GFXUTIL_GetCompositePaletteIndex` matches.
+- ROSTER_LeaveParty (00479f60): `D2RosterStrc * __stdcall ROSTER_LeaveParty()` -> `static D2RosterStrc * __stdcall ROSTER_LeaveParty()`; `oracle diff ROSTER_LeaveParty` matches; its caller 00479fc0 matches with it.
+- SPELLSEL_ClearSkillBinding (004a9d70): `void __stdcall SPELLSEL_ClearSkillBinding(short * pSkillId, int32_t nChargesLeft)` -> `static void __stdcall SPELLSEL_ClearSkillBinding(short * pSkillId, int32_t nChargesLeft)`; `oracle diff SPELLSEL_ClearSkillBinding` matches.
+- QSERVER_GetFirstActiveGame (0052f6e0): `::SGAMEDATA* nToken = 0; after EnterCriticalSection` -> `nToken = 0 before EnterCriticalSection (xor esi, esi precedes the call)`; `oracle diff QSERVER_GetFirstActiveGame` matches.
+
 ## The database
 
 **Functions marked inline that the original calls** (`fix_uninline.py`). A
@@ -205,6 +214,35 @@ them, the database is missing a parameter; CACHE_FreeMem (005193c0),
 STRTABLE_LoadStringTableFile (00525920), ITEM_CltRecalcAllEquippedItems
 (004c1bc0) and NET_D2GS_SERVER_Send_0x8F_HEARTBEAT_PING (0053e020) still
 lack theirs.
+
+**Prototypes the regeneration changed** (`fix_callsig.py`). Where a function
+matched before the regeneration and its prototype changed - a return type,
+a parameter's width or order, a convention, a parameter dropped - the
+callers' code says which was right. `fix_callsig.py` puts the old prototype
+back with every call's arguments and keeps it only where the oracle
+confirms it; the database should carry it:
+
+- ARCHIVE_WriteFormattedText (0045b960): `bool ARCHIVE_WriteFormattedText(HANDLE hFile, char * pFormat, ...)` -> `BOOL ARCHIVE_WriteFormattedText(HANDLE hFile, char * pFormat, ...)`; `oracle diff ARCHIVE_WriteFormattedText` matches.
+- AUTOMAP_SetCenters (00457750): `void __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters)` -> `int32_t __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters)`; `oracle diff AUTOMAP_SetCenters` matches.
+- CHARSEL_CreateCharEntry (0043a460): `int __stdcall CHARSEL_CreateCharEntry(uint16_t * wszCharName, uint16_t * wszCommandString, int32_t nEntryType, bool ePlayerClass)` -> `int __stdcall CHARSEL_CreateCharEntry(uint16_t * wszCharName, uint16_t * wszCommandString, int32_t nEntryType, int32_t ePlayerClass)`; CHARSEL_CreateCharEntry itself is OUR+6; its callers 0043a5d0, 0043a610 match with it.
+- CUBE_HandleTransmuteButtonClick (00566ae0): `static void CUBE_HandleTransmuteButtonClick(D2UnitStrc * pPlayer, int16_t nButtonId, ::SGAMEDATA * pGame)` -> `static void CUBE_HandleTransmuteButtonClick(D2UnitStrc * pPlayer, uint16_t nButtonId, ::SGAMEDATA * pGame)`; `oracle diff CUBE_HandleTransmuteButtonClick` matches.
+- FIELDTBLS_FreePlayerData_STUB (0066a260): `void __stdcall FIELDTBLS_FreePlayerData_STUB()` -> `void __fastcall FIELDTBLS_FreePlayerData_STUB(D2UnitStrc * pUnit)`; `oracle diff FIELDTBLS_FreePlayerData_STUB` matches; its caller 00622060 matches with it.
+- FILETOOLS_CreateFolder_UTF8 (004045f0): `BOOL __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName)` -> `bool __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName)`; `oracle diff FILETOOLS_CreateFolder_UTF8` matches.
+- MAINMENU_DisplayCredits (00431050): `int __stdcall MAINMENU_DisplayCredits()` -> `int __fastcall MAINMENU_DisplayCredits(int nUnused)`; MAINMENU_DisplayCredits itself is OUR+2; its caller 004312c0 matches with it.
+- MONSTERAI_ConvertMonstersInRadius (005dfbf0): `static void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32_t nMinDelay, int32_t nMaxDelay, int32_t bUndeadOnly, D2UnitStrc * pUnit, ::SGAMEDATA * pGame)` -> `static void __stdcall MONSTERAI_ConvertMonstersInRadius(int32_t nUnitType, int32_t nMinDelay, int32_t nMaxDelay, int32_t bUndeadOnly, ::SGAMEDATA * pGame, D2UnitStrc * pUnit)`; MONSTERAI_ConvertMonstersInRadius itself is OUR-3; its callers 005dfd90, 005dfe00, 005e0020, 005e0040 match with it.
+- MessagePump (004fa590): `void __stdcall MessagePump(pfnFramePump pfnFrameCallback)` -> `int __stdcall MessagePump(pfnFramePump pfnFrameCallback)`; `oracle diff MessagePump` matches.
+- NET_D2GS_CLIENT_Send_0x5E (00478780): `void __fastcall NET_D2GS_CLIENT_Send_0x5E(uint8_t nActionType, int32_t nPlayerGUID)` -> `void __fastcall NET_D2GS_CLIENT_Send_0x5E(int32_t nActionType, int32_t nPlayerGUID)`; NET_D2GS_CLIENT_Send_0x5E itself is OUR-5; its caller 00479fc0 matches with it.
+- Q19_IsKhalimsWillNotComplete (005b8500): `bool __fastcall Q19_IsKhalimsWillNotComplete(::SGAMEDATA * pGame)` -> `BOOL __fastcall Q19_IsKhalimsWillNotComplete(::SGAMEDATA * pGame)`; `oracle diff Q19_IsKhalimsWillNotComplete` matches.
+- QSERVER_KillConnection (0052b570): `int __stdcall QSERVER_KillConnection(int32_t nClientId)` -> `void __stdcall QSERVER_KillConnection(int32_t nClientId)`; `oracle diff QSERVER_KillConnection` matches.
+- RemoveObjectFromServerObjectTable (00465ee0): `void RemoveObjectFromServerObjectTable(eD2UnitType eUnitType, uint32_t nUnitGUID)` -> `void __fastcall RemoveObjectFromServerObjectTable(uint32_t nUnitGUID, eD2UnitType eUnitType)`; RemoveObjectFromServerObjectTable itself is OUR-1; its callers 0045cc10, 004c2050, 004c42a0 match with it.
+- ResetPartyUi (0049a640): `int32_t __stdcall ResetPartyUi()` -> `void __stdcall ResetPartyUi()`; `oracle diff ResetPartyUi` matches.
+- SKILLDESC_FormatMissileDamage (004ec540): `static void __stdcall SKILLDESC_FormatMissileDamage(int32_t nMinDamage, int32_t nMaxDamage, uint16_t wDmgTypeStringId, uint16_t * wszText)` -> `static int __stdcall SKILLDESC_FormatMissileDamage(int32_t nMinDamage, int32_t nMaxDamage, uint16_t wDmgTypeStringId, uint16_t * wszText)`; `oracle diff SKILLDESC_FormatMissileDamage` matches.
+- SKILLMONST_ResurrectUnit (005cc960): `void __fastcall SKILLMONST_ResurrectUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)` -> `int __fastcall SKILLMONST_ResurrectUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)`; `oracle diff SKILLMONST_ResurrectUnit` matches.
+- SKILLSEMON_CltSetReviveGfx (004f04f0): `static void __stdcall SKILLSEMON_CltSetReviveGfx(eMissilesId pParam, eD2Skills eSkill, int32_t nParam1, D2UnitStrc * pUnit, int32_t nParam2)` -> `static int __stdcall SKILLSEMON_CltSetReviveGfx(eMissilesId pParam, eD2Skills eSkill, int32_t nParam1, D2UnitStrc * pUnit, int32_t nParam2)`; `oracle diff SKILLSEMON_CltSetReviveGfx` matches.
+- UnsetQuestState (0065c3a0): `bool __stdcall UnsetQuestState(D2BitBufferStrc * pBitBuffer, eD2Quests nQuestId, eD2QuestState eQuestState)` -> `uint8_t __stdcall UnsetQuestState(D2BitBufferStrc * pBitBuffer, eD2Quests nQuestId, eD2QuestState eQuestState)`; `oracle diff UnsetQuestState` matches.
+- GFX_GetUnitSpriteOffset (004706e0): `void __fastcall GFX_GetUnitSpriteOffset(D2UnitStrc * pUnit, uint8_t byComponent, int32_t * pOffsetX, int32_t * pOffsetY)` -> `void __fastcall GFX_GetUnitSpriteOffset(D2UnitStrc * pUnit, int32_t byComponent, int32_t * pOffsetX, int32_t * pOffsetY)`; GFX_GetUnitSpriteOffset itself is OUR-6; its caller 004f0430 matches with it.
+- DRLGPRESET_SetPickedFileInDrlgMap (00666ec0): `void __fastcall DRLGPRESET_SetPickedFileInDrlgMap(D2DrlgMapStrc*, int32_t)` -> `int32_t __fastcall DRLGPRESET_SetPickedFileInDrlgMap(D2DrlgMapStrc*, int32_t)`, which stores nPickedFile and returns it (`mov eax, edx` before `ret`); `oracle diff DRLGPRESET_SetPickedFileInDrlgMap` matches.
+
 
 **Functions filed apart from their callers** (`evidence/objects.tsv`, kind
 `object`). A function the original passes arguments in EAX/EBX/ESI/EDI was

@@ -26,6 +26,14 @@ ensure_ref() {
     [ -f "$ORACLE_ROOT/build/ref/functions.tsv" ] || oracle_python "$SCRIPTS/refimage.py"
 }
 
+# The map and the audit name the original's CRT functions from crtmap.tsv;
+# without it every call into the CRT is an unknown, and the call sequences
+# that pair functions by position (funcmap.py, `calls`) no longer anchor.
+ensure_crt() {
+    ensure_ref
+    [ -f "$ORACLE_ROOT/evidence/crtmap.tsv" ] || oracle_python "$SCRIPTS/crtmap.py"
+}
+
 is_experiment() { [ "$ORACLE_VC" != sp1 ] || [ -n "${ORACLE_CFLAGS:-}" ]; }
 
 cmd="${1:-help}"; [ $# -gt 0 ] && shift
@@ -34,12 +42,12 @@ case "$cmd" in
     build)  oracle_python "$SCRIPTS/build.py" "$@" ;;
     ref)    oracle_python "$SCRIPTS/refimage.py" "$@" ;;
     crt)    ensure_ref; oracle_python "$SCRIPTS/crtmap.py" "$@" ;;
-    map)    ensure_ref
+    map)    ensure_crt
             if is_experiment; then
                 echo "oracle map: not in an experiment - an A/B audit must use the baseline's map" >&2; exit 2
             fi
             oracle_python "$SCRIPTS/funcmap.py" "$@" ;;
-    audit)  ensure_ref
+    audit)  ensure_crt
             if is_experiment; then
                 # Same pairs as the baseline, this experiment's objects: a fair A/B.
                 echo "*** experiment: auditing $ORACLE_BUILD/obj -> $ORACLE_BUILD/audit.tsv" >&2

@@ -13,6 +13,11 @@ body of its definition in REV - the old tree's commit, in the file the old
 audit filed it under - and puts it in place of the body of its definition
 here, the signature left as the regenerated tree has it.
 
+A function the map no longer pairs (its code changed, and `exact` was what
+paired it) is still in the file the old audit filed it under, by its name:
+its body is put back the same way and it is judged as the function of that
+name in its object; the next `oracle all` maps it again.
+
 The evidence is the oracle's alone: an edit is kept only if the function
 then matches (its code is the original's, byte for byte, so whatever
 upstream changed in it since was not the original's code), and nothing that
@@ -31,6 +36,7 @@ sys.path.insert(0, HERE)
 import audit            # noqa: E402
 import check            # noqa: E402
 import fixlib           # noqa: E402
+import ours as ourslib  # noqa: E402
 from fix_ifelse import match_close  # noqa: E402
 from fix_static import def_pattern, git_show  # noqa: E402
 from oracle_config import BUILD, ORACLE, REPO  # noqa: E402
@@ -101,6 +107,40 @@ def main():
             skipped['body already the same'] += 1
             continue
         cands[tu].append((s, leaf, otext[sp[0]:sp[1]]))
+    # Functions the map lost: the one of their name in the old audit's TU.
+    mapped = {r[0] for r in rows}
+    ends = {}
+    for line in open(args.old_audit):
+        p = line.split('\t')
+        if p[0] != 'start' and len(p) > 9:
+            ends[int(p[0], 16)] = int(p[1], 16)
+    objs = {}
+    for s, (st, oname, otu) in sorted(old.items()):
+        if st != 'MATCH' or s in mapped:
+            continue
+        if args.patterns and not any(p in otu for p in args.patterns):
+            continue
+        leaf = oname.rsplit('::', 1)[-1]
+        cpp = os.path.join(REPO, otu + '.cpp')
+        obj = os.path.join(BUILD, 'obj', otu + '.obj')
+        if not os.path.exists(cpp) or not os.path.exists(obj) or body_span(fixlib.read(cpp), leaf) is None:
+            skipped['unmapped, no definition here'] += 1
+            continue
+        if otu not in objs:
+            objs[otu] = ourslib.load_object(os.path.join(BUILD, 'obj'), otu + '.obj')
+        fs = [f for f in objs[otu] if f.name.rsplit('::', 1)[-1] == leaf]
+        if otu not in olds:
+            olds[otu] = git_show(args.rev, cpp)
+        sp = body_span(olds[otu], leaf) if olds[otu] else None
+        if len(fs) != 1 or sp is None:
+            skipped['unmapped, not found once'] += 1
+            continue
+        if restored({cpp: fixlib.read(cpp)}, cpp, leaf, olds[otu][sp[0]:sp[1]]) is None:
+            skipped['body already the same'] += 1
+            continue
+        rows.append((s, ends[s], fs[0].name, otu, fs[0].symbol, 'restore', ''))
+        syms[fs[0].symbol] = s
+        cands[otu].append((s, leaf, olds[otu][sp[0]:sp[1]]))
     total = sum(len(v) for v in cands.values())
     print('%d functions in %d TUs (skipped: %s)' % (total, len(cands), dict(skipped)), flush=True)
     if not args.apply:

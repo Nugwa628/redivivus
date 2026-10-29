@@ -59,7 +59,9 @@ for the group, not for each function), when a moved function refers to
 anything else than before (a name its new file binds differently), or when
 funcmap.py, run over the rebuilt tree, no longer pairs a function of a TU
 it touched that it paired before (the map pairs by neighbours in a TU: a
-move into Fog/Debug once left ILT_strrchr unpaired). The rest
+move into Fog/Debug once left ILT_strrchr unpaired) - unless the edit
+wins a match and that function did not match and is now paired with
+nothing: then it costs a measurement, not a match. The rest
 is tried again, a few rounds at most; a TU no edit touched that fails to
 compile drops the edits making static a function it names. A loss in a TU
 no edit touched comes from a header's declaration count, the symbol phase:
@@ -970,11 +972,19 @@ def main():
             # before and pairs no longer, or with another, is laid on every
             # edit touching its TU.
             now_map = derived_map()
+            # One it now pairs with nothing that did not match costs a
+            # measurement, not a match: it is laid only on an edit that
+            # wins none (LAUNCHER_ReadRegistryValue into OOGUtilities left
+            # its neighbour LAUNCHER_GenerateJoinGameRequestId, no match,
+            # without the anchor it was aligned by).
             unmapped = {s for s, (_t, sym) in base_map.items() if now_map.get(s, (None, None))[1] != sym}
+            unpaired = {s for s in unmapped if s not in now_map and s not in fixlib.matches(base)}
             for e in active:
                 m = move_of[e.label]
                 mine = {m.x} | set(m.ys)
                 hit = sorted(s for s in unmapped if base_map[s][0] in mine or s in e.affects)
+                if e.affects & won:
+                    hit = [s for s in hit if s not in unpaired]
                 if hit:
                     bad[e.label] = 'unmaps %s' % ', '.join('%08x' % s for s in hit)
             for s in sorted(unmapped - {s for e in active for s in e.affects} -

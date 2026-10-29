@@ -225,6 +225,10 @@ conflicting ones, which point at a wrong global or offset in the tree.
 `libcpmt.lib` (RTM and SP1) with every original function. The hits name the
 original's CRT (`evidence/crtmap.tsv`), and the per-version split is what
 settled SP1 (`evidence/toolchain.md`).
+`oracle map` and `oracle audit` derive `crtmap.tsv` when the checkout lacks
+it: without it every call into the CRT is an unknown, an aligned call
+sequence has no anchor next to `_exit` or `memset`, and functions that only
+the `calls` tier pairs drop out of the map.
 
 ## Flags
 
@@ -335,10 +339,11 @@ names the evidence its rule rests on.
 | `fix_assert.py` | `if (ok) { return x; } halt(); exit(-1);` | the assertion first: `if (!ok) { halt(); exit(-1); } return x;` |
 | `fix_ifelse.py` | `if (!c) { B } else { A }`, where a jump shows it - or, kept only where its function gets more similar, any `if (!x)` or `if (x == 0)` of one operand | the branches in the order VC8 lays out: `if (c) { A } else { B }` |
 | `fix_switch.py` | an if-chain on one variable, `if (v == A) {…} else if (v == B) {…}`, or consecutive `if (v == A) {… return;}` blocks | the `switch (v)` the original lowers to subtractions; `--single` also a one-case chain where the original subtracts the case value (`sub; je`) |
+| `fix_voidarith.py` | `(uint32_t*)(sgptDataTable->pSkillsCode + nOffset)`, arithmetic on a `void *` member, which VC8 rejects (C2036), so the function is quarantined and its callers in the TU end their call to it with `int3` | `(uint8_t*)sgptDataTable->pSkillsCode + nOffset`, the byte arithmetic g++ compiles the plain form to |
 | `fix_guardstack.py` | `Fog::Debug::GuardStack();` where the original checks its stack cookie | nothing: under `/GS` VC8 emits the check itself |
 | `fix_uninline.py` | the body of a helper marked inline in the Ghidra database, e.g. `seed.nSeedLow = v; seed.nSeedHigh = 0x29a;` | the call: `InitSeed_Param_666(&seed, v)` |
 | `fix_return.py` | `void` where the original returns one constant on every path (EAX at each `ret`, by constant propagation over its control flow: `classify.eax_at_returns`), or one argument (`arg_at_returns`) | `int` returning that constant; `bool` where only AL holds it; the parameter, as its type |
-| `fix_gsbuffer.py` | `uint8_t aPacket[9]` in a function the original gives no stack cookie (`/GS` protects byte arrays); with `--members` a byte array inside a local's struct type, such as D2DamageStrc's padding `uint8_t nReserved66[2]` | a struct of scalar fields, `struct { uint8_t e0, …, e8; }`, addressed through a byte pointer |
+| `fix_gsbuffer.py` | `uint8_t aPacket[9]` in a function the original gives no stack cookie (`/GS` protects byte arrays); with `--members` a byte array inside a local's struct type, such as D2DamageStrc's padding `uint8_t nReserved66[2]` | a struct of scalar fields, `struct { uint8_t e0, …, e8; }`, addressed through a byte pointer; a member becomes scalar members, `uint8_t nReserved66, nReserved66_1;` (a struct type would shift the symbol phase of every TU including it) |
 | `fix_order.py` | independent stores in an order of its own, `p[2] = x; p[1] = y; p[0] = 0x0c;` | the order VC8 schedules the original's from: fields in member order (`--by offset`), or the original's store order (`--by store`) |
 | `fix_idioms.py` | operators Ghidra could not fold back, e.g. `s.nSeedLow + (int)(((uint64_t)d2_bits_of(s) & 0xffffffff) / 100) * -100` | the operator: `s.nSeedLow % 100`; `__alldiv((uint32_t)E, (uint32_t)((uint64_t)E >> 0x20), 100, 0)` is `(int64_t)E / 100`; `(int)(x + (x >> 0x1f & 3U)) >> 2` is `x / 4`; `x & 0xff` is `(uint8_t)x` (each idiom documented with why the value is the same) |
 | `fix_localtype.py` | a `uint8_t` or `uint16_t` local the original keeps whole: VC8 loads and stores it as a byte (`mov al, byte ptr [edi + 3]`, `mov byte ptr [ebp - 0xcd], 0`) where the original zero-extends and stores a dword | `uint32_t` (`int32_t` if signed), kept where the function comes out more similar |
@@ -356,6 +361,7 @@ names the evidence its rule rests on.
 | `fix_paramtype.py` | a `uint8_t` or `uint16_t` parameter of a `__fastcall` function, where the original's callers load the whole of ECX or EDX (`mov edx, 5` against our `mov dl, 5`) | `int32_t`, judged on the function and every caller |
 | `fix_globalwidth.py` | a global or static typed `bool`, `uint8_t`, `uint16_t`, ..., by the accesses Ghidra saw: `mov byte ptr [g], 1` | the dword the original reads and writes, `mov dword ptr [g], 1`: `BOOL`, `int32_t` or `uint32_t` in every declaration, judged on the whole tree |
 | `fix_restore.py` | after a regeneration, the generator's body again for a function that matched before it | the body it matched with, from the old tree's commit (`fix_restore.py REV OLD_AUDIT`), kept only where the function then matches again |
+| `fix_callsig.py` | after a regeneration, another prototype for a function that a function matching before it calls, or for that function itself: a parameter dropped (`FreeDialogStrc()`), two swapped, another convention, return type or linkage | the prototype from the old tree's commit (`fix_callsig.py REV OLD_AUDIT`): definition, declarations, and the arguments of every call from the same function there; judged on the function and its callers, so `fix_restore` can bring the callers' bodies back |
 
 `oracle fix` runs them all (`scripts/fix_all.py`): conventions first
 (`fix_refile`, `fix_static`, then `--demote`, then `fix_fastcall`, `fix_paramtype`, `fix_globalwidth`), the local rewrites after, the whole cycle
@@ -414,7 +420,7 @@ map (`bracket`, `align`) and `tulayout.py` order our functions by source line
 | `scripts/diffgrams.py`, `classify.py`, `tulayout.py` | what differs, over all pairs |
 | `scripts/commit.py` | commit the branch's way (CLAUDE.md, "Commits"): tooling amended into the first commit, source changes as a new commit |
 | `scripts/objects.py` | `evidence/objects.tsv`: functions the tree files apart from the callers they share a register convention with, and declared conventions the original contradicts - for upstream |
-| `scripts/fixlib.py`, `fix_static.py`, `fix_refile.py`, `fix_compare.py`, `fix_assert.py`, `fix_ifelse.py`, `fix_switch.py`, `fix_guardstack.py`, `fix_idioms.py`, `fix_bitmask.py`, `fix_shiftbit.py`, `fix_localtype.py`, `fix_uninline.py`, `fix_return.py`, `fix_gsbuffer.py`, `fix_stringops.py`, `fix_nestcall.py`, `fix_inplace.py`, `fix_boolarith.py`, `fix_allocargs.py`, `fix_order.py`, `fix_permute.py`, `fix_caseorder.py`, `fix_forloop.py`, `fix_fastcall.py`, `fix_paramtype.py`, `fix_globalwidth.py`, `fix_restore.py`, `fix_all.py`, `tidy_blanks.py` | systematic fixes, kept only where confirmed; `oracle fix` runs them all |
+| `scripts/fixlib.py`, `fix_static.py`, `fix_refile.py`, `fix_compare.py`, `fix_assert.py`, `fix_ifelse.py`, `fix_switch.py`, `fix_guardstack.py`, `fix_idioms.py`, `fix_bitmask.py`, `fix_shiftbit.py`, `fix_localtype.py`, `fix_uninline.py`, `fix_return.py`, `fix_gsbuffer.py`, `fix_stringops.py`, `fix_nestcall.py`, `fix_inplace.py`, `fix_boolarith.py`, `fix_allocargs.py`, `fix_order.py`, `fix_permute.py`, `fix_caseorder.py`, `fix_forloop.py`, `fix_fastcall.py`, `fix_paramtype.py`, `fix_globalwidth.py`, `fix_restore.py`, `fix_callsig.py`, `fix_voidarith.py`, `fix_all.py`, `tidy_blanks.py` | systematic fixes, kept only where confirmed; `oracle fix` runs them all |
 | `scripts/oracle_config.py` | which build directory a configuration uses |
 | `scripts/objdiff.py` | do two builds contain the same code |
 | `scripts/abcompare.py` | baseline vs experiment, module by module |

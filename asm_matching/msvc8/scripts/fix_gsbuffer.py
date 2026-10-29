@@ -24,12 +24,17 @@ With --members the same is done to a struct type's members: VC8 protects a
 local struct that holds a byte array, and the generator writes padding as
 one (D2DamageStrc's `uint8_t nReserved66[2]`, local in SetUninterruptableState,
 005544b0, and 78 more functions that have a cookie the original lacks). A
-member array of a struct that is local in such a function becomes a struct
-of scalar fields, and every use of the member anywhere in the tree goes
-through a pointer to its first byte:
+member array of a struct that is local in such a function becomes scalar
+members, and every use of the member anywhere in the tree goes through a
+pointer to its first byte:
 
-    uint8_t nReserved66[2];         ->  struct { uint8_t e0, e1; } nReserved66;
+    uint8_t nReserved66[2];         ->  uint8_t nReserved66, nReserved66_1;
     pDamage->nReserved66 + n        ->  ((uint8_t*)&pDamage->nReserved66) + n
+
+Scalar members, not a struct of them: a struct type is one more symbol in
+every TU that includes the header, which shifts the symbol phase
+(evidence/flags.md) - D2COMP_DestroyCompositeUnit, 005041b0, stops matching
+with `struct { uint8_t e0, e1; } nReserved66;` and not with the members.
 
 The type is shared, so the edit is judged over the whole tree: kept only if
 every TU compiles, nothing that matched stops matching and the functions with
@@ -264,8 +269,8 @@ def apply_members(rows, model, syms, cands, log=print):
         _p, a, b = defs[struct]
         m = next(x for x in MEMBER_ARRAY.finditer(text, a, b) if x.group('n') == member)
         k = int(m.group('k'), 0)
-        decl = '%sstruct { %s %s; } %s;%s' % (m.group('ind'), m.group('t'), ', '.join('e%d' % i for i in range(k)),
-                                              member, m.group('tail'))
+        decl = '%s%s %s;%s' % (m.group('ind'), m.group('t'),
+                               ', '.join([member] + ['%s_%d' % (member, i) for i in range(1, k)]), m.group('tail'))
         new = dict(pristine)
         new[path] = text[:m.start()] + decl + text[m.end():]
         uses = rewrite_member({p: new[p] for p in files}, member, m.group('t'))
