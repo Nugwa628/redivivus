@@ -996,48 +996,6 @@ BOOL __stdcall OOGUTIL_OnPressChatWarningOk(D2ControlMsg * pControlMsg) {
     return 1;
 }
 
-int __fastcall OOGUTIL_SendChatMessage(char * szText, int32_t bUseChannelPrefix) {
-    char* pszSrc;
-    uint16_t* wszSubTitle;
-    int nSendResult;
-    uint16_t nTitleStrId;
-    char cFirstChar = *szText;
-    Storm::Source::SSystem::SMemZero(gszOogChatInputBuffer, 0x200);
-    if (!bUseChannelPrefix || cFirstChar == '/' || !gpCurrentChatRoomContext) {
-      pszSrc = szText;
-      do {
-        cFirstChar = *pszSrc;
-        pszSrc[(int)gszOogChatInputBuffer - (int)szText] = cFirstChar;
-        pszSrc++;
-      } while (cFirstChar != '\0');
-    } else {
-      char* pszChannelName;
-      pszSrc = szText;
-      pszChannelName = OOGUTIL_GetAccountName((char*)((int)gpCurrentChatRoomContext + 4));
-      sprintf(gszOogChatInputBuffer, "/whisper *%s %s", pszChannelName, pszSrc);
-    }
-
-    BOOL nMatch = ChatDlg::CHATDLG_FindSubstringMatch(*(int32_t*)D2IniData_multiplayer->padding_0x3C3, *(int32_t*)(D2IniData_multiplayer->padding_0x3C3 + 4), szText);
-    if (nMatch) {
-      wszSubTitle = D2Lang::StrTable::strtable::GetLocaleString(0x2b38);
-      nTitleStrId = 0x2b37;
-    } else {
-      nMatch = ChatDlg::CHATDLG_DetectCDKeyInString(szText);
-      if (!nMatch) {
-        nSendResult = CHAT_SendOutOfGameMessage();
-        return nSendResult;
-      }
-
-      wszSubTitle = D2Lang::StrTable::strtable::GetLocaleString(0x2b7b);
-      nTitleStrId = 0x2b7a;
-    }
-
-    uint16_t* wszTitle = D2Lang::StrTable::strtable::GetLocaleString(nTitleStrId);
-    ChatDlg::UIMENU_DrawTitleAndSubtitleOnCenterScreen(wszTitle, wszSubTitle);
-    gszOogChatInputBuffer[0] = '\0';
-    return 0;
-}
-
 int __stdcall OOGUTIL_SendChatMessageWide(uint16_t * wszText) {
     char* pszCur;
     char szTokenCopy[256];

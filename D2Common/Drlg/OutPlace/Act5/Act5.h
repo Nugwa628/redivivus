@@ -31,8 +31,6 @@ void __stdcall DRLGOUTROOM_PlaceAct5BorderPresets(struct D2DrlgLevelStrc * pLeve
 void __stdcall DRLGOUTROOM_PlaceAct5RoadPath(struct D2DrlgLevelStrc * pLevel);
 // Walks grid perimeter spawning cliff/wall border presets. Adds corner caps.
 void __stdcall DRLGOUTROOM_PlaceAct5OuterWalls(struct D2DrlgLevelStrc * pLevel);
-// Sets up secondary border decoration callbacks and calls AddSecondaryBorder.
-void DRLGOUTROOM_PlaceAct5SecondaryBorder(struct D2DrlgLevelStrc * pLevel);
 // Places random scenery presets for Act5 outdoor levels from static table.
 void __stdcall DRLGOUTROOM_PlaceAct5SceneryPresets(struct D2DrlgLevelStrc * pLevel);
 

@@ -13,6 +13,8 @@
 #include "D2Client/Archive.h"
 #include "D2Common/Drlg/Outdoors.h"
 #include "Fog/Src/ErrorManager.h"
+#include "D2Common/D2UnkOutdoorStrc.h"
+#include "D2Common/Drlg/TileSub.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -27,6 +29,29 @@ int32_t __fastcall DRLGOUTROOM_GetGridDivisionSize(D2DrlgLevelStrc * pLevel) {
 } // namespace D2Common::Drlg::OutSiege
 
 namespace D2Common::Drlg::OutPlace::Act5 {
+
+// Sets up secondary border decoration callbacks and calls AddSecondaryBorder.
+static void DRLGOUTROOM_PlaceAct5SecondaryBorder(D2DrlgLevelStrc * pLevel) {
+    D2UnkOutdoorStrc sUnkOutdoorStrc;
+    if (pLevel->eD2LevelId == 0x6e) {
+      return;
+    }
+
+    D2DrlgLevelDataWildernessLevel* pWildData = pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData;
+    memset(&sUnkOutdoorStrc, 0, 0x38);
+    sUnkOutdoorStrc.pCoordsGrid = (D2DrlgGridStrc*)&pWildData->pGridCoordsCellFlags;
+    sUnkOutdoorStrc.pPrimaryFloorGrid = &pWildData->sGridPreset;
+    sUnkOutdoorStrc.pWallGrid = &pWildData->sGridOutdoor;
+    sUnkOutdoorStrc.pfnValidateBorderCell = DRLGOUTDOOR_ValidateSecondaryBorderCell;
+    sUnkOutdoorStrc.pfnAlterAdjacentCells = Outdoors::AlterAdjacentPresetGridCells;
+    sUnkOutdoorStrc.pfnSetBlankCell = Outdoors::SetBlankGridCell;
+    sUnkOutdoorStrc.pfnSpawnPreset = Outdoors::SpawnOutdoorLevelPresetEx;
+    sUnkOutdoorStrc.pfnGetBorderPreset = DRLGOUTDOOR_GetSecondaryBorderPresetFromLvlSub;
+    sUnkOutdoorStrc.nPrevBorderPresetId = -1;
+    sUnkOutdoorStrc.nLvlSubId = 0xc;
+    sUnkOutdoorStrc.pLevel = pLevel;
+    TileSub::AddSecondaryBorder(&sUnkOutdoorStrc);
+}
 
 // Places random decorative presets in Act 5 Bloody Foothills (level 0x6F). Tries up to 90 random positions to place up to 3 presets on empty grid cells, using seed-based random offsets and grid wrapping.
 static void DRLGOUTPLACE_PlaceAct5BloodyFoothillsRandomPresets(D2DrlgLevelStrc * pLevel) {

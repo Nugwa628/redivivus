@@ -265,29 +265,6 @@ void __stdcall DRLGOUTROOM_PlaceAct5OuterWalls(D2DrlgLevelStrc * pLevel) {
     Outdoors::SpawnOutdoorLevelPresetEx(pLevel, 0, nY, bIsBloodyFoothills ? 0x3d5 : 0x389, -1, 0);
 }
 
-// Sets up secondary border decoration callbacks and calls AddSecondaryBorder.
-void DRLGOUTROOM_PlaceAct5SecondaryBorder(D2DrlgLevelStrc * pLevel) {
-    D2UnkOutdoorStrc sUnkOutdoorStrc;
-    if (pLevel->eD2LevelId == 0x6e) {
-      return;
-    }
-
-    D2DrlgLevelDataWildernessLevel* pWildData = pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData;
-    memset(&sUnkOutdoorStrc, 0, 0x38);
-    sUnkOutdoorStrc.pCoordsGrid = (D2DrlgGridStrc*)&pWildData->pGridCoordsCellFlags;
-    sUnkOutdoorStrc.pPrimaryFloorGrid = &pWildData->sGridPreset;
-    sUnkOutdoorStrc.pWallGrid = &pWildData->sGridOutdoor;
-    sUnkOutdoorStrc.pfnValidateBorderCell = DRLGOUTDOOR_ValidateSecondaryBorderCell;
-    sUnkOutdoorStrc.pfnAlterAdjacentCells = Outdoors::AlterAdjacentPresetGridCells;
-    sUnkOutdoorStrc.pfnSetBlankCell = Outdoors::SetBlankGridCell;
-    sUnkOutdoorStrc.pfnSpawnPreset = Outdoors::SpawnOutdoorLevelPresetEx;
-    sUnkOutdoorStrc.pfnGetBorderPreset = DRLGOUTDOOR_GetSecondaryBorderPresetFromLvlSub;
-    sUnkOutdoorStrc.nPrevBorderPresetId = -1;
-    sUnkOutdoorStrc.nLvlSubId = 0xc;
-    sUnkOutdoorStrc.pLevel = pLevel;
-    TileSub::AddSecondaryBorder(&sUnkOutdoorStrc);
-}
-
 // Places random scenery presets for Act5 outdoor levels from static table.
 void __stdcall DRLGOUTROOM_PlaceAct5SceneryPresets(D2DrlgLevelStrc * pLevel) {
     BOOL bSuccess;

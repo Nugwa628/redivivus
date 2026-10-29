@@ -38,7 +38,6 @@ struct D2DebugModuleInfo {
 namespace Fog::Engine::Application {
 
 // Function declarations
-bool DEBUG_CaptureThreadContext(uint32_t dwThreadId, LPCONTEXT pContext);
 bool __stdcall DEBUG_IsValidDebugDirectorySize(uint32_t nDirSize);
 uint32_t __fastcall DEBUG_ParseDebugInfoFromMemory(uint32_t nDataSize, uint32_t * pDebugData, int pModuleInfoOut);
 bool __stdcall DEBUG_EnumerateModulesViaPsapi(int * pnParam);

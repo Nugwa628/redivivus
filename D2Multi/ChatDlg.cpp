@@ -77,6 +77,59 @@ typedef BOOL (__stdcall *OnPress)(D2ControlMsg * pControlMsg);
 typedef void (__fastcall *pfnMCPGameListEntry)(uint32_t nEntryField0, uint32_t nEntryCount, uint32_t nEntryField2, uint32_t nListFlag, void * pEntryData);
 #endif
 
+namespace D2Multi::Launcher {
+
+static void __stdcall CHATDLG_AddMultiLineText(::D2WinTextBox * pTextBox, int32_t bAddBlankLine, char * szText, int32_t nColor) {
+    char* pcNextLine;
+    char* pcNewlinePos;
+    char cCur;
+    char* pcCur = szText;
+    pcCur = pcCur + strlen(pcCur) + 1;
+    if (pcCur == szText + 1 || (int)pcCur - (int)(szText + 1) < 0) {
+      D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(pTextBox, "", nColor);
+    } else if (*szText != '\0') {
+      do {
+        pcCur = szText;
+        if (*szText == '\n') {
+          *pcCur = '\0';
+          pcNextLine = pcCur + 1;
+          pcNewlinePos = pcCur;
+        } else {
+          do {
+            if (*pcCur == '\0') {
+              break;
+            }
+
+            pcCur++;
+          } while (*pcCur != '\n');
+
+          pcNextLine = pcCur;
+          pcNewlinePos = 0;
+          if (*pcCur == '\n') {
+            *pcCur = '\0';
+            pcNextLine = pcCur + 1;
+            pcNewlinePos = pcCur;
+          }
+        }
+
+        D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(pTextBox, szText, nColor);
+        if (bAddBlankLine) {
+          D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(pTextBox, "", nColor);
+        }
+        if (pcNewlinePos) {
+          *pcNewlinePos = '\n';
+        }
+
+        szText = pcNextLine;
+        if (*pcNextLine == '\0') {
+          return;
+        }
+      } while (true);
+    }
+}
+
+} // namespace D2Multi::Launcher
+
 namespace D2Multi::ChatDlg {
 
 static char gaChatDlgHistoryBuffer_1__0_[10][256] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; D2_STATIC_GUARD(gaChatDlgHistoryBuffer_1__0_, "D2Multi::ChatDlg::gaChatDlgHistoryBuffer_1__0_");
@@ -398,7 +451,7 @@ static BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
     return 1;
 }
 
-BOOL __stdcall CHATDLG_FindSubstringMatch(int32_t nTargetHash, int32_t nWordLen, char * szText) {
+static BOOL __stdcall CHATDLG_FindSubstringMatch(int32_t nTargetHash, int32_t nWordLen, char * szText) {
     char cSaved;
     if (!nWordLen) {
       return 0;
@@ -2200,6 +2253,48 @@ void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
     D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x208, wszFormatBuffer, pwszFmtTemplate, pwszMsg);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszOutputBuffer, wszFormatBuffer);
     ChatDlg::CHATDLG_AppendTextToTextBox(wszOutputBuffer, 3);
+}
+
+int __fastcall OOGUTIL_SendChatMessage(char * szText, int32_t bUseChannelPrefix) {
+    char* pszSrc;
+    uint16_t* wszSubTitle;
+    int nSendResult;
+    uint16_t nTitleStrId;
+    char cFirstChar = *szText;
+    Storm::Source::SSystem::SMemZero(gszOogChatInputBuffer, 0x200);
+    if (!bUseChannelPrefix || cFirstChar == '/' || !gpCurrentChatRoomContext) {
+      pszSrc = szText;
+      do {
+        cFirstChar = *pszSrc;
+        pszSrc[(int)gszOogChatInputBuffer - (int)szText] = cFirstChar;
+        pszSrc++;
+      } while (cFirstChar != '\0');
+    } else {
+      char* pszChannelName;
+      pszSrc = szText;
+      pszChannelName = OOGUTIL_GetAccountName((char*)((int)gpCurrentChatRoomContext + 4));
+      sprintf(gszOogChatInputBuffer, "/whisper *%s %s", pszChannelName, pszSrc);
+    }
+
+    BOOL nMatch = ChatDlg::CHATDLG_FindSubstringMatch(*(int32_t*)D2IniData_multiplayer->padding_0x3C3, *(int32_t*)(D2IniData_multiplayer->padding_0x3C3 + 4), szText);
+    if (nMatch) {
+      wszSubTitle = D2Lang::StrTable::strtable::GetLocaleString(0x2b38);
+      nTitleStrId = 0x2b37;
+    } else {
+      nMatch = ChatDlg::CHATDLG_DetectCDKeyInString(szText);
+      if (!nMatch) {
+        nSendResult = CHAT_SendOutOfGameMessage();
+        return nSendResult;
+      }
+
+      wszSubTitle = D2Lang::StrTable::strtable::GetLocaleString(0x2b7b);
+      nTitleStrId = 0x2b7a;
+    }
+
+    uint16_t* wszTitle = D2Lang::StrTable::strtable::GetLocaleString(nTitleStrId);
+    ChatDlg::UIMENU_DrawTitleAndSubtitleOnCenterScreen(wszTitle, wszSubTitle);
+    gszOogChatInputBuffer[0] = '\0';
+    return 0;
 }
 
 } // namespace D2Multi::OOGUtilities

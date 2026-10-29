@@ -772,7 +772,7 @@ static void __stdcall DAMAGE_ApplyMonsterTypeBonusDamage(D2UnitStrc * pUnit, D2D
     do {
       uint32_t nMonTypeId;
       nMonTypeId = (uint32_t)(uint16_t)anBonusValues[i].wSubIndex;
-      if (nMonTypeId && (int)nMonTypeId < pDataTbl->nTxtMonTypeSize && 0 < nMonTypeCount && nMonTypeCount < pDataTbl->nTxtMonTypeSize && *(uint32_t*)(pDataTbl->pTxtMonTypeUnknown + (pDataTbl->nMonTypeEquivRowDwords * nMonTypeCount + ((int)nMonTypeId >> 5)) * 4) & gadwBitMasks[nMonTypeId & 0x1f]) {
+      if (nMonTypeId && (int)nMonTypeId < pDataTbl->nTxtMonTypeSize && 0 < nMonTypeCount && nMonTypeCount < pDataTbl->nTxtMonTypeSize && *(uint32_t*)((uint8_t*)pDataTbl->pTxtMonTypeUnknown + (pDataTbl->nMonTypeEquivRowDwords * nMonTypeCount + ((int)nMonTypeId >> 5)) * 4) & gadwBitMasks[nMonTypeId & 0x1f]) {
         pDamage->dwEnDmgPct += anBonusValues[i].nStatValue;
         pDataTbl = sgptDataTable;
       }

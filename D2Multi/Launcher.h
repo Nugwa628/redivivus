@@ -43,7 +43,6 @@ void __stdcall LAUNCHER_DestroyLauncherForms();
 int __stdcall isServerDown();
 void __stdcall UIMENU_CantTestItBeacuseItCrash();
 void __stdcall CHATDLG_DestroyAllForms();
-void __stdcall CHATDLG_AddMultiLineText(::D2WinTextBox * pTextBox, int32_t bAddBlankLine, char * szText, int32_t nColor);
 // 1 internal function (defined in .cpp)
 
 } // namespace D2Multi::Launcher

@@ -77,6 +77,12 @@ int8_t __thiscall Open(::Report * pThis, char * szFileName) {
 
 } // namespace Fog::_3rdparty::crashy
 
+namespace Fog::Engine::Application {
+
+static bool DEBUG_CaptureThreadContext(uint32_t dwThreadId, LPCONTEXT pContext);
+
+} // namespace Fog::Engine::Application
+
 namespace Fog::File {
 
 static char * STRING_CopyStringBounded(int32_t nDestSize, char * szDest, char * szSrc);
@@ -751,3 +757,33 @@ bool __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName) {
 }
 
 } // namespace Fog::File
+
+namespace Fog::Engine::Application {
+
+static bool DEBUG_CaptureThreadContext(uint32_t dwThreadId, LPCONTEXT pContext) {
+    pContext->ContextFlags = 0x1003f;
+    DWORD dwCurrentTid = GetCurrentThreadId();
+    if (dwCurrentTid == dwThreadId) {
+      RtlCaptureContext(pContext);
+      return true;
+    }
+
+    HANDLE hThread = OpenThread(0x4a, 0, dwThreadId);
+    if (!hThread) {
+      return false;
+    }
+
+    /* HANDLE hThread for SuspendThread */ dwCurrentTid = SuspendThread(hThread);
+    if (dwCurrentTid != -1) {
+      BOOL bGotContext;
+      /* LPCONTEXT lpContext for GetThreadContext */ /* HANDLE hThread for GetThreadContext */ bGotContext = GetThreadContext(hThread, pContext);
+      /* HANDLE hThread for ResumeThread */ ResumeThread(hThread);
+      /* HANDLE hObject for CloseHandle */ CloseHandle(hThread);
+      return bGotContext != 0;
+    }
+
+    /* HANDLE hObject for CloseHandle */ CloseHandle(hThread);
+    return false;
+}
+
+} // namespace Fog::Engine::Application

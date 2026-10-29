@@ -58,7 +58,6 @@ int __fastcall FORMS_DisplayBattleNetNews(uint16_t * wszText);
 // Shows gpCtlChannelOkButton only while gpCtlChannelNameEditBox holds a non-empty name: D2WINMAIN_SetControlVisible(gpCtlChannelOkButton, name non-empty). Run by that edit box's change callback and once at the end of OOGUTIL_OpenChannelDialog.
 // Provenance: asm 0043e660..0043e6b6; change callback installed at 00441097, tail jump at 004411d7.
 void __stdcall CHATDLG_UpdateChannelOkButtonState();
-BOOL __stdcall CHATDLG_FindSubstringMatch(int32_t nTargetHash, int32_t nWordLen, char * szText);
 BOOL __stdcall CHATDLG_DetectCDKeyInString(char * szText);
 void __stdcall FORMS_DestroyListEx();
 void __fastcall UIMENU_DrawTitleAndSubtitleOnCenterScreen(uint16_t * wszTitle, uint16_t * wszSubTitle);

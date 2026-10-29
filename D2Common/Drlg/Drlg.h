@@ -440,14 +440,11 @@ int32_t __fastcall DRLGPLACE_ACT4_ValidatePlacementList1(struct D2DrlgLevelPlace
 int __fastcall DRLGPLACE_ACT4_ValidatePlacementList2(struct D2DrlgLevelPlacementStrc * pLevelUnknown, int32_t nIndexMax);
 // For outdoor (eDrlgType==3) Act 1 wilderness levels, walks the gaWildernessLevelSeedOffsets table and OR-writes orientation/connectivity flags into the level's pDrlgLevelData. Each 30-entry table record encodes five conditional rules matching level ID, excluded IDs, and two direction-table values; matching rules contribute a flag bit to the level data.
 void __fastcall ACT1_fpLevelDataFn2_A(struct D2DrlgLevelStrc * pLevel, int nNodeOffset, eD2LevelId * nDirTableBase);
-// Coordinate-adjacency warp connector over level range [eLevelFirst, nLevelLast]. For each ordered pair (outer,inner) in the range, alloc both levels and outer's warps-info; if outer!=inner and their coords are adjacent/overlapping (DRLGCOORDS_IsAdjacentOrOverlapping(...,-1)), set a warp connection (DRLGACT_SetWarpConnection(pWarps,inner,-1,-1)). Range params eLevelFirst(stack:0x4)/nLevelLast(stack:0x8) were dropped phantom stack params; pDrlgStrc in EBX (callee-saved). Act5 callers pass 0x6f..0x70 (recovered from call site 00678a96: PUSH 0x70; PUSH 0x6f; MOV EBX,ESI).
-void __stdcall DRLGACT_SetWarpConnectionsBetweenTwoAreas(struct D2DrlgStrc * pDrlgStrc, eD2LevelId eLevelFirst, int nLevelLast);
 // Allocates a DrlgOrth connection between a level data entry's RoomEx and an adjacent level.
 // Computes the direction between the two levels' coordinate rects, then calls AllocDrlgOrth
 // on the RoomEx at offset +0x264 of the level data struct.
 // Used as a callback during level chain parsing to establish orthogonal room linkage.
 void DRLGLEVEL_AllocOrthForAdjacentLevel(struct D2DrlgStrc * pDrlg, int32_t pLevelData, eD2LevelId eLevel);
-void __stdcall DRLGLEVEL_AllocDrlgLevelFromLevelIdToLevelId(struct D2DrlgStrc * pDrlg, eD2LevelId eLevel, eD2LevelId nLevelIdStart);
 // Act-specific level allocation. Parses per-act level data tables, allocates level ranges for the act, initializes Act III special handling, and sets Act V warp connections. Act IV sets a flag in Outer Steppes level data before allocating the rest.
 void __fastcall DRLGACTMISC_AllocDrlgLevelForAct(struct D2DrlgStrc * pDrlg, eAct nActNo);
 // Builds a coarse dynamic path from the unit's current position toward the target stored in pPathTypeArg, writing waypoints into pDynamicPath->PathPoints and returning the count. If a direction offset is already set, delegates to DRLGPATH_SmoothPathPoints. Otherwise: if the target is directly reachable (CheckTargetReachable) or within the IDA* distance threshold, emits a single waypoint; else walks step-by-step toward the target via DRLGPATH_GetPathDirectionTripletPacked + FindNonBlockedDirectionFromTriplet (using gPathDirectionOffsetsX/Y), recording a waypoint each time the chosen direction changes, bounded by nDistMax iterations and anti-backtracking.
