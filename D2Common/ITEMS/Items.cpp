@@ -1607,7 +1607,7 @@ uint32_t __stdcall ITEMS_IsA(D2UnitStrc * pUnit, eD2ItemTypes eItemType) {
     }
 
     eD2ItemTypes eItemType1 = TXT_Items_GetType(pUnit->nClassId);
-    if (gadwBitMasks[eItemType & ITEMTYPE_Hammer] & *(uint32_t*)(sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eItemType1 + ((int)eItemType >> 5)) * 4)) {
+    if (gadwBitMasks[eItemType & ITEMTYPE_Hammer] & *(uint32_t*)((uint8_t*)sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * eItemType1 + ((int)eItemType >> 5)) * 4)) {
       return 1;
     }
 
@@ -1621,7 +1621,7 @@ uint32_t __stdcall ITEMS_IsA(D2UnitStrc * pUnit, eD2ItemTypes eItemType) {
       return 0;
     }
 
-    return *(uint32_t*)(sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * (int)eType2 + ((int)eItemType >> 5)) * 4) & gadwBitMasks[eItemType & ITEMTYPE_Hammer];
+    return *(uint32_t*)((uint8_t*)sgptDataTable->pTxtItemTypesUnknown + (sgptDataTable->nItemTypesEquivRowDwords * (int)eType2 + ((int)eItemType >> 5)) * 4) & gadwBitMasks[eItemType & ITEMTYPE_Hammer];
 }
 
 uint32_t __stdcall TXT_Items_GetBitFieldAnd0x01(uint32_t nItemClassId) {

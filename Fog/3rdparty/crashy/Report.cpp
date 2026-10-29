@@ -18,7 +18,7 @@ static void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPat
 
 namespace Fog::_3rdparty::crashy {
 
-::Report * __thiscall Constructor(::Report * pThis) {
+::Report * __fastcall Constructor(::Report * pThis) {
     pThis->_vfptr = (ReportVtable*)(void*)crashy::vftable;
     pThis->pFile = 0;
     pThis->nAttachmentCount = 0;
