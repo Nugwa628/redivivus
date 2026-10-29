@@ -131,11 +131,8 @@ BOOL __fastcall SetPalette(LPPALETTEENTRY pPalette) {
     uint8_t byGreenBlue;
     double dPaletteSize = (double)gnDirectDrawPaletteSize;
     PALETTEENTRY* ptEntry = gaPaletteEntries;
-    for (nIndex = 0x100; nIndex; nIndex--) {
-      *ptEntry = *pPalette;
-      pPalette++;
-      ptEntry++;
-    }
+    memcpy(ptEntry, pPalette, 0x100 * sizeof(*ptEntry));
+    nIndex = 0;
 
     Fog::Src::DataArrays::FOG_FillArrayWithRandomInts(gnDirectDrawGamma, (uint32_t*)aGammaCurve, dPaletteSize, (uint32_t*)0x1, 0x100, 0xff);
     nIndex = 0;
@@ -177,11 +174,7 @@ void __fastcall SetPaletteTable(BYTE * * ppPaletteTable) {
 
     int nCount;
     uint8_t** pDst = gaPaletteTableLocal;
-    for (nCount = 0x48; nCount; nCount--) {
-      *pDst = *ppPaletteTable;
-      ppPaletteTable++;
-      pDst++;
-    }
+    memcpy(pDst, ppPaletteTable, 0x48 * sizeof(*pDst));
 
     gpPaletteTable = gaPaletteTableLocal;
 }
@@ -723,7 +716,9 @@ BOOL __stdcall InternalCutsceneWindow() {
     }
 
     nLine = pWindowHandleBuffer->lpVtbl->SetDisplayMode(pWindowHandleBuffer, 0x280, 0x1e0, nBitDepth);
-    if (!nLine) {
+    if (nLine) {
+      szErrorMsg = "SetDisplayMode failed!";
+    } else {
       ddSurfDesc.dwSize = 0x6c;
       memset(&ddSurfDesc.dwFlags, 0, 0x68);
       ddSurfDesc.dwFlags = 1;
@@ -736,8 +731,6 @@ BOOL __stdcall InternalCutsceneWindow() {
       }
 
       szErrorMsg = "Failed to create primary surface for cutscenes";
-    } else {
-      szErrorMsg = "SetDisplayMode failed!";
     }
 
     DirectDrawErrorHandler(szErrorMsg, nLine);
@@ -1601,22 +1594,22 @@ void __fastcall DrawSolidRectEx(int32_t nXStart, int32_t nYStart, int32_t nXEnd,
 // Draws a solid rectangle with alpha blending transparency
 void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, BYTE nAlpha) {
     int32_t nDrawMode;
-    if (nAlpha < 0xc0) {
-      if (nAlpha < 0x80) {
-        if (nAlpha < 0x40) {
-          if (nAlpha == '\0') {
+    if (!(nAlpha < 0xc0)) {
+      nDrawMode = 5;
+    } else {
+      if (!(nAlpha < 0x80)) {
+        nDrawMode = 2;
+      } else {
+        if (!(nAlpha < 0x40)) {
+          nDrawMode = 1;
+        } else {
+          if (nAlpha <= 0) {
             return;
           }
 
           nDrawMode = 0;
-        } else {
-          nDrawMode = 1;
         }
-      } else {
-        nDrawMode = 2;
       }
-    } else {
-      nDrawMode = 5;
     }
 
     DirectDraw::DrawSolidRectEx(nXStart, nYStart, nXEnd, nYEnd, dwColor, nDrawMode);
@@ -1624,7 +1617,7 @@ void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEn
 
 // DirectDraw renderer internal helpers for sprite visibility testing, clip rect computation, debug font rendering, shadow quality query, pixel/line drawing primitives, and smacker video frame blitting.
 void __fastcall RENDERER_DDRAW_DrawPixel(int32_t nX, int32_t nY, BYTE nPaletteIndex) {
-    if (!(-1 < nX && nX < RENDERER_nWindowWidth && -1 < nY && nY < RENDERER_nWindowHeight)) {
+    if (!(0 <= nX && nX < RENDERER_nWindowWidth && 0 <= nY && nY < RENDERER_nWindowHeight)) {
       return;
     }
 

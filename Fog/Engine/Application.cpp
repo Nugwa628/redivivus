@@ -322,11 +322,8 @@ static bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModuleP
     }
 
     pDst = aModuleInfo.szPath;
-    for (nCopyCount = 0x40; nCopyCount; nCopyCount--) {
-      *(uint32_t*)pDst = *(uint32_t*)pBasename;
-      pBasename += 4;
-      pDst += 4;
-    }
+    memcpy(pDst, pBasename, 0x40 * 4);
+    nCopyCount = 0;
 
     uint32_t nParseResult = DEBUG_ParseModuleHeaders((short int**)&aModuleInfo, pModuleBase);
     if ((char)nParseResult == '\0') {
@@ -1081,23 +1078,24 @@ int32_t __stdcall ApplicationRunCurrentMode(D2IniConfigStrc * pD2IniData) {
     static fnAppModeRun * CurrentApplication = (fnAppModeRun *)0x00000000; D2_STATIC_GUARD(CurrentApplication, "Fog::Engine::Application::ApplicationRunCurrentMode::CurrentApplication");
 
     int32_t modeResult;
-    if (4 < (uint32_t)(geD2ApplicationMode - APPMODE_client)) {
-      return 0;
-    }
-    if (!ApplicationBootstrapArray[geD2ApplicationMode].pfnInit) {
-      Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x133);
-      exit(-1);
-    } else {
-      if (!ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown) {
-        Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x134);
+    if ((uint32_t)(geD2ApplicationMode - APPMODE_client) <= 4) {
+      if (!ApplicationBootstrapArray[geD2ApplicationMode].pfnInit) {
+        Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x133);
         exit(-1);
-      }
+      } else {
+        if (!ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown) {
+          Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x134);
+          exit(-1);
+        }
 
-      CurrentApplication = ApplicationBootstrapArray[geD2ApplicationMode].pfnInit(WinMain_hInstance);
-      modeResult = (**CurrentApplication)(pD2IniData);
-      ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown();
-      return modeResult;
+        CurrentApplication = ApplicationBootstrapArray[geD2ApplicationMode].pfnInit(WinMain_hInstance);
+        modeResult = (**CurrentApplication)(pD2IniData);
+        ApplicationBootstrapArray[geD2ApplicationMode].pfnShutdown();
+        return modeResult;
+      }
     }
+
+    return 0;
 }
 
 void __stdcall SystemSurvey_WriteProductLanugageToLocaleFile() {

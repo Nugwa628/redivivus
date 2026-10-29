@@ -596,19 +596,19 @@ void __fastcall BNDOWNLOAD_ProcessPrepatchList(uint32_t * pResultOut) {
               }
 
               bArchiveOpened = __strnicmp(__frame3.szLineBuffer, "delete ", 7);
-              if (!bArchiveOpened) {
-                /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(&__frame3.cDestPathBuf);
-              } else {
+              if (bArchiveOpened) {
                 bArchiveOpened = __strnicmp(__frame3.szLineBuffer, "extract ", 8);
-                if (!bArchiveOpened) {
-                  BNDOWNLOAD_ExtractFileFromArchive(&__frame2.szEntryName, __frame0.pArchiveHandle, &__frame3.cDestPathBuf);
-                } else {
+                if (bArchiveOpened) {
                   bArchiveOpened = __strnicmp(__frame3.szLineBuffer, "execute ", 8);
                   if (!bArchiveOpened) {
                     uVar2 = Storm::Source::SSTR::SStrCopy(pVerifySigResult, &__frame3.cDestPathBuf, 0x7fffffff);
                     pVerifySigResult = pVerifySigResult + uVar2 + 1;
                   }
+                } else {
+                  BNDOWNLOAD_ExtractFileFromArchive(&__frame2.szEntryName, __frame0.pArchiveHandle, &__frame3.cDestPathBuf);
                 }
+              } else {
+                /* LPCSTR lpFileName for DeleteFileA */ DeleteFileA(&__frame3.cDestPathBuf);
               }
 
               lpFileName = __frame0.pVerifySigOut;

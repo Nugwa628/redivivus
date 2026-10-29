@@ -260,7 +260,7 @@ int32_t __fastcall NET_SID_CLIENT_Send_0x41_QueryAdURL(uint32_t dwParam) {
     uint32_t dwAdType = dwParam;
     _net_sid::NET_SID_CLIENT_ResetRequireResponse(0x41);
     int32_t nSendResult = NET_SID_CLIENT_Send(0x41, (char*)&dwAdType, 4);
-    if (-1 >= nSendResult) {
+    if (0 > nSendResult) {
       return 0;
     }
 
@@ -411,7 +411,7 @@ void __fastcall NET_SID_CLIENT_Send_0x0B_GetChannelList_0x0A_EnterChat(char * sz
 
 uint32_t NET_SID_CLIENT_Send_0x10_LeaveChat() {
     int32_t nSendResult = NET_SID_CLIENT_Send(0x10, nullptr, 0);
-    return (uint32_t)(-1 < nSendResult);
+    return (uint32_t)(0 <= nSendResult);
 }
 
 void __fastcall NET_SID_CLIENT_Send_0x0E_ChatCommand(uint8_t * pbParam) {
@@ -1091,15 +1091,16 @@ D2BNetGatewayAccessStr * __stdcall BnetLoadAndReturn() {
 
 void __fastcall GetBnetIp(char * szText, int32_t nParam) {
     char szRegistryBuf[256];
+    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     *szText = '\0';
     BNGatewayAccess::Load(&ActualRealmInfo);
     int32_t bHasRegistryOverride = nParam;
-    char* szDnsStr = BNGatewayAccess::DNS(&ActualRealmInfo, ActualRealmInfo.nCurGatewayIdx);
-    Storm::Source::SSTR::SStrCopy(szText, szDnsStr, bHasRegistryOverride);
+    Storm::Source::SSTR::SStrCopy(szText, BNGatewayAccess::DNS(&ActualRealmInfo, ActualRealmInfo.nCurGatewayIdx), bHasRegistryOverride);
     bHasRegistryOverride = Storm::Source::SReg::SRegLoadString("Diablo II", "BNETIP", 0, szRegistryBuf, 0x100);
     if (bHasRegistryOverride) {
       Storm::Source::SSTR::SStrCopy(szText, szRegistryBuf, nParam);
     }
+
 }
 
 // Returns current Battle.net connection state into output parameter. Validates param is non-null.
@@ -1444,23 +1445,23 @@ void __stdcall BnetReadFunction(uint32_t dwParam) {
 
 uint32_t __fastcall BNCLIENT_GetSocketPeerName(sockaddr * pSockAddr, int * pAddrLen) {
     D2NetDataStrc* pNetData = (D2NetDataStrc*)InterlockedCompareExchange((LONG*)&g_pBNetSocketData, 0, 0);
-    if (!pNetData) {
-      return 0;
+    if (pNetData) {
+      uint32_t nResult = Fog::Src::Safesock::GetPeerNameDoesReturn(pNetData, pSockAddr, pAddrLen);
+      return nResult;
     }
 
-    uint32_t nResult = Fog::Src::Safesock::GetPeerNameDoesReturn(pNetData, pSockAddr, pAddrLen);
-    return nResult;
+    return 0;
 }
 
 // Thread-safe wrapper around Fog::Safesock::GetSockNameDoesReturn. Returns local socket address info for Battle.net connection. Used by SID_AUTH_INFO sender.
 uint32_t __fastcall BNSEND_GetSocketAddress(sockaddr * pOutAddr, int * pOutAddrLen) {
     D2NetDataStrc* pNetData = (D2NetDataStrc*)InterlockedCompareExchange((LONG*)&g_pBNetSocketData, 0, 0);
-    if (!pNetData) {
-      return 0;
+    if (pNetData) {
+      uint32_t nResult = Fog::Src::Safesock::GetSockNameDoesReturn(pNetData, pOutAddr, pOutAddrLen);
+      return nResult;
     }
 
-    uint32_t nResult = Fog::Src::Safesock::GetSockNameDoesReturn(pNetData, pOutAddr, pOutAddrLen);
-    return nResult;
+    return 0;
 }
 
 int32_t __stdcall GET_GameVersion() {
@@ -1841,7 +1842,9 @@ HANDLE ConnectingToBattleNet() {
     DWORD dwThreadId;
     Bnet::BnetLog_WriteLine("Connecting to Battle.net...");
     LONG lSocketData = InterlockedCompareExchange((LONG*)&g_pBNetSocketData, 0, 0);
-    if (!lSocketData) {
+    if (lSocketData) {
+      Debug::DEBUG_UnusedDebugFunction("   already connected");
+    } else {
       BOOL bDisconnected;
       bDisconnected = BNSEND_Disconnect();
       if (bDisconnected) {
@@ -1855,8 +1858,6 @@ HANDLE ConnectingToBattleNet() {
         hThread = CreateThread((LPSECURITY_ATTRIBUTES)0x0, 0, (LPTHREAD_START_ROUTINE)BattleConnectFastest, (LPVOID)0x0, 0, &dwThreadId);
         return hThread;
       }
-    } else {
-      Debug::DEBUG_UnusedDebugFunction("   already connected");
     }
 
     return (HANDLE)0x0;
@@ -2058,11 +2059,7 @@ void __fastcall BNNEWS_ReallocateNewsTable(D2BnNewsTableStrc * pNewsTable, uint3
         pDst = (int*)((int)pNewsTable->pEntries + nByteOffset);
         if (pDst) {
           pSrc = (int*)(nByteOffset + (int)pObject);
-          for (nDwordsLeft = 0x102; nDwordsLeft; nDwordsLeft--) {
-            *pDst = *pSrc;
-            pSrc++;
-            pDst++;
-          }
+          memcpy(pDst, pSrc, 0x102 * sizeof(*pDst));
         }
 
         nByteOffset += 0x408;
@@ -2235,11 +2232,7 @@ BOOL __fastcall NET_SID_CLIENT_Incoming0x46(char * pBytes, size_t nSize) {
             nCacheByteOffset += -0x408;
             iVar1--;
             pSrcEntry = pDstEntry - 0x102;
-            for (nCopyCount = 0x102; nCopyCount; nCopyCount--) {
-              *pDstEntry = *pSrcEntry;
-              pSrcEntry++;
-              pDstEntry++;
-            }
+            memcpy(pDstEntry, pSrcEntry, 0x102 * sizeof(*pDstEntry));
           } while (iVar1);
         }
 

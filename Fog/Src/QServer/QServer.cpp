@@ -169,7 +169,7 @@ void __stdcall SetPerIpConnectionLimit(D2QServerStrc * pQServer, int nPerIpConne
     if (!pQServer) {
       return;
     }
-    if (!nPerIpConnectionLimit) {
+    if ((uint32_t)nPerIpConnectionLimit <= 0) {
       nPerIpConnectionLimit = 1;
     }
 
@@ -468,7 +468,7 @@ BOOL __fastcall IsPerIpLimitReached(D2QServerStrc * pQServer, in_addr * pClientI
 
 int __stdcall CountQueuedPacketsInMode(D2QServerStrc * pQServer, int nMode) {
     D2QServerModePacketNodeStrc* pDVar1;
-    if (pQServer->nModeCount <= nMode) {
+    if (nMode >= pQServer->nModeCount) {
       return -1;
     }
 
@@ -835,16 +835,16 @@ static int NET_QServer_DecrementPerIpConnectionCount(in_addr * pClientIp, D2QSer
     }
 
     pMemoryToFree->nActiveConnectionCount--;
-    if (pMemoryToFree->nActiveConnectionCount >= 1) {
+    if (pMemoryToFree->nActiveConnectionCount > 0) {
       return 1;
     }
-    if (!pDVar1) {
-      pQServer->ppIpConnCountBuckets[uVar2] = pMemoryToFree->pNext;
-    } else {
+    if (pDVar1) {
       pDVar1->pNext = pMemoryToFree->pNext;
+    } else {
+      pQServer->ppIpConnCountBuckets[uVar2] = pMemoryToFree->pNext;
     }
 
-    D2_FREE_AT(pMemoryToFree, ".\\Src\\QServer\\QServer.cpp", 0x940);
+    Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\Src\\QServer\\QServer.cpp", 0x940, 0);
     return 1;
 }
 
@@ -1515,10 +1515,10 @@ int __stdcall Shutdown(D2QServerStrc * pQServer, char * pBytes, int nSize) {
       BroadcastToAllClients(pQServer, pBytes, nSize);
     }
     if (pQServer->neD2GSConnectionType != CONNECTIONTYPE_SINGLEPLAYER && pQServer->neD2GSConnectionType != CONNECTIONTYPE_SINGLEPLAYERUNCAPPED) {
-      if (!pQServer->bUseNtLocalMode) {
-        QServer::QServer98::QSERVER_CloseAllConnections(pQServer);
-      } else {
+      if (pQServer->bUseNtLocalMode) {
         QServer::QServerNT::AwaitAndClose(pQServer);
+      } else {
+        QServer::QServer98::QSERVER_CloseAllConnections(pQServer);
       }
     }
 
@@ -1563,7 +1563,7 @@ int __stdcall Shutdown(D2QServerStrc * pQServer, char * pBytes, int nSize) {
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&pQServer->csTokenHash);
     D2_FREE_AT(pQServer->pQServerClientList, ".\\Src\\QServer\\QServer.cpp", 0x198);
     iVar1 = 0;
-    if (0 < TokenHashMapBucketSize) {
+    if (0 < (int)TokenHashMapBucketSize) {
       int nLockByteOffset;
       nLockByteOffset = 0;
       do {
@@ -1862,10 +1862,10 @@ void __fastcall RecvForClient(D2QServerStrc * pQServer, D2QServerClientConnectio
         }
 
         /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pQServer->csClientLifecycle);
-        if (!pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx]) {
-          pQServer->ppModePacketQueueHeads[__frame0.nQueueModeIdx] = pPacketNode;
-        } else {
+        if (pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx]) {
           pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx]->pNext = pPacketNode;
+        } else {
+          pQServer->ppModePacketQueueHeads[__frame0.nQueueModeIdx] = pPacketNode;
         }
 
         pQServer->ppModePacketQueueTails[__frame0.nQueueModeIdx] = pPacketNode;

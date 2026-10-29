@@ -129,8 +129,7 @@ BOOL MessageBoxA_InsertExpansionDisc() {
     UINT uType = 0x31;
     char* lpCaption = "Diablo II";
     char* lpText = "Insert Expansion Disc";
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    int nMsgBoxResult = MessageBoxA(hWnd, lpText, lpCaption, uType);
+    int nMsgBoxResult = MessageBoxA(D2gfx::D2GFX::GetHwnd(), lpText, lpCaption, uType);
     return (uint32_t)(nMsgBoxResult == 1);
 }
 
@@ -138,8 +137,7 @@ BOOL __stdcall MessageBoxA_InsertPlayDisc() {
     UINT uType = 0x31;
     char* lpCaption = "Diablo II";
     char* lpText = "Insert Play Disc";
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    int nMsgBoxResult = MessageBoxA(hWnd, lpText, lpCaption, uType);
+    int nMsgBoxResult = MessageBoxA(D2gfx::D2GFX::GetHwnd(), lpText, lpCaption, uType);
     return (uint32_t)(nMsgBoxResult == 1);
 }
 
@@ -198,14 +196,14 @@ BOOL __fastcall MPQ_LoadVideoMpqFiles(::fpRequiredUserAction nfpRequiredUserActi
     if (bDirectMode) {
       nfpRequiredUserAction = 0;
     }
-    if (!bExpansion) {
-      MPQ_d2video = Fog::Archive::ARCHIVE_LoadMPQ("d2video.mpq", nZero, (::fpRequiredUserAction)(bool (*)())nfpRequiredUserAction, 1000);
-      if (!MPQ_d2video) {
+    if (bExpansion) {
+      MPQ_d2Xvideo = Fog::Archive::ARCHIVE_LoadMPQ("d2Xvideo.mpq", nZero, (::fpRequiredUserAction)(bool (*)())nfpRequiredUserAction, 1000);
+      if (!MPQ_d2Xvideo) {
         return 0;
       }
     } else {
-      MPQ_d2Xvideo = Fog::Archive::ARCHIVE_LoadMPQ("d2Xvideo.mpq", nZero, (::fpRequiredUserAction)(bool (*)())nfpRequiredUserAction, 1000);
-      if (!MPQ_d2Xvideo) {
+      MPQ_d2video = Fog::Archive::ARCHIVE_LoadMPQ("d2video.mpq", nZero, (::fpRequiredUserAction)(bool (*)())nfpRequiredUserAction, 1000);
+      if (!MPQ_d2video) {
         return 0;
       }
     }

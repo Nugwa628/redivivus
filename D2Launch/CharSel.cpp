@@ -283,11 +283,11 @@ void __stdcall CHARSEL_DestroySelectedChar() {
 static uint32_t CHARSEL_GetDaysUntilExpiry(uint32_t nExpiryTime) {
     __time32_t nTimeBuf;
     uint32_t uVar1 = _time32(&nTimeBuf);
-    if (nExpiryTime > uVar1) {
-      return (nExpiryTime - uVar1) / 0x15180;
+    if (nExpiryTime <= uVar1) {
+      return 0;
     }
 
-    return 0;
+    return (nExpiryTime - uVar1) / 0x15180;
 }
 
 // Draws local character slots in selection screen. Iterates gaCharSelScreenSlotControls[0-7] to render each slot's character name, level, class, and hardcore/expansion flags. Highlights selected slot, draws character preview sprite, and handles expired characters.
@@ -1263,8 +1263,7 @@ void __fastcall UIMENU_SelectDifficultySinglePlayerOrTcpip(int32_t nCharLevel, i
     int nTextArg2 = 0;
     uint8_t byTextColor = 0;
     int32_t nTextArg1 = 7;
-    uint16_t* szText = D2Lang::StrTable::strtable::GetLocaleString(0x2723);
-    D2Win::Src::D2WinTextBox::SetText(pDVar2, szText, nTextArg1, (bool)byTextColor, nTextArg2);
+    D2Win::Src::D2WinTextBox::SetText(pDVar2, D2Lang::StrTable::strtable::GetLocaleString(0x2723), nTextArg1, (bool)byTextColor, nTextArg2);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08((D2ControlStrc*)pDVar2, 1);
     pFormControl = MainMenus::FORMS_CreateAnyFormFromList(0xa8);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08(pFormControl, 1);
@@ -1273,7 +1272,7 @@ void __fastcall UIMENU_SelectDifficultySinglePlayerOrTcpip(int32_t nCharLevel, i
     pFormControl = MainMenus::FORMS_CreateAnyFormFromList(0xaa);
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(pFormControl, 0);
     D2Win::Src::D2WinMain::SetUnsetFlag0x08(pFormControl, 1);
-    if (!bExpansion && 7 < nCharLevel || 9 < nCharLevel) {
+    if (!bExpansion && 8 <= nCharLevel || 10 <= nCharLevel) {
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(pFormControl, 1);
     }
 
@@ -1436,8 +1435,7 @@ void __stdcall UIMENU_AreYouSureWouWantToDeleteThisCharacter() {
     int nTextArg2 = 0;
     uint8_t byTextColor = 0;
     int32_t nTextArg1 = 0;
-    uint16_t* szText = D2Lang::StrTable::strtable::GetLocaleString(0x142b);
-    D2Win::Src::D2WinTextBox::SetText(pDVar2, szText, nTextArg1, (bool)byTextColor, nTextArg2);
+    D2Win::Src::D2WinTextBox::SetText(pDVar2, D2Lang::StrTable::strtable::GetLocaleString(0x142b), nTextArg1, (bool)byTextColor, nTextArg2);
 }
 
 BOOL __stdcall CHARSEL_OnPressDestroyFormList(D2ControlMsg * pControlMsg) {
@@ -1454,7 +1452,7 @@ BOOL __stdcall CHARSEL_OnPressScrollCharListUp(D2ControlMsg * pControlMsg) {
     if (0 < g_nCharSelNavigationIndex) {
       g_nCharSelNavigationIndex--;
     }
-    if (0 < D2Client::CharScreen::nSelectedCharIndex) {
+    if (0 < (int)D2Client::CharScreen::nSelectedCharIndex) {
       D2Client::CharScreen::nSelectedCharIndex--;
     }
 
@@ -1478,8 +1476,7 @@ BOOL __stdcall CHARSEL_OnPressScrollCharListDown(D2ControlMsg * pControlMsg) {
 }
 
 void __stdcall CHARSEL_ScrollCharList(int32_t nScrollDelta) {
-    int nCurrentScrollPos = D2Win::Src::D2WinTextBox::D2WINTEXTBOX_RefreshScrollbar(gpCtlCharSelScrollbar);
-    D2Win::Src::D2WinTextBox::D2WINTEXTBOX_SetScrollbarPosition(gpCtlCharSelScrollbar, nCurrentScrollPos + nScrollDelta);
+    D2Win::Src::D2WinTextBox::D2WINTEXTBOX_SetScrollbarPosition(gpCtlCharSelScrollbar, D2Win::Src::D2WinTextBox::D2WINTEXTBOX_RefreshScrollbar(gpCtlCharSelScrollbar) + nScrollDelta);
 }
 
 BOOL __stdcall CHARSEL_HandleKeyNavExpansion(int32_t pKeyMsg) {

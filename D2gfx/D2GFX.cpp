@@ -119,7 +119,7 @@ void __stdcall D2GFX_SetPerspectiveCapable(BOOL bResult) {
 }
 
 uint32_t __stdcall IsWindowMode() {
-    return (uint32_t)(3 < (int)eRendererMode);
+    return (uint32_t)(4 <= (int)eRendererMode);
 }
 
 uint32_t __stdcall D2GFX_IsPerspectiveActive() {
@@ -271,7 +271,7 @@ void __stdcall HideOSCursor() {
 
     do {
       /* BOOL bShow for ShowCursor */ displayCount = ShowCursor(0);
-    } while (-1 < displayCount);
+    } while (0 <= displayCount);
 
     IsOSCursorVisible = 0;
 }
@@ -726,7 +726,7 @@ void D2GFX_ResetViewport() {
       }
 
       pWindowPlacement++;
-    } while ((int)pWindowPlacement < (uintptr_t)((char*)&gaD2GFXWindowPlacements + sizeof(gaD2GFXWindowPlacements)));
+    } while ((int)pWindowPlacement < (int)((uintptr_t)((char*)&gaD2GFXWindowPlacements + sizeof(gaD2GFXWindowPlacements))));
 }
 
 void __stdcall D2GFX_EndCutScene() {
@@ -744,17 +744,17 @@ void __stdcall D2GFX_EndCutScene() {
     }
 
     ::D2GFX_EndCutScene = D2GFX_EndCutSceneCurrentState;
-    if (!D2GFX_EndCutSceneCurrentState) {
-      DRAW_HideTaskbarAppBars();
-      do {
-        /* BOOL bShow for ShowCursor */ nCursorDisplayCount = ShowCursor(0);
-      } while (-1 < nCursorDisplayCount);
-    } else {
+    if (D2GFX_EndCutSceneCurrentState) {
       /* int nCmdShow for ShowWindow */ /* HWND hWnd for ShowWindow */ ShowWindow(hwndD2GFX_Window, 6);
       D2GFX_ResetViewport();
       do {
         /* BOOL bShow for ShowCursor */ nCursorDisplayCount = ShowCursor(1);
       } while (nCursorDisplayCount < 0);
+    } else {
+      DRAW_HideTaskbarAppBars();
+      do {
+        /* BOOL bShow for ShowCursor */ nCursorDisplayCount = ShowCursor(0);
+      } while (0 <= nCursorDisplayCount);
     }
 
     RENDERER_CurrentRenderedFunctions->nfpEndCutScene(hwndD2GFX_Window, nResolutionMode, ::D2GFX_EndCutScene);
@@ -779,14 +779,14 @@ void __stdcall EndCutScene(int32_t nResolution) {
     }
 
     D2GFX_EndCutScene();
-    if (!::D2GFX_EndCutScene) {
+    if (!(!::D2GFX_EndCutScene)) {
+      nResolutionMode = nResolution;
+    } else {
       bResizeOk = D2GFX_ResizeWindow(nResolution, 1);
       if (!bResizeOk) {
         Fog::Src::LogManager::LOGFILE_WriteStringToFile("Failed to resize window after cutscenes... this is fatal!");
         exit(-1);
       }
-    } else {
-      nResolutionMode = nResolution;
     }
 
     D2GFX_SetPalette((LPPALETTEENTRY)0x0);
@@ -869,7 +869,7 @@ BOOL __stdcall D2GFX_GetBackBuffer(BYTE * pBuffer) {
 }
 
 uint32_t __stdcall D2GFX_IsWindowActive() {
-    return (uint32_t)(3 < (int)eRendererMode);
+    return (uint32_t)(4 <= (int)eRendererMode);
 }
 
 void __stdcall D2GFX_DrawRect(RECT * pRect, BYTE nPaletteIndex) {
@@ -889,7 +889,7 @@ void __stdcall D2GFX_DrawSolidSquare(POINT * pPoint, BYTE nSize, BYTE nPaletteIn
 }
 
 void __stdcall D2GFX_DrawSolidRectEx(int32_t nXStart, int32_t nYStart, int32_t nXEnd, int32_t nYEnd, DWORD dwColor, DRAWMODE nDrawMode) {
-    if (!(nXStart <= nXEnd && nYStart <= nYEnd)) {
+    if (!(nXEnd >= nXStart && nYEnd >= nYStart)) {
       return;
     }
 
@@ -897,7 +897,7 @@ void __stdcall D2GFX_DrawSolidRectEx(int32_t nXStart, int32_t nYStart, int32_t n
 }
 
 void __stdcall D2GFX_DrawSolidRectAlpha(int32_t nXStart, int32_t nYStart, int32_t nXEnd, int32_t nYEnd, DWORD dwColor, DWORD nAlpha) {
-    if (!(nXStart <= nXEnd && nYStart <= nYEnd)) {
+    if (!(nXEnd >= nXStart && nYEnd >= nYStart)) {
       return;
     }
 
@@ -922,11 +922,7 @@ void __stdcall D2GFX_SetPalette(LPPALETTEENTRY pPalette) {
       int nCount;
       pSrcEntry = pPalette;
       pDstEntry = gaPaletteCurrentBuffer;
-      for (nCount = 0x100; nCount; nCount--) {
-        *pDstEntry = *pSrcEntry;
-        pSrcEntry++;
-        pDstEntry++;
-      }
+      memcpy(pDstEntry, pSrcEntry, 0x100 * sizeof(*pDstEntry));
 
       RENDERER_CurrentRenderedFunctions->nfpSetPalette(pPalette);
       return;
@@ -1492,11 +1488,9 @@ void __fastcall PALETTE_InitColorLookupTables(BYTE * * ppPaletteTable) {
     int nCount;
     uint8_t* pDstRow;
     uint8_t** pPaletteEntry = gaPaletteBlendEntries;
-    for (nCount = 0x48; nCount; nCount--) {
-      *pPaletteEntry = *ppPaletteTable;
-      ppPaletteTable++;
-      pPaletteEntry++;
-    }
+    memcpy(pPaletteEntry, ppPaletteTable, 0x48 * sizeof(*pPaletteEntry));
+    pPaletteEntry += 0x48;
+    nCount = 0;
 
     gpPaletteBlendLookupTable = gaPaletteBlendEntries;
     pPaletteEntry = gaPaletteBlendEntries + 3;
@@ -1506,11 +1500,7 @@ void __fastcall PALETTE_InitColorLookupTables(BYTE * * ppPaletteTable) {
       pSrcEntry = *pPaletteEntry;
       pPaletteEntry++;
       pDstRow = pDst;
-      for (nCount = 0x40; nCount; nCount--) {
-        *(uint32_t*)pDstRow = *(uint32_t*)pSrcEntry;
-        pSrcEntry += 4;
-        pDstRow += 4;
-      }
+      memcpy(pDstRow, pSrcEntry, 0x40 * 4);
 
       pDst += 0x100;
     } while ((int)pPaletteEntry < (uintptr_t)((char*)&gaPaletteBlendEntries + 208));

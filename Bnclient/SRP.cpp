@@ -434,26 +434,14 @@ uint32_t __stdcall SRP_ParseChallenge(uint32_t * pContext, char * szText, uint32
     int i;
     Storm::Source::SSTR::SStrCopy((char*)(pContext + 0x10), szText, 0x7fffffff);
     uint32_t* pDst = pContext;
-    for (i = 8; i; i--) {
-      *pDst = *pModulusN;
-      pModulusN++;
-      pDst++;
-    }
+    memcpy(pDst, pModulusN, 8 * sizeof(*pDst));
 
     pDst = pContext + 8;
-    for (i = 8; i; i--) {
-      *pDst = *pGenerator;
-      pGenerator++;
-      pDst++;
-    }
+    memcpy(pDst, pGenerator, 8 * sizeof(*pDst));
 
     pDst = pServerPublicBBytes;
     uint32_t* pDst2 = pContext + 0x18;
-    for (i = 8; i; i--) {
-      *pDst2 = *pDst;
-      pDst++;
-      pDst2++;
-    }
+    memcpy(pDst2, pDst, 8 * sizeof(*pDst2));
 
     BigData* pServerPublicB = SHA::SHA1_FromBigIntBytes(pServerPublicBBytes, 0x20);
     int32_t nCompareResult = SHA::SHA1_BigIntCompareValue(pServerPublicB, 0);

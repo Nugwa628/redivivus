@@ -49,14 +49,14 @@ size_t __fastcall NET_D2GS_CLIENT_ExtractPacketSize(LPCRITICAL_SECTION * lpCriti
     if (!pPacket || nD2GSConnectionType == CONNECTIONTYPE_SINGLEPLAYERUNCAPPED && (dwTick = GetTickCount() , dwTick - pPacket->nTickCount < 500)) {
       nPacketSize = -1;
     } else {
-      if (0x203 < nSize) {
+      if (0x204 <= nSize) {
         nSize = 0x204;
       }
 
       memcpy(pBytes, pPacket, nSize);
       nPacketSize = pPacket->nSize;
       *pD2OnePacketClient = pPacket->pD2PacketClientNext;
-      D2_FREE_AT(pPacket, ".\\SRC\\D2Net.cpp", 0x46);
+      Fog::Memory::FreeClientMemory(pPacket, ".\\SRC\\D2Net.cpp", 0x46, 0);
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection((LPCRITICAL_SECTION)lpCriticalSection);

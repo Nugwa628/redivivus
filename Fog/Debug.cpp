@@ -1355,7 +1355,7 @@ D2FogModuleNodeStrc * __fastcall FindModuleContainingAddress(uint32_t nAddress, 
       if (!pModuleList) {
         return nullptr;
       }
-      if ((uintptr_t)pModuleList->dwBaseAddress <= nAddress && nAddress < (uintptr_t)(pModuleList->dwBaseAddress + pModuleList->dwSize)) {
+      if (nAddress >= (uintptr_t)pModuleList->dwBaseAddress && nAddress < (uintptr_t)(pModuleList->dwBaseAddress + pModuleList->dwSize)) {
         break;
       }
 

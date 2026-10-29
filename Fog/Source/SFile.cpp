@@ -30,8 +30,8 @@ void __fastcall SFILE_InitializeFileSystem(BOOL bResult, uint32_t dwParam) {
     Storm::Source::SFile::SFileEnableDirectAccess(bResult);
     Storm::Source::SFile::SFileSetIoErrorMode(0, nullptr);
     Storm::Source::SFile::SFileEnableSeekOptimization(dwParam);
-    dwSysOptionBuf[0] = 0x8000;
     D2Ini_bUseDirect = bResult;
+    dwSysOptionBuf[0] = 0x8000;
     Storm::Source::SSystem::SSYSTEM_SetSystemOption(2, dwSysOptionBuf, 4);
     dwSysOptionBuf[1] = 1;
     Storm::Source::SSystem::SSYSTEM_SetSystemOption(1, dwSysOptionBuf + 1, 4);
@@ -147,7 +147,7 @@ int __fastcall SFILE_EnsurePathEndsWithBackslash(char * szText1, uint32_t nMaxLe
     }
 
     uint32_t nLength = Storm::Source::SSTR::SStrLen(szText1);
-    if (!(!nLength || szText1[nLength - 1] != '\\')) {
+    if (nLength > 0 && szText1[nLength - 1] == '\\') {
       return 1;
     }
     if (nLength + 1 == nMaxLen) {

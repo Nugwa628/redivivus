@@ -3936,7 +3936,7 @@ static void SLOG_OutputIndent(D2SLogStrc * pLog) {
     if (0 >= (int)nLen) {
       return;
     }
-    if (0x7f < (int)nLen) {
+    if (0x80 <= (int)nLen) {
       nLen = 0x80;
     }
 

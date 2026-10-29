@@ -985,7 +985,7 @@ static void bi_flush(deflate_state * pDeflateState) {
       pDeflateState->bi_buf = 0;
       return;
     }
-    if (7 >= pDeflateState->bi_valid) {
+    if (8 > pDeflateState->bi_valid) {
       return;
     }
 

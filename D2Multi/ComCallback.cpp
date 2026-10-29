@@ -687,12 +687,8 @@ void __fastcall COMCALLBACK_FormatWhisperFrom(uint16_t * wszText, char * szSende
     uint16_t wszBuffer[512];
     char szFormatted[4];
     uint16_t wszConverted[4];
-    uint16_t* pStr = wszBuffer;
-    for (i = 0x100; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x200; i++) wszBuffer[i] = 0;
 
     wszConverted[0] = L'\0';
     wszConverted[1] = 0;
@@ -708,7 +704,7 @@ void __fastcall COMCALLBACK_FormatWhisperFrom(uint16_t * wszText, char * szSende
     }
 
     int32_t nTextLen = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszText);
-    if (499 < nTextLen) {
+    if (500 <= nTextLen) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb7d);
       exit(-1);
     }
@@ -779,12 +775,8 @@ BOOL __stdcall COMCALLBACK_ValidateGameJoinability() {
 int __fastcall PrintChannelText(uint32_t dwParam, char * szText, int32_t nColor) {
     int i;
     uint16_t wszText[576];
-    uint16_t* pStr = wszText;
-    for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x240; i++) wszText[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszText, szText, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(wszText);
@@ -798,17 +790,11 @@ static void __stdcall COMCALLBACK_AppendChatWithUser(uint32_t dwParam, char * sz
     uint16_t wszMain[576];
     uint16_t* pStr = wszMain;
     for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
+      *(uint32_t*)pStr = 0;
       pStr += 2;
     }
 
-    pStr = wszMessage;
-    for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    for (int i = 0; i < 0x240; i++) wszMessage[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszMain, szUsername, 0x240);
     D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszMessage, szMessage, 0x240);
@@ -1143,12 +1129,8 @@ BOOL __fastcall COMCALLBACK_HandleChannelJoin(uint32_t dwUnused, uint32_t dwPara
 uint32_t __stdcall COMCALLBACK_AppendServerMessage(uint32_t dwParam, char * szText) {
     int i;
     uint16_t wszText[576];
-    uint16_t* pStr = wszText;
-    for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x240; i++) wszText[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszText, szText, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(wszText);
@@ -1301,12 +1283,8 @@ BOOL __fastcall COMCALLBACK_HandleWhisperMessage(uint32_t dwParam1, uint32_t dwP
 BOOL __fastcall COMCALLBACK_AppendErrorMessage(uint32_t dwParam1, uint32_t dwParam2, uint32_t dwParam, char * szText) {
     int i;
     uint16_t wszText[576];
-    uint16_t* pStr = wszText;
-    for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x240; i++) wszText[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszText, szText, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(wszText);
@@ -1317,12 +1295,8 @@ BOOL __fastcall COMCALLBACK_AppendErrorMessage(uint32_t dwParam1, uint32_t dwPar
 BOOL __fastcall COMCALLBACK_AppendInfoMessage(uint32_t dwCbArg1, uint32_t dwCbArg2, uint32_t dwParam, char * szText) {
     int i;
     uint16_t wszText[576];
-    uint16_t* pStr = wszText;
-    for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x240; i++) wszText[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszText, szText, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(wszText);
@@ -1335,12 +1309,8 @@ BOOL __fastcall COMCALLBACK_HandleInfoRequest1(uint32_t dwCbArg1, uint32_t dwCbA
     uint16_t wszText[576];
     char szFormatted[500];
     sprintf(szFormatted, "The channel \"%s\" is full. If you are having problems using Battle.net commands, please click the Help button.", szInfoArg);
-    uint16_t* pStr = wszText;
-    for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x240; i++) wszText[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszText, szFormatted, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(wszText);
@@ -1353,12 +1323,8 @@ BOOL __fastcall COMCALLBACK_HandleInfoRequest2(uint32_t dwCbArg1, uint32_t dwCbA
     uint16_t wszText[576];
     char szFormatted[500];
     sprintf(szFormatted, "The channel \"%s\" is restricted. If you are having problems using Battle.net commands, please click the Help button.", szInfoArg);
-    uint16_t* pStr = wszText;
-    for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x240; i++) wszText[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszText, szFormatted, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(wszText);
@@ -1371,12 +1337,8 @@ static void __fastcall COMCALLBACK_ValidateWhisperTarget(char * szUsername, char
     uint16_t wszText[576];
     char szFormatted[500];
     sprintf(szFormatted, "*%s %s*", szUsername, szMessage);
-    uint16_t* pStr = wszText;
-    for (i = 0x120; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x240; i++) wszText[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(wszText, szFormatted, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(wszText);
@@ -1539,12 +1501,8 @@ static void __fastcall COMCALLBACK_ValidateEmoteTarget(char * szPlayerName, char
     uint16_t aWStack_678[576];
     char szFormatted[500];
     sprintf(szFormatted, "You whisper to %s: %s", szPlayerName, szEmoteText);
-    uint16_t* pwszClear = aWStack_678;
-    for (i = 0x120; i; i--) {
-      pwszClear[0] = L'\0';
-      pwszClear[1] = L'\0';
-      pwszClear += 2;
-    }
+    uint16_t* pwszClear;
+    for (int i = 0; i < 0x240; i++) aWStack_678[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_ConvertCharToWchar(aWStack_678, szFormatted, 0x240);
     OOGUtilities::OOGUTIL_AppendChatText(aWStack_678);
@@ -2062,7 +2020,7 @@ void __stdcall COMCALLBACK_ClearAllChannelUsers() {
       pNextUser = pMemoryToFree->pNext;
       D2Win::Src::D2Comp::D2COMP_DestroyCompositeUnit((D2CharSelStrc*)pMemoryToFree->pComposite, 1);
       pMemoryToFree->pComposite = 0;
-      D2_FREE_AT(pMemoryToFree, ".\\Src\\ComCallback.cpp", 0x822);
+      Fog::Memory::FreeClientMemory(pMemoryToFree, ".\\Src\\ComCallback.cpp", 0x822, 0);
       pMemoryToFree = pNextUser;
     }
 
@@ -2071,7 +2029,7 @@ void __stdcall COMCALLBACK_ClearAllChannelUsers() {
     while (pLinkedNode) {
       void* pNextLinkedNode;
       pNextLinkedNode = *(void**)((int)pLinkedNode + 0x44);
-      D2_FREE_AT(pLinkedNode, ".\\Src\\ComCallback.cpp", 0x82a);
+      Fog::Memory::FreeClientMemory(pLinkedNode, ".\\Src\\ComCallback.cpp", 0x82a, 0);
       pLinkedNode = pNextLinkedNode;
     }
 
@@ -2079,12 +2037,8 @@ void __stdcall COMCALLBACK_ClearAllChannelUsers() {
     gnChannelUserTotalCount = 0;
     gnChannelUserCount = 0;
     sprintf(szChannelUserCount, "%s (%d)", gszCurrentChannelName, 0);
-    uint16_t* pwszClear = local_584;
-    for (i = 0x120; i; i--) {
-      pwszClear[0] = L'\0';
-      pwszClear[1] = L'\0';
-      pwszClear += 2;
-    }
+    uint16_t* pwszClear;
+    for (int i = 0; i < 0x240; i++) local_584[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(local_584, szChannelUserCount, 0x240);
     ChatDlg::FORMS_DisplayBattleNetNews(local_584);

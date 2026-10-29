@@ -182,10 +182,10 @@ static int __stdcall D3DFLOOR_AllocateNodeFromFreeList(D3DFloorCacheStrc * pCach
       D3DFloorCacheNodeStrc* pNewFreeHead;
       pNewFreeHead = pNode->pNext;
       pCache->pFreeHead = pNewFreeHead;
-      if (!pNewFreeHead) {
-        pCache->pFreeTail = 0;
-      } else {
+      if (pNewFreeHead) {
         pNewFreeHead->pPrev = 0;
+      } else {
+        pCache->pFreeTail = 0;
       }
 
       pNode->pNext = 0;
@@ -211,17 +211,17 @@ static int __stdcall D3DFLOOR_AllocateNodeFromFreeList(D3DFloorCacheStrc * pCach
 // Provenance: 1.14d asm 006bb2d0; Direct3D twin of GLFLOOR_PromoteNodeToMRU (0050f670).
 void __fastcall D3DFLOOR_PromoteNodeToMRU(D3DFloorCacheStrc * pCache, int nIndex) {
     D3DFloorCacheNodeStrc* pNode;
-    if (pCache->nUsedCount < 2) {
+    if (pCache->nUsedCount <= 1) {
       return;
     }
     if (!nIndex) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 199);
       exit(-1);
-    } else if (pCache->nMaxNodes < nIndex) {
+    } else if (nIndex > pCache->nMaxNodes) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 200);
       exit(-1);
     } else {
-      if (!(0 < nIndex)) {
+      if (!(1 <= nIndex)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc9);
         exit(-1);
       }
@@ -244,10 +244,10 @@ void __fastcall D3DFLOOR_EvictLRU(D3DFloorCacheStrc * pCache) {
       D3DFloorCacheNodeStrc* pNextNode;
       pNextNode = pEvictNode->pNext;
       pCache->pUsedHead = pNextNode;
-      if (!pNextNode) {
-        pCache->pUsedTail = 0;
-      } else {
+      if (pNextNode) {
         pNextNode->pPrev = 0;
+      } else {
+        pCache->pUsedTail = 0;
       }
 
       pEvictNode->pNext = 0;
@@ -348,10 +348,10 @@ void __fastcall D3DFLOOR_Free(D3DFloorCacheStrc * pCache, BOOL bInvalidateAll) {
           if (pCurNode) {
             pNextNode = pCurNode->pNext;
             pCache->pUsedHead = pNextNode;
-            if (!pNextNode) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextNode) {
               pNextNode->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pCurNode->pNext = 0;
@@ -400,10 +400,10 @@ int32_t __fastcall D3DFLOOR_EnsureAvailableNode(D3DFloorCacheStrc * pCache) {
           if (pNode) {
             pNextNode = pNode->pNext;
             pCache->pUsedHead = pNextNode;
-            if (!pNextNode) {
-              pCache->pUsedTail = 0;
-            } else {
+            if (pNextNode) {
               pNextNode->pPrev = 0;
+            } else {
+              pCache->pUsedTail = 0;
             }
 
             pNode->pNext = 0;
@@ -432,10 +432,10 @@ int32_t __fastcall D3DFLOOR_EnsureAvailableNode(D3DFloorCacheStrc * pCache) {
       } else {
         pNextNode = pNode->pNext;
         pCache->pFreeHead = pNextNode;
-        if (!pNextNode) {
-          pCache->pFreeTail = 0;
-        } else {
+        if (pNextNode) {
           pNextNode->pPrev = 0;
+        } else {
+          pCache->pFreeTail = 0;
         }
 
         pNode->pNext = 0;

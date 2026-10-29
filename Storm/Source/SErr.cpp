@@ -61,8 +61,7 @@ void __stdcall SERR_AddStormFacility(uint16_t wModuleId) {
 
     SIZE_T dwBytes = 0xc;
     DWORD dwFlags = 4;
-    HANDLE hHeap = GetProcessHeap();
-    uint16_t* pNewNode = (uint16_t*)HeapAlloc(hHeap, dwFlags, dwBytes);
+    uint16_t* pNewNode = (uint16_t*)HeapAlloc(GetProcessHeap(), dwFlags, dwBytes);
     *ppTailLink = (uint32_t)pNewNode;
     *pNewNode = wModuleId;
     HMODULE hModule = SSystem::StormGetInstance();
@@ -106,8 +105,7 @@ static LPSTR * SERR_GetString(int32_t nErrorIndex) {
     int nLen = 0x100;
     char* pcVar1 = gszErrorStringBuffer;
     UINT uID = nErrorIndex + 0x5100;
-    HMODULE hInstance_lcl = SSystem::StormGetInstance();
-    /* HINSTANCE hInstance for LoadStringA */ nLen = LoadStringA(hInstance_lcl, uID, pcVar1, nLen);
+    /* HINSTANCE hInstance for LoadStringA */ nLen = LoadStringA(SSystem::StormGetInstance(), uID, pcVar1, nLen);
     pcVar1 = gszErrorStringBuffer;
     if (nLen) {
       return (LPSTR*)pcVar1;
@@ -151,7 +149,7 @@ void __stdcall SERR_InternalLeaveCriticalSection() {
 // @blizzard UndecorateObjectName (SERR.CPP)
 static BOOL __stdcall SERR_UndecorateObjectName(char * szMangled, int32_t nMaxLen, char * szText) {
     uint32_t pcMarker = SSTR::SStrLen(szMangled);
-    if (!(5 < pcMarker && *szMangled == '.' && szMangled[3] == 'U')) {
+    if (!(6 <= pcMarker && *szMangled == '.' && szMangled[3] == 'U')) {
       return 0;
     }
 
@@ -169,7 +167,7 @@ static BOOL __stdcall SERR_UndecorateObjectName(char * szMangled, int32_t nMaxLe
     *pcVar1 = '\0';
     while (true) {
       pcVar1--;
-      if (!(szText <= pcVar1 && *pcVar1 == '_')) {
+      if (!(pcVar1 >= szText && *pcVar1 == '_')) {
         break;
       }
 
@@ -204,8 +202,7 @@ int __stdcall SErrRegisterMessageSource(uint16_t wModuleId, HMODULE dwModuleBase
     SERR_InternalEnterCriticalSection();
     SIZE_T dwBytes = 0xc;
     DWORD dwFlags = 4;
-    HANDLE hHeap = GetProcessHeap();
-    uint16_t* pNewModule = (uint16_t*)HeapAlloc(hHeap, dwFlags, dwBytes);
+    uint16_t* pNewModule = (uint16_t*)HeapAlloc(GetProcessHeap(), dwFlags, dwBytes);
     *pNewModule = wModuleId;
     *(HMODULE*)(pNewModule + 2) = dwModuleBase;
     *(void**)(pNewModule + 4) = (void*)gpErrorModuleList;
@@ -573,25 +570,27 @@ void __stdcall SErrReportNamedResourceLeak(char * szMessage, char * szText) {
     static uint32_t gbDebugMemoryInitialized; D2_STATIC_GUARD_BSS(gbDebugMemoryInitialized, "Storm::Source::SErr::SErrReportNamedResourceLeak::gbDebugMemoryInitialized");
 
     char szDebugOutput[200];
-    uint32_t szFormatted[64];
+    char szFormatted[256];
+    uint32_t dwStackCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     if (!gbDebugMemoryInitialized) {
       gbDebugMemoryInitialized = 1;
       SReg::SRegLoadValue("Internal", "Debug Memory", 0, &gnDebugMemoryInitFlag);
     }
     if (gnDebugMemoryInitFlag) {
       if (!szText || *szText == '\0') {
-        SSTR::SStrPrintf((char*)szFormatted, 0x100, "%s", szMessage);
+        SSTR::SStrPrintf(szFormatted, 0x100, "%s", szMessage);
       } else {
-        SSTR::SStrPrintf((char*)szFormatted, 0x100, "%s (%s)", szMessage, szText);
+        SSTR::SStrPrintf(szFormatted, 0x100, "%s (%s)", szMessage, szText);
       }
       if (!gnSSystemOption1) {
-        SErrDisplayError(0x8510007f, szFormatted, -3, nullptr, 1, 1);
+        SErrDisplayError(0x8510007f, (uint32_t*)szFormatted, -3, nullptr, 1, 1);
         return;
       }
 
       /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szDebugOutput, "Storm Error : handle never released -- %s\n", szFormatted);
       /* LPCSTR lpOutputString for OutputDebugStringA */ OutputDebugStringA(szDebugOutput);
     }
+
 }
 
 // Under the error critical section, walks gpStormErrorCallbackListHead and removes every node whose handler slot (+8) equals the argument.

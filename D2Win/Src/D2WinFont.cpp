@@ -91,14 +91,13 @@ static void InitFontCache(int32_t nFontIndex) {
     char szFontTablePath[80];
     GetFontTablePath(0x4f, nFontIndex, szFontTablePath);
     if (gaFontCache[nFontIndex].pFontTable) {
-      D2_FREE_AT(gaFontCache[nFontIndex].pFontTable, ".\\Src\\D2WinFont.cpp", 0xb3);
+      Fog::Memory::FreeClientMemory(gaFontCache[nFontIndex].pFontTable, ".\\Src\\D2WinFont.cpp", 0xb3, 0);
     }
 
     int32_t nAllocLine = 0xb5;
     char* szAllocFile = ".\\Src\\D2WinFont.cpp";
     uint32_t* pOutFileSize = 0;
-    D2PoolManagerStrc* pPoolMgr = D2WinArchive::ReturnZero();
-    D2FontTableHeaderStrc* pFontTable = (D2FontTableHeaderStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(pPoolMgr, szFontTablePath, pOutFileSize, szAllocFile, nAllocLine);
+    D2FontTableHeaderStrc* pFontTable = (D2FontTableHeaderStrc*)Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szFontTablePath, pOutFileSize, szAllocFile, nAllocLine);
     gaFontCache[nFontIndex].pFontTable = pFontTable;
     gaFontCache[nFontIndex].pFontTableHeader = pFontTable;
     gaFontCache[nFontIndex].pGlyphs = (D2FontGlyphStrc*)(pFontTable + 1);
@@ -113,12 +112,12 @@ void __stdcall D2WINFONT_FreeFontCache() {
         ((D2FontCacheEntryStrc*)(ppFontTable - 1))->pFontDC6 = 0;
       }
       if (*ppFontTable) {
-        D2_FREE_AT(*ppFontTable, ".\\Src\\D2WinFont.cpp", 0x135);
+        Fog::Memory::FreeClientMemory(*ppFontTable, ".\\Src\\D2WinFont.cpp", 0x135, 0);
         *ppFontTable = 0;
       }
 
       ppFontTable += 5;
-    } while ((int)ppFontTable < (uintptr_t)((char*)&gaFontCache + sizeof(gaFontCache) + 4));
+    } while ((int)ppFontTable < (int)((uintptr_t)((char*)&gaFontCache + sizeof(gaFontCache) + 4)));
 
     D2WinArchive::IMAGE_FreeImage(gpMonsterIndicatorDC6);
     gpMonsterIndicatorDC6 = 0;

@@ -166,7 +166,7 @@ char * __stdcall Realm(D2BNetGatewayAccessStr * pGatewayAccess, int32_t nParam) 
 }
 
 void __stdcall SetCurGateway(int32_t nParam1, int32_t nParam2) {
-    /* 0x118150  19  ?SetCurGateway@BNGatewayAccess@@QAGXH@Z */ if (!(*(int*)(nParam1 + 0x10) && 0 < nParam2 && nParam2 <= *(int*)(nParam1 + 8))) {
+    /* 0x118150  19  ?SetCurGateway@BNGatewayAccess@@QAGXH@Z */ if (!(*(int*)(nParam1 + 0x10) && 1 <= nParam2 && nParam2 <= *(int*)(nParam1 + 8))) {
       return;
     }
     if (99 < nParam2) {

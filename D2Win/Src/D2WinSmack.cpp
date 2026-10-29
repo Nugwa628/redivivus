@@ -135,7 +135,7 @@ BOOL __fastcall Draw(::D2WinSmack * pSmack) {
     }
 
     uint32_t dwState = pSmack->sControl.dwState;
-    if (!(dwState & 4 && dwState & 1)) {
+    if (!(dwState & gadwBitMasks[2] && dwState & gadwBitMasks[0])) {
       return 0;
     }
     if (gbSmackerKeepTempFile) {
@@ -158,7 +158,7 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
     }
 
     uint32_t uVar1 = pSmack->sControl.dwState;
-    if (!(uVar1 & 4 && uVar1 & 1)) {
+    if (!(uVar1 & gadwBitMasks[2] && uVar1 & gadwBitMasks[0])) {
       return 0;
     }
 

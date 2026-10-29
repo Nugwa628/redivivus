@@ -132,8 +132,8 @@ int32_t __stdcall SFILE_DecompressLzw(int32_t pSrcData, int32_t pDstData, int32_
       gpSFileExplodeWorkBuffer = SMem::SMemAlloc(0x3134, ".\\SOURCE\\SFILE.CPP", 0x2c9, 0);
     }
 
-    bufState[2] = pSrcData;
     bufState[0] = pDstData;
+    bufState[2] = pSrcData;
     bufState[1] = 0;
     bufState[3] = 0;
     bufState[4] = nDstSize;
@@ -161,11 +161,12 @@ static void SFILE_Decrypt(uint32_t nSeed, uint32_t * pData, uint32_t nByteLen) {
 static uint32_t __stdcall SFILE_Hash(int32_t nHashKind, char * szText) {
     uint32_t nHash = 0x7fed7fed;
     int nSeed = -0x11111112;
-    for (; szText && *szText != '\0'; szText++) {
-      uint32_t nUpper;
-      nUpper = toupper((int)*szText);
-      nHash = nHash + nSeed ^ *(uint32_t*)((int)g_pStormMpqCryptTable + (nHashKind * 0x100 + (nUpper & 0xff)) * 4);
-      nSeed = nSeed * 0x21 + (nUpper & 0xff) + 3 + nHash;
+    while (szText && *szText != '\0') {
+      uint8_t nUpper;
+      nUpper = (uint8_t)toupper((int)*szText);
+      szText++;
+      nHash = nHash + nSeed ^ *(uint32_t*)((int)g_pStormMpqCryptTable + (nHashKind * 0x100 + nUpper) * 4);
+      nSeed = nSeed * 0x21 + nUpper + 3 + nHash;
     }
 
     return nHash;
@@ -227,17 +228,18 @@ static int __stdcall SFILE_ReadFileChecked(int32_t * pMPQFile, void * pOutputBuf
         }
 
         dwLastError = GetLastError();
-        if (!gnSFileReadErrorMode) {
+        switch (gnSFileReadErrorMode) {
+        case 0:
           return 0;
-        }
-        if (gnSFileReadErrorMode == 1) {
-          break;
-        }
-        if (gnSFileReadErrorMode == 2) {
+        case 1:
+          goto ask_handler;
+        case 2:
           SErr::SErrDisplayError(dwLastError, pnBytesRead, -4, nullptr, 0, 1);
+          break;
         }
       }
 
+    ask_handler:
       if (!pfnSFileReadErrorHandler) {
         return 0;
       }
@@ -357,12 +359,12 @@ static int32_t SFILE_GetStreamPosition(D2StormAudioStreamRec * pStream) {
     }
 
     int iVar1 = pStream->nBytePos % pStream->nBufferSize - __frame0.nPosition;
-    if (iVar1 < 1) {
+    if (iVar1 <= 0) {
       iVar1 += pStream->nBufferSize;
     }
 
     uint32_t nValidBytes = pStream->nBytePos - iVar1;
-    if (pStream->nDataChunkSize <= nValidBytes) {
+    if (nValidBytes >= pStream->nDataChunkSize) {
       nValidBytes = pStream->nDataChunkSize;
     }
 
@@ -1721,7 +1723,7 @@ static uint32_t SFILE_InternalReadAlignedSector(uint32_t nAlignedOffset, D2MPQFi
 
     uint32_t nBytesToRead = pArchive->nSectorSize;
     uint32_t nFileSize = pMPQFile->pBlockEntry->dwFileSize;
-    if (nFileSize < nBytesToRead + nAlignedOffset && !(pMPQFile->pBlockEntry->dwFlags & 0xff00)) {
+    if (nBytesToRead + nAlignedOffset > nFileSize && !(pMPQFile->pBlockEntry->dwFlags & 0xff00)) {
       nBytesToRead = nFileSize - nAlignedOffset;
     }
 
@@ -3545,10 +3547,10 @@ static D2StormAsyncOpStrc * __stdcall SFILE_IssueRequest(uint32_t nFileOffset, u
     int bArgsValid;
     D2StormAsyncOpStrc* pPrevBack;
     D2StormAsyncOpStrc* pRequest = 0;
-    if (!pChunkWritePtr && !pStream) {
-      bArgsValid = 0;
-    } else {
+    if (pChunkWritePtr && !pStream) {
       bArgsValid = -1;
+    } else {
+      bArgsValid = 0;
     }
     if (!bArgsValid) {
       SErr::SErrSetLastError(0x57);
@@ -3665,8 +3667,7 @@ int __stdcall SFileCloseFile(D2MPQFileStrc * pMPQFile) {
 
 // @blizzard SFileOpenFile (SFILE.CPP)
 int32_t __stdcall SFileOpenFile(char * szFilename, D2MPQFileStrc * * ppFile) {
-    uint32_t dwOpenFlags = SFILE_GetOpenFlags();
-    int nResult = SFileOpenFileEx(nullptr, szFilename, dwOpenFlags, (void**)ppFile);
+    int nResult = SFileOpenFileEx(nullptr, szFilename, SFILE_GetOpenFlags(), (void**)ppFile);
     return nResult;
 }
 
@@ -5712,8 +5713,9 @@ void __fastcall CRC32_UpdateCRC(uint8_t * pbData, int32_t nLength, uint32_t * pd
       dwCrc = -1;
     }
     if (byFlags & 2) {
-      for (; nLength; nLength--) {
+      while (nLength) {
         dwCrc = dwCrc >> 8 ^ gdwSFileCompressionMethod[(*pbData ^ dwCrc) & 0xff];
+        nLength--;
         pbData++;
       }
     }

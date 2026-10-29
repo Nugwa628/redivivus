@@ -46,7 +46,7 @@ void __fastcall GFX_FreeAllCacheEntries(D2PoolManagerStrc * pMemory, int32_t nPa
           *(int**)(nParam + 0x800 + *pCurEntry * 4) = (int*)pNextEntry;
         }
 
-        D2_FREE_POOL_AT(pMemory, pCurEntry, ".\\SRC\\CelDataHash.cpp", 0x3a);
+        Fog::Memory::FreeServerMemory(pMemory, pCurEntry, ".\\SRC\\CelDataHash.cpp", 0x3a, 0);
         pCurEntry = pNextEntry;
       }
 
@@ -55,7 +55,7 @@ void __fastcall GFX_FreeAllCacheEntries(D2PoolManagerStrc * pMemory, int32_t nPa
       }
 
       nBucketIdx++;
-      if (0x1ff < nBucketIdx) {
+      if (0x200 <= nBucketIdx) {
         return;
       }
     }

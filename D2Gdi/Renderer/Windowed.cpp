@@ -253,21 +253,13 @@ void __fastcall SetPalette(LPPALETTEENTRY pPalette) {
 
     /* PALETTEENTRY * pPalEntries for SetPaletteEntries */ /* UINT cEntries for SetPaletteEntries */ /* UINT iStart for SetPaletteEntries */ /* HPALETTE hpal for SetPaletteEntries */ SetPaletteEntries(RENDERER_WINDOWED_hPalette, 0, 0x100, pPalette);
     tagPALETTEENTRY* pDitherRemapEntry = (tagPALETTEENTRY*)gaDirectDrawDitherPaletteRemap;
-    for (nRemaining = 0x100; nRemaining; nRemaining--) {
-      *pDitherRemapEntry = *pPalette;
-      pPalette++;
-      pDitherRemapEntry++;
-    }
+    memcpy(pDitherRemapEntry, pPalette, 0x100 * sizeof(*pDitherRemapEntry));
 }
 
 void __fastcall SetPaletteTable(BYTE * * ppPaletteTable) {
     int nRemaining;
     uint8_t** pPaletteTableDst = gpGlidePaletteTableData;
-    for (nRemaining = 0x48; nRemaining; nRemaining--) {
-      *pPaletteTableDst = *ppPaletteTable;
-      ppPaletteTable++;
-      pPaletteTableDst++;
-    }
+    memcpy(pPaletteTableDst, ppPaletteTable, 0x48 * sizeof(*pPaletteTableDst));
 
     gpPaletteTable = gpGlidePaletteTableData;
 }
@@ -818,22 +810,22 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
 
 void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, BYTE nAlpha) {
     int nDrawMode;
-    if (nAlpha < 0xc0) {
-      if (nAlpha < 0x80) {
-        if (nAlpha < 0x40) {
-          if (nAlpha == '\0') {
+    if (!(nAlpha < 0xc0)) {
+      nDrawMode = 5;
+    } else {
+      if (!(nAlpha < 0x80)) {
+        nDrawMode = 2;
+      } else {
+        if (!(nAlpha < 0x40)) {
+          nDrawMode = 1;
+        } else {
+          if (nAlpha <= 0) {
             return;
           }
 
           nDrawMode = 0;
-        } else {
-          nDrawMode = 1;
         }
-      } else {
-        nDrawMode = 2;
       }
-    } else {
-      nDrawMode = 5;
     }
 
     Windowed::DrawSolidRectEx(nXStart, nYStart, nXEnd, nYEnd, dwColor, nDrawMode);
@@ -841,7 +833,7 @@ void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEn
 
 // Windowed GDI renderer helper functions - DIB section allocation, palette conversion, line drawing (Bresenham), crop rect calculation, Smacker video blitting
 void __fastcall RENDERER_WINDOWED_DrawPixel(int nPosX, int nPosY, BYTE byColor) {
-    if (!(-1 < nPosX && nPosX < RENDERER_nWindowWidth && -1 < nPosY && nPosY < RENDERER_nWindowHeight)) {
+    if (!(0 <= nPosX && nPosX < RENDERER_nWindowWidth && 0 <= nPosY && nPosY < RENDERER_nWindowHeight)) {
       return;
     }
 

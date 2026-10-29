@@ -225,11 +225,7 @@ void __fastcall SetPaletteTable(BYTE * * ppPaletteTable) {
 
     int nCount;
     uint8_t** pDst = gaGlidePaletteTableData;
-    for (nCount = 0x48; nCount; nCount--) {
-      *pDst = *ppPaletteTable;
-      ppPaletteTable++;
-      pDst++;
-    }
+    memcpy(pDst, ppPaletteTable, 0x48 * sizeof(*pDst));
 
     gpPaletteTable = gaGlidePaletteTableData;
 }
@@ -271,79 +267,70 @@ void __fastcall RENDERER_GLIDE_SetTextureMode(int32_t nParam) {
 }
 
 void __fastcall RENDERER_GLIDE_SetColorCombine(int32_t nParam) {
-    int nPrevMode;
-    if (!gnGlideColorCombineMode || (nPrevMode = gnGlideColorCombineMode , nParam != gnGlideColorCombineMode)) {
-      if (nParam == 1) {
-        (*GLIDEDLL_grColorCombine_20)(3, 1, 0, 1, 0);
-        nPrevMode = nParam;
-      } else {
-        nPrevMode = nParam;
-        if (nParam == 2) {
-          (*GLIDEDLL_grColorCombine_20)(1, 0, 1, 2, 0);
-          gnGlideColorCombineMode = nParam;
-          return;
-        }
-      }
+    if (!(!gnGlideColorCombineMode || nParam != gnGlideColorCombineMode)) {
+      return;
     }
 
-    gnGlideColorCombineMode = nPrevMode;
+    switch (nParam) {
+    case 1:
+      (*GLIDEDLL_grColorCombine_20)(3, 1, 0, 1, 0);
+      break;
+    case 2:
+      (*GLIDEDLL_grColorCombine_20)(1, 0, 1, 2, 0);
+      break;
+    }
+
+    gnGlideColorCombineMode = nParam;
 }
 
 void __fastcall RENDERER_GLIDE_SetAlphaBlendMode(int32_t nParam) {
-    int nBlendMode;
-    if (!gnGlideAlphaBlendMode || (nBlendMode = gnGlideAlphaBlendMode , nParam != gnGlideAlphaBlendMode)) {
-      nBlendMode = nParam;
-      switch (nParam) {
-        case 1:
-          (*GLIDEDLL_grAlphaCombine_20)(0, 0, 1, 2, 0);
-        (*GLIDEDLL_grAlphaBlendFunction_16)(4, 0, 0, 0);
-        gnGlideAlphaBlendMode = nParam;
-        return;
-        case 2:
-          (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
-        (*GLIDEDLL_grAlphaBlendFunction_16)(4, 4, 0, 0);
-        gnGlideAlphaBlendMode = nParam;
-        return;
-        case 3:
-          (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
-        (*GLIDEDLL_grAlphaBlendFunction_16)(0, 2, 0, 0);
-        gnGlideAlphaBlendMode = nParam;
-        return;
-        case 4:
-          (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
-        (*GLIDEDLL_grAlphaBlendFunction_16)(1, 5, 0, 0);
-        nBlendMode = nParam;
-      }
+    if (!(!gnGlideAlphaBlendMode || nParam != gnGlideAlphaBlendMode)) {
+      return;
     }
 
-    gnGlideAlphaBlendMode = nBlendMode;
+    switch (nParam) {
+    case 1:
+      (*GLIDEDLL_grAlphaCombine_20)(0, 0, 1, 2, 0);
+      (*GLIDEDLL_grAlphaBlendFunction_16)(4, 0, 0, 0);
+      break;
+    case 2:
+      (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
+      (*GLIDEDLL_grAlphaBlendFunction_16)(4, 4, 0, 0);
+      break;
+    case 3:
+      (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
+      (*GLIDEDLL_grAlphaBlendFunction_16)(0, 2, 0, 0);
+      break;
+    case 4:
+      (*GLIDEDLL_grAlphaCombine_20)(1, 0, 1, 2, 0);
+      (*GLIDEDLL_grAlphaBlendFunction_16)(1, 5, 0, 0);
+      break;
+    }
+
+    gnGlideAlphaBlendMode = nParam;
 }
 
 void __fastcall RENDERER_GLIDE_SetTextureFiltering(int32_t nParam) {
-    int nFilterMode;
-    if (!gnGlideTextureFilteringMode || (nFilterMode = gnGlideTextureFilteringMode , nParam != gnGlideTextureFilteringMode)) {
-      if (nParam == 1) {
-        (*GLIDEDLL_grTexFilterMode_12)(0, 0, 0);
-        nFilterMode = nParam;
-        if (1 < gnGlideTextureMemoryUsed) {
-          (*GLIDEDLL_grTexFilterMode_12)(1, 0, 0);
-          nFilterMode = nParam;
-        }
-      } else {
-        nFilterMode = nParam;
-        if (nParam == 2) {
-          (*GLIDEDLL_grTexFilterMode_12)(0, 1, 1);
-          nFilterMode = nParam;
-          if (1 < gnGlideTextureMemoryUsed) {
-            (*GLIDEDLL_grTexFilterMode_12)(1, 1, 1);
-            gnGlideTextureFilteringMode = nParam;
-            return;
-          }
-        }
-      }
+    if (!(!gnGlideTextureFilteringMode || nParam != gnGlideTextureFilteringMode)) {
+      return;
     }
 
-    gnGlideTextureFilteringMode = nFilterMode;
+    switch (nParam) {
+    case 1:
+      (*GLIDEDLL_grTexFilterMode_12)(0, 0, 0);
+      if (1 < gnGlideTextureMemoryUsed) {
+        (*GLIDEDLL_grTexFilterMode_12)(1, 0, 0);
+      }
+      break;
+    case 2:
+      (*GLIDEDLL_grTexFilterMode_12)(0, 1, 1);
+      if (1 < gnGlideTextureMemoryUsed) {
+        (*GLIDEDLL_grTexFilterMode_12)(1, 1, 1);
+      }
+      break;
+    }
+
+    gnGlideTextureFilteringMode = nParam;
 }
 
 int * GetRenderStatistics() {
@@ -555,12 +542,7 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
 
     RENDERER_GLIDE_GenerateDebugFont();
     __frame0.nResult = 0;
-    if (!nParam) {
-      screen_resolution = 7;
-      RENDERER_nWindowWidth = 0x280;
-      RENDERER_nWindowHeight = 0x1e0;
-      refresh_rate = gnGlideRefreshRate640;
-    } else {
+    if (nParam) {
       screen_resolution = 8;
       RENDERER_nWindowWidth = 800;
       RENDERER_nWindowHeight = 600;
@@ -569,15 +551,18 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
       if (nParam != 2) {
         goto open_sst_window;
       }
+    } else {
+      screen_resolution = 7;
+      RENDERER_nWindowWidth = 0x280;
+      RENDERER_nWindowHeight = 0x1e0;
+      refresh_rate = gnGlideRefreshRate640;
     }
 
     gbGlidePerspectiveMode = 1;
     open_sst_window:
     gnGlideWindowHandle = nParam2;
     ghGlideSstWindow = (*GLIDEDLL_grSstWinOpen_28)(nParam2, screen_resolution, refresh_rate, 2, 0, 2, 0);
-    if (!ghGlideSstWindow) {
-      Fog::Src::LogManager::LOGFILE_WriteStringToFile("Opening Glide window failed!");
-    } else {
+    if (ghGlideSstWindow) {
       ghGlideWindow = 1;
       if (gnGlideRendererInitialized) {
         nTMUCount = 0;
@@ -628,6 +613,8 @@ static BOOL RENDERER_GLIDE_InitWindow(int32_t nParam, FxU32 nParam2) {
       if (bInitTexMemOk) {
         return 1;
       }
+    } else {
+      Fog::Src::LogManager::LOGFILE_WriteStringToFile("Opening Glide window failed!");
     }
 
     return __frame0.nResult;
@@ -1636,15 +1623,18 @@ void __fastcall DebugFillBackBuffer(int32_t nPosX, int32_t nPosY) {
 
 // @sourcefile .\Src\glSprite.cpp
 void __stdcall RENDERER_GLIDE_InitSpriteCache() {
-    if (!gpGlideSpriteBuffer) {
+    if (gpGlideSpriteBuffer) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4a);
+      exit(-1);
+    } else {
       BOOL bIsPerspective;
       if (gpGlideSpritePixelBuffer) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4b);
         exit(-1);
       }
 
-      gpGlideSpriteBuffer = D2_ALLOC_AT(0x10000, ".\\Src\\glSprite.cpp", 0x4c);
-      gpGlideSpritePixelBuffer = D2_ALLOC_AT(0x10000, ".\\Src\\glSprite.cpp", 0x4d);
+      gpGlideSpriteBuffer = Fog::Memory::AllocClientMemory(0x10000, ".\\Src\\glSprite.cpp", 0x4c, 0);
+      gpGlideSpritePixelBuffer = Fog::Memory::AllocClientMemory(0x10000, ".\\Src\\glSprite.cpp", 0x4d, 0);
       D2CMP::SRC::CelCmp::CELCMP_SetPixelDataFreeCallback(GLIDE_PixelDataFreeCallback_ClearCacheNodes);
       gnGlideTMUIndex = (uint32_t)(1 < gnGlideTextureMemoryUsed);
       gnGlideSpriteSecondaryTMUEnabled = 0;
@@ -1656,12 +1646,8 @@ void __stdcall RENDERER_GLIDE_InitSpriteCache() {
       if (bIsPerspective) {
         return;
       }
-
       gnGlideSpriteSecondaryTMUEnabled = 1;
       return;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4a);
-      exit(-1);
     }
 }
 
@@ -2137,11 +2123,11 @@ void __fastcall DrawSolidRectAlpha(int32_t nXStart, int32_t nYStart, int32_t nXE
 
 void __fastcall DrawLine(int32_t nXStart, int32_t nYStart, int32_t nXEnd, int32_t nYEnd, DWORD dwColor, BYTE nAlpha) {
     D2GlideVertexStrc fV0X[2];
-    if (!((-1 < nXEnd || -1 < nXStart) && (nXEnd <= RENDERER_nWindowWidth || nXStart <= RENDERER_nWindowWidth) && (-1 < nYEnd || -1 < nYStart) && (nYEnd <= RENDERER_nWindowHeight || nYStart <= RENDERER_nWindowHeight))) {
+    if (!((0 <= nXEnd || 0 <= nXStart) && (nXEnd <= RENDERER_nWindowWidth || nXStart <= RENDERER_nWindowWidth) && (0 <= nYEnd || 0 <= nYStart) && (nYEnd <= RENDERER_nWindowHeight || nYStart <= RENDERER_nWindowHeight))) {
       return;
     }
 
-    uint32_t nScaledColor = RENDERER_GLIDE_ScalePaletteValue(dwColor & 0xff);
+    uint32_t nScaledColor = RENDERER_GLIDE_ScalePaletteValue((uint8_t)dwColor);
     RENDERER_GLIDE_SetColorCombine(2);
     if (nAlpha == 0xff) {
       RENDERER_GLIDE_SetAlphaBlendMode(1);

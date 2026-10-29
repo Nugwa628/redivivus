@@ -237,17 +237,17 @@ void __stdcall SOUND_LoadRegistrySettings() {
     }
 
     bReadMasterVol = Storm::Source::SReg::SRegLoadValue("Diablo II", "Master Volume", 0, (int32_t*)&dwRegValue);
-    if (bReadMasterVol && dwRegValue < 0x65) {
+    if (bReadMasterVol && dwRegValue <= 0x64) {
       g_nSoundMasterVolume = dwRegValue;
     }
 
     bReadMasterVol = Storm::Source::SReg::SRegLoadValue("Diablo II", "Music Volume", 0, (int32_t*)&dwRegValue);
-    if (bReadMasterVol && dwRegValue < 0x65) {
+    if (bReadMasterVol && dwRegValue <= 0x64) {
       g_nSoundMusicVolume = dwRegValue;
     }
 
     bReadMasterVol = Storm::Source::SReg::SRegLoadValue("Diablo II", "Positional Bias", 0, (int32_t*)&dwRegValue);
-    if (bReadMasterVol && dwRegValue < 0x65) {
+    if (bReadMasterVol && dwRegValue <= 0x64) {
       g_nSoundPositionalBias = dwRegValue;
     }
 
@@ -257,7 +257,7 @@ void __stdcall SOUND_LoadRegistrySettings() {
     }
 
     bReadMasterVol = Storm::Source::SReg::SRegLoadValue("Diablo II", "Options Music", 0, (int32_t*)&dwRegValue);
-    if (!(bReadMasterVol && dwRegValue < 2)) {
+    if (!(bReadMasterVol && dwRegValue <= 1)) {
       return;
     }
 
@@ -444,7 +444,7 @@ BOOL __stdcall SOUND_IsAnySoundEffectPlaying() {
       }
 
       ppSoundBuffer++;
-    } while ((int)ppSoundBuffer < (uintptr_t)&gpaSoundEffectBuffers + 32);
+    } while ((int)ppSoundBuffer < (int)((uintptr_t)&gpaSoundEffectBuffers + 32));
 
     return 0;
 }
@@ -463,7 +463,7 @@ void __stdcall SOUND_FadeOutAllSoundEffects() {
       }
 
       ppSoundBuffer++;
-    } while ((int)ppSoundBuffer < (uintptr_t)&gpaSoundEffectBuffers + 32);
+    } while ((int)ppSoundBuffer < (int)((uintptr_t)&gpaSoundEffectBuffers + 32));
 }
 
 int __stdcall SOUND_IsSoundEffectsInitialized() {

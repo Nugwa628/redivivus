@@ -1503,22 +1503,19 @@ void __stdcall CELCMP_InvokeFormatSpecificCleanup(int32_t nParam, BYTE * dwParam
       exit(-1);
     }
 
-    {
-      uint32_t* puVar1;
-      iFrame = 0;
-      if (!(*(int*)(nParam + 0x10) * *(int*)(nParam + 0x14))) {
-        return;
-      }
-
-      puVar1 = (uint32_t*)(nParam + 0x18);
-      do {
-        (*gapfnCelRemapFrameByFormat[*(int*)(nParam + 8)])((DC6Block*)*puVar1, dwParam);
-        iFrame++;
-        puVar1++;
-      } while (iFrame < (uint32_t)(*(int*)(nParam + 0x10) * *(int*)(nParam + 0x14)));
-
+    uint32_t* puVar1;
+    iFrame = 0;
+    if (!((uint32_t)(*(int*)(nParam + 0x10) * *(int*)(nParam + 0x14)) > 0)) {
       return;
     }
+
+    puVar1 = (uint32_t*)(nParam + 0x18);
+    do {
+      (*gapfnCelRemapFrameByFormat[*(int*)(nParam + 8)])((DC6Block*)*puVar1, dwParam);
+      iFrame++;
+      puVar1++;
+    } while (iFrame < (uint32_t)(*(int*)(nParam + 0x10) * *(int*)(nParam + 0x14)));
+    return;
 }
 
 void __stdcall CELCMP_DrawCelFrame(D2GfxDataStrc * pGfxData, int32_t nDrawX, int32_t nDrawY, int32_t nClipLeft, int32_t nClipRight, BYTE * pDstBits, int32_t nDstHeight, uint32_t nDstPitch, BYTE * pRenderArg1, BYTE * pRenderArg2, BYTE * pPalette) {

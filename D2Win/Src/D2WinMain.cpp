@@ -254,7 +254,7 @@ D2ControlStrc * __stdcall FORMS_CreateAnyForm(FORMS_PredefinedFormStrc * pForm) 
     void* pSmack;
     ::D2WinProgressBar* pProgressBar;
     void* pAccountList;
-    DC6* pBackgroundDC6 = !pForm->pDC6 ? 0 : *pForm->pDC6;
+    DC6* pBackgroundDC6 = pForm->pDC6 ? *pForm->pDC6 : 0;
     switch (pForm->neD2FormType) {
       case FORM_EditBox:
         pEditBox = D2WinEditBox::D2WinEditBox(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nExtraParam, pForm->nLabelAsLocaleStringId, pBackgroundDC6, (fpD2WinEditBoxSubmit)pForm->pTypeArg1, pForm->fpOnPressCallback, pForm->nFlagsOrType, (uint32_t*)pForm->pTypeArg2);
@@ -368,11 +368,11 @@ void __fastcall D2WINMAIN_SetControlVisible(D2ControlStrc * pControl, BOOL bVisi
       return;
     }
     if (bVisible) {
-      pControl->dwState |= 1;
+      pControl->dwState |= gadwBitMasks[0];
       return;
     }
 
-    pControl->dwState &= -2;
+    pControl->dwState &= gadwInvBitMasks[0];
 }
 
 // Returns bit 0 of control flags (offset +8), checking visibility/enabled state. Halts on null pointer.
@@ -395,11 +395,11 @@ void __fastcall D2WINMAIN_SetControlActive(D2ControlStrc * pControl, BOOL bActiv
       exit(-1);
     }
     if (bActive) {
-      pControl->dwState |= 4;
+      pControl->dwState |= gadwBitMasks[2];
       return;
     }
 
-    pControl->dwState &= -5;
+    pControl->dwState &= gadwInvBitMasks[2];
 }
 
 // Returns pControl->dwState & gadwBitMasks[2], the active bit D2WINMAIN_SetControlActive sets; halts (line 858) on NULL.
@@ -807,16 +807,7 @@ void __stdcall D2WIN_HandleActivation(int32_t nParam) {
     static uint32_t gbWindowDeactivated; D2_STATIC_GUARD_BSS(gbWindowDeactivated, "D2Win::Src::D2WinMain::D2WIN_HandleActivation::gbWindowDeactivated");
 
     gbWindowIsActive = (uint32_t)(*(int*)(nParam + 8) != 0);
-    if (!*(int*)(nParam + 8)) {
-      if (!gbWindowDeactivated) {
-        gnSavedMusicVolume = D2Sound::Src::D2SoundFast::SOUND_GetMusicVolume();
-      }
-
-      gbWindowDeactivated = 1;
-      if (gbWindowed != 1) {
-        D2gfx::D2GFX::D2GFX_OnActivationChange(1);
-      }
-    } else {
+    if (*(int*)(nParam + 8)) {
       uint32_t nErrorState;
       nErrorState = Fog::Src::ErrorManager::GetErrorState();
       if (!nErrorState) {
@@ -826,6 +817,15 @@ void __stdcall D2WIN_HandleActivation(int32_t nParam) {
 
       D2Sound::Src::D2SoundFast::SOUND_SetMusicVolume(gnSavedMusicVolume);
       gbWindowDeactivated = 0;
+    } else {
+      if (!gbWindowDeactivated) {
+        gnSavedMusicVolume = D2Sound::Src::D2SoundFast::SOUND_GetMusicVolume();
+      }
+
+      gbWindowDeactivated = 1;
+      if (gbWindowed != 1) {
+        D2gfx::D2GFX::D2GFX_OnActivationChange(1);
+      }
     }
 
     BOOL bIsCutScene = D2gfx::D2GFX::D2GFX_CheckCutScene();
@@ -1078,11 +1078,11 @@ void __stdcall D2WINMAIN_SetCursorVisible(BOOL bVisible) {
 
 void __stdcall SetUnsetFlag0x08(D2ControlStrc * pControl, int32_t nParam) {
     if (nParam) {
-      pControl->dwState |= 8;
+      pControl->dwState |= gadwBitMasks[3];
       return;
     }
 
-    pControl->dwState &= -9;
+    pControl->dwState &= gadwInvBitMasks[3];
 }
 
 // Sets pFormFourth global to the specified control
@@ -1148,9 +1148,7 @@ BOOL __stdcall FreeInGameGFX() {
     D2WINMAIN_FreeLeadingFormControls();
     D2WinList::D2WINLIST_FreePentSpinCursor();
     D2WinFont::D2WINFONT_FreeFontCache();
-    int32_t nHandlerCount = 0x21;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    Forms::D2WIN_UnregisterWindowHandlerArray((int32_t)hWnd, gaUIWindowHandlers, nHandlerCount);
+    Forms::D2WIN_UnregisterWindowHandlerArray((int32_t)D2gfx::D2GFX::GetHwnd(), gaUIWindowHandlers, 0x21);
     return 1;
 }
 

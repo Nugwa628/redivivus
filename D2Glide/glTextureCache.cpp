@@ -188,17 +188,17 @@ static int GLTEXCACHE_AllocateNode(GlTextureCacheStrc * pCache) {
 // Promotes a texture cache node to most-recently-used position (active list tail). Validates index range and ensures cache has multiple entries before relinking.
 void __fastcall GLTEXCACHE_PromoteNodeToMRU(GlTextureCacheStrc * pCache, int nNodeIndex1Based) {
     GlTextureCacheNodeStrc* pNode;
-    if ((int)pCache->nUsedCount < 2) {
+    if ((int)pCache->nUsedCount <= 1) {
       return;
     }
     if (!nNodeIndex1Based) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xde);
       exit(-1);
-    } else if ((int)pCache->nMaxEntries < nNodeIndex1Based) {
+    } else if (nNodeIndex1Based > (int)pCache->nMaxEntries) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdf);
       exit(-1);
     } else {
-      if (!(0 < nNodeIndex1Based)) {
+      if (!(1 <= nNodeIndex1Based)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe0);
         exit(-1);
       }
@@ -220,10 +220,10 @@ void __fastcall GLTEXCACHE_EvictLRU(GlTextureCacheStrc * pCache) {
       uint8_t* pNextNode;
       pNextNode = *(uint8_t**)(pEvictNode + 0x14);
       pCache->pActiveHead = pNextNode;
-      if (!pNextNode) {
-        pCache->pActiveTail = 0;
-      } else {
+      if (pNextNode) {
         *(uint32_t*)(pNextNode + 0x18) = 0;
+      } else {
+        pCache->pActiveTail = 0;
       }
 
       *(uint32_t*)(pEvictNode + 0x14) = 0;

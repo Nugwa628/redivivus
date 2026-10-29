@@ -37,10 +37,10 @@ static uint32_t SMEM_GetHandleByCaller(int * pnName, uint32_t nNameLen) {
 
     int nNameVersion;
     uint32_t uHash = 0;
-    if (!pnName) {
-      nNameVersion = 0;
-    } else {
+    if (pnName) {
       nNameVersion = *pnName;
+    } else {
+      nNameVersion = 0;
     }
     if (gdwSMemLastHashedHeapKey && pnName == (int*)g_SMemCachedHeapNamePtr && nNameLen == g_SMemCachedHeapNameLength) {
       if (nNameVersion == g_SMemCachedHeapNameVersion) {
@@ -341,14 +341,14 @@ static void __stdcall SMemCoalesceFreeBlocks(int * pnFreeTotal, D2FogHeapBlockHd
       pHeap->pWriteCursor = (void*)((uintptr_t)&pBlock->wBlockSize + nUsedSizeSnap);
       return;
     }
-    if (0xf < nFreeSize) {
+    if (0x10 <= nFreeSize) {
       uint16_t* pFreeBlock;
       pFreeBlock = (uint16_t*)((uintptr_t)&pBlock->wBlockSize + nUsedSizeSnap);
       *pFreeBlock = (short int)nFreeSize;
-      nFreeSize = (nFreeSize & 0xffff) >> 5;
+      nFreeSize = (uint16_t)nFreeSize >> 5;
       *(uint8_t*)(pFreeBlock + 1) = 0;
       *(uint8_t*)((int)pFreeBlock + 3) = 2;
-      if (7 < nFreeSize) {
+      if (8 <= nFreeSize) {
         nFreeSize = 8;
       }
 

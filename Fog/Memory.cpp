@@ -416,10 +416,10 @@ void * __fastcall ReallocTrackedAllocation(D2PoolManagerStrc * pManager, void * 
       pPrev = (void*)pCurrent;
     }
 
-    if (!pPrev) {
-      pManager->pOverflow[(int)pAllocBase % 0x3ff] = *(uint8_t**)pCurrent;
-    } else {
+    if (pPrev) {
       *(uint32_t*)pPrev = *(uint32_t*)pCurrent;
+    } else {
+      pManager->pOverflow[(int)pAllocBase % 0x3ff] = *(uint8_t**)pCurrent;
     }
 
     void* pNewAlloc = realloc(pAllocBase, nNewSize + 4);
@@ -469,15 +469,15 @@ static D2PoolBlockStrc * __stdcall FindBlockContainingAddress(uint32_t nAddress,
 
 static void PromoteBlockToFreeListHead(D2PoolStrc * pPool, D2PoolBlockStrc * pBlock) {
     D2PoolBlockStrc* nPrevBlock = pBlock->pPrev;
-    if (!(nPrevBlock && (int)pPool->nBlocks <= (int)nPrevBlock->nBlocks)) {
+    if (!(nPrevBlock && (int)nPrevBlock->nBlocks >= (int)pPool->nBlocks)) {
       return;
     }
 
     nPrevBlock->pNext = pBlock->pNext;
-    if (!pBlock->pNext) {
-      pPool->pTail = pBlock->pPrev;
-    } else {
+    if (pBlock->pNext) {
       pBlock->pNext->pPrev = pBlock->pPrev;
+    } else {
+      pPool->pTail = pBlock->pPrev;
     }
 
     pBlock->pNext = pPool->pBlocks;
@@ -502,10 +502,10 @@ void __fastcall Free(D2PoolManagerStrc * pMemory, void * * pStruct, char * szFil
     if (pBlock) {
       D2PoolStrc* pPool;
       pUserPtr = (uint8_t*)*pStruct;
-      if (pBlock->pCommit <= pUserPtr) {
+      if (pUserPtr >= pBlock->pCommit) {
         pPool = pBlock->pPool;
         nSlotIndex = ((int)pUserPtr - (int)pBlock->pCommit) / (int)pPool->nBlockSize;
-        if ((int)pPool->nBlocks <= (int)nSlotIndex) {
+        if ((int)nSlotIndex >= (int)pPool->nBlocks) {
           FreeTrackedAllocation((int32_t)pManager, (int32_t)pUserPtr, szFile, Line0);
           return;
         }

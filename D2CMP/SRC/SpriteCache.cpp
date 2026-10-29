@@ -1248,19 +1248,19 @@ static D2SpriteCacheEntryStrc * __stdcall SPRITECACHE_Query(int32_t nParam1, int
       nEntry = pGfxMemory->pFreeHead;
       if (!nEntry) {
         nEntry = 0;
-      } else if (!(nEntry->dwFlags & 2)) {
+      } else if (nEntry->dwFlags & 2) {
+        nEntry = 0;
+      } else {
         nNextNode = nEntry->pNext;
         pGfxMemory->pFreeHead = nNextNode;
-        if (!nNextNode) {
-          pGfxMemory->pFreeTail = 0;
-        } else {
+        if (nNextNode) {
           nNextNode->pPrev = 0;
+        } else {
+          pGfxMemory->pFreeTail = 0;
         }
 
         nEntry->pNext = 0;
         nEntry->pPrev = 0;
-      } else {
-        nEntry = 0;
       }
 
       SPRITECACHE_EvictOldest(nParam2, (int32_t)pGfxMemory, (int32_t)nEntry);

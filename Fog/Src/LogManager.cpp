@@ -675,14 +675,16 @@ FILE * __fastcall FindOrOpenLogFileSlot(uint8_t * szFileName, uint32_t * pnSlotI
 
 void __fastcall FILETOOLS_GetUserMyDocumentsDiabloIIGameLogsFolder(char * szGameLogsPath, int32_t nGameLogsPathLength) {
     char szMyDocuments[260];
+    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     *szGameLogsPath = '\0';
     int nResult = SHGetFolderPathA(0, 5, 0, 0, szMyDocuments);
-    if (-1 < nResult) {
+    if (0 <= nResult) {
       Storm::Source::SSTR::SStrCopy(szGameLogsPath, szMyDocuments, nGameLogsPathLength);
       Source::SFile::SFILE_EnsurePathEndsWithBackslash(szGameLogsPath, nGameLogsPathLength);
       Storm::Source::SSTR::SStrPack(szGameLogsPath, "Diablo II\\GameLogs\\", nGameLogsPathLength);
       Source::SFile::SafeCreateDirectoryTree(szGameLogsPath);
     }
+
 }
 
 // Writes a log record whose body is a hex dump to its log file, one formatted line at a time.
@@ -1025,7 +1027,7 @@ void __stdcall ExitOrCrashCleanup() {
     uint32_t uElapsed = dwTickCountB - dwTickCountA;
     while (uElapsed < 1000) {
       /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gLogMessageQueueCS);
-      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nQueueCount = gLogMessageQueueHead.pNext < 1 ? 0 : gLogMessageQueueHead.pNext;
+      /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ nQueueCount = gLogMessageQueueHead.pNext <= 0 ? 0 : gLogMessageQueueHead.pNext;
       LeaveCriticalSection(&gLogMessageQueueCS);
       if (!nQueueCount) {
         break;
@@ -1046,7 +1048,7 @@ void __stdcall ExitOrCrashCleanup() {
 
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gLogFileCS);
       openFileHandleArray++;
-    } while ((int)openFileHandleArray < (uintptr_t)((char*)&globalOpenFileHandleArray + sizeof(globalOpenFileHandleArray)));
+    } while ((int)openFileHandleArray < (int)((uintptr_t)((char*)&globalOpenFileHandleArray + sizeof(globalOpenFileHandleArray))));
 }
 
 // JMP thunk
@@ -1067,7 +1069,8 @@ void __stdcall DeleteOldLogFiles() {
     char szFilePath[260];
     char szSearchPattern[260];
     char szLogsFolder[260];
-    if (!gLogCleanupLastTickCount || (dwTickCount = GetTickCount() , 86399999 < dwTickCount - gLogCleanupLastTickCount)) {
+    uint32_t local_8 = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
+    if (!gLogCleanupLastTickCount || (dwTickCount = GetTickCount() , 86400000 <= dwTickCount - gLogCleanupLastTickCount)) {
       gLogCleanupLastTickCount = GetTickCount();
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gLogFileCS);
       ExitOrCrashCleanup();
@@ -1087,6 +1090,7 @@ void __stdcall DeleteOldLogFiles() {
         /* HANDLE hFindFile for FindClose */ FindClose(hFindFile);
       }
     }
+
 }
 
 void __fastcall UnlinkListNodeDouble(int * pNode) {

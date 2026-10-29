@@ -1507,17 +1507,17 @@ int __fastcall inflateGetHeader(z_stream * pStream, gz_header * pHead) {
 static uint32_t __stdcall syncsearch(uint32_t * pnMatchState, uint32_t nLen, uint8_t * pBuf) {
     uint32_t nGot = *pnMatchState;
     uint32_t i = 0;
-    if (nLen) {
+    if ((uint32_t)nLen > 0) {
       do {
-        if (3 < nGot) {
+        if (4 <= nGot) {
           break;
         }
         if ((uint32_t)pBuf[i] == (nGot < 2 ? -255 : 0) + 0xff) {
           nGot++;
-        } else if (!pBuf[i]) {
-          nGot = 4 - nGot;
-        } else {
+        } else if (pBuf[i]) {
           nGot = 0;
+        } else {
+          nGot = 4 - nGot;
         }
 
         i++;

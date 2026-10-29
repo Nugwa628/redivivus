@@ -674,19 +674,18 @@ bool FILETOOLS_GetTempPath_UTF8(LPSTR szDest) {
 // so a wcsrchr result inferred as wchar_t * came out as uint16_t * while the parameter stayed
 // LPCWSTR - half of a designed rewrite. LPWSTR is outside that rewrite set, so both sides now agree.
 bool __fastcall FILETOOLS_CreateDirectoryW(LPWSTR lpPathName) {
-    BOOL bCreated = CreateDirectoryW(lpPathName, (LPSECURITY_ATTRIBUTES)0x0);
-    if (bCreated) {
+    if (CreateDirectoryW(lpPathName, (LPSECURITY_ATTRIBUTES)0x0)) {
       return true;
     }
 
     DWORD dwAttribs = GetFileAttributesW(lpPathName);
     if (dwAttribs != -1) {
-      return (bool)((uint8_t)(dwAttribs >> 4) & 1);
+      return dwAttribs >> 4 & 1;
     }
 
     LPWSTR pLastSep = wcsrchr(lpPathName, L'\\');
     LPWSTR pSep = wcsrchr(lpPathName, L'/');
-    if (pLastSep < pSep) {
+    if (pSep > pLastSep) {
       pLastSep = wcsrchr(lpPathName, L'/');
     }
     if (!pLastSep) {
@@ -694,14 +693,12 @@ bool __fastcall FILETOOLS_CreateDirectoryW(LPWSTR lpPathName) {
     }
 
     *pLastSep = L'\0';
-    bool bVar1 = FILETOOLS_CreateDirectoryW(lpPathName);
-    if (!bVar1) {
+    if (!FILETOOLS_CreateDirectoryW(lpPathName)) {
       return false;
     }
 
-    /* LPSECURITY_ATTRIBUTES lpSecurityAttributes for CreateDirectoryW */ /* LPCWSTR lpPathName for CreateDirectoryW */ *pLastSep = L'\\';
-    bCreated = CreateDirectoryW(lpPathName, (LPSECURITY_ATTRIBUTES)0x0);
-    return bCreated != 0;
+    *pLastSep = L'\\';
+    return CreateDirectoryW(lpPathName, (LPSECURITY_ATTRIBUTES)0x0) != 0;
 }
 
 BOOL __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName) {

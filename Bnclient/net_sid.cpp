@@ -2185,11 +2185,9 @@ int32_t __fastcall NET_SID_CLIENT_DecodeCDKeyHash(int * pnParam, uint32_t nParam
       while (nAlignedLen) {
         pSrcCopyPtr = (uint32_t*)pnParam;
         pEncWorkPtr = (uint32_t*)abEncBlock;
-        for (nLoopIdx = 0x10; nLoopIdx; nLoopIdx--) {
-          *pEncWorkPtr = *pSrcCopyPtr;
-          pSrcCopyPtr++;
-          pEncWorkPtr++;
-        }
+        memcpy(pEncWorkPtr, pSrcCopyPtr, 0x10 * sizeof(*pEncWorkPtr));
+        pSrcCopyPtr += 0x10;
+        nLoopIdx = 0;
 
         NET_SID_CLIENT_GetSHAState(0, shaState);
         if (!(nBlockCounter & 7)) {
@@ -2201,11 +2199,8 @@ int32_t __fastcall NET_SID_CLIENT_DecodeCDKeyHash(int * pnParam, uint32_t nParam
         } else {
           pEncBuf = (uint32_t*)abEncBlock;
           pDecBuf = (uint32_t*)abDecBlock;
-          for (nLoopIdx = 0x10; nLoopIdx; nLoopIdx--) {
-            *pDecBuf = *pEncBuf;
-            pEncBuf++;
-            pDecBuf++;
-          }
+          memcpy(pDecBuf, pEncBuf, 0x10 * sizeof(*pDecBuf));
+          nLoopIdx = 0;
         }
 
         nKeyByteIdx = 0x3e;
@@ -2331,11 +2326,8 @@ void __fastcall NET_SID_CLIENT_EncodeBuffer(uint32_t * pdwParam, uint32_t nParam
         } else {
           pSrcBlock = (uint32_t*)abEncBlock;
           pDstBlock = (uint32_t*)abPlainBlock;
-          for (nCopyCount = 0x10; nCopyCount; nCopyCount--) {
-            *pDstBlock = *pSrcBlock;
-            pSrcBlock++;
-            pDstBlock++;
-          }
+          memcpy(pDstBlock, pSrcBlock, 0x10 * sizeof(*pDstBlock));
+          nCopyCount = 0;
         }
 
         puVar1 = pdwParam + 0x10;

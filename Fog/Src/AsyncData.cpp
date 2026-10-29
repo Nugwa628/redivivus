@@ -384,7 +384,10 @@ void __fastcall ASYNCDATA_WaitForCompletion(D2AsyncData_Line0x128 * pAsyncData) 
     if (!pAsyncData) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x232);
       exit(-1);
-    } else if ((pAsyncData->nFlags & 0xfffffff0U) == 0x41737960) {
+    } else if ((pAsyncData->nFlags & 0xfffffff0U) != 0x41737960) {
+      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x233);
+      exit(-1);
+    } else {
       bIsComplete = ASYNCDATA_IsComplete(pAsyncData);
       if (bIsComplete) {
         return;
@@ -399,9 +402,6 @@ void __fastcall ASYNCDATA_WaitForCompletion(D2AsyncData_Line0x128 * pAsyncData) 
 
       ASYNCDATA_CancelAndCleanup(pAsyncData);
       return;
-    } else {
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x233);
-      exit(-1);
     }
 }
 
@@ -409,7 +409,10 @@ void * __fastcall ASYNCDATA_GetResult(D2AsyncData_Line0x128 * pAsyncData) {
     if (!pAsyncData) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x25f);
       exit(-1);
-    } else if ((pAsyncData->nFlags & 0xfffffff0U) == 0x41737960) {
+    } else if ((pAsyncData->nFlags & 0xfffffff0U) != 0x41737960) {
+      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x260);
+      exit(-1);
+    } else {
       if (!(pAsyncData->nFlags & 1U)) {
         ASYNCDATA_WaitForCompletion(pAsyncData);
       }
@@ -419,9 +422,6 @@ void * __fastcall ASYNCDATA_GetResult(D2AsyncData_Line0x128 * pAsyncData) {
       }
 
       return pAsyncData->pReadBuffer;
-    } else {
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x260);
-      exit(-1);
     }
 }
 

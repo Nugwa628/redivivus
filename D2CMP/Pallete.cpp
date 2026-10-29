@@ -122,7 +122,7 @@ void __stdcall PALETTE_SetAct(int32_t nParam) {
     // Static local variables (originally global data)
     static uint32_t nPalleteAct = 0x1; D2_STATIC_GUARD(nPalleteAct, "D2CMP::Pallete::PALETTE_SetAct::nPalleteAct");
 
-    if (nParam - 1U >= 5) {
+    if (nParam - 1U > 4) {
       return;
     }
 
@@ -130,7 +130,7 @@ void __stdcall PALETTE_SetAct(int32_t nParam) {
 }
 
 uint8_t * __stdcall PALETTE_GetItemPalette(int32_t nPaletteSet, int32_t nRow) {
-    if (!(nPaletteSet < 9 && nRow < 0x15 && nPaletteSet && (nPaletteSet < 3 || 4 < nPaletteSet))) {
+    if (!(nPaletteSet < 9 && nRow < 0x15 && nPaletteSet && (nPaletteSet <= 2 || 4 < nPaletteSet))) {
       return nullptr;
     }
 

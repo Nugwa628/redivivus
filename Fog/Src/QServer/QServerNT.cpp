@@ -460,7 +460,9 @@ BOOL __fastcall SendToClientLocal(D2QServerStrc * pQServer, D2QServerClientConne
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(lpCriticalSection);
     uint32_t nHighResTime = LogManager::LOGMGR_GetHighResolutionTime();
     pQServerClient->dwLastSendTick = nHighResTime;
-    if (!pQServerClient->pSendQueueHead) {
+    if (pQServerClient->pSendQueueHead) {
+      NET_QServerClientPacket_CreateStructAndCopyBytesThere(pQServerClient, nSize, pBytes);
+    } else {
       uint32_t nBytesSent;
       if (pQServerClient->socket == -1) {
         nWsaError = pQServerClient->nClientToken;
@@ -486,8 +488,6 @@ BOOL __fastcall SendToClientLocal(D2QServerStrc * pQServer, D2QServerClientConne
         NET_QServerClientPacket_CreateStructAndCopyBytesThere(pQServerClient, nSize - nBytesSent, pBytes + nBytesSent);
         BeginAsyncWriteForClient(pQServer, pQServerClient);
       }
-    } else {
-      NET_QServerClientPacket_CreateStructAndCopyBytesThere(pQServerClient, nSize, pBytes);
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);

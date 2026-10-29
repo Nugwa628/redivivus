@@ -79,8 +79,7 @@ int __stdcall OOG_DisableControlCallback(uint32_t dwParam) {
 
 int __stdcall OOG_WaitMCPThreadDonePump(int nFrameIndex) {
     DWORD DVar1 = 0;
-    HANDLE hHandle = McpConnect::GetMCPThread();
-    DVar1 = WaitForSingleObject(hHandle, DVar1);
+    DVar1 = WaitForSingleObject(McpConnect::GetMCPThread(), DVar1);
     if (!(!DVar1 || gnMCPConnectionRestoreResult)) {
       return 1;
     }
@@ -350,20 +349,7 @@ int __stdcall OOGUTIL_HandleChannelListDoubleClick(D2ControlMsg * pControlMsg) {
 
 void __stdcall AbleToJoinGameOrBanned(int32_t bBanned) {
     uint16_t* pwszMessage;
-    if (!bBanned) {
-      if (!gpChatFormList && gpControlJoinGameError) {
-        ChatDlg::CHATDLG_DestroyAllForms();
-      }
-      if (!(D2IniData_multiplayer->eCTEMP_eD2PlayerStatus & PLAYERSTATUS_Died) || !(D2IniData_multiplayer->eCTEMP_eD2PlayerStatus & PLAYERSTATUS_Hardcore)) {
-        D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyCreateButton->sControl, 1);
-        D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyJoinButton->sControl, 1);
-      }
-
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyLadderButton->sControl, (uint32_t)!gbIsChannelScreen);
-      if (pGameListCache) {
-        D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&pGameListCache->sControl, 1);
-      }
-    } else {
+    if (bBanned) {
       int32_t bHasPeer;
       bHasPeer = D2MCPClient::McpConnect::HasPeerName();
       if (!bHasPeer) {
@@ -378,6 +364,18 @@ void __stdcall AbleToJoinGameOrBanned(int32_t bBanned) {
       if (pGameListCache) {
         D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&pGameListCache->sControl, 0);
         return;
+      }
+    } else {
+      if (!gpChatFormList && gpControlJoinGameError) {
+        ChatDlg::CHATDLG_DestroyAllForms();
+      }
+      if (!(D2IniData_multiplayer->eCTEMP_eD2PlayerStatus & PLAYERSTATUS_Died) || !(D2IniData_multiplayer->eCTEMP_eD2PlayerStatus & PLAYERSTATUS_Hardcore)) {
+        D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyCreateButton->sControl, 1);
+        D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyJoinButton->sControl, 1);
+      }
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyLadderButton->sControl, (uint32_t)!gbIsChannelScreen);
+      if (pGameListCache) {
+        D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&pGameListCache->sControl, 1);
       }
     }
 }
@@ -1175,7 +1173,7 @@ int __stdcall CHAT_SendOutOfGameMessage() {
     D2Win::Src::D2WinEditBox::D2WINEDITBOX_SetTextWide(gpChatDlgInputEditBox, nullptr);
     int32_t nVisibleLines = D2Win::Src::D2WinTextBox::D2WINTEXTBOX_GetVisibleLineCount(gpChatMessagesTextBox);
     int32_t nTotalLines = D2Win::Src::D2WinTextBox::D2WINTEXTBOX_GetLineCount(gpChatMessagesTextBox);
-    if (nVisibleLines >= nTotalLines) {
+    if (nTotalLines <= nVisibleLines) {
       return 1;
     }
 
@@ -2159,23 +2157,21 @@ void __stdcall UIMENU_PlayerProfileLabels() {
 // Provenance: asm 00443e10..00443ea0; the forms are the ones OOGUTIL_CreateViewProfileDialog / OOGUTIL_CreateEditProfileDialog create.
 void __stdcall OOGUTIL_CloseProfileDialog() {
     if (gnProfileDialogMode) {
-      ::D2WinTextBox** ppFormToDestroy;
       if (gnProfileDialogMode == 1) {
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm(&gpProfileViewBackground);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileViewAccountName);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileViewSex);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileViewLocation);
-        ppFormToDestroy = &gpProfileViewDescription;
+        D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileViewDescription);
       } else {
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm(&gpProfileEditBackground);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileEditAccountName);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileEditSex);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileEditLocation);
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileEditDescription);
-        ppFormToDestroy = (::D2WinTextBox**)&gpProfileCloseButton;
+        D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gpProfileCloseButton);
       }
 
-      D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)ppFormToDestroy);
       gnProfileDialogMode = 0;
       D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gUIPlayerProfileCharacterNameLabel);
       D2Win::Src::D2WinMain::FORMS_DestroyAnyForm((D2ControlStrc**)&gUIPlayerProfileCharacterLevelLabel);
@@ -2196,16 +2192,16 @@ void __stdcall OOGUTIL_CloseProfileDialog() {
 // Returns 1. Entry proven by the fpOnPressCallback pointer at 0070e9a0 (RET 0x4).
 BOOL __stdcall OOGUTIL_OnPressProfileLadder(D2ControlMsg * pControlMsg) {
     OOGUTIL_CloseProfileDialog();
-    if (!gnProfileUserExpansionFlag) {
-      if (!gnProfileUserHardcoreFlag) {
-        ChatDlg::CHATDLG_OpenLadderClassicSoftcore();
+    if (gnProfileUserExpansionFlag) {
+      if (gnProfileUserHardcoreFlag) {
+        ChatDlg::CHATDLG_OpenLadderExpansionHardcore();
       } else {
-        ChatDlg::CHATDLG_OpenLadderClassicHardcore();
+        ChatDlg::CHATDLG_OpenLadderExpansionSoftcore();
       }
-    } else if (!gnProfileUserHardcoreFlag) {
-      ChatDlg::CHATDLG_OpenLadderExpansionSoftcore();
+    } else if (gnProfileUserHardcoreFlag) {
+      ChatDlg::CHATDLG_OpenLadderClassicHardcore();
     } else {
-      ChatDlg::CHATDLG_OpenLadderExpansionHardcore();
+      ChatDlg::CHATDLG_OpenLadderClassicSoftcore();
     }
 
     ChatDlg::CHATDLG_RequestLadderRank(gszProfileCharacterName, gnProfileUserHardcoreFlag, gnProfileUserExpansionFlag);
@@ -2816,21 +2812,7 @@ void __stdcall OOGUTIL_UpdateLevelRestrictionControls() {
     int dwTextFlags;
     int32_t nTextAlign;
     BOOL bLevelRestrictionChecked = D2Win::Src::D2WinButton::D2WINBUTTON_IsPressed(gUIGameListLevelRestrictionCheckbox);
-    if (!bLevelRestrictionChecked) {
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveImage, 1);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveArrowButton, 1);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionUpButton, 0);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&gUIGameListLevelRestrictionDownButton->sControl, 0);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gUILevelRestrictionEditBox->sControl, 0);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gUIGameListLevelRestrictionUpButton, 0);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gUIGameListLevelRestrictionDownButton->sControl, 0);
-      dwTextFlags = 0;
-      bVar1 = false;
-      nTextAlign = 5;
-      pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(0x148b);
-      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, pwszLabel, nTextAlign, bVar1, dwTextFlags);
-      nTextAlign = 5;
-    } else {
+    if (bLevelRestrictionChecked) {
       uint8_t byColor;
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveImage, 0);
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveArrowButton, 0);
@@ -2842,15 +2824,23 @@ void __stdcall OOGUTIL_UpdateLevelRestrictionControls() {
       dwTextFlags = 0;
       byColor = 0;
       nTextAlign = 4;
-      pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(0x148b);
-      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, pwszLabel, nTextAlign, (bool)byColor, dwTextFlags);
-      nTextAlign = 4;
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148b), nTextAlign, (bool)byColor, dwTextFlags);
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), 4, false, 0);
+    } else {
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveImage, 1);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveArrowButton, 1);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionUpButton, 0);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&gUIGameListLevelRestrictionDownButton->sControl, 0);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gUILevelRestrictionEditBox->sControl, 0);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gUIGameListLevelRestrictionUpButton, 0);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gUIGameListLevelRestrictionDownButton->sControl, 0);
+      dwTextFlags = 0;
+      bVar1 = false;
+      nTextAlign = 5;
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148b), nTextAlign, bVar1, dwTextFlags);
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), 5, false, 0);
     }
 
-    dwTextFlags = 0;
-    bVar1 = false;
-    pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(0x148c);
-    D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, pwszLabel, nTextAlign, bVar1, dwTextFlags);
     OOGUTIL_RefreshGameList();
 }
 
@@ -2947,15 +2937,13 @@ void __stdcall UIMENU_WaitInLine() {
     D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(gpCtlGameNameLabelOrQueueStatus, " ", 0);
     pwszClearCursor = wszMessageBuffer;
     for (nClearIter = 100; nClearIter; nClearIter--) {
-      pwszClearCursor[0] = L'\0';
-      pwszClearCursor[1] = L'\0';
+      *(uint32_t*)pwszClearCursor = 0;
       pwszClearCursor += 2;
     }
 
     pwszClearCursor = wszPositionString;
     for (nClearIter = 0x32; nClearIter; nClearIter--) {
-      pwszClearCursor[0] = L'\0';
-      pwszClearCursor[1] = L'\0';
+      *(uint32_t*)pwszClearCursor = 0;
       pwszClearCursor += 2;
     }
 
@@ -2996,21 +2984,7 @@ BOOL __stdcall OOGUTIL_OnPressLevelRestrictionCheckbox(D2ControlMsg * pControlMs
     int dwTextFlags;
     int32_t nTextAlign;
     BOOL bLevelRestrictionChecked = D2Win::Src::D2WinButton::D2WINBUTTON_IsPressed(gUIGameListLevelRestrictionCheckbox);
-    if (!bLevelRestrictionChecked) {
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveImage, 1);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveArrowButton, 1);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionUpButton, 0);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&gUIGameListLevelRestrictionDownButton->sControl, 0);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gUILevelRestrictionEditBox->sControl, 0);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gUIGameListLevelRestrictionUpButton, 0);
-      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gUIGameListLevelRestrictionDownButton->sControl, 0);
-      dwTextFlags = 0;
-      bVar1 = false;
-      nTextAlign = 5;
-      pwszLocale = D2Lang::StrTable::strtable::GetLocaleString(0x148b);
-      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, pwszLocale, nTextAlign, bVar1, dwTextFlags);
-      nTextAlign = 5;
-    } else {
+    if (bLevelRestrictionChecked) {
       uint8_t byColor;
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveImage, 0);
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveArrowButton, 0);
@@ -3022,15 +2996,23 @@ BOOL __stdcall OOGUTIL_OnPressLevelRestrictionCheckbox(D2ControlMsg * pControlMs
       dwTextFlags = 0;
       byColor = 0;
       nTextAlign = 4;
-      pwszLocale = D2Lang::StrTable::strtable::GetLocaleString(0x148b);
-      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, pwszLocale, nTextAlign, (bool)byColor, dwTextFlags);
-      nTextAlign = 4;
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148b), nTextAlign, (bool)byColor, dwTextFlags);
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), 4, false, 0);
+    } else {
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveImage, 1);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionInactiveArrowButton, 1);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gUIGameListLevelRestrictionUpButton, 0);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&gUIGameListLevelRestrictionDownButton->sControl, 0);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gUILevelRestrictionEditBox->sControl, 0);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gUIGameListLevelRestrictionUpButton, 0);
+      D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gUIGameListLevelRestrictionDownButton->sControl, 0);
+      dwTextFlags = 0;
+      bVar1 = false;
+      nTextAlign = 5;
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148b), nTextAlign, bVar1, dwTextFlags);
+      D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, D2Lang::StrTable::strtable::GetLocaleString(0x148c), 5, false, 0);
     }
 
-    dwTextFlags = 0;
-    bVar1 = false;
-    pwszLocale = D2Lang::StrTable::strtable::GetLocaleString(0x148c);
-    D2Win::Src::D2WinTextBox::SetText(gUIGameListLevelRestrictionLevelsLabel, pwszLocale, nTextAlign, bVar1, dwTextFlags);
     OOGUTIL_RefreshGameList();
     return 1;
 }
@@ -3459,8 +3441,9 @@ void __stdcall UIMENU_JoinGame() {
 
     gpOogGameListDetailsPanelControl = (::D2WinTextBox*)D2Win::Src::D2WinMain::FORMS_CreateAnyForm(gaPredefinedForms_b + 0x37);
     DWORD dwTickNow = GetTickCount();
-    if (4999 < dwTickNow - gdwLastGameListRefreshTick) {
-      gdwLastGameListRefreshTick += dwTickNow - gdwLastGameListRefreshTick;
+    dwTickNow -= gdwLastGameListRefreshTick;
+    if (dwTickNow >= 5000) {
+      gdwLastGameListRefreshTick += dwTickNow;
       OOGMENU_RequestGameList();
     }
 
@@ -3769,7 +3752,7 @@ int __stdcall OOGUTIL_ValidateUsername3(D2ControlMsg * pControlMsg) {
     }
 
     DWORD dwTickNow = GetTickCount();
-    if (gdwLastChatSendTick + 1000 > dwTickNow) {
+    if (dwTickNow < gdwLastChatSendTick + 1000) {
       return 1;
     }
 
@@ -3828,12 +3811,8 @@ void __stdcall OOGUTIL_AppendChatText(uint16_t * wszText) {
 int __fastcall OOGUTIL_ValidateStringFilter(DWORD dwUnused, char * szText) {
     int nClearCount;
     uint16_t wszNewsText[576];
-    uint16_t* pwszClear = wszNewsText;
-    for (nClearCount = 0x120; nClearCount; nClearCount--) {
-      pwszClear[0] = L'\0';
-      pwszClear[1] = L'\0';
-      pwszClear += 2;
-    }
+    uint16_t* pwszClear;
+    for (int i = 0; i < 0x240; i++) wszNewsText[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszNewsText, szText, 0x240);
     ChatDlg::FORMS_DisplayBattleNetNews(wszNewsText);

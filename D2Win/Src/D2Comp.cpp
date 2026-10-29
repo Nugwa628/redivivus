@@ -77,8 +77,7 @@ static void * D2COMP_AssertNotNull(void * pValue) {
 static void * __stdcall D2COMP_LoadAndValidateCOFFile(char * szCOFFilePath, uint32_t * pnSize) {
     int32_t nLineNum = 0x3eb;
     char* pszSourceFile = ".\\Src\\D2Comp.cpp";
-    D2PoolManagerStrc* pMPQPool = D2WinArchive::ReturnZero();
-    void* nAddress = Fog::Archive::D2FILE_AllocAndLoadD2File(pMPQPool, szCOFFilePath, pnSize, pszSourceFile, nLineNum);
+    void* nAddress = Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szCOFFilePath, pnSize, pszSourceFile, nLineNum);
     if (!nAddress) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3ec);
       exit(-1);
@@ -151,14 +150,14 @@ static void __stdcall D2COMP_ReleaseCOFCacheEntry(int32_t nParam, int * pnParam)
     }
 
     (*pnParam)--;
-    if (*pnParam >= 1) {
+    if (*pnParam > 0) {
       return;
     }
 
     int32_t pNextNode = pnParam[7];
     nErrAddr = (void*)pnParam[6];
     if (nParam) {
-      D2_FREE_AT((void*)pnParam[5], ".\\Src\\D2Comp.cpp", 0x461);
+      Fog::Memory::FreeClientMemory((void*)pnParam[5], ".\\Src\\D2Comp.cpp", 0x461, 0);
       pnParam[5] = 0;
     }
     if (!pNextNode) {
@@ -173,7 +172,7 @@ static void __stdcall D2COMP_ReleaseCOFCacheEntry(int32_t nParam, int * pnParam)
       *(int32_t*)((int)nErrAddr + 0x1c) = pNextNode;
     }
 
-    D2_FREE_AT(pnParam, ".\\Src\\D2Comp.cpp", 0x47a);
+    Fog::Memory::FreeClientMemory(pnParam, ".\\Src\\D2Comp.cpp", 0x47a, 0);
 }
 
 static void __stdcall D2COMP_BuildCOFFilePath(int32_t nAnimMode, uint32_t dwWeaponClassToken, char * pszDestPath, int32_t nPlayerClassId) {
@@ -1373,7 +1372,7 @@ BOOL __fastcall D2COMP_SetAnimationMode(D2CharSelCompStrc * pCompUnit, int32_t n
 // Provenance: 1.14d asm 00504370 (pair scan over gnCompWeaponClassCodeMapCount entries); no callers, the same scan is inlined in D2COMP_AllocTxt_EverythingItems.
 int __stdcall D2COMP_GetWeaponClassCodeIndex(int32_t nWeaponClassCode) {
     uint32_t nIndex = 0;
-    if (!gnCompWeaponClassCodeMapCount) {
+    if (gnCompWeaponClassCodeMapCount <= 0) {
       return 0;
     }
 
@@ -2068,7 +2067,7 @@ void __stdcall D2COMP_SetCurrentFrame(D2CharSelCompStrc * pCompUnit, uint32_t nT
       exit(-1);
     }
 
-    uint32_t nClampedFrame = (int)nTargetFrame < 1 ? 0 : nTargetFrame;
+    uint32_t nClampedFrame = (int)nTargetFrame <= 0 ? 0 : nTargetFrame;
     uint32_t nMaxFrame = pCompUnit->nNumFrames * 0x100;
     if ((int)nClampedFrame < (int)nMaxFrame) {
       nMaxFrame = nClampedFrame;
@@ -2120,19 +2119,19 @@ void __stdcall D2COMP_LoadGuildEmblemIcon(int32_t pCompUnit, uint8_t byEmblemIco
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdb0);
       exit(-1);
     }
-    if ((uint8_t)(byEmblemIcon - 1) >= 0x20) {
+    if ((uint8_t)(byEmblemIcon - 1) > 0x1f) {
       return;
     }
 
     /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szEmblemPath, "%s\\ui\\emblems\\icon%02dc", "DATA\\GLOBAL", byEmblemIcon - 1);
     DC6* pEmblemDC6 = D2WinArchive::IMAGE_LoadDC6(szEmblemPath, 0);
     *(DC6**)(pCompUnit + 0xbc) = (DC6*)pEmblemDC6;
-    if ((uint8_t)(byPrimaryColor - 1) < 10) {
+    if ((uint8_t)(byPrimaryColor - 1) <= 9) {
       *(uint8_t*)(pCompUnit + 0xc0) = gaGlideEmblemPrimaryColorTableEntries[byPrimaryColor - 1];
     } else {
       *(uint8_t*)(pCompUnit + 0xc0) = 0;
     }
-    if ((uint8_t)(bySecondaryColor - 1) < 10) {
+    if ((uint8_t)(bySecondaryColor - 1) <= 9) {
       *(uint8_t*)(pCompUnit + 0xc1) = gaGlideEmblemSecondaryColorTableEntries[bySecondaryColor - 1];
       return;
     }

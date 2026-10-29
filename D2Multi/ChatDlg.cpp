@@ -301,11 +301,8 @@ void __stdcall CHATDLG_UpdateChannelOkButtonState() {
     uint16_t* pwszInput = D2Win::Src::D2WinEditBox::FORMS_TextInput_GetValue(&gpCtlChannelNameEditBox->sControl);
     BOOL bHasText = 0;
     if (pwszInput) {
-      char* pcCur;
       D2Lang::Unicode::UNISYS::UNICODE_WideToMultiByte(szText, (uint16_t*)pwszInput, 0x1f);
-      pcCur = szText;
-      pcCur = pcCur + strlen(pcCur) + 1;
-      if (pcCur != szText + 1) {
+      if (strlen(szText) >= 1) {
         bHasText = 1;
       }
     }
@@ -376,19 +373,16 @@ BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
     if (!gnNotifyEnabled) {
       pcCmdEnd = "Player entering/leaving notifications are disabled.";
       pszMsgDst = szMessage;
-      for (i = 0xd; i; i--) {
-        *(uint32_t*)pszMsgDst = *(uint32_t*)pcCmdEnd;
-        pcCmdEnd += 4;
-        pszMsgDst += 4;
-      }
+      memcpy(pszMsgDst, pcCmdEnd, 0xd * 4);
+      pcCmdEnd += 0xd * 4;
+      pszMsgDst += 0xd * 4;
+      i = 0;
     } else {
       pcCmdEnd = "Player entering/leaving notifications are enabled.";
       pszMsgDst = szMessage;
-      for (i = 0xc; i; i--) {
-        *(uint32_t*)pszMsgDst = *(uint32_t*)pcCmdEnd;
-        pcCmdEnd += 4;
-        pszMsgDst += 4;
-      }
+      memcpy(pszMsgDst, pcCmdEnd, 0xc * 4);
+      pcCmdEnd += 0xc * 4;
+      pszMsgDst += 0xc * 4;
 
       *(uint16_t*)pszMsgDst = *(uint16_t*)pcCmdEnd;
       pszMsgDst[2] = pcCmdEnd[2];
@@ -487,7 +481,7 @@ BOOL __stdcall CHATDLG_DetectCDKeyInString(char * szText) {
 }
 
 static D2ControlStrc * FORMS_CreateAnyFormFromListEx(int32_t nFormIndex) {
-    if (0x1f < FORMS_nListExCount) {
+    if ((int)FORMS_nListExCount >= 0x20) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1475);
       exit(-1);
     }
@@ -500,14 +494,14 @@ static D2ControlStrc * FORMS_CreateAnyFormFromListEx(int32_t nFormIndex) {
 
 void __stdcall FORMS_DestroyListEx() {
     int nIndex = 0;
-    if (0 < FORMS_nListExCount) {
+    if (0 < (int)FORMS_nListExCount) {
       D2ControlStrc** pForm;
       pForm = FORMS_pListEx;
       do {
         D2Win::Src::D2WinMain::FORMS_DestroyAnyForm(pForm);
         nIndex++;
         pForm++;
-      } while (nIndex < FORMS_nListExCount);
+      } while ((int)nIndex < (int)FORMS_nListExCount);
     }
 
     FORMS_nListExCount = 0;
@@ -879,7 +873,7 @@ void __stdcall CHATDLG_ClearChatHistory() {
     do {
       (*pbyHistorySlot)[0] = '\0';
       pbyHistorySlot++;
-    } while ((int)pbyHistorySlot < (uintptr_t)((char*)&gaChatDlgHistoryBuffer + sizeof(gaChatDlgHistoryBuffer)));
+    } while ((int)pbyHistorySlot < (int)((uintptr_t)((char*)&gaChatDlgHistoryBuffer + sizeof(gaChatDlgHistoryBuffer))));
 
     gnChatTabCompletionIndex = -1;
     gnChatHistoryEntryCount = 0;
@@ -936,14 +930,16 @@ uint32_t __fastcall CHATDLG_SendProfileData(char * szAccount, char * szSex, char
 uint32_t __stdcall CHATDLG_ToggleLadderNews(D2ControlMsg * pControlMsg) {
     uint16_t nStringId;
     uint16_t awszMessage[20];
-    if (!gbLadderNewsExpanded) {
+    if (gbLadderNewsExpanded) {
+      D2Win::Src::D2WinButton::D2WINBUTTON_SetImageIndex(gpCtlLobbyLadderNewsToggle, 0);
+      gbLadderNewsExpanded = 0;
+      nStringId = 0x14d7;
+    } else {
       int nRand;
       D2Win::Src::D2WinButton::D2WINBUTTON_SetImageIndex(gpCtlLobbyLadderNewsToggle, 2);
       gbLadderNewsExpanded = 1;
       nRand = rand();
-      if (!(nRand % 1000)) {
-        nStringId = 0x14d8;
-      } else {
+      if ((nRand % 1000)) {
         nRand = rand();
         if (!(nRand % 1000)) {
           nRand = rand();
@@ -960,11 +956,9 @@ uint32_t __stdcall CHATDLG_ToggleLadderNews(D2ControlMsg * pControlMsg) {
         }
 
         nStringId = 0x14d6;
+      } else {
+        nStringId = 0x14d8;
       }
-    } else {
-      D2Win::Src::D2WinButton::D2WINBUTTON_SetImageIndex(gpCtlLobbyLadderNewsToggle, 0);
-      gbLadderNewsExpanded = 0;
-      nStringId = 0x14d7;
     }
 
     uint16_t* szText = D2Lang::StrTable::strtable::GetLocaleString(nStringId);
@@ -1487,7 +1481,7 @@ BOOL __stdcall CHATDLG_OnTimerRequestLadderData(D2ControlMsg * pControlMsg) {
     static uint32_t gnChatRoomListPrevSelectedBase = -0x1; D2_STATIC_GUARD(gnChatRoomListPrevSelectedBase, "D2Multi::ChatDlg::CHATDLG_OnTimerRequestLadderData::gnChatRoomListPrevSelectedBase");
 
     DWORD DVar1 = GetTickCount();
-    if (!(gdwLadderRankRequestTimeout < DVar1 && g_pLadderBoardTextBox)) {
+    if (!(DVar1 > gdwLadderRankRequestTimeout && g_pLadderBoardTextBox)) {
       return 1;
     }
 
@@ -1664,18 +1658,18 @@ void __stdcall UIMENU_LadderBoard_PrintClassesAndTableHeaders() {
 
 void __stdcall CHATDLG_OpenLadderClassicSoftcore() {
     uint16_t* pwszLabel;
-    gbLadderExpansionEnabled = 0;
-    gpCtlLadderBtnOverall = 0;
-    gpCtlLadderBtnAmazon = 0;
-    gpCtlLadderBtnSorceress = 0;
-    gpCtlLadderBtnNecromancer = 0;
-    gpCtlLadderBtnPaladin = 0;
-    gpCtlLadderBtnBarbarian = 0;
-    gpCtlLadderBtnDruid = 0;
-    gpCtlLadderBtnAssassin = 0;
-    g_pLadderBoardTextBox = 0;
-    gnLadderListRowCount = 1000;
     if (D2IniData_multiplayer->szCharacterRealm[0] != '\0') {
+      gbLadderExpansionEnabled = 0;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
       int32_t nHasPeer;
       nHasPeer = D2MCPClient::McpConnect::HasPeerName();
       if (!nHasPeer) {
@@ -1683,6 +1677,18 @@ void __stdcall CHATDLG_OpenLadderClassicSoftcore() {
         UIMENU_DrawSpecificJoinGameError(pwszLabel, nullptr);
         return;
       }
+    } else {
+      gbLadderExpansionEnabled = 0;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
     }
 
     FORMS_CreateAnyFormFromListEx(0x65);
@@ -1699,18 +1705,18 @@ void __stdcall CHATDLG_OpenLadderClassicSoftcore() {
 
 void __stdcall CHATDLG_OpenLadderClassicHardcore() {
     uint16_t* pwszLabel;
-    gbLadderExpansionEnabled = 0;
-    gpCtlLadderBtnOverall = 0;
-    gpCtlLadderBtnAmazon = 0;
-    gpCtlLadderBtnSorceress = 0;
-    gpCtlLadderBtnNecromancer = 0;
-    gpCtlLadderBtnPaladin = 0;
-    gpCtlLadderBtnBarbarian = 0;
-    gpCtlLadderBtnDruid = 0;
-    gpCtlLadderBtnAssassin = 0;
-    g_pLadderBoardTextBox = 0;
-    gnLadderListRowCount = 1000;
     if (D2IniData_multiplayer->szCharacterRealm[0] != '\0') {
+      gbLadderExpansionEnabled = 0;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
       int32_t nHasPeer;
       nHasPeer = D2MCPClient::McpConnect::HasPeerName();
       if (!nHasPeer) {
@@ -1718,6 +1724,18 @@ void __stdcall CHATDLG_OpenLadderClassicHardcore() {
         UIMENU_DrawSpecificJoinGameError(pwszLabel, nullptr);
         return;
       }
+    } else {
+      gbLadderExpansionEnabled = 0;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
     }
 
     FORMS_CreateAnyFormFromListEx(0x65);
@@ -1734,18 +1752,18 @@ void __stdcall CHATDLG_OpenLadderClassicHardcore() {
 
 void __stdcall CHATDLG_OpenLadderExpansionSoftcore() {
     uint16_t* pwszLabel;
-    gbLadderExpansionEnabled = 1;
-    gpCtlLadderBtnOverall = 0;
-    gpCtlLadderBtnAmazon = 0;
-    gpCtlLadderBtnSorceress = 0;
-    gpCtlLadderBtnNecromancer = 0;
-    gpCtlLadderBtnPaladin = 0;
-    gpCtlLadderBtnBarbarian = 0;
-    gpCtlLadderBtnDruid = 0;
-    gpCtlLadderBtnAssassin = 0;
-    g_pLadderBoardTextBox = 0;
-    gnLadderListRowCount = 1000;
     if (D2IniData_multiplayer->szCharacterRealm[0] != '\0') {
+      gbLadderExpansionEnabled = 1;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
       int32_t nHasPeer;
       nHasPeer = D2MCPClient::McpConnect::HasPeerName();
       if (!nHasPeer) {
@@ -1753,6 +1771,18 @@ void __stdcall CHATDLG_OpenLadderExpansionSoftcore() {
         UIMENU_DrawSpecificJoinGameError(pwszLabel, nullptr);
         return;
       }
+    } else {
+      gbLadderExpansionEnabled = 1;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
     }
 
     FORMS_CreateAnyFormFromListEx(0x65);
@@ -1769,18 +1799,18 @@ void __stdcall CHATDLG_OpenLadderExpansionSoftcore() {
 
 void __stdcall CHATDLG_OpenLadderExpansionHardcore() {
     uint16_t* pwszLabel;
-    gbLadderExpansionEnabled = 1;
-    gpCtlLadderBtnOverall = 0;
-    gpCtlLadderBtnAmazon = 0;
-    gpCtlLadderBtnSorceress = 0;
-    gpCtlLadderBtnNecromancer = 0;
-    gpCtlLadderBtnPaladin = 0;
-    gpCtlLadderBtnBarbarian = 0;
-    gpCtlLadderBtnDruid = 0;
-    gpCtlLadderBtnAssassin = 0;
-    g_pLadderBoardTextBox = 0;
-    gnLadderListRowCount = 1000;
     if (D2IniData_multiplayer->szCharacterRealm[0] != '\0') {
+      gbLadderExpansionEnabled = 1;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
       int32_t nHasPeer;
       nHasPeer = D2MCPClient::McpConnect::HasPeerName();
       if (!nHasPeer) {
@@ -1788,6 +1818,18 @@ void __stdcall CHATDLG_OpenLadderExpansionHardcore() {
         UIMENU_DrawSpecificJoinGameError(pwszLabel, nullptr);
         return;
       }
+    } else {
+      gbLadderExpansionEnabled = 1;
+      gpCtlLadderBtnOverall = 0;
+      gpCtlLadderBtnAmazon = 0;
+      gpCtlLadderBtnSorceress = 0;
+      gpCtlLadderBtnNecromancer = 0;
+      gpCtlLadderBtnPaladin = 0;
+      gpCtlLadderBtnBarbarian = 0;
+      gpCtlLadderBtnDruid = 0;
+      gpCtlLadderBtnAssassin = 0;
+      g_pLadderBoardTextBox = 0;
+      gnLadderListRowCount = 1000;
     }
 
     FORMS_CreateAnyFormFromListEx(0x65);

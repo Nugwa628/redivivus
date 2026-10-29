@@ -72,12 +72,12 @@ BOOL __stdcall NET_MCP_CLIENT_ReadAndParsePacket() {
       return 0;
     }
 
-    size_t nSize = Fog::Src::D2QSSocket::ReadBytesFromSocket(D2Client::MCP::MCPD2QSSocket, szPacketBuf, 0x400);
-    if (!(short int)nSize) {
+    uint16_t nSize = Fog::Src::D2QSSocket::ReadBytesFromSocket(D2Client::MCP::MCPD2QSSocket, szPacketBuf, 0x400);
+    if (!nSize) {
       return 1;
     }
 
-    /* At self point nSize is removed from packet structure */ HandleIncomingPacket(szPacketBuf, nSize & 0xffff);
+    /* At self point nSize is removed from packet structure */ HandleIncomingPacket(szPacketBuf, nSize);
     return 1;
 }
 

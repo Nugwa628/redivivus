@@ -133,89 +133,73 @@ void __fastcall RENDERER_D3D_ConvertPalettedTo16Bit(uint8_t * pSrc8Bit, uint16_t
 }
 
 void __fastcall RENDERER_D3D_SetBlendMode(int nBlendMode) {
-    DWORD dwValue;
     if (!(!g_nCurrentTextureOpMode || nBlendMode != g_nCurrentTextureOpMode)) {
       return;
     }
-    if (nBlendMode == 1) {
+    switch (nBlendMode) {
+    case 1:
       g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 1, 4);
       g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 4, 4);
-      dwValue = 1;
-    } else {
-      if (nBlendMode != 2) {
-        g_nCurrentTextureOpMode = nBlendMode;
-        return;
-      }
-
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0xf, 1);
+      break;
+    case 2:
       g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 1, 3);
       g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 4, 3);
-      dwValue = 0;
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0xf, 0);
+      break;
     }
 
-    g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0xf, dwValue);
     g_nCurrentTextureOpMode = nBlendMode;
 }
 
 // Sets Direct3D alpha blending mode. Mode 1=opaque, 2=additive, 3=modulate, 4=alpha blend. Caches current mode to avoid redundant state changes.
 void __fastcall SetBlendMode(int nBlendMode) {
-    uint32_t uVar1;
-    if (!g_nCurrentAlphaBlendMode || (uVar1 = g_nCurrentAlphaBlendMode , nBlendMode != g_nCurrentAlphaBlendMode)) {
-      DWORD uDestBlendFactor;
-      uVar1 = nBlendMode;
-      switch (nBlendMode) {
-        case 1:
-          g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 0);
-        g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 2);
-        uDestBlendFactor = 1;
-        break;
-        case 2:
-          g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
-        g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 2);
-        uDestBlendFactor = 2;
-        break;
-        case 3:
-          g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
-        g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 1);
-        uDestBlendFactor = 3;
-        break;
-        case 4:
-          g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
-        g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 5);
-        uDestBlendFactor = 6;
-        break;
-        default:
-          {
-            g_nCurrentAlphaBlendMode = uVar1;
-            return;
-          }
-      }
-
-      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, uDestBlendFactor);
-      uVar1 = nBlendMode;
+    if (!(!g_nCurrentAlphaBlendMode || nBlendMode != g_nCurrentAlphaBlendMode)) {
+      return;
     }
 
-    g_nCurrentAlphaBlendMode = uVar1;
+    switch (nBlendMode) {
+    case 1:
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 0);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 2);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, 1);
+      break;
+    case 2:
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 2);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, 2);
+      break;
+    case 3:
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 1);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, 3);
+      break;
+    case 4:
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x1b, 1);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x13, 5);
+      g_pD3DDevice->lpVtbl->SetRenderState(g_pD3DDevice, 0x14, 6);
+      break;
+    }
+
+    g_nCurrentAlphaBlendMode = nBlendMode;
 }
 
 void __fastcall RENDERER_D3D_SetTextureFilterMode(int nFilterMode) {
-    DWORD dwValue;
     if (!(!g_nCurrentFilterMode || nFilterMode != g_nCurrentFilterMode)) {
       return;
     }
-    if (nFilterMode == 1) {
-      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x10, 1);
-      dwValue = 1;
-    } else {
-      if (nFilterMode != 2) {
-        g_nCurrentFilterMode = nFilterMode;
-        return;
-      }
 
+    switch (nFilterMode) {
+    case 1:
+      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x10, 1);
+      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x11, 1);
+      break;
+    case 2:
       g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x10, 2);
-      dwValue = 2;
+      g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x11, 2);
+      break;
     }
 
-    g_pD3DDevice->lpVtbl->SetTextureStageState(g_pD3DDevice, 0, 0x11, dwValue);
     g_nCurrentFilterMode = nFilterMode;
 }
 
@@ -675,12 +659,12 @@ void __stdcall RENDERER_D3D_AllocateTextureCaches() {
 }
 
 void __stdcall RENDERER_D3D_FreeTextureCaches() {
-    if (!g_bPerspectiveMode) {
-      RENDERER_D3D_ReleaseSmackerSurfaces();
-    } else {
+    if (g_bPerspectiveMode) {
       RENDERER_D3D_ReleaseFontTextures();
       d3dFloorCache::D3DFLOOR_Free(&gD3DFloorTextureCache, 1);
       d3dSubtileCache::D3DSUBTILE_Free(&gD3DSubtileTextureCache, 1);
+    } else {
+      RENDERER_D3D_ReleaseSmackerSurfaces();
     }
 
     d3dTextureCache::D3DTEXCACHE_Free(gD3DGenericTextureCache.aCaches, 1);
@@ -787,7 +771,7 @@ BOOL __stdcall BeginCutScene() {
     if (gnRenderState) {
       return 0;
     }
-    if (!(gnD3DTextureCapFlags & 0x80) && !(gnD3DTextureCapFlags & 0x100)) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[7]) && !(gnD3DTextureCapFlags & gadwBitMasks[8])) {
       return 1;
     }
 
@@ -899,11 +883,7 @@ int32_t __fastcall RENDERER_D3D_CreateSystemMemoryTexture(IDirectDrawSurface7 * 
     ddSurfaceDesc.dwCaps = 0x840;
     uint32_t* pSrcTemplate = gsD3DTextureDescTemplate;
     DWORD* pDstPixelFormat = ddSurfaceDesc.ddpfPixelFormat;
-    for (nCopyCount = 8; nCopyCount; nCopyCount--) {
-      *pDstPixelFormat = *pSrcTemplate;
-      pSrcTemplate++;
-      pDstPixelFormat++;
-    }
+    memcpy(pDstPixelFormat, pSrcTemplate, 8 * sizeof(*pDstPixelFormat));
 
     ddSurfaceDesc.dwHeight = nHeight;
     ddSurfaceDesc.dwWidth = nWidth;
@@ -2486,11 +2466,7 @@ BOOL __fastcall RENDERER_D3D_CreateSurfaceWithTexture(IDirectDrawSurface7 * * pd
     ddsdSize.ddsCapsRest[0] = 0x80;
     uint32_t* pDstPixelFmt = gsD3DTextureDescTemplate;
     DWORD* pSrcTemplate = ddsdSize.ddpfPixelFormat;
-    for (iLoop = 8; iLoop; iLoop--) {
-      *pSrcTemplate = *pDstPixelFmt;
-      pDstPixelFmt++;
-      pSrcTemplate++;
-    }
+    memcpy(pSrcTemplate, pDstPixelFmt, 8 * sizeof(*pSrcTemplate));
 
     ddsdSize.dwHeight = nHeight;
     ddsdSize.dwWidth = nWidth;
@@ -3964,7 +3940,7 @@ void __fastcall DrawRectEx(RECT * pRect, DWORD nPaletteIndex) {
 }
 
 void __fastcall DrawSolidRect(RECT * pRect, BYTE nPaletteIndex) {
-    if (pRect->right < pRect->left) {
+    if (pRect->left > pRect->right) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x10c);
       exit(-1);
     } else {
@@ -4972,7 +4948,7 @@ void __stdcall RENDERER_D3D_ResetSmackerSurfaces() {
     if (!gpD3DSmackerSystemSurface0[0]) {
       return;
     }
-    if (gnD3DTextureCapFlags & 0x400) {
+    if (gnD3DTextureCapFlags & gadwBitMasks[10]) {
       RENDERER_D3D_CopySurfacePixels(gpD3DSmackerVideoSurface0[0], gpD3DSmackerSystemSurface0[0], 0x40);
       RENDERER_D3D_CopySurfacePixels(gpD3DSmackerVideoSurface0[1], gpD3DSmackerSystemSurface0[1], 0x40);
       return;

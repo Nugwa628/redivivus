@@ -67,7 +67,7 @@ void __stdcall SEVT_CopyIdHashTable(uint32_t * * pDstTable, int * pSrcTable) {
 static void SEVT_DeleteIdHashTable(void * * pTable) {
     void* pObject;
     uint32_t nBucket = 0;
-    if (pTable[1]) {
+    if ((uint32_t)pTable[1] > 0) {
       void* pBuckets;
       pBuckets = *pTable;
       do {

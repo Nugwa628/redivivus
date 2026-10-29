@@ -416,16 +416,19 @@ int32_t __stdcall GetLinkNodeIndex(D2TxtLinkStrc * pLink, char * szItemCode, uin
     int nCmpResult;
     int32_t iVar1;
     uint8_t szUpperItemCode[32];
+    uint32_t dwSecurityCookie = DEFAULT_SECURITY_COOKIE ^ (uintptr_t)0;
     Storm::Source::SSTR::SStrCopy((char*)szUpperItemCode, szItemCode, 0x20);
     SMem::SMemStringToUppercase((char*)szUpperItemCode, 0x20);
     D2TxtLinkNodeStrc* pCurNode = pLink->pTxtLinkNode;
-    if (!pLink->nRecords) {
+    if (pLink->nRecords) {
+      if (!pCurNode) {
+        ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x475);
+        exit(-1);
+      }
+    } else {
       if (!pCurNode) {
         return -1;
       }
-    } else if (!pCurNode) {
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x475);
-      exit(-1);
     }
 
     do {

@@ -65,7 +65,7 @@ BOOL __fastcall D2WINSCROLLBAR_SetMaxValue(::D2WinScrollbar * pScrollbar, uint32
       exit(-1);
     }
 
-    pScrollbar->nMaxValue = (int)nMaxValue < 1 ? 0 : nMaxValue;
+    pScrollbar->nMaxValue = (int)nMaxValue <= 0 ? 0 : nMaxValue;
     return 1;
 }
 
@@ -75,7 +75,7 @@ BOOL __fastcall D2WINSCROLLBAR_SetPosition(::D2WinScrollbar * pScrollbar, int32_
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x65);
       exit(-1);
     }
-    if (pScrollbar->nMaxValue < nPosition) {
+    if (nPosition > pScrollbar->nMaxValue) {
       nPosition = pScrollbar->nMaxValue;
     }
 

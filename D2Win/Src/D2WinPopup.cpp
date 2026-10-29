@@ -61,7 +61,7 @@ BOOL __stdcall D2WINPOPUP_IsActiveAndVisible() {
     }
 
     uint32_t dwState = gpD2WinPopupControl->sControl.dwState;
-    if (!(dwState & 4 && dwState & 1)) {
+    if (!(dwState & gadwBitMasks[2] && dwState & gadwBitMasks[0])) {
       return 0;
     }
 

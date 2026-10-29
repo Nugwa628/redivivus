@@ -282,7 +282,10 @@ void __fastcall D2WINEDITBOX_LinkTabOrder(::D2WinEditBox * pEditBox, ::D2WinEdit
     if (!pEditBox) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x48a);
       exit(-1);
-    } else if (pEditBox->sControl.neD2FormType == FORM_EditBox) {
+    } else if (pEditBox->sControl.neD2FormType != FORM_EditBox) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x48c);
+      exit(-1);
+    } else {
       if (!pNextEditBox) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x48e);
         exit(-1);
@@ -296,9 +299,6 @@ void __fastcall D2WINEDITBOX_LinkTabOrder(::D2WinEditBox * pEditBox, ::D2WinEdit
         pNextEditBox->pPrevTabEditBox = pEditBox;
         return;
       }
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x48c);
-      exit(-1);
     }
 }
 
@@ -1589,21 +1589,20 @@ int __fastcall D2WINEDITBOX_SetTextWide(::D2WinEditBox * pnParam, uint16_t * wsz
       }
 
       nLine = D2Lang::Unicode::UNISYS::STRING_GetWideStringLength(wszText);
-      if (!nLine) {
-        pnParam->wszText[0] = L'\0';
-      } else {
+      if (nLine) {
         D2Lang::Unicode::UNISYS::STRING_CopyWideString(pnParam->wszText, wszText);
+      } else {
+        pnParam->wszText[0] = L'\0';
       }
-
       pnParam->nCursorIndex = nLine;
       D2WINEDITBOX_UpdateCursorPosition(pnParam);
       if (!pnParam->fpChangeCallback) {
         return 1;
       }
-
       pnParam->fpChangeCallback(nullptr);
       return 1;
     }
+    return 1;
 }
 
 BOOL __fastcall Draw(::D2WinEditBox * pEditBox) {
@@ -2010,12 +2009,8 @@ BOOL __stdcall PushFlag0x8(D2ControlMsg * pControlMsg) {
 void __fastcall D2WINEDITBOX_SetTextFromAnsi(::D2WinEditBox * pEditBox, char * szText) {
     int nZeroCount;
     uint16_t wszText[256];
-    uint16_t* pwszBufPtr = wszText;
-    for (nZeroCount = 0x80; nZeroCount; nZeroCount--) {
-      pwszBufPtr[0] = L'\0';
-      pwszBufPtr[1] = L'\0';
-      pwszBufPtr += 2;
-    }
+    uint16_t* pwszBufPtr;
+    for (int i = 0; i < 0x100; i++) wszText[i] = 0;
 
     D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszText, szText, 0x100);
     D2WINEDITBOX_SetTextWide(pEditBox, wszText);

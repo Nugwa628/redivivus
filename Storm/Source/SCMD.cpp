@@ -887,7 +887,7 @@ uint32_t __stdcall SCmdCheckId(int nCmdId) {
       }
 
       nListIndex++;
-    } while (nListIndex < 2);
+    } while (nListIndex <= 1);
 
     return 0;
 }
@@ -916,7 +916,7 @@ uint32_t __stdcall SCmdDestroy() {
       }
 
       nListIndex++;
-    } while (nListIndex < 2);
+    } while (nListIndex <= 1);
 
     SCMD_FreeAllNodes(&gStormCmdListHeadBackslash);
     SCMD_FreeAllNodes(&gStormCmdListHeadSlash);
@@ -946,7 +946,7 @@ int __stdcall SCmdGetNum(int nCmdId) {
       }
 
       nListIndex++;
-    } while (nListIndex < 2);
+    } while (nListIndex <= 1);
 
     return 0;
 }
