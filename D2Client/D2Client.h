@@ -174,7 +174,7 @@ void __fastcall thunk_ExitGamePlayCutScene(int32_t nParam);
 // Handles GS→client packet 0x89: forwards byte pBytes[1] (subcommand/type) to Storm::Source::ClientEngine::HandleIncoming0x89 for game-state update processing.
 void __fastcall NET_D2GS_CLIENT_Incoming0x89_QUESTEVENTTRIGGER(char * pBytes);
 int32_t __fastcall SEED_RollRange(struct D2SeedStrc * pSeed, int32_t nMin, int32_t nMax);
-void __stdcall OBJECT_SetLightRGB(uint8_t byRed, uint8_t byGreen, uint8_t byBlue, uint16_t nRadius, struct D2UnitStrc * pUnit);
+void __stdcall OBJECT_SetLightRGB(uint8_t byRed, uint8_t byGreen, uint8_t byBlue, uint16_t nRadius, D2UnitStrc * pUnit);
 BOOL __fastcall OBJECT_CheckAutoLight(struct D2UnitStrc * pUnit, int32_t bSkipCofLoad);
 int __stdcall TEXT_EmptyCallback();
 void __stdcall TEXT_InitializeTextSystem();

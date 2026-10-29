@@ -147,7 +147,7 @@ void __fastcall OBJMODE_UpdateDayNightState(::SGAMEDATA * pGame, D2UnitStrc * pU
         }
 
         D2Common::Units::UNITS_GetRoom(pUnit);
-        pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+        pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
         sNewSeed = D2_SEED_NEXT(*pSeed);
         *pSeed = sNewSeed;
         GAME::Event::SetEvent(pGame, pUnit, 8, sNewSeed.nSeedLow % 0xfa + 0x19 + pGame->dwGameFrame, 0, 0);
@@ -341,8 +341,7 @@ void __fastcall OBJMODE_UpdateTrapObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       pUnit->eAnimMode.ePlayerMode = Walk;
     }
 
-    D2Common::Units::UNITS_GetRoom(pUnit);
-    D2SeedStrc* pControlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    D2SeedStrc* pControlSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
     OBJMODE_TriggerProximityEffect(pGame, pUnit);
     D2SeedStrc seedNext = D2_SEED_NEXT(*pControlSeed);
     uint32_t uRandLow = seedNext.nSeedLow;
@@ -949,7 +948,7 @@ static void OBJMODE_SpawnMonsterFromObject(eD2MonsterAnimMode eMonsterAnimMode, 
 void __fastcall OBJMODE_SpawnRandomMonsters(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2ObjectOperateFnArg sOperation;
     D2Common::Units::UNITS_GetRoom(pUnit);
-    sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
     D2SeedStrc seedNext = D2_SEED_NEXT(*sOperation.pSeed);
     *sOperation.pSeed = seedNext;
     int nSpawnCount = (seedNext.nSeedLow & 1) + 1;
@@ -2388,7 +2387,7 @@ BOOL __fastcall InteractWithObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint
         sOperation.sArg.pVictim = pUnit_00;
         sOperation.pAttacker = pUnit;
         D2Common::Units::UNITS_GetRoom(pUnit_00);
-        sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+        sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit_00));
         sOperation.nObjectClassId = nUnitId;
         bResult = (*OBJECTSOPERATEFN[*(uint8_t*)(nTxt + 0x1b3)])(&sOperation);
         return bResult;
@@ -3661,7 +3660,7 @@ void __fastcall KillUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
           pUnit->pUnitData.pUnitDataMonster->Components[0] = byHitCount;
           if (byHitCount < 2) {
             D2Common::Units::UNITS_GetRoom(pUnit);
-            ObjectsRgn::GetObjectControlSeed(pGame);
+            ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
             OBJMODE_TriggerProximityEffect(pGame, pUnit);
             GAME::Event::SetEvent(pGame, pUnit, 9, pGame->dwGameFrame + 0x19, 0, 0);
             return;
@@ -3671,7 +3670,7 @@ void __fastcall KillUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
           sOperation.sArg.pGame = pGame;
           sOperation.sArg.pVictim = pUnit;
           D2Common::Units::UNITS_GetRoom(pUnit);
-          sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+          sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
           sOperation.nObjectClassId = pUnit->nClassId;
           ppDropResult = RollChestDrops(&sOperation, ITEMTYPE_None1);
           if (ppDropResult) {
@@ -4219,8 +4218,7 @@ void __fastcall OBJMODE_RollChestLoot(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2ObjectOperateFnArg sOperation;
     sOperation.sArg.pGame = pGame;
     sOperation.sArg.pVictim = pUnit;
-    D2Common::Units::UNITS_GetRoom(pUnit);
-    sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    sOperation.pSeed = ObjectsRgn::GetObjectControlSeed(pGame, D2Common::Units::UNITS_GetRoom(pUnit));
     uint32_t dwFindGUID = GetUnitGUIDFromUnitTimerArg(pUnit);
     sOperation.pAttacker = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_PLAYER, dwFindGUID);
     RollChestDrops(&sOperation, ITEMTYPE_None1);

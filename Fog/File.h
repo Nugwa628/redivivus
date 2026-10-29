@@ -118,7 +118,7 @@ FILE * __stdcall FILETOOLS_OpenFile_WriteMode_UTF8(LPCSTR lpMultiByteStr);
 // so a wcsrchr result inferred as wchar_t * came out as uint16_t * while the parameter stayed
 // LPCWSTR - half of a designed rewrite. LPWSTR is outside that rewrite set, so both sides now agree.
 bool __fastcall FILETOOLS_CreateDirectoryW(LPWSTR lpPathName);
-BOOL __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName);
+bool __stdcall FILETOOLS_CreateFolder_UTF8(LPCSTR szPathName);
 // 2 internal functions (defined in .cpp)
 
 } // namespace Fog::File

@@ -24,7 +24,7 @@ void __stdcall FreeAllUiParty();
 void __stdcall UI_InitializePartyButtonStruct(uint32_t nX, uint32_t nY, uint32_t nDC6OrCallback, uint32_t nFrame, uint32_t nButtonType, uint32_t nData1, uint32_t nData2, uint32_t * pdwParam);
 void __stdcall UI_DrawPartyLeaveButton();
 void __stdcall UI_DrawPlayerNameInParty();
-int32_t __stdcall ResetPartyUi();
+void __stdcall ResetPartyUi();
 void __stdcall UI_DrawPartyButtons(struct D2UiPartyStrc * pUiParty);
 void __stdcall UI_DrawPartyAcceptButton();
 void __stdcall SetEachPlayerRosterGlobalPartyId();

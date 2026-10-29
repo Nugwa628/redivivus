@@ -765,8 +765,8 @@ BOOL __fastcall Q22_PlayerCheckKhalimsWillItems(::SGAMEDATA * pGame, D2UnitStrc 
     }
 
     D2QuestDataA3Q5Strc* pA4Q2QuestData = pFlailItem->pQuestSpecificData.pA3Q5;
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestData->pQuestRecord[pGame->nDifficulty], QUEST_KhalimsWill, QUESTSTATE_Completed);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_KhalimsWill, QUESTSTATE_Completed);
     if (!bQuestCompleted) {
       pPlayerData = ITEMS::Items::Drop::HasQuestItem(pGame, pUnit, 0x20316671);
       if (!pPlayerData) {

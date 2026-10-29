@@ -1357,7 +1357,7 @@ BOOL __fastcall ITEMEVENT_SorAuraManaAbsorb(::SGAMEDATA * pGame, uint32_t nUnitE
     do {
       if (!pAbsorbEntry[1] || bNotMonsterOnly) {
         bIsMerc = *pAbsorbEntry;
-        nValue = *(int32_t*)(pDamage->nReserved66 + (bIsMerc - 0x66));
+        nValue = *(int32_t*)(((uint8_t*)&pDamage->nReserved66) + (bIsMerc - 0x66));
         if (0 < nValue) {
           nAbsorbAmt = D2Client::Stats::D2ApplyPercent(nValue, nAbsorbPct, 100);
           nManaCap = D2Client::Stats::D2ApplyPercent(nCurMana, 0x10, nSkillLvl);
@@ -1366,7 +1366,7 @@ BOOL __fastcall ITEMEVENT_SorAuraManaAbsorb(::SGAMEDATA * pGame, uint32_t nUnitE
           }
 
           eSkill += nAbsorbAmt;
-          *(int32_t*)(pDamage->nReserved66 + (bIsMerc - 0x66)) = nValue - nAbsorbAmt;
+          *(int32_t*)(((uint8_t*)&pDamage->nReserved66) + (bIsMerc - 0x66)) = nValue - nAbsorbAmt;
           nValue = D2Client::Stats::D2ApplyPercent(nAbsorbAmt, nSkillLvl, 0x10);
           nCurMana = (int)(nCurMana - nValue) <= 0 ? 0 : nCurMana - nValue;
         }

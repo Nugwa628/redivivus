@@ -90,7 +90,7 @@ void GFXUTIL_PadTokenString(char * szText1, char * szText2) {
     szText2[3] = ' ';
 }
 
-static uint8_t __fastcall GFXUTIL_GetCompositePaletteIndex(D2UnitStrc * pUnit, uint8_t byComponent) {
+uint8_t __fastcall GFXUTIL_GetCompositePaletteIndex(D2UnitStrc * pUnit, uint8_t byComponent) {
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && byComponent < 0x10 && pUnit->pUnitData.pUnitDataMonster)) {
       return 0;
     }
@@ -183,11 +183,12 @@ static void __stdcall GFXUTIL_SetMissileCelFile(D2GfxDataStrc * pGfxData, D2Unit
     }
 
     int nMissileTxtIdx = pMissile->nClassId;
-    if (!(-1 < nMissileTxtIdx && nMissileTxtIdx < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nMissileTxtIdx)) {
+    D2MissilesTxt* pTxtRecord = 0 <= nMissileTxtIdx && nMissileTxtIdx < sgptDataTable->nTxtMissilesSize ? &sgptDataTable->pTxtMissiles[nMissileTxtIdx] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    pGfxData->szFilename = sgptDataTable->pTxtMissiles[nMissileTxtIdx].CelFile;
+    pGfxData->szFilename = pTxtRecord->CelFile;
 }
 
 // @sourcefile .\ENGINE\GfxUtil.cpp

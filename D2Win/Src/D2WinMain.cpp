@@ -1152,7 +1152,7 @@ BOOL __stdcall FreeInGameGFX() {
     return 1;
 }
 
-void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
+int __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
     DWORD TickCountA;
     uint32_t dwSleepMs;
     tagMSG windowMsg;
@@ -1169,7 +1169,6 @@ void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
         if (!gbMessageLoopActive && gpfnExitCallback) {
           (*gpfnExitCallback)();
         }
-
         /* MSG * lpMsg for TranslateMessage */ TranslateMessage(&windowMsg);
         /* MSG * lpMsg for DispatchMessageA */ DispatchMessageA(&windowMsg);
       } else {
@@ -1210,10 +1209,11 @@ void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
 
     RENDERER_DrawOutOfGameScene();
     if (ghwndMsgHook) {
-      return;
+      return 0;
     }
 
     gbMessageLoopActive = 1;
+    return 0;
 }
 
 void __stdcall MOUSE_CaptureMousePosition(HWND * phWnd) {

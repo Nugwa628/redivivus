@@ -901,7 +901,7 @@ void __fastcall ClickParty_i(D2RosterStrc * pRoster) {
     UI::Party::ResetPartyUi();
 }
 
-D2RosterStrc * __stdcall ROSTER_LeaveParty() {
+static D2RosterStrc * __stdcall ROSTER_LeaveParty() {
     int nGUID;
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
     if (!pPlayer) {

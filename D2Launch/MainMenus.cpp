@@ -1655,7 +1655,7 @@ void __stdcall MAINMENU_SyncCreditsColumns() {
 }
 
 // @sourcefile .\Src\MainMenus.cpp
-int __stdcall MAINMENU_DisplayCredits() {
+int __fastcall MAINMENU_DisplayCredits(int nUnused) {
     int i;
     ::D2WinTextBox* pTargetBox;
     uint32_t nRemaining;
@@ -1668,8 +1668,7 @@ int __stdcall MAINMENU_DisplayCredits() {
     uint16_t* bCopied1 = awLineBuf;
     uint16_t* pwTextBuf = pwCursor;
     for (i = 0x200; i; i--) {
-      bCopied1[0] = L'\0';
-      bCopied1[1] = L'\0';
+      *(uint32_t*)bCopied1 = 0;
       bCopied1 += 2;
     }
 
@@ -1690,7 +1689,7 @@ int __stdcall MAINMENU_DisplayCredits() {
     do {
       if (!nRemaining) {
         MAINMENU_AppendCreditsEnd();
-        D2_FREE_AT(pwTextBuf, ".\\Src\\MainMenus.cpp", 0x146f);
+        Fog::Memory::FreeClientMemory(pwTextBuf, ".\\Src\\MainMenus.cpp", 0x146f, 0);
         return 1;
       }
       if (*pwCursor == L'*') {
@@ -1714,15 +1713,13 @@ int __stdcall MAINMENU_DisplayCredits() {
 
           bCopied1 = awCol1;
           for (i = 0x80; i; i--) {
-            bCopied1[0] = L'\0';
-            bCopied1[1] = L'\0';
+            *(uint32_t*)bCopied1 = 0;
             bCopied1 += 2;
           }
 
           bCopied1 = awCol2;
           for (i = 0x80; i; i--) {
-            bCopied1[0] = L'\0';
-            bCopied1[1] = L'\0';
+            *(uint32_t*)bCopied1 = 0;
             bCopied1 += 2;
           }
 
@@ -1763,6 +1760,7 @@ int __stdcall MAINMENU_DisplayCredits() {
 
       MAINMENU_SyncCreditsColumns();
     } while (true);
+    return 1;
 }
 
 BOOL __stdcall MAINMENU_InitCreditsScreen(D2ControlMsg * pControlMsg) {
@@ -1789,7 +1787,7 @@ BOOL __stdcall MAINMENU_InitCreditsScreen(D2ControlMsg * pControlMsg) {
     gpMainMenuCreditTimerControl = FORMS_CreateAnyFormFromListExEx(0x2e);
     D2Win::Src::D2WinTimer::D2WINTIMER_Start((int*)gpMainMenuCreditTimerControl);
     D2Win::Src::D2WinEditBox::D2WINEDITBOX_Destroy((int*)gpMainMenuCreditTimerControl);
-    MAINMENU_DisplayCredits();
+    MAINMENU_DisplayCredits(0);
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ScrollToLine(gpMainMenuCreditsLineTextBox, 0x14);
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ScrollToLine(gpMainMenuCreditsPairLeftTextBox, 0x14);
     D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ScrollToLine(gpMainMenuCreditsPairRightTextBox, 0x14);

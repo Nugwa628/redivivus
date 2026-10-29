@@ -86,7 +86,6 @@ void __fastcall ROSTER_ToggleListenAndSend(struct D2RosterStrc * pRoster);
 void __fastcall ROSTER_ToggleMuteAndSend(struct D2RosterStrc * pRoster);
 // Handles a UI party-button click for a roster entry. Transitions bInParty state: 0→4 sends invite (NET 0x5E action 6), 4→0 cancels invite (action 7), 2/3 send accept/decline actions (8/9). State 1 (pending) is an internal error that halts. Always calls ROSTER_RebuildPlayerParty and ResetPartyUi after any state change.
 void __fastcall ClickParty_i(struct D2RosterStrc * pRoster);
-struct D2RosterStrc * __stdcall ROSTER_LeaveParty();
 void __stdcall LeaveParty();
 void __fastcall ROSTER_ToggleHostileAndSend(struct D2RosterStrc * pRoster);
 uint32_t __fastcall CheckRostersArePartied(int32_t nRoster1GUID, int32_t nRoster2GUID);

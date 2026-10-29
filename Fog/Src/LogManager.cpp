@@ -461,14 +461,14 @@ void __fastcall InitCriticalSection(void * pElement) {
 
 void __fastcall InitLogFilePathPointers(uint8_t * * pPathPtrArray, uint32_t nCount) {
     uint32_t nIndex = 0;
-    if (!nCount) {
+    if ((uint32_t)nCount <= 0) {
       return;
     }
 
     char (*pPathSlot)[260] = gLogFilePathArray;
     uint32_t nByteOffset = 0;
     do {
-      if (0x144f < nByteOffset) {
+      if (0x1450 <= nByteOffset) {
         return;
       }
 

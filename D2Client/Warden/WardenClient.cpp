@@ -845,7 +845,7 @@ bool __thiscall GetRC4Data(::WardenClient * pThis, void * pDest, uint32_t * pnSi
     return true;
 }
 
-::WardenClient * __thiscall Constructor(::WardenClient * pThis) {
+::WardenClient * __fastcall Constructor(::WardenClient * pThis) {
     pThis->_vfptr = (WardenClientVtable*)(void*)Warden::vftable;
     return pThis;
 }

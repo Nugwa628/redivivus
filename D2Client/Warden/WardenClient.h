@@ -127,7 +127,7 @@ void __thiscall FreeMemory(::WardenClient * pThis, void * pMem);
 void __thiscall SetRC4Data(::WardenClient * pThis, void * pData, uint32_t nSize);
 // @sourcefile .\WARDEN\WardenClient.cpp
 bool __thiscall GetRC4Data(::WardenClient * pThis, void * pDest, uint32_t * pnSize);
-::WardenClient * __thiscall Constructor(::WardenClient * pThis);
+::WardenClient * __fastcall Constructor(::WardenClient * pThis);
 // @sourcefile .\WARDEN\WardenClient.cpp
 void __stdcall WARDEN_UnloadActiveModule();
 // @sourcefile .\WARDEN\WardenClient.cpp

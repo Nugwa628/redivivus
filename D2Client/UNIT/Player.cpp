@@ -2288,7 +2288,7 @@ void __fastcall PLAYER_HandlePlayerDeath(D2GSPacketSrv0x74 * pDeathMsg) {
         ITEM_RemoveItemStatsFromOwner(pItem, pUnit, 0, 0);
         eBodyLoc = D2Common::ITEMS::Items::GetBodyLocation(pItem);
         D2Common::INVENTORY::Inventory::NullSub_2Arg(pInventory, (uint32_t)eBodyLoc);
-        Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+        Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
         if (!pItem) {
           eUnitType = UNIT_COUNT;
           nUnitGUID = -1;
@@ -2297,7 +2297,7 @@ void __fastcall PLAYER_HandlePlayerDeath(D2GSPacketSrv0x74 * pDeathMsg) {
           nUnitGUID = pItem->nUnitGUID;
         }
 
-        CUnit::RemoveObjectFromServerObjectTable(eUnitType, nUnitGUID);
+        CUnit::RemoveObjectFromServerObjectTable(nUnitGUID, eUnitType);
       }
     }
 }
@@ -2624,7 +2624,7 @@ void __fastcall PLAYER_ProcessPlayerModeSimulation(D2UnitStrc * pUnit) {
     }
 
     if (pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Sequence && ((bool)(pUnit->eUnitFlags >> 0xe & 1))) {
-      Engine::Gfx::GFX_LoadUnitModeCof(pUnit);
+      Engine::Gfx::GFX_LoadUnitModeCof(pUnit, 0);
     }
     if (gaPlayerModeAttribs[pUnit->eAnimMode.ePlayerMode].nCompleteMode != 1) {
       if (1 < gaPlayerModeAttribs[pUnit->eAnimMode.ePlayerMode].nCompleteMode - 2U) {

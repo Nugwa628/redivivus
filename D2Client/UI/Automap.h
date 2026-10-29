@@ -112,7 +112,7 @@ void __fastcall AUTOMAP_CenterOnPlayer(int32_t bForceCenter);
 int32_t __stdcall AUTOMAP_GetFade();
 int32_t __fastcall AUTOMAP_SetFade(int32_t nAutomapFade);
 int32_t __stdcall AUTOMAP_GetCenters();
-void __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters);
+int32_t __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters);
 int32_t __stdcall AUTOMAP_GetLeft();
 int32_t __fastcall AUTOMAP_SetLeft(int32_t nAutoMapLeft);
 BOOL __stdcall AUTOMAP_GetParty();

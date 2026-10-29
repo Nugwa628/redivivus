@@ -7268,9 +7268,9 @@ void __fastcall GFXProcessGameGfxLists(int32_t bShowLoadingUi);
 // @sourcefile .\ENGINE\Gfx.cpp
 void __fastcall GFX_AddOverlayToUnit(struct D2UnitStrc * pUnit, eOverlayId eOverlay, int32_t nOverlayType, int32_t nColorScale, uint32_t nValue0, int32_t nValue1, int32_t nValue2, int32_t nRandomMod);
 // @sourcefile .\ENGINE\Gfx.cpp
-void __fastcall GFX_LoadUnitModeCof(struct D2UnitStrc * pUnit);
+void __fastcall GFX_LoadUnitModeCof(struct D2UnitStrc * pUnit, int32_t nUnused);
 // @sourcefile .\ENGINE\Gfx.cpp
-void __fastcall GFX_GetUnitSpriteOffset(struct D2UnitStrc * pUnit, uint8_t byComponent, int32_t * pOffsetX, int32_t * pOffsetY);
+void __fastcall GFX_GetUnitSpriteOffset(struct D2UnitStrc * pUnit, int32_t byComponent, int32_t * pOffsetX, int32_t * pOffsetY);
 // @sourcefile .\ENGINE\Gfx.cpp
 BOOL __fastcall GFX_IsUnitInsideBounds(struct D2UnitStrc * pUnit, int32_t nOriginX, int32_t nOriginY, int32_t nTestX, int32_t nTestY);
 // @sourcefile .\ENGINE\Gfx.cpp

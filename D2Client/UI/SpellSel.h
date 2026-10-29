@@ -55,7 +55,6 @@ int __fastcall SPELLSEL_FindChargedSkill2(struct D2UnitStrc * pUnit, int32_t nTa
 int __fastcall SPELLSEL_FindChargedSkill3(struct D2UnitStrc * pUnit, int32_t nTargetSkillId);
 int __fastcall SPELLSEL_FindChargedSkill4(struct D2UnitStrc * pUnit, int32_t nTargetSkillId);
 void __stdcall INPUT_SpellSelectClick(struct D2UIMouseMsgStrc * pMsg);
-void __stdcall SPELLSEL_ClearSkillBinding(short * pSkillId, int32_t nChargesLeft);
 void __stdcall SPELLSEL_ClearChargedSkillBindings();
 void __fastcall SPELLSEL_HandleSkillSelection(int32_t nSlotIndex);
 void __fastcall SPELLSEL_ActivateSkillSlot(int32_t nSlot);

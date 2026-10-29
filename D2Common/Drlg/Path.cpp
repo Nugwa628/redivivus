@@ -2904,7 +2904,7 @@ int32_t DRLGPATH_CheckSurroundingCollisions(D2PathTypeArg * pPathTypeArg) {
 
 // Computes the squared Euclidean distance between two packed (X|Y) coordinates. Returns dx*dx + dy*dy. No callers found - likely referenced via function pointer table or dead code.
 int32_t __stdcall DRLGPATH_GetSquaredDistancePacked(uint32_t nPackedA, uint32_t nPackedB) {
-    int nDeltaX = (nPackedA & 0xffff) - (nPackedB & 0xffff);
+    int nDeltaX = (uint16_t)nPackedA - ((uint16_t)nPackedB);
     int nDeltaY = (nPackedA >> 0x10) - (nPackedB >> 0x10);
     return nDeltaY * nDeltaY + nDeltaX * nDeltaX;
 }
@@ -3021,7 +3021,7 @@ int32_t __stdcall DRLGPATH_BuildBresenhamPointList(uint32_t nSrcPacked, uint32_t
 
 // Computes a direction lookup value from two packed coordinates using a table at 0x6F1E28. The index is computed as (dy*3 - srcX + dstX), suggesting a 3-state direction encoding. No callers found - likely used via function pointer.
 uint32_t __stdcall DRLGPATH_GetDirectionLookupFromPacked(uint32_t nSrcPacked, uint32_t nDstPacked) {
-    return gaPathDirectionLookupTable[((nDstPacked >> 0x10) - (nSrcPacked >> 0x10)) * 3 - (nSrcPacked & 0xffff) + (nDstPacked & 0xffff)];
+    return gaPathDirectionLookupTable[((nDstPacked >> 0x10) - (nSrcPacked >> 0x10)) * 3 - ((uint16_t)nSrcPacked) + (uint16_t)nDstPacked];
 }
 
 // Attempts to step in a preferred direction, falling back to alternate directions on collision. Uses direction lookup tables at 0x6F1D98 to compute the target position. Tries up to 4 directions before marking the step as failed. Used by the dual-scan pathfinder (PathTypeFunc_15).

@@ -217,9 +217,10 @@ int32_t __stdcall AUTOMAP_GetCenters() {
     return nAutoMapCenters;
 }
 
-void __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters) {
+int32_t __fastcall AUTOMAP_SetCenters(int32_t nAutoMapCenters) {
     Storm::Source::SReg::SRegSaveValue("Diablo II", "AutoMap Centers", 0, nAutoMapCenters);
     Automap::nAutoMapCenters = nAutoMapCenters;
+    return nAutoMapCenters;
 }
 
 int32_t __stdcall AUTOMAP_GetLeft() {

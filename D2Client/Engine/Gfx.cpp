@@ -1352,7 +1352,7 @@ void __fastcall GFX_AddOverlayToUnit(D2UnitStrc * pUnit, eOverlayId eOverlay, in
 }
 
 // @sourcefile .\ENGINE\Gfx.cpp
-void __fastcall GFX_LoadUnitModeCof(D2UnitStrc * pUnit) {
+void __fastcall GFX_LoadUnitModeCof(D2UnitStrc * pUnit, int32_t nUnused) {
     // Frame slots -20..-12 are ONE object: &nCompositResult is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -1396,7 +1396,7 @@ void __fastcall GFX_LoadUnitModeCof(D2UnitStrc * pUnit) {
 }
 
 // @sourcefile .\ENGINE\Gfx.cpp
-void __fastcall GFX_GetUnitSpriteOffset(D2UnitStrc * pUnit, uint8_t byComponent, int32_t * pOffsetX, int32_t * pOffsetY) {
+void __fastcall GFX_GetUnitSpriteOffset(D2UnitStrc * pUnit, int32_t byComponent, int32_t * pOffsetX, int32_t * pOffsetY) {
     // Frame slots -32..-16 are ONE object: &nFrameResult is passed out and the callee reaches the rest by byte offset.
     // Separate locals let the compiler reorder them, so the run is one struct.
     struct __frame0_t {
@@ -1416,7 +1416,7 @@ void __fastcall GFX_GetUnitSpriteOffset(D2UnitStrc * pUnit, uint8_t byComponent,
     int nClassId = pUnit->nClassId;
     int32_t pSeqMode = D2Common::Units::GetAnimOrSeqMode(pUnit);
     D2Common::Skills::SKILLS_GetStateTransformGfx(pUnit, &eUnitType, &nClassId, &pSeqMode, ".\\ENGINE\\Gfx.cpp", 0xd4d);
-    if (!(((bool)(pUnit->eUnitFlagsEx >> 3 & 1))) || (nFrameShifted = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !nFrameShifted) || (pOwnerUnit = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pOwnerUnit)) {
+    if (!(pUnit->eUnitFlagsEx >> 3 & 1) || (nFrameShifted = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !nFrameShifted) || (pOwnerUnit = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pOwnerUnit)) {
       pInventoryUsed = pUnit->pInventory;
     } else {
       pInventoryUsed = pOwnerUnit->pInventory;

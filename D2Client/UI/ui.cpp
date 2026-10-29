@@ -1629,7 +1629,7 @@ void __stdcall UI_CloseCurrentDialog() {
       gnGoldDialogTransactionMode = gpDialogDefaultActionCallback->pVtable->GetValue(gpDialogDefaultActionCallback);
     }
     if (Dialog::gpDialog) {
-      Dialog::FreeDialogStrc();
+      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpDialog);
       Dialog::gpDialog = 0;
     }
     if (gpCurrentDialog) {
@@ -4561,7 +4561,7 @@ BOOL __fastcall UI_IsMouseOnStatButton(int32_t nPanelMode, int32_t nMouseX, int3
     } else if (0x20 < nMouseX - 0x29U) {
       return 0;
     }
-    if (!(ScreenSizeY - 0x8b < nMouseY && nMouseY < ScreenSizeY - 0x66)) {
+    if (!(nMouseY > ScreenSizeY - 0x8b && nMouseY < ScreenSizeY - 0x66)) {
       return 0;
     }
 
@@ -4783,7 +4783,7 @@ bool __stdcall UI_CanAllocateStatPoint(int32_t nParam) {
     }
 
     bUIFlag = GetUIFlag(UI_NPCSHOP);
-    return bUIFlag != 0;
+    return (bool)bUIFlag;
 }
 
 void __stdcall UI_DrawLevelUpButtonLeft() {
@@ -6501,11 +6501,11 @@ void __stdcall UI_InitTradeState() {
 void __fastcall UI_CloseTradeWindow(int32_t nParam) {
     gbTradeWindowOpen = 0;
     if (Dialog::gpTradeCancelDialog) {
-      Dialog::FreeDialogStrc();
+      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeCancelDialog);
       Dialog::gpTradeCancelDialog = 0;
     }
     if (Dialog::gpTradeAgreeDialog) {
-      Dialog::FreeDialogStrc();
+      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpTradeAgreeDialog);
       Dialog::gpTradeAgreeDialog = 0;
     }
     if (g_nTradeWindowState == 7) {
@@ -6558,7 +6558,7 @@ void __stdcall UI_CloseHoradricCubeWindow() {
 
     _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagMapInit, nHandlerCount);
     if (Dialog::gpHoradricCubeDialog) {
-      Dialog::FreeDialogStrc();
+      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpHoradricCubeDialog);
       Dialog::gpHoradricCubeDialog = 0;
     }
 
@@ -6821,7 +6821,7 @@ void __fastcall UI_HandleHoradricCubePacket(int32_t pPacket) {
       case 4:
         gnPlayerCashDisplay = 2;
       if (Dialog::gpHoradricCubeDialog) {
-        Dialog::FreeDialogStrc();
+        Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpHoradricCubeDialog);
         Dialog::gpHoradricCubeDialog = 0;
       }
 

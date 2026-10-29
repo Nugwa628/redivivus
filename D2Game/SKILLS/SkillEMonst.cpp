@@ -145,12 +145,8 @@ BOOL __fastcall Skills_SrvDoFunc_125_CatapultFireBomb(::SGAMEDATA * pGame, D2Uni
 }
 
 BOOL __fastcall SKILLEMONST_SrvStFn59_ImpInferno(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillTable = sgptDataTable->pTxtSkills;
-    if (!(pSkillTable + eSkill)) {
+    D2SkillsTxt* pSkillTable = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillTable) {
       return 0;
     }
 
@@ -159,7 +155,7 @@ BOOL __fastcall SKILLEMONST_SrvStFn59_ImpInferno(::SGAMEDATA * pGame, D2UnitStrc
       return 0;
     }
 
-    int nCalcDuration = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTable[eSkill].calc[0], eSkill, nSkillLvl);
+    int nCalcDuration = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTable->calc[0], eSkill, nSkillLvl);
     if (nCalcDuration < 1) {
       nCalcDuration = 1;
     }

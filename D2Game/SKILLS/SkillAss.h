@@ -35,7 +35,7 @@ struct D2SkillAreaDamageArgStrc {
     /* 0x0A */ uint16_t _pad0A;
     /* 0x0C */ uint32_t dwHitFlags;
     /* 0x10 */ uint8_t nSrcDam;
-    /* 0x11 */ uint8_t _pad11[3];
+    /* 0x11 */ uint8_t _pad11, _pad11_1, _pad11_2;
 };
 
 struct __attribute__((packed)) D2SkillCurseArgStrc {

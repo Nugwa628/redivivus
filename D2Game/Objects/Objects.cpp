@@ -170,7 +170,7 @@ D2UnitStrc * __fastcall MakeRandomChest(::SGAMEDATA * pGame, D2RoomStrc * pRoom,
     eAct neAct;
     neAct = D2Common::Drlg::GetActNoFromLevelNumber(eLevelId);
     D2SeedStrc* pCtrlSeed;
-    pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     if (neAct != ACT_II) {
       if (neAct != ACT_III) {
@@ -264,7 +264,7 @@ D2UnitStrc * __fastcall MakeRandomSparklyChest(::SGAMEDATA * pGame, D2RoomStrc *
     }
     if ((eLevelId >= LEVEL_MaggotLairLevel1 && eLevelId <= LEVEL_MaggotLairLevel1 + 2)) {
       D2SeedStrc* pObjSeed;
-      pObjSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+      pObjSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
       seedTmp = D2_SEED_NEXT(*pObjSeed);
       *pObjSeed = seedTmp;
       if (0x32 < (int)(seedTmp.nSeedLow % 100)) {
@@ -483,7 +483,7 @@ void __fastcall OBJECT_InitializeObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
         exit(-1);
       }
 
-      pSeed = ObjectsRgn::GetObjectControlSeed(pGameCopy);
+      pSeed = ObjectsRgn::GetObjectControlSeed(pGameCopy, pRoom);
       if ((uint8_t)pObjectsTxt->InitFn < 0x50 && OBJECTSINITFN[(uint8_t)pObjectsTxt->InitFn]) {
         /* FARPROC lpfn for IsBadCodePtr */ bBadCodePtr = IsBadCodePtr((FARPROC)OBJECTSINITFN[(uint8_t)pObjectsTxt->InitFn]);
         if (bBadCodePtr) {
@@ -538,7 +538,7 @@ static int32_t __stdcall OBJECT_SelectRandomShrineType(::SGAMEDATA * pGame, uint
     do {
       D2SeedStrc* pObjSeed;
       nRandIdx = pShrinesRng->nShrinesCount[byShrineCategory];
-      pObjSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+      pObjSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
       if ((int)nRandIdx < 1) {
         nRandIdx = 0;
       } else if (!(nRandIdx & nRandIdx - 1)) {
@@ -779,7 +779,7 @@ void __fastcall Objects_InitFn57(D2ObjectInitFnArg * pInitArg) {
 }
 
 void __fastcall Objects_InitFn58(D2ObjectInitFnArg * pInitArg) {
-    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pInitArg->pGame);
+    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pInitArg->pGame, pInitArg->pRoom);
     D2SeedStrc seedTmp = D2_SEED_NEXT(*pCtrlSeed);
     *pCtrlSeed = seedTmp;
     GAME::Event::SetEvent(pInitArg->pGame, pInitArg->pObject, 8, pInitArg->pGame->dwGameFrame + (int)(((uint64_t)d2_bits_of(seedTmp) & 0xffffffff) / 0xfa) * -0xfa + 0x19 + seedTmp.nSeedLow, 0, 0);
@@ -895,7 +895,7 @@ void __fastcall Objects_InitFn26(D2ObjectInitFnArg * pInitArg) {
 }
 
 void __fastcall Objects_InitFn34(D2ObjectInitFnArg * pInitArg) {
-    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pInitArg->pGame);
+    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pInitArg->pGame, pInitArg->pRoom);
     D2SeedStrc seedTmp = D2_SEED_NEXT(*pCtrlSeed);
     *pCtrlSeed = seedTmp;
     if (!(seedTmp.nSeedLow & 1)) {
@@ -987,7 +987,7 @@ D2UnitStrc * __stdcall OBJECT_PlaceAtRandomPosition(::SGAMEDATA * pGame, int32_t
       return nullptr;
     }
 
-    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     int nSpawnRetries = 0;
     while (true) {
       nRange = sRoomCoords.dwXSize - nXMargin;
@@ -1140,7 +1140,7 @@ void __fastcall Objects_InitFn46(D2ObjectInitFnArg * pInitArg) {
 
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pInitArg->pRoom, &sRoomCoords);
     D2SeedStrc* pObjCtrlSeed;
-    pObjCtrlSeed = ObjectsRgn::GetObjectControlSeed(pInitArg->pGame);
+    pObjCtrlSeed = ObjectsRgn::GetObjectControlSeed(pInitArg->pGame, pInitArg->pRoom);
     int nRemainingToSpawn;
     nRemainingToSpawn = (sRoomCoords.dwYSize * sRoomCoords.dwXSize >> 7) * 0x1e >> 8;
     for (nMaxRetries = 0xc; 0 < nRemainingToSpawn && 0 < nMaxRetries; nMaxRetries--) {
@@ -1398,7 +1398,7 @@ void __fastcall Objects_PopulateFn1(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
     iVar2 = pDVar3->SizeY;
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &sRoomCoords);
     D2SeedStrc* pCtrlSeed;
-    pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     D2SeedStrc sNextSeed;
     sNextSeed = D2_SEED_NEXT(*pCtrlSeed);
     *pCtrlSeed = sNextSeed;
@@ -1622,7 +1622,7 @@ void __fastcall Objects_PopulateFn1(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
 D2UnitStrc * __stdcall OBJECT_SpawnBonusChest(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     POINT ptUnitPos;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     D2SeedStrc DVar1 = D2_SEED_NEXT(*pCtrlSeed);
     D2UnitStrc* pSpawnedUnit = (D2UnitStrc*)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) * 0x51eb851f);
     *pCtrlSeed = DVar1;
@@ -1671,7 +1671,7 @@ void __fastcall Objects_PopulateFn7(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
     __frame0.pGameSave = pGame;
     __frame0.pRoomSave = pRoom;
     D2SeedStrc* pSeed;
-    pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    pSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     D2SeedStrc sNewSeed;
     sNewSeed = D2_SEED_NEXT(*pSeed);
     *pSeed = sNewSeed;
@@ -1778,7 +1778,7 @@ D2UnitStrc * __fastcall Objects_PopulateFn3(::SGAMEDATA * pGame, D2RoomStrc * pR
     int32_t nObjSizeX = pObjectsTxt->SizeX;
     int32_t nObjSizeY = pObjectsTxt->SizeY;
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &sRoomCoords);
-    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     D2SeedStrc sNewSeed = D2_SEED_NEXT(*pCtrlSeed);
     *pCtrlSeed = sNewSeed;
     if ((uint32_t)nChancePercent < sNewSeed.nSeedLow % 100) {
@@ -1943,7 +1943,7 @@ void __fastcall Objects_PopulateFn4(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
     int nTotalSpawned;
     nTotalSpawned = 0;
     D2SeedStrc* pCtrlSeed;
-    pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     D2SeedStrc sSeedRoll;
     sSeedRoll = D2_SEED_NEXT(*pCtrlSeed);
     *pCtrlSeed = sSeedRoll;
@@ -2097,7 +2097,7 @@ void __fastcall Objects_PopulateFn5(::SGAMEDATA * pGame, D2RoomStrc * pRoom, uin
     }
 
     D2SeedStrc* pSeed;
-    pSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    pSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     D2SeedStrc sNewSeed;
     sNewSeed = D2_SEED_NEXT(*pSeed);
     *pSeed = sNewSeed;
@@ -2277,7 +2277,7 @@ int32_t __fastcall OBJECT_PopulateGridObjects(::SGAMEDATA * pGame, D2RoomStrc * 
     int iVar4 = pGridBounds->dwYStart;
     int nSpawnedCount = 0;
     D2ObjectsTxt* pDVar5 = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(7);
-    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     uint32_t nPosX = pGridBounds->dwXStart;
     do {
       D2CoordStrc sGridPos;
@@ -2367,7 +2367,7 @@ static int32_t __stdcall OBJECT_RollAndDispatchPopulateFn(::SGAMEDATA * pGame, D
       return 0;
     }
 
-    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     D2SeedStrc newSeed = D2_SEED_NEXT(*pCtrlSeed);
     *pCtrlSeed = newSeed;
     nEnabledPopTypes[7] = newSeed.nSeedLow % 100;
@@ -2602,7 +2602,7 @@ void __fastcall OBJECT_PopulateFromObjGroup(::SGAMEDATA * pGame, D2RoomStrc * pR
     }
 
     D2ObjGroupTxt* pObjGroupTxt = D2Common::DATATBLS::ObjectTbls::DATATBLS_GetObjGroupTxtRecord(nObjGroupId);
-    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame);
+    D2SeedStrc* pCtrlSeed = ObjectsRgn::GetObjectControlSeed(pGame, pRoom);
     if (!pObjGroupTxt) {
       return;
     }

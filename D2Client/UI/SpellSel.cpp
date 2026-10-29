@@ -713,7 +713,7 @@ void __stdcall INPUT_SpellSelectClick(D2UIMouseMsgStrc * pMsg) {
     Storm::SMsgBreakHandlerChain(pMsg);
 }
 
-void __stdcall SPELLSEL_ClearSkillBinding(short * pSkillId, int32_t nChargesLeft) {
+static void __stdcall SPELLSEL_ClearSkillBinding(short * pSkillId, int32_t nChargesLeft) {
     int nByteOffset;
     int nSlotMsgKey;
     int* pSlotSkillId = gSpellSelGridRegion.aLeftHandSlots;

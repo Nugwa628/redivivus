@@ -868,26 +868,19 @@ D2DialogStrc * __fastcall AllocDialogStrc(int32_t nX, int32_t nY, fpDialogFunc f
     return pDialog;
 }
 
-void __stdcall FreeDialogStrc() {
+void __fastcall FreeDialogStrc(D2DialogStrc * pDialog) {
     int32_t nHandlerCount;
     D2DialogStrc* pCurrentDialog;
     D2DialogSubStrc* pNextSub;
     D2DialogStrc* pPrevDialogNode;
     D2DialogSubStrc* pSubNode;
     gnDialogCounter_b--;
-    if (gnDialogCounter_b) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x436);
-      exit(-1);
-    }
-
-    {
+    if (!gnDialogCounter_b) {
       HWND hWnd;
       ui::UI_RegisterAutoMapEventHandlers(1);
       nHandlerCount = 0xe;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUIDialogFlagInit, nHandlerCount);
       nHandlerCount = 1;
-
       _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitDialogMouseWheel, nHandlerCount);
       Inv::INV_SetInventoryActive(1);
       GAME::Select::SELECT_SetExclusionRect(nullptr);
@@ -896,7 +889,7 @@ void __stdcall FreeDialogStrc() {
       pSubNode = gpDialogActual->pDialogSub;
       while (pSubNode) {
         pNextSub = pSubNode->pNext;
-        D2_FREE_AT(pSubNode, ".\\UI\\dialog.cpp", 0x425);
+        Fog::Memory::FreeClientMemory(pSubNode, ".\\UI\\dialog.cpp", 0x425, 0);
         pSubNode = pNextSub;
       }
 
@@ -905,10 +898,13 @@ void __stdcall FreeDialogStrc() {
       }
 
       pPrevDialogNode = pCurrentDialog->pPrev;
-      D2_FREE_AT(pCurrentDialog, ".\\UI\\dialog.cpp", 0x430);
+      Fog::Memory::FreeClientMemory(pCurrentDialog, ".\\UI\\dialog.cpp", 0x430, 0);
       gpDialogActual = pPrevDialogNode;
       return;
     }
+
+    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x436);
+    exit(-1);
 }
 
 void __fastcall DIALOG_DrawBackground(D2DialogStrc * pDialog) {
