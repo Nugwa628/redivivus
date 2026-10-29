@@ -906,31 +906,30 @@ void __fastcall SpawnPortal(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2LevelId 
     D2Common::Units::Missile::SetTargetX(pUnit, 1);
     D2UnitStrc* pOwnerUnit = UNIT::SUnit::GetOwnerUnit(pGame, pUnit);
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     BOOL bSetsPortalFlag = 1;
     int32_t nPortalObjClassId = 0x3c;
     D2UnitStrc** ppOutPortalUnit = 0;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    SKILLS::SkillsServer::SERVER_SpawnPortal(pGame, pOwnerUnit, pRoom, nX, nY, eLevel, ppOutPortalUnit, nPortalObjClassId, bSetsPortalFlag);
+    D2RoomStrc* pRoom;
+    SKILLS::SkillsServer::SERVER_SpawnPortal(pGame, pOwnerUnit, D2Common::Units::UNITS_GetRoom(pUnit), nX, nY, eLevel, ppOutPortalUnit, nPortalObjClassId, bSetsPortalFlag);
     bSetsPortalFlag = 1;
-    pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(pRoom, bSetsPortalFlag);
+    D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(D2Common::Units::UNITS_GetRoom(pUnit), bSetsPortalFlag);
 }
 
 static void MISSILES_UpdatePathToOwner(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -1202,12 +1201,11 @@ BOOL __fastcall Missiles_SrvHitFunc_AreaSplashDamage(::SGAMEDATA * pGame, D2Unit
 }
 
 BOOL __fastcall Missiles_SrvHitFunc_WallHitDelegateToAreaDamage(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
-    if (pTarget) {
-      return 0;
+    if (!pTarget) {
+      return Missiles_SrvHitFunc_AreaSplashDamage(pGame, pUnit, nullptr);
     }
 
-    BOOL bResult = Missiles_SrvHitFunc_AreaSplashDamage(pGame, pUnit, nullptr);
-    return bResult;
+    return 0;
 }
 
 // Server-side missile hit handler for healing projectiles. Validates the missile and target, checks skill-target alignment and CanUseSkillOnTarget. Computes a heal amount from skill calcs (calc[0]/calc[1]) with a random roll, clamps to the target's max HP, sets UNITSTAT_hitpoints, and optionally applies ProgOverlay. Returns 3 (pass-through) if target type/alignment check fails based on sHitPar2 (0=any, 1=undead, 2=demon); returns 4 if target cannot be healed.
@@ -2056,9 +2054,7 @@ BOOL __fastcall Missiles_SrvHitFunc_ApplyWarCryBuff(::SGAMEDATA * pGame, D2UnitS
       return 0;
     }
 
-    int32_t nSkillLvl = D2Common::Units::Missile::GetLevel(pUnit);
-    eD2Skills eSkill = D2Common::Units::Missile::GetSkillId(pUnit);
-    SKILLS::SkillBar::SKILLBAR_ApplyWarCryBuff(pGame, pTarget, pOwnerUnit, eSkill, nSkillLvl);
+    SKILLS::SkillBar::SKILLBAR_ApplyWarCryBuff(pGame, pTarget, pOwnerUnit, D2Common::Units::Missile::GetSkillId(pUnit), D2Common::Units::Missile::GetLevel(pUnit));
     return 0;
 }
 
@@ -3831,25 +3827,24 @@ BOOL __fastcall Missiles_SrvHitFunc_SpawnRandomMonsterAtHit(::SGAMEDATA * pGame,
     int32_t nPosY;
     int32_t nPosX;
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    Monster::Create::SpawnRandomMonster(pGame, pRoom, nPosX, nPosY);
+    Monster::Create::SpawnRandomMonster(pGame, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY);
     return 1;
 }
 
@@ -4489,12 +4484,8 @@ BOOL __fastcall Missiles_SrvHitFunc_DispatchSrvDoFunc(::SGAMEDATA * pGame, D2Uni
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMissilesSize)) {
-      return 1;
-    }
-
-    D2MissilesTxt* pMissileTxt = sgptDataTable->pTxtMissiles;
-    if (!(pMissileTxt + nClassId)) {
+    D2MissilesTxt* pMissileTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : 0;
+    if (!pMissileTxt) {
       return 1;
     }
 
@@ -4512,7 +4503,7 @@ BOOL __fastcall Missiles_SrvHitFunc_DispatchSrvDoFunc(::SGAMEDATA * pGame, D2Uni
       D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pTarget);
     }
 
-    SKILLS::SkillsServer::SKILLS_DispatchSrvDoFunc(pGame, pUnit, pMissileTxt[nClassId].sHitPar1, eSkillId, nSkillLvl);
+    SKILLS::SkillsServer::SKILLS_DispatchSrvDoFunc(pGame, pUnit, pMissileTxt->sHitPar1, eSkillId, nSkillLvl);
     return 1;
 }
 
@@ -4587,17 +4578,13 @@ void __fastcall Missiles_SrvDmgFunc_FreezeLengthFromColdLengthPct(::SGAMEDATA * 
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMissilesSize)) {
-      return;
-    }
-
-    D2MissilesTxt* pMissilesTxt = sgptDataTable->pTxtMissiles;
-    if (!(pMissilesTxt + nClassId)) {
+    D2MissilesTxt* pMissilesTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : 0;
+    if (!pMissilesTxt) {
       return;
     }
 
     int nColdLength = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_coldlength, 0);
-    uint32_t nDmgScalePct = pMissilesTxt[nClassId].dParam1;
+    uint32_t nDmgScalePct = pMissilesTxt->dParam1;
     int32_t nScaledLength = D2Client::Stats::D2ApplyPercent(nColdLength, (int)nDmgScalePct < 0 ? 0 : nDmgScalePct, 100);
     pDamage->dwFrzLength = nScaledLength;
     pDamage->dwColdLength = 0;
@@ -4609,18 +4596,14 @@ void __fastcall Missiles_SrvDmgFunc_RollChanceFlagBlessedAim(::SGAMEDATA * pGame
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMissilesSize)) {
-      return;
-    }
-
-    D2MissilesTxt* pMissilesTxt = sgptDataTable->pTxtMissiles;
-    if (!(pMissilesTxt + nClassId)) {
+    D2MissilesTxt* pMissilesTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : 0;
+    if (!pMissilesTxt) {
       return;
     }
 
     D2SeedStrc seedNew = D2_SEED_NEXT(pUnit->sSeed);
     pUnit->sSeed = seedNew;
-    if ((int)(seedNew.nSeedLow & 0x7f) >= pMissilesTxt[nClassId].dParam1) {
+    if ((int)(seedNew.nSeedLow & 0x7f) >= pMissilesTxt->dParam1) {
       return;
     }
 
@@ -4640,7 +4623,8 @@ void __fastcall Missiles_SrvDmgFunc_CopyColdLengthToFreezeLength(::SGAMEDATA * p
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId)) {
+    D2MissilesTxt* pMissilesRecord = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : 0;
+    if (!pMissilesRecord) {
       return;
     }
 
@@ -4730,11 +4714,12 @@ void __fastcall Missiles_SrvDmgFunc_ApplyProgOverlayToTarget(::SGAMEDATA * pGame
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId && pTarget)) {
+    D2MissilesTxt* pMissilesRecord = (0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nClassId] : 0;
+    if (!pMissilesRecord || !pTarget) {
       return;
     }
 
-    short int nProgOverlay = sgptDataTable->pTxtMissiles[nClassId].ProgOverlay;
+    short int nProgOverlay = pMissilesRecord->ProgOverlay;
     if (0 >= nProgOverlay) {
       return;
     }
@@ -5044,7 +5029,7 @@ void __fastcall MISSMODE_ExpireAndFree(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       nClassId = pUnit->nClassId;
     }
     if (bOnExpire) {
-      D2MissilesTxt* pMissilesTxt = nClassId < 0 || sgptDataTable->nTxtMissilesSize <= nClassId ? 0 : sgptDataTable->pTxtMissiles + nClassId;
+      D2MissilesTxt* pMissilesTxt = nClassId < 0 || nClassId >= sgptDataTable->nTxtMissilesSize ? 0 : sgptDataTable->pTxtMissiles + nClassId;
       nSrvHitFuncIdx = pMissilesTxt->nSrvHitFunc;
       if (0 < nSrvHitFuncIdx && nSrvHitFuncIdx < MISSILESSRVHITFUNCS_SIZE) {
         (*MISSILESSRVHITFUNCS[nSrvHitFuncIdx])(pGame, pUnit, nullptr);
@@ -5100,7 +5085,7 @@ static int getDamageTarget(D2UnitStrc * pUnit) {
 static void MISSMODE_ApplyNextHitState(D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
     D2MissilesTxt* pMissilesTxt;
     int nClassId;
-    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || sgptDataTable->nTxtMissilesSize <= nClassId) {
+    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || nClassId >= sgptDataTable->nTxtMissilesSize) {
       pMissilesTxt = 0;
     } else {
       pMissilesTxt = sgptDataTable->pTxtMissiles + nClassId;
@@ -5660,26 +5645,25 @@ int __fastcall MISSMODE_SrvDoFn03_StationaryCloud(::SGAMEDATA * pGame, D2UnitStr
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnitPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nUnitPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nUnitPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nUnitPosX = 0;
     }
 
     eCollisionFlags eCollisionFlag = COLLIDE_MISSILE;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    D2Common::Collision::AddCollision(pRoom, nUnitPosX, nPosY, eCollisionFlag);
+    D2Common::Collision::AddCollision(D2Common::Units::UNITS_GetRoom(pUnit), nUnitPosX, nPosY, eCollisionFlag);
     nDoFuncResult = MISSMODE_SrvDoFn01_BasicMissile(pGame, pUnit);
     return nDoFuncResult;
 }
@@ -8032,7 +8016,7 @@ int __fastcall MISSILESMODE_SrvDoFn36_BaalFxControl(::SGAMEDATA * pGame, D2UnitS
     uint32_t bIsEveOfDestruction;
     int32_t nCurrentFrame = D2Common::Units::Missile::GetCurrentFrame(pUnit);
     int32_t nHasSpawned = D2Common::Units::Missile::GetTargetX(pUnit);
-    if (!nHasSpawned && nCurrentFrame < 0x65) {
+    if (!nHasSpawned && nCurrentFrame <= 0x64) {
       D2RoomStrc* pRoom;
       D2Common::Units::Missile::SetTargetX(pUnit, 1);
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);

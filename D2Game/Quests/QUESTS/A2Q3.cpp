@@ -392,7 +392,7 @@ BOOL __fastcall Q11_UpdateQuestRecord(::SGAMEDATA * pGame, D2UnitStrc * pUnit, v
     if (!pDVar3) {
       return 0;
     }
-    if (pDVar3->nStateFlag) {
+    if (pDVar3->nStateFlag >= 1) {
       /* SetQuestState(buf, A2Q3, 2=Step0x02) - any progress: mark sub-state 2 */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheTaintedSun, QUESTSTATE_Step0x02);
     }
     if (pDVar3->nStateFlag == 2) {
@@ -511,8 +511,8 @@ BOOL __fastcall Q11_CheckViperAmuletRoomComplete(::SGAMEDATA * pGame, D2UnitStrc
 // A2Q3 - per-unit iterator cb (Q11_PlayCompletionSound): if this player's record is JustCompleted, fire the
 // quest-complete sound/event (SetupUpdateEvent_AttachEventSound id 0x34). Read-only on the quest record.
 BOOL __fastcall Q11_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheTaintedSun, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheTaintedSun, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
@@ -535,8 +535,8 @@ BOOL __fastcall Q11_OnStaffViperPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       return 0;
     }
 
-    D2UnitDataPlayerStrc* pQuestItem = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pQuestItem->pQuestRecord[pGame->nDifficulty], QUEST_TheHoradricStaff, QUESTSTATE_Completed);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
     if (bCompleted) {
       return 0;
     }
@@ -546,8 +546,7 @@ BOOL __fastcall Q11_OnStaffViperPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       return 0;
     }
 
-    int32_t* pnQuestItemCount = &pPlayerData->pQuestSpecificData.pA2Q3->nViperAmuletDropCount;
-    (*pnQuestItemCount)++;
+    pPlayerData->pQuestSpecificData.pA2Q3->nViperAmuletDropCount++;
     return 0;
 }
 

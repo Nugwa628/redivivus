@@ -122,7 +122,7 @@ uint32_t __fastcall DAMAGE_CheckMonsterTypeVsMonsterType(uint32_t nMonTypeA, int
       return 0;
     }
 
-    return *(uint32_t*)(sgptDataTable->pTxtMonTypeUnknown + (sgptDataTable->nMonTypeEquivRowDwords * nMonTypeB + ((int)nMonTypeA >> 5)) * 4) & gadwBitMasks[nMonTypeA & 0x1f];
+    return *(uint32_t*)((uint8_t*)sgptDataTable->pTxtMonTypeUnknown + (sgptDataTable->nMonTypeEquivRowDwords * nMonTypeB + ((int)nMonTypeA >> 5)) * 4) & gadwBitMasks[nMonTypeA & 0x1f];
 }
 
 static uint32_t __stdcall DAMAGE_RollPhysicalDamageRange(int32_t nDamageRange, int32_t nMinPctBonus, D2UnitStrc * pUnit, int32_t nDamageMin, int32_t nRangePctBonus, uint32_t nDamageAccum) {
@@ -215,7 +215,7 @@ static int32_t __stdcall DAMAGE_ApplyManaToUnit(int32_t nParam, D2UnitStrc * pUn
 }
 
 static uint32_t DAMAGE_DrainManaFromUnit(uint32_t nParam, D2UnitStrc * pUnit) {
-    if ((int)nParam < 1) {
+    if ((int)nParam <= 0) {
       return 0;
     }
 
@@ -230,7 +230,7 @@ static uint32_t DAMAGE_DrainManaFromUnit(uint32_t nParam, D2UnitStrc * pUnit) {
 }
 
 static uint32_t DAMAGE_DrainStaminaFromUnit(uint32_t nParam, D2UnitStrc * pUnit) {
-    if ((int)nParam < 1) {
+    if ((int)nParam <= 0) {
       return 0;
     }
 
@@ -427,11 +427,11 @@ int32_t __fastcall DAMAGE_GetMonsterDelayByDifficulty(D2UnitStrc * pUnit, D2Unit
     }
 
     int nVictimClassId = pMonster->nClassId;
-    if (!(-1 < nVictimClassId && nVictimClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nVictimClassId)) {
+    D2MonStatsTxt* pMonStatsRecord; pMonStatsRecord = (0 <= nVictimClassId && nVictimClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nVictimClassId] : 0; if (!pMonStatsRecord) {
       return -0x32;
     }
 
-    return (int)sgptDataTable->pTxtMonStats[nVictimClassId].aColdEffect[*(uint8_t*)((uintptr_t)&pUnit->uSideData + 9)];
+    return (int)pMonStatsRecord->aColdEffect[*(uint8_t*)((uintptr_t)&pUnit->uSideData + 9)];
 }
 
 // Applies cold slow to pUnit2 for nParam frames, sourced from attacker pUnit. Looks up MonStats ColdEffect per difficulty; divides duration for cold-immune monsters. Creates or extends STATE_cold stat list (velocity/attack/anim rate penalties), schedules expiry event, and probabilistically sets STATE_shatter on eligible monsters.
@@ -1243,15 +1243,15 @@ static void DAMAGE_ProcessFreezeAndPoisonImmunity(D2DamageContext * pCtx) {
     if (0 < pCtx->pDamage->dwColdLength || 0 < pCtx->pDamage->dwFrzLength) {
       int32_t nCannotBeFrozen;
       nCannotBeFrozen = D2Common::Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pCtx->pDefender, UNITSTAT_item_cannotbefrozen, 0);
-      if (!nCannotBeFrozen) {
+      if (nCannotBeFrozen) {
+        pCtx->pDamage->dwColdLength = 0;
+        pCtx->pDamage->dwFrzLength = 0;
+      } else {
         nCannotBeFrozen = D2Common::Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pCtx->pDefender, UNITSTAT_item_halffreezeduration, 0);
         if (nCannotBeFrozen) {
           pCtx->pDamage->dwColdLength /= 2;
           pCtx->pDamage->dwFrzLength /= 2;
         }
-      } else {
-        pCtx->pDamage->dwColdLength = 0;
-        pCtx->pDamage->dwFrzLength = 0;
       }
     }
     if (0 < pCtx->pDamage->dwPoisLength) {
@@ -3057,7 +3057,7 @@ void __fastcall DAMAGE_AddSkillBonusDamage(D2UnitStrc * pUnit, eD2Skills eSkill,
 }
 
 void __fastcall SKILL_CalculateDamageForEvent(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget, eD2Skills eSkill, int32_t nParam, D2DamageStrc * pDamage) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord; pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0; if (!pSkillsRecord) {
       return;
     }
 

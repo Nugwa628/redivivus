@@ -581,15 +581,14 @@ int __fastcall SaveSkills(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * pStar
     int nHardPoints;
     BOOL bCountBonuses;
     uint16_t* pWriteCursor = (uint16_t*)*pStartAddress;
-    if (pEndAddress < (uint32_t)(sgptDataTable->nSkillCountMaxPerClass + 2 + (int)pWriteCursor)) {
+    if ((uint32_t)(sgptDataTable->nSkillCountMaxPerClass + 2 + (int)pWriteCursor) > pEndAddress) {
       return 1;
     }
 
     *pWriteCursor = 0x6669;
     pWriteCursor++;
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrSave2.cpp", 0x307);
-    uint32_t nClassId = GAME::Clients::GetPlayerClassId(pClient);
-    if (6 < (int)nClassId) {
+    uint32_t nClassId = GAME::Clients::GetPlayerClassId(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrSave2.cpp", 0x307));
+    if (7 <= (int)nClassId) {
       return 2;
     }
 
@@ -600,8 +599,7 @@ int __fastcall SaveSkills(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWORD * pStar
       do {
         eSkill = D2Common::Skills::SKILLS_GetClassSkillByIndex(nClassId, iSkill);
         bCountBonuses = 0;
-        pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1);
-        nHardPoints = D2Common::Skills::GetSkillLevel(pUnit, pSkill, bCountBonuses);
+        nHardPoints = D2Common::Skills::GetSkillLevel(pUnit, D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1), bCountBonuses);
         *(char*)pWriteCursor = (char)nHardPoints;
         pWriteCursor = (uint16_t*)((int)pWriteCursor + 1);
         iSkill++;
@@ -1140,7 +1138,7 @@ int __fastcall ReadWaypoints(::SGAMEDATA * pGameStrc, D2UnitStrc * pUnit, short 
       nActIdx++;
       ppWaypoint++;
       pWpData += 0x18;
-      if (2 < nActIdx) {
+      if (3 <= nActIdx) {
         *ppReadPos = pBufStart + 0x28;
         return 0;
       }
@@ -1771,7 +1769,7 @@ void __fastcall SetStatsAndHotkeys(::SGAMEDATA * pGameStrc, D2UnitStrc * pUnit, 
     pPlayerData = D2Common::Units::GetPlayerData(pUnit);
     int iHotkey;
     iHotkey = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
-    if ((iHotkey < 0 || (nGoldLimit = D2Common::Units::GetInventoryGoldLimit(pUnit) , (int)nGoldLimit < iHotkey)) && pUnit) {
+    if ((iHotkey < 0 || (nGoldLimit = D2Common::Units::GetInventoryGoldLimit(pUnit) , iHotkey > (int)nGoldLimit)) && pUnit) {
       if (pUnit->eUnitType == UNIT_PLAYER) {
         D2Common::Units::GetInventoryGoldLimit(pUnit);
       }
@@ -1780,7 +1778,7 @@ void __fastcall SetStatsAndHotkeys(::SGAMEDATA * pGameStrc, D2UnitStrc * pUnit, 
     }
 
     iHotkey = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_goldbank, 0);
-    if (-1 < iHotkey) {
+    if (0 <= iHotkey) {
       nGoldLimit = D2Common::Units::GetStashGoldLimit(pUnit);
       if (iHotkey <= (int)nGoldLimit) {
         goto restore_stats_and_hotkeys;

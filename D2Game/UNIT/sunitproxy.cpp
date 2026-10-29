@@ -149,17 +149,17 @@ void __fastcall SUNITPROXY_AddItemToNpcProxy(D2UnitStrc * pNpcUnit, ::SGAMEDATA 
 // @sourcefile .\UNIT\sunitproxy.cpp
 static void SUNITPROXY_InitNpcTradeItems(int32_t nParam1, ::SGAMEDATA * pGame, void * * pParam) {
     void* nNpcTradeIdx;
-    if (0x10 < nParam1) {
+    if (0x11 <= nParam1) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa4);
       exit(-1);
     }
 
     pParam[1] = (void*)gaNpcItemTables[nParam1].nTradeCount;
-    nNpcTradeIdx = D2_ALLOC_POOL_AT(pGame->pMemoryPool, gaNpcItemTables[nParam1].nTradeCount * 0xc, ".\\UNIT\\sunitproxy.cpp", 0xa8);
+    nNpcTradeIdx = Fog::Memory::AllocServerMemory(pGame->pMemoryPool, gaNpcItemTables[nParam1].nTradeCount * 0xc, ".\\UNIT\\sunitproxy.cpp", 0xa8, 0);
     *pParam = nNpcTradeIdx;
     memcpy(nNpcTradeIdx, gaNpcItemTables[nParam1].pTradeItems, gaNpcItemTables[nParam1].nTradeCount * 0xc);
     pParam[3] = (void*)gaNpcItemTables[nParam1].nQuestCount;
-    nNpcTradeIdx = D2_ALLOC_POOL_AT(pGame->pMemoryPool, gaNpcItemTables[nParam1].nQuestCount * 4, ".\\UNIT\\sunitproxy.cpp", 0xab);
+    nNpcTradeIdx = Fog::Memory::AllocServerMemory(pGame->pMemoryPool, gaNpcItemTables[nParam1].nQuestCount * 4, ".\\UNIT\\sunitproxy.cpp", 0xab, 0);
     pParam[2] = nNpcTradeIdx;
     memcpy(nNpcTradeIdx, gaNpcItemTables[nParam1].pQuestItems, gaNpcItemTables[nParam1].nQuestCount * 4);
 }

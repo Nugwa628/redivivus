@@ -151,9 +151,9 @@ BOOL __fastcall Q33_UpdateQuestStep(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
 // If Malah was talked to -> advance to stateFlag 1 (broadcast). If quest active && Scroll-of-Resistance collected && prev<4
 // -> advance to stateFlag 4 (Anya freed / scroll obtained), broadcasting via Q33_NotifyQuestState.
 void __fastcall Q33_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    short int nTargetClassId = !pQuestArgs->pTarget ? -1 : (short int)pQuestArgs->pTarget->nClassId;
+    int32_t nTargetClassId = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA5Q3Strc* pA5Q3Data = pQuestData->pQuestSpecificData.pA5Q3;
-    if (nTargetClassId != 0x201) {
+    if ((uint16_t)nTargetClassId != 0x201) {
       return;
     }
     if (pA5Q3Data->bMalachaiTalked) {
@@ -175,11 +175,10 @@ void __fastcall Q33_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q3.cpp
 void __fastcall Q33_SendQuestStatePacket(D2UnitStrc * pUnit) {
     D2GSPacketSrv0x5D aPacketBuf;
-    aPacketBuf.nExtra = 0;
+    memset(&aPacketBuf, 0, sizeof(aPacketBuf));
     aPacketBuf.nPacketId = ']';
-    aPacketBuf.nQuestId = '!';
     aPacketBuf.nAlertFlags = ' ';
-    aPacketBuf.nFilterStatus = '\0';
+    aPacketBuf.nQuestId = '!';
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q3.cpp", 0x11e);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &aPacketBuf);
 }
@@ -751,14 +750,14 @@ void __fastcall Q33_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 // Q33_PropagateCompleteToParty (PrisonOfIce): iterator cb. If this player has JustCompleted set, propagate completion
 // to every party member via Q33_SetCompleteForPartyMember. Spreads the "Anya rescued" credit across the party.
 BOOL __fastcall Q33_PropagateCompleteToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_PrisonOfIce, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_PrisonOfIce, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }
 
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -1110,24 +1109,24 @@ void __fastcall CalculateBonusResistances(::SGAMEDATA * pGame, D2UnitStrc * pUni
     eD2QuestState eScrollState = QUESTSTATE_Step0x07;
     eD2Quests eQuestId = QUEST_PrisonOfIce;
     uint32_t nBonusTotal = 0;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[0], eQuestId, eScrollState);
+    D2UnitDataPlayerStrc* pPlayerData;
+    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[0], eQuestId, eScrollState);
     if (_bHasScrollQuestState) {
       nBonusTotal = 10;
     }
 
     eD2QuestState eScrollStateInner = QUESTSTATE_Step0x07;
     eD2Quests eQuestIdInner = QUEST_PrisonOfIce;
-    pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[1], eQuestIdInner, eScrollStateInner);
+
+    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[1], eQuestIdInner, eScrollStateInner);
     if (_bHasScrollQuestState) {
       nBonusTotal += 10;
     }
 
     eD2QuestState eScrollStateInner2 = QUESTSTATE_Step0x07;
     eD2Quests eQuestIdInner2 = QUEST_PrisonOfIce;
-    pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[2], eQuestIdInner2, eScrollStateInner2);
+
+    _bHasScrollQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[2], eQuestIdInner2, eScrollStateInner2);
     if (_bHasScrollQuestState) {
       nBonusTotal += 10;
     }
@@ -1194,9 +1193,7 @@ void __fastcall Q33_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D
 void __fastcall Q33_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     D2UnitStrc* pScrollItem = ITEMS::Items::Drop::HasQuestItem(pQuestArgs->pGame, pQuestArgs->pPlayer, 0x20656369);
     if (pScrollItem) {
-      int32_t* pnScrollCount;
-      pnScrollCount = &pQuestData->pQuestSpecificData.pA5Q3->nIceItemCount;
-      (*pnScrollCount)++;
+      pQuestData->pQuestSpecificData.pA5Q3->nIceItemCount++;
     }
     if (!(!pQuestData->bIsNotIntroduction || 4 < pQuestData->nStateFlag)) {
       return;
@@ -1259,8 +1256,8 @@ static uint32_t Q33_CheckPartyHasScrollOfResistance(int32_t nParam, D2UnitStrc *
     }
 
     int32_t pnQuestSpecificData = *(int32_t*)(nParam + 0x18);
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -1298,7 +1295,7 @@ bool __fastcall Q33_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
           *nUnknown = '\f';
           return true;
         }
-        if (4 < pQuestData->nStateFlag) {
+        if (5 <= pQuestData->nStateFlag) {
           return true;
         }
 
@@ -1655,11 +1652,11 @@ bool __fastcall Q33_IsAnyaInTown(::SGAMEDATA * pGame) {
 // (aPlayerGUID[0x1c]==0). Used to gate rescue interaction.
 uint32_t __fastcall Q33_IsFrozenAnyaAlive(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_PrisonOfIce);
-    if (pQuestData) {
-      return (uint32_t)!pQuestData->pQuestSpecificData.pA5Q3->nAnyaState;
+    if (!pQuestData) {
+      return 0;
     }
 
-    return 0;
+    return (uint32_t)!pQuestData->pQuestSpecificData.pA5Q3->nAnyaState;
 }
 
 // Q33_OnNpcNotifyPlayers (PrisonOfIce): when quest active and prev<2, broadcasts stateFlag 2 (Anya's prison

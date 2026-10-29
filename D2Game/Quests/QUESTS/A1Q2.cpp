@@ -60,7 +60,7 @@ namespace D2Game::Quests::QUESTS::A1Q2 {
 // status flag has advanced past the "boss killed" stage (nStateFlag > 3, i.e.
 // the reward/turn-in stages 4/5). Used to gate whether the quest is finalizable.
 bool __fastcall QuestDataBool(D2QuestDataStrc * pQuestData) {
-    if (!(pQuestData->bIsNotIntroduction && 3 < pQuestData->nStateFlag)) {
+    if (!(pQuestData->bIsNotIntroduction && 4 <= pQuestData->nStateFlag)) {
       return false;
     }
 
@@ -141,7 +141,7 @@ void __fastcall Q02_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     }
 
     D2QuestDataA1Q2Strc* pvVar1 = pQuestData->pQuestSpecificData.pA1Q2;
-    if (!pvVar1->bAcceptedQuest) {
+    if (pvVar1->bAcceptedQuest != 1) {
       return;
     }
 
@@ -376,8 +376,8 @@ BOOL __fastcall Q02_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pU
 // has QUESTSTATE_JustCompleted (id 0xd) set this session, plays the quest-done
 // fanfare via SetupUpdateEvent_AttachEventSound(event 0x22).
 BOOL __fastcall Q02_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_SistersBurialGrounds, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_SistersBurialGrounds, QUESTSTATE_JustCompleted);
     if (bQuestState != 1) {
       return 0;
     }
@@ -391,14 +391,14 @@ BOOL __fastcall Q02_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 // member of that player's party (ExecuteFunctionForEveryPartyMember) so partied
 // players also get quest credit for the Blood Raven kill.
 BOOL __fastcall Q02_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_SistersBurialGrounds, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_SistersBurialGrounds, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
 
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 

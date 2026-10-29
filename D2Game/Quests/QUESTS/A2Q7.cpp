@@ -188,17 +188,16 @@ int __fastcall Q14_IsSevenTombsProgressed(::SGAMEDATA * pGame) {
 // and then 0059d720. A wrapper that supplies the quest record.
 uint32_t __fastcall A2Q6_GetNextFalseTombPortalClassIdForGame(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSevenTombs);
-    if (!pQuestData) {
-      return 0x133;
+    if (pQuestData) {
+      return A2Q6_GetNextFalseTombPortalClassId(pQuestData);
     }
 
-    uint32_t uVar1 = A2Q6_GetNextFalseTombPortalClassId(pQuestData);
-    return uVar1;
+    return 0x133;
 }
 
 // Q14 accessor: returns the "town/Duriel portal already created" flag from A2Q6 data (field_0x0B). Returns 1 (treat as created) if quest not introduced. Used to gate the stairs-to-tombs operate and portal creation.
-uint8_t __fastcall Q14_GetPortalCreatedFlag(::SGAMEDATA * pGame) {
-    D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheSevenTombs);
+uint8_t __fastcall Q14_GetPortalCreatedFlag(struct D2QuestArgStrc * pQuestArg) {
+    D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pQuestArg->pGame, QUESTINT_TheSevenTombs);
     if (!(pQuestData && pQuestData->bIsNotIntroduction)) {
       return 1;
     }
@@ -286,7 +285,7 @@ void __fastcall TakeStairs(D2ObjectOperateFnArg * pOperateArg) {
 // Q14 object OperateFn: stairs/warp into the Tal Rasha tombs. Allows traversal only if The Seven Tombs isn't introduced yet OR the Duriel-area portal has already been created (field_0x0B), and the warp object is in Walk (open) anim. Calls TakeStairs. No quest-state transition.
 uint32_t __fastcall Q14_OperateStairsToTombs(D2ObjectOperateFnArg * pOperateArg) {
     D2QuestDataStrc* pDVar2 = GetQuestDataByQuestNoInternal(pOperateArg->sArg.pGame, QUESTINT_TheSevenTombs);
-    if (!(!pDVar2 || !pDVar2->bIsNotIntroduction || pDVar2->pQuestSpecificData.pA2Q6->bPortalCreated)) {
+    if (!(!pDVar2 || pDVar2->bIsNotIntroduction != 1 || pDVar2->pQuestSpecificData.pA2Q6->bPortalCreated)) {
       return 0;
     }
 
@@ -669,7 +668,7 @@ void __fastcall Q14_SetTyraelState(int nParam, char cParam) {
 
 // Q15 (Act2Guard4Gossip / Jerhyn gossip pseudo-quest) state-2 handler. When the kill/target unit is Jerhyn (classId 0x179) and the one-shot bBloodRavenKilled-style flag is set, clears it and unhooks itself (handler[2]=null). One-time post-trigger cleanup; no quest-record write.
 void __fastcall Q15_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    if (!(pQuestArgs->pTarget && (short int)pQuestArgs->pTarget->nClassId == 0x179 && pQuestData->pQuestSpecificData.pA2Q7->bGossipAwaits)) {
+    if (!(pQuestArgs->pTarget && (short int)pQuestArgs->pTarget->nClassId == 0x179 && pQuestData->pQuestSpecificData.pA2Q7->bGossipAwaits == 1)) {
       return;
     }
 

@@ -626,7 +626,7 @@ void __fastcall Q18_Callback09_PlayerDroppedWithQuestItem(D2QuestDataStrc * pQue
     D2QuestDataA3Q1Strc* pA2Q3Data = pQuestData->pQuestSpecificData.pA3Q1;
     int32_t* piVar1 = &pA2Q3Data->nPlayersInArea;
     (*piVar1)--;
-    if (!(!*piVar1 && pQuestData->bIsNotIntroduction && pA2Q3Data->bNotifiedPlayers && pQuestData->nStateFlag < 4)) {
+    if (!(!*piVar1 && pQuestData->bIsNotIntroduction && pA2Q3Data->bNotifiedPlayers && pQuestData->nStateFlag <= 3)) {
       return;
     }
 

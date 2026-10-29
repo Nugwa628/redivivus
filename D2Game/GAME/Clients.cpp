@@ -590,16 +590,14 @@ void __fastcall GAME_CollectNearbyUnitPositions(D2ClientStrc * pClient, uint32_t
       aProximityNodes[0].nNext = 0;
       aProximityNodes[0].nDistance = 0;
       nRoomIdx = 0;
-      if (nAdjacentRoomCount) {
+      if (0 < nAdjacentRoomCount) {
         do {
           for (pPlayerUnit_lcl = ppAdjacentRooms[nRoomIdx]->pUnitList; pPlayerUnit_lcl; pPlayerUnit_lcl = pPlayerUnit_lcl->pRoomNext) {
             CLIENT_AddUnitToProximitySortedList(nX, pPlayerUnit_lcl, nY, &pnMaxDist, pClient, nMaxUnits, aProximityNodes);
           }
-
           nRoomIdx++;
         } while (nRoomIdx < nAdjacentRoomCount);
       }
-
       CLIENT_PopulateVisibilityPacketBuffer(aProximityNodes, pClient);
       return;
     }
@@ -926,7 +924,7 @@ void __fastcall SetFlagIf(D2ClientStrc * pClient, uint16_t nFlag, BOOL nSet) {
 }
 
 uint32_t __fastcall CLIENT_TestFileFlags(D2ClientStrc * pClient, uint16_t fFileFlag) {
-    return (uint32_t)(pClient->nCharacterStatus & fFileFlag);
+    return (uint32_t)((uint16_t)pClient->nCharacterStatus & fFileFlag);
 }
 
 void __fastcall SetClientStatus(D2ClientStrc * pClient, int32_t nQuestProgress, int32_t nDifficulty) {
@@ -1187,8 +1185,8 @@ void __fastcall SendPongByClientId(uint32_t nClientId, int32_t dwSendTick, int32
 }
 
 BOOL __fastcall NET_D2GS_SERVER_GetPlayerNameByClientId(int32_t nClientId, char * szPlayerName) {
-    bool _bNotFound;
-    bool bNotFound;
+    BOOL _bNotFound;
+    BOOL bNotFound;
     if (!gQServerClientTablesInitialized) {
       return 1;
     }
@@ -1503,7 +1501,7 @@ bool __fastcall HasWeaponSwapped(D2ClientStrc * pClient) {
 }
 
 void __fastcall SetWeaponSwap(D2ClientStrc * pClient, uint8_t bWeaponSwapped) {
-    pClient->bWeaponSwap = (bool)bWeaponSwapped;
+    *(uint8_t*)&pClient->bWeaponSwap = bWeaponSwapped;
 }
 
 void __fastcall SERVER_PutPacketInQueueList(D2ClientStrc * pClient, D2PacketListStrc * pPacketList) {
@@ -2520,7 +2518,7 @@ void __fastcall GAME_SendRemoveObjectsForAdjacentRooms(D2RoomStrc * pRoom, D2Cli
       ePlayerUnitType = pPlayerUnit_lcl->eUnitType;
       nPlayerGUID = pPlayerUnit_lcl->nUnitGUID;
       nRoomIdx = 0;
-      if (!nRoomCount) {
+      if ((uint32_t)nRoomCount <= 0) {
         return;
       }
 
@@ -2530,10 +2528,8 @@ void __fastcall GAME_SendRemoveObjectsForAdjacentRooms(D2RoomStrc * pRoom, D2Cli
             SCmd::NET_D2GS_SERVER_Send_0x0A_REMOVEUNIT(pClient, 10, (eD2UnitType)(uint8_t)(char)pDrlgDelete->eUnitType, pDrlgDelete->nUnitGUID);
           }
         }
-
         nRoomIdx++;
       } while (nRoomIdx < nRoomCount);
-
       return;
     }
 }
@@ -2667,21 +2663,18 @@ void __fastcall CLIENT_BroadcastMovementToAdjacentRooms(::SGAMEDATA * pGame, D2R
       exit(-1);
     }
 
-    {
-      uint32_t nRoomIdx;
-      D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &ppAdjacentRooms, (int*)&nRoomCount);
-      nRoomIdx = 0;
-      if (!nRoomCount) {
-        return;
-      }
-
-      do {
-        MovementUpdateForClient(pGame, (D2RoomStrc**)ppAdjacentRooms[nRoomIdx], pUnit);
-        nRoomIdx++;
-      } while (nRoomIdx < nRoomCount);
-
+    uint32_t nRoomIdx;
+    D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &ppAdjacentRooms, (int*)&nRoomCount);
+    nRoomIdx = 0;
+    if ((uint32_t)nRoomCount <= 0) {
       return;
     }
+
+    do {
+      MovementUpdateForClient(pGame, (D2RoomStrc**)ppAdjacentRooms[nRoomIdx], pUnit);
+      nRoomIdx++;
+    } while (nRoomIdx < nRoomCount);
+    return;
 }
 
 void __fastcall CLIENT_RemoveFromAdjacentRooms(D2RoomStrc * pRoom, int32_t nClientId) {
@@ -2694,7 +2687,7 @@ void __fastcall CLIENT_RemoveFromAdjacentRooms(D2RoomStrc * pRoom, int32_t nClie
 
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &ppAdjacentRooms, (int*)&nRoomCount);
     uint32_t nRoomIdx = 0;
-    if (!nRoomCount) {
+    if ((uint32_t)nRoomCount <= 0) {
       return;
     }
 
@@ -2705,11 +2698,22 @@ void __fastcall CLIENT_RemoveFromAdjacentRooms(D2RoomStrc * pRoom, int32_t nClie
 }
 
 void __fastcall TellClientToLoadAct(::SGAMEDATA * pGame, D2ClientStrc * pClient) {
+    // Frame slots -32..-22 are ONE object: &byPacketId is passed out and the callee reaches the rest by byte offset.
+    // Separate locals let the compiler reorder them, so the run is one struct.
+    #pragma pack(push, 1)
+    struct __frame0_t {
+      uint8_t byPacketId;
+      int nCycleIndex;
+      int nTicks;
+      uint8_t bEclipse;
+    };
+    #pragma pack(pop)
+    static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 10, "frame group __frame0_t must reproduce the Ghidra frame layout");
+    __frame0_t __frame0;
     uint8_t _byActNoArg;
-    D2GSPacketSrv0x53 sPacket;
     uint8_t bEclipseOut[4];
-    int32_t nTicksOut;
-    int32_t nCycleOut;
+    int nTicksOut;
+    int nCycleOut;
     uint8_t byActNoArg;
     uint32_t uStack_7;
     uint8_t bActNo = GetAct(pClient);
@@ -2717,11 +2721,11 @@ void __fastcall TellClientToLoadAct(::SGAMEDATA * pGame, D2ClientStrc * pClient)
     eD2LevelId eTownLevelId = D2Common::DUNGEON::Dungeon::GetTownLevelIdFromAct(pGame->pAct[bActNo]);
     SCmd::NET_D2GS_SERVER_Send_0x03_NEWACT(pClient, '\x03', (uint8_t)_byActNoArg, pGame->pInitSeed.nSeedLow, pGame->pInitSeed.nSeedHigh, (uint16_t)eTownLevelId);
     D2Common::Environment::DRLGENV_GetCycleIndex_Ticks_EclipseFromAct(pGame->pAct[bActNo], &nCycleOut, &nTicksOut, (BOOL*)bEclipseOut);
-    sPacket.nTicks = nTicksOut;
-    sPacket.bEclipse = bEclipseOut[0];
-    sPacket.nHeader = 'S';
-    sPacket.nCycleIndex = nCycleOut;
-    SCmd::NET_D2GS_SERVER_Send_0x53_ACTTIMEOFDAY(pClient, &sPacket);
+    __frame0.byPacketId = 0x53;
+    __frame0.nCycleIndex = nCycleOut;
+    __frame0.nTicks = nTicksOut;
+    __frame0.bEclipse = bEclipseOut[0];
+    SCmd::NET_D2GS_SERVER_Send_0x53_ACTTIMEOFDAY(pClient, (D2GSPacketSrv0x53*)&__frame0.byPacketId);
 }
 
 } // namespace D2Game::GAME::Clients

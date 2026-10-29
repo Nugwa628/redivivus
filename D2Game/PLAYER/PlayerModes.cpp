@@ -94,7 +94,7 @@ static BOOL PLRMODES_HasEndAnimEventAndSeqInput(::SGAMEDATA * pGame, D2UnitStrc 
     if (pSkill) {
       D2SkillsTxt* pSkillTxt;
       pSkillTxt = D2Common::Skills::GetSkillsTxt(pSkill);
-      if (pSkillTxt && pSkillTxt->seqinput != '\0') {
+      if (pSkillTxt && (uint8_t)pSkillTxt->seqinput > 0) {
         return 1;
       }
     }
@@ -693,21 +693,21 @@ void __fastcall PLRMODES_HandlePlayerDeath(::SGAMEDATA * pGame, D2UnitStrc * pUn
     int32_t nDeathY;
     eD2UnitType eUnitType;
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDeathY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nDeathY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nDeathY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nDeathY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDeathX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nDeathX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nDeathX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nDeathX = 0;
     }
 
     D2UnitStrc* pRoom;
@@ -725,12 +725,7 @@ void __fastcall PLRMODES_HandlePlayerDeath(::SGAMEDATA * pGame, D2UnitStrc * pUn
       }
     }
 
-    BOOL bOverwriteSave;
-    bOverwriteSave = 0;
-    pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrModes.cpp", 0x43a);
-    char* szCharName;
-    szCharName = GAME::Clients::GetCharName(pClient);
-    PlayerSave::SaveGameAllGameTypes(pGame, pUnit, szCharName, bOverwriteSave);
+    PlayerSave::SaveGameAllGameTypes(pGame, pUnit, GAME::Clients::GetCharName(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrModes.cpp", 0x43a)), 0);
     skip_death_save:
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, 0x11);
     UNIT::SUnit::InitAnimFrame(pUnit);
@@ -950,8 +945,12 @@ static void PLRMODES_RestoreSwappedSkill(eD2Skills * peSkillId, D2UnitStrc * pUn
         pCurrentSkill = D2Common::Units::GetLeftSkill(pUnit);
         if (pSkill != pCurrentSkill) {
           nCanUse = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pSkill);
-          if (nCanUse != 2 && nCanUse != 7) {
-            SKILLS::SkillsServer::Server_SelectSkill(pUnit, 1, peSkillId[1], peSkillId[3]);
+          switch (nCanUse) {
+            case 2:
+            case 7:
+              break;
+            default:
+                SKILLS::SkillsServer::Server_SelectSkill(pUnit, 1, peSkillId[1], peSkillId[3]);
           }
         }
       }
@@ -971,8 +970,10 @@ static void PLRMODES_RestoreSwappedSkill(eD2Skills * peSkillId, D2UnitStrc * pUn
     }
 
     nCanUse = D2Common::Skills::SKILLS_CanUseSkill(pUnit, pSkill);
-    if (!(nCanUse != 2 && nCanUse != 7)) {
-      return;
+    switch (nCanUse) {
+      case 2:
+      case 7:
+        return;
     }
 
     SKILLS::SkillsServer::Server_SelectSkill(pUnit, 0, *peSkillId, peSkillId[2]);
@@ -1828,7 +1829,7 @@ void __fastcall PLRMODES_ProcessPlayerMode(::SGAMEDATA * pGame, D2UnitStrc * pUn
 }
 
 void __fastcall PLAYEREVENT_DefaultCallback(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2TimerTypeDWORD eTimerType, int32_t nArg1, int32_t nArg2) {
-    if (!(eTimerType < UNITEVENTCALLBACK_COUNT && GAME::Event::Dispatch::Player::pTimerMethods.fpFunctionExByType[eTimerType])) {
+    if ((uint32_t)UNITEVENTCALLBACK_REMOVESKILLCOOLDOWN < (uint32_t)eTimerType || !GAME::Event::Dispatch::Player::pTimerMethods.fpFunctionExByType[eTimerType]) {
       return;
     }
 

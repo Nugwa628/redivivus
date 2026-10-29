@@ -170,16 +170,16 @@ int32_t __fastcall UNITEVENT_DispatchEventsByType(::SGAMEDATA * pGame, uint32_t 
         pMemoryToFree->nFlags &= 0xfffe;
         pNextEvent = pMemoryToFree->pNext;
         if (pMemoryToFree->nFlags & 2 || !pMemoryToFree->nQueueNo) {
-          if (!pMemoryToFree->pPrev) {
-            pUnit->uSideData.pServerSide.pSrvUnitEventList = pNextEvent;
-          } else {
+          if (pMemoryToFree->pPrev) {
             pMemoryToFree->pPrev->pNext = pNextEvent;
+          } else {
+            pUnit->uSideData.pServerSide.pSrvUnitEventList = pNextEvent;
           }
           if (pMemoryToFree->pNext) {
             pMemoryToFree->pNext->pPrev = pMemoryToFree->pPrev;
           }
 
-          D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\SUnitEvent.cpp", 0xeb);
+          Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\SUnitEvent.cpp", 0xeb, 0);
         }
       }
     }

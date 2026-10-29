@@ -334,13 +334,12 @@ uint32_t __fastcall AI_BAAL_IsUnitInRange(D2UnitStrc * pUnit, int * pnParam) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x11e);
         exit(-1);
       }
+
       if (pUnit->nAct != *(eAct*)(pnParam + 6)) {
         return 0;
       }
-
       nLine = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit);
-      nX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit);
-      nDist = GetCollisionDistanceFromXY((D2UnitStrc*)pnParam, nX, nLine);
+      nDist = GetCollisionDistanceFromXY((D2UnitStrc*)pnParam, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit), nLine);
       return (uint32_t)(nDist < 0x3fc);
     }
 }
@@ -1170,8 +1169,8 @@ void __fastcall BaalCrabAi_ResetInfernoAndReattach(::SGAMEDATA * pGame, D2UnitSt
     int storedCommandArg2 = 0;
     D2MonsterAiCmdStrc* pInfernoCommand = Ai::AiGeneral::FindMonsterAiCmd(pUnit, 10, 0);
     if (pInfernoCommand) {
-      storedCommandArg2 = pInfernoCommand->nCmdArg[2];
       storedCommandArg1 = pInfernoCommand->nCmdArg[1];
+      storedCommandArg2 = pInfernoCommand->nCmdArg[2];
     }
 
     eD2States currentInfernoState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_inferno);
@@ -1184,8 +1183,8 @@ void __fastcall BaalCrabAi_ResetInfernoAndReattach(::SGAMEDATA * pGame, D2UnitSt
     if (!pInfernoCommand && storedCommandArg1 && storedCommandArg2) {
       D2AiCmdArgumentsStrc cmdArgs;
       cmdArgs.nCmdId = 10;
-      cmdArgs.nCmdArg2 = storedCommandArg2;
       cmdArgs.nCmdArg1 = storedCommandArg1;
+      cmdArgs.nCmdArg2 = storedCommandArg2;
       Ai::AiGeneral::CreateAiCmdAndFill(pGame, pUnit, &cmdArgs);
     }
 

@@ -75,18 +75,23 @@ void __fastcall ChangeGoldForPlayer(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, i
     }
     if (pUnit->eUnitType == UNIT_PLAYER) {
       uint32_t nGoldLimit;
-      if (eUnitStat == UNITSTAT_gold) {
+      switch (eUnitStat) {
+      case UNITSTAT_gold: {
         nGoldLimit = D2Common::Units::GetInventoryGoldLimit(pUnit);
-        if ((int)nGoldLimit < nCurrentGold) {
+        if (nCurrentGold > (int)nGoldLimit) {
           D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_gold, 0, 0);
           return;
         }
-      } else if (eUnitStat == UNITSTAT_goldbank) {
+        break;
+      }
+      case UNITSTAT_goldbank: {
         nGoldLimit = D2Common::Units::GetStashGoldLimit(pUnit);
-        if ((int)nGoldLimit < nCurrentGold) {
+        if (nCurrentGold > (int)nGoldLimit) {
           D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_goldbank, 0, 0);
           return;
         }
+        break;
+      }
       }
     }
 
@@ -99,21 +104,20 @@ void __fastcall AllocPartyControl(::SGAMEDATA * pGame) {
     if (!pGame) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x18);
       exit(-1);
-    } else if (!pGame->pPartyControl) {
-      pPartyControl = D2_NEW_POOL_AT(pGame->pMemoryPool, D2UnitPartyControl, ".\\UNIT\\Party.cpp", 0x1a);
+    } else if (pGame->pPartyControl) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x19);
+      exit(-1);
+    } else {
+      pPartyControl = ((D2UnitPartyControl*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2UnitPartyControl), ".\\UNIT\\Party.cpp", 0x1a, 0));
       if (!pPartyControl) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1b);
         exit(-1);
       }
 
-      *(uint32_t*)pPartyControl = 0;
-      pPartyControl->pSub = 0;
+      memset(pPartyControl, 0, 8);
       pPartyControl->nPartyId = 3;
       pGame->pPartyControl = pPartyControl;
       return;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x19);
-      exit(-1);
     }
 }
 
@@ -479,8 +483,8 @@ void __fastcall FindUnitWithFilter(::SGAMEDATA * pGame, D2UnitStrc * pUnit, pfnP
     }
 
     eD2LevelId dwLevelNo = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom1);
-    int16_t nPartyId = SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       (*fpFilter)(pGame, pUnit, pDataForFunction);
       return;
     }
@@ -522,8 +526,8 @@ static void __stdcall GoldCalculations(D2UnitStrc * pUnit, int * pnParam1, int *
 void __fastcall BroadcastAutomapAllyPartyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2UnitPartyControlSubSub* pSubSub;
     D2ClientStrc* pClient = SUnit::SUNIT_GetClient(pUnit, ".\\UNIT\\Party.cpp", 0x24f);
-    int16_t nPartyId = SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return;
     }
 
@@ -553,12 +557,16 @@ int16_t __fastcall GetPartyIdFromUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     if (pUnit->pInventory) {
       nSearchGUID = D2Common::INVENTORY::Inventory::INVENTORY_GetCursorItemGUID(pUnit->pInventory);
     }
-    if (pUnit->eUnitType == UNIT_PLAYER) {
+    if (pUnit->eUnitType != UNIT_PLAYER) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x27b);
+      exit(-1);
+    } else {
       D2UnitPartyControlSub* pSub;
       if (!pGame) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x27c);
         exit(-1);
       }
+
       if (!pGame->pPartyControl) {
         return -1;
       }
@@ -570,11 +578,7 @@ int16_t __fastcall GetPartyIdFromUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
           }
         }
       }
-
       return -1;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x27b);
-      exit(-1);
     }
 }
 

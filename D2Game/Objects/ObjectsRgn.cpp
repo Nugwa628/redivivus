@@ -291,24 +291,24 @@ void __fastcall Debug(::SGAMEDATA * pGame) {
 void __fastcall AllocObjectControlSub0x1110(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2RoomStrc * pRoom) {
     int32_t nCoord;
     D2ObjectControlStrc* pObjectControl = pGame->pObjectControl;
-    D2ObjectControlSub0x1110* pNewSub = D2_NEW_POOL_AT(pGame->pMemoryPool, D2ObjectControlSub0x1110, ".\\OBJECTS\\objrgn.cpp", 0x177);
+    D2ObjectControlSub0x1110* pNewSub = ((D2ObjectControlSub0x1110*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2ObjectControlSub0x1110), ".\\OBJECTS\\objrgn.cpp", 0x177, 0));
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nCoord = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nCoord = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nCoord = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nCoord = 0;
     }
 
     pNewSub->sCoords.x = nCoord;
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nCoord = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nCoord = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nCoord = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nCoord = 0;
     }
 
     pNewSub->sCoords.y = nCoord;
@@ -409,8 +409,7 @@ int32_t __fastcall OBJECTRGN_CheckPointsCapacity(::SGAMEDATA * pGame, eD2LevelId
 }
 
 void __fastcall OBJECT_IncrementLevelSpawnCount(::SGAMEDATA * pGame, eD2LevelId eLevel) {
-    int* pnSpawnCount = &pGame->pObjectControl->aLevelsRng[eLevel]->pad_0x10;
-    (*pnSpawnCount)++;
+    pGame->pObjectControl->aLevelsRng[eLevel]->pad_0x10++;
 }
 
 uint32_t __fastcall OBJECT_IsPositionNearSpawnPoint2(::SGAMEDATA * pGame, eD2LevelId eLevel, int32_t nX, int32_t nY) {

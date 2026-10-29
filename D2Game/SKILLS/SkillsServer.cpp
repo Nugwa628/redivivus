@@ -349,19 +349,19 @@ uint32_t __fastcall SKILLS_CheckTargetFlags(D2UnitStrc * pUnit, D2UnitStrc * pUn
 void __fastcall SKILLS_ClampHpManaStamina(D2UnitStrc * pUnit) {
     int32_t nMax = D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit);
     int32_t nCurrent = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hitpoints, 0);
-    if (nMax < nCurrent) {
+    if (nCurrent > nMax) {
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hitpoints, nMax, 0);
     }
 
     nMax = D2Common::Stats::StatsEx::GetTxtMaxMana(pUnit);
     int nCurrentValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_mana, 0);
-    if (nMax < nCurrentValue) {
+    if (nCurrentValue > nMax) {
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_mana, nMax, 0);
     }
 
     nMax = D2Common::Stats::StatsEx::GetTxtMaxStamina(pUnit);
     nCurrentValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_stamina, 0);
-    if (nMax < nCurrentValue) {
+    if (nCurrentValue > nMax) {
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_stamina, nMax, 0);
     }
 
@@ -370,10 +370,10 @@ void __fastcall SKILLS_ClampHpManaStamina(D2UnitStrc * pUnit) {
 
 void __fastcall SKILLS_InvokeCallbackNoTarget(::SGAMEDATA * pGame, D2UnitStrc * pUnit, pfnSkillNoTargetCb pfnCallback, void * pCallbackArg) {
     D2SkillCallbackContextStrc sContext;
-    sContext.pCallbackArg = pCallbackArg;
-    sContext.nHitCount = 0;
     sContext.pGame = pGame;
     sContext.pUnit = pUnit;
+    sContext.pCallbackArg = pCallbackArg;
+    sContext.nHitCount = 0;
     (*pfnCallback)(&sContext, pUnit);
 }
 
@@ -842,13 +842,13 @@ uint32_t __fastcall SKILL_CheckManaForCast(D2UnitStrc * pUnit) {
 // @sourcefile .\SKILLS\Skills.cpp
 D2UnitFindDataStrc * __fastcall SKILLS_FindUnitsInRange(int32_t nParam1, D2UnitStrc * pUnit, int32_t nRange, int32_t nX, int32_t nY) {
     D2UnitFindArgStrc sUnitFindArg;
-    D2UnitFindDataStrc* pUnitFindData = D2_NEW_POOL_AT(*(D2PoolManagerStrc**)(nParam1 + 0x1c), D2UnitFindDataStrc, ".\\SKILLS\\Skills.cpp", 1099);
+    D2UnitFindDataStrc* pUnitFindData = ((D2UnitFindDataStrc*)Fog::Memory::AllocServerMemory(*(D2PoolManagerStrc**)(nParam1 + 0x1c), sizeof(D2UnitFindDataStrc), ".\\SKILLS\\Skills.cpp", 0x44b, 0));
     memset(&sUnitFindArg, 0, 0x38);
     sUnitFindArg.nFlags = 1411;
+    sUnitFindArg.pAttacker = pUnit;
     sUnitFindArg.nX = nX;
     sUnitFindArg.nY = nY;
     sUnitFindArg.nDistance = nRange;
-    sUnitFindArg.pAttacker = pUnit;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     D2Common::Units::UnitFinds::InitializeUnitFindData(*(D2PoolManagerStrc**)(nParam1 + 0x1c), pUnitFindData, pRoom, nX, nY, nRange, nullptr, &sUnitFindArg);
     D2Common::Units::UnitFinds::UNITFINDS_FindCullRange(pUnitFindData);
@@ -1064,8 +1064,7 @@ void __fastcall Transmorgify(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc
     int32_t nStatIdPacket = 0;
     _bTransmorgified = 1;
     int32_t nUnitGUIDPacket = 0xff;
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\Skills.cpp", 0x6af);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(pClient, nullptr, nUnitGUIDPacket, _bTransmorgified, nStatIdPacket, sUnkPacketArg);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\Skills.cpp", 0x6af), nullptr, nUnitGUIDPacket, _bTransmorgified, nStatIdPacket, sUnkPacketArg);
 }
 
 uint32_t __fastcall IsSkillBoundToClass(D2UnitStrc * pUnit, int32_t nSkillId) {
@@ -1136,11 +1135,17 @@ BOOL __fastcall D2UpdateState(D2UnitStrc * pUnit, eD2States eState, int32_t bRem
 
 // Sets skill data by entry type. The second parameter is a whole 32-bit value in EDX; typed from DL alone it was truncated to a byte.
 void __fastcall SKILLS_SetSkillDataByEType(D2UnitStrc * pUnitStrc, uint32_t nUnitLow, uint32_t dwValue, uint32_t nSkillId) {
-    if (!(-1 < (int)nSkillId && (int)nSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nSkillId && true)) {
+    D2SkillsTxt* pSkillsTxt;
+    if (0 <= (int)nSkillId && (int)nSkillId < sgptDataTable->nTxtSkillsCount) {
+      pSkillsTxt = &sgptDataTable->pTxtSkills[nSkillId];
+    } else {
+      pSkillsTxt = 0;
+    }
+    if (!pSkillsTxt) {
       return;
     }
 
-    switch (sgptDataTable->pTxtSkills[nSkillId].EType) {
+    switch (pSkillsTxt->EType) {
       case ELEMENTAL_COLD:
         *(uint32_t*)(nUnitLow + 0x30) = dwValue;
       return;
@@ -1264,13 +1269,13 @@ BOOL __fastcall SKILLS_SrvStFn01_Attack(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 
 BOOL __fastcall SKILLS_SrvStFn65_Throw(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     BOOL nHasAmmo = SKILLS_CheckThrowableAmmo(pUnit);
-    if (nHasAmmo) {
-      return 1;
+    if (!nHasAmmo) {
+      PLAYER::PlayerModes::PLRMODES_CheckWeaponQuantityAndDurability(pGame, pUnit);
+      PLAYER::PlayerModes::PLRMODES_BreakZeroDurabilityWeapons(pGame, pUnit);
+      return 0;
     }
 
-    PLAYER::PlayerModes::PLRMODES_CheckWeaponQuantityAndDurability(pGame, pUnit);
-    PLAYER::PlayerModes::PLRMODES_BreakZeroDurabilityWeapons(pGame, pUnit);
-    return 0;
+    return 1;
 }
 
 BOOL __fastcall SKILLS_SrvStFn02_Kick(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
@@ -1328,8 +1333,7 @@ BOOL __fastcall Skills_SrvDoFunc_004_RemovePetBySkillParam(::SGAMEDATA * pGame, 
     }
 
     BOOL bNotify = 1;
-    DWORD dwPetGuid = D2Common::Skills::SKILL_GetParam1(pSkill);
-    PLAYER::PlayerPets::RemovePetByGuidAndNotify(pGame, pUnit, dwPetGuid, bNotify);
+    PLAYER::PlayerPets::RemovePetByGuidAndNotify(pGame, pUnit, D2Common::Skills::SKILL_GetParam1(pSkill), bNotify);
     return 1;
 }
 
@@ -2370,7 +2374,7 @@ void __fastcall SKILLS_DispatchStateActiveFunc(::SGAMEDATA * pGame, D2UnitStrc *
 }
 
 void __fastcall SKILLS_DispatchSrvDoFunc(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t nSrvDoFuncIdx, eD2Skills eSkill, int32_t nParam2) {
-    if (!(nSrvDoFuncIdx < 0xbf && SKILLSRVDOFUNCS[nSrvDoFuncIdx])) {
+    if (!(nSrvDoFuncIdx <= 0xbe && SKILLSRVDOFUNCS[nSrvDoFuncIdx])) {
       return;
     }
 
@@ -2686,7 +2690,7 @@ D2PoolManagerStrc * __fastcall SKILLS_AllocSkillAndUpdatePassives(D2UnitStrc * p
 
 // @sourcefile .\SKILLS\Skills.cpp
 void __fastcall SetSkill(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLevel, BOOL bBool) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return;
     }
 
@@ -2883,12 +2887,11 @@ BOOL __fastcall D2CheckCorpseConsumed(D2UnitStrc * pUnit, int32_t nParam) {
 
 int32_t __fastcall SKILLS_UnitFindTestCallback(D2UnitStrc * pUnit, D2UnitFindArgStrc * pSkillParam) {
     int nIsSelectableCorpse = D2Common::Skills::SKILLS_IsSelectableCorpse2(pUnit);
-    if (!nIsSelectableCorpse) {
-      return 0;
+    if (nIsSelectableCorpse) {
+      return D2Common::Units::UnitFinds::TestUnit(pUnit, pSkillParam);
     }
 
-    int32_t nTestResult = D2Common::Units::UnitFinds::TestUnit(pUnit, pSkillParam);
-    return nTestResult;
+    return 0;
 }
 
 D2UnitStrc * __fastcall SKILLS_FindNearbyCorpse(D2UnitStrc * pUnit, D2UnitStrc * pUnit2, int32_t nUnused, int32_t nMaxCorpses) {
@@ -2903,15 +2906,14 @@ D2UnitStrc * __fastcall SKILLS_FindNearbyCorpse(D2UnitStrc * pUnit, D2UnitStrc *
     int32_t nY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit2);
     memset(&sUnitFindArg, 0, 0x38);
     sUnitFindArg.nFlags = 0x1002;
-    sUnitFindArg.nDistance = 10;
     sUnitFindArg.nX = nX;
     sUnitFindArg.nY = nY;
+    sUnitFindArg.nDistance = 10;
     ::SGAMEDATA* pGame = UNIT::SUnit::GetGamePointer(pCaster);
     D2UnitFindArgStrc* pFindArgPtr = &sUnitFindArg;
     UNITFINDTEST fpCorpseTestCallback = (UNITFINDTEST)SKILLS_UnitFindTestCallback;
     int32_t nCorpseRadius = 10;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit2);
-    D2Common::Units::UnitFinds::InitializeUnitFindData(pGame->pMemoryPool, &local_34, pRoom, nX, nY, nCorpseRadius, fpCorpseTestCallback, pFindArgPtr);
+    D2Common::Units::UnitFinds::InitializeUnitFindData(pGame->pMemoryPool, &local_34, D2Common::Units::UNITS_GetRoom(pUnit2), nX, nY, nCorpseRadius, fpCorpseTestCallback, pFindArgPtr);
     D2Common::Units::UnitFinds::UNITFINDS_FindCullRange(&local_34);
     D2UnitStrc* pFoundCorpse = 0;
     if (local_34.nCountedUnits) {
@@ -2924,7 +2926,7 @@ D2UnitStrc * __fastcall SKILLS_FindNearbyCorpse(D2UnitStrc * pUnit, D2UnitStrc *
 
 uint32_t __fastcall SKILLS_CheckMissileCollision(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint32_t nMissileId) {
     D2MissilesTxt* pMissileTxt;
-    if ((int)nMissileId < 0 || sgptDataTable->nTxtMissilesSize <= (int)nMissileId) {
+    if ((int)nMissileId < 0 || (int)nMissileId >= sgptDataTable->nTxtMissilesSize) {
       pMissileTxt = 0;
     } else {
       pMissileTxt = sgptDataTable->pTxtMissiles + nMissileId;
@@ -3009,12 +3011,12 @@ int32_t __fastcall SKILLS_GetUnitWalkVelocity(D2UnitStrc * pnParam) {
 
 int32_t __fastcall SKILLS_GetSummonMonsterClassId(D2UnitStrc * pUnit, int32_t nParam, int32_t nSummonMode, int32_t nSummonParam, int * pPtr, int * pnParam1, int * pnParam2) {
     int32_t nMonsterClassId = D2Common::Monsters::MONSTERS::SummonOrSpawnMode(pUnit, nParam, nSummonMode, nSummonParam, pPtr, pnParam1, pnParam2);
-    if (!(nMonsterClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nMonsterClassId)) {
+    if (!(nMonsterClassId < 0 || nMonsterClassId >= sgptDataTable->nTxtMonStatsSize)) {
       return nMonsterClassId;
     }
 
     nMonsterClassId = Ai::AiGeneral::MONSTER_GetUnitData_AiGeneral_Offset0x3C(pUnit);
-    if (!(nMonsterClassId < 1 || sgptDataTable->nTxtMonStatsSize <= nMonsterClassId)) {
+    if (!(nMonsterClassId <= 0 || nMonsterClassId >= sgptDataTable->nTxtMonStatsSize)) {
       return nMonsterClassId;
     }
 
@@ -3115,7 +3117,7 @@ D2SUnitEventStrc * __fastcall D2SetAuraEvent(::SGAMEDATA * pGame, D2UnitStrc * p
     nullptr
 }; D2_STATIC_GUARD(ITEMSTATCOST_ITEMEVENTFUNC, "D2Game::SKILLS::SkillsServer::D2SetAuraEvent::ITEMSTATCOST_ITEMEVENTFUNC");
 
-    if (!(nItemEventFuncId < 0x32 && ITEMSTATCOST_ITEMEVENTFUNC[nItemEventFuncId])) {
+    if (!(nItemEventFuncId <= 0x31 && ITEMSTATCOST_ITEMEVENTFUNC[nItemEventFuncId])) {
       return nullptr;
     }
 
@@ -3422,27 +3424,27 @@ D2UnitStrc * __fastcall CreatingAMissile(::SGAMEDATA * pGame, eMissilesId nSrvMi
     eD2UnitType eUnitType = pUnit->eUnitType;
     sSkillArg.nFlags = 0x21;
     sSkillArg.pOwner = pUnit;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nOwnerCoord = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nOwnerCoord = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nOwnerCoord = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nOwnerCoord = 0;
     }
 
     sSkillArg.nX = nOwnerCoord + nParam1;
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nOwnerCoord = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nOwnerCoord = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nOwnerCoord = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nOwnerCoord = 0;
     }
 
     sSkillArg.nY = nOwnerCoord + nParam2;
-    sSkillArg.nSkillLevel = nSkillLvl;
     sSkillArg.eSkillNo = eSkill;
+    sSkillArg.nSkillLevel = nSkillLvl;
     sSkillArg.nMissileTxtNo = nSrvMissle;
     if (!nParam3 || !nParam4) {
       BOOL BVar1;
@@ -3466,7 +3468,7 @@ D2UnitStrc * __fastcall CreatingAMissile(::SGAMEDATA * pGame, eMissilesId nSrvMi
     }
     if (nParam5 && pUnit->eUnitType == UNIT_PLAYER) {
       nAmmoRemaining = RemoveQuanityOnUse(pGame, pUnit);
-      if (nAmmoRemaining < 1) {
+      if (nAmmoRemaining <= 0) {
         return nullptr;
       }
     }
@@ -3487,7 +3489,7 @@ D2UnitStrc * __fastcall SKILLS_CreateMissileAtTarget(::SGAMEDATA * pGame, D2Unit
     uint32_t nTargetX = nParam2;
     uint32_t nSrcX = nParam1;
     uint32_t nDistToTarget = D2Common::Collision::GetDistanceToXY(pUnit, nParam1, nParam2);
-    if (nDistToTarget >= 0x65) {
+    if (nDistToTarget > 0x64) {
       return nullptr;
     }
 
@@ -3495,10 +3497,10 @@ D2UnitStrc * __fastcall SKILLS_CreateMissileAtTarget(::SGAMEDATA * pGame, D2Unit
     sSkillArg.eSkillNo = eSkill;
     sSkillArg.nSkillLevel = nSkillLvl;
     sSkillArg.nFlags = 1;
-    sSkillArg.nMissileTxtNo = nMissileId;
     sSkillArg.pOwner = pUnit;
     sSkillArg.nX = nSrcX;
     sSkillArg.nY = nTargetX;
+    sSkillArg.nMissileTxtNo = nMissileId;
     D2UnitStrc* pMissile = MISSILES::Missiles::CreatingMissile(pGame, &sSkillArg);
     return pMissile;
 }
@@ -3581,11 +3583,11 @@ static void __stdcall SetTimeoutEffect(::SGAMEDATA * pGame, int32_t timeoutFrame
 }
 
 void __fastcall SKILLS_ApplySkillDelay(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord; pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0; if (!pSkillsRecord) {
       return;
     }
 
-    int32_t nSkillDelay = D2Common::Skills::D2GetSkillCalc(pUnit, sgptDataTable->pTxtSkills[eSkill].delay, eSkill, nSkillLvl);
+    int32_t nSkillDelay = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsRecord->delay, eSkill, nSkillLvl);
     if (0 >= nSkillDelay) {
       return;
     }

@@ -152,7 +152,7 @@ int __stdcall QSERVER_CountMonstersInFirstActiveGame() {
 
 D2RoomStrc * __stdcall QSERVER_FindRoomInFirstActiveGame(uint8_t byActIndex, int32_t nSubtileX, int32_t nSubtileY) {
     ::SGAMEDATA* pFirstGame = GAME::Server::QSERVER_GetFirstActiveGame();
-    if (4 < byActIndex) {
+    if (5 <= byActIndex) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8d);
       exit(-1);
     }
@@ -974,8 +974,8 @@ BOOL __fastcall Q26_PartyMember_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStr
 }
 
 BOOL __fastcall Q26_PartyMember_PlayCompleteSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheFallenAngel, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheFallenAngel, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }

@@ -228,7 +228,7 @@ static void PLAYER_AddEnergyStatPoints(D2UnitStrc * pUnit, int32_t nParam) {
     }
 
     int nCharClassId = pUnit->nClassId;
-    if (!(-1 < nCharClassId && nCharClassId < sgptDataTable->nTxtCharStatsSize)) {
+    if (!(0 <= nCharClassId && nCharClassId < sgptDataTable->nTxtCharStatsSize)) {
       return;
     }
 
@@ -246,7 +246,7 @@ static void PLAYER_AddEnergyStatPoints(D2UnitStrc * pUnit, int32_t nParam) {
     D2Common::Stats::StatsEx::STATLIST_AddUnitStat(pUnit, UNITSTAT_maxmana, (uint32_t)(uint8_t)pCharStats->ManaPerMagic * nParam * 0x40, 0);
     nCharClassId = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxmana, 0);
     int nCurMana = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_mana, 0);
-    if (nCharClassId >= nCurMana) {
+    if (nCurMana <= nCharClassId) {
       return;
     }
 
@@ -260,7 +260,7 @@ static void PLAYER_AddVitalityStatPoints(int32_t nParam, D2UnitStrc * pUnit) {
     }
 
     int nMaxStat = pUnit->nClassId;
-    if (!(-1 < nMaxStat && nMaxStat < sgptDataTable->nTxtCharStatsSize)) {
+    if (!(0 <= nMaxStat && nMaxStat < sgptDataTable->nTxtCharStatsSize)) {
       return;
     }
 
@@ -278,7 +278,7 @@ static void PLAYER_AddVitalityStatPoints(int32_t nParam, D2UnitStrc * pUnit) {
 
     nMaxStat = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxhp, 0);
     int nCurStat = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hitpoints, 0);
-    if (nMaxStat < nCurStat) {
+    if (nCurStat > nMaxStat) {
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_hitpoints, nMaxStat, 0);
     }
 
@@ -289,7 +289,7 @@ static void PLAYER_AddVitalityStatPoints(int32_t nParam, D2UnitStrc * pUnit) {
 
     nMaxStat = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxstamina, 0);
     nCurStat = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_stamina, 0);
-    if (nMaxStat >= nCurStat) {
+    if (nCurStat <= nMaxStat) {
       return;
     }
 

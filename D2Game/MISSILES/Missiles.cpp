@@ -64,11 +64,11 @@ void __fastcall FreeMissiles(::SGAMEDATA * pGame) {
       D2UnitStrc* pUnit;
       pUnit = *ppUnitSlot;
       while (pUnit) {
-        if (pUnit->eAnimMode.ePlayerMode == TownWalk) {
-          pUnit = UNIT::SUnit::GetNextUnit(pUnit);
-        } else {
+        if (pUnit->eAnimMode.ePlayerMode != TownWalk) {
           UNIT::SUnit::FreeServerUnit(pGame, pUnit);
           pUnit = *ppUnitSlot;
+        } else {
+          pUnit = UNIT::SUnit::GetNextUnit(pUnit);
         }
       }
 

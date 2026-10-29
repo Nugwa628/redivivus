@@ -2447,9 +2447,8 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1C_UnequipToInventory(::SGAMEDATA * pG
       return SERVERSTATUS_BAD_PARAMS;
     }
 
-    uint16_t uVar1 = pPacket->nBodyLoc;
-    uint32_t nBodyLoc = (uint32_t)uVar1;
-    if (nBodyLoc - 1 >= 10) {
+    uint32_t nBodyLoc = pPacket->nBodyLoc;
+    if (nBodyLoc - 1 > 9) {
       return SERVERSTATUS_BAD_DATA;
     }
 
@@ -2460,7 +2459,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x1C_UnequipToInventory(::SGAMEDATA * pG
     }
 
     nSize = 0;
-    BOOL nEquipResult = ITEMS::ItemMode::EquipItem(pGame, pUnit, (eD2BodyLoc)uVar1, 0, &nSize);
+    BOOL nEquipResult = ITEMS::ItemMode::EquipItem(pGame, pUnit, (eD2BodyLoc)nBodyLoc, 0, &nSize);
     if (!(!nEquipResult && nSize)) {
       return SERVERSTATUS_OK;
     }
@@ -3660,7 +3659,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x4D_ResetNpcIntroFlag(::SGAMEDATA * pGa
     if (nSize != 3) {
       return eResult;
     }
-    if (sgptDataTable->nTxtMonStatsSize <= (int)(uint32_t)pPacket->nNpcId) {
+    if ((int)(uint32_t)pPacket->nNpcId >= sgptDataTable->nTxtMonStatsSize) {
       return SERVERSTATUS_BAD_DATA;
     }
 
@@ -3733,8 +3732,8 @@ eD2ServerIncomingStatus __fastcall SCMD_0x50_DropGold(::SGAMEDATA * pGame, D2Uni
       return SERVERSTATUS_BAD_PARAMS;
     }
 
-    uint32_t nGoldAmount = pPacket->nGoldAmount;
     DWORD dwUnitGUID = pPacket->nUnitId;
+    uint32_t nGoldAmount = pPacket->nGoldAmount;
     int32_t nTradeTick = Player::GetPlayerTradeTickOrBusy(pUnit);
     if (nTradeTick) {
       nDropResult = PlayerTrade::IsInteractingWithPlayer(pGame, pUnit, 1);
@@ -3744,7 +3743,7 @@ eD2ServerIncomingStatus __fastcall SCMD_0x50_DropGold(::SGAMEDATA * pGame, D2Uni
     }
 
     nDropResult = Player::GOLD_DropGoldFromInventory(pGame, pUnit, dwUnitGUID, nGoldAmount);
-    return (nDropResult ? 0xfdU : 0) + SERVERSTATUS_BAD_PARAMS;
+    return nDropResult ? (eD2ServerIncomingStatus)0 : SERVERSTATUS_BAD_PARAMS;
 }
 
 eD2ServerIncomingStatus __fastcall SCMD_0x51_SetHotkey(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2GSPacketClt0x51_SetHotkey * pPacket, uint32_t nSize) {

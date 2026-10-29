@@ -328,11 +328,11 @@ void __fastcall SKILLNEC_OnCurseExpire(D2UnitStrc * pUnit, eD2States eState, int
 }
 
 uint32_t __fastcall SKILLNEC_IsReviveOrRaiseSkeleton(eD2Skills eSkill) {
-    if (eSkill == SKILL_Penetrate) {
-      return 1;
+    if (eSkill != SKILL_Penetrate) {
+      return (uint32_t)(eSkill == SKILL_Meteor);
     }
 
-    return (uint32_t)(eSkill == SKILL_Meteor);
+    return 1;
 }
 
 uint32_t __fastcall SKILLNEC_ValidateAttackableTarget(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pTarget) {
@@ -403,7 +403,7 @@ int32_t __fastcall SKILLNEC_ClampResistPenalty(D2UnitStrc * pUnit, eD2UnitStat e
       case UNITSTAT_coldresist:
 
       case UNITSTAT_poisonresist:
-        if (nValue < 1 && (!pUnit || pUnit->eUnitType != UNIT_PLAYER) && (nMercType = D2Common::Monsters::MONSTERS::MONSTER_GetMercType(pUnit) , !nMercType) && (nCurrentResist = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, eUnitStat, 0) , 99 < nCurrentResist)) {
+        if (nValue <= 0 && (!pUnit || pUnit->eUnitType != UNIT_PLAYER) && (nMercType = D2Common::Monsters::MONSTERS::MONSTER_GetMercType(pUnit) , !nMercType) && (nCurrentResist = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, eUnitStat, 0) , 100 <= nCurrentResist)) {
           return nValue / 5;
         }
     }
@@ -1072,11 +1072,15 @@ static void __stdcall SKILLNEC_SpawnSkeletonsForRevive(int * pnParam, D2UnitStrc
 
 void __fastcall SKILLNEC_DispatchSummonMastery(D2UnitStrc * pUnit, int * pnParam, int32_t nSkillLevel, int32_t nSkillLvl2) {
     int nSummonSkillId = !pnParam ? -1 : pnParam[1];
-    if (nSummonSkillId == 0x16b) {
+    switch (nSummonSkillId) {
+    case 0x16b: {
       SKILLNEC_RollSkeletonMastery(pUnit, pnParam, nSkillLvl2, nSkillLevel);
-    } else if (nSummonSkillId == 0x16c) {
+      break;
+    }
+    case 0x16c: {
       SKILLNEC_SpawnSkeletonsForRevive(pnParam, pUnit);
       return;
+    }
     }
 }
 
@@ -2163,11 +2167,11 @@ BOOL __fastcall Skills_SrvDoFunc_062_BonePrison(::SGAMEDATA * pGame, D2UnitStrc 
 }
 
 BOOL __fastcall Skills_SrvDoFunc_063_PoisonExplosion(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    D2SkillsTxt* pSkillsTxt = (int)eSkill < 0 || sgptDataTable->nTxtSkillsCount <= (int)eSkill ? 0 : sgptDataTable->pTxtSkills + eSkill;
+    D2SkillsTxt* pSkillsTxt = (int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount ? 0 : sgptDataTable->pTxtSkills + eSkill;
     if (eSkill == SKILL_Attack) {
       return 0;
     }
-    if (pSkillsTxt->srvmissile[1] < 0 || sgptDataTable->nTxtMissilesSize <= (int)pSkillsTxt->srvmissile[1]) {
+    if (pSkillsTxt->srvmissile[1] < 0 || (int)pSkillsTxt->srvmissile[1] >= sgptDataTable->nTxtMissilesSize) {
       return 1;
     }
 
@@ -2188,14 +2192,14 @@ BOOL __fastcall Skills_SrvDoFunc_063_PoisonExplosion(::SGAMEDATA * pGame, D2Unit
 }
 
 static int32_t SKILLNEC_AddHitpoints(D2UnitStrc * pUnit, int32_t nParam) {
-    if (nParam < 1) {
+    if (nParam <= 0) {
       return 0;
     }
 
     int nCurHp = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_hitpoints, 0);
     int32_t nMaxHp = D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit);
     nCurHp += nParam;
-    if (nMaxHp < nCurHp) {
+    if (nCurHp > nMaxHp) {
       nParam += nMaxHp - nCurHp;
       nCurHp = nMaxHp;
     }

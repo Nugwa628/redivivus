@@ -212,8 +212,8 @@ void __fastcall Q13_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 BOOL __fastcall Q13_CheckSummonerKillAndReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2RoomStrc** ppAdjacentRooms;
     uint32_t nAdjacentRoomCount;
-    D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2RoomStrc* pDVar3 = D2Common::Units::UNITS_GetRoom(pUnit);
     if (!pDVar3) {
       return 0;
@@ -239,7 +239,7 @@ BOOL __fastcall Q13_CheckSummonerKillAndReward(::SGAMEDATA * pGame, D2UnitStrc *
 
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pDVar3, &ppAdjacentRooms, (int*)&nAdjacentRoomCount);
       iAdjacentRoom = 0;
-      if (nAdjacentRoomCount) {
+      if ((uint32_t)nAdjacentRoomCount > 0) {
         do {
           if (ppAdjacentRooms[iAdjacentRoom] == pDVar1->pSummonerRoom) {
             bPlayerNearSummoner = 1;
@@ -275,8 +275,8 @@ void __fastcall Q13_Callback10_PlayerLeavesGame(D2QuestDataStrc * pQuestData, D2
 
 // A2Q5 "The Summoner" - per-player completion-sound trigger. If this player's record has JustCompleted (0xd) set and the player is currently in the Arcane Sanctuary (level 0x4a), it attaches the quest-complete "Moo" update event/sound (event 0x33) to the player. Cosmetic feedback on Summoner kill. nParam is the quest data ptr; [nParam+0x6d] is the difficulty index into pQuestRecordPool.
 BOOL __fastcall Q13_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TheSummoner, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bIsJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheSummoner, QUESTSTATE_JustCompleted);
     if (!bIsJustCompleted) {
       return 0;
     }
@@ -352,14 +352,14 @@ void __fastcall Q13_SetSummonerRewardOnPartyMember(::SGAMEDATA * pGame, D2UnitSt
 
 // A2Q5 "The Summoner" - per-player party fan-out (iterated over players when Summoner dies). If this player's record has JustCompleted (0xd) set (i.e. they got kill credit) and they belong to a party (partyId != -1), run Q13_SetSummonerRewardOnPartyMember over every party member to share the completion.
 BOOL __fastcall Q13_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TheSummoner, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheSummoner, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
 
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 

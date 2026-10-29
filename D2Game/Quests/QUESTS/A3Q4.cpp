@@ -159,7 +159,7 @@ void __fastcall Q21_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nMonStatsId, 6);
         return;
       }
-    } else if (nMonStatsId != 0xfe || !pQuestData->pQuestSpecificData.pA3Q4->bBirdDropped) {
+    } else if (nMonStatsId != 0xfe || pQuestData->pQuestSpecificData.pA3Q4->bBirdDropped != 1) {
       /* GetQuestState RewardAwaits(1) -> Alkor offers reward: gossip line 5 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheGoldenBird, QUESTSTATE_RewardAwaits);
       if (bQuestState) {
         AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nMonStatsId, 5);
@@ -230,29 +230,29 @@ void __fastcall Q21_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
 // Quest event 2 (NPC deactivate, dialog closed) for Q21: by the target NPC class (254 Alkor, 245 Cain, 264 Meshif) clears the matching talked-to byte in the quest data, clears the low flag byte and calls QUEST_SetStateAndBroadcast with Q21_PlayerNotifyCompleted (state 5 for Alkor, which also sets byte +0; 2 and 4 for Cain's two talks; 3 for Meshif).
 // Evidence: Q21_Callback11_ScrollMessage stores it at sStateFunctions slot 2 (+0xa8) after each talk; [EDX+8] is pQuestArgs->pTarget, [EAX+4] its class id. Was the label Q21_Callback_02 (kept as a secondary label).
 void __fastcall Q21_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    short int sVar1 = !pQuestArgs->pTarget ? -1 : (short int)pQuestArgs->pTarget->nClassId;
+    int32_t sVar1 = !pQuestArgs->pTarget ? -1 : pQuestArgs->pTarget->nClassId;
     D2QuestDataA3Q4Strc* pQuestDataA3Q4 = pQuestData->pQuestSpecificData.pA3Q4;
-    if (sVar1 == 0xfe) {
-      if (pQuestDataA3Q4->bRewardGivenToAlchemist) {
+    if ((uint16_t)sVar1 == 0xfe) {
+      if (pQuestDataA3Q4->bRewardGivenToAlchemist == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 5, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
         pQuestDataA3Q4->bRewardGivenToAlchemist = false;
         pQuestDataA3Q4->bBirdDropped = true;
         return;
       }
-    } else if (sVar1 == 0xf5) {
-      if (pQuestDataA3Q4->bCainToldAboutTome) {
+    } else if ((uint16_t)sVar1 == 0xf5) {
+      if (pQuestDataA3Q4->bCainToldAboutTome == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 2, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
         pQuestDataA3Q4->bCainToldAboutTome = false;
       }
-      if (pQuestDataA3Q4->bAlchemistTradedBird) {
+      if (pQuestDataA3Q4->bAlchemistTradedBird == 1) {
         pQuestData->nQuestPacketFlags = '\0';
         QUEST_SetStateAndBroadcast(pQuestData, 4, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
         pQuestDataA3Q4->bAlchemistTradedBird = false;
         return;
       }
-    } else if (sVar1 == 0x108 && pQuestDataA3Q4->bJadeGivenToMeshif) {
+    } else if ((uint16_t)sVar1 == 0x108 && pQuestDataA3Q4->bJadeGivenToMeshif == 1) {
       pQuestData->nQuestPacketFlags = '\0';
       QUEST_SetStateAndBroadcast(pQuestData, 3, nullptr, (::fpExecuteOnUnitFunction)Q21_PlayerNotifyCompleted, true);
       pQuestDataA3Q4->bJadeGivenToMeshif = false;
@@ -283,7 +283,7 @@ bool __fastcall Q21_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
     if (BVar1) {
       /* GetQuestState JustCompleted(0xd) -> out = 0xb + 2*set (0xd if just-completed
                          cinematic) */ BVar1 = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_TheGoldenBird, QUESTSTATE_JustCompleted);
-      *nUnknown = (BVar1 != 0) * '\x02' + '\v';
+      *nUnknown = BVar1 ? 0xd : 0xb;
       return true;
     }
 
@@ -305,7 +305,7 @@ bool __fastcall Q21_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
     if (!pQuestData->bIsNotIntroduction) {
       return true;
     }
-    if (5 < pQuestData->nStateFlagPrev) {
+    if (6 <= pQuestData->nStateFlagPrev) {
       *nUnknown = (pQuestData->pGame->nGameType != SGAMETYPE_SINGLEPLAYER) + '\x06';
       return true;
     }

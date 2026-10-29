@@ -352,11 +352,11 @@ void __fastcall OBJMODE_DispatchChestType(::SGAMEDATA * pGame, D2UnitStrc * pUni
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     uint8_t byChestType = pUnit->pUnitData.pUnitDataMonster->Components[0] & 0x7f;
     uint32_t uChestType = (uint32_t)byChestType;
-    if (gnObjectOperateCallbackCount <= (int)uChestType) {
+    if ((int)uChestType >= gnObjectOperateCallbackCount) {
       return;
     }
     if (byChestType == 8) {
-      if (0x4a < (int)eLevelId) {
+      if (0x4b <= (int)eLevelId) {
         /* FARPROC lpfn for IsBadCodePtr */ bBadCallback = IsBadCodePtr((FARPROC)gapObjectOperateCallbacks[2]);
         if (bBadCallback) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x161);
@@ -387,7 +387,6 @@ void __fastcall OBJMODE_DispatchChestType(::SGAMEDATA * pGame, D2UnitStrc * pUni
       (*gapObjectOperateCallbacks[2])(pGame, pUnit);
       return;
     }
-
     /* FARPROC lpfn for IsBadCodePtr */ bBadCallback = IsBadCodePtr((FARPROC)gapObjectOperateCallbacks[uChestType]);
     if (bBadCallback) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x17b);
@@ -910,7 +909,7 @@ static BOOL __stdcall OBJMODE_CheckSpawnMonsterFromSkeletonActRestriction(int32_
 
 static void OBJMODE_SpawnMonsterFromObject(eD2MonsterAnimMode eMonsterAnimMode, int32_t nParam, D2ObjectModeArg * pObjectModeArg) {
     eD2LevelId eLevel;
-    if (!(-1 < nParam && nParam < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nParam && nParam < sgptDataTable->nTxtMonStatsSize)) {
       return;
     }
 
@@ -989,8 +988,8 @@ static void OBJMODE_SpawnMonsterAtObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     LONG nX = ptCoords.x;
     LONG nY = ptCoords.y;
     uint32_t nMonClassId = dwParam;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    D2UnitStrc* bSpawnedAtExact = Monster::Create::SpawnMonsterAtRoomPosSimple(pGame, pRoom, nX, nY, nMonClassId, eSpawnAnimMode, wSpawnMode);
+    D2RoomStrc* pRoom;
+    D2UnitStrc* bSpawnedAtExact = Monster::Create::SpawnMonsterAtRoomPosSimple(pGame, D2Common::Units::UNITS_GetRoom(pUnit), nX, nY, nMonClassId, eSpawnAnimMode, wSpawnMode);
     if (bSpawnedAtExact) {
       return;
     }
@@ -998,8 +997,7 @@ static void OBJMODE_SpawnMonsterAtObject(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     D2RoomStrc** ppFreeRoom = &pFreeRoom;
     int32_t eCollisionFlag = 0x3f11;
     int32_t nSearchRadius = 0;
-    pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    D2Common::Collision::COLLISION_FindFreeCoordSpiral(pRoom, &ptCoords, nSearchRadius, eCollisionFlag, ppFreeRoom);
+    D2Common::Collision::COLLISION_FindFreeCoordSpiral(D2Common::Units::UNITS_GetRoom(pUnit), &ptCoords, nSearchRadius, eCollisionFlag, ppFreeRoom);
     if (!pFreeRoom) {
       return;
     }
@@ -1254,8 +1252,7 @@ void __fastcall Shrines_ShrineOfEnirhsFunction(D2ObjectOperateFnArg * pArguments
     }
 
     size_t nNameLen = 0x10;
-    char* szReversedName = __strrev(pPlayerData->szCharName);
-    strncpy(pPlayerData->szCharName, szReversedName, nNameLen);
+    strncpy(pPlayerData->szCharName, __strrev(pPlayerData->szCharName), nNameLen);
 }
 
 void __fastcall Shrines_PortalShrineFunction(D2ObjectOperateFnArg * pArguments, D2ShrinesTxt * pTxtShrines) {
@@ -2346,7 +2343,7 @@ BOOL __fastcall OBJOP_ActivateNoOp(D2ObjectOperateFnArg * pOperation) {
         peVar1 = &pUnit->eUnitFlags;
         *peVar1 &= ~UNITFLAG_TARGETABLE;
       }
-    } else if ((uint32_t)(pUnit->eAnimMode.ePlayerMode - eD2PlayerAnimMode_ns::Neutral) < 2) {
+    } else if ((uint32_t)(pUnit->eAnimMode.ePlayerMode - eD2PlayerAnimMode_ns::Neutral) <= 1) {
       D2Common::Units::SetupUpdateFlag(pUnit, 0);
       return 1;
     }
@@ -3263,9 +3260,9 @@ int __fastcall _x44PacketHandler(::SGAMEDATA * pGame, DWORD dwParam, DWORD param
 void __fastcall OBJMODE_HandleObjectDeactivation(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pObject) {
     DWORD dwPlayerGUID;
     if (pObject) {
-      short int nClassId;
-      nClassId = (short int)pObject->nClassId;
-      if (nClassId == 0x50 || nClassId == 0x5a) {
+      int32_t nClassId;
+      nClassId = pObject->nClassId;
+      if ((uint16_t)nClassId == 0x50 || (uint16_t)nClassId == 0x5a) {
         if (!pUnit) {
           dwPlayerGUID = -1;
         } else {
@@ -3274,12 +3271,12 @@ void __fastcall OBJMODE_HandleObjectDeactivation(::SGAMEDATA * pGame, D2UnitStrc
 
         _x44PacketHandler(pGame, dwPlayerGUID, pObject->nUnitGUID, 0, 2);
       } else {
-        if (nClassId == 0x151) {
+        if ((uint16_t)nClassId == 0x151) {
           OBJMODE_ClearObjectUnitLink(pGame, pUnit, pObject);
           UNIT::SUnit::ClearInteractInfo(pUnit);
           return;
         }
-        if (nClassId == 0x98) {
+        if ((uint16_t)nClassId == 0x98) {
           D2Common::Units::SetupUpdateFlag(pObject, 0);
           UNIT::SUnit::ClearInteractInfo(pUnit);
           return;
@@ -3716,12 +3713,12 @@ void __fastcall SERVER_MissleKilled(D2ObjectOperateFnArg * pKill) {
       pKill->sArg.pVictim->dwDropItemCode = nCharCode;
       ITEMS::Items::Drop::ITEM_RewardItemToDrop(pKill->sArg.pGame, pKill->sArg.pVictim, ITEMTYPE_Shield, &nDropArg, nullptr, -1, 1);
       ITEMS::Items::Drop::ITEM_RewardItemToDrop(pKill->sArg.pGame, pKill->sArg.pVictim, ITEMTYPE_Shield, &nDropArg, nullptr, -1, 1);
-      if (!pTxtObjects->Mode[1]) {
-        D2Common::Units::SetupUpdateFlag(pKill->sArg.pVictim, 2);
-      } else {
+      if (pTxtObjects->Mode[1]) {
         D2Common::Units::SetupUpdateFlag(pKill->sArg.pVictim, 1);
         pGame = pKill->sArg.pGame;
         GAME::Event::SetEvent(pGame, pKill->sArg.pVictim, 1, (pTxtObjects->FrameCnt[1] >> 8) + 1 + pGame->dwGameFrame, 0, 0);
+      } else {
+        D2Common::Units::SetupUpdateFlag(pKill->sArg.pVictim, 2);
       }
 
       pVictim = pKill->sArg.pVictim;
@@ -4141,12 +4138,11 @@ D2UnitStrc ** __fastcall OBJMODE_RollChestDrops(D2ObjectOperateFnArg * pOperateA
     D2SeedStrc* pSeedPtr = pOperateArg->pSeed;
     D2SeedStrc seedNext = D2_SEED_NEXT(*pSeedPtr);
     *pSeedPtr = seedNext;
-    if (seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 100) * -100 >= 0x15) {
-      return nullptr;
+    if (!(seedNext.nSeedLow % 100 > 0x14)) {
+      return RollChestDrops(pOperateArg, ITEMTYPE_None1);
     }
 
-    D2UnitStrc** ppItems = RollChestDrops(pOperateArg, ITEMTYPE_None1);
-    return ppItems;
+    return nullptr;
 }
 
 BOOL __fastcall OBJOP_OpenChestNoMonster(D2ObjectOperateFnArg * pOperation) {

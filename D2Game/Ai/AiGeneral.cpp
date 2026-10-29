@@ -158,10 +158,7 @@ void __fastcall FreeAi(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     if (!pMemoryToFree) {
       return;
     }
-    if (pMemoryToFree == pMemoryToFree->pNext) {
-      pAiGeneral->pCmdLast = 0;
-      pAiGeneral->pCmdCurrent = 0;
-    } else {
+    if (pMemoryToFree != pMemoryToFree->pNext) {
       if (pAiGeneral->pCmdLast == pMemoryToFree) {
         pAiGeneral->pCmdLast = pMemoryToFree->pNext;
       }
@@ -169,9 +166,12 @@ void __fastcall FreeAi(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       pAiGeneral->pCmdCurrent = pMemoryToFree->pNext;
       pMemoryToFree->pPrev->pNext = pMemoryToFree->pNext;
       pMemoryToFree->pNext->pPrev = pMemoryToFree->pPrev;
+    } else {
+      pAiGeneral->pCmdLast = 0;
+      pAiGeneral->pCmdCurrent = 0;
     }
 
-    D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree, ".\\Ai\\AiGeneral.cpp", 0xa1);
+    Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pMemoryToFree, ".\\Ai\\AiGeneral.cpp", 0xa1, 0);
 }
 
 // @sourcefile .\Ai\AiGeneral.cpp
@@ -373,11 +373,14 @@ D2MonsterAiCmdStrc * __fastcall AI_CreateCmdIfNotExists(::SGAMEDATA * pGame, D2U
 }
 
 D2MapAIStrc * * __stdcall GetMonsterMapAi(D2UnitStrc * pMonster) {
-    if (!(pMonster && pMonster->eUnitType == UNIT_MONSTER && pMonster->pUnitData.pUnitDataMonster)) {
-      return (D2MapAIStrc**)0x38;
+    D2AiGeneralStrc* pAiGeneral;
+    if (pMonster && pMonster->eUnitType == UNIT_MONSTER && pMonster->pUnitData.pUnitDataMonster) {
+      pAiGeneral = pMonster->pUnitData.pUnitDataMonster->pAiGeneral;
+    } else {
+      pAiGeneral = nullptr;
     }
 
-    return &pMonster->pUnitData.pUnitDataMonster->pAiGeneral->pMapAi;
+    return &pAiGeneral->pMapAi;
 }
 
 void __fastcall AssignMinionOwner(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nOwnerGUID, eD2UnitType eOwnerType, int32_t nParam, BOOL bTransferBoss) {

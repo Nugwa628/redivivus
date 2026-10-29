@@ -114,7 +114,7 @@ void __fastcall SetCombatAndMonStats(D2MonsterPathParamStrc * pPathParam, int32_
     if (nSteps == '\0') {
       return;
     }
-    if (0x4d < nSteps) {
+    if (0x4e <= nSteps) {
       nSteps = 'M';
     }
 

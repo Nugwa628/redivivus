@@ -96,7 +96,7 @@ void __fastcall Q19_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
 
 // Q19_Callback_02 (Khalim's Will). State-2 handler installed after the player commits to the quest (NPC 0xf5 dialog). When that NPC's relic-pedestal interaction fires and bQuestCompleted is set, flips quest to RewardAwaits via QUEST_SetStateAndBroadcast(state=1, Q19_PlayerNotifyKhalimsWill) and clears its own slot (one-shot). Drives the transition into the reward/turn-in phase.
 void __fastcall Q19_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    if (!(pQuestArgs->pTarget && (short int)pQuestArgs->pTarget->nClassId == 0xf5 && pQuestData->pQuestSpecificData.pA3Q2->bQuestCompleted)) {
+    if (!(pQuestArgs->pTarget && (short int)pQuestArgs->pTarget->nClassId == 0xf5 && pQuestData->pQuestSpecificData.pA3Q2->bQuestCompleted == 1)) {
       return;
     }
 
@@ -499,8 +499,7 @@ BOOL __fastcall Q19_CheckPlayerHasKhalimsEye(::SGAMEDATA * pGame, D2UnitStrc * p
       return 0;
     }
 
-    int32_t* piVar1 = &pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount;
-    (*piVar1)++;
+    pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount++;
     return 0;
 }
 
@@ -521,8 +520,7 @@ BOOL __fastcall Q19_CheckPlayerHasKhalimsBrain(::SGAMEDATA * pGame, D2UnitStrc *
       return 0;
     }
 
-    int32_t* piVar1 = &pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount;
-    (*piVar1)++;
+    pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount++;
     return 0;
 }
 
@@ -543,8 +541,7 @@ BOOL __fastcall Q19_CheckPlayerHasKhalimsHeart(::SGAMEDATA * pGame, D2UnitStrc *
       return 0;
     }
 
-    int32_t* piVar1 = &pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount;
-    (*piVar1)++;
+    pDVar3->pQuestSpecificData.pA3Q2->nKhalimsEyeCount++;
     return 0;
 }
 

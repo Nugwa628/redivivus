@@ -425,7 +425,7 @@ void __fastcall Q22_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     }
 
     D2QuestDataA3Q5Strc* pA2Q3Data = pQuestData->pQuestSpecificData.pA3Q5;
-    if (!pA2Q3Data->nTrackedCouncilByte0) {
+    if (pA2Q3Data->nTrackedCouncilByte0 != 1) {
       return;
     }
 

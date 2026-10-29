@@ -104,11 +104,12 @@ void __fastcall SetAiState(D2UnitStrc * pMonster, D2UnitStrc * nAiState) {
 }
 
 int __fastcall GetAiState(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
+    D2UnitDataMonsterStrc* pMonsterData = !pUnit || pUnit->eUnitType != UNIT_MONSTER ? 0 : pUnit->pUnitData.pUnitDataMonster;
+    if (!pMonsterData) {
       return 1;
     }
 
-    return pUnit->pUnitData.pUnitDataMonster->nAiState;
+    return pMonsterData->nAiState;
 }
 
 void __fastcall SetLevelId(D2UnitStrc * pUnit, eD2LevelId eLevel) {
@@ -128,11 +129,12 @@ eD2LevelId __fastcall GetMonsterArea(D2UnitStrc * pUnit) {
 }
 
 uint32_t __fastcall GetMonsterFlags(D2UnitStrc * pUnit, uint16_t eFlag) {
-    if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster)) {
+    D2UnitDataMonsterStrc* pMonsterData = !pUnit || pUnit->eUnitType != UNIT_MONSTER ? 0 : pUnit->pUnitData.pUnitDataMonster;
+    if (!pMonsterData) {
       return 0;
     }
 
-    return (uint32_t)((pUnit->pUnitData.pUnitDataMonster->nSummonerFlags & eFlag) != 0);
+    return (uint32_t)((pMonsterData->nSummonerFlags & eFlag) != 0);
 }
 
 void __fastcall SetUnsetSummonerFlags(D2UnitStrc * pUnit, uint16_t nSummonerFlag, BOOL bSetUnset) {
@@ -163,7 +165,7 @@ void __fastcall MONSTER_SetVelocityAndTransition(::SGAMEDATA * pGame, D2UnitStrc
       int32_t nClassId;
       nClassId = pUnit->nClassId;
       nUnitMode = pUnit->eAnimMode.eMonsterMode;
-      if (-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) {
+      if (0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) {
         pMonStatsTxt = sgptDataTable->pTxtMonStats + nClassId;
         goto set_velocity_and_transition;
       }
@@ -274,19 +276,19 @@ void __fastcall MONSTER_StartAiAndRegenTimers(::SGAMEDATA * pGame, D2UnitStrc * 
 }
 
 int32_t __fastcall PlayerMultiplyer(int32_t nPlayers) {
-    if (nPlayers >= 9) {
-      return (nPlayers - 2) * 0x32;
+    if (nPlayers < 9) {
+      return ::PlayerMultiplyer[nPlayers];
     }
 
-    return ::PlayerMultiplyer[nPlayers];
+    return (nPlayers - 2) * 0x32;
 }
 
 int32_t __fastcall PlayerMultiplyer2(int32_t nParam) {
-    if (nParam >= 9) {
-      return (nParam * 5 + 0x82) * 2;
+    if (nParam < 9) {
+      return ::PlayerMultiplyer2[nParam];
     }
 
-    return ::PlayerMultiplyer2[nParam];
+    return (nParam * 5 + 0x82) * 2;
 }
 
 // Initialises a D2MonsterLevelDataStrc with player-count and difficulty multipliers for a monster. Queries the current player count (SERVER_GAME_CountPlayers), computes PlayerMultiplyer/2/3, and reads MonsterSkillBonus from the DifficultyLevels txt. Skips scaling for boss/special-aligned monsters (Align != 0) and sets nPlayerMultiplyer3=1 for them instead.
@@ -764,7 +766,7 @@ void __fastcall STRUCT_FillDataMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, 
     pUnitDataMonster->pPathParamOrName.pPathParam = pMonsterAiParam;
     D2MonsterAiStrc* pMonsterAi = MonsterAI::AllocMonsterAI(pGame);
     pUnitDataMonster->pMonsterAi = pMonsterAi;
-    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || sgptDataTable->nTxtMonStatsSize <= nClassId) {
+    if (!pUnit || (nClassId = pUnit->nClassId , nClassId < 0) || nClassId >= sgptDataTable->nTxtMonStatsSize) {
       pMonStatsTxt = 0;
     } else {
       pMonStatsTxt = sgptDataTable->pTxtMonStats + nClassId;
@@ -781,9 +783,7 @@ void __fastcall STRUCT_FillDataMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, 
 
     AI::AttachCorrectAiFunctionToMonster(pGame, pUnit, pAiGeneralInit, 0);
     eD2LevelId eRoomLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    if (!pUnit) {
-      eAnimMode = Death;
-    } else {
+    if (pUnit) {
       if (pUnit->eUnitType == UNIT_MONSTER && pUnit->pUnitData.pUnitDataMonster) {
         pUnit->pUnitData.pUnitDataMonster->eLevelId = eRoomLevelId;
       }
@@ -794,6 +794,8 @@ void __fastcall STRUCT_FillDataMonster(::SGAMEDATA * pGame, D2RoomStrc * pRoom, 
         UNIT::SUnit::InitAnimFrame(pUnit);
         return;
       }
+    } else {
+      eAnimMode = Death;
     }
 
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, eAnimMode);

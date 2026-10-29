@@ -251,8 +251,8 @@ int __stdcall FreeServer() {
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(&gQServerGameListCs);
     UNIT::sunitproxy::SUNITPROXY_FreeAllNpcItemTables();
     gpQServerGameState = 0;
-    StartingAct = 0;
     QServerNextToken = 1;
+    StartingAct = 0;
     return 1;
 }
 
@@ -446,33 +446,29 @@ void __fastcall BroadcastPlayerJoin(::SGAMEDATA * pGame, D2ClientStrc * pClient)
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x5a1);
       exit(-1);
     }
-
-    {
-      D2UnitStrc* pUnit;
-      for (pClientOther = pGame->pClient; pClientOther; pClientOther = pClientOther->pNext) {
-        if (pClientOther != pClient) {
-          pUnit = Clients::CLIENTS_GetControlUnit(pClientOther, 0);
-          if (pUnit) {
-            SCmd::NET_D2GS_SERVER_Send_0x5B_PlayerJoin(pClient, pUnit, pClientOther);
-            SCmd::NET_D2GS_SERVER_Send_0x5B_PlayerJoin(pClientOther, pUnitJoining, pClient);
-            if (pUnit->pInventory) {
-              for (pRoomCorpse = D2Common::INVENTORY::Inventory::INVENTORY_GetCorpse(pUnit->pInventory); pRoomCorpse; pRoomCorpse = D2Common::INVENTORY::Inventory::INVENTORY_GetNextCorpse(pRoomCorpse)) {
-                dwCorpseGUIDArg = D2Common::INVENTORY::Inventory::ROOMCORPSE_GetGUID(pRoomCorpse);
-                if (dwCorpseGUIDArg != -1) {
-                  bAssign = 1;
-                  dwUnitGUID_param = D2Client::UNIT::GetGUID(pUnit);
-                  SCmd::NET_D2GS_SERVER_Send_0x8E_CorpseAssign(pClient, dwUnitGUID_param, dwCorpseGUIDArg, bAssign);
-                }
+    D2UnitStrc* pUnit;
+    for (pClientOther = pGame->pClient; pClientOther; pClientOther = pClientOther->pNext) {
+      if (pClientOther != pClient) {
+        pUnit = Clients::CLIENTS_GetControlUnit(pClientOther, 0);
+        if (pUnit) {
+          SCmd::NET_D2GS_SERVER_Send_0x5B_PlayerJoin(pClient, pUnit, pClientOther);
+          SCmd::NET_D2GS_SERVER_Send_0x5B_PlayerJoin(pClientOther, pUnitJoining, pClient);
+          if (pUnit->pInventory) {
+            for (pRoomCorpse = D2Common::INVENTORY::Inventory::INVENTORY_GetCorpse(pUnit->pInventory); pRoomCorpse; pRoomCorpse = D2Common::INVENTORY::Inventory::INVENTORY_GetNextCorpse(pRoomCorpse)) {
+              dwCorpseGUIDArg = D2Common::INVENTORY::Inventory::ROOMCORPSE_GetGUID(pRoomCorpse);
+              if (dwCorpseGUIDArg != -1) {
+                bAssign = 1;
+                SCmd::NET_D2GS_SERVER_Send_0x8E_CorpseAssign(pClient, D2Client::UNIT::GetGUID(pUnit), dwCorpseGUIDArg, bAssign);
               }
             }
           }
         }
       }
-
-      SCmd::NET_D2GS_SERVER_Send_0x5B_PlayerJoin(pClient, pUnitJoining, pClient);
-      Arena::ARENA_BroadcastScoreOnJoin(pGame, pClient);
-      return;
     }
+
+    SCmd::NET_D2GS_SERVER_Send_0x5B_PlayerJoin(pClient, pUnitJoining, pClient);
+    Arena::ARENA_BroadcastScoreOnJoin(pGame, pClient);
+    return;
 }
 
 void __fastcall BroadcastPlayerLeave(::SGAMEDATA * pGame, D2ClientStrc * pClient) {
@@ -708,7 +704,7 @@ void __fastcall GAME_DestroyGame(int32_t nGameToken, ::SGAMEDATA * pGame) {
       }
 
       pnTokenEntry++;
-    } while ((int)pnTokenEntry < (uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken)));
+    } while ((int)pnTokenEntry < (int)((uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken))));
 
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gQServerGameListCs);
     Monster::MonsterRegion::FreeMonsterRegion(pGame->pMemoryPool, (int32_t)pGame->pMonsterRegion);
@@ -741,7 +737,7 @@ void __fastcall GAME_DestroyGame(int32_t nGameToken, ::SGAMEDATA * pGame) {
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ pGame->lpCriticalSection = (LPCRITICAL_SECTION)0x0;
     LeaveCriticalSection(lpCriticalSection);
     /* LPCRITICAL_SECTION lpCriticalSection for DeleteCriticalSection */ DeleteCriticalSection(lpCriticalSection);
-    D2_FREE_POOL_AT(nullptr, lpCriticalSection, ".\\GAME\\Game.cpp", 0x8da);
+    Fog::Memory::FreeServerMemory(nullptr, lpCriticalSection, ".\\GAME\\Game.cpp", 0x8da, 0);
 }
 
 uint32_t __fastcall NET_IsClientAllowedToLeave(uint32_t nParam) {
@@ -1215,11 +1211,10 @@ void __stdcall CheckClientTimeouts(::SGAMEDATA * pGame, int * pnParam) {
       pClientNext = pClient->pNext;
       dwFileFlags = Clients::CLIENT_TestFileFlags(pClient, 4);
       dwClientTimeout = pClient->dwTimeOut;
-      if (dwClientTimeout < dwCurrentTick && (dwFileFlags && 10000 < dwCurrentTick - dwClientTimeout && 10 < (uint32_t)pClient->tQServerExt.nHeartbeatSampleCount || 45000 < dwCurrentTick - dwClientTimeout || pClient->tQServerExt.nForceTimeoutDisconnect) && BattleNetServerService) {
+      if (dwCurrentTick > dwClientTimeout && (dwFileFlags && 10000 < dwCurrentTick - dwClientTimeout && 10 < (uint32_t)pClient->tQServerExt.nHeartbeatSampleCount || 45000 < dwCurrentTick - dwClientTimeout || pClient->tQServerExt.nForceTimeoutDisconnect) && BattleNetServerService) {
         bSaveUnknownFlag = 0;
-        pCharName = Clients::GetCharName(pClient);
-        pUnit = Clients::CLIENTS_GetControlUnit(pClient, 0);
-        PLAYER::PlayerSave::SaveGameAllGameTypes(pGame, pUnit, pCharName, bSaveUnknownFlag);
+
+        PLAYER::PlayerSave::SaveGameAllGameTypes(pGame, Clients::CLIENTS_GetControlUnit(pClient, 0), Clients::GetCharName(pClient), bSaveUnknownFlag);
         *pnParam = 1;
         SERVER_DisconnectClient(pGame, pClient, 0);
       }
@@ -1397,8 +1392,8 @@ void __fastcall UpdateActEnvironments(::SGAMEDATA * pGame) {
     int nTicksOut;
     int nCycleOut;
     D2ClientStrc* pClient;
-    D2DrlgActStrc** ppActLoop = pGame->pAct;
     uint32_t nActIndex = 0;
+    D2DrlgActStrc** ppActLoop = pGame->pAct;
     do {
       D2DrlgActStrc** ppActCurrent;
       ppActCurrent = ppActLoop;
@@ -1491,10 +1486,10 @@ static void __stdcall GAME_SendPlayerVitalStats(D2ClientStrc * pClient) {
     if (!pPlayerUnit_lcl) {
       return;
     }
-    if (pPacketList && 9 < pClient->dwRoomTicker) {
+    if (pPacketList && 10 <= pClient->dwRoomTicker) {
       bForceUpdate = 1;
     }
-    if (0x13 < pClient->dwRoomTicker) {
+    if (0x14 <= pClient->dwRoomTicker) {
       bForceUpdate = 1;
     }
     if (pPlayerUnit_lcl->eUnitType != UNIT_PLAYER) {
@@ -1525,13 +1520,16 @@ static void GAME_SendNearbyUnitPositions(D2ClientStrc * pClient) {
     if (pClient->dwRoomTicker < 10) {
       return;
     }
-    if (pPlayerUnit_lcl->eUnitType == UNIT_PLAYER) {
+    if (pPlayerUnit_lcl->eUnitType != UNIT_PLAYER) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf19);
+      exit(-1);
+    } else {
       uint32_t nMaxUnitsToSend;
       nMaxUnitsToSend = (499 - pPacketList->nSize) / 9;
-      if ((int)nMaxUnitsToSend < 1) {
+      if ((int)nMaxUnitsToSend <= 0) {
         return;
       }
-      if (!(nMaxUnitsToSend < 0x38)) {
+      if (!(nMaxUnitsToSend <= 0x37)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf23);
         exit(-1);
       }
@@ -1539,9 +1537,6 @@ static void GAME_SendNearbyUnitPositions(D2ClientStrc * pClient) {
       Clients::GAME_CollectNearbyUnitPositions(pClient, nMaxUnitsToSend);
       SCmd::GAME_SendNearbyUnitPositionPacket(pClient);
       return;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf19);
-      exit(-1);
     }
 }
 
@@ -1689,9 +1684,10 @@ void __fastcall _TableNullSub25(char * szText, int32_t nId) {
 }
 
 void __fastcall MonsterIdToName(char * szText, int32_t nId) {
-    if (-1 < nId && nId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nId) {
+    D2MonStatsTxt* pMonStatsRecord = (0 <= nId && nId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nId] : 0;
+    if (pMonStatsRecord) {
       uint16_t* pwszSrc;
-      pwszSrc = D2Lang::StrTable::strtable::GetLocaleString(sgptDataTable->pTxtMonStats[nId].NameStr);
+      pwszSrc = D2Lang::StrTable::strtable::GetLocaleString(pMonStatsRecord->NameStr);
       D2Lang::Unicode::UNISYS::UNICODE_WideToMultiByte(szText, (uint16_t*)pwszSrc, 0x40);
       return;
     }
@@ -1773,7 +1769,7 @@ void __stdcall LeaveCriticalSectionLastGameServer() {
 
 void __stdcall GAME_SetFrameRate(int32_t nFrameRate) {
     Frames_PerSecond = nFrameRate;
-    Frames_TimeBetweenFrames = (int)(1000 / (int64_t)nFrameRate);
+    Frames_TimeBetweenFrames = (1000 / nFrameRate);
 }
 
 void __stdcall SetupStartingAct(int nAct) {
@@ -1925,8 +1921,7 @@ void __fastcall SendSaveFileToClient(::SGAMEDATA * pGame) {
       pUnit = Clients::CLIENTS_GetControlUnit(pClient, 0);
       if (pUnit) {
         bForceDisconnect = 0;
-        pCharName = Clients::GetCharName(pClient);
-        PLAYER::PlayerSave::SaveGameAllGameTypes(pGame, pUnit, pCharName, bForceDisconnect);
+        PLAYER::PlayerSave::SaveGameAllGameTypes(pGame, pUnit, Clients::GetCharName(pClient), bForceDisconnect);
         if (pGame->nGameType == SGAMETYPE_OBNET_HOST || pGame->nGameType == SGAMETYPE_LAN_HOST) {
           bHasSaveData = Clients::CLIENT_HasSaveData(pClient);
           while (bHasSaveData) {
@@ -2055,7 +2050,7 @@ void __fastcall QSERVER_DestroyGameByToken(uint32_t nToken) {
     ::SGAMEDATA* pGame = pQServerState->TSHashTable<::SGAMEDATA, HASHKEY_NONE>::Ptr(nToken, &pQServerState->tKey);
     if (!pGame) {
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&lpCriticalSection->m_critsect);
-      return nullptr;
+      return pGame;
     }
     if (!pGame->lpCriticalSection) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1181);
@@ -2129,8 +2124,7 @@ void __stdcall QSERVER_ShutdownAllGames() {
           ServerCmd::NET_D2GS_SERVER_Send_0xB0_ConnectionTerminated(pClient->nClientNo);
           pUnit = Clients::CLIENTS_GetControlUnit(pClient, 0);
           bForceDisconnect = 1;
-          pCharName = Clients::GetCharName(pClient);
-          PLAYER::PlayerSave::SaveGameAllGameTypes(pGame, pUnit, pCharName, bForceDisconnect);
+          PLAYER::PlayerSave::SaveGameAllGameTypes(pGame, pUnit, Clients::GetCharName(pClient), bForceDisconnect);
           if (pGame->nGameType == SGAMETYPE_OBNET_HOST || pGame->nGameType == SGAMETYPE_LAN_HOST) {
             bHasSaveData = Clients::CLIENT_HasSaveData(pClient);
             while (bHasSaveData) {
@@ -2154,7 +2148,7 @@ void __stdcall QSERVER_ShutdownAllGames() {
       }
 
       pTokenCursor++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenCursor) {
         return;
       }
     } while (true);
@@ -2182,7 +2176,7 @@ int32_t __stdcall QSERVER_CountExpansionGames() {
       }
 
       pTokenEntry++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenEntry) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenEntry) {
         return nCount;
       }
     } while (true);
@@ -2206,7 +2200,7 @@ void __stdcall QSERVER_GetGameListByPlayerCount(short * pHistogramOut, int32_t n
           }
 
           /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(pGame->lpCriticalSection);
-          if (nMaxPlayers < nClientsCount) {
+          if (nClientsCount > nMaxPlayers) {
             nClientsCount = nMaxPlayers;
           }
 
@@ -2215,7 +2209,7 @@ void __stdcall QSERVER_GetGameListByPlayerCount(short * pHistogramOut, int32_t n
       }
 
       pTokenCursor++;
-    } while ((int)pTokenCursor < (uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken)));
+    } while ((int)pTokenCursor < (int)((uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken))));
 }
 
 // Generates histogram of active games by age (in minutes). Iterates global game tokens, locks each game, reads dwGameFrame (frame counter), converts to minutes via division by 0x1d4c (7500 frames = 5 min), increments histogram bucket. Caps at nMaxMinutes-1.
@@ -2250,9 +2244,9 @@ void __stdcall QSERVER_GetGameListByAge(short * pHistogramOut, int32_t nMaxMinut
 }
 
 uint32_t __stdcall QSERVER_GetClientCountByServerId(uint16_t nServerId) {
+    ::SGAMEDATA* nToken = 0;
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gQServerGameListCs);
     ::SGAMEDATA* pGame = gaQServerGameByToken[nServerId];
-    ::SGAMEDATA* nToken = 0;
     if (pGame && pGame != (::SGAMEDATA*)-1) {
       nToken = pGame;
     }
@@ -2350,7 +2344,7 @@ int32_t __stdcall QSERVER_FillServerTokenArray(uint16_t * pOutArray, int32_t nMa
     ::SGAMEDATA** pTokenSlot = gaQServerGameByToken + 1;
     do {
       ::SGAMEDATA* pGame;
-      if (nMaxCount <= nCount) {
+      if (nCount >= nMaxCount) {
         return nCount;
       }
 
@@ -2370,7 +2364,7 @@ int32_t __stdcall QSERVER_FillServerTokenArray(uint16_t * pOutArray, int32_t nMa
       }
 
       pTokenSlot++;
-    } while ((int)pTokenSlot < (uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken)));
+    } while ((int)pTokenSlot < (int)((uintptr_t)((char*)&gaQServerGameByToken + sizeof(gaQServerGameByToken))));
 
     return nCount;
 }
@@ -2776,7 +2770,7 @@ uint32_t __fastcall QSERVER_FindGameTokenByName(char * szGameName) {
       }
 
       pTokenCursor++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenCursor) {
         return 0;
       }
     } while (true);
@@ -2785,8 +2779,8 @@ uint32_t __fastcall QSERVER_FindGameTokenByName(char * szGameName) {
 // Inline QSERVER_GetFirstActiveGame: returns that game's pInitSeed.nSeedLow and leaves its critical section, or 0 with no game; halts (line 4196) when the game has no critical section.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 uint32_t __stdcall QSERVER_GetFirstActiveGameSeed() {
-    EnterCriticalSection(&gQServerGameListCs);
     ::SGAMEDATA* nToken = 0;
+    EnterCriticalSection(&gQServerGameListCs);
     if (gaQServerGameByToken[1] && gaQServerGameByToken[1] != (::SGAMEDATA*)-1) {
       nToken = gaQServerGameByToken[1];
     }
@@ -2839,7 +2833,7 @@ BOOL __fastcall GAME_CheckIfGameNameExistsSafely(char * szGameName) {
       }
 
       pTokenCursor++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)pTokenCursor) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)pTokenCursor) {
         return 1;
       }
     } while (true);
@@ -3031,7 +3025,7 @@ int32_t __stdcall SrvProcessAllGames(int32_t bLimitFrameSkip) {
       }
 
       nToken++;
-      if ((uintptr_t)((char*)&gaQServerGameByToken + 4099) < (int)nToken) {
+      if ((int)((char*)&gaQServerGameByToken + 4100) <= (int)nToken) {
         if (!bTickedAnyGame) {
           return 0;
         }
@@ -3615,18 +3609,23 @@ void __fastcall SetStat(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, int32_t nValu
     }
     if (pUnit->eUnitType == UNIT_PLAYER) {
       uint32_t nGoldLimit;
-      if (eUnitStat == UNITSTAT_gold) {
+      switch (eUnitStat) {
+      case UNITSTAT_gold: {
         nGoldLimit = D2Common::Units::GetInventoryGoldLimit(pUnit);
-        if ((int)nGoldLimit < nValue) {
+        if (nValue > (int)nGoldLimit) {
           D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_gold, 0, 0);
           return;
         }
-      } else if (eUnitStat == UNITSTAT_goldbank) {
+        break;
+      }
+      case UNITSTAT_goldbank: {
         nGoldLimit = D2Common::Units::GetStashGoldLimit(pUnit);
-        if ((int)nGoldLimit < nValue) {
+        if (nValue > (int)nGoldLimit) {
           D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_goldbank, 0, 0);
           return;
         }
+        break;
+      }
       }
     }
 

@@ -219,8 +219,8 @@ void __fastcall Q03_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     int32_t nTargetClassId;
     uint8_t nStateFlag;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pMalusItem = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pMalusItem->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_JustCompleted);
     BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
     if (!pQuestArgs->pTarget) {
@@ -233,7 +233,17 @@ void __fastcall Q03_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     D2UnitStrc* pCompletedCheck = ITEMS::Items::Drop::HasQuestItem(pQuestArgs->pGame, pQuestArgs->pPlayer, 0x206d6468);
-    if (!pCompletedCheck) {
+    if (pCompletedCheck) {
+      nPlayerLevel2 = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pQuestArgs->pPlayer, UNITSTAT_level, 0);
+      if (8 <= nPlayerLevel2) {
+        /* GetQuestState(Completed=0) — has Malus & lvl>=8: offer "return Malus" line
+                         if not done */ bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
+        if (!bCompleted) {
+          AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 3);
+          return;
+        }
+      }
+    } else {
       uint32_t nMessageIndexMaybe;
       if (bJustCompleted != 1) {
         nStateFlag = pQuestData->nStateFlag;
@@ -242,16 +252,6 @@ void __fastcall Q03_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
           if (nMessageIndexMaybe != -1 && nMessageIndexMaybe < 6) {
             AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, nMessageIndexMaybe);
           }
-        }
-      }
-    } else {
-      nPlayerLevel2 = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pQuestArgs->pPlayer, UNITSTAT_level, 0);
-      if (7 < nPlayerLevel2) {
-        /* GetQuestState(Completed=0) — has Malus & lvl>=8: offer "return Malus" line
-                         if not done */ bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
-        if (!bCompleted) {
-          AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 3);
-          return;
         }
       }
     }
@@ -579,7 +579,13 @@ bool __fastcall Q03_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
     }
 
     bQuestState = Q03_CheckPartyHasMalus(pUnit, pQuestData);
-    if (!bQuestState) {
+    if (bQuestState) {
+      /* GetQuestState(Completed=0) — party holds Malus & not done => status 0x02 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
+      if (!bQuestState) {
+        *pbyStatusCode = '\x02';
+        return true;
+      }
+    } else {
       int iVar1;
       if (pQuestData->bIsNotIntroduction) {
         /* GetQuestState(JustCompleted=0xd) — just turned in self game */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_ToolsOfTheTrade, QUESTSTATE_JustCompleted);
@@ -602,14 +608,8 @@ bool __fastcall Q03_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
         iVar1 = QUEST_GetQuestRecordState(pQuestData->pGame, QUEST_ToolsOfTheTrade, 0xd);
         if (iVar1) {
           nCompletionState = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0);
-          *pbyStatusCode = (7 < nCompletionState) * '\b' + '\x04';
+          *pbyStatusCode = (8 <= nCompletionState ? 0xc : 0x4);
         }
-      }
-    } else {
-      /* GetQuestState(Completed=0) — party holds Malus & not done => status 0x02 */ bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_ToolsOfTheTrade, QUESTSTATE_Completed);
-      if (!bQuestState) {
-        *pbyStatusCode = '\x02';
-        return true;
       }
     }
 

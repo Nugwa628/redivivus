@@ -404,55 +404,54 @@ int32_t __fastcall MONSTERREGION_CheckSpawnDensity(D2MonsterRegionStrc * pMonter
       nTotalLevelRooms = pMonterRegion->nLevelRoomsCount;
       if (nTotalLevelRooms) {
         nSpawnedRooms = pMonterRegion->nRoomsCount;
-        if (!pRoom) {
-          pSeed = 0;
-        } else {
+        if (pRoom) {
           pSeed = &pRoom->sSeed;
+        } else {
+          pSeed = 0;
         }
 
         sNextSeed = D2_SEED_NEXT(*pSeed);
         *pSeed = sNextSeed;
-        if ((int)(sNextSeed.nSeedLow + (int)(((uint64_t)d2_bits_of(sNextSeed) & 0xffffffff) / 100) * -100) < nSpawnedRooms * 100 / nTotalLevelRooms) {
+        if ((int)(sNextSeed.nSeedLow % 100) < nSpawnedRooms * 100 / nTotalLevelRooms) {
           return 0;
         }
       }
     }
     if (byCurUniqueCount < byUniqueCount) {
-      if (!pRoom) {
-        pSeed = 0;
-      } else {
+      if (pRoom) {
         pSeed = &pRoom->sSeed;
+      } else {
+        pSeed = 0;
       }
 
       sNextSeed = D2_SEED_NEXT(*pSeed);
       *pSeed = sNextSeed;
-      if ((int)(sNextSeed.nSeedLow + (int)(((uint64_t)d2_bits_of(sNextSeed) & 0xffffffff) / 100) * -100) < 6) {
+      if ((int)(sNextSeed.nSeedLow % 100) <= 5) {
         return 0;
       }
     }
-    if (!pRoom) {
-      pSeed = 0;
-    } else {
+    if (pRoom) {
       pSeed = &pRoom->sSeed;
+    } else {
+      pSeed = 0;
     }
 
     sNextSeed = D2_SEED_NEXT(*pSeed);
     *pSeed = sNextSeed;
-    return (0x23 < (int)(sNextSeed.nSeedLow + (int)(((uint64_t)d2_bits_of(sNextSeed) & 0xffffffff) / 100) * -100)) + 1;
+    return (0x23 < (int)(sNextSeed.nSeedLow % 100)) + 1;
 }
 
 // @sourcefile .\SKILLS\SkillItem.cpp
 BOOL __fastcall SKILLITEM_ItemSpellInit_UseStackable(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pItem, D2UnitStrc * pTarget, int nX, int nY, eD2Skills eSkill) {
     D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_CURSOR, 1);
     int nSpellIcon = D2Common::ITEMS::Items::ITEM_GetSpellIcon(pItem);
-    if (-1 >= nSpellIcon) {
+    if (0 > nSpellIcon) {
       return 1;
     }
 
     int32_t nParam = 1;
     BOOL bUseUnitGUID = 0;
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\SkillItem.cpp", 0x40);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(pClient, pItem, nSpellIcon, bUseUnitGUID, nParam, (uint16_t)eSkill);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\SkillItem.cpp", 0x40), pItem, nSpellIcon, bUseUnitGUID, nParam, (uint16_t)eSkill);
     return 1;
 }
 
@@ -501,8 +500,7 @@ static void SKILLITEM_ClearCursorFlagAndNotifyClient(D2UnitStrc * pUnit) {
         nParam = 0;
         bHasCursorFlag = 1;
         nItemSlot = 0xff;
-        pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\SkillItem.cpp", 0x7a);
-        GAME::SCmd::NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(pClient, pUnitTmp2, nItemSlot, bHasCursorFlag, nParam, nSkillId);
+        GAME::SCmd::NET_D2GS_SERVER_Send_0x3F_SETSPELLICON(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\SKILLS\\SkillItem.cpp", 0x7a), pUnitTmp2, nItemSlot, bHasCursorFlag, nParam, nSkillId);
       }
     }
 }
@@ -1169,17 +1167,16 @@ BOOL __fastcall ITEM_RefreshBuffStates(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
     } while (nClearStatesLeft);
 
     BOOL bApplied = ITEM_ApplyTimedBuffStats(pGame, pUnit, pItem, pTarget, nX, nY, eSkill);
-    if (!bApplied) {
-      return bRefreshApplied;
+    if (bApplied) {
+      bRefreshApplied = 1;
     }
 
-    bRefreshApplied = 1;
     return bRefreshApplied;
 }
 
 BOOL __fastcall SKILLITEM_ApplyRejuvenationPotionEffect(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pItem, D2UnitStrc * pTarget, int nX, int nY, eD2Skills eSkill) {
     eD2UnitStat eUnitStat = D2Common::ITEMS::Items::ITEM_GetItemData_nFileIndex(pItem);
-    if (!(-1 < (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize)) {
+    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize)) {
       return 0;
     }
 
@@ -1258,9 +1255,7 @@ BOOL __fastcall ITEM_CastFireballOnTarget(::SGAMEDATA * pGame, D2UnitStrc * pUni
       return BVar1;
     }
 
-    nItemClassId = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-    uint32_t nTargetX = D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath);
-    BVar1 = Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, SKILL_FireBall, 1, nTargetX, nItemClassId, nCastParam);
+    BVar1 = Monster::AI::MONSTERAI_CastItemEffectSkill(pUnit, SKILL_FireBall, 1, D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath), D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath), nCastParam);
     return BVar1;
 }
 
@@ -1757,7 +1752,7 @@ BOOL __fastcall ITEMEVENT_FreezeTarget(::SGAMEDATA * pGame, uint32_t nUnitEvent,
 }
 
 int32_t __fastcall SKILLITEM_CalculateStaminaPotionValue(int32_t nParam, int * pnParam) {
-    if (nParam < 2 || !pnParam) {
+    if (nParam <= 1 || !pnParam) {
       return 0;
     }
     if (0x3c < nParam) {
@@ -1769,11 +1764,11 @@ int32_t __fastcall SKILLITEM_CalculateStaminaPotionValue(int32_t nParam, int * p
     if (0x1e < nParam) {
       return (nParam - 0x1e) * pnParam[2] + pnParam[1] * 0xf + *pnParam * 0xe;
     }
-    if (0xf >= nParam) {
-      return (nParam - 1) * *pnParam;
+    if (0xf < nParam) {
+      return (nParam - 0xf) * pnParam[1] + *pnParam * 0xe;
     }
 
-    return (nParam - 0xf) * pnParam[1] + *pnParam * 0xe;
+    return (nParam - 1) * *pnParam;
 }
 
 // Item-event handler that applies the Open Wounds on-hit effect. Reads the proc chance from ITEM_GetMinimalStatValueShifted, rolls the unit's seed against it, then computes a level-scaled HP-regen-drain magnitude (via SKILLITEM_CalculateStaminaPotionValue with a 5-tier table). Halves damage for players (non-attack hit) or undead monsters. Applies STATE_openwounds via SetStateWithExpiryTime with UNITSTAT_hpregen as the drain stat for 200 frames.

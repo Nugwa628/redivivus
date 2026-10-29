@@ -952,24 +952,20 @@ BOOL __fastcall DropHandlerGeneric(::SGAMEDATA * pGame, D2MonsterKillStrc * pMon
       iVar1 = D2Common::PATH::DynamicPath::GetPathPointsSize(pDynamicPath);
       if (!iVar1) {
         iVar1 = D2Client::UNIT::Player::TXT_MonStats_GetBaseId(pUnit);
-        if (!(-1 < iVar1 && iVar1 < sgptDataTable->nTxtMonStatsSize && iVar1 == 0x6e)) {
+        if (!(0 <= iVar1 && iVar1 < sgptDataTable->nTxtMonStatsSize && iVar1 == 0x6e)) {
           return 0;
         }
-
         D2Common::PATH::DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
         UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, pMonsterKill->nUnitMode);
         return 1;
       }
-
       D2Common::PATH::DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
     }
-
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, pMonsterKill->nUnitMode);
     D2SkillStrc* pCurrentSkill = D2Common::Units::GetCurrentSkill(pUnit);
     if (!pCurrentSkill) {
       return 1;
     }
-
     SKILLS::SkillsServer::SKILLS_OnModeComplete(pGame, pUnit);
     return 1;
 }
@@ -1525,7 +1521,7 @@ void __fastcall AI_ClearSwitchAiTargetParamsCallback(::SGAMEDATA * pGame, D2Unit
 void __fastcall MONSTEREVENT_DefaultCallback(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2TimerTypeDWORD eTimerType, int32_t nArg1, int32_t nArg2) {
     bool _bIsModeZeroDeath;
     bool bIsModeZeroDeath;
-    if (UNITEVENTCALLBACK_REMOVESKILLCOOLDOWN < eTimerType) {
+    if ((uint32_t)UNITEVENTCALLBACK_REMOVESKILLCOOLDOWN < (uint32_t)eTimerType) {
       return;
     }
     if (false) {

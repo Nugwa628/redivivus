@@ -830,15 +830,14 @@ void __fastcall SKILLASS_SetupMissilePath(D2UnitStrc * pUnit, int32_t nParam) {
     }
 
     int32_t nTotalFrames = D2Common::Units::Missile::GetTotalFrames(pUnit);
-    if (0x4d < nTotalFrames) {
+    if (0x4e <= nTotalFrames) {
       nTotalFrames = 0x4d;
       D2Common::Units::Missile::SetTotalFrames(pUnit, 0x4d);
       D2Common::Units::Missile::SetCurrentFrame(pUnit, 0x4d);
     }
 
     D2DynamicPathStrc* pDynamicPath = pUnit->pPath.pDynamicPath;
-    pUnit->sSeed.nSeedLow = nParam;
-    pUnit->sSeed.nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(&pUnit->sSeed, nParam);
     D2Common::PATH::DynamicPath::PATH_SetPathType(pDynamicPath, 10);
     D2Common::PATH::DynamicPath::OverwriteDistanceAndMaxDistance(pDynamicPath, (uint8_t)nTotalFrames);
     D2Common::PATH::DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
@@ -1948,17 +1947,13 @@ BOOL __fastcall SKILLASS_CastScatterMissiles(::SGAMEDATA * pGame, D2UnitStrc * p
 }
 
 BOOL __fastcall Skills_SrvDoFunc_043_ChargeRelease_ScatterMissiles(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillTxtBase + eSkill)) {
+    D2SkillsTxt* pSkillTxtBase = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillTxtBase) {
       return 0;
     }
 
     eMissilesId nMissileId = SKILLASS_GetChargeUpMissile(pUnit, eSkill);
-    if (-1 >= (int)nMissileId) {
+    if (0 > (int)nMissileId) {
       return 0;
     }
 
@@ -1967,7 +1962,7 @@ BOOL __fastcall Skills_SrvDoFunc_043_ChargeRelease_ScatterMissiles(::SGAMEDATA *
       return 0;
     }
 
-    int32_t nRange = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase[eSkill].aurarangecalc, eSkill, nSkillLvl);
+    int32_t nRange = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxtBase->aurarangecalc, eSkill, nSkillLvl);
     BOOL bResult = SKILLASS_CastScatterMissiles(pGame, pUnit, pUnit, (uint8_t*)nMissileId, nCount, nRange, eSkill, nSkillLvl);
     return bResult;
 }

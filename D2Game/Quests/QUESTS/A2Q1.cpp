@@ -336,7 +336,6 @@ BOOL __fastcall Q09_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, v
 BOOL __fastcall Q09_CheckRadamentKillAndReward(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2RoomStrc** pAdjacentRooms;
     uint32_t nAdjacentRoomCount;
-    int32_t nErrorLine = 0x598e36;
     D2UnitStrc* pPlayerUnit_lcl = pUnit;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (!pRoom) {
@@ -345,7 +344,7 @@ BOOL __fastcall Q09_CheckRadamentKillAndReward(::SGAMEDATA * pGame, D2UnitStrc *
 
     D2QuestDataStrc* pRadamentRoom = GetQuestDataByQuestNoInternal(pGame, QUESTINT_RadamentsLair);
     if (!pRadamentRoom) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), nErrorLine);
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x186);
       exit(-1);
     }
 
@@ -363,7 +362,7 @@ BOOL __fastcall Q09_CheckRadamentKillAndReward(::SGAMEDATA * pGame, D2UnitStrc *
 
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &pAdjacentRooms, (int*)&nAdjacentRoomCount);
       nAdjacentRoomIdx = 0;
-      if (nAdjacentRoomCount) {
+      if ((uint32_t)nAdjacentRoomCount > 0) {
         do {
           if (pAdjacentRooms[nAdjacentRoomIdx] == pA1Q1Data->pRadamentRoom) {
             bPlayerNearKill = 1;
@@ -375,8 +374,8 @@ BOOL __fastcall Q09_CheckRadamentKillAndReward(::SGAMEDATA * pGame, D2UnitStrc *
       }
     }
 
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pPlayerUnit_lcl);
-    D2BitBufferStrc* pBitBuffer = pQuestData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pPlayerUnit_lcl)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, pRadamentRoom->nQuestIdReal, QUESTSTATE_Completed);
     /* GetQuestState RewardAwaits: skip if book already owed/awaiting collection */ if (BVar1) {
       return 0;
@@ -393,8 +392,8 @@ BOOL __fastcall Q09_CheckRadamentKillAndReward(::SGAMEDATA * pGame, D2UnitStrc *
                          marker */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_RadamentsLair, QUESTSTATE_Step0x05);
     D2UnitStrc* pPartyUnit = pPlayerUnit_lcl;
     QUEST_SendQuestInfoToUnit(pRadamentRoom->pGame, pPlayerUnit_lcl);
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pPartyUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pPartyUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 

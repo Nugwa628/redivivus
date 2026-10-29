@@ -183,8 +183,7 @@ static bool Q35_KillAndRemoveAncient(::SGAMEDATA * pGame, DWORD dwParam) {
     GAME::Event::Dispatch::Monster::SetCurrentSkill(pAncientUnit, eD2MonsterAnimMode_ns::Dead, &sMonsterKill);
     GAME::Event::Dispatch::Monster::MONSTERAI_ExecuteLifecycleTransition(pGame, &sMonsterKill, 1);
     eD2UnitType eUnitType = UNIT_MONSTER;
-    pRoom = D2Common::Units::UNITS_GetRoom(pAncientUnit);
-    D2Common::DUNGEON::Dungeon::AllocDrlgDelete(pRoom, eUnitType, dwParam);
+    D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pAncientUnit), eUnitType, dwParam);
     D2Common::Units::RemoveCollision_Vector(pAncientUnit);
     D2Common::Unit::RemoveUnitFromRoom(pAncientUnit);
     return true;
@@ -206,8 +205,7 @@ BOOL __stdcall Q35_PrepareAncientsForBattle(D2QuestDataStrc * pQuestData, D2Ques
       }
 
       bClearPortal = 0;
-      pRoom = D2Common::Units::UNITS_GetRoom(pStatue);
-      D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(pRoom, bClearPortal);
+      D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(D2Common::Units::UNITS_GetRoom(pStatue), bClearPortal);
       nStatueIdx++;
       pStatueGUID++;
     } while (nStatueIdx < 3);
@@ -332,15 +330,15 @@ void __fastcall Q35_SpawnAncientTimer(D2QuestDataStrc * pQuestData, D2UnitStrc *
 
 // [A5Q5 = Rite of Passage] Q35_UpdateQuestStep: per-player record sync (run via IteratePlayerOrMonsterUnits). If not Completed and player level >= (diff+1)*20 (the lvl-gate to read the Ancients' scroll), mirrors the live nStateFlag into the saved quest record: nStateFlag 2 -> Step0x02, 3 -> Step0x03.
 BOOL __fastcall Q35_UpdateQuestStep(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RiteOfPassage, QUESTSTATE_Completed);
     if (bIsCompleted == 1) {
       return 0;
     }
 
     int32_t nPlayerLevel = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0);
-    if ((int)((pGame->nDifficulty + 1) * 0x14) > nPlayerLevel) {
+    if (nPlayerLevel < (int)((pGame->nDifficulty + 1) * 0x14)) {
       return 0;
     }
 
@@ -616,15 +614,15 @@ static uint32_t __stdcall RewardExperienceFromAncients(::SGAMEDATA * pQuestData,
 
 // [A5Q5 = Rite of Passage] Q35_SetCompleteForPartyMember: party-completion callback. If member not Completed, is level-gated (>=(diff+1)*20) and physically in Act V, sets RiteOfPassage Completed + JustCompleted and awards XP. Shares the kill credit with the whole party.
 void __fastcall Q35_SetCompleteForPartyMember(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_RiteOfPassage, QUESTSTATE_Completed);
     if (bCompleted) {
       return;
     }
 
     int32_t nLevel = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0);
-    if ((int)((pGame->nDifficulty + 1) * 0x14) > nLevel) {
+    if (nLevel < (int)((pGame->nDifficulty + 1) * 0x14)) {
       return;
     }
 
@@ -696,7 +694,7 @@ BOOL __fastcall Q35_OnAncientsDefeated(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
     }
 
     nAssertLine = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0);
-    if ((int)((pGame->nDifficulty + 1) * 0x14) > nAssertLine) {
+    if (nAssertLine < (int)((pGame->nDifficulty + 1) * 0x14)) {
       return 0;
     }
 
@@ -705,8 +703,8 @@ BOOL __fastcall Q35_OnAncientsDefeated(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       return 0;
     }
 
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     if (bQuestCompleted) {
       return 0;
@@ -718,8 +716,8 @@ BOOL __fastcall Q35_OnAncientsDefeated(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
                          done for self player, then awards XP (Q35_RewardExperienceFromAncients) and
                          propagates to the party */ D2Common::QuestRecord::SetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
     RewardExperienceFromAncients(pGame, pUnit);
-    int16_t nPlayerPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPlayerPartyId == -1) {
+    uint16_t nPlayerPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPlayerPartyId == 0xffff) {
       return 0;
     }
 
@@ -1020,8 +1018,7 @@ void __fastcall Q35_OnPlayerDeath(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       return;
     }
 
-    int* pnResurrectionCount = &pQuestData->pQuestSpecificData.pA5Q5->nResurrectionCount;
-    (*pnResurrectionCount)++;
+    pQuestData->pQuestSpecificData.pA5Q5->nResurrectionCount++;
     pQuestData->pQuestSpecificData.pA5Q5->bAncientsFightStarted = 0;
     pQuestData->pQuestSpecificData.pA5Q5->bAncientsActive = 0;
     Q35_ResetAncientsArena(pGame, (int32_t)pQuestData, (int32_t)d2_bits_of(pQuestData->pQuestSpecificData));
@@ -1116,11 +1113,11 @@ D2UnitStrc * __fastcall Q35_FindAncientByClassId(::SGAMEDATA * pGame, int32_t nC
 // [A5Q5 = Rite of Passage] Q35_CheckQuestNotStarted: predicate (returns BOOL in EAX) — true if quest is active but the Ancients fight hasn't been started yet. No quest-state writes.
 BOOL __fastcall Q35_CheckQuestNotStarted(::SGAMEDATA * pGame, D2UnitStrc * pUnitStrc, uint32_t dwParam) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_RiteOfPassage);
-    if (pQuestData->bIsNotIntroduction) {
-      return (uint32_t)!pQuestData->pQuestSpecificData.pA5Q5->bAncientsDefeated;
+    if (!pQuestData->bIsNotIntroduction) {
+      return 0;
     }
 
-    return 0;
+    return (uint32_t)!pQuestData->pQuestSpecificData.pA5Q5->bAncientsDefeated;
 }
 
 // [A5Q5 = Rite of Passage] Q35_SetStatueAnimMode: sets one altar statue's display/anim mode from the saved per-statue mode. classId 0x1da->slot[0x34], 0x1db->slot[0x30], 0x1dc->slot[0x38]. No quest-state writes.
@@ -1371,8 +1368,7 @@ BOOL __fastcall ResurrectAncients(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void 
     }
 
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_RiteOfPassage);
-    int* piVar1 = &pQuestData->pQuestSpecificData.pA5Q5->nPlayersOnSummit;
-    (*piVar1)++;
+    pQuestData->pQuestSpecificData.pA5Q5->nPlayersOnSummit++;
     return 0;
 }
 

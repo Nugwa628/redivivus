@@ -220,11 +220,11 @@ static void __stdcall GOLD_HandleStashGoldTransaction(int32_t nGoldAmount, ::SGA
 }
 
 uint32_t PLAYERTRADE_CompareUint32(uint32_t * pnParam1, uint32_t * pnParam2) {
-    if (*pnParam2 >= *pnParam1) {
-      return (uint32_t)(*pnParam1 != *pnParam2);
+    if (*pnParam1 > *pnParam2) {
+      return -1;
     }
 
-    return -1;
+    return (uint32_t)(*pnParam1 != *pnParam2);
 }
 
 // Removes all items from the cube before transmutation. Iterates through the player's inventory, extracts items from INVPAGE_CUBE, sets their page to None, and frees them from the server unit system. Returns the inventory pointer.
@@ -1673,8 +1673,7 @@ void __fastcall SendRemoveItemDisplayPacket0x92(::SGAMEDATA * pGame, D2UnitStrc 
     }
 
     uint8_t byUnk = '\0';
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x83b);
-    GAME::SCmd::NET_D2GS_SERVER_Send_CMD_BYTE_INT(pClient, 0x92, byUnk, nOtherGUID);
+    GAME::SCmd::NET_D2GS_SERVER_Send_CMD_BYTE_INT(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x83b), 0x92, byUnk, nOtherGUID);
 }
 
 void __fastcall TRADE_RestoreInventoryFromBackup(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -1853,10 +1852,8 @@ static void __stdcall SetStatsOnEar(BOOL bHardcore, D2UnitStrc * pUnit, D2UnitSt
     eD2ItemTypes eItemType = D2Common::ITEMS::Items::ITEM_GetItemData_wType(pOther);
     if (eItemType == ITEMTYPE_PlayerBodyPart) {
       uint8_t nEarLevel;
-      szPlayerName = D2Common::ITEMS::Items::ITEM_GetItemData_szPlayerName(pUnit);
-      D2Common::ITEMS::Items::ITEM_GetPlayerNameAkaNamedString(pOther, szPlayerName);
-      nEarLevel = D2Common::ITEMS::Items::ITEM_GetItemData_nEarLevel(pUnit);
-      D2Common::ITEMS::Items::ITEM_SetItemData_nEarLevel(pOther, nEarLevel);
+      D2Common::ITEMS::Items::ITEM_GetPlayerNameAkaNamedString(pOther, D2Common::ITEMS::Items::ITEM_GetItemData_szPlayerName(pUnit));
+      D2Common::ITEMS::Items::ITEM_SetItemData_nEarLevel(pOther, D2Common::ITEMS::Items::ITEM_GetItemData_nEarLevel(pUnit));
       D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pOther, ITEMFLAG_HARDCORE, bHardcore);
       return;
     }
@@ -1866,8 +1863,7 @@ static void __stdcall SetStatsOnEar(BOOL bHardcore, D2UnitStrc * pUnit, D2UnitSt
       return;
     }
 
-    szPlayerName = D2Common::ITEMS::Items::ITEM_GetItemData_szPlayerName(pUnit);
-    D2Common::ITEMS::Items::ITEM_GetPlayerNameAkaNamedString(pOther, szPlayerName);
+    D2Common::ITEMS::Items::ITEM_GetPlayerNameAkaNamedString(pOther, D2Common::ITEMS::Items::ITEM_GetItemData_szPlayerName(pUnit));
 }
 
 // Trade/corpse-recovery helper: iterates all items in pUnit's inventory, clones each INVPAGE_MERC item via ITEM_CloneFromSerializedData, sets ear stats if applicable, marks it for update, moves it to INVPAGE_INVENTORY, and places it into pUnit2's inventory via SERVER_ItemToInventory. Also iterates INVPAGE_CORPSE items: strips them from pUnit's inventory (sends 0x9D remove packet) and deletes them. Sends trade-action packet 0x77 opcode 10 (fail) to both parties and returns 0 on any placement failure; returns 1 on full success.
@@ -2328,21 +2324,16 @@ static void __stdcall PLRTRADE_ResetTradeState(D2UnitDataPlayerStrc * pPlayerDat
     RemoveTradeItemMabye(pGame, pUnit2, 1);
     RemoveTradeItemMabye(pGame, pUnit, 1);
     uint8_t bySide = '\0';
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit2, ".\\PLAYER\\PlrTrade.cpp", 0x991);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x79_TRADEGOLD(pClient, 0, bySide);
+    D2ClientStrc* pClient;
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x79_TRADEGOLD(UNIT::SUnit::SUNIT_GetClient(pUnit2, ".\\PLAYER\\PlrTrade.cpp", 0x991), 0, bySide);
     bySide = '\x01';
-    pClient = UNIT::SUnit::SUNIT_GetClient(pUnit2, ".\\PLAYER\\PlrTrade.cpp", 0x992);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x79_TRADEGOLD(pClient, 0, bySide);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x79_TRADEGOLD(UNIT::SUnit::SUNIT_GetClient(pUnit2, ".\\PLAYER\\PlrTrade.cpp", 0x992), 0, bySide);
     bySide = '\0';
-    pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x993);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x79_TRADEGOLD(pClient, 0, bySide);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x79_TRADEGOLD(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x993), 0, bySide);
     bySide = '\x01';
-    pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x994);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x79_TRADEGOLD(pClient, 0, bySide);
-    pClient = UNIT::SUnit::SUNIT_GetClient(pUnit2, ".\\PLAYER\\PlrTrade.cpp", 0x995);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(pClient, 6);
-    pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x996);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(pClient, 6);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x79_TRADEGOLD(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x994), 0, bySide);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(UNIT::SUnit::SUNIT_GetClient(pUnit2, ".\\PLAYER\\PlrTrade.cpp", 0x995), 6);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x77_TRADEREQUEST(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrTrade.cpp", 0x996), 6);
     pPlayerData1->dwTradeState = 5;
     pPlayerData2->dwTradeState = 5;
     ITEMS::ItemMode::ITEMMODE_CheckItemLevel(pGame, pUnit2);

@@ -309,12 +309,12 @@ D2UnitStrc * __fastcall SERVER_InitUnitObject(::SGAMEDATA * pGame, D2RoomStrc * 
 }; D2_STATIC_GUARD(RandomObjectsInit, "D2Game::Objects::SERVER_InitUnitObject::RandomObjectsInit");
     static uint32_t gnObjectSpawnChanceInitVal = 0x9; D2_STATIC_GUARD(gnObjectSpawnChanceInitVal, "D2Game::Objects::SERVER_InitUnitObject::gnObjectSpawnChanceInitVal");
 
-    if (nMonStatsId < 0x23e) {
+    if (nMonStatsId <= 0x23d) {
       return nullptr;
     }
 
     int nObjSpawnIdx = nMonStatsId - 0x23e;
-    if (gnObjectSpawnChanceInitVal <= nObjSpawnIdx) {
+    if (nObjSpawnIdx >= (int)gnObjectSpawnChanceInitVal) {
       return nullptr;
     }
 
@@ -2565,7 +2565,7 @@ void __fastcall OBJECT_CallPopulateFn(::SGAMEDATA * pGame, D2RoomStrc * pRoom, i
     }
 
     D2ObjectsTxt* pObjectsTxt = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(nObjectClassId);
-    if (9 < (uint8_t)pObjectsTxt->PopulateFn) {
+    if (10 <= (uint8_t)pObjectsTxt->PopulateFn) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc7d);
       exit(-1);
     }
@@ -2704,11 +2704,11 @@ void __fastcall OBJECTS_SetUnitIdInTimerArg(D2UnitStrc * pUnit, int32_t nParam) 
 
 int32_t __fastcall GetUnitGUIDFromUnitTimerArg(D2UnitStrc * pUnit) {
     D2TimerArgStrc* pTimerArg = D2Common::Units::GetTimerArg(pUnit);
-    if (!pTimerArg) {
-      return -1;
+    if (pTimerArg) {
+      return pTimerArg->nUnitGUID;
     }
 
-    return pTimerArg->nUnitGUID;
+    return -1;
 }
 
 void __fastcall Objects_InitFn16(D2ObjectInitFnArg * pInitArg) {

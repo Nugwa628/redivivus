@@ -68,17 +68,18 @@ namespace D2Game::SKILLS::SkillAma {
 
 BOOL __fastcall SKILLAMA_SrvStFn04_ArrowAttack(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     BOOL bHasAmmo = SkillsServer::SKILLS_CheckThrowableAmmo(pUnit);
-    if (bHasAmmo) {
-      return 1;
+    if (!bHasAmmo) {
+      PLAYER::PlayerModes::PLRMODES_CheckWeaponQuantityAndDurability(pGame, pUnit);
+      PLAYER::PlayerModes::PLRMODES_BreakZeroDurabilityWeapons(pGame, pUnit);
+      return 0;
     }
 
-    PLAYER::PlayerModes::PLRMODES_CheckWeaponQuantityAndDurability(pGame, pUnit);
-    PLAYER::PlayerModes::PLRMODES_BreakZeroDurabilityWeapons(pGame, pUnit);
-    return 0;
+    return 1;
 }
 
 BOOL __fastcall SKILLAMA_SrvStFn05_Jab(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsRecord = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsRecord) {
       return 0;
     }
 
@@ -335,12 +336,8 @@ BOOL __fastcall SKILLAMA_SrvStFn09_Fend(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 // Amazon melee area-sweep strike-step (variant of SrvStFunc_09). Sweeps the melee range for a first victim via SKILLS_FindNextUnitInAreaByGUID; if none found, clears param1 and returns 0. On success: stores calc[0] value in param1 and the target's type/GUID in param2/param3 for the do-func stage.
 BOOL __fastcall SKILLAMA_SrvStFn37_MultiStrike(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     int nStoredGUID;
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
-      return 0;
-    }
-
-    D2SkillsTxt* pSkillsTxt = sgptDataTable->pTxtSkills;
-    if (!(pSkillsTxt + eSkill)) {
+    D2SkillsTxt* pSkillsTxt = (0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount) ? &sgptDataTable->pTxtSkills[eSkill] : 0;
+    if (!pSkillsTxt) {
       return 0;
     }
 
@@ -359,7 +356,7 @@ BOOL __fastcall SKILLAMA_SrvStFn37_MultiStrike(::SGAMEDATA * pGame, D2UnitStrc *
       }
     }
 
-    nMeleeRangePlusFour = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxt[eSkill].calc[0], eSkill, nSkillLvl);
+    nMeleeRangePlusFour = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillsTxt->calc[0], eSkill, nSkillLvl);
     D2Common::Skills::SKILL_SetParam1(pSkill, nMeleeRangePlusFour);
     eD2UnitType eTargetType = UNIT_COUNT;
     if (pTarget) {

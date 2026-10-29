@@ -181,7 +181,7 @@ void __fastcall SetItemSeeds(D2UnitStrc * pUnit, D2SeedStrc * pSeed) {
 
 // Increments and returns pGame->anUnitGuidCounters[eUnitType] (+0x90), skipping -1. The incremented value IS the new unit's GUID and is returned in EAX; typing it void made every caller read the GUID out of an unassigned local.
 uint32_t __fastcall UNITS_IncrementUnitGUIDCounter(::SGAMEDATA * pGame, eD2UnitType eUnitType) {
-    if (5 < (int)eUnitType) {
+    if (6 <= (int)eUnitType) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1c4);
       exit(-1);
     }
@@ -212,10 +212,8 @@ D2UnitStrc * __fastcall FindUnitFromTable(::SGAMEDATA * pGame, eD2UnitType eUnit
     }
     if (eUnitType == UNIT_WARP) {
       ppHashSlot = &pGame->pWarpTileList;
-    } else if (eUnitType < UNIT_WARP) {
-      ppHashSlot = (D2UnitStrc**)(pGame->szGameName + ganUnitHashTableBaseOffsets[eUnitType] + (nUnitGUID & 0x7f) * 4 - 0x2a);
     } else {
-      ppHashSlot = 0;
+      ppHashSlot = (uint32_t)eUnitType <= UNIT_ITEM ? (D2UnitStrc**)(pGame->szGameName + ganUnitHashTableBaseOffsets[eUnitType] + (nUnitGUID & 0x7f) * 4 - 0x2a) : 0;
     }
 
     D2UnitStrc* pUnit = *ppHashSlot;
@@ -249,12 +247,11 @@ D2UnitStrc * __fastcall GetKillerUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 800);
       exit(-1);
     }
-    if (!(pUnit->eUnitFlagsEx & UNITFLAGEX_STORELASTATTACKER)) {
-      return nullptr;
+    if (pUnit->eUnitFlagsEx & UNITFLAGEX_STORELASTATTACKER) {
+      return FindUnitFromTable(pGame, pUnit->eKillerType, pUnit->nKillerGUID);
     }
 
-    D2UnitStrc* pKillerUnit = FindUnitFromTable(pGame, pUnit->eKillerType, pUnit->nKillerGUID);
-    return pKillerUnit;
+    return nullptr;
 }
 
 // Inserts pUnit into the game's per-type unit hash table, keyed on (nUnitGUID & 0x7F). Warp tiles use a dedicated list; other types use ganUnitHashTableBaseOffsets. Maintains sorted order by GUID descending; halts with an unrecoverable error if a duplicate GUID is detected.
@@ -264,10 +261,8 @@ void __fastcall UNITS_InsertUnitIntoHashTable(D2UnitStrc * pUnit, ::SGAMEDATA * 
     eD2UnitType eCachedUnitType = pUnit->eUnitType;
     if (eCachedUnitType == UNIT_WARP) {
       ppHashSlot = &pGame->pWarpTileList;
-    } else if (eCachedUnitType < UNIT_WARP) {
-      ppHashSlot = (D2UnitStrc**)(pGame->szGameName + ganUnitHashTableBaseOffsets[eCachedUnitType] + (pUnit->nUnitGUID & 0x7fU) * 4 - 0x2a);
     } else {
-      ppHashSlot = 0;
+      ppHashSlot = (uint32_t)eCachedUnitType <= UNIT_ITEM ? (D2UnitStrc**)(pGame->szGameName + ganUnitHashTableBaseOffsets[eCachedUnitType] + (pUnit->nUnitGUID & 0x7fU) * 4 - 0x2a) : 0;
     }
 
     D2UnitStrc* pNextUnit = *ppHashSlot;
@@ -344,11 +339,11 @@ static void UNITS_NotifyClientsUnitRemoved(D2UnitStrc * pGameUnit, ::SGAMEDATA *
 
 static int32_t IsRoomOccupied(D2UnitStrc * pUnit) {
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    if (pRoom) {
-      return (uint32_t)(pRoom->nClientsCount != 0);
+    if (!pRoom) {
+      return 0;
     }
 
-    return 0;
+    return (uint32_t)(pRoom->nClientsCount != 0);
 }
 
 // 2022.01.09 - dzik
@@ -566,42 +561,42 @@ void __fastcall LinkPortalCoords(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
       }
 
       eUnitType = pUnit2->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nCoordVal = pUnit2->pPath.pStaticPath->nPosX;
-      } else if (!pUnit2->pPath.pDynamicPath) {
-        nCoordVal = 0;
-      } else {
+      } else if (pUnit2->pPath.pDynamicPath) {
         nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit2->pPath.pDynamicPath);
+      } else {
+        nCoordVal = 0;
       }
 
       pUnit->pUnitData.pUnitDataObject->nLinkedPortalX = nCoordVal;
       eUnitTypeTmp = pUnit2->eUnitType;
-      if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp < 6) {
+      if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
         nCoordVal = pUnit2->pPath.pStaticPath->nPosY;
-      } else if (!pUnit2->pPath.pDynamicPath) {
-        nCoordVal = 0;
-      } else {
+      } else if (pUnit2->pPath.pDynamicPath) {
         nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit2->pPath.pDynamicPath);
+      } else {
+        nCoordVal = 0;
       }
 
       pUnit->pUnitData.pUnitDataObject->nLinkedPortalY = nCoordVal;
       eUnitTypeTmp = pUnit->eUnitType;
-      if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp < 6) {
+      if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
         nCoordVal = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nCoordVal = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nCoordVal = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nCoordVal = 0;
       }
 
       pUnit2->pUnitData.pUnitDataObject->nLinkedPortalX = nCoordVal;
       eUnitTypeTmp = pUnit->eUnitType;
-      if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp < 6) {
+      if (eUnitTypeTmp == UNIT_OBJECT || 3 < (int)eUnitTypeTmp && (int)eUnitTypeTmp <= 5) {
         nCoordVal = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nCoordVal = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nCoordVal = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nCoordVal = 0;
       }
 
       pUnit2->pUnitData.pUnitDataObject->nLinkedPortalY = nCoordVal;
@@ -734,7 +729,7 @@ void __fastcall IterateAllUnits(::SGAMEDATA * pGame, fpSUnitIterateCallback fpFu
 
       ppUnitBucket++;
       nSlot++;
-      if (0x7f < (int)nSlot) {
+      if (0x80 <= (int)nSlot) {
         return;
       }
     } while (true);
@@ -749,11 +744,11 @@ void __fastcall SetTimerListIfUnitExists(D2UnitStrc * pUnit, D2TimerStrc * pTime
 }
 
 D2TimerStrc * __fastcall GetTimerList(D2UnitStrc * pUnit) {
-    if (pUnit) {
-      return pUnit->pTimerList;
+    if (!pUnit) {
+      return nullptr;
     }
 
-    return nullptr;
+    return pUnit->pTimerList;
 }
 
 void __fastcall UNITS_ClearAnimTimerEvents(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -1546,10 +1541,10 @@ void __fastcall UNITS_PlaceUnitInRoom(D2UnitStrc * pUnit, int32_t nY, int32_t nX
         D2Common::PATH::DynamicPath::AllocDynamicPath(pGame->pMemoryPool, pRoom, nY, nX, pUnit, 0);
       D2Game::Monster::MONSTER_SetVelocityAndTransition(pGame, pUnit, nY, nX, nInitMode);
       iVar1 = IsRoomOccupied(pUnit);
-      if (!iVar1) {
-        UNITS_ResetUnitForReuse(pGame, pUnit);
-      } else {
+      if (iVar1) {
         D2Game::Monster::MONSTERAI_TriggerMageThink(pGame, pUnit);
+      } else {
+        UNITS_ResetUnitForReuse(pGame, pUnit);
       }
 
       break;
@@ -1566,9 +1561,6 @@ void __fastcall UNITS_PlaceUnitInRoom(D2UnitStrc * pUnit, int32_t nY, int32_t nX
 
       D2Common::Unit::DRLGROOM_AddUnitToRoom(pUnit, pRoom);
       break;
-      case UNIT_MISSILE:
-        D2Common::PATH::DynamicPath::AllocDynamicPath(pGame->pMemoryPool, pRoom, nY, nX, pUnit, 0);
-      break;
       case UNIT_ITEM:
         if (pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Run) {
           D2Common::Units::InitializeStaticPath(pUnit, pRoom, nY, nX);
@@ -1577,6 +1569,9 @@ void __fastcall UNITS_PlaceUnitInRoom(D2UnitStrc * pUnit, int32_t nY, int32_t nX
             D2Common::Unit::DRLGROOM_AddUnitToRoomList(pUnit, pRoom, UNIT_PLAYER);
           }
         }
+      break;
+      case UNIT_MISSILE:
+        D2Common::PATH::DynamicPath::AllocDynamicPath(pGame->pMemoryPool, pRoom, nY, nX, pUnit, 0);
       break;
       case UNIT_WARP:
         D2Common::Units::InitializeStaticPath(pUnit, pRoom, nY, nX);

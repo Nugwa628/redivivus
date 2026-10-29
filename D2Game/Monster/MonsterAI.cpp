@@ -112,12 +112,8 @@ void __fastcall SendMercPackets(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, int32
     UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_experience, nStatVal);
     nStatVal = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pMerc, UNITSTAT_nextexp, 0);
     UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_nextexp, nStatVal);
-    int32_t nStatTmp = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_secondary_mindamage, 0);
-    int32_t nSecondaryStatVal = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_mindamage, 0);
-    UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_mindamage, nStatTmp + nSecondaryStatVal);
-    nStatTmp = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_secondary_maxdamage, 0);
-    nSecondaryStatVal = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_maxdamage, 0);
-    UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_maxdamage, nStatTmp + nSecondaryStatVal);
+    UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_mindamage, D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_secondary_mindamage, 0) + D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_mindamage, 0));
+    UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_maxdamage, D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_secondary_maxdamage, 0) + D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_maxdamage, 0));
     nStatVal = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_fireresist, 0);
     UNIT::SUnitMsg::UnitQueuePacket0x9E(pMerc, UNITSTAT_fireresist, nStatVal);
     nStatVal = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pMerc, UNITSTAT_lightresist, 0);
@@ -495,14 +491,14 @@ void __fastcall FreeAndResetAiSub(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Uni
     Quests::QUESTS::QUEST_OnNpcDeactivate(pGame, pUnit, pMonster);
     D2MonsterAiSubStrc* pPrevSubAi = 0;
     D2MonsterAiSubStrc* pSubAi = pMonsterAi->pAiSub;
-    if (!pMonsterAi->pAiSub) {
+    if (!pSubAi) {
       return;
     }
 
     do {
       D2MonsterAiSubStrc** ppSubAiNext;
       if (pSubAi->pUnit == pUnit) {
-        if (0 < (int)pSubAi->nState) {
+        if (1 <= (int)pSubAi->nState) {
           if (!pPrevSubAi) {
             pMonsterAi->pAiSub = pSubAi->pNext;
           } else {
@@ -514,7 +510,7 @@ void __fastcall FreeAndResetAiSub(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Uni
             UNIT::SUnit::ClearInteractInfo(pUnit);
           }
 
-          D2_FREE_POOL_AT(pGame->pMemoryPool, pSubAi, ".\\MONSTER\\MonsterAI.cpp", 0x28b);
+          Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pSubAi, ".\\MONSTER\\MonsterAI.cpp", 0x28b, 0);
           if (pMonsterAi->pAiSub) {
             return;
           }
@@ -534,7 +530,7 @@ void __fastcall FreeAndResetAiSub(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2Uni
             UNIT::SUnit::ClearInteractInfo(pUnit);
           }
 
-          D2_FREE_POOL_AT(pGame->pMemoryPool, pSubAi, ".\\MONSTER\\MonsterAI.cpp", 0x2ae);
+          Fog::Memory::FreeServerMemory(pGame->pMemoryPool, pSubAi, ".\\MONSTER\\MonsterAI.cpp", 0x2ae, 0);
           return;
         }
       }

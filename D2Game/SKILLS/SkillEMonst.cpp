@@ -1346,11 +1346,8 @@ BOOL __fastcall Skills_SrvDoFunc_140_BaalTentacle(::SGAMEDATA * pGame, D2UnitStr
 }
 
 BOOL __fastcall fpBaalWaveFunction(::SGAMEDATA * pGame, D2UnitStrc * pAttacker, D2UnitStrc * pUnit, int32_t nSkillLvl, uint32_t dwParam) {
-    bool _bResult;
-    bool bResult;
     D2Common::Units::SetTargetUnitForDynamicUnit(pAttacker, pUnit);
-    _bResult = SkillNec::SKILLNEC_CorpseExplosionDispatch(pGame, pAttacker, SKILL_BaalCorpseExplode, nSkillLvl);
-    return _bResult;
+    return SkillNec::SKILLNEC_CorpseExplosionDispatch(pGame, pAttacker, SKILL_BaalCorpseExplode, nSkillLvl);
 }
 
 // SrvDoFunc 141: initiates Baal's corpse explosion wave. Builds a D2BaalWaveParamStrc from the caster's position, sets skill to SKILL_BaalCorpseExplode, computes wave distance from Param[4]+Param[5]*(lvl-1), assigns fpBaalWaveFunction callback, then calls SKILLS_ForEachUnitBaalWave to propagate the wave.

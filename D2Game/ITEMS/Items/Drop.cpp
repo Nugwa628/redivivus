@@ -80,7 +80,7 @@ typedef void (__fastcall *fpSUnitIterateCallback)(::SGAMEDATA * pGame, D2UnitStr
 namespace D2Game::ITEMS::Items::Drop {
 
 D2ItemTypesTxt * __fastcall ItemTypes_GetLine(int32_t nParam) {
-    if (!(-1 < nParam && nParam < sgptDataTable->nTxtItemTypesSize)) {
+    if (!(0 <= nParam && nParam < sgptDataTable->nTxtItemTypesSize)) {
       return nullptr;
     }
 
@@ -134,12 +134,12 @@ D2RoomStrc * __fastcall FindBestSpotToSpawnItem(D2RoomStrc * pRoom, POINT * pPoi
     int nX = pPoint->x + 2;
     int nY = pPoint->y + 3;
     D2RoomStrc* pFoundRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nX, nY);
-    if (!pFoundRoom) {
-      pNewPosition->x = pPoint->x;
-      pNewPosition->y = pPoint->y;
-    } else {
+    if (pFoundRoom) {
       pNewPosition->x = nX;
       pNewPosition->y = nY;
+    } else {
+      pNewPosition->x = pPoint->x;
+      pNewPosition->y = pPoint->y;
     }
 
     pFoundRoom = D2Common::Collision::GetFreeCoordinates_WithFieldCoords(pRoom, pNewPosition, pPoint, nCollisionMask, 0x3e01, 0x801, (uint32_t)nMaxSearchRadius);
@@ -150,10 +150,10 @@ D2RoomStrc * __fastcall FindBestSpotToSpawnItem(D2RoomStrc * pRoom, POINT * pPoi
 // Called by ITEMDROP_RollNormal/Exceptional/EliteItemClass; 1.14d asm 00555e00.
 static BOOL __stdcall ITEMDROP_IsItemClassEligible(D2SeedStrc * pSeed, int32_t bSkipRarityRoll, eD2LevelId eLevel, D2ItemsTxt * pItemsTxt, int32_t nItemTypeFilter) {
     uint32_t nActDelta;
-    if ((int)eLevel < 1) {
+    if ((int)eLevel <= 0) {
       eLevel = LEVEL_RogueEncampment;
     }
-    if (!(pItemsTxt->bSpawnable != '\0' && !pItemsTxt->bQuest && (int)(uint32_t)(uint8_t)pItemsTxt->nLevel <= (int)eLevel)) {
+    if (!((uint32_t)pItemsTxt->bSpawnable > 0 && !pItemsTxt->bQuest && (int)(uint32_t)(uint8_t)pItemsTxt->nLevel <= (int)eLevel)) {
       return 0;
     }
     if (!bSkipRarityRoll) {
@@ -493,11 +493,11 @@ static uint32_t ITEM_CheckUniqueBitmask(uint32_t nUniqueFileIndex, ::SGAMEDATA *
     if (!pGame) {
       return 0;
     }
-    if (nUniqueFileIndex >= 0x1001) {
-      return 1;
+    if (nUniqueFileIndex <= 0x1000) {
+      return pGame->fUniqueSpawn[(int)nUniqueFileIndex >> 5] & gadwBitMasks[nUniqueFileIndex & 0x1f];
     }
 
-    return pGame->fUniqueSpawn[(int)nUniqueFileIndex >> 5] & gadwBitMasks[nUniqueFileIndex & 0x1f];
+    return 1;
 }
 
 uint32_t __fastcall ITEM_IsUniqueAlreadyDropped(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -1032,16 +1032,12 @@ static void ITEM_ApplySpecialTypePropertiesExp(D2UnitStrc * pUnit, D2ItemGenCont
     bTypeCheck = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Scroll);
     if (bTypeCheck) {
       int32_t nScrollBookIdx;
-      nSuffixSlot = 0;
-      nScrollBookIdx = SKILLS::Items::ITEMMOD_GetScrollBookIndex(pUnit, 1);
-      D2Common::ITEMS::Items::SetMagicSuffix(pUnit, (int16_t)nScrollBookIdx, nSuffixSlot);
+      D2Common::ITEMS::Items::SetMagicSuffix(pUnit, (int16_t)SKILLS::Items::ITEMMOD_GetScrollBookIndex(pUnit, 1), 0);
     }
 
     bTypeCheck = D2Common::ITEMS::Items::ITEMS_IsA(pUnit, ITEMTYPE_Book);
     if (bTypeCheck) {
-      nIndex = 0;
-      nScrollIdx = SKILLS::Items::ITEMMOD_GetScrollBookIndex(pUnit, 0);
-      D2Common::ITEMS::Items::SetMagicSuffix(pUnit, (int16_t)nScrollIdx, nIndex);
+      D2Common::ITEMS::Items::SetMagicSuffix(pUnit, (int16_t)SKILLS::Items::ITEMMOD_GetScrollBookIndex(pUnit, 0), 0);
     }
 
     SKILLS::Items::StaffMod(pUnit, pItemGenContext);
@@ -1249,8 +1245,7 @@ static void __stdcall ITEM_FallbackToNormalQuality(D2UnitStrc * * ppUnit, ::SGAM
     ITEM_ClearAllMagicAffixes(ppUnit);
     D2Common::ITEMS::Items::SetModSeed(*ppUnit, nModSeedVal);
     D2SeedStrc* pSeed = D2Common::ITEMS::Items::GetItemSeed(*ppUnit);
-    pSeed->nSeedLow = nModSeedVal;
-    pSeed->nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(pSeed, nModSeedVal);
     ITEM_RollItemQuality(*ppUnit, pItemGenContext);
     D2Common::ITEMS::Items::SetItemQuality(*ppUnit, QUALITY_NORMAL);
     pItemGenContext->eQuality = QUALITY_NORMAL;
@@ -1990,11 +1985,7 @@ D2UnitStrc * __fastcall HasQuestItem(::SGAMEDATA * pGame, D2UnitStrc * pUnit, ui
 // Returns the effective item-drop level for a unit or level. For monsters returns UNITSTAT_level; for players returns server stat level; for other units/items derives level from the room's LevelId via TXT_Levels monster-level table adjusted for difficulty and expansion. Returns at least 1.
 int32_t __fastcall GetLevel(D2UnitStrc * pUnit, eD2LevelId eLevel) {
     int nLevel;
-    if (!pUnit) {
-      if (eLevel == LEVEL_None) {
-        return 1;
-      }
-    } else {
+    if (pUnit) {
       D2RoomStrc* pRoom;
       if (pUnit->eUnitType == UNIT_MONSTER) {
         nLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
@@ -2007,13 +1998,17 @@ int32_t __fastcall GetLevel(D2UnitStrc * pUnit, eD2LevelId eLevel) {
 
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
+    } else {
+      if (eLevel == LEVEL_None) {
+        return 1;
+      }
     }
 
     ::SGAMEDATA* pGame;
     pGame = UNIT::SUnit::GetGamePointer(pUnit);
     nLevel = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetMonLvlForDifficulty(eLevel, pGame->nDifficulty, pGame->bExpansion);
     clamp_level:
-    if (nLevel < 2) {
+    if (nLevel <= 1) {
       return 1;
     }
     return nLevel;
@@ -2223,7 +2218,7 @@ void __fastcall RefreshDurability(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       return;
     }
 
-    GAME::Event::SetEvent(pGame, pUnit, 3, (int)(0x9c4 / (int64_t)nReplenishDurability) + 1 + pGame->dwGameFrame, 0, 0);
+    GAME::Event::SetEvent(pGame, pUnit, 3, (0x9c4 / nReplenishDurability) + 1 + pGame->dwGameFrame, 0, 0);
 }
 
 void __fastcall RefreshQuantity(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
@@ -2237,7 +2232,7 @@ void __fastcall RefreshQuantity(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       return;
     }
 
-    GAME::Event::SetEvent(pGame, pUnit, 3, (int)(0x9c4 / (int64_t)nReplenishQuantity) + 1 + pGame->dwGameFrame, 0, 0);
+    GAME::Event::SetEvent(pGame, pUnit, 3, (0x9c4 / nReplenishQuantity) + 1 + pGame->dwGameFrame, 0, 0);
 }
 
 static int32_t ITEM_GetTotalMagicFind(D2UnitStrc * pUnit) {
@@ -4160,7 +4155,7 @@ void __fastcall ITEM_GiveGoldOrDrop(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int
       DROP_SpawnGoldPiles(pGameSaved, pUnit, nGoldAmount, apGoldPileUnits, &nGoldAmount, 0x20);
       return;
     }
-    if (nGoldLimit < nCurrentGold + nGoldAmount) {
+    if (nCurrentGold + nGoldAmount > nGoldLimit) {
       UNIT::Party::ChangeGoldForPlayer(pUnit, UNITSTAT_gold, nGoldLimit - nCurrentGold);
       DROP_SpawnGoldPiles(pGameSaved, pUnit, nCurrentGold - nGoldLimit + nGoldAmount, apGoldPileUnits, &nGoldAmount, 0x20);
       return;

@@ -85,9 +85,8 @@ void __fastcall FreeArenaControl(::SGAMEDATA * pGame) {
 
 // @sourcefile .\GAME\Arena.cpp
 void __fastcall AllocPlayerArena(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    D2UnitDataPlayerArenaStrc* pArena = D2_NEW_POOL_AT(pGame->pMemoryPool, D2UnitDataPlayerArenaStrc, ".\\GAME\\Arena.cpp", 0x47);
-    pArena->nScore = 0;
-    pArena->bScoreDirty = 0;
+    D2UnitDataPlayerArenaStrc* pArena = ((D2UnitDataPlayerArenaStrc*)Fog::Memory::AllocServerMemory(pGame->pMemoryPool, sizeof(D2UnitDataPlayerArenaStrc), ".\\GAME\\Arena.cpp", 0x47, 0));
+    memset(pArena, 0, sizeof(D2UnitDataPlayerArenaStrc));
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
     if (!pPlayerData) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4a);

@@ -283,8 +283,8 @@ void __fastcall Q28_Callback04_ItemPickedUp(D2QuestDataStrc * pQuestData, D2Ques
 
 // A4Q3 Hell's Forge — Q28_PlayerCompleteForgeInAct4: per-party-member completion applied to each member in Act IV (called via ExecuteFunctionForEveryPartyMember from the smash handler). If member hasn't already Completed/RewardAwaits Hell's Forge and is in Act IV: removes both quest items (Hellforge Hammer 'hfh ' and Mephisto's Soulstone 'mss '), sets JustCompleted+RewardAwaits, clears step-states, and increments a counter in the forge quest-specific data.
 void __fastcall Q28_PlayerCompleteForgeInAct4(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_HellsForge, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -324,8 +324,7 @@ void __fastcall Q28_PlayerCompleteForgeInAct4(::SGAMEDATA * pGame, D2UnitStrc * 
       return;
     }
 
-    int* pForgeCompletedCount = &pHellsForgeQuest->pQuestSpecificData.pA4Q3->nItemsToDrop;
-    (*pForgeCompletedCount)++;
+    pHellsForgeQuest->pQuestSpecificData.pA4Q3->nItemsToDrop++;
 }
 
 // A4Q3 Hell's Forge — OBJOP_A4Q3_HellforgeSmash (Objects_OperateFn49): the Hellforge operate handler — the core quest action. Bails if Hell's Forge already Completed/RewardAwaits. Branches on the forge object's anim mode: Death(idle) — if player carries Mephisto's Soulstone 'mss ', plays anim, broadcasts internal state 3, consumes the soulstone (this places the stone on the anvil); else plays "can't" sound and bumps stateFlag to 1. Walk(active) — if player has the Hellforge Hammer 'hfh ' equipped as weapon and has struck 3x, this is the SMASH: removes the hammer, sets JustCompleted+RewardAwaits, clears step-states, runs Q28_PlayerCompleteForgeInAct4 for the whole party, sets stateFlag 4 then broadcasts state 0xd, schedules the rune-drop event, marks other party members CannotComplete, and fires NotifyPlayersAboutEvent(0xe). Item codes: 'mss '=0x2073736d (Mephisto's Soulstone), 'hfh '=0x20686668 (Hellforge Hammer).
@@ -776,9 +775,9 @@ void __fastcall Q28_Callback_14_CheckIfGotHammer(D2QuestDataStrc * pQuestData, D
 // A4Q3 Hell's Forge — load/join handler (state slot 0xd): reconstructs in-memory stateFlag from the player's persisted QuestRecord on game load or rejoin. Counts Hellforge Hammer in inventory. If quest not Completed/FinishedInPreviousGame and soulstone absent sets stateFlag=1; otherwise maps Step0x05 -> bGotHammer+prev=4+flag=2, Step0x03 -> prev=1+flag=3, Step0x02 -> prev=1+flag=2. No new quest-record writes.
 void __fastcall Q28_Callback13_PlayerStartedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
     D2QuestDataA4Q3Strc* pQuestSpecificData = pQuestData->pQuestSpecificData.pA4Q3;
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2UnitStrc* pHammerItem = ITEMS::Items::Drop::HasQuestItem(pQuestArgs->pGame, pQuestArgs->pPlayer, 0x20686668);
     if (pHammerItem) {
       pQuestSpecificData->nHammerDropCount++;

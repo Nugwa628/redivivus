@@ -251,8 +251,7 @@ static void __stdcall Q27_SpawnDiabloPortal(D2QuestArgStrc * pQuestArgs, D2Quest
     pRoomsNear = &pPortalRoom;
     eCollisionFlags = 0x400;
     nScanRadius = 2;
-    pRoom = D2Common::Units::UNITS_GetRoom(pQuestArgs->pTarget);
-    FindSpawnableLocation(pRoom, &ptSpawnPos, nScanRadius, eCollisionFlags, pRoomsNear, nSpawnMaxTries, nSearchIterations);
+    FindSpawnableLocation(D2Common::Units::UNITS_GetRoom(pQuestArgs->pTarget), &ptSpawnPos, nScanRadius, eCollisionFlags, pRoomsNear, nSpawnMaxTries, nSearchIterations);
     if (!pPortalRoom) {
       return;
     }
@@ -458,18 +457,17 @@ BOOL __fastcall Q27_PartyMember_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStr
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a4q2.cpp
 BOOL __fastcall Q27_PlayerCheckCompletionSendState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2GSPacketSrv0x5D aQuestStatePacket;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TerrorsEnd, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TerrorsEnd, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }
 
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x1a4);
-    aQuestStatePacket.nExtra = 0;
+    memset(&aQuestStatePacket, 0, sizeof(aQuestStatePacket));
     aQuestStatePacket.nPacketId = ']';
     aQuestStatePacket.nQuestId = '\x17';
     aQuestStatePacket.nAlertFlags = '\x02';
-    aQuestStatePacket.nFilterStatus = '\0';
     GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &aQuestStatePacket);
     UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pUnit, 0x4b, pUnit);
     return 0;
@@ -499,17 +497,16 @@ BOOL __fastcall Q27_PlayerEnterGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, voi
     pPlayerData->dwTradeTick = 1;
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TerrorsEnd);
     pQuestData->pQuestSpecificData.pA4Q2->pPlayerUnit = pUnit;
-    pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_TerrorsEnd, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TerrorsEnd, QUESTSTATE_JustCompleted);
     if (bJustCompleted) {
       D2GSPacketSrv0x5D sPacket5D;
       GAME::Level::InitLevel(pGame, pUnit, LEVEL_ThePandemoniumFortress, 0);
       pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x1b8);
-      sPacket5D.nExtra = 0;
+      memset(&sPacket5D, 0, sizeof(sPacket5D));
       sPacket5D.nPacketId = ']';
       sPacket5D.nQuestId = '\x17';
       sPacket5D.nAlertFlags = '\x01';
-      sPacket5D.nFilterStatus = '\0';
       GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, &sPacket5D);
       return 0;
     }
@@ -625,8 +622,7 @@ static void __stdcall Q27_SetTerrorsEndCompleted(D2BitBufferStrc * pBitBuffer, :
       /* SetQuestState(TerrorsEnd, Step0x07) — classic-only: Tyrael-dialog-seen
                          marker */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TerrorsEnd, QUESTSTATE_Step0x07);
       nDifficulty = (uint32_t)pGame->nDifficulty;
-      pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x250);
-      GAME::Clients::SetClientStatus(pClient, 4, nDifficulty);
+      GAME::Clients::SetClientStatus(UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a4q2.cpp", 0x250), 4, nDifficulty);
     }
 
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TerrorsEnd);
@@ -634,14 +630,13 @@ static void __stdcall Q27_SetTerrorsEndCompleted(D2BitBufferStrc * pBitBuffer, :
       return;
     }
 
-    int* pKillCounter = &pQuestData->pQuestSpecificData.pA4Q2->nPlayerCompletionCount;
-    (*pKillCounter)++;
+    pQuestData->pQuestSpecificData.pA4Q2->nPlayerCompletionCount++;
 }
 
 // [A4Q3 Terror's End] Party-member callback: if QUEST_TerrorsEnd not Completed for this player and they are physically in Act IV, complete the quest via Q27_SetTerrorsEndCompleted. nParam is the SGAMEDATA.
 void __fastcall Q27_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TerrorsEnd, QUESTSTATE_Completed);
     if (BVar1 == 1) {
       return;
@@ -652,8 +647,7 @@ void __fastcall Q27_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * p
       return;
     }
 
-    eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
+    eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom));
     if (neAct != ACT_IV) {
       return;
     }
@@ -663,14 +657,14 @@ void __fastcall Q27_PartyMember_SetCompleted(::SGAMEDATA * pGame, D2UnitStrc * p
 
 // [A4Q3 Terror's End] If this player has QUEST_TerrorsEnd JustCompleted, propagate completion to every party member (ExecuteFunctionForEveryPartyMember -> Q27_PartyMember_SetCompleted).
 BOOL __fastcall Q27_PropagateCompletionToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pDVar1 = D2Common::Units::GetPlayerData(pUnit);
-    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pDVar1->pQuestRecord[pGame->nDifficulty], QUEST_TerrorsEnd, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL BVar2 = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TerrorsEnd, QUESTSTATE_JustCompleted);
     if (!BVar2) {
       return 0;
     }
 
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -899,11 +893,11 @@ BOOL __fastcall Q27_PlayerCheckNearDiablo(::SGAMEDATA * pGame, D2UnitStrc * pUni
 // [A4Q3 Terror's End] Getter: returns the "all five Chaos Sanctuary seals activated" flag (field_0x13) from the A4Q2 quest-specific struct.
 BOOL __fastcall Q27_GetAllSealsActivated(::SGAMEDATA * pGame) {
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TerrorsEnd);
-    if (!pQuestData) {
-      return 0;
+    if (pQuestData) {
+      return (uint32_t)pQuestData->pQuestSpecificData.pA4Q2->bAllSealsActivated;
     }
 
-    return (uint32_t)pQuestData->pQuestSpecificData.pA4Q2->bAllSealsActivated;
+    return 0;
 }
 
 // [A4Q3 Terror's End] All-seals-activated trigger. Sets the seals-done flag, notifies players (event 0xc), then walks every room of Act IV's Chaos Sanctuary and force-kills all neutral living monsters (except Diablo 0xf3) — i.e. clears the seal bosses' minions when the final seal is hit, summoning Diablo.

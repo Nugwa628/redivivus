@@ -144,7 +144,7 @@ void __fastcall Q06_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     }
 
     D2QuestDataA1Q6Strc* pA1Q6Data = pQuestData->pQuestSpecificData.pA1Q6;
-    if (!pA1Q6Data->bQuestAccepted) {
+    if (pA1Q6Data->bQuestAccepted != 1) {
       return;
     }
 
@@ -434,16 +434,14 @@ static void __stdcall Q06_SetQuestCompletedAndReward(::SGAMEDATA * pQuestControl
                          (drives completion sound + UI) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
     /* SetQuestState(RewardAwaits): flag reward pending so Warriv offers Act2
                          travel; SetClientStatus then unlocks act progress */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_RewardAwaits);
-    uint32_t nDifficulty = (uint32_t)pQuestControl->nDifficulty;
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q6.cpp", 0x1c3);
-    GAME::Clients::SetClientStatus(pClient, 1, nDifficulty);
+    GAME::Clients::SetClientStatus(UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a1q6.cpp", 0x1c3), 1, pQuestControl->nDifficulty);
 }
 
 // A1Q6 per-player callback: if player record not Completed/FinishedInPreviousGame and player is in Catacombs Level 4, register them on all three NPC GUID lists (Cain/Akara/Kashya) and call Q06_SetQuestCompletedAndReward. Credits players present in the boss room when Andariel dies.
 BOOL __fastcall Q06_OnPlayerEnterCatacombsL4(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     int32_t nUnitGUID;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
     if (bQuestState == 1) {
@@ -478,8 +476,8 @@ BOOL __fastcall Q06_OnPlayerEnterCatacombsL4(::SGAMEDATA * pGame, D2UnitStrc * p
 // A1Q6 per-party-member callback: if record not Completed/RewardAwaits and member is anywhere in Act I, register them on all three NPC GUID lists and Q06_SetQuestCompletedAndReward. Spreads quest credit/reward to party members in Act I (invoked via Q06_PropagateRewardToParty).
 void __fastcall Q06_RegisterActIPlayerForCompletion(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     int nPlayerGUID;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return;
@@ -540,14 +538,14 @@ BOOL __fastcall Q06_SetCannotCompleteInGame(::SGAMEDATA * pGame, D2UnitStrc * pU
 
 // A1Q6 per-player callback: if this player's record has JustCompleted set and they are in a party, runs Q06_RegisterActIPlayerForCompletion over every party member to propagate quest credit/reward across the party. Read-only on quest state (gate); writes happen in the per-member callback.
 BOOL __fastcall Q06_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_SistersToTheSlaughter, QUESTSTATE_JustCompleted);
     if (!bJustCompleted) {
       return 0;
     }
 
-    int16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
-    if (nPartyId == -1) {
+    uint16_t nPartyId = UNIT::SUnit::GetPartyId(pUnit);
+    if (nPartyId == 0xffff) {
       return 0;
     }
 
@@ -581,8 +579,7 @@ uint8_t __fastcall Q06_TimerSpawnPortalAndNotify(::SGAMEDATA * pGame, D2QuestDat
     if (pDVar1->nDeathEventCounter == 10) {
       D2UnitStrc* pCallbackArg;
       pfnCallback = Q06_SpawnReturnPortal;
-      pCallbackArg = UNIT::SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, pDVar1->nAndarielGUID);
-      UNIT::SUnit::IteratePlayerOrMonsterUnits(pGame, 0, pCallbackArg, pfnCallback);
+      UNIT::SUnit::IteratePlayerOrMonsterUnits(pGame, 0, UNIT::SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, pDVar1->nAndarielGUID), pfnCallback);
     } else if (pDVar1->nDeathEventCounter == 0xc) {
       if (!(pQuestData->nStateFlagPrev != 3 && pQuestData->nStateFlagPrev != 0xd)) {
         return '\x01';
@@ -728,16 +725,16 @@ bool __fastcall Q06_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 
 // A1Q6 small accessor: returns a quest-specific flag byte ([pQuestSpecific+0x194]) when the quest's active byte (+9) is set, else returns 1 (default). No quest-record state access.
 uint32_t __fastcall Q06_GetQuestSpecificFlag(D2QuestDataStrc * pQuestData) {
-    if (!pQuestData->bIsNotIntroduction) {
-      return 1;
+    if (pQuestData->bIsNotIntroduction) {
+      return (uint32_t)pQuestData->pQuestSpecificData.pA1Q6->bAndarielKilled;
     }
 
-    return (uint32_t)pQuestData->pQuestSpecificData.pA1Q6->bAndarielKilled;
+    return 1;
 }
 
 // A1Q6 fpSequenceFilter: if stateFlag==0 and quest is live (bIsNotIntroduction), schedules Q06_QuestUpdate on a 0x14-tick timer to introduce the quest. No quest-record access.
 bool __fastcall Q06_SequenceFilter(D2QuestDataStrc * pQuestData) {
-    if (!(!pQuestData->nStateFlag && pQuestData->bIsNotIntroduction)) {
+    if (!(!pQuestData->nStateFlag && pQuestData->bIsNotIntroduction == 1)) {
       return true;
     }
 

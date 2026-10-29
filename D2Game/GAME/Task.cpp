@@ -448,12 +448,12 @@ uint32_t __stdcall TASK_AllocateTaskQueue() {
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(aTaskQueueCriticalSections + nSlotIndex);
     if (!gaTaskQueueHeadArray[nSlotIndex]) {
       D2LinkNodeStrc* pDVar1;
-      pNewSlot = D2_NEW_POOL_AT(nullptr, D2TaskQueueSlotStrc, ".\\GAME\\Task.cpp", 0x3fb);
+      pNewSlot = ((D2TaskQueueSlotStrc*)Fog::Memory::AllocServerMemory(nullptr, sizeof(D2TaskQueueSlotStrc), ".\\GAME\\Task.cpp", 0x3fb, 0));
       pNewSlot->nSlotIndex = nSlotIndex;
       pNewSlot->nTaskCount = 0;
       pDVar1 = &pNewSlot->sTaskList;
       pDVar1->pNext = pDVar1;
-      pNewSlot->sTaskList.pPrev = pDVar1;
+      pDVar1->pPrev = pDVar1;
       gaTaskQueueHeadArray[nSlotIndex] = pNewSlot;
       TASK_MoveTasksToSlotAndLinkSlot(pNewSlot);
     }

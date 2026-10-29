@@ -253,7 +253,7 @@ void __fastcall PLAYER_MoveToLocationWithTimeout(::SGAMEDATA * pGame, D2UnitStrc
 
 // @sourcefile .\PLAYER\Player.cpp
 static uint32_t __stdcall PLAYER_PlaceItemInInventory(::SGAMEDATA * pGame, int32_t nParam, D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
-    int32_t nItemX;
+    int32_t nItemGUID;
     int bItemPlaced;
     int32_t bPlaced;
     int32_t nErrorLine;
@@ -262,7 +262,7 @@ static uint32_t __stdcall PLAYER_PlaceItemInInventory(::SGAMEDATA * pGame, int32
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb4);
       exit(-1);
     } else {
-      int32_t nItemY;
+      int32_t nItemX;
       if (!pUnit) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb5);
         exit(-1);
@@ -272,9 +272,7 @@ static uint32_t __stdcall PLAYER_PlaceItemInInventory(::SGAMEDATA * pGame, int32
       nErrorLine = pUnit2->nUnitGUID;
       pInventory = 0;
       bPlaced = 1;
-      nItemY = D2Client::Units::GetYPosFromDynamicPathUnit(pUnit2);
-      nItemX = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit2);
-      bItemPlaced = ITEMS::ItemMode::SERVER_ItemToInventory(".\\PLAYER\\Player.cpp", 0xba, pGame, pUnit, nErrorLine, nItemX, nItemY, nParam, bPlaced, pInventory);
+      bItemPlaced = ITEMS::ItemMode::SERVER_ItemToInventory(".\\PLAYER\\Player.cpp", 0xba, pGame, pUnit, nErrorLine, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit2), D2Client::Units::GetYPosFromDynamicPathUnit(pUnit2), nParam, bPlaced, pInventory);
       return (uint32_t)(bItemPlaced != 0);
     }
 }
@@ -298,8 +296,7 @@ static BOOL __stdcall PLAYER_EquipItemToBodyLoc(::SGAMEDATA * pGame, D2UnitStrc 
       nItemGUID_00 = pUnit2->nUnitGUID;
       pResultOut = &dwEquipResultOut;
       nItemGUID = 1;
-      eBodyLoc = D2Common::ITEMS::Items::GetBodyLocation(pUnit2);
-      bEquipResult = ITEMS::ItemMode::SERVER_EquipItemToBodyLoc(pGame, pUnit, nItemGUID_00, eBodyLoc, nItemGUID, pResultOut);
+      bEquipResult = ITEMS::ItemMode::SERVER_EquipItemToBodyLoc(pGame, pUnit, nItemGUID_00, D2Common::ITEMS::Items::GetBodyLocation(pUnit2), nItemGUID, pResultOut);
       return (uint32_t)(bEquipResult != 0);
     }
 }
@@ -477,7 +474,7 @@ void __fastcall PLAYER_CreateAllStarterItems(D2UnitStrc * pUnit, ::SGAMEDATA * p
     }
 
     int i = pUnit->nClassId;
-    if (!(-1 < i && i < sgptDataTable->nTxtCharStatsSize)) {
+    if (!(0 <= i && i < sgptDataTable->nTxtCharStatsSize)) {
       return;
     }
 
@@ -568,16 +565,16 @@ void __fastcall PLAYER_EndInteraction(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
       pInteractUnit = UNIT::SUnit::FindUnitFromTable(pGame, eInteractUnitType, nInteractUnitId);
       if (pInteractUnit) {
         switch (eInteractUnitType) {
-          case UNIT_PLAYER:
-            PlayerTrade::thunk_TRADE_CompleteTrade(pGame, pUnit);
-          Quests::QUESTS::A5Q5::Q35_OnPlayerLeavesSummit(pGame, pUnit);
-          return;
           case UNIT_MONSTER:
             UNIT::SUNITNPC::SUNITNPC_CloseNpcInteraction(pGame, pUnit, pInteractUnit);
           Quests::QUESTS::A5Q5::Q35_OnPlayerLeavesSummit(pGame, pUnit);
           return;
           case UNIT_OBJECT:
             Objects::ObjectsMode::OBJMODE_HandleObjectDeactivation(pGame, pUnit, pInteractUnit);
+          Quests::QUESTS::A5Q5::Q35_OnPlayerLeavesSummit(pGame, pUnit);
+          return;
+          case UNIT_PLAYER:
+            PlayerTrade::thunk_TRADE_CompleteTrade(pGame, pUnit);
           Quests::QUESTS::A5Q5::Q35_OnPlayerLeavesSummit(pGame, pUnit);
           return;
           case UNIT_ITEM:
@@ -896,7 +893,7 @@ void __fastcall CountModeZeroDeath(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DWOR
 }
 
 void __fastcall COMMAND_playersX(DWORD count) {
-    if (count >= 9) {
+    if (count > 8) {
       return;
     }
 

@@ -250,8 +250,8 @@ bool __fastcall Q10_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 // not past Step0x03, bumps a counter in A2Q2 quest-specific data so the portal-drop
 // loop knows how many scrolls to spawn. No QuestRecord writes.
 BOOL __fastcall Q10_OnScrollPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    D2BitBufferStrc* pBitBuffer = pQuestRecord;
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
     if (bQuestState == 1) {
       return 0;
@@ -267,8 +267,7 @@ BOOL __fastcall Q10_OnScrollPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void
       return 0;
     }
 
-    int32_t* ppScrollCount = &pQuestData->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount;
-    (*ppScrollCount)++;
+    pQuestData->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount++;
     return 0;
 }
 
@@ -276,8 +275,8 @@ BOOL __fastcall Q10_OnScrollPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void
 // ('msf ') drop path. For each player not yet Completed who holds neither 'msf ' nor
 // 'tsh ' (Staff of Kings), bumps the A2Q2 drop counter. No QuestRecord writes.
 BOOL __fastcall Q10_OnStaffOrViperPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
-    D2UnitDataPlayerStrc* pQuestData = D2Common::Units::GetPlayerData(pUnit);
-    BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pQuestData->pQuestRecord[pGame->nDifficulty], QUEST_TheHoradricStaff, QUESTSTATE_Completed);
+    D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
+    BOOL bCompleted = D2Common::QuestRecord::GetQuestState(pQuestRecord, QUEST_TheHoradricStaff, QUESTSTATE_Completed);
     if (bCompleted) {
       return 0;
     }
@@ -297,8 +296,7 @@ BOOL __fastcall Q10_OnStaffOrViperPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       return 0;
     }
 
-    int32_t* ppDropCounter = &pQuestItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount;
-    (*ppDropCounter)++;
+    pQuestItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount++;
     return 0;
 }
 
@@ -316,8 +314,7 @@ BOOL __fastcall Q10_OnHoradricCubePickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit
       return 0;
     }
 
-    int32_t* ppCubeCount = &pCubeItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount;
-    (*ppCubeCount)++;
+    pCubeItem->pQuestSpecificData.pA2Q2->nQuestItemPickupNotifyCount++;
     return 0;
 }
 

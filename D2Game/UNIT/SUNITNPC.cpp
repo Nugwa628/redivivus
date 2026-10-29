@@ -842,7 +842,7 @@ bool __fastcall SUNITNPC_CheckNpcCanSellItem(::SGAMEDATA * pGame, D2UnitStrc * p
     }
 
     uint32_t nItemCode = D2Common::ITEMS::Items::ITEM_GetItemsTxt_szCode(pUnit);
-    if (pGame->nDifficulty && (nItemCode == 0x20347068 || nItemCode == 0x20357068 || nItemCode == 0x2034706d || nItemCode == 0x2035706d)) {
+    if ((uint32_t)pGame->nDifficulty > 0 && (nItemCode == 0x20347068 || nItemCode == 0x20357068 || nItemCode == 0x2034706d || nItemCode == 0x2035706d)) {
       return true;
     }
 
