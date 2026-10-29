@@ -132,8 +132,8 @@ void __stdcall SetSkill(D2UnitStrc * pUnit, eD2Skills eSkill) {
       return;
     }
 
-    eD2Skills eClampedSkill = (int)eSkill < 1 ? 0 : eSkill;
-    if (0x7ffe < (int)eClampedSkill) {
+    eD2Skills eClampedSkill = (int)eSkill <= 0 ? 0 : eSkill;
+    if (0x7fff <= (int)eClampedSkill) {
       eClampedSkill = 0x7fff;
     }
 
@@ -304,11 +304,12 @@ int32_t __stdcall GetHitClass(D2UnitStrc * pUnit) {
     }
 
     int nMissileClassId = pUnit->nClassId;
-    if (!(-1 < nMissileClassId && nMissileClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nMissileClassId)) {
+    D2MissilesTxt * pTxt = (0 <= nMissileClassId && nMissileClassId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nMissileClassId] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return (uint32_t)(uint8_t)sgptDataTable->pTxtMissiles[nMissileClassId].HitClass;
+    return (uint32_t)(uint8_t)pTxt->HitClass;
 }
 
 void __stdcall SetActivateFrame(D2UnitStrc * pUnit, int32_t nActivateFrame) {
@@ -484,23 +485,23 @@ static BOOL __stdcall HasBonusStats(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
 }
 
 // Accumulates all elemental damage stats from pUnit into pMissileDamageData, left-shifted by nShift. Reads fire/lightning/magic/cold/poison/life-drain/mana-drain/burning min+max stats and their durations from pUnit via GetStatUnsignedValue, then adds each (shifted) value to the corresponding field of D2MissileDamageDataStrc. Poison length uses skill_poison_override_length if present, otherwise poisonlength+poison_count. Custom register calling convention: pMissileDamageData=ESI, pUnit=EDI, nShift=BL.
-static void AddStatsToDamage(D2MissileDamageDataStrc * pMissileDamageData, D2UnitStrc * pUnit, BYTE nShift) {
+static void AddStatsToDamage(D2MissileDamageDataStrc * pMissileDamageData, D2UnitStrc * pUnit, int nShift) {
     int nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_firemindam, 0);
-    pMissileDamageData->nFireMinDamage += nStatValue << (nShift & 0x1f);
+    pMissileDamageData->nFireMinDamage += nStatValue << (nShift);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_firemaxdam, 0);
-    pMissileDamageData->nFireMaxDamage += nStatValue << (nShift & 0x1f);
+    pMissileDamageData->nFireMaxDamage += nStatValue << (nShift);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_lightmindam, 0);
-    pMissileDamageData->nLightMinDamage += nStatValue << (nShift & 0x1f);
+    pMissileDamageData->nLightMinDamage += nStatValue << (nShift);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_lightmaxdam, 0);
-    pMissileDamageData->nLightMaxDamage += nStatValue << (nShift & 0x1f);
+    pMissileDamageData->nLightMaxDamage += nStatValue << (nShift);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_magicmindam, 0);
-    pMissileDamageData->nMagicMinDamage += nStatValue << (nShift & 0x1f);
+    pMissileDamageData->nMagicMinDamage += nStatValue << (nShift);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_magicmaxdam, 0);
-    pMissileDamageData->nMagicMaxDamage += nStatValue << (nShift & 0x1f);
+    pMissileDamageData->nMagicMaxDamage += nStatValue << (nShift);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_coldmindam, 0);
-    pMissileDamageData->nColdMinDamage += nStatValue << (nShift & 0x1f);
+    pMissileDamageData->nColdMinDamage += nStatValue << (nShift);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_coldmaxdam, 0);
-    pMissileDamageData->nColdMaxDamage += nStatValue << (nShift & 0x1f);
+    pMissileDamageData->nColdMaxDamage += nStatValue << (nShift);
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_coldlength, 0);
     pMissileDamageData->nColdLength += nStatValue;
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_poisonmindam, 0);
@@ -508,13 +509,13 @@ static void AddStatsToDamage(D2MissileDamageDataStrc * pMissileDamageData, D2Uni
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_poisonmaxdam, 0);
     pMissileDamageData->nPoisonMaxDamage += nStatValue;
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_skill_poison_override_length, 0);
-    if (nStatValue < 1) {
+    if (nStatValue > 0) {
+      pMissileDamageData->nPoisonLength += nStatValue;
+    } else {
       nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_poisonlength, 0);
       pMissileDamageData->nPoisonLength += nStatValue;
       nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_poison_count, 0);
       pMissileDamageData->nPoisonCount += nStatValue;
-    } else {
-      pMissileDamageData->nPoisonLength += nStatValue;
     }
 
     nStatValue = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_lifedrainmindam, 0);
@@ -536,39 +537,39 @@ static void CalculateFinalDamage(D2MissileDamageDataStrc * pMissileDamageData, i
     }
 
     int nScaledTmp = pMissileDamageData->nFireMinDamage * nSrcDamage;
-    pMissileDamageData->nFireMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nFireMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nFireMaxDamage * nSrcDamage;
-    pMissileDamageData->nFireMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nFireMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nLightMinDamage * nSrcDamage;
-    pMissileDamageData->nLightMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nLightMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nLightMaxDamage * nSrcDamage;
-    pMissileDamageData->nLightMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nLightMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nMagicMinDamage * nSrcDamage;
-    pMissileDamageData->nMagicMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nMagicMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nMagicMaxDamage * nSrcDamage;
-    pMissileDamageData->nMagicMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nMagicMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nColdMinDamage * nSrcDamage;
-    pMissileDamageData->nColdMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nColdMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nColdMaxDamage * nSrcDamage;
-    pMissileDamageData->nColdMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nColdMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nColdLength * nSrcDamage;
-    pMissileDamageData->nColdLength = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nColdLength = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nPoisonMinDamage * nSrcDamage;
-    pMissileDamageData->nPoisonMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nPoisonMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nPoisonMaxDamage * nSrcDamage;
-    pMissileDamageData->nPoisonMaxDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nPoisonMaxDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nPoisonCount * nSrcDamage;
-    pMissileDamageData->nPoisonCount = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nPoisonCount = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nLifeDrainMinDamage * nSrcDamage;
-    pMissileDamageData->nLifeDrainMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nLifeDrainMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nManaDrainMinDamage * nSrcDamage;
-    pMissileDamageData->nManaDrainMinDamage = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nManaDrainMinDamage = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nBurningMin * nSrcDamage;
-    pMissileDamageData->nBurningMin = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nBurningMin = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nBurningMax * nSrcDamage;
-    pMissileDamageData->nBurningMax = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nBurningMax = (int)nScaledTmp / 128;
     nScaledTmp = pMissileDamageData->nBurnLength * nSrcDamage;
-    pMissileDamageData->nBurnLength = (int)(nScaledTmp + (nScaledTmp >> 0x1f & 0x7fU)) >> 7;
+    pMissileDamageData->nBurnLength = (int)nScaledTmp / 128;
 }
 
 // Returns nSrcDamage scaled by the owner unit's elemental mastery passive stat for nElemType (fire/lightning/cold+freeze/poison). Reads UNITSTAT_passive_*_mastery via GetStatUnsignedValue and applies the percentage via D2ApplyPercent. Returns 0 if no mastery or unknown element.
@@ -776,11 +777,12 @@ int32_t __stdcall GetMaxDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int32_t 
 }
 
 uint8_t __stdcall GetElemTypeFromMissileId(int32_t nMissileId) {
-    if (!(-1 < nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nMissileId)) {
+    D2MissilesTxt * pTxt = (0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize) ? &sgptDataTable->pTxtMissiles[nMissileId] : NULL;
+    if (!pTxt) {
       return 0;
     }
 
-    return sgptDataTable->pTxtMissiles[nMissileId].EType;
+    return pTxt->EType;
 }
 
 // Returns the minimum elemental damage for a missile at a given level. Same structure as GetMinDamage but reads D2MissilesTxt EMin + MinELev1 level breakpoint and EDmgSymPerCalc calc expression. Result is shifted left by HitShift. Returns 0 for non-missile units or invalid IDs.
@@ -1034,7 +1036,7 @@ int32_t __fastcall GetRandomNumberInRange(int32_t nMin, int32_t nMax, int32_t nU
     if (!pCalc) {
       return 0;
     }
-    if (nMax <= nMin) {
+    if (nMin >= nMax) {
       return nMin;
     }
 

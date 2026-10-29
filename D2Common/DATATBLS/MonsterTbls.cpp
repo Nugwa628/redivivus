@@ -1673,7 +1673,7 @@ void __stdcall MONSTER_SetVelocityByIndex(int32_t nMonStatsId, int16_t nVelocity
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2ef);
       exit(-1);
     }
-    if (!(-1 < nMonStatsId && nMonStatsId < sgtDataTable.nTxtMonStatsSize)) {
+    if (!(0 <= nMonStatsId && nMonStatsId < sgtDataTable.nTxtMonStatsSize)) {
       return;
     }
 
@@ -1692,7 +1692,7 @@ void __fastcall DATATBLS_CompileUniqueTitleTxt(D2PoolManagerStrc * pMemory, char
     aBinFields[1].nSize = 0;
     aBinFields[1].nOffset = 0;
     aBinFields[1].fpLinker = 0;
-    if (nTitleIdx >= 4) {
+    if (nTitleIdx > 3) {
       return;
     }
 
@@ -1710,7 +1710,7 @@ void __stdcall TXT_UnloadUniqueMonsterNameTables() {
       }
 
       ppEntry = (D2UniqueNameTablesStrc*)(ppEntry->apTable + 1);
-    } while ((int)ppEntry < (uintptr_t)((char*)&gsTxtUniqueNameTables + 16));
+    } while ((int)ppEntry < (int)((uintptr_t)((char*)&gsTxtUniqueNameTables + 16)));
 }
 
 uint16_t * __fastcall MONSTER_GetRandomUniquePrefix(D2UnitStrc * pUnit) {
@@ -1772,12 +1772,8 @@ uint16_t * __fastcall MONSTER_GetRandomUniqueAppelation(D2UnitStrc * pUnit) {
 
 D2ParsedTreasureClassStrc * __fastcall TC_ExtendTreasureClassSize(char * szText) {
     Fog::Src::Excel::FOG_ParseStringField(sgtDataTable.pTxtMonsterTblsLink, szText);
-    uint32_t nAllocMask = sgtDataTable.nParsedTreasureClassSize & 0x8000000f;
-    if ((int)nAllocMask < 0) {
-      nAllocMask = (nAllocMask - 1 | -16) + 1;
-    }
-    if (!nAllocMask) {
-      sgtDataTable.pParsedTreasureClass = (D2ParsedTreasureClassStrc*)D2_REALLOC_POOL_AT(nullptr, sgtDataTable.pParsedTreasureClass, (sgtDataTable.nParsedTreasureClassSize + 0x10) * 0x2c, ".\\DATATBLS\\MonsterTbls.cpp", 0x3a2);
+    if (!((int)sgtDataTable.nParsedTreasureClassSize % 16)) {
+      sgtDataTable.pParsedTreasureClass = (D2ParsedTreasureClassStrc*)Fog::Memory::ReAllocServerMemory(nullptr, sgtDataTable.pParsedTreasureClass, (sgtDataTable.nParsedTreasureClassSize + 0x10) * 0x2c, ".\\DATATBLS\\MonsterTbls.cpp", 0x3a2, 0);
     }
 
     memset(sgtDataTable.pParsedTreasureClass + sgtDataTable.nParsedTreasureClassSize, 0, 0x2c);
@@ -3210,7 +3206,7 @@ void __stdcall MONSTERTBLS_FreeMonLvlTxt() {
       pIdLine[-0x100] = -1;
       *pIdLine = -1;
       pIdLine++;
-    } while ((int)pIdLine < (uintptr_t)((char*)&sgtDataTable + 2472));
+    } while ((int)pIdLine < (int)((uintptr_t)((char*)&sgtDataTable + 2472)));
 }
 
 D2HirelingTxt * __stdcall GetHirelingText(int32_t bIsExpansion, int32_t nHirelingId, int32_t nLevel) {
@@ -3684,7 +3680,7 @@ void __fastcall TXT_AllocTxt_monsounds(D2PoolManagerStrc * pMemory) {
 }
 
 D2MonSoundsTxt * __stdcall TxtGetMonSoundsLine(int32_t nSoundId) {
-    if (!(sgtDataTable.pTxtMonSounds && -1 < nSoundId && nSoundId < sgtDataTable.nTxtMonSoundsSize)) {
+    if (!(sgtDataTable.pTxtMonSounds && 0 <= nSoundId && nSoundId < sgtDataTable.nTxtMonSoundsSize)) {
       return nullptr;
     }
 
@@ -3697,7 +3693,7 @@ D2MonSoundsTxt * __stdcall MONSTERTBLS_GetMonSoundsTxtRecord(int32_t nParam) {
     }
 
     int nMonSoundId = (int)sgtDataTable.pTxtMonStats[nParam].MonSound;
-    if (!(-1 < nMonSoundId && nMonSoundId < sgtDataTable.nTxtMonSoundsSize)) {
+    if (!(0 <= nMonSoundId && nMonSoundId < sgtDataTable.nTxtMonSoundsSize)) {
       return nullptr;
     }
 
@@ -5341,7 +5337,7 @@ D2MonPresetTxt * __stdcall MONSTERTBLS_GetMonPresetRecord(uint32_t nParam, int *
     if (!pnParam) {
       return nullptr;
     }
-    if (nParam < 5 && sgtDataTable.pTxtMonPresetPlace) {
+    if (nParam <= 4 && sgtDataTable.pTxtMonPresetPlace) {
       *pnParam = sgtDataTable.pTxtMonPresetPerActId[nParam];
       return sgtDataTable.pTxtMonPresetPerAct[nParam];
     }
@@ -5393,7 +5389,7 @@ void __stdcall TXT_FreeTxt_sounds() {
 // Loads and compiles the MonSeq.txt data table into sgtDataTable. Defines the six binary field descriptors (sequence, mode, frame, dir, event, end), compiles the TXT via CompileTxt, then builds the pMonSeqMonsterTbls lookup array indexed by sequence ID, setting each entry's pMonSeqTxt pointer and counting rows per sequence. Called once at startup during data-table initialization.
 void __fastcall TXT_AllocTxt_monseq(D2PoolManagerStrc * pMemory) {
     D2BinFieldInputStrc monseq[6];
-    short int nSeqId;
+    int nSeqId;
     monseq[0].szName = "sequence";
     monseq[0].eType = FIELDTYPE_NAME_I_WORD;
     monseq[0].nSize = 0;
@@ -5468,7 +5464,7 @@ void __stdcall MONSTERTBLS_FreeMonPropTxt() {
 
 // 2022.01.09 - dzik
 D2MonSeqMonsterTbls * __stdcall GetMonsterSequenceTableByIndex(int32_t nIndex) {
-    if (!(-1 < nIndex && nIndex < sgtDataTable.nMonSeqMonsterTblsSize)) {
+    if (!(0 <= nIndex && nIndex < sgtDataTable.nMonSeqMonsterTblsSize)) {
       return nullptr;
     }
 
@@ -5711,7 +5707,7 @@ void __stdcall TXT_AllocItemDropData(D2PoolManagerStrc * pMemory) {
     TC_GenerateAutoItemTypeTreasureClasses();
     TXT_AllocTxt_TreasureClassEx(pMemory);
     TXT_AllocParsedTreasureClassDiffActChestABC();
-    if (0xfffe >= sgtDataTable.nParsedTreasureClassSize) {
+    if (0xffff > sgtDataTable.nParsedTreasureClassSize) {
       return;
     }
 

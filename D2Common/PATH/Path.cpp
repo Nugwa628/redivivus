@@ -475,14 +475,14 @@ static BOOL __stdcall PATH_TraceCollisionPath(int32_t nStartX, uint32_t nStartY,
 }
 
 static void PATH_UpdateVelocityWithAcceleration(int32_t nParam, D2DynamicPathStrc * pDynamicPath) {
-    if (nParam < 1) {
+    if (nParam <= 0) {
       nParam = 0x400;
     }
     if (pDynamicPath->nAcceleration) {
       pDynamicPath->nAccelerationCounter++;
-      if (4 < pDynamicPath->nAccelerationCounter) {
+      if (5 <= pDynamicPath->nAccelerationCounter) {
         pDynamicPath->dwVelocity += pDynamicPath->nAcceleration;
-        if (pDynamicPath->nMaxVelocity < pDynamicPath->dwVelocity) {
+        if (pDynamicPath->dwVelocity > pDynamicPath->nMaxVelocity) {
           pDynamicPath->dwVelocity = pDynamicPath->nMaxVelocity;
           pDynamicPath->nAcceleration = 0;
         } else if (pDynamicPath->dwVelocity < 0) {
@@ -638,11 +638,11 @@ void __stdcall PATH_SnapPositionToTile(D2DynamicPathStrc * pDynamicPath) {
 }
 
 uint32_t __stdcall Get8FlagsFromDynamicPath(D2DynamicPathStrc * pDynamicPath) {
-    if (pDynamicPath) {
+    if (!pDynamicPath) {
+      return 0;
+    } else {
       return pDynamicPath->nFlags & 8;
     }
-
-    return 0;
 }
 
 void __stdcall PATH_SetPathTarget(D2UnitStrc * pUnit, D2UnitStrc * pTargetUnit) {

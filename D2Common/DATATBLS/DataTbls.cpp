@@ -208,10 +208,10 @@ int __stdcall DATATBLS_GetLevelFromExperience(int32_t ePlayerClass, uint32_t nPa
 
 // @sourcefile .\DATATBLS\DataTbls.cpp
 int32_t __fastcall DATATBLS_AppendDataToBuffer(void * * pParam, int * pnParam, int * pnCapacity, void * pSrc, size_t nSize) {
-    while (*pnCapacity <= (int)(*pnParam + nSize)) {
+    while ((int)(*pnParam + nSize) >= *pnCapacity) {
       void* pRealloced;
       *pnCapacity += 0x400;
-      if (0x7ffffffe < *pnCapacity) {
+      if (*pnCapacity >= 0x7fffffff) {
         return 0;
       }
 
@@ -439,9 +439,10 @@ static void GetPlayerClassIdToName(int32_t nClassId, char * szResult, size_t nSi
     if (0 >= (int)nSize) {
       return;
     }
-    if (-1 < nClassId && nClassId < sgptDataTable->nTxtCharStatsSize && sgptDataTable->pTxtCharStats + nClassId) {
+    D2CharStatsTxt * pTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtCharStatsSize) ? &sgptDataTable->pTxtCharStats[nClassId] : NULL;
+    if (pTxt) {
       char* pszClassName;
-      pszClassName = sgptDataTable->pTxtCharStats[nClassId].szClass;
+      pszClassName = pTxt->szClass;
       if (*pszClassName != '\0') {
         strncpy(szResult, pszClassName, nSize);
         szResult[nSize - 1] = '\0';
@@ -458,9 +459,10 @@ static void GetMonsterClassIdToName(int32_t nClassId, char * szResult, size_t nS
     if (0 >= (int)nSize) {
       return;
     }
-    if (-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId) {
+    D2MonStatsTxt * pTxt = (0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize) ? &sgptDataTable->pTxtMonStats[nClassId] : NULL;
+    if (pTxt) {
       uint16_t* pwszLocaleName;
-      wNameStr = sgptDataTable->pTxtMonStats[nClassId].NameStr;
+      wNameStr = pTxt->NameStr;
       if (wNameStr != 0x1506) {
         pwszLocaleName = D2Lang::StrTable::strtable::GetLocaleString(wNameStr);
         D2Lang::Unicode::UNISYS::UNICODE_WideToMultiByte(szResult, (uint16_t*)pwszLocaleName, nSize);
@@ -537,9 +539,6 @@ char * __stdcall GetUnitClassIdToName(D2UnitStrc * pUnit, char * szResult, size_
         return szResult;
       }
     }
-
-    printf(szResult, "NULL Unit");
-    return szResult;
 }
 
 char * __stdcall GetNameByClassIdAndType(eD2UnitType eUnitType, int16_t nClassId, char * szResult, size_t nSize) {
@@ -1625,7 +1624,7 @@ DWORD __stdcall TXT_Experience_GetExpRatio(int32_t nLevel) {
     if (!sgtDataTable.pTxtExperience) {
       return 0;
     }
-    if (nLevel < 1) {
+    if (nLevel <= 0) {
       return sgtDataTable.pTxtExperience->ExpRatio;
     }
     if (nLevel > sgtDataTable.pTxtExperience->Class[0]) {

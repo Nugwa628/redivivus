@@ -1214,8 +1214,8 @@ void __fastcall SpawnAct12Shrines(D2DrlgLevelStrc * pLevel, int32_t nShrines) {
 static void DRLGOUTDOOR_SimplifyOutdoorPoints(D2PoolManagerStrc * pMemory, int * * ppnParam) {
     int* pPoint = *ppnParam;
     do {
-      *pPoint = (int)(*pPoint + (*pPoint >> 0x1f & 7U)) >> 3;
-      pPoint[1] = (int)(pPoint[1] + (pPoint[1] >> 0x1f & 7U)) >> 3;
+      *pPoint = (int)(*pPoint) / 8;
+      pPoint[1] = (int)pPoint[1] / 8;
       pPoint = (int*)pPoint[4];
     } while (pPoint != *ppnParam);
 
@@ -1230,7 +1230,7 @@ static void DRLGOUTDOOR_SimplifyOutdoorPoints(D2PoolManagerStrc * pMemory, int *
         pPoint[4] = pNextPoint[4];
         pPoint[3] |= pNextPoint[3];
         *(char*)(pPoint + 2) = (char)pNextPoint[2];
-        D2_FREE_POOL_AT(pMemory, pNextPoint, ".\\DRLG\\Outdoors.cpp", 0x2cb);
+        Fog::Memory::FreeServerMemory(pMemory, pNextPoint, ".\\DRLG\\Outdoors.cpp", 0x2cb, 0);
       }
 
       pPoint = (int*)pPoint[4];
@@ -1493,7 +1493,7 @@ void __fastcall InitAct4OutdoorLevel(D2DrlgLevelStrc * pLevel) {
     if (0x67 >= eLevelId) {
       return;
     }
-    /* Level is in act 4 */ if (eLevelId < 0x6b) {
+    /* Level is in act 4 */ if (eLevelId <= 0x6a) {
       /* Before river of flames */ DRLGOUTPLACE_PlaceAct4SpecialPresets(pLevel);
       AddAct124SecondaryBorder(pLevel, 1, 799);
       AddAct124SecondaryBorder(pLevel, 2, 799);

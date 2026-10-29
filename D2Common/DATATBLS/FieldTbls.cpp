@@ -114,14 +114,13 @@ void __stdcall FIELDTBLS_GetFieldCenterOffsets(uint32_t * pdwHalfWidth, uint32_t
 // allocates its own storage and returns it.
 // @sourcefile .\DATATBLS\FieldTbls.cpp
 POINT * __stdcall FIELDTBLS_AllocPoint() {
-    POINT* pPoint = D2_NEW_POOL_AT(nullptr, POINT, ".\\DATATBLS\\FieldTbls.cpp", 0x87);
+    POINT* pPoint = ((POINT*)Fog::Memory::AllocServerMemory(nullptr, sizeof(POINT), ".\\DATATBLS\\FieldTbls.cpp", 0x87, 0));
     if (!pPoint) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x88);
       exit(-1);
     }
 
-    pPoint->x = 0;
-    pPoint->y = 0;
+    memset(pPoint, 0, sizeof(*pPoint));
     return pPoint;
 }
 

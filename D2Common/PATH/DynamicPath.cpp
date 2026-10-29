@@ -379,19 +379,19 @@ uint32_t __stdcall GetYSP3(D2DynamicPathStrc * pDynamicPath) {
 }
 
 int32_t __stdcall GetLastPathPointX(D2DynamicPathStrc * pDynamicPath) {
-    if (!pDynamicPath->dwPathPoints) {
+    if (pDynamicPath->dwPathPoints) {
+      return (uint32_t)pDynamicPath->PathPoints[pDynamicPath->dwPathPoints - 1].nX;
+    } else {
       return 0;
     }
-
-    return (uint32_t)pDynamicPath->PathPoints[pDynamicPath->dwPathPoints - 1].nX;
 }
 
 int32_t __stdcall GetLastPathPointY(D2DynamicPathStrc * pDynamicPath) {
-    if (!pDynamicPath->dwPathPoints) {
+    if (pDynamicPath->dwPathPoints) {
+      return (uint32_t)pDynamicPath->PathPoints[pDynamicPath->dwPathPoints - 1].nY;
+    } else {
       return 0;
     }
-
-    return (uint32_t)pDynamicPath->PathPoints[pDynamicPath->dwPathPoints - 1].nY;
 }
 
 D2RoomStrc * __stdcall GetRoom(D2DynamicPathStrc * pDynamicPath) {
@@ -473,11 +473,11 @@ void __stdcall GetTargetTypeAndGUID(D2DynamicPathStrc * pDynamicPath, eD2UnitTyp
 }
 
 D2UnitStrc * __stdcall GetTargetUnit(D2DynamicPathStrc * pDynamicPath) {
-    if (pDynamicPath) {
+    if (!pDynamicPath) {
+      return nullptr;
+    } else {
       return pDynamicPath->pTargetUnit;
     }
-
-    return nullptr;
 }
 
 int32_t __stdcall GetCollisionType(D2DynamicPathStrc * pDynamicPath) {
@@ -633,7 +633,7 @@ void __stdcall OverwriteDistanceAndMaxDistance(D2DynamicPathStrc * pDynamicPath,
     if (!pDynamicPath) {
       return;
     }
-    if (0x4c < nDistance) {
+    if (0x4d <= nDistance) {
       nDistance = 0x4d;
     }
 
@@ -646,12 +646,9 @@ uint8_t __stdcall GetMaxDistance(D2DynamicPathStrc * pDynamicPath) {
 }
 
 eCollisionFlags __stdcall CheckAndGetCollisionFlag(D2DynamicPathStrc * pDynamicPath) {
-    if (pDynamicPath->dwVelocity) {
-      return pDynamicPath->eCollisionFlag;
+    if (!pDynamicPath->dwVelocity) {
+      pDynamicPath->eCollisionFlag = Collision::CheckCollision_BlockAll_Width(pDynamicPath->pRoom, (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosX, (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosY, pDynamicPath->nUnitSize, 0x7fff);
     }
-
-    eCollisionFlags eCollisionResult = Collision::CheckCollision_BlockAll_Width(pDynamicPath->pRoom, (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosX, (uint32_t)(uint16_t)pDynamicPath->Coords.tSubtile.nPosY, pDynamicPath->nUnitSize, 0x7fff);
-    pDynamicPath->eCollisionFlag = eCollisionResult;
     return pDynamicPath->eCollisionFlag;
 }
 
@@ -688,11 +685,10 @@ int32_t __stdcall GetLastInitCoordX(D2DynamicPathStrc * pDynamicPath) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x902);
       exit(-1);
     }
-    if (!pDynamicPath->nSaveCoordsSize) {
-      return 0;
+    if (pDynamicPath->nSaveCoordsSize) {
+      return (uint32_t)pDynamicPath->SaveCoords[pDynamicPath->nSaveCoordsSize - 1].nX;
     }
-
-    return (uint32_t)pDynamicPath->SaveCoords[pDynamicPath->nSaveCoordsSize - 1].nX;
+    return 0;
 }
 
 int32_t __stdcall GetLastInitCoordY(D2DynamicPathStrc * pDynamicPath) {
@@ -700,11 +696,10 @@ int32_t __stdcall GetLastInitCoordY(D2DynamicPathStrc * pDynamicPath) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x911);
       exit(-1);
     }
-    if (!pDynamicPath->nSaveCoordsSize) {
-      return 0;
+    if (pDynamicPath->nSaveCoordsSize) {
+      return (uint32_t)pDynamicPath->SaveCoords[pDynamicPath->nSaveCoordsSize - 1].nY;
     }
-
-    return (uint32_t)pDynamicPath->SaveCoords[pDynamicPath->nSaveCoordsSize - 1].nY;
+    return 0;
 }
 
 void __stdcall SetUnsetFlags0x40(D2DynamicPathStrc * pDynamicPath, int32_t bSet) {
@@ -746,7 +741,7 @@ void __stdcall PATH_SetMissileOffsets(D2DynamicPathStrc * pDynamicPath, uint8_t 
 }
 
 void __stdcall SetDistanceWithChecks(D2DynamicPathStrc * pDynamicPath, uint32_t nDistance) {
-    if (nDistance < 0x100) {
+    if (nDistance <= 0xff) {
       pDynamicPath->nDistance = (uint8_t)nDistance;
       return;
     }

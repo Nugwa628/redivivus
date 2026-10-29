@@ -172,7 +172,7 @@ int __stdcall ITEMMOD_FindChargedSkill(D2UnitStrc * pUnit, int32_t nParam1, int3
         return 0;
       }
 
-      nChargedSkillVal = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_item_charged_skill, (nParam1 << ((uint8_t)nStatCostShift & 0x1f)) + (uStatCostMask & nParam2));
+      nChargedSkillVal = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_item_charged_skill, (nParam1 << (uint8_t)nStatCostShift) + (uStatCostMask & nParam2));
       if (nChargedSkillVal) {
         break;
       }
@@ -199,11 +199,14 @@ BOOL __stdcall ITEMMOD_SetChargedSkillCharges(D2UnitStrc * pUnit, int32_t nSkill
     BOOL bSubFound;
     uint32_t nMaxCharges;
     uint32_t nNewCharges;
-    if (!(pUnit && pUnit->eUnitType == UNIT_ITEM)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (pUnit->eUnitType != UNIT_ITEM) {
       return 0;
     }
 
-    uint32_t nStatKey = (nSkillId << ((uint8_t)sgptDataTable->nChargedSkillLevelBits & 0x1f)) + (sgptDataTable->dwChargedSkillLevelMask & nChargeSlot);
+    uint32_t nStatKey = (nSkillId << sgptDataTable->nChargedSkillLevelBits) + (sgptDataTable->dwChargedSkillLevelMask & nChargeSlot);
     for (pStatList = Stats::StatsEx::GetStatsByFlags(pUnit, 0x40); pStatList; pStatList = Stats::StatsEx::STATLIST_FindStatListWithFlags(pStatList, 0x40)) {
       int nChargedSkillVal;
       nChargedSkillVal = Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_item_charged_skill, nStatKey);
@@ -345,8 +348,8 @@ static void __stdcall ITEMMOD_MaximizeStatForEnhanced(eD2UnitStat eEnhancedProp,
     int nNewAC;
     int nItemClassId;
     int* pnItemClassId = &nItemClassId;
-    uint32_t bIsType = Items::ITEM_GetItemsTxt_szCode(pUnit);
-    D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::ConvertItemCodeToClassIdAndGetItemsTxtLine(bIsType, pnItemClassId);
+    uint32_t bIsType;
+    D2ItemsTxt* pItemsTxt = DATATBLS::ItemTbls::ConvertItemCodeToClassIdAndGetItemsTxtLine(Items::ITEM_GetItemsTxt_szCode(pUnit), pnItemClassId);
     if (!(pItemsTxt && true)) {
       return;
     }
@@ -1169,7 +1172,7 @@ int32_t __fastcall PropertyFunc_Charges(int32_t nType, D2UnitStrc * pUnit, D2Uni
     D2SeedStrc* pSeed = Items::GetItemSeed(pItemUnit);
     uint32_t nRandChargeOffset = D2Client::Archive::RANDOM_RandomNumberSelector(pSeed, nSkillLevel - nChargesDiv8);
     D2StatListExStrc* pStatsEx = ITEMMOD_GetOrCreateStatList(pItemUnit, nParam3, nParam, pUnit);
-    nClampedSkillLevel = eSkill << ((uint8_t)sgptDataTable->nChargedSkillLevelBits & 0x1f);
+    nClampedSkillLevel = eSkill << (uint8_t)sgptDataTable->nChargedSkillLevelBits;
     Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, eStatCode, (nRandChargeOffset + 1 + nChargesDiv8 & 0xff) + nSkillLevel * 0x100, (uint32_t)((uint32_t)(uint16_t)(short int)((uint32_t)nClampedSkillLevel >> 0x10) << 16 | (uint32_t)(uint16_t)((short int)nClampedSkillLevel + ((uint16_t)sgptDataTable->dwChargedSkillLevelMask & (uint16_t)nChargeSkillLevel))));
     return 1;
 }
@@ -1657,14 +1660,7 @@ BOOL __stdcall ITEMMOD_CanApplyAffix(D2UnitStrc * pUnit, int32_t nParam) {
     uint32_t bTypeMatch;
     uint16_t wVersion = Items::ITEM_GetItemData_wItemVersion(pUnit);
     if (wVersion < 100) {
-      uint32_t fStackableCheck;
-      fStackableCheck = Items::IsStackable(pUnit);
-      if (fStackableCheck) {
-        return 0;
-      }
-
-      iVar1 = Items::ITEM_GetTxtItemTypes_throwable(pUnit);
-      if (iVar1) {
+      if (Items::IsStackable(pUnit) || Items::ITEM_GetTxtItemTypes_throwable(pUnit)) {
         return 0;
       }
     }
@@ -1924,7 +1920,10 @@ uint32_t __fastcall ITEMPROP_AddMinDamage(uint32_t dwParam1, D2UnitStrc * pUnit,
     if (!nParam1) {
       return 0;
     }
-    if (!pUnit2 || pUnit2->eUnitType != UNIT_ITEM) {
+    if (!pUnit2) {
+      return 0;
+    }
+    if (pUnit2->eUnitType != UNIT_ITEM) {
       return 0;
     }
     if (!pUnit || pUnit->eUnitType != UNIT_ITEM) {
@@ -1994,7 +1993,10 @@ uint32_t __fastcall ITEMPROP_AddMaxDamage(uint32_t dwParam1, D2UnitStrc * pUnit,
     if (!nParam1) {
       return 0;
     }
-    if (!pUnit2 || pUnit2->eUnitType != UNIT_ITEM) {
+    if (!pUnit2) {
+      return 0;
+    }
+    if (pUnit2->eUnitType != UNIT_ITEM) {
       return 0;
     }
     if (!pUnit || pUnit->eUnitType != UNIT_ITEM) {

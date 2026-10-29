@@ -290,11 +290,11 @@ static int32_t __stdcall STATLIST_LookupBaseStatWithMinAccr(D2ItemStatCostTxt * 
 }
 
 static void * STATLIST_GetEffectiveStatsArray(D2StatListExStrc * pStatList) {
-    if (!(pStatList->sStatList.nFlags & 0x80000000U)) {
+    if (pStatList->sStatList.nFlags & 0x80000000U) {
+      return &pStatList->sFullStats;
+    } else {
       return &pStatList->sStatList.sBaseStats;
     }
-
-    return &pStatList->sFullStats;
 }
 
 // Binary-searches pStatEx's stat array for the packed stat key (wStatIndex:wSubIndex == nParam), returns its nStatValue. If the ItemStatCost record has ITEMSTATCOSTFLAG_FMIN set and the owning unit is a player or monster and the found value is below minaccr, returns minaccr left-shifted by valshift instead. Returns 0 if stat not found.
@@ -468,23 +468,26 @@ D2StatListStrc * __stdcall AllocStatList(D2PoolManagerStrc * pMemory, int32_t nF
 }
 
 eD2UnitType __stdcall GetOwnerType(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return UNIT_COUNT;
+    } else {
       return pStatList->sStatList.eOwnerType;
     }
-
-    return UNIT_COUNT;
 }
 
 int32_t __stdcall STATLIST_GetStatCountFromStatList(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return 0;
+    } else {
       return (int)pStatList->sStatList.sBaseStats.wStatCount;
     }
-
-    return 0;
 }
 
 int32_t __stdcall STATLIST_GetUnitTotalStats(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->pStatsEx)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (!pUnit->pStatsEx) {
       return 0;
     }
 
@@ -508,11 +511,11 @@ void __stdcall SetState(D2StatListExStrc * pStatsEx, eD2States eState) {
 }
 
 eD2States __stdcall GetState(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return STATE_none;
+    } else {
       return pStatList->sStatList.eState;
     }
-
-    return STATE_none;
 }
 
 void __stdcall SetTimeout_WithFlag(D2StatListExStrc * pStatList, int32_t nTimeout) {
@@ -529,11 +532,11 @@ void __stdcall SetTimeout_WithFlag(D2StatListExStrc * pStatList, int32_t nTimeou
 }
 
 int __stdcall STATLIST_GetFullListFromStatList(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return 0;
+    } else {
       return pStatList->sStatList.nTimeout;
     }
-
-    return 0;
 }
 
 int32_t __stdcall STATLIST_GetStatFromBaseArray(D2StatListExStrc * pStatList, eD2UnitStat eUnitStat, uint32_t nParam) {
@@ -652,7 +655,10 @@ int32_t __stdcall UNITS_CalcUnitStatWithPercentBonus(D2UnitStrc * pUnit, eD2Unit
 }
 
 int32_t __stdcall STATLIST_GetStatValueByIndex(D2StatListExStrc * pStatList, int32_t nIndex) {
-    if (!(pStatList && nIndex < pStatList->sStatList.sBaseStats.wStatCount)) {
+    if (!pStatList) {
+      return 0;
+    }
+    if (!(nIndex < pStatList->sStatList.sBaseStats.wStatCount)) {
       return 0;
     }
 
@@ -688,7 +694,10 @@ D2StatListExStrc * __stdcall GetStatListByState(D2StatListExStrc * pStatsEx, eD2
 
 D2StatListExStrc * __stdcall GetStatsByState(D2UnitStrc * pUnit, eD2States eState) {
     D2StatListExStrc* pStatsEx = pUnit->pStatsEx;
-    if (!(pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U)) {
+    if (!pStatsEx) {
+      return nullptr;
+    }
+    if (!(pStatsEx->sStatList.nFlags & 0x80000000U)) {
       return nullptr;
     }
 
@@ -734,7 +743,10 @@ D2StatListExStrc * __stdcall STATLIST_FindStatListWithFlags(D2StatListExStrc * p
 
 D2StatListExStrc * __stdcall GetStatsByFlags(D2UnitStrc * pUnit, uint32_t nStatListFlags) {
     D2StatListExStrc* pStatsEx = pUnit->pStatsEx;
-    if (!(pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U)) {
+    if (!pStatsEx) {
+      return nullptr;
+    }
+    if (!(pStatsEx->sStatList.nFlags & 0x80000000U)) {
       return nullptr;
     }
 
@@ -744,7 +756,10 @@ D2StatListExStrc * __stdcall GetStatsByFlags(D2UnitStrc * pUnit, uint32_t nStatL
 
 D2StatListExStrc * __stdcall GetStatListByStateOrFlagsIfNotExists(D2UnitStrc * pUnit, eD2States eState, uint32_t nStatListFlags) {
     D2StatListExStrc* pStatListEx = pUnit->pStatsEx;
-    if (!(pStatListEx && pStatListEx->sStatList.nFlags & 0x80000000U)) {
+    if (!pStatListEx) {
+      return nullptr;
+    }
+    if (!(pStatListEx->sStatList.nFlags & 0x80000000U)) {
       return nullptr;
     }
     if (eState != STATE_none) {
@@ -922,7 +937,10 @@ void __stdcall STATLIST_ClearOverlayFlags(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall STATLIST_HasChangedStats(D2UnitStrc * pUnit) {
-    if (!(pUnit && pUnit->pStatsEx)) {
+    if (!pUnit) {
+      return 0;
+    }
+    if (!pUnit->pStatsEx) {
       return 0;
     }
 
@@ -989,7 +1007,10 @@ eD2States __stdcall GetStateBitFlag(D2UnitStrc * pUnit, eD2States eState) {
     }
 
     D2StatListExStrc* pStatList = pUnit->pStatsEx;
-    if (!(pStatList && pStatList->sStatList.nFlags & 0x80000000U)) {
+    if (!pStatList) {
+      return STATE_none;
+    }
+    if (!(pStatList->sStatList.nFlags & 0x80000000U)) {
       return STATE_none;
     }
 
@@ -1002,7 +1023,10 @@ int * __stdcall GetStateFlags(D2UnitStrc * pUnit) {
     }
 
     D2StatListExStrc* pStatsEx = pUnit->pStatsEx;
-    if (!(pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U)) {
+    if (!pStatsEx) {
+      return nullptr;
+    }
+    if (!(pStatsEx->sStatList.nFlags & 0x80000000U)) {
       return nullptr;
     }
 
@@ -1015,12 +1039,15 @@ int32_t __stdcall STATLIST_GetUnitGfxFlags(D2UnitStrc * pUnit) {
     }
 
     D2StatListExStrc* pStatsEx = pUnit->pStatsEx;
-    if (!(pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U)) {
+    if (!pStatsEx) {
+      return 0;
+    }
+    if (!(pStatsEx->sStatList.nFlags & 0x80000000U)) {
       return 0;
     }
 
     int nStatesSize = sgptDataTable->nTxtStatesSize + 0x1f;
-    return (int32_t)(pStatsEx->pStateFlags + ((int)(nStatesSize + (nStatesSize >> 0x1f & 0x1fU)) >> 5));
+    return (int32_t)(pStatsEx->pStateFlags + ((int)nStatesSize / 32));
 }
 
 int32_t __stdcall STATLIST_CopyStatsToBuffer(D2UnitStrc * pUnit, D2StatStrc * pStatBuf, int32_t nParam) {
@@ -1225,11 +1252,11 @@ int32_t __stdcall STATLIST_GetStatForDamageCalc(D2UnitStrc * pUnit2, D2UnitStrc 
 }
 
 int __stdcall STATLIST_GetFullListPtr(D2StatListExStrc * pStatList) {
-    if (pStatList) {
+    if (!pStatList) {
+      return 0;
+    } else {
       return pStatList->sStatList.nTimeout;
     }
-
-    return 0;
 }
 
 void __stdcall STATSEX_SetStatListTimeout(D2StatListExStrc * pStatList, int32_t nParam) {
@@ -1309,7 +1336,10 @@ int32_t __stdcall STATSEX_CopyStatPairsFromStatList(int32_t nStatListPtr, uint32
 
 int32_t __stdcall STATLIST_GetItemStatBonusValues(D2UnitStrc * pItem, uint32_t nParam, D2StatStrc * pOutStatPairs, int32_t nParam2) {
     D2StatListExStrc* pStatsEx = pItem->pStatsEx;
-    if (!(pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U)) {
+    if (!pStatsEx) {
+      return 0;
+    }
+    if (!(pStatsEx->sStatList.nFlags & 0x80000000U)) {
       return 0;
     }
 
@@ -2217,7 +2247,7 @@ void __stdcall STATLIST_SetUnitStat(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, i
       return;
     }
 
-    STATLIST_TrackChangedStat(eUnitStat * 0x10000 + (nLayer & 0xffffU), pUnit->pStatsEx);
+    STATLIST_TrackChangedStat(eUnitStat * 0x10000 + (uint16_t)nLayer, pUnit->pStatsEx);
 }
 
 void __stdcall thunk_STATLIST_AddStatValue(D2StatListExStrc * pStatList, eD2UnitStat eUnitStat, int32_t nParam, uint16_t nParam2) {
@@ -2562,7 +2592,10 @@ void __stdcall STATLIST_SetStatValueSimple(D2StatListExStrc * pStatList, eD2Unit
 
 int32_t __stdcall UNITS_CalcCombinedStatValue(D2UnitStrc * pUnit, eD2UnitStat eUnitStat) {
     D2StatListExStrc* pStatsEx = pUnit->pStatsEx;
-    if (!(pStatsEx && pStatsEx->sStatList.nFlags & 0x80000000U)) {
+    if (!pStatsEx) {
+      return 0;
+    }
+    if (!(pStatsEx->sStatList.nFlags & 0x80000000U)) {
       return 0;
     }
 
@@ -2629,13 +2662,13 @@ void __stdcall STATLIST_SetItemStatActive(D2UnitStrc * pUnit, D2UnitStrc * pItem
       }
     }
     if (pStatsEx->sStatList.pUnitAttached == pUnit) {
-      if (!nParam) {
-        if (!(pStatsEx->sStatList.nFlags & 0x40000000U)) {
-          STATLIST_DeactivateItemStats(pUnit, pItem);
+      if (nParam) {
+        if (pStatsEx->sStatList.nFlags & 0x40000000U) {
+          STATLIST_ActivateItemStats(pUnit, pItem);
           return;
         }
-      } else if (pStatsEx->sStatList.nFlags & 0x40000000U) {
-        STATLIST_ActivateItemStats(pUnit, pItem);
+      } else if (!(pStatsEx->sStatList.nFlags & 0x40000000U)) {
+        STATLIST_DeactivateItemStats(pUnit, pItem);
         return;
       }
     } else {

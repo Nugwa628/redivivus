@@ -533,12 +533,11 @@ void __fastcall AllocDrlgFile(D2DrlgFileStrc * * ppDrlgFile, D2PoolManagerStrc *
 // @sourcefile .\DRLG\Preset.cpp
 // Deep-copies a preset unit's D2MapAIStrc path (8-byte header + nSize*12-byte D2PathPosStrc).
 D2MapAIStrc * __fastcall DRLGPRESET_CopyMapAI(D2PoolManagerStrc * pMemory, D2MapAIStrc * pSrcMapAI) {
-    D2MapAIStrc* pNewMapAI = D2_NEW_POOL_AT(pMemory, D2MapAIStrc, ".\\DRLG\\Preset.cpp", 0x574);
-    pNewMapAI->nSize = 0;
-    pNewMapAI->pPosition = 0;
+    D2MapAIStrc* pNewMapAI = ((D2MapAIStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2MapAIStrc), ".\\DRLG\\Preset.cpp", 0x574, 0));
+    memset(pNewMapAI, 0, sizeof(D2MapAIStrc));
     int nMode = pSrcMapAI->nSize;
     pNewMapAI->nSize = nMode;
-    D2PathPosStrc* pData = (D2PathPosStrc*)D2_ALLOC_POOL_AT(pMemory, nMode * 0xc, ".\\DRLG\\Preset.cpp", 0x579);
+    D2PathPosStrc* pData = (D2PathPosStrc*)Fog::Memory::AllocServerMemory(pMemory, nMode * 0xc, ".\\DRLG\\Preset.cpp", 0x579, 0);
     pNewMapAI->pPosition = pData;
     memcpy(pData, pSrcMapAI->pPosition, pNewMapAI->nSize * 0xc);
     return pNewMapAI;
@@ -1632,18 +1631,23 @@ void __fastcall DRLGPRESET_CreateMonsterPresets(D2RoomExStrc * pRoomEx) {
       int nLvlPrestId;
       nLvlPrestId = pDrlgMap->nNumber;
       pDrlgMap->bInited = 0;
-      if (nLvlPrestId < 8) {
-        if (3 < nLvlPrestId) {
+      if (nLvlPrestId <= 7) {
+        if (nLvlPrestId < 4) {
+          switch (nLvlPrestId) {
+            case 1:
+            case 3:
+              break;
+            default:
+              pRoomEx->eRoomExFlags |= 0x2000000;
+              return;
+          }
+        } else {
           if (pRoomEx->pLevel->eD2LevelId == 2 && pDrlgMap->nRandomMapFileSelector == 3) {
             CreateMonsterPreset(pMemory, pDrlgMap);
             pRoomEx->eRoomExFlags |= 0x2000000;
             return;
           }
 
-          pRoomEx->eRoomExFlags |= 0x2000000;
-          return;
-        }
-        if (nLvlPrestId != 1 && nLvlPrestId != 3) {
           pRoomEx->eRoomExFlags |= 0x2000000;
           return;
         }

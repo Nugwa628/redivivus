@@ -2382,7 +2382,7 @@ int32_t __fastcall DRLGPATH_FindPathAStar(D2DrlgRoomCoordsStrc * pRoomCoords, D2
 
 // Alternate simple distance heuristic between two packed coordinates. Same formula as DRLGPATH_GetSimpleDistancePacked but used by the secondary A* pathfinder (PathTypeFunc_01).
 int32_t __stdcall DRLGPATH_GetSimpleDistancePacked2(uint32_t nParam1, uint32_t nParam2) {
-    int nAbsDX = (nParam1 & 0xffff) - (nParam2 & 0xffff);
+    int nAbsDX = (uint16_t)nParam1 - ((uint16_t)nParam2);
     if (nAbsDX < 0) {
       nAbsDX = -nAbsDX;
     }
@@ -2391,11 +2391,11 @@ int32_t __stdcall DRLGPATH_GetSimpleDistancePacked2(uint32_t nParam1, uint32_t n
     if (nAbsDY < 0) {
       nAbsDY = -nAbsDY;
     }
-    if (nAbsDY > nAbsDX) {
+    if (nAbsDX >= nAbsDY) {
+      return nAbsDY + nAbsDX * 2;
+    } else {
       return nAbsDX + nAbsDY * 2;
     }
-
-    return nAbsDY + nAbsDX * 2;
 }
 
 // Searches the open list hash table for a node matching the given packed position. Returns the node if found, NULL otherwise.

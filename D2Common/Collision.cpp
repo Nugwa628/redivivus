@@ -596,7 +596,10 @@ D2UnitStrc * __stdcall CallCollisionFunction(D2RoomStrc * pRoom, int32_t nX, int
     int32_t nAdjacentRoomCount;
     eD2UnitType eUnitType;
     D2UnitStrc* pUnit;
-    if (!pRoom || 2 < nWidth - 1U) {
+    if (!pRoom) {
+      return nullptr;
+    }
+    if (2 < nWidth - 1U) {
       return nullptr;
     }
 
@@ -1701,7 +1704,7 @@ static int32_t __stdcall CheckCollision_BlockPlayer_BoundingBox1(D2RoomStrc * pR
 eCollisionFlags __stdcall CheckCollision_Vector(D2RoomStrc * pRoom, int32_t nX, int32_t nY, uint32_t nVectorX, uint32_t nVectorY, int32_t eCollisionFlag) {
     eCollisionFlags eBBoxCollisionResult;
     D2BoundingBoxStrc bboxFromVector;
-    if ((int)nVectorX < 2 && (int)nVectorY < 2) {
+    if ((int)nVectorX <= 1 && (int)nVectorY <= 1) {
       eBBoxCollisionResult = COLLISN_CheckCellMask_RegArgs(pRoom, nX, nY, eCollisionFlag);
       return eBBoxCollisionResult;
     }

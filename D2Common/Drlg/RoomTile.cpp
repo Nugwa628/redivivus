@@ -120,11 +120,10 @@ static void __stdcall DRLGROOMTILE_SetWarpTileDirection(D2DrlgTileLinkStrc * pTi
         return;
       }
 
-      nDirection = dwParam2 != 0xb ? 0x6c : 0x72;
+      nDirection = dwParam2 == 0xb ? 0x72 : 0x6c;
       if (nCurrentDir == nDirection) {
         return;
       }
-
       pNewWarpEntry = (D2DrlgTileDataStrc*)DATATBLS::LvlTbls::TXT_LvlWarp_Setup(pNewWarpEntry->nScreenX, nDirection);
       pTileLink[1].pTileData = pNewWarpEntry;
       return;
@@ -132,7 +131,7 @@ static void __stdcall DRLGROOMTILE_SetWarpTileDirection(D2DrlgTileLinkStrc * pTi
 }
 
 static BOOL __stdcall DRLGROOMTILE_CreateExitWarp(uint32_t nTileFlags, int32_t nXTileId, int32_t nX, int32_t nYTileId, D2RoomExStrc * pRoomEx) {
-    D2LvlWarpTxt* pWarpInfo = DrlgRoom::DRLGLEVEL_GetWarpsIdIfExistsAndSetup(pRoomEx->pLevel, (uint8_t)(nTileFlags >> 0x14) & 0x3f, nX != 0xb ? 0x6c : 0x72);
+    D2LvlWarpTxt* pWarpInfo = DrlgRoom::DRLGLEVEL_GetWarpsIdIfExistsAndSetup(pRoomEx->pLevel, (uint8_t)(nTileFlags >> 0x14) & 0x3f, nX == 0xb ? 0x72 : 0x6c);
     if (!pWarpInfo) {
       return 0;
     }
@@ -799,12 +798,16 @@ void __fastcall InitGridCells(D2RoomExStrc * pRoomEx) {
 }
 
 void __fastcall InitializorForDrlgType(D2RoomExStrc * pRoomEx) {
-    if (pRoomEx->nPresetType == 1) {
+    switch (pRoomEx->nPresetType) {
+    case 1: {
       DRLGROOMEX_InitializeMazeRoom(pRoomEx);
-    } else if (pRoomEx->nPresetType == 2) {
+      break;
+    }
+    case 2: {
       Preset::DRLGROOMEX_InitializePresetRoom(pRoomEx);
       pRoomEx->eRoomExFlags |= 0x100000;
       return;
+    }
     }
 
     pRoomEx->eRoomExFlags |= 0x100000;

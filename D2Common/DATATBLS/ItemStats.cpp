@@ -30,7 +30,7 @@
 namespace D2Common::DATATBLS::ItemStats {
 
 void __stdcall SetState(D2UnitStrc * pUnit, eD2States eState, int32_t nParam) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return;
     }
 
@@ -45,7 +45,7 @@ eD2States __stdcall UNIT_GetUnitState(D2UnitStrc * pUnit, eD2States eState) {
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (!(-1 < (int)eUnitType && ((int)eUnitType < 2 || eUnitType == UNIT_MISSILE) && -1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eUnitType && ((int)eUnitType <= 1 || eUnitType == UNIT_MISSILE) && 0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return STATE_none;
     }
 
@@ -71,7 +71,7 @@ void __stdcall D2StatesTogglegfx(D2UnitStrc * pUnit, uint32_t nParam, int32_t nP
 }
 
 uint32_t __stdcall GetStateGfxFlag(D2UnitStrc * pUnit, eD2States eState) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -90,7 +90,7 @@ void __stdcall STATES_ClearGfxFlags(D2UnitStrc * pUnit) {
     }
 
     int nBufSize = sgptDataTable->nTxtStatesSize + 0x1f;
-    memset(pGfxFlags, 0, ((int)(nBufSize + (nBufSize >> 0x1f & 0x1fU)) >> 5) * 4);
+    memset(pGfxFlags, 0, ((int)nBufSize / 32) * 4);
 }
 
 BOOL __stdcall STATES_HasAnyGfxFlag(D2UnitStrc * pUnit) {
@@ -251,7 +251,7 @@ void __stdcall STATES_MoveToGfxFlags(D2UnitStrc * pUnit, uint32_t * pMaskWords) 
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray1(eD2States eState) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -264,7 +264,7 @@ BOOL __stdcall STATES_HasHideState(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray4(eD2States eState) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -321,15 +321,15 @@ BOOL __stdcall STATES_HasArmorState(D2UnitStrc * pUnit) {
 
 // Returns (pUnit->eUnitFlagsEx >> 3) & 1, the UNITFLAGEX_ISSHAPESHIFTED bit; 0 for a NULL unit. Evidence: 0063a40e MOV EAX,[EAX+0xc8]; SHR 3; AND 1.
 BOOL __stdcall UNITS_IsShapeshifted(D2UnitStrc * pUnit) {
-    if (pUnit) {
-      return pUnit->eUnitFlagsEx >> 3 & 1;
+    if (!pUnit) {
+      return 0;
+    } else {
+      return (uint32_t)pUnit->eUnitFlagsEx >> 3 & 1;
     }
-
-    return 0;
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray11(eD2States eState) {
-    if (!(-1 < (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)eState && (int)eState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -337,7 +337,7 @@ uint32_t __stdcall ITEMSTATS_CheckStateFlagArray11(eD2States eState) {
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray12(uint32_t nParam) {
-    if (!(-1 < (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -421,7 +421,7 @@ BOOL __stdcall STATES_HasCurseState(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray30(uint32_t nParam) {
-    if (!(-1 < (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -434,7 +434,7 @@ BOOL __stdcall STATES_HasMaxState(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall ITEMSTATS_CheckStateFlagArray31(uint32_t nParam) {
-    if (!(-1 < (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= (int)nParam && (int)nParam < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 

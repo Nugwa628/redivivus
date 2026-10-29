@@ -106,17 +106,17 @@ namespace D2Common::DUNGEON::Dungeon {
 // @sourcefile .\DUNGEON\Dungeon.cpp
 D2DrlgActStrc * __stdcall AllocAct(BYTE nActNo, int32_t dwInitSeed, BOOL bClientSide, ::SGAMEDATA * pGame, BYTE nDifficulty, D2PoolManagerStrc * pMemory, eD2LevelId eLevel, fAutoMap pfAutoMap, fTownAutoMap pfTownAutoMap) {
     D2DrlgStrc* pDrlg;
-    D2DrlgActStrc* pAct = D2_NEW_POOL_AT(pMemory, D2DrlgActStrc, ".\\DUNGEON\\Dungeon.cpp", 0x19);
+    D2DrlgActStrc* pAct = ((D2DrlgActStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2DrlgActStrc), ".\\DUNGEON\\Dungeon.cpp", 0x19, 0));
     memset(pAct, 0, 0x60);
     pAct->dwInitSeed = dwInitSeed;
     pAct->bClientSide = bClientSide;
     pAct->nActNo = nActNo;
     pAct->pMemory = pMemory;
-    if (!bClientSide) {
+    if (bClientSide) {
+      pDrlg = Drlg::DRLG_AllocDrlgActMisc(pAct, nActNo, nullptr, dwInitSeed, LEVEL_None, 1, pGame, nDifficulty, pfAutoMap, pfTownAutoMap);
+    } else {
       pAct->nLevelId = eLevel;
       pDrlg = Drlg::DRLG_AllocDrlgActMisc(pAct, nActNo, nullptr, dwInitSeed, eLevel, 0, pGame, nDifficulty, pfAutoMap, pfTownAutoMap);
-    } else {
-      pDrlg = Drlg::DRLG_AllocDrlgActMisc(pAct, nActNo, nullptr, dwInitSeed, LEVEL_None, 1, pGame, nDifficulty, pfAutoMap, pfTownAutoMap);
     }
 
     pAct->pDrlg = pDrlg;
@@ -253,12 +253,12 @@ D2RoomStrc * __fastcall DRLGROOM_AllocRoomStrc(D2PoolManagerStrc * pMemory) {
 // @sourcefile .\DUNGEON\Dungeon.cpp
 static void __stdcall DRLGROOM_UpdateRoomsNearAndCount(D2PoolManagerStrc * pMemory, D2RoomStrc * pRoom) {
     int32_t nNearCount = Drlg::DrlgRoom::GetRoomsNearCount(pRoom->pRoomEx);
-    D2RoomStrc** ppRoomList = (D2RoomStrc**)D2_ALLOC_POOL_AT(pMemory, nNearCount * 4, ".\\DUNGEON\\Dungeon.cpp", 0x100);
+    D2RoomStrc** ppRoomList = (D2RoomStrc**)Fog::Memory::AllocServerMemory(pMemory, nNearCount * 4, ".\\DUNGEON\\Dungeon.cpp", 0x100, 0);
     pRoom->ppRoomList = ppRoomList;
     uint32_t uRealCount = Drlg::DrlgRoom::GetRealRoomsNearCount(pRoom->pRoomEx, ppRoomList);
     uint32_t i = 0;
     pRoom->nRoomListCount = uRealCount;
-    if (!uRealCount) {
+    if ((uint32_t)uRealCount <= 0) {
       return;
     }
 
@@ -330,17 +330,18 @@ uint32_t __stdcall DoRoomsTouchOrOverlap(D2RoomStrc * pRoom, D2RoomStrc * pRoom2
 
       iVar1 = pRoom2->sCoords.sTileRect.left;
       nRoom1Left = pRoom->sCoords.sTileRect.left;
-      if (!(nRoom1Left <= pRoom2->sCoords.sTileRect.right + iVar1 && iVar1 <= pRoom->sCoords.sTileRect.right + nRoom1Left)) {
+      if (!(nRoom1Left <= pRoom2->sCoords.sTileRect.right + iVar1)) {
         return 0;
       }
-
+      if (!(pRoom->sCoords.sTileRect.right + nRoom1Left >= iVar1)) {
+        return 0;
+      }
       iVar1 = pRoom2->sCoords.sTileRect.top;
       nRoom1Left = pRoom->sCoords.sTileRect.top;
       if (nRoom1Left > pRoom2->sCoords.sTileRect.bottom + iVar1) {
         return 0;
       }
-
-      return (uint32_t)(iVar1 <= pRoom->sCoords.sTileRect.bottom + nRoom1Left);
+      return (uint32_t)(pRoom->sCoords.sTileRect.bottom + nRoom1Left >= iVar1);
     }
 }
 
@@ -351,12 +352,12 @@ BOOL __stdcall AreTileCoordinatesInsideRoom(D2RoomStrc * pRoom, int32_t nX, int3
     }
 
     int nRectEdge = pRoom->sCoords.sTileRect.left;
-    if (!(nRectEdge <= nX && nX < pRoom->sCoords.sTileRect.right + nRectEdge)) {
+    if (!(nX >= nRectEdge && nX < pRoom->sCoords.sTileRect.right + nRectEdge)) {
       return 0;
     }
 
     nRectEdge = pRoom->sCoords.sTileRect.top;
-    if (!(nRectEdge <= nY && nY < pRoom->sCoords.sTileRect.bottom + nRectEdge)) {
+    if (!(nY >= nRectEdge && nY < pRoom->sCoords.sTileRect.bottom + nRectEdge)) {
       return 0;
     }
 
@@ -405,9 +406,9 @@ int32_t __stdcall FindRoomByTileCoordinates(D2DrlgActStrc * pDrlgAct, int32_t nX
       }
 
       nRoomEdge = pCurRoom->sCoords.sTileRect.left;
-      if (nRoomEdge <= nX && nX < pCurRoom->sCoords.sTileRect.right + nRoomEdge) {
+      if (nX >= nRoomEdge && nX < pCurRoom->sCoords.sTileRect.right + nRoomEdge) {
         nRoomEdge = pCurRoom->sCoords.sTileRect.top;
-        if (nRoomEdge <= nY && nY < pCurRoom->sCoords.sTileRect.bottom + nRoomEdge) {
+        if (nY >= nRoomEdge && nY < pCurRoom->sCoords.sTileRect.bottom + nRoomEdge) {
           break;
         }
       }
@@ -461,12 +462,10 @@ void __stdcall CallRoomCallback(D2RoomStrc * pRoom, ROOMCALLBACKFN pfnRoomCallba
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1c2);
         exit(-1);
       }
-
       nRoomIdx = 0;
-      if (!pRoom->nRoomListCount) {
+      if ((uint32_t)pRoom->nRoomListCount <= 0) {
         return;
       }
-
       do {
         bBadCodePtr = (*pfnRoomCallback)(pRoom->ppRoomList[nRoomIdx], pArgs);
         if (!bBadCodePtr) {
@@ -548,9 +547,9 @@ D2RoomStrc * __stdcall FindRoomBySubtileCoordinates(D2DrlgActStrc * pDrlgAct, in
       }
 
       nRoomEdge = pCurRoom->sCoords.dwXStart;
-      if (nRoomEdge <= nX && nX < pCurRoom->sCoords.dwXSize + nRoomEdge) {
+      if (nX >= nRoomEdge && nX < pCurRoom->sCoords.dwXSize + nRoomEdge) {
         nRoomEdge = pCurRoom->sCoords.dwYStart;
-        if (nRoomEdge <= nY && nY < pCurRoom->sCoords.dwYSize + nRoomEdge) {
+        if (nY >= nRoomEdge && nY < pCurRoom->sCoords.dwYSize + nRoomEdge) {
           break;
         }
       }
@@ -568,12 +567,12 @@ BOOL __fastcall AreSubtileCoordinatesInsideRoom(D2DrlgCoordsStrc * pDrlgCoords, 
     }
 
     int nEdgePos = pDrlgCoords->WorldPosition.x;
-    if (!(nEdgePos <= nX && nX < pDrlgCoords->WorldSize.x + nEdgePos)) {
+    if (!(nX >= nEdgePos && nX < pDrlgCoords->WorldSize.x + nEdgePos)) {
       return 0;
     }
 
     nEdgePos = pDrlgCoords->WorldPosition.y;
-    if (!(nEdgePos <= nY && nY < pDrlgCoords->WorldSize.y + nEdgePos)) {
+    if (!(nY >= nEdgePos && nY < pDrlgCoords->WorldSize.y + nEdgePos)) {
       return 0;
     }
 
@@ -609,18 +608,18 @@ void __stdcall DRLGROOM_IncreaseAlliedCount(D2RoomStrc * pRoom) {
 }
 
 int32_t __stdcall GetAlliedCountFromRoom(D2RoomStrc * pRoom) {
-    if (pRoom) {
+    if (!pRoom) {
+      return 0;
+    } else {
       return pRoom->nAllies;
     }
-
-    return 0;
 }
 
 void __stdcall DRLGROOM_DecreaseAlliedCount(D2RoomStrc * pRoom) {
     if (!pRoom) {
       return;
     }
-    if (pRoom->nAllies < 1) {
+    if (pRoom->nAllies <= 0) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x27c);
       exit(-1);
     }
@@ -686,10 +685,10 @@ void __stdcall AddRoomData(D2DrlgActStrc * pDrlgAct, eD2LevelId eLevel, int32_t 
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2d7);
       exit(-1);
     }
-    if (!pRoomCache) {
-      pRoomEx = 0;
-    } else {
+    if (pRoomCache) {
       pRoomEx = pRoomCache->pRoomEx;
+    } else {
+      pRoomEx = 0;
     }
 
     AddRoomDataPrepare(pDrlgAct->pDrlg, eLevel, nX, nY, pRoomEx);
@@ -701,10 +700,10 @@ void __stdcall RemoveRoomData(D2DrlgActStrc * pDrlgAct, eD2LevelId eLevel, int32
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e9);
       exit(-1);
     }
-    if (!pRoom) {
-      pRoomEx = 0;
-    } else {
+    if (pRoom) {
       pRoomEx = pRoom->pRoomEx;
+    } else {
+      pRoomEx = 0;
     }
 
     DRLGROOMEX_RemoveRoomDataPrepare(pDrlgAct->pDrlg, eLevel, nX, nY, pRoomEx);
@@ -877,7 +876,10 @@ BOOL __stdcall DRLGROOM_TestRoomCanUntile(D2DrlgActStrc * pDrlgAct, D2RoomStrc *
     if (!pDrlgAct) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3dd);
       exit(-1);
-    } else if (!pDrlgAct->bClientSide) {
+    } else if (pDrlgAct->bClientSide) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3de);
+      exit(-1);
+    } else {
       if (!pRoom) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3df);
         exit(-1);
@@ -885,9 +887,6 @@ BOOL __stdcall DRLGROOM_TestRoomCanUntile(D2DrlgActStrc * pDrlgAct, D2RoomStrc *
 
       BVar1 = RoomEx_method_0(pRoom->pRoomEx);
       return BVar1;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3de);
-      exit(-1);
     }
 }
 
@@ -1122,10 +1121,9 @@ int32_t __stdcall DRLGROOM_GetIdleTicks(D2RoomStrc * pRoom) {
     }
     if (pRoom->nClientsCount) {
       pRoom->nIdleTicks = 0;
-      return pRoom->nIdleTicks;
+    } else {
+      pRoom->nIdleTicks++;
     }
-
-    pRoom->nIdleTicks++;
     return pRoom->nIdleTicks;
 }
 
@@ -1277,7 +1275,7 @@ void __stdcall DRLGROOM_RemoveRoomFromAct(D2DrlgActStrc * pDrlgAct, D2RoomStrc *
 }
 
 void __stdcall DRLGROOM_SwapActiveRoomExBetweenLevels(D2RoomStrc * pRoom, D2RoomStrc * pRoom2) {
-    D2RoomExStrc* pRoomEx1 = !pRoom ? 0 : pRoom->pRoomEx;
+    D2RoomExStrc* pRoomEx1 = pRoom ? pRoom->pRoomEx : 0;
     if (pRoom2) {
       Drlg::ChangeActiveRoomBetweenLevels(pRoomEx1, pRoom2->pRoomEx);
       return;
@@ -1321,11 +1319,11 @@ D2DrlgStrc * __stdcall GetDrlgFromAct(D2DrlgActStrc * pDrlgAct) {
 }
 
 int32_t __stdcall GetInitSeedFromAct(D2DrlgActStrc * pDrlgAct) {
-    if (pDrlgAct) {
+    if (!pDrlgAct) {
+      return 0;
+    } else {
       return pDrlgAct->dwInitSeed;
     }
-
-    return 0;
 }
 
 D2RoomExStrc * __fastcall GetRoomExFromRoom(D2RoomStrc * pRoom) {
@@ -1367,7 +1365,7 @@ eD2LevelId __stdcall GetTownLevelIdFromActNo(uint8_t nAct) {
     // Static local variables (originally global data)
     static eD2LevelId gaTownLevelIdByAct[5] = { LEVEL_RogueEncampment, LEVEL_LutGholein, LEVEL_KurastDocktown, LEVEL_ThePandemoniumFortress, LEVEL_Harrogath }; D2_STATIC_GUARD(gaTownLevelIdByAct, "D2Common::DUNGEON::Dungeon::GetTownLevelIdFromActNo::gaTownLevelIdByAct");
 
-    if (!(4 >= nAct)) {
+    if (!(5 > nAct)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x59a);
       exit(-1);
     }
@@ -1486,19 +1484,11 @@ void __stdcall GetPortalLevelArrayFromPortalFlags(D2PoolManagerStrc * pMemory, i
 int32_t __stdcall GetPortalFlagFromLevelId(eD2LevelId eLevel) {
     int nArrayCount;
     eD2LevelId* pPortalLevelArray = DATATBLS::LvlTbls::GetPortalLevelArrayFromPortalFlags((uint32_t*)&nArrayCount);
-    int nBitIndex = 0;
-    if (0 >= nArrayCount) {
-      return 0;
-    }
-
-    do {
+    for (int nBitIndex = 0; nBitIndex < nArrayCount; nBitIndex++, pPortalLevelArray++) {
       if (eLevel == *pPortalLevelArray) {
-        return 1 << ((uint8_t)nBitIndex & 0x1f);
+        return 1 << nBitIndex;
       }
-
-      nBitIndex++;
-      pPortalLevelArray++;
-    } while (nBitIndex < nArrayCount);
+    }
 
     return 0;
 }
@@ -2001,12 +1991,11 @@ D2RoomStrc * __fastcall InitRoomEx(D2RoomExStrc * pRoomEx) {
 // Finds a RoomEx by world coordinates in the Drlg and initializes it into a D2RoomStrc via InitRoomEx. Returns the allocated room or NULL if no RoomEx found at those coordinates.
 D2RoomStrc * __fastcall DRLGROOMEX_GetRoomByCoords(D2DrlgStrc * pDrlg, int32_t nX, int32_t nY) {
     D2RoomExStrc* pRoomEx = Drlg::GetRoomOfCoords(nX, nY, pDrlg, nullptr, nullptr);
-    if (!pRoomEx) {
-      return nullptr;
+    if (pRoomEx) {
+      D2RoomStrc* pRoom = InitRoomEx(pRoomEx);
+      return pRoom;
     }
-
-    D2RoomStrc* pRoom = InitRoomEx(pRoomEx);
-    return pRoom;
+    return nullptr;
 }
 
 // Initialize the 4-entry RoomEx activation priority queues (aSubA0). Each queue is a self-linked empty list with its priority set to its index.
@@ -2137,7 +2126,7 @@ BOOL __fastcall RoomEx_method_0(D2RoomExStrc * pRoomEx) {
     }
 
     for (pRoomExIter = pRoomEx->pLevel->pRoomExFirst; pRoomExIter; pRoomExIter = pRoomExIter->pRoomExNext) {
-      if (pRoomExIter->fRoomStatus < 2) {
+      if (pRoomExIter->fRoomStatus <= 1) {
         return 0;
       }
     }

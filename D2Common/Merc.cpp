@@ -614,7 +614,7 @@ uint16_t * __fastcall GetMercTypeString(uint32_t nIndex) {
     0xd2f
 }; D2_STATIC_GUARD(aMercTypeLocaleStringIds, "D2Common::Merc::GetMercTypeString::aMercTypeLocaleStringIds");
 
-    if (!(-1 < (int)nIndex && nIndex < 9 && aMercTypeLocaleStringIds[nIndex])) {
+    if (!(0 <= (int)nIndex && nIndex < 9 && aMercTypeLocaleStringIds[nIndex])) {
       return nullptr;
     }
 

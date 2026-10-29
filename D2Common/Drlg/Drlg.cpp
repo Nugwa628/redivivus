@@ -983,7 +983,7 @@ void __fastcall AddActiveCountToDrlgLevel(D2DrlgLevelStrc * pLevel, int32_t nCou
     eD2LevelId nVisLevelId;
     pLevel->nActiveCount += nCount;
     pLevel->dwInactiveFrames = 10;
-    pLevel->nActiveCount = (int)pLevel->nActiveCount < 1 ? 0 : pLevel->nActiveCount;
+    pLevel->nActiveCount = (int)pLevel->nActiveCount <= 0 ? 0 : pLevel->nActiveCount;
     pVisLevelIds = DrlgRoom::DRLGWARP_GetVisArrayFromLevelId(pLevel->pDrlg, pLevel->eD2LevelId);
     i = 0;
     do {
@@ -1681,10 +1681,15 @@ void __fastcall FreeRoomEx(D2RoomExStrc * pRoomEx, BOOL bServerSide) {
     pnRoomDataFreeGen = &pDrlg->nRoomDataFreeGeneration;
     (*pnRoomDataFreeGen)++;
     RoomTile::DRLGROOMTILE_FreeRoomTilesAll(pRoomEx);
-    if (pRoomEx->nPresetType == 1) {
+    switch (pRoomEx->nPresetType) {
+    case 1: {
       OutRoom::DRLGOUTROOM_FreeOutRoomEx(pRoomEx);
-    } else if (pRoomEx->nPresetType == 2) {
+      break;
+    }
+    case 2: {
       Preset::DRLGPRESET_FreePresetRoomGridsFromRoomEx(pRoomEx);
+      break;
+    }
     }
 
     for (pAnimTileGrid = pRoomEx->pRoomTileNodes; pAnimTileGrid; pAnimTileGrid = pAnimTileGrid->pRoomTileNext) {

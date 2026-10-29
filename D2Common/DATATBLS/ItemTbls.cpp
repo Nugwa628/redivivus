@@ -66,7 +66,7 @@ int32_t __fastcall ITEMTBLS_ParseItemStatCostOrBase(char * szFieldValue, int32_t
     }
     if (sgtDataTable.pTxtItemStatCostLink) {
       nStatId = Fog::Src::Excel::GetLinkNodeIndex(sgtDataTable.pTxtItemStatCostLink, szFieldValue, 0);
-      if (-1 < nStatId) {
+      if (0 <= nStatId) {
         *pResultType = 1;
         return nStatId;
       }
@@ -1158,7 +1158,10 @@ D2ItemsTableStrc * __stdcall TXT_Items_GetSize() {
 }
 
 uint32_t __stdcall TXT_Items_GetVersion(int32_t nItemClassId) {
-    if (!(nItemClassId < gsItemsTable.nSize && -1 < nItemClassId)) {
+    if (!(nItemClassId < gsItemsTable.nSize)) {
+      return -1;
+    }
+    if (!(0 <= nItemClassId)) {
       return -1;
     }
     if (!pTxtItemsVersion) {
@@ -1171,7 +1174,7 @@ uint32_t __stdcall TXT_Items_GetVersion(int32_t nItemClassId) {
 }
 
 D2ItemsTxt * __stdcall TXT_Items_GetLine(uint32_t nItemClassId) {
-    if ((uint32_t)gsItemsTable.nSize <= nItemClassId) {
+    if (nItemClassId >= (uint32_t)gsItemsTable.nSize) {
       return nullptr;
     }
     if (!gsItemsTable.pItems) {
@@ -2936,10 +2939,10 @@ void __fastcall TXT_AllocTxt_qualityitems(D2PoolManagerStrc * pMemory) {
     D2BinFieldInputStrc qualityitems[22];
     qualityitems[1].eType = FIELDTYPE_NAME_INT;
     qualityitems[1].fpLinker = &sgtDataTable.pTxtPropertiesLink;
-    qualityitems[2].eType = FIELDTYPE_NAME_INT;
-    qualityitems[2].fpLinker = &sgtDataTable.pTxtPropertiesLink;
     qualityitems[0].szName = "nummods";
     qualityitems[0].eType = FIELDTYPE_CHAR;
+    qualityitems[2].eType = FIELDTYPE_NAME_INT;
+    qualityitems[2].fpLinker = &sgtDataTable.pTxtPropertiesLink;
     qualityitems[0].nSize = 0;
     qualityitems[0].nOffset = 10;
     qualityitems[0].fpLinker = 0;
@@ -3657,25 +3660,23 @@ D2ItemRatioTxt * __stdcall TXT_QualityRatio_GetLine(uint32_t nItemClassId, uint3
     }
 
     int nRatioIdx = 0;
-    if (0 >= nTxtItemRatioSize) {
-      return nullptr;
+    if (0 < nTxtItemRatioSize) {
+      short int* pEntry = &pTxtItemRatio->Version;
+      do {
+        if (uVar1 == (uint8_t)*(char*)((int)pEntry + 3) && bIsUpgradeable == *(uint8_t*)(pEntry + 1)) {
+          wMinVal = *pEntry;
+          if (wMinVal <= nQualityTier && (int)(uint32_t)wMinVal >= (int)nBestMinVal) {
+            nBestMinVal = (uint32_t)wMinVal;
+            nBestMatchIdx = nRatioIdx;
+          }
+        }
+
+        nRatioIdx++;
+        pEntry += 0x22;
+      } while (nRatioIdx < nTxtItemRatioSize);
     }
 
-    short int* pEntry = &pTxtItemRatio->Version;
-    do {
-      if (uVar1 == (uint8_t)*(char*)((int)pEntry + 3) && bIsUpgradeable == *(uint8_t*)(pEntry + 1)) {
-        wMinVal = *pEntry;
-        if (wMinVal <= nQualityTier && (int)nBestMinVal <= (int)(uint32_t)wMinVal) {
-          nBestMatchIdx = nRatioIdx;
-          nBestMinVal = (uint32_t)wMinVal;
-        }
-      }
-
-      nRatioIdx++;
-      pEntry += 0x22;
-    } while (nRatioIdx < nTxtItemRatioSize);
-
-    if (-1 >= nBestMatchIdx) {
+    if (nBestMatchIdx < 0) {
       return nullptr;
     }
 
@@ -3683,11 +3684,11 @@ D2ItemRatioTxt * __stdcall TXT_QualityRatio_GetLine(uint32_t nItemClassId, uint3
 }
 
 int SORT_ItemDescPriority(LPCVOID pParam1, LPCVOID pParam2) {
-    if (*(short int*)((int)pParam1 + 2) >= *(short int*)((int)pParam2 + 2)) {
-      return (uint32_t)(*(short int*)((int)pParam1 + 2) != *(short int*)((int)pParam2 + 2));
+    if (*(short int*)((int)pParam1 + 2) < *(short int*)((int)pParam2 + 2)) {
+      return -1;
     }
 
-    return -1;
+    return (uint32_t)(*(short int*)((int)pParam1 + 2) != *(short int*)((int)pParam2 + 2));
 }
 
 // Builds the itemstatcost.txt field-descriptor array (52 columns) and compiles it into the in-memory ItemStatCost table via DataTbls::CompileTxt (record size 0x144), enforcing a max of 0x1FF stats (fatal error otherwise). Then post-processes op-relationships: clears each stat's aOpBaseDependents arrays to -1, derives the charged-skill-level bit count (clamped 1..8, default 6) and its mask, and for every stat with an op walks its op-base/op-stat references to populate the dependency graph (aOpBaseDependents, aOpRelations, bHasOpBaseDependencies/bHasOp4Or5Dependency flags) plus special-case stat flag bits. Finally collects stats with a nonzero descpriority, qsorts them via SORT_ItemDescPriority, and allocates/stores the sorted pItemStatCostDescPriority list. __fastcall, pMemory in ECX.
@@ -4343,11 +4344,11 @@ void __stdcall ITEMTBLS_FreeProperties() {
 }
 
 int TXT_Gamble_SortFunction(LPCVOID pParam1, LPCVOID pParam2) {
-    if (*(uint32_t*)((int)pParam2 + 4) >= *(uint32_t*)((int)pParam1 + 4)) {
-      return -(uint32_t)(*(uint32_t*)((int)pParam1 + 4) < *(uint32_t*)((int)pParam2 + 4));
+    if (*(uint32_t*)((int)pParam1 + 4) > *(uint32_t*)((int)pParam2 + 4)) {
+      return 1;
+    } else {
+      return *(uint32_t*)((int)pParam1 + 4) < *(uint32_t*)((int)pParam2 + 4) ? -1 : 0;
     }
-
-    return 1;
 }
 
 // One-time loader for gamble.txt. Compiles the binary "gamble" table (code field only), resolves each item code to a class id via the items link, then sorts the entries by level and builds two side-tables: GambleTable (sorted class-id array) and gnItemTblsCacheSize (per-level upper-bound cache for [1..99]).

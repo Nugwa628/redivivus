@@ -312,7 +312,7 @@ static D2RoomExStrc * __stdcall DRLGSPAWN_FindWaypointRoomAndCoords(int * pX, in
       return pRoomEx;
     }
 
-    while (pPresetUnit->eType != UNIT_OBJECT || 0x23c < pPresetUnit->nClassId || (pObjectTxt = DATATBLS::ObjectTbls::TXT_Objects_GetLine(pPresetUnit->nClassId) , !(pObjectTxt->SubClass & 0x40U))) {
+    while (pPresetUnit->eType != UNIT_OBJECT || 0x23d <= pPresetUnit->nClassId || (pObjectTxt = DATATBLS::ObjectTbls::TXT_Objects_GetLine(pPresetUnit->nClassId) , !(pObjectTxt->SubClass & 0x40U))) {
       pPresetUnit = pPresetUnit->pPresetUnitNext;
       if (!pPresetUnit) {
         return pRoomEx;
@@ -398,7 +398,7 @@ D2LvlWarpTxt * __fastcall DRLGROOM_GetLvlWarpTxtForWarpUnit(D2RoomExStrc * pRoom
     }
 
     while (pTileGrid) {
-      if (pTileGrid->pLvlWarpTxt->Id == (nClassId & 0xff)) {
+      if (pTileGrid->pLvlWarpTxt->Id == (uint8_t)nClassId) {
         if (pTileGrid->bEnabled) {
           return pTileGrid->pLvlWarpTxt;
         }
@@ -971,11 +971,10 @@ BOOL __fastcall AreXYInsideCoordinates(D2DrlgCoordsStrc * pDrlgCoords, int32_t n
     }
 
     int nPosY = pDrlgCoords->WorldPosition.y;
-    if (!(nPosY <= nY && nX < pDrlgCoords->WorldSize.x + nPosX)) {
-      return 0;
+    if (nY >= nPosY && nX < pDrlgCoords->WorldSize.x + nPosX) {
+      return (uint32_t)(nY < pDrlgCoords->WorldSize.y + nPosY);
     }
-
-    return (uint32_t)(nY < pDrlgCoords->WorldSize.y + nPosY);
+    return 0;
 }
 
 uint32_t __fastcall DRLGCOORDS_IsPointInside(D2DrlgCoordsStrc * pDrlgCoords, int32_t nX, int32_t nY) {
@@ -985,11 +984,10 @@ uint32_t __fastcall DRLGCOORDS_IsPointInside(D2DrlgCoordsStrc * pDrlgCoords, int
     }
 
     int nPosY = pDrlgCoords->WorldPosition.y;
-    if (!(nPosY <= nY && nX <= pDrlgCoords->WorldSize.x + nPosX)) {
-      return 0;
+    if (nY >= nPosY && nX <= pDrlgCoords->WorldSize.x + nPosX) {
+      return (uint32_t)(nY <= pDrlgCoords->WorldSize.y + nPosY);
     }
-
-    return (uint32_t)(nY <= pDrlgCoords->WorldSize.y + nPosY);
+    return 0;
 }
 
 // Checks if world coordinates (nWorldX, nWorldY) fall within a RoomEx's
@@ -997,7 +995,7 @@ uint32_t __fastcall DRLGCOORDS_IsPointInside(D2DrlgCoordsStrc * pDrlgCoords, int
 // Returns 1 if inside bounds, 0 otherwise.
 uint32_t __fastcall DRLGROOMEX_CheckWorldCoordsInRoomBounds(D2DrlgCoordsStrc * pRoomCoords, int32_t nWorldX, int32_t nWorldY) {
     int nRoomPosScaled = pRoomCoords->WorldPosition.x * 5;
-    if (nRoomPosScaled > nWorldX) {
+    if (nWorldX < nRoomPosScaled) {
       return 0;
     }
 
@@ -1007,7 +1005,7 @@ uint32_t __fastcall DRLGROOMEX_CheckWorldCoordsInRoomBounds(D2DrlgCoordsStrc * p
     }
 
     nRoomPosScaled = pRoomCoords->WorldPosition.y * 5;
-    if (nRoomPosScaled > nWorldY) {
+    if (nWorldY < nRoomPosScaled) {
       return 0;
     }
 
@@ -1016,11 +1014,13 @@ uint32_t __fastcall DRLGROOMEX_CheckWorldCoordsInRoomBounds(D2DrlgCoordsStrc * p
 }
 
 uint32_t __fastcall CheckLOSDraw(D2RoomExStrc * pRoomEx) {
-    if (pRoomEx->nPresetType == 1) {
+    switch (pRoomEx->nPresetType) {
+    case 1: {
       return 1;
     }
-    if (pRoomEx->nPresetType == 2) {
+    case 2: {
       return pRoomEx->eRoomExFlags & 0x80000;
+    }
     }
 
     return 0;
@@ -1030,8 +1030,11 @@ uint32_t __fastcall CheckLOSDraw(D2RoomExStrc * pRoomEx) {
 // Delegates to DRLGOUTROOM_HasOutdoorBorderFlag if nPresetType == 1.
 // Caller: DRLGROOM_HasOutdoorBorder
 uint32_t __fastcall DRLGROOMEX_IsPresetWithOutdoorBorder(D2RoomExStrc * pRoomEx) {
-    if (pRoomEx->nPresetType != 1) {
-      return 0;
+    switch (pRoomEx->nPresetType) {
+      case 1:
+        break;
+      default:
+        return 0;
     }
 
     uint32_t bHasOutdoorBorder = DRLGOUTROOM_HasOutdoorBorderFlag(pRoomEx);
@@ -1075,11 +1078,11 @@ eD2LevelId __fastcall GetLevelIdFromPopulatedRoomEx(D2RoomExStrc * pRoomEx) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x26b);
       exit(-1);
     }
-    if (!(pRoomEx->eRoomExFlags & 0x800000U)) {
-      return pRoomEx->pLevel->eD2LevelId;
+    if (pRoomEx->eRoomExFlags & 0x800000U) {
+      return LEVEL_None;
     }
 
-    return LEVEL_None;
+    return pRoomEx->pLevel->eD2LevelId;
 }
 
 BOOL __fastcall HasWaypoint(D2RoomExStrc * pRoomEx) {
@@ -1093,12 +1096,12 @@ BOOL __fastcall HasWaypoint(D2RoomExStrc * pRoomEx) {
 }
 
 char * __fastcall GetPickedLevelPrestFilePathFromRoomEx(D2RoomExStrc * pRoomEx) {
-    if (pRoomEx->nPresetType != 2) {
+    if (pRoomEx->nPresetType == 2) {
+      char* szFilePath = Preset::DRLGPRESET_GetPickedFilePathFromRoomEx(pRoomEx);
+      return szFilePath;
+    } else {
       return "None";
     }
-
-    char* szFilePath = Preset::DRLGPRESET_GetPickedFilePathFromRoomEx(pRoomEx);
-    return szFilePath;
 }
 
 static void ReorderNearRoomList(int nRoomCount, D2RoomStrc * * ppRoomList) {

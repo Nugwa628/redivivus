@@ -88,16 +88,16 @@ uint32_t __stdcall CheckWaypoint(D2WaypointStrc * pWaypoint, uint16_t nWaypointI
     if (!pWaypoint) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xdd);
       exit(-1);
-    } else if (D2Client::Waypoint::nWaypointsBitMasksSize == 0x70) {
+    } else if (D2Client::Waypoint::nWaypointsBitMasksSize != 0x70) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xde);
+      exit(-1);
+    } else {
       if (!(nWaypointId < 112)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe1);
         exit(-1);
       }
 
       return (uint32_t)(pWaypoint->aWaypointBits[D2Client::Waypoint::aaWaypointsBitMasks[nWaypointId][0] - 1] & D2Client::Waypoint::aaWaypointsBitMasks[nWaypointId][1]);
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xde);
-      exit(-1);
     }
 }
 
@@ -105,7 +105,10 @@ void __stdcall EnableWaypoint(D2WaypointStrc * pWaypoint, uint16_t nWaypointId) 
     if (!pWaypoint) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xed);
       exit(-1);
-    } else if (D2Client::Waypoint::nWaypointsBitMasksSize == 0x70) {
+    } else if (D2Client::Waypoint::nWaypointsBitMasksSize != 0x70) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xee);
+      exit(-1);
+    } else {
       if (!(nWaypointId < 0x70)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xf1);
         exit(-1);
@@ -113,17 +116,13 @@ void __stdcall EnableWaypoint(D2WaypointStrc * pWaypoint, uint16_t nWaypointId) 
 
       pWaypoint->aWaypointBits[D2Client::Waypoint::aaWaypointsBitMasks[nWaypointId][0] - 1] |= D2Client::Waypoint::aaWaypointsBitMasks[nWaypointId][1];
       return;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xee);
-      exit(-1);
     }
 }
 
 // @sourcefile .\WayPoint\Waypoint.cpp
 D2WaypointStrc * __stdcall Alloc(D2PoolManagerStrc * pMemory) {
-    D2WaypointStrc* pWaypoint = D2_NEW_POOL_AT(pMemory, D2WaypointStrc, ".\\WayPoint\\Waypoint.cpp", 0xfc);
-    pWaypoint->nSignature = 0;
-    memset(pWaypoint->aWaypointBits, 0, 7 * sizeof(pWaypoint->aWaypointBits[0]));
+    D2WaypointStrc* pWaypoint = ((D2WaypointStrc*)Fog::Memory::AllocServerMemory(pMemory, sizeof(D2WaypointStrc), ".\\WayPoint\\Waypoint.cpp", 0xfc, 0));
+    memset(pWaypoint, 0, sizeof(D2WaypointStrc));
     pWaypoint->nSignature = 0x102;
     /* Always have access to 1st waypoint */ pWaypoint->aWaypointBits[D2Client::Waypoint::aaWaypointsBitMasks[0][0] - 1] |= D2Client::Waypoint::aaWaypointsBitMasks[0][1];
     return pWaypoint;
@@ -133,16 +132,17 @@ D2WaypointStrc * __stdcall Alloc(D2PoolManagerStrc * pMemory) {
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 BOOL __fastcall WAYPOINT_UpgradeSignature(D2WaypointStrc * pWaypoint) {
     uint16_t uVar1 = pWaypoint->nSignature;
-    if (uVar1 == 0x102) {
+    if (uVar1 != 0x102) {
+      if (uVar1 && uVar1 != 0x101) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x113);
+        exit(-1);
+      }
+
+      pWaypoint->nSignature = 0x102;
+      return 0;
+    } else {
       return 1;
     }
-    if (uVar1 && uVar1 != 0x101) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x113);
-      exit(-1);
-    }
-
-    pWaypoint->nSignature = 0x102;
-    return 0;
 }
 
 // @sourcefile .\WayPoint\Waypoint.cpp
@@ -175,8 +175,7 @@ void __stdcall CopyWaypointBits(D2WaypointStrc * pWaypoint, uint8_t * nWaypointB
       }
 
       pWaypoint->nSignature = 0x102;
-      pWaypoint->nSignature = 0;
-      memset(pWaypoint->aWaypointBits, 0, 7 * sizeof(pWaypoint->aWaypointBits[0]));
+      memset(pWaypoint, 0, sizeof(D2WaypointStrc));
     }
 
     /* Sets 1st Waypoint always available */ pWaypoint->aWaypointBits[D2Client::Waypoint::aaWaypointsBitMasks[0][0] - 1] |= D2Client::Waypoint::aaWaypointsBitMasks[0][1];

@@ -323,7 +323,10 @@ BOOL __stdcall COMPOSIT_HasWeaponDrawn(D2UnitStrc * pUnit) {
 }
 
 uint32_t __stdcall COMPOSIT_GetBodyPartTransform(eD2BodyLocDWORD nBodyIndex, uint8_t * pbParam) {
-    if ((int)nBodyIndex < 0x10) {
+    if (!((int)nBodyIndex < 0x10)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x265);
+      exit(-1);
+    } else {
       switch (nBodyIndex) {
         case BODYLOC_HEAD:
           return (uint32_t)pbParam[2];
@@ -340,9 +343,6 @@ uint32_t __stdcall COMPOSIT_GetBodyPartTransform(eD2BodyLocDWORD nBodyIndex, uin
       }
 
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x274);
-      exit(-1);
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x265);
       exit(-1);
     }
 }

@@ -1216,7 +1216,7 @@ void __stdcall LVLTBLS_FreeLevelDefsTxt() {
 }
 
 D2LevelDefsTxt * __fastcall TXT_LevelDefs_GetLine(eD2LevelId eLevel) {
-    if (!(-1 < (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize)) {
+    if (!(0 <= (int)eLevel && (int)eLevel < sgptDataTable->nTxtLevelsSize)) {
       return nullptr;
     }
 
@@ -1707,7 +1707,7 @@ void __stdcall TXT_LvlTbls_Free() {
 }
 
 D2LvlPrestTxt * __stdcall TXT_LvlPrest_GetLine(int32_t nLvlPrestId) {
-    if (!(-1 < nLvlPrestId && nLvlPrestId < sgptDataTable->nTxtLvlPrestSize)) {
+    if (!(0 <= nLvlPrestId && nLvlPrestId < sgptDataTable->nTxtLvlPrestSize)) {
       return nullptr;
     }
 
@@ -1715,20 +1715,11 @@ D2LvlPrestTxt * __stdcall TXT_LvlPrest_GetLine(int32_t nLvlPrestId) {
 }
 
 D2LvlPrestTxt * __fastcall TXT_LvlPrest_FindLineByLevelId(eD2LevelId eLevel) {
-    int i = 0;
-    if (0 >= sgptDataTable->nTxtLvlPrestSize) {
-      return nullptr;
-    }
-
-    eD2LevelId* pLevelIdField = &sgtDataTable.pTxtLvlPrest->LevelId;
-    do {
-      if (*pLevelIdField == eLevel) {
-        return sgtDataTable.pTxtLvlPrest + i;
+    for (int i = 0; i < sgptDataTable->nTxtLvlPrestSize; i++) {
+      if (sgtDataTable.pTxtLvlPrest[i].LevelId == eLevel) {
+        return &sgtDataTable.pTxtLvlPrest[i];
       }
-
-      i++;
-      pLevelIdField += 0x6c;
-    } while (i < sgptDataTable->nTxtLvlPrestSize);
+    }
 
     return nullptr;
 }

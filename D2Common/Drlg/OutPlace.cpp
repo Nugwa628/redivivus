@@ -71,11 +71,11 @@ int32_t __fastcall DRLGOUTPLACE_GetAdjacentRoadPresetId(int32_t nDirX, int32_t n
     if (nTableIndex == -1) {
       return 0;
     }
-    if (3 >= nRoadType) {
-      return gnOutdoorsGridWidthByLevel[nRoadType + nTableIndex * 4 + 1];
+    if (nRoadType >= 4) {
+      return gRoadPresetIdLookupTable[nRoadType - 6 + nTableIndex * 2];
     }
 
-    return gRoadPresetIdLookupTable[nRoadType - 6 + nTableIndex * 2];
+    return gnOutdoorsGridWidthByLevel[nRoadType + nTableIndex * 4 + 1];
 }
 
 // Iterates all four border edges of an outdoor DRLG level grid, scanning inward from each edge and marking contiguous non-solid cells with flag 0x100 (blank/border) until a solid cell is encountered. Used during outdoor level generation to suppress tile rendering at level boundaries.
@@ -1399,8 +1399,8 @@ void __fastcall BuildKurast(D2DrlgLevelStrc * pLevel) {
 
     nLevelWidthCells = pLevel->sCoordinatesAndSize.WorldSize.x;
     int nLevelHeightCells = pLevel->sCoordinatesAndSize.WorldSize.y;
-    nLevelWidthCells = ((int)(nLevelWidthCells + (nLevelWidthCells >> 0x1f & 7U)) >> 3) - 4;
-    nLevelHeightCells = ((int)(nLevelHeightCells + (nLevelHeightCells >> 0x1f & 7U)) >> 3) - 4;
+    nLevelWidthCells = ((int)nLevelWidthCells / 8) - 4;
+    nLevelHeightCells = ((int)nLevelHeightCells / 8) - 4;
     switch (pLevel->eD2LevelId) {
       case 0x4f:
         Outdoors::SpawnOutdoorLevelPreset(pLevel, 0x277, 0, 0, '\x0f');

@@ -685,7 +685,7 @@ void __fastcall DATATBLS_LinkerItemStatCost(char * pszStatName, int32_t * pnStat
     if (cFirstChar == '\0') {
       return;
     }
-    if (cFirstChar == '-' || '/' < cFirstChar && cFirstChar < ':') {
+    if (cFirstChar == '-' || cFirstChar >= '0' && cFirstChar <= '9') {
       nStatIndex = atol(pszStatName);
     } else {
       if (!sgtDataTable.pTxtItemStatCostLink) {
