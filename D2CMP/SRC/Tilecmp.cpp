@@ -690,9 +690,9 @@ void __stdcall TILECMP_FreeTileCache(D2TileLibraryHeaderStrc * pTileLibrary, int
 
           iTileSet++;
           pBVar1 = (uint8_t*)(unsigned char*)&pDVar2[iTileSet - 1].pSubTiles;
-          memset(pBVar1, 0, 4 * sizeof(pBVar1[0]));
+          for (int i = 0; i < 4; i++) pBVar1[i] = 0;
           pBVar1 = (uint8_t*)(unsigned char*)&pDVar2[iTileSet - 1].nSubTiles;
-          memset(pBVar1, 0, 4 * sizeof(pBVar1[0]));
+          for (int i = 0; i < 4; i++) pBVar1[i] = 0;
         } while (iTileSet < pTileLibrary->nTiles);
       }
 

@@ -109,12 +109,10 @@ extern D2InventoryScreenCoordinates pNpcInventoryScreenCoordinates;
 namespace D2Client::UI::Inv {
 
 // Function declarations
-void __stdcall InitializeiInventoryPages();
 void __stdcall InitializeColors();
 BOOL __fastcall IsInInventoryScreenRange(int32_t nX, int32_t nY);
 BOOL __stdcall INV_IsPlayerInventoryMode();
 void __stdcall INV_DrawSocketedItems(struct D2UnitStrc * pUnit, struct D2GridScreenCoordinates * pGridCoords, int32_t nBaseX, int32_t nBaseY);
-void __stdcall DRAW_UI_InventoryContent(struct D2UnitStrc * pUnit);
 void InitInventory();
 // Formats weapon damage text for item tooltips, handling one-handed, two-handed, barbarian dual-wield, throwable, and missile potion damage display. Calculates min/max damage based on weapon type, applies color coding for modified stats, and formats elemental damage for missile potions with duration scaling.
 void __stdcall szPrintfBuffer(struct D2UnitStrc * pUnit, uint16_t * wszText);
@@ -130,7 +128,6 @@ int __stdcall INV_CheckActionThrottle();
 BOOL __fastcall INV_IsMouseOverCloseButton(int32_t nParam1, int32_t nParam2);
 void __stdcall INV_HandleInventoryRightClick(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INV_HandleMouseMove(struct D2UIMouseMsgStrc * pMsg);
-int32_t __stdcall ClickItemRight(struct D2UnitStrc * pItem, struct D2InventoryStrc * pGridCoords, int32_t nPage, struct D2UnitStrc * pPlayer, struct D2InventoryStrc * pInventory);
 // Resets the shop/inventory panel UI state. Fifty-six bytes whose only writes are stores to globals through EAX, so it preserves ECX. Typed __stdcall, the decompiler treated ECX as killed by the call, and INV_HandleShopLeftClick carries its button-loop stride there across two calls to this function - the stride became an unassigned local and the shop button scan advanced by garbage.
 void INV_ResetHoverAndContextState();
 void __fastcall INV_ClearItemDescription(struct D2UnitStrc * pUnit);
@@ -236,9 +233,7 @@ void __stdcall INV_ShowBookTooltip();
 void __fastcall ITEM_BuildSetItemTooltip(struct D2UnitStrc * pUnit);
 // Displays tooltip for transmogrifiable items showing the target item type they will transform into. Checks item's bTransmogrify flag, looks up dwTMogType from ItemsTxt, formats tooltip with "Transforms into:" string followed by target item name, and positions tooltip based on current inventory page and screen coordinates.
 void __stdcall INV_ShowTransmogrifyTooltip();
-void __stdcall LoadItemDesc(struct D2UnitStrc * pUnit, int32_t bUsePlayer);
 void __stdcall DRAW_UI_Inventory();
-BOOL __stdcall ClickItemLeft(struct D2UnitStrc * pUnit, struct D2InventoryStrc * pInventory, DWORD x, DWORD y, struct D2UnitStrc * targetItem, struct D2InventoryLayout * pInvLayout, uint32_t nPage);
 uint32_t __fastcall EQUIP_ItemRight(struct D2UnitStrc * pUnit, struct D2InventoryStrc * pInventory, uint32_t nBodySlot);
 // Handles left-click equip action for inventory items. Checks equipment restrictions and sends network packets.
 uint32_t __fastcall EQUIP_ItemLeft(struct D2UnitStrc * pUnit, struct D2InventoryStrc * pInventory, uint32_t nBodySlot);

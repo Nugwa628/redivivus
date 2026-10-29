@@ -104,11 +104,11 @@ void __fastcall Q23_NotifyGuardianStateToPlayers(::SGAMEDATA * pGame, char cPara
     if (!(pQuestData && pQuestData->bIsNotIntroduction && pQuestData->nStateFlag < 6)) {
       return;
     }
-    if (cParam == '\0') {
+    if (cParam != '\0') {
+      nBroadcastState = (uint8_t)pQuestData->pQuestSpecificData.pA3Q6->nPrevStateFlagPrev;
+    } else {
       pQuestData->pQuestSpecificData.pA3Q6->nPrevStateFlagPrev = (uint32_t)pQuestData->nStateFlagPrev;
       nBroadcastState = (pQuestData->pGame->nGameType != SGAMETYPE_SINGLEPLAYER) + 6;
-    } else {
-      nBroadcastState = (uint8_t)pQuestData->pQuestSpecificData.pA3Q6->nPrevStateFlagPrev;
     }
 
     QUEST_SetStateAndBroadcast(pQuestData, nBroadcastState, nullptr, (::fpExecuteOnUnitFunction)A3Q6::Q23_PlayerNotifyCompleted, pQuestData->nStateFlag != 0);
@@ -168,12 +168,12 @@ void __thiscall Q24_SetupDarkWandererMapAi(void * pThis, int32_t nParam) {
 }
 
 // A3Q7 / slot QUESTINT_TheGuardian. Q24_StatusFilter: quest status-string filter callback (installed by Q24_InitData into fpStatusFilter). Stub - always returns false (no special status-bit suppression for this slot).
-bool __fastcall Q24_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
+static bool __fastcall Q24_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
     return false;
 }
 
 // A3Q7 / slot QUESTINT_TheGuardian. Q24_ActiveFilter: quest active/monster filter callback (installed by Q24_InitData into fpActiveFilter). Stub - always returns false.
-bool __fastcall Q24_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx) {
+static bool __fastcall Q24_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx) {
     return false;
 }
 

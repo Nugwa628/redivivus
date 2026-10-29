@@ -64,10 +64,10 @@ void __stdcall DRLGOUTPLACE_PlaceAct5WallPresets(D2DrlgLevelStrc * pLevel) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x28d);
         exit(-1);
       } else {
-        nSegmentWidth = (int)(pLvlPrest->SizeX + (pLvlPrest->SizeX >> 0x1f & 7U)) >> 3;
+        nSegmentWidth = (int)pLvlPrest->SizeX / 8;
         nX = pLevelData->nGridCoordsWidth - nSegmentWidth;
         nSegmentIndex = 0;
-        while (-1 < nX) {
+        while (0 <= nX) {
           Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nX, 0, nSegmentIndex + 0x361, 0, 0);
           nSegmentIndex++;
           nX -= nSegmentWidth;

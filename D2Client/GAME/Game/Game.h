@@ -154,8 +154,6 @@ int __stdcall GAMEDATA_GetCurrentLevelBlankScreen();
 void __fastcall InGameDraw(int32_t nParam);
 // Draw localized loading message (single or multi-line) centered on screen.
 void __stdcall DrawLoadingMessage();
-// Compute frame-skip level based on elapsed ticks and fps_drawn.
-uint32_t __fastcall ComputeFrameSkipLevel(int32_t nElapsedTicks, int32_t nFpsDrawn);
 void __stdcall UpdateFrameStats();
 void __stdcall GAMEDATA_SendPeriodicPing();
 void __fastcall NET_D2GS_CLIENT_Incoming0x8F_HEARTBEAT_PING(char * pBytes);

@@ -134,13 +134,13 @@ struct __attribute__((packed)) SID_C2S_LocaleInfo {
 namespace Bnclient::BnSend {
 
 // Function declarations
-void __stdcall NET_SID_CLIENT_Send_0x1E_ClientId2();
+int __stdcall NET_SID_CLIENT_Send_0x1E_ClientId2();
 void __fastcall BNSEND_SetServerToken(uint32_t nServerToken);
 // Returns cached Battle.net server token (g_nBNetServerToken) received from SID_AUTH_INFO. Used during CD key authentication.
 uint32_t __stdcall BNSEND_GetServerToken();
 void __fastcall BNSEND_SetClientToken(uint32_t nClientToken);
 DWORD __stdcall BNCLIENT_GetBNetClientToken();
-void __fastcall NET_SID_CLIENT_Send_0x29_LogonResponse(char * szText1, char * szText2);
+int __fastcall NET_SID_CLIENT_Send_0x29_LogonResponse(char * szText1, char * szText2);
 int __fastcall NET_SID_CLIENT_Send_0x3A_LogonResponse2(char * szText1, char * szText2);
 int __fastcall NET_SID_CLIENT_Send_0x3D_CreateAccount2(char * szText1, char * szText2);
 int __fastcall NET_SID_CLIENT_Send_0x31_ChangePassword(char * szText1, char * szText2, char * szNewPassword);
@@ -233,7 +233,6 @@ int __stdcall BattleConnectFastest();
 HANDLE ConnectingToBattleNet();
 void __fastcall BNNEWS_SetNewsChannel(int bIsClassic);
 int __fastcall BNNEWS_GetNewsEntryByIndex(int * pNewsTable, int nIndex);
-uint32_t __fastcall BNNEWS_RoundToPowerOfTwo(struct D2BnNewsTableStrc * pNewsTable, uint32_t dwSize);
 DWORD __stdcall BNNEWS_RoundUpToMultiple(DWORD dwValue, DWORD dwMultiple);
 // @sourcefile .\BNNews.cpp
 void __stdcall BNNEWS_SaveToCache();

@@ -22,8 +22,6 @@ void __stdcall SetRedToBlack();
 void __stdcall UI_DrawPartyPanelBackground();
 void __stdcall FreeAllUiParty();
 void __stdcall UI_InitializePartyButtonStruct(uint32_t nX, uint32_t nY, uint32_t nDC6OrCallback, uint32_t nFrame, uint32_t nButtonType, uint32_t nData1, uint32_t nData2, uint32_t * pdwParam);
-void __fastcall UI_DrawPartyMemberName(char * pszName, struct D2UiPartyStrc * pUiParty, int32_t nScreenY, int32_t nColor, int32_t bNarrowMode);
-void __fastcall UI_DrawPartyButtonLabelText(int32_t eButtonType, int32_t nBaseY, int32_t bHostileMode, int16_t nPartyId);
 void __stdcall UI_DrawPartyLeaveButton();
 void __stdcall UI_DrawPlayerNameInParty();
 int32_t __stdcall ResetPartyUi();
@@ -34,7 +32,6 @@ BOOL __stdcall UI_CheckMouseInRectangle(int32_t nX, int32_t nY, int32_t nWidth, 
 int32_t __fastcall UI_CalculateCenteredTextXPosition(uint16_t nLocaleId, int32_t nCenterX);
 void __stdcall DRAW_UI_PartyWindow_II();
 void __stdcall UI_HandlePartyButtonTooltips();
-uint32_t ClickParty_II(int32_t eButtonType, struct D2RosterStrc * pRoster);
 void __stdcall INPUT_PartyScreenLeftClick(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall INPUT_PartyScreenMouseUp(struct D2UIMouseMsgStrc * pMsg);
 void __stdcall LoadPartyDC6();

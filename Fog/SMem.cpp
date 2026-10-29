@@ -277,15 +277,15 @@ int32_t __stdcall SMemSizeClassBucketLookup(uint32_t nAllocSize) {
     if (!nAllocSize) {
       return -1;
     }
-    if ((char)nAllocSize != '\0') {
-      return g_SMemSizeClassTable[nAllocSize & 0xff];
+    if ((uint32_t)((char)nAllocSize) > 0) {
+      return g_SMemSizeClassTable[(uint8_t)nAllocSize];
     }
 
     uint8_t byClassByte = (uint8_t)(nAllocSize >> 8);
-    if (byClassByte) {
+    if ((uint32_t)byClassByte > 0) {
       return g_SMemSizeClassTable[byClassByte] + 8;
     }
-    if (*(uint8_t*)((char*)&nAllocSize + 2)) {
+    if ((uint32_t)(*(uint8_t*)((char*)&nAllocSize + 2)) > 0) {
       return g_SMemSizeClassTable[*(uint8_t*)((char*)&nAllocSize + 2)] + 0x10;
     }
     if (!*(uint8_t*)((char*)&nAllocSize + 3)) {
@@ -315,7 +315,7 @@ void __stdcall SMemResetHeapStats() {
     static uint32_t g_SMemHeapStatsCount; D2_STATIC_GUARD_BSS(g_SMemHeapStatsCount, "Fog::SMem::SMemResetHeapStats::g_SMemHeapStatsCount");
 
     int nStatsRemaining;
-    if (g_SMemHeapStatsCount) {
+    if ((uint32_t)g_SMemHeapStatsCount > 0) {
       int* pStatEntry;
       pStatEntry = &gaSMemHeapStats[0].nIntervalStat0;
       nStatsRemaining = g_SMemHeapStatsCount;
@@ -602,7 +602,7 @@ uint32_t __stdcall HashForName(char * szText) {
     char cCurChar = (char)uLowered;
     while (cCurChar != '\0') {
       uint8_t* pbNextChar;
-      wHash = (uint16_t)(uHashAccum >> 2) ^ gwSMemAllocDebugFlags[(uLowered ^ uHashAccum) & 0xff];
+      wHash = (uint16_t)(uHashAccum >> 2) ^ gwSMemAllocDebugFlags[(uint8_t)(uLowered ^ uHashAccum)];
       pbNextChar = (uint8_t*)(szText + 1);
       szText++;
       uHashAccum = (uint32_t)wHash;
@@ -635,7 +635,7 @@ void __stdcall SMEM_TitleCaseString(mcp0x03data * pMcpData) {
 
     do {
       char cCurChar;
-      if (0x3ff < nIndex) {
+      if (0x400 <= nIndex) {
         Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), 0x78);
         exit(-1);
       }

@@ -94,7 +94,7 @@ static BOOL __stdcall WARDEN_VerifyModuleSignature(size_t nKeySize, char * szMod
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 20, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     void* nErrAddr;
-    if (nTotalLen < nSigDataLen) {
+    if (nSigDataLen > nTotalLen) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa3);
       exit(-1);
     }
@@ -833,7 +833,7 @@ bool __thiscall GetRC4Data(::WardenClient * pThis, void * pDest, uint32_t * pnSi
     }
 
     uint32_t nCopySize = *pnSize;
-    if (gnWardenResponseSize <= *pnSize) {
+    if (*pnSize >= gnWardenResponseSize) {
       nCopySize = gnWardenResponseSize;
     }
 

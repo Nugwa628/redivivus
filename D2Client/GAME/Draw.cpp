@@ -60,13 +60,13 @@ void __fastcall DRAW_UpdateTileVisibilityBounds(D2DrlgTileDataStrc * pActSub18, 
     if (nParam1 < *(int*)(nParam3 + 0x2c)) {
       *(int32_t*)(nParam3 + 0x2c) = nParam1;
     }
-    if (*(int*)(nParam3 + 0x30) < nParam1) {
+    if (nParam1 > *(int*)(nParam3 + 0x30)) {
       *(int32_t*)(nParam3 + 0x30) = nParam1;
     }
     if (nParam2 < *(int*)(nParam3 + 0x34)) {
       *(int32_t*)(nParam3 + 0x34) = nParam2;
     }
-    if (*(int*)(nParam3 + 0x38) >= nParam2) {
+    if (nParam2 <= *(int*)(nParam3 + 0x38)) {
       return;
     }
 
@@ -121,14 +121,19 @@ static void __stdcall GetIntensityFlagsForTile(int32_t nTileX, int32_t nTileY, i
 // Fills a 6×6 grid of D2GfxLightExStrc entries with full-white (RGB 0xFF, intensity 0xFF) light positions for roof/ortho lighting. When bBorderOnly is set, only the border cells are written. nSplitSide (1=left, 2=right) shifts nScreenX by ±ScreenSizeX/4 for split-screen support. Each cell position is computed from the (col, row) index and the base screen coords.
 static void __stdcall DRAW_CalcRoofLightGridOrtho(D2GfxLightExStrc * pLightEntry, int32_t nScreenX, int32_t nScreenY, int32_t bBorderOnly, int32_t nSplitSide) {
     int nHalfWidthAdj;
-    if (nSplitSide == 1) {
-      nHalfWidthAdj = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
-    } else {
+    switch (nSplitSide) {
+    case 1: {
+      nHalfWidthAdj = -((int)ScreenSizeX / 4);
+      break;
+    }
+    default: {
       if (nSplitSide != 2) {
         goto fill_light_grid;
       }
 
-      nHalfWidthAdj = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+      nHalfWidthAdj = (int)ScreenSizeX / 4;
+      break;
+    }
     }
 
     nScreenX += nHalfWidthAdj;
@@ -208,10 +213,15 @@ void __stdcall DRAW_CalcRoofLightOrtho(D2GfxLightExStrc * pParam, int32_t nScree
 static void __stdcall DRAW_CalcRoofLightGridPerspective(D2GfxLightExStrc * pLightEntry, int32_t nTileX, int32_t nTileY, int32_t nDepth, int32_t bBorderOnly, int32_t nSplitSide) {
     int* pXAdjust;
     int nScreenHalfAdj = 0;
-    if (nSplitSide == 1) {
-      nScreenHalfAdj = -((int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2);
-    } else if (nSplitSide == 2) {
-      nScreenHalfAdj = (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+    switch (nSplitSide) {
+    case 1: {
+      nScreenHalfAdj = -((int)ScreenSizeX / 4);
+      break;
+    }
+    case 2: {
+      nScreenHalfAdj = (int)ScreenSizeX / 4;
+      break;
+    }
     }
 
     int nRowY = 0;
@@ -300,7 +310,7 @@ void __stdcall DRAW_CalcRoofLightPerspective(uint8_t * nRow, int32_t nTileX, int
 }
 
 // Renders a single floor tile during the game draw pass. Skips tiles with flags 0x408 (hidden/special) or outside the extended view rect, and skips non-zero-orientation tiles. Computes a per-tile light intensity array (8x8 for software render, 6x6 for 3D) via GetIntensityFlagsForTile or DRAW_CalcRoofLight* variants (ortho vs perspective, normal vs grid-lit). Calls D2GFX_DrawGroundTile to blit. For wet-floor tiles (flag 0x2) may spawn weather splashes or bubbles via WEATHER_Spawn*. Updates tile visibility bounds after drawing.
-void __fastcall DrawFloorTile(D2DrlgTileDataStrc * pTileData, void * pParam, int32_t nScreenX, int32_t nScreenY, int32_t nWorldX, int32_t nWorldY, D2DrawFloorStrc * pFloor) {
+static void __fastcall DrawFloorTile(D2DrlgTileDataStrc * pTileData, void * pParam, int32_t nScreenX, int32_t nScreenY, int32_t nWorldX, int32_t nWorldY, D2DrawFloorStrc * pFloor) {
     D2GfxLightExStrc* pLightEx;
     int nColIter;
     uint32_t nScreenPanels;
@@ -385,7 +395,7 @@ void __fastcall DrawFloorTile(D2DrlgTileDataStrc * pTileData, void * pParam, int
     DRAW_UpdateTileVisibilityBounds(pTileData, nWorldX, nWorldY, (int32_t)pFloor);
 }
 
-void __fastcall DRAW_DrawEdgeFloorTile(int32_t nWorldX, int32_t nParam, D2DrawFloorStrc * pDrawFloor) {
+static void __fastcall DRAW_DrawEdgeFloorTile(int32_t nWorldX, int32_t nParam, D2DrawFloorStrc * pDrawFloor) {
     D2DrlgTileDataStrc* pTileData;
     int32_t nWorldY_00 = nParam;
     int32_t nWorldY = nWorldX;
@@ -408,7 +418,7 @@ void __fastcall DRAW_DrawEdgeFloorTile(int32_t nWorldX, int32_t nParam, D2DrawFl
     DrawFloorTile(pTileData, (void*)0x1, nScreenX, nWorldX, nWorldY, nWorldY_00, pDrawFloor);
 }
 
-void __fastcall DrawSubTile(int32_t nTileX, int32_t nParam1, int32_t nParam2, int32_t nParam3, D2DrawFloorStrc * pDrawFloor) {
+static void __fastcall DrawSubTile(int32_t nTileX, int32_t nParam1, int32_t nParam2, int32_t nParam3, D2DrawFloorStrc * pDrawFloor) {
     int nBaseX = nTileX / 5 * 5;
     int nBaseY = nParam1 / 5 * 5;
     DRAW_DrawEdgeFloorTile(nBaseX, nBaseY, pDrawFloor);
@@ -441,9 +451,7 @@ void __fastcall DrawFloorByViewAndFloor(D2GameViewStrc * pGameView, D2DrawFloorS
     pDrawFloor->nWindowBorderType = bIsPerspective;
     pDrawFloor->pGameView = pGameView;
     D2RoomStrc* pRoom = UNIT::CUnit::GetCurrentRoom();
-    if (!pRoom) {
-      bDrawEdges = 0;
-    } else {
+    if (pRoom) {
       DWORD dwResMode;
       eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
       pLevelTxt = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevelId);
@@ -452,6 +460,8 @@ void __fastcall DrawFloorByViewAndFloor(D2GameViewStrc * pGameView, D2DrawFloorS
       } else {
         bDrawEdges = 1;
       }
+    } else {
+      bDrawEdges = 0;
     }
 
     pDrawFloor->bPerspectiveHasEffectOnSprite = bDrawEdges;
@@ -461,7 +471,7 @@ void __fastcall DrawFloorByViewAndFloor(D2GameViewStrc * pGameView, D2DrawFloorS
     pDrawFloor->nMinTileY = 0x7fffffff;
     pDrawFloor->nX = 0x50 - pDrawFloor->pGameView->nCenterX;
     pDrawFloor->nY = -0x50 - pDrawFloor->pGameView->nCenterY;
-    if (pDrawFloor->nLastSplashFrame + 3 < nFrameIdx) {
+    if (nFrameIdx > pDrawFloor->nLastSplashFrame + 3) {
       pDrawFloor->nLastSplashFrame = nFrameIdx;
       if (pDrawFloor->uWeatherRelated) {
         pDrawFloor->bWeatherSplashEnabled = 1;
@@ -469,7 +479,7 @@ void __fastcall DrawFloorByViewAndFloor(D2GameViewStrc * pGameView, D2DrawFloorS
     }
 
     bIsPerspective = D2Client::Draw::Weather::WEATHER_GetCurrentLevelWeatherFlags();
-    if (bIsPerspective && pDrawFloor->nRecordingFrameRelated + 0x19 < nFrameIdx) {
+    if (bIsPerspective && nFrameIdx > pDrawFloor->nRecordingFrameRelated + 0x19) {
       pDrawFloor->nRecordingFrameRelated = nFrameIdx;
       pDrawFloor->nRecordingRelated = 1;
     }
@@ -536,21 +546,21 @@ void __fastcall DrawFloorByViewAndFloor(D2GameViewStrc * pGameView, D2DrawFloorS
     }
 
     eD2UnitType eUnitType = pPlayer->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       pGameView = (D2GameViewStrc*)pPlayer->pPath.pStaticPath->nPosX;
-    } else if (!pPlayer->pPath.pDynamicPath) {
-      pGameView = 0;
-    } else {
+    } else if (pPlayer->pPath.pDynamicPath) {
       pGameView = (D2GameViewStrc*)D2Common::PATH::DynamicPath::GetXPos(pPlayer->pPath.pDynamicPath);
+    } else {
+      pGameView = 0;
     }
 
     eD2UnitType ePlayerUnitType = pPlayer->eUnitType;
-    if (ePlayerUnitType == UNIT_OBJECT || 3 < (int)ePlayerUnitType && (int)ePlayerUnitType < 6) {
+    if (ePlayerUnitType == UNIT_OBJECT || 3 < (int)ePlayerUnitType && (int)ePlayerUnitType <= 5) {
       nPlayerY = pPlayer->pPath.pStaticPath->nPosY;
-    } else if (!pPlayer->pPath.pDynamicPath) {
-      nPlayerY = 0;
-    } else {
+    } else if (pPlayer->pPath.pDynamicPath) {
       nPlayerY = D2Common::PATH::DynamicPath::GetYPos(pPlayer->pPath.pDynamicPath);
+    } else {
+      nPlayerY = 0;
     }
     if ((int)pGameView - pDrawFloor->nMinTileX < bDrawEdges) {
       DrawSubTile(pDrawFloor->nMinTileX - 5, nPlayerY, 0, -5, pDrawFloor);
@@ -612,17 +622,17 @@ void __fastcall dRoofDraw(D2GameViewStrc * pGameView) {
             nRoofFlags = pRoofEntry[5];
             if ((nRoofFlags & nLayerMask) == nLayerMask) {
               if (pRoofEntry[9] & 2U) {
-                if (nEngine < 4 || (uint32_t)pRoofEntry[0xb] <= dwTickCount) {
+                if (nEngine < 4 || dwTickCount >= (uint32_t)pRoofEntry[0xb]) {
                   *(uint8_t*)(pRoofEntry + 10) = *(uint8_t*)((int)pRoofEntry + 0x2a);
                   pRoofEntry[9] &= -3;
                 } else {
                   nGridTotal = ((uint32_t)*(uint8_t*)((int)pRoofEntry + 0x2a) - (uint32_t)*(uint8_t*)((int)pRoofEntry + 0x29)) * (dwTickCount - pRoofEntry[0xb] + 500);
                   *(uint8_t*)(pRoofEntry + 10) = (char)(nGridTotal / 500) + (char)(nGridTotal >> 0x1f) - (char)((int64_t)nGridTotal * 0x10624dd3 >> 0x3f) + *(uint8_t*)((int)pRoofEntry + 0x29);
                 }
-                if ((char)pRoofEntry[10] == '\0') {
-                  nRoofFlags |= 0x400;
-                } else {
+                if ((char)pRoofEntry[10] != '\0') {
                   nRoofFlags &= -1025;
+                } else {
+                  nRoofFlags |= 0x400;
                 }
 
                 pRoofEntry[5] = nRoofFlags;
@@ -645,10 +655,10 @@ void __fastcall dRoofDraw(D2GameViewStrc * pGameView) {
                     pTile = (D2TileLibraryEntryStrc*)pRoofEntry[6];
                     pLight = aRoofLightGrid8x8;
                   } else {
-                    if (!bIsPerspective) {
-                      DRAW_CalcRoofLightOrtho(aRoofLightGrid6x6, nScreenY, nGridTotal, nWorldXpos, nWorldY, (uint32_t)*(uint16_t*)(nRoomIdx + 4), nBorderType, bLowQuality);
-                    } else {
+                    if (bIsPerspective) {
                       DRAW_CalcRoofLightPerspective((uint8_t*)aRoofLightGrid6x6, nWorldXpos, nWorldY, (uint32_t)*(uint16_t*)(nRoomIdx + 4), nBorderType, bLowQuality);
+                    } else {
+                      DRAW_CalcRoofLightOrtho(aRoofLightGrid6x6, nScreenY, nGridTotal, nWorldXpos, nWorldY, (uint32_t)*(uint16_t*)(nRoomIdx + 4), nBorderType, bLowQuality);
                     }
 
                     nAlpha = (uint8_t)pRoofEntry[10];
@@ -673,7 +683,7 @@ void __fastcall dRoofDraw(D2GameViewStrc * pGameView) {
 
       nRenderLayer++;
       nCellsLeft = nGridTotal;
-    } while (nRenderLayer < 5);
+    } while (nRenderLayer <= 4);
 }
 
 // A wrapper whose only statement is a call to the floor worker with (global floor-state struct, view):
@@ -764,7 +774,7 @@ static void __stdcall WALL2_DrawUnderFloorTiles(D2GameViewStrc * pViewData, D2Wa
     for (pWallTileNode = pWall2Cell->pUnderFloorList; pWallTileNode; pWallTileNode = pWallTileNode->pNext) {
       D2GfxLightStrc sLight;
       pTileEntry = (D2DrlgTileDataStrc*)pWallTileNode->pData;
-      if (pTileEntry->nTransitionFlags & 4U && (uint32_t)pTileEntry->nFadeEndTime <= dwTickCount) {
+      if (pTileEntry->nTransitionFlags & 4U && dwTickCount >= (uint32_t)pTileEntry->nFadeEndTime) {
         pTileEntry->nFlags |= 8;
         pTileEntry->nTransitionFlags &= -5;
       }
@@ -778,7 +788,7 @@ static void __stdcall WALL2_DrawUnderFloorTiles(D2GameViewStrc * pViewData, D2Wa
         }
 
         nLightIdx = 0;
-        if (nLightCount) {
+        if ((uint32_t)nLightCount > 0) {
           do {
             View::DRAW_CoordIsInCoord(pWallTileNode->nX + piVar1[nLightIdx * 2] * 8, pWallTileNode->nY + piVar1[nLightIdx * 2 + 1] * 8, (uint8_t*)&dwAlpha, byColorRG, byColorRG + 1, &byBlue);
             byMaskedIntensity = (uint8_t)dwAlpha ? (uint8_t)dwAlpha : 0;
@@ -795,17 +805,17 @@ static void __stdcall WALL2_DrawUnderFloorTiles(D2GameViewStrc * pViewData, D2Wa
 
         nAlpha = pTileEntry->nCurrentAlpha;
         dwAlphaByte = (uint32_t)((uint32_t)((uint32_t)d2_load24((char*)&dwAlphaByte + 1) & 0xffffffu) << 8 | (uint32_t)(uint8_t)nAlpha);
-        if (!bIsPerspective) {
-          nScreenX = pViewData->pView.left - pViewData->nCenterX + pTileEntry->nScreenX;
-          nScreenY = pTileEntry->nScreenY - pViewData->nCenterY + pViewData->pView.top;
-        } else {
+        if (bIsPerspective) {
           nScreenX = pWallTileNode->nX;
           nScreenY = pWallTileNode->nY;
-        }
-        if (nAlpha == 0xff) {
-          nScreenX = D2gfx::D2GFX::D2GFX_DrawWallTile(pTileEntry->pTileLibraryEntry, nScreenX, nScreenY, aWallLightSamples, nBorderType);
         } else {
+          nScreenX = pViewData->pView.left - pViewData->nCenterX + pTileEntry->nScreenX;
+          nScreenY = pTileEntry->nScreenY - pViewData->nCenterY + pViewData->pView.top;
+        }
+        if (nAlpha != 0xff) {
           nScreenX = D2gfx::D2GFX::D2GFX_DrawTransWallTile(pTileEntry->pTileLibraryEntry, nScreenX, nScreenY, aWallLightSamples, nBorderType, nAlpha);
+        } else {
+          nScreenX = D2gfx::D2GFX::D2GFX_DrawWallTile(pTileEntry->pTileLibraryEntry, nScreenX, nScreenY, aWallLightSamples, nBorderType);
         }
         if (nScreenX) {
           pTileEntry->nFlags |= 0x20000;
@@ -836,7 +846,7 @@ void __stdcall WALL2_DrawWallTilesWithAlpha(D2Wall2CellStrc * pWall2Cell, uint32
     uint32_t bIsPerspective = D2gfx::D2GFX::D2GFX_IsPerspectiveActive();
     int nFadeCalc = Rendering::GetCurrentEngine();
     uint32_t dwTickCount = GetTickCount();
-    uint32_t bIs3DEngine = (uint32_t)(3 < nFadeCalc);
+    uint32_t bIs3DEngine = (uint32_t)(4 <= nFadeCalc);
     if (!eRenderPass || eRenderPass == 1) {
       uint8_t nAlpha;
       pWallTileNode = pWall2Cell->pWallList;
@@ -850,7 +860,7 @@ void __stdcall WALL2_DrawWallTilesWithAlpha(D2Wall2CellStrc * pWall2Cell, uint32
           break;
         }
         if (pTileEntry->nTransitionFlags & 2U) {
-          if (!bIs3DEngine || (uint32_t)pTileEntry->nFadeEndTime <= dwTickCount) {
+          if (!bIs3DEngine || dwTickCount >= (uint32_t)pTileEntry->nFadeEndTime) {
             pTileEntry->nCurrentAlpha = pTileEntry->nAlphaEnd;
             pTileEntry->nTransitionFlags &= -3;
           } else {
@@ -863,7 +873,7 @@ void __stdcall WALL2_DrawWallTilesWithAlpha(D2Wall2CellStrc * pWall2Cell, uint32
             pTileEntry->nFlags &= -1025;
           }
         }
-        if (pTileEntry->nTransitionFlags & 4U && (uint32_t)pTileEntry->nFadeEndTime <= dwTickCount) {
+        if (pTileEntry->nTransitionFlags & 4U && dwTickCount >= (uint32_t)pTileEntry->nFadeEndTime) {
           pTileEntry->nFlags |= 8;
           pTileEntry->nTransitionFlags &= -5;
         }
@@ -877,7 +887,7 @@ void __stdcall WALL2_DrawWallTilesWithAlpha(D2Wall2CellStrc * pWall2Cell, uint32
           }
 
           nLightIdx = 0;
-          if (nLightCount) {
+          if ((uint32_t)nLightCount > 0) {
             do {
               View::DRAW_CoordIsInCoord(pWallTileNode->nX + piVar1[nLightIdx * 2] * 8, pWallTileNode->nY + piVar1[nLightIdx * 2 + 1] * 8, (uint8_t*)&dwAlphaPacked, &byRed, &byBlue, (uint8_t*)((uintptr_t)&pWall2Cell + 3));
               byMaskedIntensity = (uint8_t)dwAlphaPacked ? (uint8_t)dwAlphaPacked : 0;
@@ -894,17 +904,17 @@ void __stdcall WALL2_DrawWallTilesWithAlpha(D2Wall2CellStrc * pWall2Cell, uint32
 
           nAlpha = pTileEntry->nCurrentAlpha;
           dwAlphaByte = (uint32_t)((uint32_t)((uint32_t)d2_load24((char*)&dwAlphaByte + 1) & 0xffffffu) << 8 | (uint32_t)(uint8_t)nAlpha);
-          if (!bIsPerspective) {
-            nPosX = pCameraView->pView.left - pCameraView->nCenterX + pTileEntry->nScreenX;
-            nScreenY = pTileEntry->nScreenY - pCameraView->nCenterY + pCameraView->pView.top;
-          } else {
+          if (bIsPerspective) {
             nPosX = pWallTileNode->nX;
             nScreenY = pWallTileNode->nY;
-          }
-          if (nAlpha == 0xff) {
-            nFadeCalc = D2gfx::D2GFX::D2GFX_DrawWallTile(pTileEntry->pTileLibraryEntry, nPosX, nScreenY, aWallLightSamples, nBorderType);
           } else {
+            nPosX = pCameraView->pView.left - pCameraView->nCenterX + pTileEntry->nScreenX;
+            nScreenY = pTileEntry->nScreenY - pCameraView->nCenterY + pCameraView->pView.top;
+          }
+          if (nAlpha != 0xff) {
             nFadeCalc = D2gfx::D2GFX::D2GFX_DrawTransWallTile(pTileEntry->pTileLibraryEntry, nPosX, nScreenY, aWallLightSamples, nBorderType, nAlpha);
+          } else {
+            nFadeCalc = D2gfx::D2GFX::D2GFX_DrawWallTile(pTileEntry->pTileLibraryEntry, nPosX, nScreenY, aWallLightSamples, nBorderType);
           }
           if (nFadeCalc) {
             pTileEntry->nFlags |= 0x20000;
@@ -970,7 +980,7 @@ void __fastcall dWallPass(D2GameViewStrc * pGameView) {
         nEngine = Rendering::GetCurrentEngine();
         timer = GetTickCount();
         pWallNode = *pCellEntry;
-        bIs3DEngine = (uint32_t)(3 < nEngine);
+        bIs3DEngine = (uint32_t)(4 <= nEngine);
         if (pWallNode) {
           do {
             pWallTile = (D2DrlgTileDataStrc*)pWallNode->pData;
@@ -979,7 +989,7 @@ void __fastcall dWallPass(D2GameViewStrc * pGameView) {
               exit(-1);
             }
             if (pWallTile->nTransitionFlags & 2U) {
-              if (!bIs3DEngine || (uint32_t)pWallTile->nFadeEndTime <= timer) {
+              if (!bIs3DEngine || timer >= (uint32_t)pWallTile->nFadeEndTime) {
                 pWallTile->nCurrentAlpha = pWallTile->nAlphaEnd;
                 pWallTile->nTransitionFlags &= -3;
               } else {
@@ -992,7 +1002,7 @@ void __fastcall dWallPass(D2GameViewStrc * pGameView) {
                 pWallTile->nFlags &= -1025;
               }
             }
-            if (pWallTile->nTransitionFlags & 4U && (uint32_t)pWallTile->nFadeEndTime <= timer) {
+            if (pWallTile->nTransitionFlags & 4U && timer >= (uint32_t)pWallTile->nFadeEndTime) {
               pWallTile->nFlags |= 8;
               pWallTile->nTransitionFlags &= -5;
             }
@@ -1006,7 +1016,7 @@ void __fastcall dWallPass(D2GameViewStrc * pGameView) {
               }
 
               nLightIdx = 0;
-              if (nLightCount) {
+              if ((uint32_t)nLightCount > 0) {
                 do {
                   View::DRAW_CoordIsInCoord(pWallNode->nX + pIntensityTable[nLightIdx * 2] * 8, pWallNode->nY + pIntensityTable[nLightIdx * 2 + 1] * 8, (uint8_t*)&dwCoordPacked, byColorRG, byColorRG + 1, &byBlueTmp);
                   byAlpha = (uint8_t)dwCoordPacked ? (uint8_t)dwCoordPacked : 0;
@@ -1030,10 +1040,10 @@ void __fastcall dWallPass(D2GameViewStrc * pGameView) {
                 nScreenX = pWallNode->nX;
                 nScreenY = pWallNode->nY;
               }
-              if (nAlpha == 0xff) {
-                nFadeCalc = D2gfx::D2GFX::D2GFX_DrawWallTile(pWallTile->pTileLibraryEntry, nScreenX, nScreenY, aLightSamples, nBorderType);
-              } else {
+              if (nAlpha != 0xff) {
                 nFadeCalc = D2gfx::D2GFX::D2GFX_DrawTransWallTile(pWallTile->pTileLibraryEntry, nScreenX, nScreenY, aLightSamples, nBorderType, nAlpha);
+              } else {
+                nFadeCalc = D2gfx::D2GFX::D2GFX_DrawWallTile(pWallTile->pTileLibraryEntry, nScreenX, nScreenY, aLightSamples, nBorderType);
               }
               if (nFadeCalc) {
                 pWallTile->nFlags |= 0x20000;

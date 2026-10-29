@@ -767,7 +767,7 @@ int __fastcall DRLGPATH_CalcDirectionVector(POINT * pPoint, uint32_t * pnParam, 
 
     int nRatioIndex;
     uint32_t nMinXfp;
-    bool bSwappedX = nToXfp < nFromXfp;
+    bool bSwappedX = nFromXfp > nToXfp;
     if (bSwappedX) {
       nMinXfp = nToXfp;
       nToXfp = nFromXfp;
@@ -791,10 +791,10 @@ int __fastcall DRLGPATH_CalcDirectionVector(POINT * pPoint, uint32_t * pnParam, 
       nMinorMin = nMinXfp;
       nMinXfp = nMinCoord;
     }
-    if (!(nToXfp - nMinXfp)) {
-      nRatioIndex = 0;
-    } else {
+    if (nToXfp - nMinXfp) {
       nRatioIndex = (int)((nMajorMax - nMinorMin) * 0x7f) / (int)(nToXfp - nMinXfp);
+    } else {
+      nRatioIndex = 0;
     }
 
     uint32_t nDirIndex = gaPathDirectionVectors[nRatioIndex].nDirIndex;
@@ -850,7 +850,7 @@ int32_t __fastcall DRLGPATH_AdvanceAlongPathPoints(D2DynamicPathStrc * pDynamicP
         }
 
         bReachedWaypoint = pDynamicPath->nPathPointIndex;
-        if (pDynamicPath->dwPathPoints - 1 <= bReachedWaypoint) {
+        if (bReachedWaypoint >= pDynamicPath->dwPathPoints - 1) {
           pDynamicPath->nDirectionVectorX = 0;
           pDynamicPath->nVelocityX = 0;
           pDynamicPath->nPathPointIndex = pDynamicPath->dwPathPoints;
@@ -965,7 +965,7 @@ static int32_t __stdcall DRLGPATH_GetDirectionIndex(int32_t nY2, int32_t nY1, in
       nAbsDy = -nDy;
     }
     if ((int)nAbsDx < (int)(nAbsDy * 2)) {
-      if ((int)(nAbsDx * 2) <= (int)nAbsDy) {
+      if ((int)nAbsDy >= (int)(nAbsDx * 2)) {
         if ((int)nDx < 0) {
           nDx = -1;
           goto combine_dir_index;
@@ -1017,7 +1017,7 @@ int32_t __stdcall DRLGPATH_GetDirectionIndexPacked(uint32_t nParam1, uint32_t nP
       nAbsDeltaY = -nDeltaY;
     }
     if ((int)nAbsDeltaX < (int)(nAbsDeltaY * 2)) {
-      if ((int)(nAbsDeltaX * 2) <= (int)nAbsDeltaY) {
+      if ((int)nAbsDeltaY >= (int)(nAbsDeltaX * 2)) {
         if ((int)nDeltaX < 0) {
           nDeltaX = -1;
           goto combine_dir_index;
@@ -1130,7 +1130,7 @@ uint32_t __fastcall DRLGPATH_UpdatePathVelocityAndDirection(uint32_t * pnParam) 
     int nDistY;
     uint32_t* pnDirOut;
     if ((short int)*pnParam == (short int)pnParam[1] && *(short int*)((int)pnParam + 2) == *(short int*)((int)pnParam + 6)) {
-      memset(pnParam + 2, 0, 5 * sizeof(pnParam[0]));
+      for (int i = 2; i < 7; i++) pnParam[i] = 0;
     } else {
       uint32_t nVelX;
       DRLGPATH_CalcPathDirection((POINT*)(pnParam + 2), (uint32_t*)&pnDirOut, *pnParam, pnParam[1]);
@@ -1159,7 +1159,7 @@ uint32_t __fastcall DRLGPATH_UpdatePathVelocityAndDirection(uint32_t * pnParam) 
       if (nDistY < 0) {
         nDistY = -nDistY;
       }
-      if (nDistX * 0x10000 < (int)nVelX && nDistY * 0x10000 < (int)nVelY) {
+      if ((int)nVelX > nDistX * 0x10000 && (int)nVelY > nDistY * 0x10000) {
         return 0;
       }
     }
@@ -1173,14 +1173,14 @@ uint32_t __fastcall DRLGPATH_UpdatePathVelocityAndDirection(uint32_t * pnParam) 
 // a safe range for fixed-point iteration.
 void __fastcall DRLGPATH_NormalizeFixedPointPair(int * pnParam1, int * pnParam2) {
     int nShiftCount = *pnParam1;
-    if (nShiftCount < 0) {
-      while (nShiftCount < -0x10000) {
+    if (!(nShiftCount < 0)) {
+      while (0x10000 < nShiftCount) {
         *pnParam1 >>= 1;
         *pnParam2 >>= 1;
         nShiftCount = *pnParam1;
       }
     } else {
-      while (0x10000 < nShiftCount) {
+      while (nShiftCount < -0x10000) {
         *pnParam1 >>= 1;
         *pnParam2 >>= 1;
         nShiftCount = *pnParam1;
@@ -1259,7 +1259,7 @@ uint32_t __fastcall DRLGPATH_StepPathWithCollisionCheck(D2PathTypeArg * pPathTyp
     if ((int)nVelY < 0) {
       nAbsVelY = -nVelY;
     }
-    if ((int)nAbsVelY < (int)nAbsVelX) {
+    if ((int)nAbsVelX > (int)nAbsVelY) {
       nStepSize = nVelX;
       if (-1 < (int)nVelX) {
         goto walk_path;
@@ -1379,25 +1379,25 @@ void __fastcall DRLGPATH_GetMissileTargetPosition(short * pOutPos, D2UnitStrc * 
       }
 
       eUnitType = *pOwner;
-      if (eUnitType == 2 || 3 < eUnitType && eUnitType < 6) {
+      if (eUnitType == 2 || 3 < eUnitType && eUnitType <= 5) {
         nCoord = (short int)*(uint32_t*)(pOwner[0xb] + 0xc);
-      } else if (!(D2DynamicPathStrc*)pOwner[0xb]) {
-        nCoord = 0;
-      } else {
+      } else if ((D2DynamicPathStrc*)pOwner[0xb]) {
         nLine = PATH::DynamicPath::GetXPos((D2DynamicPathStrc*)pOwner[0xb]);
         nCoord = (short int)nLine;
+      } else {
+        nCoord = 0;
       }
 
       *pOutPos = nCoord;
       pOwner = (int*)pMissileStrc->pGfxDataCopy;
       eUnitType = *pOwner;
-      if (eUnitType == 2 || 3 < eUnitType && eUnitType < 6) {
+      if (eUnitType == 2 || 3 < eUnitType && eUnitType <= 5) {
         nCoord = (short int)*(uint32_t*)(pOwner[0xb] + 0x10);
-      } else if (!(D2DynamicPathStrc*)pOwner[0xb]) {
-        nCoord = 0;
-      } else {
+      } else if ((D2DynamicPathStrc*)pOwner[0xb]) {
         nLine = PATH::DynamicPath::GetYPos((D2DynamicPathStrc*)pOwner[0xb]);
         nCoord = (short int)nLine;
+      } else {
+        nCoord = 0;
       }
 
       pOutPos[1] = nCoord;
@@ -1489,7 +1489,7 @@ int32_t __stdcall DRLGPATH_GetWeightedDistancePacked(uint32_t nParam1, uint32_t 
     0xb
 }; D2_STATIC_GUARD(gaPathWeightTable, "D2Common::Drlg::Path::DRLGPATH_GetWeightedDistancePacked::gaPathWeightTable");
 
-    int nAbsDX = (nParam1 & 0xffff) - (nParam2 & 0xffff);
+    int nAbsDX = (uint16_t)nParam1 - ((uint16_t)nParam2);
     if (nAbsDX < 0) {
       nAbsDX = -nAbsDX;
     }
@@ -1568,7 +1568,7 @@ static BOOL __stdcall DRLGPATH_RaycastCollisionLine(int * pVelocity, uint32_t nP
     uint32_t nPackedSrc = nParam;
     int nFpIterX = nParam * 0x10000 + 0x8000;
     uint32_t nPackedDst = *pnParam;
-    int nAbsDX = (nPackedDst & 0xffff) - (nFpIterX >> 0x10 & 0xffffU);
+    int nAbsDX = (uint16_t)nPackedDst - (nFpIterX >> 0x10 & 0xffffU);
     int nFpIterY = (nParam & -65536) + 0x8000;
     int nVelX = *pVelocity;
     int nVelY = pVelocity[1];
@@ -1595,7 +1595,7 @@ static BOOL __stdcall DRLGPATH_RaycastCollisionLine(int * pVelocity, uint32_t nP
     if (nAbsDY < 0) {
       nAbsDY = -nAbsDY;
     }
-    if (nAbsDY < nAbsDX) {
+    if (nAbsDX > nAbsDY) {
       if ((short int)nParam != (short int)nPackedDst) {
         do {
           nFpIterX += nVelX;
@@ -1661,7 +1661,7 @@ BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_t * pnP
     int32_t nUnitWidth = pPathArg->nUnitWidth;
     int32_t eCollisionFlag_00 = pPathArg->nCollisionPattern;
     uint32_t nPackedDst = *pnParam;
-    int nDeltaX = (nPackedDst & 0xffff) - (nPackedSrc & 0xffff);
+    int nDeltaX = (uint16_t)nPackedDst - ((uint16_t)nPackedSrc);
     int nDeltaY = (nPackedDst >> 0x10) - (nPackedSrc >> 0x10);
     uint32_t nPackedCur = nPackedSrc;
     int nStepsX = nDeltaX;
@@ -1681,27 +1681,9 @@ BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_t * pnP
     sDst.nX = (uint16_t)nPackedDst;
     uint16_t nDstY = (uint16_t)(nPackedDst >> 0x10);
     uint16_t nIterCoord = nDstY;
-    if (nStepsY < nStepsX) {
-      if (!nDeltaX) {
-        if (nCurY != nDstY) {
-          while (true) {
-            nPackedPrev = nPackedCur;
-            nCurY = nCurY + (uint16_t)(-1 < nDeltaY) * 2 - 1;
-            nPackedCur = (uint32_t)((uint32_t)(uint16_t)nCurY << 16 | (uint32_t)(uint16_t)(short int)nPackedCur);
-            iVar1 = Collision::CheckCollision_BlockPlayer_Type(pRoom, nPackedSrc & 0xffff, (uint32_t)nCurY, nUnitWidth, eCollisionFlag_00);
-            if (iVar1) {
-              break;
-            }
-            if (nCurY == nDstY) {
-              return 1;
-            }
-          }
-
-          *pnParam = nPackedPrev;
-          return 0;
-        }
-      } else {
-        nDstY = (uint16_t)(-1 < nDeltaX) * 2 - 1;
+    if (nStepsX > nStepsY) {
+      if (nDeltaX) {
+        nDstY = (uint16_t)(0 <= nDeltaX) * 2 - 1;
         *(uint16_t*)(char*)&nPackedSrc = (uint16_t)(-1 < nDeltaY) * 2 - 1;
         nDeltaX = nStepsY;
         if (nCurX != sDst.nX) {
@@ -1716,7 +1698,7 @@ BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_t * pnP
             }
 
             nDeltaX += nStepsY;
-            if (nStepsX <= nDeltaX) {
+            if (nDeltaX >= nStepsX) {
               nCurY += (short int)nPackedSrc;
               nDeltaX -= nStepsX;
               nPackedCur = (uint32_t)((uint32_t)(uint16_t)nCurY << 16 | (uint32_t)(uint16_t)nIterCoord);
@@ -1733,11 +1715,29 @@ BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_t * pnP
             }
           } while (true);
         }
+      } else {
+        if (nCurY != nDstY) {
+          while (true) {
+            nPackedPrev = nPackedCur;
+            nCurY = nCurY + (uint16_t)(0 <= nDeltaY) * 2 - 1;
+            nPackedCur = (uint32_t)((uint32_t)(uint16_t)nCurY << 16 | (uint32_t)(uint16_t)(short int)nPackedCur);
+            iVar1 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint16_t)nPackedSrc, (uint32_t)nCurY, nUnitWidth, eCollisionFlag_00);
+            if (iVar1) {
+              break;
+            }
+            if (nCurY == nDstY) {
+              return 1;
+            }
+          }
+
+          *pnParam = nPackedPrev;
+          return 0;
+        }
       }
     } else {
       bool bNotAtDst;
       if (nStepsY <= nStepsX) {
-        *(uint16_t*)(char*)&nPackedSrc = (uint16_t)(-1 < nDeltaY) * 2 - 1;
+        *(uint16_t*)(char*)&nPackedSrc = (uint16_t)(0 <= nDeltaY) * 2 - 1;
         do {
           nPackedPrev = nPackedPrevDiag;
           if (nCurX == sDst.nX) {
@@ -1754,25 +1754,7 @@ BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_t * pnP
         *pnParam = nPackedPrev;
         return 0;
       }
-      if (!nDeltaY) {
-        if (nCurX != sDst.nX) {
-          while (true) {
-            nPackedPrev = nPackedCur;
-            nCurX = nCurX + (uint16_t)(-1 < nDeltaX) * 2 - 1;
-            nPackedCur = (uint32_t)((uint32_t)(uint16_t)*(uint16_t*)((char*)&nPackedCur + 2) << 16 | (uint32_t)(uint16_t)nCurX);
-            iVar1 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)nCurX, (uint32_t)nCurY, nUnitWidth, eCollisionFlag_00);
-            if (iVar1) {
-              break;
-            }
-            if (nCurX == sDst.nX) {
-              return 1;
-            }
-          }
-
-          *pnParam = nPackedPrev;
-          return 0;
-        }
-      } else {
+      if (nDeltaY) {
         bNotAtDst = nCurY != nDstY;
         nDstY = (uint16_t)(-1 < nDeltaX) * 2 - 1;
         *(uint16_t*)(char*)&nPackedSrc = (uint16_t)(-1 < nDeltaY) * 2 - 1;
@@ -1801,6 +1783,24 @@ BOOL __stdcall DRLGPATH_RaycastBresenhamLine(uint32_t nPackedSrc, uint32_t * pnP
               }
             }
             if ((uint16_t)(nPackedCur >> 0x10) == nIterCoord) {
+              return 1;
+            }
+          }
+
+          *pnParam = nPackedPrev;
+          return 0;
+        }
+      } else {
+        if (nCurX != sDst.nX) {
+          while (true) {
+            nPackedPrev = nPackedCur;
+            nCurX = nCurX + (uint16_t)(-1 < nDeltaX) * 2 - 1;
+            nPackedCur = (uint32_t)((uint32_t)(uint16_t)*(uint16_t*)((char*)&nPackedCur + 2) << 16 | (uint32_t)(uint16_t)nCurX);
+            iVar1 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)nCurX, (uint32_t)nCurY, nUnitWidth, eCollisionFlag_00);
+            if (iVar1) {
+              break;
+            }
+            if (nCurX == sDst.nX) {
               return 1;
             }
           }
@@ -1909,7 +1909,7 @@ int32_t __fastcall DRLGPATH_SmoothPathPoints(D2PathTypeArg * pPathTypeArg) {
 
         nIterCount++;
         nPrevDir = nChosenDir;
-        if (nMaxWaypoints <= nIterCount) {
+        if (nIterCount >= nMaxWaypoints) {
           goto finish_walk;
         }
       } while (true);
@@ -2058,12 +2058,12 @@ void __fastcall DRLGPATH_ScaleVelocityVector(int32_t nVelocityScale, POINT * pPo
     } else if (nVelY < 0) {
       nVelY = -nVelY;
     }
-    if (nVelY < 0x200000) {
-      return;
+    if (!(nVelY < 0x200000)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x331);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x331);
-    exit(-1);
+    return;
 }
 
 // Checks if a ray from source to target position is collision-free. Normalizes the direction vector and delegates to DRLGPATH_RaycastCollisionLine. Used when waypoints are more than 1 tile apart.
@@ -2151,7 +2151,7 @@ uint32_t __fastcall DRLGPATH_ValidateFullPath(D2PathTypeArg * pPathTypeArgs) {
 // Computes a simple distance heuristic between two packed coordinates: min(dx,dy) + max(dx,dy)*2. This is equivalent to a simple diagonal distance estimation.
 int32_t __stdcall DRLGPATH_GetSimpleDistancePacked(uint32_t nParam1, uint32_t nParam2) {
     int nResult;
-    int nDX = (nParam2 & 0xffff) - (nParam1 & 0xffff);
+    int nDX = (uint16_t)nParam2 - ((uint16_t)nParam1);
     if (nDX < 0) {
       nDX = -nDX;
     }
@@ -2225,13 +2225,13 @@ D2DrlgRoomAStarNodeStrc * __stdcall DRLGPATH_AdvancePathNodeChain(D2DrlgAStarCon
 
       pNode = (D2DrlgRoomAStarNodeStrc*)pNode->pParent;
       pNode->pSeedPtr = (void*)((int)pNode->pSeedPtr + 4);
-      if (!pAStarCtx->bRandomizeDirection) {
-        pNode->nDirection = pNode->nDirection + *(int*)pNode->pSeedPtr & 7;
-      } else {
+      if (pAStarCtx->bRandomizeDirection) {
         pDVar1 = pAStarCtx->pSeed;
         lSeedNext = D2_SEED_NEXT(*pDVar1);
         *pDVar1 = lSeedNext;
         pNode->nDirection = gnDrlgMemoryMax[lSeedNext.nSeedLow & 0x1f] + *(int*)pNode->pSeedPtr + pNode->nDirection & 7;
+      } else {
+        pNode->nDirection = pNode->nDirection + *(int*)pNode->pSeedPtr & 7;
       }
 
       pNode->nFlags++;
@@ -2257,7 +2257,7 @@ static int32_t DRLGPATH_ExtractPathFromResult(int32_t nPathCtx, int32_t nCurNode
 
     uint32_t* pWaypointStack = aWaypointStack + 0x4d;
     do {
-      if (0x4d < nWaypointCount) {
+      if (0x4e <= nWaypointCount) {
         break;
       }
 
@@ -2277,7 +2277,7 @@ static int32_t DRLGPATH_ExtractPathFromResult(int32_t nPathCtx, int32_t nCurNode
       nCurNode = pParentNode;
     } while (pParentNode);
 
-    if (nWaypointCount - 2U >= 0x4c) {
+    if (nWaypointCount - 2U > 0x4b) {
       return 0;
     }
 
@@ -2306,7 +2306,7 @@ int32_t __fastcall DRLGPATH_FindPathAStar(D2DrlgRoomCoordsStrc * pRoomCoords, D2
     sStartNode.nY = pPathTypeArg->pCoords.nPosX;
     *(uint16_t*)(char*)&nCostLimit = pPathTypeArg->pCoords.nOffsetY;
     *(uint16_t*)((char*)&nCostLimit + 2) = pPathTypeArg->pCoords.nPosY;
-    int nPathLength = (nCostLimit & 0xffff) - (*(uint32_t*)((char*)&sStartNode + 8) & 0xffff);
+    int nPathLength = (uint16_t)nCostLimit - (*(uint32_t*)((char*)&sStartNode + 8) & 0xffff);
     if (nPathLength < 0) {
       nPathLength = -nPathLength;
     }
@@ -2344,7 +2344,7 @@ int32_t __fastcall DRLGPATH_FindPathAStar(D2DrlgRoomCoordsStrc * pRoomCoords, D2
       if (pPathTypeArg->ePathType == 0x10) {
         nCostLimit = (uint32_t)(short int)((short int)wInitialHCost / 2 + sStartNode.nHCost);
         nInitCostClamped = (uint32_t)(uint8_t)pPathTypeArg->nIdaStarInitCopy;
-        if ((int)nInitCostClamped < (int)nCostLimit) {
+        if ((int)nCostLimit > (int)nInitCostClamped) {
           nInitCostClamped = nCostLimit;
         }
 
@@ -2617,10 +2617,59 @@ static BOOL __stdcall DRLGPATH_TryExpandNeighborNode(int32_t nOpenList, uint32_t
 
     uint16_t nNewGCost = pParentNode->nGCost + nEdgeCost;
     D2DrlgPathNodeStrc* pExistingNode = (D2DrlgPathNodeStrc*)DRLGPATH_FindNodeInOpenList(nOpenList, nPackedNeighbor);
-    if (!pExistingNode) {
+    if (pExistingNode) {
+      if (!pParentNode->pChildren[0]) {
+        pParentNode->pChildren[0] = pExistingNode;
+      } else if (!pParentNode->pChildren[1]) {
+        pParentNode->pChildren[1] = pExistingNode;
+      } else if (!pParentNode->pChildren[2]) {
+        pParentNode->pChildren[2] = pExistingNode;
+      } else if (!pParentNode->pChildren[3]) {
+        pParentNode->pChildren[3] = pExistingNode;
+      } else if (!pParentNode->pChildren[4]) {
+        pParentNode->pChildren[4] = pExistingNode;
+      } else if (!pParentNode->pChildren[5]) {
+        pParentNode->pChildren[5] = pExistingNode;
+      } else if (!pParentNode->pChildren[6]) {
+        pParentNode->pChildren[6] = pExistingNode;
+      } else if (!pParentNode->pChildren[7]) {
+        pParentNode->pChildren[7] = pExistingNode;
+      }
+      if ((short int)nNewGCost < pExistingNode->nGCost) {
+        pExistingNode->pParent = pParentNode;
+        pExistingNode->nGCost = nNewGCost;
+        pExistingNode->nFCost = pExistingNode->nHCost + nNewGCost;
+        return 1;
+      }
+    } else {
       D2DrlgPathNodeStrc* pClosedNode;
       pClosedNode = (D2DrlgPathNodeStrc*)DRLGPATH_FindNodeInClosedList(nOpenList, nPackedNeighbor);
-      if (!pClosedNode) {
+      if (pClosedNode) {
+        if (!pParentNode->pChildren[0]) {
+          pParentNode->pChildren[0] = pClosedNode;
+        } else if (!pParentNode->pChildren[1]) {
+          pParentNode->pChildren[1] = pClosedNode;
+        } else if (!pParentNode->pChildren[2]) {
+          pParentNode->pChildren[2] = pClosedNode;
+        } else if (!pParentNode->pChildren[3]) {
+          pParentNode->pChildren[3] = pClosedNode;
+        } else if (!pParentNode->pChildren[4]) {
+          pParentNode->pChildren[4] = pClosedNode;
+        } else if (!pParentNode->pChildren[5]) {
+          pParentNode->pChildren[5] = pClosedNode;
+        } else if (!pParentNode->pChildren[6]) {
+          pParentNode->pChildren[6] = pClosedNode;
+        } else if (!pParentNode->pChildren[7]) {
+          pParentNode->pChildren[7] = pClosedNode;
+        }
+        if ((short int)nNewGCost < pClosedNode->nGCost) {
+          pClosedNode->nFCost = pClosedNode->nHCost + nNewGCost;
+          pClosedNode->pParent = pParentNode;
+          pClosedNode->nGCost = nNewGCost;
+          DRLGPATH_PropagateNodeCosts((uint32_t)nNewGCost, pClosedNode, nOpenList);
+          return 1;
+        }
+      } else {
         pNewNode = (D2DrlgPathNodeStrc*)DRLGPATH_AllocPathNode(nOpenList);
         if (!pNewNode) {
           return 0;
@@ -2665,55 +2714,6 @@ static BOOL __stdcall DRLGPATH_TryExpandNeighborNode(int32_t nOpenList, uint32_t
         if (!pParentNode->pChildren[7]) {
           pParentNode->pChildren[7] = pNewNode;
         }
-      } else {
-        if (!pParentNode->pChildren[0]) {
-          pParentNode->pChildren[0] = pClosedNode;
-        } else if (!pParentNode->pChildren[1]) {
-          pParentNode->pChildren[1] = pClosedNode;
-        } else if (!pParentNode->pChildren[2]) {
-          pParentNode->pChildren[2] = pClosedNode;
-        } else if (!pParentNode->pChildren[3]) {
-          pParentNode->pChildren[3] = pClosedNode;
-        } else if (!pParentNode->pChildren[4]) {
-          pParentNode->pChildren[4] = pClosedNode;
-        } else if (!pParentNode->pChildren[5]) {
-          pParentNode->pChildren[5] = pClosedNode;
-        } else if (!pParentNode->pChildren[6]) {
-          pParentNode->pChildren[6] = pClosedNode;
-        } else if (!pParentNode->pChildren[7]) {
-          pParentNode->pChildren[7] = pClosedNode;
-        }
-        if ((short int)nNewGCost < pClosedNode->nGCost) {
-          pClosedNode->nFCost = pClosedNode->nHCost + nNewGCost;
-          pClosedNode->pParent = pParentNode;
-          pClosedNode->nGCost = nNewGCost;
-          DRLGPATH_PropagateNodeCosts((uint32_t)nNewGCost, pClosedNode, nOpenList);
-          return 1;
-        }
-      }
-    } else {
-      if (!pParentNode->pChildren[0]) {
-        pParentNode->pChildren[0] = pExistingNode;
-      } else if (!pParentNode->pChildren[1]) {
-        pParentNode->pChildren[1] = pExistingNode;
-      } else if (!pParentNode->pChildren[2]) {
-        pParentNode->pChildren[2] = pExistingNode;
-      } else if (!pParentNode->pChildren[3]) {
-        pParentNode->pChildren[3] = pExistingNode;
-      } else if (!pParentNode->pChildren[4]) {
-        pParentNode->pChildren[4] = pExistingNode;
-      } else if (!pParentNode->pChildren[5]) {
-        pParentNode->pChildren[5] = pExistingNode;
-      } else if (!pParentNode->pChildren[6]) {
-        pParentNode->pChildren[6] = pExistingNode;
-      } else if (!pParentNode->pChildren[7]) {
-        pParentNode->pChildren[7] = pExistingNode;
-      }
-      if ((short int)nNewGCost < pExistingNode->nGCost) {
-        pExistingNode->pParent = pParentNode;
-        pExistingNode->nGCost = nNewGCost;
-        pExistingNode->nFCost = pExistingNode->nHCost + nNewGCost;
-        return 1;
       }
     }
 
@@ -2821,7 +2821,7 @@ int32_t DRLGPATH_ExtractPathFromResult2(int32_t nParam, void * * pCurNode) {
 
     sFrame.pWritePtr = sFrame.aWaypoints + 0x4d;
     do {
-      if (0x4d < nWaypointCount) {
+      if (0x4e <= nWaypointCount) {
         break;
       }
 
@@ -2842,7 +2842,7 @@ int32_t DRLGPATH_ExtractPathFromResult2(int32_t nParam, void * * pCurNode) {
       pCurNode = sFrame.pParentNode;
     } while (sFrame.pParentNode);
 
-    if (nWaypointCount - 1U >= 0x4d) {
+    if (nWaypointCount - 1U > 0x4c) {
       return 0;
     }
 
@@ -3071,49 +3071,49 @@ static BOOL DRLGPATH_TryStepWithFallbackDirections(D2PathTypeArg * pPathTypeArg,
     int32_t nType = pPathTypeArg->nUnitWidth;
     D2RoomStrc* pRoom = pPathTypeArg->pRoom;
     int32_t nFallbackDirIdx = (int32_t)pPathTypeArg->pDynamicPath->pOwner;
-    if (nFallbackDirIdx && (!*(int*)nFallbackDirIdx || nFallbackDirIdx && *(int*)nFallbackDirIdx == 1)) {
-      int iVar1;
-      pScannerState[4] = 0;
-      *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[*pScannerState * 2] + (short int)pScannerState[2];
-      wNextY = (short int)gnPathDirectionTripletXOffsets[*pScannerState * 2 + 1] + *(short int*)((int)pScannerState + 10);
-      *(uint16_t*)((int)pScannerState + 0xe) = wNextY;
-      iVar2 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
-      if (!iVar2) {
-        return 1;
-      }
-
-      nErrorAddr = *(int32_t*)(pScannerState[6] + *pScannerState * 4);
-      *pScannerState = nErrorAddr;
-      *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[nErrorAddr * 2] + (short int)pScannerState[2];
-      wNextY = (short int)gnPathDirectionTripletXOffsets[nErrorAddr * 2 + 1] + *(short int*)((int)pScannerState + 10);
-      *(uint16_t*)((int)pScannerState + 0xe) = wNextY;
-      iVar2 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
-      if (!iVar2) {
-        return 1;
-      }
-
-      iVar1 = *(int*)(pScannerState[6] + *pScannerState * 4);
-      *pScannerState = iVar1;
-      *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[iVar1 * 2] + (short int)pScannerState[2];
-      wNextY = (short int)gnPathDirectionTripletXOffsets[*pScannerState * 2 + 1] + *(short int*)((int)pScannerState + 10);
-      *(uint16_t*)((int)pScannerState + 0xe) = wNextY;
-      iVar2 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
-      if (!iVar2) {
-        return 1;
-      }
-
-      pScannerState[4] = 1;
-      iVar1 = *(int*)(pScannerState[6] + *pScannerState * 4);
-      *pScannerState = iVar1;
-      *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[iVar1 * 2] + (short int)pScannerState[2];
-      wNextY = (short int)gnPathDirectionTripletXOffsets[iVar1 * 2 + 1] + *(short int*)((int)pScannerState + 10);
-      *(uint16_t*)((int)pScannerState + 0xe) = wNextY;
-      iVar3 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
-      return (uint32_t)!iVar3;
+    if (!(nFallbackDirIdx && (!*(int*)nFallbackDirIdx || nFallbackDirIdx && *(int*)nFallbackDirIdx == 1))) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x122);
+      exit(-1);
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x122);
-    exit(-1);
+    int iVar1;
+    pScannerState[4] = 0;
+    *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[*pScannerState * 2] + (short int)pScannerState[2];
+    wNextY = (short int)gnPathDirectionTripletXOffsets[*pScannerState * 2 + 1] + *(short int*)((int)pScannerState + 10);
+    *(uint16_t*)((int)pScannerState + 0xe) = wNextY;
+    iVar2 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
+    if (!iVar2) {
+      return 1;
+    }
+
+    nErrorAddr = *(int32_t*)(pScannerState[6] + *pScannerState * 4);
+    *pScannerState = nErrorAddr;
+    *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[nErrorAddr * 2] + (short int)pScannerState[2];
+    wNextY = (short int)gnPathDirectionTripletXOffsets[nErrorAddr * 2 + 1] + *(short int*)((int)pScannerState + 10);
+    *(uint16_t*)((int)pScannerState + 0xe) = wNextY;
+    iVar2 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
+    if (!iVar2) {
+      return 1;
+    }
+
+    iVar1 = *(int*)(pScannerState[6] + *pScannerState * 4);
+    *pScannerState = iVar1;
+    *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[iVar1 * 2] + (short int)pScannerState[2];
+    wNextY = (short int)gnPathDirectionTripletXOffsets[*pScannerState * 2 + 1] + *(short int*)((int)pScannerState + 10);
+    *(uint16_t*)((int)pScannerState + 0xe) = wNextY;
+    iVar2 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
+    if (!iVar2) {
+      return 1;
+    }
+
+    pScannerState[4] = 1;
+    iVar1 = *(int*)(pScannerState[6] + *pScannerState * 4);
+    *pScannerState = iVar1;
+    *(short int*)(pScannerState + 3) = (short int)gnPathDirectionTripletXOffsets[iVar1 * 2] + (short int)pScannerState[2];
+    wNextY = (short int)gnPathDirectionTripletXOffsets[iVar1 * 2 + 1] + *(short int*)((int)pScannerState + 10);
+    *(uint16_t*)((int)pScannerState + 0xe) = wNextY;
+    iVar3 = Collision::CheckCollision_BlockPlayer_Type(pRoom, (uint32_t)*(uint16_t*)(pScannerState + 3), (uint32_t)wNextY, nType, iVar3);
+    return (uint32_t)!iVar3;
 }
 
 // Inserts a set of waypoints from a path node into the main waypoint buffer at a given index. Uses memmove to shift existing data and memcpy to copy the new points. Updates the insertion index and total count.

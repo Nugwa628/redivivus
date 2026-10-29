@@ -119,8 +119,6 @@ BOOL __stdcall AUTOMAP_GetParty();
 int32_t __fastcall AUTOMAP_SetParty(int32_t nAutoMapParty);
 int32_t __stdcall AUTOMAP_GetPartyNames();
 int32_t __fastcall AUTOMAP_SetPartyNames(int32_t nAutoMapPartyNames);
-void __fastcall AUTOMAP_RotateCellRight(uint32_t dwUnused, struct D2AutomapCellStrc * * ppRootNode);
-void __fastcall AUTOMAP_RotateCellLeft(uint32_t dwUnused, struct D2AutomapCellStrc * * ppRootNode);
 void __stdcall AUTOMAP_RebalanceTreeRight(struct D2AutomapCellStrc * * ppRootNode);
 // AVL tree left rebalance: handles single left rotation (right-right case) and double left-right rotation based on grandchild balance factor. Halts on unexpected balance states.
 void __stdcall AUTOMAP_RebalanceTreeLeft(struct D2AutomapCellStrc * * ppCell);
@@ -145,8 +143,6 @@ void __stdcall AUTOMAP_LoadLayerFromFile();
 void __stdcall AUTOMAP_SwitchLayer(struct D2AutomapLayerStrc * pAutomapLayer);
 // @sourcefile .\UI\automap.cpp
 void __stdcall AUTOMAP_AllocLayer(int32_t nLayer);
-// @sourcefile .\UI\automap.cpp
-struct D2AutomapLayerStrc * AUTOMAP_AddLayer(int32_t nLayer);
 void __stdcall AUTOMAP_RevealUnitsInRoom(struct D2RoomStrc * pRoom, struct D2AutomapCellStrc * pAutomapCell);
 // AUTOMAP_RevealRoom - Reveals all tiles and units in a room on the automap.
 // Iterates floor tiles and wall tiles, checking visibility flags (0x20000).

@@ -216,7 +216,7 @@ uint8_t __stdcall DRAW_FindFarthestPaletteColor(uint8_t * pPalette, int nPalette
     do {
       uint32_t nDistance;
       nDistance = ((uint32_t)*pbCurEntry - nBlue) * ((uint32_t)*pbCurEntry - nBlue) + ((uint32_t)pbCurEntry[-1] - nGreen) * ((uint32_t)pbCurEntry[-1] - nGreen) + ((uint32_t)pbCurEntry[-2] - nRed) * ((uint32_t)pbCurEntry[-2] - nRed);
-      if (nMaxDistance < nDistance) {
+      if (nDistance > nMaxDistance) {
         nBestIndex = nCurrentIndex;
         nMaxDistance = nDistance;
       }
@@ -301,7 +301,7 @@ BOOL __stdcall DRAW_InitPalette(LPCSTR szPaletteFile, int nStartIndex, int nEndI
     if (!szPaletteFile) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3b6);
       exit(-1);
-    } else if (nEndIndex < nStartIndex) {
+    } else if (nStartIndex > nEndIndex) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3b7);
       exit(-1);
     } else if (nStartIndex < 0) {
@@ -403,7 +403,7 @@ uint8_t __stdcall DRAW_FindNearestPaletteColor(uint8_t nRed, uint8_t nGreen, uin
       }
 
       nCurrentIndex++;
-      if (gnPaletteMaxIndex < nCurrentIndex) {
+      if (nCurrentIndex > gnPaletteMaxIndex) {
         return (uint8_t)nBestIndex;
       }
     } while (true);
@@ -421,12 +421,12 @@ void __stdcall DRAW_ConvertRGBAToIndexed(uint8_t * pRGBAIn, uint8_t * pIndexedOu
       pfnColorFinder = pfnCustomColorFinder;
     }
 
-    for (; nPixelCount; nPixelCount--) {
+    for (; (uint32_t)nPixelCount > 0; nPixelCount--) {
       uint8_t byColorIndex;
       *(uint8_t*)(char*)&pfnCustomColorFinder = *pSrcPixel;
       *(uint8_t*)(char*)&pIndexedOut = pSrcPixel[1];
       *(uint8_t*)(char*)&pRGBAIn = pSrcPixel[2];
-      if (gbBlackColorIsTransparent && (uint8_t)(uintptr_t)pfnCustomColorFinder < 0xb && (uint8_t)(uintptr_t)pIndexedOut < 0xb && (uint8_t)(uintptr_t)pRGBAIn < 0xb) {
+      if (gbBlackColorIsTransparent && (uint8_t)(uintptr_t)pfnCustomColorFinder <= 0xa && (uint8_t)(uintptr_t)pIndexedOut <= 0xa && (uint8_t)(uintptr_t)pRGBAIn <= 0xa) {
         *(uint8_t*)(char*)&pfnCustomColorFinder = 4;
         *(uint8_t*)(char*)&pRGBAIn = 0;
         *(uint8_t*)(char*)&pIndexedOut = 0;
@@ -514,11 +514,11 @@ void __stdcall DRAW_BuildAdditiveBlendTable(LPPALETTEENTRY pPalette) {
         }
 
         nBlueSum = (uint32_t)pPalette[-nOuterLoop + 256].peBlue + (uint32_t)pPalette[-nInnerLoop + 256].peBlue;
-        if (0xfe < nBlueSum) {
+        if (0xff <= nBlueSum) {
           nBlueSum = 0xff;
         }
 
-        nGreenSum = D2GFX_GetColorWithAlphaFromPallete(pPalette, 0x100, uVar1, nRedSum & 0xff, nBlueSum & 0xff);
+        nGreenSum = D2GFX_GetColorWithAlphaFromPallete(pPalette, 0x100, uVar1, (uint8_t)nRedSum, (uint8_t)nBlueSum);
         ptDest->peRed = (uint8_t)nGreenSum;
         ptDest += 0x40;
         nInnerLoop--;
@@ -579,15 +579,15 @@ void __stdcall DRAW_BuildScreenBlendAndDesatTable(LPPALETTEENTRY pPalette) {
       bRed = ((tagPALETTEENTRY*)(pbColorOuter - 2))->peRed;
       nBlueComponent = *pbColorOuter;
       bGreen = pbColorOuter[-1];
-      if (bRed) {
+      if ((uint32_t)bRed > 0) {
         iScreenFactor = (int)((uint64_t)((int64_t)(int)(uint32_t)bRed * 0x55555555) >> 0x20) - (uint32_t)bRed;
         bRed += (char)(iScreenFactor >> 1) - (char)(iScreenFactor >> 0x1f);
       }
-      if (nBlueComponent) {
+      if ((uint32_t)nBlueComponent > 0) {
         iScreenFactor = (int)((uint64_t)((int64_t)(int)(uint32_t)nBlueComponent * 0x55555555) >> 0x20) - (uint32_t)nBlueComponent;
         nBlueComponent += (char)(iScreenFactor >> 1) - (char)(iScreenFactor >> 0x1f);
       }
-      if (bGreen) {
+      if ((uint32_t)bGreen > 0) {
         iScreenFactor = (int)((uint64_t)((int64_t)(int)(uint32_t)bGreen * 0x55555555) >> 0x20) - (uint32_t)bGreen;
         bGreen += (char)(iScreenFactor >> 1) - (char)(iScreenFactor >> 0x1f);
       }
@@ -610,9 +610,9 @@ void __stdcall DRAW_BuildScreenBlendAndDesatTable(LPPALETTEENTRY pPalette) {
       }
 
       bMaxComponent = pbColorOuter[1];
-      if (pbColorOuter[1] < bGreen) {
+      if (bGreen > pbColorOuter[1]) {
         bMaxComponent = *pbColorOuter;
-        if (*pbColorOuter < bRed) {
+        if (bRed > *pbColorOuter) {
           bMaxComponent = bRed;
         }
       }
@@ -1063,7 +1063,7 @@ void __stdcall DRAW_BuildHSLTransformTables(LPPALETTEENTRY pPalette, LPPALETTEEN
     do {
       fVar3 = __CIsqrt((long double)((uint32_t)*pbSrcPalEntry * (uint32_t)*pbSrcPalEntry + (uint32_t)((tagPALETTEENTRY*)(pbSrcPalEntry - 1))->peRed * (uint32_t)((tagPALETTEENTRY*)(pbSrcPalEntry - 1))->peRed + (uint32_t)pbSrcPalEntry[1] * (uint32_t)pbSrcPalEntry[1]));
       nTableIndex = (uint32_t)std::nearbyint(fVar3);
-      nTableIdx = nTableIndex & 0xff;
+      nTableIdx = (uint8_t)nTableIndex;
       nPaletteIndex = D2GFX_GetColorWithAlphaFromPallete(pPalette, 0x100, nTableIdx, 0, 0);
       pDestEntry[-0x40].peRed = (uint8_t)nPaletteIndex;
       nPaletteIndex = D2GFX_GetColorWithAlphaFromPallete(pPalette, 0x100, 0, nTableIdx, 0);

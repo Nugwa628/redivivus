@@ -27,10 +27,6 @@ void __fastcall Q23_NotifyGuardianStateToPlayers(::SGAMEDATA * pGame, char cPara
 void __fastcall Q24_HandleKhalimsWillCompletion(::SGAMEDATA * pGame);
 // A3Q7 / slot QUESTINT_TheGuardian. Q24_SetupDarkWandererMapAi(pGame, pDrlgMap): stores the passed DRLG map pointer into quest data, then if the tracked "wanderer" monster exists, its map is valid, and the map hasn't been taken yet -> transfers (DRLGPRESET_TakeFileFromDrlgMap) the monster's map-AI DRLG file into quest data and marks bDrlgMapTaken. Binds the Mephisto/Act4-transition actor's generated map into the quest. No quest-state transitions.
 void __thiscall Q24_SetupDarkWandererMapAi(void * pThis, int32_t nParam);
-// A3Q7 / slot QUESTINT_TheGuardian. Q24_StatusFilter: quest status-string filter callback (installed by Q24_InitData into fpStatusFilter). Stub - always returns false (no special status-bit suppression for this slot).
-bool __fastcall Q24_StatusFilter(struct D2QuestDataStrc * pQuestData, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown);
-// A3Q7 / slot QUESTINT_TheGuardian. Q24_ActiveFilter: quest active/monster filter callback (installed by Q24_InitData into fpActiveFilter). Stub - always returns false.
-bool __fastcall Q24_ActiveFilter(struct D2QuestDataStrc * pQuestData, int32_t nTargetClassId, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2UnitStrc * pUnitEx);
 // Uses the A3Q7 data of quest slot QUESTINT_UnknownDuplicate1 (D2QuestDataA3Q7Strc).
 // Returns 0 if that quest data is missing or bHasSpawnCoords (+0) is false. Otherwise writes
 // nDarkWandererX/Y (+4/+8) to pnParam[0]/[1]. On the first call (bCoordsAdjusted, +2, false) it sets bCoordsAdjusted and

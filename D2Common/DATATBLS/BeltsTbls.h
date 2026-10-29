@@ -21,7 +21,7 @@ void __stdcall FreeBeltsTxt();
 // nIndex in EAX: returns &pTxtBelts[nIndex]; halts (BeltTbls.cpp line 121, sgptBeltInitStats) when the table is not loaded and (line 122) when the result is NULL.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 struct D2BeltsTxt * __stdcall TXT_Belts_GetLine(int nIndex);
-void __stdcall GetBeltsLine(int32_t nIndex, int32_t bHigherRes, struct D2BeltsTxt * pRecord);
+int32_t __stdcall GetBeltsLine(int32_t nIndex, int32_t bHigherRes, struct D2BeltsTxt * pRecord);
 void __stdcall GetInvRectFromBeltsTxt(int32_t nIndex, int32_t bHigherRes, int32_t * pInvRect, int32_t nBoxId);
 
 } // namespace D2Common::DATATBLS::BeltsTbls

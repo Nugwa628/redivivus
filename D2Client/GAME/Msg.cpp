@@ -150,7 +150,7 @@ void __stdcall NET_D2GS_CLIENT_Send_0x6D_PING() {
     }
 
     DWORD dwTick = GetTickCount();
-    if (4999 >= dwTick - gdwLastPingSentTick) {
+    if (5000 > dwTick - gdwLastPingSentTick) {
       return;
     }
 
@@ -198,7 +198,7 @@ void __stdcall NET_D2GS_CLIENT_Send_0x69() {
     pCallbacks->pfnSendKeepAlive();
 }
 
-void __fastcall NET_D2GS_CLIENT_Send_0x68(int16_t nGameToken, int32_t nGameHash) {
+void __fastcall NET_D2GS_CLIENT_Send_0x68(int32_t nGameToken, int32_t nGameHash) {
     D2GSPacketClt0x68 packet;
     packet.nId = 0x68;
     packet.nGameHash = nGameHash;
@@ -602,7 +602,7 @@ void __fastcall NET_D2GS_CLIENT_Send_INT_INT_INT_INT(uint8_t nPacketId, int32_t 
     NET_D2GS_CLIENT_Send(&packet.nId, 0x11);
 }
 
-void __fastcall NET_D2GS_CLIENT_Send_0x5D(uint8_t nActionType, uint32_t nPlayerGUID, int32_t bToggle) {
+void __fastcall NET_D2GS_CLIENT_Send_0x5D(int32_t nActionType, uint32_t nPlayerGUID, int32_t bToggle) {
     D2GSPacketClt0x5D local_c;
     local_c.bToggle = bToggle != 0;
     local_c.nId = 0x5d;
@@ -628,13 +628,13 @@ void __fastcall NET_D2GS_CLIENT_Send_Chat(D2ChatPacketBuildStrc * pChatPacket) {
     sPacket.nMsgType = pChatPacket->nMsgType;
     sPacket.nIMEMode = pChatPacket->nIMEMode;
     uint32_t nMsgLen = Storm::Source::SSTR::SStrCopy(sPacket.abData, pChatPacket->szMsg, 0x100);
-    if (!pChatPacket->szTarget) {
-      sPacket.abData[nMsgLen + 1] = '\0';
-      pcVar1 = sPacket.abData + nMsgLen + 2;
-    } else {
+    if (pChatPacket->szTarget) {
       uint32_t nTargetLen;
       nTargetLen = Storm::Source::SSTR::SStrCopy(sPacket.abData + nMsgLen + 1, pChatPacket->szTarget, 0x10);
       pcVar1 = sPacket.abData + nTargetLen + nMsgLen + 2;
+    } else {
+      sPacket.abData[nMsgLen + 1] = '\0';
+      pcVar1 = sPacket.abData + nMsgLen + 2;
     }
 
     *pcVar1 = '\0';

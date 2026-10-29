@@ -270,13 +270,13 @@ void __stdcall SErrRegisterHandler(pfnSErrDisplayCallback pfnCallback) {
     uint32_t nPrevLinkOffset;
     SERR_InternalEnterCriticalSection();
     StormLinkStrc** pNode = (StormLinkStrc**)SMem::SMemAlloc(0xc, gszSSystemListAllocTag, -2, 0x8000008);
-    if (!pNode) {
-      pNewCallback = 0;
-      pNode = &gnStormErrorCallbackCount.pPrevLink;
-    } else {
+    if (pNode) {
       *pNode = 0;
       pNode[1] = 0;
       pNewCallback = pNode;
+    } else {
+      pNewCallback = 0;
+      pNode = &gnStormErrorCallbackCount.pPrevLink;
     }
 
     StormLinkStrc* iVar1 = *pNode;
@@ -427,14 +427,9 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
     pWriteMsg += nErrorCodeArg;
     if (__frame0.pStackTracePtr && (char)*__frame0.pStackTracePtr != '\0') {
       switch (nTraceFlags) {
-        case -4:
+        case -1:
           pStackTraceArg = __frame0.pStackTracePtr;
-        ppFormat = SERR_GetString(0xb);
-        /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
-        break;
-        case -3:
-          pStackTraceArg = __frame0.pStackTracePtr;
-        ppFormat = SERR_GetString(6);
+        ppFormat = SERR_GetString(4);
         /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
         break;
         case -2:
@@ -442,9 +437,14 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
         ppFormat = SERR_GetString(5);
         /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
         break;
-        case -1:
+        case -3:
           pStackTraceArg = __frame0.pStackTracePtr;
-        ppFormat = SERR_GetString(4);
+        ppFormat = SERR_GetString(6);
+        /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
+        break;
+        case -4:
+          pStackTraceArg = __frame0.pStackTracePtr;
+        ppFormat = SERR_GetString(0xb);
         /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(pWriteMsg, (LPCSTR)ppFormat, pStackTraceArg);
         break;
         default:
@@ -496,7 +496,7 @@ int __stdcall SErrDisplayError(uint32_t nErrorCode, uint32_t * pStackTrace, int3
 
     iVar1 = 7;
     __frame0.nMsgBoxFlags = (uint32_t)(nMessageFlags != 0) * 2 + 1 | 0x52010;
-    for (pCallbackNode = (StormSErrHandlerNode*)(gnStormErrorCallbackCount.pNext < 1 ? 0 : gnStormErrorCallbackCount.pNext); 0 < (int)pCallbackNode; pCallbackNode = pCallbackNode->pNext) {
+    for (pCallbackNode = (StormSErrHandlerNode*)(gnStormErrorCallbackCount.pNext <= 0 ? 0 : gnStormErrorCallbackCount.pNext); 0 < (int)pCallbackNode; pCallbackNode = pCallbackNode->pNext) {
       pCustomMsgArg = __frame0.pCustomMsgPtr;
       if (!__frame0.pCustomMsgPtr) {
         pCustomMsgArg = "";

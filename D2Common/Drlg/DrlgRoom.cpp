@@ -46,6 +46,7 @@
 #include "Fog/Src/ErrorManager.h"
 #include "globals/globals.h"
 #include "D2Game/Monster/AI/AI.h"
+#include "D2Common/Seed.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -185,7 +186,7 @@ void __fastcall DRLGWARP_UpdateWarpRoomExDeselect(D2RoomExStrc * pRoomEx, eD2Lev
 // rolls a seeded random index, then outputs the X/Y coordinates.
 // Also initializes the room at those coordinates.
 // Called by DRLGSPAWN_FindSpawnLocationInLevel.
-D2RoomExStrc * __fastcall DRLGSPAWN_GetRandomPresetSpawnPoint(int32_t nSpawnType, int * pnOutX, int * pnOutY, D2DrlgLevelStrc * pLevel) {
+static D2RoomExStrc * __fastcall DRLGSPAWN_GetRandomPresetSpawnPoint(int32_t nSpawnType, int * pnOutX, int * pnOutY, D2DrlgLevelStrc * pLevel) {
     // Static local variables (originally global data)
     static int gaSpawnPointGroupTable[28] = {
     0x1,
@@ -245,14 +246,14 @@ D2RoomExStrc * __fastcall DRLGSPAWN_GetRandomPresetSpawnPoint(int32_t nSpawnType
         } else {
           nSeedHighU = (uint64_t)pLevel->sSeed.nSeedHigh;
           nSeedLow = pLevel->sSeed.nSeedLow;
-          if (!(nMatchingCount & nMatchingCount - 1)) {
+          if (nMatchingCount & nMatchingCount - 1) {
+            sNextSeed = (D2SeedStrc)((uint64_t)nSeedLow * 0x6ac690c5 + nSeedHighU);
+            pLevel->sSeed = sNextSeed;
+            nSelectedIdx = (int)(sNextSeed.nSeedLow % nMatchingCount) + 1;
+          } else {
             sNextSeed = (D2SeedStrc)((uint64_t)nSeedLow * 0x6ac690c5 + nSeedHighU);
             nSelectedIdx = (nMatchingCount - 1 & sNextSeed.nSeedLow) + 1;
             pLevel->sSeed = sNextSeed;
-          } else {
-            sNextSeed = (D2SeedStrc)((uint64_t)nSeedLow * 0x6ac690c5 + nSeedHighU);
-            pLevel->sSeed = sNextSeed;
-            nSelectedIdx = (int)(((uint64_t)d2_bits_of(sNextSeed) & 0xffffffff) % (uint64_t)nMatchingCount) + 1;
           }
         }
 
@@ -269,7 +270,7 @@ D2RoomExStrc * __fastcall DRLGSPAWN_GetRandomPresetSpawnPoint(int32_t nSpawnType
         if (nSpawnType == *pnSpawnType || gaSpawnPointGroupTable[nSpawnType * 2] && gaSpawnPointGroupTable[nSpawnType * 2 + 1] == gaSpawnPointGroupTable[*pnSpawnType * 2 + 1]) {
           nSelectedIdx--;
         }
-        if (nSelectedIdx < 1) {
+        if (nSelectedIdx <= 0) {
           break;
         }
 
@@ -527,7 +528,7 @@ void __fastcall DRLGWARP_InitWarpConnectionsBetweenLevels(D2DrlgStrc * pDrlg, ui
       for (pPresetUnit = GetPresetUnits(pDstRoomEx); pPresetUnit && pPresetUnit->eType != UNIT_WARP; pPresetUnit = pPresetUnit->pPresetUnitNext) {}
 
       nPairIndex++;
-      if (7 < nPairIndex) {
+      if (8 <= nPairIndex) {
         return;
       }
     } while (true);
@@ -644,19 +645,22 @@ D2RoomExStrc * __fastcall DRLGROOMEX_AllocRoomEx(D2DrlgLevelStrc * pLevel, int n
     D2SeedStrc sNewSeed = D2_SEED_NEXT(pLevel->sSeed);
     D2SeedStrc* pSeedPtr = &pRoomEx->sSeed;
     pLevel->sSeed = sNewSeed;
-    pSeedPtr->nSeedLow = sNewSeed.nSeedLow;
-    pRoomEx->sSeed.nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(pSeedPtr, sNewSeed.nSeedLow);
     sNewSeed = D2_SEED_NEXT(*pSeedPtr);
     *pSeedPtr = sNewSeed;
     pRoomEx->nSeed = sNewSeed.nSeedLow;
     if (pLevel->dwFlags & 0x10) {
       pRoomEx->eRoomExFlags |= 0x40000;
     }
-    if (nPresetType == 1) {
+    switch (nPresetType) {
+    case 1: {
       OutRoom::DRLGOUTROOM_AllocOutdoorRoomData(pRoomEx);
-    } else if (nPresetType == 2) {
+      break;
+    }
+    case 2: {
       Preset::DRLGROOMEX_AllocRoomExDataPresetArea(pRoomEx);
       return pRoomEx;
+    }
     }
 
     return pRoomEx;
@@ -782,7 +786,7 @@ BOOL __fastcall DRLGORTH_CompareByDirectionAndCoord(D2DrlgOrthStrc * pOrth1, D2D
 
     switch (eDir1) {
       case DIRECTION_SOUTHEAST:
-        if (pOrth1->psCoordinatesAndSize->WorldPosition.y < pOrth2->psCoordinatesAndSize->WorldPosition.y) {
+        if (pOrth2->psCoordinatesAndSize->WorldPosition.y > pOrth1->psCoordinatesAndSize->WorldPosition.y) {
           return 1;
         }
       break;
@@ -1116,7 +1120,7 @@ static void ReorderNearRoomList(int nRoomCount, D2RoomStrc * * ppRoomList) {
         do {
           pRoomNext = ppRoomList[nIndex + 1];
           pRoomCurrent = ppRoomList[nIndex];
-          if ((int)(pRoomNext->nLastDeadGUIDs[1] + pRoomNext->eFlags) <= pRoomCurrent->eFlags || (int)(pRoomNext->nLastDeadGUIDs[2] + pRoomNext->nLastDeadGUIDs[0]) <= (int)pRoomCurrent->nLastDeadGUIDs[0]) {
+          if (pRoomCurrent->eFlags >= (int)(pRoomNext->nLastDeadGUIDs[1] + pRoomNext->eFlags) || (int)pRoomCurrent->nLastDeadGUIDs[0] >= (int)(pRoomNext->nLastDeadGUIDs[2] + pRoomNext->nLastDeadGUIDs[0])) {
             ppRoomList[nIndex] = pRoomNext;
             ppRoomList[nIndex + 1] = pRoomCurrent;
           }

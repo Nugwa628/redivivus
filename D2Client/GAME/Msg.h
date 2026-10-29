@@ -136,7 +136,7 @@ void __stdcall NET_D2GS_CLIENT_Send_0x6D_PING();
 // Takes no parameter. Sends one byte, the constant 0x69 (00477eec MOV byte ptr [EBP-1],0x69).
 // The prologue's PUSH ECX only reserves the 4-byte frame slot; ECX is not an argument.
 void __stdcall NET_D2GS_CLIENT_Send_0x69();
-void __fastcall NET_D2GS_CLIENT_Send_0x68(int16_t nGameToken, int32_t nGameHash);
+void __fastcall NET_D2GS_CLIENT_Send_0x68(int32_t nGameToken, int32_t nGameHash);
 void NET_D2GS_CLIENT_Send_0x6A();
 void __fastcall LOADING_SetProgressRatio(int32_t nParam1, int32_t nParam2);
 int __stdcall LOADING_GetProgressRatio();
@@ -155,7 +155,7 @@ void __fastcall NET_D2GS_CLIENT_Send_INT(uint8_t nId, int32_t nParam);
 void __fastcall NET_D2GS_CLIENT_Send_INT_INT(uint8_t nPacketId, int32_t nArg1, int32_t nArg2);
 void __fastcall NET_D2GS_CLIENT_Send_INT_INT_INT(uint8_t nPacketId, int32_t nArg1, int32_t nArg2, int32_t nArg3);
 void __fastcall NET_D2GS_CLIENT_Send_INT_INT_INT_INT(uint8_t nPacketId, int32_t nUnitType, int32_t nUnitGUID, int32_t nTargetX, int32_t nTargetY);
-void __fastcall NET_D2GS_CLIENT_Send_0x5D(uint8_t nActionType, uint32_t nPlayerGUID, int32_t bToggle);
+void __fastcall NET_D2GS_CLIENT_Send_0x5D(int32_t nActionType, uint32_t nPlayerGUID, int32_t bToggle);
 void __fastcall NET_D2GS_CLIENT_Send_0x5E(uint8_t nActionType, int32_t nPlayerGUID);
 void __fastcall NET_D2GS_CLIENT_Send_Chat(struct D2ChatPacketBuildStrc * pChatPacket);
 void __fastcall NET_D2GS_CLIENT_Send_0x66(void * pData, uint32_t nLen);

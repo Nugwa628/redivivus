@@ -19,9 +19,7 @@ namespace D2Game::Quests::QUESTS::A5Q4 {
 
 // Function declarations
 // Q34_NotifyQuestState (Betrayal of Harrogath / kill Nihlathak). Quest-update callback passed to QUEST_SetStateAndBroadcast. Sends quest-log update (msg 0x22) to the player only when the quest is in a finished/just-completed/cannot-complete terminal state (Completed | FinishedInPreviousGame), but NOT yet acknowledged via JustCompleted/CannotComplete. Gates client log refresh on real completion.
-void __fastcall Q34_NotifyQuestState(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// Q34_StatusFilter (Betrayal of Harrogath). Computes the quest-log icon/state byte (*nUnknown) shown to the client from the QuestRecord bits: 0=not-yet (intro), 0x0c=CannotComplete-in-this-game, else maps Step0x04 bit (+4) or the in-memory nStateFlagPrev. Read-only on quest state.
-bool __fastcall Q34_StatusFilter(struct D2QuestDataStrc * pQuestData, struct D2UnitStrc * pUnit, struct D2BitBufferStrc * pBitBuffer, struct D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown);
+int __fastcall Q34_NotifyQuestState(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A5Q4 (Betrayal of Harrogath) helper. On first call when bPortalSpawned==0, spawns the red portal object (classId 0x3c) at pUnit's tile position +(10,5) leading to LEVEL_NihlathaksTemple via SERVER_SpawnPortal. Sets bPortalSpawned=1 and clears bNotifiedCompletion on success. Gated by A5Q4 specific-data flags; no QuestRecord access.
 void __stdcall Q34_SpawnNihlathakPortal(struct D2QuestDataStrc * pQuestData, struct D2UnitStrc * pUnit);
 // A5Q4 (Betrayal of Harrogath) quest-state-2 NPC callback. Fires when the target is Nihlathak (classId 0x200). If group0 prisoners are freed: clears eFlags, calls QUEST_SetStateAndBroadcast to state 1 via Q34_NotifyQuestState, clears group0 flag. If group1 freed but group2 not: inlines Q34_SpawnNihlathakPortal — spawns a portal to LEVEL_NihlathaksTemple (objectClass 0x3c) near Nihlathak's position (+10x, +5y), and advances group1->group2 on success.
@@ -46,8 +44,6 @@ BOOL __fastcall Q34_PropagateCompleteToParty(::SGAMEDATA * pGame, struct D2UnitS
 BOOL __fastcall Q34_SetCannotComplete(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // Q34_PlayCompletionSound (Betrayal of Harrogath). Per-player: if player has Betrayal JustCompleted bit, attaches the quest-complete sound/event (id 0x52) to that player unit.
 BOOL __fastcall Q34_PlayCompletionSound(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// Q34_OnNihlathakSpeak (Betrayal of Harrogath). Quest-timer callback (scheduled from Q34_Callback_08 after Nihlathak dies). If not already at nStateFlagPrev 4, broadcasts state-flag 4 (Q34_NotifyQuestState). Clears bEnteredDen. No QuestRecord access.
-uint8_t __fastcall Q34_OnNihlathakSpeak(::SGAMEDATA * pGame, struct D2QuestDataStrc * pQuestData);
 // Q34_Callback_08 (Betrayal of Harrogath) — Nihlathak death handler. Fired when Nihlathak dies: stores his room, then runs the full completion sweep over all players — Q34_CheckNearNihlathak (set RewardAwaits/JustCompleted for nearby), Q34_PropagateCompleteToParty, Q34_SetCannotComplete (absent players forfeit), Q34_PlayCompletionSound. Sets the shared QuestRecord JustCompleted bit (QUEST_SetQuestRecordState), notifies players (event 0x11), sets state-flag 4, and schedules Q34_OnNihlathakSpeak timer. Core quest-completion entry point.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a5q4.cpp
 void __fastcall Q34_Callback08_MonsterKilled(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);

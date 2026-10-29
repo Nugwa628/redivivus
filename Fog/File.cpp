@@ -27,6 +27,57 @@ typedef int (__fastcall *pfnFogExceptionFilter)(D2CrashReportStrc * pExceptionRe
 #endif
 
 namespace Fog::File {
+static bool __fastcall STRING_AppendBlizzardErrorSubfolderToPath(char * szPath);
+
+static bool FILETOOLS_GetTempPath_UTF8(LPSTR szDest);
+
+static int STRING_FormatVarArgs(char * szFormat, char * szDest, int32_t nDestSize, ...);
+
+} // namespace Fog::File
+
+namespace Fog::_3rdparty::crashy {
+
+int8_t __thiscall Open(::Report * pThis, char * szFileName) {
+    bool bGotPath;
+    tm localTime;
+    __time64_t tTime = __time64(nullptr);
+    CRT_LocalTime_S(&localTime, (uint32_t*)&tTime);
+    if (gszCrashLogTempDir[0] == '\0') {
+      bool bVar1;
+      bVar1 = File::FILETOOLS_GetTempPath_UTF8(gszCrashLogTempDir);
+      if (!bVar1) {
+        return '\0';
+      } else {
+        bVar1 = File::STRING_AppendBlizzardErrorSubfolderToPath(gszCrashLogTempDir);
+        if (!bVar1) {
+          return '\0';
+        }
+      }
+    }
+
+    int nLen1 = File::STRING_FormatVarArgs("%s/%04d-%02d-%02d %02d.%02d.%02d", gszCrashLogTempDir, localTime.tm_year + 0x76c, localTime.tm_mon + 1, localTime.tm_mday, localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
+    if (nLen1 + 1U >= 0x401) {
+      return '\0';
+    }
+
+    BOOL bFolderCreated = File::FILETOOLS_CreateFolder_UTF8(pThis->szReportDir);
+    if ((char)bFolderCreated == '\0') {
+      return '\0';
+    }
+
+    nLen1 = File::STRING_FormatVarArgs("%s/%s", pThis->szReportDir, (int32_t)szFileName);
+    if (nLen1 + 1U >= 0x401) {
+      return '\0';
+    }
+
+    FILE* pFile = File::FILETOOLS_OpenFile_WriteMode_UTF8(pThis->szFilePath);
+    pThis->pFile = pFile;
+    return pFile != 0;
+}
+
+} // namespace Fog::_3rdparty::crashy
+
+namespace Fog::File {
 
 static char * STRING_CopyStringBounded(int32_t nDestSize, char * szDest, char * szSrc);
 
@@ -53,7 +104,7 @@ void __fastcall CRASH_DumpThreadContext(DWORD dwThreadId, void * pContext, fnCra
       *pFrameBufCursor = 0;
       pFrameBufCursor[1] = 0;
       *(uint8_t*)(pFrameBufCursor + 2) = '\0';
-      memset(pFrameBufCursor + 3, 0, 4 * sizeof(pFrameBufCursor[0]));
+      for (int i = 3; i < 7; i++) pFrameBufCursor[i] = 0;
       pFrameBufCursor += 9;
       nFrameCountClamped--;
     } while (-1 < nFrameCountClamped);
@@ -110,7 +161,7 @@ void __fastcall CRASH_FormatStackTrace(DWORD dwThreadId, D2CrashFrameStrc * aFra
       (*pOutputCallback)(pReport, __frame0.szLineBuffer);
     }
 
-    for (; nNumFrames; nNumFrames--) {
+    for (; (uint32_t)nNumFrames > 0; nNumFrames--) {
       Engine::Application::DEBUG_FormatAddressInfo(aFrameAddrs->dwReturnAddr, __frame0.szAddressInfo);
       if (bIncludeThreadName == '\0') {
         __frame0.szAddressInfo[0] = '\0';
@@ -120,12 +171,12 @@ void __fastcall CRASH_FormatStackTrace(DWORD dwThreadId, D2CrashFrameStrc * aFra
       pszScan = __frame0.szLineBuffer;
       pszScan = pszScan + strlen(pszScan) + 1;
       nLineLen = (int)pszScan - (int)(__frame0.szLineBuffer + 1);
-      if (nLineLen < 0x3ff) {
-        __frame0.szLineBuffer[nLineLen] = '\n';
-        __frame0.szLineBuffer[nLineLen + 1] = '\0';
-      } else {
+      if (!(nLineLen < 0x3ff)) {
         __frame0.szLineBuffer[0x3fe] = '\n';
         __frame0.szLineBuffer[0x3ff] = '\0';
+      } else {
+        __frame0.szLineBuffer[nLineLen] = '\n';
+        __frame0.szLineBuffer[nLineLen + 1] = '\0';
       }
 
       (*pOutputCallback)(pReport, __frame0.szLineBuffer);
@@ -274,9 +325,6 @@ static void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
       }
 
       switch (dwExceptionCode) {
-        case 0x80000001:
-          _strncpy_s(szText, 0x100, "GUARD_PAGE", -1);
-        return;
         case 0x80000002:
           _strncpy_s(szText, 0x100, "DATATYPE_MISALIGNMENT", -1);
         return;
@@ -286,24 +334,12 @@ static void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
         case 0x80000004:
           _strncpy_s(szText, 0x100, "SINGLE_STEP", -1);
         return;
+        case 0x80000001:
+          _strncpy_s(szText, 0x100, "GUARD_PAGE", -1);
+        return;
       }
     } else {
       switch (dwExceptionCode) {
-        case 0xc0000006:
-          _strncpy_s(szText, 0x100, "IN_PAGE_ERROR", -1);
-        return;
-        case 0xc0000008:
-          _strncpy_s(szText, 0x100, "INVALID_HANDLE", -1);
-        return;
-        case 0xc000001d:
-          _strncpy_s(szText, 0x100, "ILLEGAL_INSTRUCTION", -1);
-        return;
-        case 0xc0000025:
-          _strncpy_s(szText, 0x100, "NONCONTINUABLE_EXCEPTION", -1);
-        return;
-        case 0xc0000026:
-          _strncpy_s(szText, 0x100, "INVALID_DISPOSITION", -1);
-        return;
         case 0xc000008c:
           _strncpy_s(szText, 0x100, "ARRAY_BOUNDS_EXCEEDED", -1);
         return;
@@ -337,8 +373,23 @@ static void CRASH_GetExceptionName(char * szText, DWORD dwExceptionCode) {
         case 0xc0000096:
           _strncpy_s(szText, 0x100, "PRIV_INSTRUCTION", -1);
         return;
+        case 0xc0000006:
+          _strncpy_s(szText, 0x100, "IN_PAGE_ERROR", -1);
+        return;
+        case 0xc000001d:
+          _strncpy_s(szText, 0x100, "ILLEGAL_INSTRUCTION", -1);
+        return;
+        case 0xc0000025:
+          _strncpy_s(szText, 0x100, "NONCONTINUABLE_EXCEPTION", -1);
+        return;
         case 0xc00000fd:
           _strncpy_s(szText, 0x100, "STACK_OVERFLOW", -1);
+        return;
+        case 0xc0000026:
+          _strncpy_s(szText, 0x100, "INVALID_DISPOSITION", -1);
+        return;
+        case 0xc0000008:
+          _strncpy_s(szText, 0x100, "INVALID_HANDLE", -1);
         return;
       }
     }
@@ -382,7 +433,7 @@ LONG __stdcall ERRORMANAGER_UnhandledExceptionFilter(_EXCEPTION_POINTERS * pExce
       sCrashReport.nSkipFrames = 0;
       nFilterResult = (*gpCurrentExceptionFilter)(&sCrashReport, gpCurrentExceptionContext);
       if (nFilterResult) {
-        return (uint32_t)(nFilterResult != 1) * 2 - 1;
+        return (uint32_t)((nFilterResult != 1) ? 1 : -1);
       }
     }
 
@@ -486,7 +537,7 @@ uint32_t __stdcall FILETOOLS_ExtractFilename(char * szDest, char * szSrcPath, ch
     return (uint32_t)((uint32_t)((uint32_t)((int32_t)((uint32_t)((uint32_t)(pSep + (-1 - (int)szSrcPath)) >> 8) << 8) >> 8) & 0xffffffu) << 8 | (uint32_t)(uint8_t)(pSep + (-1 - (int)szSrcPath) < nDestSize));
 }
 
-bool __fastcall STRING_AppendBlizzardErrorSubfolderToPath(char * szPath) {
+static bool __fastcall STRING_AppendBlizzardErrorSubfolderToPath(char * szPath) {
     char* pEnd = szPath;
     char* pcVar1 = pEnd + strlen(pEnd);
     pEnd = pcVar1 + 1;
@@ -566,7 +617,7 @@ char * __stdcall STRING_AppendStringToString(char * szDest, int32_t nDestSize, c
     return szSrc + (nDestLen - (int)pDestEnd);
 }
 
-int STRING_FormatVarArgs(char * szFormat, char * szDest, int32_t nDestSize, ...) {
+static int STRING_FormatVarArgs(char * szFormat, char * szDest, int32_t nDestSize, ...) {
     int iVar1 = __vsnprintf(szDest, nDestSize - 1, szFormat, (va_list)((uint8_t*)&szFormat + 4));
     szDest[nDestSize - 1] = '\0';
     return iVar1;
@@ -639,21 +690,8 @@ FILE * __stdcall FILETOOLS_OpenFile_WriteMode_UTF8(LPCSTR lpMultiByteStr) {
     return nullptr;
 }
 
-void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPath) {
-    uint16_t wszSrc[260];
-    uint16_t wszDest[260];
-    int nConverted = MultiByteToWideChar(0xfde9, 0, szSrcPath, -1, (LPWSTR)wszSrc, 0x104);
-    if (nConverted) {
-      /* int cchWideChar for MultiByteToWideChar */ /* LPWSTR lpWideCharStr for MultiByteToWideChar */ /* int cbMultiByte for MultiByteToWideChar */ /* LPCSTR lpMultiByteStr for MultiByteToWideChar */ /* DWORD dwFlags for MultiByteToWideChar */ /* UINT CodePage for MultiByteToWideChar */ nConverted = MultiByteToWideChar(0xfde9, 0, szDestPath, -1, (LPWSTR)wszDest, 0x104);
-      if (nConverted) {
-        /* BOOL bFailIfExists for CopyFileW */ /* LPCWSTR lpNewFileName for CopyFileW */ /* LPCWSTR lpExistingFileName for CopyFileW */ CopyFileW((LPCWSTR)wszSrc, (LPCWSTR)wszDest, 1);
-        return;
-      }
-    }
-}
-
 // Writes the process temp path into the caller's buffer and reports success. The result is a single byte in AL (XOR AL,AL / the sole caller does TEST AL,AL); EDX is never written, so declaring an 8-byte return invented a high dword out of nothing.
-bool FILETOOLS_GetTempPath_UTF8(LPSTR szDest) {
+static bool FILETOOLS_GetTempPath_UTF8(LPSTR szDest) {
     uint16_t wszTempPath[260];
     DWORD nPathLen = GetTempPathW(0x104, (LPWSTR)wszTempPath);
     if (!nPathLen) {

@@ -379,12 +379,6 @@ static BOOL SPRITECACHE_FindOrLoad(char * szText, D2GfxDataStrc * pGfxData) {
             }
 
             switch (nSpriteCmpId) {
-              case 0xf2:
-
-              case 0xfb:
-
-              case 0x16f:
-                return 1;
               case 0xf3:
 
               case 0x11c:
@@ -393,7 +387,13 @@ static BOOL SPRITECACHE_FindOrLoad(char * szText, D2GfxDataStrc * pGfxData) {
                 check_death_mode:
                 if (!pGfxData->nMode) {
                   return 1;
-                }
+                } break;
+              case 0xf2:
+
+              case 0xfb:
+
+              case 0x16f:
+                return 1;
             }
           } else {
             switch (nSpriteCmpId) {
@@ -494,21 +494,7 @@ static BOOL __stdcall SPRITECACHE_LoadDC6(char * szText, D2GfxDataStrc * pGfxDat
 
     eD2UnitType nSpriteType;
     nSpriteType = pGfxData->eUnitType;
-    if (nSpriteType == UNIT_MISSILE) {
-      szText = pGfxData->szFilename;
-      if (!szText) {
-        *szText2 = '\0';
-        return 0;
-      }
-
-      szBasePath = "DATA\\GLOBAL\\MISSILES";
-      build_flat_path:
-      if (bUseCompressedData) {
-        /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szText2, "%s\\%s.dcc", szBasePath, szText);
-        pGfxData->dwRenderFlags |= 1;
-        return 1;
-      }
-    } else {
+    if (nSpriteType != UNIT_MISSILE) {
       uint8_t bVar1;
       if (nSpriteType == UNIT_ITEM) {
         if (!pGfxData->szFilename) {
@@ -560,7 +546,7 @@ static BOOL __stdcall SPRITECACHE_LoadDC6(char * szText, D2GfxDataStrc * pGfxDat
 
         iVar2 = pGfxData->nClassId;
         szBasePath = "DATA\\GLOBAL\\MONSTERS";
-        if (iVar2 < 0x20a) {
+        if (iVar2 <= 0x209) {
           if (iVar2 != 0x209) {
             switch (iVar2) {
               case 0xf2:
@@ -636,6 +622,20 @@ static BOOL __stdcall SPRITECACHE_LoadDC6(char * szText, D2GfxDataStrc * pGfxDat
       if (pGfxData->nOverlayId != 0x7a) {
         goto build_flat_path;
       }
+    } else {
+      szText = pGfxData->szFilename;
+      if (!szText) {
+        *szText2 = '\0';
+        return 0;
+      }
+
+      szBasePath = "DATA\\GLOBAL\\MISSILES";
+      build_flat_path:
+      if (bUseCompressedData) {
+        /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szText2, "%s\\%s.dcc", szBasePath, szText);
+        pGfxData->dwRenderFlags |= 1;
+        return 1;
+      }
     }
 
     szFormat = "%s\\%s.dc6";
@@ -708,9 +708,7 @@ static D2CelFileCacheEntryStrc * __stdcall SPRITECACHE_LoadDCC(char * szText, ch
 
       if (!(pGfxData->dwRenderFlags & 1)) {
         Fog::Source::SFile::ARCHIVE_OpenD2FileWrap(szText, (D2MPQFileStrc**)&szText);
-        if (!szText) {
-          *(uint8_t*)&pCacheEntry->dwCacheFlags = (uint8_t)pCacheEntry->dwCacheFlags | 1;
-        } else {
+        if (szText) {
           __frame0.nFileVersion = 0;
           __frame0.nPaletteIndex = 0;
           __frame0.nDirCount = 0;
@@ -732,13 +730,13 @@ static D2CelFileCacheEntryStrc * __stdcall SPRITECACHE_LoadDCC(char * szText, ch
 
           Fog::Source::SFile::ERRORMANAGER_FReadFile((D2MPQFileStrc*)szText, gdwSpriteCacheThreshold, __frame0.nFrameCount * __frame0.pFrameData * 4, nullptr, (LPOVERLAPPED)0x0, nullptr, 0);
           Fog::Source::SFile::ERRORMANAGER_FCloseFile((D2MPQFileStrc*)szText);
-          if (0x20 < pCacheEntry->nDirections) {
+          if (0x21 <= pCacheEntry->nDirections) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x449);
             exit(-1);
           }
 
           nFrameIdx = 0;
-          if (pCacheEntry->nDirections) {
+          if ((uint32_t)pCacheEntry->nDirections > 0) {
             pPaletteCursor = pCacheEntry->adwDirectionOffsets;
             do {
               *pPaletteCursor = gdwSpriteCacheThreshold[pCacheEntry->nFramesPerDirection * nFrameIdx];
@@ -748,6 +746,8 @@ static D2CelFileCacheEntryStrc * __stdcall SPRITECACHE_LoadDCC(char * szText, ch
           }
 
           pCacheEntry->adwDirectionOffsets[pCacheEntry->nDirections] = nLastPaletteEntry;
+        } else {
+          *(uint8_t*)&pCacheEntry->dwCacheFlags = (uint8_t)pCacheEntry->dwCacheFlags | 1;
         }
       } else {
         iVar1 = Codec::CODEC_LoadPaletteFromFile(szText, pCacheEntry);
@@ -771,7 +771,7 @@ static DC6Block * __stdcall SPRITECACHE_FindFrameBlock(D2GfxDataStrc * pGfxData,
     uint32_t nDirIdx;
     int nFrameOffset;
     uint8_t bVar1;
-    if (!pFrameData || !pDecodeState || (uint32_t)pDecodeState->nFramesPerDir <= (uint32_t)pGfxData->nFrameNumber) {
+    if (!pFrameData || !pDecodeState || (uint32_t)pGfxData->nFrameNumber >= (uint32_t)pDecodeState->nFramesPerDir) {
       return nullptr;
     }
 
@@ -796,7 +796,7 @@ static DC6Block * __stdcall SPRITECACHE_FindFrameBlock(D2GfxDataStrc * pGfxData,
 
     nDirIdx = CelCmp::CELCMP_GetDirectionFrameTableIndex(nFrameOffset, bVar1 - 1);
     find_frame_in_direction:
-    if ((int)(pDecodeState->nDirectionsPlus1 - 1) <= (int)nDirIdx || (nFrameOffset = pDecodeState->aDirOffsets[nDirIdx] , nFrameOffset < 0)) {
+    if ((int)nDirIdx >= (int)(pDecodeState->nDirectionsPlus1 - 1) || (nFrameOffset = pDecodeState->aDirOffsets[nDirIdx] , nFrameOffset < 0)) {
       return nullptr;
     }
     int nFrameIdx = 0;
@@ -1029,26 +1029,11 @@ static void __stdcall SPRITECACHE_EvictOldest(int32_t nParam1, int32_t nParam2, 
     *(DWORD*)(nParam3 + 0x10) = dwTick;
 }
 
-D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_AddToLRU(uint32_t dwParam, D2GfxMemoryStrc * nParam, int32_t bPriority) {
+static D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_AddToLRU(uint32_t dwParam, D2GfxMemoryStrc * nParam, int32_t bPriority) {
     D2SpriteCacheEntryStrc* nLruHead;
     D2SpriteCacheEntryStrc** pNextPtr;
     D2SpriteCacheEntryStrc* nNext;
-    if (!bPriority) {
-      nLruHead = nParam->pLruHead;
-      if (nLruHead && !(nLruHead->dwFlags & 2)) {
-        nNext = nLruHead->pNext;
-        pNextPtr = &nLruHead->pNext;
-        nParam->pLruHead = nNext;
-        if (!nNext) {
-          nParam->pLruTail = 0;
-          *pNextPtr = 0;
-          nLruHead->pPrev = 0;
-          return nLruHead;
-        }
-
-        goto done;
-      }
-    } else {
+    if (bPriority) {
       nLruHead = nParam->pPriorityLruHead;
       if (nLruHead && !(nLruHead->dwFlags & 2)) {
         nNext = nLruHead->pNext;
@@ -1066,6 +1051,21 @@ D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_AddToLRU(uint32_t dwParam, D2Gfx
         *pNextPtr = 0;
         nLruHead->pPrev = 0;
         return nLruHead;
+      }
+    } else {
+      nLruHead = nParam->pLruHead;
+      if (nLruHead && !(nLruHead->dwFlags & 2)) {
+        nNext = nLruHead->pNext;
+        pNextPtr = &nLruHead->pNext;
+        nParam->pLruHead = nNext;
+        if (!nNext) {
+          nParam->pLruTail = 0;
+          *pNextPtr = 0;
+          nLruHead->pPrev = 0;
+          return nLruHead;
+        }
+
+        goto done;
       }
     }
 
@@ -1295,22 +1295,22 @@ D2SpriteCacheEntryStrc * __fastcall SPRITECACHE_EvictEntry(D2GfxMemoryStrc * pGf
 
         pDVar1 = pCandidate->pNext;
         pGfxMemory->pLruHead = pDVar1;
-        if (!pDVar1) {
-          pGfxMemory->pLruTail = 0;
+        if (pDVar1) {
+          pDVar1->pPrev = 0;
           pCandidate->pNext = 0;
           pCandidate->pPrev = 0;
         } else {
-          pDVar1->pPrev = 0;
+          pGfxMemory->pLruTail = 0;
           pCandidate->pNext = 0;
           pCandidate->pPrev = 0;
         }
       } else {
         pDVar1 = pGfxMemory->pLruHead;
         if (pDVar1) {
-          if (!bPreferOld) {
-            bPreferOld = 0;
-          } else {
+          if (bPreferOld) {
             bPreferOld = (uint32_t)(pGfxMemory->pPriorityLruHead->dwLastAccess < pDVar1->dwLastAccess);
+          } else {
+            bPreferOld = 0;
           }
         }
 
@@ -1390,7 +1390,7 @@ void __fastcall SPRITECACHE_FreeMemory(D2GfxMemoryStrc * pGfxMemory, void * pPar
     pGfxMemory->nUsedMemory += nSize;
     uVar1 = pGfxMemory->nUsedMemory;
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);
-    while (pGfxMemory->pMaxMemory < uVar1) {
+    while (uVar1 > pGfxMemory->pMaxMemory) {
       D2SpriteCacheEntryStrc* pUsedMemory;
       pUsedMemory = SPRITECACHE_EvictEntry(pGfxMemory, nullptr, bEvictPriority);
       if (!pUsedMemory) {
@@ -1486,7 +1486,7 @@ static void __stdcall SPRITECACHE_LoadCelFileAndCache(char * szCelPath, D2CelFil
           pFrameOffsetSlot = pCacheEntry->tDecode.aDirOffsets + nStartFrame;
           pOffsetIter = puVar1;
           do {
-            if (0x20 < nStartFrame) {
+            if (0x21 <= nStartFrame) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x34c);
               exit(-1);
             }
@@ -1587,7 +1587,7 @@ static uint32_t __stdcall SPRITECACHE_LoadFromArchive(D2GfxDataStrc * pGfxData, 
         pEntryOffsetSlot = pCacheEntry->tDecode.aDirOffsets + nStartFrame;
         pOffsetIter = pOffsetTable;
         do {
-          if (0x20 < nStartFrame) {
+          if (0x21 <= nStartFrame) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x3c1);
             exit(-1);
           }
@@ -1662,7 +1662,7 @@ void __fastcall SPRITECACHE_ReleaseMemory(D2GfxMemoryStrc * pGfxMemory) {
 void * * __fastcall SPRITECACHE_AllocEntry2(D2GfxMemoryStrc * pGfxMemory, void * pParam, void * pInitData, int32_t bPriority) {
     void* nAddress;
     DWORD dwTickCount;
-    if ((void*)pGfxMemory->pMaxMemory <= pParam) {
+    if (pParam >= (void*)pGfxMemory->pMaxMemory) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x941);
       exit(-1);
     }
@@ -1675,7 +1675,7 @@ void * * __fastcall SPRITECACHE_AllocEntry2(D2GfxMemoryStrc * pGfxMemory, void *
       }
       if (pGfxMemory->pPriorityLruHead) {
         dwPriorityTick = pGfxMemory->pPriorityLruHead->dwLastAccess;
-        if (dwPriorityTick <= dwOldestTick) {
+        if (dwOldestTick >= dwPriorityTick) {
           dwOldestTick = dwPriorityTick;
         }
       }
@@ -1684,10 +1684,10 @@ void * * __fastcall SPRITECACHE_AllocEntry2(D2GfxMemoryStrc * pGfxMemory, void *
     D2SpriteCacheEntryStrc* pEvicted = SPRITECACHE_Query((int32_t)pParam, bPriority, pGfxMemory);
     while (true) {
       if (pEvicted) {
-        if (!bPriority) {
-          pEvicted->dwFlags &= -2;
-        } else {
+        if (bPriority) {
           pEvicted->dwFlags |= 1;
+        } else {
+          pEvicted->dwFlags &= -2;
         }
 
         nAddress = D2_ALLOC_POOL_AT(pGfxMemory->pMemory, (size_t)pParam, ".\\SRC\\SpriteCache.cpp", 0x96d);
@@ -1883,7 +1883,10 @@ static void __stdcall SPRITECACHE_LoadSpriteWithConversion(D2CelFileCacheEntrySt
     if (nHashLookup) {
       return;
     }
-    if (nParam1 == 1) {
+    if (nParam1 != 1) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x686);
+      exit(-1);
+    } else {
       if (!(1 < nParam)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x687);
         exit(-1);
@@ -1907,9 +1910,6 @@ static void __stdcall SPRITECACHE_LoadSpriteWithConversion(D2CelFileCacheEntrySt
 
       SPRITECACHE_LoadCelAndCache(pCelEntry, nParam1, nParam, szText2, pGfxData);
       return;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x686);
-      exit(-1);
     }
 }
 
@@ -1948,7 +1948,7 @@ int __stdcall SPRITECACHE_GetOrLoadSprite(D2GfxDataStrc * pGfxData, int32_t bChe
     bLoadSuccess = 1;
     uint32_t bAsyncDone;
     bAsyncDone = 0;
-    if (1 < nFrames && nDirections) {
+    if (1 < nFrames && (uint32_t)nDirections > 0) {
       if (nHashEntry) {
         ppAsyncHandle = *(D2AsyncData_Line0x128**)(*(int*)(nHashEntry + 0x20) + 0xb0);
         if (!ppAsyncHandle) {
@@ -1974,16 +1974,7 @@ int __stdcall SPRITECACHE_GetOrLoadSprite(D2GfxDataStrc * pGfxData, int32_t bChe
     }
 
     load_or_use_cached:
-    if (!nHashEntry) {
-      if (bCheckOnly || szSpritePath[0] == '\0' && (BVar1 = SPRITECACHE_LoadDC6(local_210, pGfxData, szSpritePath) , !BVar1)) {
-        return 0;
-      }
-
-      bLoadSuccess = SPRITECACHE_LoadDCCAndCache(pCodecHeader, nDirections, nFrames, szSpritePath, pGfxData);
-      if (!bLoadSuccess) {
-        return bLoadSuccess;
-      }
-    } else {
+    if (nHashEntry) {
       pCachedCelEntry = *(D2CelCacheBlockStrc**)(nHashEntry + 0x20);
       if (!pCachedCelEntry || pCachedCelEntry->tDecode.nFlags & 1 || (ppAsyncHandle = pCachedCelEntry->tDecode.pAsyncData , !ppAsyncHandle)) {
         return 0;
@@ -2007,7 +1998,7 @@ int __stdcall SPRITECACHE_GetOrLoadSprite(D2GfxDataStrc * pGfxData, int32_t bChe
 
         return 0;
       }
-      if (bAsyncDone || nDirections || nFrames < 2) {
+      if (bAsyncDone || nDirections || nFrames <= 1) {
         return bLoadSuccess;
       }
       if (szSpritePath[0] == '\0') {
@@ -2015,6 +2006,15 @@ int __stdcall SPRITECACHE_GetOrLoadSprite(D2GfxDataStrc * pGfxData, int32_t bChe
         if (!BVar1) {
           return 0;
         }
+      }
+    } else {
+      if (bCheckOnly || szSpritePath[0] == '\0' && (BVar1 = SPRITECACHE_LoadDC6(local_210, pGfxData, szSpritePath) , !BVar1)) {
+        return 0;
+      }
+
+      bLoadSuccess = SPRITECACHE_LoadDCCAndCache(pCodecHeader, nDirections, nFrames, szSpritePath, pGfxData);
+      if (!bLoadSuccess) {
+        return bLoadSuccess;
       }
     }
     SPRITECACHE_LoadSpriteWithConversion(pCodecHeader, pGfxData, nDirections, nFrames, local_210, nParam2, szSpritePath);
@@ -2055,7 +2055,7 @@ BOOL __stdcall SPRITECACHE_PrecacheSpriteSync(D2GfxDataStrc * pGfxData) {
 
         return 1;
       }
-      if (1 < nDirections && nFrames && !(pCodecHeader->dwCacheFlags & 1)) {
+      if (1 < nDirections && (uint32_t)nFrames > 0 && !(pCodecHeader->dwCacheFlags & 1)) {
         nPaletteShift = CelCmp::CELCMP_GetPaletteShiftValue(pGfxData->nDirection * pCodecHeader->nDirections >> 6, pCodecHeader->nDirections, nDirections, pGfxData->dwFlags & 4);
         if (pCodecHeader->nDirections < 2) {
           uVar2 = 1;

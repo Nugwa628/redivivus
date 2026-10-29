@@ -232,10 +232,10 @@ template<> void TSHashObject<SGAMEDATA, HASHKEY_NONE>::Destructor() {
 void __thiscall UnlinkNode_Unreferenced(TSExplicitList<::SGAMEDATA, -572662307>* pThis, ::SGAMEDATA * pNode) {
     TSLink<::SGAMEDATA>* pNodeLink;
     int* pPrevLink;
-    if (!pNode) {
-      pNodeLink = &pThis->m_terminator;
-    } else {
+    if (pNode) {
       pNodeLink = (TSLink<::SGAMEDATA>*)(pNode->szGameName + pThis->m_linkoffset - 0x2a);
+    } else {
+      pNodeLink = &pThis->m_terminator;
     }
 
     TSLink<::SGAMEDATA>* pNext = pNodeLink->m_prevlink;
@@ -352,9 +352,7 @@ template<> void TSHashTable<SGAMEDATA, HASHKEY_NONE>::InternalClear(int32_t bUnl
         if ((int)pGame < 1) {
           break;
         }
-        if (!bUnlinkOnly) {
-          this->pVtable->InternalDelete(this, pGame);
-        } else {
+        if (bUnlinkOnly) {
           nChunkBase = pTVar1[pBucketIdx].m_linkoffset;
           pNext = *(int*)(pGame->szGameName + nChunkBase - 0x2a);
           pNode = pGame->szGameName + nChunkBase - 0x2a;
@@ -368,8 +366,10 @@ template<> void TSHashTable<SGAMEDATA, HASHKEY_NONE>::InternalClear(int32_t bUnl
 
             *(int*)pPrevLink = pNext;
             *(uint32_t*)(*(int*)pNode + 4) = *(uint32_t*)(pNode + 4);
-            memset(pNode, 0, 8 * sizeof(pNode[0]));
+            for (int i = 0; i < 8; i++) pNode[i] = 0;
           }
+        } else {
+          this->pVtable->InternalDelete(this, pGame);
         }
       }
 
@@ -477,7 +477,7 @@ template<> void TSGrowableArray<SGAMEDATA>::ReallocData(uint32_t nAlloc) {
     if (nCapacity < this->m_count) {
       nAlloc = nCapacity;
     }
-    if (nAlloc) {
+    if ((uint32_t)nAlloc > 0) {
       ::SGAMEDATA* this_00;
       nByteOffset = 0;
       pGameEntry = pOldBuffer;
@@ -499,7 +499,7 @@ template<> void TSGrowableArray<SGAMEDATA>::ReallocData(uint32_t nAlloc) {
 
 template<> void TSGrowableArray<SGAMEDATA>::Reserve(uint32_t nCount, int32_t bRound) {
     uint32_t nNeeded = nCount + this->m_count;
-    if (this->m_alloc >= nNeeded) {
+    if (nNeeded <= this->m_alloc) {
       return;
     }
     if (bRound) {
@@ -557,15 +557,15 @@ template<> void TSGrowableArray<SGAMEDATA>::ReserveNoRound(uint32_t nCount) {
 
 template<> TSHashObjectChunk<::SGAMEDATA, HASHKEY_NONE>* TSExplicitList<TSHashObjectChunk<SGAMEDATA, HASHKEY_NONE>, 16>::NewNode(uint32_t nLocation, uint32_t nExtraBytes, uint32_t dwFlags) {
     TSHashObjectChunk<::SGAMEDATA, HASHKEY_NONE>* pChunk = (TSHashObjectChunk<::SGAMEDATA, HASHKEY_NONE>*)Storm::SMem::SMemAlloc(nExtraBytes + 0x18, s___AV__TSHashObjectChunk_USGAMEDA_0070f5f4, -2, dwFlags | 8);
-    if (!pChunk) {
-      pChunk = 0;
-    } else {
+    if (pChunk) {
       pChunk->nArrayAlloc = 0;
       pChunk->nArrayCount = 0;
       pChunk->pArray = 0;
       pChunk->nArrayChunk = 0;
       pChunk->m_link.m_prevlink = 0;
       pChunk->m_link.m_next = 0;
+    } else {
+      pChunk = 0;
     }
     if (!nLocation) {
       return pChunk;
@@ -580,15 +580,15 @@ template<> ::SGAMEDATA * __thiscall TSHashTableReuse<SGAMEDATA, HASHKEY_NONE, 0>
     TSLink<::SGAMEDATA>* ppSlot;
     uint32_t pTailLink;
     ::SGAMEDATA* pGame = (::SGAMEDATA*)Storm::SMem::SMemAlloc(nExtraBytes + 0x1df4, s___AUSGAMEDATA___0070f56c, -2, dwFlags | 8);
-    if (!pGame) {
-      pGame = 0;
-      ppSlot = &pList->m_terminator;
-    } else {
+    if (pGame) {
       pGame->m_linktoslot.m_prevlink = 0;
       pGame->m_linktoslot.m_next = 0;
       pGame->m_linktofull.m_prevlink = 0;
       pGame->m_linktofull.m_next = 0;
       ppSlot = (TSLink<::SGAMEDATA>*)(pGame->szGameName + pList->m_linkoffset - 0x2a);
+    } else {
+      pGame = 0;
+      ppSlot = &pList->m_terminator;
     }
 
     TSLink<::SGAMEDATA>* pExisting = ppSlot->m_prevlink;

@@ -104,8 +104,8 @@ static void __stdcall SUNITINACTIVE_FindAndRemoveInactiveUnitsByRoom(int * pnPar
     D2DrlgRoomCoordsStrc sRoomCoords;
     *pnParam1 = 0;
     *pnParam2 = 0;
-    eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
+
+    eAct neAct = D2Common::Drlg::GetActNoFromLevelNumber(D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom));
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &sRoomCoords);
     int* pMemoryToFree = *(int**)(nParam + 0xd8 + (uint32_t)neAct * 4);
     int* pPrevNode = 0;
@@ -116,10 +116,10 @@ static void __stdcall SUNITINACTIVE_FindAndRemoveInactiveUnitsByRoom(int * pnPar
     while (sRoomCoords.dwXStart <= *pMemoryToFree) {
       int* pNextLink;
       if (sRoomCoords.dwXStart == *pMemoryToFree && sRoomCoords.dwYStart == pMemoryToFree[1]) {
-        if (!pPrevNode) {
-          *(int*)(nParam + 0xd8 + (uint32_t)neAct * 4) = pMemoryToFree[5];
-        } else {
+        if (pPrevNode) {
           pPrevNode[5] = pMemoryToFree[5];
+        } else {
+          *(int*)(nParam + 0xd8 + (uint32_t)neAct * 4) = pMemoryToFree[5];
         }
 
         *pnParam1 = pMemoryToFree[4];
@@ -157,7 +157,7 @@ static D2UnitStrc * __stdcall SUNITINACTIVE_RestoreInactiveItem(::SGAMEDATA * pG
     int nSavedDespawnFrame = pInactiveData[1];
     pbSerializedData += nItemDataSize;
     nBytesRemaining = nTotalSerializedSize - nItemDataSize;
-    if (!nSavedDespawnFrame || (nNewDespawnFrame = pGame->dwGameFrame + 15000 , nNewDespawnFrame <= nSavedDespawnFrame)) {
+    if (!nSavedDespawnFrame || (nNewDespawnFrame = pGame->dwGameFrame + 15000 , nSavedDespawnFrame >= nNewDespawnFrame)) {
       pUnit->pUnitData.pUnitDataObject->nLinkedPortalY = nSavedDespawnFrame;
     } else {
       pUnit->pUnitData.pUnitDataObject->nLinkedPortalY = nNewDespawnFrame;
@@ -376,12 +376,12 @@ static void __stdcall SUNITINACTIVE_RestoreMonsterStateFromInactive(::SGAMEDATA 
     uint8_t* pMonDataByte;
     int nMonStatsIdx;
     nMonStatsIdx = pnParam[1];
-    if (nMonStatsIdx < 0 || sgptDataTable->nTxtMonStatsSize <= nMonStatsIdx) {
+    if (nMonStatsIdx < 0 || nMonStatsIdx >= sgptDataTable->nTxtMonStatsSize) {
       pAiCmd = 0;
     } else {
       pAiCmd = sgptDataTable->pTxtMonStats + nMonStatsIdx;
     }
-    if (pAiCmd->interact || pAiCmd->npc || pAiCmd->inTown) {
+    if ((*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[1]) || (*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[0]) || (*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[2])) {
       D2MapAIStrc** ppMapAi;
       pAiCmdNpc = Ai::AiGeneral::AI_CreateCmdIfNotExists(pGame, (D2UnitStrc*)pnParam, 10, 0);
       if (pAiCmdNpc) {
@@ -404,11 +404,11 @@ static void __stdcall SUNITINACTIVE_RestoreMonsterStateFromInactive(::SGAMEDATA 
     }
     if (*pnParam == 1) {
       nBaseId = pnParam[1];
-      if (-1 < nBaseId) {
+      if (0 <= nBaseId) {
         if (nBaseId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nBaseId) {
           nBaseId = (int)sgptDataTable->pTxtMonStats[nBaseId].BaseId;
         }
-        if (-1 < nBaseId && nBaseId < sgptDataTable->nTxtMonStatsSize) {
+        if (0 <= nBaseId && nBaseId < sgptDataTable->nTxtMonStatsSize) {
           if (nBaseId == 0x44) {
             nBaseId = pInactiveMonRec->nAiArgument;
             nArgNumber = 3;
@@ -465,7 +465,7 @@ static void SUNITINACTIVE_SaveMonsterStateToInactive(D2InactiveMonsterRecordStrc
     pDeadMarker = gpInactiveMonsterStateFlagSentinel;
     int nMonStatsIdx;
     nMonStatsIdx = pnParam[1];
-    if (nMonStatsIdx < 0 || sgptDataTable->nTxtMonStatsSize <= nMonStatsIdx) {
+    if (nMonStatsIdx < 0 || nMonStatsIdx >= sgptDataTable->nTxtMonStatsSize) {
       pAiCmd = 0;
     } else {
       pAiCmd = sgptDataTable->pTxtMonStats + nMonStatsIdx;
@@ -478,7 +478,7 @@ static void SUNITINACTIVE_SaveMonsterStateToInactive(D2InactiveMonsterRecordStrc
       pInactiveMonsterRecord->nAiArgument = pDeadMarker;
       pInactiveMonsterRecord->nAiArgument2 |= gnMonsterStateFlagMask2;
     }
-    if (pAiCmd->interact || pAiCmd->npc || pAiCmd->inTown) {
+    if ((*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[1]) || pAiCmd->npc || (*((uint8_t *)pAiCmd + 0xd) & gadwBitMasks[2])) {
       D2MapAIStrc** ppMapAi;
       pAiCmdNpc = Ai::AiGeneral::AI_CreateCmdIfNotExists(pGame, (D2UnitStrc*)pnParam, 10, 0);
       if (pAiCmdNpc && pAiCmdNpc->nCmdArg[1]) {
@@ -500,11 +500,11 @@ static void SUNITINACTIVE_SaveMonsterStateToInactive(D2InactiveMonsterRecordStrc
     }
     if (*pnParam == 1) {
       nBaseId = pnParam[1];
-      if (-1 < nBaseId) {
+      if (0 <= nBaseId) {
         if (nBaseId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nBaseId) {
           nBaseId = (int)sgptDataTable->pTxtMonStats[nBaseId].BaseId;
         }
-        if (-1 < nBaseId && nBaseId < sgptDataTable->nTxtMonStatsSize) {
+        if (0 <= nBaseId && nBaseId < sgptDataTable->nTxtMonStatsSize) {
           if (nBaseId == 0x44) {
             nArgNumber = 3;
           } else {
@@ -583,22 +583,22 @@ static void __stdcall SUNITINACTIVE_DeactivateMonster(::SGAMEDATA * pGame, D2Uni
     memset(pInactiveRec, 0, 0x5c);
     pInactiveRec->nOwnerId = -1;
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nTmpVal = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nTmpVal = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nTmpVal = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nTmpVal = 0;
     }
 
     pInactiveRec->nPosX = nTmpVal;
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nTmpVal = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nTmpVal = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nTmpVal = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nTmpVal = 0;
     }
 
     pInactiveRec->nPosY = nTmpVal;
@@ -787,13 +787,20 @@ static void __stdcall SUNITINACTIVE_RoomInitMonsters(::SGAMEDATA * pGame, D2Room
         eSpawnAnimMode = eD2MonsterAnimMode_ns::Dead;
         restore_monster:
         pSpawnedMonster = 0;
-        if (!(pInactiveMonRec->eUnitFlagsEx & 0x100U)) {
+        if (pInactiveMonRec->eUnitFlagsEx & 0x100U) {
+          pSpawnedMonster = SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, pInactiveMonRec->nUnitGUID);
+          if (pSpawnedMonster) {
+            SUnit::UNITS_RelocateUnitToRoom(pGame, pSpawnedMonster, pRoom, (int32_t)pbyPosX, nAlignmentVal);
+          }
+
+          Ai::AiGeneral::ClearMinionList(pGame, pInactiveMonRec->pMinionList);
+        } else {
           nSpawnFlags = 0x62;
           if ((eInactiveFlags & LEVEL_MaggotLairLevel3) != LEVEL_None) {
             nSpawnFlags = 0x6a;
           }
           if ((eInactiveFlags & 0x400) == LEVEL_None || (eInactiveFlags & 0x100) == LEVEL_None && -1 < (char)eInactiveFlags) {
-            if ((int)pbyClassId < 0 || sgptDataTable->nTxtMonStatsSize <= (int)pbyClassId) {
+            if ((int)pbyClassId < 0 || (int)pbyClassId >= sgptDataTable->nTxtMonStatsSize) {
               pMonStatsTxt = 0;
             } else {
               pMonStatsTxt = sgptDataTable->pTxtMonStats + (int)pbyClassId;
@@ -912,13 +919,6 @@ static void __stdcall SUNITINACTIVE_RoomInitMonsters(::SGAMEDATA * pGame, D2Room
             eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
             D2Game::Monster::MonsterRegion::UpdateMonsterRegion(pGame->pMonsterRegion, eInactiveFlags, eLevelId, nAlignmentVal, (uint32_t)(eSpawnAnimMode == eD2MonsterAnimMode_ns::Dead), pInactiveMonRec->nTypeFlags & 0x40, pSpawnedMonster);
           }
-        } else {
-          pSpawnedMonster = SUnit::FindUnitFromTable(pGame, UNIT_MONSTER, pInactiveMonRec->nUnitGUID);
-          if (pSpawnedMonster) {
-            SUnit::UNITS_RelocateUnitToRoom(pGame, pSpawnedMonster, pRoom, (int32_t)pbyPosX, nAlignmentVal);
-          }
-
-          Ai::AiGeneral::ClearMinionList(pGame, pInactiveMonRec->pMinionList);
         }
       }
       if (pInactiveMonRec->pAiGeneral) {
@@ -946,10 +946,7 @@ BOOL __fastcall SUNITINACTIVE_CheckDeadMonsterAtCoords(::SGAMEDATA * pGame, D2Ro
     if (!pGame) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6da);
       exit(-1);
-    } else if (!pRoom) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6db);
-      exit(-1);
-    } else {
+    } else if (pRoom) {
       if (!(nPosX && nPosY)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6dc);
         exit(-1);
@@ -981,6 +978,9 @@ BOOL __fastcall SUNITINACTIVE_CheckDeadMonsterAtCoords(::SGAMEDATA * pGame, D2Ro
       }
 
       return 0;
+    } else {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x6db);
+      exit(-1);
     }
 }
 
@@ -1001,11 +1001,11 @@ void __fastcall SUNITINACTIVE_FreeUnusedItems(::SGAMEDATA * pGame, int32_t nAct)
         }
 
         pNextItemRec = pMemoryToFree->pNext;
-        if (pMemoryToFree->nDespawnTimer && pMemoryToFree->nDespawnTimer < pGame->dwGameFrame) {
-          if (!pDVar1) {
-            pCurList->pInactiveItems = pNextItemRec;
-          } else {
+        if (pMemoryToFree->nDespawnTimer && pGame->dwGameFrame > pMemoryToFree->nDespawnTimer) {
+          if (pDVar1) {
             pDVar1->pNext = pNextItemRec;
+          } else {
+            pCurList->pInactiveItems = pNextItemRec;
           }
 
           D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\SUnitInactive.cpp", 0x723);
@@ -1064,13 +1064,7 @@ void __fastcall SUNITINACTIVE_RoomInit(::SGAMEDATA * pGame, D2RoomStrc * pRoom) 
           pObjTxtGrowable = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine(pUnit->nClassId);
           bIsGrowable = D2Common::Units::IsShrine(pUnit);
           if (!bIsGrowable || !pCurUnitRecord->nGameFrame) {
-            if (!(pObjTxtGrowable->SubClass & 0x20U)) {
-              pUnit->pUnitData.pUnitDataPlayer->szCharName[4] = pCurUnitRecord->field_0x28;
-              pUnit->uSideData.pServerSide.bSparkChest = (uint8_t)pCurUnitRecord->nDropItemCode;
-              if (pCurUnitRecord->nLevelId) {
-                pUnit->dwDropItemCode = pCurUnitRecord->nLevelId;
-              }
-            } else {
+            if (pObjTxtGrowable->SubClass & 0x20U) {
               iVar1 = Objects::OBJECT_GetDoubledTxtSize((int32_t)pObjTxtGrowable);
               byMaxStage = (uint8_t)iVar1;
               if (pCurUnitRecord->field_0x28 < byMaxStage) {
@@ -1082,12 +1076,12 @@ void __fastcall SUNITINACTIVE_RoomInit(::SGAMEDATA * pGame, D2RoomStrc * pRoom) 
                 }
                 if (pCurUnitRecord->nGameFrame < (int)(pObjTxtLine->Name + pGame->dwGameFrame)) {
                   nGrowStepsElapsed = (pGame->dwGameFrame - pCurUnitRecord->nGameFrame) / (int)pObjTxtLine;
-                  if (0 < nGrowStepsElapsed) {
+                  if (1 <= nGrowStepsElapsed) {
                     nGrowStepsElapsed = 1;
                   }
 
                   byNewStage = pCurUnitRecord->field_0x28 + (char)nGrowStepsElapsed;
-                  if (byMaxStage < byNewStage) {
+                  if (byNewStage > byMaxStage) {
                     byNewStage = byMaxStage;
                   }
 
@@ -1117,6 +1111,12 @@ void __fastcall SUNITINACTIVE_RoomInit(::SGAMEDATA * pGame, D2RoomStrc * pRoom) 
                     } while (nRemainingGrowSteps);
                   }
                 }
+              }
+            } else {
+              pUnit->pUnitData.pUnitDataPlayer->szCharName[4] = pCurUnitRecord->field_0x28;
+              pUnit->uSideData.pServerSide.bSparkChest = (uint8_t)pCurUnitRecord->nDropItemCode;
+              if (pCurUnitRecord->nLevelId) {
+                pUnit->dwDropItemCode = pCurUnitRecord->nLevelId;
               }
             }
           } else {
@@ -1205,17 +1205,17 @@ static void __stdcall SUNITINACTIVE_SaveInactiveUnit(::SGAMEDATA * pGame, D2Unit
         pDVar5->nX = DStack_28.dwXStart;
         pDVar5->nY = DStack_28.dwYStart;
         pDVar5->pNext = pDVar2;
-        if (!pDVar3) {
-          pGame->pInactiveUnitList[eStack_8] = pDVar5;
-        } else {
+        if (pDVar3) {
           pDVar3->pNext = pDVar5;
+        } else {
+          pGame->pInactiveUnitList[eStack_8] = pDVar5;
         }
 
         break;
       }
 
       iVar6 = pDVar2->nX;
-      if (DStack_28.dwXStart == iVar6 && DStack_28.dwYStart == pDVar2->nY || iVar6 < DStack_28.dwXStart) {
+      if (DStack_28.dwXStart == iVar6 && DStack_28.dwYStart == pDVar2->nY || DStack_28.dwXStart > iVar6) {
         pDVar5 = pDVar2;
         if (DStack_28.dwXStart <= iVar6) {
           break;
@@ -1237,22 +1237,22 @@ static void __stdcall SUNITINACTIVE_SaveInactiveUnit(::SGAMEDATA * pGame, D2Unit
     D2InactiveUnitRecordStrc* _Dst = D2_NEW_POOL_AT(pGame->pMemoryPool, D2InactiveUnitRecordStrc, ".\\UNIT\\SUnitInactive.cpp", 0x244);
     memset(_Dst, 0, 0x34);
     eD2UnitType eVar1 = pUnit->eUnitType;
-    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 < 6) {
+    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
       iVar6 = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      iVar6 = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       iVar6 = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      iVar6 = 0;
     }
 
     _Dst->nPosX = iVar6;
     eVar1 = pUnit->eUnitType;
-    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 < 6) {
+    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
       iVar6 = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      iVar6 = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       iVar6 = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      iVar6 = 0;
     }
 
     _Dst->nPosY = iVar6;
@@ -1269,18 +1269,18 @@ static void __stdcall SUNITINACTIVE_SaveInactiveUnit(::SGAMEDATA * pGame, D2Unit
 
       _Dst->eAnimMode = pUnit->eAnimMode;
       BVar8 = D2Common::Units::IsShrine(pUnit);
-      if (!BVar8) {
+      if (BVar8) {
+        uVar9 = GAME::Event::EVENT_TimerTypeExistsOnUnit(pGame, pUnit, UNITEVENTCALLBACK_ACTIVESTATE);
+        _Dst->nUnitGUID = uVar9 >> 0x10;
+        uVar9 = GAME::Event::EVENT_TimerTypeExistsOnUnit(pGame, pUnit, UNITEVENTCALLBACK_ACTIVESTATE);
+        _Dst->nDropItemCode = uVar9 & 0xffff;
+      } else {
         iVar6 = pUnit->nClassId;
         if (iVar6 == 0x3b || iVar6 == 0x3c || iVar6 == 100) {
           _Dst->nUnitGUID = pUnit->nUnitGUID;
         } else {
           _Dst->nDropItemCode = (uint32_t)pUnit->uSideData.pServerSide.bSparkChest;
         }
-      } else {
-        uVar9 = GAME::Event::EVENT_TimerTypeExistsOnUnit(pGame, pUnit, UNITEVENTCALLBACK_ACTIVESTATE);
-        _Dst->nUnitGUID = uVar9 >> 0x10;
-        uVar9 = GAME::Event::EVENT_TimerTypeExistsOnUnit(pGame, pUnit, UNITEVENTCALLBACK_ACTIVESTATE);
-        _Dst->nDropItemCode = uVar9 & 0xffff;
       }
 
       _Dst->nLevelId = pUnit->dwDropItemCode;
@@ -1407,16 +1407,16 @@ static void __stdcall UNITS_ProcessDeadOrInactiveMonster(::SGAMEDATA * pGame, D2
     bool bShouldSave;
     bShouldSave = bIsResurrect || nAlignmentOrSave;
     if (eAnimMode == Kick) {
-      if (!pUnitRoom) {
-        pRoomSeed = 0;
-      } else {
+      if (pUnitRoom) {
         pRoomSeed = &pUnitRoom->sSeed;
+      } else {
+        pRoomSeed = 0;
       }
 
       sNewSeed = D2_SEED_NEXT(*pRoomSeed);
       *pRoomSeed = sNewSeed;
       bShouldSave = bIsResurrect || nAlignmentOrSave;
-      if (sNewSeed.nSeedLow != (int)(((uint64_t)d2_bits_of(sNewSeed) & 0xffffffff) / 3) * 3) {
+      if (sNewSeed.nSeedLow % 3 != 0) {
         bShouldSave = false;
       }
     }
@@ -1460,12 +1460,12 @@ static void __stdcall UNITS_ProcessDeadOrInactiveMonster(::SGAMEDATA * pGame, D2
         bShouldSave = false;
       }
     }
-    if (pUnit->eUnitFlags >> 9 & 1) {
+    if (((bool)(pUnit->eUnitFlags >> 9 & 1))) {
       bShouldSave = false;
     }
 
     nMonStatsExIdx = pUnit->nClassId;
-    if (nMonStatsExIdx < 0 || sgptDataTable->nTxtMonStatsSize <= nMonStatsExIdx || (nMonStatsExIdx = (int)sgptDataTable->pTxtMonStats[nMonStatsExIdx].MonStatsEx , nMonStatsExIdx < 0) || sgptDataTable->nTxtMonStatsExSize <= nMonStatsExIdx || !(sgptDataTable->pTxtMonStatsEx + nMonStatsExIdx) || (cMonStatsExField = sgptDataTable->pTxtMonStatsEx[nMonStatsExIdx].byRestore , !cMonStatsExField)) {
+    if (nMonStatsExIdx < 0 || nMonStatsExIdx >= sgptDataTable->nTxtMonStatsSize || (nMonStatsExIdx = (int)sgptDataTable->pTxtMonStats[nMonStatsExIdx].MonStatsEx , nMonStatsExIdx < 0) || nMonStatsExIdx >= sgptDataTable->nTxtMonStatsExSize || !(sgptDataTable->pTxtMonStatsEx + nMonStatsExIdx) || (cMonStatsExField = sgptDataTable->pTxtMonStatsEx[nMonStatsExIdx].byRestore , !cMonStatsExField)) {
       bShouldSave = false;
     } else if (cMonStatsExField == 2) {
       bShouldSave = true;
@@ -1513,20 +1513,6 @@ void __fastcall SERVER_GAME_UNIT_method(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
     if (!false) {
       uint8_t bVar1;
       switch (eUnitType) {
-        case UNIT_PLAYER:
-          eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_playerbody);
-        if (eState != STATE_none) {
-          save_and_unlink:
-          GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_ENDANIM, 0);
-          pUnit->eUnitFlagsEx |= UNITFLAGEX_HASBEENDELETED;
-          SUNITINACTIVE_SaveInactiveUnit(pGame, pUnit);
-          D2Common::Unit::DRLGROOM_ClearUnitRoomLink(pUnit);
-          return;
-        }
-
-        break;
-        default:
-          goto free_unit;
         case UNIT_OBJECT:
           if (nClassId == 0x3b || nClassId == 0x3c) {
             goto save_and_unlink;
@@ -1540,6 +1526,20 @@ void __fastcall SERVER_GAME_UNIT_method(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
         }
 
         GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_ENDANIM, 0);
+        break;
+        default:
+          goto free_unit;
+        case UNIT_PLAYER:
+          eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_playerbody);
+        if (eState != STATE_none) {
+          save_and_unlink:
+          GAME::Event::EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_ENDANIM, 0);
+          pUnit->eUnitFlagsEx |= UNITFLAGEX_HASBEENDELETED;
+          SUNITINACTIVE_SaveInactiveUnit(pGame, pUnit);
+          D2Common::Unit::DRLGROOM_ClearUnitRoomLink(pUnit);
+          return;
+        }
+
         break;
         case UNIT_ITEM:
 

@@ -61,6 +61,7 @@
 #include "D2Common/DATATBLS/LvlTbls.h"
 #include "D2Common/Drlg/DrlgAnim.h"
 #include "D2Game/Monster/AI/AI.h"
+#include "D2Common/Seed.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -290,8 +291,7 @@ D2RoomStrc * __fastcall AllocRoom(D2DrlgActStrc * pDrlgAct, D2RoomExStrc * pRoom
     D2RoomStrc* pDrlgRoom = D2_NEW_POOL_AT(pDrlgAct->pMemory, D2RoomStrc, ".\\DUNGEON\\Dungeon.cpp", 0xf5);
     memset(pDrlgRoom, 0, 0x80);
     pDrlgRoom->eFlags = eFlags;
-    pDrlgRoom->sSeed.nSeedLow = nInitSeed;
-    pDrlgRoom->sSeed.nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(&pDrlgRoom->sSeed, nInitSeed);
     pDrlgRoom->pRoomEx = pRoomEx;
     D2DrlgRoomCoordsStrc* pDestCoords = &pDrlgRoom->sCoords;
     for (i = 8; i; i--) {
@@ -516,7 +516,7 @@ void __stdcall GetSubtileRect(D2RoomStrc * pRoom, RECT * pRect) {
       pRect->left = pRoom->sCoords.dwXStart;
       nRightEdge = pRoom->sCoords.dwXStart + pRoom->sCoords.dwXSize;
       pRect->right = nRightEdge;
-      if (pRect->bottom < pRect->top) {
+      if (pRect->top > pRect->bottom) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1eb);
         exit(-1);
       } else {
@@ -949,7 +949,7 @@ void __stdcall DRLGROOM_SetUnitInactiveProcessed(D2RoomStrc * pRoom, BOOL bSet) 
 }
 
 // Validates the client list of a room by checking that all entries in the client array (offset 0x48) are non-null. Halts if any entry is null.
-BOOL __fastcall DRLGROOM_ValidateClientList(D2RoomStrc * pRoom) {
+static BOOL __fastcall DRLGROOM_ValidateClientList(D2RoomStrc * pRoom) {
     uint32_t i = 0;
     if (!pRoom->nClientsCount) {
       return 1;
@@ -991,14 +991,14 @@ static int DRLGROOM_SortClientList(D2RoomStrc * pRoom) {
 
         bSwapped = false;
         j = 0;
-        if (nOuter < 1) {
+        if (nOuter <= 0) {
           return (int)bValid;
         }
 
         do {
           ppDVar1 = pRoom->pClients;
           bValid = ppDVar1 + j;
-          if (ppDVar1[j + 1] < ppDVar1[j]) {
+          if (ppDVar1[j] > ppDVar1[j + 1]) {
             bValid = pRoom->pClients + j;
             dwSwapTmp = *bValid;
             *bValid = pRoom->pClients[j + 1];
@@ -1150,7 +1150,7 @@ BOOL __fastcall DRLGROOM_HasUniqueClient(D2RoomStrc * pRoom1, D2RoomStrc * pRoom
           pClient1Iter++;
         } while (j < nClients1);
       }
-      if (nClients1 <= j) {
+      if (j >= nClients1) {
         return 1;
       }
 
@@ -1773,7 +1773,7 @@ static void __stdcall InitNearRooms(D2PoolManagerStrc * pMemory, D2RoomExStrc * 
           pDVar1->awRoomsInList[nPriority]++;
           nNearIndex++;
           nRecursionHigh3B = d2_load24((char*)&nRecursion + 1);
-          if (pRoomEx->nDrlgRoomsExNearCount <= nNearIndex) {
+          if (nNearIndex >= pRoomEx->nDrlgRoomsExNearCount) {
             return;
           }
         } while (true);
@@ -1835,7 +1835,7 @@ static void AddRoomDataActual(D2RoomExStrc * pRoomEx, uint8_t nInitDepth) {
 // Recalculates which activation priority list a RoomEx belongs to. Scans priorities 0-3 looking for the first one with a non-zero ref count, and moves the RoomEx to that list.
 static void DRLGROOMEX_RecalcPriority(D2RoomExStrc * pRoomEx) {
     uint8_t nPriority;
-    if (!(3 < pRoomEx->fRoomStatus || !pRoomEx->awRoomsInList[pRoomEx->fRoomStatus])) {
+    if (!(4 <= pRoomEx->fRoomStatus || !pRoomEx->awRoomsInList[pRoomEx->fRoomStatus])) {
       return;
     }
 
@@ -2049,12 +2049,12 @@ void __stdcall DRLGROOMEX_UpdateClientRoomExActivation(D2DrlgStrc * pDrlg) {
     uint8_t* pCountdown;
     D2RoomExStrc* pIteratorStart;
     BOOL bIsClientSide = Drlg::DRLGACTMISC_CheckFlag0x1(pDrlg);
-    if (!bIsClientSide) {
-      sgtDataTable.nRoomDataGenerationA = pDrlg->nRoomDataGeneration;
-      sgtDataTable.nRoomDataFreeGenerationA = pDrlg->nRoomDataFreeGeneration;
-    } else {
+    if (bIsClientSide) {
       sgtDataTable.nRoomDataGenerationB = pDrlg->nRoomDataGeneration;
       sgtDataTable.nRoomDataFreeGenerationB = pDrlg->nRoomDataFreeGeneration;
+    } else {
+      sgtDataTable.nRoomDataGenerationA = pDrlg->nRoomDataGeneration;
+      sgtDataTable.nRoomDataFreeGenerationA = pDrlg->nRoomDataFreeGeneration;
     }
     if (pDrlg->nRoomInitBatchCount < 2) {
       D2RoomExStrc* pRoomEx;

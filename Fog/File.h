@@ -104,15 +104,10 @@ LONG __stdcall ERRORMANAGER_UnhandledExceptionFilter(struct _EXCEPTION_POINTERS 
 void __fastcall CRASH_SetExceptionHandler(pfnFogExceptionFilter pfnFilter, void * pContext, uint32_t nUnused);
 uint32_t __stdcall FILETOOLS_ExtractDirectory(char * szDest, char * nDestSize, char * szSrcPath);
 uint32_t __stdcall FILETOOLS_ExtractFilename(char * szDest, char * szSrcPath, char * nDestSize);
-bool __fastcall STRING_AppendBlizzardErrorSubfolderToPath(char * szPath);
 char * __stdcall STRING_AppendStringToString(char * szDest, int32_t nDestSize, char * szSrc);
-int STRING_FormatVarArgs(char * szFormat, char * szDest, int32_t nDestSize, ...);
 bool __fastcall FILETOOLS_StartApplicationWithCommandLine_UTF8(LPCSTR lpApplicationName, LPCSTR szCommandLine);
 bool __stdcall FILETOOLS_CheckIfFileExists_UTF8(LPCSTR lpMultiByteStr);
 FILE * __stdcall FILETOOLS_OpenFile_WriteMode_UTF8(LPCSTR lpMultiByteStr);
-void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPath);
-// Writes the process temp path into the caller's buffer and reports success. The result is a single byte in AL (XOR AL,AL / the sole caller does TEST AL,AL); EDX is never written, so declaring an 8-byte return invented a high dword out of nothing.
-bool FILETOOLS_GetTempPath_UTF8(LPSTR szDest);
 // Recursively creates a directory path (CreateDirectoryW, then split at the last separator and
 // retry).
 // @evidence lpPathName was LPCWSTR and is written through: the body stores L'\0' over the last

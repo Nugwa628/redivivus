@@ -10,6 +10,12 @@
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
 
+namespace Fog::File {
+
+static void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPath);
+
+} // namespace Fog::File
+
 namespace Fog::_3rdparty::crashy {
 
 ::Report * __thiscall Constructor(::Report * pThis) {
@@ -45,44 +51,6 @@ void __thiscall Destructor(::Report * pThis) {
     pThis->pFile = 0;
 }
 
-int8_t __thiscall Open(::Report * pThis, char * szFileName) {
-    bool bGotPath;
-    tm localTime;
-    __time64_t tTime = __time64(nullptr);
-    CRT_LocalTime_S(&localTime, (uint32_t*)&tTime);
-    if (gszCrashLogTempDir[0] == '\0') {
-      bool bVar1;
-      bVar1 = File::FILETOOLS_GetTempPath_UTF8(gszCrashLogTempDir);
-      if (bVar1) {
-        bVar1 = File::STRING_AppendBlizzardErrorSubfolderToPath(gszCrashLogTempDir);
-        if (!bVar1) {
-          return '\0';
-        }
-      } else {
-        return '\0';
-      }
-    }
-
-    int nLen1 = File::STRING_FormatVarArgs("%s/%04d-%02d-%02d %02d.%02d.%02d", gszCrashLogTempDir, localTime.tm_year + 0x76c, localTime.tm_mon + 1, localTime.tm_mday, localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
-    if (nLen1 + 1U >= 0x401) {
-      return '\0';
-    }
-
-    BOOL bFolderCreated = File::FILETOOLS_CreateFolder_UTF8(pThis->szReportDir);
-    if ((char)bFolderCreated == '\0') {
-      return '\0';
-    }
-
-    nLen1 = File::STRING_FormatVarArgs("%s/%s", pThis->szReportDir, (int32_t)szFileName);
-    if (nLen1 + 1U >= 0x401) {
-      return '\0';
-    }
-
-    FILE* pFile = File::FILETOOLS_OpenFile_WriteMode_UTF8(pThis->szFilePath);
-    pThis->pFile = pFile;
-    return pFile != 0;
-}
-
 int8_t __thiscall Close(::Report * pThis) {
     if (!pThis->pFile) {
       return '\x01';
@@ -108,7 +76,7 @@ int8_t __thiscall AddAttachment(::Report * pThis, char * szPath, int8_t bCopyToR
     uint32_t local_8;
     ::Report* pFileReg;
     pFileReg = pThis;
-    if (0xf < pThis->nAttachmentCount) {
+    if (0x10 <= pThis->nAttachmentCount) {
       return '\0';
     }
     if (bCopyToReportDir == '\0') {
@@ -186,3 +154,20 @@ int32_t Printf(::Report * pThis, char * szFormat, ...) {
 }
 
 } // namespace Fog::_3rdparty::crashy
+
+namespace Fog::File {
+
+static void __stdcall FILETOOLS_CopyFile_UTF8(LPCSTR szSrcPath, LPCSTR szDestPath) {
+    uint16_t wszSrc[260];
+    uint16_t wszDest[260];
+    int nConverted = MultiByteToWideChar(0xfde9, 0, szSrcPath, -1, (LPWSTR)wszSrc, 0x104);
+    if (nConverted) {
+      /* int cchWideChar for MultiByteToWideChar */ /* LPWSTR lpWideCharStr for MultiByteToWideChar */ /* int cbMultiByte for MultiByteToWideChar */ /* LPCSTR lpMultiByteStr for MultiByteToWideChar */ /* DWORD dwFlags for MultiByteToWideChar */ /* UINT CodePage for MultiByteToWideChar */ nConverted = MultiByteToWideChar(0xfde9, 0, szDestPath, -1, (LPWSTR)wszDest, 0x104);
+      if (nConverted) {
+        /* BOOL bFailIfExists for CopyFileW */ /* LPCWSTR lpNewFileName for CopyFileW */ /* LPCWSTR lpExistingFileName for CopyFileW */ CopyFileW((LPCWSTR)wszSrc, (LPCWSTR)wszDest, 1);
+        return;
+      }
+    }
+}
+
+} // namespace Fog::File

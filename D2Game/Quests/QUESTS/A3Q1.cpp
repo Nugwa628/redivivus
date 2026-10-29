@@ -310,7 +310,7 @@ void __fastcall Q18_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (!pQuestData->bIsNotIntroduction) {
         return;
       }
-      if (3 < pQuestData->nStateFlag) {
+      if (4 <= pQuestData->nStateFlag) {
         return;
       }
 
@@ -318,7 +318,7 @@ void __fastcall Q18_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nGossipIndex == -1) {
         return;
       }
-      if (5 < nGossipIndex) {
+      if (6 <= nGossipIndex) {
         return;
       }
     } else {
@@ -723,7 +723,7 @@ bool __fastcall Q18_SequenceFilter(D2QuestDataStrc * pQuestData) {
 }
 
 // Q18_CheckPlayerHasTome — Lam Esen's Tome, per-party-member predicate (called by ExecuteFunctionForEveryPartyMember from Q18_StatusFilter). If this party member carries the Tome item (0x20626262), set the shared bTaintedSunStartedFailed flag (reused as "someone in party has the tome") in the Lam Esen quest data. Read-only on quest record.
-void __fastcall Q18_CheckPlayerHasTome(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+static void __fastcall Q18_CheckPlayerHasTome(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2UnitStrc* pTomeItem = ITEMS::Items::Drop::HasQuestItem(pGame, pUnit, 0x20626262);
     if (!pTomeItem) {
       return;
@@ -783,8 +783,8 @@ bool __fastcall Q18_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
       *nUnknown = '\f';
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       if (pRoom) {
-        eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-        neAct = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
+
+        neAct = D2Common::Drlg::GetActNoFromLevelNumber(D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom));
         if (neAct == ACT_III && pLamEsenData->nPlayersInArea) {
           *nUnknown = '\x01';
         }

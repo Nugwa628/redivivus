@@ -116,8 +116,8 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
     int nSrcLine = 99;
     char* szSrcFile = ".\\Src\\D2WinPalette.cpp";
     uint32_t* pFileSize = 0;
-    D2PoolManagerStrc* pDatFileData = D2WinArchive::ReturnZero();
-    void* pDatFileHandle = Fog::Archive::D2FILE_AllocAndLoadD2File(pDatFileData, szText1, pFileSize, szSrcFile, nSrcLine);
+    D2PoolManagerStrc* pDatFileData;
+    void* pDatFileHandle = Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szText1, pFileSize, szSrcFile, nSrcLine);
     uint32_t nPaletteIdx = 0;
     do {
       aAlphaTable[nPaletteIdx * 4] = 0;
@@ -127,8 +127,8 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
     int32_t nSrcLine2 = 0x72;
     szSrcFile = ".\\Src\\D2WinPalette.cpp";
     pFileSize = 0;
-    pDatFileData = D2WinArchive::ReturnZero();
-    PALETTEENTRY* pMemoryToFree = (PALETTEENTRY*)Fog::Archive::D2FILE_AllocAndLoadD2File(pDatFileData, szText2, pFileSize, szSrcFile, nSrcLine2);
+
+    PALETTEENTRY* pMemoryToFree = (PALETTEENTRY*)Fog::Archive::D2FILE_AllocAndLoadD2File(D2WinArchive::ReturnZero(), szText2, pFileSize, szSrcFile, nSrcLine2);
     PALETTEENTRY* pSrcArchive = pMemoryToFree;
     PALETTEENTRY* pDstIndexCounter = MostLikelyCurrentPalletePtr;
     memcpy(pDstIndexCounter, pSrcArchive, 0x100 * sizeof(*pDstIndexCounter));
@@ -196,11 +196,11 @@ BOOL __stdcall D2WINPAL_LoadPaletteFiles(char * szText1, char * szText2) {
       }
 
       uAlphaR = (uint32_t)*pSrcBytes * 0xaa / 100;
-      if (0xff < uAlphaR) {
+      if (0xff < (int)uAlphaR) {
         uAlphaR = 0xff;
       }
 
-      nColorIndex = D2CMP::Draw::D2GFX_GetColorWithAlphaFromPallete(MostLikelyCurrentPalletePtr, 0x100, nText1 & 0xff, uAlphaG & 0xff, uAlphaR & 0xff);
+      nColorIndex = D2CMP::Draw::D2GFX_GetColorWithAlphaFromPallete(MostLikelyCurrentPalletePtr, 0x100, (uint8_t)nText1, (uint8_t)uAlphaG, (uint8_t)uAlphaR);
       gPaletteMenuInGame[nPaletteIdx] = (uint8_t)nColorIndex;
       nColorIndex = D2CMP::Draw::D2GFX_GetColorWithAlphaFromPallete(MostLikelyCurrentPalletePtr, 0x100, (uint32_t)((PALETTEENTRY*)(pSrcBytes - 2))->peRed, 0, 0);
       gPaletteDataMenuInGame[nPaletteIdx] = (uint8_t)nColorIndex;

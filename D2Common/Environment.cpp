@@ -65,7 +65,7 @@ static void DRLGENV_UpdateLightIntensity(eD2LevelId eLevel, D2DrlgEnvironmentStr
       if (pDrlgEnvironment->nGlobalLightIntensity < nIntensityCap) {
         pDrlgEnvironment->nGlobalLightIntensity++;
       }
-      if (nIntensityCap < pDrlgEnvironment->nGlobalLightIntensity) {
+      if (pDrlgEnvironment->nGlobalLightIntensity > nIntensityCap) {
         pDrlgEnvironment->nGlobalLightIntensity--;
       }
       if (!pDrlgEnvironment->nGlobalLightIntensity) {
@@ -100,7 +100,7 @@ static void DRLGENV_UpdateLightIntensity(eD2LevelId eLevel, D2DrlgEnvironmentStr
         if (nActNo == 4) {
           nIntensityCap = 0xaa;
         }
-        if ((int)((int)nComputedIntensity < 1 ? 0 : nComputedIntensity) < nIntensityCap) {
+        if ((int)((int)nComputedIntensity <= 0 ? 0 : nComputedIntensity) < nIntensityCap) {
           pDrlgEnvironment->nGlobalLightIntensity = (int)nComputedIntensity < 1 ? 0 : nComputedIntensity;
           return;
         }
@@ -217,13 +217,13 @@ D2DrlgEnvironmentStrc * DRLGENV_UpdateEnvironmentCycle(D2DrlgEnvironmentStrc * p
 
     advance_time_period:
     nTicks = pEnvironment->nTimeRate;
-    if (nTicks * 0x168 <= pEnvironment->nTicks) {
+    if (pEnvironment->nTicks >= nTicks * 0x168) {
       pEnvironment->nTicks = 0;
     }
 
     int nTimeIndexPlus1 = pEnvironment->nTimeIndex + 1;
     int nNextTimeIndex = nTimeIndexPlus1;
-    if (5 < nTimeIndexPlus1) {
+    if (6 <= nTimeIndexPlus1) {
       nNextTimeIndex = 0;
     }
     if (!bEclipse) {
@@ -233,12 +233,12 @@ D2DrlgEnvironmentStrc * DRLGENV_UpdateEnvironmentCycle(D2DrlgEnvironmentStrc * p
     } else {
       pNextData = aENVIRONMENTDATA2 + nNextTimeIndex;
     }
-    if (pNextData->nLenght * nTicks >= pEnvironment->nTicks) {
+    if (pEnvironment->nTicks <= pNextData->nLenght * nTicks) {
       return pEnvironment;
     }
 
     pEnvironment->nTimeIndex = nTimeIndexPlus1;
-    if (5 < nTimeIndexPlus1) {
+    if (6 <= nTimeIndexPlus1) {
       pEnvironment->nTimeIndex = 0;
     }
 
@@ -476,7 +476,7 @@ void __stdcall DRLGENV_NextEnvCycle(D2DrlgActStrc * pDrlgAct, D2RoomStrc * pRoom
     D2DrlgActEnvironmentData* pDVar1;
     D2DrlgEnvironmentStrc* pEnv = DUNGEON::Dungeon::DRLGENV_GetEnvironmentFromAct(pDrlgAct);
     pEnv->nTimeIndex++;
-    if (5 < pEnv->nTimeIndex) {
+    if (6 <= pEnv->nTimeIndex) {
       pEnv->nTimeIndex = 0;
     }
     if (!pEnv->bEclipse) {
@@ -519,12 +519,15 @@ void __stdcall DRLGENV_InitializeEnvironment(D2DrlgActStrc * pDrlgAct, D2RoomStr
     if (nIndex < 0) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x210);
       exit(-1);
-    } else if (nIndex < 6) {
-      if (!(-1 < nAngle)) {
+    } else if (!(nIndex < 6)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x211);
+      exit(-1);
+    } else {
+      if (!(0 <= nAngle)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x212);
         exit(-1);
       }
-      if (pEnv->nTimeRate * 0x168 < nAngle) {
+      if (nAngle > pEnv->nTimeRate * 0x168) {
         nAngle = 0;
       }
 
@@ -559,9 +562,6 @@ void __stdcall DRLGENV_InitializeEnvironment(D2DrlgActStrc * pDrlgAct, D2RoomStr
       pEnv->nGlobalLightGreen = 0xf0;
       pEnv->nGlobalLightBlue = 0xff;
       return;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x211);
-      exit(-1);
     }
 }
 
@@ -589,7 +589,7 @@ void __stdcall DRLGENV_SetNextTimeRate(D2DrlgActStrc * pDrlgAct, D2RoomStrc * pR
     D2DrlgActEnvironmentData* pDVar1;
     D2DrlgEnvironmentStrc* pEnv = DUNGEON::Dungeon::DRLGENV_GetEnvironmentFromAct(pDrlgAct);
     pEnv->nTimeRateIndex++;
-    if (2 < pEnv->nTimeRateIndex) {
+    if (3 <= pEnv->nTimeRateIndex) {
       pEnv->nTimeRateIndex = 0;
     }
 

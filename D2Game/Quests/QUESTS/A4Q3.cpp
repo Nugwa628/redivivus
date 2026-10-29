@@ -153,7 +153,7 @@ void __fastcall Objects_InitFn78(D2ObjectInitFnArg * pInitArg) {
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a4q2.cpp
 BOOL __fastcall OBJOP_A4Q2_PandemoniumFortressGate(D2ObjectOperateFnArg * pOperation) {
     int32_t nTradeTick;
-    uint8_t aQuestStatePacket[6];
+    struct { uint8_t e0, e1, e2, e3, e4, e5; } aQuestStatePacket;
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
     if (!pGame->bExpansion) {
       return 0;
@@ -196,13 +196,13 @@ BOOL __fastcall OBJOP_A4Q2_PandemoniumFortressGate(D2ObjectOperateFnArg * pOpera
         if (!nTradeTick) {
           UNIT::SUnit::ClearInteractInfo(pOperation->pAttacker);
           pPlayerData->dwTradeTick = 1;
-          aQuestStatePacket[4] = 0;
-          aQuestStatePacket[5] = 0;
-          aQuestStatePacket[0] = 0x5d;
-          aQuestStatePacket[1] = 0x17;
-          aQuestStatePacket[2] = 2;
-          aQuestStatePacket[3] = 0;
-          GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pPlayerClient, (D2GSPacketSrv0x5D*)aQuestStatePacket);
+          ((uint8_t*)&aQuestStatePacket)[4] = 0;
+          ((uint8_t*)&aQuestStatePacket)[5] = 0;
+          ((uint8_t*)&aQuestStatePacket)[0] = 0x5d;
+          ((uint8_t*)&aQuestStatePacket)[1] = 0x17;
+          ((uint8_t*)&aQuestStatePacket)[2] = 2;
+          ((uint8_t*)&aQuestStatePacket)[3] = 0;
+          GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pPlayerClient, (D2GSPacketSrv0x5D*)((uint8_t*)&aQuestStatePacket));
           GAME::SCmd::NET_D2GS_SERVER_Send_0x61_CanGoToAct(pPlayerClient, 5);
         }
       }
@@ -410,7 +410,7 @@ BOOL __fastcall OBJOP_A4Q3_HellforgeSmash(D2ObjectOperateFnArg * pOperation) {
             if (pItemsTxt->dwCode == 0x20686668) {
               pStrikeCount = &pA4Q3Data->nHammerStrikeCount;
               (*pStrikeCount)++;
-              if (pA4Q3Data->nHammerStrikeCount < 3) {
+              if (pA4Q3Data->nHammerStrikeCount <= 2) {
                 return 0;
               }
 
@@ -680,7 +680,7 @@ void __fastcall Q28_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (bIsCompleted == 1) {
         return;
       }
-      if (3 < pQuestData->nStateFlag && !bIsJustCompleted) {
+      if (4 <= pQuestData->nStateFlag && !bIsJustCompleted) {
         return;
       }
 
@@ -700,7 +700,7 @@ void __fastcall Q28_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         if (pQuestData->pQuestSpecificData.pA4Q3->bGotHammer) {
           return;
         }
-        if (2 < pQuestData->nStateFlagPrev) {
+        if (3 <= pQuestData->nStateFlagPrev) {
           return;
         }
 
@@ -712,7 +712,7 @@ void __fastcall Q28_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (pQuestItem) {
         return;
       }
-      if (2 < pQuestData->nStateFlagPrev) {
+      if (3 <= pQuestData->nStateFlagPrev) {
         return;
       }
       if (pQuestData->pQuestSpecificData.pA4Q3->bGotHammer) {
@@ -965,28 +965,28 @@ void __fastcall Q28_TimerCallback_DropForgeRunes(D2QuestDataStrc * pQuestData, D
     do {
       D2UnitStrc* pDroppedGem;
       switch (pQuestSpecificData->nGemQuality) {
-        case 1:
+        case 4:
           pSeed = GetQuestControlSeed(pQuestData->pGame);
         sSeedNext = D2_SEED_NEXT(*pSeed);
-        nRngMod = (int)(((uint64_t)d2_bits_of(sSeedNext) & 0xffffffff) / 7);
+        nRngMod = (int)(sSeedNext.nSeedLow / 7);
         *pSeed = sSeedNext;
-        aRuneCode = Q28_aForgeRuneCodesAct3[((sSeedNext.nSeedLow - nRngMod >> 1) + nRngMod >> 2) * -7 + sSeedNext.nSeedLow];
+        aRuneCode = Q28_aForgeRuneCodesAct1[((sSeedNext.nSeedLow - nRngMod >> 1) + nRngMod >> 2) * -7 + sSeedNext.nSeedLow];
         break;
         case 2:
 
         case 3:
           pSeed = GetQuestControlSeed(pQuestData->pGame);
         sSeedNext = D2_SEED_NEXT(*pSeed);
-        nRngMod = (int)(((uint64_t)d2_bits_of(sSeedNext) & 0xffffffff) / 7);
+        nRngMod = (int)(sSeedNext.nSeedLow / 7);
         *pSeed = sSeedNext;
         aRuneCode = Q28_aForgeRuneCodesAct2[((sSeedNext.nSeedLow - nRngMod >> 1) + nRngMod >> 2) * -7 + sSeedNext.nSeedLow];
         break;
-        case 4:
+        case 1:
           pSeed = GetQuestControlSeed(pQuestData->pGame);
         sSeedNext = D2_SEED_NEXT(*pSeed);
-        nRngMod = (int)(((uint64_t)d2_bits_of(sSeedNext) & 0xffffffff) / 7);
+        nRngMod = (int)(sSeedNext.nSeedLow / 7);
         *pSeed = sSeedNext;
-        aRuneCode = Q28_aForgeRuneCodesAct1[((sSeedNext.nSeedLow - nRngMod >> 1) + nRngMod >> 2) * -7 + sSeedNext.nSeedLow];
+        aRuneCode = Q28_aForgeRuneCodesAct3[((sSeedNext.nSeedLow - nRngMod >> 1) + nRngMod >> 2) * -7 + sSeedNext.nSeedLow];
         break;
         default:
           return;
@@ -1006,15 +1006,20 @@ void __fastcall Q28_TimerCallback_DropForgeRunes(D2QuestDataStrc * pQuestData, D
     }
 
     pQuestSpecificData->nGemQuality--;
-    if (pQuestSpecificData->nGemQuality < 1) {
+    if (pQuestSpecificData->nGemQuality <= 0) {
       pQuestSpecificData->bDropActive = 0;
       pGame = pQuestData->pGame;
       if (pGame->bExpansion) {
         pRuneTable = aRunesListNomal;
-        if (pGame->nDifficulty == 1) {
+        switch (pGame->nDifficulty) {
+        case 1: {
           pRuneTable = aRunesListNightmare;
-        } else if (pGame->nDifficulty == 2) {
+          break;
+        }
+        case 2: {
           pRuneTable = aRunesListHell;
+          break;
+        }
         }
 
         pSeed = GetQuestControlSeed(pGame);

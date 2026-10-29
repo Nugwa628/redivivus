@@ -187,7 +187,7 @@ BOOL __fastcall Draw(::D2WinAccountList * pAccountList) {
     }
 
     uint32_t dwState = pAccountList->sControl.dwState;
-    if (!(dwState & 4 && dwState & 1 && pAccountList->pFirstEntry)) {
+    if (!(dwState & gadwBitMasks[2] && dwState & gadwBitMasks[0] && pAccountList->pFirstEntry)) {
       return 0;
     }
 

@@ -90,7 +90,7 @@ void GFXUTIL_PadTokenString(char * szText1, char * szText2) {
     szText2[3] = ' ';
 }
 
-static uint8_t GFXUTIL_GetCompositePaletteIndex(D2UnitStrc * pUnit, uint8_t byComponent) {
+static uint8_t __fastcall GFXUTIL_GetCompositePaletteIndex(D2UnitStrc * pUnit, uint8_t byComponent) {
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER && byComponent < 0x10 && pUnit->pUnitData.pUnitDataMonster)) {
       return 0;
     }
@@ -247,7 +247,7 @@ int32_t __fastcall GFXUTIL_GetUnitToken(D2UnitStrc * pUnitStrc, eD2UnitType eUni
         if ((int)nId < 0) {
           return 0;
         }
-        if (sgptDataTable->nTxtMonStatsSize <= (int)nId) {
+        if ((int)nId >= sgptDataTable->nTxtMonStatsSize) {
           return 0;
         }
         if (sgptDataTable->pTxtMonStats + nId) {
@@ -337,7 +337,7 @@ uint32_t __fastcall GFXUTIL_IsDC6BlockOnScreen(DC6Block * pDC6Block, int32_t nPa
       return 0;
     }
 
-    return (uint32_t)(-1 < nOffsetY + nScreenY + nHeight);
+    return (uint32_t)(0 <= nOffsetY + nScreenY + nHeight);
 }
 
 // @sourcefile .\ENGINE\GfxUtil.cpp
@@ -450,10 +450,10 @@ static int32_t GFXUTIL_GetBodyLocWeaponToken(int32_t nBodyLoc, D2UnitStrc * pUni
     BOOL BVar1;
     D2InventoryStrc* pInventory;
     uint32_t nWeaponClass2;
-    if (0xf < nBodyLoc) {
+    if (0x10 <= nBodyLoc) {
       return 0x2074696c;
     }
-    if (!pUnit || !(pUnit->eUnitFlagsEx >> 3 & 1)) {
+    if (!pUnit || !(((bool)(pUnit->eUnitFlagsEx >> 3 & 1)))) {
       pInventory = pUnit->pInventory;
     } else {
       int nWeaponClass;
@@ -727,7 +727,7 @@ static void GFXUTIL_ConvertDirectionBits(int32_t nFromDirs, int32_t nToDirs, uin
 void __fastcall GFXUTIL_CalcDirectionAndFrame(int32_t nTypeId, int32_t nCofComponent, uint32_t * pnParam, uint32_t * pnFrameHandler, int * pnParam2, uint32_t nNumDirs, int32_t nAnimMode, D2UnitStrc * pUnit, int32_t nAnimDir) {
     char _cNumDirs;
     char cNumDirs;
-    if (0x3f < *pnParam) {
+    if (0x40 <= *pnParam) {
       *pnParam2 = 1;
       *pnFrameHandler = 0;
       return;
@@ -805,7 +805,7 @@ BOOL __fastcall GFXUTIL_GetEtherealTransparency(D2UnitStrc * pUnit, int32_t nPar
     if (eUnitType != UNIT_PLAYER) {
       return 0;
     }
-    if (!pUnit || !(pUnit->eUnitFlagsEx >> 3 & 1) || (_bIsEthereal = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !_bIsEthereal || (pDVar2 = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pDVar2))) {
+    if (!pUnit || !(((bool)(pUnit->eUnitFlagsEx >> 3 & 1))) || (_bIsEthereal = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !_bIsEthereal || (pDVar2 = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pDVar2))) {
       pInventory = pUnit->pInventory;
     } else {
       pInventory = pDVar2->pInventory;
@@ -847,7 +847,7 @@ uint8_t * __fastcall GFXUTIL_GetItemColorForBodyLoc(D2UnitStrc * pUnit, int32_t 
     D2UnitStrc* pOwnerUnit;
     D2InventoryStrc* pInventory;
     char byColorScratch;
-    if (0xf < nParam) {
+    if (0x10 <= nParam) {
       return pDefaultColor;
     }
     if (!pUnit) {
@@ -858,7 +858,7 @@ uint8_t * __fastcall GFXUTIL_GetItemColorForBodyLoc(D2UnitStrc * pUnit, int32_t 
     if (eUnitType != UNIT_PLAYER) {
       return pDefaultColor;
     }
-    if (!(pUnit->eUnitFlagsEx >> 3 & 1) || (bHasState = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !bHasState || (pOwnerUnit = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pOwnerUnit))) {
+    if (!(((bool)(pUnit->eUnitFlagsEx >> 3 & 1))) || (bHasState = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25) , !bHasState || (pOwnerUnit = UNIT::Player::MISSILE_GetOwnerUnit(pUnit) , !pOwnerUnit))) {
       pInventory = pUnit->pInventory;
     } else {
       pInventory = pOwnerUnit->pInventory;
@@ -924,13 +924,18 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
       pXAdjust = &__frame0.nScreenX;
       nBais = 0;
       nCoord = D2Common::Units::GetPrecisionY(pUnit);
-      nXpos = D2Common::Units::GetPrecisionX(pUnit);
-      D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(nXpos, nCoord, nBais, pXAdjust, pYAdjust);
+
+      D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(D2Common::Units::GetPrecisionX(pUnit), nCoord, nBais, pXAdjust, pYAdjust);
       uVar1 = UI::Path::DRAW_GetTypeOfBorder();
-      if (uVar1 == 1) {
-        __frame0.nScreenX -= (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
-      } else if (uVar1 == 2) {
-        __frame0.nScreenX += (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+      switch (uVar1) {
+      case 1: {
+        __frame0.nScreenX -= (int)ScreenSizeX / 4;
+        break;
+      }
+      case 2: {
+        __frame0.nScreenX += (int)ScreenSizeX / 4;
+        break;
+      }
       }
     } else {
       nBais = D2Common::Units::GetTargetX(pUnit);
@@ -960,8 +965,8 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
       }
     }
 
-    int nAnimMode = Source::ClientEngine::CLIENT_GetEffectiveAnimMode(pUnit);
-    uint8_t* pCofData = GfxInfo::GFX_GetGfxInfoCofData(pUnit, nAnimMode);
+
+    uint8_t* pCofData = GfxInfo::GFX_GetGfxInfoCofData(pUnit, Source::ClientEngine::CLIENT_GetEffectiveAnimMode(pUnit));
     if (!pCofData) {
       return 0;
     }
@@ -1005,9 +1010,7 @@ BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUn
     BOOL BVar1;
     eD2UnitType eEffectiveUnitType;
     eEffectiveUnitType = UNIT_COUNT;
-    if (!pUnit) {
-      pGfxData->eUnitType = UNIT_COUNT;
-    } else {
+    if (pUnit) {
       eEffectiveUnitType = pUnit->eUnitType;
       nEffectiveClassId = pUnit->nClassId;
       pEffectiveMode = (D2UnitStrc*)D2Common::Units::GetAnimOrSeqMode(pUnit);
@@ -1022,6 +1025,8 @@ BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUn
       if (UNIT_COUNT < eEffectiveUnitType) {
         return 0;
       }
+    } else {
+      pGfxData->eUnitType = UNIT_COUNT;
     }
 
     switch (eEffectiveUnitType) {
@@ -1050,7 +1055,8 @@ BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUn
               while (*(uint8_t*)nEffectiveClassId < 0x10) {
                 if (*(uint8_t*)nEffectiveClassId == pGfxData->nComponentType) {
                   if (eEffectiveUnitType != UNIT_PLAYER) {
-                    if (eEffectiveUnitType == UNIT_MONSTER) {
+                    switch (eEffectiveUnitType) {
+                    case UNIT_MONSTER: {
                       iVar3 = pGfxData->nMode;
                       pGfxData->nModeToken = gMonModeTokens[iVar3];
                       byComponentType = *(uint8_t*)nEffectiveClassId;
@@ -1066,8 +1072,12 @@ BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUn
                         pOverlay = D2Common::DATATBLS::OverlayTbls::MONSTER_GetComponentOverlay(pUnit, (uint32_t)byComponentType, (uint32_t)nPaletteIdx);
                         pGfxData->nArmorToken = (int)pOverlay;
                       }
-                    } else if (eEffectiveUnitType == UNIT_OBJECT) {
+                      break;
+                    }
+                    case UNIT_OBJECT: {
                       pGfxData->nModeToken = gObjModeTokens[pGfxData->nMode];
+                      break;
+                    }
                     }
 
                     goto finalize_gfx_tokens;
@@ -1164,7 +1174,7 @@ BOOL __stdcall GFXUTIL_BuildCofParams(D2GfxDataStrc * pGfxData, D2UnitStrc * pUn
       default:
         iVar3 = pGfxData->nOverlayId;
       pGfxData->dwFlags |= 2;
-      if (!(-1 < iVar3 && iVar3 < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + iVar3)) {
+      if (!(0 <= iVar3 && iVar3 < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + iVar3)) {
         return 1;
       }
 

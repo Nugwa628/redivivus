@@ -27,7 +27,6 @@ BOOL __fastcall Skills_SrvDoFunc_069_FindPotion(::SGAMEDATA * pGame, struct D2Un
 void __fastcall SKILLBAR_ApplyWarCryBuff(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pCaster, eD2Skills eSkill, int32_t nParam);
 BOOL __fastcall Skills_SrvDoFunc_068_WarCry(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
 BOOL __fastcall Skills_SrvDoFunc_070_DoubleSwing(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
-BOOL __fastcall SKILL_CheckCorpseCanBeConsumed(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 // Generic server-side handler for targeted necromancer curses (Lower Resist, Amplify Damage, Life Tap, Iron Maiden, Weaken, Terror, etc). Reads curse stats and state from skills.txt aurastat/aurastatcalc/auratargetstate, applies via SKILLNEC_ApplyCurseToUnit, then forces monster AI re-evaluation.
 BOOL __fastcall Skills_SrvDoFunc_071_IronMaiden_GenericCurse(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
 BOOL __fastcall SKILLBAR_SrvStFn34_FindItem(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);

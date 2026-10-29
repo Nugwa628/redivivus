@@ -61,7 +61,7 @@ typedef BOOL (__fastcall *fpExecuteOnUnitFunction)(::SGAMEDATA * pGame, D2UnitSt
 namespace D2Game::Quests::QUESTS::A5Q4 {
 
 // Q34_NotifyQuestState (Betrayal of Harrogath / kill Nihlathak). Quest-update callback passed to QUEST_SetStateAndBroadcast. Sends quest-log update (msg 0x22) to the player only when the quest is in a finished/just-completed/cannot-complete terminal state (Completed | FinishedInPreviousGame), but NOT yet acknowledged via JustCompleted/CannotComplete. Gates client log refresh on real completion.
-void __fastcall Q34_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+int __fastcall Q34_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
     D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_BetrayalOfHaggorath, QUESTSTATE_Completed);
@@ -70,16 +70,17 @@ void __fastcall Q34_NotifyQuestState(::SGAMEDATA * pGame, D2UnitStrc * pUnit, vo
       if (!bQuestState) {
         bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_BetrayalOfHaggorath, QUESTSTATE_CannotCompleteQuestInGame);
         if (!bQuestState) {
-          return;
+          return 0;
         }
       }
     }
 
     QUEST_SendQuestUpdateToPlayer(pGame, pUnit, 0x22);
+    return 0;
 }
 
 // Q34_StatusFilter (Betrayal of Harrogath). Computes the quest-log icon/state byte (*nUnknown) shown to the client from the QuestRecord bits: 0=not-yet (intro), 0x0c=CannotComplete-in-this-game, else maps Step0x04 bit (+4) or the in-memory nStateFlagPrev. Read-only on quest state.
-bool __fastcall Q34_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
+static bool __fastcall Q34_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
     *nUnknown = '\0';
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_BetrayalOfHaggorath, QUESTSTATE_Completed);
     if (BVar1) {
@@ -96,7 +97,7 @@ bool __fastcall Q34_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUni
 
         BVar1 = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_BetrayalOfHaggorath, QUESTSTATE_CannotCompleteQuestInGame);
         if (!BVar1) {
-          if (3 < pQuestData->nStateFlag) {
+          if (4 <= pQuestData->nStateFlag) {
             return true;
           }
 
@@ -125,21 +126,21 @@ void __stdcall Q34_SpawnNihlathakPortal(D2QuestDataStrc * pQuestData, D2UnitStrc
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
     BOOL BVar1 = 1;
@@ -148,8 +149,8 @@ void __stdcall Q34_SpawnNihlathakPortal(D2QuestDataStrc * pQuestData, D2UnitStrc
     eD2LevelId eLevel = LEVEL_NihlathaksTemple;
     nPosY += 5;
     nPosX += 10;
-    pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, pRoom, nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
+
+    BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
     if (!BVar1) {
       return;
     }
@@ -207,8 +208,8 @@ void __fastcall Q34_Callback02_NpcDeactivate(D2QuestDataStrc * pQuestData, D2Que
     eD2LevelId eLevel = LEVEL_NihlathaksTemple;
     nPosY += 5;
     nPosX += 10;
-    pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    BVar2 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, pRoom, nPosX, nPosY, eLevel, ppPortal, nClassId, BVar2);
+
+    BVar2 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eLevel, ppPortal, nClassId, BVar2);
     if (!BVar2) {
       return;
     }
@@ -540,7 +541,7 @@ BOOL __fastcall Q34_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 }
 
 // Q34_OnNihlathakSpeak (Betrayal of Harrogath). Quest-timer callback (scheduled from Q34_Callback_08 after Nihlathak dies). If not already at nStateFlagPrev 4, broadcasts state-flag 4 (Q34_NotifyQuestState). Clears bEnteredDen. No QuestRecord access.
-uint8_t __fastcall Q34_OnNihlathakSpeak(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q34_OnNihlathakSpeak(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     D2QuestDataA5Q4Strc* pA5Q4SpecificData = pQuestData->pQuestSpecificData.pA5Q4;
     if (pQuestData->nStateFlagPrev != 4) {
       pQuestData->nQuestPacketFlags = '\0';
@@ -650,10 +651,10 @@ void __fastcall Q34_SpawnNihlathakPortalTimer(::SGAMEDATA * pGame, D2UnitStrc * 
     eD2UnitType eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nPosY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
@@ -671,8 +672,8 @@ void __fastcall Q34_SpawnNihlathakPortalTimer(::SGAMEDATA * pGame, D2UnitStrc * 
     eD2LevelId eLevel = LEVEL_NihlathaksTemple;
     nPosY += 5;
     nPosX += 10;
-    pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, pRoom, nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
+
+    BVar1 = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eLevel, ppPortal, nClassId, BVar1);
     if (!BVar1) {
       return;
     }

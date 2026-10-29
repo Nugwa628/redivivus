@@ -437,10 +437,10 @@ int __fastcall DumpLog(D2CrashReportStrc * pCrashInfo, void * pUserContext) {
             dwDumpFlags += 2;
           }
         }
-        if (!(D2CrashFrameStrc*)pCrashInfo->apFrameAddrs) {
-          File::CRASH_DumpThreadContext(pCrashInfo->dwThreadId, pExceptionContext, FILETOOLS_WriteOneStringToFile, &crashFile, '\0', '\x01', dwDumpFlags);
-        } else {
+        if ((D2CrashFrameStrc*)pCrashInfo->apFrameAddrs) {
           File::CRASH_FormatStackTrace(pCrashInfo->dwThreadId, (D2CrashFrameStrc*)pCrashInfo->apFrameAddrs, pCrashInfo->nNumFrames, FILETOOLS_WriteOneStringToFile, &crashFile, '\0', '\x01');
+        } else {
+          File::CRASH_DumpThreadContext(pCrashInfo->dwThreadId, pExceptionContext, FILETOOLS_WriteOneStringToFile, &crashFile, '\0', '\x01', dwDumpFlags);
         }
 
         _3rdparty::crashy::Printf(&crashFile, "<:Inspector.Assertion>\n");
@@ -453,10 +453,10 @@ int __fastcall DumpLog(D2CrashReportStrc * pCrashInfo, void * pUserContext) {
         _3rdparty::crashy::Printf(&crashFile, "<:Inspector.DebugModules>\n");
         _3rdparty::crashy::Printf(&crashFile, "<Inspector.HashBlock:>\n");
         _3rdparty::crashy::Printf(&crashFile, "[JOIN]  SrvRecvDatabaseCharacter: Didn\'t recv full char from db - CSResult(%d), ClientID(%d)");
-        if (!(D2CrashFrameStrc*)pCrashInfo->apFrameAddrs) {
-          File::CRASH_DumpThreadContext(pCrashInfo->dwThreadId, pExceptionContext, FILETOOLS_WriteOneStringToFile, &crashFile, '\0', '\0', dwDumpFlags);
-        } else {
+        if ((D2CrashFrameStrc*)pCrashInfo->apFrameAddrs) {
           File::CRASH_FormatStackTrace(pCrashInfo->dwThreadId, (D2CrashFrameStrc*)pCrashInfo->apFrameAddrs, pCrashInfo->nNumFrames, FILETOOLS_WriteOneStringToFile, &crashFile, '\0', '\0');
+        } else {
+          File::CRASH_DumpThreadContext(pCrashInfo->dwThreadId, pExceptionContext, FILETOOLS_WriteOneStringToFile, &crashFile, '\0', '\0', dwDumpFlags);
         }
 
         _3rdparty::crashy::Printf(&crashFile, "DBG-OPTIONS<>\n");
@@ -518,7 +518,7 @@ int __fastcall DumpLog(D2CrashReportStrc * pCrashInfo, void * pUserContext) {
 // @gap The pfnBlizzardError funcdef calls the EDX slot szTitle; this body never reads it, and the
 // caller puts the reason there, so the local name follows the caller. Return type is void because
 // the slot is void - EAX at the epilogue is left over from FILETOOLS_SafeCloseFile.
-void __fastcall CRASH_FillupCrashTxt(char * szSummary, char * szReason, char * * ppszAttachPaths, uint32_t nAttachPathCount, uint32_t nLineNumber, bool bSilentFlag) {
+static void __fastcall CRASH_FillupCrashTxt(char * szSummary, char * szReason, char * * ppszAttachPaths, uint32_t nAttachPathCount, uint32_t nLineNumber, bool bSilentFlag) {
     // Static local variables (originally global data)
     static int32_t lpAddend_007076bc = -0x1; D2_STATIC_GUARD(lpAddend_007076bc, "Fog::Src::ErrorManager::CRASH_FillupCrashTxt::lpAddend_007076bc");
 
@@ -611,8 +611,8 @@ BOOL __fastcall CheckErrorDuringError(char * szText, int32_t nLine, char * szRea
       return 0;
     }
 
-    char* pszRelativeFile = StripPathPrefixToRelative(szText);
-    LogManager::LOGMANAGER_TraceToModuleLog("", "\n***** ENCOUNTERED ERROR DURING ERROR HANDLING!!!\n%s,%d\n%s\n*****", pszRelativeFile, nLine, szReason);
+
+    LogManager::LOGMANAGER_TraceToModuleLog("", "\n***** ENCOUNTERED ERROR DURING ERROR HANDLING!!!\n%s,%d\n%s\n*****", StripPathPrefixToRelative(szText), nLine, szReason);
     return 1;
 }
 
@@ -4858,7 +4858,7 @@ void __fastcall ERRORMANAGER_InitErrorManager(char * dwUnused1, char * szText, B
     0
 }; D2_STATIC_GUARD(gszFogCrashReportCustomMessage, "Fog::Src::ErrorManager::ERRORMANAGER_InitErrorManager::gszFogCrashReportCustomMessage");
     static char gszFogVersionString[16] = {}; D2_STATIC_GUARD(gszFogVersionString, "Fog::Src::ErrorManager::ERRORMANAGER_InitErrorManager::gszFogVersionString");
-    static bool gbFogErrorManagerPadding; D2_STATIC_GUARD_BSS(gbFogErrorManagerPadding, "Fog::Src::ErrorManager::ERRORMANAGER_InitErrorManager::gbFogErrorManagerPadding");
+    static BOOL gbFogErrorManagerPadding; D2_STATIC_GUARD_BSS(gbFogErrorManagerPadding, "Fog::Src::ErrorManager::ERRORMANAGER_InitErrorManager::gbFogErrorManagerPadding");
     static uint64_t gFogMemoryPoolPadding = 0; D2_STATIC_GUARD(gFogMemoryPoolPadding, "Fog::Src::ErrorManager::ERRORMANAGER_InitErrorManager::gFogMemoryPoolPadding");
 
     // Frame slots -4108..-8 are ONE object: &local_100c is passed out and the callee reaches the rest by byte offset.

@@ -25,6 +25,35 @@
 #endif
 
 
+namespace D2Sound::Sound {
+
+static int * SOUND_GetAmbientSoundEntry(int32_t nIndex) {
+    if (!gbAmbientSoundLangInitialized) {
+      gbAmbientSoundLangInitialized = 1;
+      gnAmbientSoundLanguageCode = SOUND_GetLanguageCode();
+    }
+    if (gaAmbientSoundFlags != gnAmbientSoundCount) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x52);
+      exit(-1);
+    } else {
+      int* pAmbientEntry;
+      if (!(nIndex < gaAmbientSoundFlags)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x53);
+        exit(-1);
+      }
+
+      pAmbientEntry = gaAmbientSoundEntryTable + nIndex * 2;
+      if (gnAmbientSoundLanguageCode) {
+        return pAmbientEntry;
+      }
+
+      pAmbientEntry = gAmbientSoundTable + nIndex * 2;
+      return pAmbientEntry;
+    }
+}
+
+} // namespace D2Sound::Sound
+
 namespace D2Sound::Src::D2SoundFast {
 
 static D2SoundSmpStrc * nSoundEffectIndexValue[8] = { 0 }; D2_STATIC_GUARD(nSoundEffectIndexValue, "D2Sound::Src::D2SoundFast::nSoundEffectIndexValue");
@@ -62,7 +91,7 @@ void __stdcall SOUND_ResetAmbientSoundFlags() {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x52);
         exit(-1);
       }
-      if (nCount <= i) {
+      if (i >= nCount) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x53);
         exit(-1);
       }
@@ -158,7 +187,11 @@ int __stdcall SOUND_PlayNextAmbientSound() {
       SOUND_ResetAmbientSoundFlags();
       bResetDone = true;
       play_unplayed_track:
-      if (!gbSoundFastPathActive) {
+      if (gbSoundFastPathActive) {
+        pAmbientEntry = Sound::SOUND_GetAmbientSoundEntry(0);
+        gbSoundFastPathActive = 0;
+        nAmbientCount = gaAmbientSoundFlags;
+      } else {
         nRandIdx = rand();
         nRandIdx %= gaAmbientSoundFlags;
         nAmbientCount = gaAmbientSoundFlags;
@@ -174,7 +207,7 @@ int __stdcall SOUND_PlayNextAmbientSound() {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x52);
             exit(-1);
           }
-          if (nAmbientCount <= nRandIdx) {
+          if (nRandIdx >= nAmbientCount) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x53);
             exit(-1);
           }
@@ -185,7 +218,7 @@ int __stdcall SOUND_PlayNextAmbientSound() {
           }
           if (pAmbientEntry[1]) {
             nRandIdx++;
-            if (nAmbientCount <= nRandIdx) {
+            if (nRandIdx >= nAmbientCount) {
               nRandIdx = 0;
             }
 
@@ -194,10 +227,6 @@ int __stdcall SOUND_PlayNextAmbientSound() {
 
           break;
         }
-      } else {
-        pAmbientEntry = Sound::SOUND_GetAmbientSoundEntry(0);
-        gbSoundFastPathActive = 0;
-        nAmbientCount = gaAmbientSoundFlags;
       }
       bHasStreamBuffer = gpMusicStreamBuffer != 0;
       szSoundFile = (char*)*pAmbientEntry;
@@ -480,14 +509,14 @@ void __stdcall SOUND_FreeSoundEffectBuffers() {
     do {
       D2SoundSmp::SOUNDSMP_Stop(*ppSoundBuffer);
       ppSoundBuffer++;
-    } while ((int)ppSoundBuffer < (uintptr_t)&gpaSoundEffectBuffers + 32);
+    } while ((int)ppSoundBuffer < (int)((uintptr_t)&gpaSoundEffectBuffers + 32));
 
     ppSoundBuffer = gpaSoundEffectBuffers;
     do {
       D2SoundSmp::SOUNDSMP_Destroy(*ppSoundBuffer);
       *ppSoundBuffer = 0;
       ppSoundBuffer++;
-    } while ((int)ppSoundBuffer < (uintptr_t)&gpaSoundEffectBuffers + 32);
+    } while ((int)ppSoundBuffer < (int)((uintptr_t)&gpaSoundEffectBuffers + 32));
 
     while (gpWavFileCacheListHead) {
       void* nNextCacheEntry;

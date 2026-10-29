@@ -32,6 +32,7 @@
 #include "D2Common/Drlg/Drlg.h"
 #include "D2Common/Unit/D2UnitStrc.h"
 #include "D2Launch/MainMenus.h"
+#include "Storm/Source/SSTR.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -299,6 +300,98 @@ void __fastcall CMD_InvokeCallbackByParam(int32_t nParam) {
       return;
     }
 }
+
+} // namespace D2Client::UI::CmdTbl
+
+namespace D2Client::Save {
+
+// Opens (or creates) the per-character .key save file used for realm character locking. If a realm name is set, first tries the realm subdirectory path (&lt;savepath&gt;\&lt;realm&gt;\&lt;char&gt;.key); on failure falls back to the base save path (&lt;savepath&gt;\&lt;char&gt;.key). Calls Storm CreateFileA with caller-supplied dwDesiredAccess and dwCreationDisposition. Returns the file HANDLE, or INVALID_HANDLE_VALUE if both paths fail.
+static HANDLE GetKeyFileHandle(DWORD dwCreationDisposition, DWORD dwDesiredAccess) {
+    HANDLE hFile;
+    char szPath[260];
+    char szRealmDir[260];
+    char szKeyFilePath[260];
+    szPath[0] = '\0';
+    for (int i = 0x1; i < 0x104; i++) szPath[i] = 0;
+    szKeyFilePath[0] = '\0';
+    for (int i = 0x1; i < 0x104; i++) szKeyFilePath[i] = 0;
+    szRealmDir[0] = '\0';
+    for (int i = 0x1; i < 0x104; i++) szRealmDir[i] = 0;
+    Fog::Source::SFile::GetAndCreateSavePath(szPath, 0x104);
+    if (RealmName[0] != '\0') {
+      Storm::Source::SSTR::SStrPrintf(szRealmDir, 0x104, "%s%s\\", szPath, RealmName);
+      Fog::Source::SFile::SafeCreateDirectoryTree(szRealmDir);
+      Storm::Source::SSTR::SStrPrintf(szKeyFilePath, 0x104, "%s%s.key", szRealmDir, D2Game::Save::szSaveCharacterName);
+      hFile = Fog::Source::SFile::thunk_CreateFileA(szKeyFilePath, dwDesiredAccess, 0, (LPSECURITY_ATTRIBUTES)0x0, dwCreationDisposition, 0x80, (HANDLE)0x0);
+      if (hFile != (HANDLE)-1) {
+        return hFile;
+      }
+    }
+
+    Storm::Source::SSTR::SStrPrintf(szKeyFilePath, 0x104, "%s%s.key", szPath, D2Game::Save::szSaveCharacterName);
+    hFile = Fog::Source::SFile::thunk_CreateFileA(szKeyFilePath, dwDesiredAccess, 0, (LPSECURITY_ATTRIBUTES)0x0, dwCreationDisposition, 0x80, (HANDLE)0x0);
+    return hFile;
+}
+
+// Serializes the global key-bindings table (g_KeyBindingsTable, 0x474 bytes, 0x11d entries) to two files: the user's active key file (via GetKeyFileHandle) and the install-directory "default.key" fallback. Writes a header with signature 0x5357 and version 0x25 before the binding data.
+void __stdcall CMD_WriteKeyFile() {
+    char* pEnd;
+    char szBuffer[1142];
+    char cStack_115;
+    char szInstallPath[260];
+    D2KeyFileHeaderStrc sKeyFileHeader;
+    HANDLE hFile = GetKeyFileHandle(2, 0x40000000);
+    if (hFile == (HANDLE)-1) {
+      return;
+    }
+
+    for (int i = 0x2; i < 0x476; i++) szBuffer[i] = 0;
+    DWORD nWritten = 0;
+    szBuffer[0] = '%';
+    szBuffer[1] = '\0';
+    char* pDst = szBuffer + 6;
+    int nCount = 0x72;
+    do {
+      pDst[0] = -1;
+      pDst[1] = -1;
+      pDst += 10;
+      nCount--;
+    } while (nCount);
+
+    D2KeyBindStrc* pSrc = g_KeyBindingsTable;
+    int32_t* puVar5 = (int32_t*)(szBuffer + 2);
+    for (nCount = 0x11d; nCount; nCount--) {
+      *puVar5 = pSrc->nCmdIndex;
+      pSrc = (D2KeyBindStrc*)&pSrc->wKeyCode;
+      puVar5++;
+    }
+
+    Fog::Source::SFile::thunk_WriteFile(hFile, (LPCVOID)szBuffer, 0x476, &nWritten, (LPOVERLAPPED)0x0);
+    Fog::Source::SFile::SFILE_Win32CloseHandle(hFile);
+    Fog::Source::SFile::SFILE_GetInstallPath(szInstallPath, 0xdc);
+    pDst = &cStack_115;
+    do {
+      pEnd = pDst;
+      pDst = pEnd + 1;
+    } while (pEnd[1] != '\0');
+
+    memcpy(pEnd + 1, "default.key", 0xc);
+    hFile = Fog::Source::SFile::thunk_CreateFileA(szInstallPath, 0x40000000, 0, (LPSECURITY_ATTRIBUTES)0x0, 2, 0x80, (HANDLE)0x0);
+    if (hFile == (HANDLE)-1) {
+      return;
+    }
+
+    sKeyFileHeader.wSignature = 0x5357;
+    sKeyFileHeader.wVersion = 0x25;
+    sKeyFileHeader.wDataSize = 0x47a;
+    Fog::Source::SFile::thunk_WriteFile(hFile, (LPCVOID)&sKeyFileHeader, 6, &nWritten, (LPOVERLAPPED)0x0);
+    Fog::Source::SFile::thunk_WriteFile(hFile, (LPCVOID)g_KeyBindingsTable, 0x474, &nWritten, (LPOVERLAPPED)0x0);
+    Fog::Source::SFile::SFILE_Win32CloseHandle(hFile);
+}
+
+} // namespace D2Client::Save
+
+namespace D2Client::UI::CmdTbl {
 
 // @sourcefile .\UI\CmdTbl.cpp
 void __stdcall CMD_LoadDefaultKeyBindings(DWORD dwParam) {
@@ -651,7 +744,7 @@ BOOL __fastcall CMD_SetKeyBinding(int32_t nCmdIndex, int32_t nSlot, uint32_t nKe
           }
 
           nIndex++;
-        } while ((int)&g_KeyBindingsTable[nIndex].wKeyCode < (uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 4));
+        } while ((int)((int)&g_KeyBindingsTable[nIndex].wKeyCode) < (int)((uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 4)));
 
         nIndex = 0;
         pBinding2 = &g_KeyBindingsTable[0].nSlot;
@@ -1082,17 +1175,23 @@ uint16_t * __fastcall CMD_GetKeyDescForCommand(int32_t nCmdIndex, int32_t nSlot)
         describe_key:
         {
           switch (wKeyCode) {
-            case 8:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2c);
+            case 0x100:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf15);
             return pWVar1;
-            case 0x10:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2f);
+            case 0x101:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf16);
+            return pWVar1;
+            case 0x102:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf17);
+            return pWVar1;
+            case 0x103:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf18);
+            return pWVar1;
+            case 0x104:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf19);
             return pWVar1;
             case 0x11:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf30);
-            return pWVar1;
-            case 0x1b:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf1e);
             return pWVar1;
             case 0x21:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf34);
@@ -1100,14 +1199,17 @@ uint16_t * __fastcall CMD_GetKeyDescForCommand(int32_t nCmdIndex, int32_t nSlot)
             case 0x22:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf35);
             return pWVar1;
-            case 0x2c:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf37);
+            case 0x1b:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf1e);
             return pWVar1;
-            case 0x2d:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf38);
+            case 0x90:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2b);
             return pWVar1;
-            case 0x2e:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf39);
+            case 8:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2c);
+            return pWVar1;
+            case 0x10:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2f);
             return pWVar1;
             case 0x60:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf3b);
@@ -1154,26 +1256,17 @@ uint16_t * __fastcall CMD_GetKeyDescForCommand(int32_t nCmdIndex, int32_t nSlot)
             case 0x6f:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf49);
             return pWVar1;
-            case 0x90:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf2b);
-            return pWVar1;
             case 0x91:
               pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf4a);
             return pWVar1;
-            case 0x100:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf15);
+            case 0x2c:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf37);
             return pWVar1;
-            case 0x101:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf16);
+            case 0x2d:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf38);
             return pWVar1;
-            case 0x102:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf17);
-            return pWVar1;
-            case 0x103:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf18);
-            return pWVar1;
-            case 0x104:
-              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf19);
+            case 0x2e:
+              pWVar1 = D2Lang::StrTable::strtable::GetLocaleString(0xf39);
             return pWVar1;
           }
         }
@@ -1325,7 +1418,7 @@ void __stdcall CMD_LoadUserKeyBindings() {
 
           next_command:
           nCmdIndex++;
-          if (0x38 < nCmdIndex) {
+          if (0x39 <= nCmdIndex) {
             nCmdIndex = 0;
             pDstTable = &wFileMagic.aBindings[0].wKeyCode;
             do {
@@ -1342,12 +1435,12 @@ void __stdcall CMD_LoadUserKeyBindings() {
 
               nCmdIndex++;
               pDstTable += 5;
-              if (0x71 < nCmdIndex) {
+              if (0x72 <= nCmdIndex) {
                 pDstTable = &g_KeyBindingsTable[0].wKeyCode;
                 do {
                   *pDstTable = 0xffff;
                   pDstTable += 5;
-                } while ((int)pDstTable < (uintptr_t)&g_KeyBindingsTable + 1144);
+                } while ((int)pDstTable < (int)((uintptr_t)&g_KeyBindingsTable + 1144));
 
                 pBindingRow = wFileMagic.aBindings;
                 pDstCopy = g_KeyBindingsTable;
@@ -1372,7 +1465,7 @@ void __stdcall CMD_LoadUserKeyBindings() {
     do {
       *pDstTable = 0xffff;
       pDstTable += 5;
-    } while ((int)pDstTable < (uintptr_t)&g_KeyBindingsTable + 1144);
+    } while ((int)pDstTable < (int)((uintptr_t)&g_KeyBindingsTable + 1144));
 
     int* piVar1 = gaKeyBindingsDefault;
     pBindingRow = g_KeyBindingsTable;

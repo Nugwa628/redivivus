@@ -67,7 +67,7 @@ void __fastcall PATH_CheckPathPointsInRoom(D2DynamicPathStrc * pPath) {
       }
 
       i++;
-      if (pPath->dwPathPoints <= i) {
+      if (i >= pPath->dwPathPoints) {
         return;
       }
     }
@@ -385,7 +385,7 @@ static BOOL __stdcall PATH_ComputeDirectMovementVector(int * pVelOut, int * pDyn
     if (nAbsVelYCopy < 0) {
       nAbsVelY = -nAbsVelYCopy;
     }
-    if (nAbsVelY < nAbsVelX) {
+    if (nAbsVelX > nAbsVelY) {
       if (nMaxVelComponent < 0) {
         nMaxVelComponent = -nMaxVelComponent;
       }
@@ -420,12 +420,12 @@ static BOOL __stdcall PATH_TraceCollisionPath(int32_t nStartX, uint32_t nStartY,
     uint32_t currentPosXfp = pDynamicPath->Coords.tFixed.x;
     uint32_t currentPosYfp = pDynamicPath->Coords.tFixed.y;
     uint32_t targetPosYfp = currentPosYfp + nStartY;
-    uint32_t targetPosXfp = currentPosXfp + nStartX;
     uint32_t nCellPackedXY = (uint32_t)((uint32_t)(uint16_t)(short int)(currentPosYfp >> 0x10) << 16 | (uint32_t)(uint16_t)(short int)(currentPosXfp >> 0x10));
+    uint32_t targetPosXfp = currentPosXfp + nStartX;
     short int targetCellY = (short int)(targetPosYfp >> 0x10);
-    uint32_t nTargetCellX = targetPosXfp >> 0x10;
-    uint32_t bDistantFlag = pDynamicPath->nFlags & 0x20000;
     uint16_t targetCellX = (uint16_t)(targetPosXfp >> 0x10);
+    uint32_t bDistantFlag = pDynamicPath->nFlags & 0x20000;
+    uint32_t nTargetCellX = targetPosXfp >> 0x10;
     while (true) {
       short int nextCellX;
       currentCellY = (short int)(nCellPackedXY >> 0x10);
@@ -453,7 +453,7 @@ static BOOL __stdcall PATH_TraceCollisionPath(int32_t nStartX, uint32_t nStartY,
         }
 
         pDynamicPath->nSaveCoordsSize++;
-        if (9 < pDynamicPath->nSaveCoordsSize) {
+        if (10 <= pDynamicPath->nSaveCoordsSize) {
           break;
         }
       }
@@ -506,11 +506,14 @@ uint32_t __stdcall PATH_RecalculatePath(D2UnitStrc * pUnit, int32_t nParam) {
       return 0;
     }
     if (!(pDynamicPath->nFlags & 0x10)) {
-      if (pUnit->eUnitType == UNIT_MONSTER) {
+      switch (pUnit->eUnitType) {
+      case UNIT_MONSTER: {
         bPathCalcOk = DynamicPath::GetDistanceCastedToInt(pDynamicPath);
         if (!bPathCalcOk) {
           return 0;
         }
+        break;
+      }
       }
 
       Unit::ROOM_LinkUnitToUpdateList(pUnit);
@@ -520,12 +523,12 @@ uint32_t __stdcall PATH_RecalculatePath(D2UnitStrc * pUnit, int32_t nParam) {
 
     int nPathType = pDynamicPath->ePathType;
     if (nPathType == 2 || nPathType == 0xd || nPathType == 0xf) {
-      if (!nParam) {
+      if (nParam) {
+        pDynamicPath->ePathType = 0xd;
+      } else {
         pDynamicPath->ePathType = 2;
         pDynamicPath->nTargetX = pDynamicPath->nSavedTargetX;
         pDynamicPath->nTargetY = pDynamicPath->nSavedTargetY;
-      } else {
-        pDynamicPath->ePathType = 0xd;
       }
 
       bPathCalcOk = DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
@@ -546,13 +549,13 @@ static uint32_t PATH_CheckIfTargetReached(D2DynamicPathStrc * pDynamicPath) {
     int nDeltaY;
     D2PathPointStrc sTarget;
     eD2UnitType eUnitType;
-    if (pDynamicPath->ePathType - 5U < 2 && pDynamicPath->dwPathPoints <= pDynamicPath->nPathPointIndex) {
+    if (pDynamicPath->ePathType - 5U <= 1 && pDynamicPath->nPathPointIndex >= pDynamicPath->dwPathPoints) {
       return 1;
     }
 
     D2UnitStrc* pUnit = pDynamicPath->pOwner;
     if (!pDynamicPath->pTargetUnit) {
-      if (!(pDynamicPath->dwPathPoints <= pDynamicPath->nPathPointIndex && (pDynamicPath->Coords.tSubtile.nPosX != pDynamicPath->nSavedTargetX || pDynamicPath->Coords.tSubtile.nPosY != pDynamicPath->nSavedTargetY))) {
+      if (!(pDynamicPath->nPathPointIndex >= pDynamicPath->dwPathPoints && (pDynamicPath->Coords.tSubtile.nPosX != pDynamicPath->nSavedTargetX || pDynamicPath->Coords.tSubtile.nPosY != pDynamicPath->nSavedTargetY))) {
         return 1;
       }
 
@@ -776,7 +779,7 @@ static BOOL __stdcall PATH_MoveUnitToPosition(D2RoomStrc * pRoom, uint32_t nTarg
       uVar1 = pPath->Coords.tSubtile.nPosX;
       uVar2 = pPath->Coords.tSubtile.nPosY;
       if (nTargetPos || false) {
-        Collision::UpdateCollision_Type(pPath->pRoom, (uint32_t)uVar1, (uint32_t)uVar2, pRoom, nTargetPos & 0xffff, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2), pPath->nUnitWidth, pPath->nCollisionFlag);
+        Collision::UpdateCollision_Type(pPath->pRoom, (uint32_t)uVar1, (uint32_t)uVar2, pRoom, (uint16_t)nTargetPos, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2), pPath->nUnitWidth, pPath->nCollisionFlag);
       } else {
         Collision::RemoveCollision_Type(pPath->pRoom, (uint32_t)uVar1, (uint32_t)uVar2, pPath->nUnitWidth, pPath->nCollisionFlag);
       }
@@ -792,7 +795,7 @@ static BOOL __stdcall PATH_MoveUnitToPosition(D2RoomStrc * pRoom, uint32_t nTarg
         pPath->nFlags &= -9;
       }
 
-      eNewCollision = Collision::UpdateGetCollision_Width(pPath->pRoom, (uint32_t)uVar1, (uint32_t)uVar2, pRoom, nTargetPos & 0xffff, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2), pPath->nUnitSize, pPath->nCollisionFlag, pPath->nCollisionPattern);
+      eNewCollision = Collision::UpdateGetCollision_Width(pPath->pRoom, (uint32_t)uVar1, (uint32_t)uVar2, pRoom, (uint16_t)nTargetPos, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2), pPath->nUnitSize, pPath->nCollisionFlag, pPath->nCollisionPattern);
       pPath->eCollisionFlag = eNewCollision;
       pPath->nSaveCoordsSize = 1;
       pPath->SaveCoords[0].nX = (uint16_t)nTargetPos;
@@ -805,7 +808,7 @@ static BOOL __stdcall PATH_MoveUnitToPosition(D2RoomStrc * pRoom, uint32_t nTarg
     Drlg::Path::DRLGPATH_SetPathPosition(nTargetPos * 0x10000 + 0x8000, (uint32_t)uVar3 * 0x10000 + 0x8000, pRoom, pPath);
     if (nTargetPos || false) {
       D2RoomStrc* pBetterRoom;
-      pBetterRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nTargetPos & 0xffff, (uint32_t)uVar3);
+      pBetterRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, (uint16_t)nTargetPos, (uint32_t)uVar3);
       if (!pBetterRoom) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x489);
         exit(-1);
@@ -821,14 +824,14 @@ static int __stdcall PATH_MoveObjectToPosition(D2RoomStrc * pRoom, uint32_t nTar
     uint16_t wPosY = *(uint16_t*)((int)pPath + 6);
     if (!(int*)pPath[0xc] || *(int*)pPath[0xc] != 3) {
       if (nTargetPos || false) {
-        Collision::UpdateCollision_Type((D2RoomStrc*)pPath[7], (uint32_t)wPosX, (uint32_t)wPosY, pRoom, nTargetPos & 0xffff, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2), pPath[0x12], pPath[0x13]);
+        Collision::UpdateCollision_Type((D2RoomStrc*)pPath[7], (uint32_t)wPosX, (uint32_t)wPosY, pRoom, (uint16_t)nTargetPos, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2), pPath[0x12], pPath[0x13]);
       } else {
         Collision::RemoveCollision_Type((D2RoomStrc*)pPath[7], (uint32_t)wPosX, (uint32_t)wPosY, pPath[0x12], pPath[0x13]);
       }
     } else if (!(short int)nTargetPos && !(nTargetPos >> 0x10)) {
       Collision::RemoveCollision_Width((D2RoomStrc*)pPath[7], (uint32_t)wPosX, (uint32_t)wPosY, pPath[0x11], pPath[0x13]);
     } else {
-      Collision::UpdateCollision_Width((D2RoomStrc*)pPath[7], (uint32_t)wPosX, (uint32_t)wPosY, pRoom, nTargetPos & 0xffff, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2), pPath[0x11], pPath[0x13]);
+      Collision::UpdateCollision_Width((D2RoomStrc*)pPath[7], (uint32_t)wPosX, (uint32_t)wPosY, pRoom, (uint16_t)nTargetPos, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2), pPath[0x11], pPath[0x13]);
     }
     if ((D2RoomStrc*)pPath[7] != pRoom) {
       pPath[0xd] |= 1;
@@ -837,7 +840,7 @@ static int __stdcall PATH_MoveObjectToPosition(D2RoomStrc * pRoom, uint32_t nTar
     Drlg::Path::DRLGPATH_SetPathPosition(nTargetPos * 0x10000 + 0x8000, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2) * 0x10000 + 0x8000, pRoom, (D2DynamicPathStrc*)pPath);
     if (nTargetPos || false) {
       D2RoomStrc* pBetterRoom;
-      pBetterRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, nTargetPos & 0xffff, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2));
+      pBetterRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom(pRoom, (uint16_t)nTargetPos, (uint32_t)*(uint16_t*)((char*)&nTargetPos + 2));
       if (!pBetterRoom) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x4cc);
         exit(-1);

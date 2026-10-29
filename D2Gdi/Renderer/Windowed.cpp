@@ -463,7 +463,7 @@ static int __fastcall RENDERER_WINDOWED_CalculateCropRect(uint32_t * pCropRect, 
     int32_t nOffsetX = D2CMP::SRC::CelCmp::GetDC6Height(pDC6Block);
     uint32_t uClampedLeft = (int)*pCropRect < 1 ? 0 : *pCropRect;
     uint32_t nClippedRight = pCropRect[1];
-    if (RENDERER_nWindowWidth <= (int)nClippedRight) {
+    if ((int)nClippedRight >= RENDERER_nWindowWidth) {
       nClippedRight = RENDERER_nWindowWidth;
     }
     if ((int)uClampedLeft > (int)nClippedRight) {
@@ -477,7 +477,7 @@ static int __fastcall RENDERER_WINDOWED_CalculateCropRect(uint32_t * pCropRect, 
 
     uint32_t uClampedBottom = (int)pCropRect[2] < 1 ? 0 : pCropRect[2];
     uint32_t uClampedTop = pCropRect[3];
-    if (RENDERER_nWindowHeight <= (int)pCropRect[3]) {
+    if ((int)pCropRect[3] >= RENDERER_nWindowHeight) {
       uClampedTop = RENDERER_nWindowHeight;
     }
     if ((int)uClampedBottom > (int)uClampedTop) {
@@ -497,12 +497,12 @@ static int __fastcall RENDERER_WINDOWED_CalculateCropRect(uint32_t * pCropRect, 
     } else {
       pOutput[2] = 0;
     }
-    if (nOffsetY - nOffsetX < (int)uClampedBottom) {
-      pOutput[3] = nOffsetY - pOutput[2] - uClampedBottom + 1;
-    } else {
+    if (!(nOffsetY - nOffsetX < (int)uClampedBottom)) {
       pOutput[3] = nOffsetX - pOutput[2];
+    } else {
+      pOutput[3] = nOffsetY - pOutput[2] - uClampedBottom + 1;
     }
-    if (!((int)pOutput[3] >= 1)) {
+    if (!((int)pOutput[3] > 0)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd1);
       exit(-1);
     }
@@ -566,8 +566,8 @@ void __fastcall DrawShiftedImage(D2GfxDataStrc * pData, int nPosX, int nPosY, DW
     uint8_t* pRenderArg1 = 0;
     uint8_t* pPalette = 0;
     uint8_t* pRenderArg2 = RENDERER_WINDOWED_GetPalettePointer(nDrawMode, (uint32_t*)&nSpriteHeight);
-    if ((dwGamma & 0xff) != 0xff) {
-      pRenderArg1 = gpPaletteTable[((int)(dwGamma & 0xff) >> 3) + 3];
+    if ((uint8_t)dwGamma != 0xff) {
+      pRenderArg1 = gpPaletteTable[((int)((uint8_t)dwGamma) >> 3) + 3];
     }
     if (nDrawMode == 7) {
       pRenderArg1 = gpPaletteTable[0x46];
@@ -734,12 +734,12 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
     int nBlendMode;
     uint8_t* pPaletteTable = RENDERER_WINDOWED_GetPalettePointer(nDrawMode, (uint32_t*)&nBlendMode);
     uint32_t uMaxX = RENDERER_nWindowWidth - 1;
-    uint32_t uClampedYStart = nXStart < 1 ? 0 : nXStart;
-    if ((int)uMaxX <= (int)uClampedYStart) {
+    uint32_t uClampedYStart = nXStart <= 0 ? 0 : nXStart;
+    if ((int)uClampedYStart >= (int)uMaxX) {
       uClampedYStart = uMaxX;
     }
 
-    uint32_t uClampedXStart = nXEnd < 1 ? 0 : nXEnd;
+    uint32_t uClampedXStart = nXEnd <= 0 ? 0 : nXEnd;
     if ((int)uClampedXStart < (int)uMaxX) {
       uMaxX = uClampedXStart;
     }
@@ -749,11 +749,11 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
 
     uint32_t uClampedXEnd = RENDERER_nWindowHeight - 1;
     uClampedXStart = nYStart < 1 ? 0 : nYStart;
-    if ((int)uClampedXEnd <= (int)uClampedXStart) {
+    if ((int)uClampedXStart >= (int)uClampedXEnd) {
       uClampedXStart = uClampedXEnd;
     }
 
-    uint32_t uMaxY = nYEnd < 1 ? 0 : nYEnd;
+    uint32_t uMaxY = nYEnd <= 0 ? 0 : nYEnd;
     if ((int)uClampedXEnd <= (int)uMaxY) {
       uMaxY = uClampedXEnd;
     }
@@ -787,7 +787,7 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
             nRowsLeft = uMaxX - uClampedYStart;
             do {
               nRowsLeft--;
-              *pbPixel = pPaletteTable[(uint32_t)*pbPixel * 0x100 + (dwColor & 0xff)];
+              *pbPixel = pPaletteTable[(uint32_t)*pbPixel * 0x100 + (uint8_t)dwColor];
               pbPixel++;
             } while (nRowsLeft);
           }
@@ -800,7 +800,7 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
     } else if (nWidth) {
       do {
         nWidth--;
-        memset(pbScanline, dwColor & 0xff, uMaxX - uClampedYStart);
+        memset(pbScanline, (uint8_t)dwColor, uMaxX - uClampedYStart);
         pbScanline += RENDERER_nWindowWidth;
       } while (nWidth);
 
@@ -927,23 +927,23 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
     nSqrtIter = 0;
     int nStepCount = 0;
     int nY = nStartY;
-    while (nStartY < 0 || RENDERER_nWindowHeight <= nStartY || nX < 0 || RENDERER_nWindowWidth <= nX) {
+    while (nStartY < 0 || nStartY >= RENDERER_nWindowHeight || nX < 0 || nX >= RENDERER_nWindowWidth) {
       nSqrtIter += nDistSq;
-      if (0xffff < nSqrtIter || nSqrtIter < -0xffff) {
-        nStartY = (int)(nSqrtIter + (nSqrtIter >> 0x1f & 0xffffU)) >> 0x10;
+      if (0x10000 <= nSqrtIter || nSqrtIter <= -0x10000) {
+        nStartY = (int)nSqrtIter / 65536;
         nX += nStartY;
         nSqrtIter += nStartY * -0x10000;
         nStartY = nY;
       }
 
       nAccumX += nStepX;
-      if (0xffff < nAccumX || nAccumX < -0xffff) {
-        nAccumY = (int)(nAccumX + (nAccumX >> 0x1f & 0xffffU)) >> 0x10;
+      if (0x10000 <= nAccumX || nAccumX <= -0x10000) {
+        nAccumY = (int)nAccumX / 65536;
         nStartY = nY + nAccumY;
         nAccumX += nAccumY * -0x10000;
         nY = nStartY;
       }
-      if (nDistance <= nStepCount) {
+      if (nStepCount >= nDistance) {
         return;
       }
 
@@ -959,8 +959,8 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
 
     while (true) {
       nSqrtIter += nDistSq;
-      if (0xffff < nSqrtIter || nSqrtIter < -0xffff) {
-        nStartY = (int)(nSqrtIter + (nSqrtIter >> 0x1f & 0xffffU)) >> 0x10;
+      if (0x10000 <= nSqrtIter || nSqrtIter <= -0x10000) {
+        nStartY = (int)nSqrtIter / 65536;
         nX += nStartY;
         pbCurrent += nStartY;
         nSqrtIter += nStartY * -0x10000;
@@ -968,13 +968,13 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
       if (nX < 0) {
         return;
       }
-      if (RENDERER_nWindowWidth <= nX) {
+      if (nX >= RENDERER_nWindowWidth) {
         return;
       }
 
       nAccumX += nStepX;
-      if (0xffff < nAccumX || nAccumX < -0xffff) {
-        nStartY = (int)(nAccumX + (nAccumX >> 0x1f & 0xffffU)) >> 0x10;
+      if (0x10000 <= nAccumX || nAccumX <= -0x10000) {
+        nStartY = (int)nAccumX / 65536;
         nY += nStartY;
         pbCurrent += RENDERER_nWindowWidth * nStartY;
         nAccumX += nStartY * -0x10000;
@@ -982,13 +982,13 @@ void __fastcall RENDERER_WINDOWED_DrawLineBresenham(POINT * pnEndPoint, POINT * 
       if (nY < 0) {
         break;
       }
-      if (RENDERER_nWindowHeight <= nY) {
+      if (nY >= RENDERER_nWindowHeight) {
         return;
       }
 
       nStepCount++;
       *pbCurrent = byColorParam;
-      if (nDistance <= nStepCount) {
+      if (nStepCount >= nDistance) {
         return;
       }
     }
@@ -1002,7 +1002,7 @@ void __fastcall DrawRect(uint8_t * pRect, int nPaletteIndex) {
     POINT nTop;
     int32_t dwErrorCode;
     nTop.x = *(LONG*)pRect;
-    if (*(int*)(pRect + 8) < nTop.x) {
+    if (nTop.x > *(int*)(pRect + 8)) {
       dwErrorCode = 0x126;
     } else {
       uint32_t uHeight;
@@ -1041,7 +1041,7 @@ void __fastcall DrawRectEx(uint8_t * pRect, int nPaletteIndex) {
     POINT nX2_save;
     POINT nX2_copy;
     nX1.x = *(LONG*)pRect;
-    if (*(int*)(pRect + 8) < nX1.x) {
+    if (nX1.x > *(int*)(pRect + 8)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x142);
       exit(-1);
     } else {
@@ -1075,7 +1075,7 @@ void __fastcall DrawSolidRect(tagRECT * pRect, uint8_t nPaletteIndex) {
     size_t _Size;
     int nRight = pRect->left;
     int iVar1 = pRect->right;
-    if (iVar1 < nRight) {
+    if (nRight > iVar1) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x15e);
       exit(-1);
     }
@@ -1083,19 +1083,19 @@ void __fastcall DrawSolidRect(tagRECT * pRect, uint8_t nPaletteIndex) {
     int nBottom = pRect->top;
     int nTop = pRect->bottom;
     if (nBottom <= nTop) {
-      if (!(-1 < iVar1 && nRight < RENDERER_nWindowWidth && -1 < nTop && nBottom < RENDERER_nWindowHeight)) {
+      if (!(0 <= iVar1 && nRight < RENDERER_nWindowWidth && 0 <= nTop && nBottom < RENDERER_nWindowHeight)) {
         return;
       }
       if (nRight < 0) {
         pRect->left = 0;
       }
-      if (RENDERER_nWindowWidth <= iVar1) {
+      if (iVar1 >= RENDERER_nWindowWidth) {
         pRect->right = RENDERER_nWindowWidth - 1;
       }
       if (nBottom < 0) {
         pRect->top = 0;
       }
-      if (RENDERER_nWindowHeight <= nTop) {
+      if (nTop >= RENDERER_nWindowHeight) {
         pRect->bottom = RENDERER_nWindowHeight - 1;
       }
 
@@ -1185,10 +1185,10 @@ BOOL __fastcall DrawShadowTile(D2TileLibraryEntryStrc * pTile, int32_t nPosX, in
       if (nClipLeft <= nScreenX && nScreenX < nClipRight && -0x21 < nScreenY && nScreenY < iVar1) {
         nVisCount = 1;
         bAllocOk = RENDERER_WINDOWED_CheckBlendedShadowsEnabled();
-        if (!bAllocOk) {
-          D2GfxRendereInitFunctionsStrc->nfpDrawVisTile(pTile->pSubTiles[nTileIndex].pPixelData, nScreenX, nScreenY);
-        } else {
+        if (bAllocOk) {
           D2GfxRendereInitFunctionsStrc->nfpDrawBlendedVisTile((int)pTile->pSubTiles[nTileIndex].pPixelData, nScreenX, nScreenY, 0xc0);
+        } else {
+          D2GfxRendereInitFunctionsStrc->nfpDrawVisTile(pTile->pSubTiles[nTileIndex].pPixelData, nScreenX, nScreenY);
         }
       }
 
@@ -1212,10 +1212,15 @@ BOOL __fastcall DrawTransWallTile(D2TileLibraryEntryStrc * pTile, int nPosX, int
     int iVar1 = RENDERER_nWindowHeight + 0x20;
     int nClipLeft = -0x20;
     int nClipRight = RENDERER_nWindowWidth;
-    if (nScreenPanels == 1) {
+    switch (nScreenPanels) {
+    case 1: {
       nClipRight = RENDERER_nWindowWidth - RENDERER_nWindowWidth / 2;
-    } else if (nScreenPanels == 2) {
+      break;
+    }
+    case 2: {
       nClipLeft = RENDERER_nWindowWidth / 2 - 0x20;
+      break;
+    }
     }
 
     nScreenPanels = 0;
@@ -1258,10 +1263,15 @@ BOOL __fastcall DrawWallTile(D2TileLibraryEntryStrc * pTile, int nPosX, int nPos
     int iVar1 = RENDERER_nWindowHeight + 0x20;
     int nClipLeft = -0x20;
     int nClipRight = RENDERER_nWindowWidth;
-    if (nScreenPanels == 1) {
+    switch (nScreenPanels) {
+    case 1: {
       nClipRight = RENDERER_nWindowWidth - RENDERER_nWindowWidth / 2;
-    } else if (nScreenPanels == 2) {
+      break;
+    }
+    case 2: {
       nClipLeft = RENDERER_nWindowWidth / 2 - 0x20;
+      break;
+    }
     }
 
     nScreenPanels = 0;

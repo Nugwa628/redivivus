@@ -77,10 +77,6 @@ BOOL __fastcall SKILLS_RadiusCallback_IncrementCounter(struct D2fpSkillFuncArg *
 struct D2UnitStrc * __fastcall SKILL_FindClosestTarget(struct D2UnitStrc * pUnit, int32_t nCenterX, int32_t nCenterY, int32_t nRadius, uint32_t nTargetFlags);
 BOOL __fastcall SKILLS_RadiusCallback_FindMinMaxGUID(struct D2fpSkillFuncArg * pFuncArg, struct D2UnitStrc * pUnit);
 struct D2UnitStrc * __fastcall SKILL_FindClosestTargetWithStats(struct D2UnitStrc * pUnit, int32_t nCenterX, int32_t nCenterY, int32_t nRadius, uint32_t nTargetFlags, int nExcludeGUID, uint32_t * pdwResultCount);
-BOOL __fastcall Skills_CltStFunc_CheckThrowableAmmoOrWeapon(struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
-BOOL __fastcall Skills_CltStFunc_CheckThrowableAmmoAndWeapon(struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
-BOOL __fastcall Skills_CltStFunc_CheckTargetIsPetWithFlag(struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
-BOOL __fastcall Skills_CltStFunc_AlwaysAllow(struct D2UnitStrc * pUnit, eD2Skills eD2Skill, int nSkillLvl);
 BOOL __fastcall Skills_CltDoFunc_Bow_ShootArrow(struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
 BOOL __fastcall Skills_CltDoFunc_Bow_ThrowItem(struct D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl);
 // Client-side skill cast initiator for a unit. Validates the skill row, performs the line-of-sight check (mapping SkillsTxt.lineofsight 1-5 to the appropriate collision mask), and SKILL_CanTargetDeadMonster gating. Ensures the skill object exists on the unit (allocates/adds it, clamping to max level and applying a skill-level bonus for overflow) and sets it as the unit's current skill. Cancels casting in town for non-town-allowed skills (HandleMessage 7 + plays the no-cast sound). Sets the unit's anim mode (or attack animation for melee Attack), runs the per-skill client-start function (cltstfunc), plays start/cast/class sounds, adds the cast overlay, and assigns missile light. Returns the skill result code (SKILL_Attack signals abort/no-op). __fastcall (EAX=eSkill, ECX=pUnit).
@@ -115,9 +111,6 @@ uint32_t __fastcall SKILL_GetWeaponClassMask(struct D2UnitStrc * pUnit);
 void __fastcall SKILLS_ApplyDamageReduction(int32_t pUnit, int32_t nReductionPercent);
 // Spawns nCount missiles at random positions within nRadius of the casting unit. Seeds the unit's RNG from its current map coordinates, then for each spawn picks a random (X,Y) offset within the diameter, rejects positions within 3 distance units of the caster, and calls MISSILE_CreateFromUnitWithOffset with the given missile ID array, skill, and skill level. Returns 1 on success, 0 if coordinates could not be retrieved.
 uint32_t __fastcall SKILL_SpawnRandomMissilesInArea(struct D2UnitStrc * pUnit, uint8_t * pMissileId, int32_t nCount, int32_t nRadius, eD2Skills eSkill, int32_t nSkillLevel);
-// Client-side skill expiry handler called when a skill animation completes. If the unit's current skill is not STATE_skill_move and has no loop flag (bit 1), looks up the skill's srvdofunc: 0x43 stops and clears the uninterruptable skill (Paladin Holy Shield etc.), 0x4C stops and clears sound (Barbarian), 0x4D/0x4E handles teleport landing. No-ops for all other srvdofunc values.
-// @sourcefile .\SKILLS\Skills.cpp
-void __fastcall SKILLS_CltProcessActiveSkill(struct D2UnitStrc * pUnit, eD2Skills eExpiredSkill, int32_t nExpiredSkillLevel);
 void __fastcall SKILL_CreateActiveSkillStatList(struct D2UnitStrc * pUnit);
 // Iterates all skills in a player's skill list and adjusts bonus levels by nBonusDelta for skills matching eSkillEType (element type, 0=all) and nSkillPage (skill tree tab, 4=all). Only affects player-owned skills (owner GUID == -1) with base level > 0 and flag bit 1 set. Removes skills whose total level drops to 0. Triggers SKILLS_UpdateAllPassiveSkills afterward.
 // @sourcefile .\SKILLS\Skills.cpp

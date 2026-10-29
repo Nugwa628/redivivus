@@ -60,7 +60,6 @@ void __fastcall MISSILE_SetPathFromTotalFrames_ForCatapultChargedBall(struct D2U
 // Client-side hit function for missile type 046 (spiral sub-missile burst). On collision, spawns a circular grid of sub-missiles (HitSubMissile1) centred on the missile's position using SKILLS_CreateMissilespiralGrid. Sub-missile count = (level-1)*HitPar2+HitPar1, falling back to skill calc[3] if less than 1. Uses MISSILES_SetPathFromTotalFramesCallbackAlt as the path callback. Always returns 1.
 int32_t __fastcall MISSILE_CltHitFn46_CatapultChargedBall(struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
 int32_t __fastcall MISSILE_CltHitFn51_LightTrailJavelin(struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
-int32_t __fastcall MISSILE_CltHitFn61_WorldStoneShake(struct D2UnitStrc * pUnit, struct D2UnitStrc * pTarget);
 void __fastcall LIGHTMAP_SetQualityLevel(uint32_t dwParam);
 int __stdcall LIGHTMAP_GetQualityLevel();
 int32_t __fastcall Missiles_SrvDoFuncData_02(struct D2UnitStrc * pUnit, struct D2MissileCltCollideCtxStrc * pCtx);

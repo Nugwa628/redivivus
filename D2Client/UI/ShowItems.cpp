@@ -106,15 +106,7 @@ void __stdcall DRAW_AltItems() {
             if (pItem && pItem->eUnitFlagsEx >> 7 & 1 && pItem->eUnitType == UNIT_ITEM && nItemSlotIdx < 0x20) {
               gaGroundItemLabels[nItemSlotIdx].pItem = pItem;
               __frame0.pCurrentItem = pItem;
-              if (!__frame0.bPerspectiveActive) {
-                nColorOrCoord = D2Common::Units::GetTargetX(pItem);
-                nCoordTemp = Path::DRAW_GetWorldOffsetX();
-                __frame0.nItemX = nColorOrCoord - nCoordTemp;
-                nColorOrCoord = Path::DRAW_GetWorldOffsetY();
-                nCoordTemp = D2Common::Units::GetTargetY(__frame0.pCurrentItem);
-                nColorIdx = nCoordTemp + (-0x10 - nColorOrCoord);
-                pItem = __frame0.pCurrentItem;
-              } else {
+              if (__frame0.bPerspectiveActive) {
                 nColorOrCoord = D2Common::Units::GetPrecisionX(pItem);
                 __frame0.nPrecisionX = D2Common::Units::GetPrecisionY(pItem);
                 uBorderType = D2gfx::D2GFX::D2GFX_IsInPerspectiveBounds(nColorOrCoord, __frame0.nPrecisionX);
@@ -126,15 +118,27 @@ void __stdcall DRAW_AltItems() {
                 D2gfx::D2GFX::D2GFX_AdjustPerspectivePosition(nColorOrCoord, __frame0.nPrecisionX, 0, &__frame0.nItemPosX, &__frame0.nPerspY);
                 uBorderType = Path::DRAW_GetTypeOfBorder();
                 nColorIdx = __frame0.nPerspY;
-                if (uBorderType == 1) {
-                  __frame0.nItemPosX -= (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
-                } else if (uBorderType == 2) {
-                  __frame0.nItemPosX += (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
+                switch (uBorderType) {
+                case 1: {
+                  __frame0.nItemPosX -= (int)ScreenSizeX / 4;
+                  break;
+                }
+                case 2: {
+                  __frame0.nItemPosX += (int)ScreenSizeX / 4;
                   __frame0.nItemX = __frame0.nItemPosX;
                   goto layout_label;
                 }
+                }
 
                 __frame0.nItemX = __frame0.nItemPosX;
+              } else {
+                nColorOrCoord = D2Common::Units::GetTargetX(pItem);
+                nCoordTemp = Path::DRAW_GetWorldOffsetX();
+                __frame0.nItemX = nColorOrCoord - nCoordTemp;
+                nColorOrCoord = Path::DRAW_GetWorldOffsetY();
+                nCoordTemp = D2Common::Units::GetTargetY(__frame0.pCurrentItem);
+                nColorIdx = nCoordTemp + (-0x10 - nColorOrCoord);
+                pItem = __frame0.pCurrentItem;
               }
 
               layout_label:
@@ -142,10 +146,15 @@ void __stdcall DRAW_AltItems() {
               __frame0.nItemVisY = nColorIdx;
               __frame0.nMaxX = ScreenSizeX;
               uBorderType = Path::DRAW_GetTypeOfBorder();
-              if (uBorderType == 1) {
+              switch (uBorderType) {
+              case 1: {
                 __frame0.nMaxX = ScreenSizeX / 2 - 0x20;
-              } else if (uBorderType == 2) {
+                break;
+              }
+              case 2: {
                 __frame0.nItemPosY = ScreenSizeX / 2;
+                break;
+              }
               }
 
               nDrawCount = gItemDrawFlags;
@@ -179,7 +188,45 @@ void __stdcall DRAW_AltItems() {
                   gaGroundItemLabels[nItemSlotIdx].nTop = __frame0.nItemNameHeight;
                   gaGroundItemLabels[nItemSlotIdx].nRight = __frame0.nPrecisionX;
                   gaGroundItemLabels[nItemSlotIdx].nBottom = __frame0.nItemVisY;
-                  if (!__frame0.bFoundMatch) {
+                  if (__frame0.bFoundMatch) {
+                    color_by_quality:
+                    nColorIdx = 0;
+                    gaGroundItemLabels[nItemSlotIdx].nColorKey = 0;
+                    gaGroundItemLabels[nItemSlotIdx].nDrawPosition = 1;
+                    nDrawCount = D2Common::ITEMS::Items::GetItemQuality(__frame0.pCurrentItem);
+                    switch (nDrawCount) {
+                      case 4:
+                        nColorIdx = 3;
+                      break;
+                      case 6:
+                        nColorIdx = 9;
+                      break;
+                      case 8:
+                        nColorIdx = 8;
+                      break;
+                      case 9:
+                        nColorIdx = 10;
+                      break;
+                      case 7:
+                        nColorIdx = 4;
+                      break;
+                      case 5:
+                        nColorIdx = 2;
+                      break;
+                      default:
+                        bSocketedFlag = D2Common::ITEMS::Items::CheckItemFlag(pItem, ITEMFLAG_SOCKETED, 0x106, ".\\UI\\showitems.cpp");
+                      if (bSocketedFlag && (nColorOrCoord = D2Common::ITEMS::Items::ITEM_GetItemsTxt_bHasInv(pItem) , nColorOrCoord != 0) && (nMaxSockets = D2Common::ITEMS::Items::ITEM_GetMaxSockCount(pItem) , nMaxSockets != '\0') || (bSocketedFlag = D2Common::ITEMS::Items::CheckItemFlag(pItem, ITEMFLAG_ETHEREAL, 0x10c, ".\\UI\\showitems.cpp") , bSocketedFlag != 0)) {
+                        nColorIdx = 5;
+                      }
+                    }
+
+                    pItemTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(pItem->nClassId);
+                    if (pItemTxt->bQuest && pItemTxt->dwCode != 0x2067656c) {
+                      nColorIdx = 4;
+                    }
+
+                    gaGroundItemLabels[nItemSlotIdx].nTextColor = nColorIdx;
+                  } else {
                     if (nMouseX < __frame0.nItemX || __frame0.nPrecisionX < nMouseX || nMouseY < __frame0.nItemNameHeight || __frame0.nItemVisY + 4 < nMouseY) {
                       if (__frame0.pCurrentItem != pPlayerUnit_lcl) {
                         goto color_by_quality;
@@ -198,44 +245,6 @@ void __stdcall DRAW_AltItems() {
                       GAME::Select::SELECT_UpdateUnitSelection(__frame0.pCurrentItem);
                       __frame0.bFoundMatch = 1;
                     }
-                  } else {
-                    color_by_quality:
-                    nColorIdx = 0;
-                    gaGroundItemLabels[nItemSlotIdx].nColorKey = 0;
-                    gaGroundItemLabels[nItemSlotIdx].nDrawPosition = 1;
-                    nDrawCount = D2Common::ITEMS::Items::GetItemQuality(__frame0.pCurrentItem);
-                    switch (nDrawCount) {
-                      case 4:
-                        nColorIdx = 3;
-                      break;
-                      case 5:
-                        nColorIdx = 2;
-                      break;
-                      case 6:
-                        nColorIdx = 9;
-                      break;
-                      case 7:
-                        nColorIdx = 4;
-                      break;
-                      case 8:
-                        nColorIdx = 8;
-                      break;
-                      case 9:
-                        nColorIdx = 10;
-                      break;
-                      default:
-                        bSocketedFlag = D2Common::ITEMS::Items::CheckItemFlag(pItem, ITEMFLAG_SOCKETED, 0x106, ".\\UI\\showitems.cpp");
-                      if (bSocketedFlag && (nColorOrCoord = D2Common::ITEMS::Items::ITEM_GetItemsTxt_bHasInv(pItem) , nColorOrCoord != 0) && (nMaxSockets = D2Common::ITEMS::Items::ITEM_GetMaxSockCount(pItem) , nMaxSockets != '\0') || (bSocketedFlag = D2Common::ITEMS::Items::CheckItemFlag(pItem, ITEMFLAG_ETHEREAL, 0x10c, ".\\UI\\showitems.cpp") , bSocketedFlag != 0)) {
-                        nColorIdx = 5;
-                      }
-                    }
-
-                    pItemTxt = D2Common::DATATBLS::ItemTbls::TXT_Items_GetLine(pItem->nClassId);
-                    if (pItemTxt->bQuest && pItemTxt->dwCode != 0x2067656c) {
-                      nColorIdx = 4;
-                    }
-
-                    gaGroundItemLabels[nItemSlotIdx].nTextColor = nColorIdx;
                   }
 
                   gItemDrawFlags++;

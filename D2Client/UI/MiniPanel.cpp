@@ -67,25 +67,27 @@ void MINIPANEL_DrawBackground(int32_t nPanelSection) {
       D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, ScreenSizeX / 2 - 0xcd, ScreenSizeY - 0x2f, -1, DRAW_SOLID, nullptr);
     } else {
       int nXOffset;
-      if (nPanelSection == 2) {
-        if (!gbMiniPanelSinglePlayer) {
-          nXOffset = -0x54;
-        } else {
+      switch (nPanelSection) {
+      case 2: {
+        if (gbMiniPanelSinglePlayer) {
           nXOffset = -0x4a;
+        } else {
+          nXOffset = -0x54;
         }
 
         D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, ScreenSizeX / 2 + nXOffset - 3, ScreenSizeY - 0x2f, -1, DRAW_SOLID, nullptr);
         return;
       }
-      if (nPanelSection == 3) {
-        if (!gbMiniPanelSinglePlayer) {
-          nXOffset = ScreenSizeX / 2 + 0x23;
-        } else {
+      case 3: {
+        if (gbMiniPanelSinglePlayer) {
           nXOffset = ScreenSizeX / 2 + 0x38;
+        } else {
+          nXOffset = ScreenSizeX / 2 + 0x23;
         }
 
         D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nXOffset - 2, ScreenSizeY - 0x2f, -1, DRAW_SOLID, nullptr);
         return;
+      }
       }
     }
 }
@@ -553,13 +555,13 @@ void __stdcall INPUT_MiniPanelMouseDown(D2UIMouseMsgStrc * pMsg) {
     if (nMouseX <= nButtonIndex - 0x54) {
       return;
     }
-    if (nButtonIndex + 0x59 <= nMouseX) {
+    if (nMouseX >= nButtonIndex + 0x59) {
       return;
     }
     if (nMouseY <= ScreenSizeY - 0x45) {
       return;
     }
-    if (ScreenSizeY - 0x2f <= nMouseY) {
+    if (nMouseY >= ScreenSizeY - 0x2f) {
       return;
     }
 
@@ -570,7 +572,7 @@ void __stdcall INPUT_MiniPanelMouseDown(D2UIMouseMsgStrc * pMsg) {
 
     while (nMouseX <= (int)gnMiniPanelButtonX[nButtonIndex] || (int)(gnMiniPanelButtonX[nButtonIndex] + 0x14) <= nMouseX) {
       nButtonIndex++;
-      if (nButtonCount <= nButtonIndex) {
+      if (nButtonIndex >= nButtonCount) {
         return;
       }
     }
@@ -752,8 +754,8 @@ static void __stdcall MINIPANEL_ShowTooltip(int32_t nX, int32_t nY, int32_t nBut
       pLocaleStr += 2;
     }
 
-    pLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(nStringIndex);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszTooltip, pLocaleStr);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszTooltip, D2Lang::StrTable::strtable::GetLocaleString(nStringIndex));
     if (bHasCommand && nCommandId != 0x39) {
       uint16_t* pFormatStr;
       Fog::File::CONTAINER_InitializeBuffer(wszKeyText, 2, 0x1e, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
@@ -761,8 +763,8 @@ static void __stdcall MINIPANEL_ShowTooltip(int32_t nX, int32_t nY, int32_t nBut
       if (nStringIndex != 0xffff) {
         memset(wszKeyText, 0, 0x3c);
         pLocaleStr = CmdTbl::CMD_GetKeyNameForCommand(nCommandId, 1);
-        pFormatStr = D2Lang::StrTable::strtable::GetLocaleString(0x1052);
-        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyText, pFormatStr, pLocaleStr);
+
+        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyText, D2Lang::StrTable::strtable::GetLocaleString(0x1052), pLocaleStr);
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, wszKeyText);
       }
 
@@ -770,8 +772,8 @@ static void __stdcall MINIPANEL_ShowTooltip(int32_t nX, int32_t nY, int32_t nBut
       if (nStringIndex != 0xffff) {
         memset(wszKeyText, 0, 0x3c);
         pLocaleStr = CmdTbl::CMD_GetKeyNameForCommand(nCommandId, 0);
-        pFormatStr = D2Lang::StrTable::strtable::GetLocaleString(0x1052);
-        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyText, pFormatStr, pLocaleStr);
+
+        D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x1e, wszKeyText, D2Lang::StrTable::strtable::GetLocaleString(0x1052), pLocaleStr);
         D2Lang::Unicode::UNISYS::AppendToBuffer(wszTooltip, wszKeyText);
       }
     }
@@ -826,10 +828,10 @@ void __stdcall DRAW_UI_MiniPanel() {
       if (!bRightOpen) {
         memset(&sGfxData, 0, 0x48);
         sGfxData.pDC6 = gpMiniPanelBackgroundDC6;
-        if (!gbMiniPanelSinglePlayer) {
-          iVar1 = -0x54;
-        } else {
+        if (gbMiniPanelSinglePlayer) {
           iVar1 = -0x4a;
+        } else {
+          iVar1 = -0x54;
         }
 
         D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, ScreenSizeX / 2 + iVar1 - 3, ScreenSizeY - 0x2f, -1, DRAW_SOLID, nullptr);
@@ -852,10 +854,10 @@ void __stdcall DRAW_UI_MiniPanel() {
     if (!bRightOpen) {
       memset(&sGfxData, 0, 0x48);
       sGfxData.pDC6 = gpMiniPanelBackgroundDC6;
-      if (!gbMiniPanelSinglePlayer) {
-        iVar1 = ScreenSizeX / 2 + 0x23;
-      } else {
+      if (gbMiniPanelSinglePlayer) {
         iVar1 = ScreenSizeX / 2 + 0x38;
+      } else {
+        iVar1 = ScreenSizeX / 2 + 0x23;
       }
 
       D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, iVar1 - 2, ScreenSizeY - 0x2f, -1, DRAW_SOLID, nullptr);

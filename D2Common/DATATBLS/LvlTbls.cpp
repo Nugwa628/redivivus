@@ -793,7 +793,7 @@ void __fastcall TXT_AllocTxt_levels(D2PoolManagerStrc * pMemory) {
     levels[0x8d].nOffset = 0;
     levels[0x8d].fpLinker = 0;
     sgtDataTable.pTxtLevels = (D2LevelsTxt*)DataTbls::CompileTxt(pMemory, "levels", levels, &sgtDataTable.nTxtLevelsSize, 0x220);
-    if (0x3ff < sgtDataTable.nTxtLevelsSize) {
+    if (0x400 <= sgtDataTable.nTxtLevelsSize) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 199);
       exit(-1);
     }
@@ -811,8 +811,8 @@ void __fastcall TXT_AllocTxt_levels(D2PoolManagerStrc * pMemory) {
       memset(pWVar2, 0, 0x50);
       memset((void*)&pDVar1[i].wszLevelWarp[0], 0, 0x50);
       nWideCharBufLen = 0x28;
-      pwszLevelWarpStr = D2Lang::StrTable::strtable::STRTABLE_GetStringByKey((uint8_t*)(pDVar1->LevelName + nByteOffset));
-      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(pWVar2, pwszLevelWarpStr, nWideCharBufLen);
+
+      D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(pWVar2, D2Lang::StrTable::strtable::STRTABLE_GetStringByKey((uint8_t*)(pDVar1->LevelName + nByteOffset)), nWideCharBufLen);
       nWideCharBufLen = 0x28;
       pDVar1[i].wszLevelName[39] = 0;
       pWVar2 = D2Lang::StrTable::strtable::STRTABLE_GetStringByKey((uint8_t*)(pDVar1->LevelWarp + nByteOffset));
@@ -962,7 +962,7 @@ static void LVLTBLS_BuildPortalLevelArray(D2LevelDefsTxt * pTxtLevelDefs) {
     pPortalFieldCur = &pTxtLevelDefs->Portal;
     do {
       if (*pPortalFieldCur) {
-        if ((int)nPortalLevels <= nPortalWriteIdx) {
+        if (nPortalWriteIdx >= (int)nPortalLevels) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x177);
           exit(-1);
         }
@@ -1729,37 +1729,37 @@ void __fastcall TXT_AllocTxt_lvlwarp(D2PoolManagerStrc * pMemory) {
     D2BinFieldInputStrc lvlwarp[13];
     int nTxtLvlWarpSize_lcl;
     lvlwarp[0].eType = FIELDTYPE_INT;
-    lvlwarp[1].eType = FIELDTYPE_INT;
-    lvlwarp[2].eType = FIELDTYPE_INT;
-    lvlwarp[3].eType = FIELDTYPE_INT;
-    lvlwarp[4].eType = FIELDTYPE_INT;
-    lvlwarp[5].eType = FIELDTYPE_INT;
-    lvlwarp[6].eType = FIELDTYPE_INT;
-    lvlwarp[7].eType = FIELDTYPE_INT;
-    lvlwarp[8].eType = FIELDTYPE_INT;
-    lvlwarp[9].eType = FIELDTYPE_INT;
-    lvlwarp[10].eType = FIELDTYPE_INT;
     lvlwarp[0].nSize = 0;
     lvlwarp[0].nOffset = 0;
     lvlwarp[0].fpLinker = 0;
+    lvlwarp[1].eType = FIELDTYPE_INT;
     lvlwarp[1].nSize = 0;
     lvlwarp[1].fpLinker = 0;
+    lvlwarp[2].eType = FIELDTYPE_INT;
     lvlwarp[2].nSize = 0;
     lvlwarp[2].fpLinker = 0;
+    lvlwarp[3].eType = FIELDTYPE_INT;
     lvlwarp[3].nSize = 0;
     lvlwarp[3].fpLinker = 0;
+    lvlwarp[4].eType = FIELDTYPE_INT;
     lvlwarp[4].nSize = 0;
     lvlwarp[4].fpLinker = 0;
+    lvlwarp[5].eType = FIELDTYPE_INT;
     lvlwarp[5].nSize = 0;
     lvlwarp[5].fpLinker = 0;
+    lvlwarp[6].eType = FIELDTYPE_INT;
     lvlwarp[6].nSize = 0;
     lvlwarp[6].fpLinker = 0;
+    lvlwarp[7].eType = FIELDTYPE_INT;
     lvlwarp[7].nSize = 0;
     lvlwarp[7].fpLinker = 0;
+    lvlwarp[8].eType = FIELDTYPE_INT;
     lvlwarp[8].nSize = 0;
     lvlwarp[8].fpLinker = 0;
+    lvlwarp[9].eType = FIELDTYPE_INT;
     lvlwarp[9].nSize = 0;
     lvlwarp[9].fpLinker = 0;
+    lvlwarp[10].eType = FIELDTYPE_INT;
     lvlwarp[10].nSize = 0;
     lvlwarp[10].fpLinker = 0;
     lvlwarp[0xb].fpLinker = 0;
@@ -2030,7 +2030,7 @@ void __fastcall TXT_AllocTxt_lvlsub(D2PoolManagerStrc * pMemory, int32_t nParam,
     if (0 < nTxtLvlSubSize) {
       size_t nAllocSize;
       do {
-        if (nMaxTypeId < pLvlSubTxt->Type) {
+        if (pLvlSubTxt->Type > nMaxTypeId) {
           nMaxTypeId = pLvlSubTxt->Type;
         }
 
@@ -2931,8 +2931,7 @@ void __fastcall TXT_AllocTxt_automap(D2PoolManagerStrc * pMemory) {
     int nIndex;
     Seed::SEED_InitDefault(psDataTableSeed);
     D2SeedStrc* pSeed = psDataTableSeed;
-    psDataTableSeed->nSeedLow = 0;
-    pSeed->nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(pSeed, 0);
     automap[0].eType = FIELDTYPE_ASCII;
     automap[1].eType = FIELDTYPE_ASCII;
     automap[2].eType = FIELDTYPE_CHAR;
@@ -3035,7 +3034,7 @@ void __fastcall TXT_AllocTxt_automap(D2PoolManagerStrc * pMemory) {
       ((D2AutomapRelatedTxt*)(pMiddlePointer - 1))->nIndex = -1;
       *pMiddlePointer = -1;
       pMiddlePointer += 2;
-    } while ((int)pMiddlePointer < (uintptr_t)&gpaAutoMapRelated + 292);
+    } while ((int)pMiddlePointer < (int)((uintptr_t)&gpaAutoMapRelated + 292));
 
     int nAutoMapRow = 0;
     if (0 < nTxtAutomapSize) {

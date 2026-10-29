@@ -523,7 +523,7 @@ void __fastcall Q04_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (byStateFlag == 4) {
         nMessageIndexMaybe = 2;
       } else {
-        if (5 < byStateFlag) {
+        if (6 <= byStateFlag) {
           return;
         }
 
@@ -531,7 +531,7 @@ void __fastcall Q04_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         if (nMessageIndexMaybe == -1) {
           return;
         }
-        if (10 < nMessageIndexMaybe) {
+        if (11 <= nMessageIndexMaybe) {
           return;
         }
       }
@@ -614,9 +614,9 @@ static void __stdcall Q04_SpawnDeckardCainNpc(D2RoomStrc * pRoom, ::SGAMEDATA * 
     pSpawnRoomOut = pRoom;
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetRoomCoordinates(pRoom, &sRoomCoords);
     int iRetry;
-    iRetry = 0;
     ptCainSpawnPos.x = nX;
     ptCainSpawnPos.y = nY;
+    iRetry = 0;
     do {
       if (sRoomCoords.dwXStart <= ptCainSpawnPos.x && sRoomCoords.dwYStart <= ptCainSpawnPos.y && ptCainSpawnPos.x < sRoomCoords.dwXSize - 1 + sRoomCoords.dwXStart && ptCainSpawnPos.y < sRoomCoords.dwYSize - 1 + sRoomCoords.dwYStart) {
         goto spawn_cain;
@@ -625,15 +625,15 @@ static void __stdcall Q04_SpawnDeckardCainNpc(D2RoomStrc * pRoom, ::SGAMEDATA * 
       iRetry++;
       ptCainSpawnPos.x++;
       ptCainSpawnPos.y++;
-    } while (iRetry < 0x15);
+    } while (iRetry <= 0x14);
 
     ptCainSpawnPos.x = nY;
     spawn_cain:
     FindSpawnableLocation(pRoom, &ptCainSpawnPos, 2, 0x100, &pSpawnRoomOut, 1, 100);
     if (!pSpawnRoomOut) {
+      pSpawnRoomOut = pRoom;
       ptCainSpawnPos.x = nX;
       ptCainSpawnPos.y = nY;
-      pSpawnRoomOut = pRoom;
     }
 
     D2UnitStrc* pSpawnedCain;
@@ -821,21 +821,21 @@ uint8_t __fastcall Q04_SpawnTristramPortal(::SGAMEDATA * pGame, D2QuestDataStrc 
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nStonesY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nStonesY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nStonesY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nStonesY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nStonesX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nStonesX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nStonesX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nStonesX = 0;
     }
 
     BOOL bIgnoreSpawnLoc = 1;
@@ -844,8 +844,8 @@ uint8_t __fastcall Q04_SpawnTristramPortal(::SGAMEDATA * pGame, D2QuestDataStrc 
     eD2LevelId eLevel = LEVEL_Tristram;
     nStonesY += 4;
     nStonesX += 4;
-    pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    bIgnoreSpawnLoc = SKILLS::SkillsServer::SERVER_SpawnPortal(pGame, nullptr, pRoom, nStonesX, nStonesY, eLevel, ppPortalUnitOut, nClassId, bIgnoreSpawnLoc);
+
+    bIgnoreSpawnLoc = SKILLS::SkillsServer::SERVER_SpawnPortal(pGame, nullptr, D2Common::Units::UNITS_GetRoom(pUnit), nStonesX, nStonesY, eLevel, ppPortalUnitOut, nClassId, bIgnoreSpawnLoc);
     if (!bIgnoreSpawnLoc) {
       return '\0';
     }
@@ -1126,7 +1126,7 @@ BOOL __fastcall Q04_RegisterTristramVisitor(::SGAMEDATA * pGame, D2UnitStrc * pU
 // A1Q4 — Q04_TimerDespawnRogueGuards: quest-timer entry that iterates all monsters
 // running Q04_DespawnRogueGuards (kills/clears the Rogue guards), then clears the
 // "despawn scheduled" flag (0x46).
-uint8_t __fastcall Q04_TimerDespawnRogueGuards(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q04_TimerDespawnRogueGuards(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 1, nullptr, (::fpExecuteOnUnitFunction)Q04_DespawnRogueGuards);
     pQuestData->pQuestSpecificData.pA1Q4->sSub.bRogueGuardTimerArmed = false;
     return '\x01';
@@ -1220,8 +1220,8 @@ BOOL __fastcall OBJOP_A1Q4_ActivateInifussTree(D2ObjectOperateFnArg * pOperation
     }
 
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
-    D2UnitDataPlayerStrc* pUnitPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
-    D2BitBufferStrc* pBitBuffer = pUnitPlayerData->pQuestRecord[pGame->nDifficulty];
+
+    D2BitBufferStrc* pBitBuffer = D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty];
     _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_RewardAwaits);
     if (!_bQuestState && (_bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_Completed) , !_bQuestState)) {
       D2UnitStrc* pUnit;
@@ -1245,8 +1245,8 @@ BOOL __fastcall OBJOP_A1Q4_ActivateInifussTree(D2ObjectOperateFnArg * pOperation
         pGame = pOperation->sArg.pGame;
         GAME::Event::SetEvent(pGame, pOperation->sArg.pVictim, 7, pGame->dwGameFrame + 0x11, 0, 0);
         _bQuestState = 0;
-        pRoom = D2Common::Units::UNITS_GetRoom(pOperation->sArg.pVictim);
-        D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(pRoom, _bQuestState);
+
+        D2Common::DUNGEON::Dungeon::ToggleHasPortalFlagRoom(D2Common::Units::UNITS_GetRoom(pOperation->sArg.pVictim), _bQuestState);
         D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_JustCompleted);
         D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheSearchForCain, QUESTSTATE_RewardAwaits);
         QUEST_SendQuestInfoToUnit(pOperation->sArg.pGame, pOperation->pAttacker);
@@ -1271,13 +1271,7 @@ void __fastcall Objects_InitFn06(uint32_t * pdwParam) {
     char cFlagByte;
     D2UnitStrc* pObjectUnit;
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal((::SGAMEDATA*)*pdwParam, QUESTINT_TheSearchForCain);
-    if (!pQuestData) {
-      pA1Q1Data = (D2QuestDataA1Q1Strc*)pdwParam[1];
-      if (!pA1Q1Data || pA1Q1Data->sQuestGUID.aPlayerGUID[4] != 2) {
-        D2Common::Units::SetupUpdateFlag((D2UnitStrc*)pA1Q1Data, 2);
-        return;
-      }
-    } else {
+    if (pQuestData) {
       int32_t nClassId;
       pObjectUnit = (D2UnitStrc*)pdwParam[1];
       if (!pObjectUnit) {
@@ -1315,6 +1309,12 @@ void __fastcall Objects_InitFn06(uint32_t * pdwParam) {
         }
       } else {
         D2Common::Units::SetupUpdateFlag(pObjectUnit, 2);
+      }
+    } else {
+      pA1Q1Data = (D2QuestDataA1Q1Strc*)pdwParam[1];
+      if (!pA1Q1Data || pA1Q1Data->sQuestGUID.aPlayerGUID[4] != 2) {
+        D2Common::Units::SetupUpdateFlag((D2UnitStrc*)pA1Q1Data, 2);
+        return;
       }
     }
 }
@@ -1434,7 +1434,7 @@ BOOL __fastcall OBJOP_A1Q4_ActivateHoradricMalusSmith(D2ObjectOperateFnArg * pOp
     if (!__frame0.pQuestData->bIsNotIntroduction) {
       return 0;
     }
-    if (5 < __frame0.pQuestData->nStateFlag) {
+    if (6 <= __frame0.pQuestData->nStateFlag) {
       return 0;
     }
 
@@ -1531,7 +1531,7 @@ BOOL __fastcall OBJOP_A1Q4_ActivateHoradricMalusSmith(D2ObjectOperateFnArg * pOp
       D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pUnitPlayerData, pppRoomList, (int*)pNumRooms);
       pRoomListEnd = 0;
       pMissileRoom = __frame0.pExistingPortal;
-      if (__frame0.pExistingPortal) {
+      if ((uint32_t)__frame0.pExistingPortal > 0) {
         do {
           pMissileUnit = __frame0.ppRoomList[(int)pRoomListEnd]->pUnitList;
           do {
@@ -2271,8 +2271,8 @@ void __fastcall Q04_DropShieldRewards(D2QuestDataStrc * pQuestData, D2UnitStrc *
       pQuestSpecificData->sSub.bShieldDropActive = true;
       nShieldCount = 0x14;
       pDroppedItemOut = pQuestData;
-      pSeed = GetQuestControlSeed(pQuestData->pGame);
-      nShieldCount = D2Client::SEED_RollRange(pSeed, 10, nShieldCount);
+
+      nShieldCount = D2Client::SEED_RollRange(GetQuestControlSeed(pQuestData->pGame), 10, nShieldCount);
       pQuestSpecificData->sSub.nShieldsRemaining = nShieldCount;
       pUnit->dwDropItemCode = 0x20646c67;
     }
@@ -2286,8 +2286,7 @@ void __fastcall Q04_DropShieldRewards(D2QuestDataStrc * pQuestData, D2UnitStrc *
       return;
     }
 
-    int32_t* pShieldsRemaining = &pQuestSpecificData->sSub.nShieldsRemaining;
-    (*pShieldsRemaining)--;
+    pQuestSpecificData->sSub.nShieldsRemaining--;
     if (0 >= pQuestSpecificData->sSub.nShieldsRemaining) {
       return;
     }

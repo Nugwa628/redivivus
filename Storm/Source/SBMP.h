@@ -102,7 +102,6 @@ namespace Storm::Source::SBMP {
 // Write bitmap data to PCX format file with RLE compression and palette
 // @sourcefile .\SOURCE\SBMP.CPP
 // @blizzard EncodePcx256File (SBMP.CPP)
-int __fastcall SBMP_EncodePcx256File(int nWidth, int nHeight, HANDLE hFile, int nPalettePtr, void * pPixels);
 // @blizzard CompressGifImage (SBMP.CPP)
 int __fastcall SBMP_CompressGifImage(int nSrcLen, uint8_t * pSrcPixels, int pDstBuf);
 // Decodes an image already held in memory. With nFormat 0 it sniffs the first two bytes via SBMP_DetectFormat, then dispatches to SBMP_LoadBMPFromMemory / SBMP_LoadGIFFromMemory / SBMP_LoadFromMemory (TGA).

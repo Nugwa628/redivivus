@@ -237,7 +237,7 @@ int __fastcall SKILL_SelectProc_IsConvertibleCorpse(D2UnitStrc * pUnit, D2UnitSt
     }
 
     int32_t nMonStatsId = UNIT::Player::TXT_MonStats_GetBaseId(pTargetUnit);
-    if (!(nMonStatsId < 0 || sgptDataTable->nTxtMonStatsSize <= nMonStatsId || nMonStatsId != 0x4e)) {
+    if (!(nMonStatsId < 0 || nMonStatsId >= sgptDataTable->nTxtMonStatsSize || nMonStatsId != 0x4e)) {
       return 0;
     }
 
@@ -813,7 +813,7 @@ void __stdcall CMD_ReleaseHoldAltAndClearSelection() {
 
 // Validates whether a command can be bound to mouse buttons (0x103-0x104). Returns false if command handler exists and button is left/right click, true otherwise. Used during key binding setup to prevent invalid mouse button assignments.
 BOOL CMD_ValidateMouseButtonBinding(int32_t nCmdIndex, uint16_t * pErrorCode, uint32_t nMouseButton) {
-    if (!((nMouseButton & 0xffff) - 0x103 < 2 && gaCmdBindings[nCmdIndex].pfnAltHandler)) {
+    if (!((nMouseButton & 0xffff) - 0x103 <= 1 && gaCmdBindings[nCmdIndex].pfnAltHandler)) {
       return 1;
     }
     if (!pErrorCode) {
@@ -825,7 +825,7 @@ BOOL CMD_ValidateMouseButtonBinding(int32_t nCmdIndex, uint16_t * pErrorCode, ui
 }
 
 int32_t SORT_CompareInts(int * pA, int * pB) {
-    if (*pA < *pB) {
+    if (*pB > *pA) {
       return -1;
     }
     if (*pB < *pA) {
@@ -859,7 +859,7 @@ void __stdcall CMD_RebuildDerivedBindings() {
           nKeyCode = (uint32_t)pBinding->wKeyCode;
           switch (nKeyCode) {
             case 0x100:
-              if (nKeyCode - 0x103 < 2 && gaCmdBindings[iVar1].pfnAltHandler) {
+              if (nKeyCode - 0x103 <= 1 && gaCmdBindings[iVar1].pfnAltHandler) {
                 unbind_key:
                 pBinding->wKeyCode = 0xffff;
               } else {
@@ -868,27 +868,27 @@ void __stdcall CMD_RebuildDerivedBindings() {
               }
             break;
             case 0x101:
-              if (nKeyCode - 0x103 < 2 && gaCmdBindings[iVar1].pfnAltHandler) {
+              if (nKeyCode - 0x103 <= 1 && gaCmdBindings[iVar1].pfnAltHandler) {
                 goto unbind_key;
               }
             gpfnMouseMiddleButtonAltHandler = gaCmdBindings[iVar1].pfnHandler;
             gpfnMouseRightButtonHandler = gaCmdBindings[iVar1].pfnAltHandler;
             break;
             case 0x102:
-              if (nKeyCode - 0x103 < 2 && gaCmdBindings[iVar1].pfnAltHandler) {
+              if (nKeyCode - 0x103 <= 1 && gaCmdBindings[iVar1].pfnAltHandler) {
                 goto unbind_key;
               }
             gpfnMouseRightButtonAltHandler = gaCmdBindings[iVar1].pfnHandler;
             gpfnMouseMiddleButtonHandler = gaCmdBindings[iVar1].pfnAltHandler;
             break;
             case 0x103:
-              if (nKeyCode - 0x103 < 2 && gaCmdBindings[iVar1].pfnAltHandler) {
+              if (nKeyCode - 0x103 <= 1 && gaCmdBindings[iVar1].pfnAltHandler) {
                 goto unbind_key;
               }
             gpfnScrollUpButtonHandler = gaCmdBindings[iVar1].pfnHandler;
             break;
             case 0x104:
-              if (nKeyCode - 0x103 < 2 && gaCmdBindings[iVar1].pfnAltHandler) {
+              if (nKeyCode - 0x103 <= 1 && gaCmdBindings[iVar1].pfnAltHandler) {
                 goto unbind_key;
               }
             gpfnScrollDownButtonHandler = gaCmdBindings[iVar1].pfnHandler;
@@ -921,8 +921,8 @@ void __stdcall ClientLight_UpdateRoomLightPulse() {
     uint8_t* pGreen = &gRoomLightPulse.nLightRoomGreen;
     uint8_t* pRed = &gRoomLightPulse.nLightRoomRed;
     uint32_t nAmbientColor = 0;
-    D2RoomStrc* pRoom = UNIT::CUnit::GetCurrentRoom();
-    Draw::LightMap::ROOM_GetAmbientLightColor(pRoom, &nAmbientColor, (char*)pRed, (char*)pGreen, (char*)pBlue, nAmbientArg);
+    D2RoomStrc* pRoom;
+    Draw::LightMap::ROOM_GetAmbientLightColor(UNIT::CUnit::GetCurrentRoom(), &nAmbientColor, (char*)pRed, (char*)pGreen, (char*)pBlue, nAmbientArg);
     if ((int)gRoomLightPulse.nCurrentTick < (int)gRoomLightPulse.nFadeInDuration) {
       fVar1 = Fog::MATH_sinTable_f32_LookupOffset(gRoomLightPulse.nSinOffset);
       fAmbientColorF = (float)(int)nAmbientColor;
@@ -932,9 +932,7 @@ void __stdcall ClientLight_UpdateRoomLightPulse() {
 
       gRoomLightPulse.nLightPulseIntensity = (uint32_t)(fAmbientColorF * fVar1);
       gRoomLightPulse.nSinOffset = (int)(gRoomLightPulse.nCurrentTick << 7) / (int)gRoomLightPulse.nFadeInDuration;
-    } else if ((int)gRoomLightPulse.nCurrentTick < (int)(gRoomLightPulse.nTotalDuration - gRoomLightPulse.nFadeOutDuration)) {
-      gRoomLightPulse.nLightPulseIntensity = 0;
-    } else {
+    } else if (!((int)gRoomLightPulse.nCurrentTick < (int)(gRoomLightPulse.nTotalDuration - gRoomLightPulse.nFadeOutDuration))) {
       fVar1 = Fog::MATH_sinTable_f32_LookupOffset(gRoomLightPulse.nSinOffset);
       fAmbientColorF = (float)(int)nAmbientColor;
       if ((int)nAmbientColor < 0) {
@@ -948,6 +946,8 @@ void __stdcall ClientLight_UpdateRoomLightPulse() {
       }
 
       gRoomLightPulse.nSinOffset = 0x80 - (int)((nFadeOutBase + gRoomLightPulse.nCurrentTick) * 0x80) / (int)gRoomLightPulse.nFadeOutDuration;
+    } else {
+      gRoomLightPulse.nLightPulseIntensity = 0;
     }
 
     gRoomLightPulse.nCurrentTick++;
@@ -956,7 +956,7 @@ void __stdcall ClientLight_UpdateRoomLightPulse() {
     if (pRoom) {
       eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     }
-    if (!((int)gRoomLightPulse.nTotalDuration < (int)gRoomLightPulse.nCurrentTick || eLevelId != gRoomLightPulse.eLevelId)) {
+    if (!((int)gRoomLightPulse.nCurrentTick > (int)gRoomLightPulse.nTotalDuration || eLevelId != gRoomLightPulse.eLevelId)) {
       return;
     }
 
@@ -1195,9 +1195,7 @@ void __fastcall UNITMODE_ExecuteDeferredAction(D2UnitStrc * pUnit) {
     }
     if (eTargetType == UNIT_PLAYER) {
       fInteractResult = UNIT::UnitMode::UNITMODE_HandleItemOrObjectInteraction(nActionType, 0, nUnitGUID, pTargetUnit, pUnit);
-    } else if (eTargetType == UNIT_MONSTER) {
-      fInteractResult = UNIT::UnitMode::UNITMODE_HandleSkillTargetInteraction(nActionType, 1, pUnit, pTargetUnit, nUnitGUID);
-    } else {
+    } else if (eTargetType != UNIT_MONSTER) {
       if (eTargetType != UNIT_OBJECT) {
         bTargetable = UNIT::CheckFlags(pTargetUnit, UNITFLAG_TARGETABLE);
         if (!bTargetable) {
@@ -1209,6 +1207,8 @@ void __fastcall UNITMODE_ExecuteDeferredAction(D2UnitStrc * pUnit) {
       }
 
       fInteractResult = UNITMODE_TryInteractWithObject(pUnit, (D2PathPointStrc)0x2, nActionType, pTargetUnit, nUnitGUID);
+    } else {
+      fInteractResult = UNIT::UnitMode::UNITMODE_HandleSkillTargetInteraction(nActionType, 1, pUnit, pTargetUnit, nUnitGUID);
     }
     if (!fInteractResult) {
       return;
@@ -1291,11 +1291,11 @@ void __fastcall ExitGamePlayCutScene(int32_t nCutsceneId) {
         pszSrcName[(int)(szVideoPath + bMpqLoaded)] = cChar;
         pszSrcName++;
       } while (cChar != '\0');
-    } else if (gbLoggerStateInactive == '\0') {
+    } else if (gbLoggerStateInactive != '\0') {
+      sprintf(szVideoPath, gdwSoundHeaderCacheIndex[nCutsceneId].pszVideoPath, "640x292");
+    } else {
       nPlayMode = 2;
       sprintf(szVideoPath, gdwSoundHeaderCacheIndex[nCutsceneId].pszVideoPath, "640x146");
-    } else {
-      sprintf(szVideoPath, gdwSoundHeaderCacheIndex[nCutsceneId].pszVideoPath, "640x292");
     }
 
     Sound::SoundHdr::Cleanup();
@@ -1352,10 +1352,10 @@ void __fastcall ExitGamePlayCutScene(int32_t nCutsceneId) {
         }
       } else {
         bVideoLoaded = 1;
-        if (!gdwSoundHeaderCacheIndex[nCutsceneId].bHasAltSoundPath) {
-          sprintf((char*)szSoundPath, "%s\\video\\%s", "DATA\\GLOBAL", szVideoPath);
-        } else {
+        if (gdwSoundHeaderCacheIndex[nCutsceneId].bHasAltSoundPath) {
           Sound::SOUND_LocalizeSoundPath("%s\\video\\%s\\%s", szSoundPath);
+        } else {
+          sprintf((char*)szSoundPath, "%s\\video\\%s", "DATA\\GLOBAL", szVideoPath);
         }
 
         bExitCutsceneActive = '\x01';
@@ -1363,10 +1363,10 @@ void __fastcall ExitGamePlayCutScene(int32_t nCutsceneId) {
         UI::Draw::SetUIFlag(UI_NODRAW, UI_SET, 0);
         dwResult = D2Win::D2GFX::BeginCutSceneAtResolutionMode0();
         if (dwResult) {
-          if (gbCutsceneActive == '\0') {
-            pfFrame = (void*)GAME::Msg::NET_D2GS_CLIENT_Send_0x6D_PING;
-          } else {
+          if (gbCutsceneActive != '\0') {
             pfFrame = 0;
+          } else {
+            pfFrame = (void*)GAME::Msg::NET_D2GS_CLIENT_Send_0x6D_PING;
           }
 
           D2gfx::D2GFX::D2GFX_PlayCutScene((char*)szSoundPath, nPlayMode, pfFrame);
@@ -1392,18 +1392,18 @@ void __fastcall ExitGamePlayCutScene(int32_t nCutsceneId) {
         bConnectionLost = D2Win::Src::D2WinArchive::MPQ_LoadVideoMpqFiles((::fpRequiredUserAction)(bool (*)())Engine::fpRequiredUserAction, 0, 1);
         if (bConnectionLost) {
           nCurrentCutsceneId = 6;
-          if (gbLoggerStateInactive == '\0') {
+          if (gbLoggerStateInactive != '\0') {
+            pszSrcName = "640x292";
+          } else {
             pszSrcName = "640x146";
             nPlayMode = 2;
-          } else {
-            pszSrcName = "640x292";
           }
 
           sprintf(szVideoPath, gdwSoundHeaderCacheIndex[6].pszVideoPath, pszSrcName);
-          if (!gdwSoundHeaderCacheIndex[6].bHasAltSoundPath) {
-            sprintf((char*)szSoundPath, "%s\\video\\%s", "DATA\\GLOBAL", szVideoPath);
-          } else {
+          if (gdwSoundHeaderCacheIndex[6].bHasAltSoundPath) {
             Sound::SOUND_LocalizeSoundPath("%s\\video\\%s\\%s", szSoundPath);
+          } else {
+            sprintf((char*)szSoundPath, "%s\\video\\%s", "DATA\\GLOBAL", szVideoPath);
           }
 
           dwResult = D2Win::D2GFX::BeginCutSceneAtResolutionMode0();
@@ -1491,7 +1491,7 @@ void __fastcall MONUNIQUE_DispatchDeathEffect(D2UnitStrc * pUnit, int32_t nUMod,
     }
 
     uint32_t uVar1 = pUnit->nClassId;
-    if (uVar1 < 0x101) {
+    if (uVar1 <= 0x100) {
       if (uVar1 == 0x100) {
         if (pUnit->eAnimMode.ePlayerMode == Death) {
           Source::ClientEngine::CLIENT_BossDeath_Izual(pUnit);
@@ -1499,27 +1499,27 @@ void __fastcall MONUNIQUE_DispatchDeathEffect(D2UnitStrc * pUnit, int32_t nUMod,
         }
       } else {
         switch (uVar1) {
-          case 0x2d:
-            if (pUnit->eAnimMode.ePlayerMode == Death) {
-              Source::ClientEngine::CLIENT_SpawnTowerMistEffect(pUnit);
-              return;
-            }
-          break;
           case 0x9c:
             if (pUnit->eAnimMode.ePlayerMode == Death) {
               Source::ClientEngine::CLIENT_BossDeath_Andariel(pUnit);
               return;
             }
           break;
-          case 0xd3:
+          case 0x2d:
             if (pUnit->eAnimMode.ePlayerMode == Death) {
-              Source::ClientEngine::CLIENT_BossDeath_Duriel(pUnit);
+              Source::ClientEngine::CLIENT_SpawnTowerMistEffect(pUnit);
               return;
             }
           break;
           case 0xe5:
             if (pUnit->eAnimMode.ePlayerMode == Death) {
               Source::ClientEngine::CLIENT_BossDeath_Radament(pUnit);
+              return;
+            }
+          break;
+          case 0xd3:
+            if (pUnit->eAnimMode.ePlayerMode == Death) {
+              Source::ClientEngine::CLIENT_BossDeath_Duriel(pUnit);
               return;
             }
           break;
@@ -1556,7 +1556,7 @@ void __fastcall MONUNIQUE_DispatchDeathEffect(D2UnitStrc * pUnit, int32_t nUMod,
         Source::ClientEngine::CLIENT_SpawnOrbMistEffect(pUnit);
         return;
       }
-    } else if (0x21b < uVar1) {
+    } else if (0x21c <= uVar1) {
       if (uVar1 < 0x21f) {
         if (pUnit->eAnimMode.ePlayerMode == Death) {
           Source::ClientEngine::CLIENT_SpawnAncientDeathMissile(pUnit);
@@ -1654,9 +1654,9 @@ void __fastcall TRADE_SendGoldToPartner(uint32_t nParam) {
       D2UnitStrc* pUnit;
       nLayer = 0;
       eUnitStat = UNITSTAT_gold;
-      pUnit = UNIT::Player::GetPlayerUnit_UI();
-      gnTradePlayerGoldAmount = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eUnitStat, nLayer);
-      if (gnTradePlayerGoldAmount <= nParam) {
+
+      gnTradePlayerGoldAmount = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(UNIT::Player::GetPlayerUnit_UI(), eUnitStat, nLayer);
+      if (nParam >= gnTradePlayerGoldAmount) {
         GAME::Msg::NET_D2GS_CLIENT_Send_SHORT_SHORT_SHORT(0x4f, 8, (int16_t)(gnTradePlayerGoldAmount >> 0x10), (int16_t)gnTradePlayerGoldAmount);
         return;
       }
@@ -1679,7 +1679,7 @@ int __stdcall TRADE_IsTradeThrottled() {
     }
 
     DWORD dwTickCount = GetTickCount();
-    if (gdwTradeThrottleTimestamp + 30000U >= dwTickCount) {
+    if (dwTickCount <= gdwTradeThrottleTimestamp + 30000U) {
       return 1;
     }
 
@@ -1894,8 +1894,8 @@ void ITEM_ToggleHandState(D2UnitStrc * pUnit) {
         nSoundArg3 = 0;
         nSoundArg2 = 0;
         nSoundArg1 = 0;
-        nSoundId = UNIT::SOUND_GetIdFromUnit(pUnit);
-        Sound::SOUND_PlaySound(nSoundId, nullptr, nSoundArg1, nSoundArg2, nSoundArg3);
+
+        Sound::SOUND_PlaySound(UNIT::SOUND_GetIdFromUnit(pUnit), nullptr, nSoundArg1, nSoundArg2, nSoundArg3);
         return;
       }
     } else if (gnPlayerCashDisplay == 2) {
@@ -1924,8 +1924,8 @@ void __stdcall TEXT_HandleMouseMove() {
     int32_t nDialogX = 0;
     uint32_t uShadow = 0;
     uint32_t uTextColor = 0xf;
-    uint16_t* pszDialogTitle = D2Lang::StrTable::strtable::GetLocaleString(0xd19);
-    UI::Dialog::AddStringData(UI::Dialog::gpHoradricCubeDialog, pszDialogTitle, uTextColor, uShadow, nDialogX, uAlignment, uTransFlag, nDialogY);
+
+    UI::Dialog::AddStringData(UI::Dialog::gpHoradricCubeDialog, D2Lang::StrTable::strtable::GetLocaleString(0xd19), uTextColor, uShadow, nDialogX, uAlignment, uTransFlag, nDialogY);
     gnPlayerCashDisplay = 3;
     if (!nHoradricCubeUIState) {
       D2UnitStrc* pPlayerUnit_lcl;
@@ -2031,7 +2031,7 @@ static BOOL __stdcall GFXUTIL_BuildMonsterCofParams(void * pCofFile, int32_t nAn
         }
 
         do {
-          if (0xf < *pCofEntry) {
+          if (0x10 <= *pCofEntry) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", (void*)(int32_t)Fog::Src::ErrorManager::GetInstructionPointer(), 0x3fb);
             exit(-1);
           }
@@ -2144,7 +2144,7 @@ int32_t __fastcall GFXUTIL_CalcMaxSpriteHeight(D2UnitStrc * pUnit, uint8_t * pbP
           nDrawWorldOffsetY = UI::Path::DRAW_GetWorldOffsetY();
           nWorldOffsetY = D2Common::Units::GetTargetY(pUnit);
           iVar1 = nWorldOffsetY + (nOffsetY - nDrawWorldOffsetY);
-          if (*pOutMaxY < iVar1) {
+          if (iVar1 > *pOutMaxY) {
             *pOutMaxY = iVar1;
           }
 
@@ -2261,7 +2261,7 @@ void __stdcall dSceneTransitionDraw() {
 
     DWORD dwTickCount = GetTickCount();
     int nXEnd = ScreenSizeX;
-    if (gdwWarpFadeExpireTime < dwTickCount) {
+    if (dwTickCount > gdwWarpFadeExpireTime) {
       gdwWarpFadeExpireTime = 0;
       return;
     }
@@ -4200,7 +4200,7 @@ uint32_t __fastcall WARDEN_DecryptModule(uint32_t * * ppInput, uint32_t nInputSi
             pImageWritePtr = (void*)((int)pImageWritePtr + ((uint32_t)__frame0.pModuleBase & 0xffff));
             __frame0.pCopyDst = pImageWritePtr;
             __frame0.ppSectionEntry = ppSectionDataCursor;
-            if ((void*)(nHeaderSize + (int)ppFVar7) <= pImageWritePtr) {
+            if (pImageWritePtr >= (void*)(nHeaderSize + (int)ppFVar7)) {
               break;
             }
 
@@ -4453,23 +4453,20 @@ void __fastcall BINK_PlayVideoFile(char * szFileName, int32_t nParam, fnBinkFram
           }
 
           /* UINT wRemoveMsg for PeekMessageA */ /* UINT wMsgFilterMax for PeekMessageA */ /* UINT wMsgFilterMin for PeekMessageA */ /* HWND hWnd for PeekMessageA */ /* LPMSG lpMsg for PeekMessageA */ bDirectCommand = PeekMessageA(&msgPeek, (HWND)0x0, 0, 0, 1);
-          if (!bDirectCommand) {
-            nBinkWaitResult = BinkWait(gpBinkVideoDirectDraw);
-            if (!nBinkWaitResult) {
-              BINK_RenderVideoFrame();
-            } else {
-              /* DWORD dwMilliseconds for Sleep */ Sleep(1);
-            }
-          } else {
-            if (msgPeek.message < 0x202) {
+          if (bDirectCommand) {
+            if (msgPeek.message <= 0x201) {
               if (msgPeek.message == 0x201) {
                 goto request_skip;
               }
-              if (msgPeek.message == 0x12) {
+              switch (msgPeek.message) {
+              case 0x12: {
                 g_bBinkDDrawVideoQuitRequested = 1;
                 gbBinkDDrawVideoExitRequested = 1;
-              } else if (msgPeek.message == 0x102) {
+                break;
+              }
+              case 0x102: {
                 goto request_skip;
+              }
               }
             } else {
               if (!(msgPeek.message != 0x204 && msgPeek.message != 0x207)) {
@@ -4481,6 +4478,13 @@ void __fastcall BINK_PlayVideoFile(char * szFileName, int32_t nParam, fnBinkFram
 
             /* MSG * lpMsg for TranslateMessage */ TranslateMessage(&msgPeek);
             /* MSG * lpMsg for DispatchMessageA */ DispatchMessageA(&msgPeek);
+          } else {
+            nBinkWaitResult = BinkWait(gpBinkVideoDirectDraw);
+            if (!nBinkWaitResult) {
+              BINK_RenderVideoFrame();
+            } else {
+              /* DWORD dwMilliseconds for Sleep */ Sleep(1);
+            }
           }
         }
 

@@ -29,8 +29,6 @@ void __stdcall AddGamePathCount(struct D2MonsterPathParamStrc * pPathParam, int3
 struct D2MonsterPathParamStrc * __fastcall AllocAiParam(::SGAMEDATA * pGame);
 // @sourcefile .\MONSTER\MonsterMode.cpp
 void __fastcall MONSTERDATA_FreeMonsterMode(::SGAMEDATA * pGame, struct D2MonsterPathParamStrc * pPathParam);
-// Death transition handler for a monster unit. Frees hover-text, calls RemoveMinionsFromAiIfFlag1Set2Not, clears targeting flags (ISVALIDTARGET, CANBEATTACKED), recalculates stats, filters states by boss context, removes light state targetability, optionally enables corpse collision (if deadCol flag not set in MonStats2), sets final facing direction, and starts regen timers via MONSTER_StartAiAndRegenTimers.
-void __stdcall MONSTERMODE_OnDeath(uint8_t bParam, ::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 // 1 internal function (defined in .cpp)
 
 } // namespace D2Game::Monster::MonsterMode

@@ -85,7 +85,7 @@ BOOL __fastcall Q31_NpcGossipHandler(::SGAMEDATA * pGame, D2UnitStrc * pUnit, vo
 }
 
 // A5Q1 status-icon filter: decides the quest-log icon/flag (*nUnknown) for Siege on Harrogath. If RewardAwaits(1) or JustCompleted(0xd): icon 3 (reward pending) unless Step0x05(5) reward-given -> icon 4. Else if intro shown and not Completed(0): CannotComplete(0xe) -> icon 0xc; otherwise default to nStateFlagPrev icon.
-bool __fastcall Q31_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * pbyIconFlag) {
+static bool __fastcall Q31_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * pbyIconFlag) {
     *pbyIconFlag = '\0';
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_SiegeOnHaggorath, QUESTSTATE_RewardAwaits);
     if (bQuestState || (bQuestState = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_SiegeOnHaggorath, QUESTSTATE_JustCompleted) , bQuestState != 0)) {
@@ -474,7 +474,7 @@ void __fastcall Q31_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     BOOL bQuestState;
     D2BitBufferStrc* pBitBuffer;
     ::SGAMEDATA* pGame;
-    if (pQuestArgs->sQuestArgs.sNpcActivate.nIndex - 0x6eU < 3) {
+    if (pQuestArgs->sQuestArgs.sNpcActivate.nIndex - 0x6eU <= 2) {
       if (pQuestData->bIsNotIntroduction && (pQuestData->nStateFlag == 1 || pQuestData->nStateFlag == 2)) {
         QUEST_SetStateFlag(pQuestData, 3, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q1.cpp", 0x229);
         UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Q31_SyncQuestProgress);
@@ -681,8 +681,8 @@ void __fastcall Objects_InitFn71(D2ObjectInitFnArg * pInitArg) {
       return;
     }
 
-    sSpawnPos.y = pInitArg->nY;
     sSpawnPos.x = pInitArg->nX;
+    sSpawnPos.y = pInitArg->nY;
     FindSpawnableLocation(pInitArg->pRoom, &sSpawnPos, 2, 0x100, &pSpawnRoom, 0x10, 100);
     if (!pSpawnRoom) {
       return;

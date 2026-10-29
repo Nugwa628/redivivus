@@ -103,7 +103,7 @@ void __stdcall PLAYER_SetStartingLevelForAct(uint8_t nAct, ::SGAMEDATA * pGame, 
 
 // Sets all base stats for a newly created player unit from CharStats.txt (str, dex, vit, energy, HP, mana, stamina at fixed-point *256, level=1, nextexp for level 1, attack/velocity/animrate=100). If nAct != 0, also raises the unit to gaStartingLevelByAct[nAct] via DAMAGE_SetUnitToLevel. The third argument is the act (both call sites pass D2Game::Game::Clients::GetAct(pClient)), not a character class.
 void __fastcall PLAYER_InitBaseStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit, uint8_t nAct) {
-    if (4 < nAct) {
+    if (5 <= nAct) {
       nAct = 4;
     }
     if (!pUnit) {
@@ -111,7 +111,7 @@ void __fastcall PLAYER_InitBaseStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit, ui
     }
 
     int nStatValue = pUnit->nClassId;
-    if (!(-1 < nStatValue && nStatValue < sgptDataTable->nTxtCharStatsSize)) {
+    if (!(0 <= nStatValue && nStatValue < sgptDataTable->nTxtCharStatsSize)) {
       return;
     }
 
@@ -142,10 +142,10 @@ void __fastcall PLAYER_InitBaseStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit, ui
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_attackrate, 100, 0);
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_velocitypercent, 100, 0);
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_other_animrate, 100, 0);
-    if (!nAct) {
+    if ((uint32_t)nAct <= 0) {
       return;
     }
-    if (4 < nAct) {
+    if (5 <= nAct) {
       nAct = 4;
     }
     if (gnActCount <= (int)(uint32_t)nAct) {
@@ -155,7 +155,7 @@ void __fastcall PLAYER_InitBaseStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit, ui
     SUnitDmg::DAMAGE_SetUnitToLevel(pGame, pUnit, gaStartingLevelByAct[nAct]);
 }
 
-void __fastcall thunk_NET_D2GS_SERVER_Send_0x75_PlayerPartyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pOtherUnit) {
+static void __fastcall thunk_NET_D2GS_SERVER_Send_0x75_PlayerPartyInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pOtherUnit) {
     GAME::SCmd::NET_D2GS_SERVER_Send_0x75_UPDATEROSTER(pUnit, pOtherUnit);
 }
 
@@ -180,7 +180,7 @@ void __fastcall UpdateGameInfo(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     if (0 >= nLevelDelta) {
       return;
     }
-    if (nCurHp < 0 || sgptDataTable->nTxtCharStatsSize <= nCurHp) {
+    if (nCurHp < 0 || nCurHp >= sgptDataTable->nTxtCharStatsSize) {
       pCharStats = 0;
     } else {
       pCharStats = sgptDataTable->pTxtCharStats + nCurHp;
@@ -302,7 +302,7 @@ void __fastcall ClearStats(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     }
 
     int nStatDelta = pUnit->nClassId;
-    if (!(-1 < nStatDelta && nStatDelta < sgptDataTable->nTxtCharStatsSize)) {
+    if (!(0 <= nStatDelta && nStatDelta < sgptDataTable->nTxtCharStatsSize)) {
       return;
     }
 
@@ -397,7 +397,7 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
       uint32_t uVar1;
       _Src = D2Common::DATATBLS::ItemStats::thunk_UNIT_GetStateList_StateFlags(pUnit);
       nFlagDwordCount = sgptDataTable->nTxtStatesSize + 0x1f;
-      nFlagDwordCount = (int)(nFlagDwordCount + (nFlagDwordCount >> 0x1f & 0x1fU)) >> 5;
+      nFlagDwordCount = (int)nFlagDwordCount / 32;
       nStateFlagDwordCount = nFlagDwordCount;
       memcpy(aStateFlagDwords, _Src, nFlagDwordCount * 4);
       sPacket.nUnitGUID = pUnit->nUnitGUID;
@@ -413,21 +413,23 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
           nDwordIdxSaved = nDwordIdx;
           pCurFlagDword = pFlagDword;
           nSetBitIdx = Fog::SMem::SMemSizeClassBucketLookup(*pFlagDword);
-          while (-1 < (int)nSetBitIdx) {
+          while (0 <= (int)nSetBitIdx) {
             aStateFlagDwords[((int)nSetBitIdx >> 5) + nDwordIdxSaved] &= gadwInvBitMasks[nSetBitIdx & 0x1f];
             eState = nSetBitIdx + nStateBaseIdx;
-            if ((int)eState < 0 || sgptDataTable->nTxtStatesSize <= (int)eState || !(sgptDataTable->pTxtStates + eState)) {
+            if ((int)eState < 0 || (int)eState >= sgptDataTable->nTxtStatesSize || !(sgptDataTable->pTxtStates + eState)) {
               nFlagDwordVal = *pFlagDword;
-            } else if (!sgptDataTable->pTxtStates[eState].nosend) {
+            } else if (sgptDataTable->pTxtStates[eState].nosend) {
+              nFlagDwordVal = *pFlagDword;
+            } else {
               nBitPos = Fog::BitBuffer::GetNextPositon(&bitBuf);
               nFlagDwordCount = nStateFlagDwordCount;
-              if (0xda < nBitPos + 7) {
+              if (0xdb <= nBitPos + 7) {
                 break;
               }
 
               Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, eState, 8);
               pStatListEx = D2Common::Stats::StatsEx::GetStatsByState(pUnitSaved, eState);
-              if (!pStatListEx || (nBitPosCheck = D2Common::Stats::StatsEx::CopyStatsToBuffer(pStatListEx, aStatBuf, 0x10) , nStatCount = nBitPosCheck , nBitPosCheck < 1)) {
+              if (!pStatListEx || (nBitPosCheck = D2Common::Stats::StatsEx::CopyStatsToBuffer(pStatListEx, aStatBuf, 0x10) , nStatCount = nBitPosCheck , nBitPosCheck <= 0)) {
                 Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, 0, 1);
               } else {
                 Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, 1, 1);
@@ -442,16 +444,10 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
                       pItemStatCost = pDataTable->pTxtItemStatCost + nStatId;
                       if (pItemStatCost) {
                         bySendBits = pItemStatCost->sendBits;
-                        if (bySendBits) {
+                        if ((uint32_t)bySendBits > 0) {
                           nValue = uVar1;
                           if (bySendBits < 0x20) {
-                            if (!(pItemStatCost->dwItemStatFlags & ITEMSTATCOSTFLAG_SIGNED)) {
-                              nMaxVal = (1 << (bySendBits & 0x1f)) - 1;
-                              nValue = (int)uVar1 < 1 ? 0 : uVar1;
-                              if ((int)nMaxVal <= (int)nValue) {
-                                nValue = nMaxVal;
-                              }
-                            } else {
+                            if (pItemStatCost->dwItemStatFlags & ITEMSTATCOSTFLAG_SIGNED) {
                               nMaxVal = -1 << (bySendBits - 1 & 0x1f);
                               nClampedVal = uVar1;
                               if ((int)uVar1 <= (int)nMaxVal) {
@@ -465,12 +461,18 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
                                   nValue = nMaxVal;
                                 }
                               }
+                            } else {
+                              nMaxVal = (1 << (bySendBits & 0x1f)) - 1;
+                              nValue = (int)uVar1 < 1 ? 0 : uVar1;
+                              if ((int)nMaxVal <= (int)nValue) {
+                                nValue = nMaxVal;
+                              }
                             }
                           }
 
                           Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nStatId, 9);
                           if (pItemStatCost->sendParamBits) {
-                            Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nStatSubIndex & 0xffff, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
+                            Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint16_t)nStatSubIndex, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
                           }
 
                           Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nValue, (uint32_t)(uint8_t)pItemStatCost->sendBits);
@@ -488,8 +490,6 @@ void __fastcall PLAYER_SendStateListToClient(D2UnitStrc * pUnit, D2ClientStrc * 
                 pFlagDword = pCurFlagDword;
               }
 
-              nFlagDwordVal = *pFlagDword;
-            } else {
               nFlagDwordVal = *pFlagDword;
             }
 
@@ -550,7 +550,7 @@ void __fastcall PLAYER_SendStateDeltaToClient(D2UnitStrc * pUnit, D2ClientStrc *
       eD2States eState_00;
       _Src = (void*)D2Common::DATATBLS::ItemStats::STATES_AssertGetGfxFlags(pUnit);
       nFlagDwordCountTmp = sgptDataTable->nTxtStatesSize + 0x1f;
-      nFlagDwordCount = (int)(nFlagDwordCountTmp + (nFlagDwordCountTmp >> 0x1f & 0x1fU)) >> 5;
+      nFlagDwordCount = (int)nFlagDwordCountTmp / 32;
       nStateFlagDwordCount = nFlagDwordCount;
       memcpy(aStateFlagDwords, _Src, nFlagDwordCount * 4);
       eUnitType = pUnit->eUnitType;
@@ -562,7 +562,7 @@ void __fastcall PLAYER_SendStateDeltaToClient(D2UnitStrc * pUnit, D2ClientStrc *
         pCurFlagDword = aStateFlagDwords;
         do {
           nSetBitIdx = Fog::SMem::SMemSizeClassBucketLookup(*pCurFlagDword);
-          while (-1 < (int)nSetBitIdx) {
+          while (0 <= (int)nSetBitIdx) {
             aStateFlagDwords[((int)nSetBitIdx >> 5) + nDwordIdx] &= gadwInvBitMasks[nSetBitIdx & 0x1f];
             eState_00 = nSetBitIdx + nStateBaseIdx;
             if ((int)eState_00 < 0 || sgptDataTable->nTxtStatesSize <= (int)eState_00 || !(sgptDataTable->pTxtStates + eState_00)) {
@@ -599,7 +599,7 @@ void __fastcall PLAYER_SendStateDeltaToClient(D2UnitStrc * pUnit, D2ClientStrc *
                             pItemStatCost = pDataTable->pTxtItemStatCost + nStatId;
                             if (pItemStatCost) {
                               bySendBits = pItemStatCost->sendBits;
-                              if (bySendBits) {
+                              if ((uint32_t)bySendBits > 0) {
                                 nValue = uVar1;
                                 if (bySendBits < 0x20) {
                                   if (!(pItemStatCost->dwItemStatFlags & ITEMSTATCOSTFLAG_SIGNED)) {
@@ -627,7 +627,7 @@ void __fastcall PLAYER_SendStateDeltaToClient(D2UnitStrc * pUnit, D2ClientStrc *
 
                                 Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nStatId, 9);
                                 if (pItemStatCost->sendParamBits) {
-                                  Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nStatSubIndex & 0xffff, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
+                                  Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, (uint16_t)nStatSubIndex, (uint32_t)(uint8_t)pItemStatCost->sendParamBits);
                                 }
 
                                 Fog::BitBuffer::WriteValueToBitBuffer(&bitBuf, nValue, (uint32_t)(uint8_t)pItemStatCost->sendBits);
@@ -684,7 +684,7 @@ void __fastcall PLAYER_SendOverlayToClient(D2UnitStrc * pUnit, D2ClientStrc * pC
     }
 
     int32_t nOverlayId = D2Common::Stats::StatsEx::STATLIST_GetStatByState(pOverlayStatList, UNITSTAT_unit_dooverlay);
-    if (!(-1 < nOverlayId && nOverlayId <= sgptDataTable->nTxtOverlaySize)) {
+    if (!(0 <= nOverlayId && nOverlayId <= sgptDataTable->nTxtOverlaySize)) {
       return;
     }
     if (!pUnit) {
@@ -707,10 +707,7 @@ void __fastcall PLAYER_SendHoverTextToClient(D2UnitStrc * pUnit, D2ClientStrc * 
     uint8_t byUnitTypeFallback;
     D2GSPacketSrv0x26 sPacket;
     D2HoverTextStrc* pHoverText;
-    if (!pUnit) {
-      nGUIDFallback = -1;
-      byUnitTypeFallback = 6;
-    } else {
+    if (pUnit) {
       D2UnitStrc* pUnit_00;
       pHoverText = pUnit->pHoverText;
       if (pHoverText) {
@@ -744,6 +741,9 @@ void __fastcall PLAYER_SendHoverTextToClient(D2UnitStrc * pUnit, D2ClientStrc * 
 
       nGUIDFallback = pUnit->nUnitGUID;
       byUnitTypeFallback = (uint8_t)pUnit->eUnitType;
+    } else {
+      nGUIDFallback = -1;
+      byUnitTypeFallback = 6;
     }
 
     GAME::SCmd::NET_D2GS_SERVER_Send_CMD_BYTE_INT(pClient, 0x76, byUnitTypeFallback, nGUIDFallback);
@@ -828,7 +828,7 @@ void __fastcall UnitQueuePacket0x9A(D2UnitStrc * pUnit, uint16_t wParam1, uint8_
 void __fastcall UnitQueuePacket0x9E(D2UnitStrc * pUnit, eD2UnitStat eUnitStat, uint32_t dwStatValue) {
     D2PoolManagerStrc* pMemory;
     int nUnitGUID;
-    if (0xfe < (uint16_t)eUnitStat) {
+    if (0xff <= (uint16_t)eUnitStat) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2ad);
       exit(-1);
     }
@@ -1077,7 +1077,7 @@ void __fastcall SERVER_UnitQueuePacket0xA4(D2UnitStrc * pUnit, int16_t nClassId)
 }
 
 // @sourcefile .\UNIT\SUnitMsg.cpp
-void __fastcall SERVER_SendPacket0x23(D2UnitStrc * pMemory, uint8_t byTypeId, uint16_t wCoords, uint32_t dwData) {
+void __fastcall SERVER_SendPacket0x23(D2UnitStrc * pMemory, int32_t byTypeId, uint16_t wCoords, uint32_t dwData) {
     D2PoolManagerStrc* pAllocPool = 0;
     if (pMemory) {
       pAllocPool = pMemory->pMemory;
@@ -1207,8 +1207,8 @@ void __fastcall SERVER_UnitQueuePacketFree(D2UnitStrc * pUnit) {
       nLine = 0x3ce;
       pMsgNext = pMemoryToFree->pNext;
       szFile = ".\\UNIT\\SUnitMsg.cpp";
-      pMemory = D2Client::UNIT::CUnitEvent::GetMemPool(pUnit);
-      Fog::Memory::FreeServerMemory(pMemory, pMemoryToFree, szFile, nLine, nNull);
+
+      Fog::Memory::FreeServerMemory(D2Client::UNIT::CUnitEvent::GetMemPool(pUnit), pMemoryToFree, szFile, nLine, nNull);
       pMemoryToFree = pMsgNext;
     } while (pMsgNext);
 
@@ -1264,7 +1264,7 @@ void __fastcall SERVER_SendInitUnitPacket(::SGAMEDATA * pGame, D2UnitStrc * pUni
           do {
             if ((uint8_t)gadwBitMasks[(uint32_t)pClient & 7] & pMonStatsTxt->SendSkills[(int)pClient >> 3]) {
               wSkillId = *pMonSkillEntry;
-              if (-1 < (short int)wSkillId && (int)(short int)wSkillId < sgptDataTable->nTxtSkillsCount) {
+              if (0 <= (short int)wSkillId && (int)(short int)wSkillId < sgptDataTable->nTxtSkillsCount) {
                 pSkill = D2Common::Skills::SKILLS_GetSkillByEnum((int)(short int)wSkillId, pUnit);
                 if (pSkill) {
                   bRemove = 0;
@@ -1306,7 +1306,7 @@ void __fastcall SERVER_SendInitUnitPacket(::SGAMEDATA * pGame, D2UnitStrc * pUni
       MISSILES::Missiles::MISSILES_SendMissilePacket(pClient, pGameSaved, pUnit, nMiscVal);
       break;
       case UNIT_ITEM:
-        if (pUnit->eUnitFlags >> 4 & 1) {
+        if (((bool)(pUnit->eUnitFlags >> 4 & 1))) {
           if (pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Run && (dwTargetGUID = D2Client::UNIT::CheckFlags(pUnit, UNITFLAG_SENDREFRESHMSG) , dwTargetGUID != 0)) {
             GAME::SCmd::Send0x9CItemDroppedToGround(pClient, pPlayerUnit_lcl, pUnit, ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD));
           } else {

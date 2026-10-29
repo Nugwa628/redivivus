@@ -197,7 +197,7 @@ int32_t __fastcall WSASocket2_Read(D2NetDataStrc * pNetData, char * pBuffer, siz
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pNetData->pSync);
     int nBytesRead = recv(pNetData->hSocket, pBuffer, nSize, 0);
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&pNetData->pSync);
-    if (nBytesRead >= 1) {
+    if (nBytesRead > 0) {
       return nBytesRead;
     }
 
@@ -256,7 +256,7 @@ void __fastcall SAFESOCK_EnterCriticalSection(D2NetDataStrc * pNetData) {
 }
 
 // Leaves the critical section embedded at offset 0xC within the safesock structure. Thin wrapper around Win32 LeaveCriticalSection.
-void __stdcall LeaveCriticalSection_Safesock(void * pSafesockStrc) {
+void __fastcall LeaveCriticalSection_Safesock(void * pSafesockStrc) {
     /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection((LPCRITICAL_SECTION)((int)pSafesockStrc + 0xc));
 }
 

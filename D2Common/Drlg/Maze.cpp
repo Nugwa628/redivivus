@@ -286,7 +286,7 @@ void __stdcall DRLGMAZE_PickRoomPresets(D2RoomExStrc * pRoomEx) {
 
           sNewSeed = D2_SEED_NEXT(pNeighbor->sSeed);
           pNeighbor->sSeed = sNewSeed;
-          if ((int)(sNewSeed.nSeedLow + (int)(((uint64_t)d2_bits_of(sNewSeed) & 0xffffffff) / 1000) * -1000) < pMazeTxt->Merge) {
+          if ((int)(sNewSeed.nSeedLow % 1000) < pMazeTxt->Merge) {
             nDirection = GetDirectionFromCoordinates(&pNeighbor->sCoords, &pRoomEx->sCoords);
             if (nDirection != DIRECTION_INVALID) {
               DrlgRoom::DRLGROOMEX_AllocNodesForBothRoomEx(pNeighbor, pRoomEx, nDirection);
@@ -535,7 +535,7 @@ D2RoomExStrc * __fastcall GetRandomRoomExFromLevel(D2DrlgLevelStrc * pLevel) {
       } else {
         sSeed = (D2SeedStrc)((uint64_t)nSeedLowOld * 0x6ac690c5 + nSeedLowCopy);
         pLevel->sSeed = sSeed;
-        nSelectedRoom = (uint32_t)(((uint64_t)d2_bits_of(sSeed) & 0xffffffff) % (uint64_t)nSelectedRoom);
+        nSelectedRoom = (uint32_t)(sSeed.nSeedLow % nSelectedRoom);
       }
     }
 
@@ -1024,7 +1024,7 @@ static int __stdcall DRLGMAZE_SelectRandomPresetFile(int nPresetFile, D2DrlgLeve
     nFirstFile = *(int*)pState[2];
     uint32_t nResult;
     nResult = pLevel->nLevelType - 3;
-    if (nResult >= 0x21) {
+    if (nResult > 0x20) {
       return nResult;
     }
 
@@ -1079,7 +1079,7 @@ static int __stdcall DRLGMAZE_SelectRandomPresetFile(int nPresetFile, D2DrlgLeve
         return nResult;
     }
 
-    if ((int)nResult >= nFirstFile) {
+    if (nFirstFile <= (int)nResult) {
       return nResult;
     }
 

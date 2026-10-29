@@ -318,7 +318,7 @@ int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
     pcEnd1 = pcEnd1 + strlen(pcEnd1) + 1;
     char* pcEnd2 = szText2;
     pcEnd2 = pcEnd2 + strlen(pcEnd2) + 1;
-    if ((uint32_t)((int)pcEnd2 - (int)(szText2 + 1)) > (uint32_t)((int)pcEnd1 - (int)(szText1 + 1))) {
+    if ((uint32_t)((int)pcEnd1 - (int)(szText1 + 1)) < (uint32_t)((int)pcEnd2 - (int)(szText2 + 1))) {
       return -1;
     }
 
@@ -363,21 +363,14 @@ BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
     }
 
     gnNotifyEnabled = (uint32_t)!gnNotifyEnabled;
-    uint16_t* pwszZeroFill = wszMessage;
-    for (i = 0x80; i; i--) {
-      pwszZeroFill[0] = L'\0';
-      pwszZeroFill[1] = L'\0';
-      pwszZeroFill += 2;
-    }
+    uint16_t* pwszZeroFill;
+    for (int i = 0; i < 0x100; i++) wszMessage[i] = 0;
 
-    if (!gnNotifyEnabled) {
-      pcCmdEnd = "Player entering/leaving notifications are disabled.";
-      pszMsgDst = szMessage;
-      memcpy(pszMsgDst, pcCmdEnd, 0xd * 4);
-      pcCmdEnd += 0xd * 4;
-      pszMsgDst += 0xd * 4;
-      i = 0;
-    } else {
+
+
+
+
+    if (gnNotifyEnabled) {
       pcCmdEnd = "Player entering/leaving notifications are enabled.";
       pszMsgDst = szMessage;
       memcpy(pszMsgDst, pcCmdEnd, 0xc * 4);
@@ -386,6 +379,13 @@ BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
 
       *(uint16_t*)pszMsgDst = *(uint16_t*)pcCmdEnd;
       pszMsgDst[2] = pcCmdEnd[2];
+    } else {
+      pcCmdEnd = "Player entering/leaving notifications are disabled.";
+      pszMsgDst = szMessage;
+      memcpy(pszMsgDst, pcCmdEnd, 0xd * 4);
+      pcCmdEnd += 0xd * 4;
+      pszMsgDst += 0xd * 4;
+      i = 0;
     }
 
     D2Lang::UTF8_ConvertToWideChar(wszMessage, szMessage, 0x200);
@@ -412,7 +412,7 @@ BOOL __stdcall CHATDLG_FindSubstringMatch(int32_t nTargetHash, int32_t nWordLen,
 
     do {
       int nCmpTmp;
-      if ((nStart < 1 || (nCmpTmp = isalnum((int)szText[nStart - 1]) , !nCmpTmp)) && (nMaxStart <= nStart || (nCmpTmp = isalnum((int)szText[nWordLen + nStart]) , !nCmpTmp))) {
+      if ((nStart <= 0 || (nCmpTmp = isalnum((int)szText[nStart - 1]) , !nCmpTmp)) && (nStart >= nMaxStart || (nCmpTmp = isalnum((int)szText[nWordLen + nStart]) , !nCmpTmp))) {
         cSaved = szText[nWordLen + nStart];
         szText[nWordLen + nStart] = '\0';
         nCmpTmp = Storm::Source::SSTR::SStrHashHT((uint8_t*)(szText + nStart));
@@ -452,13 +452,7 @@ BOOL __stdcall CHATDLG_DetectCDKeyInString(char * szText) {
       }
 
       cCur = szText[nPos];
-      if ((cCur < 'A' || 'Z' < cCur) && (cCur < 'a' || 'z' < cCur) && 9 < (uint8_t)(cCur - 0x30U)) {
-        if (cCur == '-' || cCur == ' ') {
-          goto check_key_complete;
-        }
-
-        nCharsCollected = 0;
-      } else {
+      if (!((cCur < 'A' || 'Z' < cCur) && (cCur < 'a' || 'z' < cCur) && 9 < (uint8_t)(cCur - 0x30U))) {
         szKeyBuf[nCharsCollected] = cCur;
         nCharsCollected++;
         check_key_complete:
@@ -471,6 +465,12 @@ BOOL __stdcall CHATDLG_DetectCDKeyInString(char * szText) {
 
           nCharsCollected = 0;
         }
+      } else {
+        if (cCur == '-' || cCur == ' ') {
+          goto check_key_complete;
+        }
+
+        nCharsCollected = 0;
       }
 
       nPos++;
@@ -553,7 +553,7 @@ void __stdcall CHATDLG_OpenLadderTypeMenu() {
     D2Win::Src::D2WinMain::D2WINMAIN_SetFormFourth(pControl);
 }
 
-void __stdcall CHATDLG_UpdateButtonVisibility() {
+int __stdcall CHATDLG_UpdateButtonVisibility() {
     uint32_t bConfirmJoinVisible;
     D2Win::Src::D2WinButton::D2WINBUTTON_SetPressed(gpLobbyForm0.pCtlLobbyChannelButton, 0);
     D2Win::Src::D2WinButton::D2WINBUTTON_SetPressed(gpLobbyForm0.pCtlLobbyCreateButton, 0);
@@ -563,14 +563,15 @@ void __stdcall CHATDLG_UpdateButtonVisibility() {
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyCreateButton->sControl, 1);
       D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyJoinButton->sControl, 1);
     }
-    if (!D2IniData_multiplayer->padding_0x35F[2]) {
-      bConfirmJoinVisible = (uint32_t)!gbLobbyInitialized;
-    } else {
+    if (D2IniData_multiplayer->padding_0x35F[2]) {
       bConfirmJoinVisible = 1;
+    } else {
+      bConfirmJoinVisible = (uint32_t)!gbLobbyInitialized;
     }
 
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyChannelButton->sControl, bConfirmJoinVisible);
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpLobbyForm0.pCtlLobbyLadderButton->sControl, (uint32_t)!gbIsChannelScreen);
+    return 1;
 }
 
 // Stores the ladder filter byte (0070cd62) = nFilterMode and the selected rank (0070cd7c) = nRank.
@@ -586,10 +587,10 @@ void __fastcall CHATDLG_RequestLadderRank(char * szText, int32_t nParam, int32_t
     }
 
     Storm::Source::SSTR::SStrCopy(gszLadderCharNameFilter, szText, 0x7fffffff);
-    if (!nLadderRequestMode) {
-      g_nLadderFilterMode = nParam ? 0 : 0x9;
-    } else {
+    if (nLadderRequestMode) {
       g_nLadderFilterMode = !nParam * '\b' + 0x13;
+    } else {
+      g_nLadderFilterMode = nParam ? 0 : 0x9;
     }
 
     gnLadderBoardSelectedRank = -1;
@@ -1003,7 +1004,7 @@ void __stdcall CHATDLG_RefreshGameNameDisplay() {
     if (gpChatPlayerNameListHead) {
       char* pszCursor;
       do {
-        if (0x1ff < nUsedLen) {
+        if (0x200 <= nUsedLen) {
           break;
         }
 
@@ -1126,7 +1127,7 @@ int __stdcall CHATDLG_HandleTabCompletion(uint32_t nKeyCode, size_t nSize, char 
       pcInputEnd = pcInputEnd + strlen(pcInputEnd) + 1;
       pcChannelEnd = __frame0.szChannelName;
       pcChannelEnd = pcChannelEnd + strlen(pcChannelEnd) + 1;
-      if ((int)(pcInputEnd + (int)(pcChannelEnd + (-(int)(__frame0.szChannelName + 1) - (int)(__frame0.szInputText + 1)))) >= 0x100) {
+      if ((int)(pcInputEnd + (int)(pcChannelEnd + (-(int)(__frame0.szChannelName + 1) - (int)(__frame0.szInputText + 1)))) > 0xff) {
         return 0;
       }
 
@@ -1453,7 +1454,7 @@ BOOL __stdcall CHATDLG_UpdateChatRoomList() {
     int32_t nScrollPos = D2Win::Src::D2WinTextBox::D2WINTEXTBOX_GetScrollPosition(g_pLadderBoardTextBox);
     int32_t iVar1 = D2Win::Src::D2WinTextBox::D2WINTEXTBOX_GetVisibleLineCount(g_pLadderBoardTextBox);
     int32_t nEndLine = iVar1 + nScrollPos;
-    if (gnLadderListRowCount <= nEndLine) {
+    if (nEndLine >= gnLadderListRowCount) {
       nEndLine = gnLadderListRowCount;
     }
 
@@ -1463,7 +1464,7 @@ BOOL __stdcall CHATDLG_UpdateChatRoomList() {
       D2Lang::Unicode::UNISYS::UNICODE_WideToMultiByte(szCell, (uint16_t*)pwszCell, 0x100);
       bMatch = !strcmp(szCell, "-");
       if (bMatch) {
-        gnChatRoomListSelectedBase = (int)(nScrollPos + (nScrollPos >> 0x1f & 0xfU)) >> 4 << 4;
+        gnChatRoomListSelectedBase = (int)nScrollPos / 16 << 4;
         gnLadderBoardSelectedRank = gnChatRoomListSelectedBase;
         return 1;
       }
@@ -1529,19 +1530,19 @@ void __fastcall CHATDLG_HandleChatListClick(int32_t nStartRank, int32_t nRankCou
         pcScratch = (D2LadderRowBufStrc*)(pcScratch->wszCell + 2);
       }
 
-      pwszScratch = wszNamePart;
-      for (nCmp = 0x80; nCmp; nCmp--) {
-        pwszScratch[0] = L'\0';
-        pwszScratch[1] = L'\0';
-        pwszScratch += 2;
-      }
 
-      pwszScratch = wszEmptyMsg;
-      for (nCmp = 0x80; nCmp; nCmp--) {
-        pwszScratch[0] = L'\0';
-        pwszScratch[1] = L'\0';
-        pwszScratch += 2;
-      }
+      for (int i = 0; i < 0x100; i++) wszNamePart[i] = 0;
+
+
+
+
+
+
+      for (int i = 0; i < 0x100; i++) wszEmptyMsg[i] = 0;
+
+
+
+
 
       OOGUtilities::OOGUTIL_GetProfileCharacterName(sScratch);
       D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszNamePart, "Player \'%s\' is not on the ladder.", 0x100);
@@ -1561,7 +1562,7 @@ void __fastcall CHATDLG_HandleChatListClick(int32_t nStartRank, int32_t nRankCou
     }
 
     int nEndRank = nStartRank + nRankCount;
-    if (gnLadderListRowCount < nStartRank + nRankCount) {
+    if (nStartRank + nRankCount > gnLadderListRowCount) {
       nEndRank = gnLadderListRowCount;
     }
     if (nStartRank >= nEndRank) {
@@ -1912,7 +1913,7 @@ void __fastcall CHATDLG_StorePlayerName(uint32_t nPlayerId, uint32_t nDataLength
     bool bEmpty;
     bEmpty = !gpChatPlayerNameListHead;
     *(uint32_t*)(pNode + 0x200) = nPlayerId;
-    if (bEmpty || (pCur = pInsertAfter , (int)nPlayerId < *(int*)((int)pInsertAfter + 0x200))) {
+    if (bEmpty || (pCur = pInsertAfter , *(int*)((int)pInsertAfter + 0x200) > (int)nPlayerId)) {
       *(void**)(pNode + 0x204) = (void*)pInsertAfter;
       gpChatPlayerNameListHead = pNode;
     } else {

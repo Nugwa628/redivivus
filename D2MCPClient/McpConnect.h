@@ -105,7 +105,7 @@ void __stdcall MCPCONNECT_CreateThread(uint32_t * pSrcState);
 int32_t __fastcall NET_MCP_CLIENT_Send_0x01_StartUp(int * pnParam);
 void __fastcall NET_MCP_CLIENT_Send_0x02_CharCreate(char * szCharName, DWORD dwCharClassFlags, uint32_t dwUnused);
 void __fastcall NET_MCP_CLIENT_Send_0x07_CharLogon(char * szText);
-void __fastcall NET_MCP_CLIENT_Send_0x03_CreateGame(mcp0x03data * pMcpData, int16_t nRequestId);
+void __fastcall NET_MCP_CLIENT_Send_0x03_CreateGame(mcp0x03data * pMcpData, int32_t nRequestId);
 void __fastcall NET_MCP_CLIENT_Send_0x04_JoinGame(char * szGameName, char * szGamePassword, uint16_t nRequestId);
 void __fastcall NET_MCP_CLIENT_Send_0x05_GameList(char * szText, uint16_t wRequestIdArg);
 void __fastcall NET_MCP_CLIENT_Send_0x06_GameInfo(char * szText, uint16_t wRequestIdArg);

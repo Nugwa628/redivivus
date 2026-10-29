@@ -251,7 +251,6 @@ void SFILE_DecompressLzw_BufferWrite(void * pSrc, uint32_t * pnBytes, void * pBu
 // so SFile owning its own explode wrapper alongside SComp's is the real structure, not an error.
 // @blizzard DecompressLzw (SFILE.CPP)
 int32_t __stdcall SFILE_DecompressLzw(int32_t pSrcData, int32_t pDstData, int32_t nDstSize);
-void __fastcall SFILE_ShiftSectorTable(int32_t pSectorTable, uint32_t nSectorCount);
 // @blizzard BuildDefaultBasePath (SFILE.CPP)
 void __stdcall SFILE_BuildDefaultBasePath();
 // @blizzard CheckForCdRom (SFILE.CPP)
@@ -455,7 +454,6 @@ int __stdcall SFILE_EnumFilesInternal(struct D2ArchiveStrc * pArchive, char * sz
 // @blizzard SFileOpenFileEx (SFILE.CPP)
 int __stdcall SFileOpenFileEx(struct D2ArchiveStrc * pArchive, char * szFileName, uint32_t dwFlags, void * * phFile);
 struct D2MPQFileStrc * * __fastcall SFILE_AllocFileRecord3(int * * ppArchive, int32_t nInsertMode, int32_t nExtraSize, uint32_t nFlags);
-uint32_t __fastcall SFILE_RemoveAsyncRequestFromQueue(void * pListContext, int * pNode);
 struct D2MPQFileStrc * * __fastcall SFILE_AllocFileRecord4(int * * ppArchive, int32_t nInsertMode, int32_t nExtraSize, uint32_t nFlags);
 // @blizzard SFileCloseFile (SFILE.CPP)
 int __stdcall SFileCloseFile(struct D2MPQFileStrc * pMPQFile);
@@ -516,9 +514,6 @@ uint32_t __stdcall SFileLoadFileEx2(struct D2ArchiveStrc * pArchive, uint32_t * 
 int __stdcall SFileReadFile(struct D2MPQFileStrc * pMPQFile, void * pOutputBuffer, uint32_t nBytesToRead, uint32_t * pnSize, int32_t pAsyncReadCtx);
 // Simplified wrapper for SFILE_ReadFile that passes 0 for the completion callback parameter and param6 as the async flags. Used when caller doesn't need completion notification.
 void __stdcall SFILE_ReadFileSimple(struct D2MPQFileStrc * pMPQFile, void * pOutputBuffer, uint32_t nBytesToRead, uint32_t * pnSize, int32_t pAsyncReadCtx, struct D2StormAsyncCompletionStrc * pCompletion);
-// Load MPQ attributes from (attributes) file in archive
-// @sourcefile .\SOURCE\SFILE.CPP
-int __thiscall SFILE_LoadAttributes(struct D2ArchiveStrc * pArchive, int pAttributesBuffer, int nNumEntries);
 // Open wave file as audio stream from MPQ archive. Parses RIFF/WAVE headers, allocates audio buffer, initializes DirectSound stream with frequency/channels settings. Starts async IO thread. Returns 1 on success, 0 on failure.
 // @sourcefile .\SOURCE\SFILE.CPP
 BOOL __stdcall SFileDdaBeginEx(struct D2MPQFileStrc * hFile, uint32_t dwBufferBytes, uint32_t dwFlags, uint32_t dwInitialPos, int32_t lVolume, int32_t lPan, struct IDirectSoundBuffer * lpDSB);

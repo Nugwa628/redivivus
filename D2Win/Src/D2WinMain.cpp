@@ -170,11 +170,11 @@ BOOL __fastcall FORMS_AppendFormToDestroyQueue(D2ControlStrc * pControl) {
 // @sourcefile .\Src\D2WinMain.cpp
 void __stdcall D2WINMAIN_FreeLeadingFormControls() {
     D2ControlStrc* pDVar1;
-    if (!(gnFormControlCount < 1 && D2Client::Forms::pFormUnknown)) {
+    if (!(gnFormControlCount <= 0 && D2Client::Forms::pFormUnknown)) {
       return;
     }
 
-    while (!(D2Client::Forms::pFormUnknown->dwState & 1U)) {
+    while (!(D2Client::Forms::pFormUnknown->dwState & gadwBitMasks[0])) {
       pDVar1 = D2Client::Forms::pFormUnknown->pNext;
       D2_FREE_AT(D2Client::Forms::pFormUnknown, ".\\Src\\D2WinMain.cpp", 0x25a);
       D2Client::Forms::pFormUnknown = pDVar1;
@@ -184,7 +184,7 @@ void __stdcall D2WINMAIN_FreeLeadingFormControls() {
     }
 
     do {
-      if (D2Client::Forms::pFormUnknown->dwState & 2U) {
+      if (D2Client::Forms::pFormUnknown->dwState & gadwBitMasks[1]) {
         return;
       }
 
@@ -256,6 +256,9 @@ D2ControlStrc * __stdcall FORMS_CreateAnyForm(FORMS_PredefinedFormStrc * pForm) 
     void* pAccountList;
     DC6* pBackgroundDC6 = pForm->pDC6 ? *pForm->pDC6 : 0;
     switch (pForm->neD2FormType) {
+      case FORM_TextBox:
+        pTextBox = D2WinTextBox::D2WinTextBox(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nExtraParam, pForm->nLabelAsLocaleStringId, pBackgroundDC6, pForm->fpOnPressCallback, pForm->nFlagsOrType, (int*)pForm->pTypeArg2, (int*)pForm->pTypeArg1);
+      return (D2ControlStrc*)pTextBox;
       case FORM_EditBox:
         pEditBox = D2WinEditBox::D2WinEditBox(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nExtraParam, pForm->nLabelAsLocaleStringId, pBackgroundDC6, (fpD2WinEditBoxSubmit)pForm->pTypeArg1, pForm->fpOnPressCallback, pForm->nFlagsOrType, (uint32_t*)pForm->pTypeArg2);
       return (D2ControlStrc*)pEditBox;
@@ -265,9 +268,9 @@ D2ControlStrc * __stdcall FORMS_CreateAnyForm(FORMS_PredefinedFormStrc * pForm) 
       case FORM_AnimImage:
         pAnimImage = D2WinAnimImage(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pBackgroundDC6, pForm->nExtraParam, pForm->fpOnPressCallback, (FORMS_AnimFrameStrc*)pForm->pTypeArg1, pForm->nLabelAsLocaleStringId, (fpD2WinAnimImageNotify)pForm->pTypeArg2);
       return (D2ControlStrc*)pAnimImage;
-      case FORM_TextBox:
-        pTextBox = D2WinTextBox::D2WinTextBox(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nExtraParam, pForm->nLabelAsLocaleStringId, pBackgroundDC6, pForm->fpOnPressCallback, pForm->nFlagsOrType, (int*)pForm->pTypeArg2, (int*)pForm->pTypeArg1);
-      return (D2ControlStrc*)pTextBox;
+      case FORM_ImageEx:
+        pImageEx = Forms::D2WinImageEx(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pBackgroundDC6, pForm->nExtraParam, pForm->nLabelAsLocaleStringId);
+      return (D2ControlStrc*)pImageEx;
       case FORM_Scrollbar:
         pScrollbar = D2WinScrollbar::D2WinScrollbar(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pBackgroundDC6, pForm->fpOnPressCallback);
       return (D2ControlStrc*)pScrollbar;
@@ -289,9 +292,6 @@ D2ControlStrc * __stdcall FORMS_CreateAnyForm(FORMS_PredefinedFormStrc * pForm) 
       case FORM_AccountList:
         pAccountList = D2WinAccountList::D2WinAccountList(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pForm->nFlagsOrType, (uint32_t*)pForm->pTypeArg2);
       return (D2ControlStrc*)pAccountList;
-      case FORM_ImageEx:
-        pImageEx = Forms::D2WinImageEx(pForm->aParams[0], pForm->aParams[1], pForm->aParams[2], pForm->aParams[3], pBackgroundDC6, pForm->nExtraParam, pForm->nLabelAsLocaleStringId);
-      return (D2ControlStrc*)pImageEx;
     }
 
     return nullptr;
@@ -309,6 +309,10 @@ void __stdcall FORMS_DestroyAnyForm(D2ControlStrc * * pForm) {
     }
 
     switch (pWinEditBox_00->sControl.neD2FormType) {
+      case FORM_TextBox:
+        D2WinTextBox::FORMS_DestroyD2WinTextBox((::D2WinTextBox*)pWinEditBox_00);
+      *pForm = 0;
+      return;
       case FORM_EditBox:
         D2WinEditBox::FORMS_DestroyD2WinEditBox(pWinEditBox_00);
       *pForm = 0;
@@ -317,12 +321,12 @@ void __stdcall FORMS_DestroyAnyForm(D2ControlStrc * * pForm) {
         D2WinImage::FORMS_DestroyD2WinImage((::D2WinImage*)pWinEditBox_00);
       *pForm = 0;
       return;
-      case FORM_AnimImage:
-        FORMS_DestroyD2WinAnimImage((::D2WinAnimImage*)pWinEditBox_00);
+      case FORM_ImageEx:
+        D2WinImage::FORMS_DestroyD2WinImageEx((::D2WinImageEx*)pWinEditBox_00);
       *pForm = 0;
       return;
-      case FORM_TextBox:
-        D2WinTextBox::FORMS_DestroyD2WinTextBox((::D2WinTextBox*)pWinEditBox_00);
+      case FORM_AnimImage:
+        FORMS_DestroyD2WinAnimImage((::D2WinAnimImage*)pWinEditBox_00);
       *pForm = 0;
       return;
       case FORM_Scrollbar:
@@ -351,10 +355,6 @@ void __stdcall FORMS_DestroyAnyForm(D2ControlStrc * * pForm) {
       return;
       case FORM_AccountList:
         D2WinAccountList::FORMS_DestroyD2WinAccountList((::D2WinAccountList*)pWinEditBox_00);
-      *pForm = 0;
-      return;
-      case FORM_ImageEx:
-        D2WinImage::FORMS_DestroyD2WinImageEx((::D2WinImageEx*)pWinEditBox_00);
       *pForm = 0;
       return;
     }
@@ -442,7 +442,7 @@ void __stdcall DrawCursorOOG() {
     sGfxData.nFrameNumber = gnCursorDC6FrameNumber;
     sGfxData.pDC6 = pDVar1;
     sGfxData.nDirection = 0;
-    D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nMouseX < 1 ? 0 : nMouseX, (nMouseY < 1 ? 0 : nMouseY) - 1, -1, DRAW_SOLID, nullptr);
+    D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nMouseX <= 0 ? 0 : nMouseX, (nMouseY <= 0 ? 0 : nMouseY) - 1, -1, DRAW_SOLID, nullptr);
 }
 
 void __stdcall DRAW_UI_Sprites() {
@@ -524,7 +524,7 @@ void __stdcall RENDERER_DrawOutOfGameScene() {
       }
 
       for (; pForm; pForm = pForm->pNext) {
-        if (pForm->fpDraw && !(pForm->dwState & 8U)) {
+        if (pForm->fpDraw && !(pForm->dwState & gadwBitMasks[3])) {
           pForm->fpDraw(pForm);
         }
       }
@@ -537,7 +537,7 @@ void __stdcall RENDERER_DrawOutOfGameScene() {
       }
 
       for (; pForm; pForm = pForm->pNext) {
-        if (pForm->fpDraw && pForm->dwState & 8U) {
+        if (pForm->fpDraw && pForm->dwState & gadwBitMasks[3]) {
           pForm->fpDraw(pForm);
         }
       }
@@ -748,7 +748,7 @@ void __stdcall D2WIN_HandleSystemCommand(int32_t nParam) {
         pRcDesktop = &rcDesktop;
         /* LPRECT lpRect for GetClientRect */ hDesktopWnd = GetDesktopWindow();
         /* HWND hWnd for GetClientRect */ GetClientRect(hDesktopWnd, pRcDesktop);
-        if (nClientWidth == nTargetWidth && nClientHeight == nTargetHeight && nTargetWidth < rcDesktop.right - rcDesktop.left && nTargetHeight < rcDesktop.bottom - rcDesktop.top) {
+        if (nClientWidth == nTargetWidth && nClientHeight == nTargetHeight && rcDesktop.right - rcDesktop.left > nTargetWidth && rcDesktop.bottom - rcDesktop.top > nTargetHeight) {
           nWndPosX = nMonWorkLeft;
           nWndPosY = nMonWorkTop;
           bFixAspect = D2gfx::D2GFX::D2GFX_GetFixAspect();
@@ -908,7 +908,7 @@ void __fastcall D2WIN_TakeThrottledScreenshot(LPCSTR szFileName) {
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 8, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     DWORD dwTickCount = GetTickCount();
-    if (!(999 < dwTickCount - gdwLastScreenshotTick || szFileName)) {
+    if (!(1000 <= dwTickCount - gdwLastScreenshotTick || szFileName)) {
       return;
     }
 
@@ -936,10 +936,10 @@ void __stdcall D2WIN_ToggleMusicOptions(int32_t nParam) {
     }
 
     bMusicEnabled = D2Sound::Src::D2SoundFast::SOUND_GetOptionsMusic();
-    if (!bMusicEnabled) {
-      D2Sound::Src::D2SoundFast::SOUND_SetMusicEnabled(1);
-    } else {
+    if (bMusicEnabled) {
       D2Sound::Src::D2SoundFast::SOUND_FadeOutMusic();
+    } else {
+      D2Sound::Src::D2SoundFast::SOUND_SetMusicEnabled(1);
     }
 
     D2Sound::Src::D2SoundFast::SOUND_SetOptionsMusic((uint32_t)!bMusicEnabled);
@@ -962,7 +962,7 @@ int32_t __stdcall D2WIN_FindClosestControlToMouse(D2ControlStrc * pControl1, D2C
     int nDistX1 = pControl1->dwPosX;
     if (D2Client::Mouse::nPosX < nDistX1) {
       nDistX1 = D2Client::Mouse::nPosX - nDistX1;
-    } else if (pControl1->dwSizeX + nDistX1 < D2Client::Mouse::nPosX) {
+    } else if (D2Client::Mouse::nPosX > pControl1->dwSizeX + nDistX1) {
       nDistX1 = D2Client::Mouse::nPosX - pControl1->dwSizeX - nDistX1;
     } else {
       nDistX1 = 0;
@@ -971,7 +971,7 @@ int32_t __stdcall D2WIN_FindClosestControlToMouse(D2ControlStrc * pControl1, D2C
     int nDistY1 = pControl1->dwPosY;
     if (D2Client::Mouse::nPosY < nDistY1 - pControl1->dwSizeY) {
       nDistY1 = pControl1->dwSizeY - nDistY1 + D2Client::Mouse::nPosY;
-    } else if (nDistY1 < D2Client::Mouse::nPosY) {
+    } else if (D2Client::Mouse::nPosY > nDistY1) {
       nDistY1 = D2Client::Mouse::nPosY - nDistY1;
     } else {
       nDistY1 = 0;
@@ -989,7 +989,7 @@ int32_t __stdcall D2WIN_FindClosestControlToMouse(D2ControlStrc * pControl1, D2C
     int nDistY2 = pControl2->dwPosY;
     if (D2Client::Mouse::nPosY < nDistY2 - pControl2->dwSizeY) {
       nDistY2 = pControl2->dwSizeY - nDistY2 + D2Client::Mouse::nPosY;
-    } else if (nDistY2 < D2Client::Mouse::nPosY) {
+    } else if (D2Client::Mouse::nPosY > nDistY2) {
       nDistY2 = D2Client::Mouse::nPosY - nDistY2;
     } else {
       nDistY2 = 0;
@@ -999,7 +999,7 @@ int32_t __stdcall D2WIN_FindClosestControlToMouse(D2ControlStrc * pControl1, D2C
     } else {
       bControl1Inside = false;
     }
-    if (!nDistY2 && nDistX2 < 1) {
+    if (!nDistY2 && nDistX2 <= 0) {
       bVar1 = true;
     } else {
       bVar1 = false;
@@ -1044,7 +1044,7 @@ void __stdcall INPUT_FormMouseWheel(D2UIMouseMsgStrc * pMsg) {
       do {
         if (pControl->sControl.neD2FormType == FORM_Scrollbar) {
           dwState = pControl->sControl.dwState;
-          if (dwState & 4 && dwState & 1) {
+          if (dwState & gadwBitMasks[2] && dwState & gadwBitMasks[0]) {
             nMaxValue = D2WinScrollbar::D2WINSCROLLBAR_GetMaxValue(pControl);
             if (0 < nMaxValue) {
               pClosestScrollbar = (::D2WinScrollbar*)D2WIN_FindClosestControlToMouse(&pClosestScrollbar->sControl, &pControl->sControl);
@@ -1164,7 +1164,15 @@ void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
       BOOL hasMessage;
       D2CONTROL_Pump(); D2LOUD_GuardPump();   // in-process test channel: applies queued input on THIS thread; loud build: walks the guard zones
       /* UINT wRemoveMsg for PeekMessageA */ /* UINT wMsgFilterMax for PeekMessageA */ /* UINT wMsgFilterMin for PeekMessageA */ /* HWND hWnd for PeekMessageA */ /* LPMSG lpMsg for PeekMessageA */ hasMessage = PeekMessageA(&windowMsg, (HWND)0x0, 0, 0, 0);
-      if (!hasMessage) {
+      if (hasMessage) {
+        /* UINT wMsgFilterMax for GetMessageA */ /* UINT wMsgFilterMin for GetMessageA */ /* HWND hWnd for GetMessageA */ /* LPMSG lpMsg for GetMessageA */ gbMessageLoopActive = GetMessageA(&windowMsg, (HWND)0x0, 0, 0);
+        if (!gbMessageLoopActive && gpfnExitCallback) {
+          (*gpfnExitCallback)();
+        }
+
+        /* MSG * lpMsg for TranslateMessage */ TranslateMessage(&windowMsg);
+        /* MSG * lpMsg for DispatchMessageA */ DispatchMessageA(&windowMsg);
+      } else {
         TickCountA = GetTickCount();
         dwSleepMs = TickCountA - TickCountB;
         TickCountB = GetTickCount();
@@ -1174,7 +1182,7 @@ void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
         }
 
         nBudgetAccum -= dwSleepMs;
-        if ((int)nBudgetAccum < 1) {
+        if ((int)nBudgetAccum <= 0) {
           nBudgetAccum += 0x28;
           if ((int)nBudgetAccum < -1000) {
             nBudgetAccum = 0;
@@ -1197,14 +1205,6 @@ void __stdcall MessagePump(pfnFramePump pfnFrameCallback) {
         }
 
         /* DWORD dwMilliseconds for Sleep */ Sleep(dwSleepMs);
-      } else {
-        /* UINT wMsgFilterMax for GetMessageA */ /* UINT wMsgFilterMin for GetMessageA */ /* HWND hWnd for GetMessageA */ /* LPMSG lpMsg for GetMessageA */ gbMessageLoopActive = GetMessageA(&windowMsg, (HWND)0x0, 0, 0);
-        if (!gbMessageLoopActive && gpfnExitCallback) {
-          (*gpfnExitCallback)();
-        }
-
-        /* MSG * lpMsg for TranslateMessage */ TranslateMessage(&windowMsg);
-        /* MSG * lpMsg for DispatchMessageA */ DispatchMessageA(&windowMsg);
       }
     }
 
@@ -1242,7 +1242,7 @@ void __stdcall MOUSE_CaptureMousePosition(HWND * phWnd) {
     if (bWindowActive) {
       int nClampedX;
       nClampedX = nRawX;
-      if ((int)phWnd < nRawX) {
+      if (nRawX > (int)phWnd) {
         nClampedX = (int)phWnd;
       }
 
@@ -1293,7 +1293,7 @@ void __stdcall TakeScreenshot() {
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 8, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     DWORD dwTickCount = GetTickCount();
-    if (999 >= dwTickCount - gdwLastScreenshotTick) {
+    if (1000 > dwTickCount - gdwLastScreenshotTick) {
       return;
     }
 
@@ -1343,11 +1343,7 @@ void __stdcall INPUT_FormMouseHandler(D2UIMouseMsgStrc * pMsg) {
       iVar1 = D2Client::Mouse::nPosX;
       if (pControl) {
         do {
-          if (!pControl->fpDrawAnim) {
-            if (pControl->dwPosX <= iVar1 && pControl->dwPosY - pControl->dwSizeY <= D2Client::Mouse::nPosY && iVar1 < pControl->dwSizeX + pControl->dwPosX && D2Client::Mouse::nPosY < pControl->dwPosY) {
-              goto push_hit_control;
-            }
-          } else {
+          if (pControl->fpDrawAnim) {
             bHandled = pControl->fpDrawAnim(pControl);
             iVar1 = D2Client::Mouse::nPosX;
             if (bHandled) {
@@ -1363,6 +1359,10 @@ void __stdcall INPUT_FormMouseHandler(D2UIMouseMsgStrc * pMsg) {
                   break;
                 }
               }
+            }
+          } else {
+            if (pControl->dwPosX <= iVar1 && pControl->dwPosY - pControl->dwSizeY <= D2Client::Mouse::nPosY && iVar1 < pControl->dwSizeX + pControl->dwPosX && D2Client::Mouse::nPosY < pControl->dwPosY) {
+              goto push_hit_control;
             }
           }
 

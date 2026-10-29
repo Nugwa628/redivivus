@@ -32,8 +32,6 @@ namespace D2Game::Quests::QUESTS::A4Q2 {
 // Function declarations
 // [A4Q3 Terror's End — kill Diablo] Q26 Izual-kill notify (shared A4Q1 helper reused here): on Izual death, if The Fallen Angel quest is in intro state and step<2, advance its internal nStateFlag to 2 and broadcast via Q26_PlayerNotifyCompleted. NOTE: Q26_* belong to A4Q1 (Izual); they live here because A4Q2.cpp bundles the Act4 Diablo questline.
 void __fastcall Q26_NotifyIzualKilledToPlayers(::SGAMEDATA * pGame);
-// [A4Q1 Izual helper] Per-unit IterateAllUnits callback: if this unit is within collision-distance 5 of the tracked target (Izual), set the "near" flag in the iteration context.
-void __fastcall Q26_CheckIzualProximity(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nParam);
 // [A4Q1 Izual helper] Returns true if NO player is near Izual: looks up The Fallen Angel quest data, then iterates all units via Q26_CheckIzualProximity to test proximity.
 // Returns a full 32-bit value: every return path writes all of EAX (MOV EAX,imm32 / XOR EAX,EAX / MOVZX EAX,<narrow>).
 BOOL __fastcall Q26_CheckIzualNearPlayer(::SGAMEDATA * pGame, int32_t nParam);
@@ -79,8 +77,6 @@ void __fastcall Q27_Callback03_ChangedLevel(struct D2QuestDataStrc * pQuestData,
 void __fastcall Q27_Callback02_NpcDeactivate(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // [A5 helper, lives in A4Q2.cpp] Enable the Harrogath (Act 5 town) waypoint for the player: resolve waypoint id from LEVEL_Harrogath and call EnableWaypoint. Fired when the Pandemonium portal grants Act5 access.
 void __stdcall Q23_UnlockHarrogathWaypoint(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-// [A4Q3 Terror's End — expansion] Callback slot 0x0e. Cleanup: if Step0x09 (Diablo portal/go-to-act5 flag) is set but QUEST_AbleGoToAct5 not yet Completed, clear Step0x09. Keeps the portal-state flag consistent.
-void __fastcall Q27_Callback14_PlayerJoinedGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // [A4Q3 Terror's End] Load/restore handler (callback slot 0x0d). Expansion: same Step0x09 vs QUEST_AbleGoToAct5 cleanup as slot 0x0e. Then, if quest not Completed/FinishedInPreviousGame, rebuild the in-memory nStateFlag/nStateFlagPrev from persisted record steps: Step0x04 -> (3,prev2); Step0x03 -> (3,prev1); Step0x02 -> (2,prev1).
 void __fastcall Q27_Callback13_PlayerStartedGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // [A4Q3 Terror's End] Per-player: if QUEST_TerrorsEnd not Completed and the player's room is the room (or adjacent to the room) where Diablo died, and quest is not Completed/RewardAwaits, complete it via Q27_SetTerrorsEndCompleted. Credits the kill only to players near the corpse.

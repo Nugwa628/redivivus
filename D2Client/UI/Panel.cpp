@@ -77,9 +77,9 @@
 
 namespace D2Client::UI::Panel {
 
-static bool gbPanelClickProcessed = true; D2_STATIC_GUARD(gbPanelClickProcessed, "D2Client::UI::Panel::gbPanelClickProcessed");
+static BOOL gbPanelClickProcessed = true; D2_STATIC_GUARD(gbPanelClickProcessed, "D2Client::UI::Panel::gbPanelClickProcessed");
 static uint32_t gaaBeltSlotHotkeyCommands[4] = { 0x17, 0x18, 0x19, 0x1a }; D2_STATIC_GUARD(gaaBeltSlotHotkeyCommands, "D2Client::UI::Panel::gaaBeltSlotHotkeyCommands");
-static bool gbPanelLeftBeltArrowClicked = 0; D2_STATIC_GUARD(gbPanelLeftBeltArrowClicked, "D2Client::UI::Panel::gbPanelLeftBeltArrowClicked");
+static BOOL gbPanelLeftBeltArrowClicked = 0; D2_STATIC_GUARD(gbPanelLeftBeltArrowClicked, "D2Client::UI::Panel::gbPanelLeftBeltArrowClicked");
 
 // JMP thunk
 void __stdcall thunk_CMD_UseBeltSlot1() {
@@ -113,7 +113,7 @@ void __stdcall LoadPanelImages() {
         bExpansion = true;
       }
     }
-    if (nLanguageCode - 6 < 4) {
+    if (nLanguageCode - 6 <= 3) {
       char szPath[260];
       if (bExpansion) {
         ppszPath = "%s\\UI\\InvChar6";
@@ -374,7 +374,7 @@ static int32_t PANEL_GetSmoothedStatValue(eD2UnitStat eUnitStat) {
     }
 
     uint32_t nFrameIndex = GAME::Game::GetEntryIndex();
-    if (nFrameIndex < 2) {
+    if (nFrameIndex <= 1) {
       *(int*)(gaPanelImageLoadFlags + nSlotOffset * 0x10 + 8) = nCurValue;
       *(int*)(gaPanelImageLoadFlags + nSlotOffset * 0x10) = nCurValue;
     }
@@ -396,17 +396,17 @@ static int32_t PANEL_GetSmoothedStatValue(eD2UnitStat eUnitStat) {
       if (nAbsDiff < 0) {
         nAbsDiff = -nAbsDiff;
       }
-      if (nAbsDiff < (int)(nMaxValue + (nMaxValue >> 0x1f & 7U)) >> 3) {
+      if (!(nAbsDiff < (int)(nMaxValue + (nMaxValue >> 0x1f & 7U)) >> 3)) {
+        *(int*)(gaPanelImageLoadFlags + nSlotOffset + 8) = nCurValue;
+        nNow = GAME::Game::GetEntryIndex();
+        *(int32_t*)(gaPanelImageLoadFlags + nSlotOffset + 0xc) = nNow;
+      } else {
         *(uint32_t*)(gaPanelImageLoadFlags + nSlotOffset + 0xc) = *(uint32_t*)(gaPanelImageLoadFlags + nSlotOffset + 4);
         if (nCurValue == nMaxValue) {
           *(int*)(gaPanelImageLoadFlags + nSlotOffset + 8) = nCurValue;
         } else {
           *(int*)(gaPanelImageLoadFlags + nSlotOffset + 8) = nStoredVal;
         }
-      } else {
-        *(int*)(gaPanelImageLoadFlags + nSlotOffset + 8) = nCurValue;
-        nNow = GAME::Game::GetEntryIndex();
-        *(int32_t*)(gaPanelImageLoadFlags + nSlotOffset + 0xc) = nNow;
       }
 
       *(int*)(gaPanelImageLoadFlags + nSlotOffset) = nCurValue;
@@ -454,7 +454,7 @@ void __stdcall PANEL_DrawHealthOrb() {
     }
 
     int nPercentHideFromBottom = nValue * 0x50 / nMaxValue;
-    if (nPercentHideFromBottom - 1U < 2) {
+    if (nPercentHideFromBottom - 1U <= 1) {
       pUnit = UNIT::Player::GetPlayerUnit_UI();
       if (pUnit && pUnit->eUnitType == UNIT_PLAYER && pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead) {
         nPercentHideFromBottom = 2;
@@ -466,19 +466,19 @@ void __stdcall PANEL_DrawHealthOrb() {
     sGfxData.nDirection = 0;
     sGfxData.pDC6 = Hlthmana;
     sGfxData.nFrameNumber = 0;
-    pUnit = UNIT::Player::GetPlayerUnit_UI();
-    eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, eState);
+
+    eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(UNIT::Player::GetPlayerUnit_UI(), eState);
     if (eState != STATE_none) {
       int nRegenWidth;
       nLayer = 0;
       eUnitStat = UNITSTAT_hpregen;
-      pUnit = UNIT::Player::GetPlayerUnit_UI();
-      nRegenWidth = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eUnitStat, nLayer);
+
+      nRegenWidth = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(UNIT::Player::GetPlayerUnit_UI(), eUnitStat, nLayer);
       nRegenWidth = nRegenWidth * 0x50 / 100;
       if (0x50 < nRegenWidth) {
         nRegenWidth = 0x50;
       }
-      if (nPercentHideFromBottom < nRegenWidth) {
+      if (nRegenWidth > nPercentHideFromBottom) {
         eRenderer = D2gfx::D2GFX::D2GFX_GetRendererMode();
         if (eRenderer == RENDERER_Direct3D) {
           nValue = 0x1c;
@@ -491,8 +491,8 @@ void __stdcall PANEL_DrawHealthOrb() {
     }
 
     eState = STATE_poison;
-    pUnit = UNIT::Player::GetPlayerUnit_UI();
-    eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, eState);
+
+    eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(UNIT::Player::GetPlayerUnit_UI(), eState);
     sGfxData.nFrameNumber = eState != STATE_none ? 2 : 0;
     if (nPercentHideFromBottom) {
       D2gfx::D2GFX::D2GFX_GetRendererMode();
@@ -515,7 +515,7 @@ void __stdcall PANEL_DrawManaOrb() {
     if (!nMaxValue) {
       return;
     }
-    if (nMaxValue < nPositionX) {
+    if (nPositionX > nMaxValue) {
       nPositionX = nMaxValue;
     }
 
@@ -525,19 +525,19 @@ void __stdcall PANEL_DrawManaOrb() {
     sGfxData.nDirection = 0;
     sGfxData.pDC6 = Hlthmana;
     sGfxData.nFrameNumber = 1;
-    pUnit = UNIT::Player::GetPlayerUnit_UI();
-    eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, eState);
+
+    eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(UNIT::Player::GetPlayerUnit_UI(), eState);
     if (eState != STATE_none) {
       int nRegenWidth;
       nLayer = 0;
       eUnitStat = UNITSTAT_manarecovery;
-      pUnit = UNIT::Player::GetPlayerUnit_UI();
-      nRegenWidth = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eUnitStat, nLayer);
+
+      nRegenWidth = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(UNIT::Player::GetPlayerUnit_UI(), eUnitStat, nLayer);
       nRegenWidth = nRegenWidth * 0x50 / 100;
       if (0x50 < nRegenWidth) {
         nRegenWidth = 0x50;
       }
-      if (nPercentHideFromBottom < nRegenWidth) {
+      if (nRegenWidth > nPercentHideFromBottom) {
         eRenderer = D2gfx::D2GFX::D2GFX_GetRendererMode();
         if (eRenderer == RENDERER_Direct3D) {
           nPositionX = ScreenSizeX - 0x70;
@@ -674,13 +674,13 @@ void __stdcall PANEL_DrawStaminaBar() {
       gbPanelStaminaColorRed = (uint8_t)nPaletteColor;
     }
 
-    uint8_t byBarColor;
+    uint32_t byBarColor;
     byBarColor = gbPanelGoldColorGreen;
     if (nMaxStamina + 5 < nCurStamina || (nTmp = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x18) , nTmp != 0)) {
       nMaxStamina = nCurStamina;
       byBarColor = gbPanelStaminaColorRed;
     }
-    if (nMaxStamina < 1) {
+    if (nMaxStamina <= 0) {
       nMaxStamina = 0;
       byBarColor = gbPanelStaminaColorBlue;
     } else {
@@ -697,10 +697,10 @@ void __stdcall PANEL_DrawStaminaBar() {
     nMouseY = ui::GetMouseY();
     nMaxStamina = PANEL_GetSmoothedStatValue(UNITSTAT_stamina);
     int32_t nCurStaminaUnits;
-    nCurStaminaUnits = (int)(nMaxStamina + (nMaxStamina >> 0x1f & 0xffU)) >> 8;
+    nCurStaminaUnits = (int)nMaxStamina / 256;
     nMaxStamina = D2Common::Stats::StatsEx::GetTxtMaxStamina(pUnit);
     int32_t nMaxStaminaUnits;
-    nMaxStaminaUnits = (int)(nMaxStamina + (nMaxStamina >> 0x1f & 0xffU)) >> 8;
+    nMaxStaminaUnits = (int)nMaxStamina / 256;
     nCurStamina = 0;
     if (nCurStaminaUnits <= nMaxStaminaUnits) {
       eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_shrine_stamina);
@@ -745,18 +745,7 @@ void __stdcall PANEL_DrawMenuButton() {
     sGfxData.nDirection = 0;
     BOOL bMiniPanel;
     bMiniPanel = ui::GetUIFlag(UI_MINIPANEL);
-    if (!bMiniPanel) {
-      if (gpPanelMenuButton) {
-        nMouseY = ui::GetMouseY();
-        nMouseX = ui::GetMouseX();
-        if (ScreenSizeX / 2 - 8 <= nMouseX && nMouseX <= ScreenSizeX / 2 + 5 && ScreenSizeY - 0x27 <= nMouseY && nMouseY <= ScreenSizeY - 0xd) {
-          sGfxData.nFrameNumber = 1;
-          goto draw_menu_button;
-        }
-      }
-
-      sGfxData.nFrameNumber = 0;
-    } else {
+    if (bMiniPanel) {
       if (gpPanelMenuButton) {
         nMouseY = ui::GetMouseY();
         nMouseX = ui::GetMouseX();
@@ -767,6 +756,17 @@ void __stdcall PANEL_DrawMenuButton() {
       }
 
       sGfxData.nFrameNumber = 2;
+    } else {
+      if (gpPanelMenuButton) {
+        nMouseY = ui::GetMouseY();
+        nMouseX = ui::GetMouseX();
+        if (ScreenSizeX / 2 - 8 <= nMouseX && nMouseX <= ScreenSizeX / 2 + 5 && ScreenSizeY - 0x27 <= nMouseY && nMouseY <= ScreenSizeY - 0xd) {
+          sGfxData.nFrameNumber = 1;
+          goto draw_menu_button;
+        }
+      }
+
+      sGfxData.nFrameNumber = 0;
     }
 
     draw_menu_button:
@@ -884,7 +884,7 @@ void __stdcall PANEL_DrawExperienceBar() {
     }
 
     pUnit = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pUnit->pInventory);
-    if (!(!pUnit && (gnBeltSlotUnderCursor < 4 || gnPanelBeltRowsExpanded || gbPanelBeltAnimating))) {
+    if (!(!pUnit && (gnBeltSlotUnderCursor <= 3 || gnPanelBeltRowsExpanded || gbPanelBeltAnimating))) {
       return;
     }
     if (!gpPanelBeltHoverItem) {
@@ -972,25 +972,25 @@ static void __stdcall Draw_EquipmentNeedToRepairBody_1(int32_t bIsLeftSide, int3
         iVar1 += 4;
       break;
       case BODYLOC_R_ARM:
-        if (!bIsLeftSide) {
-          if (!nSlotVariant) {
-            iVar1 += 6;
-          } else {
-            iVar1 += 7;
-          }
-        } else {
+        if (bIsLeftSide) {
           iVar1 += 10;
+        } else {
+          if (nSlotVariant) {
+            iVar1 += 7;
+          } else {
+            iVar1 += 6;
+          }
         }
       break;
       case BODYLOC_L_ARM:
-        if (!bIsLeftSide) {
-          if (!nSlotVariant) {
-            iVar1 += 8;
-          } else {
-            iVar1 += 5;
-          }
-        } else {
+        if (bIsLeftSide) {
           iVar1 += 9;
+        } else {
+          if (nSlotVariant) {
+            iVar1 += 5;
+          } else {
+            iVar1 += 8;
+          }
         }
       break;
       case BODYLOC_BELT:
@@ -1045,7 +1045,7 @@ void __stdcall DRAW_EquipmentNeedArrows() {
     uint32_t nSlotIndex;
     int* pWarningEntry;
     uint32_t nWarningItemIndex;
-    memset(gaPanelBeltArrowsNeeded, 0, 6 * sizeof(gaPanelBeltArrowsNeeded[0]));
+    for (int i = 0; i < 6; i++) gaPanelBeltArrowsNeeded[i] = 0;
     D2UnitStrc* pItem;
     pItem = UNIT::Player::GetPlayerUnit_UI();
     D2InventoryStrc* pInventory;
@@ -1076,7 +1076,7 @@ void __stdcall DRAW_EquipmentNeedArrows() {
     PANEL_DrawBeltSlots(2);
     check_quantity_warnings:
     nSlotIndex = 0;
-    if (!gnInventoryWarningSlotCount) {
+    if ((uint32_t)gnInventoryWarningSlotCount <= 0) {
       return;
     }
 
@@ -1086,7 +1086,7 @@ void __stdcall DRAW_EquipmentNeedArrows() {
         bVar1 = D2Common::ITEMS::Items::ITEM_GetItemsTxt_bQntWarning(pItem);
         if (bVar1) {
           nWarningItemIndex = 0;
-          if (gnInventoryWarningItemCount) {
+          if ((uint32_t)gnInventoryWarningItemCount > 0) {
             pWarningEntry = gaInventoryWarningItems_nWarningKind_col[0] + 4;
             do {
               if ((*(int (*)[5])(pWarningEntry - 4))[0] == 1) {
@@ -1117,7 +1117,7 @@ void __stdcall DRAW_EquipmentNeedArrows() {
                 }
                 if ((uint32_t)*pWarningEntry < nTotalQuantity) {
                   if ((uint32_t)pWarningEntry[-1] < nTotalQuantity) {
-                    if ((uint32_t)pWarningEntry[-2] < nTotalQuantity) {
+                    if (nTotalQuantity > (uint32_t)pWarningEntry[-2]) {
                       goto next_warning_entry;
                     }
 
@@ -1169,7 +1169,7 @@ void __stdcall Draw_EquipmentNeedToRepairBody() {
             nMaxDurability = D2Common::Stats::StatsEx::GetTxtMaxDurability(pItem);
             if (nMaxDurability) {
               nBodyLoc = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pItem, UNITSTAT_durability, 0);
-              if (nBodyLoc * 100 / nMaxDurability < 0x15) {
+              if (nBodyLoc * 100 / nMaxDurability <= 0x14) {
                 pSlotLocEntry2 = (uint32_t*)gaBodySlotLocTable;
                 break;
               }
@@ -1202,9 +1202,9 @@ void __stdcall Draw_EquipmentNeedToRepairBody() {
             if (nMaxDurability) {
               nBodyLoc = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pItem, UNITSTAT_durability, 0);
               nBodyLoc = nBodyLoc * 100 / nMaxDurability;
-              if (nBodyLoc < 1) {
+              if (nBodyLoc <= 0) {
                 nRepairState = 2;
-              } else if (nBodyLoc < 0x15) {
+              } else if (nBodyLoc <= 0x14) {
                 nRepairState = 1;
               }
             }
@@ -1273,12 +1273,12 @@ void __stdcall PANEL_DrawPanelLayout() {
       nTextWidth = D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit);
       nMouseY = nTextWidth >> 8;
       pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_UI();
-      if (pPlayerUnit_lcl && pPlayerUnit_lcl->eUnitType == UNIT_PLAYER && pPlayerUnit_lcl->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead && (uint32_t)nStatValue < 2) {
+      if (pPlayerUnit_lcl && pPlayerUnit_lcl->eUnitType == UNIT_PLAYER && pPlayerUnit_lcl->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead && (uint32_t)nStatValue <= 1) {
         nStatValue = 1;
       }
 
-      pwszBuf = D2Lang::StrTable::strtable::GetLocaleString(0x1045);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszHpFormatted, pwszBuf, nStatValue, nMouseY);
+
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszHpFormatted, D2Lang::StrTable::strtable::GetLocaleString(0x1045), nStatValue, nMouseY);
       D2Lang::Unicode::UNISYS::AppendToBuffer(wszHpText, wszHpFormatted);
       nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszHpText);
       D2Win::Src::D2WinFont::DRAW_text(wszHpText, 0x41 - nTextWidth / 2, ScreenSizeY - 0x5f, 0, 0);
@@ -1293,8 +1293,8 @@ void __stdcall PANEL_DrawPanelLayout() {
     nMouseX = nTextWidth >> 8;
     nTextWidth = D2Common::Stats::StatsEx::GetTxtMaxMana(pUnit);
     nMouseY = nTextWidth >> 8;
-    pwszBuf = D2Lang::StrTable::strtable::GetLocaleString(0x1046);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszMpFormatted, pwszBuf, nMouseX, nMouseY);
+
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszMpFormatted, D2Lang::StrTable::strtable::GetLocaleString(0x1046), nMouseX, nMouseY);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszMpText, wszMpFormatted);
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszMpText);
     D2Win::Src::D2WinFont::DRAW_text(wszMpText, ScreenSizeX - nTextWidth / 2 - 0x50, ScreenSizeY - 0x5f, 0, 0);
@@ -1484,20 +1484,20 @@ void __stdcall ClickBelt(D2InventoryStrc * pInventory, int32_t nMouseY, int32_t 
     }
 
     BVar1 = UNIT::PlayerIsUnInterruptable(pCursorItem_lcl);
-    if (!pBeltItem) {
-      if (BVar1) {
-        goto play_item_sound;
-      }
-
-      nBeltSlot &= 0xffff;
-      nPacketId = 0x23;
-    } else {
+    if (pBeltItem) {
       if (BVar1) {
         goto play_item_sound;
       }
 
       nBeltSlot = pBeltItem->nUnitGUID;
       nPacketId = 0x25;
+    } else {
+      if (BVar1) {
+        goto play_item_sound;
+      }
+
+      nBeltSlot &= 0xffff;
+      nPacketId = 0x23;
     }
 
     GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT(nPacketId, pCursorItem_lcl->nUnitGUID, nBeltSlot);
@@ -1513,7 +1513,7 @@ void __stdcall ClickBelt(D2InventoryStrc * pInventory, int32_t nMouseY, int32_t 
 static void CLIENT_HandleBeltMouseDown(D2InventoryStrc * pInventory, int32_t nMouseY, int32_t nMouseX) {
     int aInvRect[4];
     uint32_t nBeltSlot = PANEL_GetPanelLayoutHeight(nMouseX, nMouseY);
-    if (-1 >= (int)nBeltSlot) {
+    if (0 > (int)nBeltSlot) {
       return;
     }
 
@@ -1556,7 +1556,7 @@ static void CLIENT_HandleBeltMouseDown(D2InventoryStrc * pInventory, int32_t nMo
     }
 }
 
-BOOL __fastcall PANEL_CheckEquipmentClickable(D2ItemsTxt * pItemTxt, D2UnitStrc * pUnit, int32_t nItemSlot) {
+static BOOL __fastcall PANEL_CheckEquipmentClickable(D2ItemsTxt * pItemTxt, D2UnitStrc * pUnit, int32_t nItemSlot) {
     if (!pItemTxt) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xa3d);
       exit(-1);
@@ -1592,8 +1592,8 @@ void __stdcall ClickBeltRight(uint32_t nBeltSlot, D2UnitStrc * pUnit, D2Inventor
       return;
     }
 
-    bClickable = GAME::Game::CLIENT_CheckExpansion();
-    int32_t nErrorLine = D2Common::Units::GetInventoryPage(pUnit, 0, bClickable);
+
+    int32_t nErrorLine = D2Common::Units::GetInventoryPage(pUnit, 0, GAME::Game::CLIENT_CheckExpansion());
     D2Common::DATATBLS::TokTbls::GetGridDimensions(nErrorLine, nScreenMode, &sGridCoords);
     pItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemInBeltSlot(pInventory, nBeltSlot);
     if (!pItem) {
@@ -1643,8 +1643,8 @@ void __stdcall ClickBeltRight(uint32_t nBeltSlot, D2UnitStrc * pUnit, D2Inventor
     int32_t nSoundArg3 = 0;
     int32_t nVolume = 0;
     nErrorLine = 0;
-    eD2Sounds nSoundId = UNIT::ITEM_PlayItemUseSound(pItem);
-    Sound::SOUND_PlaySound(nSoundId, nullptr, nErrorLine, nVolume, nSoundArg3);
+
+    Sound::SOUND_PlaySound(UNIT::ITEM_PlayItemUseSound(pItem), nullptr, nErrorLine, nVolume, nSoundArg3);
     gpPanelBeltSlot = 0;
 }
 
@@ -1728,7 +1728,7 @@ void __stdcall CMD_UseBeltSlot4() {
     ClickBeltRight(3, pUnit, pUnit->pInventory, wShiftKeyState & 0x8000);
 }
 
-void __fastcall PANEL_SetBeltSlotHoverFlag(uint32_t nIndex, uint8_t byValue) {
+void __fastcall PANEL_SetBeltSlotHoverFlag(uint32_t nIndex, int32_t byValue) {
     if (nIndex >= 4) {
       return;
     }
@@ -1799,11 +1799,11 @@ void __stdcall PANEL_DrawGoldAmount() {
     int32_t ePlayerClass = nClassId;
     int32_t nCurrentLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_level, 0);
     int32_t nCurrentExp = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_experience, 0);
-    int32_t nServerLevel = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0);
-    DWORD nNextLevelExp = D2Common::DATATBLS::DataTbls::TXT_Experience_GetLineLevel(ePlayerClass, nServerLevel);
+
+    DWORD nNextLevelExp = D2Common::DATATBLS::DataTbls::TXT_Experience_GetLineLevel(ePlayerClass, D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_level, 0));
     int32_t nCurLevelExp = D2Common::DATATBLS::DataTbls::TXT_Experience_GetLineLevel(ePlayerClass, nCurrentLevel - 1);
     uint32_t nBarWidth = nNextLevelExp - nCurLevelExp;
-    if ((uint32_t)nCurLevelExp < (uint32_t)nCurrentExp) {
+    if ((uint32_t)nCurrentExp > (uint32_t)nCurLevelExp) {
       nExpIntoLevel = nCurrentExp - nCurLevelExp;
     } else {
       nExpIntoLevel = 0;
@@ -1811,18 +1811,18 @@ void __stdcall PANEL_DrawGoldAmount() {
 
     int nMouseX = ui::GetMouseX();
     int nMouseY = ui::GetMouseY();
-    uint16_t* pwsText = awsTooltip;
-    for (nClassOrX = 0x32; nClassOrX; nClassOrX--) {
-      pwsText[0] = L'\0';
-      pwsText[1] = L'\0';
-      pwsText += 2;
-    }
+    uint16_t* pwsText;
+    for (int i = 0; i < 0x64; i++) awsTooltip[i] = 0;
+
+
+
+
 
     if (ScreenSizeX / 2 - 0x92 <= nMouseX && nMouseX <= ScreenSizeX / 2 - 0x17 && ScreenSizeY - 0x2b <= nMouseY && nMouseY <= ScreenSizeY - 0x22) {
       DWORD nNextLevelExp2 = nNextLevelExp;
       nNextLevelExp = nNextLevelExp2;
-      pwsText = D2Lang::StrTable::strtable::GetLocaleString(0x1043);
-      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, awsTooltip, pwsText, nCurrentExp, nNextLevelExp);
+
+      D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, awsTooltip, D2Lang::StrTable::strtable::GetLocaleString(0x1043), nCurrentExp, nNextLevelExp);
       D2Win::Src::D2WinFont::TEXT_TooltipSetAttributes(awsTooltip, ScreenSizeX / 2 - 0x92, ScreenSizeY - 0x33, 0, 1);
     }
     if (!nBarWidth) {
@@ -1830,7 +1830,7 @@ void __stdcall PANEL_DrawGoldAmount() {
     }
 
     uint32_t nExpScaled = nExpIntoLevel;
-    if (0x226b901 < nExpIntoLevel) {
+    if (0x226b902 <= nExpIntoLevel) {
       nExpScaled = nExpIntoLevel >> 7;
       nBarWidth >>= 7;
     }
@@ -1874,10 +1874,7 @@ void __stdcall PANEL_DrawBottomPanel() {
     D2UnitStrc* pItem = UNIT::Player::GetPlayerUnit_UI();
     D2InventoryStrc* pInventory = pItem->pInventory;
     pItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemByGridOffset(pInventory, 8);
-    if (!pItem) {
-      gnBeltPanelState = 2;
-      nBeltState = gnBeltPanelState;
-    } else {
+    if (pItem) {
       eItemType = D2Common::ITEMS::Items::ITEM_GetItemData_wType(pItem);
       nBeltState = gnBeltPanelState;
       if (eItemType == ITEMTYPE_Belt) {
@@ -1887,6 +1884,9 @@ void __stdcall PANEL_DrawBottomPanel() {
           exit(-1);
         }
       }
+    } else {
+      gnBeltPanelState = 2;
+      nBeltState = gnBeltPanelState;
     }
 
     gnBeltPanelState = nBeltState;
@@ -1944,7 +1944,7 @@ void __stdcall PANEL_DrawBottomPanel() {
 
     D2Common::DATATBLS::BeltsTbls::GetBeltsLine(gnBeltPanelState, nScreenMode, &sBeltsTxt);
     uint32_t nSlotIndex = 0;
-    if ((uint8_t)sBeltsTxt.nBoxes) {
+    if ((uint32_t)((uint8_t)sBeltsTxt.nBoxes) > 0) {
       uint16_t uVar1;
       do {
         if (3 < (int)nSlotIndex && !gbPanelBeltSlotHovered) {
@@ -1954,12 +1954,12 @@ void __stdcall PANEL_DrawBottomPanel() {
         pItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemInBeltSlot(pInventory, nSlotIndex);
         if (pItem) {
           eUnitType = pItem->eUnitType;
-          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
             nBeltState = pItem->pPath.pStaticPath->nPosX;
-          } else if (!pItem->pPath.pDynamicPath) {
-            nBeltState = 0;
-          } else {
+          } else if (pItem->pPath.pDynamicPath) {
             nBeltState = D2Common::PATH::DynamicPath::GetXPos(pItem->pPath.pDynamicPath);
+          } else {
+            nBeltState = 0;
           }
 
           bUiFlag = D2Common::ITEMS::Items::CheckItemFlag(pItem, ITEMFLAG_CURSOR, 0x5d5, ".\\UI\\panel.cpp");
@@ -2035,7 +2035,7 @@ void __stdcall PANEL_DrawBottomPanel() {
 
 void __stdcall DRAW_UI_BordersAndOrbsAndFillers() {
     // Static local variables (originally global data)
-    static bool gbPanelBorderDrawn; D2_STATIC_GUARD_BSS(gbPanelBorderDrawn, "D2Client::UI::Panel::DRAW_UI_BordersAndOrbsAndFillers::gbPanelBorderDrawn");
+    static BOOL gbPanelBorderDrawn; D2_STATIC_GUARD_BSS(gbPanelBorderDrawn, "D2Client::UI::Panel::DRAW_UI_BordersAndOrbsAndFillers::gbPanelBorderDrawn");
     static uint32_t gpPanelBorderImage; D2_STATIC_GUARD_BSS(gpPanelBorderImage, "D2Client::UI::Panel::DRAW_UI_BordersAndOrbsAndFillers::gpPanelBorderImage");
 
     eD2LevelId eRoomLevelId;
@@ -2103,7 +2103,7 @@ void __stdcall INPUT_PanelLeftClickDown(D2UIMouseMsgStrc * pMsg) {
         pMsg->bHandled = 0;
         return;
       }
-      if (nMouseX - 0x75U < 0x31 && nMouseY <= ScreenSizeY) {
+      if (nMouseX - 0x75U <= 0x30 && nMouseY <= ScreenSizeY) {
         gpPanelClickedButton = 1;
         gbPanelLeftBeltArrowClicked = 1;
       } else if (nMouseX < ScreenSizeX - 0xa5 || ScreenSizeX - 0x75 < nMouseX || ScreenSizeY < nMouseY) {
@@ -2112,15 +2112,15 @@ void __stdcall INPUT_PanelLeftClickDown(D2UIMouseMsgStrc * pMsg) {
           Storm::Source::SReg::SRegSaveValue("Diablo II", "Show HP Text", 0, bShowHpText);
         } else if (nMouseX < ScreenSizeX - 0x6f || ScreenSizeX - 0x1f < nMouseX || nMouseY < ScreenSizeY - 0x4b || ScreenSizeY - 0xf < nMouseY) {
           bExitFlag = PANEL_IsMouseInMenuButton(nMouseX, nMouseY);
-          if (!bExitFlag) {
+          if (bExitFlag) {
+            gpPanelMenuButton = 1;
+          } else {
             bExitFlag = PANEL_IsMouseInRunButton(nMouseX, nMouseY);
             if (!bExitFlag) {
               goto consume_panel_click;
             }
 
             gpPanelRunButton = 1;
-          } else {
-            gpPanelMenuButton = 1;
           }
 
           gpPanelClickedButton = 1;
@@ -2161,7 +2161,7 @@ void __stdcall INPUT_PanelLeftClickUp(D2UIMouseMsgStrc * pMsg) {
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
     int32_t nMouseX = (int32_t)pMsg->uLParam.sMousePos.nMouseX;
     int32_t nMouseY = (int32_t)pMsg->uLParam.sMousePos.nMouseY;
-    memset(gbPanelRightBeltArrowClicked, 0, 4 * sizeof(gbPanelRightBeltArrowClicked[0]));
+    for (int i = 0; i < 4; i++) gbPanelRightBeltArrowClicked[i] = 0;
     gbPanelLeftBeltArrowClicked = 0;
     if (!gpPanelClickedButton) {
       if (nMouseX - 0x75U < 0x31 && ScreenSizeY - 0x30 <= nMouseY && nMouseY <= ScreenSizeY || ScreenSizeX - 0xa5 <= nMouseX && nMouseX <= ScreenSizeX - 0x75 && ScreenSizeY - 0x30 <= nMouseY && nMouseY <= ScreenSizeY) {
@@ -2188,7 +2188,7 @@ void __stdcall INPUT_PanelLeftClickUp(D2UIMouseMsgStrc * pMsg) {
 
       iVar1 = ScreenSizeX / 2;
       if (nMouseX < iVar1 + 0x17 || iVar1 + 0x91 < nMouseX || nMouseY < ScreenSizeY - 0x27 || ScreenSizeY - 10 < nMouseY) {
-        if (nMouseX - 0x75U < 0x31 && nMouseY <= ScreenSizeY) {
+        if (nMouseX - 0x75U <= 0x30 && nMouseY <= ScreenSizeY) {
           iVar1 = ui::GetItemType();
           if (iVar1 == 6) {
             ui::UI_DropCursorItemOnGround();
@@ -2200,11 +2200,11 @@ void __stdcall INPUT_PanelLeftClickUp(D2UIMouseMsgStrc * pMsg) {
           }
 
           bFlag = ui::GetUIFlag(UI_SKILLSELECT);
-          if (!bFlag) {
-            Draw::SetUIFlag(UI_SKILLSELECT, UI_SET, 0);
+          if (bFlag) {
+            Draw::SetUIFlag(UI_SKILLSELECT, UI_RESET, 0);
             SpellSel::SPELLSEL_SetMouseHandFlag(1);
           } else {
-            Draw::SetUIFlag(UI_SKILLSELECT, UI_RESET, 0);
+            Draw::SetUIFlag(UI_SKILLSELECT, UI_SET, 0);
             SpellSel::SPELLSEL_SetMouseHandFlag(1);
           }
         } else if (nMouseX < ScreenSizeX - 0xa5 || ScreenSizeX - 0x75 < nMouseX || ScreenSizeY < nMouseY) {
@@ -2237,11 +2237,11 @@ void __stdcall INPUT_PanelLeftClickUp(D2UIMouseMsgStrc * pMsg) {
           }
 
           bFlag = ui::GetUIFlag(UI_SKILLSELECT);
-          if (!bFlag) {
-            Draw::SetUIFlag(UI_SKILLSELECT, UI_SET, 0);
+          if (bFlag) {
+            Draw::SetUIFlag(UI_SKILLSELECT, UI_RESET, 0);
             SpellSel::SPELLSEL_SetMouseHandFlag(0);
           } else {
-            Draw::SetUIFlag(UI_SKILLSELECT, UI_RESET, 0);
+            Draw::SetUIFlag(UI_SKILLSELECT, UI_SET, 0);
             SpellSel::SPELLSEL_SetMouseHandFlag(0);
           }
         }

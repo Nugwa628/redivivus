@@ -930,7 +930,7 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
       }
 
       uVar1 = pTextBox->sControl.dwState;
-      if (!(uVar1 & 4 && uVar1 & 1 && 0 < pTextBox->sStyleControl.dwSizeX)) {
+      if (!(uVar1 & gadwBitMasks[2] && uVar1 & 1 && 0 < pTextBox->sStyleControl.dwSizeX)) {
         return 0;
       }
       if ((uint32_t)pTextBox->sStyleControl.fpDraw & 1) {
@@ -941,12 +941,12 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
         uSelectedRow = (::DrawEx)((nMouseYOffset - (int)pTextBox->sStyleControl.pDC6) / (int)((int)pTextBox->pLineSpacingGlobal + uFontHeight) + pTextBox->sStyleControl.dwSizeY);
         pTextBox->sStyleControl.fpDrawEx = uSelectedRow;
         if (!((uint32_t)pTextBox->sStyleControl.fpDraw & 8)) {
-          if ((int)uSelectedRow < 0 || pTextBox->sStyleControl.dwSizeX <= (int)uSelectedRow) {
+          if ((int)uSelectedRow < 0 || (int)uSelectedRow >= pTextBox->sStyleControl.dwSizeX) {
             pTextBox->sStyleControl.fpDrawEx = (::DrawEx)-1;
           }
         } else {
           uClampedSel = (::DrawEx)(pTextBox->sStyleControl.dwSizeX - 1);
-          if ((int)((int)uSelectedRow < 1 ? 0 : (uint32_t)uSelectedRow) < (int)uClampedSel) {
+          if ((int)((int)uSelectedRow <= 0 ? 0 : (uint32_t)uSelectedRow) < (int)uClampedSel) {
             uClampedSel = (::DrawEx)((int)uSelectedRow < 1 ? 0 : (uint32_t)uSelectedRow);
           }
 
@@ -1239,8 +1239,7 @@ int __fastcall D2WINTEXTBOX_GetScrollbarStyle(::D2WinTextBox * pTextBox) {
     }
 
     pNew->sControl.neD2FormType = FORM_TextBox;
-    int* pnStateFlags = &pNew->sControl.dwState;
-    *pnStateFlags |= 1;
+    pNew->sControl.dwState |= 1;
     pNew->sControl.dwPosX = nParam1;
     pNew->sControl.dwSizeY = nHeight;
     pNew->sControl.dwState |= 4;
@@ -1388,7 +1387,7 @@ BOOL __fastcall SetText(::D2WinTextBox * pTextBox, uint16_t * szText, int32_t nL
         }
 
         nStrLen = D2WinFont::D2WINFONT_GetStringPixelWidth(pszTrimmed, 0xff);
-        if (nVisibleLines <= nStrLen) {
+        if (nStrLen >= nVisibleLines) {
           _uResult = D2WINTEXTBOX_WordWrapAndSetText(pTextBox, pszTrimmed, nLineStyle, nAlignment);
           return _uResult;
         }
@@ -1415,7 +1414,7 @@ BOOL __fastcall SetText(::D2WinTextBox * pTextBox, uint16_t * szText, int32_t nL
       }
 
       D2Lang::Unicode::UNISYS::STRING_CopyWideString((uint16_t*)wDestination, pszTrimmed);
-      memset(pLineEntry + 1, 0, 4 * sizeof(pLineEntry[0]));
+      for (int i = 1; i < 5; i++) pLineEntry[i] = 0;
       pLineEntry[5] = nLineStyle;
       *(bool*)(pLineEntry + 6) = bIndent;
       pLineEntry[7] = 0;
@@ -1433,7 +1432,7 @@ BOOL __fastcall SetText(::D2WinTextBox * pTextBox, uint16_t * szText, int32_t nL
         pTextBox->sStyleControl.dwPosX = (int)pLineEntry;
         nStrLen = D2WINTEXTBOX_GetVisibleLineCount(pTextBox);
         nMaxWidth = D2WINTEXTBOX_GetVisibleLinesFromScroll(pTextBox);
-        if (nStrLen < nMaxWidth) {
+        if (nMaxWidth > nStrLen) {
           pScrollbar = pTextBox->pScrollbar;
           if (pScrollbar) {
             nStrLen = D2WinScrollbar::D2WINSCROLLBAR_GetMaxValue(pScrollbar);
@@ -1489,7 +1488,7 @@ int __fastcall D2WINTEXTBOX_AddLines(::D2WinTextBox * pnParam, uint16_t * wszTex
           pAllocedText = (uint16_t*)D2_ALLOC_AT(nLine * 2 + 2, ".\\Src\\D2WinTextBox.cpp", 0x1b0);
           *pNewEntry = (uint32_t)(uintptr_t)pAllocedText;
           D2Lang::Unicode::UNISYS::STRING_CopyWideString(pAllocedText, wszText);
-          memset(pNewEntry + 1, 0, 4 * sizeof(pNewEntry[0]));
+          for (int i = 1; i < 5; i++) pNewEntry[i] = 0;
           pNewEntry[5] = nLineStyle;
           *(bool*)(pNewEntry + 6) = bIndent;
           pNewEntry[7] = 0;
@@ -1579,7 +1578,7 @@ BOOL __fastcall D2WINTEXTBOX_WordWrapAndSetText(::D2WinTextBox * pTextBox, uint1
 
           nWrapCharCount = nPrevCharCount + 1;
           nLine = D2WinFont::D2WINFONT_GetStringPixelWidth(pszCurScan, nWrapCharCount);
-          if (nMaxPixelWidth <= nLine) {
+          if (nLine >= nMaxPixelWidth) {
             nWrapCharCount = nPrevCharCount;
             if (pLastSpace) {
               nWrapCharCount = (int)pLastSpace - (int)pFirstLine >> 1;

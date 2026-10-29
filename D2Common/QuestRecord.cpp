@@ -124,7 +124,7 @@ void __stdcall ReadQuestRecordFromBuffer(D2BitBufferStrc * pBitBuffer, char * sz
     } while (iCopyCount < 0x2ae);
 }
 
-void __stdcall CopyQuestBitBuffer(D2BitBufferStrc * pBitBuffer, uint8_t * pOutputBuffer, int16_t nLength, uint32_t dwParam) {
+D2BitBufferStrc * __stdcall CopyQuestBitBuffer(D2BitBufferStrc * pBitBuffer, uint8_t * pOutputBuffer, int16_t nLength, uint32_t dwParam) {
     uint32_t iCount;
     /* Input is an array of 96 bytes (=24 uints) */ if (nLength != 0x60) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x84);
@@ -137,6 +137,7 @@ void __stdcall CopyQuestBitBuffer(D2BitBufferStrc * pBitBuffer, uint8_t * pOutpu
       pInputAddress++;
       pOutputBuffer = (uint8_t*)((int)pOutputBuffer + 4);
     }
+    return pBitBuffer;
 }
 
 } // namespace D2Common::QuestRecord

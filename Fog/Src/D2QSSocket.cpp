@@ -116,10 +116,7 @@ static int __stdcall ProcessReceivedData(D2QSSocketStrc * pQServerStrc, void * p
 
       wMsgSize = wPacketSize - (short int)iVar2;
       pParam = (void*)(iVar2 + (int)pvVar4);
-      if (!pQServerStrc->pfnPacketHandler) {
-        D2QSQueue::FOG_EnqueueMessage(&pQServerStrc->aQueue, pParam, wMsgSize);
-        /* HANDLE hEvent for SetEvent */ SetEvent(pQServerStrc->pEvent);
-      } else {
+      if (pQServerStrc->pfnPacketHandler) {
         /* FARPROC lpfn for IsBadCodePtr */ bBadHandlerPtr = IsBadCodePtr((FARPROC)pQServerStrc->pfnPacketHandler);
         if (bBadHandlerPtr) {
           ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x101);
@@ -138,6 +135,9 @@ static int __stdcall ProcessReceivedData(D2QSSocketStrc * pQServerStrc, void * p
           pvVar4 = (void*)((int)pvVar4 + uVar3);
           continue;
         }
+      } else {
+        D2QSQueue::FOG_EnqueueMessage(&pQServerStrc->aQueue, pParam, wMsgSize);
+        /* HANDLE hEvent for SetEvent */ SetEvent(pQServerStrc->pEvent);
       }
 
       pvVar4 = (void*)((int)pvVar4 + uVar3);
@@ -190,7 +190,7 @@ static void __stdcall CloseSocket(D2QSSocketStrc * pQServer) {
 }
 
 // Socket receive loop, passed as thread proc to Fog::Safesock::Create_Flag0
-void __stdcall ReceiveLoopCallback(D2QSSocketStrc * pQSSocket) {
+int __stdcall ReceiveLoopCallback(D2QSSocketStrc * pQSSocket) {
     uint32_t nBytesRecv;
     uint32_t nBufferSpace;
     int nWsaError;
@@ -256,7 +256,7 @@ void __stdcall ReceiveLoopCallback(D2QSSocketStrc * pQSSocket) {
               /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&pQSSocket->pSafesock->pSync);
             }
 
-            return;
+            return 0;
           }
 
           nPendingOffset = ProcessReceivedData(pQSSocket, aRecvBuffer, nBytesRecv + nPendingBytes);
@@ -274,6 +274,7 @@ void __stdcall ReceiveLoopCallback(D2QSSocketStrc * pQSSocket) {
 
     cleanup:
     CloseSocket(pQSSocket);
+    return 0;
 }
 
 // lpStartAddress parameter of CreateThread
@@ -345,11 +346,11 @@ D2QSSocketStrc * __stdcall STRUCT_D2QSSocket_Init(char * szIpAddress, int nPort,
 
       memset(pD2QSSocket, 0, 0x194);
       Storm::Source::SSTR::SStrCopy(pD2QSSocket->szIpAddress, szIpAddress, 0x104);
-      if (!szName) {
+      if (szName) {
+        dwErrorCode = 4;
+      } else {
         dwErrorCode = 0x40;
         szName = "UNKNOWN";
-      } else {
-        dwErrorCode = 4;
       }
 
       Storm::Source::SSTR::SStrCopy(pD2QSSocket->szName, szName, dwErrorCode);
@@ -441,7 +442,7 @@ int32_t __stdcall NET_MCP_CLIENT_Send(D2QSSocketStrc * pQSocket, char * pBytes, 
       nTotalSendSize = _nDataSizeNoHeader + 3;
     } else {
       *(uint16_t*)(char*)&abLenHeader = nDataSize + 2;
-      if (0x2063 < (uint16_t)*(uint16_t*)(char*)&abLenHeader) {
+      if (0x2064 <= (uint16_t)*(uint16_t*)(char*)&abLenHeader) {
         ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x71);
         exit(-1);
       }

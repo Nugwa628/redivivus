@@ -183,7 +183,7 @@ uint32_t __stdcall COMPOSIT_ResolveWeaponClass(D2UnitStrc * pUnit, int32_t nUnit
     }
 
     pick_weapon_class:
-    if (nClassIndex < 0 || sgptDataTable->nTxtCharStatsSize <= nClassIndex) {
+    if (nClassIndex < 0 || nClassIndex >= sgptDataTable->nTxtCharStatsSize) {
       pCharStatsTxt = 0;
     } else {
       pCharStatsTxt = sgptDataTable->pTxtCharStats + nClassIndex;
@@ -310,7 +310,7 @@ BOOL __stdcall COMPOSIT_HasWeaponDrawn(D2UnitStrc * pUnit) {
     int32_t nAnimMode = -1;
     pUnit = (D2UnitStrc*)pUnit->nClassId;
     nAnimMode = Units::GetAnimOrSeqMode(pOrigUnit);
-    if (pOrigUnit->eUnitFlagsEx >> 3 & 1) {
+    if (((bool)(pOrigUnit->eUnitFlagsEx >> 3 & 1))) {
       Skills::SKILLS_GetStateTransformGfx(pOrigUnit, &eUnitType, (int*)&pUnit, &nAnimMode, ".\\COMPOSIT\\Composit.cpp", 0x236);
     }
 
@@ -415,7 +415,7 @@ void __stdcall COMPOSIT_BuildCofPath(D2UnitStrc * pUnit, uint32_t nPlrClass, uin
       }
 
       i = 0;
-      if (gnPlayerCompositeOverrideCount) {
+      if ((uint32_t)gnPlayerCompositeOverrideCount > 0) {
         do {
           if (nResolvedClass == gaPlayerCompositeOverrideGfx[i].nMode) {
             nMonModeItemCode = gaPlayerCompositeOverrideGfx[i].dwToken;
@@ -463,7 +463,7 @@ void __stdcall COMPOSIT_BuildCofPath(D2UnitStrc * pUnit, uint32_t nPlrClass, uin
       if ((int)nPlrClass < 0) {
         return;
       }
-      if (sgptDataTable->nTxtMonStatsSize <= (int)nPlrClass) {
+      if ((int)nPlrClass >= sgptDataTable->nTxtMonStatsSize) {
         return;
       }
       if (!(sgptDataTable->pTxtMonStats + nPlrClass)) {
@@ -481,7 +481,7 @@ void __stdcall COMPOSIT_BuildCofPath(D2UnitStrc * pUnit, uint32_t nPlrClass, uin
       }
 
       i = 0;
-      if (gnMonsterCompositeOverrideCount) {
+      if ((uint32_t)gnMonsterCompositeOverrideCount > 0) {
         do {
           if (nResolvedClass == gaMonsterCompositeOverrideGfx[i].nMode) {
             dwModeToken = gaMonsterCompositeOverrideGfx[i].dwToken;

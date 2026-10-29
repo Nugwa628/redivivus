@@ -75,53 +75,6 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2GfxInfoStrc) == 0x3c, "D2_NEW_AT(
 
 namespace D2Client::Engine::GfxInfo {
 
-// @sourcefile .\ENGINE\Gfx.cpp
-void __stdcall GFX_RemoveOverlayFromUnit(D2UnitStrc * pUnit, int * pOverlay) {
-    int* pMemoryToFree;
-    D2GfxInfoStrc* pGfxInfo = UNIT::CUnit::GetGfxInfo(pUnit);
-    if (!pGfxInfo) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1bf);
-      exit(-1);
-    }
-
-    int* pPrev = 0;
-    int* pCur = (int*)pGfxInfo->pOverlayList;
-    if (!pGfxInfo->pOverlayList) {
-      return;
-    }
-
-    while (true) {
-      pMemoryToFree = pCur;
-      if (pMemoryToFree == pOverlay) {
-        break;
-      }
-
-      pCur = (int*)pMemoryToFree[0x29];
-      pPrev = pMemoryToFree;
-      if (!(int*)pMemoryToFree[0x29]) {
-        return;
-      }
-    }
-
-    if (!pMemoryToFree) {
-      return;
-    }
-    if ((D2LightMapStrc*)pMemoryToFree[0x10]) {
-      Draw::LightMap::FreeLightMap((D2LightMapStrc*)pMemoryToFree[0x10]);
-      pMemoryToFree[0x10] = 0;
-    }
-    if (!pPrev) {
-      pGfxInfo->pOverlayList = (void*)pMemoryToFree[0x29];
-    } else {
-      pPrev[0x29] = pMemoryToFree[0x29];
-    }
-    if (*pMemoryToFree == 8) {
-      Gfx::GFX_RemoveStateOverlayAndReprioritize(pUnit, (int32_t)pGfxInfo, (int32_t)pMemoryToFree);
-    }
-
-    D2_FREE_AT(pMemoryToFree, ".\\ENGINE\\Gfx.cpp", 0x1e1);
-}
-
 BOOL __fastcall GFX_HasOverlayOfType(D2UnitStrc * pUnit, int32_t nOverlayType) {
     void* nAddress;
     D2GfxInfoStrc* pGfxInfo = UNIT::CUnit::GetGfxInfo(pUnit);
@@ -224,7 +177,7 @@ void __fastcall GFX_DrawOverlayOnUnit(D2UnitStrc * pUnit, int32_t nOverlayId, in
           if (nThisOverlayId < 0) {
             return;
           }
-          if (sgptDataTable->nTxtOverlaySize <= nThisOverlayId) {
+          if (nThisOverlayId >= sgptDataTable->nTxtOverlaySize) {
             return;
           }
 
@@ -342,7 +295,7 @@ void __stdcall DRAW_UNIT_States(D2UnitStrc * pUnit, int32_t nBlendMode, int32_t 
       if ((*pCur != 8 || pCur[0xf]) && bShow) {
         nFrameField = pCur[6];
         nThisOverlayId = pCur[1];
-        if (nThisOverlayId < 0 || sgptDataTable->nTxtOverlaySize <= nThisOverlayId || (pOverlayTxt = sgptDataTable->pTxtOverlay + nThisOverlayId , !pOverlayTxt)) {
+        if (nThisOverlayId < 0 || nThisOverlayId >= sgptDataTable->nTxtOverlaySize || (pOverlayTxt = sgptDataTable->pTxtOverlay + nThisOverlayId , !pOverlayTxt)) {
           DRAW_UNIT_States_HaltTail(0x2d1);
         }
 
@@ -516,13 +469,13 @@ int __stdcall GFX_LoadCompositCof(int * pnOutCofData, uint32_t nAnimMode, D2Unit
     int nWeaponParam;
     nWeaponParam = 0;
     szCofPath[0] = '\0';
-    memset(szCofPath + 1, 0, 0x103);
+    for (int i = 0x1; i < 0x104; i++) szCofPath[i] = 0;
     int bResult;
     bResult = GfxUtil::GFXUTIL_IsValidUnitType(pUnit);
     if (!bResult) {
       return 0;
     }
-    if (pUnit && pUnit->eUnitFlagsEx >> 3 & 1) {
+    if (pUnit && ((bool)(pUnit->eUnitFlagsEx >> 3 & 1))) {
       D2UnitStrc* pOwner;
       BVar1 = D2Common::DATATBLS::ItemStats::ITEMSTATS_CheckUnitHasStateFlagIndex(pUnit, 0x25);
       if (BVar1) {
@@ -848,7 +801,7 @@ uint8_t GFX_GetUnitHealthBarColor(D2UnitStrc * pUnit) {
     if (eUnitType != UNIT_MONSTER) {
       return gbHealthBarColorGreen;
     }
-    if (nClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nClassId) {
+    if (nClassId < 0 || nClassId >= sgptDataTable->nTxtMonStatsSize) {
       pMonStats = 0;
     } else {
       pMonStats = sgptDataTable->pTxtMonStats + nClassId;
@@ -889,7 +842,7 @@ uint32_t __fastcall DrawItemGfx(D2UnitStrc * pUnit, int32_t nHeight, int32_t nWi
     eD2ItemTypes eItemType = D2Common::ITEMS::Items::ITEM_GetItemData_wType(pUnit);
     if (eItemType == ITEMTYPE_Gold) {
       nGoldAmount = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
-      if (99 < nGoldAmount) {
+      if (100 <= nGoldAmount) {
         if (nGoldAmount < 500) {
           nDC6Height = 1;
         } else {
@@ -989,7 +942,7 @@ void __fastcall GFX_RemoveOverlayById(int32_t nOverlayId, D2UnitStrc * pUnit) {
     if (!pGfxInfo) {
       return;
     }
-    if (nOverlayId < 0 || sgptDataTable->nTxtOverlaySize <= nOverlayId || !(sgptDataTable->pTxtOverlay + nOverlayId)) {
+    if (nOverlayId < 0 || nOverlayId >= sgptDataTable->nTxtOverlaySize || !(sgptDataTable->pTxtOverlay + nOverlayId)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xca9);
       exit(-1);
     }

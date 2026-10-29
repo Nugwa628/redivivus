@@ -353,7 +353,7 @@ void __fastcall Q20_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nNPCClassId, 4);
         return;
       }
-      if (3 < pQuestData->nStateFlag) {
+      if (4 <= pQuestData->nStateFlag) {
         return;
       }
       if (pWillQuestItem) {
@@ -364,7 +364,7 @@ void __fastcall Q20_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nGossipLine == -1) {
         return;
       }
-      if (7 < nGossipLine) {
+      if (8 <= nGossipLine) {
         return;
       }
     } else {
@@ -585,10 +585,15 @@ void __fastcall Q20_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
                           */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_BladeOfTheOldReligion, QUESTSTATE_Step0x08);
       nDifficulty = pQuestArgs->pGame->nDifficulty;
       iVar1 = 0x15;
-      if (nDifficulty == 1) {
+      switch (nDifficulty) {
+      case 1: {
         iVar1 = 0x23;
-      } else if (nDifficulty == 2) {
+        break;
+      }
+      case 2: {
         iVar1 = 0x4b;
+        break;
+      }
       }
 
       ITEM_RewardItemInInventory(pQuestArgs->pGame, pQuestArgs->pPlayer, 0x206e6972, iVar1, QUALITY_RARE, 1);
@@ -993,17 +998,17 @@ BOOL __fastcall OBJOP_A3Q5_NihlathakPortalTrigger(D2ObjectOperateFnArg * pOperat
     }
 
     ::SGAMEDATA* pGame = pOperation->sArg.pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
-    BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_BladeOfTheOldReligion, QUESTSTATE_Completed);
+    D2UnitDataPlayerStrc* pPlayerData;
+    BOOL bQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty], QUEST_BladeOfTheOldReligion, QUESTSTATE_Completed);
     if (!bQuestState) {
       D2QuestDataStrc* pQuestData;
       pGame = pOperation->sArg.pGame;
-      pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
-      bQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_BladeOfTheOldReligion, QUESTSTATE_Step0x07);
+
+      bQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty], QUEST_BladeOfTheOldReligion, QUESTSTATE_Step0x07);
       if (!bQuestState) {
         pGame = pOperation->sArg.pGame;
-        pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
-        bQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_BladeOfTheOldReligion, QUESTSTATE_Step0x08);
+
+        bQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pOperation->pAttacker)->pQuestRecord[pGame->nDifficulty], QUEST_BladeOfTheOldReligion, QUESTSTATE_Step0x08);
         if (!bQuestState) {
           pQuestData = GetQuestDataByQuestNoInternal(pOperation->sArg.pGame, QUESTINT_BladeOfTheOldReligion);
           if (!(pQuestData && pQuestData->bIsNotIntroduction)) {

@@ -155,7 +155,7 @@ void __fastcall WND_InsertListNode(int * * pNode, int32_t nMode, int * * ppAncho
 
 uint32_t __fastcall WND_GetNodeMaskedOffset(int32_t pThis, int32_t pNode) {
     if (pNode) {
-      return (int)*(uint32_t*)(pNode + 4) < 1 ? 0 : *(uint32_t*)(pNode + 4);
+      return (int)*(uint32_t*)(pNode + 4) <= 0 ? 0 : *(uint32_t*)(pNode + 4);
     }
 
     pNode = pThis + 4;
@@ -290,13 +290,13 @@ void __stdcall SMSG_AddWindow(uint32_t hWnd) {
     StormWndRecStrc* pEntry;
     uint32_t nOffset;
     StormWndRecStrc* pRecord = (StormWndRecStrc*)SMem::SMemAlloc(0xc, s___AUWNDREC___00708850, -2, 8);
-    if (!pRecord) {
-      pEntry = 0;
-      pRecord = (StormWndRecStrc*)&gpWndTrackingListHead.pPrevLink;
-    } else {
+    if (pRecord) {
       pRecord->link.pPrevLink = 0;
       pRecord->link.pNext = 0;
       pEntry = pRecord;
+    } else {
+      pEntry = 0;
+      pRecord = (StormWndRecStrc*)&gpWndTrackingListHead.pPrevLink;
     }
 
     StormLinkStrc* nNext = pRecord->link.pPrevLink;
@@ -322,7 +322,7 @@ void __stdcall SMSG_AddWindow(uint32_t hWnd) {
     pEntry->hWnd = (HWND)hWnd;
 }
 
-uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, StormWndRecStrc * pRecord) {
+static uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, StormWndRecStrc * pRecord) {
     uint32_t nOffset;
     StormWndRecStrc* pSVar1 = pRecord;
     if (!pRecord) {
@@ -347,14 +347,14 @@ uint32_t __fastcall WND_RemoveAndFreeRecord(void * pListHead, StormWndRecStrc * 
     }
 
     SMem::SMemFree(pRecord, s___AUWNDREC___00708850, -2, 0);
-    return (int)nResult < 1 ? 0 : nResult;
+    return (int)nResult <= 0 ? 0 : nResult;
 }
 
 // @blizzard FindWindow (SMSG.CPP)
 uint32_t __fastcall SMSG_FindWindow(int32_t nHandle) {
-    uint32_t nRecord = gpWndTrackingListHead.pNext < 1 ? 0 : gpWndTrackingListHead.pNext;
+    uint32_t nRecord = gpWndTrackingListHead.pNext <= 0 ? 0 : gpWndTrackingListHead.pNext;
     while (true) {
-      if ((int)nRecord < 1) {
+      if ((int)nRecord <= 0) {
         return 0;
       }
       if (*(int*)(nRecord + 8) == nHandle) {

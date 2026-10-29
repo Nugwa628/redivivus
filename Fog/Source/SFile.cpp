@@ -209,7 +209,7 @@ int __fastcall SFILE_GetInstallPath(LPSTR lpFilename, DWORD nSize) {
       return 0;
     }
     uint32_t uVar1 = Storm::Source::SSTR::SStrLen(lpFilename);
-    if (!(!uVar1 || lpFilename[uVar1 - 1] != '\\')) {
+    if (!((uint32_t)uVar1 <= 0 || lpFilename[uVar1 - 1] != '\\')) {
       return 1;
     }
     if (uVar1 + 1 == nSize) {
@@ -230,7 +230,7 @@ int __fastcall SFILE_GetBlizzardAppDataPath(char * szOutPath, uint32_t nMaxLen) 
       Storm::Source::SSTR::SStrPack(cAppDataPath, "\\Blizzard Entertainment", 0x7fffffff);
       if (nMaxLen) {
         nSrcPathLen = Storm::Source::SSTR::SStrLen(cAppDataPath);
-        if (!nSrcPathLen || cAppDataPath[nSrcPathLen - 1] != '\\') {
+        if ((uint32_t)nSrcPathLen <= 0 || cAppDataPath[nSrcPathLen - 1] != '\\') {
           if (nSrcPathLen + 1 == nMaxLen) {
             return 0;
           }
@@ -269,7 +269,10 @@ static bool SFILE_GetSaveGamePath(LPSTR szOutPath, uint32_t nMaxLen) {
     }
 
     uint32_t bKnownFolderOk = Engine::Application::PATH_GetKnownFolderPath(szOutPath, nMaxLen);
-    if ((char)bKnownFolderOk == '\0') {
+    if ((char)bKnownFolderOk != '\0') {
+      SFILE_EnsurePathEndsWithBackslash(szOutPath, nMaxLen);
+      pszSubPath = "Diablo II";
+    } else {
       iVar1 = SHGetFolderPathA(0, 5, 0, 0, szAppDataPath);
       if (iVar1) {
         return false;
@@ -277,9 +280,6 @@ static bool SFILE_GetSaveGamePath(LPSTR szOutPath, uint32_t nMaxLen) {
 
       SFILE_EnsurePathEndsWithBackslash(szOutPath, nMaxLen);
       pszSubPath = "Diablo II\\Save";
-    } else {
-      SFILE_EnsurePathEndsWithBackslash(szOutPath, nMaxLen);
-      pszSubPath = "Diablo II";
     }
 
     Storm::Source::SSTR::SStrPack(szOutPath, pszSubPath, nMaxLen);
@@ -324,7 +324,7 @@ int __fastcall SFILE_MoveDirectoryRecursive(LPCSTR szSrcRoot, LPCSTR szDstRoot) 
           }
 
           uVar1 = Storm::Source::SSTR::SStrLen(szDstDir);
-          if ((!uVar1 || szSrcPath[uVar1 + 0x103] != '\\') && uVar1 != 0x103) {
+          if (((uint32_t)uVar1 <= 0 || szSrcPath[uVar1 + 0x103] != '\\') && uVar1 != 0x103) {
             szDstDir[uVar1] = '\\';
             szDstDir[uVar1 + 1] = '\0';
           }
@@ -394,7 +394,7 @@ void __fastcall GetAndCreateSavePath(char * pBuffer, size_t nSize) {
                 pcLen = szOldSavePath;
               } else {
                 uVar1 = Storm::Source::SSTR::SStrLen(szNewSavePath);
-                if ((!uVar1 || szOldSavePath[uVar1 + 0x103] != '\\') && uVar1 != 0x103) {
+                if (((uint32_t)uVar1 <= 0 || szOldSavePath[uVar1 + 0x103] != '\\') && uVar1 != 0x103) {
                   szNewSavePath[uVar1] = '\\';
                   szNewSavePath[uVar1 + 1] = '\0';
                 }
@@ -417,7 +417,7 @@ void __fastcall GetAndCreateSavePath(char * pBuffer, size_t nSize) {
       SFILE_GetSaveGamePath(pBuffer, nSize);
       if (nSize) {
         uVar1 = Storm::Source::SSTR::SStrLen(pBuffer);
-        if ((!uVar1 || pBuffer[uVar1 - 1] != '\\') && uVar1 + 1 != nSize) {
+        if (((uint32_t)uVar1 <= 0 || pBuffer[uVar1 - 1] != '\\') && uVar1 + 1 != nSize) {
           pBuffer[uVar1] = '\\';
           pBuffer[uVar1 + 1] = '\0';
         }
@@ -429,7 +429,7 @@ void __fastcall GetAndCreateSavePath(char * pBuffer, size_t nSize) {
     }
     if (nSize) {
       uVar1 = Storm::Source::SSTR::SStrLen(pBuffer);
-      if (!uVar1 || pBuffer[uVar1 - 1] != '\\') {
+      if ((uint32_t)uVar1 <= 0 || pBuffer[uVar1 - 1] != '\\') {
         if (uVar1 + 1 == nSize) {
           return;
         }
@@ -507,7 +507,7 @@ void __fastcall SFILE_GregorianCalendarFromJulian(int32_t nJulianDay, int * pYea
     int fpTmp4;
     int uVar2;
     int nTmp2;
-    if (0x8fc1c < nJulianDay) {
+    if (0x8fc1d <= nJulianDay) {
       nYearsSinceEpoch = (int)(((double)(nJulianDay - 0x1c7dd0) - 0.25) / 36524.25);
       nJulianDay = nYearsSinceEpoch - (int)((double)nYearsSinceEpoch * 0.25) + 1 + nJulianDay;
     }
@@ -545,9 +545,9 @@ void __fastcall SFILE_DeleteOldLogFiles(char * szLogPrefix) {
       SafeCreateDirectoryTree(szLogDir);
     }
 
-    uint32_t nDay = (uint32_t)systemTime.wDay;
     uint32_t nYear = (uint32_t)systemTime.wYear;
     uint32_t nMonth = (uint32_t)systemTime.wMonth;
+    uint32_t nDay = (uint32_t)systemTime.wDay;
     int32_t nTodayJulian = SFILE_JulianDayNumber(nYear, nMonth, nDay);
     int nJulianDay = nTodayJulian - 5;
     int iCount = 10;

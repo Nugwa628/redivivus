@@ -190,7 +190,7 @@ int __stdcall NET_D2GS_CLIENT_ParseRecvBufferIntoPacketQueues() {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x129);
         exit(-1);
       }
-      if ((int)pBytesSize < (int)nPacketSize) {
+      if ((int)nPacketSize > (int)pBytesSize) {
         break;
       }
 
@@ -222,7 +222,7 @@ int __stdcall NET_D2GS_CLIENT_ParseRecvBufferIntoPacketQueues() {
       }
 
       ppTailNext = &pD2PacketClient_to_0xAE;
-      if (0xae < (uint8_t)pBytes->pBytes[0]) {
+      if (0xaf <= (uint8_t)pBytes->pBytes[0]) {
         ppTailNext = &pD2PacketClient_from_0xAF;
       }
 
@@ -434,7 +434,7 @@ void __fastcall NET_D2GS_CLIENT_HandleIncomingBufferAndCreatePacket(char * pByte
     char* nPacketSize = pBytes;
     while (true) {
       D2OnePacketClientStrc* pNewPacket;
-      if ((int)pBytesSize < 1) {
+      if ((int)pBytesSize <= 0) {
         return;
       }
 
@@ -446,7 +446,7 @@ void __fastcall NET_D2GS_CLIENT_HandleIncomingBufferAndCreatePacket(char * pByte
       if ((char*)0x204 < nPacketSize) {
         break;
       }
-      if ((int)nPacketSize < 1) {
+      if ((int)nPacketSize <= 0) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x204);
         exit(-1);
       }
@@ -465,17 +465,7 @@ void __fastcall NET_D2GS_CLIENT_HandleIncomingBufferAndCreatePacket(char * pByte
           exit(-1);
         }
       }
-      if (!pTailPacket) {
-        pTailPacket = pD2PacketClient_from_0xAF;
-        if (0xae < byFirstByte) {
-          pTailPacket = pNewPacket;
-          pNewPacket = pD2PacketClient_to_0xAE;
-          if (0xb4 < byFirstByte) {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x21e);
-            exit(-1);
-          }
-        }
-      } else {
+      if (pTailPacket) {
         pWalkPacket = pTailPacket->pD2PacketClientNext;
         while (pWalkPacket) {
           pTailPacket = pTailPacket->pD2PacketClientNext;
@@ -485,6 +475,16 @@ void __fastcall NET_D2GS_CLIENT_HandleIncomingBufferAndCreatePacket(char * pByte
         pTailPacket->pD2PacketClientNext = pNewPacket;
         pTailPacket = pD2PacketClient_from_0xAF;
         pNewPacket = pD2PacketClient_to_0xAE;
+      } else {
+        pTailPacket = pD2PacketClient_from_0xAF;
+        if (0xae < byFirstByte) {
+          pTailPacket = pNewPacket;
+          pNewPacket = pD2PacketClient_to_0xAE;
+          if (0xb4 < byFirstByte) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x21e);
+            exit(-1);
+          }
+        }
       }
 
       pD2PacketClient_to_0xAE = pNewPacket;

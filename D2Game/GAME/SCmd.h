@@ -195,9 +195,9 @@ void __fastcall NET_D2GS_SERVER_Send_0x6D_UNITCHANGE_MONSTERNEUTRAL(struct D2Cli
 // "Reassign" in their names; they warp a unit like the other two.
 void __fastcall NET_D2GS_SERVER_Send_0x15_WarpXY(struct D2ClientStrc * pClient, uint8_t nPacketId, uint8_t nUnitType, uint32_t nUnitGUID, uint16_t wX, uint16_t wY, uint8_t bParam);
 // Server-to-client map reveal. Opcode 0x07, 6 bytes. Reveals automap area around tile coordinate.
-void __fastcall NET_D2GS_SERVER_Send_0x07_MapReveal(struct D2ClientStrc * pClient, uint8_t nAreaId, uint16_t nTileX, uint16_t nTileY);
+void __fastcall NET_D2GS_SERVER_Send_0x07_MapReveal(struct D2ClientStrc * pClient, int32_t nAreaId, uint16_t nTileX, uint16_t nTileY);
 // Server-to-client map hide. Opcode 0x08, 6 bytes.
-void __fastcall NET_D2GS_SERVER_Send_0x08_REMOVEROOM(struct D2ClientStrc * pClient, uint8_t bParam, uint16_t nTileX, uint16_t nTileY);
+void __fastcall NET_D2GS_SERVER_Send_0x08_REMOVEROOM(struct D2ClientStrc * pClient, int32_t bParam, uint16_t nTileX, uint16_t nTileY);
 // Server-to-client level warp assignment. Opcode 0x09.
 void __fastcall NET_D2GS_SERVER_Send_0x09_NEWUNIT(struct D2ClientStrc * pClient, uint8_t nPacketId, uint8_t nLevelId, uint32_t dwGUID, uint8_t bParam, uint16_t wX, uint16_t wY);
 // Server-to-client world object assignment. Opcode 0x51.
@@ -323,18 +323,12 @@ void __fastcall NET_D2GS_SERVER_Send_0x83_Unused(struct D2ClientStrc * pClient, 
 void __fastcall NET_D2GS_SERVER_Send_0x84_Unused(struct D2ClientStrc * pClient, uint8_t byFlag, uint16_t wDataLen, void * pData);
 void __fastcall NET_D2GS_SERVER_Send_0x88_Unused(struct D2ClientStrc * pClient, char * szText, uint16_t wDataLen, uint16_t wExtraFlag, uint16_t wParam, void * pData);
 void __fastcall NET_D2GS_SERVER_Send_0x8B_PlayerRelationship(struct D2ClientStrc * pClient, uint32_t dwTargetArg, uint8_t byTypeArg);
-// @sourcefile .\GAME\SCmd.cpp
-void __fastcall NET_D2GS_SERVER_Send_0x8C_PLAYERFLAGS_Argument(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2GSPacketSrv0x8C * pPacket);
 void __fastcall NET_D2GS_SERVER_Send_0x8C_RelationshipUpdate_Sender(::SGAMEDATA * pGame, uint32_t nUnitGUID, uint32_t nOtherUnitGUID, uint16_t wRelationFlags);
 // @sourcefile .\GAME\SCmd.cpp
 void __fastcall NET_D2GS_SERVER_Send_0x8C_PLAYERFLAGS(struct D2UnitStrc * pUnit, uint32_t nUnitGUID, uint32_t nOtherUnitGUID, uint16_t wRelationFlags);
-// @sourcefile .\GAME\SCmd.cpp
-void __fastcall NET_D2GS_SERVER_Send_0x8D_PLAYERPARTY_Argument(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint8_t * pPacketBuf);
 void __fastcall NET_D2GS_SERVER_Send_0x8D_AssignPlayerToParty_Sender(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 // @sourcefile .\GAME\SCmd.cpp
 void __fastcall NET_D2GS_SERVER_Send_0x8D_PLAYERPARTY(struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2);
-// @sourcefile .\GAME\SCmd.cpp
-void __fastcall NET_D2GS_SERVER_Send_0x8E_LINKDEADBODY_Argument(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint8_t * pPacketBuf);
 void __fastcall NET_D2GS_SERVER_Send_0x8E_CorpseAssign_Sender(::SGAMEDATA * pGame, int32_t nUnitGUID, int32_t nCorpseGUID, uint8_t byCorpseFlagArg);
 void __fastcall NET_D2GS_SERVER_Send_0x8E_CorpseAssign(struct D2ClientStrc * pClient, uint32_t dwUnitGUID_param, uint32_t dwCorpseGUIDArg, uint8_t byCorpseFlagArg);
 void __fastcall NET_D2GS_SERVER_Send_0x89_QUESTEVENTTRIGGER(struct D2ClientStrc * pClient, struct D2GSPacketClt0x89 * pPacket0x89);
@@ -358,7 +352,7 @@ void __fastcall NET_D2GS_SERVER_Send_0xAC_AddMonster(struct D2ClientStrc * pClie
 // (29 functions in D2Client::Warden::WardenClient namespace), but server-side dispatch is stubbed
 // (SCMD_0x66_WardenStub @ 0x0054d740 returns PROCEED_NEXT without processing).
 // Likely disabled/removed in later patches after Warden was integrated into Battle.net realm.
-void __fastcall NET_D2GS_SERVER_Send_0xAE_WARDENDATA(struct D2ClientStrc * pClient, void * pParam, uint32_t nDataSize);
+int __fastcall NET_D2GS_SERVER_Send_0xAE_WARDENDATA(struct D2ClientStrc * pClient, void * pParam, uint32_t nDataSize);
 // Generic wrapper for sending state-related packets (0xA8 SetState or 0xAA AddUnit).
 // Actual opcode selection handled by caller (PLAYER_SendStateListToClient or PLAYER_SendStateDeltaToClient).
 // This is just a thin shim around NET_D2GS_SERVER_SendPacket_Helper.

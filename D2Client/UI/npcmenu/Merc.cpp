@@ -78,7 +78,7 @@ void __fastcall NPCMENU_SetSelectedMercIndex(int16_t nParam) {
       }
 
       pMercEntry++;
-    } while ((int)pMercEntry < (uintptr_t)((char*)&D2Client::Merc::D2MercForHire + sizeof(D2Client::Merc::D2MercForHire)));
+    } while ((int)pMercEntry < (int)((uintptr_t)((char*)&D2Client::Merc::D2MercForHire + sizeof(D2Client::Merc::D2MercForHire))));
 
     Hireables::UI_InitializeHirelingIconsUI();
 }
@@ -175,8 +175,8 @@ int __stdcall NPCMENU_ShowMercResurrectDialog() {
     }
 
     int32_t nRosterPetGUID = 0;
-    D2UnitStrc* pMerc = UNIT::Player::GetPlayerUnit_UI();
-    nRosterPetGUID = GAME::RosterPets::GetRosterPetGUID(pMerc, 7, nRosterPetGUID);
+    D2UnitStrc* pMerc;
+    nRosterPetGUID = GAME::RosterPets::GetRosterPetGUID(UNIT::Player::GetPlayerUnit_UI(), 7, nRosterPetGUID);
     if (nRosterPetGUID == -1) {
       BOOL bIsExpansion;
       bIsExpansion = GAME::Game::CLIENT_CheckExpansion();
@@ -185,8 +185,8 @@ int __stdcall NPCMENU_ShowMercResurrectDialog() {
         return 0;
       }
 
-      pMerc = UNIT::Player::GetPlayerUnit_UI();
-      nRosterPetGUID = GAME::RosterPets::CountRostersForUnitFilterBySkill(pMerc, 7);
+
+      nRosterPetGUID = GAME::RosterPets::CountRostersForUnitFilterBySkill(UNIT::Player::GetPlayerUnit_UI(), 7);
       if (!nRosterPetGUID && nMercNameId == -1) {
         NPCMENU_HireMerc();
         return 0;

@@ -115,7 +115,7 @@ int __fastcall MISSILETBLS_ValidateCalcCode(char * szText, int * pOutHasResolved
       } else if (nKeywordNumber == 4) {
         if (sgtDataTable.pTxtMissilesLink) {
           nLinkIdx = Fog::Src::Excel::GetLinkNodeIndex(sgtDataTable.pTxtMissilesLink, szText, 0);
-          if (-1 < nLinkIdx) {
+          if (0 <= nLinkIdx) {
             *pOutHasResolvedToConstant = 1;
             return nLinkIdx;
           }
@@ -133,12 +133,7 @@ int __fastcall MISSILETBLS_ValidateCalcCode(char * szText, int * pOutHasResolved
     if (cFirstChar == '\0') {
       cFourthChar = ' ';
       nAST = 0x202020;
-    } else if (szText[1] == '\0') {
-      cFourthChar = ' ';
-      *(uint16_t*)(char*)&nAST = (uint16_t)((uint16_t)(uint8_t)0x20 << 8 | (uint16_t)(uint8_t)cFirstChar);
-      d2_store24((char*)&nAST, (uint32_t)((uint32_t)((uint32_t)(uint8_t)0x20 << 16 | (uint32_t)(uint16_t)nAST) & 0xffffffu));
-      nAST = (int)((uint32_t)nAST & 0xffffffu);
-    } else {
+    } else if (szText[1] != '\0') {
       *(uint16_t*)(char*)&nAST = (uint16_t)((uint16_t)(uint8_t)szText[1] << 8 | (uint16_t)(uint8_t)cFirstChar);
       if (szText[2] == '\0') {
         cFourthChar = ' ';
@@ -152,6 +147,11 @@ int __fastcall MISSILETBLS_ValidateCalcCode(char * szText, int * pOutHasResolved
           goto lookup_miss_calc;
         }
       }
+    } else {
+      cFourthChar = ' ';
+      *(uint16_t*)(char*)&nAST = (uint16_t)((uint16_t)(uint8_t)0x20 << 8 | (uint16_t)(uint8_t)cFirstChar);
+      d2_store24((char*)&nAST, (uint32_t)((uint32_t)((uint32_t)(uint8_t)0x20 << 16 | (uint32_t)(uint16_t)nAST) & 0xffffffu));
+      nAST = (int)((uint32_t)nAST & 0xffffffu);
     }
 
     nAST = (uint32_t)((uint32_t)(uint8_t)cFourthChar << 24 | (uint32_t)((uint32_t)nAST & 0xffffffu));
@@ -182,7 +182,7 @@ void __fastcall MissileCalcLinker(char * pSrc, void * pRecord, int32_t nOffset, 
 
 // Validates a single field of a D2MissilesTxt row (indexed by nMissileIdx) against [nMinVal, nMaxVal] and clamps it in-place if out of range. Reads the field via eFieldType (0=signed byte, 1=unsigned byte, 2=signed short, 3=unsigned short, 4=uint32) at nFieldOffset into the Missile sub-struct. On violation, walks pFieldDescArray to find the matching descriptor, then writes back the clamped value at the same offset and width.
 void __stdcall MISSILETBLS_ValidateAndClampField(int32_t eFieldType, uint32_t nMinVal, uint32_t nMaxVal, int32_t nFieldOffset, int32_t pFieldDescArray, int32_t nMissileIdx) {
-    D2MissilesTxt* pMissileTxt = nMissileIdx < 0 || sgptDataTable->nTxtMissilesSize <= nMissileIdx ? 0 : sgptDataTable->pTxtMissiles + nMissileIdx;
+    D2MissilesTxt* pMissileTxt = nMissileIdx < 0 || nMissileIdx >= sgptDataTable->nTxtMissilesSize ? 0 : sgptDataTable->pTxtMissiles + nMissileIdx;
     uint32_t nRawVal = 0;
     switch (eFieldType) {
       case 0:
@@ -991,7 +991,7 @@ void __fastcall TXT_AllocTxt_missiles(D2PoolManagerStrc * pMemory) {
       int iFieldIdx;
       sgptDataTable_lcl = sgptDataTable;
       do {
-        if (iMissileIdx < 0 || sgptDataTable_lcl->nTxtMissilesSize <= iMissileIdx) {
+        if (iMissileIdx < 0 || iMissileIdx >= sgptDataTable_lcl->nTxtMissilesSize) {
           pMissileTxt = 0;
         } else {
           pMissileTxt = &sgptDataTable_lcl->pTxtMissiles[iMissileIdx];

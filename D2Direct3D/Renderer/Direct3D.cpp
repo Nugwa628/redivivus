@@ -598,44 +598,37 @@ void __stdcall RENDERER_D3D_AllocateTextureCaches() {
     g_nBytesPerPixel = 2;
     g_bSupportsTextureCachingInternal = 0;
     uint32_t uSmallCacheAlloc = g_nVideoMemoryTotal;
-    if (!(gnD3DTextureCapFlags & 2) || 0xcfffff < g_nVideoMemoryTotal) {
-      if (0x1ffffff < g_nVideoMemoryTotal) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[1]) || 0xd00000 <= g_nVideoMemoryTotal) {
+      if (0x2000000 <= g_nVideoMemoryTotal) {
         uSmallCacheAlloc = 0x2000000;
       }
     } else {
       g_bSupportsTextureCachingInternal = 1;
-      if (0x1ffffff < g_nVideoMemoryFree) {
+      if (0x2000000 <= g_nVideoMemoryFree) {
         g_nVideoMemoryFree = 0x2000000;
       }
       if (g_nVideoMemoryTotal <= g_nVideoMemoryFree) {
         uSmallCacheAlloc = g_nVideoMemoryFree;
       }
     }
-    if (!g_bPerspectiveMode) {
-      gnTextureMemoryUsageBytes.nTextureMemoryUsageBytes = 0;
-      gnTextureMemoryUsageBytes.nGlideSubtileCacheMemBytes = 0;
-      nSmackerBase = RENDERER_D3D_CreateSmackerSurfaces(0);
-      nGenericNodeBytes = RENDERER_D3D_InitializeTextureCachePool(gD3DGenericTextureCache.aCaches, nSmackerBase, (uSmallCacheAlloc - nSmackerBase) * 0x46 / 100 + nSmackerBase, 0x100, 0x100);
-      nGenericCacheEnd = gD3DGenericTextureCache.aCaches[0].nMaxNodes * g_nBytesPerPixel;
-      uSubtileCacheAlloc = (uint32_t)((uint64_t)((uSmallCacheAlloc - nSmackerBase) * 0x50) * 0x51eb851f >> 0x20);
-    } else {
+    if (g_bPerspectiveMode) {
       uint32_t uVideoMemBudget;
-      if (!(gnD3DTextureCapFlags & 0x40)) {
-        gnD3DTextureCacheBlockSize = 0x100;
-        gnD3DTextureCacheCount = 0x80;
-      } else {
+      if (gnD3DTextureCapFlags & 0x40) {
         gnD3DTextureCacheBlockSize = 0xa0;
         gnD3DTextureCacheCount = 0x50;
+      } else {
+        gnD3DTextureCacheBlockSize = 0x100;
+        gnD3DTextureCacheCount = 0x80;
       }
 
       nSmackerBase = gnD3DTextureCacheCount * gnD3DTextureCacheBlockSize;
       uSubtileCacheAlloc = uSmallCacheAlloc >> 1;
-      if (0x5fffff < uSubtileCacheAlloc) {
+      if (0x600000 <= uSubtileCacheAlloc) {
         uSubtileCacheAlloc = 0x600000;
       }
 
       uVideoMemBudget = uSmallCacheAlloc >> 3;
-      if (0x2fffff < uVideoMemBudget) {
+      if (0x300000 <= uVideoMemBudget) {
         uVideoMemBudget = 0x300000;
       }
 
@@ -647,6 +640,13 @@ void __stdcall RENDERER_D3D_AllocateTextureCaches() {
       nGenericNodeBytes = RENDERER_D3D_InitializeTextureCachePool(gD3DGenericTextureCache.aCaches, nSmackerBase, (uSmallCacheAlloc - nSmackerBase) * 0x14 / 100 + nSmackerBase, 0x100, 0x100);
       nGenericCacheEnd = gD3DGenericTextureCache.aCaches[0].nMaxNodes * g_nBytesPerPixel;
       uSubtileCacheAlloc = (uint32_t)((uint64_t)((uSmallCacheAlloc - nSmackerBase) * 0x4b) * 0x51eb851f >> 0x20);
+    } else {
+      gnTextureMemoryUsageBytes.nTextureMemoryUsageBytes = 0;
+      gnTextureMemoryUsageBytes.nGlideSubtileCacheMemBytes = 0;
+      nSmackerBase = RENDERER_D3D_CreateSmackerSurfaces(0);
+      nGenericNodeBytes = RENDERER_D3D_InitializeTextureCachePool(gD3DGenericTextureCache.aCaches, nSmackerBase, (uSmallCacheAlloc - nSmackerBase) * 0x46 / 100 + nSmackerBase, 0x100, 0x100);
+      nGenericCacheEnd = gD3DGenericTextureCache.aCaches[0].nMaxNodes * g_nBytesPerPixel;
+      uSubtileCacheAlloc = (uint32_t)((uint64_t)((uSmallCacheAlloc - nSmackerBase) * 0x50) * 0x51eb851f >> 0x20);
     }
 
     gnTextureMemoryUsageBytes.nGlideSmallTextureCacheMemBytes = nGenericCacheEnd * 0x10000;
@@ -736,8 +736,8 @@ BOOL __stdcall RENDERER_D3D_InitializeCutsceneMode() {
     RENDERER_nWindowWidth = 0x280;
     RENDERER_nWindowHeight = 0x1e0;
     uint32_t nBitsPerPixel = 0x10;
-    if (!(gnD3DTextureCapFlags & 0x80)) {
-      if (gnD3DTextureCapFlags & 0x100) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[7])) {
+      if (gnD3DTextureCapFlags & gadwBitMasks[8]) {
         nBitsPerPixel = 0x18;
       }
     } else {
@@ -745,7 +745,9 @@ BOOL __stdcall RENDERER_D3D_InitializeCutsceneMode() {
     }
 
     DWORD nSetDisplayModeResult = g_pDirectDraw7->lpVtbl->SetDisplayMode(g_pDirectDraw7, 0x280, 0x1e0, nBitsPerPixel, 0, 0);
-    if (!nSetDisplayModeResult) {
+    if (nSetDisplayModeResult) {
+      szErrorMessage = "SetDisplayMode failed!";
+    } else {
       dwDDSurfDescSize.dwSize = 0x7c;
       memset(&dwDDSurfDescSize.dwFlags, 0, 0x78);
       dwDDSurfDescSize.dwFlags = 1;
@@ -758,8 +760,6 @@ BOOL __stdcall RENDERER_D3D_InitializeCutsceneMode() {
       }
 
       szErrorMessage = "Failed to create primary surface for cutscenes";
-    } else {
-      szErrorMessage = "SetDisplayMode failed!";
     }
 
     DIRECTD3D_LogError(szErrorMessage, nSetDisplayModeResult);
@@ -785,7 +785,7 @@ void __fastcall SetGamma(int nGamma) {
     uint32_t aGammaRampRed[128];
     uint32_t aGammaRampGreen[128];
     uint32_t aGammaRampBlue[128];
-    if (!(gnD3DTextureCapFlags & 0x10)) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[4])) {
       return;
     }
 
@@ -935,16 +935,20 @@ void __fastcall RENDERER_D3D_CopySurfacePixels(IDirectDrawSurface7 * pSrcSurface
     ddDestDescSize.dwSize = 0x7c;
     memset(&ddDestDescSize.dwFlags, 0, 0x78);
     DWORD nLockResult = pDestSurface->lpVtbl->Lock(pDestSurface, nullptr, &ddDestDescSize, 0x21, nullptr);
-    if (!nLockResult) {
+    if (nLockResult) {
+      DIRECTD3D_LogError("Failed to lock source surface", nLockResult);
+    } else {
       DDSURFACEDESC2 ddSrcDescSize;
       ddSrcDescSize.dwSize = 0x7c;
       memset(&ddSrcDescSize.dwFlags, 0, 0x78);
       nLockResult = pSrcSurface->lpVtbl->Lock(pSrcSurface, nullptr, &ddSrcDescSize, 0x21, nullptr);
-      if (!nLockResult) {
+      if (nLockResult) {
+        DIRECTD3D_LogError("Failed to lock dest surface", nLockResult);
+      } else {
         nCopyWidth = ddDestDescSize.lPitch;
         pSrcRowCopy = ddSrcDescSize.lpSurface;
         pDestRowCopy = ddDestDescSize.lpSurface;
-        if ((uint32_t)ddSrcDescSize.lPitch <= (uint32_t)ddDestDescSize.lPitch) {
+        if ((uint32_t)ddDestDescSize.lPitch >= (uint32_t)ddSrcDescSize.lPitch) {
           nCopyWidth = ddSrcDescSize.lPitch;
         }
 
@@ -953,11 +957,7 @@ void __fastcall RENDERER_D3D_CopySurfacePixels(IDirectDrawSurface7 * pSrcSurface
           pSrcRowCopy = (void*)((int)pSrcRowCopy + ddSrcDescSize.lPitch);
           pDestRowCopy = (void*)((int)pDestRowCopy + ddDestDescSize.lPitch);
         }
-      } else {
-        DIRECTD3D_LogError("Failed to lock dest surface", nLockResult);
       }
-    } else {
-      DIRECTD3D_LogError("Failed to lock source surface", nLockResult);
     }
 
     pDestSurface->lpVtbl->Unlock(pDestSurface, nullptr);
@@ -965,7 +965,7 @@ void __fastcall RENDERER_D3D_CopySurfacePixels(IDirectDrawSurface7 * pSrcSurface
 }
 
 void __fastcall RENDERER_DIRECT3D_ErrorLog(char * szText, DWORD dwParam) {
-    if ((int)dwParam < 1) {
+    if ((int)dwParam <= 0) {
       if (!dwParam) {
         Fog::Src::LogManager::LOGFILE_WriteStringToFile("***** Direct3D error: %s - %s (0x%x)", szText, "D3D_OK", 0);
         return;
@@ -1170,7 +1170,7 @@ HRESULT __stdcall RENDERER_D3D_EnumDisplayModeCallback(int * pDisplayModeDesc, i
     if (!pDisplayModeDesc || *pDisplayModeDesc != 0x7c) {
       return 0;
     }
-    if (0x1f < *(int*)(pModeList + 0x3bc)) {
+    if (0x20 <= *(int*)(pModeList + 0x3bc)) {
       Fog::Src::LogManager::LOGFILE_WriteStringToFile("***** Exceeded Maximum Display Mode Count (%d >= %d)", *(int*)(pModeList + 0x3bc), 0x20);
       if (__frame0.pTestDevice) {
         __frame0.pTestDevice->lpVtbl->Release(__frame0.pTestDevice);
@@ -1196,10 +1196,10 @@ HRESULT __stdcall RENDERER_D3D_EnumDisplayModeCallback(int * pDisplayModeDesc, i
     }
     if (nBitDepth == 0x20) {
       if (pDisplayModeDesc[3] == gnD3DEnumDisplayModeCacheWidth && pDisplayModeDesc[2] == gnD3DEnumDisplayModeCacheFormat) {
-        uModeFlags |= 2;
+        uModeFlags |= gadwBitMasks[1];
       }
       if (true && pDisplayModeDesc[3] == gnD3DEnumDisplayModeCacheHeight && pDisplayModeDesc[2] == gnD3DEnumDisplayModeCacheRefreshRate) {
-        uModeFlags |= 1;
+        uModeFlags |= gadwBitMasks[0];
       }
     }
     if (!uModeFlags) {
@@ -1211,8 +1211,10 @@ HRESULT __stdcall RENDERER_D3D_EnumDisplayModeCallback(int * pDisplayModeDesc, i
     if (!nDDResult || nDDResult == -0x7789fdbb) {
       DWORD nDDCallResult;
       nDDCallResult = g_pDirectDraw7->lpVtbl->SetDisplayMode(g_pDirectDraw7, pDisplayModeDesc[3], pDisplayModeDesc[2], pDisplayModeDesc[0x15], pDisplayModeDesc[6], 0);
-      if (!nDDCallResult) {
-        if (!(uModeFlags & 1) && !(uModeFlags & 2)) {
+      if (nDDCallResult) {
+        DIRECTD3D_LogError("SetDisplayMode (mode enumeration) failed!", nDDCallResult);
+      } else {
+        if (!(uModeFlags & gadwBitMasks[0]) && !(uModeFlags & gadwBitMasks[1])) {
           nDDSurfDescSize.dwSize = 0x7c;
           memset(&nDDSurfDescSize.dwFlags, 0, 0x78);
           nDDSurfDescSize.dwFlags = 1;
@@ -1258,8 +1260,6 @@ HRESULT __stdcall RENDERER_D3D_EnumDisplayModeCallback(int * pDisplayModeDesc, i
         pModeEntry[1] = pDisplayModeDesc[0x15];
         pModeEntry[4] = pDisplayModeDesc[6];
         (*(int*)(pModeList + 0x3bc))++;
-      } else {
-        DIRECTD3D_LogError("SetDisplayMode (mode enumeration) failed!", nDDCallResult);
       }
     } else {
       DIRECTD3D_LogError("SetCooperativeLevel (mode enumeration) failed!", nDDResult);
@@ -1338,7 +1338,7 @@ BOOL __stdcall Direct3DCallBack(GUID * lpGUID, char * lpDriverDescription, char 
     Fog::Source::SFile::SFILE_GetGlobalPointer();
     uint32_t uVar3;
     uVar3 = gnDirect3DDeviceCount;
-    if (1 < (int)gnDirect3DDeviceCount) {
+    if (2 <= (int)gnDirect3DDeviceCount) {
       Fog::Src::LogManager::LOGFILE_WriteStringToFile("***** Exceeded Maximum Display Count (%d >= %d)", gnDirect3DDeviceCount, 2);
       ExceptionList = __frame0.pPrevExceptionRecord;
       return 0;
@@ -1363,9 +1363,13 @@ BOOL __stdcall Direct3DCallBack(GUID * lpGUID, char * lpDriverDescription, char 
 
     DWORD hResult;
     hResult = DirectDrawCreate(lpGUID, &__frame0.pDirectDraw1, nullptr);
-    if (!hResult) {
+    if (hResult) {
+      pszErrorMsg = "Enumeration DirectDrawCreate failed";
+    } else {
       hResult = __frame0.pDirectDraw1->lpVtbl->QueryInterface((IDirectDraw*)__frame0.pDirectDraw1, (IID*)&IID_IDirectDraw7, (LPVOID*)&g_pDirectDraw7);
-      if (!hResult) {
+      if (hResult) {
+        pszErrorMsg = "Enumeration failed to get DirectDraw4 interface";
+      } else {
         __frame0.pDirectDraw1->lpVtbl->Release((IDirectDraw*)__frame0.pDirectDraw1);
         __frame0.pDirectDraw1 = 0;
         hDeviceIdResult = g_pDirectDraw7->lpVtbl->GetDeviceIdentifier(g_pDirectDraw7, &sDeviceIdentifier, 0);
@@ -1663,11 +1667,7 @@ BOOL __stdcall Direct3DCallBack(GUID * lpGUID, char * lpDriverDescription, char 
         } else {
           pszErrorMsg = "Failed to get D3D interface";
         }
-      } else {
-        pszErrorMsg = "Enumeration failed to get DirectDraw4 interface";
       }
-    } else {
-      pszErrorMsg = "Enumeration DirectDrawCreate failed";
     }
 
     DIRECTD3D_LogError(pszErrorMsg, hResult);
@@ -1817,7 +1817,7 @@ BOOL __fastcall Initialize(HINSTANCE hInstance) {
       if (iVar2) {
         iVar1 = Storm::Source::SReg::SRegLoadValue(szRegPath, "dwFlags", 0, (int32_t*)&gnD3DTextureCapFlags);
         if (iVar1) {
-          if (gnD3DTextureCapFlags & 1) {
+          if (gnD3DTextureCapFlags & gadwBitMasks[0]) {
             return 1;
           }
 
@@ -2184,7 +2184,7 @@ static BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWn
     iidData2.dwCaps = 4;
     nResult = g_pD3DSurfaceBackbuffer->lpVtbl->GetAttachedSurface(g_pD3DSurfaceBackbuffer, &iidData2, (void**)&D3DSurfaceSecondary);
     if (!nResult) {
-      if (gnD3DTextureCapFlags & 0x10) {
+      if (gnD3DTextureCapFlags & gadwBitMasks[4]) {
         nResult = g_pD3DSurfaceBackbuffer->lpVtbl->QueryInterface(g_pD3DSurfaceBackbuffer, (GUID*)gszRendererD3DDeviceInitializationCode, (void**)&g_pDDGammaControl);
         if (nResult) {
           DIRECTD3D_LogError("Failed to get gamma control interface!", nResult);
@@ -2249,7 +2249,7 @@ static BOOL __stdcall RENDERER_D3D_InitializeDevice(int nResolutionMode, int hWn
                 if (nResult) {
                   DIRECTD3D_LogError("Failed to get available local texture memory", nResult);
                 }
-                if (gnD3DTextureCapFlags & 2) {
+                if (gnD3DTextureCapFlags & gadwBitMasks[1]) {
                   iidData2.dwCaps2 = 0;
                   iidData2.dwCaps3 = 0;
                   iidData2.dwCaps4 = 0;
@@ -2504,7 +2504,7 @@ BOOL __fastcall InitPerspective(D2GfxSettingsStrc * pSettings, ::D2GfxHelperStrc
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x687);
       exit(-1);
     }
-    if (!(gnD3DTextureCapFlags & 1)) {
+    if (!(gnD3DTextureCapFlags & gadwBitMasks[0])) {
       lpGUID = &gsD3DAdapterGuid;
     } else {
       lpGUID = 0;
@@ -2668,9 +2668,9 @@ static int32_t __thiscall RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfo
     }
     if (!*(int*)(pbSrcPixel + nMipIdx * 8)) {
       iMipLevel = pTexInfo->nWidth;
-      if (iMipLevel < 0x21 && pTexInfo->nHeight < 0x21) {
+      if (iMipLevel <= 0x20 && pTexInfo->nHeight <= 0x20) {
         *(uint32_t*)(pbSrcPixel + nMipIdx * 8) = 3;
-      } else if (iMipLevel < 0x81 && pTexInfo->nHeight < 0x81) {
+      } else if (iMipLevel <= 0x80 && pTexInfo->nHeight <= 0x80) {
         *(uint32_t*)(pbSrcPixel + nMipIdx * 8) = 2;
       } else {
         if (0x100 < iMipLevel || 0x100 < pTexInfo->nHeight) {
@@ -2708,7 +2708,10 @@ static int32_t __thiscall RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfo
     if (iVar1 < 0) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x164);
       exit(-1);
-    } else if (iVar1 < pCache->nMaxNodes) {
+    } else if (!(iVar1 < pCache->nMaxNodes)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x165);
+      exit(-1);
+    } else {
       iCacheNodeIdx = *piVar2 * 0x20;
       iVar1 = *(int*)(iCacheNodeIdx - 0x10 + ((int*)((uint8_t*)&gD3DGenericTextureCache - 0x4))[iMipLevel * 7]);
       iMipLevel = iCacheNodeIdx - 0x20 + ((int*)((uint8_t*)&gD3DGenericTextureCache - 0x4))[iMipLevel * 7];
@@ -2807,10 +2810,10 @@ static int32_t __thiscall RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfo
           if (dwHResult) {
             DIRECTD3D_LogError("Failed to unlock memory surface", dwHResult);
           }
-          if (!(gnD3DTextureCapFlags & 0x400)) {
-            (*(dt_df2bbc22*)((char*)*(void**)(uintptr_t)*(int**)(iMipLevel + 0x14) + 20))(*(int**)(iMipLevel + 0x14), lpD3DTexture_00);
-          } else {
+          if (gnD3DTextureCapFlags & gadwBitMasks[10]) {
             RENDERER_D3D_CopySurfacePixels(*(IDirectDrawSurface7**)(iMipLevel + 0x10), pDestSurface_00, pTexInfo->nTexHeight);
+          } else {
+            (*(dt_df2bbc22*)((char*)*(void**)(uintptr_t)*(int**)(iMipLevel + 0x14) + 20))(*(int**)(iMipLevel + 0x14), lpD3DTexture_00);
           }
 
           dwHResult = g_pD3DDevice->lpVtbl->SetTexture(g_pD3DDevice, 0, *(void**)(iMipLevel + 0x14));
@@ -2825,9 +2828,6 @@ static int32_t __thiscall RENDERER_DIRECT3D_UploadTextureToCache(D2D3DSpriteInfo
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x172);
         exit(-1);
       }
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x165);
-      exit(-1);
     }
 }
 
@@ -2851,10 +2851,10 @@ static void __stdcall RENDERER_D3D_DrawShadowQuad(int * pTextureInfo, int nPosX,
     nCenterX = pTextureInfo[3] + pTextureInfo[4];
     nTopYOffset = pTextureInfo[4] - nHalfHeight;
     if (bPerspectiveEnabled && g_aSmackerSurfaceArray != 0x100) {
-      nCenterX = (int)(g_aSmackerSurfaceArray * nCenterX + (g_aSmackerSurfaceArray * nCenterX >> 0x1f & 0xffU)) >> 8;
-      nTopYOffset = (int)(g_aSmackerSurfaceArray * nTopYOffset + (g_aSmackerSurfaceArray * nTopYOffset >> 0x1f & 0xffU)) >> 8;
-      nQuadWidth = (int)(g_aSmackerSurfaceArray * nQuadWidth + (g_aSmackerSurfaceArray * nQuadWidth >> 0x1f & 0xffU)) >> 8;
-      nHalfHeight = (int)(g_aSmackerSurfaceArray * nHalfHeight + (g_aSmackerSurfaceArray * nHalfHeight >> 0x1f & 0xffU)) >> 8;
+      nCenterX = (int)(g_aSmackerSurfaceArray * nCenterX) / 256;
+      nTopYOffset = (int)(g_aSmackerSurfaceArray * nTopYOffset) / 256;
+      nQuadWidth = (int)(g_aSmackerSurfaceArray * nQuadWidth) / 256;
+      nHalfHeight = (int)(g_aSmackerSurfaceArray * nHalfHeight) / 256;
     }
 
     fQuadTopY = (float)(nTopYOffset + nPosY);
@@ -2919,10 +2919,10 @@ static void __stdcall RENDERER_DIRECT3D_DrawPalettedQuad(D2D3DSpriteInfoStrc * p
     int nScaledHeight = pTextureInfo->nTexHeight;
     int nScaledWidth = pTextureInfo->nOffsetY - nScaledHeight;
     if (bPerspective && g_aSmackerSurfaceArray != 0x100) {
-      nLockResult = (int)(g_aSmackerSurfaceArray * nLockResult + (g_aSmackerSurfaceArray * nLockResult >> 0x1f & 0xffU)) >> 8;
-      nScaledWidth = (int)(g_aSmackerSurfaceArray * nScaledWidth + (g_aSmackerSurfaceArray * nScaledWidth >> 0x1f & 0xffU)) >> 8;
-      nScaledOffsetX = (int)(g_aSmackerSurfaceArray * nScaledOffsetX + (g_aSmackerSurfaceArray * nScaledOffsetX >> 0x1f & 0xffU)) >> 8;
-      nScaledHeight = (int)(g_aSmackerSurfaceArray * nScaledHeight + (g_aSmackerSurfaceArray * nScaledHeight >> 0x1f & 0xffU)) >> 8;
+      nLockResult = (int)(g_aSmackerSurfaceArray * nLockResult) / 256;
+      nScaledWidth = (int)(g_aSmackerSurfaceArray * nScaledWidth) / 256;
+      nScaledOffsetX = (int)(g_aSmackerSurfaceArray * nScaledOffsetX) / 256;
+      nScaledHeight = (int)(g_aSmackerSurfaceArray * nScaledHeight) / 256;
     }
 
     float fQuadLeftX = (float)(nLockResult + nPosX);
@@ -2983,16 +2983,16 @@ static void __stdcall RENDERER_DIRECT3D_DrawPalettedQuad(D2D3DSpriteInfoStrc * p
 // Sets blend mode based on draw mode enum (0-7) and returns the appropriate alpha value. Mode 0=25%, 1=50%, 2=75%, 3=additive, 4=modulate, 5/7=opaque, default=100% alpha.
 static uint8_t __stdcall SetDrawModeAndGetAlpha(int nDrawMode) {
     switch (nDrawMode) {
+      case 5:
+
+      case 7:
+        SetBlendMode(1);
+      return 0xff;
       case 3:
         SetBlendMode(2);
       return 0xff;
       case 4:
         SetBlendMode(3);
-      return 0xff;
-      case 5:
-
-      case 7:
-        SetBlendMode(1);
       return 0xff;
     }
 
@@ -3059,18 +3059,23 @@ void __fastcall DrawPerspectiveImage(D2GfxDataStrc * pData, int nPosX, int nPosY
     aQuadVertexData[3].fRHW = 1.0;
     aQuadVertexData[3].fU = spriteInfo.fU1;
     aQuadVertexData[3].fV = spriteInfo.fV0;
-    if (nScreenMode == 1) {
-      fHalfWidth = (float)((int)(RENDERER_nWindowWidth + (RENDERER_nWindowWidth >> 0x1f & 3U)) >> 2);
+    switch (nScreenMode) {
+    case 1: {
+      fHalfWidth = (float)((int)RENDERER_nWindowWidth / 4);
       aQuadVertexData[0].fX -= fHalfWidth;
       aQuadVertexData[1].fX -= fHalfWidth;
       aQuadVertexData[2].fX -= fHalfWidth;
       aQuadVertexData[3].fX -= fHalfWidth;
-    } else if (nScreenMode == 2) {
-      fHalfWidth = (float)((int)(RENDERER_nWindowWidth + (RENDERER_nWindowWidth >> 0x1f & 3U)) >> 2);
+      break;
+    }
+    case 2: {
+      fHalfWidth = (float)((int)RENDERER_nWindowWidth / 4);
       aQuadVertexData[0].fX = fHalfWidth + aQuadVertexData[0].fX;
       aQuadVertexData[1].fX = fHalfWidth + aQuadVertexData[1].fX;
       aQuadVertexData[2].fX = fHalfWidth + aQuadVertexData[2].fX;
       aQuadVertexData[3].fX = fHalfWidth + aQuadVertexData[3].fX;
+      break;
+    }
     }
 
     nScreenMode = RENDERER_nWindowHeight - 0x2f;
@@ -3171,12 +3176,7 @@ void __fastcall DrawVerticalCropImage(D2GfxDataStrc * pData, int nPosX, int nPos
     if (!bTextureUploaded) {
       return;
     }
-    if (!nSkipLines) {
-      fVar1 = (float)(spriteInfo.nTexHeight - nDrawLines);
-      if (spriteInfo.nTexHeight - nDrawLines < 0) {
-        fVar1 += 4.2949673e+09;
-      }
-    } else {
+    if (nSkipLines) {
       float fVar2;
       nPosY -= nSkipLines;
       iVar3 = spriteInfo.nTexHeight - nSkipLines;
@@ -3191,6 +3191,11 @@ void __fastcall DrawVerticalCropImage(D2GfxDataStrc * pData, int nPosX, int nPos
       }
 
       spriteInfo.fV1 = fVar2 * (1.0 / (float)spriteInfo.nTexHeight);
+    } else {
+      fVar1 = (float)(spriteInfo.nTexHeight - nDrawLines);
+      if (spriteInfo.nTexHeight - nDrawLines < 0) {
+        fVar1 += 4.2949673e+09;
+      }
     }
 
     spriteInfo.fV0 = 1.0 / (float)spriteInfo.nTexHeight * fVar1;
@@ -3311,11 +3316,11 @@ void __fastcall DrawShadow(D2GfxDataStrc * pData, int nPosX, int nPosY) {
 
     RENDERER_D3D_SetBlendMode(1);
     bShadowBlend = RENDERER_D3D_IsShadowBlendingEnabled();
-    if (!bShadowBlend) {
-      SetBlendMode(1);
-    } else {
+    if (bShadowBlend) {
       SetBlendMode(4);
       byAlpha = 0xc0;
+    } else {
+      SetBlendMode(1);
     }
 
     RENDERER_D3D_SetTextureFilterMode(1);
@@ -3349,9 +3354,15 @@ void __fastcall DebugFillBackBuffer(int nPosX, int nPosY) {
 void __stdcall RENDERER_D3D_InitializeTexturePools() {
     D3DVERTEXBUFFERDESC sVBDesc;
     int32_t nErrorLine;
-    if (!gpD3DTextureSpritePoolMemory0) {
+    if (gpD3DTextureSpritePoolMemory0) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x55);
+      exit(-1);
+    } else {
       DWORD dwParam;
-      if (!gpD3DTextureSpritePoolMemory1) {
+      if (gpD3DTextureSpritePoolMemory1) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x56);
+        exit(-1);
+      } else {
         gpD3DTextureSpritePoolMemory0 = D2_ALLOC_AT(0x10000, ".\\Src\\d3dSprite.cpp", 0x57);
         gpD3DTextureSpritePoolMemory1 = D2_ALLOC_AT(0x10000, ".\\Src\\d3dSprite.cpp", 0x58);
         nErrorLine = RENDERER_D3D_CreateSystemMemoryTexture(gD3DGenericTextureCache.apSpriteSurfaces, gD3DGenericTextureCache.apSpriteTextures, 0x100, 0x100);
@@ -3385,13 +3396,7 @@ void __stdcall RENDERER_D3D_InitializeTexturePools() {
             return;
           }
         }
-      } else {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x56);
-        exit(-1);
       }
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x55);
-      exit(-1);
     }
 }
 
@@ -3500,11 +3505,11 @@ void __stdcall RENDERER_D3D_CreateFontTextures() {
       if (!BVar1) {
         break;
       }
-      if (!(gnD3DTextureCapFlags & 0x400)) {
+      if (gnD3DTextureCapFlags & 0x400) {
+        RENDERER_D3D_CopySurfacePixels(*pTextureSurface, __frame0.pMemorySurface, 0x10);
+      } else {
         pVtbl = (IDirect3DTexture2*)*pTextureHandle;
         pVtbl->lpVtbl->Load(pVtbl, __frame0.pMemoryTexture);
-      } else {
-        RENDERER_D3D_CopySurfacePixels(*pTextureSurface, __frame0.pMemorySurface, 0x10);
       }
 
       __frame0.nCurrentChar++;
@@ -3638,14 +3643,14 @@ BOOL __stdcall RENDERER_D3D_IsShadowBlendingEnabled() {
 
 void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE dwColor, int nDrawMode) {
     D2D3DVertexStrc fV0x[4];
-    uint32_t nClampedBottom = nXStart < 1 ? 0 : nXStart;
+    uint32_t nClampedBottom = nXStart <= 0 ? 0 : nXStart;
     uint32_t nClampedRight = RENDERER_nWindowWidth - 1;
     uint32_t uVar3 = nClampedRight;
     if ((int)nClampedBottom < (int)nClampedRight) {
       uVar3 = nClampedBottom;
     }
 
-    nClampedBottom = nXEnd < 1 ? 0 : nXEnd;
+    nClampedBottom = nXEnd <= 0 ? 0 : nXEnd;
     if ((int)nClampedBottom < (int)nClampedRight) {
       nClampedRight = nClampedBottom;
     }
@@ -3654,13 +3659,13 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
     }
 
     nClampedBottom = RENDERER_nWindowHeight - 1;
-    uint32_t nClampedLeft = nYStart < 1 ? 0 : nYStart;
+    uint32_t nClampedLeft = nYStart <= 0 ? 0 : nYStart;
     uint32_t uVar2 = nClampedBottom;
     if ((int)nClampedLeft < (int)nClampedBottom) {
       uVar2 = nClampedLeft;
     }
 
-    nClampedLeft = nYEnd < 1 ? 0 : nYEnd;
+    nClampedLeft = nYEnd <= 0 ? 0 : nYEnd;
     if ((int)nClampedLeft < (int)nClampedBottom) {
       nClampedBottom = nClampedLeft;
     }
@@ -3731,14 +3736,14 @@ void __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, 
 
 void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, BYTE nAlpha) {
     D2D3DVertexStrc fV0x[4];
-    uint32_t nClampedBottom = nXStart < 1 ? 0 : nXStart;
+    uint32_t nClampedBottom = nXStart <= 0 ? 0 : nXStart;
     uint32_t dwRGBColor = RENDERER_nWindowWidth - 1;
     uint32_t uVar3 = dwRGBColor;
     if ((int)nClampedBottom < (int)dwRGBColor) {
       uVar3 = nClampedBottom;
     }
 
-    nClampedBottom = nXEnd < 1 ? 0 : nXEnd;
+    nClampedBottom = nXEnd <= 0 ? 0 : nXEnd;
     if ((int)nClampedBottom < (int)dwRGBColor) {
       dwRGBColor = nClampedBottom;
     }
@@ -3747,13 +3752,13 @@ void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEn
     }
 
     nClampedBottom = RENDERER_nWindowHeight - 1;
-    uint32_t nClampedLeft = nYStart < 1 ? 0 : nYStart;
+    uint32_t nClampedLeft = nYStart <= 0 ? 0 : nYStart;
     uint32_t uVar2 = nClampedBottom;
     if ((int)nClampedLeft < (int)nClampedBottom) {
       uVar2 = nClampedLeft;
     }
 
-    nClampedLeft = nYEnd < 1 ? 0 : nYEnd;
+    nClampedLeft = nYEnd <= 0 ? 0 : nYEnd;
     if ((int)nClampedLeft < (int)nClampedBottom) {
       nClampedBottom = nClampedLeft;
     }
@@ -3792,7 +3797,7 @@ void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEn
     fV0x[2].fY = fV0x[1].fY;
     fV0x[3].fX = fV0x[2].fX;
     fV0x[3].fY = fV0x[0].fY;
-    uint32_t uVar1 = PALETTE_GetColorByIndex(dwColor & 0xff);
+    uint32_t uVar1 = PALETTE_GetColorByIndex((uint8_t)dwColor);
     fV0x[0].dwDiffuse = uVar1 & 0xffffff | (uint32_t)nAlpha << 0x18;
     fV0x[1].dwDiffuse = fV0x[0].dwDiffuse;
     fV0x[2].dwDiffuse = fV0x[0].dwDiffuse;
@@ -3802,11 +3807,11 @@ void __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEn
 
 void __fastcall DrawLine(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, BYTE nAlpha) {
     D2D3DVertexStrc v1[2];
-    if (!((-1 < nXEnd || -1 < nXStart) && (nXEnd < RENDERER_nWindowWidth || nXStart < RENDERER_nWindowWidth) && (-1 < nYEnd || -1 < nYStart) && (nYEnd < RENDERER_nWindowHeight || nYStart < RENDERER_nWindowHeight))) {
+    if (!((0 <= nXEnd || 0 <= nXStart) && (nXEnd < RENDERER_nWindowWidth || nXStart < RENDERER_nWindowWidth) && (0 <= nYEnd || 0 <= nYStart) && (nYEnd < RENDERER_nWindowHeight || nYStart < RENDERER_nWindowHeight))) {
       return;
     }
 
-    uint32_t dwRGBColor = PALETTE_GetColorByIndex(dwColor & 0xff);
+    uint32_t dwRGBColor = PALETTE_GetColorByIndex((uint8_t)dwColor);
     RENDERER_D3D_SetBlendMode(2);
     if (nAlpha == 0xff) {
       SetBlendMode(1);
@@ -3852,7 +3857,7 @@ void __fastcall DrawRect(RECT * pRect, DWORD nPaletteIndex) {
     int nXStart;
     int nYEnd_00;
     int nXEnd = pRect->left;
-    if (pRect->right < nXEnd) {
+    if (nXEnd > pRect->right) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xc5);
       exit(-1);
     } else {
@@ -3873,7 +3878,7 @@ void __fastcall DrawRect(RECT * pRect, DWORD nPaletteIndex) {
       nYEnd = nHeight + nYStart;
       nXStart = (nWidth >> 1) + nXEnd;
       nYEnd_00 = (nHeight >> 1) + nYStart;
-      if (!(-1 < nXEnd_00 && nXEnd <= RENDERER_nWindowWidth && -1 < nYEnd && nYStart <= RENDERER_nWindowHeight)) {
+      if (!(0 <= nXEnd_00 && nXEnd <= RENDERER_nWindowWidth && 0 <= nYEnd && nYStart <= RENDERER_nWindowHeight)) {
         return;
       }
 
@@ -3891,7 +3896,7 @@ void __fastcall DrawRectEx(RECT * pRect, DWORD nPaletteIndex) {
     uint32_t nClampedTop;
     uint32_t nClampedLeft = pRect->left;
     uint32_t nClampedBottom = pRect->right;
-    if ((int)nClampedBottom < (int)nClampedLeft) {
+    if ((int)nClampedLeft > (int)nClampedBottom) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xeb);
       exit(-1);
     } else {
@@ -3905,11 +3910,11 @@ void __fastcall DrawRectEx(RECT * pRect, DWORD nPaletteIndex) {
 
       nXEnd = RENDERER_nWindowWidth - 1;
       nXStart = nXEnd;
-      if ((int)((int)nClampedLeft < 1 ? 0 : nClampedLeft) < (int)nXEnd) {
-        nXStart = (int)nClampedLeft < 1 ? 0 : nClampedLeft;
+      if ((int)((int)nClampedLeft <= 0 ? 0 : nClampedLeft) < (int)nXEnd) {
+        nXStart = (int)nClampedLeft <= 0 ? 0 : nClampedLeft;
       }
-      if ((int)((int)nClampedBottom < 1 ? 0 : nClampedBottom) < (int)nXEnd) {
-        nXEnd = (int)nClampedBottom < 1 ? 0 : nClampedBottom;
+      if ((int)((int)nClampedBottom <= 0 ? 0 : nClampedBottom) < (int)nXEnd) {
+        nXEnd = (int)nClampedBottom <= 0 ? 0 : nClampedBottom;
       }
       if (nXStart == nXEnd) {
         return;
@@ -3917,11 +3922,11 @@ void __fastcall DrawRectEx(RECT * pRect, DWORD nPaletteIndex) {
 
       nClampedBottom = RENDERER_nWindowHeight - 1;
       nClampedLeft = nClampedBottom;
-      if ((int)((int)nClampedTop < 1 ? 0 : nClampedTop) < (int)nClampedBottom) {
+      if ((int)((int)nClampedTop <= 0 ? 0 : nClampedTop) < (int)nClampedBottom) {
         nClampedLeft = (int)nClampedTop < 1 ? 0 : nClampedTop;
       }
-      if ((int)((int)nClampedRight < 1 ? 0 : nClampedRight) < (int)nClampedBottom) {
-        nClampedBottom = (int)nClampedRight < 1 ? 0 : nClampedRight;
+      if ((int)((int)nClampedRight <= 0 ? 0 : nClampedRight) < (int)nClampedBottom) {
+        nClampedBottom = (int)nClampedRight <= 0 ? 0 : nClampedRight;
       }
       if (nClampedBottom == nClampedLeft) {
         return;
@@ -3967,15 +3972,15 @@ void __fastcall DrawSolidSquare(POINT * pPoint, BYTE nSize, BYTE nPaletteIndex) 
 
 void __fastcall ClearScreen(BOOL bPartial) {
     RECT nViewportLeft;
-    if (gnD3DTextureCapFlags & 0x400) {
+    if (gnD3DTextureCapFlags & gadwBitMasks[10]) {
       RENDERER_D3D_ClearBackbuffer();
       return;
     }
 
     nViewportLeft.left = 0;
     nViewportLeft.top = 0;
-    nViewportLeft.bottom = RENDERER_nWindowHeight;
     nViewportLeft.right = RENDERER_nWindowWidth;
+    nViewportLeft.bottom = RENDERER_nWindowHeight;
     g_pD3DViewport->lpVtbl->Clear2(g_pD3DViewport, 1, &nViewportLeft, 1, -16777216, 0, 0);
 }
 
@@ -3993,13 +3998,15 @@ static void __thiscall RENDERER_D3D_CalculateViewportRect(RECT * pRect, int nScr
     if (!nParam1) {
       pRect->bottom += 0x20;
       pRect->left = -0x20;
-      if (nScreenPanels == 1) {
+      switch (nScreenPanels) {
+      case 1: {
         pRect->right -= RENDERER_nWindowWidth / 2;
         return;
       }
-      if (nScreenPanels == 2) {
+      case 2: {
         pRect->left = RENDERER_nWindowWidth / 2 - 0x20;
         return;
+      }
       }
     } else {
       int nQuarterWidth;
@@ -4008,16 +4015,20 @@ static void __thiscall RENDERER_D3D_CalculateViewportRect(RECT * pRect, int nScr
         exit(-1);
       }
 
-      nQuarterWidth = (int)(RENDERER_nWindowWidth + (RENDERER_nWindowWidth >> 0x1f & 3U)) >> 2;
-      if (nScreenPanels == 1) {
+      nQuarterWidth = (int)RENDERER_nWindowWidth / 4;
+      switch (nScreenPanels) {
+      case 1: {
         *pOffset = -nQuarterWidth;
         pRect->right -= nQuarterWidth;
         pRect->left += nQuarterWidth;
-      } else if (nScreenPanels == 2) {
+        break;
+      }
+      case 2: {
         *pOffset = nQuarterWidth;
         pRect->right -= nQuarterWidth;
         pRect->left += nQuarterWidth;
         return;
+      }
       }
     }
 }
@@ -4068,7 +4079,7 @@ void __stdcall RENDERER_D3D_InitPerspectiveVertexBuffer() {
       } while (nNextCol < 3);
 
       iRow++;
-    } while ((int)pNextVertexRHW < (uintptr_t)((char*)&gaD3DPerspectiveStripVertices + sizeof(gaD3DPerspectiveStripVertices) + 12));
+    } while ((int)pNextVertexRHW < (int)((uintptr_t)((char*)&gaD3DPerspectiveStripVertices + sizeof(gaD3DPerspectiveStripVertices) + 12)));
 
     uint32_t* pWallCornerFixup = (uint32_t*)&gaD3DWallCornerTable[1].nY;
     do {
@@ -4085,7 +4096,7 @@ void __stdcall RENDERER_D3D_InitPerspectiveVertexBuffer() {
       pWallCornerFixup[0xb] <<= 0x10;
       pWallCornerFixup[0xc] <<= 0x10;
       pWallCornerFixup += 0x12;
-    } while ((int)pWallCornerFixup < (uintptr_t)&gaD3DWallCornerTable + 736);
+    } while ((int)pWallCornerFixup < (int)((uintptr_t)&gaD3DWallCornerTable + 736));
 }
 
 // NOTE: Register params: pTileLibraryEntryStrc (ECX): D2TileLibraryEntryStrc *, nTilePosX (EDX): int
@@ -4098,10 +4109,15 @@ int32_t __fastcall RENDERER_D3D_BuildShadowTileVertices(D2TileLibraryEntryStrc *
     _bRendered = 0;
     int nPanelWidth = RENDERER_nWindowWidth;
     int nPanelXOffset = -0x20;
-    if (nScreenSplitIndex == 1) {
+    switch (nScreenSplitIndex) {
+    case 1: {
       nPanelWidth = RENDERER_nWindowWidth - RENDERER_nWindowWidth / 2;
-    } else if (nScreenSplitIndex == 2) {
+      break;
+    }
+    case 2: {
       nPanelXOffset = RENDERER_nWindowWidth / 2 - 0x20;
+      break;
+    }
     }
 
     nScreenSplitIndex = 0;
@@ -4205,7 +4221,7 @@ int __fastcall RENDERER_D3D_RenderShadowTileWithPerspective(D2TileLibraryEntrySt
 
           nFixedScreenX += 0x8000;
           _bRendered += 0x8000;
-        } while ((int)pfVertex < (uintptr_t)((char*)&gaD3DPerspectiveStripVertices + sizeof(gaD3DPerspectiveStripVertices)));
+        } while ((int)pfVertex < (int)((uintptr_t)((char*)&gaD3DPerspectiveStripVertices + sizeof(gaD3DPerspectiveStripVertices))));
 
         g_pD3DDevice->lpVtbl->DrawIndexedPrimitive(g_pD3DDevice, 5, 0x1c4, gaD3DPerspectiveStripVertices, 0xf, gaD3DPerspectiveStripIndices, 0x16, 0x1c);
         _bRendered = 1;
@@ -4229,11 +4245,11 @@ BOOL __fastcall DrawShadowTile(D2TileLibraryEntryStrc * pTile, int nPosX, int nP
     nAlpha = (uint32_t)((uint32_t)((uint32_t)d2_load24((char*)&nAlpha + 1) & 0xffffffu) << 8 | (uint32_t)(uint8_t)0xff);
     RENDERER_D3D_SetBlendMode(1);
     BVar1 = RENDERER_D3D_IsShadowBlendingEnabled();
-    if (!BVar1) {
-      SetBlendMode(1);
-    } else {
+    if (BVar1) {
       SetBlendMode(4);
       nAlpha = (uint32_t)((uint32_t)((uint32_t)d2_load24((char*)&nAlpha + 1) & 0xffffffu) << 8 | (uint32_t)(uint8_t)0xc0);
+    } else {
+      SetBlendMode(1);
     }
 
     RENDERER_D3D_SetTextureFilterMode(1);
@@ -4248,7 +4264,7 @@ BOOL __fastcall DrawShadowTile(D2TileLibraryEntryStrc * pTile, int nPosX, int nP
     return iVar3;
 }
 
-BOOL __thiscall RENDERER_D3D_BuildWallTileVerticesNoPerspective(void * pThis, D2TileLibraryEntryStrc * pTile, int nPosX, int nPosY, int pTexColorTable, uint8_t nParam4) {
+static BOOL __thiscall RENDERER_D3D_BuildWallTileVerticesNoPerspective(void * pThis, D2TileLibraryEntryStrc * pTile, int nPosX, int nPosY, int pTexColorTable, uint8_t nParam4) {
     uint8_t _nParam4;
     short int* psSubtileCoords;
     int nSubtileScreenX;
@@ -4415,7 +4431,7 @@ static BOOL __stdcall RENDERER_D3D_RenderWallTileWithPerspective(int nScreenPane
 
           fLayerIndex.nValue++;
           pfVertexOuter += 3;
-        } while ((int)pfVertexOuter < (uintptr_t)((char*)&gaD3DPerspectiveVertices + 64));
+        } while ((int)pfVertexOuter < (int)((uintptr_t)((char*)&gaD3DPerspectiveVertices + 64)));
 
         g_pD3DDevice->lpVtbl->DrawIndexedPrimitive(g_pD3DDevice, 5, 0x1c4, gaD3DPerspectiveStripVertices, 0xf, gaD3DPerspectiveStripIndices, 0x16, 0x1c);
         nMidZ = 1;
@@ -4637,7 +4653,41 @@ void __fastcall DrawGroundTile(D2TileLibraryEntryStrc * pTile, D2GfxLightExStrc 
     RENDERER_D3D_SetTextureFilterMode(iVar3);
     D3DVB_Lock pVBLockFn;
     pVBLockFn = g_pD3DGroundTileVB->lpVtbl->Lock;
-    if (!pD2GFXRenderedDataStrc->bLowQuality) {
+    if (pD2GFXRenderedDataStrc->bLowQuality) {
+      DVar2 = (*pVBLockFn)(g_pD3DGroundTileVB, 0x21, (void**)&nAlpha, nullptr);
+      if (DVar2) {
+        lock_failed:
+        DIRECTD3D_LogError("Vertex buffer lock failed!", DVar2);
+        return;
+      }
+
+      byLightIntensity = pLight->sLight.nIntensity;
+      *(uint32_t*)(nAlpha + 0x10) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
+      *(float*)nAlpha = (float)pLight->nX;
+      *(float*)(nAlpha + 4) = (float)pLight->nY;
+      byLightIntensity = pLight[5].sLight.nIntensity;
+      *(uint32_t*)(nAlpha + 0xb0) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
+      *(float*)(nAlpha + 0xa0) = (float)pLight[5].nX;
+      *(float*)(nAlpha + 0xa4) = (float)pLight[5].nY;
+      byLightIntensity = pLight[0x23].sLight.nIntensity;
+      *(uint32_t*)(nAlpha + 0x470) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
+      *(float*)(nAlpha + 0x460) = (float)pLight[0x23].nX;
+      *(float*)(nAlpha + 0x464) = (float)pLight[0x23].nY;
+      byLightIntensity = pLight[0x1e].sLight.nIntensity;
+      *(uint32_t*)(nAlpha + 0x3d0) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
+      *(float*)(nAlpha + 0x3c0) = (float)pLight[0x1e].nX;
+      *(float*)(nAlpha + 0x3c4) = (float)pLight[0x1e].nY;
+      DVar2 = g_pD3DGroundTileVB->lpVtbl->Unlock(g_pD3DGroundTileVB);
+      if (DVar2) {
+        unlock_failed:
+        DIRECTD3D_LogError("Vertex buffer unlock failed!", DVar2);
+        return;
+      }
+
+      dwIndexCount = 4;
+      lpwIndices = &gdwRendererMode;
+      DVar2 = 6;
+    } else {
       uint8_t* pLightCursor;
       DVar2 = (*pVBLockFn)(g_pD3DGroundTileVB, 0x21, (void**)&nAlpha, nullptr);
       if (DVar2) {
@@ -4696,40 +4746,6 @@ void __fastcall DrawGroundTile(D2TileLibraryEntryStrc * pTile, D2GfxLightExStrc 
       dwIndexCount = 0x41;
       DVar2 = 5;
       lpwIndices = &gpD3DGroundTileVertexBuffer;
-    } else {
-      DVar2 = (*pVBLockFn)(g_pD3DGroundTileVB, 0x21, (void**)&nAlpha, nullptr);
-      if (DVar2) {
-        lock_failed:
-        DIRECTD3D_LogError("Vertex buffer lock failed!", DVar2);
-        return;
-      }
-
-      byLightIntensity = pLight->sLight.nIntensity;
-      *(uint32_t*)(nAlpha + 0x10) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight->sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
-      *(float*)nAlpha = (float)pLight->nX;
-      *(float*)(nAlpha + 4) = (float)pLight->nY;
-      byLightIntensity = pLight[5].sLight.nIntensity;
-      *(uint32_t*)(nAlpha + 0xb0) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[5].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
-      *(float*)(nAlpha + 0xa0) = (float)pLight[5].nX;
-      *(float*)(nAlpha + 0xa4) = (float)pLight[5].nY;
-      byLightIntensity = pLight[0x23].sLight.nIntensity;
-      *(uint32_t*)(nAlpha + 0x470) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x23].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
-      *(float*)(nAlpha + 0x460) = (float)pLight[0x23].nX;
-      *(float*)(nAlpha + 0x464) = (float)pLight[0x23].nY;
-      byLightIntensity = pLight[0x1e].sLight.nIntensity;
-      *(uint32_t*)(nAlpha + 0x3d0) = (uint32_t)((uint32_t)((uint32_t)((uint32_t)(uint16_t)((uint16_t)(uint8_t)cAlphaByte << 8 | (uint16_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nRed + (uint32_t)byLightIntensity * 0x100]) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nGreen + (uint32_t)byLightIntensity * 0x100]) & 0xffffffu) << 8 | (uint32_t)(uint8_t)g_aLightingTable[(uint32_t)pLight[0x1e].sLight.nBlue + (uint32_t)byLightIntensity * 0x100]);
-      *(float*)(nAlpha + 0x3c0) = (float)pLight[0x1e].nX;
-      *(float*)(nAlpha + 0x3c4) = (float)pLight[0x1e].nY;
-      DVar2 = g_pD3DGroundTileVB->lpVtbl->Unlock(g_pD3DGroundTileVB);
-      if (DVar2) {
-        unlock_failed:
-        DIRECTD3D_LogError("Vertex buffer unlock failed!", DVar2);
-        return;
-      }
-
-      dwIndexCount = 4;
-      lpwIndices = &gdwRendererMode;
-      DVar2 = 6;
     }
 
     g_pD3DDevice->lpVtbl->DrawIndexedPrimitiveVB(g_pD3DDevice, DVar2, g_pD3DGroundTileVB, (WORD*)lpwIndices, dwIndexCount, 0x1c);
@@ -4752,7 +4768,7 @@ void __stdcall RENDERER_D3D_InitLightingTable() {
 
       pTableRow += 0x100;
       nRow++;
-    } while ((int)pTableRow < (uintptr_t)((char*)&g_aLightingTable + sizeof(g_aLightingTable)));
+    } while ((int)pTableRow < (int)((uintptr_t)((char*)&g_aLightingTable + sizeof(g_aLightingTable))));
 }
 
 void __fastcall SetGlobalLight(BYTE nRed, BYTE nGreen, BYTE nBlue) {

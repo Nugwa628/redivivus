@@ -267,7 +267,7 @@ static int32_t ESCMENU_GetItemIndexFromMouseY(int32_t nParam) {
 
     int* pItemYPosition = &gpEscMenuCurrentTable->nYPosition;
     do {
-      if (*pItemYPosition && *pItemYPosition + iVar1 <= nParam) {
+      if (*pItemYPosition && nParam >= *pItemYPosition + iVar1) {
         nFoundIndex = nMenuCenterY;
       }
 
@@ -275,7 +275,7 @@ static int32_t ESCMENU_GetItemIndexFromMouseY(int32_t nParam) {
       pItemYPosition += 0x154;
     } while (nMenuCenterY < iVar1);
 
-    if (-1 >= nFoundIndex) {
+    if (0 > nFoundIndex) {
       return nFoundIndex;
     }
     if (gpEscMenuCurrentTable[nFoundIndex].nMenuItemType != -1) {
@@ -302,14 +302,17 @@ static void __stdcall ESCMENU_ClickMenuItem(D2UIMouseMsgStrc * pMsg) {
     }
 
     D2EscMenuItemStrc* pItemData = gpEscMenuCurrentTable + gnEscMenuSelectedIndex;
-    if (!pItemData->nMenuItemType) {
+    switch (pItemData->nMenuItemType) {
+    case 0: {
       if (pItemData->fpClickCallback) {
         pItemData->fpClickCallback(pItemData, pMsg);
         Sound::SOUND_PlaySound(SOUND_CURSOR_SELECT, nullptr, 0, 0, 0);
       }
-    } else if (pItemData->nMenuItemType == 1) {
+      break;
+    }
+    case 1: {
       pItemData->nImageIndex++;
-      if (pItemData->nSubImageCount - 1U < (uint32_t)pItemData->nImageIndex) {
+      if ((uint32_t)pItemData->nImageIndex > pItemData->nSubImageCount - 1U) {
         pItemData->nImageIndex = 0;
       }
       if (pItemData->fpClickCallback) {
@@ -318,6 +321,7 @@ static void __stdcall ESCMENU_ClickMenuItem(D2UIMouseMsgStrc * pMsg) {
 
       Sound::SOUND_PlaySound(SOUND_CURSOR_PASS, nullptr, 0, 0, 0);
       return;
+    }
     }
 }
 
@@ -338,7 +342,8 @@ static void ESCMENU_HandleSliderDrag(int32_t nParam1, int32_t nParam2) {
       D2EscMenuItemStrc* pDVar1;
       nSelectedIndex = gnEscMenuSelectedIndex;
       pDVar1 = gpEscMenuCurrentTable + gnEscMenuSelectedIndex;
-      if (pDVar1->nMenuItemType == 2) {
+      switch (pDVar1->nMenuItemType) {
+      case 2: {
         nScreenCenterX = ScreenSizeX / 2;
         iVar3 = nScreenCenterX - 0x3b;
         nSliderTrackX = nScreenCenterX - 0x3c;
@@ -367,6 +372,8 @@ static void ESCMENU_HandleSliderDrag(int32_t nParam1, int32_t nParam2) {
 
           gnEscMenuSliderValue = 1;
         }
+        break;
+      }
       }
     }
     if (nPrevItemValue == gpEscMenuCurrentTable[nSelectedIndex].nImageIndex) {
@@ -419,7 +426,7 @@ void __stdcall INPUT_EscMenuNavigateNext(D2UIMouseMsgStrc * pMsg) {
     pfnEscMenuItemVisible pfnEnableCallback;
     do {
       gnEscMenuSelectedIndex++;
-      if (gpEscMenuItemCount->nItemCount - 1 < gnEscMenuSelectedIndex) {
+      if (gnEscMenuSelectedIndex > gpEscMenuItemCount->nItemCount - 1) {
         gnEscMenuSelectedIndex = 0;
       }
     } while (gpEscMenuCurrentTable[gnEscMenuSelectedIndex].nMenuItemType == -1 || (pfnEnableCallback = gpEscMenuCurrentTable[gnEscMenuSelectedIndex].fpVisibilityCheck , pfnEnableCallback && (nNextIndex = (*pfnEnableCallback)() , !nNextIndex)));
@@ -467,10 +474,10 @@ void __stdcall INPUT_EscMenuOptionDecrease(D2UIMouseMsgStrc * pMsg) {
     if (pItemData->nMenuItemType == 1) {
       pItemData->nImageIndex--;
       uVar2 = pItemData->nSubImageCount - 1;
-      if (uVar2 < (uint32_t)pItemData->nImageIndex) {
+      if ((uint32_t)pItemData->nImageIndex > uVar2) {
         pItemData->nImageIndex = uVar2;
       }
-    } else if (pItemData->nMenuItemType == 2 && (pItemData->nImageIndex-- , pItemData->nSubImageCount - 1U < (uint32_t)pItemData->nImageIndex)) {
+    } else if (pItemData->nMenuItemType == 2 && (pItemData->nImageIndex-- , (uint32_t)pItemData->nImageIndex > pItemData->nSubImageCount - 1U)) {
       pItemData->nImageIndex = 0;
     }
 
@@ -508,7 +515,7 @@ void __stdcall INPUT_EscMenuOptionIncrease(D2UIMouseMsgStrc * pMsg) {
     pItemData = gpEscMenuCurrentTable + gnEscMenuSelectedIndex;
     if (pItemData->nMenuItemType == 1) {
       pItemData->nImageIndex++;
-      if (pItemData->nSubImageCount - 1U < (uint32_t)pItemData->nImageIndex) {
+      if ((uint32_t)pItemData->nImageIndex > pItemData->nSubImageCount - 1U) {
         pItemData->nImageIndex = 0;
       }
     } else if (pItemData->nMenuItemType == 2) {
@@ -571,7 +578,7 @@ void __fastcall ESCMENU_LoadLocalizedImages(int * pMenuHeader, D2EscMenuItemStrc
     if (pMenuTable) {
       __frame0.szImagePath = '\0';
       memset(__frame0.szImagePathBuffer, 0, 0x103);
-      memset(szLangAbbrev, 0, 4 * sizeof(szLangAbbrev[0]));
+      for (int i = 0; i < 4; i++) szLangAbbrev[i] = 0;
       D2Lang::StrTable::strtable::TABLES_GetLangAbbreviation(szLangAbbrev, 0);
       __frame0.nItemIndex = 0;
       if (0 >= *pMenuHeader) {
@@ -588,7 +595,7 @@ void __fastcall ESCMENU_LoadLocalizedImages(int * pMenuHeader, D2EscMenuItemStrc
             pMenuTable[__frame0.nItemIndex].pDC6Main = pLoadedDC6;
             if (nSubImageCount == 1) {
               nSubImageCount = pMenuTable[__frame0.nItemIndex].nSubImageCount;
-              if (!nSubImageCount || 4 < nSubImageCount) {
+              if ((uint32_t)nSubImageCount <= 0 || 4 < nSubImageCount) {
                 ESCMENU_LoadLocalizedImages_HaltTail(0x4fe);
               }
 
@@ -971,13 +978,13 @@ void __stdcall DRAW_EscMenu() {
       if (gnEscMenuLastMouseY != nMouseY || gnEscMenuLastMouseX != nMouseX) {
         gnEscMenuLastMouseX = nMouseX;
         gnEscMenuLastMouseY = nMouseY;
-        if (!gbEscMenuSliderDragging) {
+        if (gbEscMenuSliderDragging) {
+          ESCMENU_HandleSliderDrag(nMouseY, nMouseX);
+        } else {
           nErrorLine = ESCMENU_GetItemIndexFromMouseY(nMouseY);
           if (nErrorLine != -1) {
             gnEscMenuSelectedIndex = nErrorLine;
           }
-        } else {
-          ESCMENU_HandleSliderDrag(nMouseY, nMouseX);
         }
       }
 
@@ -989,7 +996,7 @@ void __stdcall DRAW_EscMenu() {
           bItemVisible = 0;
           nMouseY = pCurrentTable[nItemIndex].nExpansionOnly;
           pcVar1 = (char*)&pCurrentTable[nItemIndex].nYPosition;
-          memset(pcVar1, 0, 4 * sizeof(pcVar1[0]));
+          for (int i = 0; i < 4; i++) pcVar1[i] = 0;
           if (!nMouseY || (bIsExpansion = Fog::D2CheckExpansionGame() , pCurrentTable = gpEscMenuCurrentTable , bIsExpansion != 0)) {
             pfnEnableCallback = pCurrentTable[nItemIndex].fpVisibilityCheck;
             if (!pfnEnableCallback || (bIsExpansion = (*pfnEnableCallback)() , pCurrentTable = gpEscMenuCurrentTable , bIsExpansion != 0)) {
@@ -1006,6 +1013,11 @@ void __stdcall DRAW_EscMenu() {
             nItemBottomY = gpEscMenuItemCount->nRowHeight + nMouseY;
             pCurrentTable[nItemIndex].nYPosition = nMouseY;
             switch ((int32_t)(uint32_t)pCurrentTable[nItemIndex].nMenuItemType) {
+              case -1:
+
+              case 0:
+                D2Win::Src::D2WinFont::IMAGE_DrawDC6ImageOnScreen(pCurrentTable[nItemIndex].pDC6Main, ScreenSizeX / 2, nItemBottomY, 1, eDrawMode, -1);
+              pCurrentTable = gpEscMenuCurrentTable; break;
               case 1:
                 D2Win::Src::D2WinFont::IMAGE_DrawDC6ImageOnScreen(pCurrentTable[nItemIndex].pDC6Main, ScreenSizeX / 2 - 0xe6, nItemBottomY, 0, eDrawMode, -1);
               D2Win::Src::D2WinFont::IMAGE_DrawDC6ImageOnScreen(gpEscMenuCurrentTable[nItemIndex].pDC6SubImages[gpEscMenuCurrentTable[nItemIndex].nImageIndex], ScreenSizeX / 2 + 0xe6, nItemBottomY, 2, eDrawMode, -1);
@@ -1019,11 +1031,6 @@ void __stdcall DRAW_EscMenu() {
               ESCMENU_DrawProgressBar(&pCurrentTable[nItemIndex], nMouseY, eDrawMode, (uint32_t)!pCurrentTable[nItemIndex].pDC6Main);
               pCurrentTable = gpEscMenuCurrentTable;
               break;
-              case -1:
-
-              case 0:
-                D2Win::Src::D2WinFont::IMAGE_DrawDC6ImageOnScreen(pCurrentTable[nItemIndex].pDC6Main, ScreenSizeX / 2, nItemBottomY, 1, eDrawMode, -1);
-              pCurrentTable = gpEscMenuCurrentTable;
             }
 
             nVisibleItemCount++;
@@ -1035,10 +1042,10 @@ void __stdcall DRAW_EscMenu() {
 
       memset(&sGfxData, 0, 0x48);
       sGfxData.pDC6 = ui::UI_GetCursorIconIndex();
-      if (!DRAW_RotatingStarPosition) {
-        sGfxData.nFrameNumber = 0;
-      } else {
+      if (DRAW_RotatingStarPosition) {
         sGfxData.nFrameNumber = 8 - DRAW_RotatingStarPosition;
+      } else {
+        sGfxData.nFrameNumber = 0;
       }
 
       nVerticalSpacing = gpEscMenuCurrentTable[gnEscMenuSelectedIndex].nYPosition + gpEscMenuItemCount->nStarOffset;

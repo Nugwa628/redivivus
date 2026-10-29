@@ -74,17 +74,24 @@ void __fastcall SetAiArgument(D2UnitStrc * pMonster, int32_t nArgNumber, int32_t
     if (!pAiGeneral) {
       return;
     }
-    if (nArgNumber == 1) {
+    switch (nArgNumber) {
+    case 1: {
       pAiGeneral->dwArg0 = nValue;
-    } else {
-      if (nArgNumber == 2) {
+      break;
+    }
+    default: {
+      switch (nArgNumber) {
+      case 2: {
         pAiGeneral->dwArg1 = nValue;
         return;
       }
-      if (nArgNumber == 3) {
+      case 3: {
         pAiGeneral->dwArg2 = nValue;
         return;
       }
+      }
+      break;
+    }
     }
 }
 
@@ -97,11 +104,13 @@ int __fastcall GetAiArgument(D2UnitStrc * pMonster, int32_t nArgNumber) {
     if (!pAiGeneral) {
       return 0;
     }
-    if (nArgNumber == 1) {
+    switch (nArgNumber) {
+    case 1: {
       return pAiGeneral->dwArg0;
     }
-    if (nArgNumber == 2) {
+    case 2: {
       return pAiGeneral->dwArg1;
+    }
     }
     if (nArgNumber != 3) {
       return 0;
@@ -186,10 +195,7 @@ static void FreeAiCmds(D2AiGeneralStrc * pAiGeneral, ::SGAMEDATA * pGame) {
       if (!pCmd) {
         break;
       }
-      if (pCmd == pCmd->pNext) {
-        pAiGeneral->pCmdLast = 0;
-        pAiGeneral->pCmdCurrent = 0;
-      } else {
+      if (pCmd != pCmd->pNext) {
         if (pAiGeneral->pCmdLast == pCmd) {
           pAiGeneral->pCmdLast = pCmd->pNext;
         }
@@ -197,6 +203,9 @@ static void FreeAiCmds(D2AiGeneralStrc * pAiGeneral, ::SGAMEDATA * pGame) {
         pAiGeneral->pCmdCurrent = pCmd->pNext;
         pCmd->pPrev->pNext = pCmd->pNext;
         pCmd->pNext->pPrev = pCmd->pPrev;
+      } else {
+        pAiGeneral->pCmdLast = 0;
+        pAiGeneral->pCmdCurrent = 0;
       }
 
       D2_FREE_POOL_AT(pGame->pMemoryPool, pCmd, ".\\Ai\\AiGeneral.cpp", 0xc4);
@@ -224,10 +233,7 @@ void __fastcall ResetAiGeneralStrc(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
         if (pMonAi2) {
           pCmd = pMonAi2->pCmdCurrent;
           if (pCmd) {
-            if (pCmd == pCmd->pNext) {
-              pMonAi2->pCmdLast = 0;
-              pMonAi2->pCmdCurrent = 0;
-            } else {
+            if (pCmd != pCmd->pNext) {
               if (pMonAi2->pCmdLast == pCmd) {
                 pMonAi2->pCmdLast = pCmd->pNext;
               }
@@ -235,6 +241,9 @@ void __fastcall ResetAiGeneralStrc(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
               pMonAi2->pCmdCurrent = pCmd->pNext;
               pCmd->pPrev->pNext = pCmd->pNext;
               pCmd->pNext->pPrev = pCmd->pPrev;
+            } else {
+              pMonAi2->pCmdLast = 0;
+              pMonAi2->pCmdCurrent = 0;
             }
 
             D2_FREE_POOL_AT(pGame->pMemoryPool, pCmd, ".\\Ai\\AiGeneral.cpp", 0xa1);
@@ -388,10 +397,10 @@ void __fastcall AssignMinionOwner(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32
     if (!(pUnit && pUnit->eUnitType == UNIT_MONSTER)) {
       return;
     }
-    if (!pUnit->pUnitData.pUnitDataMonster) {
-      pAiGeneral = 0;
-    } else {
+    if (pUnit->pUnitData.pUnitDataMonster) {
       pAiGeneral = pUnit->pUnitData.pUnitDataMonster->pAiGeneral;
+    } else {
+      pAiGeneral = 0;
     }
     if (bTransferBoss) {
       Monster::AI::SetUnsetAiFlag(pAiGeneral, 2, 1);
@@ -608,10 +617,10 @@ void __fastcall CallForEachMinion(D2UnitStrc * pUnit, void * pContext, void * pA
       if (!(pOwnerUnit && pOwnerUnit->eUnitType == UNIT_MONSTER)) {
         return;
       }
-      if (!pOwnerUnit->pUnitData.pUnitDataMonster) {
-        pOwnerAi = 0;
-      } else {
+      if (pOwnerUnit->pUnitData.pUnitDataMonster) {
         pOwnerAi = pOwnerUnit->pUnitData.pUnitDataMonster->pAiGeneral;
+      } else {
+        pOwnerAi = 0;
       }
 
       pGame = pOwnerAi->pGame;

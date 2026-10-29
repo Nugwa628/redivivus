@@ -277,12 +277,12 @@ void __stdcall PARTICLE_UpdatePosition(D2UnitStrc * pUnit) {
     nOffsetX1 = iVar1 + pParticle->pOffsets[1].nOffsetZ;
     pParticle->pOffsets[0].nOffsetZ = nOffsetX1;
     if (nFlags & 2) {
-      if (!pParticle->nBounceCount) {
+      if (pParticle->nBounceCount) {
+        pParticle->nBounceCount--;
+      } else {
         pParticle->nFlags = nFlags | 1;
         *pX = 0;
         *pY = 0;
-      } else {
-        pParticle->nBounceCount--;
       }
     }
 
@@ -298,10 +298,10 @@ void __stdcall PARTICLE_UpdatePosition(D2UnitStrc * pUnit) {
         nSpriteOffsetX = 0;
         nSpriteOffsetY = 0;
         bySpriteLayer = '\b';
-        if (!pUnit) {
-          eUnitType = UNIT_COUNT;
-        } else {
+        if (pUnit) {
           eUnitType = pUnit->eUnitType;
+        } else {
+          eUnitType = UNIT_COUNT;
         }
         if (eUnitType == UNIT_MONSTER) {
           bySpriteLayer = '\x0e';

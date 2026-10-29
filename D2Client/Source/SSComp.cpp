@@ -32,12 +32,12 @@ uint32_t __fastcall ZLIB_Adler32(uint32_t nAdler, uint8_t * pbData, uint32_t nLe
     uint32_t nSum1 = nAdler & 0xffff;
     if (nLen == 1) {
       nSum1 += *pbData;
-      if (0xfff0 < nSum1) {
+      if (0xfff1 <= nSum1) {
         nSum1 -= 0xfff1;
       }
 
       nSum2 += nSum1;
-      if (0xfff0 < nSum2) {
+      if (0xfff1 <= nSum2) {
         return (nSum2 - 0xfff1) * 0x10000 | nSum1;
       }
     } else {
@@ -61,7 +61,7 @@ uint32_t __fastcall ZLIB_Adler32(uint32_t nAdler, uint8_t * pbData, uint32_t nLe
       }
 
       nRemaining = nLen;
-      if (0x15af < nLen) {
+      if (0x15b0 <= nLen) {
         nLen /= 0x15b0;
         do {
           nRemaining -= 0x15b0;
@@ -313,7 +313,7 @@ void __fastcall ZLIB_InflateFast(uint8_t * * pInflateState, int32_t nEndPos) {
       dwBitHold >>= (int8_t)dwCodeEntry;
       if ((uint32_t)((int)pOutput - (int)pOutputBase) < nDistance) {
         dwCodeEntry = nDistance - ((int)pOutput - (int)pOutputBase);
-        if (nWindowSize < dwCodeEntry && *(int*)(pInternalState + 0x1bc0)) {
+        if (dwCodeEntry > nWindowSize && *(int*)(pInternalState + 0x1bc0)) {
           pInflateState[6] = (uint8_t*)"invalid distance too far back";
           bad_data:
           pInternalState[0] = 0x1d;
@@ -433,7 +433,7 @@ void __fastcall ZLIB_InflateFast(uint8_t * * pInflateState, int32_t nEndPos) {
 
         pOutput = pCopyByte + 4;
         *pOutput = *(uint8_t*)(nCopySrc3 + 4);
-        if (nMatchLen < 2) {
+        if (nMatchLen <= 1) {
           goto check_room;
         }
 
@@ -610,7 +610,7 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
     uint16_t aCount[16];
     uint32_t nMaxBits;
     nMaxBits = 0;
-    memset(aCount, 0, 16 * sizeof(aCount[0]));
+    for (int i = 0; i < 16; i++) aCount[i] = 0;
     if (nNumCodes) {
       do {
         aCount[*(uint16_t*)(pBitLengths + nMaxBits * 2)]++;
@@ -629,7 +629,7 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
 
     uint32_t nRootBits;
     nRootBits = *pMaxBits;
-    if (nMaxBits < *pMaxBits) {
+    if (*pMaxBits > nMaxBits) {
       nRootBits = nMaxBits;
     }
     if (!nMaxBits) {
@@ -667,7 +667,7 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
       }
 
       nLoopIdx++;
-    } while (nLoopIdx < 0x10);
+    } while (nLoopIdx <= 0xf);
 
     if (0 < nLeft && (!nTableType || nMaxBits != 1)) {
       return -1;
@@ -682,7 +682,7 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
     } while (nFillIdx < 0x1e);
 
     nLoopIdx = 0;
-    if (nNumCodes) {
+    if ((uint32_t)nNumCodes > 0) {
       do {
         if (*(short int*)(pBitLengths + nLoopIdx * 2)) {
           aOutCodes[aOffset[*(uint16_t*)(pBitLengths + nLoopIdx * 2)]] = (uint16_t)nLoopIdx;
@@ -692,18 +692,25 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
         nLoopIdx++;
       } while (nLoopIdx < nNumCodes);
     }
-    if (!nTableType) {
+    switch (nTableType) {
+    case 0: {
       pExtraTable = aOutCodes;
       pBaseTable = aOutCodes;
       nMatchLimit = 0x13;
-    } else if (nTableType == 1) {
+      break;
+    }
+    case 1: {
       /* base = lbase - 257 (inftrees.c LENS) */ pBaseTable = (uint16_t*)(gaZlibLengthBaseTable - 257);
       /* extra = lext - 257 (inftrees.c LENS) */ pExtraTable = (uint16_t*)(gaZlibLengthExtraBitsTable - 257);
       nMatchLimit = 0x100;
-    } else {
+      break;
+    }
+    default: {
       pBaseTable = gaZlibDistBaseTable;
       pExtraTable = gaZlibDistExtraBitsTable;
       nMatchLimit = -1;
+      break;
+    }
     }
 
     int pNextTable;
@@ -760,10 +767,10 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
 
         for (nFillIdx = 1 << (byCurLength - 1U & 0x1f); nHuffCode & nFillIdx; nFillIdx >>= 1) {}
 
-        if (!nFillIdx) {
-          nHuffCode = 0;
-        } else {
+        if (nFillIdx) {
           nHuffCode = (nFillIdx - 1 & nHuffCode) + nFillIdx;
+        } else {
+          nHuffCode = 0;
         }
 
         aCount[nCurLength]--;
@@ -796,7 +803,7 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
         pCountEntry = aCount + nLenIndex;
         do {
           uVar1 = *pCountEntry;
-          if ((int)(nLeft - (uint32_t)uVar1) < 1) {
+          if ((int)(nLeft - (uint32_t)uVar1) <= 0) {
             break;
           }
 
@@ -809,18 +816,23 @@ static uint16_t gaZlibLengthExtraBitsTable[31] = {
 
       nTableFill = 1 << ((uint8_t)nCurExtraBits & 0x1f);
       nUsedEntries += nTableFill;
-      if (nTableType == 1) {
+      switch (nTableType) {
+      case 1: {
         bTableSizeOk = nUsedEntries < 0x354;
         bTableSizeExact = nUsedEntries == 0x354;
         if (!bTableSizeOk && !bTableSizeExact) {
           return 1;
         }
-      } else if (nTableType == 2) {
+        break;
+      }
+      case 2: {
         bTableSizeOk = nUsedEntries < 0x250;
         bTableSizeExact = nUsedEntries == 0x250;
         if (!bTableSizeOk && !bTableSizeExact) {
           return 1;
         }
+        break;
+      }
       }
 
       *(uint8_t*)(*ppOutTable + nFillIdx * 4) = (uint8_t)nCurExtraBits;

@@ -40,14 +40,14 @@ void __fastcall BuildJungle(D2DrlgLevelStrc * pLevel) {
     int nLevelPrestId;
     int nRand;
     int nXCell;
-    if (pLevel->eD2LevelId - 0x4cU >= 3) {
+    if (pLevel->eD2LevelId - 0x4cU > 2) {
       return;
     }
 
     D2LevelDefsTxt* pSpiderForestDefs = DATATBLS::LvlTbls::TXT_LevelDefs_GetLine(LEVEL_SpiderForest);
     uint8_t byDifficulty = pLevel->pDrlg->nDifficulty;
-    int nLevelWidthCells = (int)(pSpiderForestDefs->SizeX[byDifficulty] + (pSpiderForestDefs->SizeX[byDifficulty] >> 0x1f & 0x1fU)) >> 5;
-    int nLevelHeightCells = (int)(pSpiderForestDefs->SizeY[byDifficulty] + (pSpiderForestDefs->SizeY[byDifficulty] >> 0x1f & 0x1fU)) >> 5;
+    int nLevelWidthCells = (int)pSpiderForestDefs->SizeX[byDifficulty] / 32;
+    int nLevelHeightCells = (int)pSpiderForestDefs->SizeY[byDifficulty] / 32;
     int nPresetArrayIdx = 0;
     uint32_t nSeedModulo = D2Client::Archive::UNIT_GetModuloFromSeed(&pLevel->sSeed, (uint32_t)(pLevel->nUnknown_1B8 == 3) * 4 + 2);
     int nSpecialPresetCount = 0;
@@ -76,7 +76,7 @@ void __fastcall BuildJungle(D2DrlgLevelStrc * pLevel) {
             nPresetArrayIdx++;
             nRand = -1;
             if (0x23e < nLevelPrestId) {
-              if (2 < nSpecialPresetCount) {
+              if (3 <= nSpecialPresetCount) {
                 Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x47);
                 exit(-1);
               }
@@ -150,7 +150,7 @@ void __fastcall SpawnRandomPreset(D2DrlgLevelStrc * pLevel, int32_t nLevelPrestI
       nShuffleCountdown = nTotalCells;
       if (0 < (int)nTotalCells) {
         do {
-          if ((int)nTotalCells < 1) {
+          if ((int)nTotalCells <= 0) {
             nRandIdxA = 0;
           } else {
             nRandIdxA = pLevel->sSeed.nSeedLow;
@@ -227,7 +227,7 @@ void __fastcall SpawnRandomPreset(D2DrlgLevelStrc * pLevel, int32_t nLevelPrestI
         if (bCanSpawn) {
           Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nFreeSrcLine, nY, nLevelPrestId1 + nRandIdxA, -1, 0);
           nPlacedCount++;
-          if (0 < a4 && a4 <= nPlacedCount) {
+          if (0 < a4 && nPlacedCount >= a4) {
             nFreeSrcLine = 0xeb;
             goto cleanup;
           }

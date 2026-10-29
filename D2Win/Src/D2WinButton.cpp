@@ -155,33 +155,33 @@ void __fastcall D2WINBUTTON_SetImageIndex(::D2WinButton * pButton, int32_t nImag
 // Handles mouse wheel input for scrollable buttons. Checks scroll up/down flags (bits 3-4 of field 0x10), invokes wheel callback (field 0xd) if delta is non-zero. Uses global recursion counter.
 BOOL __fastcall D2WINBUTTON_HandleMouseWheel(::D2WinButton * pButton, int32_t nWheelDelta) {
     uint32_t dwState;
-    if (pButton->sControl.neD2FormType == FORM_Button) {
-      D2ControlMsg sMsg;
-      dwState = pButton->sControl.dwState;
-      if (!(dwState & 1 && dwState & 4 && !pButton->bPressed && !pButton->bPressedInside && (0 < nWheelDelta && pButton->nButtonFlags & 8 || nWheelDelta < 0 && pButton->nButtonFlags & 0x10))) {
-        return 0;
-      }
+    if (pButton->sControl.neD2FormType != FORM_Button) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe2);
+      exit(-1);
+    }
 
-      sMsg.uMsg = 0;
-      sMsg.wParam = 0;
-      sMsg.uLParam.nLParam = 0;
-      sMsg.nCmdCode = 0;
-      sMsg.dwReserved = 0;
-      sMsg.bHandled = 0;
-      sMsg.dwResult = 0;
-      if (!pButton->sControl.fpOnPress) {
-        return 0;
-      }
-
-      gnFormControlCount++;
-      sMsg.pControl = &pButton->sControl;
-      pButton->sControl.fpOnPress(&sMsg);
-      gnFormControlCount--;
+    D2ControlMsg sMsg;
+    dwState = pButton->sControl.dwState;
+    if (!(dwState & gadwBitMasks[0] && dwState & gadwBitMasks[2] && !pButton->bPressed && !pButton->bPressedInside && (0 < nWheelDelta && pButton->nButtonFlags & 8 || nWheelDelta < 0 && pButton->nButtonFlags & 0x10))) {
       return 0;
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe2);
-    exit(-1);
+    sMsg.uMsg = 0;
+    sMsg.wParam = 0;
+    sMsg.uLParam.nLParam = 0;
+    sMsg.nCmdCode = 0;
+    sMsg.dwReserved = 0;
+    sMsg.bHandled = 0;
+    sMsg.dwResult = 0;
+    if (!pButton->sControl.fpOnPress) {
+      return 0;
+    }
+
+    gnFormControlCount++;
+    sMsg.pControl = &pButton->sControl;
+    pButton->sControl.fpOnPress(&sMsg);
+    gnFormControlCount--;
+    return 0;
 }
 
 // Sets custom user data field (field 0x9c) for application-specific button state.
@@ -241,8 +241,8 @@ static void __stdcall D2WINBUTTON_DrawText(::D2WinButton * pButton, int nOffsetY
       nSizeY = pButton->sControl.dwSizeY;
       nPosY = pButton->sControl.dwPosY;
       nPrimaryXCenter = pButton->sControl.dwPosX + nSecondLabelY;
-      nSecondaryTextWidth = D2Lang::StrTable::strtable::GetLocaleString(pButton->nHotkeyStringId);
-      nDrawY = D2WinFont::DRAW_text0(nSecondaryTextWidth);
+
+      nDrawY = D2WinFont::DRAW_text0(D2Lang::StrTable::strtable::GetLocaleString(pButton->nHotkeyStringId));
       nSecondaryXCenter = (pButton->sControl.dwSizeX - nDrawY) / 2;
       if (nSecondaryXCenter < 0) {
         nSecondaryXCenter = 0;
@@ -261,8 +261,8 @@ static void __stdcall D2WINBUTTON_DrawText(::D2WinButton * pButton, int nOffsetY
       eGlobalPalette = pButton->nTextColor;
       eDrawMode = DRAW_DARKTRANSPARENT;
       bDrawBackground = 0;
-      nSecondaryTextWidth = D2Lang::StrTable::strtable::GetLocaleString(pButton->nHotkeyStringId);
-      D2WinFont::D2WINFONT_DrawTextWithOptionalBackground(nSecondaryTextWidth, nSecondaryXCenter, nSecondLabelY, eGlobalPalette, bDrawBackground, eDrawMode);
+
+      D2WinFont::D2WINFONT_DrawTextWithOptionalBackground(D2Lang::StrTable::strtable::GetLocaleString(pButton->nHotkeyStringId), nSecondaryXCenter, nSecondLabelY, eGlobalPalette, bDrawBackground, eDrawMode);
     }
 
     D2WinFont::D2WINFONT_DrawTextWithOptionalBackground(wszText, nPrimaryXCenter, nDrawY, pButton->nTextColor, 0, DRAW_DARKTRANSPARENT);
@@ -292,7 +292,7 @@ BOOL __fastcall Draw(::D2WinButton * pButton) {
     dwState = pButton->sControl.dwState;
     int nFrameBase;
     nFrameBase = pButton->nCurrentImageIndex;
-    if (!(dwState & 4) || !(dwState & 1)) {
+    if (!(dwState & gadwBitMasks[2]) || !(dwState & gadwBitMasks[0])) {
       nFrameOffset = pButton->nFrameOffsetDisabled;
     } else {
       nFrameOffset = pButton->bPressed;
@@ -302,13 +302,13 @@ BOOL __fastcall Draw(::D2WinButton * pButton) {
           goto draw_button;
         }
       } else {
-        if (!(pButton->nButtonFlags & 3)) {
+        if (pButton->nButtonFlags & 3) {
+          pButton->bPressedInside = 1;
+        } else {
           bIsPointInside = D2WINBUTTON_IsPointInside(pButton, D2Client::Mouse::nPosX, D2Client::Mouse::nPosY);
           nFrameOffset = pButton->bPressed;
           dwState = pButton->sControl.dwState;
           pButton->bPressedInside = bIsPointInside;
-        } else {
-          pButton->bPressedInside = 1;
         }
         if (!nFrameOffset || !pButton->bPressedInside) {
           goto not_hovered;
@@ -320,8 +320,8 @@ BOOL __fastcall Draw(::D2WinButton * pButton) {
 
     nFrameBase += nFrameOffset;
     draw_button:
-    if (pButton->sControl.pDC6 && dwState & 4) {
-      if (dwState & 1 || (eDrawMode = DRAW_TRANSPARENT , (pButton->nButtonFlags & 0x20) != 0)) {
+    if (pButton->sControl.pDC6 && dwState & gadwBitMasks[2]) {
+      if (dwState & gadwBitMasks[0] || (eDrawMode = DRAW_TRANSPARENT , (pButton->nButtonFlags & 0x20) != 0)) {
         eDrawMode = DRAW_SOLID;
       }
 
@@ -354,7 +354,7 @@ BOOL __fastcall Draw(::D2WinButton * pButton) {
           nTileRows--;
         } while (nTileRows);
       }
-      if (-1 < nLastTileRow) {
+      if (0 <= nLastTileRow) {
         nFrameOffset = 0;
         if (0 < nTileCols) {
           nRowFrame = nTileRowCount;
@@ -397,7 +397,9 @@ BOOL __fastcall Draw(::D2WinButton * pButton) {
     }
 
     pActiveFormImage = D2WinMain::D2WINMAIN_GetFormImage();
-    if (!pActiveFormImage) {
+    if (pActiveFormImage) {
+      pButton->bMouseOver = 0;
+    } else {
       nFrameOffset = pButton->sControl.dwPosX;
       nPosY = pButton->sControl.dwPosY;
       if (D2Client::Mouse::nPosX < nFrameOffset || D2Client::Mouse::nPosY < nPosY - pButton->sControl.dwSizeY || pButton->sControl.dwSizeX + nFrameOffset <= D2Client::Mouse::nPosX || nPosY <= D2Client::Mouse::nPosY) {
@@ -407,8 +409,6 @@ BOOL __fastcall Draw(::D2WinButton * pButton) {
       }
 
       pButton->bMouseOver = nFrameOffset;
-    } else {
-      pButton->bMouseOver = 0;
     }
 
     sHoverMsg.uLParam = d2_bits_as<D2UIMsgLParamUnion>(pButton->bMouseOver);
@@ -427,19 +427,19 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
     }
 
     uint32_t uVar1 = pButton->sControl.dwState;
-    if (!(uVar1 & 4) || !(uVar1 & 1)) {
+    if (!(uVar1 & 4) || !(uVar1 & gadwBitMasks[0])) {
       return 0;
     }
-    if (!(pButton->nButtonFlags & 2U)) {
+    if (pButton->nButtonFlags & 2U) {
+      pButton->bPressed = (uint32_t)!pButton->bPressed;
+      pButton->bPressedInside = (uint32_t)!pButton->bPressedInside;
+    } else {
       if (pButton->bPressed && pButton->bPressedInside) {
         return 1;
       }
 
       pButton->bPressed = 1;
       pButton->bPressedInside = 1;
-    } else {
-      pButton->bPressed = (uint32_t)!pButton->bPressed;
-      pButton->bPressedInside = (uint32_t)!pButton->bPressedInside;
     }
     if (!(pButton->nButtonFlags & 4U)) {
       D2Sound::Src::D2SoundFast::SOUND_PlaySoundEffect((uint8_t*)"data\\global\\sfx\\cursor\\button.wav");
@@ -452,7 +452,7 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
     if (!pOVar2) {
       return 1;
     }
-    if (gnFormControlCount < 1) {
+    if (gnFormControlCount <= 0) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x221);
       exit(-1);
     }
@@ -474,7 +474,7 @@ BOOL __stdcall Mouse(D2ControlMsg * pControlMsg) {
     *piVar1 |= 2;
     dwState = pButton->sControl.dwState;
     bCallbackResult = 0;
-    if (!(dwState & 4) || !(dwState & 1)) {
+    if (!(dwState & gadwBitMasks[2]) || !(dwState & gadwBitMasks[0])) {
       pButton->sControl.dwState = dwState & -3;
       return 0;
     }

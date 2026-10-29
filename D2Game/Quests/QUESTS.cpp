@@ -403,7 +403,7 @@ void __fastcall QUEST_OnMonsterKilled(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
       int16_t nBossNo;
       nBossNo = Monsters::GetBossNo(pUnit);
       nSuperUniqueHcIdx = (int)nBossNo;
-      if (nSuperUniqueHcIdx < 0 || sgptDataTable->nTxtSuperUniquesSize <= nSuperUniqueHcIdx) {
+      if (nSuperUniqueHcIdx < 0 || nSuperUniqueHcIdx >= sgptDataTable->nTxtSuperUniquesSize) {
         nSuperUniqueHcIdx = -1;
       } else {
         nSuperUniqueHcIdx = sgptDataTable->pTxtSuperUniques[nSuperUniqueHcIdx].hcIdx;
@@ -704,7 +704,7 @@ void __fastcall QUEST_GetQuestLogDisplayState(D2QuestDataStrc * pQuestData, uint
       BOOL bJustCompleted;
       bJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_JustCompleted);
       if (bJustCompleted == 1) {
-        if (0x28 < (int)pQuestData->nQuestIdReal) {
+        if (0x29 <= (int)pQuestData->nQuestIdReal) {
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x455);
           exit(-1);
         }
@@ -747,28 +747,30 @@ static void __stdcall QUEST_RemoveItemFromInventory(D2InventoryStrc * pInventory
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0x534);
     eD2ItemFlag eItemFlags = ~(ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD);
     D2Common::ITEMS::Items::ITEM_SetServerSideFlag((uint32_t*)&eItemFlags, 0x20, 1);
-    if (!pItem) {
-      eItemMode = Container;
-    } else {
+    if (pItem) {
       eItemMode = pItem->eAnimMode.ePlayerMode;
-    }
-    if (eItemMode == Container) {
-      eInventoryPage eContainerPage;
-      eContainerPage = D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pItem);
-      D2Common::ITEMS::Items::ITEM_SetItemData_ePreviousPage(pItem, eContainerPage);
-      GAME::SCmd::Send0x9DRemoveItemFromContainer(pClient, pUnit, pItem, eItemFlags);
-      ITEMS::ItemMode::ITEMMODE_DeleteItemFromInventory(pGame, pUnit, pItem, 0);
     } else {
-      if (eItemMode == Equipment) {
+      eItemMode = Container;
+    }
+    if (eItemMode != Container) {
+      switch (eItemMode) {
+      case Equipment: {
         dwXPos = D2Common::INVENTORY::Inventory::INVENTORY_GetItemXPosition(pInventory, pItem);
         ITEMS::ItemMode::EquipItem(pGame, pUnit, (eD2BodyLoc)dwXPos, 1, (uint32_t*)&pInventory);
         return;
       }
-      if (eItemMode == Cursor) {
+      case Cursor: {
         ITEMS::ItemMode::ToCursorItem(pGame, pUnit, pItem);
         D2Common::INVENTORY::Inventory::CopyInventoryOfPlayerOrFree(pInventory, nullptr);
         return;
       }
+      }
+    } else {
+      eInventoryPage eContainerPage;
+
+      D2Common::ITEMS::Items::ITEM_SetItemData_ePreviousPage(pItem, D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pItem));
+      GAME::SCmd::Send0x9DRemoveItemFromContainer(pClient, pUnit, pItem, eItemFlags);
+      ITEMS::ItemMode::ITEMMODE_DeleteItemFromInventory(pGame, pUnit, pItem, 0);
     }
 }
 
@@ -798,7 +800,7 @@ void __fastcall QUEST_SendQuestUpdateToPlayer(::SGAMEDATA * pGame, D2UnitStrc * 
       return;
     }
 
-    while (pQuestData->nQuestNoInternal != (nInternalQuestNo & 0xff)) {
+    while (pQuestData->nQuestNoInternal != (uint8_t)nInternalQuestNo) {
       pQuestData = pQuestData->pPrev;
       if (!pQuestData) {
         return;
@@ -897,7 +899,7 @@ void __fastcall QUEST_OnNpcGossip(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, uin
       }
     }
 
-    questArg.sQuestArgs.sNpcActivate.nIndex = nGossipIndex & 0xffff;
+    questArg.sQuestArgs.sNpcActivate.nIndex = (uint16_t)nGossipIndex;
     QUEST_DispatchBroadcast(true, true, &questArg);
 }
 
@@ -989,7 +991,7 @@ uint32_t __fastcall QUEST_NpcWantsInteract(::SGAMEDATA * pGame, D2UnitStrc * pUn
     if (pUnit && pUnit->eUnitType == UNIT_PLAYER && nNpcClassId && *(int*)nNpcClassId == 1) {
       int nTargetClassId;
       nTargetClassId = *(int*)(nNpcClassId + 4);
-      if (nTargetClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nTargetClassId || !(sgptDataTable->pTxtMonStats + nTargetClassId) || !sgptDataTable->pTxtMonStats[nTargetClassId].interact) {
+      if (nTargetClassId < 0 || nTargetClassId >= sgptDataTable->nTxtMonStatsSize || !(sgptDataTable->pTxtMonStats + nTargetClassId) || !sgptDataTable->pTxtMonStats[nTargetClassId].interact) {
         return 0;
       }
 
@@ -1069,7 +1071,7 @@ int __fastcall QUEST_GetQuestRecordState(::SGAMEDATA * pGame, eD2Quests eQuestId
 }
 
 void __stdcall QUEST_DispatchMonsterDeathToQ12(int32_t nMonsterClassId, int32_t nBossType, int32_t nUnused) {
-    if (!(-1 < nUnused && nUnused < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nUnused && nUnused < sgptDataTable->nTxtMonStatsSize)) {
       return;
     }
     if (nUnused == 0xc9) {
@@ -1223,7 +1225,7 @@ void __fastcall SetTimerByMonsterId(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2QuestDataStrc* pQuestDataB;
     int nMonsterId = !pUnit ? -1 : pUnit->nClassId;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    if (nMonsterId < 0x170) {
+    if (nMonsterId <= 0x16f) {
       eAct eActNo;
       if (nMonsterId == 0x16f) {
         if (pGame->pQuestControl) {
@@ -1261,7 +1263,7 @@ void __fastcall SetTimerByMonsterId(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
                 return;
               }
             }
-          } else if (eLevelId == LEVEL_Harrogath || 0x70 < (int)eLevelId) {
+          } else if (eLevelId == LEVEL_Harrogath || 0x71 <= (int)eLevelId) {
             if (pGame->pQuestControl) {
               pQuestData = pGame->pQuestControl->pQuestData;
               if (pQuestData) {
@@ -1450,7 +1452,7 @@ void __fastcall QUEST_CheckGoldenBirdDrop(::SGAMEDATA * pGame, D2UnitStrc * pUni
 
     pQuestData = 0;
     check_drop_conditions:
-    if (pUnit && (nMonClassId = pUnit->nClassId , -1 < nMonClassId) && nMonClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonClassId && pQuestData && pQuestData->bIsNotIntroduction && nMonClassId != 0x197 && !sgptDataTable->pTxtMonStats[nMonClassId].flying) {
+    if (pUnit && (nMonClassId = pUnit->nClassId , 0 <= nMonClassId) && nMonClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonClassId && pQuestData && pQuestData->bIsNotIntroduction && nMonClassId != 0x197 && !sgptDataTable->pTxtMonStats[nMonClassId].flying) {
       A3Q5::Q21_CheckGoldenBirdDropConditions(pQuestData, pUnit);
       return;
     }
@@ -1717,7 +1719,7 @@ void __fastcall QUESTGUID_SetPlayerCountToZero(D2QuestGUIDStrc * pQuestGUID) {
 // @evidence Takes D2QuestDataStrc + D2QuestArgStrc, resolves the player
 // GUID (-1 if none) and delegates to 00545240. A wrapper, not the list operation itself.
 void __fastcall QUESTGUID_RemovePlayerFromQuest(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
-    if (!pQuestData->sQuestGUID.nPlayerCount) {
+    if ((uint32_t)pQuestData->sQuestGUID.nPlayerCount <= 0) {
       return;
     }
     if (!pQuestArgs->pPlayer) {
@@ -1756,7 +1758,7 @@ void __fastcall FindSpawnableLocation(D2RoomStrc * pRoom, POINT * pPoint, uint32
       do {
         nYStep = nNegRadius;
         nYInner = nRadius;
-        if (nNegRadius < nRadius) {
+        if (nRadius > nNegRadius) {
           do {
             nY = nYInner + nScanOriginY;
             pRowRoom = pRoom;
@@ -1798,7 +1800,7 @@ void __fastcall FindSpawnableLocation(D2RoomStrc * pRoom, POINT * pPoint, uint32
             }
 
             nYInner += -2;
-          } while (nYStep < nYInner);
+          } while (nYInner > nYStep);
         }
 
         nRadius++;
@@ -1819,7 +1821,7 @@ void __fastcall SetRewardAndFinishFlags(D2QuestDataStrc * pQuestData, D2QuestArg
     }
 
     bRewardAwaits = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Completed);
-    if (!(bRewardAwaits && pQuestData->sQuestGUID.nPlayerCount)) {
+    if (!((uint32_t)bRewardAwaits > 0 && pQuestData->sQuestGUID.nPlayerCount)) {
       return;
     }
     if (!pQuestArgs->pPlayer) {
@@ -1956,11 +1958,11 @@ BOOL __fastcall PORTAL_ActivateOrDeactivatePortalObject(::SGAMEDATA * * ppGame) 
 
     D2Common::Units::GetCoords(pObjectUnit, &sCoords);
     D2ObjectsTxt* pObjectsTxt = D2Common::DATATBLS::ObjectTbls::TXT_Objects_GetLine((int32_t)ppGame[4]);
-    if (!pObjectsTxt->Mode[1]) {
-      D2Common::Units::SetupUpdateFlag((D2UnitStrc*)ppGame[1], 2);
-    } else {
+    if (pObjectsTxt->Mode[1]) {
       D2Common::Units::SetupUpdateFlag((D2UnitStrc*)ppGame[1], 1);
       GAME::Event::SetEvent(*ppGame, (D2UnitStrc*)ppGame[1], 1, (pObjectsTxt->FrameCnt[1] >> 8) + (*ppGame)->dwGameFrame, 0, 0);
+    } else {
+      D2Common::Units::SetupUpdateFlag((D2UnitStrc*)ppGame[1], 2);
     }
     if (!ppGame[1]) {
       return 1;
@@ -1985,7 +1987,7 @@ void __fastcall SendQuestState(D2UnitStrc * pUnit, int32_t nQuestId) {
 // @sourcefile .\QUESTS\QUESTS.CPP
 void __fastcall QUEST_SendQuestStatePacket(D2UnitStrc * pUnit, int32_t bQuestId, uint8_t bReasoned) {
     eD2LevelId eLevel;
-    uint8_t aPacketBuf[6];
+    struct { uint8_t e0, e1, e2, e3, e4, e5; } aPacketBuf;
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
     if (pRoom) {
       eAct eActNo;
@@ -2000,14 +2002,14 @@ void __fastcall QUEST_SendQuestStatePacket(D2UnitStrc * pUnit, int32_t bQuestId,
       }
     }
 
-    aPacketBuf[4] = '\0';
-    aPacketBuf[5] = '\0';
-    aPacketBuf[1] = bQuestId;
-    aPacketBuf[0] = ']';
-    aPacketBuf[2] = '\0';
-    aPacketBuf[3] = '\f';
+    ((uint8_t*)&aPacketBuf)[4] = '\0';
+    ((uint8_t*)&aPacketBuf)[5] = '\0';
+    ((uint8_t*)&aPacketBuf)[1] = bQuestId;
+    ((uint8_t*)&aPacketBuf)[0] = ']';
+    ((uint8_t*)&aPacketBuf)[2] = '\0';
+    ((uint8_t*)&aPacketBuf)[3] = '\f';
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xd82);
-    GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, (D2GSPacketSrv0x5D*)aPacketBuf);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x5D_QuestState(pClient, (D2GSPacketSrv0x5D*)((uint8_t*)&aPacketBuf));
 }
 
 void __stdcall QUEST_StubEmpty(uint32_t nUnused) {
@@ -2039,7 +2041,7 @@ D2UnitStrc * __fastcall QUEST_SpawnMonsterNearCoords(::SGAMEDATA * pGame, int32_
       nOffsetAttempt++;
       nSpawnX++;
       sSpawnPoint.y++;
-    } while (nOffsetAttempt < 0x15);
+    } while (nOffsetAttempt <= 0x14);
 
     sSpawnPoint.x = nSpawnY;
     place_monster:
@@ -2160,13 +2162,15 @@ void __fastcall QUEST_DispatchPresetObjectLoad(::SGAMEDATA * pGame, D2UnitStrc *
     }
 
     int nClassId = pUnit->nClassId;
-    if (nClassId == 0x1cb) {
+    switch (nClassId) {
+    case 0x1cb: {
       A5Q3::Q33_OnPresetObjectLoad1(pGame, pMapAI);
       return;
     }
-    if (nClassId == 0x1cd) {
+    case 0x1cd: {
       A5Q3::Q33_OnPresetObjectLoad2(pGame, pMapAI);
       return;
+    }
     }
     if (nClassId != 0x21f) {
       return;
@@ -2188,12 +2192,12 @@ void __fastcall AttachToUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2RoomStrc
     if (!byQuestId) {
       return;
     }
-    if (!bExpectedResult) {
-      nAttachResult = QUEST_AttachToUnitByQuestId(pGame, pUnit, (eD2QuestsInternal)byQuestId);
-      bAttachFailed = nAttachResult == 1;
-    } else {
+    if (bExpectedResult) {
       nAttachResult = QUEST_AttachToUnitByQuestId(pGame, pUnit, (eD2QuestsInternal)byQuestId);
       bAttachFailed = !nAttachResult;
+    } else {
+      nAttachResult = QUEST_AttachToUnitByQuestId(pGame, pUnit, (eD2QuestsInternal)byQuestId);
+      bAttachFailed = nAttachResult == 1;
     }
     if (!(bAttachFailed && DEBUGPRINT)) {
       return;
@@ -2317,8 +2321,7 @@ void __fastcall AllocQuestControl(::SGAMEDATA * pGame) {
     D2SeedStrc sSeedNext = D2_SEED_NEXT(pGame->pGameSeed);
     int32_t nSeedLow = sSeedNext.nSeedLow;
     pGame->pGameSeed = sSeedNext;
-    pQuestControl->sSeed.nSeedLow = nSeedLow;
-    pQuestControl->sSeed.nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(&pQuestControl->sSeed, nSeedLow);
     pQuestControl->bExecuting = 0;
     D2BitBufferStrc* pQuestFlags = D2Common::QuestRecord::CreateBitBuffer(pGame->pMemoryPool);
     pQuestControl->pQuestFlags = pQuestFlags;
@@ -2346,10 +2349,10 @@ void RemoveQuestTimer(D2QuestDataStrc * pQuestData, QUESTUPDATE pQuestUpdate, ::
         break;
       }
       if (pMemoryToFree->pfUpdate == pQuestUpdate && pMemoryToFree->pQuest == pQuestData) {
-        if (!pPrevTimer) {
-          pQuestControl->pTimer = pMemoryToFree->pNext;
-        } else {
+        if (pPrevTimer) {
           pPrevTimer->pNext = pMemoryToFree->pNext;
+        } else {
+          pQuestControl->pTimer = pMemoryToFree->pNext;
         }
 
         D2_FREE_POOL_AT(pQuestData->pGame->pMemoryPool, pMemoryToFree, ".\\QUESTS\\QUESTS.CPP", 0x43e);
@@ -2387,13 +2390,13 @@ void __fastcall RefreshQuestDataForUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
     bool bNeedSpecialMsg;
     int32_t dwErrorLine;
     D2QuestDataStrc* pGameQuestData;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer2 = pPlayerData->pQuestRecord[pGame->nDifficulty];
+    D2UnitDataPlayerStrc* pPlayerData;
+    D2BitBufferStrc* pBitBuffer2 = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
     uint8_t nUpdateType = 0;
     uint32_t nUnitGUID = 0;
     uint32_t nActionType = 6;
-    D2ClientStrc* pClientData = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xca7);
-    /* Send player quest states info to client */ GAME::SCmd::NET_D2GS_SERVER_Send_0x28_PlayerQuestInfo(pClientData, 0x28, nActionType, nUnitGUID, pBitBuffer2, nUpdateType);
+    D2ClientStrc* pClientData;
+    /* Send player quest states info to client */ GAME::SCmd::NET_D2GS_SERVER_Send_0x28_PlayerQuestInfo(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xca7), 0x28, nActionType, nUnitGUID, pBitBuffer2, nUpdateType);
     pClientData = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0x49a);
     __frame0.byMsgId52 = 0x52;
     memset(__frame0.aQuestStateArray, 0, 0x29);
@@ -2401,13 +2404,13 @@ void __fastcall RefreshQuestDataForUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
     if (pQuestControl) {
       void* nAddress;
       pGameQuestData = pQuestControl->pQuestData;
-      pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-      pBitBuffer2 = pPlayerData->pQuestRecord[pGame->nDifficulty];
+
+      pBitBuffer2 = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
       /* Retrieve latest quest (in sequence) */ for (; pGameQuestData; pGameQuestData = pGameQuestData->pPrev) {
-        if (0x28 < (int)pGameQuestData->nQuestNoInternal) {
+        if (0x29 <= (int)pGameQuestData->nQuestNoInternal) {
           /* End of quest array - matching quest not found - error */ dwErrorLine = 0x4b3;
-          nAddress = Fog::Src::ErrorManager::GetInstructionPointer();
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", nAddress, dwErrorLine);
+
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), dwErrorLine);
           exit(-1);
         }
         if (pGameQuestData->nStateFlagPrev) {
@@ -2417,8 +2420,8 @@ void __fastcall RefreshQuestDataForUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
             /* FARPROC lpfn for IsBadCodePtr */ bTmpBool = IsBadCodePtr((FARPROC)pGameQuestData->fpStatusFilter);
             if (bTmpBool) {
               /* Invalid address: error */ dwErrorLine = 0x4cb;
-              nAddress = Fog::Src::ErrorManager::GetInstructionPointer();
-              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", nAddress, dwErrorLine);
+
+              Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), dwErrorLine);
               exit(-1);
             }
 
@@ -2466,20 +2469,20 @@ void __fastcall RefreshQuestDataForUnit(::SGAMEDATA * pGame, D2UnitStrc * pUnit)
       }
 
       bTmpBool = D2Common::QuestRecord::GetQuestState(pBitBuffer2, QUEST_TheArcaneSanctuary, QUESTSTATE_Completed);
-      if (!bTmpBool && (bTmpBool = D2Common::QuestRecord::GetQuestState(pBitBuffer2, QUEST_TheArcaneSanctuary, QUESTSTATE_JustCompleted) , !bTmpBool) || !pGame->pAct[1]) {
-        /* If Act2 not yet reached or summoner is not dead (for quest), only set
-                         SpecialMsg (0x50) if it contains data */ if (bNeedSpecialMsg) {
-          /* Common code for sending a 0x50 (Quest Special) msg */ __frame0.sPacket50.nPacketId = 'P';
-          __frame0.sPacket50.nMessageType = 1;
-          GAME::SCmd::NET_D2GS_SERVER_Send_0x50_QuestSpecial(pClientData, &__frame0.sPacket50);
-        }
-      } else {
+      if (!(!bTmpBool && (bTmpBool = D2Common::QuestRecord::GetQuestState(pBitBuffer2, QUEST_TheArcaneSanctuary, QUESTSTATE_JustCompleted) , !bTmpBool) || !pGame->pAct[1])) {
         /* If summoner is dead, msg SpecialMsg (0x50) is always sent with the info about
                          Tal Rasha's Tomb symbol */ eLevelId = D2Common::DUNGEON::Dungeon::GetHoradricStaffTombLevelId(pGame->pAct[1]);
         __frame0.sPacket50.aPayload[1] = (short int)eLevelId - 0x42;
         /* Common code for sending a 0x50 (Quest Special) msg */ __frame0.sPacket50.nPacketId = 'P';
         __frame0.sPacket50.nMessageType = 1;
         GAME::SCmd::NET_D2GS_SERVER_Send_0x50_QuestSpecial(pClientData, &__frame0.sPacket50);
+      } else {
+        /* If Act2 not yet reached or summoner is not dead (for quest), only set
+                         SpecialMsg (0x50) if it contains data */ if (bNeedSpecialMsg) {
+          /* Common code for sending a 0x50 (Quest Special) msg */ __frame0.sPacket50.nPacketId = 'P';
+          __frame0.sPacket50.nMessageType = 1;
+          GAME::SCmd::NET_D2GS_SERVER_Send_0x50_QuestSpecial(pClientData, &__frame0.sPacket50);
+        }
       }
 
       GAME::SCmd::NET_D2GS_SERVER_Send_0x52_PlayerQuestLog(pClientData, &__frame0.byMsgId52);
@@ -2605,7 +2608,7 @@ void __fastcall QUEST_OnPlayerJoinGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
         if (0 < nQuestDataExtendedSize) {
           pQuestInitEntry = &aQuestInitDataExtended[0].nQuestIdReal;
           do {
-            /* nAct */ if (4 < *(uint8_t*)((int)pQuestInitEntry - 0x10)) {
+            /* nAct */ if (5 <= *(uint8_t*)((int)pQuestInitEntry - 0x10)) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x637);
               exit(-1);
             }
@@ -2653,7 +2656,10 @@ void __fastcall QUEST_OnPlayerJoinGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
     pQuestDataIter = 0;
     run_den_of_evil_filter:
     /* FARPROC lpfn for IsBadCodePtr */ bBadCodePtr = IsBadCodePtr((FARPROC)pQuestDataIter->fpSequenceFilter);
-    if (!bBadCodePtr) {
+    if (bBadCodePtr) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x64d);
+      exit(-1);
+    } else {
       pQuestDataIter->fpSequenceFilter(pQuestDataIter);
       pGame = uSavedGameOrPacket0x89.pGameSaved;
       if (uSavedGameOrPacket0x89.pGameSaved->pQuestControl) {
@@ -2667,7 +2673,10 @@ void __fastcall QUEST_OnPlayerJoinGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       pQuestDataIter = 0;
       run_radament_filter:
       /* FARPROC lpfn for IsBadCodePtr */ bBadCodePtr = IsBadCodePtr((FARPROC)pQuestDataIter->fpSequenceFilter);
-      if (!bBadCodePtr) {
+      if (bBadCodePtr) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x650);
+        exit(-1);
+      } else {
         pQuestDataIter->fpSequenceFilter(pQuestDataIter);
         if (pGame->pQuestControl) {
           for (pQuestDataIter = pGame->pQuestControl->pQuestData; pQuestDataIter; pQuestDataIter = pQuestDataIter->pPrev) {
@@ -2721,13 +2730,7 @@ void __fastcall QUEST_OnPlayerJoinGame(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
           Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x653);
           exit(-1);
         }
-      } else {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x650);
-        exit(-1);
       }
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x64d);
-      exit(-1);
     }
 }
 
@@ -2781,8 +2784,8 @@ D2UnitStrc * __fastcall ITEM_RewardItemInInventory(::SGAMEDATA * pGame, D2UnitSt
       pRoomsNear = (D2RoomStrc**)&nRewardLevel;
       nMaxDurability = 0x3e01;
       nScanRadius = 1;
-      pUnitRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-      FindSpawnableLocation(pUnitRoom, &sDropCoords, nScanRadius, nMaxDurability, pRoomsNear, nFindRadius, nSearchIterations);
+
+      FindSpawnableLocation(D2Common::Units::UNITS_GetRoom(pUnit), &sDropCoords, nScanRadius, nMaxDurability, pRoomsNear, nFindRadius, nSearchIterations);
       ITEMS::Items::Drop::DropItem(pGame, 0, pRewardItem, (D2RoomStrc*)nRewardLevel, sDropCoords.x, sDropCoords.y);
       return pRewardItem;
     }
@@ -2929,8 +2932,8 @@ void __fastcall QUEST_HandleKhalimsWillCompletion(::SGAMEDATA * pGame, D2UnitStr
     uint32_t nUnitGUID;
     uint32_t uiUpdateType;
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    D2UnitDataPlayerStrc* pPlayerData2 = D2Common::Units::GetPlayerData(pUnit);
-    D2BitBufferStrc* pBitBuffer = pPlayerData2->pQuestRecord[pGame->nDifficulty];
+    D2UnitDataPlayerStrc* pPlayerData2;
+    D2BitBufferStrc* pBitBuffer = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
     if (param_1 == 0x66) {
       BOOL bQuestState;
       bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_AbleGoToAct4, QUESTSTATE_Completed);
@@ -2968,13 +2971,13 @@ void __fastcall QUEST_HandleKhalimsWillCompletion(::SGAMEDATA * pGame, D2UnitStr
         D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_AbleGoToAct4, QUESTSTATE_Completed);
         D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_AbleGoToAct4, QUESTSTATE_JustCompleted);
         QUEST_GrantActTransitionReward(ACT_III, pGame, pUnit);
-        pPlayerData2 = D2Common::Units::GetPlayerData(pUnit);
-        pBitBuffer = pPlayerData2->pQuestRecord[pGame->nDifficulty];
+
+        pBitBuffer = D2Common::Units::GetPlayerData(pUnit)->pQuestRecord[pGame->nDifficulty];
         byActionType = 0;
         nUnitGUID = 0;
         uiUpdateType = 6;
-        pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xca7);
-        GAME::SCmd::NET_D2GS_SERVER_Send_0x28_PlayerQuestInfo(pClient, 0x28, uiUpdateType, nUnitGUID, pBitBuffer, byActionType);
+
+        GAME::SCmd::NET_D2GS_SERVER_Send_0x28_PlayerQuestInfo(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xca7), 0x28, uiUpdateType, nUnitGUID, pBitBuffer, byActionType);
         pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\QUESTS\\QUESTS.CPP", 0xb56);
         if (pPlayerData->dwTradeTick != 1) {
           pPlayerData->dwTradeTick = 1;

@@ -56,7 +56,7 @@ typedef BOOL (__fastcall *fpExecuteOnUnitFunction)(::SGAMEDATA * pGame, D2UnitSt
 namespace D2Game::Quests::QUESTS::A2Q5 {
 
 // A2Q5 "The Summoner" - fpActiveFilter. Returns true only when the target monster is one of the Arcane Sanctuary gossip NPCs/spirits (classIds 0xaf,0xb0,0xb1,0xb2,0xc7,0xc8,0xc9,0xca,0xd2,0xf4 - 199/200) AND this player's quest record has RewardAwaits set, i.e. the Summoner is already dead and the journal reward is pending. Gates whether the quest is "active" for monster-gossip purposes.
-bool __fastcall Q13_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx) {
+static bool __fastcall Q13_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx) {
     if (!(nTargetClassId == 0xb0 || nTargetClassId == 0xaf || nTargetClassId == 199 || nTargetClassId == 0xb1 || nTargetClassId == 0xca || nTargetClassId == 0xf4 || nTargetClassId == 0xd2 || nTargetClassId == 0xc9 || nTargetClassId == 200 || nTargetClassId == 0xb2)) {
       return false;
     }
@@ -107,7 +107,7 @@ void __fastcall Q13_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (BVar1 == 1 && !BVar2) {
         return;
       }
-      if (1 < pQuestData->nStateFlag && !BVar2) {
+      if (2 <= pQuestData->nStateFlag && !BVar2) {
         return;
       }
 
@@ -115,7 +115,7 @@ void __fastcall Q13_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nMessageIndexMaybe == -1) {
         return;
       }
-      if (3 < nMessageIndexMaybe) {
+      if (4 <= nMessageIndexMaybe) {
         return;
       }
     } else {
@@ -296,7 +296,7 @@ BOOL __fastcall Q13_PlayCompletionSound(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
 }
 
 // A2Q5 "The Summoner" - quest-timer end callback (scheduled by Callback_08 via AddQuestTimer). First invocation: sets pA2Q5->bCainSaved flag and iterates players running Q13_PlayCompletionSound (play the completion jingle). Second invocation (flag already set): clears eFlags and broadcasts quest state 4 (post-kill stage; notify=Q13_NotifySummonerComplete), then clears field_0x08. Drives the delayed completion sequence after the Summoner dies.
-uint8_t __fastcall Q13_OnEndCallbackAndNotify(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q13_OnEndCallbackAndNotify(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     D2QuestDataA2Q5Strc* pQuestSpecificData = pQuestData->pQuestSpecificData.pA2Q5;
     if (!pQuestSpecificData->field_0x9) {
       pQuestSpecificData->field_0x9 = 1;

@@ -69,7 +69,6 @@ void __fastcall DRLGOUTDOOR_GenerateLevel(struct D2DrlgLevelStrc * pLevel);
 // @sourcefile .\DRLG\Outdoors.cpp
 void __fastcall DRLGOUTDOOR_FreeOutdoorLevelData(struct D2DrlgLevelStrc * pLevel, BOOL bKeepRoomData);
 void __fastcall InitAct4OutdoorLevel(struct D2DrlgLevelStrc * pLevel);
-void AddAct124SecondaryBorderSubId213(struct D2DrlgLevelStrc * pLevel);
 // 5 internal functions (defined in .cpp)
 
 } // namespace D2Common::Drlg::Outdoors

@@ -167,10 +167,10 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
 
       nTmp = nLevel - pHirelingTxt->level;
       nCalc = D2Common::DATATBLS::DataTbls::TXT_Experience_GetMaxLevel(0);
-      if (nLevel < nCalc - 1) {
-        nCalc = D2Common::Merc::GetBaseExperience(nLevel + 1, pHirelingTxt->expPerLvl);
-      } else {
+      if (!(nLevel < nCalc - 1)) {
         nCalc = 0;
+      } else {
+        nCalc = D2Common::Merc::GetBaseExperience(nLevel + 1, pHirelingTxt->expPerLvl);
       }
 
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_nextexp, nCalc, 0);
@@ -181,14 +181,14 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
       }
 
       nLevelDiff = pHirelingTxt->strPerlvl * nTmp;
-      nCalc = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->str;
+      nCalc = ((int)nLevelDiff / 8) + pHirelingTxt->str;
       if (nCalc < 10) {
         nCalc = 10;
       }
 
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_strength, nCalc, 0);
       nLevelDiff = pHirelingTxt->dexPerlvl * nTmp;
-      nCalc = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->dex;
+      nCalc = ((int)nLevelDiff / 8) + pHirelingTxt->dex;
       if (nCalc < 10) {
         nCalc = 10;
       }
@@ -204,10 +204,10 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
       nUnsignedStatVal = pHirelingTxt->defPerlvl * nTmp + pHirelingTxt->defense;
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_armorclass, (int)nUnsignedStatVal < 0 ? 0 : nUnsignedStatVal, 0);
       nLevelDiff = pHirelingTxt->dmgPerlvl * nTmp;
-      uVar1 = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->dmgMin;
+      uVar1 = ((int)nLevelDiff / 8) + pHirelingTxt->dmgMin;
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_secondary_mindamage, (int)uVar1 < 0 ? 0 : uVar1, 0);
       nLevelDiff = pHirelingTxt->dmgPerlvl * nTmp;
-      nCalc = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 7U)) >> 3) + pHirelingTxt->dmgMax;
+      nCalc = ((int)nLevelDiff / 8) + pHirelingTxt->dmgMax;
       if (nCalc < 1) {
         nCalc = 1;
       }
@@ -216,7 +216,7 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
       uVar1 = pHirelingTxt->arPerlvl * nTmp + pHirelingTxt->ar;
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_tohit, (int)uVar1 < 0 ? 0 : uVar1, 0);
       nLevelDiff = pHirelingTxt->resistPerlvl * nTmp;
-      uVar1 = ((int)(nLevelDiff + (nLevelDiff >> 0x1f & 3U)) >> 2) + pHirelingTxt->resist;
+      uVar1 = ((int)nLevelDiff / 4) + pHirelingTxt->resist;
       uVar1 = (int)uVar1 < 0 ? 0 : uVar1;
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_fireresist, uVar1, 0);
       D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pMerc, UNITSTAT_lightresist, uVar1, 0);
@@ -227,10 +227,10 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
       pSkillEntry = pHirelingTxt->nSkillId;
       for (nLevelDiff = 0; nLevelDiff < 6; pSkillEntry++ , nLevelDiff++) {
         eSkill = *pSkillEntry;
-        if ((int)eSkill < 1) {
+        if ((int)eSkill <= 0) {
           return;
         }
-        if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+        if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
           return;
         }
         if ('\x0f' < (char)pHirelingTxt->nSkillMode[nLevelDiff]) {
@@ -238,15 +238,15 @@ void __fastcall MERC_ApplyLevelStats(::SGAMEDATA * pGame, D2UnitStrc * pPlayer, 
         }
 
         pSkillTxt = D2Client::GAME::SCmd::TXT_Skills_GetLine(eSkill);
-        if (pSkillTxt && pSkillTxt->reqlevel <= nLevel) {
+        if (pSkillTxt && nLevel >= pSkillTxt->reqlevel) {
           uVar1 = ((char)pHirelingTxt->nSkillLvlPerLvl[nLevelDiff] * nTmp >> 5) + (int)(char)pHirelingTxt->nSkillLevel[nLevelDiff];
-          uVar1 = (int)uVar1 < 1 ? 0 : uVar1;
-          if ((int)uVar1 < 0x20) {
-            if ((int)uVar1 < 1) {
+          uVar1 = (int)uVar1 <= 0 ? 0 : uVar1;
+          if (!((int)uVar1 < 0x20)) {
+            uVar1 = 0x20;
+          } else {
+            if ((int)uVar1 <= 0) {
               continue;
             }
-          } else {
-            uVar1 = 0x20;
           }
 
           SKILLS::SkillsServer::SetSkill(pMerc, *pSkillEntry, uVar1, 0);
@@ -554,7 +554,7 @@ static BOOL __stdcall UnitHasSwitchAiSet(D2UnitStrc * pMonster) {
     }
 
     int32_t nClassId = pMonster->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId && sgptDataTable->pTxtMonStats[nClassId].switchai)) {
+    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nClassId && sgptDataTable->pTxtMonStats[nClassId].switchai)) {
       return 0;
     }
 
@@ -664,8 +664,8 @@ void __fastcall ClearAISub(::SGAMEDATA * pGame, D2UnitStrc * pUnit, fpAiClear fp
       uVar6 = 0;
       nMonsterGUID = D2Client::UNIT::GetGUID(pUnit);
       byMonsterUnitType = '\x01';
-      pClient = UNIT::SUnit::SUNIT_GetClient(pAiSub->pUnit, ".\\MONSTER\\MonsterAI.cpp", 0x35c);
-      GAME::SCmd::NET_D2GS_SERVER_Send_0x62_INTERACTION_STOP(pClient, 'b', byMonsterUnitType, nMonsterGUID, uVar6);
+
+      GAME::SCmd::NET_D2GS_SERVER_Send_0x62_INTERACTION_STOP(UNIT::SUnit::SUNIT_GetClient(pAiSub->pUnit, ".\\MONSTER\\MonsterAI.cpp", 0x35c), 'b', byMonsterUnitType, nMonsterGUID, uVar6);
       if (!bClientSide || (bHasInteractInfo = UNIT::SUnit::GetInteractInfo(pAiSub->pUnit, &eUnitType, &nUnitGUID) , bHasInteractInfo && eUnitType == UNIT_MONSTER) && (nMonsterGUID2 = D2Client::UNIT::GetGUID(pUnit) , nUnitGUID == nMonsterGUID2)) {
         UNIT::SUnit::ClearInteractInfo(pAiSub->pUnit);
       }
@@ -707,21 +707,21 @@ void __fastcall MERC_HireAndReplaceMerc(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     if (pExistingMerc) {
       D2ClientStrc* pClient;
       dwZeroReviveCost = 0;
-      pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\MONSTER\\MonsterAI.cpp", 0x52);
-      GAME::SCmd::NET_D2GS_SERVER_Send_0x9B_MercReviveCost(pClient, 0xffff, dwZeroReviveCost);
+
+      GAME::SCmd::NET_D2GS_SERVER_Send_0x9B_MercReviveCost(UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\MONSTER\\MonsterAI.cpp", 0x52), 0xffff, dwZeroReviveCost);
       Ai::AiGeneral::AssignMinionOwner(pGame, pExistingMerc, -1, UNIT_MONSTER, 0, 0);
       PLAYER::PlayerPets::RemovePetByGuidAndNotify(pGame, pUnit, pExistingMerc->nUnitGUID, 0);
       nOldMercGUID = pExistingMerc->nUnitGUID;
       eOldMercUnitType = UNIT_MONSTER;
-      pRoom = D2Common::Units::UNITS_GetRoom(pExistingMerc);
-      D2Common::DUNGEON::Dungeon::AllocDrlgDelete(pRoom, eOldMercUnitType, nOldMercGUID);
+
+      D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pExistingMerc), eOldMercUnitType, nOldMercGUID);
       UNIT::SUnit::FreeServerUnit(pGame, pExistingMerc);
     }
 
     sPetData.nSeed = pHireInfo->nSeed;
     sPetData.nNameId = (int)(uint16_t)pHireInfo->nNameStringId;
-    nAct = D2Common::Merc::GetMercAct(pGame->bExpansion, 0, pHireInfo->nNameStringId);
-    BVar1 = D2Common::Merc::RollMercStats(pGame->bExpansion, pUnit, pHireInfo->nSeed, nAct, (uint32_t)pGame->nDifficulty, &sMercHireData);
+
+    BVar1 = D2Common::Merc::RollMercStats(pGame->bExpansion, pUnit, pHireInfo->nSeed, D2Common::Merc::GetMercAct(pGame->bExpansion, 0, pHireInfo->nNameStringId), (uint32_t)pGame->nDifficulty, &sMercHireData);
     if (!BVar1) {
       return;
     }
@@ -731,7 +731,7 @@ void __fastcall MERC_HireAndReplaceMerc(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     pMinion->eUnitFlags |= UNITFLAG_ISREVIVE;
     Ai::AiGeneral::AssignMinionOwner(pGame, pMinion, pUnit->nUnitGUID, pUnit->eUnitType, 0, 0);
     if (nMercLevelOverride == -1) {
-      pHirelingTxt = D2Common::DATATBLS::MonsterTbls::GetHirelingText(pGame->bExpansion, sMercHireData.nId & 0xffff, sMercHireData.nLevel);
+      pHirelingTxt = D2Common::DATATBLS::MonsterTbls::GetHirelingText(pGame->bExpansion, (uint16_t)sMercHireData.nId, sMercHireData.nLevel);
       if (!pHirelingTxt) {
         return;
       }

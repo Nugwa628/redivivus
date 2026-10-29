@@ -292,7 +292,7 @@ void __fastcall Q23_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
       nGossipLineIdx = 6;
     } else {
-      if (5 < pQuestData->nStateFlag) {
+      if (6 <= pQuestData->nStateFlag) {
         if (_bCompleted != 1) {
           return;
         }
@@ -305,7 +305,7 @@ void __fastcall Q23_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nGossipLineIdx == -1) {
         return;
       }
-      if (7 < nGossipLineIdx) {
+      if (8 <= nGossipLineIdx) {
         return;
       }
     }
@@ -353,7 +353,7 @@ void __fastcall Q23_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
     if (pQuestArgs->sQuestArgs.sNpcActivate.pTextControl == (D2GSPacketSrv0x27_TextStrc*)0x4b) {
       D2BitBufferStrc* pBitBuffer;
       QUESTGUID_RemovePlayerFromQuest(pQuestData, pQuestArgs);
-      if (1 < pQuestData->nStateFlag && pQuestData->nStateFlag < 4) {
+      if (1 < pQuestData->nStateFlag && pQuestData->nStateFlag <= 3) {
         pGame = pQuestArgs->pGame;
         pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
         pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
@@ -385,7 +385,7 @@ void __fastcall Q23_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
         UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Q23_PlayerUpdateGuardianSteps);
       }
     }
-    if (0x61 < nLamEsenDone2 && pQuestData->bIsNotIntroduction && !pQuestData->nStateFlag) {
+    if (0x62 <= nLamEsenDone2 && pQuestData->bIsNotIntroduction && !pQuestData->nStateFlag) {
       pQuestData->nStateFlag = 1;
       pQuestData->sStateFunctions.fpQuestStateHandler[2] = Q23_Callback02_NpcDeactivate;
     }
@@ -425,12 +425,12 @@ void __fastcall Q23_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
       }
 
       nLamEsenDone2 = QUEST_GetQuestRecordState(pQuestArgs->pGame, QUEST_LamEsensTome, 0xd);
-      if (nLamEsenDone2 != 1) {
-        nJournalStringId = 0x1ae;
-        nEventId = 5;
-      } else {
+      if (nLamEsenDone2 == 1) {
         nJournalStringId = 0x1aa;
         nEventId = 4;
+      } else {
+        nJournalStringId = 0x1ae;
+        nEventId = 5;
       }
     }
 
@@ -517,7 +517,7 @@ void __fastcall Q23_Callback10_PlayerLeavesGame(D2QuestDataStrc * pQuestData, D2
 // [The Guardian (Q23)] Quest timer callback (armed by Callback_08 after Mephisto dies). Broadcasts
 // quest state 4 if not already at stateFlagPrev 4, and clears the bBloodRavenKilled/scratch flag in the
 // A3Q6 quest-specific struct. Used to drive the post-kill cinematic/state settle.
-uint8_t __fastcall Q23_QuestUpdate(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q23_QuestUpdate(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     D2QuestDataA3Q6Strc* pQuestSpecificData = pQuestData->pQuestSpecificData.pA3Q6;
     if (pQuestData->nStateFlagPrev != 4) {
       pQuestData->nQuestPacketFlags = '\0';
@@ -650,8 +650,7 @@ void __fastcall Q23_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
           pAttackerPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
           _bQuestState = D2Common::QuestRecord::GetQuestState(pAttackerPlayerData->pQuestRecord[pGameInner->nDifficulty], QUEST_TheGuardian, QUESTSTATE_Step0x11);
           if (!_bQuestState) {
-            piParticipantCount = &pQuestData->pQuestSpecificData.pA3Q6->nPlayerCount;
-            (*piParticipantCount)++;
+            pQuestData->pQuestSpecificData.pA3Q6->nPlayerCount++;
           }
 
           pGameInner = pQuestData->pGame;

@@ -101,8 +101,8 @@ void __fastcall CLIENT_WarpToAct(::SGAMEDATA * pGame, D2ClientStrc * pClient, eD
         }
 
         D2Common::Skills::STATES_RemoveAllProgressiveStates(pUnit);
-        bIsArena = D2Common::Units::GetUnitSizeX(pUnit);
-        pSpawnRoom = D2Common::DUNGEON::Dungeon::SpawnUnit(*ppDVar1, eLevel, param_1, &nSpawnX, &nSpawnY, bIsArena);
+
+        pSpawnRoom = D2Common::DUNGEON::Dungeon::SpawnUnit(*ppDVar1, eLevel, param_1, &nSpawnX, &nSpawnY, D2Common::Units::GetUnitSizeX(pUnit));
         if (!pSpawnRoom) {
           return;
         }
@@ -111,8 +111,8 @@ void __fastcall CLIENT_WarpToAct(::SGAMEDATA * pGame, D2ClientStrc * pClient, eD
         eCollisionFlag = 0x1c89;
         ptSpawnPos.x = nSpawnX;
         ptSpawnPos.y = nSpawnY;
-        nErrorLine = D2Common::Units::GetUnitSizeX(pUnit);
-        pSpawnRoom = D2Common::Collision::GetFreeCoordinates_WithIncrementValue(pSpawnRoom, &ptSpawnPos, nErrorLine, eCollisionFlag, nSearchRadius);
+
+        pSpawnRoom = D2Common::Collision::GetFreeCoordinates_WithIncrementValue(pSpawnRoom, &ptSpawnPos, D2Common::Units::GetUnitSizeX(pUnit), eCollisionFlag, nSearchRadius);
         if (!pSpawnRoom) {
           return;
         }

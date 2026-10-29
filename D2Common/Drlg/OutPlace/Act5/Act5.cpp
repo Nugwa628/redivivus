@@ -210,7 +210,7 @@ void __stdcall DRLGOUTROOM_PlaceAct5RoadPath(D2DrlgLevelStrc * pLevel) {
 
         nCurrentY = nMaxCoord + nAbsDx * -4 & -2;
         nMaxCoord = pNextVertex->nPosY;
-        if (pNextVertex->nPosY < pDrlgVertex->nPosY) {
+        if (pDrlgVertex->nPosY > pNextVertex->nPosY) {
           nMaxCoord = pDrlgVertex->nPosY;
         }
 
@@ -332,121 +332,6 @@ void __stdcall DRLGOUTROOM_PlaceAct5SceneryPresets(D2DrlgLevelStrc * pLevel) {
         return;
       }
     } while (true);
-}
-
-// Places random decorative presets in Act 5 Bloody Foothills (level 0x6F). Tries up to 90 random positions to place up to 3 presets on empty grid cells, using seed-based random offsets and grid wrapping.
-void DRLGOUTPLACE_PlaceAct5BloodyFoothillsRandomPresets(D2DrlgLevelStrc * pLevel) {
-    uint32_t nGridX;
-    uint32_t nGridY;
-    int32_t nPresetCoord;
-    int32_t iVar2;
-    int nGridWidth;
-    int nY;
-    int nAttempts;
-    int nXIter;
-    uint32_t nStartY;
-    uint32_t nStartX;
-    int nPlacedCount;
-    D2SeedStrc tNewSeed2;
-    int32_t nErrCode;
-    uint32_t nSeedLowTmp;
-    if (pLevel->eD2LevelId != 0x6f) {
-      return;
-    }
-
-    D2DrlgLevelDataWildernessLevel* pLevelData = pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData;
-    if (pLevelData) {
-      D2SeedStrc DVar1;
-      nAttempts = 0;
-      nPlacedCount = 0;
-      do {
-        if (2 < nPlacedCount) {
-          break;
-        }
-
-        nGridX = D2Client::Archive::UNIT_GetModuloFromSeed(&pLevel->sSeed, pLevelData->nGridCoordsWidth / 2);
-        nGridY = D2Client::Archive::UNIT_GetModuloFromSeed(&pLevel->sSeed, pLevelData->nGridCoordsHeight / 2);
-        nPresetCoord = Outdoors::DRLGOUTDOOR_GetPresetCoordFromGrid(pLevel, nGridX * 2, nGridY * 2);
-        if (nPresetCoord - 0x393U < 8) {
-          Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nGridX * 2, nGridY * 2, nPresetCoord + 0x10, -1, 0);
-          nPlacedCount++;
-        }
-
-        nAttempts++;
-      } while (nAttempts < 0x5a);
-
-      nStartX = pLevelData->nGridCoordsWidth / 2;
-      if ((int)nStartX < 1) {
-        nStartX = 0;
-      } else {
-        nSeedLowTmp = pLevel->sSeed.nSeedLow;
-        if (!(nStartX & nStartX - 1)) {
-          tNewSeed2 = D2_SEED_NEXT(pLevel->sSeed);
-          nStartX = nStartX - 1 & tNewSeed2.nSeedLow;
-          pLevel->sSeed = tNewSeed2;
-        } else {
-          DVar1 = D2_SEED_NEXT(pLevel->sSeed);
-          pLevel->sSeed = DVar1;
-          nStartX = DVar1.nSeedLow % nStartX;
-        }
-      }
-
-      nStartY = pLevelData->nGridCoordsHeight / 2;
-      if ((int)nStartY < 1) {
-        nStartY = 0;
-      } else {
-        nSeedLowTmp = pLevel->sSeed.nSeedLow;
-        if (!(nStartY & nStartY - 1)) {
-          DVar1 = D2_SEED_NEXT(pLevel->sSeed);
-          nStartY = nStartY - 1 & DVar1.nSeedLow;
-          pLevel->sSeed = DVar1;
-        } else {
-          DVar1 = D2_SEED_NEXT(pLevel->sSeed);
-          pLevel->sSeed = DVar1;
-          nStartY = DVar1.nSeedLow % nStartY;
-        }
-      }
-
-      nAttempts = 0;
-      if (0 < pLevelData->nGridCoordsHeight) {
-        do {
-          if (2 < nPlacedCount) {
-            return;
-          }
-
-          nGridWidth = pLevelData->nGridCoordsWidth;
-          nXIter = 0;
-          if (0 < nGridWidth) {
-            do {
-              if (2 < nPlacedCount) {
-                break;
-              }
-
-              nGridWidth = (int)(nXIter + nStartX * 2) % nGridWidth;
-              nY = (int)(nAttempts + nStartY * 2) % pLevelData->nGridCoordsHeight;
-              iVar2 = Outdoors::DRLGOUTDOOR_GetPresetCoordFromGrid(pLevel, nGridWidth, nY);
-              if (iVar2 - 0x393U < 8) {
-                Outdoors::SpawnOutdoorLevelPresetEx(pLevel, nGridWidth, nY, iVar2 + 0x10, -1, 0);
-                nPlacedCount++;
-              }
-
-              nGridWidth = pLevelData->nGridCoordsWidth;
-              nXIter++;
-            } while (nXIter < nGridWidth);
-          }
-
-          nAttempts++;
-        } while (nAttempts < pLevelData->nGridCoordsHeight);
-      }
-      if (2 < nPlacedCount) {
-        return;
-      }
-
-      nErrCode = 0x259;
-    }
-
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), nErrCode);
-    exit(-1);
 }
 
 } // namespace D2Common::Drlg::OutPlace::Act5

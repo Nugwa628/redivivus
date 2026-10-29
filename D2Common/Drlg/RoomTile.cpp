@@ -30,6 +30,7 @@
 #include "D2Common/DUNGEON/Dungeon.h"
 #include "D2Common/Drlg/D2DrlgCoordsStrc.h"
 #include "D2Common/Drlg/D2DrlgStrc.h"
+#include "D2Common/Seed.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -238,11 +239,11 @@ static void __stdcall DRLGROOMTILE_InitWarpCacheTiles(uint32_t nPackedTileFlags,
       nOffsetY = gaWarpTileOffsetY[nWarpSubIdx * 2];
       pTileData = pDVar1->sRoomTiles.pFloorTiles + pDVar1->nFloors;
       pTileListHead = &pWarpCacheIter->pTileListClearedOnSelect;
-      if (!pTileListHead) {
-        pTileData->pNext = 0;
-      } else {
+      if (pTileListHead) {
         pTileData->pNext = *pTileListHead;
         *pTileListHead = pTileData;
+      } else {
+        pTileData->pNext = 0;
       }
 
       pDVar1->nFloors++;
@@ -575,7 +576,7 @@ static void __stdcall DRLGROOMTILE_ProcessTile(eD2GridCellFlags nFlags, D2RoomEx
     uint32_t nBlankTileFlags;
     uint8_t nMainIndex;
     nMainIndex = (uint8_t)(nFlags >> 0x14) & 0x3f;
-    if ((nOtherFlags == (CELLFLAGS_0x08 | CELLFLAGS_0x02 | CELLFLAGS_0x01) || nOtherFlags == (CELLFLAGS_0x08 | CELLFLAGS_0x02)) && 7 < nMainIndex) {
+    if ((nOtherFlags == (CELLFLAGS_0x08 | CELLFLAGS_0x02 | CELLFLAGS_0x01) || nOtherFlags == (CELLFLAGS_0x08 | CELLFLAGS_0x02)) && 8 <= nMainIndex) {
       return;
     }
 
@@ -586,6 +587,15 @@ static void __stdcall DRLGROOMTILE_ProcessTile(eD2GridCellFlags nFlags, D2RoomEx
     }
     if ((nFlags & CELLFLAGS_0x80000000) != CELLFLAGS_NONE) {
       switch (nOtherFlags) {
+        case CELLFLAGS_0x08 | CELLFLAGS_0x02:
+
+        case CELLFLAGS_0x08 | CELLFLAGS_0x02 | CELLFLAGS_0x01:
+          if (8 <= nMainIndex) {
+            return;
+          }
+        DRLGROOMTILE_CreateExitWarp(nFlags, nX, nOtherFlags, nSizeMaybe, pRoom);
+        DRLGROOMTILE_InitWarpCacheTiles(nFlags, pRoom, nX, nSizeMaybe, nOtherFlags);
+        return;
         case CELLFLAGS_0x08:
 
         case CELLFLAGS_0x08 | CELLFLAGS_0x01:
@@ -596,15 +606,6 @@ static void __stdcall DRLGROOMTILE_ProcessTile(eD2GridCellFlags nFlags, D2RoomEx
         }
 
         break;
-        case CELLFLAGS_0x08 | CELLFLAGS_0x02:
-
-        case CELLFLAGS_0x08 | CELLFLAGS_0x02 | CELLFLAGS_0x01:
-          if (7 < nMainIndex) {
-            return;
-          }
-        DRLGROOMTILE_CreateExitWarp(nFlags, nX, nOtherFlags, nSizeMaybe, pRoom);
-        DRLGROOMTILE_InitWarpCacheTiles(nFlags, pRoom, nX, nSizeMaybe, nOtherFlags);
-        return;
       }
     }
     if ((nFlags & CELLFLAGS_0x04) != CELLFLAGS_NONE) {
@@ -625,7 +626,10 @@ static void __stdcall DRLGROOMTILE_ProcessTile(eD2GridCellFlags nFlags, D2RoomEx
         return;
       }
     }
-    if ((nFlags & CELLFLAGS_0x02) == CELLFLAGS_NONE) {
+    if ((nFlags & CELLFLAGS_0x02) != CELLFLAGS_NONE) {
+      nTileLibEntry = DRLG_FindHTile(pRoom, 0, nFlags);
+      nGridFlags = nFlags;
+    } else {
       BOOL bIsInside;
       if (!nParam || (bIsInside = DrlgRoom::AreXYInsideCoordinates(&pRoom->sCoords, nX, nSizeMaybe) , !bIsInside)) {
         goto add_wall_and_shadow;
@@ -639,9 +643,6 @@ static void __stdcall DRLGROOMTILE_ProcessTile(eD2GridCellFlags nFlags, D2RoomEx
       }
 
       nTileLibEntry = DRLG_FindHTile(pRoom, 0, nBlankTileFlags);
-    } else {
-      nTileLibEntry = DRLG_FindHTile(pRoom, 0, nFlags);
-      nGridFlags = nFlags;
     }
 
     D2DrlgTileGridStrc* pTileGrid;
@@ -671,8 +672,8 @@ void __fastcall InitRoomTiles(D2RoomExStrc * pRoomEx, D2DrlgGridStrc * pGrid, D2
     eD2GridCellFlags nFlags;
     eD2GridCellFlags nCellFlags;
     D2PoolManagerStrc* pMemory = pRoomEx->pLevel->pDrlg->pMemoryPool;
-    int nXOffset = pRoomEx->sCoords.WorldPosition.x;
     int nXMax = (uint32_t)!nY + pRoomEx->sCoords.WorldSize.x;
+    int nXOffset = pRoomEx->sCoords.WorldPosition.x;
     int nYOffset = pRoomEx->sCoords.WorldPosition.y;
     nY = 0;
     int maxTile = (uint32_t)!nSizeMaybe + pRoomEx->sCoords.WorldSize.y;
@@ -686,10 +687,10 @@ void __fastcall InitRoomTiles(D2RoomExStrc * pRoomEx, D2DrlgGridStrc * pGrid, D2
       if (0 < nXMax) {
         do {
           nFlags = DrlgGrid::GetGridFlags(pGrid, nColIdx, nY);
-          if (!pOtherGrid) {
-            nCellFlags = CELLFLAGS_NONE;
-          } else {
+          if (pOtherGrid) {
             nCellFlags = DrlgGrid::GetGridFlags(pOtherGrid, nColIdx, nY);
+          } else {
+            nCellFlags = CELLFLAGS_NONE;
           }
 
           DRLGROOMTILE_ProcessTile(nFlags, pRoomEx, pMemory, nColIdx + nXOffset, nY + nYOffset, nTileParam, nCellFlags);
@@ -764,7 +765,7 @@ void __fastcall DRLGROOMTILE_CountWallTilesFromGrid(D2RoomExStrc * pRoomEx, D2Dr
           if (nTileType == 3) {
             pnTileCounter = &pTileGrid->sRoomTiles.nWallTilesCount;
             (*pnTileCounter)++;
-          } else if (nTileType - 10U < 2) {
+          } else if (nTileType - 10U <= 1) {
             nTileType = DrlgGrid::GetGridFlags(pFloorGrid, nColIdx, nY);
             if (-1 < nTileType) {
               pnTileCounter = &pTileGrid->sRoomTiles.nWallTilesCount;
@@ -784,17 +785,14 @@ void __fastcall DRLGROOMTILE_CountWallTilesFromGrid(D2RoomExStrc * pRoomEx, D2Dr
 }
 
 void __fastcall InitGridCells(D2RoomExStrc * pRoomEx) {
-    pRoomEx->sSeed.nSeedLow = pRoomEx->nSeed;
-    pRoomEx->sSeed.nSeedHigh = 0x29a;
-    if (pRoomEx->nPresetType == 1) {
-      DRLGROOMEX_AllocAndInitRoomGrids(pRoomEx);
-      return;
+    D2Common::Seed::InitSeed_Param_666(&pRoomEx->sSeed, pRoomEx->nSeed);
+    switch (pRoomEx->nPresetType) {
+      case 1:
+        DRLGROOMEX_AllocAndInitRoomGrids(pRoomEx);
+        return;
+      case 2:
+        Preset::DRLGPRESET_InitGridsFromDS1File(pRoomEx);
     }
-    if (pRoomEx->nPresetType != 2) {
-      return;
-    }
-
-    Preset::DRLGPRESET_InitGridsFromDS1File(pRoomEx);
 }
 
 void __fastcall InitializorForDrlgType(D2RoomExStrc * pRoomEx) {

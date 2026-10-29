@@ -141,7 +141,6 @@ namespace D2Game::UNIT::SUnitMsg {
 void __stdcall PLAYER_SetStartingLevelForAct(uint8_t nAct, ::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 // Sets all base stats for a newly created player unit from CharStats.txt (str, dex, vit, energy, HP, mana, stamina at fixed-point *256, level=1, nextexp for level 1, attack/velocity/animrate=100). If nAct != 0, also raises the unit to gaStartingLevelByAct[nAct] via DAMAGE_SetUnitToLevel. The third argument is the act (both call sites pass D2Game::Game::Clients::GetAct(pClient)), not a character class.
 void __fastcall PLAYER_InitBaseStats(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint8_t nAct);
-void __fastcall thunk_NET_D2GS_SERVER_Send_0x75_PlayerPartyInfo(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pOtherUnit);
 // Server-side level-up handler: recomputes pUnit's level from accumulated experience, updates UNITSTAT_level and UNITSTAT_nextexp, then — if the unit gained one or more levels — scales up max HP/mana/stamina (and restores them to max), awards stat points and skill points, refreshes NPC gamble inventories, broadcasts party info (0x75) to all players, recalculates equipped item stats, and calls the BattleNet UpdateGameInformation callback. Called from the SUnitMsg message-processing layer.
 void __fastcall UpdateGameInfo(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 void __fastcall ClearStats(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
@@ -177,7 +176,7 @@ void __fastcall UnitQueuePacket0xA5(struct D2UnitStrc * pUnit, uint16_t wParam);
 // @sourcefile .\UNIT\SUnitMsg.cpp
 void __fastcall SERVER_UnitQueuePacket0xA4(struct D2UnitStrc * pUnit, int16_t nClassId);
 // @sourcefile .\UNIT\SUnitMsg.cpp
-void __fastcall SERVER_SendPacket0x23(struct D2UnitStrc * pMemory, uint8_t byTypeId, uint16_t wCoords, uint32_t dwData);
+void __fastcall SERVER_SendPacket0x23(struct D2UnitStrc * pMemory, int32_t byTypeId, uint16_t wCoords, uint32_t dwData);
 // Drains a unit's outbound message queue and sends each pending packet to the given client. Iterates pUnit->pMsgFirst, dispatching on nPacketId: 0x23=SetSkill, 0x99=UnitCastSkill (targeted), 0x9A=UnitCastSkill (XY), 0x9E=MercAttribute, 0xA1=MercExperience, 0xA3=SkillAuraStat, 0xA4=BaalWaves, 0xA5=StateSkillMove, 0xAB=NpcHeal (only if attacker can legally attack the unit).
 void __fastcall SERVER_UnitQueuePacketSend(struct D2UnitStrc * pUnit, struct D2ClientStrc * pClient);
 // @sourcefile .\UNIT\SUnitMsg.cpp

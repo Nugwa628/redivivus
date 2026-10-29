@@ -75,7 +75,7 @@ void __stdcall SaveAndUnload(D2BNetGatewayAccessStr * pGatewayAccess) {
 
 char * __thiscall Nth(void * pThis, int nIndex) {
     char* szDataCursor = *(char**)((int)pThis + 0x10);
-    if (!(szDataCursor && 0 < nIndex && nIndex <= *(int*)((int)pThis + 8))) {
+    if (!(szDataCursor && 1 <= nIndex && nIndex <= *(int*)((int)pThis + 8))) {
       return (char*)pThis;
     }
 
@@ -184,7 +184,7 @@ void __stdcall SetCurGateway(int32_t nParam1, int32_t nParam2) {
 // Load falls to UpdateGatewaysFromIni -> assert (see 0x518850).
 // An "Override.." value name sets bIsOverride=1 @0x51827f.
 // @sourcefile .\BNetGW.cpp
-void __thiscall GetGatewayList(void * pThis, char * szText) {
+static void __thiscall GetGatewayList(void * pThis, char * szText) {
     bool bRegReadResult;
     uint32_t* dwRegDataSize;
     int32_t nLine;
@@ -307,7 +307,7 @@ char * __stdcall SkipEOL(char * szText1, char * szText2) {
     return szText1;
 }
 
-char * __thiscall FindSection(D2BNetGatewayAccessStr * pThis, char * szText1, char * szText2) {
+static char * __thiscall FindSection(D2BNetGatewayAccessStr * pThis, char * szText1, char * szText2) {
     char* pIniCursor = szText1;
     char* pBufEnd = pIniCursor + strlen(pIniCursor);
     pIniCursor = pBufEnd + 1;
@@ -429,10 +429,10 @@ void __thiscall PickClosestZone(void * pThis, int32_t nGmtMinutes) {
     }
 
     nGmtOffset = strtol(pcVar1, &__frame0.szStrtolEnd, 10);
-    pcVar1 = Nth(pThis, nBestGatewayIdx);
-    Bnet::BnetLog_WriteLine("Gateway %d (%s at GMT %02d) is closest to %02d.%02d", nBestGatewayIdx, pcVar1, nGmtOffset, nGmtMinutes / 0x3c, __frame0.nMinutes);
+
+    Bnet::BnetLog_WriteLine("Gateway %d (%s at GMT %02d) is closest to %02d.%02d", nBestGatewayIdx, Nth(pThis, nBestGatewayIdx), nGmtOffset, nGmtMinutes / 0x3c, __frame0.nMinutes);
     Bnet::BNET_LogIndent(2, -4);
-    if (!(*(int*)((int)pThis + 0x10) && 0 < nBestGatewayIdx && nBestGatewayIdx <= *(int*)((int)pThis + 8))) {
+    if (!(*(int*)((int)pThis + 0x10) && 1 <= nBestGatewayIdx && nBestGatewayIdx <= *(int*)((int)pThis + 8))) {
       return;
     }
     if (99 < nBestGatewayIdx) {
@@ -468,10 +468,10 @@ void __stdcall Load(D2BNetGatewayAccessStr * pGatewayAccess) {
     GetBattlenetRealmsList((int32_t)pGatewayAccess);
     pGatewayAccess_00->bIsOverride = 0;
     GetGatewayList(pGatewayAccess_00, "Override Battle.net gateways");
-    if (!pGatewayAccess_00->pGatewayData) {
-      GetGatewayList(pGatewayAccess_00, "Diablo II Battle.net gateways");
-    } else {
+    if (pGatewayAccess_00->pGatewayData) {
       pGatewayAccess_00->bIsOverride = 1;
+    } else {
+      GetGatewayList(pGatewayAccess_00, "Diablo II Battle.net gateways");
     }
     if (pGatewayAccess_00->pGatewayData) {
       if (pGatewayAccess_00->nFormatVersion < 1000) {
@@ -516,7 +516,7 @@ void __stdcall Load(D2BNetGatewayAccessStr * pGatewayAccess) {
         nCurGateway = strtoul(pCur + pStrLen + 1, &pEndPtr, 10);
         pGatewayAccess_00->nCurGatewayIdx = nCurGateway;
         pGatewayAccess_00->bDirty = 0;
-        if (!((int)nCurGateway < 1 || pGatewayAccess_00->nGatewayCount < (int)nCurGateway)) {
+        if (!((int)nCurGateway < 1 || (int)nCurGateway > pGatewayAccess_00->nGatewayCount)) {
           return;
         }
 
@@ -584,11 +584,11 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
         }
 
         Bnet::BnetLog_WriteLine("Parsing new gateway list (version %d)", nIniVersion);
-        if (!pClientSideData->pGatewayData) {
-          __frame0.nSystemGmtBias = GetSystemTimeZone();
-        } else {
+        if (pClientSideData->pGatewayData) {
           nLine = GMT(pClientSideData, pClientSideData->nCurGatewayIdx);
           __frame0.nSystemGmtBias = nLine * 0x3c;
+        } else {
+          __frame0.nSystemGmtBias = GetSystemTimeZone();
         }
 
         pClientSideData->bDirty = 0;
@@ -620,27 +620,27 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
           if (pZoneVal) {
             __frame0.nTmp1 = pCur + 1 + (int)__frame0.nTmp1;
             pCur = FindKey(pZoneVal, "ZONE");
-            if (!pCur) {
-              nFieldLen = 2;
-              pCur = "0";
-              nZoneLen = 1;
-            } else {
+            if (pCur) {
               pEnuLineEnd = SkipToEOL(pCur, __frame0.nTmp2);
               nZoneLen = (int)pEnuLineEnd - (int)pCur;
               nFieldLen = nZoneLen + 1;
+            } else {
+              nFieldLen = 2;
+              pCur = "0";
+              nZoneLen = 1;
             }
 
             Storm::Source::SSTR::SStrCopy(__frame0.nTmp1, pCur, nFieldLen);
             __frame0.nTmp1 = __frame0.nTmp1 + nZoneLen + 1;
             pCur = FindKey(pZoneVal, "ENU");
-            if (!pCur) {
+            if (pCur) {
+              pZoneVal = SkipToEOL(pCur, __frame0.nTmp2);
+              nFieldLen = (int)pZoneVal - (int)pCur;
+            } else {
               pCur = __frame0.nTmp3;
               pCur = pCur + strlen(pCur) + 1;
               nFieldLen = (int)pCur - (int)(__frame0.nTmp3 + 1);
               pCur = __frame0.nTmp3;
-            } else {
-              pZoneVal = SkipToEOL(pCur, __frame0.nTmp2);
-              nFieldLen = (int)pZoneVal - (int)pCur;
             }
 
             Storm::Source::SSTR::SStrCopy(__frame0.nTmp1, pCur, nFieldLen + 1);
@@ -654,7 +654,10 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
 
         *pCur = '\0';
         pCur += 1 - (int)pRegMultiSzBuf;
-        if ((int)pCur < (int)nSize) {
+        if (!((int)pCur < (int)nSize)) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e6);
+          exit(-1);
+        } else {
           if (!(pRegMultiSzBuf[(int)(pCur - 1)] == '\0' && pRegMultiSzBuf[(int)(pCur - 2)] == '\0')) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e8);
             exit(-1);
@@ -666,9 +669,6 @@ void __stdcall UpdateGatewaysFromIni(D2BNetGatewayAccessStr * pClientSideData, c
           SaveAndUnload(pClientSideData);
           Load(pClientSideData);
           return;
-        } else {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2e6);
-          exit(-1);
         }
       }
     }

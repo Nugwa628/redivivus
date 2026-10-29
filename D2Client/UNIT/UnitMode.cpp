@@ -79,8 +79,8 @@ void __fastcall INTERACT_AnyObject(uint16_t eUnitType, DWORD nUnitGUID) {
     switch (eUnitType_00) {
       case UNIT_PLAYER:
         nPosY = Units::GetYPosFromDynamicPathUnit(pTargetUnit);
-      nPosX = Units::GetXPosFromDynamicPathUnit(pTargetUnit);
-      D2Common::Units::UpdateDirectionAndSpeed(pPlayerUnit_lcl, nPosX, nPosY);
+
+      D2Common::Units::UpdateDirectionAndSpeed(pPlayerUnit_lcl, Units::GetXPosFromDynamicPathUnit(pTargetUnit), nPosY);
       GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT(0x13, eUnitType_00, nUnitGUID);
       return;
       case UNIT_MONSTER:
@@ -95,15 +95,15 @@ void __fastcall INTERACT_AnyObject(uint16_t eUnitType, DWORD nUnitGUID) {
       case UNIT_OBJECT:
         {
           D2Common::PATH::DynamicPath::SetTarget(pPlayerUnit_lcl->pPath.pDynamicPath, nullptr);
-          if (pTargetUnit->eUnitFlags >> 2 & 1) {
+          if (((bool)(pTargetUnit->eUnitFlags >> 2 & 1))) {
             nPosY = Units::GetYPosFromDynamicPathUnit(pTargetUnit);
-            nPosX = Units::GetXPosFromDynamicPathUnit(pTargetUnit);
-            D2Common::Units::UpdateDirectionAndSpeed(pPlayerUnit_lcl, nPosX, nPosY);
+
+            D2Common::Units::UpdateDirectionAndSpeed(pPlayerUnit_lcl, Units::GetXPosFromDynamicPathUnit(pTargetUnit), nPosY);
             nPosY = 0x20d;
             pcVar2 = ".\\UNIT\\UnitMode.cpp";
             memset(aSkillCastMsg, 0, 7 * sizeof(aSkillCastMsg[0]));
-            pSkill = D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_Kick, pPlayerUnit_lcl);
-            aSkillCastMsg[0] = D2Common::Skills::GetSkillId(pSkill, pcVar2, nPosY);
+
+            aSkillCastMsg[0] = D2Common::Skills::GetSkillId(D2Common::Skills::SKILLS_GetSkillByEnum(SKILL_Kick, pPlayerUnit_lcl), pcVar2, nPosY);
             if (pTargetUnit->nClassId == 0x194) {
               if (pTargetUnit->eAnimMode.ePlayerMode == Death) {
                 pTargetUnit = D2Common::INVENTORY::Inventory::GetEquipedWeapon(pPlayerUnit_lcl->pInventory);
@@ -114,8 +114,8 @@ void __fastcall INTERACT_AnyObject(uint16_t eUnitType, DWORD nUnitGUID) {
 
                 nPosY = 0x218;
                 pcVar2 = ".\\UNIT\\UnitMode.cpp";
-                pSkill = D2Common::Skills::GetSkillByIdAndOwner(pPlayerUnit_lcl, SKILL_Attack, -1);
-                aSkillCastMsg[0] = D2Common::Skills::GetSkillId(pSkill, pcVar2, nPosY);
+
+                aSkillCastMsg[0] = D2Common::Skills::GetSkillId(D2Common::Skills::GetSkillByIdAndOwner(pPlayerUnit_lcl, SKILL_Attack, -1), pcVar2, nPosY);
               }
             } else if (pTargetUnit->nClassId == 0x178) {
               if (pTargetUnit->eAnimMode.ePlayerMode == Death) {
@@ -131,8 +131,8 @@ void __fastcall INTERACT_AnyObject(uint16_t eUnitType, DWORD nUnitGUID) {
 
                 nPosY = 0x22e;
                 pcVar2 = ".\\UNIT\\UnitMode.cpp";
-                pSkill = D2Common::Skills::GetSkillByIdAndOwner(pPlayerUnit_lcl, SKILL_Attack, -1);
-                aSkillCastMsg[0] = D2Common::Skills::GetSkillId(pSkill, pcVar2, nPosY);
+
+                aSkillCastMsg[0] = D2Common::Skills::GetSkillId(D2Common::Skills::GetSkillByIdAndOwner(pPlayerUnit_lcl, SKILL_Attack, -1), pcVar2, nPosY);
               }
             }
 
@@ -149,7 +149,7 @@ void __fastcall INTERACT_AnyObject(uint16_t eUnitType, DWORD nUnitGUID) {
         break;
       case UNIT_ITEM:
         bInventoryOpen = UI::ui::GetUIFlag(UI_INVENTORY);
-      GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT(0x16, 4, nUnitGUID, bInventoryOpen & 0xff);
+      GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT(0x16, 4, nUnitGUID, (uint8_t)bInventoryOpen);
       return;
     }
 
@@ -196,7 +196,7 @@ uint32_t UNITMODE_CanInterruptSkill(D2UnitStrc * pUnit) {
     }
 
     eD2Skills eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UNIT\\UnitMode.cpp", 0x2cc);
-    if (!(-1 < (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId && !sgptDataTable->pTxtSkills[eSkillId].interrupt && (!pUnit || pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Neutral && pUnit->eAnimMode.ePlayerMode != TownNeutral))) {
+    if (!(0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId && !sgptDataTable->pTxtSkills[eSkillId].interrupt && (!pUnit || pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Neutral && pUnit->eAnimMode.ePlayerMode != TownNeutral))) {
       return 1;
     }
 
@@ -386,7 +386,7 @@ void __fastcall UNITMODE_SendWalkToPosition(D2UnitStrc * pUnit, int32_t nTargetX
     bMoved = 0;
     int32_t local_c;
     local_c = nTargetX;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosDelta = pUnit->pPath.pStaticPath->nPosX;
     } else if (pUnit->pPath.pDynamicPath) {
       nPosDelta = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
@@ -403,7 +403,7 @@ void __fastcall UNITMODE_SendWalkToPosition(D2UnitStrc * pUnit, int32_t nTargetX
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosDelta = pUnit->pPath.pStaticPath->nPosY;
     } else if (pUnit->pPath.pDynamicPath) {
       nPosDelta = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
@@ -502,10 +502,10 @@ void __fastcall UNITMODE_ExecuteSkillAction(eD2UnitModeAction nActionType, D2Uni
       case UNITMODEACTION_LEFTSKILL_COORD2:
         nLine = 0x32c;
       szFile = ".\\UNIT\\UnitMode.cpp";
-      pSkill = D2Common::Units::GetLeftSkill(pUnit);
-      msgSkillId.nSkillId = D2Common::Skills::GetSkillId(pSkill, szFile, nLine);
-      pSkill = D2Common::Units::GetLeftSkill(pUnit);
-      msgSkillId.nItemId = D2Common::Skills::GetOwnerGUID(pSkill);
+
+      msgSkillId.nSkillId = D2Common::Skills::GetSkillId(D2Common::Units::GetLeftSkill(pUnit), szFile, nLine);
+
+      msgSkillId.nItemId = D2Common::Skills::GetOwnerGUID(D2Common::Units::GetLeftSkill(pUnit));
       msgSkillId.nTargetUnitType = nTargetOrX;
       msgSkillId.nTargetUnitId = nTargetGUIDOrY;
       nLine = 0x15;
@@ -519,10 +519,10 @@ void __fastcall UNITMODE_ExecuteSkillAction(eD2UnitModeAction nActionType, D2Uni
       case UNITMODEACTION_LEFTSKILL_UNIT4:
         nLine = 0x336;
       szFile = ".\\UNIT\\UnitMode.cpp";
-      pSkill = D2Common::Units::GetLeftSkill(pUnit);
-      msgSkillId.nSkillId = D2Common::Skills::GetSkillId(pSkill, szFile, nLine);
-      pSkill = D2Common::Units::GetLeftSkill(pUnit);
-      msgSkillId.nItemId = D2Common::Skills::GetOwnerGUID(pSkill);
+
+      msgSkillId.nSkillId = D2Common::Skills::GetSkillId(D2Common::Units::GetLeftSkill(pUnit), szFile, nLine);
+
+      msgSkillId.nItemId = D2Common::Skills::GetOwnerGUID(D2Common::Units::GetLeftSkill(pUnit));
       msgSkillId.nTargetUnitType = nTargetOrX;
       msgSkillId.nTargetUnitId = nTargetGUIDOrY;
       nLine = 0x16;
@@ -537,10 +537,10 @@ void __fastcall UNITMODE_ExecuteSkillAction(eD2UnitModeAction nActionType, D2Uni
       case UNITMODEACTION_RIGHTSKILL_COORD2:
         nLine = 0x33e;
       szFile = ".\\UNIT\\UnitMode.cpp";
-      pSkill = D2Common::Units::GetRightSkill(pUnit);
-      msgSkillId.nSkillId = D2Common::Skills::GetSkillId(pSkill, szFile, nLine);
-      pSkill = D2Common::Units::GetRightSkill(pUnit);
-      msgSkillId.nItemId = D2Common::Skills::GetOwnerGUID(pSkill);
+
+      msgSkillId.nSkillId = D2Common::Skills::GetSkillId(D2Common::Units::GetRightSkill(pUnit), szFile, nLine);
+
+      msgSkillId.nItemId = D2Common::Skills::GetOwnerGUID(D2Common::Units::GetRightSkill(pUnit));
       msgSkillId.nTargetUnitType = nTargetOrX;
       msgSkillId.nTargetUnitId = nTargetGUIDOrY;
       nLine = 0x15;
@@ -554,10 +554,10 @@ void __fastcall UNITMODE_ExecuteSkillAction(eD2UnitModeAction nActionType, D2Uni
       case UNITMODEACTION_RIGHTSKILL_UNIT4:
         nLine = 0x348;
       szFile = ".\\UNIT\\UnitMode.cpp";
-      pSkill = D2Common::Units::GetRightSkill(pUnit);
-      msgSkillId.nSkillId = D2Common::Skills::GetSkillId(pSkill, szFile, nLine);
-      pSkill = D2Common::Units::GetRightSkill(pUnit);
-      msgSkillId.nItemId = D2Common::Skills::GetOwnerGUID(pSkill);
+
+      msgSkillId.nSkillId = D2Common::Skills::GetSkillId(D2Common::Units::GetRightSkill(pUnit), szFile, nLine);
+
+      msgSkillId.nItemId = D2Common::Skills::GetOwnerGUID(D2Common::Units::GetRightSkill(pUnit));
       nLine = 0x16;
       msgSkillId.nTargetUnitType = nTargetOrX;
       msgSkillId.nTargetUnitId = nTargetGUIDOrY;

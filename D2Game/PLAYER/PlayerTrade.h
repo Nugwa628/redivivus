@@ -90,16 +90,12 @@ void __fastcall CUBE_GenerateOutput(::SGAMEDATA * pGame, struct D2UnitStrc * pUn
 void __stdcall GetDateUnused(int * pnParam);
 // @sourcefile .\PLAYER\PlrTrade.cpp
 void __fastcall PLRTRADE_FreeTradeCopyInventory(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-// @sourcefile .\PLAYER\PlrTrade.cpp
-void __fastcall SendRemoveItemDisplayPacket0x92(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pOtherUnit);
 void __fastcall TRADE_RestoreInventoryFromBackup(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 // @sourcefile .\PLAYER\PlrTrade.cpp
 void __fastcall SendEventMsg(struct D2UnitStrc * pUnit, uint8_t nMessageType, char * szName);
 // Server-side trade initiation check between two players. Verifies neither player is already trading, the classic game is not completed (A4Q3), and both are in town. Enforces a 5-second accept-trade cooldown and a 1-second throttle on repeated trade messages. On success, sets mutual interact info, sends 0x77 TradeAction packets to both clients (initiator=0, target=1), and sets dwTradeState to 1/2 respectively.
 // @sourcefile .\PLAYER\PlrTrade.cpp
 void __fastcall CheckIfCanStartTradeWithPlayer(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pOtherUnit);
-// @sourcefile .\PLAYER\PlrTrade.cpp
-void __thiscall TRADE_SendTradeCompleteToPlayers(void * pThis, struct D2UnitStrc * pUnit, struct D2UnitDataPlayerStrc * pData, struct D2UnitDataPlayerStrc * pDataOther);
 // Called when player ends interaction with the Horadric Cube item. Clears the interact info and performs item level check. Ensures proper cleanup when cube UI is closed.
 void __fastcall CUBE_OnCubeInteractionEnd(::SGAMEDATA * pGame, struct D2UnitStrc * pPlayer);
 // Server-side handler for a player picking up an item from the trade screen. Validates that the interact partner is a player; sends 0x77/0x0C error if not. Calls SERVER_TakeItemToCursor to move the item to the cursor slot. On success, resets the 10-second trade acceptance timer for both parties and sends 0x77/0x0E (unaccept) to both clients. If either party had committed gold (dwTradeState==4), zeroes out both gold totals via 0x79 packets and finalises the trade via TRADE_SendTradeCompleteToPlayers.

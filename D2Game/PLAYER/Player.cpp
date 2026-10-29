@@ -319,8 +319,8 @@ uint32_t __stdcall PLAYER_PlaceItemInBelt(::SGAMEDATA * pGame, int32_t nParam, D
       nItemGUID = pUnit2->nUnitGUID;
       pnBeltSlot = &nParam;
       dwGUID = nParam;
-      nXPos = D2Client::Units::GetXPosFromDynamicPathUnit(pUnit2);
-      bBeltPlaced = ITEMS::ItemMode::ITEM_TryPlaceInBelt(pGame, pUnit, nItemGUID, nXPos, dwGUID, (uint32_t*)pnBeltSlot);
+
+      bBeltPlaced = ITEMS::ItemMode::ITEM_TryPlaceInBelt(pGame, pUnit, nItemGUID, D2Client::Units::GetXPosFromDynamicPathUnit(pUnit2), dwGUID, (uint32_t*)pnBeltSlot);
       return (uint32_t)(bBeltPlaced != 0);
     }
 }
@@ -341,7 +341,7 @@ static D2UnitStrc * __stdcall PLAYER_CreateRewardItemFromTemplate(int32_t nGameP
       D2Common::Stats::StatsEx::STATLIST_RemoveAndRecalc(pCreatedItem, pStatList);
       D2Common::Stats::StatsEx::FreeStatList(&pStatList->sStatList);
     }
-    if (!bNoSkill && -1 < *(short int*)(pTemplateTxt + 0xac) && (int)*(short int*)(pTemplateTxt + 0xac) < sgptDataTable->nTxtSkillsCount) {
+    if (!bNoSkill && 0 <= *(short int*)(pTemplateTxt + 0xac) && (int)*(short int*)(pTemplateTxt + 0xac) < sgptDataTable->nTxtSkillsCount) {
       pStatList = D2Common::Stats::StatsEx::GetStatList(pCreatedItem, STATE_none, 0x40);
       if (!pStatList) {
         pStatList = (D2StatListExStrc*)D2Common::Stats::StatsEx::AllocStatList(pCreatedItem->pMemory, 0x40, 0, UNIT_ITEM, pCreatedItem->nUnitGUID);
@@ -389,7 +389,7 @@ void __fastcall PLAYER_CreateStarterItems(::SGAMEDATA * pGame, D2UnitStrc * pUni
     }
 
     __frame0.i = 0;
-    if (*(char*)((int)pnParam + 5) == '\0') {
+    if ((uint32_t)(*(char*)((int)pnParam + 5)) <= 0) {
       return;
     }
 
@@ -399,26 +399,32 @@ void __fastcall PLAYER_CreateStarterItems(::SGAMEDATA * pGame, D2UnitStrc * pUni
       D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pNewItem, ITEMFLAG_BEGINNER, 1);
       D2Common::ITEMS::Items::SetBodyLoc(pNewItem, *(eD2BodyLoc*)(pnParam + 1));
       nLine = D2Common::ITEMS::Items::ITEM_GetTxtItemTypes_beltable(pNewItem);
-      if (!nLine) {
-        if ((char)pnParam[1] == '\0') {
-          PLAYER_PlaceItemInInventory(__frame0.pGameSaved, 1, pUnit, pNewItem);
-          bIsQuiver = D2Common::ITEMS::Items::ITEMS_IsA(pNewItem, ITEMTYPE_BowQuiver);
-          nLine = 0;
-          if (!bIsQuiver) {
-            nStatValue = D2Common::Stats::StatsEx::GetTxtMaxDurability(pNewItem);
-            eUnitStat = UNITSTAT_durability;
-          } else {
-            nStatValue = 0xfa;
-            eUnitStat = UNITSTAT_quantity;
-          }
+      if (nLine) {
+        if (!pNewItem) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd8);
+          exit(-1);
+        }
+        if (!pUnit) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd9);
+          exit(-1);
+        }
 
-          D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pNewItem, eUnitStat, nStatValue, nLine);
-          bIsQuiver = D2Common::ITEMS::Items::ITEMS_IsA(pNewItem, ITEMTYPE_BowQuiver);
-          if (bIsQuiver) {
-            nLine = 100;
-            goto set_quiver_quantity;
-          }
+        eItemUnitType = pNewItem->eUnitType;
+        if (eItemUnitType == UNIT_OBJECT || 3 < (int)eItemUnitType && (int)eItemUnitType <= 5) {
+          bIsQuiver = pNewItem->pPath.pStaticPath->nPosX;
+        } else if (pNewItem->pPath.pDynamicPath) {
+          bIsQuiver = D2Common::PATH::DynamicPath::GetXPos(pNewItem->pPath.pDynamicPath);
         } else {
+          bIsQuiver = 0;
+        }
+
+        pGameLocal = __frame0.pGameSaved;
+        nBeltResult = ITEMS::ItemMode::ITEM_TryPlaceInBelt(__frame0.pGameSaved, pUnit, pNewItem->nUnitGUID, bIsQuiver, 1, &__frame0.dwBeltSlotOut);
+        if (!nBeltResult) {
+          PLAYER_PlaceItemInInventory(pGameLocal, 1, pUnit, pNewItem);
+        }
+      } else {
+        if ((char)pnParam[1] != '\0') {
           nBeltResult = PLAYER_EquipItemToBodyLoc(__frame0.pGameSaved, pUnit, pNewItem);
           if (!nBeltResult) {
             PLAYER_PlaceItemInInventory(__frame0.pGameSaved, 1, pUnit, pNewItem);
@@ -437,30 +443,24 @@ void __fastcall PLAYER_CreateStarterItems(::SGAMEDATA * pGame, D2UnitStrc * pUni
           }
 
           D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pNewItem, eStatId, nLine, nStatValue);
-        }
-      } else {
-        if (!pNewItem) {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd8);
-          exit(-1);
-        }
-        if (!pUnit) {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd9);
-          exit(-1);
-        }
-
-        eItemUnitType = pNewItem->eUnitType;
-        if (eItemUnitType == UNIT_OBJECT || 3 < (int)eItemUnitType && (int)eItemUnitType < 6) {
-          bIsQuiver = pNewItem->pPath.pStaticPath->nPosX;
-        } else if (!pNewItem->pPath.pDynamicPath) {
-          bIsQuiver = 0;
         } else {
-          bIsQuiver = D2Common::PATH::DynamicPath::GetXPos(pNewItem->pPath.pDynamicPath);
-        }
+          PLAYER_PlaceItemInInventory(__frame0.pGameSaved, 1, pUnit, pNewItem);
+          bIsQuiver = D2Common::ITEMS::Items::ITEMS_IsA(pNewItem, ITEMTYPE_BowQuiver);
+          nLine = 0;
+          if (!bIsQuiver) {
+            nStatValue = D2Common::Stats::StatsEx::GetTxtMaxDurability(pNewItem);
+            eUnitStat = UNITSTAT_durability;
+          } else {
+            nStatValue = 0xfa;
+            eUnitStat = UNITSTAT_quantity;
+          }
 
-        pGameLocal = __frame0.pGameSaved;
-        nBeltResult = ITEMS::ItemMode::ITEM_TryPlaceInBelt(__frame0.pGameSaved, pUnit, pNewItem->nUnitGUID, bIsQuiver, 1, &__frame0.dwBeltSlotOut);
-        if (!nBeltResult) {
-          PLAYER_PlaceItemInInventory(pGameLocal, 1, pUnit, pNewItem);
+          D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pNewItem, eUnitStat, nStatValue, nLine);
+          bIsQuiver = D2Common::ITEMS::Items::ITEMS_IsA(pNewItem, ITEMTYPE_BowQuiver);
+          if (bIsQuiver) {
+            nLine = 100;
+            goto set_quiver_quantity;
+          }
         }
       }
 
@@ -608,9 +608,6 @@ void __fastcall PLAYER_CancelInteraction(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     } else {
       D2ItemsTxt* pItemTxt;
       switch (eInteractUnitType) {
-        case UNIT_PLAYER:
-          PlayerTrade::ClickButton(pGame, pUnit, 6, 0);
-        return;
         case UNIT_MONSTER:
           UNIT::SUNITNPC::SUNITNPC_CloseNpcInteraction(pGame, pUnit, pInteractUnit);
         nInteractGUID = pInteractUnit->nUnitGUID;
@@ -623,6 +620,9 @@ void __fastcall PLAYER_CancelInteraction(::SGAMEDATA * pGame, D2UnitStrc * pUnit
         byPacketUnitType = '\x02';
         nLine = 0x206;
         break;
+        case UNIT_PLAYER:
+          PlayerTrade::ClickButton(pGame, pUnit, 6, 0);
+        return;
         default:
           goto no_interact_target;
         case UNIT_ITEM:
@@ -765,7 +765,7 @@ BOOL __fastcall GOLD_DropGoldFromInventory(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
     int i = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
     uint32_t nClampedGold = nGoldAmount;
-    if (!((int)nGoldAmount <= i && -1 < (int)nGoldAmount)) {
+    if (!((int)nGoldAmount <= i && 0 <= (int)nGoldAmount)) {
       return 0;
     }
 
@@ -814,13 +814,7 @@ uint32_t __fastcall CheckItemMovePermission(::SGAMEDATA * pGame, D2UnitStrc * pU
     uint32_t nInteractUnitId;
     eD2UnitType eInteractUnitType;
     BOOL bHasInteraction = UNIT::SUnit::GetInteractInfo(pUnit, &eInteractUnitType, &nInteractUnitId);
-    if (!bHasInteraction) {
-      pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-      if (!pPlayerData->dwTradeTick) {
-        bCanMove = PlayerTrade::PLRTRADE_ValidateAndInitiateTrade(pGame, pUnit, pItem);
-        return bCanMove;
-      }
-    } else {
+    if (bHasInteraction) {
       D2UnitStrc* pInteractUnit;
       pInteractUnit = UNIT::SUnit::FindUnitFromTable(pGame, eInteractUnitType, nInteractUnitId);
       if (pInteractUnit) {
@@ -838,6 +832,12 @@ uint32_t __fastcall CheckItemMovePermission(::SGAMEDATA * pGame, D2UnitStrc * pU
       }
 
       UNIT::SUnit::ClearInteractInfo(pUnit);
+    } else {
+      pPlayerData = D2Common::Units::GetPlayerData(pUnit);
+      if (!pPlayerData->dwTradeTick) {
+        bCanMove = PlayerTrade::PLRTRADE_ValidateAndInitiateTrade(pGame, pUnit, pItem);
+        return bCanMove;
+      }
     }
 
     return 0;
@@ -925,7 +925,7 @@ static void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2Unit
     nTotalGold = nBankGold + nGold;
     int nLevelCap;
     nLevelCap = nLevel;
-    if (0x13 < nLevel) {
+    if (0x14 <= nLevel) {
       nLevelCap = 0x14;
     }
 
@@ -948,12 +948,12 @@ static void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2Unit
           nValue = 0;
         }
       }
-      if ((int)nGold < (int)nValue) {
+      if ((int)nValue > (int)nGold) {
         nValue = nGold;
       }
     }
     if (!bKilledByPlayer) {
-      if ((int)nGold < (int)nValue) {
+      if ((int)nValue > (int)nGold) {
         if (pGame->nGameType != SGAMETYPE_SINGLEPLAYER) {
           nTotalGold = nBankGold - nValue + nGold;
           if (!pUnit2) {
@@ -961,7 +961,7 @@ static void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2Unit
           }
           if (nTotalGold < 0) {
             nTotalGold = 0;
-          } else if (pUnit2->eUnitType == UNIT_PLAYER && (nGold = D2Common::Units::GetStashGoldLimit(pUnit2) , (int)nGold < nTotalGold)) {
+          } else if (pUnit2->eUnitType == UNIT_PLAYER && (nGold = D2Common::Units::GetStashGoldLimit(pUnit2) , nTotalGold > (int)nGold)) {
             nTotalGold = 0;
           }
 
@@ -987,7 +987,7 @@ static void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2Unit
       if (pUnit2) {
         if (nTotalGold < 0) {
           nTotalGold = 0;
-        } else if (pUnit2->eUnitType == UNIT_PLAYER && (nGold = D2Common::Units::GetStashGoldLimit(pUnit2) , (int)nGold < nTotalGold)) {
+        } else if (pUnit2->eUnitType == UNIT_PLAYER && (nGold = D2Common::Units::GetStashGoldLimit(pUnit2) , nTotalGold > (int)nGold)) {
           nTotalGold = 0;
         }
 
@@ -998,7 +998,7 @@ static void __stdcall PLAYER_ApplyGoldPenaltyOnDeath(::SGAMEDATA * pGame, D2Unit
           nGold = nValue;
           if (pUnit2->eUnitType == UNIT_PLAYER) {
             nStashLimit = D2Common::Units::GetInventoryGoldLimit(pUnit2);
-            if ((int)nStashLimit < (int)nValue) {
+            if ((int)nValue > (int)nStashLimit) {
               nGold = 0;
             }
           }

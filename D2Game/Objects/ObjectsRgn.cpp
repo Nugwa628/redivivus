@@ -238,11 +238,11 @@ D2ObjectRngShrines * __fastcall GetShrinesRng(::SGAMEDATA * pGame) {
     return &pGame->pObjectControl->sShrinesRng;
 }
 
-void __fastcall Send_0x26_Chat(D2ClientStrc * pClient, char * * ppMessage) {
+static void __fastcall Send_0x26_Chat(D2ClientStrc * pClient, char * * ppMessage) {
     GAME::SCmd::NET_D2GS_SERVER_Send_0x26_CHATSTART(pClient, (D2GSPacketSrv0x26*)*ppMessage);
 }
 
-void __thiscall SendDebugMessageToEveryone(void * pThis, char * pMessage) {
+static void __thiscall SendDebugMessageToEveryone(void * pThis, char * pMessage) {
     D2GSPacketSrv0x26 nMsgBuf;
     char cChar;
     nMsgBuf.szName[4] = '\0';
@@ -518,7 +518,7 @@ int32_t __fastcall OBJECT_HandleObjectMode(D2ObjectModeArg * pObjectModeArg) {
     eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     eAct eActNo = D2Common::Drlg::GetActNoFromLevelNumber(eLevel);
     __frame0.pLevelRng = pObjectModeArg->pGame->pObjectControl->aLevelsRng[eLevel];
-    if (!(__frame0.pLevelRng->nMonClassId < 0 || sgptDataTable->nTxtMonStatsSize <= __frame0.pLevelRng->nMonClassId)) {
+    if (!(__frame0.pLevelRng->nMonClassId < 0 || __frame0.pLevelRng->nMonClassId >= sgptDataTable->nTxtMonStatsSize)) {
       return __frame0.pLevelRng->nMonClassId;
     }
 

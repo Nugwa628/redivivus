@@ -81,7 +81,6 @@ void __fastcall WEATHER_SetGlobalFlag(int nValue);
 void __fastcall ENV_Rcv0x54_NoOp(char * pBytes);
 void __stdcall ENV_InitClientSide_NoOp();
 void __stdcall ENV_FreeClientSide_NoOp();
-void __fastcall WEATHER_TransitionState(uint32_t nState);
 // Flips gnWeatherTransitionLock. Unlocking calls WEATHER_UpdateStateAct5(1). Locking zeroes the Act 5 and transition weather states, requires the player unit (halt, Env.cpp line 311), clears gnWeatherParticleState and resets the particle array (halt, line 347, if entries remain).
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 void __stdcall WEATHER_ToggleTransitionLock();

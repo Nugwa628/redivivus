@@ -44,7 +44,7 @@ int __thiscall OnMouseMove(::ListBoxImplementation * pThis, struct D2UIMouseMsgS
 int __thiscall OnChar(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 int __thiscall GetValue(::ListBoxImplementation * pThis);
 uint32_t __thiscall GetItemUserData(::ListBoxImplementation * pThis, int nIndex);
-void __thiscall Draw(::ListBoxImplementation * pThis);
+void __fastcall Draw(::ListBoxImplementation * pThis);
 int __thiscall HandleScrollTrackClick(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 int __thiscall OnMouseDown(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);
 int __thiscall OnMouseUp(::ListBoxImplementation * pThis, struct D2UIMouseMsgStrc * pMsg);

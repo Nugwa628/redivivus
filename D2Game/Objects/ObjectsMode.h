@@ -100,10 +100,8 @@ void __fastcall Shrines_ExplodingShrineFunction(struct D2ObjectOperateFnArg * pA
 // Object operate handler for a Poison shrine. Using the shrine unit's seed, spawns dwArg0..dwArg1 random potion items ("gpm" item code) at the best free spot near the attacker via FindBestSpotToSpawnItem + ITEM_CreateItemInstance (quantity 1, DOUPDATE). Then fires 6 poison missiles in a fixed offset spread (the aMissileOffsets ring) centered on the shrine, with skill level scaled by attacker level/5 (clamped 1..8). Side effect: advances the shrine seed.
 void __fastcall Shrines_PoisonShrineFunction(struct D2ObjectOperateFnArg * pArguments, struct D2ShrinesTxt * pTxtShrines);
 void __fastcall Shrines_CombatBoostFunction(struct D2ObjectOperateFnArg * pArguments, struct D2ShrinesTxt * pTxtShrines);
-void __fastcall SHRINE_OnStaminaExpire(struct D2UnitStrc * pUnit, eD2States eState, int32_t dwParam);
 void __fastcall Shrines_StaminaBoostFunction(struct D2ObjectOperateFnArg * pArguments, struct D2ShrinesTxt * pTxtShrines);
 void __fastcall Shrines_StatBoostFunction(struct D2ObjectOperateFnArg * pArguments, struct D2ShrinesTxt * pTxtShrines);
-void __fastcall SHRINE_OnSkillExpire(struct D2UnitStrc * pUnit, eD2States eState, int32_t dwParam);
 void __fastcall Shrines_SkillBoostFunction(struct D2ObjectOperateFnArg * pArguments, struct D2ShrinesTxt * pTxtShrines);
 // Object operate-handler invoked when a player activates a shrine. Guards against re-use (bails if already activated or wrong anim mode), records the activating player's GUID, marks the object dirty/update, and builds+attaches a floating hover-text label (shrine name string). Then looks up the shrine's D2ShrinesTxt record and dispatches its specific effect via OBJECTSHRINEFUNCTION[nCode].fpShrineHandler (falling back to Shrines_RefillFunction if none), validating the pointer with IsBadCodePtr. Schedules the shrine-reset event (nResetTimeInMins) and an object anim event. Returns Fog::GuardStack result (BOOL).
 BOOL __fastcall OBJOP_ActivateShrine(struct D2ObjectOperateFnArg * pOperation);
@@ -135,13 +133,6 @@ BOOL __fastcall OBJOP_ActivatePortalObject(struct D2ObjectOperateFnArg * pOperat
 BOOL __fastcall OBJOP_ActivateWaypoint(struct D2ObjectOperateFnArg * pOperation);
 // @sourcefile .\OBJECTS\ObjMode.cpp
 void __fastcall TakeWaypoint(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nwpId, uint16_t nWaypointMasks);
-uint32_t __fastcall OBJMODE_ShrineManaRefill(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nBoostAmount);
-uint32_t __fastcall OBJMODE_ShrineEnergyBoost(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nBoostAmount);
-uint32_t __fastcall OBJMODE_ShrineDexterityBoost(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nBoostAmount);
-uint32_t __fastcall OBJMODE_ShrineVitalityBoost(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nBoostAmount);
-uint32_t __fastcall OBJMODE_ShrineStrengthBoost(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nBoostAmount);
-uint32_t __fastcall OBJMODE_ShrineHealthRefill(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nBoostAmount);
-uint32_t __fastcall OBJMODE_ShrineSkillPointBoost(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nBoostAmount);
 // Server-side handler for the 0x44 object-interaction packet (well/Horadric-orifice/quest container). Resolves the player, object and item units by GUID. For nParam==2 sends the 0x58 OpenUI response (result 1) and clears interaction. For nParam==3 it tries to consume an item: special-cases the Horadric Orifice object (classId 0x98) requiring the "tsh " (Horadric Staff) item code, otherwise moves the item to the player's cursor; on success dispatches the object's operate function (or the orifice's Q14_OnStaffUsedInOrifice for A2Q7), sends OpenUI result 5 and schedules the object anim event; on failure sends result 4. Returns 1.
 // @sourcefile .\OBJECTS\ObjMode.cpp
 int __fastcall _x44PacketHandler(::SGAMEDATA * pGame, DWORD dwParam, DWORD param_1, DWORD dwItemGUID, int16_t nParam);

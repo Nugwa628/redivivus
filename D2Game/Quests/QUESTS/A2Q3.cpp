@@ -148,7 +148,7 @@ BOOL __fastcall Q11_PropagateRewardToParty(::SGAMEDATA * pGame, D2UnitStrc * pUn
 // A2Q3 - per-unit iterator cb (Q11_SendDarknessPacket): for each player in an act, send 0x53 "darkness"
 // env packet (subcmd 5) to blot out the sun, then a 0x5D quest-state packet (quest 10, flag 0x10).
 // No quest-record access; pure client notification of the Tainted-Sun darkening.
-BOOL __fastcall Q11_SendDarknessPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+static BOOL __fastcall Q11_SendDarknessPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2GSPacketSrv0x53 sPacket53;
     D2GSPacketSrv0x5D sPacket5D;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q3.cpp", 0x142);
@@ -173,7 +173,7 @@ BOOL __fastcall Q11_SendDarknessPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
 // A2Q3 - per-unit iterator cb (Q11_SendSunRestoredPacket): for each player in an act, send 0x53
 // "darkness" env packet (subcmd 2 = restore daylight) when the Tainted Sun Altar is destroyed.
 // No quest-record access; mirror of Q11_SendDarknessPacket that lifts the darkness.
-BOOL __fastcall Q11_SendSunRestoredPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+static BOOL __fastcall Q11_SendSunRestoredPacket(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2GSPacketSrv0x53 sPacket;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q3.cpp", 0x165);
     uint8_t nActNo = GAME::Clients::GetAct(pClient);
@@ -261,7 +261,7 @@ void __fastcall Q11_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (bQuestState == 1) {
         return;
       }
-      if (3 < pQuestData->nStateFlag) {
+      if (4 <= pQuestData->nStateFlag) {
         return;
       }
 
@@ -269,7 +269,7 @@ void __fastcall Q11_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nMessageIndexMaybe == -1) {
         return;
       }
-      if (5 < nMessageIndexMaybe) {
+      if (6 <= nMessageIndexMaybe) {
         return;
       }
     }
@@ -281,7 +281,7 @@ void __fastcall Q11_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 // QUEST_SetStateAndBroadcast w/ Q11_NotifyTaintedSunComplete), bumps stateFlag to 1 on first run, then if
 // Act 2 DRLG is loaded calls DRLGENV_TaintedSunBegin() (darkens the act) and iterates players sending
 // Q11_SendDarknessPacket. Returns nonzero(low byte 1) on success; 0 if act not yet loaded (deferred).
-uint8_t __stdcall Q11_BeginTaintedSun(D2QuestDataStrc * pQuestData) {
+static uint8_t __stdcall Q11_BeginTaintedSun(D2QuestDataStrc * pQuestData) {
     pQuestData->nQuestPacketFlags = '\0';
     QUEST_SetStateAndBroadcast(pQuestData, 1, nullptr, (::fpExecuteOnUnitFunction)Q11_NotifyTaintedSunComplete, true);
     if (!pQuestData->nStateFlag) {
@@ -656,15 +656,14 @@ BOOL __fastcall OBJOP_A2Q3_ActivateHoradricStaffAltar(D2ObjectOperateFnArg * pOp
 
           pHoradricStaffQuestData = GetQuestDataByQuestNoInternal(pTaintedSunQuestData->pGame, QUESTINT_TheHoradricStaff);
           if (pHoradricStaffQuestData) {
-            ppDroppedBodyPartCount = &pHoradricStaffQuestData->pQuestSpecificData.pA2Q2->nVipCount;
-            *ppDroppedBodyPartCount += nDroppedItemCount;
+            pHoradricStaffQuestData->pQuestSpecificData.pA2Q2->nVipCount += nDroppedItemCount;
           }
 
           Objects::ObjectsMode::RollChestDrops(pOperation, ITEMTYPE_Gold);
           pQuestSeed = GetQuestControlSeed(pOperation->sArg.pGame);
           seedNext = D2_SEED_NEXT(*pQuestSeed);
           *pQuestSeed = seedNext;
-          iDropLoop = seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 5) * -5 + 5;
+          iDropLoop = seedNext.nSeedLow % 5 + 5;
           if (0 < iDropLoop) {
             do {
               Objects::ObjectsMode::SpawnDrop(pOperation->sArg.pGame, pOperation->sArg.pVictim, 0x20646c67, QUALITY_NORMAL);
@@ -704,7 +703,7 @@ BOOL __fastcall OBJOP_A2Q3_ActivateHoradricStaffAltar(D2ObjectOperateFnArg * pOp
         pQuestSeed = GetQuestControlSeed(pOperation->sArg.pGame);
         seedNext = D2_SEED_NEXT(*pQuestSeed);
         *pQuestSeed = seedNext;
-        iDropLoop = seedNext.nSeedLow + (int)(((uint64_t)d2_bits_of(seedNext) & 0xffffffff) / 5) * -5 + 5;
+        iDropLoop = seedNext.nSeedLow % 5 + 5;
         if (0 < iDropLoop) {
           do {
             Objects::ObjectsMode::SpawnDrop(pOperation->sArg.pGame, pOperation->sArg.pVictim, 0x20646c67, QUALITY_NORMAL);
@@ -714,8 +713,7 @@ BOOL __fastcall OBJOP_A2Q3_ActivateHoradricStaffAltar(D2ObjectOperateFnArg * pOp
 
         pHoradricStaffQuestData = GetQuestDataByQuestNoInternal(pTaintedSunQuestData->pGame, QUESTINT_TheHoradricStaff);
         if (pHoradricStaffQuestData) {
-          ppDroppedBodyPartCount = &pHoradricStaffQuestData->pQuestSpecificData.pA2Q2->nVipCount;
-          *ppDroppedBodyPartCount += nDroppedItemCount;
+          pHoradricStaffQuestData->pQuestSpecificData.pA2Q2->nVipCount += nDroppedItemCount;
           return 0;
         }
       }
@@ -794,7 +792,7 @@ void __fastcall Q11_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
           return;
         }
       }
-    } else if (nMsgIndex - 0x16a < 0xb) {
+    } else if (nMsgIndex - 0x16a <= 0xa) {
       pGame = pQuestArgs->pGame;
       pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
       pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
@@ -835,6 +833,32 @@ void __fastcall Q11_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
       }
     }
 }
+
+} // namespace D2Game::Quests::QUESTS::A2Q3
+
+namespace D2Game {
+
+uint8_t __fastcall Q11_TimerCheckDarkness(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+    D2QuestDataA2Q3Strc* pA2Q3Data = pQuestData->pQuestSpecificData.pA2Q3;
+    pA2Q3Data->field_0x01 = 0;
+    if (pA2Q3Data->bSunDarkened) {
+      return '\x01';
+    }
+
+    bool nResult = (bool)Quests::QUESTS::A2Q3::Q11_BeginTaintedSun(pQuestData);
+    if (!nResult) {
+      pA2Q3Data->bViperAmuletInitPending = true;
+      return '\x01';
+    }
+
+    pA2Q3Data->bSunDarkened = true;
+    UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)Quests::QUESTS::A2Q3::Q11_UpdateQuestRecord);
+    return '\x01';
+}
+
+} // namespace D2Game
+
+namespace D2Game::Quests::QUESTS::A2Q3 {
 
 // A2Q3 - Q11_StartDarknessTimer (custom register calling convention): if darkness not yet started, rolls a
 // random 15-17 tick delay (SEED_RollRange) and arms Q11_TimerCheckDarkness via AddQuestTimer, setting the

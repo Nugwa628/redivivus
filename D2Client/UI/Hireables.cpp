@@ -242,9 +242,9 @@ static void __stdcall GetAndDrawHirelingName(int32_t nX, int32_t nY, int32_t nPe
     DrawHirelingName(nX, nY, 0, wszName);
 }
 
-void __fastcall UI_DrawHirelingNameFromString(char * szText, int32_t nX, int32_t nY) {
+static void __fastcall UI_DrawHirelingNameFromString(char * szText, int32_t nX, int32_t nY) {
     uint16_t szString[32];
-    memset(szString, 0, 32 * sizeof(szString[0]));
+    for (int i = 0; i < 32; i++) szString[i] = 0;
     D2Lang::UTF8_ConvertToWideChar(szString, szText, 0x20);
     DrawHirelingName(nX, nY, 0, szString);
 }
@@ -256,10 +256,10 @@ void __stdcall UI_DrawHirelingGoldCost(int nGoldCost, int32_t nDrawPositionX) {
     char szGoldCostStr[32];
     uint16_t wszConverted[32];
     uint16_t wszGoldText[32];
-    memset(wszConverted, 0, 32 * sizeof(wszConverted[0]));
-    memset(wszGoldText, 0, 32 * sizeof(wszGoldText[0]));
+    for (int i = 0; i < 32; i++) wszConverted[i] = 0;
+    for (int i = 0; i < 32; i++) wszGoldText[i] = 0;
     sprintf(szGoldCostStr, "%d", nGoldCost);
-    memset(wszGoldText, 0, 0x40);
+    for (int i = 0; i < 0x20; i++) wszGoldText[i] = 0;
     D2Lang::UTF8_ConvertToWideChar(wszConverted, szGoldCostStr, 0x20);
     D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(wszGoldText, wszConverted, 0x20);
     *(uint32_t*)((char*)&wszGoldText + 60) &= 0xffff;
@@ -277,7 +277,7 @@ void __stdcall UI_DrawHirelingGoldCost(int nGoldCost, int32_t nDrawPositionX) {
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nStrLen);
 }
 
-DC6 * __fastcall GetRosterIcon(D2UnitStrc * pUnit, int32_t nSkillId, int32_t * pRosterGUID, uint32_t * pFlagOut) {
+static DC6 * __fastcall GetRosterIcon(D2UnitStrc * pUnit, int32_t nSkillId, int32_t * pRosterGUID, uint32_t * pFlagOut) {
     int nIconIndex;
     char szIconPath[256];
     if (nSkillId < 0) {
@@ -345,15 +345,7 @@ void __stdcall DRAW_Overlay_PetsAndPartyMembers() {
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
     BOOL bHasRosterPet = GAME::RosterPets::CheckIfUnitHasRosterPet(pPlayer);
     BOOL bHasPartiedRosters = GAME::Roster::CheckIfUnitHasPartiedRosters(pPlayer);
-    if ((!bHasPartiedRosters || gnHireDisplayMode == 1) && !bHasRosterPet) {
-      gnHireIconHoverIndex = 0;
-      gnHireIconHoverY = 0;
-      gnHireIconHoverX = 0;
-      bHasRosterPet = ui::GetUIFlag(UI_HIREABLES);
-      if (bHasRosterPet) {
-        Draw::SetUIFlag(UI_HIREABLES, UI_RESET, 0);
-      }
-    } else {
+    if (!((!bHasPartiedRosters || gnHireDisplayMode == 1) && !bHasRosterPet)) {
       int32_t nPetGUID;
       nPetGUID = GAME::RosterPets::GetRosterPetGUID(pPlayer, 7, 0);
       if (nPetGUID == -1 || (pPlayer = UNIT::Player::UNITS_FindClientSideUnit(nPetGUID, UNIT_MONSTER) , pPlayer && (bIsActive = UNIT::CUnit::IsActive(pPlayer) , bIsActive != 0))) {
@@ -366,6 +358,14 @@ void __stdcall DRAW_Overlay_PetsAndPartyMembers() {
       if (!bHasRosterPet) {
         Draw::SetUIFlag(UI_HIREABLES, UI_SET, 0);
         return;
+      }
+    } else {
+      gnHireIconHoverIndex = 0;
+      gnHireIconHoverY = 0;
+      gnHireIconHoverX = 0;
+      bHasRosterPet = ui::GetUIFlag(UI_HIREABLES);
+      if (bHasRosterPet) {
+        Draw::SetUIFlag(UI_HIREABLES, UI_RESET, 0);
       }
     }
 }
@@ -460,7 +460,7 @@ int32_t __stdcall UI_CheckItemCanEquipToHireling(int32_t bPlaySound) {
 
     int32_t nMercClass;
     nMercClass = GAME::RosterPets::GetRosterClass(nMercGUID);
-    if (nMercClass < 0x168) {
+    if (nMercClass <= 0x167) {
       if (nMercClass == 0x167) {
         bIsType = D2Common::ITEMS::Items::ITEMS_IsA(pCursorItem_lcl, ITEMTYPE_Shield);
         if (bIsType) {
@@ -586,7 +586,7 @@ void __stdcall UI_HandleHirelingTooltipHoverTimer(D2UIMouseMsgStrc * pMsg) {
       if (nMercGUID != -1) {
         gnHireIconHoverY = 1;
         dwNow = GetTickCount();
-        if (699 < dwNow - gnHireIconHoverIndex) {
+        if (700 <= dwNow - gnHireIconHoverIndex) {
           gnHireIconHoverX = 1;
         }
       }
@@ -604,11 +604,13 @@ void __stdcall UI_ToggleHirelingIconsVisibility() {
     eD2GSGameType eGameType;
     if (!gnHireDisplayMode) {
       eGameType = GAME::Game::CLIENT_GetD2GSGameType();
-      if (eGameType == GAMETYPE_SINGLEPLAYER) {
+      switch (eGameType) {
+      case GAMETYPE_SINGLEPLAYER: {
         gnHireDisplayMode = 2;
         gnHireIconHoverIndex = 0;
         Draw::SetUIFlag(UI_HIREICONS, UI_RESET, 0);
         return;
+      }
       }
 
       gnHireDisplayMode = 1;
@@ -622,10 +624,12 @@ void __stdcall UI_ToggleHirelingIconsVisibility() {
     }
 
     eGameType = GAME::Game::CLIENT_GetD2GSGameType();
-    if (eGameType == GAMETYPE_SINGLEPLAYER) {
+    switch (eGameType) {
+    case GAMETYPE_SINGLEPLAYER: {
       gnHireDisplayMode = 0;
       Draw::SetUIFlag(UI_HIREICONS, UI_SET, 0);
       return;
+    }
     }
 
     gnHireDisplayMode = 2;
@@ -652,7 +656,7 @@ void __stdcall INPUT_HireableLongPress(D2UIMouseMsgStrc * pMsg) {
       }
 
       dwNow = GetTickCount();
-      if (699 < dwNow - gnHireIconHoverIndex) {
+      if (700 <= dwNow - gnHireIconHoverIndex) {
         pMsg->bHandled = 1;
         pMsg->dwResult = 0;
         Storm::SMsgBreakHandlerChain(pMsg);
@@ -699,7 +703,7 @@ static void __stdcall DrawHealthBar(uint32_t nRosterGUID, uint32_t nPetType, int
       return;
     }
 
-    uint32_t nHpPercent = nHp < 1 ? 0 : nHp;
+    uint32_t nHpPercent = nHp <= 0 ? 0 : nHp;
     if (99 < (int)nHpPercent) {
       nHpPercent = 100;
     }
@@ -753,10 +757,10 @@ static BOOL __stdcall UI_DrawPartyMembersHirelingIcons(int * pnY, int * pnYOffse
     int nIconDrawX;
     bool bDrewAny = false;
     int16_t nPartyId = UNIT::CUnit::GetPlayerUnitPartyId(pUnit);
-    if (!pUnit) {
-      nPlayerGUID = -1;
-    } else {
+    if (pUnit) {
       nPlayerGUID = pUnit->nUnitGUID;
+    } else {
+      nPlayerGUID = -1;
     }
     if (!(nPartyId != -1 && !gnHireDisplayMode)) {
       return 0;
@@ -781,20 +785,20 @@ static BOOL __stdcall UI_DrawPartyMembersHirelingIcons(int * pnY, int * pnYOffse
             case 1:
               pClassIcon = ClassIcons[1];
             break;
-            case 2:
-              pClassIcon = ClassIcons[4];
+            case 4:
+              pClassIcon = ClassIcons[2];
             break;
             case 3:
               pClassIcon = ClassIcons[3];
             break;
-            case 4:
-              pClassIcon = ClassIcons[2];
-            break;
-            case 5:
-              pClassIcon = ClassIcons[6];
+            case 2:
+              pClassIcon = ClassIcons[4];
             break;
             case 6:
               pClassIcon = ClassIcons[5];
+            break;
+            case 5:
+              pClassIcon = ClassIcons[6];
             break;
             default:
               continue;
@@ -804,14 +808,14 @@ static BOOL __stdcall UI_DrawPartyMembersHirelingIcons(int * pnY, int * pnYOffse
             DrawHealthBar(nRosterGUID, 0, *pnX);
             nIconDrawX = *pnY;
             nX = *pnX;
-            pszName = GAME::Roster::GetRosterName(pRoster);
-            UI_DrawHirelingNameFromString(pszName, nX, nIconDrawX);
-            if (!*pnYOffset) {
-              *pnYOffset = 10;
-              *pnY += 10;
-            } else {
+
+            UI_DrawHirelingNameFromString(GAME::Roster::GetRosterName(pRoster), nX, nIconDrawX);
+            if (*pnYOffset) {
               *pnY -= *pnYOffset;
               *pnYOffset = 0;
+            } else {
+              *pnYOffset = 10;
+              *pnY += 10;
             }
 
             memset(&sGfxData, 0, 0x48);
@@ -857,7 +861,7 @@ static BOOL __stdcall HIRELING_DrawPortraitIcon(D2UnitStrc * pUnit, int * pnYTog
     if (gnHireIconHoverY && gnHireIconHoverIndex) {
       DWORD dwNow;
       dwNow = GetTickCount();
-      if (699 < dwNow - gnHireIconHoverIndex) {
+      if (700 <= dwNow - gnHireIconHoverIndex) {
         gnHireIconHoverX = 1;
         D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, *pnX, 0x3c, -1, DRAW_LIGHTERSOLID, nullptr);
         *pnX += 0x38;
@@ -886,12 +890,12 @@ static BOOL __stdcall HIRELING_DrawPetIcon(D2UnitStrc * pUnit, int * nX, int * p
     DrawHealthBar((uint32_t)pUnit, nPetType, *nX);
     int* pnXCursor = nX;
     GetAndDrawHirelingName(*nX, *nY, nPetType);
-    if (!*pnYToggle) {
-      *pnYToggle = 10;
-      *nY += 10;
-    } else {
+    if (*pnYToggle) {
       *nY -= *pnYToggle;
       *pnYToggle = 0;
+    } else {
+      *pnYToggle = 10;
+      *nY += 10;
     }
 
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, *pnXCursor, 0x3c, -1, DRAW_TRANSPARENT, nullptr);
@@ -923,12 +927,12 @@ static BOOL __stdcall HIRELING_DrawSummonIcon(D2UnitStrc * pUnit, int32_t * nY, 
 
     UI_DrawHirelingGoldCost(nRosterCount, *nX);
     GetAndDrawHirelingName(*nX, *nY, nSkillId);
-    if (!*pnYToggle) {
-      *pnYToggle = 10;
-      *nY += 10;
-    } else {
+    if (*pnYToggle) {
       *nY -= *pnYToggle;
       *pnYToggle = 0;
+    } else {
+      *pnYToggle = 10;
+      *nY += 10;
     }
 
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, *nX, 0x3c, -1, DRAW_TRANSPARENT, nullptr);
@@ -947,12 +951,12 @@ static BOOL __stdcall HIRELING_DrawGenericPetIcon(D2UnitStrc * pUnit, int * pnX,
     DrawHealthBar((uint32_t)pUnit, nPetType, *pnX);
     int* pnXCursor = pnX;
     GetAndDrawHirelingName(*pnX, *pnY, nPetType);
-    if (!*pnYToggle) {
-      *pnYToggle = 10;
-      *pnY += 10;
-    } else {
+    if (*pnYToggle) {
       *pnY -= *pnYToggle;
       *pnYToggle = 0;
+    } else {
+      *pnYToggle = 10;
+      *pnY += 10;
     }
 
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, *pnXCursor, 0x3c, -1, DRAW_TRANSPARENT, nullptr);

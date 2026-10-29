@@ -151,10 +151,6 @@ BOOL __fastcall Q04_SetQuestCannotComplete(::SGAMEDATA * pGame, struct D2UnitStr
 // (aPlayerGUID[0x1d]) as the Tristram-present unit and returns 1 (stops iteration).
 // Used by MakeTownPortalFromScroolTree to find a witness to anchor the town portal.
 BOOL __fastcall Q04_RegisterTristramVisitor(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// A1Q4 — Q04_TimerDespawnRogueGuards: quest-timer entry that iterates all monsters
-// running Q04_DespawnRogueGuards (kills/clears the Rogue guards), then clears the
-// "despawn scheduled" flag (0x46).
-uint8_t __fastcall Q04_TimerDespawnRogueGuards(::SGAMEDATA * pGame, struct D2QuestDataStrc * pQuestData);
 // A1Q4 — MakeTownPortalFromScroolTree: the Tree-of-Inifuss "rescue Cain" sequence.
 // On the rescue event (quest begun, not already done): spawns Deckard Cain (monster
 // 0x92) next to the player; if that fails, falls back to a spawnable nearby tile and,

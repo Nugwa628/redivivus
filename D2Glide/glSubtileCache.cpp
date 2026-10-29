@@ -111,7 +111,7 @@ static void GLSUBTILE_AppendNodeToTail(GlSubtileCacheStrc * pCache, GlSubtileCac
 }
 
 // Removes and returns the head node from active LRU list (least-recently-used).
-GlSubtileCacheNodeStrc * __fastcall GLSUBTILE_RemoveNodeFromHead(uint32_t dwParam, GlSubtileCacheStrc * pCache) {
+static GlSubtileCacheNodeStrc * __fastcall GLSUBTILE_RemoveNodeFromHead(uint32_t dwParam, GlSubtileCacheStrc * pCache) {
     GlSubtileCacheNodeStrc* pHeadNode = pCache->pActiveHead;
     if (!pHeadNode) {
       return nullptr;
@@ -120,7 +120,7 @@ GlSubtileCacheNodeStrc * __fastcall GLSUBTILE_RemoveNodeFromHead(uint32_t dwPara
     uint8_t* pNext = (uint8_t*)pHeadNode->pNext;
     pCache->pActiveHead = (GlSubtileCacheNodeStrc*)pNext;
     if (pNext) {
-      memset(pNext + 16, 0, 4 * sizeof(pNext[0]));
+      for (int i = 16; i < 20; i++) pNext[i] = 0;
       pHeadNode->pNext = 0;
       pHeadNode->pPrev = 0;
       return pHeadNode;
@@ -152,7 +152,7 @@ static GlSubtileCacheNodeStrc * GLSUBTILE_RemoveNodeByIndex(GlSubtileCacheStrc *
     if (pTargetNode == pCache->pActiveTail) {
       pPrevTail = (uint8_t*)pCache->pActiveTail->pPrev;
       pCache->pActiveTail = (GlSubtileCacheNodeStrc*)pPrevTail;
-      memset(pPrevTail + 12, 0, 4 * sizeof(pPrevTail[0]));
+      for (int i = 12; i < 16; i++) pPrevTail[i] = 0;
       pTargetNode->pNext = 0;
       pTargetNode->pPrev = 0;
       return pTargetNode;
@@ -172,50 +172,50 @@ static int GLSUBTILE_AllocateNode(GlSubtileCacheStrc * pCache) {
     }
 
     GlSubtileCacheNodeStrc* pGVar1 = pCache->pFreeHead;
-    if (pGVar1) {
-      uint8_t* pNewFreeHead;
-      pNewFreeHead = (uint8_t*)pGVar1->pNext;
-      pCache->pFreeHead = (GlSubtileCacheNodeStrc*)pNewFreeHead;
-      if (!pNewFreeHead) {
-        pCache->pFreeTail = 0;
-      } else {
-        memset(pNewFreeHead + 16, 0, 4 * sizeof(pNewFreeHead[0]));
-      }
+    if (!pGVar1) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9d);
+      exit(-1);
+    }
 
-      pGVar1->pNext = 0;
-      pGVar1->pPrev = 0;
-      if (!pCache->pActiveHead) {
-        pCache->nUsedCount++;
-        pCache->pActiveHead = pGVar1;
-        pCache->pActiveTail = pGVar1;
-        return pGVar1->nIndex + 1;
-      }
+    uint8_t* pNewFreeHead;
+    pNewFreeHead = (uint8_t*)pGVar1->pNext;
+    pCache->pFreeHead = (GlSubtileCacheNodeStrc*)pNewFreeHead;
+    if (pNewFreeHead) {
+      for (int i = 16; i < 20; i++) pNewFreeHead[i] = 0;
+    } else {
+      pCache->pFreeTail = 0;
+    }
 
-      pCache->pActiveTail->pNext = pGVar1;
-      pGVar1->pPrev = pCache->pActiveTail;
+    pGVar1->pNext = 0;
+    pGVar1->pPrev = 0;
+    if (!pCache->pActiveHead) {
       pCache->nUsedCount++;
+      pCache->pActiveHead = pGVar1;
       pCache->pActiveTail = pGVar1;
       return pGVar1->nIndex + 1;
     }
 
-    Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9d);
-    exit(-1);
+    pCache->pActiveTail->pNext = pGVar1;
+    pGVar1->pPrev = pCache->pActiveTail;
+    pCache->nUsedCount++;
+    pCache->pActiveTail = pGVar1;
+    return pGVar1->nIndex + 1;
 }
 
 // Promotes a subtile cache node to most-recently-used position (active list tail).
 void __fastcall GLSUBTILE_PromoteNodeToMRU(GlSubtileCacheStrc * pCache, int nNodeIndex1Based) {
     GlSubtileCacheNodeStrc* pNode;
-    if ((int)pCache->nUsedCount < 2) {
+    if ((int)pCache->nUsedCount <= 1) {
       return;
     }
     if (!nNodeIndex1Based) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xba);
       exit(-1);
-    } else if ((int)pCache->nMaxEntries < nNodeIndex1Based) {
+    } else if (nNodeIndex1Based > (int)pCache->nMaxEntries) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xbb);
       exit(-1);
     } else {
-      if (!(0 < nNodeIndex1Based)) {
+      if (!(1 <= nNodeIndex1Based)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xbc);
         exit(-1);
       }

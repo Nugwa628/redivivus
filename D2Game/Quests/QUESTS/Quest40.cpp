@@ -123,7 +123,7 @@ bool __fastcall Q40_ActiveFilter(D2QuestDataStrc * pQuestData, int32_t nTargetCl
 }
 
 // Quest 40 (Siege on Harrogath) NPC-gossip callback. Dispatches on monster-class ID and dialog message index. For Drehya, Malah, Town (Korlic?), Qualkehk, and Deckard Cain: if the matching message index is spoken, calls PLAYER_SetSpokenWithNPC. Special Malah path also fetches the SiegeOnHaggorath quest data and sets nStateFlag=1 on first introduction (gate: bIsNotIntroduction && nStateFlag==0).
-void __fastcall Q40_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q40_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     D2QuestDataStrc* pSiegeQuestData;
     bool bMsgMatched;
     eD2MonsterClassId nMonStatsId;
@@ -131,6 +131,8 @@ void __fastcall Q40_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     short int nMsgIndex;
     nMsgIndex = pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex;
     switch (nMonStatsId) {
+      case MonsterUnitDeckardCain6:
+        bMsgMatched = nMsgIndex == 0x4e23; break;
       case MonsterUnitDrehya1:
         bMsgMatched = nMsgIndex == 0x4e2e;
       break;
@@ -158,16 +160,14 @@ void __fastcall Q40_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
           break;
         }
       goto mark_spoken;
+      default:
+        return;
       case MonsterUnitQualkehk:
         if (nMsgIndex == 0x4e63 || nMsgIndex == 0x4e62) {
           goto mark_spoken;
         }
       bMsgMatched = nMsgIndex == 0x4e61;
       break;
-      default:
-        return;
-      case MonsterUnitDeckardCain6:
-        bMsgMatched = nMsgIndex == 0x4e23;
     }
 
     if (!bMsgMatched) {

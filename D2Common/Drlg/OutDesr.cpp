@@ -28,7 +28,7 @@ void __stdcall PlacePresetVariants(D2DrlgLevelStrc * pLevel, D2LvlPrestId * pLev
     uint32_t nRandVariantIdx;
     int nFileIdx;
     int nFileCount;
-    if ((int)nVariants < 1) {
+    if ((int)nVariants <= 0) {
       nRandVariantIdx = 0;
     } else {
       D2SeedStrc DVar1;
@@ -40,7 +40,7 @@ void __stdcall PlacePresetVariants(D2DrlgLevelStrc * pLevel, D2LvlPrestId * pLev
       } else {
         DVar1 = D2_SEED_NEXT(pLevel->sSeed);
         pLevel->sSeed = DVar1;
-        nRandVariantIdx = (uint32_t)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) % (uint64_t)nVariants);
+        nRandVariantIdx = (uint32_t)(DVar1.nSeedLow % nVariants);
       }
     }
 
@@ -51,9 +51,7 @@ void __stdcall PlacePresetVariants(D2DrlgLevelStrc * pLevel, D2LvlPrestId * pLev
 
     uint32_t nIterCountdown = nVariants;
     do {
-      if (!bIterateFiles) {
-        Outdoors::SpawnOutdoorLevelPreset(pLevel, pLevelPrestIds[nRandVariantIdx], -1, 0, '\x0f');
-      } else {
+      if (bIterateFiles) {
         pLvlPrest = DATATBLS::LvlTbls::TXT_LvlPrest_GetLine(pLevelPrestIds[nRandVariantIdx]);
         nFileCount = pLvlPrest->Files;
         nFileIdx = 0;
@@ -63,6 +61,8 @@ void __stdcall PlacePresetVariants(D2DrlgLevelStrc * pLevel, D2LvlPrestId * pLev
             nFileIdx++;
           } while (nFileIdx < nFileCount);
         }
+      } else {
+        Outdoors::SpawnOutdoorLevelPreset(pLevel, pLevelPrestIds[nRandVariantIdx], -1, 0, '\x0f');
       }
 
       nRandVariantIdx = (int)(nRandVariantIdx + 1) % (int)nVariants;
@@ -269,6 +269,20 @@ static void PlaceCliffs(D2DrlgLevelStrc * pLevel) {
     } while (nEntriesLeft);
 }
 
+} // namespace D2Common::Drlg::OutDesr
+
+namespace D2Common::Drlg::Outdoors {
+
+static void AddAct124SecondaryBorderSubId213(D2DrlgLevelStrc * pLevel) {
+    AddAct124SecondaryBorder(pLevel, 2, 0x16c);
+    AddAct124SecondaryBorder(pLevel, 1, 0x16c);
+    AddAct124SecondaryBorder(pLevel, 3, 0x16c);
+}
+
+} // namespace D2Common::Drlg::Outdoors
+
+namespace D2Common::Drlg::OutDesr {
+
 void __fastcall AddExits(D2DrlgLevelStrc * pLevel) {
     int32_t nLine;
     switch (pLevel->eD2LevelId) {
@@ -368,7 +382,7 @@ static void PlaceTombEntriesInCanyon(D2DrlgLevelStrc * pLevel) {
     do {
       Outdoors::SpawnOutdoorLevelPresetEx(pLevel, pTombTableEntry[-1], *pTombTableEntry, pTombTableEntry[-3], pTombTableEntry[-2], 0);
       pTombTableEntry += 4;
-    } while ((int)pTombTableEntry < (uintptr_t)((char*)&gaTombCanyonPresetOffsets + 156));
+    } while ((int)pTombTableEntry < (int)((uintptr_t)((char*)&gaTombCanyonPresetOffsets + 156)));
 
     Outdoors::SpawnOutdoorLevelPresetEx(pLevel, 4, 4, 0x18a, -1, 0);
 }

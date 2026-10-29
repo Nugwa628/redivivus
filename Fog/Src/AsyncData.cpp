@@ -87,7 +87,7 @@ void __stdcall STRUCT_FreeAsyncData() {
       D2AsyncDataStrc* pMemoryToFree;
       nIndex = 0;
       pMemoryToFree = pD2AsyncDataStrc;
-      if (gnAsyncDataHandleBufferSize) {
+      if ((uint32_t)gnAsyncDataHandleBufferSize > 0) {
         do {
           pSlot = (void*)((uintptr_t)&pMemoryToFree->aSlots[0].hEvent + nSlotOffset);
           if (pSlot && *(HANDLE*)pSlot) {
@@ -151,7 +151,7 @@ D2AsyncDataSlotStrc * __stdcall ASYNCDATA_AllocSlot() {
 
     uint32_t nSlotIndex = 0;
     D2AsyncDataSlotStrc* pSlot = pD2AsyncDataStrc->aSlots;
-    if (gnAsyncDataHandleBufferSize) {
+    if ((uint32_t)gnAsyncDataHandleBufferSize > 0) {
       do {
         if (pSlot->bFree) {
           pSlot->bFree = 0;
@@ -164,7 +164,7 @@ D2AsyncDataSlotStrc * __stdcall ASYNCDATA_AllocSlot() {
     }
 
     nSlotIndex = 0;
-    if (gnAsyncDataHandleBufferSize) {
+    if ((uint32_t)gnAsyncDataHandleBufferSize > 0) {
       DWORD dwWaitResult;
       do {
         pCandidateSlot = (D2AsyncDataSlotStrc*)((uintptr_t)&pD2AsyncDataStrc->aSlots[0].hEvent + nByteOffset);
@@ -214,7 +214,7 @@ D2AsyncData_Line0x128 * __fastcall STRUCT_AllocAsyncData_Line0x128(D2PoolManager
           exit(-1);
         }
       }
-      if ((int)nReadSize < 1) {
+      if ((int)nReadSize <= 0) {
         nReadSize = Source::SFile::ERRORMANAGER_FGetFileSize(pAsyncData->pFile, (LPDWORD)0x0);
       }
 
@@ -446,7 +446,10 @@ void __fastcall ASYNCDATA_SetResult(D2AsyncData_Line0x128 * pAsyncData, void * p
     if (!pAsyncData) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x27e);
       exit(-1);
-    } else if ((pAsyncData->nFlags & 0xfffffff0U) == 0x41737960) {
+    } else if ((pAsyncData->nFlags & 0xfffffff0U) != 0x41737960) {
+      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x27f);
+      exit(-1);
+    } else {
       if (!(pAsyncData->nFlags & 1U)) {
         ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x281);
         exit(-1);
@@ -456,9 +459,6 @@ void __fastcall ASYNCDATA_SetResult(D2AsyncData_Line0x128 * pAsyncData, void * p
       pAsyncData->pReadBuffer = pNewBuffer;
       pAsyncData->nReadSize = nNewSize;
       return;
-    } else {
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x27f);
-      exit(-1);
     }
 }
 

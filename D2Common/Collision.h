@@ -57,13 +57,6 @@ void __fastcall FreeRoomCollisionGrid(struct D2PoolManagerStrc * pMemory, struct
 eCollisionFlags __stdcall CheckCollision_BlockPlayerMissile(struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, eCollisionFlags eCollisionFlag);
 void __stdcall AddCollision(struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, eCollisionFlags eCollisionFlag);
 void __stdcall RemoveCollision(struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, int32_t eCollisionFlag);
-// The two stack locals at -0x38 and -0x28 are ONE D2BoundingBoxStrc[3]. BoundnigBox_AdaptBoundingBoxToGrid (0064cdf0) writes up to 3 sub-boxes through the pointer it is handed and the loop here walks elements 1..n-1 from it; naming only the first two elements made the callee's third write land on whatever local the compiler put next, which smashed pCollisionGrid with a tile coordinate.
-int16_t __fastcall CheckCollision_BoundingBox(struct D2RoomStrc * pRoom, struct D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag);
-// Tests whether any cell within pBoundingBox has eCollisionFlag set in the nearby room's collision grid. Resolves the best containing room, splits the box with BoundnigBox_AdaptBoundingBoxToGrid, and recurses for overflow sub-boxes. Returns COLLIDE_NONE if all cells pass, COLLIDE_BLOCK_PLAYER if any cell is blocked or no grid is found.
-// The stack locals at -0x38 and -0x28 are ONE D2BoundingBoxStrc[3], the same frame group as CheckCollision_BoundingBox (0064ceb0). BoundnigBox_AdaptBoundingBoxToGrid writes up to 3 sub-boxes through the pointer it is handed; naming them separately lets a write land on an unrelated local.
-int32_t __fastcall CheckCollision_BlockPlayer_BoundingBox(struct D2RoomStrc * pRoom, struct D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag);
-void __fastcall RemoveCollision_BoundingBox(struct D2RoomStrc * pRoom, struct D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag);
-void __fastcall AddCollision_BoundingBox(struct D2RoomStrc * pRoom, struct D2BoundingBoxStrc * pBoundingBox, int32_t eCollisionFlag);
 struct D2BoundingBoxStrc * __fastcall BoundingBox(struct D2BoundingBoxStrc * pBox, int32_t nX, uint32_t nVectorY, int32_t nY, uint32_t nVectorX);
 eCollisionFlags __stdcall CheckCollision_Vector(struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, uint32_t nVectorX, uint32_t nVectorY, int32_t eCollisionFlag);
 eCollisionFlags __stdcall CheckCollision_BlockAll_Type(struct D2RoomStrc * pRoom, int32_t nX, int32_t nY, eD2CollisionShapeType nType, int32_t eCollisionFlag);

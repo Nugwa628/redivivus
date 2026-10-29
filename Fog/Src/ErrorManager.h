@@ -94,26 +94,6 @@ void __stdcall FormatDebugOutputLogOnly(char * szText, char firstArg);
 // Returns int 2 ('mov eax,2' at 00408637, before the only RET at 00408657); the dispatcher
 // compares that EAX at 00403f28 and 00403f2f, matching the pfnFogExceptionFilter slot.
 int __fastcall DumpLog(struct D2CrashReportStrc * pCrashInfo, void * pUserContext);
-// Fog's implementation of Storm's Blizzard-error callback: writes Crash.txt (summary, line number,
-// thread context, registers, thread list, attachments) and hands it to ErrorReportingLaunch.
-// @abi __fastcall(char *szSummary @ECX, char *szReason @EDX, char **ppszAttachPaths @Stack[0x4],
-// uint32_t nAttachPathCount @Stack[0x8], uint32_t nLineNumber @Stack[0xc], bool bSilentFlag
-// @Stack[0x10]) -> void.
-// @evidence It is installed with SErrSetBlizzardErrorFunction, so its ABI is the pfnBlizzardError
-// slot's, and RET 0x10 confirms exactly four stack parameters, after szSummary in ECX and szReason
-// in EDX.
-// @evidence The direct caller settles the EDX slot independently of the funcdef: FOG_ErrorHandler
-// 00408900 now lifts as CRASH_FillupCrashTxt(szErrorMessageBuffer, szFormattedReasonBuffer, NULL, 0,
-// nLine, false) - ECX is the composed "[Type] (reason) failed at file(line)" line and EDX is the raw
-// reason.
-// @evidence The body confirms the ordering too: szSummary feeds "<Inspector.Summary:>
-// %s",
-// nLineNumber "<Inspector.LineNumber>%u", ppszAttachPaths/nAttachPathCount the attachment loop, and
-// bSilentFlag sets bit 0 of the D2BlizzardErrorArgument flags.
-// @gap The pfnBlizzardError funcdef calls the EDX slot szTitle; this body never reads it, and the
-// caller puts the reason there, so the local name follows the caller. Return type is void because
-// the slot is void - EAX at the epilogue is left over from FILETOOLS_SafeCloseFile.
-void __fastcall CRASH_FillupCrashTxt(char * szSummary, char * szReason, char * * ppszAttachPaths, uint32_t nAttachPathCount, uint32_t nLineNumber, bool bSilentFlag);
 BOOL __fastcall CheckErrorDuringError(char * szText, int32_t nLine, char * szReason);
 // Main error handling dispatcher for Fog subsystem. Validates error is not recursive via CheckErrorDuringError, logs the error category, and formats error message with file/line info. For assertion/halt/OOM errors, writes crash report via CRASH_FillupCrashTxt. Uses two 4096-byte buffers: one for vsnprintf formatting the reason (varargs), one for the final "[ErrorType] (reason) failed at file(line)" message. Sets global error state to prevent cascading errors.
 // @sourcefile .\Src\ErrorManager.cpp

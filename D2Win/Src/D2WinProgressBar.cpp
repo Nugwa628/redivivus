@@ -66,7 +66,7 @@ BOOL __fastcall Draw(::D2WinProgressBar * pProgressBar) {
     *pStateField |= 1;
     dwState = pNewBar->sControl.dwState;
     pNewBar->fCurrentProgress = 0.0;
-    pNewBar->sControl.dwState = dwState | 4;
+    pNewBar->sControl.dwState = dwState | gadwBitMasks[2];
     pNewBar->sControl.pDC6 = 0;
     pNewBar->sControl.dwPosX = dwPosX;
     pNewBar->sControl.dwPosY = dwPosY;

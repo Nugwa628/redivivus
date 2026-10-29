@@ -401,8 +401,6 @@ struct D2QServerClientConnectionStrc * __fastcall FindClientBySocket(struct D2QS
 void __fastcall IncrementClientRefCount(struct D2QServerStrc * pQServer, struct D2QServerClientConnectionStrc * pQServerClient);
 void __stdcall LogHackList(int nHacklistSize);
 void __fastcall SweepExpiredHackEntries(struct D2QServerStrc * pQServer);
-// @sourcefile .\Src\QServer\QServer.cpp
-void __fastcall HACKL_RemoveIpFromHacklist(struct D2QServerStrc * pQServer, uint32_t nIpAddress, uint32_t dwParam3);
 int __thiscall HACKL_CheckAndResetHacklistEntry(struct D2QServerStrc * pQServer, uint32_t nIpAddress);
 // Checks whether the given IP currently has at least the configured per-IP connection limit.
 BOOL __fastcall IsPerIpLimitReached(struct D2QServerStrc * pQServer, in_addr * pClientIp);

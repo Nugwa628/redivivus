@@ -251,7 +251,7 @@ uint32_t __fastcall ARCHIVE_RemoveNode(int32_t pThis, int * pNode) {
     }
 
     Storm::SMem::SMemFree(pNode, s___AUTALLOCREC___00711480, -2, 0);
-    return (int)nValue < 1 ? 0 : nValue;
+    return (int)nValue <= 0 ? 0 : nValue;
 }
 
 // NOTE: Callee-saved register params inferred (medium confidence): param_esi (ESI): LPOVERLAPPED, param_edi (EDI): LPOVERLAPPED, param_ebx (EBX): LPOVERLAPPED
@@ -290,11 +290,11 @@ void ARCHIVE_WriteMemoryCheckReport() {
     while (nResult) {
       int**** pNewRec;
       pNewRec = (int****)Storm::SMem::SMemAlloc(0x130, s___AUTALLOCREC___00711480, -2, 8);
-      if (!pNewRec) {
-        pNewRec = 0;
-      } else {
+      if (pNewRec) {
         *pNewRec = 0;
         pNewRec[1] = 0;
+      } else {
+        pNewRec = 0;
       }
 
       pSrcInfo = &sHeapDetails;
@@ -471,13 +471,13 @@ uint32_t __fastcall UNIT_GetModuloFromSeed(D2SeedStrc * pSeed, uint32_t nModulo)
 
 uint32_t __fastcall RANDOM_RandomNumberSelector(D2SeedStrc * pSeed, uint32_t nModulo) {
     D2SeedStrc DVar1;
-    if ((int)nModulo < 1) {
+    if ((int)nModulo <= 0) {
       return 0;
     }
     if (nModulo & nModulo - 1) {
       DVar1 = D2_SEED_NEXT(*pSeed);
       *pSeed = DVar1;
-      return (uint32_t)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) % (uint64_t)nModulo);
+      return (uint32_t)(DVar1.nSeedLow % nModulo);
     }
 
     DVar1 = D2_SEED_NEXT(*pSeed);

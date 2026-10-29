@@ -228,7 +228,29 @@ int __fastcall PLRMODES_TryCancelModeAndMoveToLocation(::SGAMEDATA * pGame, D2Un
         return 1;
       }
     }
-    if (!pSkillTxt->interrupt) {
+    if ((*((uint8_t *)pSkillTxt + 0x7) & gadwBitMasks[7])) {
+      D2StatListExStrc* pConcStatList;
+      eStunState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_concentration);
+      if (eStunState == STATE_none) {
+        eStunState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_concentrate);
+        if (eStunState == STATE_none) {
+          return 1;
+        }
+      } else {
+        pConcStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit, STATE_concentration);
+        nConcPct = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pConcStatList, UNITSTAT_skill_concentration, 0);
+        nConcRandRoll = D2Client::Archive::UNIT_GetModuloFromSeed(&pUnit->sSeed, 100);
+        if ((int)nConcRandRoll >= nConcPct) {
+          eStunState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_concentrate);
+          if (eStunState == STATE_none) {
+            return 1;
+          }
+        }
+      }
+      if (pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Neutral) {
+        return 0;
+      }
+    } else {
       if (pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Neutral) {
         switch (nX) {
           case 7:
@@ -254,28 +276,6 @@ int __fastcall PLRMODES_TryCancelModeAndMoveToLocation(::SGAMEDATA * pGame, D2Un
             return 0;
         }
       }
-    } else {
-      D2StatListExStrc* pConcStatList;
-      eStunState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_concentration);
-      if (eStunState == STATE_none) {
-        eStunState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_concentrate);
-        if (eStunState == STATE_none) {
-          return 1;
-        }
-      } else {
-        pConcStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit, STATE_concentration);
-        nConcPct = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pConcStatList, UNITSTAT_skill_concentration, 0);
-        nConcRandRoll = D2Client::Archive::UNIT_GetModuloFromSeed(&pUnit->sSeed, 100);
-        if (nConcPct <= (int)nConcRandRoll) {
-          eStunState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_concentrate);
-          if (eStunState == STATE_none) {
-            return 1;
-          }
-        }
-      }
-      if (pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Neutral) {
-        return 0;
-      }
     }
 
     PLRMODES_MoveToLocation(pGame, pUnit, nullptr, 1, 0, 0, 1);
@@ -295,11 +295,11 @@ void __fastcall PLRMODES_SetIdleMode(::SGAMEDATA * pGame, D2UnitStrc * pUnit, DW
     D2Common::Units::SetCurrentSkill(pUnit, nullptr);
 }
 
-int32_t __fastcall PLRMODES_ModeCallback_DeathDead(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
+static int32_t __fastcall PLRMODES_ModeCallback_DeathDead(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
     return 1;
 }
 
-int32_t __fastcall PLRMODES_ModeCallback_Neutral(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
+static int32_t __fastcall PLRMODES_ModeCallback_Neutral(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
     return 1;
 }
 
@@ -385,7 +385,7 @@ static BOOL PLRMODES_DrainStamina(D2UnitStrc * pUnit) {
     }
 
     int nStaminaDrain = pUnit->nClassId;
-    if (!(-1 < nStaminaDrain && nStaminaDrain < sgptDataTable->nTxtCharStatsSize && sgptDataTable->pTxtCharStats + nStaminaDrain)) {
+    if (!(0 <= nStaminaDrain && nStaminaDrain < sgptDataTable->nTxtCharStatsSize && sgptDataTable->pTxtCharStats + nStaminaDrain)) {
       return 0;
     }
 
@@ -470,7 +470,7 @@ void __fastcall SERVERUNIT_GoldAmmountForDeadBody(::SGAMEDATA * pGame, D2UnitStr
 }
 
 // Removes an equipped item (pUnit2) from the player's body at nBodyLoc and prepares it for dropping. Swaps primary weapon if needed, nulls the body-loc slot, handles belt removal for belt-type items, unequips item stats, marks item as REMOVED, issues ITEMCMD_DELETE and ITEMCMD_BODYLOC_TAKE_ITEM, refreshes inventory. Halts with error if item doesn't belong to the player's inventory.
-void __stdcall PLRMODES_UnequipAndPrepareItemForDrop(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pUnit2, int32_t nBodyLoc) {
+static void __stdcall PLRMODES_UnequipAndPrepareItemForDrop(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2UnitStrc * pUnit2, int32_t nBodyLoc) {
     D2InventoryStrc* pInventory = pUnit->pInventory;
     int32_t bShouldReturnItem = D2Common::ITEMS::Items::ReturnFalse(pUnit, pUnit2);
     D2Common::INVENTORY::Inventory::INVENTORY_SwapPrimaryWeaponOnRemoval(pInventory, pUnit2);
@@ -510,7 +510,7 @@ void __stdcall PLRMODES_UnequipAndPrepareItemForDrop(::SGAMEDATA * pGame, D2Unit
 }
 
 // @sourcefile .\PLAYER\PlrModes.cpp
-void PLRMODES_ClearCursorAndDeleteItem(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
+static void PLRMODES_ClearCursorAndDeleteItem(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) {
     D2InventoryStrc* pInventory = pUnit->pInventory;
     D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrModes.cpp", 0x27d);
     GAME::SCmd::NET_D2GS_SERVER_Send_0x42_DESTROYHANDITEM(pClient, pUnit);
@@ -522,7 +522,7 @@ void PLRMODES_ClearCursorAndDeleteItem(D2UnitStrc * pUnit, D2UnitStrc * pUnit2) 
 
 // Drops all equipped items (body locations -1 through 12) and all carried gold from pUnit onto the ground, typically called on player death. Cursor item (body loc -1) is cleared from inventory and deleted before dropping. Each body-loc item is unequipped via PLRMODES_UnequipAndPrepareItemForDrop, cloned from serialised data, and placed at the nearest free ground spot via FindBestSpotToSpawnItem/DropItem. After equipment, drains UNITSTAT_gold to 0 and calls GOLD_DropGoldFromInventory.
 // @sourcefile .\PLAYER\PlrModes.cpp
-void __stdcall PLRMODES_DropAllEquipmentAndGold(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall PLRMODES_DropAllEquipmentAndGold(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2ClientStrc* pClient;
     D2RoomStrc* pSpawnRoom;
     int nBodyLoc_00;
@@ -583,7 +583,7 @@ void __stdcall PLRMODES_DropAllEquipmentAndGold(::SGAMEDATA * pGame, D2UnitStrc 
     Player::GOLD_DropGoldFromInventory(pGame, pUnit, pUnit->nUnitGUID, nGoldAmount);
 }
 
-int32_t __stdcall PLRMODES_CleanupInvalidCorpses(::SGAMEDATA * pGame, D2UnitStrc * pUnitRaw) {
+static int32_t __stdcall PLRMODES_CleanupInvalidCorpses(::SGAMEDATA * pGame, D2UnitStrc * pUnitRaw) {
     uint32_t dwFindGUID;
     D2UnitStrc* pFoundUnit;
     D2InventoryStrc* pInventory = pUnitRaw->pInventory;
@@ -608,6 +608,211 @@ int32_t __stdcall PLRMODES_CleanupInvalidCorpses(::SGAMEDATA * pGame, D2UnitStrc
 
     return nCorpseCount;
 }
+
+} // namespace D2Game::PLAYER::PlayerModes
+
+namespace D2Game {
+
+// @sourcefile .\PLAYER\PlrModes.cpp
+D2UnitStrc * __fastcall PLRMODES_CreateDeadBody(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nX, int32_t nY, D2UnitStrc * pRoom) {
+    D2RoomStrc* pSpawnRoom;
+    D2UnitStrc* pUnit_00;
+    D2ClientStrc* pClient;
+    char* szName;
+    D2UnitStrc* pItemUnit;
+    int* pGridSlot;
+    BOOL BVar2;
+    uint32_t dwParam;
+    uint32_t uVar3;
+    int iVar4;
+    int nExpQuotient;
+    int64_t lExpTimes75;
+    POINT* pNewPosition;
+    uint8_t nMaxSearchRadius;
+    int32_t iVar5;
+    POINT sUnitCoords;
+    POINT sDropCoords;
+    D2UnitStrc* pSavedBodyUnit;
+    int32_t nBodyLocIndex;
+    D2InventoryStrc* pCorpseInventory;
+    D2UnitStrc* pSlotItem;
+    pSlotItem = pRoom;
+    D2UnitStrc* pOrigUnit;
+    pOrigUnit = pUnit;
+    ::SGAMEDATA* pSavedGame;
+    pSavedGame = pGame;
+    PLAYER::PlayerModes::PLRMODES_CleanupInvalidCorpses(pGame, pUnit);
+    D2InventoryStrc* pPlayerInventory;
+    pPlayerInventory = pUnit->pInventory;
+    uint32_t uVar1;
+    uVar1 = D2Common::INVENTORY::Inventory::INVENTORY_GetCorpseCount(pPlayerInventory);
+    if (0xf < uVar1) {
+      PLAYER::PlayerModes::PLRMODES_DropAllEquipmentAndGold(pGame, pUnit);
+      return nullptr;
+    }
+    if (!pRoom) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2fd);
+      exit(-1);
+    } else {
+      ::SGAMEDATA* pGame_00;
+      pSpawnRoom = D2Client::UNIT::Player::DRLGROOM_FindBetterNearbyRoom((D2RoomStrc*)pSlotItem, nX, nY);
+      if (!pSpawnRoom) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x2ff);
+        exit(-1);
+      } else {
+        pUnit_00 = UNIT::SUnit::CreateUnit(UNIT_PLAYER, pUnit->nClassId, nX, nY, pGame, pSpawnRoom, 1, 0x11, nullptr);
+        pSavedBodyUnit = pUnit_00;
+        if (!pUnit_00) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x304);
+          exit(-1);
+        } else {
+          pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, ".\\PLAYER\\PlrModes.cpp", 0x306);
+          pUnit_00->eUnitFlags &= ~UNITFLAG_CANBEATTACKED;
+          UNIT::SUnit::SetClient(pUnit_00, pClient);
+          szName = GAME::Clients::GetCharName(pClient);
+          D2Common::Units::SetNameInPlayerData(pUnit_00, szName);
+          UNIT::SUnit::SetSeed(pUnit_00, &pSavedGame->pGameSeed);
+          D2Common::Units::SetupUpdateFlag(pUnit_00, 0x11);
+          D2Common::DATATBLS::ItemStats::SetState(pUnit_00, STATE_playerbody, 1);
+          pUnit_00->eUnitFlagsEx |= UNITFLAGEX_ISCORPSE;
+          pUnit_00->eUnitFlags |= UNITFLAG_TARGETABLE;
+          uVar1 = GAME::Clients::GetExperience(pClient);
+          if ((int)uVar1 < 0x100001) {
+            iVar4 = (int)(uVar1 * 0x4b) >> 0x1f;
+            nExpQuotient = (int)(uVar1 * 0x4b) / 100 + iVar4;
+            lExpTimes75 = (uint64_t)((uint64_t)(uint32_t)nExpQuotient << 32 | (uint64_t)(uint32_t)(nExpQuotient - iVar4));
+          } else {
+            iVar4 = (int)uVar1 >> 0x1f;
+            if ((int)(uVar1 & -16) < 0x640) {
+              lExpTimes75 = __allmul(uVar1, iVar4, 0x4b, 0);
+              lExpTimes75 = (int64_t)lExpTimes75 / 100;
+            } else {
+              nExpQuotient = (int)uVar1 / 100 + iVar4;
+              lExpTimes75 = (uint64_t)((uint64_t)(uint32_t)nExpQuotient << 32 | (uint64_t)(uint32_t)((nExpQuotient - iVar4) * 0x4b));
+            }
+          }
+
+          pCorpseInventory = (D2InventoryStrc*)lExpTimes75;
+          GAME::Clients::SetExperience(pClient, 0);
+          D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit_00, UNITSTAT_experience, (int32_t)pCorpseInventory, 0);
+          D2Common::INVENTORY::Inventory::INVENTORY_AddCorpse(pPlayerInventory, pUnit_00->nUnitGUID, 0, UNIT_MONSTER);
+          pCorpseInventory = pUnit_00->pInventory;
+          if (pUnit_00->nUnitGUID == pUnit->nUnitGUID) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x31a);
+            exit(-1);
+          }
+
+          D2Common::INVENTORY::Inventory::INVENTORY_SetOwnerGUID(pCorpseInventory, pUnit->nUnitGUID);
+          nBodyLocIndex = -1;
+          do {
+            iVar5 = nBodyLocIndex;
+            if (nBodyLocIndex == -1) {
+              pSlotItem = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pPlayerInventory);
+            } else {
+              pSlotItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemByGridOffset(pPlayerInventory, nBodyLocIndex);
+            }
+            if (pSlotItem) {
+              if (iVar5 == -1) {
+                PLAYER::PlayerModes::PLRMODES_ClearCursorAndDeleteItem(pUnit, pSlotItem);
+                pUnit = pOrigUnit;
+              } else {
+                if (pSlotItem->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Neutral) {
+                  Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x339);
+                  exit(-1);
+                }
+
+                PLAYER::PlayerModes::PLRMODES_UnequipAndPrepareItemForDrop(pSavedGame, pUnit, pSlotItem, iVar5);
+                pUnit_00 = pSavedBodyUnit;
+              }
+
+              pItemUnit = pSlotItem;
+              D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pSlotItem, INVPAGE_INVENTORY);
+              pItemUnit = ITEMS::Items::Drop::ITEM_CloneFromSerializedData(pSavedGame, pItemUnit, pUnit, 1);
+              if (nBodyLocIndex == -1) {
+                iVar5 = D2Common::Units::GetInventoryPage(pUnit_00, 0, pSavedGame->bExpansion);
+                pGridSlot = D2Common::INVENTORY::Inventory::INVENTORY_AutoPlaceItemInGrid(pCorpseInventory, pItemUnit, iVar5, 0, 0, ".\\PLAYER\\PlrModes.cpp", 0x349);
+                if (pGridSlot) {
+                  BVar2 = D2Common::INVENTORY::Inventory::PutItemInInventory(pCorpseInventory, pItemUnit, 1);
+                  if (BVar2) {
+                    if (pItemUnit) {
+                      pItemUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
+                    }
+
+                    D2Common::Units::SetupUpdateFlag(pItemUnit, 0);
+                    if (pItemUnit) {
+                      pItemUnit->eUnitFlags &= ~UNITFLAG_ISRESURRECT;
+                    }
+
+                    D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pItemUnit, ITEMCMD_INVENTORY_PUT_ITEM, 1);
+                    break;
+                  }
+                }
+              } else {
+                BVar2 = D2Common::INVENTORY::Inventory::INVENTORY_GetItemAtBodyLoc(pCorpseInventory, pItemUnit, nBodyLocIndex);
+                if (BVar2) {
+                  dwParam = 3;
+                  if (nBodyLocIndex == 0xb || nBodyLocIndex == 0xc) {
+                    dwParam = 4;
+                  }
+
+                  BVar2 = D2Common::INVENTORY::Inventory::PutItemInInventory(pCorpseInventory, pItemUnit, dwParam);
+                  if (BVar2) {
+                    D2Common::ITEMS::Items::SetBodyLoc(pItemUnit, (eD2BodyLoc)nBodyLocIndex);
+                    if (pItemUnit) {
+                      pItemUnit->eUnitFlags &= ~UNITFLAG_TARGETABLE;
+                    }
+
+                    D2Common::Units::SetupUpdateFlag(pItemUnit, 1);
+                    D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItemUnit, INVPAGE_None);
+                    D2Common::ITEMS::Items::ITEM_EditItemData_eD2ItemCmd(pItemUnit, ITEMCMD_BODYLOC_PUT_ITEM, 1);
+                    if (pItemUnit) {
+                      pItemUnit->eUnitFlags &= ~UNITFLAG_ISRESURRECT;
+                    }
+
+                    break;
+                  }
+                }
+              }
+
+              D2Common::Units::GetCoords(pUnit, &sUnitCoords);
+              nMaxSearchRadius = 1;
+              uVar3 = 1;
+              pNewPosition = &sDropCoords;
+              pSpawnRoom = D2Common::Units::UNITS_GetRoom(pUnit);
+              pSpawnRoom = ITEMS::Items::Drop::FindBestSpotToSpawnItem(pSpawnRoom, &sUnitCoords, pNewPosition, uVar3, nMaxSearchRadius);
+              ITEMS::Items::Drop::DropItem(pSavedGame, (int32_t)pUnit, pItemUnit, pSpawnRoom, sDropCoords.x, sDropCoords.y);
+              iVar5 = nBodyLocIndex;
+            }
+
+            next_body_loc:
+            nBodyLocIndex = iVar5 + 1;
+            if (0xd <= nBodyLocIndex) {
+              uVar3 = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
+              if (pUnit->eUnitType == UNIT_PLAYER) {
+                D2Common::Units::GetInventoryGoldLimit(pUnit);
+              }
+
+              D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_gold, 0, 0);
+              pGame_00 = pSavedGame;
+              PLAYER::PlayerModes::SERVERUNIT_GoldAmmountForDeadBody(pSavedGame, pUnit, pUnit_00, uVar3, 1);
+              GAME::SCmd::NET_D2GS_SERVER_Send_0x8E_CorpseAssign_Sender(pGame_00, pUnit->nUnitGUID, pUnit_00->nUnitGUID, 1);
+              return pUnit_00;
+            }
+          } while (true);
+
+          D2Common::INVENTORY::Inventory::UpsertToUpdateList(pCorpseInventory, pItemUnit);
+          D2Common::Units::RefreshInventory(pUnit_00, 1);
+          Quests::QUESTS::QUEST_OnItemPickedUp(pSavedGame, pUnit_00, pItemUnit);
+          iVar5 = nBodyLocIndex;
+          goto next_body_loc;
+        }
+      }
+    }
+}
+
+} // namespace D2Game
+
+namespace D2Game::PLAYER::PlayerModes {
 
 static uint32_t __stdcall PLRMODES_IsCorpseOwnedByPlayer(::SGAMEDATA * pGame, D2UnitStrc * pCorpseUnitRaw, D2UnitStrc * pUnit) {
     D2UnitStrc* pCorpseOwner;
@@ -674,8 +879,8 @@ void __fastcall PLRMODES_PickupCorpse(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
       D2Common::INVENTORY::Inventory::INVENTORY_RemoveCorpse(pUnit->pInventory, pCorpseUnit->nUnitGUID, 1);
       nPendingExperience = pCorpseUnit->nUnitGUID;
       eCorpseUnitType = pCorpseUnit->eUnitType;
-      pRoom = D2Common::Units::UNITS_GetRoom(pCorpseUnit);
-      D2Common::DUNGEON::Dungeon::AllocDrlgDelete(pRoom, eCorpseUnitType, nPendingExperience);
+
+      D2Common::DUNGEON::Dungeon::AllocDrlgDelete(D2Common::Units::UNITS_GetRoom(pCorpseUnit), eCorpseUnitType, nPendingExperience);
       GAME::SCmd::NET_D2GS_SERVER_Send_0x8E_CorpseAssign_Sender(pGame, pUnit->nUnitGUID, pCorpseUnit->nUnitGUID, 0);
       D2Common::Units::RemoveCollision_Vector(pCorpseUnit);
       UNIT::SUnit::FreeServerUnit(pGame, pCorpseUnit);
@@ -746,7 +951,7 @@ void __fastcall PLRMODES_StartModeWithTarget(::SGAMEDATA * pGame, D2UnitStrc * p
     UNIT::SUnit::UNITS_SetupAnimTimerEvents(pGame, pUnit);
 }
 
-int32_t __fastcall PLRMODES_ModeCallback_GetHitCast(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
+static int32_t __fastcall PLRMODES_ModeCallback_GetHitCast(::SGAMEDATA * pGame, D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2) {
     return 1;
 }
 
@@ -845,7 +1050,7 @@ static void __stdcall PLRMODES_HandleDepletedAmmoOrThrowable(::SGAMEDATA * pGame
     }
 
     int nQuantity = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_quantity, 0);
-    if (nQuantity >= 1) {
+    if (nQuantity > 0) {
       return;
     }
 
@@ -874,13 +1079,13 @@ static void __stdcall PLRMODES_HandleDepletedAmmoOrThrowable(::SGAMEDATA * pGame
             bIsBroken = D2Common::ITEMS::Items::CheckItemFlag(pReloadItem, ITEMFLAG_BROKEN, 0x531, ".\\PLAYER\\PlrModes.cpp");
             if (!bIsBroken) {
               if (pReloadItem) {
-                if (!pUnit) {
-                  nQuantity = -1;
-                } else {
+                if (pUnit) {
                   nQuantity = pUnit->nClassId;
+                } else {
+                  nQuantity = -1;
                 }
                 if (nQuantity == pReloadItem->nClassId) {
-                  pSlotItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemByGridOffset(pWeaponOwner->pInventory, nBodyLocWord & 0xff);
+                  pSlotItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemByGridOffset(pWeaponOwner->pInventory, (uint8_t)nBodyLocWord);
                   if (!pSlotItem) {
                     bIsBroken = ITEMS::ItemMode::ITEMMODE_ProcessItemBuy((D2UnitStrc**)pGame, pWeaponOwner, pReloadItem->nUnitGUID, (eD2BodyLoc)nBodyLocWord);
                     if (bIsBroken) {
@@ -911,14 +1116,14 @@ static void __stdcall PLRMODES_HandleDepletedAmmoOrThrowable(::SGAMEDATA * pGame
 void PLRMODES_CheckSwapWeaponSkill(eD2Skills * peSkillId, D2UnitStrc * pUnit) {
     eD2Skills eSkillId;
     D2SkillStrc* pSkill = D2Common::Units::GetLeftSkill(pUnit);
-    if (!pSkill) {
-      peSkillId[3] = ~SKILL_Attack;
-      peSkillId[1] = SKILL_Attack;
-    } else {
+    if (pSkill) {
       eSkillId = D2Common::Skills::GetOwnerGUID(pSkill);
       peSkillId[3] = eSkillId;
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\PLAYER\\PlrModes.cpp", 0x56e);
       peSkillId[1] = eSkillId;
+    } else {
+      peSkillId[3] = ~SKILL_Attack;
+      peSkillId[1] = SKILL_Attack;
     }
 
     pSkill = D2Common::Units::GetRightSkill(pUnit);
@@ -1156,7 +1361,7 @@ static void PLRMODES_RecoverStamina(D2UnitStrc * pUnit) {
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_stamina, nRecoveryBonus, 0);
 }
 
-uint8_t PLRMODES_GetHpPercent128(D2UnitStrc * pUnit) {
+uint8_t __fastcall PLRMODES_GetHpPercent128(D2UnitStrc * pUnit) {
     if (!pUnit) {
       return 0x80;
     }
@@ -1186,7 +1391,7 @@ static BOOL PLRMODES_RegenHp(D2UnitStrc * pUnit) {
     nMaxHp = D2Common::Stats::StatsEx::GetTxtMaxHp(pUnit);
     int nNewHp;
     nNewHp = nCurrentHp + nHpRegen;
-    if (nMaxHp < nCurrentHp + nHpRegen) {
+    if (nCurrentHp + nHpRegen > nMaxHp) {
       D2StatListExStrc* pStatList;
       pStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit, STATE_healthpot);
       nNewHp = nMaxHp;
@@ -1214,7 +1419,7 @@ static BOOL PLRMODES_RegenHp(D2UnitStrc * pUnit) {
 
     nNewHpPct128 = 0x80;
     send_hp_pct_if_changed:
-    nHpRegen = (nLastSentHpPct & 0xff) - (nNewHpPct128 & 0xff);
+    nHpRegen = (uint8_t)nLastSentHpPct - ((uint8_t)nNewHpPct128);
     if (nHpRegen < 0) {
       nHpRegen = -nHpRegen;
     }
@@ -1223,7 +1428,7 @@ static BOOL PLRMODES_RegenHp(D2UnitStrc * pUnit) {
     }
 
     UNIT::SUnitMsg::UnitQueuePacket0xAB(pUnit, (uint8_t)nNewHpPct128);
-    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_last_sent_hp_pct, nNewHpPct128 & 0xff, 0);
+    D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_last_sent_hp_pct, (uint8_t)nNewHpPct128, 0);
     return 1;
 }
 
@@ -1246,7 +1451,7 @@ static void PLRMODES_RegenMana(D2UnitStrc * pUnit) {
       if (nCharClassId < 0) {
         return;
       }
-      if (sgptDataTable->nTxtCharStatsSize <= nCharClassId) {
+      if (nCharClassId >= sgptDataTable->nTxtCharStatsSize) {
         return;
       }
       if (!(sgptDataTable->pTxtCharStats + nCharClassId)) {
@@ -1277,7 +1482,7 @@ static void PLRMODES_RegenMana(D2UnitStrc * pUnit) {
         D2Common::Stats::StatsEx::FreeStatList(&pStatList->sStatList);
       }
     }
-    if (nMaxMana - nManaRegen < nCharClassId) {
+    if (nCharClassId > nMaxMana - nManaRegen) {
       nCharClassId = nMaxMana - nManaRegen;
     }
     if (nCharClassId < -nManaRegen) {
@@ -1317,14 +1522,14 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     pLocalPlayer = GAME::Clients::CLIENTS_GetControlUnit(pClient, 0);
     if (pUnit) {
       uint8_t bIsWarping;
-      if (!(pUnit->eUnitFlagsEx >> 0x10 & 1)) {
+      if (pUnit->eUnitFlagsEx >> 0x10 & 1) {
+        bIsWarping = '\x01';
+      } else {
         if (!(pUnit->eUnitFlagsEx >> 0xb & 1) || pUnit == pLocalPlayer) {
           goto send_items_and_mode;
         }
 
         bIsWarping = '\0';
-      } else {
-        bIsWarping = '\x01';
       }
 
       PlayerMsg::SendReassignPlayer(pUnit, pClient, bIsWarping);
@@ -1348,13 +1553,13 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     send_unit_updates:
     UNIT::SUnitMsg::SERVER_UnitQueuePacketSend(pUnit, pClient);
     if (pUnit) {
-      if (pUnit->eUnitFlags >> 10 & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 10 & 1))) {
         UNIT::SUnitMsg::UNITMSG_SendSoundPacketToClient(pUnit, pClient);
       }
-      if (pUnit->eUnitFlags >> 8 & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 8 & 1))) {
         /* Is Valid Target */ UNIT::SUnitMsg::PLAYER_SendHoverTextToClient(pUnit, pClient);
       }
-      if (pUnit->eUnitFlags >> 0xf & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 0xf & 1))) {
         PlayerMsg::UpgradeLifeAndHitClass(pUnit, pClient);
       }
     }
@@ -1508,31 +1713,31 @@ int32_t __fastcall PLRMODES_ModeCallback_WalkRunBlock(::SGAMEDATA * pGame, D2Uni
     dwTickCount = GetTickCount();
     D2UnitDataPlayerStrc* pPlayerData;
     pPlayerData = D2Common::Units::GetPlayerData(pUnit);
-    if (pPlayerData->dwPosHistoryTick + 0x19 < dwTickCount) {
+    if (dwTickCount > pPlayerData->dwPosHistoryTick + 0x19) {
       uint8_t bVar1;
       bVar1 = pPlayerData->nPosHistoryIndex;
-      if (!bVar1) {
-        byPrevSlot = 0x13;
-      } else {
+      if (bVar1) {
         byPrevSlot = bVar1 - 1;
+      } else {
+        byPrevSlot = 0x13;
       }
 
       eTargetUnitType = pUnit->eUnitType;
-      if (eTargetUnitType == UNIT_OBJECT || 3 < (int)eTargetUnitType && (int)eTargetUnitType < 6) {
+      if (eTargetUnitType == UNIT_OBJECT || 3 < (int)eTargetUnitType && (int)eTargetUnitType <= 5) {
         nPosX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosX = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosX = 0;
       }
 
       eTargetUnitType = pUnit->eUnitType;
-      if (eTargetUnitType == UNIT_OBJECT || 3 < (int)eTargetUnitType && (int)eTargetUnitType < 6) {
+      if (eTargetUnitType == UNIT_OBJECT || 3 < (int)eTargetUnitType && (int)eTargetUnitType <= 5) {
         nPosY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosY = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosY = 0;
       }
 
       nDistance = D2Common::PATH::DynamicPath::GetDistanceSquaredXY(nPosX, nPosY, pPlayerData->aPosHistory[byPrevSlot].nX, pPlayerData->aPosHistory[byPrevSlot].nY);
@@ -1541,7 +1746,7 @@ int32_t __fastcall PLRMODES_ModeCallback_WalkRunBlock(::SGAMEDATA * pGame, D2Uni
         pPlayerData->aPosHistory[bVar1].nY = nPosY;
         pPlayerData->nPosHistoryIndex += '\x01';
         pPlayerData->dwPosHistoryTick = dwTickCount;
-        if (0x13 < pPlayerData->nPosHistoryIndex) {
+        if (0x14 <= pPlayerData->nPosHistoryIndex) {
           pPlayerData->nPosHistoryIndex = '\0';
         }
       }
@@ -1576,9 +1781,7 @@ int32_t __fastcall PLRMODES_ModeCallback_WalkRunBlock(::SGAMEDATA * pGame, D2Uni
 
     D2SkillStrc* pSkill;
     pSkill = D2Common::Skills::SKILLS_GetSkillByEnum(eSkill, pUnit);
-    if (!pSkill) {
-      PLRMODES_SetIdleMode(pGame, pUnit, 1, 0, 0);
-    } else {
+    if (pSkill) {
       nPosY = D2Common::Skills::GetSkillMode(pUnit, pSkill);
       if (pUnit->eUnitType == UNIT_PLAYER && pUnit->pUnitData.pUnitDataPlayer) {
         dwTickCount = pUnit->pUnitData.pUnitDataPlayer->nTargetUnitGUID;
@@ -1593,6 +1796,8 @@ int32_t __fastcall PLRMODES_ModeCallback_WalkRunBlock(::SGAMEDATA * pGame, D2Uni
 
       PLRMODES_StartModeID(pGame, pUnit, pSkill, nPosY, eTargetUnitType, dwTickCount, 0);
       nSkillMode = 1;
+    } else {
+      PLRMODES_SetIdleMode(pGame, pUnit, 1, 0, 0);
     }
 
     clear_pending_interact:
@@ -1691,7 +1896,7 @@ void __fastcall PLRMODES_OnModeComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
       pSkill = D2Common::Units::GetCurrentSkill(pUnit);
       if (pSkill) {
         eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\PLAYER\\PlrModes.cpp", 0x779);
-        if (-1 < (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId && sgptDataTable->pTxtSkills[eSkillId].durability) {
+        if (0 <= (int)eSkillId && (int)eSkillId < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkillId && (*((uint8_t *)&sgptDataTable->pTxtSkills[eSkillId] + 0x6) & gadwBitMasks[2])) {
           PLRMODES_CheckWeaponQuantityAndDurability(pGame, pUnit);
           PLRMODES_BreakZeroDurabilityWeapons(pGame, pUnit);
         }

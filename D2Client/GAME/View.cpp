@@ -239,12 +239,12 @@ uint8_t * * __stdcall VIEW_AllocPalettePointerTable(uint32_t nDim, uint32_t nSte
       nMidScaled = nOuterScaled;
       nMidLeft = nDim;
       do {
-        if (nSteps) {
+        if ((uint32_t)nSteps > 0) {
           nInnerLeft = nSteps;
           nAccum = nOuter << 0x10;
           do {
-            nPaletteIdx = (int)(nAccum + (nAccum >> 0x1f & 0xffffU)) >> 0x10;
-            *pWrite = gPaletteTransitionTable + (nPaletteIdx & 0xff) * 0x100;
+            nPaletteIdx = (int)nAccum / 65536;
+            *pWrite = gPaletteTransitionTable + ((uint8_t)nPaletteIdx) * 0x100;
             pWrite++;
             nAccum += nMidScaled / (int)nSteps;
             nInnerLeft--;
@@ -252,7 +252,7 @@ uint8_t * * __stdcall VIEW_AllocPalettePointerTable(uint32_t nDim, uint32_t nSte
         }
 
         nMidScaled += 0x10000;
-        *pWrite = gPaletteTransitionTable + (nPaletteIdx & 0xff) * 0x100;
+        *pWrite = gPaletteTransitionTable + ((uint8_t)nPaletteIdx) * 0x100;
         pWrite++;
         nMidLeft--;
       } while (nMidLeft);
@@ -282,8 +282,8 @@ uint8_t * * __stdcall VIEW_AllocPalettePointerTable2(uint32_t nDim, int32_t nSte
       nMidLeft = nDim;
       do {
         nAccum = nOuter << 0x10;
-        for (nStepLeft = nSteps; nStepLeft; nStepLeft--) {
-          *pWrite = gPaletteTransitionTable + ((int)(nAccum + (nAccum >> 0x1f & 0xffffU)) >> 0x10 & 0xffU) * 0x100;
+        for (nStepLeft = nSteps; (uint32_t)nStepLeft > 0; nStepLeft--) {
+          *pWrite = gPaletteTransitionTable + ((int)nAccum / 65536 & 0xffU) * 0x100;
           pWrite++;
           nAccum += nMidScaled / nSteps;
         }
@@ -488,17 +488,17 @@ void __stdcall VIEW_GenerateRandomViewParams(int32_t nStarIndex, int32_t bRespaw
     uint32_t nYPos;
     D2SeedStrc seed;
     D2SeedStrc* pStarSeed = gpArcaneStarsSeed;
-    if (!bRespawn) {
-      nStarXPos = Archive::UNIT_GetModuloFromSeed(gpArcaneStarsSeed, WindowSizeX);
-    } else {
+    if (bRespawn) {
       seed = D2_SEED_NEXT(*gpArcaneStarsSeed);
       *gpArcaneStarsSeed = seed;
       nStarXPos = (seed.nSeedLow & 7) - 1 + WindowSizeX;
+    } else {
+      nStarXPos = Archive::UNIT_GetModuloFromSeed(gpArcaneStarsSeed, WindowSizeX);
     }
 
     int nWindowHeight = WindowSizeY;
     gaArcaneStarXPos[nStarIndex] = nStarXPos;
-    if (nWindowHeight < 1) {
+    if (nWindowHeight <= 0) {
       nYPos = 0;
     } else if (!(nWindowHeight & nWindowHeight - 1U)) {
       seed = D2_SEED_NEXT(*pStarSeed);
@@ -507,7 +507,7 @@ void __stdcall VIEW_GenerateRandomViewParams(int32_t nStarIndex, int32_t bRespaw
     } else {
       seed = D2_SEED_NEXT(*pStarSeed);
       *pStarSeed = seed;
-      nYPos = (uint32_t)(((uint64_t)d2_bits_of(seed) & 0xffffffff) % (uint64_t)(uint32_t)nWindowHeight);
+      nYPos = (uint32_t)(seed.nSeedLow % (uint32_t)nWindowHeight);
     }
 
     gaArcaneStarYPos[nStarIndex] = nYPos;
@@ -539,8 +539,7 @@ void __stdcall DRAW_Overlay_ArcaneStars() {
       D2Common::Seed::SEED_InitDefault(gpArcaneStarsSeed);
       nInitSeedLow = D2Common::Seed::SEED_GenerateRandomSeed(SHAKE_StartTickcount);
       pSeed = gpArcaneStarsSeed;
-      gpArcaneStarsSeed->nSeedLow = nInitSeedLow;
-      pSeed->nSeedHigh = 0x29a;
+      D2Common::Seed::InitSeed_Param_666(pSeed, nInitSeedLow);
       nColorIdx = 0;
       nBrightness = 0;
       do {
@@ -757,8 +756,7 @@ static void DRAW_Background_Ancients(D2UnitStrc * pPlayerUnit) {
       dwResMode = GetTickCount();
       nCloudSeedVal = D2Common::Seed::SEED_GenerateRandomSeed(dwResMode);
       pAncientsCloudSeed = gpAncientsCloudSeed;
-      gpAncientsCloudSeed->nSeedLow = nCloudSeedVal;
-      pAncientsCloudSeed->nSeedHigh = 0x29a;
+      D2Common::Seed::InitSeed_Param_666(pAncientsCloudSeed, nCloudSeedVal);
       pAncientsCloudSeed = gpAncientsCloudSeed;
       nScrollOffset = 0;
       do {
@@ -766,7 +764,7 @@ static void DRAW_Background_Ancients(D2UnitStrc * pPlayerUnit) {
         *(uint32_t*)((int)gaAncientsCloudXPos + nScrollOffset) = nCloudSeedVal;
         ullSeedValue = D2_SEED_NEXT(*pAncientsCloudSeed);
         *pAncientsCloudSeed = ullSeedValue;
-        *(uint32_t*)((int)gaAncientsCloudYPos + nScrollOffset) = ullSeedValue.nSeedLow + (int)(((uint64_t)d2_bits_of(ullSeedValue) & 0xffffffff) / 0xfa) * -0xfa;
+        *(uint32_t*)((int)gaAncientsCloudYPos + nScrollOffset) = ullSeedValue.nSeedLow % 0xfa;
         ullSeedValue = D2_SEED_NEXT(*pAncientsCloudSeed);
         *pAncientsCloudSeed = ullSeedValue;
         *(uint32_t*)((int)gaAncientsCloudVelocities + nScrollOffset) = (ullSeedValue.nSeedLow & 0xf) + 8;
@@ -780,11 +778,11 @@ static void DRAW_Background_Ancients(D2UnitStrc * pPlayerUnit) {
     do {
       nCloudIdx = WindowSizeX;
       *(int*)((int)gaAncientsCloudXPos + nScrollOffset) += *(int*)((int)gaAncientsCloudVelocities + nScrollOffset);
-      if ((nCloudIdx + 0x170) * 0x10 < *(int*)((int)gaAncientsCloudXPos + nScrollOffset)) {
+      if (*(int*)((int)gaAncientsCloudXPos + nScrollOffset) > (nCloudIdx + 0x170) * 0x10) {
         *(uint32_t*)((int)gaAncientsCloudXPos + nScrollOffset) = -5888;
         ullSeedValue = D2_SEED_NEXT(*pAncientsCloudSeed);
         *pAncientsCloudSeed = ullSeedValue;
-        *(uint32_t*)((int)gaAncientsCloudYPos + nScrollOffset) = ullSeedValue.nSeedLow + (int)(((uint64_t)d2_bits_of(ullSeedValue) & 0xffffffff) / 300) * -300;
+        *(uint32_t*)((int)gaAncientsCloudYPos + nScrollOffset) = ullSeedValue.nSeedLow % 300;
       }
 
       nScrollOffset += 4;
@@ -792,7 +790,7 @@ static void DRAW_Background_Ancients(D2UnitStrc * pPlayerUnit) {
 
     nScrollOffset = 0;
     do {
-      nCloudIdx = (int)(*(int*)((int)gaAncientsCloudXPos + nScrollOffset) + (*(int*)((int)gaAncientsCloudXPos + nScrollOffset) >> 0x1f & 0xfU)) >> 4;
+      nCloudIdx = (int)(*(int*)((int)gaAncientsCloudXPos + nScrollOffset)) / 16;
       sGfxData.pDC6 = gnDrawBackgroundRenderOffset;
       sGfxData.nFrameNumber = 0;
       D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, nCloudIdx, *(int32_t*)((int)gaAncientsCloudYPos + nScrollOffset), -0x22222223, DRAW_LIGHTTRANSPARENT, nullptr);
@@ -807,15 +805,8 @@ static void SHAKE_UpdateShakeSoundVolume(int32_t nShakeIntensity) {
     uint32_t nNewVolume;
     uint32_t nTargetVolume;
     nTargetVolume = nShakeIntensity * 0xff / 0x14;
-    nTargetVolume = (int)nTargetVolume < 1 ? 0 : nTargetVolume;
-    if ((int)nTargetVolume < 0xff) {
-      if (nTargetVolume) {
-        goto ensure_sound_playing;
-      }
-      if (!gnSoundShakeVolume) {
-        return;
-      }
-    } else {
+    nTargetVolume = (int)nTargetVolume <= 0 ? 0 : nTargetVolume;
+    if (!((int)nTargetVolume < 0xff)) {
       nTargetVolume = 0xff;
       ensure_sound_playing:
       if (!gnSoundShakeVolume) {
@@ -828,6 +819,13 @@ static void SHAKE_UpdateShakeSoundVolume(int32_t nShakeIntensity) {
         if (!gnSoundShakeVolume) {
           return;
         }
+      }
+    } else {
+      if (nTargetVolume) {
+        goto ensure_sound_playing;
+      }
+      if (!gnSoundShakeVolume) {
+        return;
       }
     }
 
@@ -908,8 +906,8 @@ D2GameViewStrc * __stdcall AllocGameView() {
       pGameView = D2_NEW_AT(D2GameViewStrc, ".\\GAME\\View.cpp", 0x11d);
       /* int yBottom for SetRect */ /* int xRight for SetRect */ /* int yTop for SetRect */ /* int xLeft for SetRect */ /* LPRECT lprc for SetRect */ SetRect(&pGameView->pView, 0, 0, 0, 0);
       pPalByteTable16x32 = gpViewPalByteTable16x32;
-      pPalByteTable32x16 = gpViewPalByteTable32x16;
       pPalPointerTable = gpViewPalPointerTable32x8;
+      pPalByteTable32x16 = gpViewPalByteTable32x16;
       pGameView->nFlags = 0;
       pGameView->pPalPointerTable32x8 = pPalPointerTable;
       pGameView->pPalByteTable32x16 = pPalByteTable32x16;
@@ -1023,7 +1021,7 @@ void __fastcall SHAKE_AdjustCenterByShake(uint32_t * pCenterX, uint32_t * pCente
     nTicks = nCurrentTickCount - SHAKE_StartTickcount;
     uint32_t nSoundIntensity;
     nSoundIntensity = 0;
-    if (SHAKE_Arg2 + SHAKE_Arg1 + SHAKE_Arg3 < nTicks) {
+    if (nTicks > SHAKE_Arg2 + SHAKE_Arg1 + SHAKE_Arg3) {
       SHAKE_UpdateShakeSoundVolume(0);
       SHAKE_Amplitude = 0;
       SHAKE_OFFSET_X = 0;

@@ -161,7 +161,7 @@ void __stdcall SetTotalFrames(D2UnitStrc * pUnit, int32_t nTotalFrames) {
       pUnitDataMissile->nTotalFrames = -0x8000;
       return;
     }
-    if (0x7ffe < nTotalFrames) {
+    if (0x7fff <= nTotalFrames) {
       nTotalFrames = 0x7fff;
     }
 
@@ -189,7 +189,7 @@ void __stdcall SetCurrentFrame(D2UnitStrc * pUnit, int32_t nCurrentFrame) {
       pUnitDataMissile->nCurrentFrame = -0x8000;
       return;
     }
-    if (0x7ffe < nCurrentFrame) {
+    if (0x7fff <= nCurrentFrame) {
       nCurrentFrame = 0x7fff;
     }
 
@@ -231,7 +231,7 @@ void __stdcall SetOwner(D2UnitStrc * pUnit, D2UnitStrc * pOwner) {
     }
 
     int nClassId = pUnit->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId && sgptDataTable->pTxtMissiles[nClassId].LastCollide)) {
+    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId && (*((uint8_t *)&sgptDataTable->pTxtMissiles[nClassId] + 0x4) & gadwBitMasks[0]))) {
       return;
     }
 
@@ -254,7 +254,7 @@ BOOL __stdcall CheckUnitIfOwner(D2UnitStrc * pMissile, D2UnitStrc * pUnit) {
     }
 
     int nClassId = pMissile->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId && sgptDataTable->pTxtMissiles[nClassId].LastCollide)) {
+    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMissilesSize && sgptDataTable->pTxtMissiles + nClassId && (*((uint8_t *)&sgptDataTable->pTxtMissiles[nClassId] + 0x4) & gadwBitMasks[0]))) {
       return 0;
     }
 
@@ -325,7 +325,7 @@ void __stdcall SetActivateFrame(D2UnitStrc * pUnit, int32_t nActivateFrame) {
       pMissileData->nActivateFrame = -0x8000;
       return;
     }
-    if (0x7ffe < nActivateFrame) {
+    if (0x7fff <= nActivateFrame) {
       nActivateFrame = 0x7fff;
     }
 
@@ -356,7 +356,7 @@ void __stdcall SetAnimSpeed(D2UnitStrc * pUnit, int32_t nAnimSpeed) {
       pUnit->nAnimSpeed = -0x8000;
       return;
     }
-    if (0x7ffe < nAnimSpeed) {
+    if (0x7fff <= nAnimSpeed) {
       nAnimSpeed = 0x7fff;
     }
 
@@ -454,7 +454,7 @@ static BOOL __stdcall HasBonusStats(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
     int nCritChance = Stats::StatsEx::STATSEX_GetCurrentStat(pItem, UNITSTAT_passive_critical_strike, 0);
     D2SeedStrc seedRng = D2_SEED_NEXT(pItem->sSeed);
     pItem->sSeed = seedRng;
-    if ((int)(seedRng.nSeedLow + (int)(((uint64_t)d2_bits_of(seedRng) & 0xffffffff) / 100) * -100) < nCritChance) {
+    if ((int)(seedRng.nSeedLow % 100) < nCritChance) {
       return 1;
     }
 
@@ -462,7 +462,7 @@ static BOOL __stdcall HasBonusStats(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
     if (nItemBonusDamage) {
       DVar1 = D2_SEED_NEXT(pItem->sSeed);
       pItem->sSeed = DVar1;
-      if ((int)(DVar1.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) / 100) * -100) < nItemBonusDamage) {
+      if ((int)(DVar1.nSeedLow % 100) < nItemBonusDamage) {
         return 1;
       }
     }
@@ -477,7 +477,7 @@ static BOOL __stdcall HasBonusStats(D2UnitStrc * pUnit, D2UnitStrc * pItem) {
 
     DVar1 = D2_SEED_NEXT(pItem->sSeed);
     pItem->sSeed = DVar1;
-    if ((int)(DVar1.nSeedLow + (int)(((uint64_t)d2_bits_of(DVar1) & 0xffffffff) / 100) * -100) >= nItemBonusDamage) {
+    if ((int)(DVar1.nSeedLow % 100) >= nItemBonusDamage) {
       return 0;
     }
 
@@ -621,10 +621,10 @@ void __stdcall SetDamageStats(D2UnitStrc * pUnit, D2UnitStrc * pMissile, D2Missi
     if (!(pMissile && pMissile->eUnitType == UNIT_MISSILE)) {
       return;
     }
-    if (!pMissile->pUnitData.pUnitDataMissile) {
-      dwMissileFlags = 0;
-    } else {
+    if (pMissile->pUnitData.pUnitDataMissile) {
       dwMissileFlags = pMissile->pUnitData.pUnitDataMissile->dwMissileFlags;
+    } else {
+      dwMissileFlags = 0;
     }
     if (pMissileDamageData->nFlags & 1U) {
       dwMissileFlags |= 1;
@@ -703,7 +703,7 @@ int32_t __stdcall GetMinDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int32_t 
     if (nMissileId < 0 && pUnit) {
       nMissileId = pUnit->nClassId;
     }
-    if (nLevel < 1 && pUnit) {
+    if (nLevel <= 0 && pUnit) {
       D2UnitDataMissileStrc* pUnitDataMissile;
       if (pUnit->eUnitType == UNIT_MISSILE && (pUnitDataMissile = pUnit->pUnitData.pUnitDataMissile , pUnitDataMissile != 0)) {
         nLevel = (int32_t)pUnitDataMissile->nSkillLevel;
@@ -711,7 +711,7 @@ int32_t __stdcall GetMinDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int32_t 
         nLevel = 0;
       }
     }
-    if (!(-1 < nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -744,14 +744,14 @@ int32_t __stdcall GetMaxDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int32_t 
     if (nMissileId < 0 && pUnit) {
       nMissileId = pUnit->nClassId;
     }
-    if (nLevel < 1 && pUnit) {
+    if (nLevel <= 0 && pUnit) {
       if (pUnit->eUnitType == UNIT_MISSILE && pUnit->pUnitData.pUnitDataMissile) {
         nLevel = (int32_t)pUnit->pUnitData.pUnitDataMissile->nSkillLevel;
       } else {
         nLevel = 0;
       }
     }
-    if (!(-1 < nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -793,14 +793,14 @@ int32_t __stdcall GetMinElemDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int3
     if (nMissileId < 0 && pUnit) {
       nMissileId = pUnit->nClassId;
     }
-    if (nLevel < 1 && pUnit) {
+    if (nLevel <= 0 && pUnit) {
       if (pUnit->eUnitType == UNIT_MISSILE && pUnit->pUnitData.pUnitDataMissile) {
         nLevel = (int32_t)pUnit->pUnitData.pUnitDataMissile->nSkillLevel;
       } else {
         nLevel = 0;
       }
     }
-    if (!(-1 < nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -833,14 +833,14 @@ int32_t __stdcall GetMaxElemDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int3
     if (nMissileId < 0 && pUnit) {
       nMissileId = pUnit->nClassId;
     }
-    if (nLevel < 1 && pUnit) {
+    if (nLevel <= 0 && pUnit) {
       if (pUnit->eUnitType == UNIT_MISSILE && pUnit->pUnitData.pUnitDataMissile) {
         nLevel = (int32_t)pUnit->pUnitData.pUnitDataMissile->nSkillLevel;
       } else {
         nLevel = 0;
       }
     }
-    if (!(-1 < nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -867,7 +867,7 @@ int32_t __stdcall GetMaxElemDamage(D2UnitStrc * pUnit, D2UnitStrc * pOwner, int3
 
 int32_t __stdcall GetElementalLength(int32_t nUnused, D2UnitStrc * pUnit, int32_t nMissileId, int32_t nLevel) {
     int nLevLenBonus;
-    if (!(-1 < nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -875,7 +875,7 @@ int32_t __stdcall GetElementalLength(int32_t nUnused, D2UnitStrc * pUnit, int32_
     if (!pMissileTxt) {
       return 0;
     }
-    if (nLevel < 1) {
+    if (nLevel <= 0) {
       return pMissileTxt->ELen;
     }
     if (nLevel < 0x11) {
@@ -897,7 +897,7 @@ int32_t __stdcall GetSpecialParamValue(D2UnitStrc * pUnit, D2UnitStrc * pOwner, 
     if (pUnit && pUnit->eUnitType != UNIT_MISSILE) {
       return 0;
     }
-    if (!(-1 < nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -1141,7 +1141,7 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
     }
 
     int nMissileId = pMissile->nClassId;
-    if (!(-1 < nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return;
     }
 
@@ -1151,7 +1151,7 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
     }
 
     short int sVar1 = pMissileTxt->Skill;
-    if (sVar1 < 1 && !pMissileTxt->MissileSkill) {
+    if (sVar1 <= 0 && !pMissileTxt->MissileSkill) {
       nSourceDamage = (uint32_t)(uint8_t)pMissileTxt->SrcDamage;
       nSrcMissDmgPct = (uint32_t)(uint8_t)pMissileTxt->SrcMissDmg;
       nCalcMinDmg = GetMinDamage(pMissile, pUnit, nMissileId, nParam);
@@ -1212,28 +1212,7 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
     int nItemMinDmgBonus = 0;
     int nItemMaxDmgPercent = 0;
     nSkillId = 0;
-    if (!nSourceDamage) {
-      if (nSrcMissDmgPct && pUnit2) {
-        _bHasBonusStats = HasBonusStats(nullptr, pUnit2);
-        if (_bHasBonusStats) {
-          pMissileDamageData->nFlags |= 2;
-        }
-
-        nMissileId = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_mindamage, 0);
-        nMissileId = (int)(nMissileId * nSrcMissDmgPct + ((int)(nMissileId * nSrcMissDmgPct) >> 0x1f & 0x7fU)) >> 7;
-        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_maxdamage, 0);
-        nParam = (int)(nStatVal * nSrcMissDmgPct + ((int)(nStatVal * nSrcMissDmgPct) >> 0x1f & 0x7fU)) >> 7;
-        nDmgPercentBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_damagepercent, 0);
-        nItemMinDmgBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_mindamage_percent, 0);
-        nItemMaxDmgPercent = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_maxdamage_percent, 0);
-        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_demondamage_percent, 0);
-        pMissileDamageData->nDemonDamagePercent += nStatVal;
-        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_undeaddamage_percent, 0);
-        pMissileDamageData->nUndeadDamagePercent += nStatVal;
-        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_damagetargetac, 0);
-        pMissileDamageData->nDamageTargetAC += nStatVal;
-      }
-    } else {
+    if (nSourceDamage) {
       int16_t nStrBonus;
       pMissileDamageData->nFlags |= 1;
       if (pOwner->eUnitType == UNIT_PLAYER) {
@@ -1282,7 +1261,10 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
         }
 
         nMasteryElemMin = ITEMS::Items::ITEM_GetTxtItemTypes_throwable((D2UnitStrc*)nSkillId);
-        if (!nMasteryElemMin) {
+        if (nMasteryElemMin) {
+          nMissileId = Stats::StatsEx::STATSEX_GetCurrentStat(pOwner, UNITSTAT_item_throw_mindamage, 0);
+          eUnitStat = UNITSTAT_item_throw_maxdamage;
+        } else {
           if (!pOwner->pInventory || (nMissileId = INVENTORY::Inventory::INVENTORY_GetWeaponHandedness(pOwner, pOwner->pInventory) , nMissileId != 2)) {
             nMissileId = Stats::StatsEx::STATSEX_GetCurrentStat(pOwner, UNITSTAT_mindamage, 0);
             eUnitStat = UNITSTAT_maxdamage;
@@ -1290,9 +1272,6 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
             nMissileId = Stats::StatsEx::STATSEX_GetCurrentStat(pOwner, UNITSTAT_secondary_mindamage, 0);
             eUnitStat = UNITSTAT_secondary_maxdamage;
           }
-        } else {
-          nMissileId = Stats::StatsEx::STATSEX_GetCurrentStat(pOwner, UNITSTAT_item_throw_mindamage, 0);
-          eUnitStat = UNITSTAT_item_throw_maxdamage;
         }
 
         nMissileId <<= 8;
@@ -1304,8 +1283,8 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
         }
       }
 
-      nParam = (int)(nParam * nSourceDamage + ((int)(nParam * nSourceDamage) >> 0x1f & 0x7fU)) >> 7;
-      nMissileId = (int)(nMissileId * nSourceDamage + ((int)(nMissileId * nSourceDamage) >> 0x1f & 0x7fU)) >> 7;
+      nParam = (int)(nParam * nSourceDamage) / 128;
+      nMissileId = (int)(nMissileId * nSourceDamage) / 128;
       nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pOwner, UNITSTAT_damagepercent, 0);
       nDmgPercentBonus = nDmgPercentBonus + nStatVal + nItemMinDmgBonus;
       nItemMinDmgBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pOwner, UNITSTAT_item_mindamage_percent, 0);
@@ -1330,15 +1309,36 @@ void __stdcall EvaluateMissileFormula(D2MissileDamageDataStrc * pMissileDamageDa
       if (nStatVal) {
         pMissileDamageData->nFlags |= 0x400;
       }
+    } else {
+      if (nSrcMissDmgPct && pUnit2) {
+        _bHasBonusStats = HasBonusStats(nullptr, pUnit2);
+        if (_bHasBonusStats) {
+          pMissileDamageData->nFlags |= 2;
+        }
+
+        nMissileId = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_mindamage, 0);
+        nMissileId = (int)(nMissileId * nSrcMissDmgPct) / 128;
+        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_maxdamage, 0);
+        nParam = (int)(nStatVal * nSrcMissDmgPct) / 128;
+        nDmgPercentBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_damagepercent, 0);
+        nItemMinDmgBonus = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_mindamage_percent, 0);
+        nItemMaxDmgPercent = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_maxdamage_percent, 0);
+        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_demondamage_percent, 0);
+        pMissileDamageData->nDemonDamagePercent += nStatVal;
+        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_undeaddamage_percent, 0);
+        pMissileDamageData->nUndeadDamagePercent += nStatVal;
+        nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pUnit2, UNITSTAT_item_damagetargetac, 0);
+        pMissileDamageData->nDamageTargetAC += nStatVal;
+      }
     }
 
     nStatVal = Stats::StatsEx::STATSEX_GetCurrentStat(pMissile, UNITSTAT_damagepercent, 0);
-    if (nItemMaxDmgPercent < nItemMinDmgBonus) {
+    if (nItemMinDmgBonus > nItemMaxDmgPercent) {
       nItemMaxDmgPercent = nItemMinDmgBonus;
     }
 
     int nTotalDmgPercent = nDmgPercentBonus + nStatVal + nItemMaxDmgPercent;
-    if (nTotalDmgPercent < -0x59) {
+    if (nTotalDmgPercent <= -0x5a) {
       nTotalDmgPercent = -0x5a;
     }
 

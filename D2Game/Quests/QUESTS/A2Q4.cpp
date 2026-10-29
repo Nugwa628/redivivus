@@ -276,11 +276,11 @@ void __fastcall Q12_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     D2UnitDataPlayerStrc* pDVar2 = D2Common::Units::GetPlayerData(pQuestArg->pPlayer);
     D2BitBufferStrc* pBitBuffer = pDVar2->pQuestRecord[pSVar1->nDifficulty];
     if ((short int)nNPCNo == 0x14b) {
-      if ((nMessageIndex & 0xffff) == 0xba) {
+      if ((uint16_t)nMessageIndex == 0xba) {
         /* SetQuestState Step0x07 - Drognan first hint about Summoner (msg 0xba) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Step0x07);
         return;
       }
-      if ((nMessageIndex & 0xffff) - 0xbb < 3) {
+      if ((uint16_t)nMessageIndex - 0xbb <= 2) {
         /* SetQuestState Step0x08 - Drognan tells Summoner location (msg 0xbb-0xbd) */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_Step0x08);
         return;
       }
@@ -360,9 +360,7 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     D2UnitDataPlayerStrc* pControlSeed = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
     D2BitBufferStrc* pBitBuffer = pControlSeed->pQuestRecord[pGame->nDifficulty];
-    if (!pQuestArgs->pTarget) {
-      nTargetClassId = -1;
-    } else {
+    if (pQuestArgs->pTarget) {
       D2SeedStrc* pA2Q4Specific;
       nTargetClassId = pQuestArgs->pTarget->nClassId;
       if (nTargetClassId == 0x14b) {
@@ -377,10 +375,14 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, 0x14b, 7);
         return;
       }
+    } else {
+      nTargetClassId = -1;
     }
 
     BOOL bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_RewardAwaits);
-    if (!bQuestState) {
+    if (bQuestState) {
+      nGossipLineIndex = 4;
+    } else {
       if (!pQuestArgs->pPlayer) {
         nPlayerGUID = -1;
       } else {
@@ -403,7 +405,7 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (bQuestState == 1) {
         return;
       }
-      if (4 < pQuestData->nStateFlag) {
+      if (5 <= pQuestData->nStateFlag) {
         bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheArcaneSanctuary, QUESTSTATE_JustCompleted);
         if (!bQuestState) {
           return;
@@ -414,11 +416,9 @@ void __fastcall Q12_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (nGossipLineIndex == -1) {
         return;
       }
-      if (0xb < nGossipLineIndex) {
+      if (0xc <= nGossipLineIndex) {
         return;
       }
-    } else {
-      nGossipLineIndex = 4;
     }
 
     AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, nGossipLineIndex);
@@ -604,9 +604,7 @@ void __fastcall Q12_OnHoradricStaffAssembled(::SGAMEDATA * pGame) {
     if (!pQuestContext) {
       return;
     }
-    if (!pQuestContext->bIsNotIntroduction) {
-      Q12_OnJournalActivate(pQuestContext->pQuestSpecificData.pA2Q4, pQuestContext);
-    } else {
+    if (pQuestContext->bIsNotIntroduction) {
       if (!pQuestContext->nStateFlag) {
         QUEST_SetStateFlag(pQuestContext, 1, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q4.cpp", 0x3bf);
       }
@@ -615,6 +613,8 @@ void __fastcall Q12_OnHoradricStaffAssembled(::SGAMEDATA * pGame) {
         QUEST_SetStateAndBroadcast(pQuestContext, 1, nullptr, (::fpExecuteOnUnitFunction)Q12_NotifyArcaneComplete, true);
         return;
       }
+    } else {
+      Q12_OnJournalActivate(pQuestContext->pQuestSpecificData.pA2Q4, pQuestContext);
     }
 }
 
@@ -660,15 +660,15 @@ void __fastcall BlockHaremRoomForPlayerAccess(int32_t nParam, D2UnitStrc * pUnit
     pA2Q4Specific->field_0x20 = ptPlayerPos.x - 2;
     uint8_t bForcedSpawn = 1;
     pA2Q4Specific->nHaremBlockerY = ptPlayerPos.y - 1;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    D2UnitStrc* pBlockerUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x13e, pA2Q4Specific->field_0x20, pA2Q4Specific->nHaremBlockerY, *(::SGAMEDATA**)(nParam + 4), pRoom, bForcedSpawn, iVar1, pNullArg);
+    D2RoomStrc* pRoom;
+    D2UnitStrc* pBlockerUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x13e, pA2Q4Specific->field_0x20, pA2Q4Specific->nHaremBlockerY, *(::SGAMEDATA**)(nParam + 4), D2Common::Units::UNITS_GetRoom(pUnit), bForcedSpawn, iVar1, pNullArg);
     if (!pBlockerUnit) {
       pNullArg = 0;
       iVar1 = 0;
       bForcedSpawn = 1;
       pA2Q4Specific->nHaremBlockerY = ptPlayerPos.y;
-      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-      pBlockerUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x13e, pA2Q4Specific->field_0x20, pA2Q4Specific->nHaremBlockerY, *(::SGAMEDATA**)(nParam + 4), pRoom, bForcedSpawn, iVar1, pNullArg);
+
+      pBlockerUnit = UNIT::SUnit::CreateUnit(UNIT_OBJECT, 0x13e, pA2Q4Specific->field_0x20, pA2Q4Specific->nHaremBlockerY, *(::SGAMEDATA**)(nParam + 4), D2Common::Units::UNITS_GetRoom(pUnit), bForcedSpawn, iVar1, pNullArg);
       if (!pBlockerUnit) {
         return;
       }
@@ -726,7 +726,7 @@ BOOL __fastcall Q14_CheckDurielProximity(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_TheArcaneSanctuary);
     D2QuestDataA2Q4Strc* pA2Q4Data = pQuestData->pQuestSpecificData.pA2Q4;
     uint32_t nDist = Monster::AI::MONSTERAI_GetDistanceToCoords(pUnit, pA2Q4Data->field_0x20, pA2Q4Data->nHaremBlockerY);
-    if (nDist >= 0x1f) {
+    if (nDist > 0x1e) {
       return 0;
     }
 
@@ -920,9 +920,7 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
       ptPos.y = (LONG)pQuestData->pQuestSpecificData.pA2Q4;
       if (((D2QuestDataA2Q4Strc*)ptPos.y)->bJerhynAiActive) {
         pPlayerData = UNIT::SUnit::FindUnitFromTable(pQuestData->pGame, UNIT_MONSTER, ((D2QuestDataA2Q4Strc*)ptPos.y)->nJerhynMonsterGUID);
-        if (!pPlayerData) {
-          *(bool*)(ptPos.y + 0xc) = false;
-        } else {
+        if (pPlayerData) {
           if (pPlayerData->eUnitType == UNIT_MONSTER && pPlayerData->pUnitData.pUnitDataMonster) {
             pMonsterAi = pPlayerData->pUnitData.pUnitDataMonster->pMonsterAi;
           } else {
@@ -930,12 +928,14 @@ void __fastcall Q12_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
           }
 
           bQuestDone = Monster::MonsterAI::HasAiSub(pMonsterAi);
-          if (!bQuestDone) {
+          if (bQuestDone) {
+            Monster::MonsterAI::ClearAISub(pQuestData->pGame, pPlayerData, nullptr, true);
+          } else {
             GAME::Server::RemoveObjects(pPlayerData, pQuestData->pGame);
             *(bool*)(ptPos.y + 0xc) = false;
-          } else {
-            Monster::MonsterAI::ClearAISub(pQuestData->pGame, pPlayerData, nullptr, true);
           }
+        } else {
+          *(bool*)(ptPos.y + 0xc) = false;
         }
       }
       if (!*(bool*)(ptPos.y + 0xd) && *(bool*)(ptPos.y + 0x11)) {

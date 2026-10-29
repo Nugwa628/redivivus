@@ -595,7 +595,7 @@ uint8_t __fastcall Q06_TimerSpawnPortalAndNotify(::SGAMEDATA * pGame, D2QuestDat
 
 // A1Q6 deferred quest-update (scheduled by Q06_SequenceFilter timer): if stateFlag is still 0, bump to 1 (quest now introduced/visible in log). One-shot init nudge.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
-uint8_t __fastcall Q06_QuestUpdate(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q06_QuestUpdate(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     if (pQuestData->nStateFlag) {
       return '\x01';
     }
@@ -627,16 +627,16 @@ void __fastcall Q06_Callback08_MonsterKilled(D2QuestDataStrc * pQuestData, D2Que
       D2UnitDataPlayerStrc* pKillerPlayerData;
       if (pQuestArgs->pPlayer) {
         pGame = pQuestData->pGame;
-        pKillerPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-        bQuestState = D2Common::QuestRecord::GetQuestState(pKillerPlayerData->pQuestRecord[pGame->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
+
+        bQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_Completed);
         if (!bQuestState) {
           pGame2 = pQuestData->pGame;
-          pPlayerData2nd = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-          bQuestState = D2Common::QuestRecord::GetQuestState(pPlayerData2nd->pQuestRecord[pGame2->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_RewardAwaits);
+
+          bQuestState = D2Common::QuestRecord::GetQuestState(D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame2->nDifficulty], QUEST_SistersToTheSlaughter, QUESTSTATE_RewardAwaits);
           if (!bQuestState) {
             pGame2 = pQuestData->pGame;
-            pPlayerData2nd = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-            Q06_SetQuestCompletedAndReward(pQuestData->pGame, pQuestArgs->pPlayer, pPlayerData2nd->pQuestRecord[pGame2->nDifficulty]);
+
+            Q06_SetQuestCompletedAndReward(pQuestData->pGame, pQuestArgs->pPlayer, D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame2->nDifficulty]);
             iQ37DropCount = 2;
             do {
               pQuestSeed = GetQuestControlSeed(pQuestData->pGame);

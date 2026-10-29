@@ -36,7 +36,7 @@ int32_t __stdcall SRegGetBaseKey(uint8_t byFlags, char * szText, int32_t nBufSiz
 // @namespace-fix moved from Storm::Source::SSTR to Storm::Source::SReg. SReg is a separate
 // Storm module with its own nine exported symbols; nothing in this family belongs to the string module.
 // The SReg block occupies 00414930-0041513f, contiguous, between SStr and SFile.
-int __fastcall SREG_DeleteValueInternal(uint8_t byFlags, char * pszSubKey, LPCSTR szValueName) {
+int __fastcall SREG_DeleteValueInternal(int32_t byFlags, char * pszSubKey, LPCSTR szValueName) {
     DWORD lResult;
     DWORD lResult2;
     HKEY hKey;
@@ -292,11 +292,16 @@ int __stdcall SRegLoadValue(char * pTree, char * pKey, uint8_t byFlags, int32_t 
       __frame0.valueBuf[0] &= -256;
       bReadOk = SREG_InternalLoadEntry(&__frame0.dwType, (LPBYTE)__frame0.valueBuf, pTree, byFlags, 0x100, pKey, &__frame0.dwDataLen);
       if (bReadOk) {
-        if (__frame0.dwType == 1) {
+        switch (__frame0.dwType) {
+        case 1: {
           nParsed = strtoul((char*)__frame0.valueBuf, nullptr, 0);
           *__frame0.pnOutVal = nParsed;
-        } else if (__frame0.dwType == 4) {
+          break;
+        }
+        case 4: {
           *__frame0.pnOutVal = __frame0.valueBuf[0];
+          break;
+        }
         }
 
         return 1;

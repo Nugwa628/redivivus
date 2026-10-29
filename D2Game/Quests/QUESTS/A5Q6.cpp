@@ -204,35 +204,35 @@ void __fastcall Q36_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     ::SGAMEDATA* pGame;
     eD2QuestState eQuestState;
     switch (pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex) {
-      case 0x4ecf:
+      case 0x4ed2:
         pGame = pQuestData->pGame;
       pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-      eQuestState = QUESTSTATE_Step0x07;
-      break;
-      case 0x4ed0:
-        pGame = pQuestData->pGame;
-      pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-      eQuestState = QUESTSTATE_Step0x09;
+      eQuestState = QUESTSTATE_Step0x04;
       break;
       case 0x4ed1:
         pGame = pQuestData->pGame;
       pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
       eQuestState = QUESTSTATE_Step0x05;
       break;
-      case 0x4ed2:
-        pGame = pQuestData->pGame;
-      pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-      eQuestState = QUESTSTATE_Step0x04;
-      break;
       case 0x4ed3:
         pGame = pQuestData->pGame;
       pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
       eQuestState = QUESTSTATE_Step0x06;
       break;
+      case 0x4ecf:
+        pGame = pQuestData->pGame;
+      pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+      eQuestState = QUESTSTATE_Step0x07;
+      break;
       case 0x4ed4:
         pGame = pQuestData->pGame;
       pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
       eQuestState = QUESTSTATE_Step0x08;
+      break;
+      case 0x4ed0:
+        pGame = pQuestData->pGame;
+      pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
+      eQuestState = QUESTSTATE_Step0x09;
       break;
       default:
         return;
@@ -294,19 +294,7 @@ void __fastcall Q36_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
     /* GetQuestState(QUEST_EveOfDestruction, 0=Completed) — branch: pre-complete
                          uses nStateFlag table, post-complete uses per-NPC switch below */ _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Completed);
-    if (!_bQuestState) {
-      if (3 < pQuestData->nStateFlag) {
-        return;
-      }
-
-      nGossipMenuIndex = gdwQuestCallbackAddressQ36[pQuestData->nStateFlag];
-      if (nGossipMenuIndex == -1) {
-        return;
-      }
-      if (8 < nGossipMenuIndex) {
-        return;
-      }
-    } else {
+    if (_bQuestState) {
       switch (nTargetClassId) {
         case MonsterUnitLarzuk:
           /* GetQuestState(QUEST_EveOfDestruction, 4=Step0x04) — NPC 0x1ff:
@@ -324,41 +312,6 @@ void __fastcall Q36_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
         nGossipMenuIndex = 3;
         break;
-        case MonsterUnitDrehya1:
-          _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Step0x09);
-        if (_bQuestState) {
-          _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
-          if (!_bQuestState) {
-            return;
-          }
-
-          AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 3);
-          return;
-        }
-
-        nGossipMenuIndex = 2;
-        break;
-        case MonsterUnitMalah:
-          eQuestState = QUESTSTATE_Step0x06;
-        goto pick_menu_by_told_step;
-        default:
-          return;
-        case MonsterUnitQualkehk:
-          eQuestState = QUESTSTATE_Step0x08;
-        pick_menu_by_told_step:
-        _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, eQuestState);
-        if (!_bQuestState) {
-          AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 2);
-          return;
-        }
-
-        _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
-        if (!_bQuestState) {
-          return;
-        }
-
-        AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 3);
-        return;
         case MonsterUnitDeckardCain6:
           _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, pQuestData->nQuestIdReal, QUESTSTATE_Step0x10);
         if (_bQuestState) {
@@ -380,13 +333,60 @@ void __fastcall Q36_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
         nGossipMenuIndex = 5;
         break;
+        case MonsterUnitMalah:
+          eQuestState = QUESTSTATE_Step0x06;
+        goto pick_menu_by_told_step;
+        default:
+          return;
         case MonsterUnitTyrael3:
           _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
         if (!_bQuestState) {
           return;
         }
 
+        nGossipMenuIndex = 2; break;
+        case MonsterUnitQualkehk:
+          eQuestState = QUESTSTATE_Step0x08;
+        pick_menu_by_told_step:
+        _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, eQuestState);
+        if (!_bQuestState) {
+          AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 2);
+          return;
+        }
+
+        _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
+        if (!_bQuestState) {
+          return;
+        }
+
+        AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 3);
+        return;
+        case MonsterUnitDrehya1:
+          _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Step0x09);
+        if (_bQuestState) {
+          _bQuestState = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
+          if (!_bQuestState) {
+            return;
+          }
+
+          AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, nTargetClassId, 3);
+          return;
+        }
+
         nGossipMenuIndex = 2;
+        break;
+      }
+    } else {
+      if (4 <= pQuestData->nStateFlag) {
+        return;
+      }
+
+      nGossipMenuIndex = gdwQuestCallbackAddressQ36[pQuestData->nStateFlag];
+      if (nGossipMenuIndex == -1) {
+        return;
+      }
+      if (9 <= nGossipMenuIndex) {
+        return;
       }
     }
 
@@ -450,15 +450,14 @@ static void __stdcall Q36_CompleteQuestAndSetStatus(D2UnitStrc * pUnit, D2BitBuf
     /* SetQuestState(QUEST_EveOfDestruction, 0=Completed) — mark Baal quest
                          permanently complete */ D2Common::QuestRecord::SetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Completed);
     uint32_t nDifficulty = (uint32_t)pGame->nDifficulty;
-    D2ClientStrc* pClient = UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q6.cpp", 0x1a2);
-    GAME::Clients::SetClientStatus(pClient, 5, nDifficulty);
+
+    GAME::Clients::SetClientStatus(UNIT::SUnit::SUNIT_GetClient(pUnit, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q6.cpp", 0x1a2), 5, nDifficulty);
     D2QuestDataStrc* pQuestData = GetQuestDataByQuestNoInternal(pGame, QUESTINT_EveOfDestruction);
     if (!pQuestData) {
       return;
     }
 
-    int32_t* pnPlayersInWorldstone = &pQuestData->pQuestSpecificData.pA5Q6->nPlayersInWorldstone;
-    (*pnPlayersInWorldstone)++;
+    pQuestData->pQuestSpecificData.pA5Q6->nPlayersInWorldstone++;
 }
 
 // A5Q6 Eve of Destruction. Per-player iterate callback: if this player's quest is JustCompleted(0xd), look up their party and propagate Baal-kill credit to every party member via ExecuteFunctionForEveryPartyMember(Q36_SetCompleteForPartyMember).
@@ -603,7 +602,7 @@ void __fastcall Q36_Callback_08_CompleteQuest(D2QuestDataStrc * pQuestData, D2Qu
         if (bPlayerNotYetComplete) {
           nBaseGold = (uint32_t)pQuestData->pGame->nDifficulty * 6000;
           nGoldCap = nBaseGold + 3000;
-          if (0xfffe < nGoldCap) {
+          if (0xffff <= nGoldCap) {
             nGoldCap = 0xffff;
           }
           if (0 < pA5Q6Data->nPlayersInWorldstone) {
@@ -628,22 +627,22 @@ void __fastcall Q36_Callback_08_CompleteQuest(D2QuestDataStrc * pQuestData, D2Qu
 
     D2UnitStrc* pTargetUnit = pQuestArgs->pTarget;
     eD2UnitType eUnitType = pTargetUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nPosY = pTargetUnit->pPath.pStaticPath->nPosY;
-    } else if (!pTargetUnit->pPath.pDynamicPath) {
-      nPosY = 0;
-    } else {
+    } else if (pTargetUnit->pPath.pDynamicPath) {
       nPosY = D2Common::PATH::DynamicPath::GetYPos(pTargetUnit->pPath.pDynamicPath);
+    } else {
+      nPosY = 0;
     }
 
     pTargetUnit = pQuestArgs->pTarget;
     eD2UnitType eTargetUnitType = pTargetUnit->eUnitType;
-    if (eTargetUnitType == UNIT_OBJECT || 3 < (int)eTargetUnitType && (int)eTargetUnitType < 6) {
+    if (eTargetUnitType == UNIT_OBJECT || 3 < (int)eTargetUnitType && (int)eTargetUnitType <= 5) {
       nPosX = pTargetUnit->pPath.pStaticPath->nPosX;
-    } else if (!pTargetUnit->pPath.pDynamicPath) {
-      nPosX = 0;
-    } else {
+    } else if (pTargetUnit->pPath.pDynamicPath) {
       nPosX = D2Common::PATH::DynamicPath::GetXPos(pTargetUnit->pPath.pDynamicPath);
+    } else {
+      nPosX = 0;
     }
 
     D2UnitStrc* pMissile = SKILLS::SkillsServer::SKILLS_CreateMissileAtTarget(pQuestArgs->pGame, pQuestArgs->pTarget, SKILL_Attack, 1, MISSILE_BaalfxControl, nPosX, nPosY);
@@ -714,7 +713,7 @@ void __fastcall Q36_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
         UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestData->pGame, 0, nullptr, (::fpExecuteOnUnitFunction)SetStep0x2And0x3);
       }
     }
-    if (0x82 >= nIndex) {
+    if (0x83 > nIndex) {
       return;
     }
     if (pQuestData->bIsNotIntroduction && pQuestData->nStateFlagPrev < 2) {
@@ -729,7 +728,7 @@ void __fastcall Q36_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2Ques
 bool __fastcall Q36_ActiveFilter(D2QuestDataStrc * pQuestData, eD2MonsterClassId nTargetClassId, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2UnitStrc * pUnitEx) {
     bool bQuestState;
     eD2QuestState eQuestState;
-    if ((uint32_t)(nTargetClassId - MonsterUnitAncientStatue1) < 3) {
+    if ((uint32_t)(nTargetClassId - MonsterUnitAncientStatue1) <= 2) {
       D2QuestDataStrc* pA5Q5QuestData;
       pA5Q5QuestData = GetQuestDataByQuestNoInternal(pQuestData->pGame, QUESTINT_RiteOfPassage);
       if (pA5Q5QuestData && pA5Q5QuestData->pQuestSpecificData.pA5Q5->bAncientsSpawned && !pA5Q5QuestData->pQuestSpecificData.pA5Q5->nAncientsAlive && pQuestData->nStateFlag == 1 && !pQuestData->pQuestSpecificData.pA5Q6->bAnyaTransformed) {
@@ -746,17 +745,6 @@ bool __fastcall Q36_ActiveFilter(D2QuestDataStrc * pQuestData, eD2MonsterClassId
       case MonsterUnitLarzuk:
         eQuestState = QUESTSTATE_Step0x04;
       break;
-      case MonsterUnitDrehya1:
-        eQuestState = QUESTSTATE_Step0x09;
-      break;
-      case MonsterUnitMalah:
-        eQuestState = QUESTSTATE_Step0x06;
-      break;
-      default:
-        return false;
-      case MonsterUnitQualkehk:
-        eQuestState = QUESTSTATE_Step0x08;
-      break;
       case MonsterUnitDeckardCain6:
         /* GetQuestState(QUEST_EveOfDestruction, 0xa=Step0x10) — NPC 0x208: suppress
                          gossip once final Step0x10 (left act) set */ BVar1 = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_Step0x10);
@@ -766,8 +754,19 @@ bool __fastcall Q36_ActiveFilter(D2QuestDataStrc * pQuestData, eD2MonsterClassId
 
       eQuestState = QUESTSTATE_Step0x05;
       break;
+      case MonsterUnitMalah:
+        eQuestState = QUESTSTATE_Step0x06;
+      break;
+      default:
+        return false;
       case MonsterUnitTyrael3:
-        eQuestState = QUESTSTATE_Step0x07;
+        eQuestState = QUESTSTATE_Step0x07; break;
+      case MonsterUnitQualkehk:
+        eQuestState = QUESTSTATE_Step0x08;
+      break;
+      case MonsterUnitDrehya1:
+        eQuestState = QUESTSTATE_Step0x09;
+      break;
     }
 
     /* GetQuestState(QUEST_EveOfDestruction, eStep) — per-NPC Step bit
@@ -965,9 +964,7 @@ BOOL __fastcall OBJOP_A5Q6_TyraelPortalToEnd(D2ObjectOperateFnArg * pOperation) 
     D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pOperation->pAttacker);
     D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
     BOOL bJustCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_EveOfDestruction, QUESTSTATE_JustCompleted);
-    if (!bJustCompleted) {
-      UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pOperation->pAttacker, 0x13, pOperation->pAttacker);
-    } else {
+    if (bJustCompleted) {
       D2ClientStrc* pClient;
       GAME::Level::InitLevel(pOperation->sArg.pGame, pOperation->pAttacker, LEVEL_Harrogath, 0);
       pClient = UNIT::SUnit::SUNIT_GetClient(pOperation->pAttacker, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a5q6.cpp", 0x39b);
@@ -984,6 +981,8 @@ BOOL __fastcall OBJOP_A5Q6_TyraelPortalToEnd(D2ObjectOperateFnArg * pOperation) 
           return 0;
         }
       }
+    } else {
+      UNIT::SUnit::SetupUpdateEvent_AttachEventSound(pOperation->pAttacker, 0x13, pOperation->pAttacker);
     }
 
     return 0;
@@ -1003,16 +1002,16 @@ void __fastcall Objects_InitFn79(D2ObjectInitFnArg * pInitArg) {
     int nAttempt = 0;
     do {
       D2SeedStrc* pSeed;
-      if (9 < nAttempt) {
+      if (10 <= nAttempt) {
         break;
       }
 
       nMax = nMonStatsSize;
-      pSeed = GetQuestControlSeed(pQuestData->pGame);
-      nRolledMonId = D2Client::SEED_RollRange(pSeed, 1, nMax);
+
+      nRolledMonId = D2Client::SEED_RollRange(GetQuestControlSeed(pQuestData->pGame), 1, nMax);
       nAttempt++;
       pQuestSpecificA1Q4->nQuestFlags = nRolledMonId;
-      if (-1 < nRolledMonId && nRolledMonId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nRolledMonId && sgptDataTable->pTxtMonStats[nRolledMonId].zoo) {
+      if (0 <= nRolledMonId && nRolledMonId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nRolledMonId && sgptDataTable->pTxtMonStats[nRolledMonId].zoo) {
         pQuestSpecificA1Q4->field_0xA0 = '\x01';
       }
     } while (pQuestSpecificA1Q4->field_0xA0 == '\0');

@@ -18,6 +18,8 @@ typedef _EXCEPTION_DISPOSITION (*pfnEHHandlerRoutine)(EHExceptionRecord * pExcep
 #endif
 
 namespace Storm::Source::SSignature {
+static void __fastcall CryptRSA_Process(void * pData, uint32_t nDataLen, BigData * * ppKey);
+static void __fastcall CryptRSA_Prepare(void * pModulusBytes, uint32_t nModulusLen, void * pExponentBytes, uint32_t nExponentLen, BigData * * ppKey);
 
 BigData * * __fastcall SSIG_InitBigNum(BigData * * pBigNum) {
     SBig::SBigNew(pBigNum);
@@ -31,7 +33,7 @@ void __fastcall SSIG_FreeBigNum(void * * pBigNum) {
 static BOOL __stdcall SSIG_FindSignatureMarker(int32_t nOffset, uint32_t nTotalSize, int32_t pBuffer, int * pnFoundOffset) {
     int nMarkerOffset = nTotalSize - nOffset - 4;
     *pnFoundOffset = nMarkerOffset;
-    if (!(nOffset + 4U <= nTotalSize && *(int*)(nMarkerOffset + pBuffer) == 0x5349474e)) {
+    if (!(nTotalSize >= nOffset + 4U && *(int*)(nMarkerOffset + pBuffer) == 0x5349474e)) {
       return 0;
     }
 
@@ -71,7 +73,7 @@ uint32_t __fastcall SSignatureVerifyStream_GetSignatureLength(D2SsigContextStrc 
 void __fastcall SSignatureVerifyStream_ProvideData(D2SsigContextStrc * pContext, uint8_t * pData, size_t nDataLen) {
     uint32_t nRemaining = nDataLen - pContext->nBufferSize;
     if (-1 < (int)nRemaining) {
-      if (pContext->nBytesBuffered) {
+      if ((uint32_t)pContext->nBytesBuffered > 0) {
         Sha1_Append(pContext->pDataBuffer, pContext->nBytesBuffered, &pContext->sSha1);
       }
       if (0 < (int)nRemaining) {
@@ -460,7 +462,7 @@ void __fastcall Sha1_Append(uint8_t * pData, uint32_t nLen, D2Sha1ContextStrc * 
       pCursor += 0x40;
       nBufIndex = 0;
     }
-    if (0x3f < nLen) {
+    if (0x40 <= nLen) {
       pData = (uint8_t*)(nLen >> 6);
       do {
         Sha1_Pump(pCtx->aState, pCursor);
@@ -634,14 +636,14 @@ void __fastcall SSIGNATURE_RsaLoadComponent(void * pBytes, uint32_t nParam, BigD
 // @oracle 2026-08-28 pass 5. Oracle: Mac PPC 1.10b Storm.
 // Was SBIG_RSA_LoadKeyPair. Oracle: ".Prepare__Q25Crypt3RSAFPCvUlPCvUl" @100a2a50 = Crypt::RSA::Prepare(const void*, unsigned long, const void*, unsigned long). Basis: PPC body is exactly two bl .SBigFromBinary calls on this[0] and this[4], and reads r3..r7 = this+4 args; this function is byte-for-byte the same shape with this+4 params. So the object is a pair of BigBuffer handles at +0 and +4.
 // ppKey[0] is the modulus and ppKey[1] the exponent: CryptRSA_Process calls SBigPowMod(out, in, ppKey[1], ppKey[0]). SSignatureGenerate passes one modulus with its private then its public exponent, so neither pair is 'public' or 'private' as a whole.
-void __fastcall CryptRSA_Prepare(void * pModulusBytes, uint32_t nModulusLen, void * pExponentBytes, uint32_t nExponentLen, BigData * * ppKey) {
+static void __fastcall CryptRSA_Prepare(void * pModulusBytes, uint32_t nModulusLen, void * pExponentBytes, uint32_t nExponentLen, BigData * * ppKey) {
     SBig::SBigFromBinary(*ppKey, pModulusBytes, nModulusLen);
     SBig::SBigFromBinary(ppKey[1], pExponentBytes, nExponentLen);
 }
 
 // Crypt::RSA::Process: one RSA operation in place on nDataLen bytes at pData. Loads the bytes into a BigData, computes SBigPowMod(out, in, ppKey[1] exponent, ppKey[0] modulus), writes the result back with SBigToBinaryBuffer and zero-fills any shorter tail; used for both signing (SSignatureGenerate) and verifying (SSignatureVerifyStream_Finish).
 // Provenance: 1.14d asm 004260a0; PPC Storm 1.10b symbol Process__Q25Crypt3RSAFPUcUl with the same callee set.
-void __fastcall CryptRSA_Process(void * pData, uint32_t nDataLen, BigData * * ppKey) {
+static void __fastcall CryptRSA_Process(void * pData, uint32_t nDataLen, BigData * * ppKey) {
     BigData* pPlainBn;
     BigData* pCipherBn;
     uint32_t local_8 = -1;

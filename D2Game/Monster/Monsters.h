@@ -71,11 +71,6 @@ int32_t __fastcall CountActiveUMods(uint8_t * pUModList);
 // 2022.01.09 - dzik
 uint32_t __fastcall CheckMonUModList(struct D2UnitStrc * pUnit);
 int32_t __fastcall MONSTER_GetBossNo(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-// Rolls and assigns unique-modifier (UMod) enchantments to a newly spawned monster. If bResult is set, first rolls against the champion threshold (MonUMod.txt constants row 0) to potentially make the monster a champion instead; if champion, calls MONSTER_SelectChampionMod and returns. Otherwise rolls 1+difficulty extra UMod slots, calls MONUMOD_RollRandomModifier up to that count (avoiding already-assigned mods via a local dedup table), and appends each selected UMod ID to pUnitDataMonster->MonUModList. Guards against stack overflow via security cookie.
-void __thiscall MONSTER_RollAndAssignUMods(void * pThis, ::SGAMEDATA * pGame, BOOL bResult);
-void __fastcall UMOD_DispatchInitFunction(struct D2UnitStrc * pUnit, int32_t nParam, BOOL bApply);
-// Applies the Amplify Damage curse (skill 0x42) from pUnit onto pAttacker. Validates attack eligibility and skill table bounds, then builds a D2StateExArgStrc with duration and stat values derived from skills.txt aura columns, calls SetStateWithExpiryTime to attach the state, and iterates remaining aura stats to add them to the resulting stat list.
-void __fastcall MONSTER_ApplyAmplifyDamageCurse(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pAttacker, int32_t nDuration);
 void __fastcall MONSTER_OnDeathAmplifyDamageAura(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint32_t dwUnused1, int32_t bShouldTrigger);
 void __fastcall MONSTER_OnDeathScheduleDelayed(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, uint32_t dwUnused1, int32_t bShouldTrigger);
 // Server-side handler for a monster corpse explosion (Necromancer Corpse Explosion skill or similar). Spawns a MISSILE_Monstercorpseexplode at the corpse's position, scales damage from MonStats using difficulty-dependent CEDamagePercent (Normal -25%, Nightmare -33%, Hell -87.5% reduction), then applies AoE physical damage around the origin via DAMAGE_ApplyAreaOfEffectDamage.

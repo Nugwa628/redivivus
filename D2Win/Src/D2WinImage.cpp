@@ -171,7 +171,7 @@ BOOL __fastcall Draw(::D2WinImage * pImage) {
     }
 
     uint32_t dwState = pImage->sControl.dwState;
-    if (!(dwState & 4 && dwState & 1)) {
+    if (!(dwState & gadwBitMasks[2] && dwState & gadwBitMasks[0])) {
       return 0;
     }
     if (!pImage->sControl.pDC6) {
@@ -246,12 +246,12 @@ void __stdcall D2WinImage_Draw(D2GfxTileRectStrc * pScreenRect, D2GfxTileRectStr
       if (0 < iVar1) {
         do {
           sClipRect.nX0 = pDstRect->nX0 + nParam1;
-          if (sClipRect.nX0 < pScreenRect->nX0) {
+          if (pScreenRect->nX0 > sClipRect.nX0) {
             sClipRect.nX0 = pScreenRect->nX0;
           }
 
           sClipRect.nX1 = pScreenRect->nX1;
-          if (sClipRect.nX0 + nTileCountX <= pScreenRect->nX1) {
+          if (pScreenRect->nX1 >= sClipRect.nX0 + nTileCountX) {
             sClipRect.nX1 = sClipRect.nX0 + nTileCountX;
           }
 
@@ -325,10 +325,9 @@ BOOL __stdcall Push(D2ControlMsg * pControlMsg) {
     ::D2WinImage* pNewImage = D2_NEW_AT(::D2WinImage, ".\\Src\\D2WinImage.cpp", 0x1d);
     memset(pNewImage, 0, 0x4c);
     pNewImage->sControl.neD2FormType = FORM_Image;
-    int* pDwState = &pNewImage->sControl.dwState;
-    *pDwState |= 1;
+    pNewImage->sControl.dwState |= 1;
     pNewImage->sControl.pDC6 = pDC6;
-    pNewImage->sControl.dwState |= 4;
+    pNewImage->sControl.dwState |= gadwBitMasks[2];
     pNewImage->sControl.dwSizeX = nSizeX;
     pNewImage->sControl.dwSizeY = nSizeY;
     pNewImage->sControl.fpKey = pKey;

@@ -30,7 +30,8 @@ void __fastcall GFX_ClearAllModeFlags(D2UnitStrc * pUnit, int32_t nMaxMode) {
 
     eD2UnitType eUnitType = Source::ClientEngine::CLIENT_GetEffectiveUnitType(pUnit);
     if (eUnitType != UNIT_PLAYER) {
-      if (eUnitType == UNIT_MONSTER) {
+      switch (eUnitType) {
+      case UNIT_MONSTER: {
         nComponent = 0;
         do {
           Engine::GfxUtil::GFXUTIL_SetGfxInfoComponent(pUnit, nComponent, '\0');
@@ -38,6 +39,7 @@ void __fastcall GFX_ClearAllModeFlags(D2UnitStrc * pUnit, int32_t nMaxMode) {
         } while (nComponent < 0x10);
 
         return;
+      }
       }
       if (eUnitType != UNIT_OBJECT) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd3e);
@@ -58,16 +60,6 @@ void __fastcall GFX_ClearAllModeFlags(D2UnitStrc * pUnit, int32_t nMaxMode) {
       Engine::GfxUtil::GFXUTIL_SetGfxInfoComponent(pUnit, nComponentPlayer, '\0');
       nComponentPlayer++;
     } while (nComponentPlayer < 0x14);
-}
-
-// Builds the COF archive path for a monster COF name index and loads it. The index is a single byte: the prologue does MOVZX EAX, CL before indexing the name table at 0x6d6c30, so the upper 24 bits of ECX are dead.
-void __fastcall GFX_LoadMonsterCofArchive(uint8_t nCofNameIndex) {
-    // Static local variables (originally global data)
-    static char * gpszMonsterCofNameTable[5] = { s_cmncof_a1_d2_006d6c44, s_cmncof_a2_d2_006d6c54, s_cmncof_a3_d2_006d6c64, s_cmncof_a4_d2_006d6c74, s_cmncof_a6_d2_006d6c84 }; D2_STATIC_GUARD(gpszMonsterCofNameTable, "D2Client::SRC::CelCmp::GFX_LoadMonsterCofArchive::gpszMonsterCofNameTable");
-
-    char szCofPath[260];
-    /* LPCSTR param_2 for wsprintfA */ /* LPSTR param_1 for wsprintfA */ wsprintfA(szCofPath, "%s\\%s", "DATA\\GLOBAL", gpszMonsterCofNameTable[nCofNameIndex]);
-    Engine::Gfx::GFX_LoadAndHashCofArchive(szCofPath, &gMonsterCofCache.nFrameCount);
 }
 
 void __stdcall GFX_Noop() {

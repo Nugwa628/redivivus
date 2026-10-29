@@ -247,7 +247,7 @@ pfnFaultError __fastcall RegisterExitFunction(pfnFaultError pfnNewCallback) {
     return pfnPrevCallback;
 }
 
-void __stdcall FAULT_TerminateCurrentProcess() {
+static void __stdcall FAULT_TerminateCurrentProcess() {
     UINT uExitCode = -1;
     HANDLE hProcess = GetCurrentProcess();
     /* HANDLE hProcess for TerminateProcess */ TerminateProcess(hProcess, uExitCode);
@@ -760,7 +760,7 @@ void StaticInit_6caab0() {
 }
 
 void StaticInit_6caad0() {
-    memset(gwKeyNameBuffer, 0, 4 * sizeof(gwKeyNameBuffer[0]));
+    for (int i = 0; i < 4; i++) gwKeyNameBuffer[i] = 0;
 }
 
 void StaticInit_6caaf0() {

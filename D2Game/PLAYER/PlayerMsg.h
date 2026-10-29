@@ -644,11 +644,7 @@ uint32_t __fastcall PLAYER_AreInDifferentActs(struct D2UnitStrc * pUnit, struct 
 eD2ServerIncomingStatus __fastcall SERVER_InteractOrPick(struct D2UnitStrc * pUnit, eD2UnitType eUnitType, uint32_t uuid, BOOL bSetting, ::SGAMEDATA * pGame);
 uint8_t __stdcall PLAYERMSG_GetMessageType(int32_t nParam1, int32_t nParam2);
 int32_t __stdcall PLAYERMSG_GetMessagePriority(uint32_t nParam);
-eD2ServerIncomingStatus __thiscall SERVER_IsItemOnCursor(void * pThis, struct D2UnitStrc * pUnit, uint32_t dwParam);
-eD2ServerIncomingStatus __thiscall IsPlayerTheOwner(void * pThis, struct D2UnitStrc * pOwner, uint32_t nItemGid);
-eD2ServerIncomingStatus __thiscall ItemBelongsToUnit(void * pThis, struct D2UnitStrc * pOwner, uint32_t nItemGid);
 uint8_t __stdcall MONSTER_SetAlignmentCallback(int32_t nParam1, int32_t nParam2);
-eD2ServerIncomingStatus __thiscall ItemBelongsToInventoryOf(void * pThis, struct D2UnitStrc * pPlayer, uint32_t nItemGid);
 int32_t __stdcall MONSTER_FindNearbyAllyUnit(::SGAMEDATA * pGame, int32_t bCheckRange, struct D2UnitStrc * * ppUnit, struct D2UnitStrc * pUnit, DWORD nUnitId);
 // C->S Packet 0x01 - Walk to XY (5 bytes)
 // [op:1][x:u16][y:u16]

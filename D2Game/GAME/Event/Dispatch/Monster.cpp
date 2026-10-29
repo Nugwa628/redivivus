@@ -201,7 +201,7 @@ void __fastcall DropItemForVictim_Unused(::SGAMEDATA * pGame, D2ObjectOperateFnA
       exit(-1);
     } else {
       eCollisionFlags eCollision;
-      if (pVictim->eUnitFlags >> 0x11 & 1) {
+      if (((bool)(pVictim->eUnitFlags >> 0x11 & 1))) {
         return;
       }
       /* bonewall */ if (pVictim->nClassId == 0x158) {
@@ -211,8 +211,8 @@ void __fastcall DropItemForVictim_Unused(::SGAMEDATA * pGame, D2ObjectOperateFnA
         eCollisionFlag = COLLISION_ITEMS;
         nY = D2Client::Units::GetYPosFromDynamicPathUnit(pVictim);
         nX = D2Client::Units::GetXPosFromDynamicPathUnit(pVictim);
-        pRoom = D2Common::Units::UNITS_GetRoom(pVictim);
-        eCollision = D2Common::Collision::CheckCollision_BlockPlayerMissile(pRoom, nX, nY, eCollisionFlag);
+
+        eCollision = D2Common::Collision::CheckCollision_BlockPlayerMissile(D2Common::Units::UNITS_GetRoom(pVictim), nX, nY, eCollisionFlag);
         if (eCollision != COLBIT_NONE) {
           return;
         }
@@ -237,7 +237,7 @@ void __fastcall DropItemForVictim_Unused(::SGAMEDATA * pGame, D2ObjectOperateFnA
 
 void SetAiState(D2UnitStrc * pUnit, uint32_t nParam) {
     int nAiState = D2Game::Monster::GetAiState(pUnit);
-    if (0xf < nAiState) {
+    if (0x10 <= nAiState) {
       D2Game::Monster::SetAiState(pUnit, (D2UnitStrc*)(nAiState - 0x10));
       return;
     }
@@ -284,7 +284,7 @@ void __fastcall RegenAndPsnDecreaser(::SGAMEDATA * pGame, D2UnitStrc * pUnit, in
     }
 
     eD2States nHpNew = iPoisonSearch + nHpRegen;
-    if ((int)aPoisonStateSearch[1] < iPoisonSearch + nHpRegen) {
+    if (iPoisonSearch + nHpRegen > (int)aPoisonStateSearch[1]) {
       EVENT_RemoveUnitTimersByType(pGameSaved, pUnit, UNITEVENTCALLBACK_STATREGEN, 0);
       nHpNew = aPoisonStateSearch[1];
     }
@@ -522,7 +522,7 @@ void __stdcall MISSILE_SpawnFromMaggot(::SGAMEDATA * pGame, D2UnitStrc * pUnit, 
       }
 
       seedStrc = D2_SEED_NEXT_VAL(ullSeedStep);
-      if ((uint64_t)d2_bits_of(seedStrc) & 1) {
+      if (seedStrc.nSeedLow & 1) {
         nSpreadY = -nSpreadY;
       }
 
@@ -564,39 +564,6 @@ BOOL __fastcall thunk_ExecuteTimerTrigger(::SGAMEDATA * pGame, D2UnitStrc * pUni
     return 1;
 }
 
-static void CalculateCollisionDamage_Unused(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
-    bool _bInRange;
-    bool bInRange;
-    int32_t nDamage;
-    int nTargetHp;
-    eD2States eUninterruptibleState;
-    D2DamageStrc sDamage;
-    D2UnitStrc* pTarget;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    for (pTarget = pRoom->pUnitList; pTarget; pTarget = pTarget->pRoomNext) {
-      if (pTarget->eUnitType == UNIT_PLAYER && pTarget->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead) {
-        nDamage = D2Common::Collision::GetCollisionDistance(pUnit, pTarget);
-        if (nDamage < 3) {
-          _bInRange = D2Common::Units::TestCollisionBetweenInteractingUnits(pTarget, pUnit, 0x3c01);
-          if (!_bInRange) {
-            memset(&sDamage, 0, 0x70);
-            nTargetHp = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pTarget, UNITSTAT_hitpoints, 0);
-            sDamage.dwPhysDamage = nTargetHp >> 5;
-            sDamage.wResultFlags = 1;
-            eUninterruptibleState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pTarget, STATE_uninterruptable);
-            if (eUninterruptibleState == STATE_none) {
-              sDamage.wResultFlags |= 4;
-            }
-
-            UNIT::SUnitDmg::DAMAGE_ApplyDefensiveReduction(pGame, pUnit, pTarget, &sDamage);
-            UNIT::SUnitDmg::DAMAGE_ApplyDamageToUnit(pGame, pUnit, pTarget, 1, &sDamage);
-            UNIT::SUnitDmg::SERVER_GetHitCalculation(pGame, pUnit, pTarget, &sDamage);
-          }
-        }
-      }
-    }
-}
-
 // Timer callback for summoned/owned monsters. Resolves pUnit's owner, finds a free spawn coordinate near the owner, and attempts to cast the owner's primary skill (pMonStats->Skill1 at Sk1mode) via SERVER_UNIT_CastSkill. On success triggers an AITHINK event; if the cast fails or no free tile exists, kills the owner via SERVER_KillMonster.
 void __stdcall MONMODE_OwnerCastOrDie(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     POINT ptSpawn;
@@ -607,7 +574,7 @@ void __stdcall MONMODE_OwnerCastOrDie(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     }
 
     int nOwnerMonClassId = pOwner->nClassId;
-    if (!(-1 < nOwnerMonClassId && nOwnerMonClassId < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nOwnerMonClassId && nOwnerMonClassId < sgptDataTable->nTxtMonStatsSize)) {
       return;
     }
 
@@ -617,29 +584,29 @@ void __stdcall MONMODE_OwnerCastOrDie(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     }
 
     eD2UnitType eOwnerUnitType = pOwner->eUnitType;
-    if (eOwnerUnitType == UNIT_OBJECT || 3 < (int)eOwnerUnitType && (int)eOwnerUnitType < 6) {
+    if (eOwnerUnitType == UNIT_OBJECT || 3 < (int)eOwnerUnitType && (int)eOwnerUnitType <= 5) {
       ptSpawn.x = pOwner->pPath.pStaticPath->nPosX;
-    } else if (!pOwner->pPath.pDynamicPath) {
-      ptSpawn.x = 0;
-    } else {
+    } else if (pOwner->pPath.pDynamicPath) {
       ptSpawn.x = D2Common::PATH::DynamicPath::GetXPos(pOwner->pPath.pDynamicPath);
+    } else {
+      ptSpawn.x = 0;
     }
 
     eD2UnitType eOwnerUnitType2 = pOwner->eUnitType;
-    if (eOwnerUnitType2 == UNIT_OBJECT || 3 < (int)eOwnerUnitType2 && (int)eOwnerUnitType2 < 6) {
+    if (eOwnerUnitType2 == UNIT_OBJECT || 3 < (int)eOwnerUnitType2 && (int)eOwnerUnitType2 <= 5) {
       ptSpawn.y = pOwner->pPath.pStaticPath->nPosY;
-    } else if (!pOwner->pPath.pDynamicPath) {
-      ptSpawn.y = 0;
-    } else {
+    } else if (pOwner->pPath.pDynamicPath) {
       ptSpawn.y = D2Common::PATH::DynamicPath::GetYPos(pOwner->pPath.pDynamicPath);
+    } else {
+      ptSpawn.y = 0;
     }
 
     BOOL bAllowNeighboorRooms = 0;
     int32_t nOwnerAlignment = 0x3c01;
     int32_t nOwnerSizeX = D2Common::Units::GetUnitSizeX(pOwner);
     POINT* pSpawnPoint = &ptSpawn;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pOwner);
-    D2RoomStrc* pFreeRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(pRoom, pSpawnPoint, nOwnerSizeX, nOwnerAlignment, bAllowNeighboorRooms);
+
+    D2RoomStrc* pFreeRoom = D2Common::Collision::GetFreeCoordinates_WithNeighboorRooms(D2Common::Units::UNITS_GetRoom(pOwner), pSpawnPoint, nOwnerSizeX, nOwnerAlignment, bAllowNeighboorRooms);
     nOwnerAlignment = D2Common::Stats::StatsEx::STATSEX_GetAlignment(pUnit);
     if (!nOwnerAlignment && pFreeRoom) {
       int32_t nCastResult;
@@ -653,129 +620,6 @@ void __stdcall MONMODE_OwnerCastOrDie(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     UNIT::SUnitDmg::SERVER_KillMonster(pGame, pOwner, nullptr, 1);
 }
 
-// The live monster-death dispatcher.
-BOOL __fastcall MONSTER_OnDeathDispatch(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
-    int nClassId;
-    D2UnitStrc* pUnit_00;
-    D2DifficultyLevelsTxt* pDifficultyLvl;
-    int nMonsterLevel;
-    uint32_t nCEDamageScaled;
-    uint32_t nRandCEOffset;
-    int64_t nMulResult;
-    D2DamageStrc sDamage;
-    D2MonStatsInitStrc sMonStats;
-    int32_t nPosYCoord;
-    int32_t nPosY;
-    ::SGAMEDATA* pGameSaved;
-    D2MonsterKillStrc* pMonsterKillSaved;
-    eD2UnitType eUnitType;
-    ::SGAMEDATA* pGameCE;
-    uint32_t bRandDmgFlag;
-    int* pScaledStatsOut;
-    D2UnitStrc* pUnit;
-    int32_t nVictimClassIdForStats;
-    D2UnitStrc* pVictim = pMonsterKill->pVictim;
-    UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pVictim, 0);
-    D2Game::Monster::MonsterMode::MONSTERMODE_OnDeath(pMonsterKill->nAnimatedMode1, pGame, pVictim);
-    DropItemForVictim_Unused(pGame, (D2ObjectOperateFnArg*)pMonsterKill, 0);
-    D2Game::Monster::MonsterRegion::IncreaseMonKillCount(pGame->pMonsterRegion, pVictim);
-    if (!pVictim) {
-      nClassId = -1;
-    } else {
-      nClassId = pVictim->nUnitGUID;
-    }
-
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pVictim);
-    D2Common::DUNGEON::Dungeon::SaveKilledUnitGUID(pRoom, nClassId);
-    if (!pVictim) {
-      return 1;
-    }
-
-    nClassId = pVictim->nClassId;
-    if (-1 >= nClassId) {
-      return 1;
-    }
-
-    int nMonStatsSize = sgptDataTable->nTxtMonStatsSize;
-    if (nClassId >= nMonStatsSize) {
-      return 1;
-    }
-
-    D2MonStatsTxt* pMonStats = sgptDataTable->pTxtMonStats + nClassId;
-    if (!(pMonStats && pMonStats->deathDmg)) {
-      return 1;
-    }
-    if (pVictim->eUnitType == UNIT_MONSTER && -1 < nClassId) {
-      D2MonStatsTxt* pMonStats2;
-      if (nClassId < nMonStatsSize) {
-        pMonStats2 = sgptDataTable->pTxtMonStats + nClassId;
-        if (pMonStats2) {
-          nClassId = (int)pMonStats2->BaseId;
-        }
-      }
-      if (-1 < nClassId && nClassId < nMonStatsSize) {
-        if (nClassId == 0xd4) {
-          if (false || false) {
-            pMonsterKillSaved = (D2MonsterKillStrc*)pVictim->pPath.pStaticPath->nPosX;
-          } else if (!pVictim->pPath.pDynamicPath) {
-            pMonsterKillSaved = 0;
-          } else {
-            pMonsterKillSaved = (D2MonsterKillStrc*)D2Common::PATH::DynamicPath::GetXPos(pVictim->pPath.pDynamicPath);
-          }
-
-          eUnitType = pVictim->eUnitType;
-          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-            nPosY = pVictim->pPath.pStaticPath->nPosY;
-          } else if (!pVictim->pPath.pDynamicPath) {
-            nPosY = 0;
-          } else {
-            nPosY = D2Common::PATH::DynamicPath::GetYPos(pVictim->pPath.pDynamicPath);
-          }
-
-          pUnit_00 = SKILLS::SkillsServer::CreatingAMissile(pGame, MISSILE_Monstercorpseexplode, pVictim, SKILL_Attack, 1, 0, 0, (int32_t)pMonsterKillSaved, nPosY, 1);
-          if (!pUnit_00) {
-            return 1;
-          }
-
-          pDifficultyLvl = D2Common::DATATBLS::DataTbls::GetDifficultyLevels((uint32_t)pGame->nDifficulty);
-          if (!pDifficultyLvl) {
-            return 1;
-          }
-
-          memset(&sMonStats, 0, 0x38);
-          nVictimClassIdForStats = pVictim->nClassId;
-          pScaledStatsOut = &sMonStats.nMinHP;
-          bRandDmgFlag = 1;
-          nMonsterLevel = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pVictim, UNITSTAT_level, 0);
-          D2Common::DATATBLS::MonsterTbls::MONSTER_CalculateLevelScaledStats(nVictimClassIdForStats, pGame->eGameType, (uint32_t)pGame->nDifficulty, nMonsterLevel, bRandDmgFlag, (D2MonStatsInitStrc*)pScaledStatsOut);
-          nCEDamageScaled = D2Client::Stats::D2ApplyPercent(sMonStats.nMaxHP, pDifficultyLvl->MonsterCEDamagePercent, 100);
-          if ((int)nCEDamageScaled < 0x100001) {
-            nClassId = (int)(nCEDamageScaled * 0x3c) / 100;
-          } else if ((int)(nCEDamageScaled & -16) < 0x640) {
-            nMulResult = __allmul(nCEDamageScaled, (int)nCEDamageScaled >> 0x1f, 0x3c, 0);
-            nMulResult = __alldiv((uint32_t)nMulResult, (uint32_t)((uint64_t)nMulResult >> 0x20), 100, 0);
-            nClassId = (int)nMulResult;
-          } else {
-            nClassId = (int)nCEDamageScaled / 100 * 0x3c;
-          }
-
-          memset(&sDamage, 0, 0x70);
-          nRandCEOffset = D2Client::Archive::RANDOM_RandomNumberSelector(&pVictim->sSeed, nCEDamageScaled - nClassId);
-          sDamage.dwPhysDamage = (nRandCEOffset + nClassId) * 0x80;
-          UNIT::SUnitDmg::DAMAGE_ApplyAreaOfEffectDamage(pGame, pUnit_00, (int32_t)pMonsterKillSaved, nPosY, 5, &sDamage, 0, 0, nullptr, 0x581);
-          return 1;
-        }
-        if (nClassId == 0x1b9) {
-          MONMODE_OwnerCastOrDie(pGame, pVictim);
-          return 1;
-        }
-      }
-    }
-
-    CalculateCollisionDamage_Unused(pGame, pVictim);
-    return 1;
-}
-
 void __fastcall MONMODE_HandleSpecialEndDeath(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     D2UnitStrc* pOwner;
     if (!pUnit) {
@@ -785,7 +629,7 @@ void __fastcall MONMODE_HandleSpecialEndDeath(::SGAMEDATA * pGame, D2UnitStrc * 
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, 0xc);
     UNIT::SUnitEvent::UNITEVENT_DispatchEventsByType(pGame, 0xd, pUnit, nullptr, nullptr);
     int nClassId = pUnit->nClassId;
-    if (!(-1 < nClassId && nClassId < sgptDataTable->nTxtMonStatsSize)) {
+    if (!(0 <= nClassId && nClassId < sgptDataTable->nTxtMonStatsSize)) {
       return;
     }
 
@@ -796,7 +640,7 @@ void __fastcall MONMODE_HandleSpecialEndDeath(::SGAMEDATA * pGame, D2UnitStrc * 
     if (pMonStats->SplEndDeath == '\x01') {
       short int nMinionClassId;
       nMinionClassId = pMonStats->minion1;
-      if (-1 < nMinionClassId && (int)nMinionClassId <= sgptDataTable->nTxtMonStatsSize) {
+      if (0 <= nMinionClassId && (int)nMinionClassId <= sgptDataTable->nTxtMonStatsSize) {
         D2Game::Monster::MONSTER_TransformMonsterClass(pGame, pUnit, (int)nMinionClassId, 1);
         D2Game::Monster::MONSTERAI_TriggerMageThink(pGame, pUnit);
         return;
@@ -825,23 +669,11 @@ BOOL __fastcall MONMODE_ProcessBlockAnimation(::SGAMEDATA * pGame, D2UnitStrc * 
     return 1;
 }
 
-BOOL __fastcall MONMODE_CompleteCastAndReset(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
-    D2UnitStrc* pUnit = pMonsterKill->pVictim;
-    if (pUnit && pUnit->eAnimMode.ePlayerMode != Death) {
-      D2Game::Monster::MonsterMode::MONSTERMODE_OnDeath(pMonsterKill->nAnimatedMode1, pGame, pUnit);
-    }
-
-    UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, 0xc);
-    EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSKILLS, 0);
-    EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSTATS, 0);
-    return 1;
-}
-
 // Schedules the deferred death animation for a monster. Clears combat state via FreeCombatAndChangeAnimMode, then if no AITHINK timer is pending: if the unit is stunned, schedules the death event 45 frames out; otherwise reads aidel from MonStatsTxt (SP) or TreasureClass offset by difficulty (MP/BNet) as the death-animation delay, defaulting to 15 frames if zero.
 BOOL __fastcall PlanExecutionOfMonster(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
     bool _bTimerExists;
     bool bTimerExists;
-    uint8_t byAiDel;
+    uint32_t byAiDel;
     D2UnitStrc* pUnit = pMonsterKill->pVictim;
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, 1);
     _bTimerExists = EVENT_TimerTypeExistsOnUnit(pGame, pUnit, UNITEVENTCALLBACK_AITHINK);
@@ -877,7 +709,7 @@ BOOL __fastcall PlanExecutionOfMonster(::SGAMEDATA * pGame, D2MonsterKillStrc * 
     return 1;
 }
 
-BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_A(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
+static BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_A(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pMonsterKill->pVictim, 10);
     return 1;
 }
@@ -1044,7 +876,7 @@ BOOL __fastcall MONMODE_ProcessSkillCast(::SGAMEDATA * pGame, D2UnitStrc * pUnit
     return 1;
 }
 
-BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_B(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
+static BOOL __fastcall thunk_FreeCombatAndChangeAnimMode_B(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
     UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pMonsterKill->pVictim, 6);
     return 1;
 }
@@ -1081,7 +913,7 @@ BOOL __fastcall MONMODE_TryFleeFromTarget(::SGAMEDATA * pGame, D2MonsterKillStrc
     D2DynamicPathStrc* pDynamicPath = pUnit->pPath.pDynamicPath;
     D2Common::PATH::DynamicPath::PATH_SetPathType(pDynamicPath, 8);
     int32_t nMonStatsRow = D2Client::UNIT::Player::TXT_MonStats_GetBaseId(pUnit);
-    if (nMonStatsRow < 0 || sgptDataTable->nTxtMonStatsSize <= nMonStatsRow || nMonStatsRow != 0x4e) {
+    if (nMonStatsRow < 0 || nMonStatsRow >= sgptDataTable->nTxtMonStatsSize || nMonStatsRow != 0x4e) {
       nDistance = 5;
     } else {
       nDistance = 10;
@@ -1243,7 +1075,7 @@ D2AiDispatchCallbacksStrc * __fastcall GetDropHandler(D2UnitStrc * pUnit, uint32
 
     eD2MonsterClassId nMonClassId;
     nMonClassId = pUnit->nClassId;
-    if ((int)nMonClassId < 0 || sgptDataTable->nTxtMonStatsSize <= (int)nMonClassId || !(sgptDataTable->pTxtMonStats + nMonClassId) || 0xf < nParam) {
+    if ((int)nMonClassId < 0 || (int)nMonClassId >= sgptDataTable->nTxtMonStatsSize || !(sgptDataTable->pTxtMonStats + nMonClassId) || 0xf < nParam) {
       return nullptr;
     }
     if (sgptDataTable->pTxtMonStats[nMonClassId].SplGetModeChart == '\0') {
@@ -1390,10 +1222,10 @@ int32_t __stdcall MONSTERAI_ExecuteLifecycleTransition(::SGAMEDATA * pGame, D2Mo
 
     D2MonsterPathParamStrc* pAiParams = 0;
     if (eTargetMode != eD2MonsterAnimMode_ns::GetHit) {
-      if (!pMonsterKill->pAttacker) {
-        D2Common::PATH::DynamicPath::SetSP1(pDynPath, (int16_t)pMonsterKill->nTargetX, (int16_t)pMonsterKill->nTargetY);
-      } else {
+      if (pMonsterKill->pAttacker) {
         D2Common::PATH::DynamicPath::SetTarget(pDynPath, pMonsterKill->pAttacker);
+      } else {
+        D2Common::PATH::DynamicPath::SetSP1(pDynPath, (int16_t)pMonsterKill->nTargetX, (int16_t)pMonsterKill->nTargetY);
       }
 
       D2Common::PATH::DynamicPath::SetDistanceWithChecks(pDynPath, 0x14);
@@ -1440,10 +1272,10 @@ int32_t __stdcall MONSTERAI_ExecuteLifecycleTransition(::SGAMEDATA * pGame, D2Mo
       if (pCurrentModeHandler) {
         if (pCurrentModeHandler->bBool) {
           bHasAnimSequence = MONSTER_HasAnimModeSequence(pUnit, eActualAnimMode);
-          if (!bHasAnimSequence) {
-            UNIT::SUnit::UNITS_SetupAnimTimerEvents(pGame, pUnit);
-          } else {
+          if (bHasAnimSequence) {
             UNIT::SUnit::UNITS_ClearAnimAndTriggerEndAnim(pGame, pUnit);
+          } else {
+            UNIT::SUnit::UNITS_SetupAnimTimerEvents(pGame, pUnit);
           }
         }
         if (eActualAnimMode != eD2MonsterAnimMode_ns::GetHit) {
@@ -1461,7 +1293,7 @@ int32_t __stdcall MONSTERAI_ExecuteLifecycleTransition(::SGAMEDATA * pGame, D2Mo
 }
 
 void __stdcall SetCurrentSkill(D2UnitStrc * pUnit, eD2MonsterAnimMode nUnitMode, D2MonsterKillStrc * pMonsterKill) {
-    if (0xf < (int)nUnitMode) {
+    if (0x10 <= (int)nUnitMode) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x7b8);
       exit(-1);
     }
@@ -1607,7 +1439,7 @@ void __fastcall MONSTER_EndOfFrameAiDispatch(::SGAMEDATA * pGame, D2UnitStrc * p
         if (-1 < nBaseMonClassId && nBaseMonClassId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nBaseMonClassId) {
           nBaseMonClassId = (int)sgptDataTable->pTxtMonStats[nBaseMonClassId].BaseId;
         }
-        if (-1 < nBaseMonClassId) {
+        if (0 <= nBaseMonClassId) {
           nResolvedBaseId = nBaseMonClassId;
           if (nBaseMonClassId < sgptDataTable->nTxtMonStatsSize) {
             goto dispatch_by_base_id;
@@ -1618,7 +1450,7 @@ void __fastcall MONSTER_EndOfFrameAiDispatch(::SGAMEDATA * pGame, D2UnitStrc * p
 
     nResolvedBaseId = -1;
     dispatch_by_base_id:
-    if (nBaseMonClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nBaseMonClassId) {
+    if (nBaseMonClassId < 0 || nBaseMonClassId >= sgptDataTable->nTxtMonStatsSize) {
       pMonStats = 0;
     } else {
       pMonStats = sgptDataTable->pTxtMonStats + nBaseMonClassId;
@@ -1943,8 +1775,8 @@ BOOL __fastcall MONSTER_UpdateSkillCastAnimation(::SGAMEDATA * pGame, D2UnitStrc
       }
     }
 
-    uint8_t byCurrentActionFrame = pUnit->nActionFrame;
-    if (byCurrentActionFrame == 4 || bShouldSpawnSkill && !(pUnit->eUnitFlags >> 6 & 1) && (byCurrentActionFrame == 1 || byCurrentActionFrame == 2)) {
+    uint32_t byCurrentActionFrame = pUnit->nActionFrame;
+    if (byCurrentActionFrame == 4 || bShouldSpawnSkill && !(((bool)(pUnit->eUnitFlags >> 6 & 1))) && (byCurrentActionFrame == 1 || byCurrentActionFrame == 2)) {
       SKILLS::SkillsServer::SKILLS_PeriodicSkillSpawnAndTimer(pGame, pUnit);
     }
 

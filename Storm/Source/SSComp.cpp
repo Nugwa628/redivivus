@@ -146,7 +146,7 @@ static uint32_t __stdcall SCOMP_ADPCMEncode(uint32_t nMaxOutSize, short * pInSam
     aChannelState[2] = 0x2c;
     aChannelState[3] = 0x2c;
     uint32_t nChannel = 0;
-    if (nChannels) {
+    if ((uint32_t)nChannels > 0) {
       do {
         nSample = *pInSamples;
         aChannelState[nChannel] = (int)nSample;
@@ -166,7 +166,7 @@ static uint32_t __stdcall SCOMP_ADPCMEncode(uint32_t nMaxOutSize, short * pInSam
     if (nChannels < nInSize >> 1) {
       int* piVar1;
       do {
-        if ((int)nMaxOutSize < (int)(pOutCur + (2 - (int)pOutStart))) {
+        if ((int)(pOutCur + (2 - (int)pOutStart)) > (int)nMaxOutSize) {
           return (uint32_t)(pOutCur + (2 - (int)pOutStart));
         }
         if (nChannels == 2) {
@@ -195,7 +195,7 @@ static uint32_t __stdcall SCOMP_ADPCMEncode(uint32_t nMaxOutSize, short * pInSam
         } else {
           while (true) {
             nChannelIdx = nChannel;
-            if (!(nStepSize * 2 < nDelta && aChannelState[nChannelTmp + 2] < 0x58)) {
+            if (!(nDelta > nStepSize * 2 && aChannelState[nChannelTmp + 2] < 0x58)) {
               break;
             }
             if (!nMaxSamples) {
@@ -288,7 +288,7 @@ static short * __stdcall SCOMP_ADPCMDecode(short * pOut, uint32_t nOutSize, int3
     uint32_t nChannel = 0;
     short int* pOutStart = pOut;
     uint8_t* pInEnd = (uint8_t*)(pIn + nInSize);
-    if (nChannels) {
+    if ((uint32_t)nChannels > 0) {
       do {
         nSample = *(short int*)pInCur;
         pInCur += 2;
@@ -409,7 +409,7 @@ static short * __stdcall SCOMP_ADPCMDecode(short * pOut, uint32_t nOutSize, int3
 uint32_t SCOMP_PkwareBufferRead(void * pDst, uint32_t * pnReqSize, PKWARE_STREAM * pStream) {
     uint32_t nAvail = pStream->nInLen - pStream->nInPos;
     uint32_t _Size = *pnReqSize;
-    if (nAvail <= *pnReqSize) {
+    if (*pnReqSize >= nAvail) {
       _Size = nAvail;
     }
 
@@ -422,7 +422,7 @@ uint32_t SCOMP_PkwareBufferRead(void * pDst, uint32_t * pnReqSize, PKWARE_STREAM
 void SCOMP_PkwareBufferWrite(void * pSrc, uint32_t * pnReqSize, PKWARE_STREAM * pStream) {
     uint32_t nAvail = pStream->nOutLen - pStream->nOutPos;
     uint32_t _Size = *pnReqSize;
-    if (nAvail <= *pnReqSize) {
+    if (*pnReqSize >= nAvail) {
       _Size = nAvail;
     }
 
@@ -439,8 +439,8 @@ void __fastcall SCOMP_PkwareCompress(void * pOutBuf, uint32_t * pdwOutLength, vo
     Stream.nOutLen = *pdwOutLength;
     Stream.nOutPos = 0;
     uint32_t nCompType = (uint32_t)(*pnMode == 2);
-    Stream.nInPos = 0;
     Stream.pInBuf = pInBuf;
+    Stream.nInPos = 0;
     Stream.nInLen = nInLen;
     if (nInLen < 0xc00) {
       nDictSize = (nInLen < 0x600 ? -1024 : 0) + 0x800;
@@ -531,12 +531,19 @@ static int __stdcall SCOMP_ZlibCompress(uint8_t * pSrc, uint32_t nSrcLen, uint32
 
 void __fastcall SCOMP_ZlibCompressWithLevel(uint8_t * pDst, uint32_t * pnDstLen, uint32_t pSrc, uint32_t nSrcLen, uint32_t * pUserData, int32_t nLevel) {
     uint32_t nZlibLevel;
-    if (nLevel == 1) {
+    switch (nLevel) {
+    case 1: {
       nZlibLevel = 9;
-    } else if (nLevel == 2) {
+      break;
+    }
+    case 2: {
       nZlibLevel = 1;
-    } else {
+      break;
+    }
+    default: {
       nZlibLevel = -1;
+      break;
+    }
     }
 
     nLevel = *pnDstLen;
@@ -4034,7 +4041,7 @@ void __stdcall SLogDump(uint32_t nHandle, int32_t pData, uint32_t nLength) {
     if (!pContext) {
       return;
     }
-    if (nLength) {
+    if ((uint32_t)nLength > 0) {
       uint32_t nWritten;
       nRowStart = 0;
       do {
@@ -4099,7 +4106,7 @@ void __stdcall SLogDump(uint32_t nHandle, int32_t pData, uint32_t nLength) {
     }
 
     pContext->nLineStart = pContext->nUsed;
-    if (0xbfff < pContext->nUsed) {
+    if (0xc000 <= pContext->nUsed) {
       SLOG_FlushLog(pContext);
     }
 
@@ -4182,7 +4189,7 @@ void SLogWrite(uint32_t nHandle, char * szFormat, ...) {
     }
 
     pContext->nLineStart = pContext->nUsed;
-    if (0xbfff < pContext->nUsed) {
+    if (0xc000 <= pContext->nUsed) {
       SLOG_FlushLog(pContext);
     }
 
@@ -4437,7 +4444,7 @@ uint8_t PKWARE_explode(pfnPkwareRead pfnRead, pfnPkwareWrite pfnWrite, TDcmpStru
     *pBufByteCount = 0x800;
     uint32_t uVar1 = pWorkBuf->read_buf(pWorkBuf->in_buff, pBufByteCount, pWorkBuf->param);
     pWorkBuf->in_bytes = uVar1;
-    if (uVar1 < 5) {
+    if (uVar1 <= 4) {
       return 3;
     }
 
@@ -4516,7 +4523,7 @@ uint32_t PKWARE_ExplodeStream(TDcmpStruct * pItemData) {
           __frame0.nInventoryResult--;
         } while (__frame0.nInventoryResult);
       }
-      if (0x1fff < pItemData->outputPos) {
+      if (0x2000 <= pItemData->outputPos) {
         __frame0.nInventoryResult = 0x1000;
         pItemData->write_buf(pItemData->out_buff + 0x1000, &__frame0.nInventoryResult, pItemData->param);
         PKWARE_SetMemoryValue((uint32_t*)pItemData->out_buff, (uint32_t*)(pItemData->out_buff + 0x1000), pItemData->outputPos - 0x1000);
@@ -4542,14 +4549,7 @@ uint32_t PKWARE_ProcessItemInventory(TDcmpStruct * nParam) {
         }
       } else {
         nDecodedValue = nParam->bit_buff & 0xff;
-        if (!nDecodedValue) {
-          nRangeCheckResult = PKWARE_CheckItemDataRange(nParam, 8);
-          if (nRangeCheckResult) {
-            return 0x306;
-          }
-
-          nDecodedValue = (uint32_t)nParam->offs2EB4[nParam->bit_buff & 0xff];
-        } else {
+        if (nDecodedValue) {
           nDecodedValue = (uint32_t)nParam->offs2C34[nDecodedValue];
           if (nDecodedValue == 0xff) {
             if (!(nParam->bit_buff & 0x3f)) {
@@ -4568,6 +4568,13 @@ uint32_t PKWARE_ProcessItemInventory(TDcmpStruct * nParam) {
               nDecodedValue = (uint32_t)nParam->offs2D34[nParam->bit_buff & 0xff];
             }
           }
+        } else {
+          nRangeCheckResult = PKWARE_CheckItemDataRange(nParam, 8);
+          if (nRangeCheckResult) {
+            return 0x306;
+          }
+
+          nDecodedValue = (uint32_t)nParam->offs2EB4[nParam->bit_buff & 0xff];
         }
 
         nRangeCheckResult = PKWARE_CheckItemDataRange(nParam, (uint32_t)nParam->ChBitsAsc[nDecodedValue]);
@@ -4631,7 +4638,7 @@ int PKWARE_GetItemDataValue(TDcmpStruct * pClientSideData, int nParam) {
 BOOL PKWARE_CheckItemDataRange(TDcmpStruct * pClientSideData, uint32_t nParam) {
     uint8_t bNextByte;
     uint32_t dwBitBuffer = pClientSideData->extra_bits;
-    if (nParam <= dwBitBuffer) {
+    if (dwBitBuffer >= nParam) {
       pClientSideData->extra_bits = dwBitBuffer - nParam;
       pClientSideData->bit_buff >>= (uint8_t)nParam & 0x1f;
       return 0;
@@ -4948,20 +4955,13 @@ void PKWARE_IterateItemData(TDcmpStruct * pState) {
       pCodeLengthByte = pState->ChBitsAsc + nSymbolIndex;
       byBitLength = *pCodeLengthByte;
       bySymbolValue = (uint8_t)nSymbolIndex;
-      if (byBitLength < 9) {
+      if (byBitLength <= 8) {
         nTableFillIndex = (uint32_t)*pHuffCodeWidthEntry;
         do {
           pState->offs2C34[nTableFillIndex] = bySymbolValue;
           nTableFillIndex += 1 << (byBitLength & 0x1f);
         } while (nTableFillIndex < 0x100);
-      } else if (!(*pHuffCodeWidthEntry & 0xff)) {
-        *pCodeLengthByte = byBitLength - 8;
-        nTableFillIndex = (uint32_t)(*pHuffCodeWidthEntry >> 8);
-        do {
-          pState->offs2EB4[nTableFillIndex] = bySymbolValue;
-          nTableFillIndex += 1 << (byBitLength - 8 & 0x1f);
-        } while (nTableFillIndex < 0x100);
-      } else {
+      } else if (*pHuffCodeWidthEntry & 0xff) {
         pState->offs2C34[*pHuffCodeWidthEntry & 0xff] = 0xff;
         if (!(*pHuffCodeWidthEntry & 0x3f)) {
           byBitLength = *pCodeLengthByte - 6;
@@ -4980,6 +4980,13 @@ void PKWARE_IterateItemData(TDcmpStruct * pState) {
             nTableFillIndex += 1 << (byBitLength & 0x1f);
           } while (nTableFillIndex < 0x100);
         }
+      } else {
+        *pCodeLengthByte = byBitLength - 8;
+        nTableFillIndex = (uint32_t)(*pHuffCodeWidthEntry >> 8);
+        do {
+          pState->offs2EB4[nTableFillIndex] = bySymbolValue;
+          nTableFillIndex += 1 << (byBitLength - 8 & 0x1f);
+        } while (nTableFillIndex < 0x100);
       }
 
       pHuffCodeWidthEntry--;
@@ -5789,7 +5796,7 @@ uint32_t PKWARE_implode(pfnPkwareRead pfnRead, pfnPkwareWrite pfnWrite, TCmpStru
           *psCodeTable = (short int)nGroupCodeIndex << (gaPKWARE_ExtraLenBitsTable[nLenCodeGroup] + 1 & 0x1f) | (uint16_t)gaCRT_PKWareLenBaseTable[nLenCodeGroup] * 2 | 1;
           nGroupCodeIndex = nNextGroupCodeIndex;
           psCodeTable++;
-        } while (nNextGroupCodeIndex < (uint32_t)(1 << (gbCRT_BitwiseOpState[nLenCodeGroup] & 0x1f)));
+        } while ((uint32_t)(1 << (gbCRT_BitwiseOpState[nLenCodeGroup] & 0x1f)) > nNextGroupCodeIndex);
       }
 
       nLenCodeGroup++;

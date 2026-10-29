@@ -2957,7 +2957,7 @@ extern int D2GS_Connected;
 extern int ServerLoadingComplete;
 extern BOOL D2CLIENT_ExitVar3;
 // Level load in-progress flag: set on unload complete, cleared on load complete.
-extern bool gLevelLoadInProgress;
+extern BOOL gLevelLoadInProgress;
 // Exit cutscene state: pending id + played flag.
 extern D2ExitCutsceneState gExitCutsceneState;
 extern D2ExitCutsceneState gExitCutscenePlayed;
@@ -3190,7 +3190,7 @@ extern uint32_t gnCurrentEngineFlags;
 extern uint32_t gbHideExtendedFPSStats;
 extern uint32_t gnLoadingProgressRatio;
 extern uint32_t gnChatHistoryScrollIndex;
-extern char gaIMECompositionBuffer;
+extern int32_t gaIMECompositionBuffer;
 extern char gaChatInputBuffer;
 extern uint8_t gbChatInputEnabled;
 extern uint16_t gnChatHistoryFillCount;
@@ -3511,7 +3511,7 @@ extern unsigned int gdwNpcMenuLastClickTimestamp;
 extern uint16_t gNpcMenuConfirmDialogStrings[40];
 extern int32_t gnDialogStructAllocCount;
 extern uint32_t gnTradeGoldUpdateBuffer;
-extern uint16_t gnTradePlayerGoldAmount;
+extern uint32_t gnTradePlayerGoldAmount;
 extern uint16_t gnTradePartnerGoldAmount;
 extern uint32_t gdwTradeThrottleTimestamp;
 extern bool gbTradeResetFlag;
@@ -3543,7 +3543,7 @@ extern int gnSoundLastInitTick;
 extern uint32_t gdwSoundChannelIndex;
 extern uint32_t gnSoundInitCooldown;
 extern unsigned int gnSoundLastPlayerAnimModeTime;
-extern unsigned short geSoundLastPlayerAnimMode;
+extern uint32_t geSoundLastPlayerAnimMode;
 extern int gPlrModeTokens[20];
 extern int gTxtCompositTokens[16];
 extern int gObjModeTokens[8];
@@ -5327,20 +5327,20 @@ extern unsigned int g_bCutscenePlaying;
 // =============================================================================
 
 extern eD2PlayerClassID eD2PlayerClassID_00712f00;
-extern bool gbPanelClickProcessed;
-extern bool gbBNetConnectionProgressFlag;
+extern BOOL gbPanelClickProcessed;
+extern BOOL gbBNetConnectionProgressFlag;
 extern bool gbAutomapPanelOpened;
 extern bool gbInvOverlayFlag;
-extern bool gbPanelLeftBeltArrowClicked;
-extern bool gbUIStatButtonHovered;
-extern bool gbUISkillButtonHovered;
-extern bool gbUIStatScreenMouseDown;
+extern BOOL gbPanelLeftBeltArrowClicked;
+extern BOOL gbUIStatButtonHovered;
+extern BOOL gbUISkillButtonHovered;
+extern BOOL gbUIStatScreenMouseDown;
 extern bool gbSpellSelActiveRightSkillSlot;
-extern bool gbSpellSelSkillTreeBackground;
-extern bool gbNpcMenuTransactionConfirmed;
-extern bool gbNpcMenuShopTransactionActive;
-extern unsigned short geCutsceneAmbientMusicSoundId;
-extern bool gbDDrawPaletteSet;
+extern BOOL gbSpellSelSkillTreeBackground;
+extern BOOL gbNpcMenuTransactionConfirmed;
+extern BOOL gbNpcMenuShopTransactionActive;
+extern uint32_t geCutsceneAmbientMusicSoundId;
+extern BOOL gbDDrawPaletteSet;
 
 // =============================================================================
 // Declaration closure

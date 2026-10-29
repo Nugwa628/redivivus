@@ -258,8 +258,14 @@ void __stdcall CopyCharListToGlobal(char * pBytes, size_t nSize) {
     D2Client::MCP::CharListPacket = D2_ALLOC_AT(nSize, ".\\Src\\McpConnect.cpp", 0x227);
     memcpy(D2Client::MCP::CharListPacket, pBytes, nSize);
     if (*pBytes == '\x17') {
-      if (*(uint16_t*)((int)D2Client::MCP::CharListPacket + 1) < 0x100) {
-        if (*(uint16_t*)((int)D2Client::MCP::CharListPacket + 3) < 0x100) {
+      if (!(*(uint16_t*)((int)D2Client::MCP::CharListPacket + 1) < 0x100)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x233);
+        exit(-1);
+      } else {
+        if (!(*(uint16_t*)((int)D2Client::MCP::CharListPacket + 3) < 0x100)) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x234);
+          exit(-1);
+        } else {
           if (*(uint16_t*)((int)D2Client::MCP::CharListPacket + 5) < 0x100) {
             if (!(*(uint16_t*)((int)D2Client::MCP::CharListPacket + 7) < 0x100)) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x236);
@@ -271,17 +277,17 @@ void __stdcall CopyCharListToGlobal(char * pBytes, size_t nSize) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x235);
             exit(-1);
           }
-        } else {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x234);
-          exit(-1);
         }
-      } else {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x233);
-        exit(-1);
       }
     } else if (*pBytes == '\x19') {
-      if (*(uint16_t*)((int)D2Client::MCP::CharListPacket + 1) < 0x100) {
-        if (*(uint16_t*)((int)D2Client::MCP::CharListPacket + 3) < 0x100) {
+      if (!(*(uint16_t*)((int)D2Client::MCP::CharListPacket + 1) < 0x100)) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x242);
+        exit(-1);
+      } else {
+        if (!(*(uint16_t*)((int)D2Client::MCP::CharListPacket + 3) < 0x100)) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x243);
+          exit(-1);
+        } else {
           if (*(uint16_t*)((int)D2Client::MCP::CharListPacket + 5) < 0x100) {
             if (!(*(uint16_t*)((int)D2Client::MCP::CharListPacket + 7) < 0x100)) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x245);
@@ -300,13 +306,7 @@ void __stdcall CopyCharListToGlobal(char * pBytes, size_t nSize) {
             Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x244);
             exit(-1);
           }
-        } else {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x243);
-          exit(-1);
         }
-      } else {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x242);
-        exit(-1);
       }
     } else {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x254);
@@ -344,7 +344,7 @@ void __stdcall McpConnectionLoop(int * pnParam) {
       }
 
       dwWaitResult = GetTickCount();
-      if (dwStartTick + 60000 <= dwWaitResult) {
+      if (dwWaitResult >= dwStartTick + 60000) {
         D2Client::MCP::D2GSJoinResult = 2;
         return;
       }
@@ -417,7 +417,7 @@ static char * __stdcall STRING_GetStringLength(char * szText, char * * ppszText,
     char* pszScan = szText;
     pszScan = pszScan + strlen(pszScan) + 1;
     *ppszText += (int)(pszScan + (1 - (int)pcVar1));
-    if (pszBufferEnd <= *ppszText) {
+    if (*ppszText >= pszBufferEnd) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x26);
       exit(-1);
     }
@@ -504,7 +504,7 @@ void __fastcall NET_MCP_CLIENT_Send_0x07_CharLogon(char * szText) {
     Fog::Src::D2QSSocket::NET_MCP_CLIENT_Send(D2Client::MCP::MCPD2QSSocket, &__frame0.byPacketId, (uint16_t)(uintptr_t)(__frame0.pStrLen + 1));
 }
 
-void __fastcall NET_MCP_CLIENT_Send_0x03_CreateGame(mcp0x03data * pMcpData, int16_t nRequestId) {
+void __fastcall NET_MCP_CLIENT_Send_0x03_CreateGame(mcp0x03data * pMcpData, int32_t nRequestId) {
     MCP_CREATEGAME sPacket;
     SetD2GSJoinResult(0);
     sPacket.nGameFlags = pMcpData->nGameFlags;
@@ -738,7 +738,7 @@ void __fastcall NET_MCP_CLIENT_Send_0x16_CharRank(char * szText, uint32_t dwFiel
     sPacket.dwField2 = dwField2;
     sPacket.dwField1 = dwField1;
     STRING_GetStringLength(szText, (char**)&nTextLength, (char*)0x400, (int32_t)sPacket.szData);
-    if (0xfffe < nTextLength + 9) {
+    if (0xffff <= nTextLength + 9) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x27b);
       exit(-1);
     }
@@ -804,8 +804,8 @@ BOOL __fastcall NET_MCP_CLIENT_Incoming0x04(MCPPacketSrv0x04 * pBytes, size_t nS
     }
 
     int32_t nIpStringMaxLen = 0x12;
-    char* szGameIpString = Fog::Src::Safesock::NET_MakeIPV4AddressHumanFriendly((in_addr)pBytes->nGameIp);
-    Storm::Source::SSTR::SStrCopy(D2Client::MCP::D2GSConnectIp, szGameIpString, nIpStringMaxLen);
+
+    Storm::Source::SSTR::SStrCopy(D2Client::MCP::D2GSConnectIp, Fog::Src::Safesock::NET_MakeIPV4AddressHumanFriendly((in_addr)pBytes->nGameIp), nIpStringMaxLen);
     return 1;
 }
 

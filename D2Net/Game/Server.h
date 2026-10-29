@@ -22,7 +22,6 @@ namespace D2Net::Game::Server {
 
 // Function declarations
 int __stdcall CreateThreadClientSocketOrSingleplayer();
-int32_t __fastcall HandleIncomingPacketBuffer(struct D2QServerStrc * pQServer, char * pBytes, size_t nSize);
 // Validates an incoming client packet before dispatch. Returns 3 if buffer empty or size indeterminate, 4 if opcode is out-of-range or packet too large (> 0x204). On success, fills pnPacketSize, pnPacketClass (0=game-phase, 1=pre-game, 2=QServer-token-gated opcodes >= 0x71), and pnTimeoutMs (100 ms). QServer-gated packets additionally checked against the game token via QServer::MatchesGameTokenFilter.
 int32_t __fastcall NET_D2GS_CLIENT_CheckIfPacketSizeIsCorrect(uint8_t * pbPacket, size_t nSize, uint32_t * pnPacketSize, int * pnUnknown, int * pnPacketClass, int * pnTimeoutMs, uint32_t dwArg1, uint32_t dwArg2, uint32_t nParam);
 void __stdcall WaitForEmptyEvent(DWORD dwParam);
@@ -57,8 +56,6 @@ void __stdcall _NullSub();
 // @evidence Forwards to QServer::_NullSubRet8(pQServer, dwParam). 0052b6f0 forwards to
 // _NullSubRet4(pQServer). Two distinct stubs.
 void __stdcall _NullSubRet8(uint32_t dwParam);
-int32_t __fastcall NET_D2GS_SERVER_Send_0xAF01(struct D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine);
-int32_t __fastcall NET_D2GS_CLIENT_Send_0x70(struct D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine);
 void __stdcall NET_D2GS_SERVER_Send_0xAF00();
 // Wrapper that creates and stores the global QServer instance. Calls NET_QServer_Init with port 4000, three packet modes (setup/in-game/system), and registers four callbacks: packet size classifier, client accepted (0xAF01), client freed (0x70), and single-player packet handler. Stores result in global pQServer variable.
 void __stdcall QSERVER_CreateAndInit(eD2GSConnectionType neD2GSConnectionType, eD2GSGameType eD2GameType);

@@ -74,6 +74,7 @@
 #include "D2Common/ITEMS/ItemMods.h"
 #include "D2Common/Unit/Unit.h"
 #include "D2Game/D2Game.h"
+#include "D2Common/Seed.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -116,12 +117,12 @@ BOOL __fastcall INFERNO_CastInfernoTick(::SGAMEDATA * pGame, D2UnitStrc * pUnit,
     int32_t nCalcDuration;
     uint32_t nTargetY;
     uint32_t nTargetX;
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
     D2SkillsTxt* pSkillTxtBase = sgptDataTable->pTxtSkills;
-    if (!(pSkillTxtBase + eSkill && -1 < (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(pSkillTxtBase + eSkill && 0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -182,7 +183,7 @@ BOOL __fastcall INFERNO_BeginOrContinueChannel(::SGAMEDATA * pGame, D2UnitStrc *
     D2SkillStrc* pSkill;
     eD2UnitType eUnitType;
     int32_t nInitParam;
-    if ((int)eSkill < 0 || sgptDataTable->nTxtSkillsCount <= (int)eSkill || !(sgptDataTable->pTxtSkills + eSkill)) {
+    if ((int)eSkill < 0 || (int)eSkill >= sgptDataTable->nTxtSkillsCount || !(sgptDataTable->pTxtSkills + eSkill)) {
       return 0;
     }
     if (pUnit && pUnit->eUnitType == UNIT_MONSTER) {
@@ -192,8 +193,8 @@ BOOL __fastcall INFERNO_BeginOrContinueChannel(::SGAMEDATA * pGame, D2UnitStrc *
       }
 
       nCalcDuration = pGame->dwGameFrame + nCalcDuration;
-      pSkill = D2Common::Units::GetCurrentSkill(pUnit);
-      D2Common::Skills::SKILL_SetParam1(pSkill, nCalcDuration);
+
+      D2Common::Skills::SKILL_SetParam1(D2Common::Units::GetCurrentSkill(pUnit), nCalcDuration);
     }
 
     D2StatListExStrc* pStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit, STATE_inferno);
@@ -219,8 +220,8 @@ BOOL __fastcall INFERNO_BeginOrContinueChannel(::SGAMEDATA * pGame, D2UnitStrc *
       D2Common::Stats::StatsEx::SetState(pStatList, STATE_inferno);
       D2Common::DATATBLS::ItemStats::SetState(pUnit, STATE_inferno, 1);
       nInitParam = 0;
-      pSkill = D2Common::Units::GetCurrentSkill(pUnit);
-      D2Common::Skills::SKILL_SetParam1(pSkill, nInitParam);
+
+      D2Common::Skills::SKILL_SetParam1(D2Common::Units::GetCurrentSkill(pUnit), nInitParam);
       return 1;
     }
 
@@ -267,13 +268,13 @@ BOOL __fastcall SKILLSOR_SrvStFn12_TargetInAuraRange(::SGAMEDATA * pGame, D2Unit
     int32_t nDistSq;
     int32_t nCasterY;
     D2UnitStrc* pTarget = UNIT::SUnit::GetTargetEx(pGame, pUnit);
-    if (!(pTarget && -1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    if (!(pTarget && 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
       return 0;
     }
 
     int32_t nAuraRange = D2Common::Skills::D2GetSkillCalc(pUnit, sgptDataTable->pTxtSkills[eSkill].aurarangecalc, eSkill, nSkillLvl);
     eD2UnitType eUnitType = pTarget->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       eSkill = pTarget->pPath.pStaticPath->nPosY;
     } else if (!pTarget->pPath.pDynamicPath) {
       eSkill = SKILL_Attack;
@@ -282,7 +283,7 @@ BOOL __fastcall SKILLSOR_SrvStFn12_TargetInAuraRange(::SGAMEDATA * pGame, D2Unit
     }
 
     eUnitType = pTarget->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nSkillLvl = pTarget->pPath.pStaticPath->nPosX;
     } else if (!pTarget->pPath.pDynamicPath) {
       nSkillLvl = 0;
@@ -291,7 +292,7 @@ BOOL __fastcall SKILLSOR_SrvStFn12_TargetInAuraRange(::SGAMEDATA * pGame, D2Unit
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nCasterY = pUnit->pPath.pStaticPath->nPosY;
     } else if (!pUnit->pPath.pDynamicPath) {
       nCasterY = 0;
@@ -300,7 +301,7 @@ BOOL __fastcall SKILLSOR_SrvStFn12_TargetInAuraRange(::SGAMEDATA * pGame, D2Unit
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nDistSq = pUnit->pPath.pStaticPath->nPosX;
     } else if (!pUnit->pPath.pDynamicPath) {
       nDistSq = 0;
@@ -337,7 +338,7 @@ BOOL __fastcall SKILLSOR_SrvStFn12_TargetInAuraRange(::SGAMEDATA * pGame, D2Unit
 }
 
 BOOL __fastcall SKILLSOR_SrvStFn13_ThunderStorm(::SGAMEDATA * pGame, D2UnitStrc * pAttacker, eD2Skills eD2Skill, int nSkillLvl) {
-    if (!(-1 < (int)eD2Skill && (int)eD2Skill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eD2Skill)) {
+    if (!(0 <= (int)eD2Skill && (int)eD2Skill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eD2Skill)) {
       return 0;
     }
 
@@ -381,7 +382,7 @@ void __fastcall SKILL_InitChargedBoltPath(D2UnitStrc * pUnit, int32_t nParam) {
     }
 
     int32_t nFrameCount = D2Common::Units::Missile::GetTotalFrames(pUnit);
-    if (0x4d < nFrameCount) {
+    if (0x4e <= nFrameCount) {
       nFrameCount = 0x4d;
       D2Common::Units::Missile::SetTotalFrames(pUnit, 0x4d);
       D2Common::Units::Missile::SetCurrentFrame(pUnit, 0x4d);
@@ -389,8 +390,7 @@ void __fastcall SKILL_InitChargedBoltPath(D2UnitStrc * pUnit, int32_t nParam) {
 
     D2DynamicPathStrc* pDynamicPath = pUnit->pPath.pDynamicPath;
     uint32_t nSeedX = D2Common::PATH::DynamicPath::GetXSP1(pDynamicPath);
-    pUnit->sSeed.nSeedLow = nSeedX + nParam;
-    pUnit->sSeed.nSeedHigh = 0x29a;
+    D2Common::Seed::InitSeed_Param_666(&pUnit->sSeed, nSeedX + nParam);
     D2Common::PATH::DynamicPath::PATH_SetPathType(pDynamicPath, 10);
     D2Common::PATH::DynamicPath::OverwriteDistanceAndMaxDistance(pDynamicPath, (uint8_t)nFrameCount);
     D2Common::PATH::DynamicPath::PATH_CalculatePath(pDynamicPath, pUnit, 0);
@@ -404,7 +404,7 @@ BOOL __fastcall Skills_SrvDoFunc_017_ChargedBolt(::SGAMEDATA * pGame, D2UnitStrc
     if (pUnit) {
       pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
     }
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
@@ -414,7 +414,7 @@ BOOL __fastcall Skills_SrvDoFunc_017_ChargedBolt(::SGAMEDATA * pGame, D2UnitStrc
     }
 
     sSkillArg.nMissileTxtNo = SkillAss::SKILLASS_GetChargeUpMissile(pUnit, eSkill);
-    if (!(-1 < (int)sSkillArg.nMissileTxtNo && (int)sSkillArg.nMissileTxtNo < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= (int)sSkillArg.nMissileTxtNo && (int)sSkillArg.nMissileTxtNo < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -469,12 +469,12 @@ void __fastcall SetFrozenArmorState(D2UnitStrc * pUnit, eD2States eState, int32_
 BOOL __fastcall Skills_SrvDoFunc_018_Armor(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     D2StateExArgStrc sStateArgs;
     int iAuraEvent;
-    /* Set State (Armor buff), set Auratarget event, event, event func */ if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    /* Set State (Armor buff), set Auratarget event, event, event func */ if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
     D2SkillsTxt* pSkillTxt = sgptDataTable->pTxtSkills + eSkill;
-    if (!(pSkillTxt && -1 < pSkillTxt->aurastate && (int)pSkillTxt->aurastate < sgptDataTable->nTxtStatesSize)) {
+    if (!(pSkillTxt && 0 <= pSkillTxt->aurastate && (int)pSkillTxt->aurastate < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
     if (pUnit) {
@@ -506,7 +506,7 @@ BOOL __fastcall Skills_SrvDoFunc_018_Armor(::SGAMEDATA * pGame, D2UnitStrc * pUn
     SkillDruid::D2SetPassiveStatsFromSkills(pUnit, pStatsExTmp, pSkillTxt, eSkill, nSkillLvl);
     D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsExTmp, UNITSTAT_modifierlist_skill, eSkill, 0);
     D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsExTmp, UNITSTAT_modifierlist_level, nSkillLvl, 0);
-    if (-1 < pSkillTxt->auraevent[0]) {
+    if (0 <= pSkillTxt->auraevent[0]) {
       short int* psAuraEvent;
       UNIT::SUnitEvent::SUNITEVENT_RemoveEventsByQueueAndOwner(pGameCtx, pUnit, 1, (int)pSkillTxt->aurastate);
       iAuraEvent = 0;
@@ -581,7 +581,7 @@ uint32_t __fastcall SKILLSOR_ApplyStaticFieldToUnit(D2SkillCallbackContextStrc *
     eStatType = ~UNITSTAT_strength;
     eElemType = pDmgEvent[4];
     SkillsServer::SERVER_AppendDamageToUnitEvent(pAttackerUnit, &sDamage, eElemType, nHp, pDmgEvent[3], (uint32_t*)&eStatType, (int*)&eElemType);
-    if (-1 < (int)eStatType) {
+    if (0 <= (int)eStatType) {
       nHpDrain = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pVictimSaved, eStatType, 0);
       if (nHpDrain < 0) {
         nHp = D2Client::Stats::D2ApplyPercent(nHp, 100, 100 - nHpDrain);
@@ -602,7 +602,7 @@ uint32_t __fastcall SKILLSOR_ApplyStaticFieldToUnit(D2SkillCallbackContextStrc *
 // @sourcefile .\SKILLS\SkillSor.cpp
 BOOL __fastcall Skills_SrvDoFunc_020_Static(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     D2StaticFieldArgStrc sStaticArgs;
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
@@ -625,8 +625,8 @@ BOOL __fastcall Skills_SrvDoFunc_020_Static(::SGAMEDATA * pGame, D2UnitStrc * pU
 
     sStaticArgs.nSynergyBonus = D2Common::Skills::SERVER_Synergy1(pUnit, eSkill, nSkillLvl, 1);
     sStaticArgs.eElemType = (eSkillEType)pSkillTxt->EType;
-    int32_t nRange = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxt->aurarangecalc, eSkill, nSkillLvl);
-    SkillsServer::SKILLS_ApplyAreaEffect(pGame, pUnit, 0, 0, nRange, pSkillTxt->aurafilter, SKILLSOR_ApplyStaticFieldToUnit, &sStaticArgs, 0, ".\\SKILLS\\SkillSor.cpp", 0x273);
+
+    SkillsServer::SKILLS_ApplyAreaEffect(pGame, pUnit, 0, 0, D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxt->aurarangecalc, eSkill, nSkillLvl), pSkillTxt->aurafilter, SKILLSOR_ApplyStaticFieldToUnit, &sStaticArgs, 0, ".\\SKILLS\\SkillSor.cpp", 0x273);
     return 1;
 }
 
@@ -651,7 +651,7 @@ BOOL __fastcall Skills_SrvDoFunc_021_Telekenis(::SGAMEDATA * pGame, D2UnitStrc *
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -724,9 +724,6 @@ BOOL __fastcall Skills_SrvDoFunc_021_Telekenis(::SGAMEDATA * pGame, D2UnitStrc *
       UNIT::SUnitDmg::DAMAGE_ApplyDamageToUnit(__frame0.pGameSaved, pUnit, __frame0.pTargetSaved, 1, &sDamage);
       UNIT::SUnitDmg::SERVER_GetHitCalculation(pGameHit, pUnit, pTarget, &sDamage);
       return 1;
-      case UNIT_OBJECT:
-        Objects::ObjectsMode::InteractWithObject(__frame0.pGameSaved, pUnit, pTarget->eUnitType, pTarget->nUnitGUID, &__frame0.nInteractOut);
-      break;
       case UNIT_ITEM:
         nRandRoll = D2Common::ITEMS::Items::ITEMS_IsA(pTarget, ITEMTYPE_Scroll);
       if (!nRandRoll) {
@@ -751,6 +748,9 @@ BOOL __fastcall Skills_SrvDoFunc_021_Telekenis(::SGAMEDATA * pGame, D2UnitStrc *
 
       ITEMS::ItemMode::SERVER_PickToInventory(__frame0.pGameSaved, pUnit, pTarget->nUnitGUID, &__frame0.nPickupFlags);
       return 1;
+      case UNIT_OBJECT:
+        Objects::ObjectsMode::InteractWithObject(__frame0.pGameSaved, pUnit, pTarget->eUnitType, pTarget->nUnitGUID, &__frame0.nInteractOut);
+      break;
     }
 
     return 1;
@@ -760,7 +760,7 @@ BOOL __fastcall Skills_SrvDoFunc_022_Nova_FrostNova(::SGAMEDATA * pGame, D2UnitS
     if (pUnit) {
       pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
     }
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
@@ -770,7 +770,7 @@ BOOL __fastcall Skills_SrvDoFunc_022_Nova_FrostNova(::SGAMEDATA * pGame, D2UnitS
     }
 
     eMissilesId peMissileId = SkillAss::SKILLASS_GetChargeUpMissile(pUnit, eSkill);
-    if (!(-1 < (int)peMissileId && (int)peMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= (int)peMissileId && (int)peMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -867,7 +867,7 @@ void __fastcall BlazePath(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     }
 
     eMissilesId eSrvMissileId = (eMissilesId)pSkillTxt->srvmissile[1];
-    if (!(-1 < (int)eSrvMissileId && (int)eSrvMissileId < pDataTable->nTxtMissilesSize)) {
+    if (!(0 <= (int)eSrvMissileId && (int)eSrvMissileId < pDataTable->nTxtMissilesSize)) {
       return;
     }
 
@@ -894,7 +894,7 @@ void __fastcall BlazePath(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
 BOOL __fastcall Skills_SrvDoFunc_024_FireWall(::SGAMEDATA * pGame, D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
     uint32_t nTargetY;
     D2SkillArgStrc sSkillArg;
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
@@ -904,7 +904,7 @@ BOOL __fastcall Skills_SrvDoFunc_024_FireWall(::SGAMEDATA * pGame, D2UnitStrc * 
     }
 
     eMissilesId eSrvMissileId = (eMissilesId)pSkillTxt->srvmissile[1];
-    if (!(-1 < (int)eSrvMissileId && (int)eSrvMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= (int)eSrvMissileId && (int)eSrvMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
@@ -914,12 +914,12 @@ BOOL __fastcall Skills_SrvDoFunc_024_FireWall(::SGAMEDATA * pGame, D2UnitStrc * 
     }
 
     D2UnitStrc* pCursorTarget = UNIT::SUnit::GetTargetEx(pGame, pUnit);
-    if (!pCursorTarget) {
-      nTargetX = D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath);
-      nTargetY = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
-    } else {
+    if (pCursorTarget) {
       nTargetX = D2Client::Units::GetXPosFromDynamicPathUnit(pCursorTarget);
       nTargetY = D2Client::Units::GetYPosFromDynamicPathUnit(pCursorTarget);
+    } else {
+      nTargetX = D2Common::PATH::DynamicPath::GetXSP1(pUnit->pPath.pDynamicPath);
+      nTargetY = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
     }
     if (!(nTargetX && nTargetY)) {
       return 0;
@@ -970,7 +970,7 @@ BOOL __fastcall Skills_SrvDoFunc_025_Enchant(::SGAMEDATA * pGame, D2UnitStrc * p
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -982,13 +982,13 @@ BOOL __fastcall Skills_SrvDoFunc_025_Enchant(::SGAMEDATA * pGame, D2UnitStrc * p
     if (pSkillTxt->aurastat[0] < -1) {
       return 0;
     }
-    if (sgptDataTable->nTxtItemStatCostSize <= (int)pSkillTxt->aurastat[0]) {
+    if ((int)pSkillTxt->aurastat[0] >= sgptDataTable->nTxtItemStatCostSize) {
       return 0;
     }
     if (pSkillTxt->aurastate < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtStatesSize <= (int)pSkillTxt->aurastate) {
+    if ((int)pSkillTxt->aurastate >= sgptDataTable->nTxtStatesSize) {
       return 0;
     }
 
@@ -1031,7 +1031,7 @@ BOOL __fastcall Skills_SrvDoFunc_025_Enchant(::SGAMEDATA * pGame, D2UnitStrc * p
     nAuraStatIdx = 6;
     do {
       D2UnitStrc* pCaster = pUnit;
-      if (-1 < *psAuraStat && (int)*psAuraStat < sgptDataTable->nTxtItemStatCostSize) {
+      if (0 <= *psAuraStat && (int)*psAuraStat < sgptDataTable->nTxtItemStatCostSize) {
         nValue = D2Common::Skills::D2GetSkillCalc(pCaster, *piStatCalc, eSkill, nSkillLvl);
         if (nValue) {
           D2Common::Stats::StatsEx::D2AddStatToStatsListEx(pStatsEx, (int)*psAuraStat, nValue, 0);
@@ -1087,7 +1087,7 @@ BOOL __fastcall Skills_SrvDoFunc_151_FireDirectionalMissile(::SGAMEDATA * pGame,
     }
 
     eMissilesId eMissileId = (eMissilesId)pSkillTxt->srvmissile[1];
-    if (!(-1 < (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
     if (pUnit) {
@@ -1200,7 +1200,7 @@ BOOL __fastcall Skills_SrvDoFunc_029_ThunderStorm(::SGAMEDATA * pGame, D2UnitStr
     if ((int)eSkill < 0) {
       return 0;
     }
-    if (sgptDataTable->nTxtSkillsCount <= (int)eSkill) {
+    if ((int)eSkill >= sgptDataTable->nTxtSkillsCount) {
       return 0;
     }
 
@@ -1254,9 +1254,7 @@ BOOL __fastcall Skills_SrvDoFunc_029_ThunderStorm(::SGAMEDATA * pGame, D2UnitStr
       nPrevTargetGUID = D2Common::Skills::SKILL_GetParam1(pSkill);
       nAreaRange = GetTxtTableParam6(eSkill);
       pThunderTarget = SkillsServer::SKILLS_FindNextUnitInAreaByGUID(pGameCtx, pUnit, 0, 0, nAreaRange, 3, nPrevTargetGUID, nullptr);
-      if (!pThunderTarget) {
-        D2Common::Skills::SKILL_SetParam1(pSkill, -1);
-      } else {
+      if (pThunderTarget) {
         eMissileId = (eMissilesId)SKILLSOR_CreateMissileAtTarget(pGameCtx, eMissileId, eSkill, nSkillLvl, pThunderTarget, pUnit);
         if ((D2UnitStrc*)eMissileId) {
           MISSILES::MissilesMode::Hits(pGameCtx, (D2UnitStrc*)eMissileId, pThunderTarget, 1);
@@ -1265,6 +1263,8 @@ BOOL __fastcall Skills_SrvDoFunc_029_ThunderStorm(::SGAMEDATA * pGame, D2UnitStr
         }
 
         D2Common::Skills::SKILL_SetParam1(pSkill, pThunderTarget->nUnitGUID);
+      } else {
+        D2Common::Skills::SKILL_SetParam1(pSkill, -1);
       }
     }
 
@@ -1317,7 +1317,7 @@ BOOL __fastcall ITEMEVENT_SorAuraManaAbsorb(::SGAMEDATA * pGame, uint32_t nUnitE
     if (!pUnit || !pDamage) {
       return 0;
     }
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
@@ -1327,7 +1327,7 @@ BOOL __fastcall ITEMEVENT_SorAuraManaAbsorb(::SGAMEDATA * pGame, uint32_t nUnitE
     }
 
     short int eSkillAuraState = pSkillTxt->aurastate;
-    if (!(-1 < eSkillAuraState && (int)eSkillAuraState < sgptDataTable->nTxtStatesSize)) {
+    if (!(0 <= eSkillAuraState && (int)eSkillAuraState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 
@@ -1343,7 +1343,7 @@ BOOL __fastcall ITEMEVENT_SorAuraManaAbsorb(::SGAMEDATA * pGame, uint32_t nUnitE
 
     uint32_t nCurMana = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_mana, 0);
     nSkillLvl = D2Common::Skills::D2GetSkillCalc(pUnit, pSkillTxt->calc[1], eSkill, nSkillLvl);
-    if (nSkillLvl < 1) {
+    if (nSkillLvl <= 0) {
       nSkillLvl = 1;
     }
 
@@ -1361,29 +1361,29 @@ BOOL __fastcall ITEMEVENT_SorAuraManaAbsorb(::SGAMEDATA * pGame, uint32_t nUnitE
         if (0 < nValue) {
           nAbsorbAmt = D2Client::Stats::D2ApplyPercent(nValue, nAbsorbPct, 100);
           nManaCap = D2Client::Stats::D2ApplyPercent(nCurMana, 0x10, nSkillLvl);
-          if (nManaCap <= nAbsorbAmt) {
+          if (nAbsorbAmt >= nManaCap) {
             nAbsorbAmt = nManaCap;
           }
 
           eSkill += nAbsorbAmt;
           *(int32_t*)(pDamage->nReserved66 + (bIsMerc - 0x66)) = nValue - nAbsorbAmt;
           nValue = D2Client::Stats::D2ApplyPercent(nAbsorbAmt, nSkillLvl, 0x10);
-          nCurMana = (int)(nCurMana - nValue) < 1 ? 0 : nCurMana - nValue;
+          nCurMana = (int)(nCurMana - nValue) <= 0 ? 0 : nCurMana - nValue;
         }
       }
 
       pAbsorbEntry += 2;
-    } while ((int)pAbsorbEntry < (uintptr_t)((char*)&gnAuraManaAbsorbIndex + sizeof(gnAuraManaAbsorbIndex)));
+    } while ((int)pAbsorbEntry < (int)((uintptr_t)((char*)&gnAuraManaAbsorbIndex + sizeof(gnAuraManaAbsorbIndex))));
 
-    nCurMana = (int)nCurMana < 1 ? 0 : nCurMana;
+    nCurMana = (int)nCurMana <= 0 ? 0 : nCurMana;
     D2Common::Stats::StatsEx::STATLIST_SetUnitStat(pUnit, UNITSTAT_mana, nCurMana, 0);
-    if (pTarget && 0 < (int)eSkill && -1 < pSkillTxt->prgoverlay && (int)pSkillTxt->prgoverlay <= sgptDataTable->nTxtOverlaySize) {
+    if (pTarget && 0 < (int)eSkill && 0 <= pSkillTxt->prgoverlay && (int)pSkillTxt->prgoverlay <= sgptDataTable->nTxtOverlaySize) {
       int nDirection;
       nAbsorbPct = D2Client::Units::GetYPosFromDynamicPathUnit(pTarget);
-      nValue = D2Client::Units::GetXPosFromDynamicPathUnit(pTarget);
-      nDirection = D2Common::Units::GetDirectionToCoords(pUnit, nValue, nAbsorbPct);
+
+      nDirection = D2Common::Units::GetDirectionToCoords(pUnit, D2Client::Units::GetXPosFromDynamicPathUnit(pTarget), nAbsorbPct);
       bIsMerc = D2Common::Monsters::MONSTERS::MONSTERS_GetGfxOffsetTable2((uint8_t)nDirection);
-      D2Common::Units::SetOverlay(pUnit, (int)pSkillTxt->prgoverlay + (bIsMerc & 0xff), 0);
+      D2Common::Units::SetOverlay(pUnit, (int)pSkillTxt->prgoverlay + (uint8_t)bIsMerc, 0);
     }
     if ((int)nCurMana >= 1) {
       return 1;
@@ -1416,7 +1416,7 @@ BOOL __fastcall Skills_SrvDoFunc_144_Hydra(::SGAMEDATA * pGame, D2UnitStrc * pUn
     uint32_t nSpawnY;
     uint32_t nSpawnX;
     eD2Skills eSkillOrig = iHydraIdx;
-    if (!(-1 < (int)iHydraIdx && (int)iHydraIdx < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)iHydraIdx && (int)iHydraIdx < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 
@@ -1427,12 +1427,12 @@ BOOL __fastcall Skills_SrvDoFunc_144_Hydra(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
     ::SGAMEDATA* pGameSaved = pGame;
     sSummonParams.pSkillTxt = (D2SkillsTxt*)SkillsServer::SKILLS_GetSummonMonsterClassId(pUnit, 0, iHydraIdx, nSkillLvl, &nAnimMode, nullptr, nullptr);
-    if (-1 >= (int)sSummonParams.pSkillTxt) {
+    if (0 > (int)sSummonParams.pSkillTxt) {
       return 0;
     }
 
     BOOL nPetType = (BOOL)pSkillTxt->pettype;
-    if (!(-1 < nPetType && nPetType < sgptDataTable->nTxtPetTypeSize)) {
+    if (!(0 <= nPetType && nPetType < sgptDataTable->nTxtPetTypeSize)) {
       return 0;
     }
 

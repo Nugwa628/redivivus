@@ -173,7 +173,7 @@ template<> void TSGrowableArray<TSExplicitList<StringEntryNode, -572662307>>::Re
     if (nCapacityOrig < this->m_count) {
       nAlloc = nCapacityOrig;
     }
-    if (nAlloc) {
+    if ((uint32_t)nAlloc > 0) {
       uint32_t* puVar1;
       pBucket = pBlock;
       do {
@@ -216,7 +216,7 @@ template<> void TSGrowableArray<TSExplicitList<StringEntryNode, -572662307>>::Re
 template<> ::StringEntryNode * TSHashTable<StringEntryNode, HASHKEY_STRI>::Ptr(uint32_t dwHashVal, ::HASHKEY_STRI * pKey) {
     int32_t nCmpResult;
     uint32_t uFirstEntry = this->tSlotListArray.m_data[dwHashVal & this->nSlotMask].m_terminator.m_next;
-    ::StringEntryNode* pEntry = (::StringEntryNode*)((int)uFirstEntry < 1 ? 0 : uFirstEntry);
+    ::StringEntryNode* pEntry = (::StringEntryNode*)((int)uFirstEntry <= 0 ? 0 : uFirstEntry);
     while (true) {
       if ((int)pEntry < 1) {
         return nullptr;
@@ -240,7 +240,7 @@ template<> void TSGrowableArray<TSExplicitList<StringEntryNode, -572662307>>::De
     TSLink<::StringEntryNode>* nHead;
     uint32_t uLink;
     uint32_t nBucketIdx = 0;
-    if (this->m_count) {
+    if ((uint32_t)this->m_count > 0) {
       TSLink<::StringEntryNode>* pTVar1;
       do {
         pBucket = &this->m_data[nBucketIdx];
@@ -273,7 +273,7 @@ template<> void TSGrowableArray<TSExplicitList<StringEntryNode, -572662307>>::De
 
 template<> void TSGrowableArray<TSExplicitList<StringEntryNode, -572662307>>::Reserve(uint32_t nCount, int32_t bRound) {
     uint32_t uNewCount = nCount + this->m_count;
-    if (this->m_alloc >= uNewCount) {
+    if (uNewCount <= this->m_alloc) {
       return;
     }
     if (bRound) {
@@ -300,8 +300,8 @@ template<> ::StringEntryNode * TSHashTable<StringEntryNode, HASHKEY_STRI>::Ptr(c
     ::HASHKEY_STRI* ppszKey = (::HASHKEY_STRI*)&szKey;
     nExState = 0;
     szKey = (char*)pDupStr;
-    uint32_t uHash = Storm::Source::SSTR::SStrHash(pszText, 0, 0);
-    ::StringEntryNode* pEntry = this->Ptr(uHash, ppszKey);
+
+    ::StringEntryNode* pEntry = this->Ptr(Storm::Source::SSTR::SStrHash(pszText, 0, 0), ppszKey);
     if (pDupStr) {
       Storm::SMem::SMemFree(pDupStr, "d:\\diablo2\\Diablo2\\3rdparty\\storm\\h\\stpl.h", 0x5e4, 0);
     }
@@ -330,7 +330,7 @@ template<> void TSGrowableArray<TSExplicitList<StringEntryNode, -572662307>>::Se
     uint32_t* pBucketLink;
     if (this->m_count < nCount) {
       uint32_t uGranularity;
-      if (this->m_alloc < nCount) {
+      if (nCount > this->m_alloc) {
         uGranularity = this->m_chunk;
         if (!uGranularity) {
           uGranularity = this->CalcChunkSize(nCount);
@@ -428,14 +428,14 @@ template<> void TSHashTable<StringEntryNode, HASHKEY_STRI>::Destructor() {
 
 template<> ::StringEntryNode * TSExplicitList<StringEntryNode, -572662307>::NewNode(uint32_t nLocation, uint32_t nExtraBytes, uint32_t dwFlags) {
     ::StringEntryNode* pNode = (::StringEntryNode*)Storm::SMem::SMemAlloc(nExtraBytes + 0x18, s___AUStringEntryNode___0074364c, -2, dwFlags | 8);
-    if (!pNode) {
-      pNode = 0;
-    } else {
+    if (pNode) {
       pNode->m_linktoslot.m_prevlink = 0;
       pNode->m_linktoslot.m_next = 0;
       pNode->m_linktofull.m_prevlink = 0;
       pNode->m_linktofull.m_next = 0;
       pNode->m_key.szString = 0;
+    } else {
+      pNode = 0;
     }
     if (!nLocation) {
       return pNode;
@@ -450,16 +450,16 @@ template<> ::StringEntryNode * __thiscall TSHashTable<StringEntryNode, HASHKEY_S
     TSLink<::StringEntryNode>* pBucketHead;
     uint32_t piVar2;
     ::StringEntryNode* pNode = (::StringEntryNode*)Storm::SMem::SMemAlloc(nExtraBytes + 0x18, s___AUStringEntryNode___0074364c, -2, dwFlags | 8);
-    if (!pNode) {
-      pNode = 0;
-      pBucketHead = &pList->m_terminator;
-    } else {
+    if (pNode) {
       pNode->m_linktoslot.m_prevlink = 0;
       pNode->m_linktoslot.m_next = 0;
       pNode->m_linktofull.m_prevlink = 0;
       pNode->m_linktofull.m_next = 0;
       pNode->m_key.szString = 0;
       pBucketHead = (TSLink<::StringEntryNode>*)((uintptr_t)&pNode->m_hashval + pList->m_linkoffset);
+    } else {
+      pNode = 0;
+      pBucketHead = &pList->m_terminator;
     }
 
     TSLink<::StringEntryNode>* pHeadEntry = pBucketHead->m_prevlink;
@@ -570,7 +570,7 @@ template<> void TSHashTable<StringEntryNode, HASHKEY_STRI>::GrowListArray() {
     tempList.m_linkoffset = 4;
     tempList.m_terminator.m_next = (int)pCurEntry;
     uint32_t nIterCount = 0;
-    if (nOldBucketCount) {
+    if ((uint32_t)nOldBucketCount > 0) {
       int nBucketByteOff;
       nBucketByteOff = 0;
       ppTempHead = tempList.m_terminator.m_prevlink;
@@ -614,7 +614,7 @@ template<> void TSHashTable<StringEntryNode, HASHKEY_STRI>::GrowListArray() {
 
     pCurEntry = pNewBucketCount;
     pThis->tSlotListArray.SetCount((uint32_t)pNewBucketCount);
-    if (pCurEntry) {
+    if ((uint32_t)pCurEntry > 0) {
       nBucketOffset = 0;
       nIterCount = (uint32_t)pCurEntry;
       do {

@@ -45,14 +45,6 @@ BOOL __fastcall Q11_SetCannotComplete(::SGAMEDATA * pGame, struct D2UnitStrc * p
 // run Q11_SetTaintedSunRewardOnPartyMember across the player's whole party so partymates also get the
 // RewardAwaits credit. Read-only on the quest record; the write happens in the party callback.
 BOOL __fastcall Q11_PropagateRewardToParty(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// A2Q3 - per-unit iterator cb (Q11_SendDarknessPacket): for each player in an act, send 0x53 "darkness"
-// env packet (subcmd 5) to blot out the sun, then a 0x5D quest-state packet (quest 10, flag 0x10).
-// No quest-record access; pure client notification of the Tainted-Sun darkening.
-BOOL __fastcall Q11_SendDarknessPacket(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// A2Q3 - per-unit iterator cb (Q11_SendSunRestoredPacket): for each player in an act, send 0x53
-// "darkness" env packet (subcmd 2 = restore daylight) when the Tainted Sun Altar is destroyed.
-// No quest-record access; mirror of Q11_SendDarknessPacket that lifts the darkness.
-BOOL __fastcall Q11_SendSunRestoredPacket(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A2Q3 - fpActiveFilter (Q11_ActiveFilter): decides whether a Claw-Viper-cult monster/NPC class
 // should react/gossip about the quest. Returns true only when quest is NOT Completed but IS RewardAwaits
 // and the target classId is one of the Viper-cult monsters (0xaf,0xb0,0xb1,0xc6,0xc7,0xc9,0xca,0xd2,0xf4,0xc8),
@@ -63,11 +55,6 @@ bool __fastcall Q11_ActiveFilter(struct D2QuestDataStrc * pQuestData, int32_t nT
 // already participated, otherwise pick a msg from gdwQ10QuestStateMessages[stateFlag] when the intro is done,
 // quest not Completed and stateFlag<=3. AddGossipMessageOnMonster shows the chosen line. Read-only on record.
 void __fastcall Q11_Callback00_NpcActivate(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
-// A2Q3 - Q11_BeginTaintedSun: begins the Tainted-Sun darkening. Sets quest display state 1 (broadcast via
-// QUEST_SetStateAndBroadcast w/ Q11_NotifyTaintedSunComplete), bumps stateFlag to 1 on first run, then if
-// Act 2 DRLG is loaded calls DRLGENV_TaintedSunBegin() (darkens the act) and iterates players sending
-// Q11_SendDarknessPacket. Returns nonzero(low byte 1) on success; 0 if act not yet loaded (deferred).
-uint8_t __stdcall Q11_BeginTaintedSun(struct D2QuestDataStrc * pQuestData);
 // A2Q3 - Q11_EndTaintedSun: ends the darkening. Clears the darkened flag, calls DRLGENV_TaintedSunEnd()
 // (restores daylight in Act 2) and iterates players sending Q11_SendSunRestoredPacket. No quest-record writes.
 void __stdcall Q11_EndTaintedSun(int pQuestData, ::SGAMEDATA * pGame);

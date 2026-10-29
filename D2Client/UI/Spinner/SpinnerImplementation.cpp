@@ -260,14 +260,14 @@ int __thiscall OnLeftArrow(::SpinnerImplementation * pThis, D2UIMouseMsgStrc * p
     pDimVal = D2CMP::SRC::CelCmp::GetDC6Width(pDC6Block);
     pThis->nButtonWidth = pDimVal;
     pThis->nUpButtonY = nPosY;
-    if (!pThis->bHorizontal) {
-      pThis->nUpButtonX = nPosX + 1;
-      pThis->nDownButtonX = nPosX + 1;
-      pThis->nDownButtonY = pThis->nButtonHeight + 1 + nPosY;
-    } else {
+    if (pThis->bHorizontal) {
       pThis->nUpButtonX = nPosX + 1;
       pThis->nDownButtonX = pDimVal + nPosX;
       pThis->nDownButtonY = nPosY;
+    } else {
+      pThis->nUpButtonX = nPosX + 1;
+      pThis->nDownButtonX = nPosX + 1;
+      pThis->nDownButtonY = pThis->nButtonHeight + 1 + nPosY;
     }
 
     ExceptionList = pExcList;

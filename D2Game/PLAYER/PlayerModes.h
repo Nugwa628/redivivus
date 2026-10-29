@@ -28,26 +28,15 @@ BOOL PLRMODES_CanInterruptCurrentMode(struct D2UnitStrc * pUnit, ::SGAMEDATA * p
 // @sourcefile .\PLAYER\PlrModes.cpp
 int __fastcall PLRMODES_TryCancelModeAndMoveToLocation(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int nX, int nY, struct D2SkillStrc * pSkill);
 void __fastcall PLRMODES_SetIdleMode(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nMode, int32_t nX, int32_t nY);
-int32_t __fastcall PLRMODES_ModeCallback_DeathDead(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2);
-int32_t __fastcall PLRMODES_ModeCallback_Neutral(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2);
 void __fastcall PLRMODES_SetTargetAndStartPath(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nModeIndex, struct D2UnitStrc * pTargetUnit);
 void __fastcall PLRMODES_SetMoveTargetPosition(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nLevel, int32_t nPosX, int32_t nPosY);
 void __fastcall SERVERUNIT_GoldAmmountForDeadBody(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pDeadBody, uint32_t nGoldAmmount, uint32_t nGoldPileCount);
-// Removes an equipped item (pUnit2) from the player's body at nBodyLoc and prepares it for dropping. Swaps primary weapon if needed, nulls the body-loc slot, handles belt removal for belt-type items, unequips item stats, marks item as REMOVED, issues ITEMCMD_DELETE and ITEMCMD_BODYLOC_TAKE_ITEM, refreshes inventory. Halts with error if item doesn't belong to the player's inventory.
-void __stdcall PLRMODES_UnequipAndPrepareItemForDrop(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2, int32_t nBodyLoc);
-// @sourcefile .\PLAYER\PlrModes.cpp
-void PLRMODES_ClearCursorAndDeleteItem(struct D2UnitStrc * pUnit, struct D2UnitStrc * pUnit2);
-// Drops all equipped items (body locations -1 through 12) and all carried gold from pUnit onto the ground, typically called on player death. Cursor item (body loc -1) is cleared from inventory and deleted before dropping. Each body-loc item is unequipped via PLRMODES_UnequipAndPrepareItemForDrop, cloned from serialised data, and placed at the nearest free ground spot via FindBestSpotToSpawnItem/DropItem. After equipment, drains UNITSTAT_gold to 0 and calls GOLD_DropGoldFromInventory.
-// @sourcefile .\PLAYER\PlrModes.cpp
-void __stdcall PLRMODES_DropAllEquipmentAndGold(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
-int32_t __stdcall PLRMODES_CleanupInvalidCorpses(::SGAMEDATA * pGame, struct D2UnitStrc * pUnitRaw);
 // Processes a player picking up their own corpse. Validates the corpse has STATE_playerbody and is owned by the acting player. If the corpse holds pending experience (e.g. from Nightmare/Hell death penalty), awards it via DAMAGE_AwardKillExperience. Equips corpse items back onto the player; on success, removes the corpse from inventory, deletes the unit from the room, sends packet 0x8E (corpse assign=0) to clients, removes collision, and frees the unit.
 void __fastcall PLRMODES_PickupCorpse(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, struct D2UnitStrc * pCorpseUnit);
 // Server-side handler executed when a player's death animation completes. Creates the dead-body unit at the player's current position, frees all pets, sets the client's dead flag (bit 3), and saves the game (ladder games only). Then: forces anim mode 0x11 (dead), resets HP to 0, recalculates stats, filters active states, detaches unit type from client, enables corpse collision, and cancels all periodic skill/stat timer events.
 // @sourcefile .\PLAYER\PlrModes.cpp
 void __fastcall PLRMODES_HandlePlayerDeath(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nModeIndex, int32_t dwParam2, int32_t dwParam3);
 void __fastcall PLRMODES_StartModeWithTarget(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nAnimMode, int32_t dwParam1, int32_t dwParam2);
-int32_t __fastcall PLRMODES_ModeCallback_GetHitCast(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2);
 void __fastcall PLRMODES_ChangeAnimModeAndResetSkill(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nAnimMode, int32_t dwParam1, int32_t dwParam2);
 void __fastcall PLRMODES_StartCastAtPosition(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nAnimMode, int32_t nPosX, int32_t nPosY);
 void __fastcall PLRMODES_StartCastAtEntity(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, DWORD nAnimMode, struct D2UnitStrc * pTargetUnit);
@@ -59,7 +48,7 @@ void __fastcall PLRMODES_CheckWeaponQuantityAndDurability(::SGAMEDATA * pGame, s
 // @sourcefile .\PLAYER\PlrModes.cpp
 void __fastcall PLRMODES_BreakZeroDurabilityWeapons(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit);
 int32_t __fastcall PLRMODES_ModeCallback_AttackSkill(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nModeArg, int32_t nSeqFrame);
-uint8_t PLRMODES_GetHpPercent128(struct D2UnitStrc * pUnit);
+uint8_t __fastcall PLRMODES_GetHpPercent128(struct D2UnitStrc * pUnit);
 void __fastcall PLRMODES_RemoveExpiredStatLists(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2);
 void __fastcall PLRMODES_PeriodicStatRegen(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, int32_t nArg1, int32_t nArg2);
 // Flushes all pending per-unit network state to a single client after a mode change. Sends ReassignPlayer if the unit is warping or is a remote player. If bSendItems is set, sends updated inventory items (0x9C packet) plus two equipped-item-recalc packets (0x47, 0x48). Dispatches the mode-change net message if DOUPDATE is flagged. Then drains the unit's packet queue, sends pending sound/hover-text/life-class/state/overlay packets, and fires attribute-update callbacks for velocity, attack-rate, level, strength, and dexterity stats that changed.

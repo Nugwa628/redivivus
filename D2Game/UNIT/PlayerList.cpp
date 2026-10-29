@@ -151,10 +151,10 @@ void __fastcall PLAYERLIST_RemoveFromList(::SGAMEDATA * pGame, D2UnitStrc * pUni
       }
     }
 
-    if (!pPrevEntry) {
-      pPlayerData->pPlayerList = pMemoryToFree->pNext;
-    } else {
+    if (pPrevEntry) {
       pPrevEntry->pNext = pMemoryToFree->pNext;
+    } else {
+      pPlayerData->pPlayerList = pMemoryToFree->pNext;
     }
 
     D2_FREE_POOL_AT(pGame->pMemoryPool, pMemoryToFree, ".\\UNIT\\PlayerList.cpp", 0x97);

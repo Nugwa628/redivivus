@@ -203,9 +203,6 @@ int32_t __stdcall IsUnique(struct D2UnitStrc * pUnit);
 int32_t __stdcall IsQuestItem(struct D2UnitStrc * pUnit);
 // Computes the repair-price premium for all charged-skill stats (stat 0xCC) on an item. For each charged stat, if charges are not full, adds (maxCharges-curCharges)/maxCharges * (skillLevelCost * multiplier + costmult/costadd from Skills.txt) to the total. Returns total modifier to be added to item sell/repair price.
 int32_t __fastcall ITEMS_CalcChargedSkillPriceModifier(struct D2UnitStrc * pUnit, int32_t nMultiplier);
-// Adds an item's stat-driven cost to its three prices. Copies the item's stats (up to 511), and for each nonzero stat (shifted by ItemStatCost valshift) takes cost multiply/add from its ItemStatCost row by encode: 1 = SkillsTxt costmult/costadd of the stat's skill, 2/3 = same for a charged skill (packed sub-index), 4 = ITEMMODS_CalculateRepairCost min/max average, otherwise ItemStatCost multiply/add. The per-stat cost scales the incoming sell price (>>10), buy price (>>12 for skill encodes, >>10 otherwise) and repair price (>>10); each sum is divided by nDivisor and added to *pnSellPrice, *pnBuyPrice and *pnRepairPrice.
-// Provenance: 1.14d asm 00628e70; sole caller ITEMS_CalcTransactionCost 0062f81a passes (pItem, &nSellPrice, &nBuyPrice, &nRepairPrice, nMaxStack).
-void __fastcall ITEM_AddStatCostsToPrices(struct D2UnitStrc * pItem, int * pnSellPrice, int * pnBuyPrice, int * pnRepairPrice, uint32_t nDivisor);
 int32_t __stdcall TXT_Items_GetMaxStack(uint32_t nItemClassId);
 // Returns max stack size (base from ItemsTxt + stat bonus), capped at 511. Halts if unit is null or not an item.
 int __stdcall ITEM_GetMaxStack(struct D2UnitStrc * pUnit);

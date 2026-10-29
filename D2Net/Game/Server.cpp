@@ -49,7 +49,7 @@ int __stdcall CreateThreadClientSocketOrSingleplayer() {
     return 2;
 }
 
-int32_t __fastcall HandleIncomingPacketBuffer(D2QServerStrc * pQServer, char * pBytes, size_t nSize) {
+static int32_t __fastcall HandleIncomingPacketBuffer(D2QServerStrc * pQServer, char * pBytes, size_t nSize) {
     SRC::Client::NET_D2GS_CLIENT_HandleIncomingBufferAndCreatePacket(pBytes, nSize);
     return 1;
 }
@@ -67,7 +67,7 @@ int32_t __fastcall NET_D2GS_CLIENT_CheckIfPacketSizeIsCorrect(uint8_t * pbPacket
     if (!nPacketSizeResult) {
       return 3;
     }
-    if (0x70 < byOpcode && byOpcode != 0xff || 0x204 < (uint16_t)(uintptr_t)pPacketEnd) {
+    if (0x71 <= byOpcode && byOpcode != 0xff || 0x204 < (uint16_t)(uintptr_t)pPacketEnd) {
       return 4;
     }
     if ((int)((uint32_t)pPacketEnd & 0xffff) > (int)nSize) {
@@ -288,7 +288,7 @@ void __stdcall _NullSubRet8(uint32_t dwParam) {
     Fog::Src::_NullSubRet8(pQServer, dwParam);
 }
 
-int32_t __fastcall NET_D2GS_SERVER_Send_0xAF01(D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine) {
+static int32_t __fastcall NET_D2GS_SERVER_Send_0xAF01(D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine) {
     uint8_t aPacketFrame[4];
     *(uint16_t*)((char*)&aPacketFrame + 2) = (uint16_t)((uint32_t)pQServer >> 0x10);
     aPacketFrame[0] = 0xaf;
@@ -297,7 +297,7 @@ int32_t __fastcall NET_D2GS_SERVER_Send_0xAF01(D2QServerStrc * pQServer, uint32_
     return 1;
 }
 
-int32_t __fastcall NET_D2GS_CLIENT_Send_0x70(D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine) {
+static int32_t __fastcall NET_D2GS_CLIENT_Send_0x70(D2QServerStrc * pQServer, uint32_t nClientId, char * pszSourceFile, int nLine) {
     uint8_t aPacketFrame[4];
     d2_store24((char*)&aPacketFrame, (uint32_t)((uint32_t)(uintptr_t)pQServer & 0xffffffu));
     aPacketFrame[3] = 0x70;
@@ -345,7 +345,7 @@ size_t __fastcall NET_D2GS_CLIENT_GetIncomingPacketSizeFromTableAndVariableSize(
     }
 
     uint8_t byOpcode = *pBytes;
-    if (0xb4 < byOpcode) {
+    if (0xb5 <= byOpcode) {
       return 0;
     }
 
@@ -360,7 +360,7 @@ size_t __fastcall NET_D2GS_CLIENT_GetIncomingPacketSizeFromTableAndVariableSize(
 
     switch ((uint32_t)byOpcode) {
       case 0x16:
-        if (0xc < pBytesSize) {
+        if (0xd <= pBytesSize) {
           *pExpectedSize = (uint32_t)*(uint16_t*)(pBytes + 1);
           return 1;
         }
@@ -369,12 +369,12 @@ size_t __fastcall NET_D2GS_CLIENT_GetIncomingPacketSizeFromTableAndVariableSize(
         {
           *pExpectedSize = 0;
           return 1;
-        }
+        } break;
       case 0x26:
-        if (9 < (int)pBytesSize) {
+        if (10 <= (int)pBytesSize) {
           pcStrBase = pBytes + 10;
           nStrLen1 = Storm::Source::SSTR::SStrLen(pcStrBase);
-          if ((int)(nStrLen1 + 0xb) <= (int)pBytesSize) {
+          if ((int)pBytesSize >= (int)(nStrLen1 + 0xb)) {
             nStrLen2 = Storm::Source::SSTR::SStrLen(pcStrBase);
             nStrLen2 = Storm::Source::SSTR::SStrLen(pcStrBase + nStrLen2 + 1);
             nStrLen2 = nStrLen1 + 0xc + nStrLen2;
@@ -385,63 +385,63 @@ size_t __fastcall NET_D2GS_CLIENT_GetIncomingPacketSizeFromTableAndVariableSize(
           }
         }
       break;
-      case 0x3e:
-        if (1 < pBytesSize) {
-          *pExpectedSize = (uint32_t)(uint8_t)pBytes[1];
-          return 1;
-        }
-      break;
       case 0x5b:
-        if (0x21 < pBytesSize) {
+        if (0x22 <= pBytesSize) {
           *pExpectedSize = (uint32_t)*(uint16_t*)(pBytes + 1);
           return 1;
         }
       break;
       case 0x94:
-        if (8 < pBytesSize) {
+        if (9 <= pBytesSize) {
           nStrLen2 = ((uint8_t)pBytes[1] + 2) * 3;
           *pExpectedSize = nStrLen2;
           return 1;
         }
       break;
       case 0x9c:
-        if (2 < pBytesSize) {
+        if (3 <= pBytesSize) {
           *pExpectedSize = (uint32_t)(uint8_t)pBytes[2];
           return 1;
         }
       break;
+      case 0x3e:
+        if (2 <= pBytesSize) {
+          *pExpectedSize = (uint32_t)(uint8_t)pBytes[1];
+          return 1;
+        }
+      break;
       case 0x9d:
-        if (2 < pBytesSize) {
+        if (3 <= pBytesSize) {
           *pExpectedSize = (uint32_t)(uint8_t)pBytes[2];
           return 1;
         }
       break;
       case 0xa6:
-        if (3 < pBytesSize) {
+        if (4 <= pBytesSize) {
           *pExpectedSize = (uint32_t)*(uint16_t*)(pBytes + 2);
           return 1;
         }
       break;
       case 0xa8:
-        if (6 < pBytesSize) {
+        if (7 <= pBytesSize) {
           *pExpectedSize = (uint32_t)(uint8_t)pBytes[6];
           return 1;
         }
       break;
       case 0xaa:
-        if (6 < pBytesSize) {
+        if (7 <= pBytesSize) {
           *pExpectedSize = (uint32_t)(uint8_t)pBytes[6];
           return 1;
         }
       break;
       case 0xac:
-        if (0xc < pBytesSize) {
+        if (0xd <= pBytesSize) {
           *pExpectedSize = (uint32_t)(uint8_t)pBytes[0xc];
           return 1;
         }
       break;
       case 0xae:
-        if (2 < pBytesSize) {
+        if (3 <= pBytesSize) {
           wRawLen = *(uint16_t*)(pBytes + 1);
           if (0x1fd < wRawLen) {
             wRawLen = 0;
@@ -452,7 +452,7 @@ size_t __fastcall NET_D2GS_CLIENT_GetIncomingPacketSizeFromTableAndVariableSize(
         }
       break;
       case 0xaf:
-        if (1 < pBytesSize) {
+        if (2 <= pBytesSize) {
           if (!pBytes[1]) {
             *pExpectedSize = 2;
             return 1;
@@ -463,7 +463,7 @@ size_t __fastcall NET_D2GS_CLIENT_GetIncomingPacketSizeFromTableAndVariableSize(
         }
       break;
       case 0xb3:
-        if (7 < pBytesSize) {
+        if (8 <= pBytesSize) {
           *pExpectedSize = (uint8_t)pBytes[1] + 7;
           return 1;
         }
@@ -607,7 +607,7 @@ int32_t __fastcall NET_D2GS_CLIENT_GetOutgoingPacketSizeFromTableAndVariableSize
       *pSize = 0x10;
       return 1;
     }
-    if (0x70 < byStrLenByte) {
+    if (0x71 <= byStrLenByte) {
       return 0;
     }
 
@@ -617,7 +617,7 @@ int32_t __fastcall NET_D2GS_CLIENT_GetOutgoingPacketSizeFromTableAndVariableSize
     if (!nTableSize) {
       return 0;
     }
-    if (-1 < nTableSize) {
+    if (0 <= nTableSize) {
       return *pSize;
     }
 
@@ -625,18 +625,18 @@ int32_t __fastcall NET_D2GS_CLIENT_GetOutgoingPacketSizeFromTableAndVariableSize
       case 0x14:
 
       case 0x15:
-        if (2 < (int)nSize) {
+        if (3 <= (int)nSize) {
           pcVar1 = pBytes + 3;
           nStrLen1 = Storm::Source::SSTR::SStrLen(pcVar1);
-          if ((int)(nStrLen1 + 4) <= (int)nSize) {
+          if ((int)nSize >= (int)(nStrLen1 + 4)) {
             nStrLen2 = Storm::Source::SSTR::SStrLen(pcVar1);
             pcVar1 = pcVar1 + nStrLen2 + 1;
             nStrLen2 = Storm::Source::SSTR::SStrLen(pcVar1);
             nTableSize = nStrLen1 + 5 + nStrLen2;
-            if (nTableSize <= (int)nSize) {
+            if ((int)nSize >= nTableSize) {
               nStrLen1 = Storm::Source::SSTR::SStrLen(pcVar1);
               nTableSize = nTableSize + 1 + (int)pcVar1[nStrLen1 + 1];
-              if (nTableSize <= (int)nSize) {
+              if ((int)nSize >= nTableSize) {
                 *pSize = nTableSize;
                 return *pSize;
               }
@@ -647,7 +647,7 @@ int32_t __fastcall NET_D2GS_CLIENT_GetOutgoingPacketSizeFromTableAndVariableSize
       default:
         goto default_case;
       case 0x66:
-        if (2 < nSize) {
+        if (3 <= nSize) {
           wRawLen = *(uint16_t*)(pBytes + 1);
           if (0x1fd < wRawLen) {
             wRawLen = 0;

@@ -43,7 +43,7 @@ static char gLogFileNameArray_0__2_[20][16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 int __stdcall DetectCpuVendor() {
     char szCpuVendor[16];
-    memset(szCpuVendor + 12, 0, 4 * sizeof(szCpuVendor[0]));
+    for (int i = 12; i < 16; i++) szCpuVendor[i] = 0;
     int nCpuidResult = D2_Cpuid(0);
     *(uint32_t*)(char*)&szCpuVendor = *(uint32_t*)(nCpuidResult + 4);
     *(uint32_t*)((char*)&szCpuVendor + 4) = *(uint32_t*)(nCpuidResult + 8);
@@ -147,7 +147,7 @@ static void __stdcall DecodeCpuModelName(uint32_t nModel, int32_t nBrandId, char
             memcpy(pOutName, "Pentium OD486", 0xe);
             return;
           }
-          if (3 < nModel) {
+          if (4 <= nModel) {
             memcpy(pOutName, "Pentium MMX OD586", 0x12);
             return;
           }
@@ -276,7 +276,7 @@ uint32_t __stdcall BenchmarkCpuSpeed() {
     /* LARGE_INTEGER * lpFrequency for QueryPerformanceFrequency */ QueryPerformanceFrequency(&qpcFreq);
     nMhz = __allmul((uint32_t)(nMhz - nTscStart), (int)((uint64_t)(nMhz - nTscStart) >> 0x20), qpcFreq.u.LowPart, qpcFreq.u.HighPart);
     nMhz = __alldiv((uint32_t)nMhz, (uint32_t)((uint64_t)nMhz >> 0x20), qpcEnd.u.LowPart - *(uint32_t*)(char*)&qpcStart, qpcEnd.u.HighPart - *(uint32_t*)((char*)&qpcStart + 4) - (uint32_t)(qpcEnd.u.LowPart < qpcStart.u.LowPart));
-    nMhz = __alldiv((uint32_t)nMhz, (uint32_t)((uint64_t)nMhz >> 0x20), 1000000, 0);
+    nMhz = (int64_t)nMhz / 1000000;
     return (uint32_t)nMhz;
 }
 
@@ -290,7 +290,7 @@ uint32_t __stdcall GetCpuBrandId() {
     uint64_t nVersionInfo = GetCpuVersionInfo();
     uint32_t nFamily = (uint32_t)nVersionInfo >> 8 & 0xf;
     int nVendor = DetectCpuVendor();
-    if (!(nVendor == 1 && (6 < nFamily || nFamily == 6 && 0x7f < ((uint32_t)nVersionInfo & 0xf0)))) {
+    if (!(nVendor == 1 && (7 <= nFamily || nFamily == 6 && 0x80 <= ((uint32_t)nVersionInfo & 0xf0)))) {
       return nBrandId;
     }
 
@@ -414,9 +414,7 @@ void __stdcall LogCpuInfo() {
     uint64_t uVar1;
     char szModelName[256];
     char* Format;
-    if (gSystemInfo.wProcessorLevel == 3) {
-      Format = "Intel 386";
-    } else {
+    if (gSystemInfo.wProcessorLevel != 3) {
       int nVendorIndex;
       if (gSystemInfo.wProcessorLevel != 4) {
         nVendorIndex = DetectCpuVendor();
@@ -435,6 +433,8 @@ void __stdcall LogCpuInfo() {
       }
 
       Format = "Intel 486";
+    } else {
+      Format = "Intel 386";
     }
 
     LOGFILE_WriteStringToFile(Format);
@@ -585,7 +585,7 @@ FILE * __fastcall FindOrOpenLogFileSlot(uint8_t * szFileName, uint32_t * pnSlotI
           if (pOpenedFile) {
             goto report_slot;
           }
-          if (-1 < (int)nSlot) {
+          if (0 <= (int)nSlot) {
             goto open_in_slot;
           }
 
@@ -601,11 +601,11 @@ FILE * __fastcall FindOrOpenLogFileSlot(uint8_t * szFileName, uint32_t * pnSlotI
           nFreeHandleSlotTmp = nSlot;
           if (-1 < (int)nFreeHandleSlot) {
             nFreeHandleSlotTmp = nFreeHandleSlot;
-            if (gLogFileLastAccessTimeArray[nFreeHandleSlot] < dwNow - *(int*)((int)gLogFileLastAccessTimeArray + nSlotOffset)) {
+            if (dwNow - *(int*)((int)gLogFileLastAccessTimeArray + nSlotOffset) > gLogFileLastAccessTimeArray[nFreeHandleSlot]) {
               nFreeHandleSlotTmp = nSlot;
             }
           }
-        } else if (dwNow - *(int*)((int)gLogFileLastAccessTimeArray + nIsNewFile) < dwNow - *(int*)((int)gLogFileLastAccessTimeArray + nSlotOffset)) {
+        } else if (dwNow - *(int*)((int)gLogFileLastAccessTimeArray + nSlotOffset) > dwNow - *(int*)((int)gLogFileLastAccessTimeArray + nIsNewFile)) {
           nIsNewFile = nSlotOffset;
           nLruSlot = nSlot;
         }
@@ -616,13 +616,13 @@ FILE * __fastcall FindOrOpenLogFileSlot(uint8_t * szFileName, uint32_t * pnSlotI
         nSlotOffset += 4;
         pSearchName = pSavedFileName;
         pSlotNameBase = pStoredName;
-      } while ((int)pStoredName < (uintptr_t)((char*)&gLogFileNameArray + sizeof(gLogFileNameArray)));
+      } while ((int)pStoredName < (int)((uintptr_t)((char*)&gLogFileNameArray + sizeof(gLogFileNameArray))));
 
       nSlot = nEmptySlot;
-      if (-1 < (int)nEmptySlot) {
+      if (0 <= (int)nEmptySlot) {
         goto open_in_slot;
       }
-      if (-1 < (int)nFreeHandleSlot) {
+      if (0 <= (int)nFreeHandleSlot) {
         nLruSlot = nFreeHandleSlot;
       }
     }
@@ -636,7 +636,7 @@ FILE * __fastcall FindOrOpenLogFileSlot(uint8_t * szFileName, uint32_t * pnSlotI
 
     open_in_slot:
     pNameEnd = Storm::Source::SSTR::SStrLen((char*)szFileName);
-    if (0xf < pNameEnd) {
+    if (0x10 <= pNameEnd) {
       ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x34c);
       exit(-1);
     }
@@ -724,11 +724,11 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
     pData = Storm::Source::SSTR::SStrLen((char*)pbVar2);
     pDumpHeader = pbVar2 + pData + 1;
     __frame0.pDumpHeaderSaved = pDumpHeader;
-    if (!*(int*)(pbVar2 + pData + 0xd)) {
+    if (*(int*)(pbVar2 + pData + 0xd)) {
+      __frame0.pDumpData = *(uint8_t**)pDumpHeader;
+    } else {
       pData = Storm::Source::SSTR::SStrLen((char*)(pDumpHeader + 0x14));
       __frame0.pDumpData = pDumpHeader + pData + 0x15;
-    } else {
-      __frame0.pDumpData = *(uint8_t**)pDumpHeader;
     }
 
     __frame0.pLogFile = FindOrOpenLogFileSlot(pbVar2, &__frame0.local_160);
@@ -740,7 +740,7 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
       pbVar2 = __frame0.pDumpData;
       while (true) {
         __frame0.pChunkStart = pbVar2;
-        if (!__frame0.nBytesRemaining) {
+        if ((uint32_t)__frame0.nBytesRemaining <= 0) {
           break;
         }
 
@@ -762,15 +762,17 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
         fprintf(__frame0.pLogFile, pRecordBody, pLineCursor, pDumpHeader + 0x14, iVar1);
         __frame0.local_160 = 0;
         nChunkLen = __frame0.nBytesRemaining;
-        if (0xf < __frame0.nBytesRemaining) {
+        if (0x10 <= __frame0.nBytesRemaining) {
           nChunkLen = 0x10;
         }
 
         /* UINT_PTR ucb for IsBadReadPtr */ /* void * lp for IsBadReadPtr */ __frame0.szLineBuf[0] = '\0';
         bBadPtr = IsBadReadPtr(pbVar2, nChunkLen);
-        if (!bBadPtr) {
+        if (bBadPtr) {
+          Storm::Source::SSTR::SStrCopy(__frame0.szLineBuf, "<unreadable>", 0x7fffffff);
+        } else {
           nColumn = 0;
-          if (nChunkLen) {
+          if ((uint32_t)nChunkLen > 0) {
             do {
               pLineCursor = __frame0.szLineBuf;
               pLineCursor = pLineCursor + strlen(pLineCursor) + 1;
@@ -795,7 +797,7 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
             pLineCursor = __frame0.szLineBuf;
             pLineCursor = pLineCursor + strlen(pLineCursor) + 1;
             nColumn = 0;
-            if (nChunkLen) {
+            if ((uint32_t)nChunkLen > 0) {
               pDumpHeader = (uint8_t*)(pLineCursor + (int)(__frame0.szLineBuf - (int)(__frame0.szLineBuf + 1)));
               do {
                 byAsciiChar = pbVar2[nColumn];
@@ -812,8 +814,6 @@ void __fastcall WriteHexDumpLogEntry(int32_t pLogRecord) {
             pLineCursor[(int)(__frame0.szLineBuf + (nColumn - (int)(__frame0.szLineBuf + 1)))] = '\0';
             pDumpHeader = __frame0.pDumpHeaderSaved;
           }
-        } else {
-          Storm::Source::SSTR::SStrCopy(__frame0.szLineBuf, "<unreadable>", 0x7fffffff);
         }
 
         fprintf(__frame0.pLogFile, "%s\n", __frame0.szLineBuf);
@@ -864,7 +864,7 @@ void __fastcall DeleteOldLogFile(int32_t pRefFileTime, char * szFileName) {
     sysTimeHead.wMonth = nMonth[0];
     /* LPFILETIME lpFileTime for SystemTimeToFileTime */ /* SYSTEMTIME * lpSystemTime for SystemTimeToFileTime */ *(uint32_t*)((char*)&sysTimeHead + 4) = (uint32_t)nDay[0] << 0x10;
     SystemTimeToFileTime(&sysTimeHead, &fileTime);
-    if (!(fileTime.dwHighDateTime <= *(uint32_t*)(pRefFileTime + 4) && 0x4b6 < *(uint32_t*)(pRefFileTime + 4) - fileTime.dwHighDateTime)) {
+    if (!(*(uint32_t*)(pRefFileTime + 4) >= fileTime.dwHighDateTime && 0x4b7 <= *(uint32_t*)(pRefFileTime + 4) - fileTime.dwHighDateTime)) {
       return;
     }
 
@@ -1327,11 +1327,11 @@ int * * __fastcall AllocateAndInsertMessageNode(int32_t nInsertMode, int32_t nPa
     void* pPrevExceptionList = ExceptionList;
     ExceptionList = &pPrevExceptionList;
     int** pNode = (int**)Storm::SMem::SMemAlloc(nPayloadSize + 0x24, s___AUMessage_LogManager___00708124, -2, dwAllocFlags | 8);
-    if (!pNode) {
-      pNode = 0;
-    } else {
+    if (pNode) {
       *pNode = 0;
       pNode[1] = 0;
+    } else {
+      pNode = 0;
     }
 
     dwSEHTryLevel = -1;
@@ -1472,7 +1472,7 @@ DWORD __stdcall LOGMANAGER_LogWriterThreadProc(void * lpThreadParam) {
         }
 
         dwSleepMs = GetTickCount();
-        if (14999 < dwSleepMs - dwStopStartTick) {
+        if (15000 <= dwSleepMs - dwStopStartTick) {
           ExceptionList = pPrevExceptionList;
           return 1;
         }
@@ -1483,10 +1483,15 @@ DWORD __stdcall LOGMANAGER_LogWriterThreadProc(void * lpThreadParam) {
         dwSleepMs = 0x32;
       } else {
         /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&gLogFileCS);
-        if (pNode[3] == 1) {
+        switch (pNode[3]) {
+        case 1: {
           LogToFile((uint32_t)pNode);
-        } else if (pNode[3] == 2) {
+          break;
+        }
+        case 2: {
           WriteHexDumpLogEntry((int32_t)pNode);
+          break;
+        }
         }
 
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&gLogFileCS);
@@ -1699,7 +1704,7 @@ void __fastcall Atomic64Store(int64_t * pllTarget, int64_t * pllValue) {
 // Atomic 64-bit read of *pllSource into *pllResult via LOCK CMPXCHG8B: the comparand EDX:EAX is the don't-care ECX:EBX, and either path leaves the current value in EDX:EAX (ECX=result, EDX=source). The EBX half is not a parameter: callers at 00410a1c and 00410a9a set only ECX and EDX.
 // @renamed-from AtomicExchange64 (it never changes *pllSource)
 // [override: replace]
-void __fastcall Atomic64Load(int64_t * pllResult, int64_t * pllSource) {
+static void __fastcall Atomic64Load(int64_t * pllResult, int64_t * pllSource) {
     // Hand-supplied body. Ghidra address 004107d0. ECX = pllResult, EDX = pllSource.
     //
     //   004107d4  MOV EAX,EBX ; 004107d6 MOV EDX,ECX   comparand EDX:EAX = new value ECX:EBX

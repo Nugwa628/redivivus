@@ -64,7 +64,7 @@ void __stdcall UI_UpdateConfigControlsState(int32_t nMouseXStack, int32_t nMouse
       }
 
       pButtonState++;
-    } while ((int)pButtonState < (uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState)));
+    } while ((int)pButtonState < (int)((uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState))));
 
     if (!nMouseInTopScroll && !nMouseInBottomScroll && !nMouseInLeftScroll && !nMouseInRightScroll && !nMouseInScrollbar && !nMouseInButton && nHoveredTab == 3) {
       gnUICtrlConfigButton3State = gnUICtrlConfigMouseButtonState;
@@ -79,7 +79,7 @@ void __stdcall UI_UpdateConfigControlsState(int32_t nMouseXStack, int32_t nMouse
       }
 
       piVar1++;
-    } while ((int)piVar1 < (uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState)));
+    } while ((int)piVar1 < (int)((uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState))));
 
     if (nMouseInTopScroll || gaControlConfigRegionMouseState[0]) {
       int32_t nRowAtY;
@@ -89,7 +89,7 @@ void __stdcall UI_UpdateConfigControlsState(int32_t nMouseXStack, int32_t nMouse
         if (nMouseYStack < nMouseInTopScroll + 0x28) {
           ui::UI_ScrollConfigListHorizontal(-1);
         }
-        if (nMouseInTopScroll + 0x136 < nMouseYStack) {
+        if (nMouseYStack > nMouseInTopScroll + 0x136) {
           ui::UI_ScrollConfigListHorizontal(1);
         }
 
@@ -113,20 +113,20 @@ void __stdcall UI_UpdateConfigControlsState(int32_t nMouseXStack, int32_t nMouse
       }
 
       pButtonState++;
-    } while ((int)pButtonState < (uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState)));
+    } while ((int)pButtonState < (int)((uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState))));
 
     if (nMouseInBottomScroll) {
       gaControlConfigRegionMouseState[1] = gnUICtrlConfigMouseButtonState;
       if (gnUICtrlConfigMouseButtonState) {
         dwNowTick = GetTickCount();
-        if (gbUICtrlConfigPendingKey + 0x32 < dwNowTick) {
+        if (dwNowTick > gbUICtrlConfigPendingKey + 0x32) {
           gbUICtrlConfigPendingKey = GetTickCount();
           nMaxScrollRows = ui::UI_GetControlConfigRowCount();
           nMouseInTopScroll = gnUICtrlConfigScrollOffset;
-          if (0 < gnUICtrlConfigScrollOffset) {
+          if (0 < (int)gnUICtrlConfigScrollOffset) {
             nMouseInTopScroll = gnUICtrlConfigScrollOffset - 1;
           }
-          if (-1 < nMouseInTopScroll) {
+          if (0 <= nMouseInTopScroll) {
             gnUICtrlConfigScrollOffset = nMouseInTopScroll;
           }
 
@@ -143,18 +143,18 @@ void __stdcall UI_UpdateConfigControlsState(int32_t nMouseXStack, int32_t nMouse
       }
 
       pButtonState++;
-    } while ((int)pButtonState < (uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState)));
+    } while ((int)pButtonState < (int)((uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState))));
 
     if (nMouseInLeftScroll) {
       gaControlConfigRegionMouseState[2] = gnUICtrlConfigMouseButtonState;
       if (gnUICtrlConfigMouseButtonState) {
         dwTickCount = GetTickCount();
-        if (gbUICtrlConfigPendingKey + 0x32 < dwTickCount) {
+        if (dwTickCount > gbUICtrlConfigPendingKey + 0x32) {
           gbUICtrlConfigPendingKey = GetTickCount();
           nMaxScrollRows = ui::UI_GetControlConfigRowCount();
           nMouseInBottomScroll = (int)nMaxScrollRows;
           nMouseInTopScroll = gnUICtrlConfigScrollOffset;
-          if (gnUICtrlConfigScrollOffset < nMouseInBottomScroll) {
+          if ((int)gnUICtrlConfigScrollOffset < (int)nMouseInBottomScroll) {
             nMouseInTopScroll = gnUICtrlConfigScrollOffset + 1;
           }
           if (nMouseInTopScroll <= nMouseInBottomScroll) {
@@ -174,13 +174,13 @@ void __stdcall UI_UpdateConfigControlsState(int32_t nMouseXStack, int32_t nMouse
       }
 
       pButtonState++;
-    } while ((int)pButtonState < (uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState)));
+    } while ((int)pButtonState < (int)((uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState))));
 
     if (nMouseInRightScroll) {
       gaControlConfigRegionMouseState[3] = gnUICtrlConfigMouseButtonState;
       if (gnUICtrlConfigMouseButtonState) {
         dwTickCount = GetTickCount();
-        if (gbUICtrlConfigPendingKey + 0x32 < dwTickCount) {
+        if (dwTickCount > gbUICtrlConfigPendingKey + 0x32) {
           gbUICtrlConfigPendingKey = GetTickCount();
           ui::UI_ScrollConfigListVertical(-0xe);
         }
@@ -196,7 +196,7 @@ void __stdcall UI_UpdateConfigControlsState(int32_t nMouseXStack, int32_t nMouse
       }
 
       pButtonState++;
-    } while ((int)pButtonState < (uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState)));
+    } while ((int)pButtonState < (int)((uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState))));
 
     if (!nMouseInScrollbar) {
       if (!gaControlConfigRegionMouseState[4]) {
@@ -220,13 +220,13 @@ void __stdcall UI_UpdateConfigControlsState(int32_t nMouseXStack, int32_t nMouse
       }
 
       pButtonState++;
-    } while ((int)pButtonState < (uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState)));
+    } while ((int)pButtonState < (int)((uintptr_t)((char*)&gaControlConfigRegionMouseState + sizeof(gaControlConfigRegionMouseState))));
 
     if (nMouseInButton) {
       gaControlConfigRegionMouseState[5] = nMouseInTopScroll;
       if (nMouseInTopScroll) {
         dwTickCount = GetTickCount();
-        if (gbUICtrlConfigPendingKey + 0x32 < dwTickCount) {
+        if (dwTickCount > gbUICtrlConfigPendingKey + 0x32) {
           gbUICtrlConfigPendingKey = GetTickCount();
           ui::UI_ScrollConfigListVertical(0xe);
         }
@@ -297,7 +297,7 @@ void __stdcall CONTROLCONFIG_CalculateColumnBounds() {
     nColumnIndex = gnUICtrlConfigTotalRows;
     do {
       nColumnIndex--;
-      if (nColumnIndex < 1) {
+      if (nColumnIndex <= 0) {
         nColumnIndex = 0;
         break;
       }

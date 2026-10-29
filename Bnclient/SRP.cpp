@@ -63,7 +63,7 @@ void __thiscall SRP_ExtractSessionKeyBytes(void * pThis, void * pDst, uint32_t n
     if (nBytes) {
       iVar1 = *(int*)pThis;
       nAvail = *(uint32_t*)(iVar1 + 0x48);
-      while (nAvail < nBytes) {
+      while (nBytes > nAvail) {
         memcpy(pDst, (void*)(iVar1 - nAvail + 0x48), nAvail);
         pDst = (void*)((int)pDst + *(int*)(*(int*)pThis + 0x48));
         nBytes -= *(int*)(*(int*)pThis + 0x48);
@@ -77,7 +77,7 @@ void __thiscall SRP_ExtractSessionKeyBytes(void * pThis, void * pDst, uint32_t n
         nAvail = *(uint32_t*)(iVar1 + 0x48);
       }
 
-      if (nBytes) {
+      if ((uint32_t)nBytes > 0) {
         memcpy(pDst, (void*)(*(int*)pThis - *(int*)(*(int*)pThis + 0x48) + 0x48), nBytes);
         *(int*)(*(int*)pThis + 0x48) -= nBytes;
       }
@@ -163,7 +163,7 @@ int __fastcall SRP_ClientComputeSharedSecret(int32_t pSrp, BigData * * pPrivateK
     return 1;
 }
 
-int __fastcall SRP_ServerComputeSharedSecret(D2Srp * pThis, BigData * * ppClientPublic, int * pnParam, BigData * * pnParam1, BigData * * pnParam2, BigData * * pnParam3) {
+static int __fastcall SRP_ServerComputeSharedSecret(D2Srp * pThis, BigData * * ppClientPublic, int * pnParam, BigData * * pnParam1, BigData * * pnParam2, BigData * * pnParam3) {
     SRP_HashBigNumToU32((BigData**)pnParam, (uint32_t*)&pnParam);
     int* pScramblingHash = pnParam;
     if (!pnParam) {
@@ -395,7 +395,7 @@ BOOL __thiscall SRP_ClientVerifyServerProof(D2Srp * * pThis, void * pSrpContext,
       nRemaining -= 4;
       pServerProof = (int*)((int)pServerProof + 4);
       pComputedProof += 4;
-    } while (3 < nRemaining);
+    } while (4 <= nRemaining);
 
     if (!nRemaining) {
       proofs_equal:
@@ -505,7 +505,7 @@ void __thiscall SRP_ClientVerifyAndComputeKey(void * pThis, void * pContext, uin
       nRemaining -= 4;
       pServerProof++;
       pSharedSecret = (BigData*)&pSharedSecret->sPrimary.nCount;
-    } while (3 < nRemaining);
+    } while (4 <= nRemaining);
 }
 
 void __stdcall SRP_ComputeFinalProof(int32_t nContextBase) {

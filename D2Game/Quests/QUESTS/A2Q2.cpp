@@ -303,7 +303,7 @@ BOOL __fastcall Q10_OnStaffOrViperPickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit
 // Q10_OnHoradricCubePickup. Per-player iterate callback for the Horadric Cube
 // ('box ') drop path. Bumps the A2Q2 drop counter for each player not already
 // holding the cube. No QuestRecord writes.
-BOOL __fastcall Q10_OnHoradricCubePickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
+static BOOL __fastcall Q10_OnHoradricCubePickup(::SGAMEDATA * pGame, D2UnitStrc * pUnit, void * pArg) {
     D2UnitStrc* pQuestData = ITEMS::Items::Drop::HasQuestItem(pGame, pUnit, 0x20786f62);
     if (pQuestData) {
       return 0;
@@ -395,7 +395,9 @@ void __fastcall Q10_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
     }
 
     BOOL bIsCompleted = D2Common::QuestRecord::GetQuestState(pBitBuffer, QUEST_TheHoradricStaff, QUESTSTATE_RewardAwaits);
-    if (!bIsCompleted) {
+    if (bIsCompleted) {
+      nGossipMsgIndex = 4;
+    } else {
       bool bHasQuestItem;
       bHasQuestItem = (bool)Q10_CheckQuestItemsForDialog(pQuestArgs->pPlayer, pQuestData, &byItemDialogMsg);
       if (!bHasQuestItem || byItemDialogMsg == 0xff) {
@@ -431,8 +433,6 @@ void __fastcall Q10_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       } else {
         nGossipMsgIndex = (uint32_t)byItemDialogMsg;
       }
-    } else {
-      nGossipMsgIndex = 4;
     }
 
     AddGossipMessageOnMonster(pQuestData, pQuestArgs->sQuestArgs.sNpcActivate.pTextControl, 0xf4, nGossipMsgIndex);
@@ -440,7 +440,7 @@ void __fastcall Q10_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
 // Q10_Callback_03. Gossip sub-event handler: when the text-control id == 0x28,
 // removes the player from the quest GUID participation list. No QuestRecord writes.
-void __fastcall Q10_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q10_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     if (pQuestArgs->sQuestArgs.sNpcActivate.pTextControl != (D2GSPacketSrv0x27_TextStrc*)0x28) {
       return;
     }
@@ -517,7 +517,7 @@ void __fastcall Q10_Callback04_ItemPickedUp(D2QuestDataStrc * pQuestData, D2Ques
 // a quest piece, clears the matching "told Drognan about it" step bit so the dialog
 // will re-offer: viper ('vip ')->clear Step0x04, cube ('box ')->clear Step0x06,
 // msf ('msf ')->clear Step0x05. Each clear is gated on the bit currently being set.
-void __fastcall Q10_Callback05_ItemDropped(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q10_Callback05_ItemDropped(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     uint32_t nItemClassId;
     BOOL bQuestStateFlag;
     if (!pQuestArgs->pTarget) {
@@ -980,7 +980,7 @@ void __fastcall Q10_Callback09_PlayerDroppedWithQuestItem(D2QuestDataStrc * pQue
     eD2HostGameType eGameType;
     D2QuestDataA2Q2Strc* pA2Q2Data = pQuestData->pQuestSpecificData.pA2Q2;
     uint32_t dwItemCode = D2Common::ITEMS::Items::ITEM_GetItemsTxt_szCode(pQuestArgs->pTarget);
-    if (dwItemCode < 0x20747369) {
+    if (dwItemCode <= 0x20747368) {
       switch (dwItemCode) {
         case 0x20747368:
           {

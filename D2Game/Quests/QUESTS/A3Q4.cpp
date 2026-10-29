@@ -219,7 +219,7 @@ void __fastcall Q21_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 // Q21_Callback_03 -- Golden Bird quest-state-3 handler. When the gossip text-control id == 0x4b
 // (the bird-quest-finished trigger), removes the player from the participant list
 // (QUESTGUID_RemovePlayerFromList). No QuestRecord state changes here.
-void __fastcall Q21_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q21_Callback03_ChangedLevel(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     if (pQuestArgs->sQuestArgs.sNpcActivate.pTextControl != (D2GSPacketSrv0x27_TextStrc*)0x4b) {
       return;
     }
@@ -344,7 +344,7 @@ void __fastcall Q21_PlayerSetGoldenBirdQuestState(::SGAMEDATA * pGame, D2UnitStr
 // Q21_PartySetGoldenBirdState (custom regs) -- broadcast the player's current Golden Bird sub-state to
 // every party member. Gets the player's party id (SUnit::GetPartyId); if in a party, runs
 // Q21_PlayerSetGoldenBirdQuestState over all members (ExecuteFunctionForEveryPartyMember). No-op solo.
-int __thiscall Q21_PartySetGoldenBirdState(void * pThis, ::SGAMEDATA * pGame) {
+static int __thiscall Q21_PartySetGoldenBirdState(void * pThis, ::SGAMEDATA * pGame) {
     int16_t nPartyId = UNIT::SUnit::GetPartyId((D2UnitStrc*)pThis);
     if (nPartyId == -1) {
       return 0;

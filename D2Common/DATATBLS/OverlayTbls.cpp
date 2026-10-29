@@ -225,7 +225,7 @@ uint32_t __stdcall OVERLAYTBLS_GetTrans(int32_t nParam) {
 }
 
 uint32_t __stdcall OVERLAYTBLS_GetLightRadiusAndRGB(int32_t nOverlayId, int * pnInitRadius, int * pnRadius, char * pbyRed, char * pbyGreen, char * pbyBlue) {
-    if (-1 < nOverlayId && nOverlayId < sgptDataTable->nTxtOverlaySize) {
+    if (0 <= nOverlayId && nOverlayId < sgptDataTable->nTxtOverlaySize) {
       D2OverlayTxt* pOverlay;
       pOverlay = sgptDataTable->pTxtOverlay + nOverlayId;
       if (pOverlay) {

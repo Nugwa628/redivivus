@@ -201,7 +201,7 @@ void __fastcall Q14_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
       if (bQuestState == 1 && !bJustCompleted) {
         return;
       }
-      if (3 < pQuestData->nStateFlag && !bJustCompleted) {
+      if (4 <= pQuestData->nStateFlag && !bJustCompleted) {
         return;
       }
 
@@ -216,7 +216,7 @@ void __fastcall Q14_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
         if (nMessageIndexMaybe == -1) {
           return;
         }
-        if (7 < nMessageIndexMaybe) {
+        if (8 <= nMessageIndexMaybe) {
           return;
         }
       }
@@ -449,7 +449,7 @@ BOOL __fastcall Q14_SetCannotComplete(::SGAMEDATA * pGame, D2UnitStrc * pUnit, v
 }
 
 // A2Q6 "The Seven Tombs" — fpStatusFilter: computes the journal status code (*nUnknown) shown for this quest. Gated on QUEST_AbleGoToAct2 Completed. If Jerhyn's gate already opened, uses cached code; else derives from TheSevenTombs record: Step0x03 -> 5, Step0x04 -> 6, Step0x05 -> nStateFlagPrev, nStateFlag<3 -> nStateFlagPrev, else 0xc. Read-only on quest state.
-bool __fastcall Q14_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
+static bool __fastcall Q14_StatusFilter(D2QuestDataStrc * pQuestData, D2UnitStrc * pUnit, D2BitBufferStrc * pBitBuffer, D2BitBufferStrc * pBitBufferEx, BYTE * nUnknown) {
     BOOL BVar1 = D2Common::QuestRecord::GetQuestState(pBitBufferEx, QUEST_AbleGoToAct2, QUESTSTATE_Completed);
     if (!BVar1) {
       *nUnknown = '\0';
@@ -506,8 +506,8 @@ void __fastcall Q14_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
     int32_t nPortalClassId;
     D2UnitStrc** ppSpawnedPortal;
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
-    D2UnitDataPlayerStrc* pPlayerData = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer);
-    D2BitBufferStrc* pBitBuffer = pPlayerData->pQuestRecord[pGame->nDifficulty];
+
+    D2BitBufferStrc* pBitBuffer = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
     short int nNpcNo = pQuestArgs->sQuestArgs.sNpcMessage.nNPCNo;
     short int nMessageIndex = pQuestArgs->sQuestArgs.sNpcMessage.nMessageIndex;
     D2QuestDataA2Q6Strc* pSpecificData = pQuestData->pQuestSpecificData.pA2Q6;
@@ -521,8 +521,8 @@ void __fastcall Q14_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
         eLevel = LEVEL_LutGholein;
         nPlayerY = D2Client::Units::GetYPosFromDynamicPathUnit(pQuestArgs->pPlayer);
         nPlayerX = D2Client::Units::GetXPosFromDynamicPathUnit(pQuestArgs->pPlayer);
-        pRoom = D2Common::Units::UNITS_GetRoom(pQuestArgs->pPlayer);
-        bPortalSpawned = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, pQuestArgs->pPlayer, pRoom, nPlayerX, nPlayerY, eLevel, ppSpawnedPortal, nPortalClassId, bPortalSpawned);
+
+        bPortalSpawned = SKILLS::SkillsServer::SERVER_SpawnPortal(pQuestData->pGame, pQuestArgs->pPlayer, D2Common::Units::UNITS_GetRoom(pQuestArgs->pPlayer), nPlayerX, nPlayerY, eLevel, ppSpawnedPortal, nPortalClassId, bPortalSpawned);
         if (bPortalSpawned) {
           QUEST_SetStateFlag(pQuestData, 4, "d:\\diablo2\\Diablo2\\Source\\D2Game/Quests/a2q6.cpp", 0x241);
           UNIT::SUnit::IteratePlayerOrMonsterUnits(pQuestArgs->pGame, 0, pQuestArgs->pTarget, (::fpExecuteOnUnitFunction)Q14_CheckDurielLairAndComplete);
@@ -655,7 +655,7 @@ void __fastcall Q14_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 }
 
 // A2Q6 "The Seven Tombs" — quest timer callback armed by Q14_Callback_08 (8 frames after entering Duriel's chamber). If nStateFlagPrev is not already 3/4/5, broadcasts quest state 3 (Duriel-encounter reached). Clears the bBloodRavenKilled-aliased flag. Returns 1 to indicate the timer is done.
-uint8_t __fastcall Q14_OnEndCallback(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
+static uint8_t __fastcall Q14_OnEndCallback(::SGAMEDATA * pGame, D2QuestDataStrc * pQuestData) {
     uint8_t bPrevFlag = pQuestData->nStateFlagPrev;
     D2QuestDataA2Q6Strc* pBloodRavenData = pQuestData->pQuestSpecificData.pA2Q6;
     if (bPrevFlag != 5 && bPrevFlag != 4 && bPrevFlag != 3) {
@@ -1017,7 +1017,7 @@ bool __fastcall Q14_SequenceFilter(D2QuestDataStrc * pQuestData) {
 }
 
 // A2Q6 "The Seven Tombs" — handler slot 0xe: on this event, clears the player's TheHoradricStaff record Step0x09 bit (cross-quest cleanup tying staff completion into the tombs quest).
-void __fastcall Q14_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
+static void __fastcall Q14_Callback14_PlayerJoinedGame(D2QuestDataStrc * pQuestData, D2QuestArgStrc * pQuestArgs) {
     ::SGAMEDATA* pGame = pQuestArgs->pGame;
     D2BitBufferStrc* pQuestRecord = D2Common::Units::GetPlayerData(pQuestArgs->pPlayer)->pQuestRecord[pGame->nDifficulty];
     /* UnsetQuestState(TheHoradricStaff=0xa, 9=Step0x09) — cross-quest cleanup:

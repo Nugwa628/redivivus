@@ -26,7 +26,7 @@ namespace D2Client::UI::Editbox::EditBoxImplementation {
 // Function declarations
 void __thiscall Destructor(::EditBoxImplementation * pThis);
 void __thiscall SetNumericOnly(::EditBoxImplementation * pThis, BOOL bNumericOnly);
-void __thiscall Draw(::EditBoxImplementation * pThis);
+void __fastcall Draw(::EditBoxImplementation * pThis);
 // Formats nNumber as decimal text and stores it as the edit box text.
 // EditBoxImplementation vtable slot 15.
 void __thiscall SetNumber(::EditBoxImplementation * pThis, int nNumber);

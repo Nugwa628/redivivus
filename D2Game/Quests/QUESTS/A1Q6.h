@@ -51,9 +51,6 @@ BOOL __fastcall Q06_PropagateRewardToParty(::SGAMEDATA * pGame, struct D2UnitStr
 BOOL __fastcall Q06_SpawnReturnPortal(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A1Q6 post-Andariel-death quest timer. Increments nDeathEventCounter each tick: at 10, spawns return portals for all players in L4 (Q06_SpawnReturnPortal); at 12, if stateFlag not already 3/0xd, broadcasts state 3 (final) via QUEST_SetStateAndBroadcast(Q06_NotifyQuestStateToPlayer) and ends the timer. Drives the celebratory portal + completion broadcast.
 uint8_t __fastcall Q06_TimerSpawnPortalAndNotify(::SGAMEDATA * pGame, struct D2QuestDataStrc * pQuestData);
-// A1Q6 deferred quest-update (scheduled by Q06_SequenceFilter timer): if stateFlag is still 0, bump to 1 (quest now introduced/visible in log). One-shot init nudge.
-// @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
-uint8_t __fastcall Q06_QuestUpdate(::SGAMEDATA * pGame, struct D2QuestDataStrc * pQuestData);
 // Already documented.
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a1q6.cpp
 void __fastcall Q06_Callback08_MonsterKilled(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);

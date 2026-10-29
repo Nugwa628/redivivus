@@ -796,7 +796,7 @@ static uint32_t crc32_little(uint8_t * pbBuf, uint32_t nLen, uint32_t nCrc) {
       nLen--;
     }
 
-    if (0x1f < nLen) {
+    if (0x20 <= nLen) {
       uint32_t* pdwBuf;
       nBlockCount = nLen >> 5;
       pdwBuf = (uint32_t*)pbBuf;
@@ -816,7 +816,7 @@ static uint32_t crc32_little(uint8_t * pbBuf, uint32_t nLen, uint32_t nCrc) {
         pdwBuf = (uint32_t*)pbBuf;
       } while (nBlockCount);
     }
-    if (3 < nLen) {
+    if (4 <= nLen) {
       nBlockCount = nLen >> 2;
       do {
         nCrcAcc ^= *(uint32_t*)pbBuf;
@@ -1620,29 +1620,29 @@ int32_t __stdcall crc32_big(uint32_t nLength, uint32_t dwInitialCrc, uint8_t * p
     }
 
     uint32_t* pdwData = (uint32_t*)(pbParam - 4);
-    if (0x1f < nLength) {
+    if (0x20 <= nLength) {
       nBlockCount = nLength >> 5;
       do {
         dwCrc ^= pdwData[1];
-        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[dwCrc & 0xff] ^ pdwData[2];
-        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[dwCrc & 0xff] ^ pdwData[3];
-        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[dwCrc & 0xff] ^ pdwData[4];
-        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[dwCrc & 0xff] ^ pdwData[5];
-        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[dwCrc & 0xff] ^ pdwData[6];
-        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[dwCrc & 0xff] ^ pdwData[7];
+        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[(uint8_t)dwCrc] ^ pdwData[2];
+        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[(uint8_t)dwCrc] ^ pdwData[3];
+        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[(uint8_t)dwCrc] ^ pdwData[4];
+        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[(uint8_t)dwCrc] ^ pdwData[5];
+        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[(uint8_t)dwCrc] ^ pdwData[6];
+        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[(uint8_t)dwCrc] ^ pdwData[7];
         pdwData += 8;
         nLength -= 0x20;
-        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[dwCrc & 0xff] ^ *pdwData;
-        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[dwCrc & 0xff];
+        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[(uint8_t)dwCrc] ^ *pdwData;
+        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[(uint8_t)dwCrc];
         nBlockCount--;
       } while (nBlockCount);
     }
-    if (3 < nLength) {
+    if (4 <= nLength) {
       nBlockCount = nLength >> 2;
       do {
         dwCrc ^= pdwData[1];
         pdwData++;
-        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[dwCrc & 0xff];
+        dwCrc = gdwCrc32Table4[dwCrc >> 0x10 & 0xff] ^ gdwCrc32Table3_b[dwCrc >> 8 & 0xff] ^ gdwCrc32Table5[dwCrc >> 0x18] ^ gdwCrc32TableBase[(uint8_t)dwCrc];
         nLength -= 4;
         nBlockCount--;
       } while (nBlockCount);

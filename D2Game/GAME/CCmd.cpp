@@ -59,7 +59,7 @@ static int __stdcall IsTokenFirstGame(int nMode, int nParam, char * szCharName) 
       Server::Unlock(pGame);
       return 0x10;
     }
-    if (7 < pGame->nClientsCount) {
+    if (8 <= pGame->nClientsCount) {
       Server::Unlock(pGame);
       return 0xf;
     }
@@ -140,6 +140,9 @@ void __fastcall NET_D2GS_SERVER_ProcessClientMessage_GameSetup(D2GSClientMsgEnve
       }
 
       break;
+      case 'm':
+        /* D2GS_PING */ Server::NET_SendPong(nClientId, pPacket->uMsg.sPing.nPingTime, pPacket->uMsg.sPing.nSeqNum, 0);
+      return;
       case 'h':
         /* D2GS_GAMELOGON_MULTI */ __frame0.dwJoinParam0 = 0;
       __frame0.dwJoinParam1 = 0;
@@ -185,7 +188,7 @@ void __fastcall NET_D2GS_SERVER_ProcessClientMessage_GameSetup(D2GSClientMsgEnve
 
       break;
       case 'l':
-        /* D2GS_UPLOADSAVE */ if (0x1fff < pPacket->uMsg.sUploadSave.nTotalSize) {
+        /* D2GS_UPLOADSAVE */ if (0x2000 <= pPacket->uMsg.sUploadSave.nTotalSize) {
           /* Does self mean an entire game server crashes if you simply send a packet 0x6c
                          00 00 00 00 FF FF FF FF */ nLine = 0x1a8;
           bReturn1Result = Fog::Src::ErrorManager::GetInstructionPointer();
@@ -199,9 +202,6 @@ void __fastcall NET_D2GS_SERVER_ProcessClientMessage_GameSetup(D2GSClientMsgEnve
       }
 
       break;
-      case 'm':
-        /* D2GS_PING */ Server::NET_SendPong(nClientId, pPacket->uMsg.sPing.nPingTime, pPacket->uMsg.sPing.nSeqNum, 0);
-      return;
       case 'n':
         /* D2GS_FINDME_6E */ bFindMeCheckResult = Server::FindMe_6E_Handler(nClientId);
       if (bFindMeCheckResult) {

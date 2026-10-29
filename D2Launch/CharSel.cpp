@@ -40,6 +40,10 @@
 #include "D2Win/D2WinImageEx.h"
 #include "D2Win/D2WinScrollbar.h"
 #include "D2Win/D2WinTimer.h"
+#include "D2Sound/Src/D2SoundFast.h"
+#include "D2Win/Src/D2WinButton.h"
+#include "D2Win/Src/D2WinPalette.h"
+#include "D2MCPClient/McpConnect.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -57,6 +61,37 @@
 
 static_assert(sizeof(void*) != 4 || sizeof(::D2CharSelStrc) == 0x350, "D2_NEW_AT(D2CharSelStrc): the 32-bit layout must be the 0x350 bytes 1.14d allocates");
 
+
+namespace D2Launch::MainMenus {
+
+static uint32_t CHARSEL_FindRealmByName(char * szText) {
+    char* pszRealmName;
+    int32_t nCmp;
+    int nIndex = 0;
+    while (true) {
+      int nRealmCount;
+      nRealmCount = MAINMENU_GetRealmCount();
+      if (nRealmCount <= nIndex) {
+        return 0;
+      }
+
+      pszRealmName = MAINMENU_GetRealmName(nIndex);
+      if (!pszRealmName) {
+        break;
+      }
+
+      nCmp = Storm::Source::SSTR::SStrCmpI(szText, pszRealmName, 0x7fffffff);
+      if (!nCmp) {
+        return 1;
+      }
+
+      nIndex++;
+    }
+
+    return 0;
+}
+
+} // namespace D2Launch::MainMenus
 
 namespace D2Launch::CharSel {
 
@@ -209,7 +244,7 @@ static uint32_t CHARSEL_IsBetaRealm(uint16_t * wszText) {
       }
 
       ppwszRealmName++;
-    } while ((int)ppwszRealmName < (uintptr_t)((char*)&pBetaRealmNames + sizeof(pBetaRealmNames)));
+    } while ((int)ppwszRealmName < (int)((uintptr_t)((char*)&pBetaRealmNames + sizeof(pBetaRealmNames))));
 
     return 0;
 }
@@ -322,15 +357,15 @@ void __stdcall DRAW_LocalCharsInSelectionScreen() {
         D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ClearAllLines(gaCharSelScreenSlotControls[nCharacterIndex]);
         nLanguageCode = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
         switch (nLanguageCode) {
+          case 7:
+            nTextLine = -7;
+          break;
           case 6:
 
           case 9:
 
           case 10:
             nTextLine = -2;
-          break;
-          case 7:
-            nTextLine = -7;
           break;
           default:
             continue;
@@ -406,7 +441,7 @@ void __stdcall DRAW_LocalCharsInSelectionScreen() {
             pwVar3 += 2;
           }
 
-          memset(wszLevelStr, 0, 10 * sizeof(wszLevelStr[0]));
+          for (int i = 0; i < 10; i++) wszLevelStr[i] = 0;
           sprintf(szNameBuf, " %d ", (uint32_t)pDVar1->nLevel);
           D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszLevelStr, szNameBuf, 9);
           pwszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0xfd9);
@@ -436,7 +471,7 @@ void __stdcall DRAW_LocalCharsInSelectionScreen() {
           } else {
             nDaysUntilExpire = 0;
           }
-          if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET && nDaysUntilExpire < 0x3d) {
+          if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET && nDaysUntilExpire <= 0x3c) {
             nTextLine = 1;
             if (!nDaysUntilExpire) {
               wExpireStrIndex = 0x2b7e;
@@ -444,7 +479,7 @@ void __stdcall DRAW_LocalCharsInSelectionScreen() {
               wExpireStrIndex = 0x2b7c;
             } else {
               wExpireStrIndex = 0x2b7d;
-              if (0xe < nDaysUntilExpire) {
+              if (0xf <= nDaysUntilExpire) {
                 nTextLine = 0;
               }
             }
@@ -662,7 +697,7 @@ void __stdcall DRAW_LocalCharsInSelectionScreen0() {
               pDVar1 = (D2CharSelLineBufStrc*)(pDVar1->wszLineBuf + 2);
             }
 
-            memset(wszLevelStr, 0, 10 * sizeof(wszLevelStr[0]));
+            for (int i = 0; i < 10; i++) wszLevelStr[i] = 0;
             sprintf(sLineBuf.szNameBuf, " %d ", (uint32_t)pCharSelIter->nLevel);
             D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(wszLevelStr, sLineBuf.szNameBuf, 9);
             pwszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0xfd9);
@@ -719,7 +754,7 @@ void __stdcall DRAW_LocalCharsInSelectionScreen0() {
 }
 
 // @sourcefile .\Src\CharSel.cpp
-BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharacterName, char * aSaveData, uint32_t dwRealmParam, FILETIME ftLastWriteTime) {
+static BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharacterName, char * aSaveData, uint32_t dwRealmParam, FILETIME ftLastWriteTime) {
     int nEquipIndexPrev;
     D2CharSelCompStrc* pCharSelComp;
     BOOL BVar6;
@@ -734,11 +769,11 @@ BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharacterName
     Storm::Source::SSTR::SStrCopy(pNewCharSel->szCharname, szCharacterName, 0x7fffffff);
     char* pDestination;
     pDestination = pNewCharSel->szCommandStringTable;
-    if (!szRealmName) {
+    if (szRealmName) {
+      D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize((uint16_t*)pDestination, szRealmName, 0xff);
+    } else {
       pDestination[0] = '\0';
       pDestination[1] = '\0';
-    } else {
-      D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize((uint16_t*)pDestination, szRealmName, 0xff);
     }
 
     int nEquipIndex;
@@ -816,12 +851,7 @@ BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharacterName
     int32_t nClassicOrExpansionMode;
     nClassicOrExpansionMode = 5;
     if (pNewCharSel->nCharacterFlags & 4) {
-      if (!(pNewCharSel->nCharacterFlags & 8)) {
-        BVar6 = Fog::D2CheckExpansionGame();
-        if (BVar6 || pNewCharSel->ePlayerClassID < CLASS_DRUID) {
-          nClassicOrExpansionMode = 1;
-        }
-      } else {
+      if (pNewCharSel->nCharacterFlags & 8) {
         switch (ePlayerClassID) {
           case 0:
 
@@ -835,6 +865,11 @@ BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharacterName
         }
 
         ePlayerClassID = 9;
+      } else {
+        BVar6 = Fog::D2CheckExpansionGame();
+        if (BVar6 || pNewCharSel->ePlayerClassID < CLASS_DRUID) {
+          nClassicOrExpansionMode = 1;
+        }
       }
     }
 
@@ -870,16 +905,7 @@ BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharacterName
     pListIter = D2Client::CharScreen::D2CharSelStrcFirst;
     if (D2Client::CharScreen::D2CharSelStrcFirst) {
       BVar6 = Fog::D2CheckExpansionGame();
-      if (!BVar6) {
-        pListPrev = pListIter->pNext;
-        while (pListPrev) {
-          pListIter = pListIter->pNext;
-          pListPrev = pListIter->pNext;
-        }
-
-        pListIter->pNext = pNewCharSel;
-        pNewCharSel = D2Client::CharScreen::D2CharSelStrcFirst;
-      } else {
+      if (BVar6) {
         if (pListIter) {
           while (true) {
             pListCur = pListIter;
@@ -906,6 +932,15 @@ BOOL __stdcall SAVEFILE_ParseSaveData(char * szRealmName, char * szCharacterName
         }
 
         pNewCharSel->pNext = D2Client::CharScreen::D2CharSelStrcFirst;
+      } else {
+        pListPrev = pListIter->pNext;
+        while (pListPrev) {
+          pListIter = pListIter->pNext;
+          pListPrev = pListIter->pNext;
+        }
+
+        pListIter->pNext = pNewCharSel;
+        pNewCharSel = D2Client::CharScreen::D2CharSelStrcFirst;
       }
     }
 
@@ -943,7 +978,7 @@ void __stdcall CHARSEL_DestroyAllCharEntries() {
     gpCharSelPendingEntry = 0;
 }
 
-void __stdcall CHARSEL_EnumerateLocalSaves() {
+static void __stdcall CHARSEL_EnumerateLocalSaves() {
     // Static local variables (originally global data)
     static char gszLocalSaveFilenameBuffer[256] = {}; D2_STATIC_GUARD(gszLocalSaveFilenameBuffer, "D2Launch::CharSel::CHARSEL_EnumerateLocalSaves::gszLocalSaveFilenameBuffer");
     static int gnLocalSaveFileCount; D2_STATIC_GUARD_BSS(gnLocalSaveFileCount, "D2Launch::CharSel::CHARSEL_EnumerateLocalSaves::gnLocalSaveFileCount");
@@ -1005,7 +1040,7 @@ int __stdcall CHARSEL_UpdateSelectionExpansion() {
     }
 
     uint32_t nSlotIndex = D2Client::CharScreen::nSelectedCharIndex - g_nCharSelNavigationIndex;
-    if ((int)nSlotIndex < 0 || gnCharSelScreenSlotCount <= (int)nSlotIndex) {
+    if ((int)nSlotIndex < 0 || (int)nSlotIndex >= gnCharSelScreenSlotCount) {
       bDisabled = 0;
     } else {
       uint32_t nColumnParity;
@@ -1078,7 +1113,7 @@ BOOL __stdcall CHARSEL_UpdateSelectedCharDisplay() {
 
     int nSlotIndex;
     nSlotIndex = D2Client::CharScreen::nSelectedCharIndex - g_nCharSelNavigationIndex;
-    if (D2Client::CharScreen::TotalCurrentChars < 1 || D2Client::CharScreen::nSelectedCharIndex <= gnCharSelLoadMoreEntryIndex || D2Client::CharScreen::nSelectedCharIndex == gnCharSelLoadingEntryIndex) {
+    if (D2Client::CharScreen::TotalCurrentChars < 1 || (int)D2Client::CharScreen::nSelectedCharIndex <= (int)gnCharSelLoadMoreEntryIndex || D2Client::CharScreen::nSelectedCharIndex == gnCharSelLoadingEntryIndex) {
       bControlState = 0;
     } else {
       bControlState = 1;
@@ -1086,7 +1121,7 @@ BOOL __stdcall CHARSEL_UpdateSelectedCharDisplay() {
 
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(&gpCtlCharSelDownArrow->sControl, bControlState);
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCtlCharSelDeleteButton, 1);
-    if (nSlotIndex < 0 || gnCharSelScreenSlotCount <= nSlotIndex) {
+    if (nSlotIndex < 0 || nSlotIndex >= gnCharSelScreenSlotCount) {
       bControlState = 0;
     } else {
       if (D2Client::CharScreen::nSelectedCharIndex == gnCharSelLoadMoreEntryIndex && gnCharSelLoadedCharCount) {
@@ -1146,15 +1181,15 @@ BOOL __stdcall CHARSEL_UpdateSelectedCharDisplay() {
         ePlayerClass = pCharSelCopy->ePlayerClassID;
         nClassicOrExpansionMode = 5;
         if (pCharSelCopy->nCharacterFlags & 4) {
-          if (!(pCharSelCopy->nCharacterFlags & 8)) {
+          if (pCharSelCopy->nCharacterFlags & 8) {
+            bControlState = CHARSEL_ClassHasAlternateDeath((uint32_t)ePlayerClass);
+            ePlayerClass = (bControlState != 0) + 8;
+          } else {
             bControlState = Fog::D2CheckExpansionGame();
             pCharSelCopy = gpCharSelPendingEntry;
             if (bControlState || gpCharSelPendingEntry->ePlayerClassID < CLASS_DRUID) {
               nClassicOrExpansionMode = 1;
             }
-          } else {
-            bControlState = CHARSEL_ClassHasAlternateDeath((uint32_t)ePlayerClass);
-            ePlayerClass = (bControlState != 0) + 8;
           }
         }
 
@@ -1195,7 +1230,7 @@ BOOL __stdcall CHARSEL_UpdateSelectedCharDisplay() {
           dwCompFlags |= 0x20;
         }
         if (wCharFlags & 0x20) {
-          dwCompFlags |= 0x1000;
+          dwCompFlags |= gadwBitMasks[12];
         }
 
         D2Win::Src::D2Comp::D2COMP_SetFlags((D2CharSelStrc*)gpCharSelPendingEntry->pCharSelCompStrc, dwCompFlags);
@@ -1312,13 +1347,13 @@ BOOL __stdcall SelectCharHandler(D2ControlMsg * pControlMsg) {
         nSelectedIndex = 0;
         byTextColor = 0;
         nTextArg1 = 0;
-        pwszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b3c);
-        D2Win::Src::D2WinTextBox::SetText(gnCharSelScrollOffset, pwszLocaleStr, nTextArg1, (bool)byTextColor, nSelectedIndex);
+
+        D2Win::Src::D2WinTextBox::SetText(gnCharSelScrollOffset, D2Lang::StrTable::strtable::GetLocaleString(0x2b3c), nTextArg1, (bool)byTextColor, nSelectedIndex);
         nSelectedIndex = 0;
         bIsCreateNewSlot = false;
         nTextArg1 = 0;
-        pwszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0x2b3d);
-        D2Win::Src::D2WinTextBox::SetText(gnCharSelScrollOffset, pwszLocaleStr, nTextArg1, bIsCreateNewSlot, nSelectedIndex);
+
+        D2Win::Src::D2WinTextBox::SetText(gnCharSelScrollOffset, D2Lang::StrTable::strtable::GetLocaleString(0x2b3d), nTextArg1, bIsCreateNewSlot, nSelectedIndex);
         return 1;
       }
       if (nSelectedIndex != -1) {
@@ -1357,8 +1392,8 @@ BOOL __stdcall SelectCharHandler(D2ControlMsg * pControlMsg) {
 
             wCharFlags = pSelectedChar->nCharacterFlags;
             if (wCharFlags & 4 && wCharFlags & 8 && (OogCurrentCharSelectionMode == CHAR_SELECTION_SP || OogCurrentCharSelectionMode == CHAR_SELECTION_TCP_IP)) {
-              pwszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(0x14b8);
-              MainMenus::MAINMENU_ShowPopupWithCancel(pwszLocaleStr, MainMenus::FORMS_DestroyList);
+
+              MainMenus::MAINMENU_ShowPopupWithCancel(D2Lang::StrTable::strtable::GetLocaleString(0x14b8), MainMenus::FORMS_DestroyList);
               return 1;
             }
             if ((OogCurrentCharSelectionMode == CHAR_SELECTION_SP || OogCurrentCharSelectionMode == CHAR_SELECTION_TCP_IP && D2IniData_launcher->nGAMETYPE == GAMETYPE_LAN_HOST) && ((nDifficultyUnlocked = pSelectedChar->nCharacterFlags >> 8 & 0x1f , !(pSelectedChar->nCharacterFlags & 0x20) && 3 < nDifficultyUnlocked) || 4 < nDifficultyUnlocked)) {
@@ -1465,7 +1500,7 @@ BOOL __stdcall CHARSEL_OnPressScrollCharListDown(D2ControlMsg * pControlMsg) {
     if (gnCharSelScreenSlotCount + g_nCharSelNavigationIndex >= D2Client::CharScreen::TotalCurrentChars) {
       return 1;
     }
-    if (D2Client::CharScreen::nSelectedCharIndex < D2Client::CharScreen::TotalCurrentChars - 1) {
+    if ((int)D2Client::CharScreen::nSelectedCharIndex < (int)(D2Client::CharScreen::TotalCurrentChars - 1)) {
       D2Client::CharScreen::nSelectedCharIndex++;
     }
 
@@ -1488,33 +1523,35 @@ BOOL __stdcall CHARSEL_HandleKeyNavExpansion(int32_t pKeyMsg) {
     }
 
     switch (*(uint32_t*)(pKeyMsg + 8)) {
-      case 0x23:
-        if (gnCharSelScreenSlotCount < D2Client::CharScreen::TotalCurrentChars) {
-          g_nCharSelNavigationIndex = D2Client::CharScreen::TotalCurrentChars - gnCharSelScreenSlotCount;
-        }
-      D2Client::CharScreen::nSelectedCharIndex = D2Client::CharScreen::TotalCurrentChars - 1;
-      break;
-      case 0x24:
-        D2Client::CharScreen::nSelectedCharIndex = 0;
-      g_nCharSelNavigationIndex = 0;
-      break;
-      case 0x25:
-        if ((int)D2Client::CharScreen::nSelectedCharIndex < 1) {
-          break;
-        }
-      nNewSelectedIndex = D2Client::CharScreen::nSelectedCharIndex & 0x80000001;
-      bIsEvenColumn = !nNewSelectedIndex;
-      if ((int)nNewSelectedIndex < 0) {
-        bIsEvenColumn = (nNewSelectedIndex - 1 | -2) == -1;
-      }
-      if (bIsEvenColumn) {
-        break;
-      }
+      case 0x28:
+        if ((int)D2Client::CharScreen::nSelectedCharIndex < D2Client::CharScreen::TotalCurrentChars - 1 && (nNewSelectedIndex = D2Client::CharScreen::nSelectedCharIndex + 2 , (int)nNewSelectedIndex <= D2Client::CharScreen::TotalCurrentChars - 1)) {
+          D2Client::CharScreen::nSelectedCharIndex = nNewSelectedIndex;
+          if ((int)nNewSelectedIndex < g_nCharSelNavigationIndex) {
+            goto scroll_view_to;
+          }
+          if ((int)nNewSelectedIndex > gnCharSelScreenSlotCount - 1 + g_nCharSelNavigationIndex) {
+            nCandidateIndex = nNewSelectedIndex & 0x80000001;
+            bIsEvenColumn = !nCandidateIndex;
+            if ((int)nCandidateIndex < 0) {
+              bIsEvenColumn = (nCandidateIndex - 1 | -2) == -1;
+            }
+            if (!bIsEvenColumn) {
+              g_nCharSelNavigationIndex = nNewSelectedIndex - gnCharSelScreenSlotCount + 1;
+              CHARSEL_ScrollCharList(1);
+              DRAW_LocalCharsInSelectionScreen0();
+              CHARSEL_UpdateSelectedCharDisplay();
+              return 1;
+            }
 
-      nNewSelectedIndex = D2Client::CharScreen::nSelectedCharIndex - 1;
-      goto select_and_scroll_into_view;
+            g_nCharSelNavigationIndex = nNewSelectedIndex - gnCharSelScreenSlotCount + 2;
+            CHARSEL_ScrollCharList(1);
+            DRAW_LocalCharsInSelectionScreen0();
+            CHARSEL_UpdateSelectedCharDisplay();
+            return 1;
+          }
+        } break;
       case 0x26:
-        if ((int)D2Client::CharScreen::nSelectedCharIndex < 1 || (nCandidateIndex = D2Client::CharScreen::nSelectedCharIndex - 2 , (int)nCandidateIndex < 0)) {
+        if ((int)D2Client::CharScreen::nSelectedCharIndex <= 0 || (nCandidateIndex = D2Client::CharScreen::nSelectedCharIndex - 2 , (int)nCandidateIndex < 0)) {
           break;
         }
       if ((int)nCandidateIndex < g_nCharSelNavigationIndex) {
@@ -1566,7 +1603,7 @@ BOOL __stdcall CHARSEL_HandleKeyNavExpansion(int32_t pKeyMsg) {
         CHARSEL_UpdateSelectedCharDisplay();
         return 1;
       }
-      if (gnCharSelScreenSlotCount - 1 + g_nCharSelNavigationIndex < (int)nNewSelectedIndex) {
+      if ((int)nNewSelectedIndex > gnCharSelScreenSlotCount - 1 + g_nCharSelNavigationIndex) {
         g_nCharSelNavigationIndex = nNewSelectedIndex - gnCharSelScreenSlotCount + 1;
         DRAW_LocalCharsInSelectionScreen0();
         CHARSEL_UpdateSelectedCharDisplay();
@@ -1574,33 +1611,31 @@ BOOL __stdcall CHARSEL_HandleKeyNavExpansion(int32_t pKeyMsg) {
       }
 
       break;
-      case 0x28:
-        if ((int)D2Client::CharScreen::nSelectedCharIndex < D2Client::CharScreen::TotalCurrentChars - 1 && (nNewSelectedIndex = D2Client::CharScreen::nSelectedCharIndex + 2 , (int)nNewSelectedIndex <= D2Client::CharScreen::TotalCurrentChars - 1)) {
-          D2Client::CharScreen::nSelectedCharIndex = nNewSelectedIndex;
-          if ((int)nNewSelectedIndex < g_nCharSelNavigationIndex) {
-            goto scroll_view_to;
-          }
-          if (gnCharSelScreenSlotCount - 1 + g_nCharSelNavigationIndex < (int)nNewSelectedIndex) {
-            nCandidateIndex = nNewSelectedIndex & 0x80000001;
-            bIsEvenColumn = !nCandidateIndex;
-            if ((int)nCandidateIndex < 0) {
-              bIsEvenColumn = (nCandidateIndex - 1 | -2) == -1;
-            }
-            if (!bIsEvenColumn) {
-              g_nCharSelNavigationIndex = nNewSelectedIndex - gnCharSelScreenSlotCount + 1;
-              CHARSEL_ScrollCharList(1);
-              DRAW_LocalCharsInSelectionScreen0();
-              CHARSEL_UpdateSelectedCharDisplay();
-              return 1;
-            }
-
-            g_nCharSelNavigationIndex = nNewSelectedIndex - gnCharSelScreenSlotCount + 2;
-            CHARSEL_ScrollCharList(1);
-            DRAW_LocalCharsInSelectionScreen0();
-            CHARSEL_UpdateSelectedCharDisplay();
-            return 1;
-          }
+      case 0x25:
+        if ((int)D2Client::CharScreen::nSelectedCharIndex <= 0) {
+          break;
         }
+      nNewSelectedIndex = D2Client::CharScreen::nSelectedCharIndex & 0x80000001;
+      bIsEvenColumn = !nNewSelectedIndex;
+      if ((int)nNewSelectedIndex < 0) {
+        bIsEvenColumn = (nNewSelectedIndex - 1 | -2) == -1;
+      }
+      if (bIsEvenColumn) {
+        break;
+      }
+
+      nNewSelectedIndex = D2Client::CharScreen::nSelectedCharIndex - 1;
+      goto select_and_scroll_into_view;
+      case 0x24:
+        D2Client::CharScreen::nSelectedCharIndex = 0;
+      g_nCharSelNavigationIndex = 0;
+      break;
+      case 0x23:
+        if (gnCharSelScreenSlotCount < D2Client::CharScreen::TotalCurrentChars) {
+          g_nCharSelNavigationIndex = D2Client::CharScreen::TotalCurrentChars - gnCharSelScreenSlotCount;
+        }
+      D2Client::CharScreen::nSelectedCharIndex = D2Client::CharScreen::TotalCurrentChars - 1;
+      break;
     }
 
     DRAW_LocalCharsInSelectionScreen0();
@@ -1671,14 +1706,21 @@ BOOL __stdcall CHARSEL_HandleKeyNavClassic(int32_t pKeyMsg) {
     return 1;
 }
 
-void CHARSEL_SetStatusMessage(int32_t nStatusCode) {
+static void CHARSEL_SetStatusMessage(int32_t nStatusCode) {
     uint16_t wLocaleStrId;
-    if (nStatusCode == 0x7e) {
+    switch (nStatusCode) {
+    case 0x7e: {
       wLocaleStrId = 0x2b99;
-    } else if (nStatusCode == 0x7f) {
+      break;
+    }
+    case 0x7f: {
       wLocaleStrId = 0x2b9a;
-    } else {
+      break;
+    }
+    default: {
       wLocaleStrId = 0x2b3a;
+      break;
+    }
     }
 
     gbCharSelArrowsHidden = 1;
@@ -1687,8 +1729,8 @@ void CHARSEL_SetStatusMessage(int32_t nStatusCode) {
     int nTextArg4 = 0;
     bool uVar3 = false;
     int32_t nTextLine = 4;
-    uint16_t* szText = D2Lang::StrTable::strtable::GetLocaleString(wLocaleStrId);
-    D2Win::Src::D2WinTextBox::SetText(gpCharSelStatusTextBox, szText, nTextLine, uVar3, nTextArg4);
+
+    D2Win::Src::D2WinTextBox::SetText(gpCharSelStatusTextBox, D2Lang::StrTable::strtable::GetLocaleString(wLocaleStrId), nTextLine, uVar3, nTextArg4);
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpControlCharSelArrows, 0);
     if (!gnCharSelSelectedIndex) {
       return;
@@ -1707,8 +1749,8 @@ void __stdcall CHARSEL_ShowWaitTimeout() {
     int nTextArg4 = 0;
     bool uVar3 = false;
     int32_t nTextLine = 4;
-    uint16_t* szText = D2Lang::StrTable::strtable::GetLocaleString(0x2b39);
-    D2Win::Src::D2WinTextBox::SetText(gpCharSelStatusTextBox, szText, nTextLine, uVar3, nTextArg4);
+
+    D2Win::Src::D2WinTextBox::SetText(gpCharSelStatusTextBox, D2Lang::StrTable::strtable::GetLocaleString(0x2b39), nTextLine, uVar3, nTextArg4);
 }
 
 BOOL __stdcall CHARSEL_InitRealmSelection() {
@@ -1728,10 +1770,7 @@ BOOL __stdcall CHARSEL_InitRealmSelection() {
 
     MainMenus::MAINMENU_QueryAndBuildRealmList();
     int nRealmCount = MainMenus::MAINMENU_GetRealmCount();
-    if (nRealmCount == -1) {
-      Launcher::LAUNCHER_DisconnectFromBnet();
-      wErrorStrId = 0x14e3;
-    } else {
+    if (nRealmCount != -1) {
       D2ControlStrc* pTimerForm;
       if (nRealmCount) {
         pTimerForm = MainMenus::FORMS_CreateAnyFormFromListExEx(0x7a);
@@ -1758,8 +1797,8 @@ BOOL __stdcall CHARSEL_InitRealmSelection() {
 
         pBNetGateway = (D2BNetGatewayAccessStr*)gpBNetCallbacks->pfnBnetLoadAndReturn();
         nRegResult = 0x7fffffff;
-        pszRealmName = Bnclient::BNGatewayAccess::Realm(pBNetGateway, pBNetGateway->nCurGatewayIdx);
-        Storm::Source::SSTR::SStrCopy(PreferredClosedRealm, pszRealmName, nRegResult);
+
+        Storm::Source::SSTR::SStrCopy(PreferredClosedRealm, Bnclient::BNGatewayAccess::Realm(pBNetGateway, pBNetGateway->nCurGatewayIdx), nRegResult);
         Storm::Source::SReg::SRegSaveString((uint32_t*)"Diablo II", "Preferred Realm", 0, PreferredClosedRealm);
         nTextLine = MainMenus::CHARSEL_FindRealmByName(PreferredClosedRealm);
         if (nTextLine) {
@@ -1780,10 +1819,13 @@ BOOL __stdcall CHARSEL_InitRealmSelection() {
 
       Launcher::LAUNCHER_DisconnectFromBnet();
       wErrorStrId = 0x14aa;
+    } else {
+      Launcher::LAUNCHER_DisconnectFromBnet();
+      wErrorStrId = 0x14e3;
     }
 
-    pwszLocaleStr = D2Lang::StrTable::strtable::GetLocaleString(wErrorStrId);
-    MainMenus::MAINMENU_ShowPopupWithCancel(pwszLocaleStr, MainMenus::UIMENU_MainMenu);
+
+    MainMenus::MAINMENU_ShowPopupWithCancel(D2Lang::StrTable::strtable::GetLocaleString(wErrorStrId), MainMenus::UIMENU_MainMenu);
     return 0;
 }
 
@@ -1894,3 +1936,340 @@ void __stdcall CHARSEL_ClearCharDetailUI() {
 }
 
 } // namespace D2Launch::CharSel
+
+namespace D2Launch::Launcher {
+
+void __stdcall CHARSEL_ParseRealmCharList(char * szRealmName, char * szText, int32_t bShouldCache) {
+    uint16_t* pwszHeader;
+    uint32_t* pSaveDataCursor;
+    uint16_t nSubHeaderStrId;
+    uint32_t dwCharFlags;
+    uint32_t* szCharacterName;
+    uint32_t dwScanByte;
+    char* pRecordHeader = szText;
+    uint32_t nCharCount = (uint32_t)*(uint16_t*)(szText + 7);
+    char byRecordType = *szText;
+    uint32_t* aSaveData = (uint32_t*)(szText + 9);
+    BOOL bIsExpansion = Fog::D2CheckExpansionGame();
+    if (!bIsExpansion) {
+      uint16_t* pwszSubHeader;
+      pwszHeader = D2Lang::StrTable::strtable::GetLocaleString(0x1419);
+      nSubHeaderStrId = 0x141b;
+      if (OogCurrentCharSelectionMode != CHAR_SELECTION_BNET) {
+        nSubHeaderStrId = 0x141a;
+      }
+
+      pwszSubHeader = D2Lang::StrTable::strtable::GetLocaleString(nSubHeaderStrId);
+      gnCharSelLoadMoreEntryIndex = D2Client::CharScreen::TotalCurrentChars;
+      CharSel::CHARSEL_CreateCharEntry(pwszHeader, pwszSubHeader, 1, true);
+    }
+
+    uint32_t nRemaining = (uint32_t)*(uint16_t*)(pRecordHeader + 3);
+    if (nCharCount < *(uint16_t*)(pRecordHeader + 3)) {
+      nRemaining = nCharCount;
+    }
+
+    for (; (uint32_t)nRemaining > 0; nRemaining--) {
+      dwCharFlags = 0;
+      szCharacterName = aSaveData;
+      if (byRecordType == '\x19') {
+        dwCharFlags = *aSaveData;
+        aSaveData++;
+        szCharacterName = aSaveData;
+      }
+
+      do {
+        dwScanByte = *aSaveData;
+        aSaveData = (uint32_t*)((int)aSaveData + 1);
+        pSaveDataCursor = aSaveData;
+      } while ((char)dwScanByte != '\0');
+
+      do {
+        dwScanByte = *pSaveDataCursor;
+        pSaveDataCursor = (uint32_t*)((int)pSaveDataCursor + 1);
+      } while ((char)dwScanByte != '\0');
+
+      bIsExpansion = CharSel::SAVEFILE_ParseSaveData(szRealmName, (char*)szCharacterName, (char*)aSaveData, dwCharFlags, d2_bits_as<FILETIME>(0x0));
+      if (!bIsExpansion) {
+        nCharCount--;
+        CharSel::CHARSEL_FreeCachedRealmData();
+        bShouldCache = 0;
+      }
+
+      aSaveData = pSaveDataCursor;
+      pRecordHeader = szText;
+    }
+
+    if (bShouldCache) {
+      CharSel::CHARSEL_CacheRealmData(szRealmName, pRecordHeader, (int)aSaveData - (int)pRecordHeader);
+    }
+    if (nCharCount >= *(uint16_t*)(pRecordHeader + 1)) {
+      gnCharSelLoadedCharCount = 1;
+    }
+    if (*(uint16_t*)(pRecordHeader + 3) > *(uint16_t*)(pRecordHeader + 7)) {
+      pwszHeader = D2Lang::StrTable::strtable::GetLocaleString(0x2b3b);
+      szText = (char*)((uint32_t)szText & -65536);
+      gnCharSelLoadingEntryIndex = D2Client::CharScreen::TotalCurrentChars;
+      CharSel::CHARSEL_CreateCharEntry(pwszHeader, (uint16_t*)&szText, 2, true);
+    }
+
+    CharSel::CHARSEL_UpdateSelectedCharDisplay();
+}
+
+BOOL __stdcall CHARSEL_OnPressPumpRealmCharListLoad(D2ControlMsg * pControlMsg) {
+    char* szText;
+    int iVar1;
+    int32_t nStatusCode;
+    bool bVar2;
+    if (gnCharSelBNetLoadState == 1) {
+      if (gnCharSelSelectedIndex) {
+        D2Win::Src::D2WinTextBox::D2WINTEXTBOX_SetLineColor(gpWinTextBoxRealmSelect, -1, 4);
+      }
+
+      CharSel::CHARSEL_SelectRealmInDropdown(gszPendingRealmName);
+      MainMenus::MAINMENU_ConnectToRealm((uint8_t*)gszPendingRealmName, 1);
+      gnCharSelBNetLoadState = 2;
+      gbCharSelScreenWaitTimeout = GetTickCount();
+      return 1;
+    }
+    if (gnCharSelBNetLoadState == 2) {
+      uint32_t nMcpThreadStatus;
+      CharSel::CHARSEL_ShowWaitTimeout();
+      nMcpThreadStatus = MainMenus::MAINMENU_PollMCPThreadStatus();
+      if (nMcpThreadStatus) {
+        bVar2 = nMcpThreadStatus == 2;
+      } else {
+        D2MCPClient::McpConnect::CopyCharListToGlobal(nullptr, 0);
+        gnCharSelBNetLoadState = 3;
+        iVar1 = D2MCPClient::McpConnect::NET_MCP_CLIENT_Send_0x19_CharList2();
+        bVar2 = !iVar1;
+      }
+      if (bVar2) {
+        nStatusCode = D2MCPClient::McpConnect::GetD2GSJoinResult();
+        CharSel::CHARSEL_SetStatusMessage(nStatusCode);
+      }
+    } else if (gnCharSelBNetLoadState == 3) {
+      CharSel::CHARSEL_ShowWaitTimeout();
+      D2MCPClient::McpConnect::NET_MCP_CLIENT_ReadAndParsePacket();
+      szText = (char*)D2MCPClient::McpConnect::MCPCONNECT_GetCharListPacket();
+      if (!szText) {
+        return 1;
+      }
+
+      gnCharSelBNetLoadState = 0;
+      if (gnCharSelSelectedIndex) {
+        D2Win::Src::D2WinTextBox::D2WINTEXTBOX_SetLineColor(gpWinTextBoxRealmSelect, -1, 4);
+      }
+
+      CHARSEL_ParseRealmCharList(gszPendingRealmName, szText, 1);
+      return 1;
+    }
+
+    return 1;
+}
+
+static void CHARSEL_RequestRealmCharList(char * szRealmName) {
+    CharSel::CHARSEL_DestroyAllCharEntries();
+    gbCharSelArrowsHidden = 0;
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpControlCharSelArrows, 1);
+    uint32_t dwRealmHash = Storm::Source::SSTR::SStrHash(szRealmName, 0, 0);
+    DWORD dwNowTick = GetTickCount();
+    D2RealmCharListCacheEntryStrc* pCacheEntry = gpRealmCharListCache;
+    do {
+      if (!pCacheEntry) {
+        break;
+      }
+      if (pCacheEntry->nHash == dwRealmHash && (int)dwNowTick <= pCacheEntry->nExpireTick) {
+        if (pCacheEntry->pData) {
+          CHARSEL_ParseRealmCharList(szRealmName, (char*)pCacheEntry->pData, 0);
+          return;
+        }
+
+        break;
+      }
+
+      pCacheEntry = pCacheEntry->pNext;
+    } while (true);
+
+    BOOL bIsConnected = gpBNetCallbacks->pfnIsSocketConnected();
+    if (!bIsConnected) {
+      uint16_t* pwszErrorMsg;
+      pwszErrorMsg = D2Lang::StrTable::strtable::GetLocaleString(0x14e3);
+      MainMenus::MAINMENU_ShowPopupWithCancel(pwszErrorMsg, MainMenus::UIMENU_MainMenu);
+      return;
+    }
+
+    gnCharSelBNetLoadState = 1;
+    gszPendingRealmName = szRealmName;
+}
+
+void __fastcall CHARSEL_LoadCharList(char * szText) {
+    gnCharSelLoadedCharCount = 0;
+    if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET) {
+      D2Win::Src::D2WinTextBox::D2WINTEXTBOX_ClearAllLines(gpControlCharSelList);
+      D2Win::Src::D2WinImage::D2WINTEXTBOX_SetTextFromAnsi(gpControlCharSelList, szText, 0);
+      CHARSEL_RequestRealmCharList(szText);
+      CharSel::CHARSEL_UpdateSelectedCharDisplay();
+      CharSel::DRAW_LocalCharsInSelectionScreen0();
+      return;
+    }
+    if (OogCurrentCharSelectionMode == CHAR_SELECTION_SP || OogCurrentCharSelectionMode == CHAR_SELECTION_BNET_OPEN_Unsure || OogCurrentCharSelectionMode == CHAR_SELECTION_TCP_IP) {
+      BOOL bIsExpansion;
+      CharSel::CHARSEL_DestroyAllCharEntries();
+      bIsExpansion = Fog::D2CheckExpansionGame();
+      if (!bIsExpansion) {
+        CharSel::CHARSEL_AddCreateNewEntry();
+      }
+
+      CharSel::CHARSEL_EnumerateLocalSaves();
+    }
+
+    CharSel::CHARSEL_UpdateSelectedCharDisplay();
+    CharSel::DRAW_LocalCharsInSelectionScreen0();
+}
+
+void __stdcall UIMENU_CharacterSelectAllGameTypes() {
+    int nSlotIndex;
+    uint16_t* pwszLabel;
+    ::D2WinTextBox* pSlotControl;
+    uint32_t nFoundRealmIndex;
+    D2BNetGatewayAccessStr* pGatewayAccess;
+    char* szRealmName;
+    int nSlotY;
+    uint8_t byTmp;
+    BOOL bIsExpansion;
+    bIsExpansion = Fog::D2CheckExpansionGame();
+    if (bIsExpansion) {
+      CHARSEL_InitCharSelScreen();
+      return;
+    }
+
+    MainMenus::FORMS_DestroyLists();
+    D2Win::Src::D2WinMain::D2WINMAIN_SetBackgroundDC6(DC6_CharSelect_charselectbckg);
+    MainMenus::D2GFX_SetPaletteForDraw("palette\\sky\\pal.dat", "palette\\sky\\pal.pl2");
+    if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET) {
+      MainMenus::MAINMENU_QueryAndBuildRealmList();
+      nSlotIndex = MainMenus::MAINMENU_GetRealmCount();
+      if (nSlotIndex == -1) {
+        LAUNCHER_DisconnectFromBnet();
+        pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(0x14e3);
+        MainMenus::MAINMENU_ShowPopupWithCancel(pwszLabel, MainMenus::UIMENU_MainMenu);
+        return;
+      }
+      if (!nSlotIndex) {
+        LAUNCHER_DisconnectFromBnet();
+        pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(0x14aa);
+        MainMenus::MAINMENU_ShowPopupWithCancel(pwszLabel, MainMenus::UIMENU_MainMenu);
+        return;
+      }
+    }
+
+    nCharacterSelectionIndex = 1;
+    D2Client::CharScreen::TotalCurrentChars = 0;
+    g_nCharSelNavigationIndex = 0;
+    D2Client::CharScreen::nSelectedCharIndex = 0;
+    gnCharSelSelectedIndex = 0;
+    gnCharSelScrollOffset = 0;
+    gpCharSelStatusTextBox = 0;
+    gnCharSelBNetLoadState = 0;
+    D2ControlStrc* pTimerControl;
+    pTimerControl = MainMenus::FORMS_CreateAnyFormFromListExEx(0x7a);
+    D2Win::Src::D2WinTimer::D2WINTIMER_Start((int*)pTimerControl);
+    D2Win::Src::D2WinEditBox::D2WINEDITBOX_Destroy((int*)pTimerControl);
+    D2IniData_launcher->nDifficulty = 0;
+    gpCharSelExitButton = MainMenus::FORMS_CreateAnyFormFromListExEx(0x7c);
+    gpCtlCharSelDownArrow = (::D2WinButton*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x7d);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible((D2ControlStrc*)gpCtlCharSelDownArrow, 0);
+    gpCtlCharSelDeleteButton = MainMenus::FORMS_CreateAnyFormFromListExEx(0x7e);
+    gpCtlCharSelOKButton = (::D2WinButton*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x99);
+    gpCtlCharSelectGameTypeBtn = MainMenus::FORMS_CreateAnyFormFromListExEx(0x9a);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(&gpCtlCharSelOKButton->sControl, 0);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive(gpCtlCharSelectGameTypeBtn, 0);
+    gpaCharSelectDisplay = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x9b);
+    gpCharSelDeleteButton = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x9d);
+    gpCharSelExpansionToggle = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x9e);
+    gpControlCharSelArrows = MainMenus::FORMS_CreateAnyFormFromListExEx(0x9f);
+    nSlotIndex = 0;
+    memset(gaCharSelScreenSlotControls, 0, 8 * sizeof(gaCharSelScreenSlotControls[0]));
+    if (OogCurrentCharSelectionMode == CHAR_SELECTION_BNET) {
+      int32_t nRegResult;
+      gnCharSelScreenSlotCount = 4;
+      nSlotY = 0xf6;
+      do {
+        D2Win::Src::D2WinPalette::D2WINPAL_SetGammaRamp(1);
+        pSlotControl = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(nSlotIndex + 0x80);
+        gaCharSelScreenSlotControls[nSlotIndex] = pSlotControl;
+        D2Win::Src::D2WinPalette::D2WINPAL_SetGammaRamp(0);
+        gnCharSlotYPositions[nSlotIndex] = nSlotY;
+        nSlotIndex++;
+        nSlotY += 0x5d;
+      } while (nSlotIndex < gnCharSelScreenSlotCount);
+
+      gpCharSelStatusTextBox = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x98);
+      gnCharSelScrollOffset = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x79);
+      D2Win::Src::D2WinButton::D2WINBUTTON_SetBounds(gpCtlCharSelOKButton, 0x27a, 0x8f, 0x1d, 0x14);
+      MainMenus::FORMS_CreateAnyFormFromListExEx(0x65);
+      gpControlRealmSelectDropdown = MainMenus::FORMS_CreateAnyFormFromListExEx(0x67);
+      gpControlCharSelList = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x68);
+      nSlotIndex = 0;
+      byTmp = 0;
+      nRegResult = 4;
+      /* Current Realm */ /* Current Realm */ /* Current Realm */ pwszLabel = D2Lang::StrTable::strtable::GetLocaleString(0x2b32);
+      pSlotControl = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x66);
+      D2Win::Src::D2WinTextBox::SetText(pSlotControl, pwszLabel, nRegResult, (bool)byTmp, nSlotIndex);
+      nRegResult = Storm::Source::SReg::SRegLoadString("Diablo II", "Preferred Realm", 0, PreferredClosedRealm, 0x100);
+      if (nRegResult) {
+        nFoundRealmIndex = MainMenus::CHARSEL_FindRealmByName(PreferredClosedRealm);
+        if (nFoundRealmIndex) {
+          goto load_char_list;
+        }
+      }
+
+      pGatewayAccess = (D2BNetGatewayAccessStr*)gpBNetCallbacks->pfnBnetLoadAndReturn();
+      nRegResult = 0x7fffffff;
+      szRealmName = Bnclient::BNGatewayAccess::Realm(pGatewayAccess, pGatewayAccess->nCurGatewayIdx);
+      Storm::Source::SSTR::SStrCopy(PreferredClosedRealm, szRealmName, nRegResult);
+      Storm::Source::SReg::SRegSaveString((uint32_t*)"Diablo II", "Preferred Realm", 0, PreferredClosedRealm);
+      nFoundRealmIndex = MainMenus::CHARSEL_FindRealmByName(PreferredClosedRealm);
+      if (!nFoundRealmIndex) {
+        nSlotIndex = MainMenus::MAINMENU_GetRealmCount();
+        if (nSlotIndex < 1) {
+          szRealmName = 0;
+        } else {
+          szRealmName = MainMenus::MAINMENU_GetRealmName(0);
+        }
+
+        Storm::Source::SSTR::SStrCopy(PreferredClosedRealm, szRealmName, 0x7fffffff);
+        Storm::Source::SReg::SRegSaveString((uint32_t*)"Diablo II", "Preferred Realm", 0, PreferredClosedRealm);
+      }
+    } else {
+      gnCharSelScreenSlotCount = 5;
+      nSlotY = 0x99;
+      do {
+        D2Win::Src::D2WinPalette::D2WINPAL_SetGammaRamp(1);
+        pSlotControl = (::D2WinTextBox*)MainMenus::FORMS_CreateAnyFormFromListExEx(nSlotIndex + 0x7f);
+        gaCharSelScreenSlotControls[nSlotIndex] = pSlotControl;
+        D2Win::Src::D2WinPalette::D2WINPAL_SetGammaRamp(0);
+        gnCharSlotYPositions[nSlotIndex] = nSlotY;
+        nSlotIndex++;
+        nSlotY += 0x5d;
+      } while (nSlotIndex < gnCharSelScreenSlotCount);
+
+      D2Win::Src::D2WinButton::D2WINBUTTON_SetBounds(gpCtlCharSelOKButton, 0x27a, 0x32, 0x1d, 0x14);
+    }
+
+    load_char_list:
+    gpaCharSelCharacterList = (::D2WinImage*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x96);
+    gpControlCharSelImage = (::D2WinImage*)MainMenus::FORMS_CreateAnyFormFromListExEx(0x97);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlActive((D2ControlStrc*)gpControlCharSelImage, 0);
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCharSelExitButton, 0);
+    CHARSEL_LoadCharList(PreferredClosedRealm);
+    nSlotIndex = D2Sound::Src::D2SoundFast::SOUND_GetOptionsMusic();
+    if (nSlotIndex) {
+      D2Sound::Src::D2SoundFast::SOUND_SetMusicEnabled(1);
+    }
+
+    D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCharSelExitButton, 1);
+}
+
+} // namespace D2Launch::Launcher

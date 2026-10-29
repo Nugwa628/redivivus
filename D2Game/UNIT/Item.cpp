@@ -43,6 +43,7 @@
 #include "D2Client/UI/Automap.h"
 #include "D2Common/Unit/Unit.h"
 #include "D2Game/Ai/AiGeneral.h"
+#include "D2Common/Skills.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -462,6 +463,54 @@ static void __stdcall MONSTER_SendNpcHealthUpdate(D2ClientStrc * pClient, D2Unit
     GAME::SCmd::NET_D2GS_SERVER_Send_0x0C_UNITCHANGE(pClient, '\f', '\x01', pUnit->nUnitGUID, '\x13', (uint8_t)uVar1, byHpPct);
 }
 
+} // namespace D2Game::UNIT
+
+namespace D2Game::Monster::MonsterMsg {
+
+// Sends a skill-cast network message (0x4C or 0x4D) to pClient for a monster (pMonster) casting its current skill. If pTarget is near the client, sends 0x4C (unit-targeted cast) with target GUID; otherwise sends 0x4D (XY-targeted cast) using pMonster's SP1 path position. Skill ID and level are read from pMonster's active skill. EDI is callee-saved here (PUSH EDI on entry, then overwritten), not a parameter.
+static void __stdcall SendCastSkillMsg(D2ClientStrc * pClient, D2UnitStrc * pTarget, D2UnitStrc * pMonster) {
+    uint16_t wTargetY;
+    uint16_t wTargetX;
+    uint32_t nMonsterGUID;
+    uint32_t nSkillLevelPacked;
+    uint16_t wSkillPad;
+    uint32_t nTargetYPos;
+    int32_t nTargetX;
+    D2SkillStrc* pSkill = D2Common::Units::GetCurrentSkill(pMonster);
+    if (!pSkill) {
+      return;
+    }
+
+    eD2Skills eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\MONSTER\\MonsterMsg.cpp", 0x96);
+    int nSkillLvl = D2Common::Skills::GetSkillLevel(pMonster, pSkill, 1);
+    uint8_t bySkillLvl = (uint8_t)nSkillLvl;
+    if (!pMonster) {
+      nMonsterGUID = -1;
+    } else {
+      nMonsterGUID = pMonster->nUnitGUID;
+    }
+    if (pTarget) {
+      BOOL BVar1;
+      BVar1 = GAME::Clients::IsUnitNearClient(pTarget, pClient);
+      if (BVar1) {
+        GAME::SCmd::NET_D2GS_SERVER_Send_0x4C_UnitCastSkill_Target_0x4D_UnitCastSkill_XY(pClient, '\x01', nMonsterGUID, (uint8_t)pTarget->eUnitType, pTarget->nUnitGUID, (uint16_t)eSkillId, 0, bySkillLvl, 0);
+        return;
+      }
+    }
+
+    eSkillId &= 0xffff;
+    nTargetX = 0;
+    wSkillPad = 0;
+    nTargetYPos = D2Common::PATH::DynamicPath::GetYSP1(pMonster->pPath.pDynamicPath);
+    wTargetY = (uint16_t)nTargetYPos;
+    nTargetYPos = D2Common::PATH::DynamicPath::GetXSP1(pMonster->pPath.pDynamicPath);
+    GAME::SCmd::NET_D2GS_SERVER_Send_0x4D_SKILL_XY(pClient, 1, nMonsterGUID, (uint16_t)nTargetYPos, wTargetY, eSkillId, wSkillPad, bySkillLvl, nTargetX);
+}
+
+} // namespace D2Game::Monster::MonsterMsg
+
+namespace D2Game::UNIT {
+
 // Server-side: serialize a monster/NPC unit's current animation state into the appropriate D2GS update packet and send it to one client (pClientSide). Branches on the unit's player/anim mode (Death, Run, TownWalk, Kick, Skill1, Neutral, Walk, etc.) and on whether it has a valid target near the client, choosing the packet opcode (0x67 NpcMove / 0x68 NpcMoveToEntity / 0x69 NpcState / 0x6A NpcStateToEntity / 0x6B NpcAction / 0x6C NpcAttack / 0x6D NpcStop, plus cast-skill msg). Fills move params, HP%, direction, step number, last-hit class, and target position/GUID from the unit's dynamic path. Halts with an internal error if pUnit/pClientSide/path are NULL. __fastcall.
 void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D2ClientStrc * pClientSide) {
     // Static local variables (originally global data)
@@ -570,10 +619,10 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
     uint32_t nTargetY;
     uint32_t nMonsterGUID;
     int32_t nTmp2;
-    uint16_t wTargetX;
+    uint32_t wTargetX;
     int32_t nLayer;
-    uint8_t byMoveParam2;
-    uint8_t nPacketId;
+    uint32_t byMoveParam2;
+    uint32_t nPacketId;
     uint8_t byDistance;
     byDistance = 0;
     uint8_t byMoveParam1;
@@ -613,20 +662,7 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe6);
       exit(-1);
     }
-    if (!pTargetUnit) {
-      byMoveParam2 = (uint8_t)gaUnitModeUpdateFields[eAnimMode * 6 + 4];
-      if (!gaUnitModeUpdateFields[eAnimMode * 6 + 1]) {
-        nTmp2 = D2Common::PATH::DynamicPath::GetXPos(pDynamicPath);
-        wTargetX = (uint16_t)nTmp2;
-        nTargetY = D2Common::PATH::DynamicPath::GetYPos(pDynamicPath);
-      } else {
-        nTmp2 = D2Common::PATH::DynamicPath::GetLastPathPointX(pDynamicPath);
-        wTargetX = (uint16_t)nTmp2;
-        nTargetY = D2Common::PATH::DynamicPath::GetLastPathPointY(pDynamicPath);
-      }
-
-      nPacketId = 0x67;
-    } else {
+    if (pTargetUnit) {
       byMoveParam2 = (uint8_t)gaUnitModeUpdateFields[eAnimMode * 6 + 5];
       wTargetX = (uint16_t)pTargetUnit->eUnitType;
       nTargetY = pTargetUnit->nUnitGUID;
@@ -641,6 +677,19 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
           nPacketId = 0x67;
         }
       }
+    } else {
+      byMoveParam2 = (uint8_t)gaUnitModeUpdateFields[eAnimMode * 6 + 4];
+      if (gaUnitModeUpdateFields[eAnimMode * 6 + 1]) {
+        nTmp2 = D2Common::PATH::DynamicPath::GetLastPathPointX(pDynamicPath);
+        wTargetX = (uint16_t)nTmp2;
+        nTargetY = D2Common::PATH::DynamicPath::GetLastPathPointY(pDynamicPath);
+      } else {
+        nTmp2 = D2Common::PATH::DynamicPath::GetXPos(pDynamicPath);
+        wTargetX = (uint16_t)nTmp2;
+        nTargetY = D2Common::PATH::DynamicPath::GetYPos(pDynamicPath);
+      }
+
+      nPacketId = 0x67;
     }
     if (false) {
       default_case:
@@ -669,12 +718,26 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
       }
     } else {
       switch (eAnimMode) {
+        case eD2MonsterAnimMode_ns::Block:
+          if (!pTargetUnit) {
+            wTargetX = 0;
+            nTargetY = -1;
+          }
+        break;
+        default:
+          goto default_case;
         case Death:
           byMoveParam1 = D2Common::PATH::DynamicPath::GetDirection(pDynamicPath);
         byLastHitClass = (uint8_t)pUnit->dwLastHitClass;
         break;
-        default:
-          goto default_case;
+        case eD2MonsterAnimMode_ns::Dead:
+          byMoveParam1 = D2Common::PATH::DynamicPath::GetDirection(pDynamicPath);
+        break;
+        case Knockback:
+          byDistance = D2Common::PATH::DynamicPath::GetDistance(pDynamicPath);
+        uVar1 = Monsters::MONSTER_GetHpPercent128(pUnit);
+        byExtraParam = (uint8_t)pUnit->dwLastHitClass;
+        goto send_path_ex_packet;
         case eD2MonsterAnimMode_ns::GetHit:
           byMoveParam1 = Monsters::MONSTER_GetHpPercent128(pUnit);
         if (1 < byMoveParam1) {
@@ -688,20 +751,6 @@ void __fastcall MONSTER_SendUpdateToClient(::SGAMEDATA * pGame, D2UnitStrc * pUn
 
         byLastHitClass = (uint8_t)pUnit->dwLastHitClass;
         break;
-        case eD2MonsterAnimMode_ns::Block:
-          if (!pTargetUnit) {
-            wTargetX = 0;
-            nTargetY = -1;
-          }
-        break;
-        case eD2MonsterAnimMode_ns::Dead:
-          byMoveParam1 = D2Common::PATH::DynamicPath::GetDirection(pDynamicPath);
-        break;
-        case Knockback:
-          byDistance = D2Common::PATH::DynamicPath::GetDistance(pDynamicPath);
-        uVar1 = Monsters::MONSTER_GetHpPercent128(pUnit);
-        byExtraParam = (uint8_t)pUnit->dwLastHitClass;
-        goto send_path_ex_packet;
       }
     }
 
@@ -756,23 +805,23 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
       uint16_t wPosY;
       if (pUnit->eUnitFlagsEx & UNITFLAGEX_TELEPORTED) {
         eType = pUnit->eUnitType;
-        if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType < 6) {
+        if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType <= 5) {
           wPosY = (uint16_t)pUnit->pPath.pStaticPath->nPosY;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          wPosY = 0;
-        } else {
+        } else if (pUnit->pPath.pDynamicPath) {
           nPosRaw = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
           wPosY = (uint16_t)nPosRaw;
+        } else {
+          wPosY = 0;
         }
 
         eType = pUnit->eUnitType;
-        if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType < 6) {
+        if (eType == UNIT_OBJECT || 3 < (int)eType && (int)eType <= 5) {
           wPosX = (uint16_t)pUnit->pPath.pStaticPath->nPosX;
-        } else if (!pUnit->pPath.pDynamicPath) {
-          wPosX = 0;
-        } else {
+        } else if (pUnit->pPath.pDynamicPath) {
           nPosRaw = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
           wPosX = (uint16_t)nPosRaw;
+        } else {
+          wPosX = 0;
         }
 
         GAME::SCmd::NET_D2GS_SERVER_Send_0x15_WarpXY(pClient, '\x15', (uint8_t)pUnit->eUnitType, pUnit->nUnitGUID, wPosX, wPosY, '\x01');
@@ -787,7 +836,7 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
 
     SUnitMsg::SERVER_UnitQueuePacketSend(pUnit, pClient);
     if (pUnit) {
-      if (pUnit->eUnitFlags >> 8 & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 8 & 1))) {
         SUnitMsg::PLAYER_SendHoverTextToClient(pUnit, pClient);
       }
       if (pUnit->eUnitFlagsEx & UNITFLAGEX_HASINV) {
@@ -810,10 +859,10 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
       }
 
       send_sound_and_health:
-      if (pUnit->eUnitFlags >> 10 & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 10 & 1))) {
         SUnitMsg::UNITMSG_SendSoundPacketToClient(pUnit, pClient);
       }
-      if (pUnit->eUnitFlags >> 0xf & 1) {
+      if (((bool)(pUnit->eUnitFlags >> 0xf & 1))) {
         MONSTER_SendNpcHealthUpdate(pClient, pUnit);
       }
     }
@@ -828,7 +877,7 @@ void __fastcall PacketUpdateForClient(::SGAMEDATA * pGame, D2UnitStrc * pUnit, D
     if (nMercType) {
       SUnitMsg::PLAYER_SendOverlayToClient(pUnit, pClient);
     }
-    if (!(pUnit && pUnit->eUnitFlags >> 0xb & 1)) {
+    if (!(pUnit && ((bool)(pUnit->eUnitFlags >> 0xb & 1)))) {
       return;
     }
 

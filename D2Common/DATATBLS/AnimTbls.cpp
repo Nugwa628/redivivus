@@ -129,7 +129,7 @@ static int * ANIMDATA_GetRecordByNameHash(LPSTR pnParam) {
     int nRecordCount = pAnimTbls->pHashTable[nHashValue & 0xff]->nCount;
     D2AnimDataRecordStrc* szRecordName = pAnimTbls->pHashTable[nHashValue & 0xff]->aRecords;
     while (true) {
-      if (nRecordCount < 1) {
+      if (nRecordCount <= 0) {
         return nullptr;
       }
 
@@ -161,7 +161,7 @@ static int * ANIMDATA_GetRecordByNameHash(LPSTR pnParam) {
 D2AnimDataRecordStrc * __fastcall ANIMDATA_GetAnimDataForUnit(D2UnitStrc * pUnit, uint32_t nParam, uint32_t nCofMode, uint32_t nWeaponClass, D2InventoryStrc * pInventory) {
     D2AnimDataStrc* pDVar1;
     char szCofName[8];
-    memset(szCofName, 0, 8 * sizeof(szCofName[0]));
+    for (int i = 0; i < 8; i++) szCofName[i] = 0;
     int32_t nCofNameLen = 0;
     COMPOSIT::Composit::COMPOSIT_BuildCofPath(pUnit, nParam, nCofMode, nWeaponClass, pInventory, szCofName, &nCofNameLen, 0, 1);
     D2AnimDataRecordStrc* pRecord = (D2AnimDataRecordStrc*)ANIMDATA_GetRecordByNameHash(szCofName);
@@ -177,7 +177,7 @@ D2AnimDataRecordStrc * __fastcall ANIMDATA_GetAnimDataForUnit(D2UnitStrc * pUnit
 // Builds composit name, looks up record, writes nParam to the speed field.
 void __stdcall ANIMDATA_SetAnimSpeedForUnit(D2UnitStrc * pUnit, int32_t nParam) {
     char szCofName[8];
-    memset(szCofName, 0, 8 * sizeof(szCofName[0]));
+    for (int i = 0; i < 8; i++) szCofName[i] = 0;
     int nCofNameLen = 0;
     COMPOSIT::Composit::COMPOSIT_GetCofPathWithTransform(pUnit, szCofName, &nCofNameLen, 0, 1, pUnit->pInventory, -1);
     int* pRecord = ANIMDATA_GetRecordByNameHash(szCofName);

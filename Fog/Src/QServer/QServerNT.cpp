@@ -119,7 +119,10 @@ static BOOL __stdcall BeginAsyncReadForClient(D2QServerStrc * pQServer, D2QServe
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);
       return 0;
     }
-    if ((pClient->dwReadFlags & QSRV_READFLAG_PENDING_IO) == QSRV_READFLAG_NONE) {
+    if ((pClient->dwReadFlags & QSRV_READFLAG_PENDING_IO) != QSRV_READFLAG_NONE) {
+      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3f5);
+      exit(-1);
+    } else {
       HANDLE pvVar1;
       pvVar1 = pClient->ovRead.hEvent;
       pClient->dwReadFlags |= QSRV_READFLAG_PENDING_IO;
@@ -150,9 +153,6 @@ static BOOL __stdcall BeginAsyncReadForClient(D2QServerStrc * pQServer, D2QServe
 
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);
       return fReadResult;
-    } else {
-      ErrorManager::ERROR_UnrecoverableInternalError_Halt("", ErrorManager::GetInstructionPointer(), 0x3f5);
-      exit(-1);
     }
 }
 
@@ -247,8 +247,8 @@ static int32_t __stdcall AcceptConnection(D2QServerStrc * pQServer, sockaddr * p
         }
       }
 
-      /* in_addr in for inet_ntoa */ szClientIpStr = inet_ntoa((in_addr)pClientIp->S_un_b);
-      LogManager::LOGMANAGER_TraceToModuleLog("HACK", "[sQSNTAccept]               *** Deleted socket %d (%s) - %s ***", FileHandle, szClientIpStr, dwRejectLogMsg);
+       /* in_addr in for inet_ntoa */
+      LogManager::LOGMANAGER_TraceToModuleLog("HACK", "[sQSNTAccept]               *** Deleted socket %d (%s) - %s ***", FileHandle, inet_ntoa((in_addr)pClientIp->S_un_b), dwRejectLogMsg);
       Safesock::closeSocket((SOCKET)FileHandle);
       return -1;
     }
@@ -385,9 +385,7 @@ DWORD __stdcall AcceptThreadMain(void * lpThreadParam) {
         if (nStopFlag == -1) {
           goto exit_thread;
         }
-        if (!nStopFlag) {
-          /* DWORD dwMilliseconds for Sleep */ dwNextSweepTick = 0x14;
-        } else {
+        if (nStopFlag) {
           /* LARGE_INTEGER * lpPerformanceCount for QueryPerformanceCounter */ QueryPerformanceCounter(&qpcStart);
           /* HANDLE hThread for GetThreadPriority */ nStopFlag = GetThreadPriority(pQServer->aAcceptThreadHandles[nWorkerIndex]);
           if (nStopFlag != 0x7fffffff) {
@@ -437,6 +435,8 @@ DWORD __stdcall AcceptThreadMain(void * lpThreadParam) {
           dwNextSweepTick = 0;
           dwSleepMs = dwLastSweepTick + 8 + (uint32_t)bRngCarry;
           dwLastSweepTick = dwSleepMs;
+        } else {
+          /* DWORD dwMilliseconds for Sleep */ dwNextSweepTick = 0x14;
         }
       } else {
         dwNextSweepTick = 10;

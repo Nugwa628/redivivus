@@ -270,10 +270,10 @@ void __fastcall Q05_Callback11_ScrollMessage(D2QuestDataStrc * pQuestData, D2Que
 
         pQuestData->fpSequenceFilter(pQuestData);
       }
-      if (!pQuestArgs->pPlayer) {
-        nPlayerGuid = -1;
-      } else {
+      if (pQuestArgs->pPlayer) {
         nPlayerGuid = pQuestArgs->pPlayer->nUnitGUID;
+      } else {
+        nPlayerGuid = -1;
       }
 
       iStoneIdx = 0;
@@ -409,7 +409,7 @@ void __fastcall Q05_Callback00_NpcActivate(D2QuestDataStrc * pQuestData, D2Quest
 
     D2QuestDataA1Q5Strc* pQuestSpecific;
     pQuestSpecific = pQuestData->pQuestSpecificData.pA1Q5;
-    if (3 < pQuestData->nStateFlag) {
+    if (4 <= pQuestData->nStateFlag) {
       i = 0;
       if (pQuestSpecific->nPlayersForRewardCount) {
         pListEntry = pQuestSpecific->aPlayersForRewardGUIDs;
@@ -900,21 +900,21 @@ void __stdcall Q05_SpawnCountessDeathEffect(D2QuestDataStrc * pQuestData, int32_
 
         *(uint8_t*)(nParam2 + 0x119) = 1;
         eUnitType = pChestUnit->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
           nPosY = pChestUnit->pPath.pStaticPath->nPosY;
-        } else if (!pChestUnit->pPath.pDynamicPath) {
-          nPosY = 0;
-        } else {
+        } else if (pChestUnit->pPath.pDynamicPath) {
           nPosY = D2Common::PATH::DynamicPath::GetYPos(pChestUnit->pPath.pDynamicPath);
+        } else {
+          nPosY = 0;
         }
 
         eUnitType = pChestUnit->eUnitType;
-        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+        if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
           nPosX = pChestUnit->pPath.pStaticPath->nPosX;
-        } else if (!pChestUnit->pPath.pDynamicPath) {
-          nPosX = 0;
-        } else {
+        } else if (pChestUnit->pPath.pDynamicPath) {
           nPosX = D2Common::PATH::DynamicPath::GetXPos(pChestUnit->pPath.pDynamicPath);
+        } else {
+          nPosX = 0;
         }
 
         pChestUnit = SKILLS::SkillsServer::SKILLS_CreateMissileAtTarget(pQuestData->pGame, pCountessDeathActor, SKILL_Attack, 1, MISSILE_Towerchestspawner, nPosX, nPosY);

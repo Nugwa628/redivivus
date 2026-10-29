@@ -81,7 +81,6 @@ namespace D2Client::UNIT::Player {
 // Function declarations
 // Client-side reaction handler invoked when a unit stat changes; dwStatIdAndSubIndex packs the stat id (high 16 bits, eD2UnitStat) and a sub-index (low 16 bits), nValue is the new value. Dispatches on stat id: item_lightradius/item_lightcolor update the unit's rendered light; item_nonclassskill/item_singleskill add or remove a granted skill on a player (AddSkill when newly granted and class-eligible, SKILL_RemoveSkillCallback when value drops to 0 and skill level is gone); item_charged_skill adds/removes a charged item skill (decoding charge level/max from the sub-index and item charge count, gated on the item owner matching the player). All other stats are no-ops here. Player/UI-side only.
 // @sourcefile .\UNIT\Player.cpp
-void __fastcall CLIENT_OnStatChanged(uint32_t dwUnused, struct D2UnitStrc * pUnit, struct D2UnitStrc * pItem, uint32_t dwStatIdAndSubIndex, uint32_t dwUnused2, int32_t nValue);
 // Initialises a player unit entering a room on the client side: registers the unit in the active slot, allocates a dynamic path, creates inventory and skill list, allocates stat list with base rates at 100, sets unit flags, handles dead/corpse collision state, allocates a light map (dimmed for other players), seeds the RNG direction for non-local players, and preloads adjacent-room monster COFs.
 void __fastcall JoinRoomSetup(struct D2UnitStrc * pUnit, struct D2RoomStrc * pRoom, int32_t nX, int32_t nY);
 void __fastcall CLIENT_FreePlayerUnit(struct D2UnitStrc * pUnit);
@@ -122,7 +121,6 @@ struct D2UnitStrc * __fastcall UNITS_FindServerSideUnit(int32_t nUnitGUID, eD2Un
 struct D2UnitStrc * __fastcall MISSILE_GetOwnerUnit(struct D2UnitStrc * pUnit);
 // Inserts pUnit into the appropriate global unit hash table (server-side or client-side, selected by UNITFLAG bit 0x21). Computes bucket from nUnitGUID &amp; 0x7f and inserts in ascending GUID order. Halts (ERROR_UnrecoverableInternalError_Halt) if the unit already exists in the table. Returns 1 on successful insert, 0 if the unit was already present (duplicate path).
 uint32_t InsertIntoHashTable(struct D2UnitStrc * pUnit);
-void CLIENT_SendIdlePlayerMessage(struct D2UnitStrc * pUnit);
 void __stdcall PLAYER_PlaceUnitInRoom(int32_t nParam1, struct D2RoomStrc * pRoom, struct D2UnitStrc * pUnit, int32_t nParam2);
 void __fastcall CLIENT_UpdateMonsterAllegiance(struct D2UnitStrc * pUnit, char byOldAllegiance, char byNewAllegiance);
 void __stdcall CLIENT_ClearServerAndClientUnitLists();

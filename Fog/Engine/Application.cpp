@@ -302,23 +302,23 @@ static bool __stdcall DEBUG_AddModuleToList(int * pModuleList, LPCWSTR szModuleP
 
     char* pDst = strrchr(aModuleInfo.szPath, 0x2f);
     char* pBasename = 0;
-    if (pDst) {
+    if ((uint32_t)pDst > 0) {
       pBasename = pDst;
     }
 
     pDst = strrchr(aModuleInfo.szPath, 0x5c);
-    if (pDst && pBasename < pDst) {
+    if (pDst && pDst > pBasename) {
       pBasename = pDst;
     }
 
     pDst = strrchr(aModuleInfo.szPath, 0x3a);
-    if (pDst && pBasename < pDst) {
+    if (pDst && pDst > pBasename) {
       pBasename = pDst;
     }
-    if (!pBasename) {
-      pBasename = aModuleInfo.szPath;
-    } else {
+    if (pBasename) {
       pBasename++;
+    } else {
+      pBasename = aModuleInfo.szPath;
     }
 
     pDst = aModuleInfo.szPath;
@@ -984,7 +984,7 @@ void __stdcall CloseDiablo() {
     exit(-1);
 }
 
-void __fastcall MISC_ParseCommandLineAndPutIntoD2IniData(D2IniConfigStrc * pD2IniData, char * szText) {
+static void __fastcall MISC_ParseCommandLineAndPutIntoD2IniData(D2IniConfigStrc * pD2IniData, char * szText) {
     char* pcVar4;
     long int nConfigIdx;
     int nDstOffset;
@@ -1260,7 +1260,7 @@ static int __stdcall CLIENT_CheckIfApplicationModeIsInCommandLineAndSetItToArgum
 // lpHandlerProc parameter of RegisterServiceCtrlHandlerA
 void __stdcall ERRORMANAGER_ServiceControlHandler(int32_t nServiceControl) {
     // Static local variables (originally global data)
-    static bool gbApplicationModeCommandLineArgumentFound = true; D2_STATIC_GUARD(gbApplicationModeCommandLineArgumentFound, "Fog::Engine::Application::ERRORMANAGER_ServiceControlHandler::gbApplicationModeCommandLineArgumentFound");
+    static BOOL gbApplicationModeCommandLineArgumentFound = true; D2_STATIC_GUARD(gbApplicationModeCommandLineArgumentFound, "Fog::Engine::Application::ERRORMANAGER_ServiceControlHandler::gbApplicationModeCommandLineArgumentFound");
 
     if (nServiceControl != 1) {
       if (nServiceControl == 4) {

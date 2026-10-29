@@ -44,7 +44,7 @@ void OutOfMemoryHandler(char * format, ...) {
 }
 
 static int32_t ComputeSizeClassIndex(int32_t nParam) {
-    if (nParam < 0x11) {
+    if (nParam <= 0x10) {
       return 0;
     }
     if (nParam < 3) {
@@ -170,7 +170,7 @@ static int32_t FindFreeSlotInBitmap(uint32_t * pnBitmap, uint32_t nTotalBits) {
       }
 
       test_tail_word_or_advance:
-      if (nWordCount < 9) {
+      if (nWordCount <= 8) {
         if (!(nTotalBits & 0x1f && pnBitmap[nWordCount] != gdwFogMemoryAllocFlags[nTotalBits & 0x1f])) {
           return nFreeSlot;
         }
@@ -189,7 +189,7 @@ static void __stdcall InsertBlockIntoSortedArray(uint32_t * pBlock, int32_t nMan
     int nLo;
     void* nFaultAddress;
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection((LPCRITICAL_SECTION)(nManager + 4));
-    if (*(int*)(nManager + 0x7a4) <= *(int*)(nManager + 0x7a0)) {
+    if (*(int*)(nManager + 0x7a0) >= *(int*)(nManager + 0x7a4)) {
       nLo = *(int*)(nManager + 0x7a4) + 0x20;
       *(int*)(nManager + 0x7a4) = nLo;
       nFaultAddress = realloc(*(void**)(nManager + 0x7a8), nLo * 8);
@@ -209,7 +209,7 @@ static void __stdcall InsertBlockIntoSortedArray(uint32_t * pBlock, int32_t nMan
       int nMidIdx;
       do {
         nMidIdx = (nHi - nLo >> 1) + nLo;
-        if (*(uint32_t*)(nArrayBase + 4 + nMidIdx * 8) < *pBlock) {
+        if (*pBlock > *(uint32_t*)(nArrayBase + 4 + nMidIdx * 8)) {
           nLo = nMidIdx + 1;
           nMidIdx = nHi;
         }
@@ -282,7 +282,7 @@ static void __stdcall RemoveBlockFromSortedArray(uint32_t * pBlock, int32_t nMan
 
 static LPVOID * __stdcall AllocatePoolBlock(LPVOID pPool, int32_t nManager) {
     void* nErrAddress;
-    if (*(int*)(nManager + 0x7a4) <= *(int*)(nManager + 0x7a0)) {
+    if (*(int*)(nManager + 0x7a0) >= *(int*)(nManager + 0x7a4)) {
       int nNewCapacity;
       nNewCapacity = *(int*)(nManager + 0x7a4) + 0x20;
       *(int*)(nManager + 0x7a4) = nNewCapacity;
@@ -332,7 +332,7 @@ static int32_t __stdcall FindOrCreateBlockWithFreeSlots(LPVOID * ppOutBlock, int
     } else {
       if ((int)pOverflowBlock->nBlocks < (int)pPool->nBlocks) {
         nSlotIndex = FindFreeSlotInBitmap((uint32_t*)pOverflowBlock->pUsage, pPool->nBlocks);
-        if (-1 < nSlotIndex) {
+        if (0 <= nSlotIndex) {
           *ppOutBlock = pOverflowBlock;
           return nSlotIndex;
         }
@@ -447,7 +447,7 @@ static D2PoolBlockStrc * __stdcall FindBlockContainingAddress(uint32_t nAddress,
       size_t nMid;
       do {
         nMid = ((int)(nHigh - nLow) >> 1) + nLow;
-        if ((uintptr_t)pArrayBase[nMid].pCommit <= nAddress) {
+        if (nAddress >= (uintptr_t)pArrayBase[nMid].pCommit) {
           nLow = nMid + 1;
           nMid = nHigh;
         }
@@ -457,7 +457,7 @@ static D2PoolBlockStrc * __stdcall FindBlockContainingAddress(uint32_t nAddress,
     }
 
     nLow--;
-    if (-1 < nLow && nLow < (int)nCount) {
+    if (0 <= nLow && nLow < (int)nCount) {
       pFoundBlock = pArrayBase[nLow].pBlock;
       /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(lpCriticalSection);
       return pFoundBlock;
@@ -664,7 +664,10 @@ void __stdcall InitializePoolSystem(D2PoolManagerStrc * * pPoolManager, char * s
     }
 
     /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&pGlobalPoolSystem.pSync);
-    if (!pGlobalPoolSystem.nFreeManagerIndex) {
+    if (pGlobalPoolSystem.nFreeManagerIndex) {
+      nManagerIndex = pGlobalPoolSystem.nManagerIndex[pGlobalPoolSystem.nFreeManagerIndex - 1];
+      pGlobalPoolSystem.nFreeManagerIndex--;
+    } else {
       if (7 < (int)pGlobalPoolSystem.nManagers) {
         /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ LeaveCriticalSection(&pGlobalPoolSystem.pSync);
         OutOfMemoryHandler("Insufficient pre-allocated pool systems");
@@ -674,9 +677,6 @@ void __stdcall InitializePoolSystem(D2PoolManagerStrc * * pPoolManager, char * s
 
       nManagerIndex = pGlobalPoolSystem.nManagers;
       pGlobalPoolSystem.nManagers++;
-    } else {
-      nManagerIndex = pGlobalPoolSystem.nManagerIndex[pGlobalPoolSystem.nFreeManagerIndex - 1];
-      pGlobalPoolSystem.nFreeManagerIndex--;
     }
 
     D2PoolManagerStrc* pNewManager = pGlobalPoolSystem.pManagers + nManagerIndex;
@@ -701,15 +701,15 @@ void __stdcall InitializePoolSystem(D2PoolManagerStrc * * pPoolManager, char * s
         nSizeClass = 1;
       } else {
         nRegionSize = nParam - 1;
-        if (!nRegionSize) {
-          nSizeClass = 0;
-        } else {
+        if (nRegionSize) {
           nSizeClass = 0x1f;
           if (nRegionSize) {
             for (; !(nRegionSize >> nSizeClass); nSizeClass--) {}
           }
 
           nSizeClass++;
+        } else {
+          nSizeClass = 0;
         }
       }
 
@@ -727,10 +727,10 @@ void __stdcall InitializePoolSystem(D2PoolManagerStrc * * pPoolManager, char * s
     if (0 < (int)nPoolCount) {
       do {
         /* LPCRITICAL_SECTION lpCriticalSection for InitializeCriticalSection */ InitializeCriticalSection(&pNewManager->pPools[nPoolIndex].pSync);
-        if (!nPoolIndex) {
-          nBlockSize = 0x10;
-        } else {
+        if (nPoolIndex) {
           nBlockSize = 1 << ((char)nPoolIndex + 4U & 0x1f);
+        } else {
+          nBlockSize = 0x10;
         }
 
         pNewManager->pPools[nPoolIndex].nBlockSize = nBlockSize;
@@ -797,7 +797,7 @@ void * __fastcall Alloc(D2PoolManagerStrc * pMemory, size_t MemSize, char * szFi
     }
 
     int32_t nSizeClass = ComputeSizeClassIndex(MemSize);
-    if ((int)pMemory->nPools <= nSizeClass) {
+    if (nSizeClass >= (int)pMemory->nPools) {
       pOverflowResult = POOL_AllocOverflowBlock(pMemory, MemSize, szFile, Line);
       return pOverflowResult;
     }
@@ -817,7 +817,7 @@ void * __fastcall Alloc(D2PoolManagerStrc * pMemory, size_t MemSize, char * szFi
         if (!(*(uint32_t*)(nBitmapByteOff + *(int*)(Line + 4)) & gadwBitMasks[nSlotIndex & 0x1f])) {
           pBitmapWord = (uint32_t*)(nBitmapByteOff + *(int*)(Line + 4));
           *pBitmapWord |= gadwBitMasks[nSlotIndex & 0x1f];
-          if ((int)pPool->nBlocks <= *(int*)(Line + 8) && *(int*)(Line + 0x10)) {
+          if (*(int*)(Line + 8) >= (int)pPool->nBlocks && *(int*)(Line + 0x10)) {
             pNextBlock = *(D2PoolBlockStrc**)(Line + 0x10);
             if ((int)pNextBlock->nBlocks < (int)pPool->nBlocks) {
               if (!*(int*)(Line + 0xc)) {
@@ -877,7 +877,15 @@ void * __fastcall ReAlloc(D2PoolManagerStrc * pMemory, void * pMemoryToRealloc, 
         if (((D2PoolBlockStrc*)pFoundBlock)->pCommit <= (unsigned char*)pMemoryToRealloc) {
           lpCriticalSection = ((D2PoolBlockStrc*)pFoundBlock)->pPool;
           nSlotIndex = ((int)pMemoryToRealloc - (int)((D2PoolBlockStrc*)pFoundBlock)->pCommit) / (int)lpCriticalSection->nBlockSize;
-          if ((int)nSlotIndex < (int)lpCriticalSection->nBlocks) {
+          if (!((int)nSlotIndex < (int)lpCriticalSection->nBlocks)) {
+            nErrAddress = ReallocTrackedAllocation(pManager, pMemoryToRealloc, nAllocSize, szFile, nLine);
+            if (!nErrAddress) {
+              Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), (int32_t)(char*)0x648);
+              exit(-1);
+            }
+
+            return nErrAddress;
+          } else {
             /* LPCRITICAL_SECTION lpCriticalSection for EnterCriticalSection */ EnterCriticalSection(&lpCriticalSection->pSync);
             /* LPCRITICAL_SECTION lpCriticalSection for LeaveCriticalSection */ if (!(gadwBitMasks[nSlotIndex & 0x1f] & *(uint32_t*)(pFoundBlock[1] + ((int)nSlotIndex >> 5) * 4))) {
               LeaveCriticalSection(&lpCriticalSection->pSync);
@@ -885,7 +893,7 @@ void * __fastcall ReAlloc(D2PoolManagerStrc * pMemory, void * pMemoryToRealloc, 
               exit(-1);
             } else {
               pFoundBlock = (uint32_t*)lpCriticalSection->nBlockSize;
-              if ((int)nAllocSize <= (int)pFoundBlock) {
+              if ((int)pFoundBlock >= (int)nAllocSize) {
                 LeaveCriticalSection(&lpCriticalSection->pSync);
                 return pMemoryToRealloc;
               }
@@ -901,14 +909,6 @@ void * __fastcall ReAlloc(D2PoolManagerStrc * pMemory, void * pMemoryToRealloc, 
               Memory::Free(pOrigManager, &pOldPtr, szFile, nLine);
               return nErrAddress;
             }
-          } else {
-            nErrAddress = ReallocTrackedAllocation(pManager, pMemoryToRealloc, nAllocSize, szFile, nLine);
-            if (!nErrAddress) {
-              Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Src::ErrorManager::GetInstructionPointer(), (int32_t)(char*)0x648);
-              exit(-1);
-            }
-
-            return nErrAddress;
           }
         }
 

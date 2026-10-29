@@ -91,12 +91,12 @@ void __fastcall SOUND_SetEaxEnvironment(int32_t nEnvId) {
         bHas3D = D2Sound::SOUND_GetSound3DFlag();
         nNewEnvId = nEnvId;
         if (bHas3D) {
-          sEnviron.nRoom = pEnvTxt->EAX_Room_Vol;
           sEnviron.nEnvironment = pEnvTxt->EAX_Environ;
+          sEnviron.nRoom = pEnvTxt->EAX_Room_Vol;
           sEnviron.nRoomHF = pEnvTxt->EAX_Room_HF;
           sEnviron.fEnvSize = (float)pEnvTxt->EAX_Env_Size / 1000.0;
-          sEnviron.nReverb = pEnvTxt->EAX_Reverb;
           sEnviron.nReflections = pEnvTxt->EAX_Reflect;
+          sEnviron.nReverb = pEnvTxt->EAX_Reverb;
           sEnviron.fEnvDiffusion = (float)pEnvTxt->EAX_Env_Diff / 1000.0;
           sEnviron.fDecayTime = (float)pEnvTxt->EAX_Decay_Time / 1000.0;
           sEnviron.fDecayHFRatio = (float)pEnvTxt->EAX_Decay_HF / 1000.0;
@@ -347,7 +347,7 @@ static D2ClientSoundChannelStrc * __stdcall SOUND_FindAvailableChannel(uint32_t 
       }
 
       pBestChannel++;
-    } while ((int)pBestChannel < (uintptr_t)&gaSoundChannels[16]);
+    } while ((int)pBestChannel < (int)((uintptr_t)&gaSoundChannels[16]));
 
     pBestChannel = 0;
     D2SoundChannelStrc** pChannelEntry;
@@ -471,7 +471,7 @@ int __fastcall SOUND_UpdateChannelParams(int * pSoundChannel) {
         nBytesRemaining -= 4;
         pByteA += 4;
         pByteB += 4;
-      } while (3 < nBytesRemaining);
+      } while (4 <= nBytesRemaining);
 
       if (!nBytesRemaining) {
         position_unchanged:
@@ -633,7 +633,7 @@ D2ClientSoundChannelStrc * __fastcall SOUND_PlaySoundWithPanning(D2SoundChannelS
     int* pPlayingChannel = SOUND_FindPlayingByIdSafe(pMemory->nSoundId);
     if (pPlayingChannel) {
       nResult = pPlayingChannel[2];
-      if (!*(int*)(nResult + 0x3d) && (uint32_t)(pMemory->nScheduledTime - *(int*)(nResult + 0x34)) < 2 && pMemory->nPriorityByte <= *(uint8_t*)(nResult + 0x3c)) {
+      if (!*(int*)(nResult + 0x3d) && (uint32_t)(pMemory->nScheduledTime - *(int*)(nResult + 0x34)) < 2 && *(uint8_t*)(nResult + 0x3c) >= pMemory->nPriorityByte) {
         return nullptr;
       }
     }
@@ -960,6 +960,48 @@ static D2NpcGreetingSoundsStrc gaNpcGreetingSounds[29] = {
       }
 
       switch (nClassId) {
+        case 0x94:
+          return gaNpcGreetingSounds;
+        case 0xfe:
+          return gaNpcGreetingSounds + 1;
+        case 0xfc:
+          return gaNpcGreetingSounds + 2;
+        case 0xb0:
+          return gaNpcGreetingSounds + 3;
+        case 0x9a:
+          return gaNpcGreetingSounds + 5;
+        case 0xb1:
+          return gaNpcGreetingSounds + 6;
+        case 199:
+          return gaNpcGreetingSounds + 7;
+        case 0xb2:
+          return gaNpcGreetingSounds + 8;
+        case 200:
+          return gaNpcGreetingSounds + 9;
+        case 0x93:
+          return gaNpcGreetingSounds + 10;
+        case 0xc6:
+          return gaNpcGreetingSounds + 0xb;
+        case 0x101:
+          return gaNpcGreetingSounds + 0xc;
+        case 0xfd:
+          return gaNpcGreetingSounds + 0xd;
+        case 0xc9:
+          return gaNpcGreetingSounds + 0x10;
+        case 0x96:
+          return gaNpcGreetingSounds + 0x11;
+        case 0xca:
+          return gaNpcGreetingSounds + 0x12;
+        case 0xd2:
+          return gaNpcGreetingSounds + 0x13;
+        case 0x129:
+          return gaNpcGreetingSounds + 0x14;
+        case 0xff:
+          return gaNpcGreetingSounds + 0x15;
+        case 0x9b:
+
+        case 0xaf:
+          return gaNpcGreetingSounds + 0x17;
         case 0x92:
 
         case 0xf4:
@@ -970,63 +1012,21 @@ static D2NpcGreetingSoundsStrc gaNpcGreetingSounds[29] = {
 
         case 0x109:
           return gaNpcGreetingSounds + 4;
-        case 0x93:
-          return gaNpcGreetingSounds + 10;
-        case 0x94:
-          return gaNpcGreetingSounds;
-        case 0x96:
-          return gaNpcGreetingSounds + 0x11;
-        case 0x9a:
-          return gaNpcGreetingSounds + 5;
-        case 0x9b:
-
-        case 0xaf:
-          return gaNpcGreetingSounds + 0x17;
-        case 0xb0:
-          return gaNpcGreetingSounds + 3;
-        case 0xb1:
-          return gaNpcGreetingSounds + 6;
-        case 0xb2:
-          return gaNpcGreetingSounds + 8;
-        case 0xc6:
-          return gaNpcGreetingSounds + 0xb;
-        case 199:
-          return gaNpcGreetingSounds + 7;
-        case 200:
-          return gaNpcGreetingSounds + 9;
-        case 0xc9:
-          return gaNpcGreetingSounds + 0x10;
-        case 0xca:
-          return gaNpcGreetingSounds + 0x12;
-        case 0xd2:
-          return gaNpcGreetingSounds + 0x13;
         case 0xfb:
           return gaNpcGreetingSounds + 0x16;
-        case 0xfc:
-          return gaNpcGreetingSounds + 2;
-        case 0xfd:
-          return gaNpcGreetingSounds + 0xd;
-        case 0xfe:
-          return gaNpcGreetingSounds + 1;
-        case 0xff:
-          return gaNpcGreetingSounds + 0x15;
-        case 0x101:
-          return gaNpcGreetingSounds + 0xc;
-        case 0x129:
-          return gaNpcGreetingSounds + 0x14;
       }
     } else {
       switch (nClassId) {
-        case 0x1ff:
-          return gaNpcGreetingSounds + 0x1b;
         case 0x200:
           return gaNpcGreetingSounds + 0x18;
-        case 0x201:
-          return gaNpcGreetingSounds + 0x1a;
-        case 0x202:
-          return gaNpcGreetingSounds + 0x1c;
         case 0x203:
           return gaNpcGreetingSounds + 0x19;
+        case 0x202:
+          return gaNpcGreetingSounds + 0x1c;
+        case 0x1ff:
+          return gaNpcGreetingSounds + 0x1b;
+        case 0x201:
+          return gaNpcGreetingSounds + 0x1a;
         case 0x208:
           return gaNpcGreetingSounds + 4;
         case 0x209:

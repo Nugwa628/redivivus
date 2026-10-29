@@ -268,7 +268,7 @@ void __stdcall INPUT_HelpCloseButtonDown(D2UIMouseMsgStrc * pMsg) {
     } else {
       nRelX -= 0x20d;
     }
-    if (nRelX < 0x21 && (uint32_t)(nMouseY - 0x18) < 0x21) {
+    if (nRelX <= 0x20 && (nMouseY >= 0x18 && nMouseY <= 0x38)) {
       gpHelpCloseButton = 1;
       pMsg->bHandled = 1;
       pMsg->dwResult = 0;
@@ -831,12 +831,12 @@ void __stdcall DRAW_UI_HelpXpac() {
     nPosY = 0x1b8;
     pStr = D2Lang::StrTable::strtable::GetLocaleString(0x1072);
     D2Win::Src::D2WinFont::DRAW_text(pStr, 0x2a2 - nLabelWidth / 2, nPosY, nColor_lcl, bCentered);
-    pStr = wszBuf;
-    for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+
+    for (int i = 0; i < 0x64; i++) wszBuf[i] = 0;
+
+
+
+
 
     pStr = D2Lang::StrTable::strtable::GetLocaleString(0x107e);
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pStr);
@@ -864,14 +864,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1066);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1066));
     int32_t nPrevFont = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     BOOL bCentered = 0;
     int32_t nPosY = 0;
     int32_t nTextWidth = 0x11;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1066);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x131 - nPrevFont / 2, nTextWidth, nPosY, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1066), 0x131 - nPrevFont / 2, nTextWidth, nPosY, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -879,14 +879,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1030);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1030));
     nPrevFont = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nPosY = 0;
     nTextWidth = 0x49;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1030);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x21d - nPrevFont / 2, nTextWidth, nPosY, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1030), 0x21d - nPrevFont / 2, nTextWidth, nPosY, bCentered);
     nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(5);
     pDst = wszBuf4;
     for (i = 0x32; i; i--) {
@@ -896,8 +896,8 @@ void __stdcall DRAW_UI_HelpClassic() {
     }
 
     pDst = CmdTbl::CMD_GetKeyNameForCommand(0x22, 1);
-    uint16_t* pFormat = D2Lang::StrTable::strtable::GetLocaleString(0x1067);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf4, pFormat, pDst);
+    uint16_t* pFormat;
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf4, D2Lang::StrTable::strtable::GetLocaleString(0x1067), pDst);
     D2Win::Src::D2WinFont::DRAW_text(wszBuf4, 0x75, 0x4e, 0, 0);
     pDst = wszBuf1;
     for (i = 0x32; i; i--) {
@@ -907,8 +907,8 @@ void __stdcall DRAW_UI_HelpClassic() {
     }
 
     pDst = CmdTbl::CMD_GetKeyNameForCommand(0x25, 1);
-    pFormat = D2Lang::StrTable::strtable::GetLocaleString(0x1068);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf1, pFormat, pDst);
+
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf1, D2Lang::StrTable::strtable::GetLocaleString(0x1068), pDst);
     D2Win::Src::D2WinFont::DRAW_text(wszBuf1, 0x75, 0x62, 0, 0);
     pDst = wszBuf2;
     for (i = 0x32; i; i--) {
@@ -918,8 +918,8 @@ void __stdcall DRAW_UI_HelpClassic() {
     }
 
     pDst = CmdTbl::CMD_GetKeyNameForCommand(0x24, 1);
-    pFormat = D2Lang::StrTable::strtable::GetLocaleString(0x1069);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf2, pFormat, pDst);
+
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf2, D2Lang::StrTable::strtable::GetLocaleString(0x1069), pDst);
     D2Win::Src::D2WinFont::DRAW_text(wszBuf2, 0x75, 0x76, 0, 0);
     pDst = wszBuf3;
     for (i = 0x32; i; i--) {
@@ -929,24 +929,24 @@ void __stdcall DRAW_UI_HelpClassic() {
     }
 
     pDst = CmdTbl::CMD_GetKeyNameForCommand(7, 1);
-    pFormat = D2Lang::StrTable::strtable::GetLocaleString(0x106a);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf3, pFormat, pDst);
+
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf3, D2Lang::StrTable::strtable::GetLocaleString(0x106a), pDst);
     D2Win::Src::D2WinFont::DRAW_text(wszBuf3, 0x75, 0x8a, 0, 0);
     bCentered = 0;
     nPosY = 0;
     nTextWidth = 0x9e;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x106b);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x75, nTextWidth, nPosY, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x106b), 0x75, nTextWidth, nPosY, bCentered);
     bCentered = 0;
     nPosY = 0;
     nTextWidth = 0xb2;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x106c);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x75, nTextWidth, nPosY, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x106c), 0x75, nTextWidth, nPosY, bCentered);
     bCentered = 0;
     nPosY = 0;
     nTextWidth = 0xc6;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x106d);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x75, nTextWidth, nPosY, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x106d), 0x75, nTextWidth, nPosY, bCentered);
     pDst = wszBuf5;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -955,8 +955,8 @@ void __stdcall DRAW_UI_HelpClassic() {
     }
 
     pDst = CmdTbl::CMD_GetKeyNameForCommand(6, 1);
-    pFormat = D2Lang::StrTable::strtable::GetLocaleString(0x106e);
-    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf5, pFormat, pDst);
+
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(100, wszBuf5, D2Lang::StrTable::strtable::GetLocaleString(0x106e), pDst);
     D2Win::Src::D2WinFont::DRAW_text(wszBuf5, 0x75, 0xda, 0, 0);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
@@ -965,14 +965,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x106f);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x106f));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     int32_t nColor_lcl = 0;
     nPosY = 0x168;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x106f);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x37 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x106f), 0x37 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -980,14 +980,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1070);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1070));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x122;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1070);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x83 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1070), 0x83 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -995,14 +995,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1071);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1071));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x131;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1071);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x83 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1071), 0x83 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1010,14 +1010,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1072);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1072));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x140;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1072);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x83 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1072), 0x83 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1025,14 +1025,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1074);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1074));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x181;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1074);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0xb6 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1074), 0xb6 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1040,14 +1040,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1075);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1075));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 400;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1075);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0xb6 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1075), 0xb6 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1055,14 +1055,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1076);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1076));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x168;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1076);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0xe7 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1076), 0xe7 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1070,14 +1070,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1077);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1077));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x181;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1077);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x120 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1077), 0x120 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1085,14 +1085,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1078);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1078));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 400;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1078);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x120 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1078), 0x120 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1100,14 +1100,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1079);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1079));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x113;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1079);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1079), 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1115,14 +1115,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107a);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x107a));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x122;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107a);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x107a), 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1130,14 +1130,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107b);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x107b));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x131;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107b);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x107b), 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1145,14 +1145,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107c);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x107c));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x140;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107c);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x107c), 0x162 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1160,14 +1160,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107d);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x107d));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 400;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107d);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x1c1 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x107d), 0x1c1 - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1175,14 +1175,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1073);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1073));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x122;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1073);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x1fb - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1073), 0x1fb - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1190,14 +1190,14 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1071);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1071));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x131;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1071);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x1fb - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1071), 0x1fb - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     pDst = wszBuf;
     for (i = 0x32; i; i--) {
       pDst[0] = L'\0';
@@ -1205,29 +1205,29 @@ void __stdcall DRAW_UI_HelpClassic() {
       pDst += 2;
     }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1072);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x1072));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x140;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x1072);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x1fb - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
-    pDst = wszBuf;
-    for (i = 0x32; i; i--) {
-      pDst[0] = L'\0';
-      pDst[1] = L'\0';
-      pDst += 2;
-    }
 
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107e);
-    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, pDst);
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x1072), 0x1fb - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    for (int i = 0; i < 0x64; i++) wszBuf[i] = 0;
+
+
+
+
+
+
+    D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszBuf, D2Lang::StrTable::strtable::GetLocaleString(0x107e));
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszBuf);
     bCentered = 0;
     nColor_lcl = 0;
     nPosY = 0x168;
-    pDst = D2Lang::StrTable::strtable::GetLocaleString(0x107e);
-    D2Win::Src::D2WinFont::DRAW_text(pDst, 0x24a - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
+
+    D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0x107e), 0x24a - nTextWidth / 2, nPosY, nColor_lcl, bCentered);
     D2Win::Src::D2WinFont::SetAndReturnLastFont(nPrevFont);
 }
 
@@ -1268,7 +1268,7 @@ void __stdcall INPUT_HelpCloseButtonUp(D2UIMouseMsgStrc * pMsg) {
       } else {
         nRelX -= 0x20d;
       }
-      if (nRelX < 0x21 && (uint32_t)(nMouseY - 0x18) < 0x21) {
+      if (nRelX <= 0x20 && (nMouseY >= 0x18 && nMouseY <= 0x38)) {
         Draw::SetUIFlag(UI_HELPSCREEN, UI_TOGGLE, 0);
         HELP_HideMiniPanel();
         goto consume_click;

@@ -479,43 +479,6 @@ void __fastcall StoreLastSkillHit(eSkillEType pSkill, D2UnitStrc * pUnit, eD2Uni
     pUnit->pUnitData.pUnitDataPlayer->nTargetUnitGUID = nUid;
 }
 
-void __stdcall CLIENT_SetAnimModeAndMoveToCurrentPos(eD2PlayerAnimMode nAnimMode, BOOL bMovePlayerUnit, D2UnitStrc * pUnit) {
-    int nX;
-    int nY;
-    UNIT::UnitMode::UNITMODE_SetAnimMode(pUnit, nAnimMode);
-    if (!bMovePlayerUnit) {
-      return;
-    }
-
-    D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
-    if (pUnit != pPlayerUnit_lcl) {
-      return;
-    }
-
-    eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-      nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
-      nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
-    }
-
-    eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
-      nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nY = 0;
-    } else {
-      nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
-    }
-    if (!(nX && nY)) {
-      return;
-    }
-
-    UNIT::Path::PATH_MoveUnitToPoint(pUnit, (uint16_t)nX, nY, 0, 0, 0);
-}
-
 void __stdcall CLIENT_PreloadMonsterCofsInAdjacentRooms() {
     eD2States eState;
     D2RoomStrc** pAdjacentRooms;
@@ -532,7 +495,7 @@ void __stdcall CLIENT_PreloadMonsterCofsInAdjacentRooms() {
 
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &pAdjacentRooms, (int*)&nRoomCount);
     uint32_t nCount = 0;
-    if (!nRoomCount) {
+    if ((uint32_t)nRoomCount <= 0) {
       return;
     }
 
@@ -583,7 +546,7 @@ void __fastcall CLIENT_UpdateUnitLightRadius(D2UnitStrc * pUnit, int32_t nRadius
     }
 
     nLightRadius += nRadiusBonus;
-    Draw::LightMap::LIGHTMAP_SetRadius(pLightMap, (int)nLightRadius < 1 ? 0 : nLightRadius);
+    Draw::LightMap::LIGHTMAP_SetRadius(pLightMap, (int)nLightRadius <= 0 ? 0 : nLightRadius);
 }
 
 void __fastcall CLIENT_SetUnitLightColor(D2UnitStrc * pUnit, int32_t dwRGB) {

@@ -415,7 +415,7 @@ int32_t __fastcall CountPartyControlSubSize(::SGAMEDATA * pGame, int16_t nPartyI
     return nCount;
 }
 
-BOOL __fastcall CountAliveUnitsLevelSum(int32_t nContext, D2UnitStrc * pUnit, int * pLevelSum) {
+static BOOL __fastcall CountAliveUnitsLevelSum(int32_t nContext, D2UnitStrc * pUnit, int * pLevelSum) {
     BOOL bIsDead = SUnit::CheckForModeZeroDeath(pUnit);
     if (bIsDead) {
       return bIsDead;
@@ -426,7 +426,7 @@ BOOL __fastcall CountAliveUnitsLevelSum(int32_t nContext, D2UnitStrc * pUnit, in
     return bIsDead;
 }
 
-void __fastcall CountModeZero(int32_t * pContext, D2UnitStrc * pUnit, int * pCount) {
+static void __fastcall CountModeZero(int32_t * pContext, D2UnitStrc * pUnit, int * pCount) {
     if (!pUnit) {
       return;
     }
@@ -514,7 +514,7 @@ static void __stdcall GoldCalculations(D2UnitStrc * pUnit, int * pnParam1, int *
     int nCurrentGold = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
     *pnParam2 = 0;
     *pnParam1 = nParam;
-    if ((int)nGoldLimit >= nCurrentGold + nParam) {
+    if (nCurrentGold + nParam <= (int)nGoldLimit) {
       return;
     }
 
@@ -613,10 +613,10 @@ void __fastcall PARTY_RemoveUnitFromParty(::SGAMEDATA * pGame, D2UnitStrc * pUni
             break;
           }
           if (pMemoryToFree->nUnitGUID == nUnitGUID) {
-            if (!pPrevSubSub) {
-              pPartySub->pSub = pMemoryToFree->pNext;
-            } else {
+            if (pPrevSubSub) {
               pPrevSubSub->pNext = pMemoryToFree->pNext;
+            } else {
+              pPartySub->pSub = pMemoryToFree->pNext;
             }
 
             PLAYER::PlayerScreen::SendAllPlayersPartyInfo(pGame, pUnit);
@@ -630,7 +630,7 @@ void __fastcall PARTY_RemoveUnitFromParty(::SGAMEDATA * pGame, D2UnitStrc * pUni
         }
 
         iVar1 = CountPartyControlSubSize(pGame, nPartyId);
-        if (iVar1 >= 2) {
+        if (iVar1 > 1) {
           return;
         }
 
@@ -678,12 +678,12 @@ DWORD __fastcall PARTY_SplitGoldToPartyMembers(::SGAMEDATA * pGame, D2UnitStrc *
     D2UnitPartyControlSubSub* pSubSub;
     DWORD nAlivePartyMembers = 0;
     FindUnitWithFilter(pGame, pUnit, (pfnPartyMemberFilter)CountModeZero, &nAlivePartyMembers);
-    if ((int)nAlivePartyMembers < 2) {
+    if ((int)nAlivePartyMembers <= 1) {
       nGoldLimit = D2Common::Units::GetInventoryGoldLimit(pUnit);
       nGold = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
       nAlivePartyMembers = 0;
       nShare = nAmount;
-      if ((int)nGoldLimit < nGold + nAmount) {
+      if (nGold + nAmount > (int)nGoldLimit) {
         nShare = nGoldLimit - nGold;
         nAlivePartyMembers = nAmount - nShare;
       }
@@ -705,7 +705,7 @@ DWORD __fastcall PARTY_SplitGoldToPartyMembers(::SGAMEDATA * pGame, D2UnitStrc *
         nGoldLimit = D2Common::Units::GetInventoryGoldLimit(pUnit);
         nGold = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
         nAlivePartyMembers = 0;
-        if ((int)nGoldLimit < nGold + nAmount) {
+        if (nGold + nAmount > (int)nGoldLimit) {
           ChangeGoldForPlayer(pUnit, UNITSTAT_gold, nGoldLimit - nGold);
           return nAmount - (nGoldLimit - nGold);
         }
@@ -744,7 +744,7 @@ DWORD __fastcall PARTY_SplitGoldToPartyMembers(::SGAMEDATA * pGame, D2UnitStrc *
       nCurrentGold = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_gold, 0);
       nAlivePartyMembers = 0;
       nGold = nAmount;
-      if ((int)nGoldLimit < nCurrentGold + nAmount) {
+      if (nCurrentGold + nAmount > (int)nGoldLimit) {
         nGold = nGoldLimit - nCurrentGold;
         nAlivePartyMembers = nAmount - nGold;
       }

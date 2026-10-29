@@ -39,6 +39,11 @@
 #include "Fog/Memory.h"
 #include "globals/globals.h"
 #include "D2Common/Chat.h"
+#include "D2Client/Archive.h"
+#include "D2Client/Stats.h"
+#include "D2Common/Collision.h"
+#include "D2Common/DATATBLS/DataTbls.h"
+#include "D2Game/SKILLS/SkillsServer.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -268,7 +273,7 @@ void __fastcall MONSTERDATA_FreeMonsterMode(::SGAMEDATA * pGame, D2MonsterPathPa
 }
 
 // Death transition handler for a monster unit. Frees hover-text, calls RemoveMinionsFromAiIfFlag1Set2Not, clears targeting flags (ISVALIDTARGET, CANBEATTACKED), recalculates stats, filters states by boss context, removes light state targetability, optionally enables corpse collision (if deadCol flag not set in MonStats2), sets final facing direction, and starts regen timers via MONSTER_StartAiAndRegenTimers.
-void __stdcall MONSTERMODE_OnDeath(uint8_t bParam, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+static void __stdcall MONSTERMODE_OnDeath(uint8_t bParam, ::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
     bool _bHasLightState;
     bool bHasLightState;
     D2MonStatsTxt* pMonStats = 0;
@@ -312,3 +317,175 @@ void __stdcall MONSTERMODE_OnDeath(uint8_t bParam, ::SGAMEDATA * pGame, D2UnitSt
 }
 
 } // namespace D2Game::Monster::MonsterMode
+
+namespace D2Game::GAME::Event::Dispatch::Monster {
+
+static void CalculateCollisionDamage_Unused(::SGAMEDATA * pGame, D2UnitStrc * pUnit) {
+    bool _bInRange;
+    bool bInRange;
+    int32_t nDamage;
+    int nTargetHp;
+    eD2States eUninterruptibleState;
+    D2DamageStrc sDamage;
+    D2UnitStrc* pTarget;
+    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
+    for (pTarget = pRoom->pUnitList; pTarget; pTarget = pTarget->pRoomNext) {
+      if (pTarget->eUnitType == UNIT_PLAYER && pTarget->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead) {
+        nDamage = D2Common::Collision::GetCollisionDistance(pUnit, pTarget);
+        if (nDamage <= 2) {
+          _bInRange = D2Common::Units::TestCollisionBetweenInteractingUnits(pTarget, pUnit, 0x3c01);
+          if (!_bInRange) {
+            memset(&sDamage, 0, 0x70);
+            nTargetHp = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pTarget, UNITSTAT_hitpoints, 0);
+            sDamage.dwPhysDamage = nTargetHp >> 5;
+            sDamage.wResultFlags = 1;
+            eUninterruptibleState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pTarget, STATE_uninterruptable);
+            if (eUninterruptibleState == STATE_none) {
+              sDamage.wResultFlags |= 4;
+            }
+
+            UNIT::SUnitDmg::DAMAGE_ApplyDefensiveReduction(pGame, pUnit, pTarget, &sDamage);
+            UNIT::SUnitDmg::DAMAGE_ApplyDamageToUnit(pGame, pUnit, pTarget, 1, &sDamage);
+            UNIT::SUnitDmg::SERVER_GetHitCalculation(pGame, pUnit, pTarget, &sDamage);
+          }
+        }
+      }
+    }
+}
+
+// The live monster-death dispatcher.
+BOOL __fastcall MONSTER_OnDeathDispatch(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
+    int nClassId;
+    D2UnitStrc* pUnit_00;
+    D2DifficultyLevelsTxt* pDifficultyLvl;
+    int nMonsterLevel;
+    uint32_t nCEDamageScaled;
+    uint32_t nRandCEOffset;
+    int64_t nMulResult;
+    D2DamageStrc sDamage;
+    D2MonStatsInitStrc sMonStats;
+    int32_t nPosYCoord;
+    int32_t nPosY;
+    ::SGAMEDATA* pGameSaved;
+    D2MonsterKillStrc* pMonsterKillSaved;
+    eD2UnitType eUnitType;
+    ::SGAMEDATA* pGameCE;
+    uint32_t bRandDmgFlag;
+    int* pScaledStatsOut;
+    D2UnitStrc* pUnit;
+    int32_t nVictimClassIdForStats;
+    D2UnitStrc* pVictim = pMonsterKill->pVictim;
+    UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pVictim, 0);
+    D2Game::Monster::MonsterMode::MONSTERMODE_OnDeath(pMonsterKill->nAnimatedMode1, pGame, pVictim);
+    DropItemForVictim_Unused(pGame, (D2ObjectOperateFnArg*)pMonsterKill, 0);
+    D2Game::Monster::MonsterRegion::IncreaseMonKillCount(pGame->pMonsterRegion, pVictim);
+    if (!pVictim) {
+      nClassId = -1;
+    } else {
+      nClassId = pVictim->nUnitGUID;
+    }
+
+
+    D2Common::DUNGEON::Dungeon::SaveKilledUnitGUID(D2Common::Units::UNITS_GetRoom(pVictim), nClassId);
+    if (!pVictim) {
+      return 1;
+    }
+
+    nClassId = pVictim->nClassId;
+    if (-1 >= nClassId) {
+      return 1;
+    }
+
+    int nMonStatsSize = sgptDataTable->nTxtMonStatsSize;
+    if (nClassId >= nMonStatsSize) {
+      return 1;
+    }
+
+    D2MonStatsTxt* pMonStats = sgptDataTable->pTxtMonStats + nClassId;
+    if (!(pMonStats && (*((uint8_t *)pMonStats + 0xe) & gadwBitMasks[4]))) {
+      return 1;
+    }
+    if (pVictim->eUnitType == UNIT_MONSTER && -1 < nClassId) {
+      D2MonStatsTxt* pMonStats2;
+      if (nClassId < nMonStatsSize) {
+        pMonStats2 = sgptDataTable->pTxtMonStats + nClassId;
+        if (pMonStats2) {
+          nClassId = (int)pMonStats2->BaseId;
+        }
+      }
+      if (-1 < nClassId && nClassId < nMonStatsSize) {
+        if (nClassId == 0xd4) {
+          if (false || false) {
+            pMonsterKillSaved = (D2MonsterKillStrc*)pVictim->pPath.pStaticPath->nPosX;
+          } else if (pVictim->pPath.pDynamicPath) {
+            pMonsterKillSaved = (D2MonsterKillStrc*)D2Common::PATH::DynamicPath::GetXPos(pVictim->pPath.pDynamicPath);
+          } else {
+            pMonsterKillSaved = 0;
+          }
+
+          eUnitType = pVictim->eUnitType;
+          if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+            nPosY = pVictim->pPath.pStaticPath->nPosY;
+          } else if (pVictim->pPath.pDynamicPath) {
+            nPosY = D2Common::PATH::DynamicPath::GetYPos(pVictim->pPath.pDynamicPath);
+          } else {
+            nPosY = 0;
+          }
+
+          pUnit_00 = SKILLS::SkillsServer::CreatingAMissile(pGame, MISSILE_Monstercorpseexplode, pVictim, SKILL_Attack, 1, 0, 0, (int32_t)pMonsterKillSaved, nPosY, 1);
+          if (!pUnit_00) {
+            return 1;
+          }
+
+          pDifficultyLvl = D2Common::DATATBLS::DataTbls::GetDifficultyLevels((uint32_t)pGame->nDifficulty);
+          if (!pDifficultyLvl) {
+            return 1;
+          }
+
+          memset(&sMonStats, 0, 0x38);
+          nVictimClassIdForStats = pVictim->nClassId;
+          pScaledStatsOut = &sMonStats.nMinHP;
+          bRandDmgFlag = 1;
+
+          D2Common::DATATBLS::MonsterTbls::MONSTER_CalculateLevelScaledStats(nVictimClassIdForStats, pGame->eGameType, (uint32_t)pGame->nDifficulty, D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pVictim, UNITSTAT_level, 0), bRandDmgFlag, (D2MonStatsInitStrc*)pScaledStatsOut);
+          nCEDamageScaled = D2Client::Stats::D2ApplyPercent(sMonStats.nMaxHP, pDifficultyLvl->MonsterCEDamagePercent, 100);
+          if ((int)nCEDamageScaled < 0x100001) {
+            nClassId = (int)(nCEDamageScaled * 0x3c) / 100;
+          } else if ((int)(nCEDamageScaled & -16) < 0x640) {
+            nMulResult = __allmul(nCEDamageScaled, (int)nCEDamageScaled >> 0x1f, 0x3c, 0);
+            nMulResult = __alldiv((uint32_t)nMulResult, (uint32_t)((uint64_t)nMulResult >> 0x20), 100, 0);
+            nClassId = (int)nMulResult;
+          } else {
+            nClassId = (int)nCEDamageScaled / 100 * 0x3c;
+          }
+
+          memset(&sDamage, 0, 0x70);
+          nRandCEOffset = D2Client::Archive::RANDOM_RandomNumberSelector(&pVictim->sSeed, nCEDamageScaled - nClassId);
+          sDamage.dwPhysDamage = (nRandCEOffset + nClassId) * 0x80;
+          UNIT::SUnitDmg::DAMAGE_ApplyAreaOfEffectDamage(pGame, pUnit_00, (int32_t)pMonsterKillSaved, nPosY, 5, &sDamage, 0, 0, nullptr, 0x581);
+          return 1;
+        }
+        if (nClassId == 0x1b9) {
+          MONMODE_OwnerCastOrDie(pGame, pVictim);
+          return 1;
+        }
+      }
+    }
+
+    CalculateCollisionDamage_Unused(pGame, pVictim);
+    return 1;
+}
+
+BOOL __fastcall MONMODE_CompleteCastAndReset(::SGAMEDATA * pGame, D2MonsterKillStrc * pMonsterKill) {
+    D2UnitStrc* pUnit = pMonsterKill->pVictim;
+    if (pUnit && pUnit->eAnimMode.ePlayerMode != Death) {
+      D2Game::Monster::MonsterMode::MONSTERMODE_OnDeath(pMonsterKill->nAnimatedMode1, pGame, pUnit);
+    }
+
+    UNIT::SUnit::FreeCombatAndChangeAnimMode(pGame, pUnit, 0xc);
+    EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSKILLS, 0);
+    EVENT_RemoveUnitTimersByType(pGame, pUnit, UNITEVENTCALLBACK_PERIODICSTATS, 0);
+    return 1;
+}
+
+} // namespace D2Game::GAME::Event::Dispatch::Monster

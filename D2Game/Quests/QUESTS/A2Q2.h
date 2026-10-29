@@ -43,10 +43,6 @@ BOOL __fastcall Q10_OnScrollPickup(::SGAMEDATA * pGame, struct D2UnitStrc * pUni
 // ('msf ') drop path. For each player not yet Completed who holds neither 'msf ' nor
 // 'tsh ' (Staff of Kings), bumps the A2Q2 drop counter. No QuestRecord writes.
 BOOL __fastcall Q10_OnStaffOrViperPickup(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
-// Q10_OnHoradricCubePickup. Per-player iterate callback for the Horadric Cube
-// ('box ') drop path. Bumps the A2Q2 drop counter for each player not already
-// holding the cube. No QuestRecord writes.
-BOOL __fastcall Q10_OnHoradricCubePickup(::SGAMEDATA * pGame, struct D2UnitStrc * pUnit, void * pArg);
 // A2Q2 (Horadric Staff) NPC-gossip callback for Drognan (classId 0xf4). Dispatches on dialog message index: 0x14f removes the Staff of Kings item from inventory and sets Step0x03; 0x150/0x151/0x152 set the corresponding step bit plus Step0x03; 0x153 (told-everything) clears RewardAwaits, registers the player GUID in the quest list, sets Step0x10+0x04+0x06+0x05+0x03, and sends an NPC gossip packet. Early-exits if NPC is not Drognan.
 void __fastcall Q10_Callback11_ScrollMessage(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // Q10_Callback_00. Drognan (NPC 0xf4) gossip-MENU builder. Picks which gossip line
@@ -56,9 +52,6 @@ void __fastcall Q10_Callback11_ScrollMessage(struct D2QuestDataStrc * pQuestData
 // else default item/Step0x03-gated msg (>=10 collapses to 6). JustCompleted/Completed
 // gate suppresses re-offer.
 void __fastcall Q10_Callback00_NpcActivate(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
-// Q10_Callback_03. Gossip sub-event handler: when the text-control id == 0x28,
-// removes the player from the quest GUID participation list. No QuestRecord writes.
-void __fastcall Q10_Callback03_ChangedLevel(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 void __fastcall Q10_Callback10_PlayerLeavesGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // Q10_Callback_08. Empty quest state-handler slot (handler[8]); no-op stub.
 void __fastcall Q10_Callback08_MonsterKilled(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
@@ -69,11 +62,6 @@ void __fastcall Q10_Callback08_MonsterKilled(struct D2QuestDataStrc * pQuestData
 // Q10_CheckHoradricStaffState / Q10_NotifyHoradricStaffActive. Reads Step0x03 only;
 // no QuestRecord writes.
 void __fastcall Q10_Callback04_ItemPickedUp(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
-// Q10_Callback_05. Item-DROP/loss state handler (handler[5]). When the player drops
-// a quest piece, clears the matching "told Drognan about it" step bit so the dialog
-// will re-offer: viper ('vip ')->clear Step0x04, cube ('box ')->clear Step0x06,
-// msf ('msf ')->clear Step0x05. Each clear is gated on the bit currently being set.
-void __fastcall Q10_Callback05_ItemDropped(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 // Q10_AdjustStaffPieceCount. Helper that adds nCountDelta to the A2Q2 staff-piece
 // counter at sQuestGUID.aPlayerGUID[9] (the 'vip'/viper-piece slot). Used by the
 // drop/pickup bookkeeping. No QuestRecord access.

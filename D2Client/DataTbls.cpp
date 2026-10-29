@@ -93,7 +93,7 @@ int32_t __fastcall CheckMonStatId(int32_t nMonStatsId) {
 }
 
 int32_t __fastcall TXT_Skills_GetSkillRange(eD2Skills eSkill, int32_t pnSkillLevel) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return 0;
     }
 

@@ -88,7 +88,6 @@ struct __attribute__((packed)) D2QuestLogStrc {
 namespace D2Client::UI::QuestLog {
 
 // Function declarations
-int32_t __fastcall QUESTLOG_FindQuestIndexById(int32_t nQuestId);
 void __stdcall QUESTLOG_SetActiveActFromPlayerRoom();
 void __stdcall QUESTLOG_ResetState();
 // Lazy-loads all quest log DC6 image assets on first call. Checks INV_GetItemDescDirtyFlag to avoid redundant loads, then conditionally loads 6 DC6 files via IMAGE_LoadDC6Ex: questbackground, questtabs (classic vs expansion variant), questsockets, questdone, invps, and questlast. All file paths are sprintf-formatted into a 260-byte buffer using format strings from gTxtCompilationMemPool.pOverflow with "DATA\\GLOBAL" directory prefix.
@@ -97,7 +96,6 @@ void __stdcall FreeQuestImages();
 void __stdcall QUESTLOG_FreeQuestImages_Thunk();
 int __stdcall CloseQuestLogWeird(DWORD dwParam);
 void __stdcall QUESTLOG_AcknowledgeNewQuests();
-int __fastcall QUESTLOG_ScrollCompleteCallback_ClearButton(void * pUserParam, uint32_t nReason, void * pDismissCallback);
 void __stdcall QUESTLOG_OnCloseClick(struct D2UIMouseMsgStrc * pMsg);
 void __fastcall QUESTLOG_HandleSpecialPacket(int32_t nParam);
 void __stdcall QUESTLOG_CloseAndFreeImages();

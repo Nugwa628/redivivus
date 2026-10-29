@@ -70,10 +70,6 @@ void __fastcall Q23_Callback03_ChangedLevel(struct D2QuestDataStrc * pQuestData,
 // @sourcefile d:\diablo2\Diablo2\Source\D2Game/Quests/a3q6.cpp
 void __fastcall Q23_Callback11_ScrollMessage(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
 void __fastcall Q23_Callback10_PlayerLeavesGame(struct D2QuestDataStrc * pQuestData, struct D2QuestArgStrc * pQuestArgs);
-// [The Guardian (Q23)] Quest timer callback (armed by Callback_08 after Mephisto dies). Broadcasts
-// quest state 4 if not already at stateFlagPrev 4, and clears the bBloodRavenKilled/scratch flag in the
-// A3Q6 quest-specific struct. Used to drive the post-kill cinematic/state settle.
-uint8_t __fastcall Q23_QuestUpdate(::SGAMEDATA * pGame, struct D2QuestDataStrc * pQuestData);
 // [The Guardian (Q23)] Party-member iterator: for each party member NOT yet Completed who is physically
 // in Act III, mark the Guardian quest complete (Q23_SetGuardianQuestComplete) and bump participation
 // count. Gives nearby party members Mephisto-kill credit. (Called via ExecuteFunctionForEveryPartyMember.)

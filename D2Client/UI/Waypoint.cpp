@@ -194,7 +194,7 @@ static void Waypoint_SetWaypointArea(int32_t nAct) {
     BOOL bQuestComplete;
     eD2Quests eQuestId;
     eD2QuestState eQuestState;
-    if (gaWaypointRowLayout[0] <= nAct) {
+    if (nAct >= gaWaypointRowLayout[0]) {
       nAct = 0;
     }
 
@@ -326,7 +326,7 @@ void __stdcall WAYPOINT_PopulateList() {
       *pPageEntry = '\0';
       nActIdx = WaypointCurrentSelectedAct;
       pPageEntry += 5;
-    } while ((int)pPageEntry < (uintptr_t)((char*)&gaWaypointListEntries + sizeof(gaWaypointListEntries) + 4));
+    } while ((int)pPageEntry < (int)((uintptr_t)((char*)&gaWaypointListEntries + sizeof(gaWaypointListEntries) + 4)));
 
     if (5 < WaypointCurrentSelectedAct) {
       D2Client::Waypoint::bNeedAllocation = false;
@@ -348,7 +348,7 @@ void __stdcall WAYPOINT_PopulateList() {
             }
 
             byMaxId = gaWaypointVisited[nActOffset + 10];
-            if (gaWaypointVisited[nActOffset + 10] < (uint8_t)(uint8_t)nWaypointIdOut) {
+            if ((uint8_t)(uint8_t)nWaypointIdOut > gaWaypointVisited[nActOffset + 10]) {
               byMaxId = (uint8_t)nWaypointIdOut;
             }
 
@@ -361,7 +361,7 @@ void __stdcall WAYPOINT_PopulateList() {
     }
 
     uint32_t nWaypointIdIter = (uint32_t)gaWaypointVisited[nActIdx * 0xb + 9];
-    if (nWaypointIdIter > gaWaypointVisited[nActIdx * 0xb + 10]) {
+    if ((int)nWaypointIdIter > (int)(gaWaypointVisited[nActIdx * 0xb + 10])) {
       return;
     }
 
@@ -369,14 +369,7 @@ void __stdcall WAYPOINT_PopulateList() {
       uint32_t bIsActivated;
       nWaypointId = (uint16_t)nWaypointIdIter;
       bIsActivated = D2Common::Waypoints::CheckWaypoint(D2Client::Waypoint::pWaypoint, nWaypointId);
-      if (!bIsActivated) {
-        bFound = D2Common::Waypoints::FindLevelIdByWaypointId(nWaypointId, &eDestLevel);
-        if (bFound) {
-          gaWaypointListEntries[MaximumAmountOfWaypointInSelectedAct].eLevelId = eDestLevel;
-          gaWaypointListEntries[MaximumAmountOfWaypointInSelectedAct].bActivated = '\0';
-          MaximumAmountOfWaypointInSelectedAct++;
-        }
-      } else {
+      if (bIsActivated) {
         bFound = D2Common::Waypoints::FindLevelIdByWaypointId(nWaypointId, &nWaypointIdOut);
         if (bFound) {
           gaWaypointListEntries[MaximumAmountOfWaypointInSelectedAct].eLevelId = nWaypointIdOut;
@@ -388,6 +381,13 @@ void __stdcall WAYPOINT_PopulateList() {
             gaWaypointListEntries[MaximumAmountOfWaypointInSelectedAct].bActivated = '\x01';
             MaximumAmountOfWaypointInSelectedAct++;
           }
+        }
+      } else {
+        bFound = D2Common::Waypoints::FindLevelIdByWaypointId(nWaypointId, &eDestLevel);
+        if (bFound) {
+          gaWaypointListEntries[MaximumAmountOfWaypointInSelectedAct].eLevelId = eDestLevel;
+          gaWaypointListEntries[MaximumAmountOfWaypointInSelectedAct].bActivated = '\0';
+          MaximumAmountOfWaypointInSelectedAct++;
         }
       }
 
@@ -571,9 +571,9 @@ void __stdcall DRAW_UI_Waypoint() {
         ActsInGame++;
         nWaypointIndex++;
         pDrawOffsets += 6;
-      } while (nWaypointIndex < MaximumAmountOfWaypointInSelectedAct);
+      } while ((int)nWaypointIndex < (int)MaximumAmountOfWaypointInSelectedAct);
     }
-    if (nMouseX - 0x111U < 0x24 && nMouseY - 0x183U < 0x22) {
+    if (nMouseX - 0x111U <= 0x23 && nMouseY - 0x183U <= 0x21) {
       /* Draw cancel hoover */ pwszText = D2Lang::StrTable::strtable::GetLocaleString(0x1022);
       nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(pwszText);
       nMouseX = nTextWidth / 2;
@@ -702,7 +702,7 @@ void __stdcall INPUT_WaypointMouseUp(D2UIMouseMsgStrc * pMsg) {
             return;
           }
         }
-      } else if (nMouseX - 0x111U < 0x24 && nRelMouseY - 0x183U < 0x22) {
+      } else if (nMouseX - 0x111U <= 0x23 && nRelMouseY - 0x183U <= 0x21) {
         Draw::SetUIFlag(UI_WAYPOINT, UI_RESET, 0);
         WAYPOINT_SendClosePacket();
       }

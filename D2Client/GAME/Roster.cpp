@@ -525,10 +525,10 @@ void __stdcall ROSTER_SortAllParties() {
     for (pPartyIter = pRosterPartyList; pPartyIter; pPartyIter = pPartyIter->pNext) {
       int32_t bIsArena;
       bIsArena = CLIENT_IsArenaLevel();
-      if (!bIsArena) {
-        pSortedOwner = ROSTER_SortByName(pPartyIter->pOwner);
-      } else {
+      if (bIsArena) {
         pSortedOwner = ROSTER_SortByLevel(pPartyIter->pOwner);
+      } else {
+        pSortedOwner = ROSTER_SortByName(pPartyIter->pOwner);
       }
 
       pPartyIter->pOwner = pSortedOwner;
@@ -543,11 +543,11 @@ void __stdcall ROSTER_FlattenPartyListsIntoSingleRosterChain() {
     D2RosterStrc* pWalkNext;
     D2RosterStrc* pChainTail = 0;
     for (pPartyList = pRosterPartyList; pPartyList; pPartyList = pPartyList->pNext) {
-      if (!pChainTail) {
+      if (pChainTail) {
+        pChainTail->pNext = pPartyList->pOwner;
+      } else {
         pChainTail = pPartyList->pOwner;
         gpRosterPlayers = pChainTail;
-      } else {
-        pChainTail->pNext = pPartyList->pOwner;
       }
 
       pPartyList->pOwner = 0;
@@ -881,15 +881,15 @@ void __fastcall ClickParty_i(D2RosterStrc * pRoster) {
       case 2:
         nActionType = 8;
       break;
-      case 3:
-        nActionType = 9;
-      break;
       case 4:
         pRoster->nPartyState = 0;
       Msg::NET_D2GS_CLIENT_Send_0x5E(7, pRoster->nRosterGUID);
       ROSTER_RebuildPlayerParty();
       UI::Party::ResetPartyUi();
       return;
+      case 3:
+        nActionType = 9;
+      break;
       default:
         goto send_party_action;
     }
@@ -1448,11 +1448,11 @@ void __fastcall ROSTER_AllocOrUpdatePlayer(int nPlayerGUID, int nCharType, char 
       if (!pNewRoster) {
         pNewRoster = D2_NEW_AT(D2RosterStrc, ".\\GAME\\Roster.cpp", 0xd8);
         memset(pNewRoster, 0, 0x84);
-      } else if (!pPrev) {
-        gpRosterOther = pNewRoster->pNext;
+      } else if (pPrev) {
+        pPrev->pNext = pNewRoster->pNext;
         pNewRoster->pNext = 0;
       } else {
-        pPrev->pNext = pNewRoster->pNext;
+        gpRosterOther = pNewRoster->pNext;
         pNewRoster->pNext = 0;
       }
 
@@ -1517,10 +1517,10 @@ void __fastcall PlayerLeft(int32_t nPlayerUid) {
         }
       }
 
-      if (!pPrevious) {
-        gpRosterPlayers = pCurrent->pNext;
-      } else {
+      if (pPrevious) {
         pPrevious->pNext = pCurrent->pNext;
+      } else {
+        gpRosterPlayers = pCurrent->pNext;
       }
 
       UNIT::PlayerList::FreePlayerList(pCurrent->pPlayerList);

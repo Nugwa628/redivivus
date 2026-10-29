@@ -164,18 +164,18 @@ static BOOL D2WINANIMIMAGE_UpdateFrame(::D2WinAnimImage * pAnimImage) {
 
     int nAnimState;
     nAnimState = pAnimImage->nAnimState;
-    if (nAnimState == 2) {
-      if (pAnimImage->nCurrentFrame < nFrames - 2) {
-        goto wrap_frame_counter;
-      }
-
-      pAnimImage->nAnimState = 3;
-    } else {
+    if (nAnimState != 2) {
       if (nAnimState != 4 || pAnimImage->nCurrentFrame < nFrames - 2) {
         goto wrap_frame_counter;
       }
 
       pAnimImage->nAnimState = 1;
+    } else {
+      if (pAnimImage->nCurrentFrame < nFrames - 2) {
+        goto wrap_frame_counter;
+      }
+
+      pAnimImage->nAnimState = 3;
     }
 
     pAnimImage->nCurrentFrame = 0;
@@ -186,7 +186,7 @@ static BOOL D2WINANIMIMAGE_UpdateFrame(::D2WinAnimImage * pAnimImage) {
     if (nAnimState != pAnimImage->nAnimState && (pFrameEntry = (uint32_t*)pAnimImage->pAnimFrames[pAnimImage->nAnimState].ppBaseImage , pFrameEntry != 0) && (pDC6Next = (DC6*)*pFrameEntry , pDC6Next != 0)) {
       D2CMP::SRC::CelCmp::IMAGE_GetFramesCount(pDC6Next);
     }
-    if (nFrames >= pAnimImage->nCurrentFrame) {
+    if (pAnimImage->nCurrentFrame <= nFrames) {
       return 1;
     }
 
@@ -276,7 +276,7 @@ BOOL __fastcall Draw(::D2WinAnimImage * pAnimImage) {
     dwTick = GetTickCount();
     nFrameIntervalMs = (dwTick - pAnimImage->dwAnimStartTick) / nFrameIntervalMs;
     pAnimImage->nCurrentFrame = nFrameIntervalMs;
-    if ((int)(nFrameCount - 1U) <= (int)nFrameIntervalMs) {
+    if ((int)nFrameIntervalMs >= (int)(nFrameCount - 1U)) {
       nFrameIntervalMs = nFrameCount - 1U;
     }
 
@@ -334,10 +334,9 @@ BOOL __stdcall D2WINANIMIMAGE_SetAnimate(::D2WinAnimImage * pAnimImage, BOOL bAn
     ::D2WinAnimImage* pNewAnimImage = D2_NEW_AT(::D2WinAnimImage, ".\\D2WinAnimImage.cpp", 0x1c);
     memset(pNewAnimImage, 0, 0x60);
     pNewAnimImage->sControl.neD2FormType = FORM_Image;
-    int* pStateField = &pNewAnimImage->sControl.dwState;
-    *pStateField |= 1;
+    pNewAnimImage->sControl.dwState |= 1;
     pNewAnimImage->sControl.pDC6 = pDC6;
-    pNewAnimImage->sControl.dwState |= 4;
+    pNewAnimImage->sControl.dwState |= gadwBitMasks[2];
     pNewAnimImage->sControl.dwPosX = nPosX;
     pNewAnimImage->sControl.dwPosY = nPosY;
     pNewAnimImage->sControl.dwSizeX = nSizeX;
