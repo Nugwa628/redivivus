@@ -1,16 +1,16 @@
-tree 6d44bad; compiler sp1; flags /O2 /Oy- /Ob1 /EHsc /GS /MT /W1 /D WIN32 /D NDEBUG /D _WINDOWS; D2Client/ /GS-; D2DDraw/ /GS-; D2Direct3D/ /GS-; D2Gdi/ /GS-; D2Glide/ /GS-; D2Launch/ /GS-; D2Launch/Engine/ ; D2MCPClient/ /GS-; D2Multi/ /GS-; D2Sound/ /GS-; D2Win/ /GS-; D2gfx/ /GS-
+tree 1d6ccdd-dirty; compiler sp1; flags /O2 /Oy- /Ob1 /EHsc /GS /MT /W1 /D WIN32 /D NDEBUG /D _WINDOWS; D2Client/ /GS-; D2DDraw/ /GS-; D2Direct3D/ /GS-; D2Gdi/ /GS-; D2Glide/ /GS-; D2Launch/ /GS-; D2Launch/Engine/ ; D2MCPClient/ /GS-; D2Multi/ /GS-; D2Sound/ /GS-; D2Win/ /GS-; D2gfx/ /GS-
 original functions: 15521 (2678537 bytes of code)
-mapped and compared: 12458
-  MATCH               5090
+mapped and compared: 12512
+  MATCH               5205
   REF_DIFF               5
-  INSN_MATCH           255
-  INSN_COUNT_MATCH    1298
-  OUR+-N              5794
-  QUARANTINE            16
+  INSN_MATCH           247
+  INSN_COUNT_MATCH    1315
+  OUR+-N              5732
+  QUARANTINE             8
   MISSING                0
-matched code: 370878 bytes (13.85% of the original)
-pairings by funcmap tier: votes 3845, exact 3462, bracket 3023, calls 855, refs 500, align 328, string 240, name 124, import 59, export 22
-globals seen at aligned instructions: 2070, of which consistent 1996 (datamap.tsv)
+matched code: 383036 bytes (14.30% of the original)
+pairings by funcmap tier: votes 3851, exact 3551, bracket 2926, calls 952, refs 485, align 303, string 239, name 124, import 59, export 22
+globals seen at aligned instructions: 2086, of which consistent 2014 (datamap.tsv)
 self-check, names carrying their own address: 200 agree, 6 elsewhere
   look at: D2Direct3D::Renderer::Catch_All_006b4c42 at 006b4770
   look at: D2Direct3D::Renderer::Catch_All_006b4c73 at 006b4900
