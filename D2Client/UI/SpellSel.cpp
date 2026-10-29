@@ -203,7 +203,7 @@ void __stdcall SPELLSEL_Cleanup() {
       }
 
       pClassIconEntry++;
-    } while ((int)pClassIconEntry < (uintptr_t)((char*)&pSpellsClassSkillicon + sizeof(pSpellsClassSkillicon)));
+    } while ((int)pClassIconEntry < (int)((uintptr_t)((char*)&pSpellsClassSkillicon + sizeof(pSpellsClassSkillicon))));
 }
 
 DC6 * __fastcall ARCHIVE_LoadSpellsClassSkillicon(short * pSkillId) {
@@ -593,7 +593,7 @@ int __fastcall SPELLSEL_FindChargedSkill1(D2UnitStrc * pUnit, int32_t nTargetSki
     }
 
     D2SkillStrc* pSkill = D2Common::Units::GetFirstSkill(pUnit);
-    while (pSkill && ((pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt || (nQuantity = D2Common::Skills::SKILL_GetQuantity(pSkill) , nQuantity < 1)) || pSkillsTxt->skill != nTargetSkillId)) {
+    while (pSkill && ((pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt || (nQuantity = D2Common::Skills::SKILL_GetQuantity(pSkill) , nQuantity <= 0)) || pSkillsTxt->skill != nTargetSkillId)) {
       pSkill = D2Common::Skills::GetNext(pSkill);
     }
 
@@ -608,7 +608,7 @@ int __fastcall SPELLSEL_FindChargedSkill2(D2UnitStrc * pUnit, int32_t nTargetSki
     }
 
     D2SkillStrc* pSkill = D2Common::Units::GetFirstSkill(pUnit);
-    while (pSkill && ((pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt || (nQuantity = D2Common::Skills::SKILL_GetQuantity(pSkill) , nQuantity < 1)) || pSkillsTxt->skill != nTargetSkillId)) {
+    while (pSkill && ((pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt || (nQuantity = D2Common::Skills::SKILL_GetQuantity(pSkill) , nQuantity <= 0)) || pSkillsTxt->skill != nTargetSkillId)) {
       pSkill = D2Common::Skills::GetNext(pSkill);
     }
 
@@ -623,7 +623,7 @@ int __fastcall SPELLSEL_FindChargedSkill3(D2UnitStrc * pUnit, int32_t nTargetSki
     }
 
     D2SkillStrc* pSkill = D2Common::Units::GetFirstSkill(pUnit);
-    while (pSkill && ((pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt || (nQuantity = D2Common::Skills::SKILL_GetQuantity(pSkill) , nQuantity < 1)) || pSkillsTxt->skill != nTargetSkillId)) {
+    while (pSkill && ((pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt || (nQuantity = D2Common::Skills::SKILL_GetQuantity(pSkill) , nQuantity <= 0)) || pSkillsTxt->skill != nTargetSkillId)) {
       pSkill = D2Common::Skills::GetNext(pSkill);
     }
 
@@ -638,7 +638,7 @@ int __fastcall SPELLSEL_FindChargedSkill4(D2UnitStrc * pUnit, int32_t nTargetSki
     }
 
     D2SkillStrc* pSkill = D2Common::Units::GetFirstSkill(pUnit);
-    while (pSkill && ((pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt || (nQuantity = D2Common::Skills::SKILL_GetQuantity(pSkill) , nQuantity < 1)) || pSkillsTxt->skill != nTargetSkillId)) {
+    while (pSkill && ((pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill) , !pSkillsTxt || (nQuantity = D2Common::Skills::SKILL_GetQuantity(pSkill) , nQuantity <= 0)) || pSkillsTxt->skill != nTargetSkillId)) {
       pSkill = D2Common::Skills::GetNext(pSkill);
     }
 
@@ -750,7 +750,7 @@ void __stdcall SPELLSEL_ClearChargedSkillBindings() {
 
     do {
       pSkillsTxt = D2Common::Skills::GetSkillsTxt(pSkill);
-      if (pSkillsTxt->scroll) {
+      if ((*((uint8_t*)pSkillsTxt + 0x8) & gadwBitMasks[4])) {
         nLine = D2Common::Skills::SKILL_GetQuantity(pSkill);
         SPELLSEL_ClearSkillBinding(&pSkillsTxt->skill, nLine);
       }
@@ -830,7 +830,7 @@ static int SPELLSEL_IsSkillSlotValid(int32_t nSlot) {
     }
 
     BOOL bHasSkillData = D2Common::Skills::SKILLS_GetSkillData(pSkill, nullptr, nullptr, nullptr, &nChargesLeft);
-    if (!(bHasSkillData && nChargesLeft < 1)) {
+    if (!(bHasSkillData && nChargesLeft <= 0)) {
       return 1;
     }
 
@@ -1010,7 +1010,7 @@ void __fastcall SPELLSEL_DrawSkillGrid(D2UnitStrc * pUnit, int32_t nGridStartX, 
             nSkillId = (int)sgptDataTable->pTxtSkills[nSkillId].skilldesc;
             if (-1 < nSkillId && nSkillId < sgptDataTable->nTxtSkillDescSize) {
               pSkillDescTxt = sgptDataTable->pTxtSkillDesc + nSkillId;
-              if (pSkillDescTxt && (!bWeaponSwap || pSkillsTxt->leftskill) && !pSkillsTxt->passive) {
+              if (pSkillDescTxt && (!bWeaponSwap || (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[6])) && !pSkillsTxt->passive) {
                 dwSkillFlags = D2Common::Skills::SKILL_GetFlags(pCurSkill);
                 if (!(dwSkillFlags & 8)) {
                   nOwnerGUID = -1;
@@ -1019,7 +1019,7 @@ void __fastcall SPELLSEL_DrawSkillGrid(D2UnitStrc * pUnit, int32_t nGridStartX, 
                   bIsChargedOrValid = D2Common::Skills::SKILLS_GetSkillData(pCurSkill, &nOwnerGUID, nullptr, nullptr, &nChargesLeft);
                   if (!bWeaponSwap && !bIsChargedOrValid) {
                     nChargeQty = D2Common::Skills::SKILL_GetQuantity(pCurSkill);
-                    if (0 < nChargeQty && pSkillsTxt->scroll) {
+                    if (0 < nChargeQty && (*((uint8_t*)pSkillsTxt + 0x8) & gadwBitMasks[4])) {
                       bIsChargedOrValid = 1;
                     }
                   }
@@ -1208,7 +1208,8 @@ int __stdcall SPELLSEL_IsWaitingForSkill() {
     }
 
     eD2States eState = D2Common::DATATBLS::ItemStats::UNIT_GetUnitState(pUnit, STATE_uninterruptable);
-    if (eState == STATE_none) {
+    switch (eState) {
+    case STATE_none:
       return BooleanWaitingForSkillingMaybe;
     }
 
@@ -2049,7 +2050,7 @@ void __stdcall SKILLTREE_DrawSkillNode(eD2Skills eSkill, D2SkillsTxt * pSkillTxt
     if (nColumnX < nMouseX && nMouseX < nColumnX + 0x30 && nRowY - 0x30 < nMouseY && nMouseY < nRowY) {
       nGlobalPaletteShift = PALETTE_BLUE;
     }
-    if (!pSkillTxt->InGame) {
+    if (!(*((uint8_t*)pSkillTxt + 0x5) & gadwBitMasks[2])) {
       nGlobalPaletteShift = PALETTE_RED;
     }
 

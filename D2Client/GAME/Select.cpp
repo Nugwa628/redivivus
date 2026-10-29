@@ -424,7 +424,7 @@ static D2UnitStrc * __stdcall SKILL_FindTargetInRange(D2SkillStrc * pSkill, D2Un
     int32_t nRadius;
     D2UnitStrc* pFoundUnit;
     if (pUnit) {
-      if (pSkillsTxt->TargetCorpse) {
+      if ((*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[0])) {
         nFindFlags = UNIT::CUnit::IsActive(pUnit);
         if (nFindFlags) {
           return pUnit;
@@ -434,20 +434,20 @@ static D2UnitStrc * __stdcall SKILL_FindTargetInRange(D2SkillStrc * pSkill, D2Un
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
         nRadius = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nRadius = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nRadius = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nRadius = 0;
       }
 
       *pX = nRadius;
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
         nRadius = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nRadius = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nRadius = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nRadius = 0;
       }
 
       *pY = nRadius;
@@ -666,19 +666,19 @@ D2UnitStrc * __fastcall SKILL_ValidateTarget(D2SkillStrc * pSkill, D2UnitStrc * 
     eUnitType = pPlayerUnit_lcl->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nUnitCoord = pPlayerUnit_lcl->pPath.pStaticPath->nPosX;
-    } else if (!pPlayerUnit_lcl->pPath.pDynamicPath) {
-      nUnitCoord = 0;
-    } else {
+    } else if (pPlayerUnit_lcl->pPath.pDynamicPath) {
       nUnitCoord = D2Common::PATH::DynamicPath::GetXPos(pPlayerUnit_lcl->pPath.pDynamicPath);
+    } else {
+      nUnitCoord = 0;
     }
     if (*pX == nUnitCoord) {
       eUnitType = pPlayerUnit_lcl->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
         nUnitCoord = pPlayerUnit_lcl->pPath.pStaticPath->nPosY;
-      } else if (!pPlayerUnit_lcl->pPath.pDynamicPath) {
-        nUnitCoord = 0;
-      } else {
+      } else if (pPlayerUnit_lcl->pPath.pDynamicPath) {
         nUnitCoord = D2Common::PATH::DynamicPath::GetYPos(pPlayerUnit_lcl->pPath.pDynamicPath);
+      } else {
+        nUnitCoord = 0;
       }
       if (*pY == nUnitCoord) {
         SKILLS::Skills::GetPositionNextToPlayerDirection(pPlayerUnit_lcl, pX, pY);

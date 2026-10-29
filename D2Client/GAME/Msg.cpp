@@ -66,10 +66,10 @@ void __fastcall NET_D2GS_CLIENT_Send_0x67(char * szGameName) {
     }
 
     uint32_t bIsArena = CLIENT_IsArenaMode();
-    if (!bIsArena) {
-      packet.nCharClass = nD2PlayerClassID;
-    } else {
+    if (bIsArena) {
       packet.nCharClass = CLIENT_GetDefaultCharClass();
+    } else {
+      packet.nCharClass = nD2PlayerClassID;
     }
 
     bIsArena = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
@@ -211,10 +211,10 @@ void __fastcall NET_D2GS_CLIENT_Send_0x68(int16_t nGameToken, int32_t nGameHash)
     uint32_t nLangOrArena = D2Lang::StrTable::strtable::MISC_GetLanguageCode();
     packet.nLanguageCode = (uint8_t)nLangOrArena;
     nLangOrArena = CLIENT_IsArenaMode();
-    if (!nLangOrArena) {
-      packet.nCharClass = nD2PlayerClassID;
-    } else {
+    if (nLangOrArena) {
       packet.nCharClass = CLIENT_GetDefaultCharClass();
+    } else {
+      packet.nCharClass = nD2PlayerClassID;
     }
 
     Storm::Source::SSTR::SStrCopy(packet.szCharName, D2Game::Save::szSaveCharacterName, 0x7fffffff);

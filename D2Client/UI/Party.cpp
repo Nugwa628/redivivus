@@ -354,8 +354,7 @@ void __stdcall UI_DrawPartyLeaveButton() {
       uint16_t* wszMessage;
       UI_DrawPartyButtonFrame(pMenu_partybuttons, 0xe3, 0, 0x23);
       nTextFlags = 2;
-      wszMessage = D2Lang::StrTable::strtable::GetLocaleString(0x1038);
-      ui::UI_DrawTextCentered(gnPanelOffsetX + 0xe3, 0x21 - gnPanelOffsetY, gnPanelOffsetX + 0x118, wszMessage, nTextFlags);
+      ui::UI_DrawTextCentered(gnPanelOffsetX + 0xe3, 0x21 - gnPanelOffsetY, gnPanelOffsetX + 0x118, D2Lang::StrTable::strtable::GetLocaleString(0x1038), nTextFlags);
     }
 
     D2Win::Src::D2WinFont::SetAndReturnLastFont(1);

@@ -65,11 +65,12 @@
 namespace D2Client::SKILLS::SkillsPal {
 
 int32_t __fastcall SKILLS_GetManaCostMultiplier(int32_t nParam) {
-    if (!(-1 < nParam && nParam < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + nParam)) {
+    D2SkillsTxt* pTxtRecord = 0 <= nParam && nParam < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[nParam] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    return sgptDataTable->pTxtSkills[nParam].Param[0];
+    return pTxtRecord->Param[0];
 }
 
 // Client DoFunc for Paladin Zeal directional offset missile. Determines the firing direction quadrant from the unit's movement direction (or a random quadrant if stationary), applies a random ±1 offset from gnPaladinSkillIndexTable/gnPaladinSkillOffsetTable, then spawns a missile of the skill's cltmissilea type (offset by a calc-driven random variant) at the computed position. Returns 1 on success, 0 if skill/missile data is invalid or no confirmed target.
@@ -667,7 +668,7 @@ BOOL __fastcall Skills_CltDoFunc_Pal_RateThrottledBloodParticles(D2UnitStrc * pU
     static uint32_t gdwBloodParticleThrottleNextTick; D2_STATIC_GUARD_BSS(gdwBloodParticleThrottleNextTick, "D2Client::SKILLS::SkillsPal::Skills_CltDoFunc_Pal_RateThrottledBloodParticles::gdwBloodParticleThrottleNextTick");
 
     uint32_t nCurrentTick = GAME::Game::GetEntryIndex();
-    if (gdwBloodParticleThrottleNextTick >= nCurrentTick) {
+    if (nCurrentTick <= gdwBloodParticleThrottleNextTick) {
       return 1;
     }
 
@@ -702,10 +703,10 @@ void __fastcall SKILL_ExecuteItemCast(D2UnitStrc * pUnit, eD2Skills eSkill, shor
     nSavedSP1Y = D2Common::PATH::DynamicPath::GetYSP1(pUnit->pPath.pDynamicPath);
     eD2UnitFlags eSavedUnitFlags;
     eSavedUnitFlags = pUnit->eUnitFlags;
-    if (!pTargetUnit) {
-      D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, nParam1, nParam2);
-    } else {
+    if (pTargetUnit) {
       D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pTargetUnit);
+    } else {
+      D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, nParam1, nParam2);
     }
     if (pSkillTxt->ItemCltCheckStart) {
       int bTargetIsActive;
@@ -741,10 +742,10 @@ void __fastcall SKILL_ExecuteItemCast(D2UnitStrc * pUnit, eD2Skills eSkill, shor
 
     Skills::SKILL_ExecuteClientDoFunc(pUnit, eSkill, (int32_t)pDoFuncData, (uint32_t)nParam);
     restore_caster_state:
-    if (!pSavedTarget) {
-      D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, (int16_t)nSavedSP1X, (int16_t)nSavedSP1Y);
-    } else {
+    if (pSavedTarget) {
       D2Common::Units::SetTargetUnitForDynamicUnit(pUnit, pSavedTarget);
+    } else {
+      D2Common::PATH::DynamicPath::SetSP1(pUnit->pPath.pDynamicPath, (int16_t)nSavedSP1X, (int16_t)nSavedSP1Y);
     }
     if (!(eSavedUnitFlags >> 6 & 1)) {
       pUnit->eUnitFlags &= ~UNITFLAG_SKSRVDOFUNC;

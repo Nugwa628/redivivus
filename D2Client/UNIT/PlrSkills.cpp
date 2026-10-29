@@ -239,11 +239,12 @@ void __fastcall PLRSKILLS_StateSetFn02_CloakOfShadows(D2UnitStrc * pUnit, eD2Sta
 
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
     int nSkillLvl = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return;
     }
 
-    int32_t nAuraLen = D2Common::Skills::D2GetSkillCalc(pUnit, sgptDataTable->pTxtSkills[eSkill].auralencalc, eSkill, nSkillLvl);
+    int32_t nAuraLen = D2Common::Skills::D2GetSkillCalc(pUnit, pTxtRecord->auralencalc, eSkill, nSkillLvl);
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     UI::CmdTbl::CMD_InitKeyConfigUI(5, nAuraLen * 3 / 5, nAuraLen * 2 / 5, eLevelId, 0);
 }
@@ -264,17 +265,17 @@ void __fastcall PLRSKILLS_StateSetFn03_Blaze(D2UnitStrc * pUnit, eD2States eStat
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
     int nSkillLevel = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_level, 0);
     D2SkillStrc* pSkill = D2Common::Skills::GetSkillByIdAndOwner(pUnit, eSkill, -1);
-    if (!pSkill) {
-      nCurSkillLvl = 0;
-    } else {
+    if (pSkill) {
       nCurSkillLvl = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 1);
+    } else {
+      nCurSkillLvl = 0;
     }
     if (nCurSkillLvl == nSkillLevel) {
       return;
     }
 
     int32_t nSkillLevel_00 = DataTbls::SKILL_GetMaxLevelForSkill(eSkill);
-    if (nSkillLevel_00 < nSkillLevel) {
+    if (nSkillLevel > nSkillLevel_00) {
       D2Common::Skills::AddSkill(pUnit, eSkill, nSkillLevel_00, 0, ".\\UNIT\\PlrSkills.cpp", 0x11b);
       D2Common::Skills::SKILLS_SetSkillLevelBonus(pUnit, eSkill, nSkillLevel - nSkillLevel_00);
       return;
@@ -290,7 +291,7 @@ void __fastcall PLRSKILLS_StateSetFn04_SourceUnit(D2UnitStrc * pUnit, eD2States 
     }
 
     eD2UnitType eUnitType = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_source_unit_type, 0);
-    if (eUnitType >= UNIT_COUNT) {
+    if ((uint32_t)eUnitType >= UNIT_COUNT) {
       return;
     }
 
@@ -635,11 +636,12 @@ void __fastcall PLRSKILLS_StateSetFn07_Hurricane(D2UnitStrc * pUnit, eD2States e
     }
 
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsTxt = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pSkillsTxt) {
       return;
     }
 
-    short int sPrgSound = sgptDataTable->pTxtSkills[eSkill].prgsound;
+    short int sPrgSound = pSkillsTxt->prgsound;
     if (0 >= sPrgSound) {
       return;
     }
@@ -654,11 +656,12 @@ void __fastcall PLRSKILLS_StateRemFn04_Hurricane(D2UnitStrc * pUnit, eD2States e
     }
 
     eD2Skills eSkill = D2Common::Stats::StatsEx::STATLIST_GetBaseStatValue(pStatList, UNITSTAT_modifierlist_skill, 0);
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pSkillsTxt = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pSkillsTxt) {
       return;
     }
 
-    short int sPrgSound = sgptDataTable->pTxtSkills[eSkill].prgsound;
+    short int sPrgSound = pSkillsTxt->prgsound;
     if (0 >= sPrgSound) {
       return;
     }
@@ -1207,7 +1210,7 @@ void __fastcall STATES_SetStateOnUnit(D2UnitStrc * pUnit, eD2States eState) {
     if (!pDVar1) {
       return;
     }
-    if (pDVar1->notondead && (pUnit->eUnitType == UNIT_MONSTER && pUnit->eAnimMode.ePlayerMode == Kick || pUnit->eUnitType == UNIT_PLAYER && pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Dead)) {
+    if ((*((uint8_t*)pDVar1 + 0x14) & gadwBitMasks[7]) && (pUnit->eUnitType == UNIT_MONSTER && pUnit->eAnimMode.ePlayerMode == Kick || pUnit->eUnitType == UNIT_PLAYER && pUnit->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Dead)) {
       D2Common::DATATBLS::ItemStats::SetState(pUnit, eState, 1);
       return;
     }
@@ -1220,7 +1223,7 @@ void __fastcall STATES_SetStateOnUnit(D2UnitStrc * pUnit, eD2States eState) {
     } else {
       D2StatListExStrc* pStatList;
       pStatList = D2Common::Stats::StatsEx::GetStatsByState(pUnit, eState);
-      if (!pDVar1->noclear) {
+      if (!(*((uint8_t*)pDVar1 + 0x14) & gadwBitMasks[4])) {
         D2Common::Stats::StatsEx::STATLIST_FreeChildStatLists(pStatList);
       }
     }
@@ -1239,7 +1242,7 @@ void __fastcall STATES_SetStateOnUnit(D2UnitStrc * pUnit, eD2States eState) {
         pUnit->eUnitFlags = pUnit->eUnitFlags & ~UNITFLAG_TARGETABLE | UNITFLAG_DRAWSHADOW;
       }
     }
-    if (!pDVar1->transform) {
+    if (!(*((uint8_t*)pDVar1 + 0x10) & gadwBitMasks[3])) {
       return;
     }
 
@@ -1298,7 +1301,7 @@ void __fastcall PLRSKILLS_RemoveStateFromUnit(D2UnitStrc * pUnit, eD2States eSta
     if (-1 < pDVar1->overlay[1]) {
       STATES_RemoveOverlayById(pUnit, (int)pDVar1->overlay[1]);
     }
-    if (pDVar1->transform) {
+    if ((*((uint8_t*)pDVar1 + 0x10) & gadwBitMasks[3])) {
       STATES_ResetUnitGfxAndMode(pUnit);
     }
 
@@ -1386,7 +1389,7 @@ void __fastcall STATES_DispatchSetFunc(D2UnitStrc * pUnit, eD2States eState) {
     }
 
     D2StatesTxt* pDVar1 = sgptDataTable->pTxtStates + eState;
-    if (!(pDVar1 && (!pDVar1->notondead || (pUnit->eUnitType != UNIT_MONSTER || pUnit->eAnimMode.ePlayerMode != Kick) && (pUnit->eUnitType != UNIT_PLAYER || pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead)))) {
+    if (!(pDVar1 && (!(*((uint8_t*)pDVar1 + 0x14) & gadwBitMasks[7]) || (pUnit->eUnitType != UNIT_MONSTER || pUnit->eAnimMode.ePlayerMode != Kick) && (pUnit->eUnitType != UNIT_PLAYER || pUnit->eAnimMode.ePlayerMode != eD2PlayerAnimMode_ns::Dead)))) {
       return;
     }
 

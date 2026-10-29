@@ -454,18 +454,17 @@ void __fastcall ReadByteOrShort(D2BitBufferStrc * pBitBuffer) {
 
 uint32_t __fastcall UNIT_GetModuloFromSeed(D2SeedStrc * pSeed, uint32_t nModulo) {
     D2SeedStrc DVar2;
-    if ((int)nModulo < 1) {
+    if ((int)nModulo <= 0) {
       return 0;
     }
 
-    int64_t lVar1 = (uint64_t)pSeed->nSeedLow * 0x6ac690c5;
     if (nModulo & nModulo - 1) {
-      DVar2 = (D2SeedStrc)(lVar1 + (uint64_t)pSeed->nSeedHigh);
+      DVar2 = D2_SEED_NEXT(*pSeed);
       *pSeed = DVar2;
-      return (uint32_t)(((uint64_t)d2_bits_of(DVar2) & 0xffffffff) % (uint64_t)nModulo);
+      return (uint32_t)(DVar2.nSeedLow % nModulo);
     }
 
-    DVar2 = (D2SeedStrc)(lVar1 + (uint64_t)pSeed->nSeedHigh);
+    DVar2 = D2_SEED_NEXT(*pSeed);
     *pSeed = DVar2;
     return nModulo - 1 & DVar2.nSeedLow;
 }

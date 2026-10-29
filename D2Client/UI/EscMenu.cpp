@@ -644,24 +644,19 @@ void __stdcall ESCMENU_Initialize() {
     static_assert(sizeof(void*) != 4 || sizeof(__frame0_t) == 260, "frame group __frame0_t must reproduce the Ghidra frame layout");
     __frame0_t __frame0;
     int32_t nFrameWidth;
-    D2EscMenuHeaderStrc* pSaveExitHeader;
-    D2EscMenuItemStrc* pSaveExitTable;
     D2GfxDataStrc sStarGfxData;
     ESCMENU_LoadLocalizedImages(&gEscMenuHeaderInitData.nItemCount, gaEscMenuMainTable);
     ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderOptions.nItemCount, gaEscMenuOptionsTable);
     ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderSaveExit.nItemCount, gaEscMenuSaveExitTable);
     BOOL bIsExpansion = Fog::D2CheckExpansionGame();
-    if (!bIsExpansion) {
-      ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderSwitchClass.nItemCount, gaEscMenuSwitchClassTable);
-      pSaveExitTable = gaEscMenuClassicSaveExitTable;
-      pSaveExitHeader = &gaEscMenuHeaderExpansionOptions;
-    } else {
+    if (bIsExpansion) {
       ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderDeleteChar.nItemCount, gaEscMenuDeleteCharTable);
-      pSaveExitTable = gaEscMenuExpansionSaveExitTable;
-      pSaveExitHeader = &gaEscMenuHeaderExpansionSaveExit;
+      ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderExpansionSaveExit.nItemCount, gaEscMenuExpansionSaveExitTable);
+    } else {
+      ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderSwitchClass.nItemCount, gaEscMenuSwitchClassTable);
+      ESCMENU_LoadLocalizedImages(&gaEscMenuHeaderExpansionOptions.nItemCount, gaEscMenuClassicSaveExitTable);
     }
 
-    ESCMENU_LoadLocalizedImages(&pSaveExitHeader->nItemCount, pSaveExitTable);
     gpEscMenuItemCount = &gEscMenuHeaderInitData;
     gpEscMenuCurrentTable = gaEscMenuMainTable;
     __frame0.szWidgetPath = '\0';
@@ -677,7 +672,7 @@ void __stdcall ESCMENU_Initialize() {
     uint32_t nStarFrameCount = D2CMP::SRC::CelCmp::IMAGE_GetFramesCount(sStarGfxData.pDC6);
     int32_t nMaxStarWidth = 0;
     sStarGfxData.nFrameNumber = 0;
-    if (nStarFrameCount) {
+    if ((uint32_t)nStarFrameCount > 0) {
       DC6Block* pStarFrame;
       do {
         pStarFrame = D2CMP::SRC::CelCmp::CELCMP_GetDC6BlockFromGfxData(&sStarGfxData);
@@ -764,14 +759,14 @@ void __stdcall ESCMENU_Shutdown() {
     ESCMENU_FreeLoadedImages(&gaEscMenuHeaderOptions.nItemCount, gaEscMenuOptionsTable);
     ESCMENU_FreeLoadedImages(&gEscMenuHeaderInitData.nItemCount, gaEscMenuMainTable);
     BOOL bIsExpansion = Fog::D2CheckExpansionGame();
-    if (!bIsExpansion) {
-      ESCMENU_FreeLoadedImages(&gaEscMenuHeaderSwitchClass.nItemCount, gaEscMenuSwitchClassTable);
-      pSaveExitTable = gaEscMenuClassicSaveExitTable;
-      pMenuTable = &gaEscMenuHeaderExpansionOptions;
-    } else {
+    if (bIsExpansion) {
       ESCMENU_FreeLoadedImages(&gaEscMenuHeaderDeleteChar.nItemCount, gaEscMenuDeleteCharTable);
       pSaveExitTable = gaEscMenuExpansionSaveExitTable;
       pMenuTable = &gaEscMenuHeaderExpansionSaveExit;
+    } else {
+      ESCMENU_FreeLoadedImages(&gaEscMenuHeaderSwitchClass.nItemCount, gaEscMenuSwitchClassTable);
+      pSaveExitTable = gaEscMenuClassicSaveExitTable;
+      pMenuTable = &gaEscMenuHeaderExpansionOptions;
     }
 
     ESCMENU_FreeLoadedImages(&pMenuTable->nItemCount, pSaveExitTable);
@@ -834,23 +829,23 @@ void __fastcall ESCMENU_ShowMenu(int32_t bHideUI, int32_t nMenuIndex) {
       break;
       case 3:
         bShouldHideUI = Fog::D2CheckExpansionGame();
-      if (!bShouldHideUI) {
-        gpEscMenuItemCount = &gaEscMenuHeaderSwitchClass;
-        gpEscMenuCurrentTable = gaEscMenuSwitchClassTable;
-      } else {
+      if (bShouldHideUI) {
         gpEscMenuItemCount = &gaEscMenuHeaderDeleteChar;
         gpEscMenuCurrentTable = gaEscMenuDeleteCharTable;
+      } else {
+        gpEscMenuItemCount = &gaEscMenuHeaderSwitchClass;
+        gpEscMenuCurrentTable = gaEscMenuSwitchClassTable;
       }
 
       break;
       case 4:
         bShouldHideUI = Fog::D2CheckExpansionGame();
-      if (!bShouldHideUI) {
-        gpEscMenuItemCount = &gaEscMenuHeaderExpansionOptions;
-        gpEscMenuCurrentTable = gaEscMenuClassicSaveExitTable;
-      } else {
+      if (bShouldHideUI) {
         gpEscMenuItemCount = &gaEscMenuHeaderExpansionSaveExit;
         gpEscMenuCurrentTable = gaEscMenuExpansionSaveExitTable;
+      } else {
+        gpEscMenuItemCount = &gaEscMenuHeaderExpansionOptions;
+        gpEscMenuCurrentTable = gaEscMenuClassicSaveExitTable;
       }
     }
 

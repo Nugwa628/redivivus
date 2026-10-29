@@ -1051,7 +1051,7 @@ static void __stdcall PLAYER_InteractWithObject(int32_t nParam1, D2UnderMouseStr
 
 static void PLAYER_InteractWithUnit(int32_t nParam1, D2UnderMouseStrc * pUnderMouse) {
     uint32_t nDistance = D2Common::Collision::GetDistanceBetweenUnits(pUnderMouse->pTarget, pUnderMouse->pPlayer);
-    if (nDistance < 3) {
+    if (nDistance <= 2) {
       BOOL bBlocked;
       bBlocked = D2Common::Units::TestCollisionBetweenInteractingUnits(pUnderMouse->pTarget, pUnderMouse->pPlayer, 0x804);
       if (!bBlocked) {
@@ -1420,14 +1420,14 @@ static uint32_t INPUT_ValidateSkillAction(D2UnderMouseStrc * pUnderMouse) {
       }
 
       pRoom = D2Common::Units::UNITS_GetRoom(pUnderMouse->pPlayer);
-      if (!pSkillsTxt->InTown) {
+      if (!(*((uint8_t*)pSkillsTxt + 0x5) & gadwBitMasks[0])) {
         bRoomInTown = D2Common::DUNGEON::Dungeon::DRLGROOM_IsRoomInTown(pRoom);
         if (bRoomInTown) {
           UnitSnd::UNITSND_PlayPlayerSound(pUnderMouse->pPlayer, 0x18);
           return 0;
         }
       }
-      if (pSkillsTxt->passive) {
+      if ((*((uint8_t*)pSkillsTxt + 0x4) & gadwBitMasks[4])) {
         return 0;
       }
     }
@@ -1680,7 +1680,7 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
         } else {
           if (*ppSkill) {
             pSkillsTxt2 = D2Common::Skills::GetSkillsTxt(*ppSkill);
-            if (pSkillsTxt2 && pSkillsTxt2->TargetItem) {
+            if (pSkillsTxt2 && (*((uint8_t*)pSkillsTxt2 + 0x7) & gadwBitMasks[3])) {
               bValid = PLAYER_CheckSkillUsability(nullptr, pUnderMouse->pPlayer, ppSkill);
               if (!bValid) {
                 return;
@@ -1693,7 +1693,7 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
 
           bIsInteractable = pUnit->eUnitFlags >> 2 & 1;
           if (bIsInteractable) {
-            if (!pSkillsTxt->TargetPet && !pSkillsTxt->TargetAlly) {
+            if (!(*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[1]) && !pSkillsTxt->TargetAlly) {
               bIsInteractable = CUnit::CanInteractWith(pPlayerUnit_lcl, pUnit);
             }
             if (bIsInteractable) {
@@ -1753,7 +1753,7 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
         }
         if ((uint8_t)dwFlags & 4) {
           pMonStatsTxt = DataTbls::MonsterTbls::TXT_MonStats_GetLine(pUnit->nClassId);
-          if (pMonStatsTxt && pMonStatsTxt->interact) {
+          if (pMonStatsTxt && (*((uint8_t*)pMonStatsTxt + 0xd) & gadwBitMasks[1])) {
             PLAYER_InteractWithUnitByType(UNIT_MONSTER, nTargetUnitGUID, pUnderMouse);
             return;
           }
@@ -1765,13 +1765,13 @@ static void INPUT_ExecuteSkillCommand(D2UnderMouseStrc * pUnderMouse) {
       eD2Skills eSkillId;
       if (!(*(uint8_t*)&pUnderMouse->flags & 2) || nWeaponClass == 1) {
         choose_unit_or_ground:
-        if (pUnit->eUnitType != UNIT_MONSTER || (iVar1 = CUnit::IsActive(pUnit) , !iVar1) || pSkillsTxt->TargetCorpse) {
+        if (pUnit->eUnitType != UNIT_MONSTER || (iVar1 = CUnit::IsActive(pUnit) , !iVar1) || (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[0])) {
           goto use_on_target_unit;
         }
       } else {
         eTargetType = pUnit->eUnitType;
         if (eTargetType == UNIT_OBJECT || eTargetType == UNIT_ITEM) {
-          if (pSkillsTxt->TargetItem) {
+          if ((*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[3])) {
             bForceInteract = true;
             goto choose_unit_or_ground;
           }
@@ -1844,7 +1844,10 @@ static BOOL INPUT_HandleLeftClickRepeat(D2UnderMouseStrc * pUnderMouse) {
     D2SkillStrc* pLeftSkill = D2Common::Units::GetLeftSkill(pUnderMouse->pPlayer);
     pUnderMouse->pSkill = pLeftSkill;
     bResult = CUnit::PlayerCanBeInterrupted(pUnderMouse->pPlayer, pLeftSkill);
-    if (!bResult) {
+    if (bResult) {
+      pUnderMouse->flags |= 0x80;
+      INPUT_ExecuteSkillCommand(pUnderMouse);
+    } else {
       int nCursorItemType;
       nCursorItemType = UI::ui::GetItemType();
       if (nCursorItemType == 6) {
@@ -1861,9 +1864,6 @@ static BOOL INPUT_HandleLeftClickRepeat(D2UnderMouseStrc * pUnderMouse) {
         GAME::Msg::NET_D2GS_CLIENT_Send_INT(0x17, pCursorItem_lcl->nUnitGUID);
         return 0;
       }
-    } else {
-      pUnderMouse->flags |= 0x80;
-      INPUT_ExecuteSkillCommand(pUnderMouse);
     }
 
     return 1;
@@ -1975,13 +1975,16 @@ static BOOL ClickMapRightSkill(D2UnderMouseStrc * pUnderMouse) {
     }
 
     eD2Skills eSkillId = D2Common::Skills::GetSkillId(pUnderMouse->pSkill, ".\\UNIT\\Player.cpp", 0x9dd);
-    if ((int)eSkillId < 0 || sgptDataTable->nTxtSkillsCount <= (int)eSkillId) {
+    if ((int)eSkillId < 0 || (int)eSkillId >= sgptDataTable->nTxtSkillsCount) {
       pSkillsTxt = 0;
     } else {
       pSkillsTxt = sgptDataTable->pTxtSkills + eSkillId;
     }
-    if (pSkillsTxt->range == '\x01' && !(pUnderMouse->flags & 0x40)) {
-      pUnderMouse->flags |= 0x80;
+    switch (pSkillsTxt->range) {
+    case 1:
+      if (!(pUnderMouse->flags & 0x40)) {
+        pUnderMouse->flags |= 0x80;
+      }
     }
 
     INPUT_ExecuteSkillCommand(pUnderMouse);
@@ -2004,13 +2007,16 @@ static BOOL INPUT_HandleRightClickRepeat(D2UnderMouseStrc * pUnderMouse) {
     }
 
     eD2Skills eSkillId = D2Common::Skills::GetSkillId(pUnderMouse->pSkill, ".\\UNIT\\Player.cpp", 0x9fd);
-    if ((int)eSkillId < 0 || sgptDataTable->nTxtSkillsCount <= (int)eSkillId) {
+    if ((int)eSkillId < 0 || (int)eSkillId >= sgptDataTable->nTxtSkillsCount) {
       pSkillsTxt = 0;
     } else {
       pSkillsTxt = sgptDataTable->pTxtSkills + eSkillId;
     }
-    if (pSkillsTxt->range == '\x01' && !(pUnderMouse->flags & 0x40)) {
-      pUnderMouse->flags |= 0x80;
+    switch (pSkillsTxt->range) {
+    case 1:
+      if (!(pUnderMouse->flags & 0x40)) {
+        pUnderMouse->flags |= 0x80;
+      }
     }
 
     INPUT_ExecuteSkillCommand(pUnderMouse);
@@ -2020,7 +2026,8 @@ static BOOL INPUT_HandleRightClickRepeat(D2UnderMouseStrc * pUnderMouse) {
 static BOOL INPUT_HandleRightClickWithPet(D2UnderMouseStrc * pUnderMouse) {
     IsUnitNotMoving(pUnderMouse);
     int32_t nUnitGUID = GAME::RosterPets::GetRosterPetGUID(pUnderMouse->pPlayer, 7, 0);
-    if (nUnitGUID == -1) {
+    switch (nUnitGUID) {
+    case -1:
       return 0;
     }
 
@@ -2726,11 +2733,12 @@ int __fastcall PLAYER_GetMonsterOwnerId(D2UnitStrc * pnParam) {
 }
 
 int32_t __fastcall TXT_MonStats_GetBaseId_NoChecks(int32_t nMonsterId) {
-    if (!(-1 < nMonsterId && nMonsterId < sgptDataTable->nTxtMonStatsSize && sgptDataTable->pTxtMonStats + nMonsterId)) {
+    D2MonStatsTxt* pTxtRecord = 0 <= nMonsterId && nMonsterId < sgptDataTable->nTxtMonStatsSize ? &sgptDataTable->pTxtMonStats[nMonsterId] : nullptr;
+    if (!pTxtRecord) {
       return nMonsterId;
     }
 
-    nMonsterId = (int32_t)sgptDataTable->pTxtMonStats[nMonsterId].BaseId;
+    nMonsterId = (int32_t)pTxtRecord->BaseId;
     return nMonsterId;
 }
 
@@ -2762,7 +2770,7 @@ BOOL __fastcall TXT_MonStats_MonStats2_GetFlagsByBitOffset(int32_t nMonStatsId, 
 }
 
 int32_t __fastcall ValidateClassId(int32_t nClassId) {
-    if (!(nClassId < 0 || sgptDataTable->nTxtMonStatsSize <= nClassId)) {
+    if (!(nClassId < 0 || nClassId >= sgptDataTable->nTxtMonStatsSize)) {
       return nClassId;
     }
 

@@ -300,10 +300,22 @@ uint8_t * * __stdcall VIEW_AllocPalettePointerTable2(uint32_t nDim, int32_t nSte
 }
 
 void __stdcall VIEW_InitLookupTables() {
-    if (!gpViewPalPointerTable32x8) {
-      if (!gpViewPalByteTable32x16) {
-        if (!gpViewPalByteTable16x32) {
-          if (!gpViewPalPointerTable32x32) {
+    if (gpViewPalPointerTable32x8) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xca);
+      exit(-1);
+    } else {
+      if (gpViewPalByteTable32x16) {
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcb);
+        exit(-1);
+      } else {
+        if (gpViewPalByteTable16x32) {
+          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcc);
+          exit(-1);
+        } else {
+          if (gpViewPalPointerTable32x32) {
+            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcd);
+            exit(-1);
+          } else {
             if (gpViewPalByteTable32x40) {
               Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xce);
               exit(-1);
@@ -316,21 +328,9 @@ void __stdcall VIEW_InitLookupTables() {
             gpViewPalPointerTable32x32 = VIEW_AllocPalettePointerTable2(0x20, 0x20);
             gpViewPalByteTable32x40 = VIEW_AllocByteTable(0x20, 0x28);
             return;
-          } else {
-            Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcd);
-            exit(-1);
           }
-        } else {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcc);
-          exit(-1);
         }
-      } else {
-        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcb);
-        exit(-1);
       }
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xca);
-      exit(-1);
     }
 }
 
@@ -403,7 +403,7 @@ void __fastcall SetFlag0x1(D2GameViewStrc * pGameView) {
 }
 
 void __fastcall SetViewRectangleSize(D2GameViewStrc * pGameView, int32_t xLeft, int32_t yTop, int32_t xRight, int32_t yBottom) {
-    bool _bPerspective;
+    BOOL _bPerspective;
     bool bPerspective;
     if (!pGameView) {
       return;
@@ -864,9 +864,9 @@ void __fastcall SetShake(int32_t nAmplitude, int32_t nArg3, int32_t nArg1, int32
     }
 
     SHAKE_StartTickcount = GetTickCount();
+    SHAKE_Arg3 = nArg3;
     SHAKE_Arg1 = nArg1;
     SHAKE_Arg2 = nArg2;
-    SHAKE_Arg3 = nArg3;
     SHAKE_Amplitude = nAmplitude;
 }
 
@@ -965,7 +965,7 @@ void __fastcall ViewDraw2(D2GameViewStrc * pGameView) {
     }
 
     uint32_t nRecordingFrame = Game::gnRecordingIndex();
-    if (gnLastLightmapUpdateFrame < nRecordingFrame) {
+    if (nRecordingFrame > gnLastLightmapUpdateFrame) {
       gnLastLightmapUpdateFrame = nRecordingFrame;
       D2Client::Draw::LightMap::dLightMapUpdate();
     }
@@ -991,18 +991,18 @@ void __fastcall ViewDraw2(D2GameViewStrc * pGameView) {
         gnDrawBackgroundRenderOffset = 0;
       }
     }
-    if (pGameView->sWall2.dwWall2PassMask & 1) {
+    if (pGameView->sWall2.dwWall2PassMask & gadwBitMasks[0]) {
       Draw::DRAW_WORLD_UnderFloor(pGameView);
     }
 
     Draw::dFloorDraw(pGameView);
     D2Client::Draw::Weather::DRAW_WORLD_RainEffectOnFloor();
-    if (pGameView->sWall2.dwWall2PassMask & 8) {
+    if (pGameView->sWall2.dwWall2PassMask & gadwBitMasks[3]) {
       Draw::dShadowPass(pGameView);
     }
 
     Draw::dWallPass(pGameView);
-    if (pGameView->sWall2.dwWall2PassMask & 2) {
+    if (pGameView->sWall2.dwWall2PassMask & gadwBitMasks[1]) {
       Draw::dRoofDraw(pGameView);
     }
     if (gnFrameDrawCounter) {

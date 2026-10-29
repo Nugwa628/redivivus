@@ -382,7 +382,7 @@ void __stdcall WEATHER_FreeDC6Graphics() {
       }
 
       ppBubbleDC6Cur++;
-    } while ((int)ppBubbleDC6Cur < (uintptr_t)&DC6_UncompOverlays_bubble[4]);
+    } while ((int)ppBubbleDC6Cur < (int)((uintptr_t)&DC6_UncompOverlays_bubble[4]));
 }
 
 void __fastcall WEATHER_ClearParticleArrays(int bUpdateAct5) {
@@ -545,7 +545,12 @@ void __fastcall WEATHER_SpawnBubble(int nScreenX, int nScreenY, int nWorldX, int
     nRoll = pEnvironmentBubbles->pData;
     short int nBubbleIndex = (short int)(nSlot >> 0x10);
     uint32_t bPerspective = D2gfx::D2GFX::D2GFX_IsPerspectiveActive();
-    if (!bPerspective) {
+    if (bPerspective) {
+      nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
+      *(int32_t*)((int)nRoll + nBubbleIndex * 0x18 + 4) = (nRollResult - 2) * 0x10000 + nWorldX;
+      nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
+      nRange = (nRollResult - 2) * 0x10000 + nWorldY;
+    } else {
       int32_t iVar1;
       nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 0x50);
       nRange = nRollResult - 0x28;
@@ -557,11 +562,6 @@ void __fastcall WEATHER_SpawnBubble(int nScreenX, int nScreenY, int nWorldX, int
       iVar1 = Seed::RollBetweenMinAndMax(pSeed, -nRange, nRange * 2);
       *(int32_t*)((int)nRoll + nBubbleIndex * 0x18 + 4) = iVar1 + nScreenX;
       nRange = nRollResult - 0x1e + nScreenY;
-    } else {
-      nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
-      *(int32_t*)((int)nRoll + nBubbleIndex * 0x18 + 4) = (nRollResult - 2) * 0x10000 + nWorldX;
-      nRollResult = Seed::RollBetweenMinAndMax(pSeed, 0, 5);
-      nRange = (nRollResult - 2) * 0x10000 + nWorldY;
     }
 
     *(int*)((int)nRoll + nBubbleIndex * 0x18 + 8) = nRange;

@@ -388,10 +388,10 @@ void __fastcall UNITMODE_SendWalkToPosition(D2UnitStrc * pUnit, int32_t nTargetX
     local_c = nTargetX;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nPosDelta = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosDelta = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosDelta = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosDelta = 0;
     }
 
     nPosDelta = nTargetX - nPosDelta;
@@ -405,10 +405,10 @@ void __fastcall UNITMODE_SendWalkToPosition(D2UnitStrc * pUnit, int32_t nTargetX
     eUnitType = pUnit->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nPosDelta = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nPosDelta = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nPosDelta = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nPosDelta = 0;
     }
 
     nPosDelta = nTargetY - nPosDelta;

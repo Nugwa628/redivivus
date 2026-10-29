@@ -555,12 +555,13 @@ BOOL __fastcall Skills_CltStFunc_CheckCasterHasRoomNotInTown(D2UnitStrc * pUnit,
 }
 
 BOOL __fastcall Skills_CltDoFunc_Sor_SimpleMakeMissile(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
     eMissilesId eMissileId = SkillsAss::SKILLSASS_GetCltMissileByAuraLevel(pUnit, eSkill);
-    if (!(-1 < (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
     if (pUnit) {
@@ -708,7 +709,7 @@ int32_t __fastcall SKILLSSOR_StateCltEventFn01_ChillingArmor(int32_t nParam1, D2
     }
 
     D2MissilesTxt* pMissileTxt = GetMissleById(pMissile->nClassId);
-    if (!pMissileTxt->ReturnFire) {
+    if (!(*((uint8_t*)pMissileTxt + 0x5) & gadwBitMasks[1])) {
       return 0;
     }
 
@@ -718,22 +719,22 @@ int32_t __fastcall SKILLSSOR_StateCltEventFn01_ChillingArmor(int32_t nParam1, D2
     }
 
     eMissilesId eMissileId = (eMissilesId)pSkillTxt->cltmissile[1];
-    if (!(-1 < (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= (int)eMissileId && (int)eMissileId < sgptDataTable->nTxtMissilesSize)) {
       return 0;
     }
 
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.eSkillNo = eSkill;
     sSkillArg.nFlags = 0x20;
-    sSkillArg.nSkillLevel = nParam2;
     sSkillArg.pOwner = pUnit;
     sSkillArg.pMissile = pUnit;
+    sSkillArg.nSkillLevel = nParam2;
     sSkillArg.nMissileTxtNo = eMissileId;
     sSkillArg.nUnitX = Units::GetXPosFromDynamicPathUnit(pOwnerUnit);
     sSkillArg.nUnitY = Units::GetYPosFromDynamicPathUnit(pOwnerUnit);
     UNIT::Missile::MakeMissile(&sSkillArg);
     short int nOverlayId = pSkillTxt->cltoverlaya;
-    if (!(-1 < nOverlayId && (int)nOverlayId < sgptDataTable->nTxtOverlaySize)) {
+    if (!(0 <= nOverlayId && (int)nOverlayId < sgptDataTable->nTxtOverlaySize)) {
       return 1;
     }
 

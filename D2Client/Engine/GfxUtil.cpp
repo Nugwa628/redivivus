@@ -434,11 +434,12 @@ static void GFXUTIL_SetItemGfxFile(D2GfxDataStrc * pGfxData, D2UnitStrc * pUnit)
 }
 
 static int32_t GFXUTIL_GetOverlayNumDirections(int32_t nParam) {
-    if (!(-1 < nParam && nParam < sgptDataTable->nTxtOverlaySize && sgptDataTable->pTxtOverlay + nParam)) {
+    D2OverlayTxt* pTxtRecord = 0 <= nParam && nParam < sgptDataTable->nTxtOverlaySize ? &sgptDataTable->pTxtOverlay[nParam] : nullptr;
+    if (!pTxtRecord) {
       return 1;
     }
 
-    return (uint32_t)(uint8_t)sgptDataTable->pTxtOverlay[nParam].NumDirections;
+    return (uint32_t)(uint8_t)pTxtRecord->NumDirections;
 }
 
 static int32_t GFXUTIL_GetBodyLocWeaponToken(int32_t nBodyLoc, D2UnitStrc * pUnit) {
@@ -656,7 +657,7 @@ uint32_t __fastcall GFXUTIL_GetCofDrawOrder(uint8_t * pbParam, uint32_t nParam) 
 }
 
 int __fastcall GFXUTIL_IsValidUnitType(D2UnitStrc * pnParam) {
-    if (!(pnParam && -1 < (int)pnParam->eUnitType && (int)pnParam->eUnitType < 3)) {
+    if (!(pnParam && 0 <= (int)pnParam->eUnitType && (int)pnParam->eUnitType <= 2)) {
       return 0;
     }
 
@@ -917,14 +918,7 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
     __frame0.nScreenY = 0;
     uint32_t nDirection = nParam;
     uint32_t bIsPerspective = D2gfx::D2GFX::D2GFX_IsPerspectiveActive();
-    if (!bIsPerspective) {
-      nBais = D2Common::Units::GetTargetX(pUnit);
-      nWorldOffset = UI::Path::DRAW_GetWorldOffsetX();
-      __frame0.nScreenX = nBais - nWorldOffset;
-      nBais = D2Common::Units::GetTargetY(pUnit);
-      nWorldOffset = UI::Path::DRAW_GetWorldOffsetY();
-      __frame0.nScreenY = nBais - nWorldOffset;
-    } else {
+    if (bIsPerspective) {
       int32_t nCoord;
       pYAdjust = &__frame0.nScreenY;
       pXAdjust = &__frame0.nScreenX;
@@ -938,6 +932,13 @@ uint32_t __fastcall GFXUTIL_GetUnitCofDirectionOnScreen(D2UnitStrc * pUnit, uint
       } else if (uVar1 == 2) {
         __frame0.nScreenX += (int)(ScreenSizeX + (ScreenSizeX >> 0x1f & 3U)) >> 2;
       }
+    } else {
+      nBais = D2Common::Units::GetTargetX(pUnit);
+      nWorldOffset = UI::Path::DRAW_GetWorldOffsetX();
+      __frame0.nScreenX = nBais - nWorldOffset;
+      nBais = D2Common::Units::GetTargetY(pUnit);
+      nWorldOffset = UI::Path::DRAW_GetWorldOffsetY();
+      __frame0.nScreenY = nBais - nWorldOffset;
     }
 
     D2GfxInfoUnkStrc* pGfxInfo = Gfx::GFX_IsUnitOnScreen(pUnit, __frame0.nScreenX, __frame0.nScreenY, 0, 0);

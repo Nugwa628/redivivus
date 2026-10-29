@@ -345,18 +345,15 @@ void __stdcall CMD_AutomapCycleFade() {
 }
 
 void __stdcall CMD_AutomapToggleParty() {
-    BOOL BVar1 = UI::Automap::AUTOMAP_GetParty();
-    UI::Automap::AUTOMAP_SetParty((uint32_t)!BVar1);
+    UI::Automap::AUTOMAP_SetParty((uint32_t)!UI::Automap::AUTOMAP_GetParty());
 }
 
 void __stdcall CMD_AutomapTogglePartyNames() {
-    int32_t iVar1 = UI::Automap::AUTOMAP_GetPartyNames();
-    UI::Automap::AUTOMAP_SetPartyNames((uint32_t)!iVar1);
+    UI::Automap::AUTOMAP_SetPartyNames((uint32_t)!UI::Automap::AUTOMAP_GetPartyNames());
 }
 
 void __stdcall CMD_AutomapToggleLeft() {
-    int32_t iVar1 = UI::Automap::AUTOMAP_GetLeft();
-    UI::Automap::AUTOMAP_SetLeft((uint32_t)!iVar1);
+    UI::Automap::AUTOMAP_SetLeft((uint32_t)!UI::Automap::AUTOMAP_GetLeft());
 }
 
 void __stdcall CMD_ToggleSkillTree() {
@@ -907,7 +904,7 @@ void __stdcall CMD_RebuildDerivedBindings() {
 }
 
 D2MissilesTxt * __fastcall GetMissleById(int32_t nMissileId) {
-    if (!(-1 < nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
+    if (!(0 <= nMissileId && nMissileId < sgptDataTable->nTxtMissilesSize)) {
       return nullptr;
     }
 
@@ -1015,7 +1012,7 @@ eD2PlayerClassID __stdcall CLIENT_GetDefaultCharClass() {
 
 // Returns 1 if arena mode is active (bit 8 of CLIENT_ArenaFlags is set), indicating the game session is running in arena/PvP mode.
 uint32_t __stdcall CLIENT_IsArenaMode() {
-    return CLIENT_ArenaFlags >> 8 & 1;
+    return (uint32_t)CLIENT_ArenaFlags >> 8 & 1;
 }
 
 void __stdcall INPUT_HandleIMEComposition(D2UIMouseMsgStrc * pMsg) {
@@ -1702,11 +1699,14 @@ void __stdcall SHOP_CleanupAssets() {
 
 void __fastcall NET_D2GS_CLIENT_Handle0x50_QuestSpecial(D2GSPacketSrv0x50 * pPacket) {
     switch (pPacket->nMessageType) {
-      case 1:
-        UI::QuestLog::QUESTLOG_HandleSpecialPacket((int32_t)pPacket);
+      case 0x24:
+        UI::QuestLog::QUESTLOG_SetZooSpawnFlag((uint32_t)pPacket->aPayload[0]);
       return;
       case 2:
         UI::npcmenu::Merc::NPCMENU_SetSelectedMercIndex(pPacket->aPayload[0]);
+      return;
+      case 1:
+        UI::QuestLog::QUESTLOG_HandleSpecialPacket((int32_t)pPacket);
       return;
       case 3:
 
@@ -1724,9 +1724,6 @@ void __fastcall NET_D2GS_CLIENT_Handle0x50_QuestSpecial(D2GSPacketSrv0x50 * pPac
       GAME::Game::D2CLIENT_SetExitVar2(1);
       GAME::Game::D2CLIENT_SetExitVar3ToTrue();
       return;
-      case 0x24:
-        UI::QuestLog::QUESTLOG_SetZooSpawnFlag((uint32_t)pPacket->aPayload[0]);
-      return;
     }
 }
 
@@ -1735,11 +1732,9 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x5E_QUESTPICKS(char * pBytes) {
     int nDwordCount;
     uint8_t* pSrc = (uint8_t*)(pBytes + 1);
     uint8_t* pDst = aQuestAvailabilityPacket;
-    for (nDwordCount = 9; nDwordCount; nDwordCount--) {
-      *(uint32_t*)pDst = *(uint32_t*)pSrc;
-      pSrc += 4;
-      pDst += 4;
-    }
+    memcpy(pDst, pSrc, 9 * 4);
+    pSrc += 9 * 4;
+    pDst += 9 * 4;
 
     *pDst = *pSrc;
     bReceivedQuestAvailabilityPacket = 1;
@@ -1778,7 +1773,7 @@ int32_t __fastcall SEED_RollRange(D2SeedStrc * pSeed, int32_t nMin, int32_t nMax
     if (nRangeWidth & nRangeWidth - 1) {
       dSeedResult = D2_SEED_NEXT(*pSeed);
       *pSeed = dSeedResult;
-      return (int)(((uint64_t)d2_bits_of(dSeedResult) & 0xffffffff) % (uint64_t)nRangeWidth) + nMin;
+      return (int)(dSeedResult.nSeedLow % nRangeWidth) + nMin;
     }
 
     dSeedResult = D2_SEED_NEXT(*pSeed);

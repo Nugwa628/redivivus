@@ -795,7 +795,8 @@ static D2UnitStrc * CUNIT_IterateUntilWarp(int * pnParam) {
 uint16_t * __fastcall ROOM_GetWarpDestinationName(D2RoomStrc * pRoom, D2UnitStrc * pWarpUnit) {
     eD2LevelId eDestLevel = !pWarpUnit ? ~LEVEL_None : pWarpUnit->nClassId;
     eDestLevel = D2Common::DUNGEON::Dungeon::GetWarpDestinationLevel(pRoom, eDestLevel);
-    if (eDestLevel == LEVEL_None) {
+    switch (eDestLevel) {
+    case LEVEL_None:
       return nullptr;
     }
 
@@ -1037,7 +1038,7 @@ uint32_t __fastcall SKILL_IsTargetOwnedPet(D2UnitStrc * pUnit, int * pnSkillPara
     if (pSkill) {
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UNIT\\CUnit.cpp", 0xb4a);
       pSkillsTxt = GAME::SCmd::TXT_Skills_GetLine(eSkillId);
-      if (pSkillsTxt && pSkillsTxt->TargetPet) {
+      if (pSkillsTxt && (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[1])) {
         bHasPetSkill = true;
       }
     }
@@ -1046,7 +1047,7 @@ uint32_t __fastcall SKILL_IsTargetOwnedPet(D2UnitStrc * pUnit, int * pnSkillPara
     if (pSkill) {
       eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UNIT\\CUnit.cpp", 0xb55);
       pSkillsTxt = GAME::SCmd::TXT_Skills_GetLine(eSkillId);
-      if (pSkillsTxt && pSkillsTxt->TargetPet) {
+      if (pSkillsTxt && (*((uint8_t*)pSkillsTxt + 0x7) & gadwBitMasks[1])) {
         nOwnerGUID = GAME::RosterPets::GetRosterOwnerGUID(pnSkillParams[3]);
         return (uint32_t)(nOwnerGUID == pUnit->nUnitGUID);
       }
@@ -1551,6 +1552,11 @@ static void FreeAny(D2UnitStrc * pUnit) {
       Monster::FreeMonster(pUnit);
       UnitSnd::IterateUnitSfxData(pUnit, 1);
       break;
+      case UNIT_ITEM:
+        ITEM_FreeItemUnit(pUnit);
+      D2Common::ITEMS::Items::ITEMDATA_Free(nullptr, pUnit);
+      D2Common::Units::FreeStaticPath(pUnit);
+      break;
       case UNIT_OBJECT:
         if (pUnit->pHoverText) {
           UI::Text::TEXT_FreeHoverText(pUnit->pHoverText);
@@ -1562,11 +1568,6 @@ static void FreeAny(D2UnitStrc * pUnit) {
       break;
       case UNIT_MISSILE:
         Missile::MISSILE_FreeClientMissile(pUnit);
-      break;
-      case UNIT_ITEM:
-        ITEM_FreeItemUnit(pUnit);
-      D2Common::ITEMS::Items::ITEMDATA_Free(nullptr, pUnit);
-      D2Common::Units::FreeStaticPath(pUnit);
       break;
       case UNIT_WARP:
         if (sgpDrlgAct) {
@@ -1690,6 +1691,7 @@ void __stdcall CLIENT_UpdateUnitGfxState() {
 
 void __fastcall FaceTarget(D2UnitStrc * pUnit, int32_t nParam) {
     int32_t nTargetY;
+    int32_t nTargetX;
     Path::ConfirmTarget(pUnit);
     if (!pUnit->pPath.pDynamicPath) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x946);
@@ -1707,9 +1709,7 @@ void __fastcall FaceTarget(D2UnitStrc * pUnit, int32_t nParam) {
       exit(-1);
     }
 
-    nTargetY = Units::GetYPosFromDynamicPathUnit(pTarget);
-    int32_t nTargetX = Units::GetXPosFromDynamicPathUnit(pTarget);
-    D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pDynamicPath, nTargetX, nTargetY, nParam);
+    D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pDynamicPath, Units::GetXPosFromDynamicPathUnit(pTarget), Units::GetYPosFromDynamicPathUnit(pTarget), nParam);
 }
 
 // Determines whether pUnit may interact with / target pUnit2 (hostility & targetability check). Returns nonzero if interaction allowed, 0 if not. Resolves pets to their player owner via RosterPets::GetRosterOwnerGUID and charmed/owned units. In town: only allows player-vs-player when ROSTER_CheckPlayerCanLoot permits looting a dead party member. Out of town: rejects self/same-unit; player-vs-player uses loot rights then PlayerList party flag (8); against monsters consults MonStats2 alSel/noSel flags (always-selectable / never-selectable); players may always interact with items and objects; otherwise falls back to Path::IsAllyOf (returns true only if NOT an ally). Also blocks a player from interacting with an enemy pet they don't own.

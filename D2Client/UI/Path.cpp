@@ -251,7 +251,7 @@ void __stdcall DEBUG_DrawWarpUnitBounds() {
 
     D2Common::DUNGEON::Dungeon::DRLGROOM_GetAdjacentRoomsList(pRoom, &ppAdjacentRooms, (int*)&nRoomCount);
     uint32_t i = 0;
-    if (!nRoomCount) {
+    if ((uint32_t)nRoomCount <= 0) {
       return;
     }
 
@@ -305,16 +305,16 @@ void __stdcall DRAW_DrawRoomCollisionGrid(D2RoomStrc * pRoom) {
       return;
     }
 
-    int nXEnd = roomCoords.dwXSize + 5 + roomCoords.dwXStart;
     int nXStart = roomCoords.dwXStart;
+    int nXEnd = roomCoords.dwXSize + 5 + roomCoords.dwXStart;
     int nYStart = roomCoords.dwYStart;
     do {
       int nX;
       nX = nXStart + 3;
       while (nX < nXEnd) {
         nGridIndex = D2Common::DUNGEON::Dungeon::GetGridIndex(pRoom, nX, nY);
-        nScreenY = nY;
         nScreenX = nX;
+        nScreenY = nY;
         D2Common::Drlg::Transform::CoordsMapToScreen(&nScreenX, &nScreenY);
         rect.left = nScreenX - MouseXOffset - 0x10;
         rect.right = nScreenX - MouseXOffset + 0x10;
@@ -447,21 +447,21 @@ void __stdcall DEBUG_DrawLogicalRoomOverlay() {
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_Net();
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nY = 0;
     }
 
     D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);

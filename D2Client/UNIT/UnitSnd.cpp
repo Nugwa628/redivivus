@@ -124,7 +124,7 @@ static int32_t GetSndUnitMode(D2UnitStrc * pUnit) {
 }
 
 static int * UNITSND_GetBaseSoundId(uint32_t nUnitClassId) {
-    if (!(6 >= nUnitClassId)) {
+    if (!(7 > nUnitClassId)) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xb22);
       exit(-1);
     }
@@ -1040,7 +1040,7 @@ static eD2Sounds UNITSND_GetSpecialSoundByMode(D2UnitStrc * pUnit, int32_t nMode
 }; D2_STATIC_GUARD(gaUnitSoundTableSpecialMode, "D2Client::UNIT::UnitSnd::UNITSND_GetSpecialSoundByMode::gaUnitSoundTableSpecialMode");
 
     DWORD nSndClassId = GetSndUnitClassId(pUnit);
-    if (0x23c < nSndClassId || 7 < nMode) {
+    if (0x23d <= nSndClassId || 8 <= nMode) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xe86);
       exit(-1);
     }
@@ -1401,14 +1401,12 @@ static void UNITSND_PlayFleeSound(D2UnitStrc * pUnit) {
     }
 
     int32_t nRecordingIdx = GAME::Game::gnRecordingIndex();
-    if (3 >= nRecordingIdx - gdwSoundChannelIndex) {
+    if (4 > nRecordingIdx - gdwSoundChannelIndex) {
       return;
     }
 
-    int32_t nSfxTick = 0;
-    nRecordingIdx = 0;
-    uint32_t nFleeDelay = _Utils::RollRandomNumerUpToArgument(3);
-    Sound::SOUND_PlaySound(pMonSoundsLine->Flee, pUnit, nFleeDelay + 6, nRecordingIdx, nSfxTick);
+    uint32_t nFleeDelay;
+    Sound::SOUND_PlaySound(pMonSoundsLine->Flee, pUnit, _Utils::RollRandomNumerUpToArgument(3) + 6, 0, 0);
     nFleeDelay = GAME::Game::gnRecordingIndex();
     SetSfxTicks(nFleeDelay, pUnit);
     gdwSoundChannelIndex = GAME::Game::gnRecordingIndex();
@@ -1788,12 +1786,14 @@ void __fastcall MuteOrUnmuteUnitSounds(D2UnitStrc * pUnit, int32_t nMuteDelta) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xcfd);
       exit(-1);
     }
-    if (!pUnit->uSideData.pClientSide.bHasActiveSound) {
+    if (pUnit->uSideData.pClientSide.bHasActiveSound) {
+      if (0 < nMuteDelta) {
+        return;
+      }
+    } else {
       if (nMuteDelta < 0) {
         return;
       }
-    } else if (0 < nMuteDelta) {
-      return;
     }
 
     *(uint32_t*)((uintptr_t)&pUnit->uSideData + 0x24) = (uint32_t)(0 < nMuteDelta);
@@ -1811,7 +1811,7 @@ void __fastcall MuteOrUnmuteUnitSounds(D2UnitStrc * pUnit, int32_t nMuteDelta) {
       }
     } else if (nUnitType == 2) {
       DVar2 = GetSndUnitClassId(pUnit);
-      if (0x23c < DVar2) {
+      if (0x23d <= DVar2) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1213);
         exit(-1);
       }

@@ -577,7 +577,7 @@ void __stdcall ClientSideGameLoop() {
     D2Common::DUNGEON::Dungeon::DRLGROOMEX_UpdateClientRoomExActivation(pDrlgAct);
     UI::Automap::AUTOMAP_Update();
     gClientGameData.gnRecordEntryIndex++;
-    if (gClientGameData.gnRecordEntryIndex != (uint32_t)gClientGameData.gnRecordEntryIndex / 0xd * 0xd) {
+    if ((uint32_t)gClientGameData.gnRecordEntryIndex % 0xd != 0) {
       return;
     }
 
@@ -593,8 +593,7 @@ void __stdcall GAMEDATA_InitializeEclipseEnvironment() {
       bEclipse = 1;
       nAngle = 0;
       nIndex = 5;
-      pRoom = UNIT::CUnit::GetCurrentRoom();
-      D2Common::Environment::DRLGENV_InitializeEnvironment(sgpDrlgAct, pRoom, nIndex, nAngle, bEclipse);
+      D2Common::Environment::DRLGENV_InitializeEnvironment(sgpDrlgAct, UNIT::CUnit::GetCurrentRoom(), nIndex, nAngle, bEclipse);
       return;
     }
 
@@ -1175,12 +1174,8 @@ void __stdcall Congratz_SetOkClicked(D2UIMouseMsgStrc * pMsg) {
 int32_t __fastcall GAMEDATA_GetCenteredTextX(uint16_t nStringId, int32_t nCenterX) {
     int iClear;
     uint16_t wszText[100];
-    uint16_t* pSourceStr = wszText;
-    for (iClear = 0x32; iClear; iClear--) {
-      pSourceStr[0] = L'\0';
-      pSourceStr[1] = L'\0';
-      pSourceStr += 2;
-    }
+    uint16_t* pSourceStr;
+    for (int i = 0; i < 0x64; i++) wszText[i] = 0;
 
     pSourceStr = D2Lang::StrTable::strtable::GetLocaleString(nStringId);
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszText, pSourceStr);
@@ -1289,7 +1284,10 @@ void __fastcall ClientInit_StartingAct(D2IniConfigStrc * pIniConfig) {
     if (!iVar1) {
       return;
     }
-    if (iVar1 < 6) {
+    if (!(iVar1 < 6)) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd26);
+      exit(-1);
+    } else {
       if (!(0 < iVar1)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd27);
         exit(-1);
@@ -1297,9 +1295,6 @@ void __fastcall ClientInit_StartingAct(D2IniConfigStrc * pIniConfig) {
 
       D2Game::GAME::Server::SetupStartingAct(iVar1 - 1);
       return;
-    } else {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0xd26);
-      exit(-1);
     }
 }
 
@@ -1725,7 +1720,7 @@ eD2GSGameType __stdcall CLIENT_GetD2GSGameType() {
 
 void __fastcall GAMEDATA_ExtendTimeout(int32_t nDelayMs) {
     DWORD dwCurrentTick = GetTickCount();
-    if ((uint32_t)gClientGameData.gdwCatchupTimeoutTick >= dwCurrentTick + nDelayMs) {
+    if (dwCurrentTick + nDelayMs <= (uint32_t)gClientGameData.gdwCatchupTimeoutTick) {
       return;
     }
 
@@ -1789,7 +1784,7 @@ void __fastcall CLIENT_SetDifficulty(char nDifficulty) {
     CLIENT_nDifficulty = nDifficulty;
 }
 
-void __fastcall CLIENT_SetExpansion(bool bExpansion) {
+void __fastcall CLIENT_SetExpansion(uint8_t bExpansion) {
     gClientGameData.CLIENT_bExpansion = (uint32_t)bExpansion;
 }
 
@@ -1818,26 +1813,22 @@ uint8_t __stdcall GetDificulity() {
 // Clear in-game UI flags for several UI elements (data_0070f2c4/348/360).
 void __stdcall ClearInGameUIFlags() {
     int32_t nHandlerCount = 1;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &g_UIFlagInitGameDataPanel1, nHandlerCount);
+    HWND hWnd;
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitGameDataPanel1, nHandlerCount);
     nHandlerCount = 2;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, g_UIFlagInitGameDataPanel2, nHandlerCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel2, nHandlerCount);
     nHandlerCount = 2;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, g_UIFlagInitGameDataPanel3, nHandlerCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel3, nHandlerCount);
 }
 
 void __stdcall GAMEDATA_RegisterEventHandlers() {
     int32_t nCount = 1;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, &g_UIFlagInitGameDataPanel1, nCount);
+    HWND hWnd;
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitGameDataPanel1, nCount);
     nCount = 2;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, g_UIFlagInitGameDataPanel2, nCount);
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel2, nCount);
     nCount = 2;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, g_UIFlagInitGameDataPanel3, nCount);
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitGameDataPanel3, nCount);
 }
 
 void __fastcall D2CLIENT_ExitGame(int32_t nParam) {
@@ -2012,7 +2003,7 @@ void __fastcall CLIENT_ConnectionRefused(int32_t nReason) {
     }
 
     gnConnectionRefusedReason = nReason;
-    if (0x1c < nReason) {
+    if (0x1d <= nReason) {
       gnConnectionRefusedReason = 9;
     }
 

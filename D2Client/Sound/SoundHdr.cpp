@@ -142,7 +142,7 @@ uint32_t __fastcall SOUNDHDR_GetSoundLoopFlag(int32_t nSoundId) {
 }
 
 D2SoundEnvironTxt * __fastcall GetSoundEnvironLine(int32_t nSoundEnviron) {
-    if (!(pTxtSoundEnviron && -1 < nSoundEnviron && nSoundEnviron < nTxtSoundEnvironSize)) {
+    if (!(pTxtSoundEnviron && 0 <= nSoundEnviron && (int)nSoundEnviron < (int)nTxtSoundEnvironSize)) {
       return nullptr;
     }
 
@@ -688,7 +688,7 @@ float __fastcall SOUNDHDR_GetFalloffMin(int32_t nSoundId) {
 }
 
 float __fastcall SOUNDHDR_GetFalloffMax(int32_t nSoundId) {
-    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nTxtSoundsSize <= nSoundId ? 0 : pTxtSounds + nSoundId;
+    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nSoundId >= (int)nTxtSoundsSize ? 0 : pTxtSounds + nSoundId;
     switch (pSound->Falloff) {
       case 0:
         return 400.0;
@@ -840,7 +840,7 @@ void __fastcall SOUNDHDR_BuildSoundPath(int32_t nSoundId, uint32_t * pszOutPath)
 }
 
 void __fastcall SOUNDHDR_UpdateLRUTimestamp(int32_t nSoundId) {
-    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nTxtSoundsSize <= nSoundId ? 0 : pTxtSounds + nSoundId;
+    D2SoundsTxt* pSound = !pTxtSounds || nSoundId < 0 || nSoundId >= (int)nTxtSoundsSize ? 0 : pTxtSounds + nSoundId;
     pSound->nLRUTimestamp = gnCurrentGameAudioVolume;
     D2Sound::D2SoundUntil::SOUND_sD2SoundSmp_Free((int**)&gpSoundLRUListHead, nSoundId);
     D2Sound::D2SoundUntil::SOUNDUTIL_AppendToLinkedList(&gpSoundLRUListHead, nSoundId);
@@ -849,21 +849,21 @@ void __fastcall SOUNDHDR_UpdateLRUTimestamp(int32_t nSoundId) {
 // @sourcefile .\Sound\SoundHdr.cpp
 void __stdcall SOUNDHDR_Shutdown() {
     if (pTxtSoundEnviron) {
-      D2_FREE_AT(pTxtSoundEnviron, ".\\Sound\\SoundHdr.cpp", 0x181);
+      Fog::Memory::FreeClientMemory(pTxtSoundEnviron, ".\\Sound\\SoundHdr.cpp", 0x181, 0);
       pTxtSoundEnviron = 0;
       nTxtSoundEnvironSize = 0;
     }
     if (pTxtSounds) {
       int nSoundId;
       nSoundId = 1;
-      if (1 < nTxtSoundsSize) {
+      if (1 < (int)nTxtSoundsSize) {
         do {
           SOUNDHDR_FreeSoundBuffer(nSoundId);
           nSoundId++;
-        } while (nSoundId < nTxtSoundsSize);
+        } while ((int)nSoundId < (int)nTxtSoundsSize);
       }
 
-      D2_FREE_AT(pTxtSounds, ".\\Sound\\SoundHdr.cpp", 0x18e);
+      Fog::Memory::FreeClientMemory(pTxtSounds, ".\\Sound\\SoundHdr.cpp", 0x18e, 0);
       pTxtSounds = 0;
       nTxtSoundsSize = 0;
     }

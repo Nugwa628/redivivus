@@ -126,7 +126,7 @@ static D2GridScreenCoordinates gnTradePage2ScreenTop = {}; D2_STATIC_GUARD(gnTra
 static D2GridScreenCoordinates gnTradePage2ScreenBottom = {}; D2_STATIC_GUARD(gnTradePage2ScreenBottom, "D2Client::UI::Inv::gnTradePage2ScreenBottom");
 static D2GridScreenCoordinates gnTradePage2ScreenLeft = {}; D2_STATIC_GUARD(gnTradePage2ScreenLeft, "D2Client::UI::Inv::gnTradePage2ScreenLeft");
 static D2GridScreenCoordinates gnTradePage2ScreenRight = {}; D2_STATIC_GUARD(gnTradePage2ScreenRight, "D2Client::UI::Inv::gnTradePage2ScreenRight");
-static bool gbInvOverlayFlag = 0; D2_STATIC_GUARD(gbInvOverlayFlag, "D2Client::UI::Inv::gbInvOverlayFlag");
+static BOOL gbInvOverlayFlag = 0; D2_STATIC_GUARD(gbInvOverlayFlag, "D2Client::UI::Inv::gbInvOverlayFlag");
 
 void __stdcall InitializeiInventoryPages() {
     // Static local variables (originally global data)
@@ -2672,7 +2672,8 @@ static D2UnitStrc * GetSetItem(int32_t nId, D2InventoryStrc * pInventory) {
           eVar1 = D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pCarriedItem);
           if ((eVar1 == INVPAGE_INVENTORY || eVar1 == INVPAGE_CUBE || eVar1 == INVPAGE_STASH || eVar1 == INVPAGE_None) && ((iVar1 = D2Common::INVENTORY::Inventory::ITEM_GetItemData_eD2InventoryGridType(pUnit) , iVar1 == 1 || iVar1 == 3) || iVar1 == 4)) {
             nQuality = D2Common::ITEMS::Items::ITEM_GetItemData_nFileIndex(pCarriedItem);
-            if (-1 < nQuality && nQuality < sgptDataTable->nTxtSetItemsSize && sgptDataTable->pTxtSetItems + nQuality && sgptDataTable->pTxtSetItems[nQuality].nId == nId) {
+            D2SetItemsTxt* pTxtRecord = 0 <= nQuality && nQuality < sgptDataTable->nTxtSetItemsSize ? &sgptDataTable->pTxtSetItems[nQuality] : nullptr;
+            if (pTxtRecord && pTxtRecord->nId == nId) {
               break;
             }
           }
@@ -3355,14 +3356,14 @@ int32_t __stdcall ClickItemRight(D2UnitStrc * pItem, D2InventoryStrc * pGridCoor
       nCellHeightDivisor = (uint32_t)pInventoryGridScreenCoordinated.nCellHeight;
     } else {
       bExpansion = GAME::Game::CLIENT_CheckExpansion();
-      if (!bExpansion) {
-        nCol = (uint32_t)((int)pGridCoords - pBankPageGridScreenCoordinates.nPixelLeft) / (uint32_t)pBankPageGridScreenCoordinates.nCellWidth;
-        nRowOffset = (int)pItem - pBankPageGridScreenCoordinates.nTop;
-        nCellHeightDivisor = (uint32_t)pBankPageGridScreenCoordinates.nCellHeight;
-      } else {
+      if (bExpansion) {
         nCol = (uint32_t)((int)pGridCoords - pBigBankPageGridScreenCoordinates.nPixelLeft) / (uint32_t)pBigBankPageGridScreenCoordinates.nCellWidth;
         nRowOffset = (int)pItem - pBigBankPageGridScreenCoordinates.nTop;
         nCellHeightDivisor = (uint32_t)pBigBankPageGridScreenCoordinates.nCellHeight;
+      } else {
+        nCol = (uint32_t)((int)pGridCoords - pBankPageGridScreenCoordinates.nPixelLeft) / (uint32_t)pBankPageGridScreenCoordinates.nCellWidth;
+        nRowOffset = (int)pItem - pBankPageGridScreenCoordinates.nTop;
+        nCellHeightDivisor = (uint32_t)pBankPageGridScreenCoordinates.nCellHeight;
       }
     }
 
@@ -3413,10 +3414,10 @@ int32_t __stdcall ClickItemRight(D2UnitStrc * pItem, D2InventoryStrc * pGridCoor
       eUnitType = pPlayer->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
         nPosY = pPlayer->pPath.pStaticPath->nPosY;
-      } else if (!pPlayer->pPath.pDynamicPath) {
-        nPosY = 0;
-      } else {
+      } else if (pPlayer->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pPlayer->pPath.pDynamicPath);
+      } else {
+        nPosY = 0;
       }
 
       bExpansion = UNIT::PlayerIsUnInterruptable(pItemAtCell);
@@ -4536,10 +4537,7 @@ void __fastcall INV_InitTradeMode(int32_t nParam) {
     gbInvTradeWindowOpen = 0;
     gbInvTradeWindowOpen2 = 0;
     gnInvInventoryGold = 0;
-    if (!nParam) {
-      g_nCurrentInventoryPage = 10;
-      Path::TypeOfUiOverlayOverWorld(0);
-    } else {
+    if (nParam) {
       char szPathBuf[260];
       gdwInvLastActionTickCount = 0;
       g_nCurrentInventoryPage = 0xb;
@@ -4548,6 +4546,9 @@ void __fastcall INV_InitTradeMode(int32_t nParam) {
         Storm::Source::SSTR::SStrPrintf(szPathBuf, 0x104, "%s\\ui\\panel\\trade", "DATA\\GLOBAL");
         gpInvShopTabImage = Core::Archive::IMAGE_LoadDC6Ex(szPathBuf, 0);
       }
+    } else {
+      g_nCurrentInventoryPage = 10;
+      Path::TypeOfUiOverlayOverWorld(0);
     }
 
     gShopTradeUIState = 0;
@@ -5139,7 +5140,7 @@ static BOOL __stdcall INV_IsMouseOverTransmuteBtn(int32_t nX, int32_t nY) {
 }
 
 static BOOL CheckSomeCoords(int32_t nX, int32_t nY) {
-    if (!(gnPanelOffsetX + 0x90 < nX && nX < gnPanelOffsetX + 0xb8 && gnPanelOffsetY - 0xdf + ScreenSizeY < nY && nY < gnPanelOffsetY - 0xb7 + ScreenSizeY)) {
+    if (!(nX > gnPanelOffsetX + 0x90 && nX < gnPanelOffsetX + 0xb8 && nY > gnPanelOffsetY - 0xdf + ScreenSizeY && nY < gnPanelOffsetY - 0xb7 + ScreenSizeY)) {
       return 0;
     }
 
@@ -5529,12 +5530,12 @@ BOOL __stdcall INV_IsMouseInRectLTRB(int32_t nLeft, int32_t nTop, int32_t nRight
 void __stdcall INV_DrawHirelingName(D2UnitStrc * pUnit) {
     int nTextWidth;
     uint16_t wszNameBuf[32];
-    memset(wszNameBuf, 0, 32 * sizeof(wszNameBuf[0]));
+    for (int i = 0; i < 32; i++) wszNameBuf[i] = 0;
     int32_t nPrevFont = D2Win::Src::D2WinFont::SetAndReturnLastFont(6);
     size_t nMaxChars = 0x20;
-    uint16_t* pwTruncate = UNIT::CUnit::GetName(pUnit);
-    D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(wszNameBuf, pwTruncate, nMaxChars);
-    *(uint32_t*)((char*)&wszNameBuf + 60) &= 0xffff;
+    uint16_t* pwTruncate;
+    D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(wszNameBuf, UNIT::CUnit::GetName(pUnit), nMaxChars);
+    wszNameBuf[31] = 0;
     pwTruncate = wszNameBuf + 0x1f;
     nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszNameBuf);
     while (0xa0 < nTextWidth) {
@@ -5847,17 +5848,7 @@ static void INV_DrawHirelingStats(D2UnitStrc * pUnit) {
         }
 
         pDmgTypeStatArray = (eD2UnitStat*)D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, UNITSTAT_maxdamage, 0);
-        if (!pRightArmItem) {
-          iServerStat = UNIT::GetClassId(pUnit);
-          if (iServerStat == 0x10f) {
-            eStatId = UNITSTAT_dexterity;
-          } else {
-            eStatId = UNITSTAT_strength;
-          }
-
-          iDamageValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eStatId, 0);
-          iStatRaw += iDamageValue;
-        } else {
+        if (pRightArmItem) {
           bResult = D2Common::ITEMS::Items::IsTwoHanded(pRightArmItem);
           if (bResult) {
             iDamageValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pRightArmItem, UNITSTAT_mindamage, 0);
@@ -5887,6 +5878,16 @@ static void INV_DrawHirelingStats(D2UnitStrc * pUnit) {
           iServerStat = D2Common::Skills::SKILLS_GetItemBonusDamage(pUnit, pRightArmItem, nullptr, 1);
           iStatRaw += iServerStat;
           iStatBonusPct = D2Common::Stats::StatsEx::ITEM_GetMinimalStatValueShifted(pRightArmItem, UNITSTAT_item_normaldamage, 0);
+        } else {
+          iServerStat = UNIT::GetClassId(pUnit);
+          if (iServerStat == 0x10f) {
+            eStatId = UNITSTAT_dexterity;
+          } else {
+            eStatId = UNITSTAT_strength;
+          }
+
+          iDamageValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pUnit, eStatId, 0);
+          iStatRaw += iDamageValue;
         }
         if (iStatRaw < -0x59) {
           iStatRaw = -0x5a;
@@ -6641,9 +6642,9 @@ void __stdcall INV_DrawRecipeScroll() {
 
     DC6* pScrollImage = gpInvCubeRecipeScrollImage;
     memset(&sGfxData, 0, 0x48);
+    sGfxData.pDC6 = pScrollImage;
     sGfxData.nDirection = 0;
     sGfxData.nFrameNumber = 0;
-    sGfxData.pDC6 = pScrollImage;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, gnPanelOffsetX, gnPanelOffsetY - 0xe0 + ScreenSizeY, -1, DRAW_SOLID, nullptr);
     sGfxData.nFrameNumber = 1;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, gnPanelOffsetX + 0x100, gnPanelOffsetY - 0xe0 + ScreenSizeY, -1, DRAW_SOLID, nullptr);
@@ -6661,7 +6662,7 @@ void __stdcall INV_HandleRecipeScrollClick(D2UIMouseMsgStrc * pMsg) {
     int nRightBound = ScreenSizeX / 2;
     int nMouseX = ui::GetMouseX();
     int nMouseY = ui::GetMouseY();
-    if (!(-1 < nMouseX && nMouseX <= nRightBound && -1 < nMouseY && nMouseY <= nBottomBound)) {
+    if (!(0 <= nMouseX && nMouseX <= nRightBound && 0 <= nMouseY && nMouseY <= nBottomBound)) {
       return;
     }
 

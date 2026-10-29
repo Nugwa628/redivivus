@@ -593,22 +593,20 @@ void __stdcall DIALOG_InitializeSystem() {
 void __stdcall DIALOG_CleanupSystem() {
     int32_t nHandlerCount;
     D2DialogStrc* pNextDialog;
-    D2DialogStrc* pDialogNode = gpDialogActual;
+    D2DialogStrc* pDialogNode;
     if (gnDialogStructAllocCount) {
       HWND hWnd;
       nHandlerCount = 0xe;
-      hWnd = D2gfx::D2GFX::GetHwnd();
-      _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, gsUIDialogFlagInit, nHandlerCount);
+      _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUIDialogFlagInit, nHandlerCount);
       nHandlerCount = 1;
-      hWnd = D2gfx::D2GFX::GetHwnd();
-      _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &g_UIFlagInitDialogMouseWheel, nHandlerCount);
+      _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &g_UIFlagInitDialogMouseWheel, nHandlerCount);
       gnDialogCounter--;
-      pDialogNode = gpDialogActual;
     }
 
+    pDialogNode = gpDialogActual;
     while (pDialogNode) {
       pNextDialog = pDialogNode->pPrev;
-      D2_FREE_AT(pDialogNode, ".\\UI\\dialog.cpp", 0x333);
+      Fog::Memory::FreeClientMemory(pDialogNode, ".\\UI\\dialog.cpp", 0x333, 0);
       pDialogNode = pNextDialog;
     }
 
@@ -633,7 +631,7 @@ void __stdcall DIALOG_RegisterHandler() {
     uint32_t nKeyCode = CmdTbl::CMD_IsCommandBound(0x26, 1);
     if (nKeyCode) {
       uVar1 = CmdTbl::CMD_GetKeyForCommand(0x26, 1);
-      if (uVar1 != 0xffff && uVar1 < 0xe0) {
+      if (uVar1 != 0xffff && uVar1 <= 0xdf) {
         gsUIDialogFlagInit[0].nMessageOrKeyCode = (int32_t)uVar1;
       }
     }
@@ -644,7 +642,7 @@ void __stdcall DIALOG_RegisterHandler() {
     }
 
     uVar1 = CmdTbl::CMD_GetKeyForCommand(0x26, 0);
-    if (!(uVar1 != 0xffff && uVar1 < 0xe0)) {
+    if (!(uVar1 != 0xffff && uVar1 <= 0xdf)) {
       return;
     }
 

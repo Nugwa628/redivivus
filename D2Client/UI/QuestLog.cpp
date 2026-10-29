@@ -647,7 +647,7 @@ void __stdcall FreeQuestImages() {
       }
 
       ppActImage++;
-    } while ((int)ppActImage < (uintptr_t)((char*)&gQuestLog + 181));
+    } while ((int)ppActImage < (int)((uintptr_t)((char*)&gQuestLog + 181)));
 }
 
 // JMP thunk
@@ -749,7 +749,7 @@ static int32_t __stdcall QUESTLOG_HitTestActTab(uint32_t nY, uint32_t nX) {
 void __stdcall QUESTLOG_AcknowledgeNewQuests() {
     D2BitBufferStrc* pBitBuffer;
     int nIndex = 0;
-    if (0 >= gQuestLog.nQuestLogQuestCount) {
+    if (0 >= (int)gQuestLog.nQuestLogQuestCount) {
       return;
     }
 
@@ -763,7 +763,7 @@ void __stdcall QUESTLOG_AcknowledgeNewQuests() {
 
       nIndex++;
       pQuestEntry = (int32_t*)((int)pQuestEntry + 0x26a);
-    } while (nIndex < gQuestLog.nQuestLogQuestCount);
+    } while ((int)nIndex < (int)gQuestLog.nQuestLogQuestCount);
 }
 
 int __fastcall QUESTLOG_ScrollCompleteCallback_ClearButton(void * pUserParam, uint32_t nReason, void * pDismissCallback) {
@@ -1943,11 +1943,9 @@ void __fastcall QUESTLOG_ToggleQuestScreen(DWORD dwParam) {
 void __fastcall NET_D2GS_CLIENT_Incoming0x52_QUESTSTATUS(char * pBytes) {
     int nDwordCopyCount;
     bool* pQuestStateDst = (bool*)&gQuestLog.aQuestLogStateBuffer;
-    for (nDwordCopyCount = 10; nDwordCopyCount; nDwordCopyCount--) {
-      *(uint32_t*)pQuestStateDst = *(uint32_t*)pBytes;
-      pBytes += 4;
-      pQuestStateDst += 4;
-    }
+    memcpy(pQuestStateDst, pBytes, 10 * 4);
+    pBytes += 10 * 4;
+    pQuestStateDst += 10 * 4;
 
     *(uint16_t*)pQuestStateDst = *(uint16_t*)pBytes;
     gQuestLog.bQuestLogWindowOpen = 0;

@@ -747,10 +747,10 @@ int __fastcall ROSTER_GetHostileFlag(D2RosterStrc * pRoster) {
     }
 
     D2UnitStrc* pPlayer = UNIT::Player::GetPlayerUnit_UI();
-    if (!pPlayer) {
-      nUnitGUID = -1;
-    } else {
+    if (pPlayer) {
       nUnitGUID = pPlayer->nUnitGUID;
+    } else {
+      nUnitGUID = -1;
     }
 
     uint32_t bFlag = UNIT::PlayerList::GetFlag(nUnitGUID, pRoster->nRosterGUID, 8);
@@ -990,7 +990,7 @@ void __fastcall SetRosterHpAndArea(int32_t nRosterGUID, int32_t nHpPercent, eD2L
     }
 
     pRoster->nHpPercent = nHpPercent;
-    pRoster->eLevelId = eLevel & 0xffff;
+    pRoster->eLevelId = (uint16_t)eLevel;
     ROSTER_RebuildPlayerParty();
     UI::Party::ResetPartyUi();
 }
@@ -1396,7 +1396,7 @@ BOOL __fastcall RosterIsFemale(D2RosterStrc * pRoster) {
     }
 
     int nCharType = pRoster->nCharType;
-    if (!(-1 < nCharType && (nCharType < 2 || nCharType == 6))) {
+    if (!(0 <= nCharType && (nCharType <= 1 || nCharType == 6))) {
       return 1;
     }
 

@@ -169,7 +169,7 @@ void __fastcall SCMD_ClearPlayerTradeFields(D2UnitStrc * pUnit) {
 }
 
 D2SkillsTxt * __fastcall TXT_Skills_GetLine(eD2Skills eSkill) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
+    if (!(0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount)) {
       return nullptr;
     }
 
@@ -177,7 +177,7 @@ D2SkillsTxt * __fastcall TXT_Skills_GetLine(eD2Skills eSkill) {
 }
 
 D2ItemStatCostTxt * __fastcall TXT_ItemStatCost_GetLine(eD2UnitStat eUnitStat) {
-    if (!(-1 < (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize)) {
+    if (!(0 <= (int)eUnitStat && (int)eUnitStat < sgptDataTable->nTxtItemStatCostSize)) {
       return nullptr;
     }
 
@@ -367,7 +367,7 @@ void __fastcall NET_D2GS_CLIENT_PacketHandle_from0xAF(uint8_t * pBytes, size_t n
 void __fastcall NET_D2GS_CLIENT_Incoming0x01_NEWGAME(char * pBytes) {
     eD2ArenaFlags eArenaFlags = *(eD2ArenaFlags*)(pBytes + 2);
     Game::CLIENT_SetDifficulty(pBytes[1]);
-    Game::CLIENT_SetExpansion((bool)pBytes[6]);
+    Game::CLIENT_SetExpansion(pBytes[6]);
     Game::CLIENT_SetLadder((uint32_t)(uint8_t)pBytes[7]);
     CLIENT_SetArenaFlags(eArenaFlags);
     UI::Draw::InitializeUI();
@@ -482,10 +482,10 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x07_NEWROOM(char * pBytes) {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    if (!pUnit) {
-      pRoomCache = 0;
-    } else {
+    if (pUnit) {
       pRoomCache = D2Common::Units::UNITS_GetRoom(pUnit);
+    } else {
+      pRoomCache = 0;
     }
 
     D2Common::DUNGEON::Dungeon::AddRoomData(sgpDrlgAct, (eD2LevelId)(uint8_t)pBytes[5], (uint32_t)nX, (uint32_t)nY, pRoomCache);
@@ -501,10 +501,10 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x08_REMOVEROOM(char * pBytes) {
     }
 
     D2UnitStrc* pUnit = UNIT::Player::GetPlayerUnit_UI();
-    if (!pUnit) {
-      pRoom = 0;
-    } else {
+    if (pUnit) {
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
+    } else {
+      pRoom = 0;
     }
 
     D2Common::DUNGEON::Dungeon::RemoveRoomData(sgpDrlgAct, (eD2LevelId)(uint8_t)pBytes[5], (uint32_t)nX, (uint32_t)nY, pRoom);
@@ -592,8 +592,8 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x0E_UNITCHANGE_ID(D2UnitStrc * pUnit, c
 void __fastcall NET_D2GS_CLIENT_Incoming0x0F_UNITCHANGE_XYPOS(D2UnitStrc * pUnit, char * pBytes) {
     D2ServerMessageHandleStrc msg;
     msg.nSkillId = (uint32_t)*(uint16_t*)(pBytes + 7);
-    msg.nTargetUnitType = (uint32_t)(uint8_t)pBytes[0xb];
     msg.nItemId = (uint32_t)*(uint16_t*)(pBytes + 9);
+    msg.nTargetUnitType = (uint32_t)(uint8_t)pBytes[0xb];
     UNIT::Path::PATH_MoveUnitToPoint(pUnit, *(uint16_t*)(pBytes + 0xc), (uint32_t)*(uint16_t*)(pBytes + 0xe), 0, 0, 0);
     UNIT::UnitMode::HandleMessage((uint32_t)(uint8_t)pBytes[6], pUnit, &msg, 1);
 }
@@ -621,10 +621,10 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x67_UNITCHANGE_MONSTERXYPATH(D2UnitStrc
 void __fastcall NET_D2GS_CLIENT_Incoming0x68_UNITCHANGE_MONSTERIDPATH(D2UnitStrc * pUnit, char * pBytes) {
     D2ServerMessageHandleStrc msg;
     msg.nSkillId = (uint32_t)(uint8_t)pBytes[10];
-    msg.nTargetUnitType = (uint32_t)(uint8_t)pBytes[0xf];
     msg.nItemId = *(uint32_t*)(pBytes + 0xb);
-    msg.nSkillLvl = (int)*(short int*)(pBytes + 0x12);
+    msg.nTargetUnitType = (uint32_t)(uint8_t)pBytes[0xf];
     msg.nTargetUnitId = (uint32_t)(uint8_t)pBytes[0x11];
+    msg.nSkillLvl = (int)*(short int*)(pBytes + 0x12);
     msg.nMaxDistance = (uint32_t)(uint8_t)pBytes[0x14];
     msg.nTargetX = (int32_t)(uint8_t)pBytes[0x10];
     UNIT::Path::PATH_MoveUnitToPoint(pUnit, *(uint16_t*)(pBytes + 6), (uint32_t)*(uint16_t*)(pBytes + 8), 0, 0, 0);
@@ -2003,21 +2003,6 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x9C_ITEMEX(uint8_t * pBytes) {
     }
 
     switch (pBytesCopy[1]) {
-      case 0:
-        UNIT::HandleItemAddToGround(pBytesCopy);
-      return;
-      case 1:
-        UNIT::HandleItemPickedFromGround(pBytesCopy);
-      return;
-      case 2:
-        UNIT::HandleItemDroppedToGround(pBytesCopy);
-      return;
-      case 3:
-        UNIT::HandleItemOnGround(pBytesCopy);
-      return;
-      case 4:
-        UNIT::HandleItemPutInContainer(pBytesCopy);
-      return;
       case 5:
 
       case 6:
@@ -2042,14 +2027,24 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x9C_ITEMEX(uint8_t * pBytes) {
         nLine = 0xf6d;
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), nLine);
       exit(-1);
+      case 0:
+        UNIT::HandleItemAddToGround(pBytesCopy);
+      return;
+      case 1:
+        UNIT::HandleItemPickedFromGround(pBytesCopy);
+      return;
+      case 2:
+        UNIT::HandleItemDroppedToGround(pBytesCopy);
+      return;
+      case 3:
+        UNIT::HandleItemOnGround(pBytesCopy);
+      return;
+      case 4:
+        UNIT::HandleItemPutInContainer(pBytesCopy);
+      return;
       case 10:
         UNIT::NET_D2GS_CLIENT_HandleItemAddQuantity(pBytesCopy);
       return;
-      case 0xb:
-
-      case 0xc:
-        UNIT::HandleItemInShop(pBytesCopy);
-      break;
       case 0xd:
         UNIT::HandleItemSwapInContainer(pBytesCopy);
       return;
@@ -2065,6 +2060,10 @@ void __fastcall NET_D2GS_CLIENT_Incoming0x9C_ITEMEX(uint8_t * pBytes) {
       case 0x12:
         UNIT::HandleItemToCursor(pBytesCopy);
       return;
+      case 0xb:
+      case 0xc:
+        UNIT::HandleItemInShop(pBytesCopy);
+      break;
     }
 }
 
@@ -2614,7 +2613,7 @@ static void __stdcall NET_D2GS_CLIENT_PutIncomingBytesIntoServerCmdStructure(siz
     if (!pServerCmd || pServerCmd->nUsedBuffersCount + 1 == pServerCmd->nBufferArraySize) {
       pServerCmd = STRUCT_CreateAndPreprareServerCmd(pUnit);
     }
-    if ((int)nD2PacketsClientBufferSize < (int)nExpectedSize) {
+    if ((int)nExpectedSize > (int)nD2PacketsClientBufferSize) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x127f);
       exit(-1);
     }

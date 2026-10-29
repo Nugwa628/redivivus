@@ -87,11 +87,12 @@ BOOL __fastcall Skills_CltDoFunc_Bar_BloodParticlesOnTarget(D2UnitStrc * pUnit, 
 }
 
 BOOL __fastcall Skills_CltStFunc_AllocStatListByCltCalc(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    int32_t nSkillLevel = D2Common::Skills::D2GetSkillCalc(pUnit, sgptDataTable->pTxtSkills[eSkill].cltcalc[0], eSkill, nSkillLvl);
+    int32_t nSkillLevel = D2Common::Skills::D2GetSkillCalc(pUnit, pTxtRecord->cltcalc[0], eSkill, nSkillLvl);
     Skills::SKILLS_CltAllocStatListForSkill(pUnit, nSkillLevel);
     return 1;
 }
@@ -109,15 +110,11 @@ BOOL __fastcall Skills_CltDoFunc_Bar_DoubleSwing_Sound(D2UnitStrc * pUnit, eD2Sk
       nTargetY = 0;
       nTargetX = 0;
       nHitSound = 4;
-      nHitClass = D2Common::Units::GetHitClassForPlayerOrMonster(pUnit);
-      nSoundId = UNIT::UnitSnd::UNITSND_GetSkillCastSound(pUnit, nHitClass);
-      Sound::SOUND_PlaySound(nSoundId, pUnit, nHitSound, nTargetX, nTargetY);
+      Sound::SOUND_PlaySound(UNIT::UnitSnd::UNITSND_GetSkillCastSound(pUnit, D2Common::Units::GetHitClassForPlayerOrMonster(pUnit)), pUnit, nHitSound, nTargetX, nTargetY);
       pConfirmedTarget = UNIT::CUnit::GetConfirmedTargetUnit(pUnit);
       if (pConfirmedTarget && pUnit->pPath.pStaticPath) {
         nTargetY = 0;
-        nHitSound = Units::GetYPosFromDynamicPathUnit(pConfirmedTarget);
-        nTargetX = Units::GetXPosFromDynamicPathUnit(pConfirmedTarget);
-        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, nTargetX, nHitSound, nTargetY);
+        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pConfirmedTarget), Units::GetYPosFromDynamicPathUnit(pConfirmedTarget), nTargetY);
         return 1;
       }
     } else {
@@ -130,9 +127,7 @@ BOOL __fastcall Skills_CltDoFunc_Bar_DoubleSwing_Sound(D2UnitStrc * pUnit, eD2Sk
       pConfirmedTarget = Skills::SKILL_FindClosestTargetWithStats(pUnit, 0, 0, 3, 0, uVar2, nullptr);
       if (pConfirmedTarget && pUnit->pPath.pStaticPath) {
         nTargetY = 0;
-        nHitSound = Units::GetYPosFromDynamicPathUnit(pConfirmedTarget);
-        nTargetX = Units::GetXPosFromDynamicPathUnit(pConfirmedTarget);
-        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, nTargetX, nHitSound, nTargetY);
+        D2Common::PATH::DynamicPath::PATH_SetDirectionToTarget(pUnit->pPath.pDynamicPath, Units::GetXPosFromDynamicPathUnit(pConfirmedTarget), Units::GetYPosFromDynamicPathUnit(pConfirmedTarget), nTargetY);
       }
     }
 
@@ -150,7 +145,7 @@ BOOL __fastcall Skills_CltDoFunc_Bar_ThrowItem(D2UnitStrc * pUnit, eD2Skills eSk
     }
 
     D2Common::ITEMS::Items::ITEM_GetTxtItemTypes_throwable(pWeapon);
-    if (0x8ff < (int)(pUnit->nSeqFrame & -256)) {
+    if (0x900 <= (int)(pUnit->nSeqFrame & -256)) {
       pUnit->eUnitFlags |= UNITFLAG_SKSRVDOFUNC;
     }
 
@@ -168,13 +163,13 @@ BOOL __fastcall Skills_CltDoFunc_Bar_ThrowItem(D2UnitStrc * pUnit, eD2Skills eSk
     }
 
     uint32_t bIsMissilePotion = D2Common::ITEMS::Items::ITEMS_IsA(pWeapon, ITEMTYPE_MissilePotion);
-    if (!bIsMissilePotion) {
-      Skills::MakeMissileAtSkillTarget(pUnit, eMissileId, eSkill, nSkillLvl);
-    } else {
+    if (bIsMissilePotion) {
       pWeapon = UNIT::Missile::MISSILE_CreateFromUnitWithOffset(pUnit, eMissileId, 0, 0, 0, 0, eSkill, nSkillLvl, 0);
       if (!pWeapon) {
         return 0;
       }
+    } else {
+      Skills::MakeMissileAtSkillTarget(pUnit, eMissileId, eSkill, nSkillLvl);
     }
 
     return 1;
@@ -261,12 +256,12 @@ BOOL __fastcall Skills_CltDoFunc_Bar_Whirlwind_CorpseExplosion(D2UnitStrc * pUni
     if (!pMonStats2) {
       return 0;
     }
-    if (!pMonStats2->large) {
+    if (pMonStats2->large) {
+      eCorpseMissile = (eMissilesId)pSkillTxt->cltmissile[3];
+    } else {
       if (pMonStats2->isSmall) {
         eCorpseMissile = (eMissilesId)pSkillTxt->cltmissile[2];
       }
-    } else {
-      eCorpseMissile = (eMissilesId)pSkillTxt->cltmissile[3];
     }
     if (!(-1 < (int)eCorpseMissile && (int)eCorpseMissile < sgptDataTable->nTxtMissilesSize)) {
       return 0;
@@ -877,29 +872,29 @@ void __fastcall SKILL_HandleTeleportLanding(D2UnitStrc * pUnit) {
     }
 
     D2SkillStrc* pSkill = D2Common::Units::GetCurrentSkill(pUnit);
-    if (!pSkill) {
+    if (pSkill) {
+      nDestX = D2Common::Skills::SKILL_GetParam1(pSkill);
+    } else {
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
         nDestX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nDestX = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nDestX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nDestX = 0;
       }
-    } else {
-      nDestX = D2Common::Skills::SKILL_GetParam1(pSkill);
     }
-    if (!pSkill) {
+    if (pSkill) {
+      nDestY = D2Common::Skills::SKILL_GetParam2(pSkill);
+    } else {
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
         nDestY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nDestY = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nDestY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nDestY = 0;
       }
-    } else {
-      nDestY = D2Common::Skills::SKILL_GetParam2(pSkill);
     }
 
     eD2CollisionShapeType nType = D2Common::PATH::DynamicPath::GetUnitWidth(pUnit);

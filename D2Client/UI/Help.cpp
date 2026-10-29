@@ -428,12 +428,8 @@ void __stdcall INPUT_HelpScrollButtonUp(D2UIMouseMsgStrc * pMsg) {
 int32_t __fastcall HELP_CenterTextAndGetX(uint16_t nStringId, int32_t nCenterX) {
     int i;
     uint16_t wszText[100];
-    uint16_t* pStr = wszText;
-    for (i = 0x32; i; i--) {
-      pStr[0] = L'\0';
-      pStr[1] = L'\0';
-      pStr += 2;
-    }
+    uint16_t* pStr;
+    for (int i = 0; i < 0x64; i++) wszText[i] = 0;
 
     pStr = D2Lang::StrTable::strtable::GetLocaleString(nStringId);
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszText, pStr);

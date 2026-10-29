@@ -283,10 +283,10 @@ int __fastcall NPCMENU_ScrollCompleteShowNextMessage(void * pUserParam, uint32_t
         pDVar2 = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
         if (pDVar2) {
           gnNpcMenuScrollCompleteMode = nParam;
-          if (!_Interaction::bInteractingWithNpc) {
-            pDVar2 = 0;
-          } else {
+          if (_Interaction::bInteractingWithNpc) {
             pDVar2 = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
+          } else {
+            pDVar2 = 0;
           }
 
           Text::TEXT_ShowNpcDialog(pDVar2, nParam, 0);
@@ -372,10 +372,10 @@ int __stdcall NPCMENU_ShowSelectedDialogOption() {
     uint32_t nMessageId = D2Common::Text::TEXT_GetMessageByIndex(pOverheadText, nSelectedIndex - nDialogBaseOffset);
     uint16_t wMessageId = (uint16_t)nMessageId;
     gnNpcMenuScrollCompleteMode = wMessageId;
-    if (!_Interaction::bInteractingWithNpc) {
-      pNpcUnit = 0;
-    } else {
+    if (_Interaction::bInteractingWithNpc) {
       pNpcUnit = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
+    } else {
+      pNpcUnit = 0;
     }
 
     Text::TEXT_ShowNpcDialog(pNpcUnit, wMessageId, 0);
@@ -4151,7 +4151,7 @@ void __stdcall NPCMENU_HandleMenuSelection(int32_t nParam, D2UnitStrc * pUnit) {
 void __fastcall SetPlayersMercInfo(int16_t nParam, int32_t nParam2) {
     nMercNameId = nParam;
     D2Client::Merc::nMercReviveCost = nParam2;
-    if (nParam != -1) {
+    if ((uint16_t)nParam != 0xffff) {
       return;
     }
 
@@ -4196,10 +4196,10 @@ int __fastcall NPCMENU_OnScrollComplete(void * dwParam, int32_t nParam, int32_t 
         pNpcUnit = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
         if (pNpcUnit) {
           gnNpcMenuScrollCompleteMode = gnNpcMenuTradeActionGold;
-          if (!_Interaction::bInteractingWithNpc) {
-            pNpcUnit = 0;
-          } else {
+          if (_Interaction::bInteractingWithNpc) {
             pNpcUnit = UNIT::Player::UNITS_FindClientSideUnit(_Interaction::nCurrentInteractedNpcGUID, UNIT_MONSTER);
+          } else {
+            pNpcUnit = 0;
           }
 
           Text::TEXT_ShowNpcDialog(pNpcUnit, gnNpcMenuScrollCompleteMode, 1);

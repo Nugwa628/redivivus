@@ -82,8 +82,7 @@ void __stdcall CMD_ToggleRunMode() {
 }
 
 void __stdcall CMD_ToggleAlwaysRun() {
-    BOOL BVar1 = GAME::Game::GetGlobalAlwaysRun();
-    GAME::Game::SetGlobalAlwaysRun((uint32_t)!BVar1);
+    GAME::Game::SetGlobalAlwaysRun((uint32_t)!GAME::Game::GetGlobalAlwaysRun());
 }
 
 void __stdcall CMD_SetClickModifier() {
@@ -384,7 +383,7 @@ void __fastcall CMD_ResetKeyBindingsToDefaults(DWORD dwParam) {
     do {
       *pWKeyCode = 0xffff;
       pWKeyCode += 5;
-    } while ((int)pWKeyCode < (uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 4));
+    } while ((int)pWKeyCode < (int)((uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 4)));
 
     int* pSrcDefault = gaKeyBindingsDefault;
     D2KeyBindStrc* pDstBinding = g_KeyBindingsTable;
@@ -720,7 +719,7 @@ void __fastcall CMD_UnbindCommand(int32_t nCmdIndex, int32_t nSlot) {
       }
 
       pBinding = (PD2KeyBindSlot)((int)pBinding + 10);
-    } while ((int)pBinding < (uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 6));
+    } while ((int)pBinding < (int)((uintptr_t)((char*)&g_KeyBindingsTable + sizeof(g_KeyBindingsTable) + 6)));
 }
 
 uint32_t __fastcall CMD_IsCommandBound(int32_t nCmdIndex, int32_t nSlot) {
@@ -1257,32 +1256,30 @@ void __fastcall CMD_ToggleKeyConfigMode(int32_t nEnable, int32_t bUpdateUIHandle
     HWND hWnd;
     int32_t nHandlerCount;
     gbKeyBindingsEnabled = nEnable;
-    if (!nEnable) {
+    if (nEnable) {
+      if (!gbKeyConfigModeActive) {
+        gbKeyConfigModeActive = 1;
+        if (bUpdateUIHandlers && gbNormalUIHandlersRegistered) {
+          nHandlerCount = 2;
+          _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagCmdTableInit, nHandlerCount);
+          gbNormalUIHandlersRegistered = 0;
+        }
+
+        nHandlerCount = 4;
+        _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
+        return;
+      }
+    } else {
       if (gbKeyConfigModeActive == 1) {
         nHandlerCount = 4;
         gbKeyConfigModeActive = 0;
-        hWnd = D2gfx::D2GFX::GetHwnd();
-        _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, gsUICmdTblFlagInit, nHandlerCount);
+        _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
         if (bUpdateUIHandlers && !gbNormalUIHandlersRegistered) {
           nHandlerCount = 2;
-          hWnd = D2gfx::D2GFX::GetHwnd();
-          _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, &gUIFlagCmdTableInit, nHandlerCount);
+          _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagCmdTableInit, nHandlerCount);
           gbNormalUIHandlersRegistered = 1;
         }
       }
-    } else if (!gbKeyConfigModeActive) {
-      gbKeyConfigModeActive = 1;
-      if (bUpdateUIHandlers && gbNormalUIHandlersRegistered) {
-        nHandlerCount = 2;
-        hWnd = D2gfx::D2GFX::GetHwnd();
-        _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gUIFlagCmdTableInit, nHandlerCount);
-        gbNormalUIHandlersRegistered = 0;
-      }
-
-      nHandlerCount = 4;
-      hWnd = D2gfx::D2GFX::GetHwnd();
-      _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, gsUICmdTblFlagInit, nHandlerCount);
-      return;
     }
 }
 
@@ -1398,8 +1395,7 @@ void __stdcall CMD_InitKeyBindings() {
 
     int32_t nHandlerCount = 4;
     gbKeyConfigModeActive = 1;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, gsUICmdTblFlagInit, nHandlerCount);
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
 }
 
 void __stdcall CMD_ExitKeyConfigMode() {
@@ -1410,8 +1406,7 @@ void __stdcall CMD_ExitKeyConfigMode() {
 
     int32_t nHandlerCount = 4;
     gbKeyConfigModeActive = 0;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, gsUICmdTblFlagInit, nHandlerCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gsUICmdTblFlagInit, nHandlerCount);
 }
 
 void __fastcall CMD_InitKeyConfigUI(int32_t nFadeInDuration, int32_t nHoldDuration, int32_t nFadeOutDuration, eD2LevelId eLevelId, int32_t bForce) {

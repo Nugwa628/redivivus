@@ -780,7 +780,7 @@ void __thiscall SendPacket(::WardenClient * pThis, void * pData, uint32_t nLen) 
 
 bool __thiscall CheckModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pRc4Key) {
     BOOL bResult = WARDEN_ResolveAndLoadModule(pRc4Key, pModuleHash);
-    return bResult != 0;
+    return (bool)bResult;
 }
 
 void __thiscall LoadModule(::WardenClient * pThis, uint8_t * pModuleHash, void * pData, uint32_t nSize) {

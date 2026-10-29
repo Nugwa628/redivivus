@@ -548,7 +548,7 @@ template<> ::SGAMEDATA * TSGrowableArray<SGAMEDATA>::New() {
 // Same code as TSGrowableArray<CELLIST>::ReserveNoRound 00604440; T from its call to ReallocData 00450d90.
 template<> void TSGrowableArray<SGAMEDATA>::ReserveNoRound(uint32_t nCount) {
     uint32_t uVar1 = this->m_count + nCount;
-    if (this->m_alloc >= uVar1) {
+    if (uVar1 <= this->m_alloc) {
       return;
     }
 

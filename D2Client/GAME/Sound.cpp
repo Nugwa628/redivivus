@@ -171,7 +171,7 @@ void __stdcall CleanUpGame() {
       }
 
       pChannel += 8;
-    } while ((int)pChannel < (uintptr_t)((char*)&gaSoundChannels + sizeof(gaSoundChannels) + 8));
+    } while ((int)pChannel < (int)((uintptr_t)((char*)&gaSoundChannels + sizeof(gaSoundChannels) + 8)));
 
     D2Sound::Src::D2SoundSmp::SOUNDSMP_SetGlobalVolume(0xff);
 }
@@ -209,7 +209,7 @@ void __stdcall SOUND_UpdateNonLoopingStreams() {
       }
 
       pChannelEntry += 8;
-    } while ((int)pChannelEntry < (uintptr_t)((char*)&gaSoundChannels + sizeof(gaSoundChannels) + 8));
+    } while ((int)pChannelEntry < (int)((uintptr_t)((char*)&gaSoundChannels + sizeof(gaSoundChannels) + 8)));
 }
 
 uint32_t __fastcall SOUND_GetStreamProgress(D2ClientSoundChannelStrc * pnParam) {
@@ -260,7 +260,7 @@ int * __fastcall SOUND_FindPlayingByIdSafe(int32_t nId) {
       }
 
       ppDVar3 += 8;
-    } while ((int)ppDVar3 < (uintptr_t)((char*)&gaSoundChannels + sizeof(gaSoundChannels) + 8));
+    } while ((int)ppDVar3 < (int)((uintptr_t)((char*)&gaSoundChannels + sizeof(gaSoundChannels) + 8)));
 
     return (int*)pDVar4;
 }
@@ -285,7 +285,7 @@ void __stdcall SOUND_ShutdownAudio() {
       D2Sound::Src::D2SoundSmp::SOUNDSMP_Destroy(ppSampleInst->pSoundSmp);
       ppSampleInst->pSoundSmp = 0;
       ppSampleInst++;
-    } while ((int)ppSampleInst < (uintptr_t)((char*)&gaSoundChannels + sizeof(gaSoundChannels)));
+    } while ((int)ppSampleInst < (int)((uintptr_t)((char*)&gaSoundChannels + sizeof(gaSoundChannels))));
 
     pAudioMixerInterface = 0;
 }

@@ -156,7 +156,7 @@ int * __stdcall SOUND_GetChannelArray() {
       }
 
       pChannel++;
-    } while ((int)pChannel < (uintptr_t)((char*)&gaSoundChannelPool + sizeof(gaSoundChannelPool)));
+    } while ((int)pChannel < (int)((uintptr_t)((char*)&gaSoundChannelPool + sizeof(gaSoundChannelPool))));
 
     return nullptr;
 }
@@ -306,7 +306,7 @@ static D2SoundChannelStrc * __stdcall SOUND_FindActiveStreamChannel(D2SoundChann
       }
 
       nChannelData = pDVar1->pChannel;
-      if (nChannelData != pExcludeChannel && nChannelData->nPlayMode == 1 && (!nListKey || (bInList = D2Sound::D2SoundUntil::SOUNDUTIL_FindInLinkedList(nChannelData->pGlobal3Ref, nListKey) , bInList != 0)) && 0xb75 < nChannelData->nSoundId && nChannelData->nSoundId < 0x1231) {
+      if (nChannelData != pExcludeChannel && nChannelData->nPlayMode == 1 && (!nListKey || (bInList = D2Sound::D2SoundUntil::SOUNDUTIL_FindInLinkedList(nChannelData->pGlobal3Ref, nListKey) , bInList != 0)) && 0xb76 <= nChannelData->nSoundId && nChannelData->nSoundId <= 0x1230) {
         break;
       }
 
@@ -575,7 +575,7 @@ int __stdcall SOUND_IsMusicPlaying() {
       }
       if (pDVar1->pChannel->nPlayMode != 2) {
         nSoundId = pDVar1->pChannel->nSoundId;
-        if (0xb75 < nSoundId && nSoundId < 0x1231) {
+        if (0xb76 <= nSoundId && nSoundId <= 0x1230) {
           break;
         }
       }
@@ -595,7 +595,7 @@ BOOL __stdcall SOUND_GetAmbientMusicState() {
       }
       if (pDVar1->pChannel->nPlayMode != 2) {
         nSoundId = pDVar1->pChannel->nSoundId;
-        if (0x1230 < nSoundId && nSoundId < 0x125b) {
+        if (0x1231 <= nSoundId && nSoundId <= 0x125a) {
           break;
         }
       }
@@ -754,12 +754,7 @@ void __fastcall SOUND_StopChannelGracefully(int32_t nSoundId, int32_t nFadeTarge
         nFadeDuration = (uint32_t)byFadeVal;
       }
     }
-    if (!nChannelData->bFadeActive) {
-      stop_if_fading_out:
-      if (nFadeTarget) {
-        goto begin_fade;
-      }
-    } else {
+    if (nChannelData->bFadeActive) {
       if (nFadeTarget == nChannelData->nFadeDir) {
         pSmpData = SoundHdr::SOUNDHDR_GetGlobal3();
         if (nChannelData->nFadeEndTime <= pSmpData + nFadeDelay + nFadeDuration) {
@@ -771,6 +766,11 @@ void __fastcall SOUND_StopChannelGracefully(int32_t nSoundId, int32_t nFadeTarge
       }
       if (nFadeTarget) {
         return;
+      }
+    } else {
+      stop_if_fading_out:
+      if (nFadeTarget) {
+        goto begin_fade;
       }
     }
 

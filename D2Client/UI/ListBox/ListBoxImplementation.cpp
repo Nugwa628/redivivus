@@ -283,10 +283,10 @@ void __thiscall AddItem(::ListBoxImplementation * pThis, uint16_t * wszLine0, ui
       pThis->aItems[pThis->nItemCount].wszText[5][0x3ff] = L'\0';
       pThis->field_0x18073c++;
     }
-    if (!bUseDefaultColor) {
-      pThis->aItems[pThis->nItemCount].dwValue = nColor;
-    } else {
+    if (bUseDefaultColor) {
       pThis->aItems[pThis->nItemCount].dwValue = pThis->nDefaultTextColor;
+    } else {
+      pThis->aItems[pThis->nItemCount].dwValue = nColor;
     }
 
     pThis->aItems[pThis->nItemCount].dwAuxData = nFont;
@@ -361,7 +361,7 @@ void __thiscall EnsureSelectionVisible(::ListBoxImplementation * pThis) {
     if ((int)nSelIdx < (int)pThis->nFirstVisibleIndex) {
       pThis->nFirstVisibleIndex = nSelIdx;
     }
-    if ((int)(pThis->nVisibleRows + pThis->nFirstVisibleIndex) > (int)nSelIdx) {
+    if ((int)nSelIdx < (int)(pThis->nVisibleRows + pThis->nFirstVisibleIndex)) {
       return;
     }
 

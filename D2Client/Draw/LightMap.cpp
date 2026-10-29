@@ -121,7 +121,7 @@ void __fastcall SetRadiusY(D2LightMapStrc * pLightMap, int32_t nValue) {
     if (0 >= nValue) {
       return;
     }
-    if (0x11 < nValue) {
+    if (0x12 <= nValue) {
       nValue = 0x12;
     }
     if (!pLightMap) {
@@ -136,14 +136,14 @@ void __fastcall LIGHTMAP_SetRadius(D2LightMapStrc * pLightMap, int32_t nParam) {
     if (0 >= nParam) {
       return;
     }
-    if (0x11 < nParam) {
+    if (0x12 <= nParam) {
       nParam = 0x12;
     }
     if (!pLightMap) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x141);
       exit(-1);
     }
-    if (0x11 < nParam) {
+    if (0x12 <= nParam) {
       nParam = 0x12;
     }
 
@@ -155,7 +155,7 @@ void __fastcall LIGHTMAP_SetRadius(D2LightMapStrc * pLightMap, int32_t nParam) {
 
     pLightMap->bPixelMapReady = 0;
     if (pLightMap->pPixelMap) {
-      D2_FREE_AT(pLightMap->pPixelMap, ".\\DRAW\\dLightMap.cpp", 0x14a);
+      Fog::Memory::FreeClientMemory(pLightMap->pPixelMap, ".\\DRAW\\dLightMap.cpp", 0x14a, 0);
     }
 
     pLightMap->pPixelMap = 0;
@@ -591,7 +591,7 @@ static void __stdcall LIGHTMAP_ComputeInterpolationDir(int nSrcX, int nSrcY, D2L
       gnLightmapInterpolationState[0] = 1;
       return;
     }
-    if ((int)nDeltaY <= nDeltaX) {
+    if (nDeltaX >= (int)nDeltaY) {
       gnLightmapInterpolationState[0] = 2;
       gnLightmapInterpSubdivRatio = (int)(nDeltaY << 8) / nDeltaX;
       return;

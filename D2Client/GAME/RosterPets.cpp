@@ -53,7 +53,7 @@ static_assert(sizeof(void*) != 4 || sizeof(::D2RosterPetStrc) == 0x34, "D2_NEW_A
 namespace D2Client::GAME::RosterPets {
 
 D2PetTypeTxt * __fastcall GetPetTypeTxtById(int32_t nPetId) {
-    if (!(-1 < nPetId && nPetId < sgptDataTable->nTxtPetTypeSize)) {
+    if (!(0 <= nPetId && nPetId < sgptDataTable->nTxtPetTypeSize)) {
       return nullptr;
     }
 

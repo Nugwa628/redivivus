@@ -120,7 +120,7 @@ void __fastcall SetActNo(int32_t nParam) {
 
 void __stdcall CleanupAfterLoadingAct() {
     // Static local variables (originally global data)
-    static bool gbCleanupAfterLoadingActFlag; D2_STATIC_GUARD_BSS(gbCleanupAfterLoadingActFlag, "D2Client::UI::Draw::CleanupAfterLoadingAct::gbCleanupAfterLoadingActFlag");
+    static BOOL gbCleanupAfterLoadingActFlag; D2_STATIC_GUARD_BSS(gbCleanupAfterLoadingActFlag, "D2Client::UI::Draw::CleanupAfterLoadingAct::gbCleanupAfterLoadingActFlag");
 
     if (gnLoadedActIndex) {
       Core::Archive::DC6_FreeAndDelete(gnLoadedActIndex);
@@ -188,11 +188,10 @@ int32_t __stdcall DRAW_GetBottomPanelY() {
 
 void __stdcall DRAW_RegisterDrawHandlers() {
     int32_t nCount = 0xd;
-    HWND pHwnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(pHwnd, gaUIFlagInitTable + 5, nCount);
+    HWND pHwnd;
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gaUIFlagInitTable + 5, nCount);
     nCount = 1;
-    pHwnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(pHwnd, &gUIFlagDrawPanelInit, nCount);
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagDrawPanelInit, nCount);
 }
 
 void __stdcall DRAW_RefreshNpcDialog() {
@@ -1973,8 +1972,7 @@ void __stdcall FreeDraw() {
     GFX_bShowUIFlag.Game = 0;
     if (bWasGameUiOpen) {
       nLine = 4;
-      pHwnd = D2gfx::D2GFX::GetHwnd();
-      _Message::MESSAGE_UnregisterEventHandlerBatch(pHwnd, g_UIFlagInitDrawMouseDown, nLine);
+      _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), g_UIFlagInitDrawMouseDown, nLine);
     }
 
     ui::GetMouseX();

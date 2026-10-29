@@ -401,13 +401,12 @@ void __stdcall CHAT_ShutdownIME() {
 
 static int32_t __stdcall CHAT_CompareCaseInsensitive(char * szText1, char * szText2) {
     int nUpper1;
-    int nUpper2;
     char cCur;
     char* pScan1 = szText1;
     pScan1 = pScan1 + strlen(pScan1) + 1;
     char* pScan2 = szText2;
     pScan2 = pScan2 + strlen(pScan2) + 1;
-    if ((uint32_t)((int)pScan2 - (int)(szText2 + 1)) > (uint32_t)((int)pScan1 - (int)(szText1 + 1))) {
+    if ((uint32_t)((int)pScan1 - (int)(szText1 + 1)) < (uint32_t)((int)pScan2 - (int)(szText2 + 1))) {
       return -1;
     }
 
@@ -420,9 +419,8 @@ static int32_t __stdcall CHAT_CompareCaseInsensitive(char * szText1, char * szTe
       }
 
       nRemaining--;
-      nUpper1 = toupper((int)*szText1);
-      nUpper2 = toupper((int)*szText2);
-      if (nUpper1 != nUpper2) {
+      nUpper1 = toupper((int)*szText1) - toupper((int)*szText2);
+      if (nUpper1) {
         break;
       }
 
@@ -430,7 +428,7 @@ static int32_t __stdcall CHAT_CompareCaseInsensitive(char * szText1, char * szTe
       szText2++;
     }
 
-    return (uint32_t)(nUpper1 != nUpper2 && -1 < nUpper1 - nUpper2) * 2 - 1;
+    return nUpper1 > 0 ? 1 : -1;
 }
 
 static void CHAT_DrawCursor(int32_t nPosY, int32_t nPosX, int32_t nColor) {
@@ -443,12 +441,11 @@ static void CHAT_DrawCursor(int32_t nPosY, int32_t nPosX, int32_t nColor) {
     if (gnIMECursorVisible == 1) {
       uint16_t* wszCursor;
       bMultiLineCenter = 0;
-      wszCursor = D2Lang::StrTable::strtable::GetLocaleString(0xd4c);
-      D2Win::Src::D2WinFont::DRAW_text(wszCursor, nPosX + 0x83, nPosY, nColor, bMultiLineCenter);
+      D2Win::Src::D2WinFont::DRAW_text(D2Lang::StrTable::strtable::GetLocaleString(0xd4c), nPosX + 0x83, nPosY, nColor, bMultiLineCenter);
     }
 
     DWORD dwTickCount = GetTickCount();
-    if ((uint32_t)gnIMECursorBlinkDuration >= dwTickCount - gnIMECursorBlinkTime) {
+    if (dwTickCount - gnIMECursorBlinkTime <= (uint32_t)gnIMECursorBlinkDuration) {
       return;
     }
 
@@ -836,7 +833,7 @@ BOOL __stdcall CHAT_ParseCommand(char * * ppszText, uint8_t * pbCommandType, cha
 }
 
 void __stdcall CHAT_CheckChatboxBounds(int32_t nParam) {
-    if (ScreenSizeY - 0x31 >= (int)(uint32_t)*(uint16_t*)(nParam + 0xe)) {
+    if ((int)(uint32_t)*(uint16_t*)(nParam + 0xe) <= ScreenSizeY - 0x31) {
       return;
     }
 
@@ -850,13 +847,17 @@ void __stdcall INPUT_HandleChatScroll(D2UIMouseMsgStrc * pMsg) {
     if (pMsg->uLParam.nLParam & 0x40000000U) {
       return;
     }
-    if (pMsg->nWParam == 0x26) {
+    switch (pMsg->nWParam) {
+    case 0x26: {
       CHAT_RestoreFromHistory();
       CHAT_ScrollHistory(1);
-    } else if (pMsg->nWParam == 0x28) {
+      break;
+    }
+    case 0x28: {
       CHAT_ScrollHistory(-1);
       CHAT_RestoreFromHistory();
       return;
+    }
     }
 }
 

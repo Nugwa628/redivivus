@@ -357,9 +357,9 @@ void __fastcall UI_StoreGlobalTooltipText(uint16_t * wszText, int32_t nScreenX, 
     }
 
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(UNICODE_007a2c80, wszText);
+    gnTooltipScreenX = nScreenX;
     gnTooltipScreenY = nScreenY;
     gnTooltipHpBarValue = nHpBarValue;
-    gnTooltipScreenX = nScreenX;
 }
 
 void __fastcall UI_SetTooltipAttributesWithCustomField(uint16_t * wszText, int32_t nParam1, int32_t nParam2, int32_t nParam3, int32_t nParam4, int32_t nParam5) {
@@ -1140,11 +1140,11 @@ void __stdcall UI_DrawPlayerStateOverlays() {
         pStatList = D2Common::Stats::StatsEx::GetStatsByState(pPlayerUnit_lcl, eState);
         if (pStatList) {
           pStateTxt = DataTbls::MonsterTbls::TXT_States_GetLine(eState);
-          if (pStateTxt && pStateTxt->pgsv && 0 < pStateTxt->pgsvoverlay && (int)pStateTxt->pgsvoverlay < sgptDataTable->nTxtOverlaySize) {
+          if (pStateTxt && (*((uint8_t *)pStateTxt + 0x10) & gadwBitMasks[4]) && 0 < pStateTxt->pgsvoverlay && (int)pStateTxt->pgsvoverlay < sgptDataTable->nTxtOverlaySize) {
             nStatId = pStateTxt->stat;
-            if (-1 < nStatId && (int)nStatId <= sgptDataTable->nTxtItemStatCostSize) {
+            if (0 <= nStatId && (int)nStatId <= sgptDataTable->nTxtItemStatCostSize) {
               nStatValue = D2Common::Stats::StatsEx::STATSEX_GetCurrentStat(pPlayerUnit_lcl, (int)nStatId, 0);
-              if (nStatValue - 1U < 3) {
+              if (nStatValue - 1U <= 2) {
                 Engine::GfxInfo::GFX_DrawOverlayOnUnit(pPlayerUnit_lcl, pStateTxt->pgsvoverlay - 1 + nStatValue, nScreenX, nScreenY);
                 nScreenX -= gnStateOverlayXSpacing;
               }
@@ -1859,20 +1859,20 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
 
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 0;
-          if (!pAllocCtx) {
-            gpCurrentDialog = 0;
-          } else {
+          if (pAllocCtx) {
             gpCurrentDialog = Spinner::SpinnerWrapper::Constructor((::SpinnerWrapper*)pAllocCtx, 0xdf, 0xdb, 0, (fpSpinnerRepeatAction)UI_GoldDialogScrollCallback);
+          } else {
+            gpCurrentDialog = 0;
           }
 
           nCleanupStage = -1;
           Dialog::AllocDialogSub(Dialog::gpDialog, gpCurrentDialog, 0, 0);
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 1;
-          if (!pAllocCtx) {
-            gpDialogDefaultActionCallback = 0;
-          } else {
+          if (pAllocCtx) {
             gpDialogDefaultActionCallback = Editbox::EditBoxWrapper::Constructor(pAllocCtx, 0x102, 0xe4, 100, 1, pnCurrentGold, 10, UI_GoldInputCallback_ReturnZero, 1);
+          } else {
+            gpDialogDefaultActionCallback = 0;
           }
 
           nCleanupStage = -1;
@@ -1883,10 +1883,10 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
 
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 2;
-          if (!pAllocCtx) {
-            gpUiGoldTransactionDialog = 0;
-          } else {
+          if (pAllocCtx) {
             gpUiGoldTransactionDialog = Button::ButtonWrapper::Constructor((::ButtonWrapper*)pAllocCtx, 0xfa, 0x11f, 0, UI_GoldDialogConfirmCallback);
+          } else {
+            gpUiGoldTransactionDialog = 0;
           }
 
           nCleanupStage = -1;
@@ -1894,10 +1894,10 @@ void __fastcall UI_ShowGoldTransactionDialog(int32_t nTransactionType) {
           gpUiGoldTransactionDialog->pVtable->SetAccelerator(gpUiGoldTransactionDialog, 1);
           pAllocCtx = (::EditBoxWrapper*)Storm::SMem::SMemAlloc(0xc, "new", -1, 0);
           nCleanupStage = 3;
-          if (!pAllocCtx) {
-            gpUiGoldDialogCancelButton = 0;
-          } else {
+          if (pAllocCtx) {
             gpUiGoldDialogCancelButton = Button::ButtonWrapper::Constructor((::ButtonWrapper*)pAllocCtx, 0x163, 0x11f, 1, UI_ButtonCallback_CloseDialog);
+          } else {
+            gpUiGoldDialogCancelButton = 0;
           }
 
           nCleanupStage = -1;
@@ -1934,17 +1934,17 @@ void __stdcall UI_DrawDialogBackground() {
 void __fastcall UI_RegisterAutoMapEventHandlers(int32_t bRegister) {
     HWND hWnd;
     int32_t nHandlerCount;
-    if (!bRegister) {
+    if (bRegister) {
       if (GFX_bShowUIFlag.Automap) {
         nHandlerCount = 5;
-        hWnd = D2gfx::D2GFX::GetHwnd();
-        _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, gaUIFlagInitTable, nHandlerCount);
+        _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gaUIFlagInitTable, nHandlerCount);
+        return;
       }
-    } else if (GFX_bShowUIFlag.Automap) {
-      nHandlerCount = 5;
-      hWnd = D2gfx::D2GFX::GetHwnd();
-      _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, gaUIFlagInitTable, nHandlerCount);
-      return;
+    } else {
+      if (GFX_bShowUIFlag.Automap) {
+        nHandlerCount = 5;
+        _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gaUIFlagInitTable, nHandlerCount);
+      }
     }
 }
 
@@ -2041,28 +2041,32 @@ bool __stdcall UI_ShowPopupDialog() {
 }
 
 static int UI_GetCursorFrameOffset(int32_t nCursorIndex) {
-    if (gnCursorDataCount == 7) {
+    switch (gnCursorDataCount) {
+    case 7:
       if (!(nCursorIndex < 7)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x90);
         exit(-1);
       }
 
       return CursorData[nCursorIndex].nFrameOffset;
-    } else {
+      break;
+    default:
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x8f);
       exit(-1);
     }
 }
 
 static int32_t UI_GetCursorMaxFrames(int32_t nCursorIndex) {
-    if (gnCursorDataCount == 7) {
+    switch (gnCursorDataCount) {
+    case 7:
       if (!(nCursorIndex < 7)) {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9b);
         exit(-1);
       }
 
       return CursorData[nCursorIndex].nMaxFrames << 8;
-    } else {
+      break;
+    default:
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x9a);
       exit(-1);
     }
@@ -2174,8 +2178,7 @@ void __fastcall UI_InitializeCursor(int32_t nCursorType) {
 
 void __stdcall UI_FreeCursor() {
     int32_t nEventCount = 3;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, gUIFlagGeneralInit, nEventCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), gUIFlagGeneralInit, nEventCount);
     gnCursorInitialized = 0;
     DC6** ppCursorDC6 = Cursor::pCursorsDC6;
     do {
@@ -2185,7 +2188,7 @@ void __stdcall UI_FreeCursor() {
       }
 
       ppCursorDC6++;
-    } while ((int)ppCursorDC6 < (uintptr_t)((char*)&Cursor::pCursorsDC6 + sizeof(Cursor::pCursorsDC6)));
+    } while ((int)ppCursorDC6 < (int)((uintptr_t)((char*)&Cursor::pCursorsDC6 + sizeof(Cursor::pCursorsDC6))));
 }
 
 void __stdcall UI_AnimateCursorForward() {
@@ -3396,32 +3399,26 @@ void __stdcall UI_ConfigKeyBindModeEnable() {
     gbUICtrlConfigKeyBindMode = 1;
     Draw::UI_UnregisterHandlersForPanel(UI_CONFIG);
     int32_t nHandlerCount = 6;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, &gsUIFlagInit0, nHandlerCount);
+    HWND hWnd;
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit0, nHandlerCount);
     nHandlerCount = 1;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, &gsUIFlagInit1, nHandlerCount);
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit1, nHandlerCount);
     nHandlerCount = 1;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, &gsUIFlagInit2, nHandlerCount);
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit2, nHandlerCount);
     nHandlerCount = 1;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_RegisterEventHandlerBatch(hWnd, &gsUIFlagInit3, nHandlerCount);
+    _Message::MESSAGE_RegisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit3, nHandlerCount);
 }
 
 void __stdcall UI_ConfigKeyBindModeDisable(int32_t bRestoreDrawHandlers) {
     int32_t nHandlerCount = 6;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gsUIFlagInit0, nHandlerCount);
+    HWND hWnd;
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit0, nHandlerCount);
     nHandlerCount = 1;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gsUIFlagInit3, nHandlerCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit3, nHandlerCount);
     nHandlerCount = 1;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gsUIFlagInit2, nHandlerCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit2, nHandlerCount);
     nHandlerCount = 1;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gsUIFlagInit1, nHandlerCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit1, nHandlerCount);
     if (!bRestoreDrawHandlers) {
       return;
     }
@@ -3436,17 +3433,14 @@ void __stdcall UI_ConfigKeyBindModeCancelAndRevert() {
     }
 
     int32_t nHandlerCount = 6;
-    HWND hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gsUIFlagInit0, nHandlerCount);
+    HWND hWnd;
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit0, nHandlerCount);
     nHandlerCount = 1;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gsUIFlagInit3, nHandlerCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit3, nHandlerCount);
     nHandlerCount = 1;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gsUIFlagInit2, nHandlerCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit2, nHandlerCount);
     nHandlerCount = 1;
-    hWnd = D2gfx::D2GFX::GetHwnd();
-    _Message::MESSAGE_UnregisterEventHandlerBatch(hWnd, &gsUIFlagInit1, nHandlerCount);
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gsUIFlagInit1, nHandlerCount);
     CmdTbl::CMD_RevertKeyBindings();
     CmdTbl::CMD_ToggleKeyConfigMode(1, 0);
     GAME::Game::GAMEDATA_RegisterEventHandlers();
@@ -3503,12 +3497,14 @@ void __stdcall INPUT_ConfigConfirmEntry(D2UIMouseMsgStrc * pMsg) {
       pMsg->bHandled = 0;
       return;
     }
-    if (!gnConfigBindingFirstClick) {
+    if (gnConfigBindingFirstClick) {
+      if (!(pMsg->uLParam.nLParam & 0x40000000U) && gpStatDescriptorTable[g_ControlConfigUIState].nCmdIndex != 0x39) {
+        UI_ConfigKeyBindModeEnable();
+        Sound::SOUND_PlaySound(SOUND_CURSOR_SELECT, nullptr, 0, 0, 0);
+        gnConfigBindingFirstClick = 0;
+      }
+    } else {
       gnConfigBindingFirstClick = 1;
-    } else if (!(pMsg->uLParam.nLParam & 0x40000000U) && gpStatDescriptorTable[g_ControlConfigUIState].nCmdIndex != 0x39) {
-      UI_ConfigKeyBindModeEnable();
-      Sound::SOUND_PlaySound(SOUND_CURSOR_SELECT, nullptr, 0, 0, 0);
-      gnConfigBindingFirstClick = 0;
     }
 
     pMsg->bHandled = 1;
@@ -3746,38 +3742,38 @@ void __stdcall UI_UpdateNewStatSkillIcons() {
     D2UnitStrc* pUnit;
     pUnit = UNIT::Player::GetPlayerUnit_UI();
     bUIFlag = GetUIFlag(UI_NEWSTATS);
-    if (!bUIFlag) {
-      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_statpts, 0);
-      if (!nPointsAvailable || (bUIFlag = GetUIFlag(UI_STATSCREEN) , bUIFlag != 0)) {
-        goto update_new_skills_icon;
-      }
-
-      neD2UIvarsSetType = UI_SET;
-    } else {
+    if (bUIFlag) {
       nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_statpts, 0);
       if (nPointsAvailable) {
         goto update_new_skills_icon;
       }
 
       neD2UIvarsSetType = UI_RESET;
+    } else {
+      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_statpts, 0);
+      if (!nPointsAvailable || (bUIFlag = GetUIFlag(UI_STATSCREEN) , bUIFlag != 0)) {
+        goto update_new_skills_icon;
+      }
+
+      neD2UIvarsSetType = UI_SET;
     }
 
     Draw::SetUIFlag(UI_NEWSTATS, neD2UIvarsSetType, 0);
     update_new_skills_icon:
     bUIFlag = GetUIFlag(UI_NEWSKILLS);
-    if (!bUIFlag) {
+    if (bUIFlag) {
+      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
+      if (nPointsAvailable <= 0) {
+        Draw::SetUIFlag(UI_NEWSKILLS, UI_RESET, 0);
+        return;
+      }
+    } else {
       nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
       if (0 < nPointsAvailable) {
         bUIFlag = GetUIFlag(UI_SKILLTREE);
         if (!bUIFlag) {
           Draw::SetUIFlag(UI_NEWSKILLS, UI_SET, 0);
         }
-      }
-    } else {
-      nPointsAvailable = D2Common::Stats::StatsEx::SERVER_GetUnitStat(pUnit, UNITSTAT_newskills, 0);
-      if (nPointsAvailable < 1) {
-        Draw::SetUIFlag(UI_NEWSKILLS, UI_RESET, 0);
-        return;
       }
     }
 }
@@ -5900,10 +5896,10 @@ void __stdcall PACKET_SendUnitInteraction0x44(D2UIMouseMsgStrc * pMsg) {
       }
 
       pPlayerOrCursorItem = UNIT::Player::GetPlayerUnit_UI();
-      if (!pPlayerOrCursorItem) {
-        pPlayerOrCursorItem = 0;
-      } else {
+      if (pPlayerOrCursorItem) {
         pPlayerOrCursorItem = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pPlayerOrCursorItem->pInventory);
+      } else {
+        pPlayerOrCursorItem = 0;
       }
 
       ITEM_SetItemOnHand(pPlayerOrCursorItem);
@@ -5915,10 +5911,10 @@ void __stdcall PACKET_SendUnitInteraction0x44(D2UIMouseMsgStrc * pMsg) {
     }
 
     pPlayerOrCursorItem = UNIT::Player::GetPlayerUnit_UI();
-    if (!pPlayerOrCursorItem) {
-      nUnitType = -1;
-    } else {
+    if (pPlayerOrCursorItem) {
       nUnitType = pPlayerOrCursorItem->nUnitGUID;
+    } else {
+      nUnitType = -1;
     }
 
     GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT_INT(0x44, nUnitType, gnNpcShopActiveTab, 0, 2);
@@ -5984,10 +5980,10 @@ BOOL __stdcall NPCSHOP_IsRepairTabActive() {
     }
     if (gnPlayerCashDisplay == 2) {
       pDVar1 = UNIT::Player::GetPlayerUnit_UI();
-      if (!pDVar1) {
-        pDVar1 = 0;
-      } else {
+      if (pDVar1) {
         pDVar1 = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pDVar1->pInventory);
+      } else {
+        pDVar1 = 0;
       }
 
       ITEM_SetItemOnHand(pDVar1);
@@ -5997,10 +5993,10 @@ BOOL __stdcall NPCSHOP_IsRepairTabActive() {
     if (!nHoradricCubeUIState) {
       int nUnitType;
       pDVar1 = UNIT::Player::GetPlayerUnit_UI();
-      if (!pDVar1) {
-        nUnitType = -1;
-      } else {
+      if (pDVar1) {
         nUnitType = pDVar1->nUnitGUID;
+      } else {
+        nUnitType = -1;
       }
 
       GAME::Msg::NET_D2GS_CLIENT_Send_INT_INT_INT_INT(0x44, nUnitType, gnNpcShopActiveTab, 0, 2);

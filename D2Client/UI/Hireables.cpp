@@ -164,7 +164,7 @@ void __stdcall FreeHireablesList() {
       }
 
       ppClassIcon++;
-    } while ((int)ppClassIcon < (uintptr_t)((char*)&ClassIcons + sizeof(ClassIcons)));
+    } while ((int)ppClassIcon < (int)((uintptr_t)((char*)&ClassIcons + sizeof(ClassIcons))));
 
     if (!gpHireablesList) {
       return;
@@ -172,19 +172,15 @@ void __stdcall FreeHireablesList() {
 
     int nIconCount = sgptDataTable->nTxtPetTypeSize * 5;
     D2HireablesListStrc* pMemoryToFree = gpHireablesList;
-    if (0 < nIconCount) {
-      int nIconIdx = 0;
-      do {
+    for (int nIconIdx = 0; nIconIdx < nIconCount; nIconIdx++) {
         if ((&pMemoryToFree->pIcon)[nIconIdx]) {
           Core::Archive::DC6_FreeAndDelete((&pMemoryToFree->pIcon)[nIconIdx]);
           pMemoryToFree = gpHireablesList;
         }
 
-        nIconIdx++;
-      } while (nIconIdx < nIconCount);
     }
 
-    D2_FREE_POOL_AT(nullptr, pMemoryToFree, ".\\UI\\Hireables.cpp", 0xb7);
+    Fog::Memory::FreeServerMemory(nullptr, pMemoryToFree, ".\\UI\\Hireables.cpp", 0xb7, 0);
     gpHireablesList = 0;
 }
 
@@ -231,12 +227,12 @@ static void __stdcall DrawHirelingName(int32_t nX, int32_t nY, int32_t nColor, u
 
 static void __stdcall GetAndDrawHirelingName(int32_t nX, int32_t nY, int32_t nPetType) {
     uint16_t wszName[32];
-    if (!(-1 < nPetType && nPetType < sgptDataTable->nTxtPetTypeSize)) {
+    if (!(0 <= nPetType && nPetType < sgptDataTable->nTxtPetTypeSize)) {
       return;
     }
 
     D2PetTypeTxt* pPetTypeTxt = sgptDataTable->pTxtPetType + nPetType;
-    if (!(pPetTypeTxt && pPetTypeTxt->name && pPetTypeTxt->name != 0x1506)) {
+    if (!(pPetTypeTxt && (uint32_t)pPetTypeTxt->name > 0 && pPetTypeTxt->name != 0x1506)) {
       return;
     }
 
@@ -741,8 +737,7 @@ static void __stdcall UI_DrawHirelingNameFromUnit(int32_t nX, int32_t nY, D2Unit
 
     memset(wszName, 0, 0x40);
     size_t nNameMaxChars = 0x20;
-    uint16_t* pwszName = UNIT::CUnit::GetName(pUnit);
-    D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(wszName, pwszName, nNameMaxChars);
+    D2Lang::Unicode::UNISYS::WSTRING_PutWideCharIntoBuffer(wszName, UNIT::CUnit::GetName(pUnit), nNameMaxChars);
     wszName[0x1f] = L'\0';
     DrawHirelingName(nX, nY, 0, wszName);
 }
@@ -849,12 +844,12 @@ static BOOL __stdcall HIRELING_DrawPortraitIcon(D2UnitStrc * pUnit, int * pnYTog
     int nX = *pnX;
     D2UnitStrc* pMercUnit = UNIT::Player::UNITS_FindClientSideUnit((int32_t)pUnit, UNIT_MONSTER);
     UI_DrawHirelingNameFromUnit(nX, nY, pMercUnit);
-    if (!*pnYToggle) {
-      *pnYToggle = 10;
-      *pnY += 10;
-    } else {
+    if (*pnYToggle) {
       *pnY -= *pnYToggle;
       *pnYToggle = 0;
+    } else {
+      *pnYToggle = 10;
+      *pnY += 10;
     }
 
     gpHireHoverUnit = *pnX;

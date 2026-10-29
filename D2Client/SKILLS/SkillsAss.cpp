@@ -154,7 +154,7 @@ int32_t __fastcall SKILLSASS_GetCltMissileByAuraLevel(D2UnitStrc * pUnit, int32_
     if (!pSkillTxt) {
       return -1;
     }
-    if (!pSkillTxt->progressive) {
+    if (!(*((uint8_t*)pSkillTxt + 0x4) & gadwBitMasks[2])) {
       return (int)pSkillTxt->cltmissile[1];
     }
 
@@ -193,7 +193,7 @@ uint32_t __fastcall SKILLSASS_GetPrgCalcByAuraLevel(D2UnitStrc * pUnit, eD2Skill
     if (!pSkillTxt) {
       return 0;
     }
-    if (pSkillTxt->progressive) {
+    if ((*((uint8_t*)pSkillTxt + 0x4) & gadwBitMasks[2])) {
       D2StatListExStrc* pStatListEx;
       sAuraState = pSkillTxt->aurastate;
       if (sAuraState < 0 || sgptDataTable->nTxtStatesSize <= (int)sAuraState) {
@@ -249,12 +249,13 @@ BOOL __fastcall Skills_CltDoFunc_Ass_AuraLevel_SpawnMissileRandom(D2UnitStrc * p
 }
 
 BOOL __fastcall Skills_CltStFunc_CheckAuraStateInactive(D2UnitStrc * pUnit, eD2Skills eSkill, int32_t nSkillLvl) {
-    if (!(-1 < (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount && sgptDataTable->pTxtSkills + eSkill)) {
+    D2SkillsTxt* pTxtRecord = 0 <= (int)eSkill && (int)eSkill < sgptDataTable->nTxtSkillsCount ? &sgptDataTable->pTxtSkills[eSkill] : nullptr;
+    if (!pTxtRecord) {
       return 0;
     }
 
-    short int sAuraState = sgptDataTable->pTxtSkills[eSkill].aurastate;
-    if (!(-1 < sAuraState && (int)sAuraState < sgptDataTable->nTxtStatesSize)) {
+    short int sAuraState = pTxtRecord->aurastate;
+    if (!(0 <= sAuraState && (int)sAuraState < sgptDataTable->nTxtStatesSize)) {
       return 0;
     }
 

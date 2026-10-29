@@ -133,7 +133,7 @@ static uint32_t GFX_HashTextureName(char * pArchive) {
     char DVar1;
     char* pEnd = pArchive;
     pEnd = pEnd + strlen(pEnd) + 1;
-    if (7 < (uint32_t)((int)pEnd - (int)(pArchive + 1))) {
+    if (8 <= (uint32_t)((int)pEnd - (int)(pArchive + 1))) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x79);
       exit(-1);
     }
@@ -2456,17 +2456,7 @@ BOOL __fastcall GFX_DrawUnitSelectionShape(D2UnitStrc * pUnit) {
       GFX_DrawUnitColoredShape(pUnit);
       return 1;
     }
-    if (!nCallResult) {
-      nCoord = D2Common::Units::GetTargetX(pUnit);
-      nWorldOffsetVal = UI::Path::DRAW_GetWorldOffsetX();
-      nParticleXY = Particle::PARTICLE_GetX(pUnit);
-      __frame0.nScreenX = nParticleXY + (nCoord - nWorldOffsetVal);
-      nCoord = D2Common::Units::GetTargetY(pUnit);
-      nWorldOffsetVal = UI::Path::DRAW_GetWorldOffsetY();
-      nParticleXY = Particle::PARTICLE_GetY(pUnit);
-      __frame0.nScreenY = nParticleXY + (nCoord - nWorldOffsetVal);
-      nParticleOffset = Particle::PARTICLE_GetScreenZ(pUnit);
-    } else {
+    if (nCallResult) {
       nCoord = Particle::PARTICLE_GetScreenZ(pUnit);
       pScreenYOut = &__frame0.nScreenY;
       pScreenXOut = &__frame0.nScreenX;
@@ -2486,6 +2476,16 @@ BOOL __fastcall GFX_DrawUnitSelectionShape(D2UnitStrc * pUnit) {
       nCoord = Particle::PARTICLE_GetX(pUnit);
       __frame0.nScreenX += nCoord;
       nParticleOffset = Particle::PARTICLE_GetY(pUnit);
+    } else {
+      nCoord = D2Common::Units::GetTargetX(pUnit);
+      nWorldOffsetVal = UI::Path::DRAW_GetWorldOffsetX();
+      nParticleXY = Particle::PARTICLE_GetX(pUnit);
+      __frame0.nScreenX = nParticleXY + (nCoord - nWorldOffsetVal);
+      nCoord = D2Common::Units::GetTargetY(pUnit);
+      nWorldOffsetVal = UI::Path::DRAW_GetWorldOffsetY();
+      nParticleXY = Particle::PARTICLE_GetY(pUnit);
+      __frame0.nScreenY = nParticleXY + (nCoord - nWorldOffsetVal);
+      nParticleOffset = Particle::PARTICLE_GetScreenZ(pUnit);
     }
 
     __frame0.nScreenY += nParticleOffset;

@@ -475,7 +475,7 @@ static int TEXT_DrawTextBoxWithBorderCheck(D2TextBoxStrc * pTextBox, int * pnPar
     switch (nBorderType) {
       case 1:
         {
-          if (ScreenSizeX / 2 - 10 < *pnParam) {
+          if (*pnParam > ScreenSizeX / 2 - 10) {
             return 1;
           }
 
@@ -576,7 +576,7 @@ void __fastcall TEXT_InsertScreenMessage(uint16_t * * ppwszText) {
       if (pPrev) {
         pPrev->pNext = 0;
       }
-      if (AllMessagesMaybe.nCount) {
+      if (AllMessagesMaybe.nCount >= 1) {
         AllMessagesMaybe.nCount--;
       }
     }
@@ -938,13 +938,13 @@ static uint32_t TEXT_ConvertCharToWideWithLanguage(uint32_t dwParam, char * szTe
 }
 
 void __stdcall TEXT_FreeStaticTextBox() {
-    D2TextBoxStrc* pPopup = gpStaticTextPopup;
     if (!gpStaticTextPopup) {
       return;
     }
 
+    D2TextBoxStrc* pPopup = gpStaticTextPopup;
     TEXT_FreeTextLineList(gpStaticTextPopup->pLineList);
-    D2_FREE_AT(pPopup, ".\\UI\\text.cpp", 0x68e);
+    Fog::Memory::FreeClientMemory(pPopup, ".\\UI\\text.cpp", 0x68e, 0);
     gpStaticTextPopup = 0;
 }
 
@@ -1188,7 +1188,7 @@ void __stdcall TEXT_SetTextBoxExclusionRect() {
     RECT nRectLeft;
     nRectLeft.top = gnScrollingTextBoxTopY;
     nRectLeft.bottom = gnScrollingTextBoxTopY + 0xb6;
-    if (ScreenSizeY - 0x35 <= (int)(gnScrollingTextBoxTopY + 0xb6)) {
+    if ((int)(gnScrollingTextBoxTopY + 0xb6) >= ScreenSizeY - 0x35) {
       nRectLeft.bottom = ScreenSizeY - 0x35;
     }
 
@@ -1225,9 +1225,7 @@ static BOOL TEXT_FormatEventMessage(int32_t pEventData, uint16_t * wszText) {
     memset(awszPlayerName, 0, 16 * sizeof(awszPlayerName[0]));
     D2UnitStrc* pPlayerUnit_lcl;
     pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_UI();
-    if (!pRoster) {
-      szRosterName[0] = '\0';
-    } else {
+    if (pRoster) {
       char* pszSrc;
       pszSrc = GAME::Roster::GetRosterName(pRoster);
       pszDst = szRosterName;
@@ -1237,6 +1235,8 @@ static BOOL TEXT_FormatEventMessage(int32_t pEventData, uint16_t * wszText) {
         pszSrc++;
         pszDst++;
       } while (cNameCh != '\0');
+    } else {
+      szRosterName[0] = '\0';
     }
 
     D2Lang::Unicode::UNISYS::STRING_CopyCharToWCharWithSetMaxSize(awszPlayerName, szRosterName, 0x10);
@@ -4042,9 +4042,9 @@ void __stdcall TEXT_DrawScrollBackground() {
 
     DC6* pScrollBgImage = gpQuestScrollImageBg;
     memset(&sGfxData, 0, 0x48);
+    sGfxData.pDC6 = pScrollBgImage;
     sGfxData.nDirection = 0;
     sGfxData.nFrameNumber = 0;
-    sGfxData.pDC6 = pScrollBgImage;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, gnPanelOffsetX, gnPanelOffsetY - 0x6d + ScreenSizeY, -1, DRAW_SOLID, nullptr);
     sGfxData.nFrameNumber = 1;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, gnPanelOffsetX + 0x100, gnPanelOffsetY - 0x6d + ScreenSizeY, -1, DRAW_SOLID, nullptr);
@@ -5898,7 +5898,15 @@ void __stdcall INPUT_TextClickHandler(D2UIMouseMsgStrc * pMsg) {
     D2UnitStrc* pNpcUnit;
     gpTextDismissCallback = 1;
     D2UnitStrc* pSelectedUnit = GAME::Select::GetSelectedUnit();
-    if (!pSelectedUnit) {
+    if (pSelectedUnit) {
+      if (gnTextNpcInteractGuid) {
+        pSelectedUnit = UNIT::Player::UNITS_FindClientSideUnit(gnTextNpcGuid, UNIT_MONSTER);
+        pNpcUnit = GAME::Select::GetSelectedUnit();
+        if (pSelectedUnit == pNpcUnit) {
+          return;
+        }
+      }
+    } else {
       pSelectedUnit = GAME::Select::GetSelectedUnit();
       if (!pSelectedUnit && gbTextNpcMenuSelection != '\0') {
         pSelectedUnit = UNIT::Player::UNITS_FindClientSideUnit(gnTextNpcMenuIndex, UNIT_MONSTER);
@@ -5916,12 +5924,6 @@ void __stdcall INPUT_TextClickHandler(D2UIMouseMsgStrc * pMsg) {
         Storm::SMsgBreakHandlerChain(pMsg);
         return;
       }
-    } else if (gnTextNpcInteractGuid) {
-      pSelectedUnit = UNIT::Player::UNITS_FindClientSideUnit(gnTextNpcGuid, UNIT_MONSTER);
-      pNpcUnit = GAME::Select::GetSelectedUnit();
-      if (pSelectedUnit == pNpcUnit) {
-        return;
-      }
     }
 
     INPUT_TextDismiss(pMsg);
@@ -5932,7 +5934,7 @@ void __stdcall INPUT_TextKeyHandler(D2UIMouseMsgStrc * pMsg) {
     if (bIsBound) {
       uint16_t uVar1;
       uVar1 = CmdTbl::CMD_GetKeyForCommand(7, 1);
-      if (uVar1 != 0xffff && uVar1 < 0xe0 && pMsg->nWParam == (uint32_t)uVar1) {
+      if (uVar1 != 0xffff && uVar1 <= 0xdf && pMsg->nWParam == (uint32_t)uVar1) {
         return;
       }
     }

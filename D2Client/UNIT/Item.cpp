@@ -350,7 +350,11 @@ static void ITEM_RestoreSkillSelections(int * pSkillSaveState, D2UnitStrc * pUni
         pCurrentSkill = D2Common::Units::GetLeftSkill(pUnit);
         if (pSkillLeft != pCurrentSkill) {
           nCanUseResult = PlrSkills::PLRSKILLS_CanUseSkillCheck(pUnit, pSkillLeft);
-          if (nCanUseResult != 2 && nCanUseResult != 7) {
+          switch (nCanUseResult) {
+          case 2:
+          case 7:
+            break;
+          default:
             D2Common::Skills::SelectSkillLeft(pUnit, pSkillSaveState[4], pSkillSaveState[6]);
           }
         }
@@ -371,7 +375,9 @@ static void ITEM_RestoreSkillSelections(int * pSkillSaveState, D2UnitStrc * pUni
     }
 
     nCanUseResult = PlrSkills::PLRSKILLS_CanUseSkillCheck(pUnit, pSkillLeft);
-    if (!(nCanUseResult != 2 && nCanUseResult != 7)) {
+    switch (nCanUseResult) {
+    case 2:
+    case 7:
       return;
     }
 
@@ -842,7 +848,10 @@ void __fastcall ITEM_UpdateItemAnimation(D2UnitStrc * pUnit) {
 }
 
 void __fastcall ItemMessage(int32_t eMessageType, D2UnitStrc * pUnit, D2ServerMessageHandleStrc * pMessage, int32_t nUpdateFlag) {
-    if (eMessageType != 2) {
+    switch (eMessageType) {
+    case 2:
+      break;
+    default:
       return;
     }
 
@@ -1652,13 +1661,7 @@ void __fastcall HandleItemPutInContainer(uint8_t * pbParam) {
     } else {
       uint8_t ePage;
       nFlagResult = D2Common::ITEMS::Items::ITEMFLAG_CheckFlag(sItemDetails.flags, ITEMFLAG_RELOAD);
-      if (!nFlagResult) {
-        ePage = sItemDetails.nInvPage;
-        ITEM_SetAnimModeAndPlace(pItem, nullptr, (uint32_t)sItemDetails.x, (uint32_t)sItemDetails.y, (uint32_t)sItemDetails.nAnimMode, 0);
-        D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, ePage);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
-        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, sItemDetails.flags, 1);
-      } else {
+      if (nFlagResult) {
         pBelongsResult = D2Common::INVENTORY::Inventory::ItemBelongsToInventoryOfPlayer(pPlayerUnit_lcl->pInventory, pItem);
         if (pBelongsResult) {
           eInvPage = D2Common::ITEMS::Items::ITEM_GetContainingInventoryPage(pItem);
@@ -1686,6 +1689,12 @@ void __fastcall HandleItemPutInContainer(uint8_t * pbParam) {
         if (!pItem) {
           return;
         }
+      } else {
+        ePage = sItemDetails.nInvPage;
+        ITEM_SetAnimModeAndPlace(pItem, nullptr, (uint32_t)sItemDetails.x, (uint32_t)sItemDetails.y, (uint32_t)sItemDetails.nAnimMode, 0);
+        D2Common::ITEMS::Items::ITEM_SetItemData_ePage(pItem, ePage);
+        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, ITEMFLAG_TAGGED | ITEMFLAG_DROW | ITEMFLAG_CURSED | ITEMFLAG_STAFFMODS | ITEMFLAG_MAGICAL | ITEMFLAG_RUNEWORD | ITEMFLAG_CRUDE | ITEMFLAG_PLAYERNAME | ITEMFLAG_SAVED | ITEMFLAG_ETHEREAL | ITEMFLAG_COMPACT | ITEMFLAG_100000 | ITEMFLAG_SERVER | ITEMFLAG_RESTRICT | ITEMFLAG_BEGINNER | ITEMFLAG_BODYPART | ITEMFLAG_HARDCORE | ITEMFLAG_DISABLED | ITEMFLAG_NEW | ITEMFLAG_MONSTER | ITEMFLAG_SOCKETED | ITEMFLAG_SORTED | ITEMFLAG_RESTORED | ITEMFLAG_BROKEN | ITEMFLAG_TAKEN | ITEMFLAG_ADDED | ITEMFLAG_REMOVED | ITEMFLAG_IDENTIFIED | ITEMFLAG_IGNORE | ITEMFLAG_CURSOR | ITEMFLAG_BOUGHT | ITEMFLAG_RELOAD, 0);
+        D2Common::ITEMS::Items::ITEM_EditItemData_eItemFlag(pItem, sItemDetails.flags, 1);
       }
     }
     if (sItemDetails.nInvPage == 0xff) {
@@ -2288,18 +2297,14 @@ static void __stdcall ITEM_HandleSwapBodyUnequipItem(uint8_t * pPacketData, D2Un
     if (pOwnerUnit->eUnitType == UNIT_PLAYER) {
       D2UnitStrc* pBelongsResult;
       pInventory = pOwnerUnit->pInventory;
-      if (!pInventory) {
-        nErrorLineVal = 0x6ef;
-      } else {
+      if (pInventory) {
         pBodyItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemByGridOffset(pInventory, (uint32_t)pUnitDataItemDetails->nBodyLoc);
         Units::IfPlayer(pOwnerUnit);
         D2Common::INVENTORY::Inventory::INVENTORY_SwapPrimaryWeaponOnRemoval(pInventory, pBodyItem);
         SRC::CelCmp::GFX_ClearAllModeFlags(pOwnerUnit, (uint32_t)pPacketData[3]);
         D2Common::INVENTORY::Inventory::GetCurrentItemOnBodyLocation(pOwnerUnit, pInventory, &pBodyItem, (uint32_t)pUnitDataItemDetails->nBodyLoc);
         pBelongsResult = D2Common::INVENTORY::Inventory::ItemBelongsToInventoryOfPlayer(pInventory, pBodyItem);
-        if (!pBelongsResult) {
-          nErrorLineVal = 0x6f7;
-        } else {
+        if (pBelongsResult) {
           if (pBelongsResult == pBodyItem) {
             if (pOwnerUnit->eUnitType == UNIT_PLAYER) {
               D2Common::INVENTORY::Inventory::GetEquipedWeapon(pOwnerUnit->pInventory);
@@ -2343,7 +2348,11 @@ static void __stdcall ITEM_HandleSwapBodyUnequipItem(uint8_t * pPacketData, D2Un
           }
 
           nErrorLineVal = 0x6f8;
+        } else {
+          nErrorLineVal = 0x6f7;
         }
+      } else {
+        nErrorLineVal = 0x6ef;
       }
     }
 
@@ -2842,10 +2851,10 @@ void __fastcall HandleItemPutInBelt(uint8_t * pbParam) {
       eUnitType = pUnit->eUnitType;
       if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
         nIndex = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nIndex = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nIndex = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nIndex = 0;
       }
 
       UI::Panel::PANEL_SetBeltSlotHoverFlag(nIndex, 1);

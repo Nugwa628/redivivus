@@ -273,7 +273,7 @@ void __fastcall SPELLSEL_DrawSkillIcon(D2UnitStrc * pUnit, D2SkillStrc * pSkill,
 
     DC6* pSkillIconDC6 = SpellSel::ARCHIVE_LoadSpellsClassSkillicon(&pSkillTxt->skill);
     GLOBALPALLETE ePalette = SpellSel::SPELLSEL_GetSkillPalette(pUnit, pSkill);
-    if (!pSkillTxt->InTown) {
+    if (!(*((uint8_t*)pSkillTxt + 0x5) & gadwBitMasks[0])) {
       D2RoomStrc* pRoom;
       pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
       if (pRoom) {
@@ -319,11 +319,10 @@ void __stdcall PANEL_DrawSkillIcons() {
     D2SkillStrc* pSkill = D2Common::Units::GetLeftSkill(pUnit);
     if (pSkill) {
       nSkillLevel = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 1);
-      if (nSkillLevel < 1) {
+      if (nSkillLevel <= 0) {
         nLine = 0x289;
         pszContext = ".\\UI\\panel.cpp";
-        eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UI\\panel.cpp", 0x289);
-        D2Common::Skills::SKILL_RemoveSkillCallback(pUnit, eSkillId, pszContext, nLine);
+        D2Common::Skills::SKILL_RemoveSkillCallback(pUnit, D2Common::Skills::GetSkillId(pSkill, ".\\UI\\panel.cpp", 0x289), pszContext, nLine);
         D2Common::Skills::SelectSkillLeft(pUnit, SKILL_Attack, -1);
         pSkill = D2Common::Units::GetLeftSkill(pUnit);
       }
@@ -333,11 +332,10 @@ void __stdcall PANEL_DrawSkillIcons() {
     pSkill = D2Common::Units::GetRightSkill(pUnit);
     if (pSkill) {
       nSkillLevel = D2Common::Skills::GetSkillLevel(pUnit, pSkill, 1);
-      if (nSkillLevel < 1) {
+      if (nSkillLevel <= 0) {
         nLine = 0x294;
         pszContext = ".\\UI\\panel.cpp";
-        eSkillId = D2Common::Skills::GetSkillId(pSkill, ".\\UI\\panel.cpp", 0x294);
-        D2Common::Skills::SKILL_RemoveSkillCallback(pUnit, eSkillId, pszContext, nLine);
+        D2Common::Skills::SKILL_RemoveSkillCallback(pUnit, D2Common::Skills::GetSkillId(pSkill, ".\\UI\\panel.cpp", 0x294), pszContext, nLine);
         D2Common::Skills::SelectSkillRight(pUnit, 0, -1);
         pSkill = D2Common::Units::GetRightSkill(pUnit);
       }
@@ -795,7 +793,7 @@ static void CLIENT_HandleBeltSlotClick(D2InventoryStrc * pInventory) {
     }
 
     D2Common::DATATBLS::BeltsTbls::GetBeltsLine(gnBeltPanelState, nScreenMode, &sBeltsTxt);
-    if (!(-1 < gnBeltSlotUnderCursor && gnBeltSlotUnderCursor < (int)(uint32_t)(uint8_t)sBeltsTxt.nBoxes)) {
+    if (!(0 <= gnBeltSlotUnderCursor && gnBeltSlotUnderCursor < (int)(uint32_t)(uint8_t)sBeltsTxt.nBoxes)) {
       return;
     }
 
@@ -824,16 +822,15 @@ uint32_t __stdcall PANEL_GetBeltSlotHoverFlag() {
 
 int __stdcall PANEL_CheckBeltUseBlocked() {
     switch (gnBeltPanelState) {
+      case 2:
+        return 1;
+      case 1:
+      case 4:
+        return 2;
       case 0:
 
       case 5:
         return 3;
-      case 1:
-
-      case 4:
-        return 2;
-      case 2:
-        return 1;
     }
 
     return 4;
@@ -1194,11 +1191,7 @@ void __stdcall Draw_EquipmentNeedToRepairBody() {
       nRepairState = 0;
       bIsShield = 0;
       bIsQuiver = 0;
-      if (!pItem) {
-        if (eEquipSlot != BODYLOC_R_ARM && eEquipSlot != BODYLOC_L_ARM) {
-          Draw_EquipmentNeedToRepairBody_1(bIsQuiver, bIsShield, eEquipSlot, nRepairState);
-        }
-      } else {
+      if (pItem) {
         bHasDurability = D2Common::ITEMS::Items::ITEM_CheckIfItemHasDurability(pItem);
         if (bHasDurability) {
           BVar1 = D2Common::ITEMS::Items::IsStackable(pItem);
@@ -1219,6 +1212,10 @@ void __stdcall Draw_EquipmentNeedToRepairBody() {
         }
 
         Draw_EquipmentNeedToRepairBody_1(bIsQuiver, bIsShield, eEquipSlot, nRepairState);
+      } else {
+        if (eEquipSlot != BODYLOC_R_ARM && eEquipSlot != BODYLOC_L_ARM) {
+          Draw_EquipmentNeedToRepairBody_1(bIsQuiver, bIsShield, eEquipSlot, nRepairState);
+        }
       }
 
       pSlotLocEntry2++;
@@ -1330,7 +1327,10 @@ static void PANEL_DrawCharacterInfo(int32_t nPanelOffsetY) {
     D2GfxDataStrc sGfxData;
     memset(&sGfxData, 0, 0x48);
     DWORD eResolutionMode = D2gfx::D2GFX::D2GFX_GetResolutionMode();
-    if (eResolutionMode != 2) {
+    switch (eResolutionMode) {
+    case 2:
+      break;
+    default:
       if (!CtrlPnl7) {
         CtrlPnl7 = ui::ARCHIVE_LoadOverlayImageUsedInGame("Panel\\CtrlPnl7");
       }
@@ -1365,9 +1365,9 @@ static void PANEL_DrawCharacterInfo(int32_t nPanelOffsetY) {
       _00CtrlPnl7 = ui::ARCHIVE_LoadOverlayImageUsedInGame("Panel\\800CtrlPnl7");
     }
 
+    sGfxData.pDC6 = _00CtrlPnl7;
     sGfxData.nDirection = 0;
     sGfxData.nFrameNumber = 0;
-    sGfxData.pDC6 = _00CtrlPnl7;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, 0, ScreenSizeY - nPanelOffsetY, -1, DRAW_SOLID, nullptr);
     sGfxData.nFrameNumber = 1;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, ScreenSizeX / 2 - 0xeb, ScreenSizeY, -1, DRAW_SOLID, nullptr);
@@ -1388,9 +1388,9 @@ void __stdcall DRAW_UI_BorderLeft() {
       _00BorderFrame = ui::ARCHIVE_LoadOverlayImageUsedInGame("Panel\\800BorderFrame");
     }
 
+    sGfxData.pDC6 = _00BorderFrame;
     sGfxData.nDirection = 0;
     sGfxData.nFrameNumber = 0;
-    sGfxData.pDC6 = _00BorderFrame;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, 0, 0xfd, -1, DRAW_SOLID, nullptr);
     sGfxData.nFrameNumber = 1;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, 0x100, 0x3f, -1, DRAW_SOLID, nullptr);
@@ -1410,9 +1410,9 @@ void __stdcall DRAW_UI_BorderRight() {
 
     DC6* pDVar1 = _00BorderFrame;
     memset(&sGfxData, 0, 0x48);
+    sGfxData.pDC6 = pDVar1;
     sGfxData.nDirection = 0;
     sGfxData.nFrameNumber = 5;
-    sGfxData.pDC6 = pDVar1;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, 400, 0x3f, -1, DRAW_SOLID, nullptr);
     sGfxData.nFrameNumber = 6;
     D2gfx::D2GFX::D2GFX_DrawImage(&sGfxData, 0x220, 0xfd, -1, DRAW_SOLID, nullptr);
@@ -1537,11 +1537,7 @@ static void CLIENT_HandleBeltMouseDown(D2InventoryStrc * pInventory, int32_t nMo
 
     pItem = D2Common::INVENTORY::Inventory::INVENTORY_GetItemInBeltSlot(pInventory, nBeltSlot);
     gnBeltSlotUnderCursor = nBeltSlot;
-    if (!pItem) {
-      gpPanelBeltSlot = 0;
-      gpPanelBeltLastHoverItem = 0;
-      gpPanelBeltHoverItem = 0;
-    } else {
+    if (pItem) {
       int32_t nItemXPos;
       gpPanelBeltSlot = 1;
       if (pItem != gpPanelBeltLastHoverItem) {
@@ -1553,6 +1549,10 @@ static void CLIENT_HandleBeltMouseDown(D2InventoryStrc * pInventory, int32_t nMo
         gnBeltTooltipY = aInvRect[2];
         return;
       }
+    } else {
+      gpPanelBeltSlot = 0;
+      gpPanelBeltLastHoverItem = 0;
+      gpPanelBeltHoverItem = 0;
     }
 }
 
@@ -1748,7 +1748,7 @@ void __stdcall PANEL_ClearBeltSlotHover() {
 // Stores nState in gnBeltPanelState; halts (panel.cpp line 2823) when nState is negative.
 // Unreferenced in 1.14d (entry: aligned start after padding); was undefined code hidden by a CALL_RETURN override on its halt call. Lines from docs/data/win-assert-oracle.tsv.
 void __fastcall PANEL_SetBeltPanelState(int nState) {
-    if (-1 < nState) {
+    if (0 <= nState) {
       gnBeltPanelState = nState;
       return;
     }

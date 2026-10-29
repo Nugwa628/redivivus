@@ -94,7 +94,7 @@ void __stdcall CLIENT_QuestEvent_CairnStonesPortal() {
     int32_t iVar1 = Units::GetXPosFromDynamicPathUnit(pUnit_00);
     int32_t nY = Units::GetYPosFromDynamicPathUnit(pUnit_00);
     UNIT::Missile::CastAttack(pUnit, MISSILE_Cairnstones, iVar1, nY, SKILL_Attack, 1);
-    if (sgptDataTable->nTxtMissilesSize < 0x121) {
+    if (sgptDataTable->nTxtMissilesSize <= 0x120) {
       pDVar2 = 0;
     } else {
       pDVar2 = sgptDataTable->pTxtMissiles + 0x120;
@@ -250,10 +250,10 @@ void __stdcall CLIENT_QuestEvent_RestoreTaintedSun() {
     eUnitType = pObject->eUnitType;
     if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
       nX = pObject->pPath.pStaticPath->nPosX;
-    } else if (!pObject->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pObject->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pObject->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     pPlayer = UNIT::Missile::CastAttack(pPlayer, MISSILE_Taintedsuncontrol, nX, nY, SKILL_Attack, 1);
@@ -330,21 +330,21 @@ void __fastcall CLIENT_SpawnOverseerControlMissile(D2UnitStrc * pUnit) {
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nY = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     D2UnitStrc* pMissile = UNIT::Missile::CastAttack(pUnit, MISSILE_Overseercontrol, nX, nY, SKILL_Attack, 1);
@@ -373,9 +373,7 @@ void __stdcall CLIENT_QuestEvent_FreeAnyaFromIce() {
 
     int32_t nSkillLevel = 1;
     eD2Skills eSkill = SKILL_Attack;
-    int32_t nY = Units::GetYPosFromDynamicPathUnit(pUnit);
-    int32_t nX = Units::GetXPosFromDynamicPathUnit(pUnit);
-    pPlayer = UNIT::Missile::CastAttack(pPlayer, MISSILE_AnyaCenter, nX, nY, eSkill, nSkillLevel);
+    pPlayer = UNIT::Missile::CastAttack(pPlayer, MISSILE_AnyaCenter, Units::GetXPosFromDynamicPathUnit(pUnit), Units::GetYPosFromDynamicPathUnit(pUnit), eSkill, nSkillLevel);
     if (!pPlayer) {
       return;
     }
@@ -518,9 +516,9 @@ void __fastcall CLIENT_BossDeath_BloodRaven(D2UnitStrc * pUnit) {
     D2SkillArgStrc sSkillArg;
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.nMissileTxtNo = MISSILE_Brdeathcontrol;
-    sSkillArg.nSkillLevel = 1;
     sSkillArg.pOwner = pUnit;
     sSkillArg.pMissile = pUnit;
+    sSkillArg.nSkillLevel = 1;
     D2UnitStrc* pMissile = UNIT::Missile::MakeMissile(&sSkillArg);
     if (pMissile) {
       D2Common::Units::Missile::SetTargetX(pMissile, 0x32);
@@ -528,9 +526,9 @@ void __fastcall CLIENT_BossDeath_BloodRaven(D2UnitStrc * pUnit) {
 
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.nMissileTxtNo = MISSILE_Brdeathspirits1;
-    sSkillArg.nSkillLevel = 1;
     sSkillArg.pOwner = pUnit;
     sSkillArg.pMissile = pUnit;
+    sSkillArg.nSkillLevel = 1;
     UNIT::Missile::MakeMissile(&sSkillArg);
     sSkillArg.nMissileTxtNo = MISSILE_Brdeathsmokes1;
     UNIT::Missile::MakeMissile(&sSkillArg);
@@ -578,10 +576,10 @@ void __fastcall CLIENT_SpawnTowerMistEffect(D2UnitStrc * pUnit) {
       eFindType = pTarget->eUnitType;
       if (eFindType == UNIT_OBJECT || 3 < (int)eFindType && (int)eFindType < 6) {
         nY = pTarget->pPath.pStaticPath->nPosY;
-      } else if (!pTarget->pPath.pDynamicPath) {
-        nY = 0;
-      } else {
+      } else if (pTarget->pPath.pDynamicPath) {
         nY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
+      } else {
+        nY = 0;
       }
     }
 
@@ -671,9 +669,9 @@ void __fastcall CLIENT_BossDeath_Mephisto(D2UnitStrc * pUnit) {
     D2SkillArgStrc sSkillArg;
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.nMissileTxtNo = MISSILE_Mephistodeathcontrol;
-    sSkillArg.nSkillLevel = 1;
     sSkillArg.pOwner = pUnit;
     sSkillArg.pMissile = pUnit;
+    sSkillArg.nSkillLevel = 1;
     D2UnitStrc* pMissile = UNIT::Missile::MakeMissile(&sSkillArg);
     if (pMissile) {
       D2Common::Units::Missile::SetTargetX(pMissile, 0x4b);
@@ -681,16 +679,16 @@ void __fastcall CLIENT_BossDeath_Mephisto(D2UnitStrc * pUnit) {
     }
 
     memset(&sSkillArg, 0, 0x5c);
-    sSkillArg.nSkillLevel = 1;
-    sSkillArg.nMissileTxtNo = MISSILE_Mephistoholedelay;
     sSkillArg.pOwner = pUnit;
+    sSkillArg.nSkillLevel = 1;
     sSkillArg.pMissile = pUnit;
+    sSkillArg.nMissileTxtNo = MISSILE_Mephistoholedelay;
     UNIT::Missile::MakeMissile(&sSkillArg);
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.nMissileTxtNo = MISSILE_Mephistodonotdraw;
-    sSkillArg.nSkillLevel = 1;
     sSkillArg.pOwner = pUnit;
     sSkillArg.pMissile = pUnit;
+    sSkillArg.nSkillLevel = 1;
     UNIT::Missile::MakeMissile(&sSkillArg);
 }
 
@@ -698,9 +696,9 @@ void __fastcall CLIENT_BossDeath_Andariel(D2UnitStrc * pUnit) {
     D2SkillArgStrc sSkillArg;
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.nMissileTxtNo = MISSILE_Andycontrol0;
-    sSkillArg.nSkillLevel = 1;
     sSkillArg.pOwner = pUnit;
     sSkillArg.pMissile = pUnit;
+    sSkillArg.nSkillLevel = 1;
     UNIT::Missile::MakeMissile(&sSkillArg);
 }
 
@@ -709,21 +707,21 @@ void __fastcall CLIENT_BossDeath_Radament(D2UnitStrc * pBossUnit) {
     int32_t nX;
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
     eD2UnitType eUnitType = pBossUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY = pBossUnit->pPath.pStaticPath->nPosY;
-    } else if (!pBossUnit->pPath.pDynamicPath) {
-      nY = 0;
-    } else {
+    } else if (pBossUnit->pPath.pDynamicPath) {
       nY = D2Common::PATH::DynamicPath::GetYPos(pBossUnit->pPath.pDynamicPath);
+    } else {
+      nY = 0;
     }
 
     eUnitType = pBossUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pBossUnit->pPath.pStaticPath->nPosX;
-    } else if (!pBossUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pBossUnit->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pBossUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     UNIT::Missile::CastAttack(pPlayerUnit_lcl, MISSILE_Radamentdeath, nX, nY, SKILL_Attack, 1);
@@ -734,21 +732,21 @@ void __fastcall CLIENT_BossDeath_SandMaggotQueen(D2UnitStrc * pBossUnit) {
     int32_t nX;
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
     eD2UnitType eUnitType = pBossUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY = pBossUnit->pPath.pStaticPath->nPosY;
-    } else if (!pBossUnit->pPath.pDynamicPath) {
-      nY = 0;
-    } else {
+    } else if (pBossUnit->pPath.pDynamicPath) {
       nY = D2Common::PATH::DynamicPath::GetYPos(pBossUnit->pPath.pDynamicPath);
+    } else {
+      nY = 0;
     }
 
     eUnitType = pBossUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pBossUnit->pPath.pStaticPath->nPosX;
-    } else if (!pBossUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pBossUnit->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pBossUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     UNIT::Missile::CastAttack(pPlayerUnit_lcl, MISSILE_Queendeathcenter, nX, nY, SKILL_Attack, 1);
@@ -759,21 +757,21 @@ void __fastcall CLIENT_BossDeath_Duriel(D2UnitStrc * pBossUnit) {
     int32_t nX;
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
     eD2UnitType eUnitType = pBossUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nY = pBossUnit->pPath.pStaticPath->nPosY;
-    } else if (!pBossUnit->pPath.pDynamicPath) {
-      nY = 0;
-    } else {
+    } else if (pBossUnit->pPath.pDynamicPath) {
       nY = D2Common::PATH::DynamicPath::GetYPos(pBossUnit->pPath.pDynamicPath);
+    } else {
+      nY = 0;
     }
 
     eUnitType = pBossUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nX = pBossUnit->pPath.pStaticPath->nPosX;
-    } else if (!pBossUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pBossUnit->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pBossUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     UNIT::Missile::CastAttack(pPlayerUnit_lcl, MISSILE_Durieldeathcontrol, nX, nY, SKILL_Attack, 1);
@@ -784,9 +782,9 @@ void __fastcall CLIENT_BossDeath_Izual(D2UnitStrc * pUnit) {
     GAME::Wall2::WALL2_ScheduleSoundSequence(0x1253, 0, 0xfa, 0, 0, 0, 0);
     memset(&sSkillArg, 0, 0x5c);
     sSkillArg.nMissileTxtNo = MISSILE_IzualControl;
-    sSkillArg.nSkillLevel = 1;
     sSkillArg.pOwner = pUnit;
     sSkillArg.pMissile = pUnit;
+    sSkillArg.nSkillLevel = 1;
     UNIT::Missile::MakeMissile(&sSkillArg);
 }
 
@@ -805,28 +803,27 @@ void __stdcall CLIENT_BossDeath_Baal() {
     D2UnitStrc* pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
     int32_t nSearchRange = 0x220;
     eD2UnitType eSearchType = UNIT_MONSTER;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pPlayerUnit_lcl);
-    D2UnitStrc* pBaalUnit = D2Common::Units::UnitFinds::FindUnitInNeighboredRooms(pRoom, eSearchType, nSearchRange);
+    D2UnitStrc* pBaalUnit = D2Common::Units::UnitFinds::FindUnitInNeighboredRooms(D2Common::Units::UNITS_GetRoom(pPlayerUnit_lcl), eSearchType, nSearchRange);
     if (!pBaalUnit) {
       return;
     }
 
     eSearchType = pBaalUnit->eUnitType;
-    if (eSearchType == UNIT_OBJECT || 3 < (int)eSearchType && (int)eSearchType < 6) {
+    if (eSearchType == UNIT_OBJECT || 3 < (int)eSearchType && (int)eSearchType <= 5) {
       nY = pBaalUnit->pPath.pStaticPath->nPosY;
-    } else if (!pBaalUnit->pPath.pDynamicPath) {
-      nY = 0;
-    } else {
+    } else if (pBaalUnit->pPath.pDynamicPath) {
       nY = D2Common::PATH::DynamicPath::GetYPos(pBaalUnit->pPath.pDynamicPath);
+    } else {
+      nY = 0;
     }
 
     eSearchType = pBaalUnit->eUnitType;
-    if (eSearchType == UNIT_OBJECT || 3 < (int)eSearchType && (int)eSearchType < 6) {
+    if (eSearchType == UNIT_OBJECT || 3 < (int)eSearchType && (int)eSearchType <= 5) {
       nX = pBaalUnit->pPath.pStaticPath->nPosX;
-    } else if (!pBaalUnit->pPath.pDynamicPath) {
-      nX = 0;
-    } else {
+    } else if (pBaalUnit->pPath.pDynamicPath) {
       nX = D2Common::PATH::DynamicPath::GetXPos(pBaalUnit->pPath.pDynamicPath);
+    } else {
+      nX = 0;
     }
 
     UNIT::Missile::CastAttack(pPlayerUnit_lcl, MISSILE_BaalfxControl, nX, nY, SKILL_Attack, 1);
@@ -857,12 +854,13 @@ int __stdcall CLIENT_GetDenOfEvilLightIntensity(uint8_t * pRed, uint8_t * pGreen
 
 int __fastcall ROOM_GetLevelLightColor(D2RoomStrc * pRoom, char * pRed, char * pGreen, char * pBlue) {
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    if (eLevelId == LEVEL_DenOfEvil) {
+    switch (eLevelId) {
+    case LEVEL_DenOfEvil:
       int iVar1;
       iVar1 = CLIENT_GetDenOfEvilLightIntensity((uint8_t*)pRed, (uint8_t*)pGreen, (uint8_t*)pBlue);
       return iVar1;
     }
-    if ((uint32_t)(eLevelId - LEVEL_RiverOfFlame) < 2) {
+    if ((uint32_t)(eLevelId - LEVEL_RiverOfFlame) <= 1) {
       if (!(gnDiabloSpawnLightActive && gnDiabloSpawnLightTimer == -1)) {
         return 0;
       }
@@ -900,7 +898,7 @@ void __stdcall ClientLight_UpdateLightTimers() {
     }
     if (!::DenOfEvilLight && gnDenOfEvilLightTimerTick != -1) {
       gnDenOfEvilLightTimerTick++;
-      if (0x1d < gnDenOfEvilLightTimerTick) {
+      if ((int)gnDenOfEvilLightTimerTick >= 0x1e) {
         ::DenOfEvilLight = 1;
         ClientLight_ApplyDenOfEvilLighting();
       }
@@ -910,7 +908,7 @@ void __stdcall ClientLight_UpdateLightTimers() {
     }
 
     gnDiabloSpawnLightTimer++;
-    if (0x1d >= gnDiabloSpawnLightTimer) {
+    if ((int)gnDiabloSpawnLightTimer < 0x1e) {
       return;
     }
 
@@ -927,7 +925,7 @@ void __fastcall CLIENT_CheckWorldstoneShake(D2RoomStrc * pRoom) {
     }
 
     eD2LevelId eLevelId = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
-    if ((uint32_t)(eLevelId - LEVEL_ThroneOfDestruction) < 2) {
+    if ((eLevelId >= LEVEL_ThroneOfDestruction && eLevelId <= LEVEL_ThroneOfDestruction + 1)) {
       D2UnitStrc* pPlayerUnit_lcl;
       if (!gbWorldstoneShakeFired && gbWorldstoneShouldShake) {
         pPlayerUnit_lcl = UNIT::Player::GetPlayerUnit_Net();
@@ -964,8 +962,8 @@ void __fastcall CLIENT_SetQuestGameEndTimer(int32_t nSeconds) {
 void __fastcall CLIENT_SpawnWorldstoneShakeParticle(D2UnitStrc * pUnit) {
     int32_t nClassId = 0x271;
     eD2UnitType eUnitType = UNIT_MISSILE;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    D2UnitStrc* pMissileUnit = D2Common::Units::UnitFinds::FindUnitInNeighboredRooms(pRoom, eUnitType, nClassId);
+    D2RoomStrc* pRoom;
+    D2UnitStrc* pMissileUnit = D2Common::Units::UnitFinds::FindUnitInNeighboredRooms(D2Common::Units::UNITS_GetRoom(pUnit), eUnitType, nClassId);
     if (!pMissileUnit) {
       return;
     }
@@ -976,8 +974,7 @@ void __fastcall CLIENT_SpawnWorldstoneShakeParticle(D2UnitStrc * pUnit) {
     Engine::Particle::PARTICLE_SetBoundsOffset(pUnit, 0, 0, 5, 0);
     Engine::Particle::PARTICLE_SetReverseDirection(pUnit, 0);
     D2Common::Units::Missile::SetTargetY(pMissileUnit, 1);
-    pRoom = UNIT::CUnit::GetCurrentRoom();
-    CLIENT_CheckWorldstoneShake(pRoom);
+    CLIENT_CheckWorldstoneShake(UNIT::CUnit::GetCurrentRoom());
 }
 
 static void DRAW_Overlay_SecondsLeftToGame(D2QServerClientConnectionStrc * pQServerClientConnection) {
@@ -1145,10 +1142,10 @@ void __fastcall DRLGROOM_SpawnRandomMonsters(D2RoomStrc * pRoom) {
     }
 
     D2LevelsTxt* pLevelsTxt = D2Common::DATATBLS::LvlTbls::TXT_Levels_GetLine(eLevelId);
-    if (!pRoom) {
-      pSeed = 0;
-    } else {
+    if (pRoom) {
       pSeed = &pRoom->sSeed;
+    } else {
+      pSeed = 0;
     }
 
     int nSlotIndex = 0;
@@ -1255,7 +1252,7 @@ eD2UnitType __fastcall CLIENT_FindNearbyCorpseCallback(D2UnitStrc * pSourceUnit,
     }
 
     int32_t nDistance = D2Common::Collision::GetCollisionDistance(pSourceUnit, pCandidate);
-    if (nDistance - 3U >= 0x17) {
+    if (nDistance - 3U > 0x16) {
       return UNIT_PLAYER;
     }
 
@@ -1353,39 +1350,39 @@ static uint32_t __stdcall MONSTER_TryMoveTowardTarget(D2UnitStrc * pUnit, uint8_
     uint32_t local_c;
     uint32_t nMonsterY;
     eD2UnitType eVar1 = pUnit->eUnitType;
-    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 < 6) {
+    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
       nMonsterY = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nMonsterY = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nMonsterY = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nMonsterY = 0;
     }
 
     eVar1 = pUnit->eUnitType;
-    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 < 6) {
+    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
       local_c = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      local_c = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       local_c = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      local_c = 0;
     }
 
     eVar1 = pTarget->eUnitType;
-    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 < 6) {
+    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
       nTargetX = pTarget->pPath.pStaticPath->nPosX;
-    } else if (!pTarget->pPath.pDynamicPath) {
-      nTargetX = 0;
-    } else {
+    } else if (pTarget->pPath.pDynamicPath) {
       nTargetX = D2Common::PATH::DynamicPath::GetXPos(pTarget->pPath.pDynamicPath);
+    } else {
+      nTargetX = 0;
     }
 
     eVar1 = pTarget->eUnitType;
-    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 < 6) {
+    if (eVar1 == UNIT_OBJECT || 3 < (int)eVar1 && (int)eVar1 <= 5) {
       nTargetY = pTarget->pPath.pStaticPath->nPosY;
-    } else if (!pTarget->pPath.pDynamicPath) {
-      nTargetY = 0;
-    } else {
+    } else if (pTarget->pPath.pDynamicPath) {
       nTargetY = D2Common::PATH::DynamicPath::GetYPos(pTarget->pPath.pDynamicPath);
+    } else {
+      nTargetY = 0;
     }
 
     int nStepY = 0;
@@ -1408,14 +1405,13 @@ static uint32_t __stdcall MONSTER_TryMoveTowardTarget(D2UnitStrc * pUnit, uint8_
     eD2CollisionUnitSize nWidth = COLLISION_UNIT_SIZE_POINT;
     int nY = nStepY + local_c;
     int nX = nStepX + nMonsterY;
-    D2RoomStrc* pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-    eCollisionFlags eVar2 = D2Common::Collision::CheckCollision_BlockAll_Width(pRoom, nX, nY, nWidth, eCollisionFlag);
+    eCollisionFlags eVar2 = D2Common::Collision::CheckCollision_BlockAll_Width(D2Common::Units::UNITS_GetRoom(pUnit), nX, nY, nWidth, eCollisionFlag);
     if (eVar2 != COLLIDE_NONE) {
       return 0;
     }
 
-    sMsg.nItemId = (uint32_t)bMoveStep * nStepY + local_c;
     sMsg.nSkillId = (uint32_t)bMoveStep * nStepX + nMonsterY;
+    sMsg.nItemId = (uint32_t)bMoveStep * nStepY + local_c;
     sMsg.nTargetUnitType = 0;
     sMsg.nTargetUnitId = D2Common::PATH::DynamicPath::GetPathType(pServerPath);
     sMsg.nSkillLvl = dwAnimMode;
@@ -1475,9 +1471,9 @@ static void __stdcall CLIENT_SendMonsterMoveToRandomNearbyPosMessage(uint32_t nO
 static void __stdcall CLIENT_SendMonsterMoveToTargetMessage(int32_t nTargetX, int32_t nTargetY, int32_t nSenderId, int32_t nSkillLvl, D2UnitStrc * pUnit) {
     D2ServerMessageHandleStrc sMsg;
     D2DynamicPathStrc* pDynamicPath = pUnit->pPath.pDynamicPath;
-    sMsg.nTargetUnitType = 0;
     sMsg.nSkillId = nTargetX;
     sMsg.nItemId = nTargetY;
+    sMsg.nTargetUnitType = 0;
     sMsg.nTargetUnitId = D2Common::PATH::DynamicPath::GetPathType(pDynamicPath);
     sMsg.nSkillLvl = nSkillLvl;
     uint8_t byMaxDistance = D2Common::PATH::DynamicPath::GetMaxDistance(pDynamicPath);
@@ -1549,7 +1545,7 @@ static void CLIENT_SendMonsterWanderMessage(D2UnitStrc * pUnit) {
 // clamps it against 199 and stores it through GetMonsterAi into the monster data's AI slot (+0x30), which the client uses as a frame countdown, not a pointer: 0046d780 tests it with a signed compare and decrements it, and sets it to 25 when no
 // target is found.
 static void CLIENT_SetMonsterAiTimer(D2UnitStrc * pUnit, int32_t sMonsterAi) {
-    if (199 < sMonsterAi) {
+    if (200 <= sMonsterAi) {
       sMonsterAi = 200;
     }
 
@@ -1567,39 +1563,39 @@ static uint32_t CLIENT_CheckIfUnitPositionsMatch(D2UnitStrc * pnUnit1, D2UnitStr
     int nUnit2Y;
     int nUnit1X;
     eD2UnitType eUnitType = pnUnit1->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnit1X = pnUnit1->pPath.pStaticPath->nPosX;
-    } else if (!pnUnit1->pPath.pDynamicPath) {
-      nUnit1X = 0;
-    } else {
+    } else if (pnUnit1->pPath.pDynamicPath) {
       nUnit1X = D2Common::PATH::DynamicPath::GetXPos(pnUnit1->pPath.pDynamicPath);
+    } else {
+      nUnit1X = 0;
     }
 
     eUnitType = pnUnit1->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnit1Y = pnUnit1->pPath.pStaticPath->nPosY;
-    } else if (!pnUnit1->pPath.pDynamicPath) {
-      nUnit1Y = 0;
-    } else {
+    } else if (pnUnit1->pPath.pDynamicPath) {
       nUnit1Y = D2Common::PATH::DynamicPath::GetYPos(pnUnit1->pPath.pDynamicPath);
+    } else {
+      nUnit1Y = 0;
     }
 
     eUnitType = pnUnit2->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnit2X = pnUnit2->pPath.pStaticPath->nPosX;
-    } else if (!pnUnit2->pPath.pDynamicPath) {
-      nUnit2X = 0;
-    } else {
+    } else if (pnUnit2->pPath.pDynamicPath) {
       nUnit2X = D2Common::PATH::DynamicPath::GetXPos(pnUnit2->pPath.pDynamicPath);
+    } else {
+      nUnit2X = 0;
     }
 
     eUnitType = pnUnit2->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nUnit2Y = pnUnit2->pPath.pStaticPath->nPosY;
-    } else if (!pnUnit2->pPath.pDynamicPath) {
-      nUnit2Y = 0;
-    } else {
+    } else if (pnUnit2->pPath.pDynamicPath) {
       nUnit2Y = D2Common::PATH::DynamicPath::GetYPos(pnUnit2->pPath.pDynamicPath);
+    } else {
+      nUnit2Y = 0;
     }
     if (!(nUnit1X == nUnit2X && nUnit1Y == nUnit2Y)) {
       return 0;

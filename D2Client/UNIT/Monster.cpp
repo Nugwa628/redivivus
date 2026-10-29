@@ -587,7 +587,7 @@ static void MONSTER_ResetToNeutralFacingTarget(D2UnitStrc * pUnit) {
     }
 
     eD2MonsterAnimMode eMonAnimMode = pUnit->eAnimMode.eMonsterMode;
-    if (!(eMonAnimMode < 0x10 && eMonAnimMode != Death && eMonAnimMode != eD2MonsterAnimMode_ns::Dead)) {
+    if (!((uint32_t)eMonAnimMode < 0x10 && eMonAnimMode != Death && eMonAnimMode != eD2MonsterAnimMode_ns::Dead)) {
       return;
     }
 
@@ -710,29 +710,29 @@ static void MONSTER_SpawnRandomAttachedMissile(D2UnitStrc * pUnit) {
     int32_t nErrLine;
     D2SeedStrc sNextSeed = D2_SEED_NEXT(pUnit->sSeed);
     pUnit->sSeed = sNextSeed;
-    int nRandMissileIdx = sNextSeed.nSeedLow + (int)(((uint64_t)d2_bits_of(sNextSeed) & 0xffffffff) / 5) * -5;
-    if (4 < nRandMissileIdx) {
+    int nRandMissileIdx = sNextSeed.nSeedLow % 5;
+    if (5 <= nRandMissileIdx) {
       Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x174);
       exit(-1);
     }
 
     eD2UnitType eUnitType = pUnit->eUnitType;
     eMissilesId nMissileId = INT_ARRAY_006da5dc[nRandMissileIdx];
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nRandMissileIdx = pUnit->pPath.pStaticPath->nPosY;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nRandMissileIdx = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nRandMissileIdx = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nRandMissileIdx = 0;
     }
 
     eUnitType = pUnit->eUnitType;
-    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+    if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
       nErrLine = pUnit->pPath.pStaticPath->nPosX;
-    } else if (!pUnit->pPath.pDynamicPath) {
-      nErrLine = 0;
-    } else {
+    } else if (pUnit->pPath.pDynamicPath) {
       nErrLine = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+    } else {
+      nErrLine = 0;
     }
 
     D2UnitStrc* pMissileUnit = Missile::CastAttack(pUnit, nMissileId, nErrLine, nRandMissileIdx, SKILL_Attack, 1);
@@ -2007,47 +2007,45 @@ static void MONSTER_HandleBurrowTransition(D2UnitStrc * pUnit, int32_t nParam) {
       }
 
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosY = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosY = 0;
       }
 
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosX = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosX = 0;
       }
 
       nRemoveCollisionFlags = 0x1000;
-      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-      D2Common::Collision::RemoveCollision(pRoom, nPosX, nPosY, nRemoveCollisionFlags);
+      D2Common::Collision::RemoveCollision(D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, nRemoveCollisionFlags);
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosY = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosY = 0;
       }
 
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosX = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosX = 0;
       }
 
       nRemoveCollisionFlags = 0x100;
-      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-      D2Common::Collision::RemoveCollision(pRoom, nPosX, nPosY, nRemoveCollisionFlags);
+      D2Common::Collision::RemoveCollision(D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, nRemoveCollisionFlags);
       D2Common::PATH::DynamicPath::SetUnitWidth(pUnit, 5);
       D2Common::PATH::DynamicPath::PATH_SetCollisionPattern(pUnit->pPath.pDynamicPath, 0);
       nPosY = Engine::Particle::PARTICLE_GetScreenZ(pUnit);
@@ -2065,47 +2063,45 @@ static void MONSTER_HandleBurrowTransition(D2UnitStrc * pUnit, int32_t nParam) {
       }
 
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosY = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosY = 0;
       }
 
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosX = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosX = 0;
       }
 
       eAddCollisionFlag = COLLIDE_UNIT_RELATED;
-      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-      D2Common::Collision::AddCollision(pRoom, nPosX, nPosY, eAddCollisionFlag);
+      D2Common::Collision::AddCollision(D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eAddCollisionFlag);
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosY = pUnit->pPath.pStaticPath->nPosY;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosY = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosY = D2Common::PATH::DynamicPath::GetYPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosY = 0;
       }
 
       eUnitType = pUnit->eUnitType;
-      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType < 6) {
+      if (eUnitType == UNIT_OBJECT || 3 < (int)eUnitType && (int)eUnitType <= 5) {
         nPosX = pUnit->pPath.pStaticPath->nPosX;
-      } else if (!pUnit->pPath.pDynamicPath) {
-        nPosX = 0;
-      } else {
+      } else if (pUnit->pPath.pDynamicPath) {
         nPosX = D2Common::PATH::DynamicPath::GetXPos(pUnit->pPath.pDynamicPath);
+      } else {
+        nPosX = 0;
       }
 
       eAddCollisionFlag = COLLIDE_MONSTER;
-      pRoom = D2Common::Units::UNITS_GetRoom(pUnit);
-      D2Common::Collision::AddCollision(pRoom, nPosX, nPosY, eAddCollisionFlag);
+      D2Common::Collision::AddCollision(D2Common::Units::UNITS_GetRoom(pUnit), nPosX, nPosY, eAddCollisionFlag);
       D2Common::PATH::DynamicPath::SetUnitWidth(pUnit, 1);
       D2Common::PATH::DynamicPath::PATH_SetCollisionPattern(pUnit->pPath.pDynamicPath, 0x3c01);
       nPosY = Engine::Particle::PARTICLE_GetScreenZ(pUnit);
@@ -3150,7 +3146,7 @@ void __fastcall CLIENT_UpdateUnitNameplate(D2UnitStrc * pDynamicPath) {
     if (!pMonStats) {
       return;
     }
-    if (pMonStats->interact) {
+    if ((*((uint8_t*)pMonStats + 0xd) & gadwBitMasks[1])) {
       bIsCritter = Player::TXT_MonStats_MonStats2_GetFlagsByBitOffset(nClassId, TXTMonStats2Field0x04DWORD_ns::critter);
       if (!bIsCritter && pDynamicPath->eAnimMode.ePlayerMode == eD2PlayerAnimMode_ns::Neutral) {
         nCheckResult = CheckFlags(pDynamicPath, UNITFLAG_ISMERC);

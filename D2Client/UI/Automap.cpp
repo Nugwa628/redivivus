@@ -145,18 +145,21 @@ void __stdcall AUTOMAP_SetupPosition() {
       AUTOMAP_CenterOnPlayer(1);
       return;
     }
-    if (!AutoMapLeft) {
-      gnAutomapCenterX = ScreenSizeX * 2 / 3;
-      nAutomapCenterY = 0x4e;
-    } else {
+    if (AutoMapLeft) {
       gnAutomapCenterX = 0;
       bNotMercPurchase = Hireables::HIREABLE_IsNotInMercPurchaseMode();
       nAutomapCenterY = bNotMercPurchase ? 0x60 : 0;
+    } else {
+      gnAutomapCenterX = ScreenSizeX * 2 / 3;
+      nAutomapCenterY = 0x4e;
     }
 
     gnAutomapPanelOffsetX = gnAutomapCenterX;
     gnAutomapPanelOffsetY = nAutomapCenterY;
-    if (MiniMapType != 1) {
+    switch (MiniMapType) {
+    case 1:
+      break;
+    default:
       gnAutomapClipRight = ScreenSizeX;
       gnAutomapClipLeft = -0x10;
       gnAutomapClipTop = -0x10;
@@ -176,7 +179,10 @@ void __fastcall AUTOMAP_CenterOnPlayer(int32_t bForceCenter) {
     }
 
     AUTOMAP_SetupPosition();
-    if (MiniMapType != 1) {
+    switch (MiniMapType) {
+    case 1:
+      break;
+    default:
       AutoMapMoveX = 0;
       AutoMapMoveY = 0;
       return;
@@ -586,26 +592,27 @@ static void __stdcall AUTOMAP_RevealTile(D2RoomExStrc * pRoomEx, D2AutomapCellSt
     }
 
     pAutomapCell1 = AUTOMAP_AllocCell();
-    nX = pRoomEx->sCoords.WorldPosition.y + pTileData->nPosY;
     nY = pRoomEx->sCoords.WorldPosition.x + pTileData->nPosX;
+    nX = pRoomEx->sCoords.WorldPosition.y + pTileData->nPosY;
     D2Common::Drlg::Transform::CoordsMiniMapToScreen(&nY, &nX);
     nY /= 10;
     nX /= 10;
-    if (nY + 0x8000U < 0x10000) {
-      if (nX + 0x8000U < 0x10000) {
-        if (!(nCellNo + 0x8000U < 0x10000)) {
-          Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x393);
-          exit(-1);
-        }
-        if (0xf < pTileData->nTileType) {
-          nX += 0x18;
+    if (nY + 0x8000U <= 0xffff) {
+      if (nX + 0x8000U <= 0xffff) {
+        if (nCellNo + 0x8000U <= 0xffff) {
+          if (0x10 <= pTileData->nTileType) {
+            nX += 0x18;
+          }
+
+          pAutomapCell1->nCellNo = (short int)nCellNo;
+          pAutomapCell1->xPixel = (short int)nY;
+          pAutomapCell1->yPixel = (short int)nX;
+          AUTOMAP_InsertCellIntoTree(pAutomapCell1, pAutomapCell);
+          return;
         }
 
-        pAutomapCell1->nCellNo = (short int)nCellNo;
-        pAutomapCell1->xPixel = (short int)nY;
-        pAutomapCell1->yPixel = (short int)nX;
-        AUTOMAP_InsertCellIntoTree(pAutomapCell1, pAutomapCell);
-        return;
+        Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x393);
+        exit(-1);
       } else {
         Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x392);
         exit(-1);
@@ -790,9 +797,7 @@ static void AUTOMAP_SaveLayerToFile(D2AutomapFileEntryStrc * pEntry) {
 
     __frame0.nEntryOffset = dwHeader[pEntry->nLayer];
     __frame0.dwFileSize = GetFileSize(hFile, (LPDWORD)0x0);
-    if (!__frame0.nEntryOffset) {
-      dwHeader[pEntry->nLayer] = __frame0.dwFileSize;
-    } else {
+    if (__frame0.nEntryOffset) {
       int nPrevEntryOffset;
       do {
         Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, __frame0.nEntryOffset, (PLONG)0x0, 0);
@@ -802,6 +807,8 @@ static void AUTOMAP_SaveLayerToFile(D2AutomapFileEntryStrc * pEntry) {
 
       Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, nPrevEntryOffset, (PLONG)0x0, 0);
       Fog::Source::SFile::thunk_WriteFile(hFile, (LPCVOID)&__frame0.dwFileSize, 4, &__frame0.dwBytesTransferred, (LPOVERLAPPED)0x0);
+    } else {
+      dwHeader[pEntry->nLayer] = __frame0.dwFileSize;
     }
 
     Fog::Source::SFile::SFILE_Win32SetFilePointer(hFile, 0, (PLONG)0x0, 0);
@@ -1358,7 +1365,7 @@ void __stdcall AUTOMAP_RevealRoom(D2RoomStrc * pRoom, int32_t bForceReveal, D2Au
     D2RoomExStrc* pRoomEx = D2Common::DUNGEON::Dungeon::GetRoomExFromRoom(pRoom);
     D2DrlgTileDataStrc* pTiles = D2Common::DUNGEON::Dungeon::DRLGROOM_GetFloorTilesFromRoom(pRoom, (int*)&nTileCount);
     uint32_t i = 0;
-    if (nTileCount) {
+    if (nTileCount > 0) {
       pnTileFlags = &pTiles->nFlags;
       do {
         if (!(*pnTileFlags & 8U) && (*pnTileFlags & 0x20000U || bAutoMapRevealAll || bForceReveal)) {
@@ -1372,7 +1379,7 @@ void __stdcall AUTOMAP_RevealRoom(D2RoomStrc * pRoom, int32_t bForceReveal, D2Au
 
     pTiles = D2Common::DUNGEON::Dungeon::DRLGROOM_GetWallTilesFromRoom(pRoom, (int*)&nTileCount);
     i = 0;
-    if (nTileCount) {
+    if (nTileCount > 0) {
       pnTileFlags = &pTiles->nFlags;
       do {
         if (!(*pnTileFlags & 8U) && (*pnTileFlags & 0x20000U || bAutoMapRevealAll || bForceReveal)) {
@@ -2100,13 +2107,9 @@ void __stdcall AUTOMAP_DrawGamePassword() {
     uint16_t wPassWide[26];
     BOOL bMultiLineCenter;
     int32_t dwColor;
-    memset(wPassWide, 0, 25 * sizeof(wPassWide[0]));
-    uint16_t* pZeroFill = wszPasswordLine;
-    for (nY = 0x19; nY; nY--) {
-      pZeroFill[0] = L'\0';
-      pZeroFill[1] = L'\0';
-      pZeroFill += 2;
-    }
+    for (int i = 0; i < 25; i++) wPassWide[i] = 0;
+    uint16_t* pZeroFill;
+    for (int i = 0; i < 0x32; i++) wszPasswordLine[i] = 0;
 
     char* szPassPart1 = ClientModeInGame::CLIENTMODE_GetGamePasswordPart1();
     char* szPassPart3 = ClientModeInGame::CLIENTMODE_GetGamePasswordPart3();
@@ -2120,11 +2123,7 @@ void __stdcall AUTOMAP_DrawGamePassword() {
       pZeroFill = D2Lang::StrTable::strtable::GetLocaleString(0x1055);
       D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszPasswordLine, pZeroFill);
       D2Lang::Unicode::UNISYS::AppendToBuffer(wszPasswordLine, wPassWide);
-      bMultiLineCenter = 0;
-      dwColor = 4;
-      nY = AUTOMAP_TextHeightOffset;
-      nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszPasswordLine);
-      D2Win::Src::D2WinFont::DRAW_text(wszPasswordLine, WindowSizeX - nTextWidth - 0x10, nY, dwColor, bMultiLineCenter);
+      D2Win::Src::D2WinFont::DRAW_text(wszPasswordLine, WindowSizeX - D2Win::Src::D2WinFont::DRAW_text0(wszPasswordLine) - 0x10, AUTOMAP_TextHeightOffset, 4, 0);
       AUTOMAP_TextHeightOffset += 0x10;
     }
 
@@ -2138,11 +2137,7 @@ void __stdcall AUTOMAP_DrawGamePassword() {
     pZeroFill = D2Lang::StrTable::strtable::GetLocaleString(0x1056);
     D2Lang::Unicode::UNISYS::STRING_CopyWideString(wszPasswordLine, pZeroFill);
     D2Lang::Unicode::UNISYS::AppendToBuffer(wszPasswordLine, wPassWide);
-    bMultiLineCenter = 0;
-    dwColor = 4;
-    nY = AUTOMAP_TextHeightOffset;
-    nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wszPasswordLine);
-    D2Win::Src::D2WinFont::DRAW_text(wszPasswordLine, WindowSizeX - nTextWidth - 0x10, nY, dwColor, bMultiLineCenter);
+    D2Win::Src::D2WinFont::DRAW_text(wszPasswordLine, WindowSizeX - D2Win::Src::D2WinFont::DRAW_text0(wszPasswordLine) - 0x10, AUTOMAP_TextHeightOffset, 4, 0);
     AUTOMAP_TextHeightOffset += 0x10;
 }
 
@@ -2174,11 +2169,7 @@ void __stdcall AUTOMAP_DrawLevelName() {
 
     eD2LevelId eLevel = D2Common::DUNGEON::Dungeon::DRLGROOM_GetLevelIdFromRoom(pRoom);
     uint16_t* wMessage = ui::CLIENT_GetLevelNameByLevelId(eLevel);
-    BOOL bMultiLineCenter = 0;
-    int32_t dwColor = 4;
-    int nY = AUTOMAP_TextHeightOffset;
-    int32_t nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wMessage);
-    D2Win::Src::D2WinFont::DRAW_text(wMessage, WindowSizeX - nTextWidth - 0x10, nY, dwColor, bMultiLineCenter);
+    D2Win::Src::D2WinFont::DRAW_text(wMessage, WindowSizeX - D2Win::Src::D2WinFont::DRAW_text0(wMessage) - 0x10, AUTOMAP_TextHeightOffset, 4, 0);
     AUTOMAP_TextHeightOffset += 0x10;
 }
 
@@ -2186,12 +2177,8 @@ void __stdcall AUTOMAP_DrawVersion() {
     int i;
     uint16_t aWStack_130[100];
     char szVersionUtf8[100];
-    uint16_t* pZeroFill = aWStack_130;
-    for (i = 0x32; i; i--) {
-      pZeroFill[0] = L'\0';
-      pZeroFill[1] = L'\0';
-      pZeroFill += 2;
-    }
+    uint16_t* pZeroFill;
+    for (int i = 0; i < 0x64; i++) aWStack_130[i] = 0;
 
     Storm::Source::SSTR::SStrPrintf(szVersionUtf8, 100, "v %d.%d%c", 1, 0xe, 'd');
     D2Lang::UTF8_ConvertToWideChar(aWStack_130, szVersionUtf8, 100);
@@ -2204,20 +2191,11 @@ void __stdcall AUTOMAP_DrawServerIP() {
     int nY;
     uint16_t wIpWide[300];
     int32_t nTextWidth = 300;
-    uint16_t* pZeroFill = wIpWide;
-    for (nY = 0x96; nY; nY--) {
-      pZeroFill[0] = L'\0';
-      pZeroFill[1] = L'\0';
-      pZeroFill += 2;
-    }
+    uint16_t* pZeroFill;
+    for (int i = 0; i < 0x12c; i++) wIpWide[i] = 0;
 
-    char* szLocalIp = Fog::Src::Safesock::NET_GetLocalIp();
-    D2Lang::UTF8_ConvertToWideChar(wIpWide, szLocalIp, nTextWidth);
-    BOOL bMultiLineCenter = 0;
-    int32_t dwColor = 4;
-    nY = AUTOMAP_TextHeightOffset;
-    nTextWidth = D2Win::Src::D2WinFont::DRAW_text0(wIpWide);
-    D2Win::Src::D2WinFont::DRAW_text(wIpWide, WindowSizeX - nTextWidth - 0x10, nY, dwColor, bMultiLineCenter);
+    D2Lang::UTF8_ConvertToWideChar(wIpWide, Fog::Src::Safesock::NET_GetLocalIp(), nTextWidth);
+    D2Win::Src::D2WinFont::DRAW_text(wIpWide, WindowSizeX - D2Win::Src::D2WinFont::DRAW_text0(wIpWide) - 0x10, AUTOMAP_TextHeightOffset, 4, 0);
     AUTOMAP_TextHeightOffset += 0x10;
 }
 
@@ -2227,14 +2205,15 @@ void __stdcall AUTOMAP_DrawDifficulty() {
     uint16_t wText[300];
     BOOL bMultiLineCenter;
     uint8_t eDifficulty = GAME::Game::GetDificulity();
-    if (eDifficulty == '\x01') {
+    switch (eDifficulty) {
+    case 1:
       /* Nightmare */ nDiffStringId = 0x1423;
-    } else {
-      if (eDifficulty != '\x02') {
-        return;
-      }
-
+      break;
+    case 2:
       /* Hell */ nDiffStringId = 0x1422;
+      break;
+    default:
+      return;
     }
 
     uint16_t* pZeroFill = wText;
@@ -2429,7 +2408,6 @@ void __stdcall AUTOMAP_Init() {
 }; D2_STATIC_GUARD(gnAutoMapInitialZoomLevel, "D2Client::UI::Automap::AUTOMAP_Init::gnAutoMapInitialZoomLevel");
 
     int nCellId;
-    uint32_t* pPriorityValue;
     int32_t nRegValue = 0;
     AUTOMAP_LoadDC6Sprites();
     uint32_t* pPriorityTable = gnAutoMapCellPriority;
@@ -2442,10 +2420,9 @@ void __stdcall AUTOMAP_Init() {
     do {
       uint32_t nCellIndex;
       nCellIndex = *pCellEntry;
-      pPriorityValue = pCellEntry + 1;
+      gnAutoMapCellPriority[nCellIndex] = pCellEntry[1];
       pCellEntry += 2;
-      gnAutoMapCellPriority[nCellIndex] = *pPriorityValue;
-    } while (pCellEntry < gnAutoMapInitialZoomLevel + 98);
+    } while ((int)pCellEntry < (int)(gnAutoMapInitialZoomLevel + 98));
     // The original's bound is `pCellEntry < 0x7113e0`, and 0x7113e0 is where nAutoMapCenters
     // happens to sit immediately after this 49-pair table - so the compiler spelled "the end of
     // the table" as the NEXT GLOBAL'S ADDRESS. After relinking the two are nowhere near each

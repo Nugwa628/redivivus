@@ -1012,7 +1012,7 @@ bool __fastcall OBJECT_ClientFn_RemoveWhenPlayerFar(D2UnitStrc * pUnit) {
     DWORD DVar1 = GetTickCount();
     if (pUnit->dwTickCount) {
       D2UnitStrc* pTarget;
-      if (DVar1 - pUnit->dwTickCount < 0x3e9) {
+      if (DVar1 - pUnit->dwTickCount <= 0x3e8) {
         return true;
       }
 
@@ -1097,7 +1097,7 @@ bool __fastcall OBJECT_ClientFn_PlayLevelUpCinematic(D2UnitStrc * pUnit) {
 // Provenance: 1.14d asm 004bdcc0.
 bool __fastcall OBJECT_ClientFn_AutoLightPulse(D2UnitStrc * pUnit) {
     DWORD DVar1 = GetTickCount();
-    if (pUnit->dwTickCount >= DVar1) {
+    if (DVar1 <= pUnit->dwTickCount) {
       return true;
     }
 
