@@ -6544,28 +6544,6 @@ int __stdcall TRADE_GetTradeStatus() {
     return 0;
 }
 
-void __stdcall UI_CloseHoradricCubeWindow() {
-    gnPlayerCashDisplay = 0;
-    D2UnitStrc* pCursorItem_lcl = UNIT::Player::GetPlayerUnit_UI();
-    if (pCursorItem_lcl) {
-      pCursorItem_lcl = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pCursorItem_lcl->pInventory);
-    } else {
-      pCursorItem_lcl = 0;
-    }
-
-    ITEM_ToggleHandState(pCursorItem_lcl);
-    int32_t nHandlerCount = 8;
-
-    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagMapInit, nHandlerCount);
-    if (Dialog::gpHoradricCubeDialog) {
-      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpHoradricCubeDialog);
-      Dialog::gpHoradricCubeDialog = 0;
-    }
-
-    Draw::SetUIFlag(UI_ANVIL, UI_RESET, 0);
-    GAME::Select::SELECT_SetExclusionRect(nullptr);
-}
-
 void __stdcall UI_FreeHoradricCubeAssets() {
     if (gnPlayerCashDisplay) {
       UI_CloseHoradricCubeWindow();

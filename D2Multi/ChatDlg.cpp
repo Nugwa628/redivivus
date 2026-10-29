@@ -39,6 +39,9 @@
 #include "D2Win/D2WinImageEx.h"
 #include "D2Win/D2WinScrollbar.h"
 #include "D2Win/D2WinTimer.h"
+#include "D2Common/Chat/Ignorelist.h"
+#include "D2Common/Chat/Ignorelist/IgnoreList.h"
+#include "D2Multi/OOG.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -310,7 +313,7 @@ void __stdcall CHATDLG_UpdateChannelOkButtonState() {
     D2Win::Src::D2WinMain::D2WINMAIN_SetControlVisible(gpCtlChannelOkButton, bHasText);
 }
 
-int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
+static int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
     int nUpper1;
     char cCur;
     char* pcEnd1 = szText1;
@@ -342,7 +345,7 @@ int32_t __stdcall someStrCompare(char * szText1, char * szText2) {
     return nUpper1 > 0 ? 1 : -1;
 }
 
-BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
+static BOOL CHATDLG_HandleNotifyCommand(char * szCommand, char * szInput) {
     int i;
     char* pszMsgDst;
     uint16_t wszMessage[256];
@@ -878,7 +881,7 @@ void __stdcall CHATDLG_ClearChatHistory() {
     gnChatHistoryEntryCount = 0;
 }
 
-void CHATDLG_AppendChatToHistory(char * szText) {
+static void CHATDLG_AppendChatToHistory(char * szText) {
     char cCurrent;
     memmove(gaChatDlgHistoryBuffer + 1, gaChatDlgHistoryBuffer, 0x900);
     int iVar1 = (int)gaChatDlgHistoryBuffer - (int)szText;
@@ -1045,7 +1048,7 @@ int __stdcall CHATDLG_CancelGameCreate() {
     return 1;
 }
 
-void __stdcall CHATDLG_ParseCommandArgument(int32_t nMaxLen, char * szSource, char * szDest) {
+static void __stdcall CHATDLG_ParseCommandArgument(int32_t nMaxLen, char * szSource, char * szDest) {
     char* pszSpace = Storm::Source::SSTR::SStrChr(szSource, ' ');
     if (pszSpace) {
       Storm::Source::SSTR::SStrCopy(szDest, pszSpace + 1, nMaxLen);
@@ -1936,6 +1939,88 @@ void __fastcall CHATDLG_StorePlayerName(uint32_t nPlayerId, uint32_t nDataLength
     CHATDLG_RefreshGameNameDisplay();
 }
 
+} // namespace D2Multi::ChatDlg
+
+namespace D2Multi::OOGUtilities {
+
+// Handles the /reply command for out-of-game chat. Parses the reply target from gszOogReplyCommandBuffer, validates token count is exactly 2 (command + message), and formats a whisper message ("/w *target message") to send via the network interface. Shows error messages if no reply target exists or if command syntax is incorrect.
+static uint32_t OOGUTIL_HandleReplyCommand(char * szText1, char * szText2) {
+    int nTokenCount;
+    uint16_t* pwszErrorMsg;
+    char szCommandBuffer[256];
+    uint16_t wszOutputBuffer[256];
+    char szTokenBuffer[256];
+    char szMessageBuffer[260];
+    char szDelimiter[4];
+    char cVar1;
+    char* pcScan = szText1;
+    pcScan = pcScan + strlen(pcScan) + 1;
+    int32_t nCmdCmp = ChatDlg::someStrCompare(szText2, szText1);
+    if (!(!nCmdCmp && (szText2[(int)pcScan - (int)(szText1 + 1)] == ' ' || szText2[(int)pcScan - (int)(szText1 + 1)] == '\0'))) {
+      return 0;
+    }
+
+    pcScan = gszOogReplyCommandBuffer;
+    char* pcEnd = pcScan + strlen(pcScan);
+    pcScan = pcEnd + 1;
+    if (pcEnd == gszOogReplyCommandBuffer) {
+
+      for (int i = 0; i < 0x100; i++) wszOutputBuffer[i] = 0;
+
+
+
+
+
+      sprintf(szMessageBuffer, "Nobody to reply to!");
+    } else {
+      BOOL BVar1;
+      sprintf(szCommandBuffer, "%s ", szText1);
+      pcScan = szText2;
+      do {
+        cVar1 = *pcScan;
+        pcScan[(int)(szTokenBuffer - (int)szText2)] = cVar1;
+        pcScan++;
+      } while (cVar1 != '\0');
+
+      szDelimiter[0] = ' ';
+      szDelimiter[1] = '\0';
+      pcScan = strtok(szTokenBuffer, szDelimiter);
+      nTokenCount = 0;
+      while (pcScan) {
+        nTokenCount++;
+        if (nTokenCount == 2) {
+          BVar1 = pNetworkUnknown->pfnIsSocketConnected();
+          if (!BVar1) {
+            pwszErrorMsg = D2Lang::StrTable::strtable::GetLocaleString(0x14e7);
+            ChatDlg::UIMENU_DrawTitleOnCenterSmaller(pwszErrorMsg, OOG::OOGUTIL_DrawCallback_SetModeAndClearMsgLoop);
+            return 1;
+          }
+
+          sprintf(szMessageBuffer, "/w *%s %s", gszOogReplyCommandBuffer, szText2 + ((int)pcScan - (int)szTokenBuffer));
+          pNetworkUnknown->pfnSendChatCommand((uint8_t*)szMessageBuffer);
+          return 1;
+        }
+
+        pcScan = strtok(nullptr, szDelimiter);
+      }
+
+      Fog::File::CONTAINER_InitializeBuffer(wszOutputBuffer, 2, 0x100, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+      sprintf(szMessageBuffer, "Correct usage is: %s (message)", szText1);
+    }
+
+    D2Lang::UTF8_ConvertToWideChar(wszOutputBuffer, szMessageBuffer, 0x100);
+    if (!gpChatMessagesTextBox) {
+      return 1;
+    }
+
+    D2Win::Src::D2WinTextBox::SetText(gpChatMessagesTextBox, wszOutputBuffer, 1, false, 1);
+    return 1;
+}
+
+} // namespace D2Multi::OOGUtilities
+
+namespace D2Multi::ChatDlg {
+
 // OnPress handler of a ladder-board button: destroys the chat forms (CHATDLG_DestroyAllForms), opens the ladder with CHATDLG_OpenLadderClassicHardcore, sets the ladder type byte g_nLadderFilterMode (0070cd62) = 0 and gnLadderBoardSelectedRank = 0; returns 1.
 // Unreferenced by code; its address is the OnPress field (+0x20) of the button form at 0070e020 (string 0x14c6) in the FORMS_PredefinedFormStrc table.
 BOOL __stdcall CHATDLG_OnPressLadderClassicHardcore(D2ControlMsg * pControlMsg) {
@@ -1947,3 +2032,174 @@ BOOL __stdcall CHATDLG_OnPressLadderClassicHardcore(D2ControlMsg * pControlMsg) 
 }
 
 } // namespace D2Multi::ChatDlg
+
+namespace D2Multi::OOGUtilities {
+
+void __fastcall OOGUTIL_HandleChatCommands(char * szText) {
+    char* pcVar1;
+    bool bCmdResult;
+    ::IgnoreList* ppIgnoreListThis;
+    uint16_t* pwszMsg;
+    uint16_t nErrorStrId;
+    uint16_t* pwszFmtTemplate;
+    uint16_t wszOutputBuffer[520];
+    uint16_t wszFormatBuffer[520];
+    char szArgBuffer[260];
+    uint16_t wszNameWide[34];
+    char szChannelName[32];
+    IgnoreListVtable* pvVar1;
+    ChatDlg::CHATDLG_AppendChatToHistory(szText);
+    uint32_t nHandled;
+    nHandled = OOGUTIL_HandleReplyCommand("/r", szText);
+    if (nHandled) {
+      return;
+    }
+
+    nHandled = OOGUTIL_HandleReplyCommand("/reply", szText);
+    if (nHandled) {
+      return;
+    }
+
+    BOOL nResult;
+    nResult = ChatDlg::CHATDLG_HandleNotifyCommand("/d2notify", szText);
+    if (nResult) {
+      return;
+    }
+
+    int32_t nCmdMatch;
+    nCmdMatch = ChatDlg::someStrCompare(szText, "/ignorepersist");
+    if (!nCmdMatch) {
+      ::IgnoreList* ppIgnoreListB;
+      ppIgnoreListThis = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+      ppIgnoreListB = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+      pvVar1 = ppIgnoreListB->_vfptr;
+      nCmdMatch = ppIgnoreListThis->_vfptr->GetPersistentSetting(ppIgnoreListThis);
+      pvVar1->SavePersistentSetting(ppIgnoreListB, (uint32_t)!nCmdMatch);
+      ppIgnoreListThis = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+      nCmdMatch = ppIgnoreListThis->_vfptr->GetPersistentSetting(ppIgnoreListThis);
+      if (!nCmdMatch) {
+        pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba2);
+        ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
+        return;
+      }
+
+      pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba1);
+      ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
+      return;
+    }
+
+    nCmdMatch = ChatDlg::someStrCompare(szText, "/ignore ");
+    if (!nCmdMatch || (nCmdMatch = ChatDlg::someStrCompare(szText, "/squelch ") , !nCmdMatch)) {
+      Fog::File::CONTAINER_InitializeBuffer(wszFormatBuffer, 2, 0x208, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+      Fog::File::CONTAINER_InitializeBuffer(wszOutputBuffer, 2, 0x208, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+      Fog::File::CONTAINER_InitializeBuffer(wszNameWide, 2, 0x22, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+      pcVar1 = szChannelName + 0xc;
+      ChatDlg::CHATDLG_ParseCommandArgument(0x11, szText, pcVar1);
+      nCmdMatch = Storm::Source::SSTR::SStrCmpI(szChannelName + 0xd, D2IniData_multiplayer->szLastBnetAccount, 0x7fffffff);
+      if (!nCmdMatch) {
+        return;
+      }
+
+      D2Lang::UTF8_ConvertToWideChar(wszNameWide, pcVar1, 0x22);
+      ppIgnoreListThis = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+      nCmdMatch = ppIgnoreListThis->_vfptr->AddByPattern(ppIgnoreListThis, pcVar1);
+      if (nCmdMatch) {
+        pwszMsg = wszNameWide;
+        pwszFmtTemplate = D2Lang::StrTable::strtable::GetLocaleString(0x2ba3);
+        goto print_ignore_result;
+      }
+
+      nErrorStrId = 0x2ba4;
+    } else {
+      nCmdMatch = ChatDlg::someStrCompare(szText, "/unignore ");
+      if (nCmdMatch) {
+        nCmdMatch = ChatDlg::someStrCompare(szText, "/unsquelch ");
+        if (nCmdMatch) {
+          nCmdMatch = ChatDlg::someStrCompare(szText, "/filtermsg ");
+          if (!nCmdMatch) {
+            ChatDlg::CHATDLG_ParseCommandArgument(0x104, szText, szArgBuffer);
+            ppIgnoreListThis = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+            nCmdMatch = ppIgnoreListThis->_vfptr->AddByAccountName(ppIgnoreListThis, szArgBuffer);
+            if (!nCmdMatch) {
+              pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba8);
+              ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
+              return;
+            }
+
+            pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba7);
+            ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
+            return;
+          }
+
+          nCmdMatch = ChatDlg::someStrCompare(szText, "/unfiltermsg ");
+          if (!nCmdMatch) {
+            ChatDlg::CHATDLG_ParseCommandArgument(0x104, szText, szArgBuffer);
+            ppIgnoreListThis = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+            nCmdMatch = ppIgnoreListThis->_vfptr->RemoveByAccountName(ppIgnoreListThis, szArgBuffer);
+            if (!nCmdMatch) {
+              pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x2baa);
+              ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
+              return;
+            }
+
+            pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x2ba9);
+            ChatDlg::CHATDLG_AppendTextToTextBox(pwszMsg, 3);
+            return;
+          }
+
+          nCmdMatch = ChatDlg::someStrCompare(szText, "/homechannel ");
+          if (!nCmdMatch || (nCmdMatch = ChatDlg::someStrCompare(szText, "/defaultchannel ") , !nCmdMatch) || (nCmdMatch = ChatDlg::someStrCompare(szText, "/home ") , !nCmdMatch)) {
+            ChatDlg::CHATDLG_ParseCommandArgument(0x20, szText, szChannelName);
+            Storm::Source::SReg::SRegSaveString((uint32_t*)"Diablo II", "Default Channel", 0, szChannelName);
+            return;
+          }
+
+          nCmdMatch = ChatDlg::someStrCompare(szText, "/home");
+          if (nCmdMatch) {
+            nResult = pNetworkUnknown->pfnIsSocketConnected();
+            if (nResult) {
+              pNetworkUnknown->pfnSendChatCommand((uint8_t*)szText);
+              return;
+            }
+
+            pwszMsg = D2Lang::StrTable::strtable::GetLocaleString(0x14e7);
+            ChatDlg::UIMENU_DrawTitleOnCenterSmaller(pwszMsg, OOG::OOGUTIL_DrawCallback_SetModeAndClearMsgLoop);
+            return;
+          }
+
+          nCmdMatch = Storm::Source::SReg::SRegLoadString("Diablo II", "Default Channel", 0, szChannelName, 0x20);
+          if (!nCmdMatch) {
+            return;
+          }
+
+          OOGUTIL_JoinChannelAndDestroyForms(szChannelName);
+          return;
+        }
+      }
+
+      Fog::File::CONTAINER_InitializeBuffer(wszFormatBuffer, 2, 0x208, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+      Fog::File::CONTAINER_InitializeBuffer(wszOutputBuffer, 2, 0x208, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+      Fog::File::CONTAINER_InitializeBuffer(wszNameWide, 2, 0x22, D2Launch::MainMenus::STRING_ZeroOneWCHAR);
+      pcVar1 = szChannelName + 0xc;
+      ChatDlg::CHATDLG_ParseCommandArgument(0x11, szText, pcVar1);
+      D2Lang::UTF8_ConvertToWideChar(wszNameWide, pcVar1, 0x22);
+      ppIgnoreListThis = D2Common::Chat::Ignorelist::MISC_GetIgnorelist();
+      nCmdMatch = ppIgnoreListThis->_vfptr->RemoveByPattern(ppIgnoreListThis, pcVar1);
+      if (nCmdMatch) {
+        pwszMsg = wszNameWide;
+        pwszFmtTemplate = D2Lang::StrTable::strtable::GetLocaleString(0x2ba5);
+        goto print_ignore_result;
+      }
+
+      nErrorStrId = 0x2ba6;
+    }
+
+    pwszMsg = wszNameWide;
+    pwszFmtTemplate = D2Lang::StrTable::strtable::GetLocaleString(nErrorStrId);
+    print_ignore_result:
+    D2Lang::Unicode::UNISYS::UNICODE_FormatWideString(0x208, wszFormatBuffer, pwszFmtTemplate, pwszMsg);
+    D2Lang::Unicode::UNISYS::AppendToBuffer(wszOutputBuffer, wszFormatBuffer);
+    ChatDlg::CHATDLG_AppendTextToTextBox(wszOutputBuffer, 3);
+}
+
+} // namespace D2Multi::OOGUtilities

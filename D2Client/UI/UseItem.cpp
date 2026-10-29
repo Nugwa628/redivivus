@@ -34,6 +34,8 @@
 #include "Storm/Storm.h"
 #include "globals/globals.h"
 #include "D2Launch/MainMenus.h"
+#include "D2Client/GAME/Select.h"
+#include "D2Client/Message.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -41,6 +43,38 @@
 #define D2_FREE_AT(p, szFile, nLine) Fog::Memory::FreeClientMemory((p), (szFile), (nLine), 0)
 #endif
 
+
+namespace D2Client {
+
+static void ITEM_ToggleHandState(D2UnitStrc * pUnit) {
+    int32_t nSoundArg1;
+    int32_t nSoundArg2;
+    int32_t nSoundArg3;
+    if (gnPlayerCashDisplay == 1) {
+      eD2Sounds nSoundId;
+      gnPlayerCashDisplay = 2;
+      UI::ui::ITEM_SetItemOnHand(nullptr);
+      if (pUnit) {
+        gnCursorItemUnitId = pUnit->nUnitGUID;
+        nSoundArg3 = 0;
+        nSoundArg2 = 0;
+        nSoundArg1 = 0;
+
+        Sound::SOUND_PlaySound(UNIT::SOUND_GetIdFromUnit(pUnit), nullptr, nSoundArg1, nSoundArg2, nSoundArg3);
+        return;
+      }
+    } else if (gnPlayerCashDisplay == 2) {
+      gnPlayerCashDisplay = 1;
+      gnCursorItemUnitId = 0;
+      if (pUnit) {
+        UI::ui::ITEM_SetItemOnHand(pUnit);
+      }
+
+      Sound::SOUND_PlaySound(SOUND_CURSOR_PASS, nullptr, 0, 0, 0);
+    }
+}
+
+} // namespace D2Client
 
 namespace D2Client::UI::UseItem {
 
@@ -237,3 +271,29 @@ void __stdcall TEXT_DrawCashDisplay() {
 }
 
 } // namespace D2Client::UI::UseItem
+
+namespace D2Client::UI::ui {
+
+void __stdcall UI_CloseHoradricCubeWindow() {
+    gnPlayerCashDisplay = 0;
+    D2UnitStrc* pCursorItem_lcl = UNIT::Player::GetPlayerUnit_UI();
+    if (pCursorItem_lcl) {
+      pCursorItem_lcl = D2Common::INVENTORY::Inventory::INVENTORY_GetHandItem(pCursorItem_lcl->pInventory);
+    } else {
+      pCursorItem_lcl = 0;
+    }
+
+    ITEM_ToggleHandState(pCursorItem_lcl);
+    int32_t nHandlerCount = 8;
+
+    _Message::MESSAGE_UnregisterEventHandlerBatch(D2gfx::D2GFX::GetHwnd(), &gUIFlagMapInit, nHandlerCount);
+    if (Dialog::gpHoradricCubeDialog) {
+      Dialog::FreeDialogStrc((D2DialogStrc*)Dialog::gpHoradricCubeDialog);
+      Dialog::gpHoradricCubeDialog = 0;
+    }
+
+    Draw::SetUIFlag(UI_ANVIL, UI_RESET, 0);
+    GAME::Select::SELECT_SetExclusionRect(nullptr);
+}
+
+} // namespace D2Client::UI::ui

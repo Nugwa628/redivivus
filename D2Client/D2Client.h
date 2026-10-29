@@ -139,7 +139,6 @@ void __stdcall INPUT_HandleIMEEndComposition(struct D2UIMouseMsgStrc * pMsg);
 // Small callback/thunk that reads a party names field from ECX+0x124 and forwards it to AUTOMAP_SetPartyNames.
 void __fastcall AUTOMAP_UpdatePartyNamesCallback(struct D2EscMenuItemStrc * pItem, struct D2UIMouseMsgStrc * pMsg);
 void __fastcall UNITMODE_ExecuteDeferredAction(struct D2UnitStrc * pUnit);
-void SOUNDHDR_CompleteAsyncLoad(int32_t pSoundHdr);
 // The ECX slot that carries a function pointer was one variable holding three callees with two
 // different conventions - fpRequiredUserAction (bool __cdecl(void)), UI_ShowPopupDialog and
 // NET_D2GS_CLIENT_Send_0x6D_PING (void __stdcall(void)). Typing it void * split it into two register
@@ -174,12 +173,10 @@ void __fastcall thunk_ExitGamePlayCutScene(int32_t nParam);
 // Handles GS→client packet 0x89: forwards byte pBytes[1] (subcommand/type) to Storm::Source::ClientEngine::HandleIncoming0x89 for game-state update processing.
 void __fastcall NET_D2GS_CLIENT_Incoming0x89_QUESTEVENTTRIGGER(char * pBytes);
 int32_t __fastcall SEED_RollRange(struct D2SeedStrc * pSeed, int32_t nMin, int32_t nMax);
-void __stdcall OBJECT_SetLightRGB(uint8_t byRed, uint8_t byGreen, uint8_t byBlue, uint16_t nRadius, D2UnitStrc * pUnit);
 BOOL __fastcall OBJECT_CheckAutoLight(struct D2UnitStrc * pUnit, int32_t bSkipCofLoad);
 int __stdcall TEXT_EmptyCallback();
 void __stdcall TEXT_InitializeTextSystem();
 void __stdcall TEXT_SetUnknownFlag(struct D2UIMouseMsgStrc * pMsg);
-void ITEM_ToggleHandState(struct D2UnitStrc * pUnit);
 void __stdcall TEXT_HandleMouseMove();
 void __fastcall TEXT_HandleItemUse(int32_t nParam1, int32_t nParam2);
 void __stdcall SOUND_ClearGlobalState();

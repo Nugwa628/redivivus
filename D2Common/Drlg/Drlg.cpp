@@ -72,6 +72,7 @@
 #include "D2Game/Monster/AI/AI.h"
 #include "D2Game/SKILLS/SkillAss.h"
 #include "D2Common/Seed.h"
+#include "D2Common/Drlg/OutWild.h"
 
 #define DEFAULT_SECURITY_COOKIE 0xBB40E64E
 
@@ -1152,97 +1153,6 @@ void __fastcall DRLG_FreeInactiveLevelData(D2DrlgStrc * pDrlg) {
     }
 }
 
-// Links a RoomEx across levels using the vis arrays. For srcVisSlot (0..7), computes dst level id and ensures dst level is initialized. If a warp destination exists, align by matching the Nth occurrence of dst in src vis array with the Nth occurrence of src in dst vis array, then link via DRLGROOMEX_LinkNearRoomByDirection. Fallback: scan dst vis array for src and link first match.
-void __stdcall DRLGROOMEX_LinkNearRoomsByVis(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx, uint8_t srcVisSlot) {
-    bool _bLinkResult;
-    bool bLinkResult;
-    uint8_t nNextSlot;
-    int nSrcOccurrenceIndex;
-    int nDstOccurrenceIndex;
-    int nSrcOccurCountBeforeSlot;
-    if (!pRoomEx || 8 <= srcVisSlot) {
-      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x350);
-      exit(-1);
-    }
-
-    D2DrlgLevelStrc* pSrcLevel = pRoomEx->pLevel;
-    eD2LevelId srcLevelId = pSrcLevel->eD2LevelId;
-    eD2LevelId* pSrcVisArray = (eD2LevelId*)DrlgRoom::DRLGWARP_GetVisArrayFromLevelId(pSrcLevel->pDrlg, srcLevelId);
-    uint32_t nSlotIndex = (uint32_t)srcVisSlot;
-    eD2LevelId dstLevelId = pSrcVisArray[nSlotIndex];
-    D2DrlgLevelStrc* pDstLevel = GetLevelAndAlloc(pSrcLevel->pDrlg, dstLevelId);
-    int* pDstVisArray = DrlgRoom::DRLGWARP_GetVisArrayFromLevelId(pSrcLevel->pDrlg, dstLevelId);
-    int warpDestLevel = DrlgWarp::DRLGWARP_GetWarpDestinationFromArray(pSrcLevel, srcVisSlot);
-    if (!pDstLevel->pRoomExFirst) {
-      D2Common::Drlg::InitLevel(pDstLevel);
-    }
-    if (warpDestLevel != -1) {
-      nSrcOccurrenceIndex = 0;
-      nDstOccurrenceIndex = 0;
-      nSrcOccurCountBeforeSlot = 0;
-      if ((uint32_t)srcVisSlot > 0) {
-        do {
-          if (*pSrcVisArray == dstLevelId) {
-            nSrcOccurrenceIndex++;
-          }
-
-          pSrcVisArray++;
-          nSlotIndex--;
-          nSrcOccurCountBeforeSlot = nSrcOccurrenceIndex;
-        } while (nSlotIndex);
-      }
-
-      nSlotIndex = 0;
-      do {
-        if (pDstVisArray[nSlotIndex] == srcLevelId) {
-          if (nSrcOccurCountBeforeSlot == nDstOccurrenceIndex) {
-            _bLinkResult = DrlgRoom::DRLGROOMEX_LinkNearRoomByDirection((uint8_t)nSlotIndex, pRoomEx, pMemory, srcVisSlot, warpDestLevel, pDstLevel->pRoomExFirst);
-            if (_bLinkResult) {
-              return;
-            }
-
-            break;
-          }
-
-          nDstOccurrenceIndex++;
-        }
-
-        nNextSlot = (uint8_t)nSlotIndex + 1;
-        nSlotIndex = (uint32_t)nNextSlot;
-      } while (nNextSlot < 8);
-    }
-
-    nSlotIndex = 0;
-    while (pDstVisArray[nSlotIndex] != srcLevelId || (_bLinkResult = DrlgRoom::DRLGROOMEX_LinkNearRoomByDirection((uint8_t)nSlotIndex, pRoomEx, pMemory, srcVisSlot, warpDestLevel, pDstLevel->pRoomExFirst) , !_bLinkResult)) {
-      nNextSlot = (uint8_t)nSlotIndex + 1;
-      nSlotIndex = (uint32_t)nNextSlot;
-      if (8 <= nNextSlot) {
-        return;
-      }
-    }
-}
-
-// Defines near rooms, then for each vis flag bit (0x10..0x800) links rooms across levels via DRLGROOMEX_LinkNearRoomsByVis unless in level 0x85. Finally sets town-related flag based on near rooms.
-void __fastcall DRLGROOMEX_InitNearRoomsAndVisTiles(D2PoolManagerStrc * pMemory, D2RoomExStrc * pRoomEx) {
-    uint8_t visSlot;
-    DrlgRoom::DefineRoomsNear(pMemory, pRoomEx);
-    if (pRoomEx->eRoomExFlags & 0xff0U) {
-      uint32_t dwVisFlagMask;
-      dwVisFlagMask = 0x10;
-      visSlot = 0;
-      do {
-        if (pRoomEx->eRoomExFlags & dwVisFlagMask && pRoomEx->pLevel->eD2LevelId != 0x85) {
-          DRLGROOMEX_LinkNearRoomsByVis(pMemory, pRoomEx, visSlot);
-        }
-
-        visSlot++;
-        dwVisFlagMask *= 2;
-      } while (dwVisFlagMask & 0xff0);
-    }
-
-    DrlgRoom::DRLGROOM_FlagRoomExBorderingTown(pRoomEx);
-}
-
 // Gets the grid cell flags for a room at world coordinates. If the room has a valid coordinate list structure (offset 0x64), reads the grid flags at the relative position (worldX - roomX, worldY - roomY) and stores the result. From DrlgLogic.cpp area.
 void __fastcall DRLGLOGIC_GetGridFlagsAtWorldPos(D2RoomExStrc * pRoomEx, D2DrlgVertexStrc * pVertex, int nWorldX, int nWorldY) {
     D2DrlgCoordListStrc* pCoordList = pRoomEx->pDrlgCoordList;
@@ -1885,35 +1795,6 @@ BOOL __stdcall DRLGOUTDOOR_PlaceRandomBorderSubTiles(D2UnkOutdoorStrc * pOutdoor
     } while (posIter < (int)totalPositions);
 
     return 0;
-}
-
-void __stdcall DRLGOUTDOOR_ApplySubstitutionGroup(D2UnkOutdoorStrc * pUnkOutdoor, D2LvlSubTxt * pLvlSub) {
-    D2DrlgFileStrc* pFile = pLvlSub->pDrlgFile;
-    uint32_t nModulo = pFile->nSubstGroups;
-    int nGroupIter = 0;
-    uint32_t nRandStartGroup = 0;
-    if (!nModulo) {
-      return;
-    }
-    if (pUnkOutdoor->nPrevBorderPresetId == -1) {
-      pUnkOutdoor->nPrevBorderPresetId = 0x3e;
-    }
-    if (!pLvlSub->BordType) {
-      nRandStartGroup = D2Client::Archive::RANDOM_RandomNumberSelector(&pUnkOutdoor->pLevel->sSeed, nModulo);
-    }
-    if (0 >= (int)nModulo) {
-      return;
-    }
-
-    do {
-      BOOL bPlaced;
-      bPlaced = DRLGOUTDOOR_PlaceRandomBorderSubTiles(pUnkOutdoor, (int32_t)pLvlSub, (int*)(pFile->pSubstGroups + (int)(nRandStartGroup + nGroupIter) % (int)nModulo));
-      if (bPlaced && !pLvlSub->BordType) {
-        return;
-      }
-
-      nGroupIter++;
-    } while (nGroupIter < (int)nModulo);
 }
 
 // Applies a LvlSub DS1 patch to the outdoor room: copies floor/wall/shadow flags into the room’s grids, grows the room tile array for flagged shadow tiles, and spawns shadow tiles plus preset units from the sub file.
@@ -5200,7 +5081,7 @@ void __fastcall DRLGOUTROOM_FindRightExitPosition(D2DrlgLevelStrc * pLevel, int 
 }
 
 // Checks whether the entire grid column at nX is empty (no flags set), returns TRUE if empty.
-BOOL DRLGOUTROOM_IsGridColumnEmpty(D2DrlgLevelStrc * pLevel, int nX) {
+static BOOL DRLGOUTROOM_IsGridColumnEmpty(D2DrlgLevelStrc * pLevel, int nX) {
     D2DrlgLevelDataWildernessLevel* pLevelData = pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData;
     int nY = 0;
     if (0 >= pLevelData->nGridCoordsHeight) {
@@ -5351,7 +5232,7 @@ void __stdcall DRLGOUTROOM_SpawnVerticalBorderPresets(D2DrlgLevelStrc * pLevel, 
 }
 
 // Marks contiguous border spans where rooms meet at corners.
-void DRLGOUTROOM_MarkBorderJunctions(D2DrlgLevelStrc * pLevel) {
+static void DRLGOUTROOM_MarkBorderJunctions(D2DrlgLevelStrc * pLevel) {
     D2DrlgVertexStrc* pDVar1;
     D2DrlgVertexStrc* pNext;
     D2DrlgVertexStrc* pStart;
@@ -5534,6 +5415,60 @@ void __stdcall DRLGOUTROOM_FillBorderCornersAndPresets(D2DrlgLevelStrc * pLevel)
     pWildData->dwFlags |= 0x40;
 }
 
+} // namespace D2Common::Drlg
+
+namespace D2Common::Drlg::OutWild {
+
+// Spawns outdoor level border presets (town transitions, caves, vertical dividers) for pLevel based on wilderness flags. Handles the central column divider (dwFlags bit 4), the four cardinal border exits (bits 7-10), and the mandatory town wayback preset (0x33/preset 15). Aborts with an unrecoverable error if the wayback preset fails to place. Skips level 0x27 (Harrogath interior).
+static void SpawnTownTransitionsAndCaves(D2DrlgLevelStrc * pLevel) {
+    D2DrlgLevelStrc* pLinkedLevel;
+    int nMidColumn;
+    if (pLevel->eD2LevelId == 0x27) {
+      return;
+    }
+
+    D2DrlgLevelDataWildernessLevel* pWildData2 = pLevel->pDrlgLevelData.pDrlgLevelOutdoorsData;
+    if (pWildData2->dwFlags & 0x10) {
+      BOOL bColumnEmpty;
+      nMidColumn = pWildData2->nGridCoordsWidth / 2 - 1;
+      bColumnEmpty = DRLGOUTROOM_IsGridColumnEmpty(pLevel, nMidColumn);
+      if (bColumnEmpty) {
+        DRLGOUTROOM_SpawnVerticalBorderPresets(pLevel, nMidColumn);
+      }
+    }
+    if (pWildData2->dwFlags & 0x80) {
+      Outdoors::SpawnOutdoorLevelPresetEx(pLevel, 0, 0, 3, 1, 0);
+    }
+    if (pWildData2->dwFlags & 0x100) {
+      Outdoors::SpawnOutdoorLevelPresetEx(pLevel, pWildData2->nGridCoordsWidth - 7, 0, 3, 2, 0);
+    }
+    if (pWildData2->dwFlags & 0x200) {
+      Outdoors::SpawnOutdoorLevelPresetEx(pLevel, 0, 1, 2, 1, 0);
+    }
+    if (pWildData2->dwFlags & 0x400) {
+      Outdoors::SpawnOutdoorLevelPresetEx(pLevel, 0, pWildData2->nGridCoordsHeight - 6, 2, 1, 0);
+    }
+    if (pWildData2->dwFlags & 0x40) {
+      return;
+    }
+    if (pLevel->eD2LevelId == 2) {
+      pLinkedLevel = GetLevelAndAlloc(pLevel->pDrlg, 1);
+      nMidColumn = Outdoors::SpawnPresetFarAway(pLevel, (D2DrlgCoordStrc*)&pLinkedLevel->sCoordinatesAndSize, 0x34, -1, 1, '\x0f');
+    } else {
+      nMidColumn = Outdoors::SpawnOutdoorLevelPreset(pLevel, 0x33, -1, 1, '\x0f');
+    }
+    if (!nMidColumn) {
+      Fog::Src::ErrorManager::ERROR_UnrecoverableInternalError_Halt("", Fog::Src::ErrorManager::GetInstructionPointer(), 0x1e5);
+      exit(-1);
+    }
+
+    pWildData2->dwFlags |= 0x40;
+}
+
+} // namespace D2Common::Drlg::OutWild
+
+namespace D2Common::Drlg {
+
 // NOTE: Callee-saved register params inferred (medium confidence): pDrlgLevelStrc (ESI): D2DrlgLevelStrc*
 static BOOL __stdcall DRLGOUTROOM_SpawnRandomOutdoorDecorations(int32_t nPresetType, D2DrlgLevelStrc * pDrlgLevelStrc, int bAllowDouble) {
     uint32_t uVar1;
@@ -5560,7 +5495,7 @@ static BOOL __stdcall DRLGOUTROOM_SpawnRandomOutdoorDecorations(int32_t nPresetT
 }
 
 // Switch on level ID spawning Act1 level-specific presets (BloodMoor through MooMooFarm).
-void DRLGOUTROOM_SpawnAct1LevelPresets(D2DrlgLevelStrc * pLevel) {
+static void DRLGOUTROOM_SpawnAct1LevelPresets(D2DrlgLevelStrc * pLevel) {
     int32_t nLevelPresetId;
     switch (pLevel->eD2LevelId) {
       case 2:
@@ -5616,6 +5551,47 @@ void DRLGOUTROOM_SpawnAct1LevelPresets(D2DrlgLevelStrc * pLevel) {
     Outdoors::SpawnOutdoorLevelPreset(pLevel, 0x1d, -1, 0, '\x0f');
     Outdoors::SpawnOutdoorLevelPreset(pLevel, 0x1e, -1, 0, '\x0f');
 }
+
+} // namespace D2Common::Drlg
+
+namespace D2Common::Drlg::OutWild {
+
+void __fastcall InitAct1OutdoorLevel(D2DrlgLevelStrc * pLevel) {
+    int eLevelId = pLevel->eD2LevelId;
+    if (eLevelId != 2 && eLevelId != 3 && eLevelId != 0x11) {
+      DRLGOUTROOM_MarkBorderJunctions(pLevel);
+    }
+
+    OutPlace::SetOutGridLinkFlags(pLevel);
+    OutPlace::PlaceAct1245OutdoorBorders(pLevel);
+    if (2 <= pLevel->eD2LevelId && pLevel->eD2LevelId <= 7) {
+      Outdoors::AddAct124SecondaryBorder(pLevel, 0, 4);
+      DRLGOUTROOM_FillBorderCornersAndPresets(pLevel);
+      Outdoors::AddAct124SecondaryBorder(pLevel, 1, 4);
+      Outdoors::AddAct124SecondaryBorder(pLevel, 2, 4);
+      SpawnTownTransitionsAndCaves(pLevel);
+      Outdoors::AddAct124SecondaryBorder(pLevel, 3, 4);
+      DRLGOUTROOM_LinkOutdoorRoomExits(pLevel);
+    }
+    if (pLevel->eD2LevelId == 0x27) {
+      Outdoors::AddAct124SecondaryBorder(pLevel, 0, 4);
+      Outdoors::AddAct124SecondaryBorder(pLevel, 1, 4);
+      Outdoors::AddAct124SecondaryBorder(pLevel, 2, 4);
+      Outdoors::AddAct124SecondaryBorder(pLevel, 3, 4);
+    }
+    if (3 <= pLevel->eD2LevelId && pLevel->eD2LevelId <= 6) {
+      Outdoors::SpawnAct12Waypoint(pLevel);
+    }
+    if (2 <= pLevel->eD2LevelId && pLevel->eD2LevelId <= 7) {
+      Outdoors::SpawnAct12Shrines(pLevel, 5);
+    }
+
+    DRLGOUTROOM_SpawnAct1LevelPresets(pLevel);
+}
+
+} // namespace D2Common::Drlg::OutWild
+
+namespace D2Common::Drlg {
 
 // Shifts 3x3 neighbor buffer up one row and reads new values.
 void __stdcall DRLGOUTROOM_SlideGridNeighborBuffer(D2DrlgGridStrc * pGrid, int32_t nRow, int32_t nCol, int * pNeighborBuffer) {

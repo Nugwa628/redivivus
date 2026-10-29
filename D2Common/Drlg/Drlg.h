@@ -377,7 +377,6 @@ void __fastcall DRLGROOMEX_InitTileData(struct D2RoomExStrc * pRoomEx);
 int __stdcall DRLGOUTDOOR_GetSecondaryFloorGridFlags(int * pLevelCtx, int32_t nGridY, int32_t nGridX);
 // Shuffles candidate border subtile positions using current level seed, then tries each until `ValidateSubTilePlacement` approves and calls `ApplySubTileToGrid`. Defaults to random variant (pRect[5]) and returns as soon as a placement succeeds when the level flag indicates only one patch per run.
 BOOL __stdcall DRLGOUTDOOR_PlaceRandomBorderSubTiles(struct D2UnkOutdoorStrc * pOutdoorCtx, int32_t pLevelPtr, int * pRect);
-void __stdcall DRLGOUTDOOR_ApplySubstitutionGroup(struct D2UnkOutdoorStrc * pUnkOutdoor, struct D2LvlSubTxt * pLvlSub);
 // Applies a LvlSub DS1 patch to the outdoor room: copies floor/wall/shadow flags into the room’s grids, grows the room tile array for flagged shadow tiles, and spawns shadow tiles plus preset units from the sub file.
 void __stdcall DRLGOUTDOOR_ApplyLvlSubTileData(struct D2PoolManagerStrc * pMemory, int32_t baseX, int32_t baseY, struct D2DrlgWallLayerGridsStrc * pRoomCtx, int * pRect, struct D2LvlSubTxt * pSubTxt, int32_t rectOffsetY);
 // Iterates all substitution groups in a DRLG level-sub file and attempts to place each group's tile pattern on the outdoor room grid. Act 1: sweeps interior grid positions, applies overlap-checked tiles directly. Act 2: matches tile types and applies a randomly selected variant (using pSubTxt probability and the room seed) at each matching grid cell. Writes tile data via DRLGOUTDOOR_ApplyLvlSubTileData.
@@ -507,18 +506,12 @@ void DRLGOUTPLACE_PlaceAct2DesertVariants(struct D2DrlgLevelStrc * pLevel);
 void __fastcall DRLGOUTROOM_FindLeftExitPosition(struct D2DrlgLevelStrc * pLevel, int * pOutX, int * pOutY);
 // Finds an exit point at the near-full-width column of the outdoor level. Wrapper around FindExitPointOnColumn that passes X = level width - 2.
 void __fastcall DRLGOUTROOM_FindRightExitPosition(struct D2DrlgLevelStrc * pLevel, int * pOutX, int * pOutY);
-// Checks whether the entire grid column at nX is empty (no flags set), returns TRUE if empty.
-BOOL DRLGOUTROOM_IsGridColumnEmpty(struct D2DrlgLevelStrc * pLevel, int nX);
 // Returns a preset variant index from a grid cell's flags and preset type. For type 0, checks bit 0x100 to choose variant 0 or 3. For type 7 with flags matching 0x30000, returns variant 3. Otherwise indexes into the variant lookup table at data_006f2680, choosing between two columns based on the bAlternate stack arg.
 int __stdcall DRLGOUTROOM_GetPresetVariantFromGridCell(uint32_t nGridFlags, int nPresetType, int dwParam3);
 // Spawns border column presets (0x1A and 0x1B) for two adjacent columns. Iterates all Y rows, determining the preset orientation from grid flags using lookup tables. If the level has road flags (0x14), also places a road transition preset. Called by FillBorderCornersAndPresets and SpawnTownTransitionsAndCaves.
 void __stdcall DRLGOUTROOM_SpawnVerticalBorderPresets(struct D2DrlgLevelStrc * pLevel, int32_t nColumn);
-// Marks contiguous border spans where rooms meet at corners.
-void DRLGOUTROOM_MarkBorderJunctions(struct D2DrlgLevelStrc * pLevel);
 // Outdoor DRLG finalization for a wilderness level (skips eD2LevelId 0x27). Driven by the level data's dwFlags: optionally spawns vertical border presets along the second-to-last grid column (if that column is empty); seed-randomly iterates the grid in row- or column-major order placing corner-fill presets (SpawnCornerFillPreset), halting via Fog ErrorManager if the grid loop completes without success; and finally (flags &0x1c, not &0x40) picks a seed-random edge position and spawns one outdoor level preset (SpawnOutdoorLevelPresetEx), then sets the 0x40 done-flag. Consumes pLevel->sSeed for randomness.
 void __stdcall DRLGOUTROOM_FillBorderCornersAndPresets(struct D2DrlgLevelStrc * pLevel);
-// Switch on level ID spawning Act1 level-specific presets (BloodMoor through MooMooFarm).
-void DRLGOUTROOM_SpawnAct1LevelPresets(struct D2DrlgLevelStrc * pLevel);
 // Shifts 3x3 neighbor buffer up one row and reads new values.
 void __stdcall DRLGOUTROOM_SlideGridNeighborBuffer(struct D2DrlgGridStrc * pGrid, int32_t nRow, int32_t nCol, int * pNeighborBuffer);
 // Autotiling: computes 8-bit neighbor mask, looks up wall orientation from 256-entry table.
